@@ -33,7 +33,7 @@ export function StructType({ name, fields }) {
       {fields.map(field => {
         return (
           <div>
-            {field.name} - {field.type.name} - {field.description}
+            {field.name} - {field.type && field.type.name} - {field.description}
           </div>
         );
       })}
