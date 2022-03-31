@@ -8,7 +8,7 @@
     "lint": "eslint --ignore-pattern '**/node_modules/*' --ignore-pattern '**/log/*' --ignore-pattern 'supervise' --ignore-pattern '**/shared/*' ."
   },
   "dependencies": {
-    "@actual-app/api": "^2.0.1",
+    "@actual-app/api": "2.0.1",
     "adm-zip": "^0.5.9",
     "bcrypt": "^5.0.1",
     "better-sqlite3": "^7.5.0",
