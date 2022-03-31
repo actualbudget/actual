@@ -1,0 +1,39 @@
+{
+  "name": "actual-sync",
+  "version": "1.0.0",
+  "description": "actual syncing server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app",
+    "lint": "eslint --ignore-pattern '**/node_modules/*' --ignore-pattern '**/log/*' --ignore-pattern 'supervise' --ignore-pattern '**/shared/*' ."
+  },
+  "dependencies": {
+    "@actual-app/api": "^2.0.1",
+    "adm-zip": "^0.5.9",
+    "bcrypt": "^5.0.1",
+    "better-sqlite3": "^7.5.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.3",
+    "express-response-size": "^0.0.3",
+    "node-fetch": "^2.2.0",
+    "source-map-support": "^0.5.21",
+    "uuid": "^3.3.2"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.12.1",
+    "eslint-config-react-app": "^3.0.6",
+    "eslint-plugin-flowtype": "^3.2.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.12.4"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none"
+  }
+}
