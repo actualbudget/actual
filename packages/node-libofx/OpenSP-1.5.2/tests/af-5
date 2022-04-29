@@ -1,0 +1,90 @@
+#!/bin/sh
+# Architectural Form: test ArcSupr:
+#    suppress element "v", but keep CDATA of this element
+# test onsgmls and osgmlnorm
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles af-5.sgml af-5.dtd af-meta-5.dtd"
+cat <<EOF >af-5.sgml
+<!DOCTYPE doc SYSTEM "af-5.dtd">
+<doc>
+ <s>
+  <v n="1">verse 1</v>
+  <v n="2">verse 2</v>
+ </s>
+</doc>
+EOF
+cat <<EOF >af-5.dtd
+<!NOTATION SGML PUBLIC "-//ISO 8879:1986//NOTATION Standard Generalized Markup
+    Language//EN">
+
+<?IS10744 ArcBase open>
+<!NOTATION open PUBLIC "-//OpenJade Project//NOTATION AFDR ARCBASE open Architecture//EN">
+<!ATTLIST #NOTATION open
+    ArcSupr NAME #FIXED "doc-proc"
+    ArcDTD CDATA #FIXED "opendtd">
+<!ENTITY opendtd SYSTEM "af-meta-5.dtd" CDATA SGML>
+
+<!ELEMENT doc - o (s+)>
+<!ATTLIST doc
+  open NMTOKEN #FIXED "open">
+<!ELEMENT s   - o (v+)>
+<!ATTLIST s
+  open NMTOKEN #FIXED "stanza">
+<!ELEMENT v   - o (#PCDATA)>
+<!ATTLIST v
+  n CDATA #REQUIRED
+  doc-proc CDATA #FIXED "sArcForm">
+EOF
+
+cat <<EOF >af-meta-5.dtd
+<!ELEMENT open     - o (stanza+)>
+<!ELEMENT stanza   - o (#PCDATA)> <!-- (verse+) -->
+
+<!-- ELEMENT verse    - o (#PCDATA) -->
+<!-- ATTLIST verse
+  v CDATA #REQUIRED -->
+EOF
+
+tmpfiles="$tmpfiles af-5-onsgmls.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >af-5-onsgmls.out -A open af-5.sgml
+tmpfiles="$tmpfiles af-5-onsgmls.ok"
+cat <<EOF >af-5-onsgmls.ok
+(OPEN
+(STANZA
+-verse 1verse 2
+)STANZA
+)OPEN
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} af-5-onsgmls.ok af-5-onsgmls.out
+result=$?
+test $result = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles af-5-norm.out"
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >af-5-norm.out -A open af-5.sgml
+tmpfiles="$tmpfiles af-5-norm.ok"
+
+cat <<EOF >af-5-norm.ok
+<OPEN>
+<STANZA>verse 1verse 2</STANZA>
+</OPEN>
+EOF
+
+${DIFF} af-5-norm.ok af-5-norm.out
+result=$?
+test $result = 0 || result=$(($result + 1))
+
+rm -fr $tmpfiles
+
+exit $result

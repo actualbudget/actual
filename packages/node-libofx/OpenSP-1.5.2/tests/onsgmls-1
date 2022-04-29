@@ -1,0 +1,38 @@
+#!/bin/sh
+# basic onsgmls test
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles onsgmls-1.sgml"
+cat <<EOF >onsgmls-1.sgml
+<!DOCTYPE doc [
+<!ELEMENT doc - o (#PCDATA)>
+<!ATTLIST doc
+  n CDATA #IMPLIED>
+]>
+<doc n=1>
+EOF
+tmpfiles="$tmpfiles onsgmls-1.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >onsgmls-1.out onsgmls-1.sgml
+
+tmpfiles="$tmpfiles onsgmls-1.ok"
+cat <<EOF >onsgmls-1.ok
+AN CDATA 1
+(DOC
+)DOC
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} onsgmls-1.ok onsgmls-1.out
+result=$?
+
+rm -fr $tmpfiles
+
+exit $result

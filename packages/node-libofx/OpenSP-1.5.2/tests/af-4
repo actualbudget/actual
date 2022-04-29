@@ -1,0 +1,101 @@
+#!/bin/sh
+# Architectural Form: test ArcNamrA:
+#    change attribute name "n" to "v"
+# test onsgmls and osgmlnorm
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles af-4.sgml af-4.dtd af-meta-4.dtd"
+cat <<EOF >af-4.sgml
+<!DOCTYPE doc SYSTEM "af-4.dtd">
+<doc>
+ <s>
+  <v n="1">verse 1</v>
+  <v n="2">verse 2</v>
+ </s>
+</doc>
+EOF
+cat <<EOF >af-4.dtd
+<!NOTATION SGML PUBLIC "-//ISO 8879:1986//NOTATION Standard Generalized Markup
+    Language//EN">
+
+<?IS10744 ArcBase open>
+<!NOTATION open PUBLIC "-//OpenJade Project//NOTATION AFDR ARCBASE open Architecture//EN">
+<!ATTLIST #NOTATION open
+    ArcNamrA NAME #FIXED "doc-attr"
+    ArcDTD CDATA #FIXED "opendtd">
+<!ENTITY opendtd SYSTEM "af-meta-4.dtd" CDATA SGML>
+
+<!ELEMENT doc - o (s+)>
+<!ATTLIST doc
+  open NMTOKEN #FIXED "open">
+<!ELEMENT s   - o (v+)>
+<!ATTLIST s
+  open NMTOKEN #FIXED "stanza">
+<!ELEMENT v   - o (#PCDATA)>
+<!ATTLIST v
+  n CDATA #REQUIRED
+  doc-attr CDATA #FIXED "v n"
+  open NMTOKEN #FIXED "verse">
+EOF
+
+cat <<EOF >af-meta-4.dtd
+<!ELEMENT open     - o (stanza+)>
+<!ELEMENT stanza   - o (verse+)>
+<!ELEMENT verse    - o (#PCDATA)>
+<!ATTLIST verse
+  v CDATA #REQUIRED>
+EOF
+
+tmpfiles="$tmpfiles af-4-onsgmls.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >af-4-onsgmls.out -A open af-4.sgml
+
+tmpfiles="$tmpfiles af-4-onsgmls.ok"
+cat <<EOF >af-4-onsgmls.ok
+(OPEN
+(STANZA
+AV CDATA 1
+(VERSE
+-verse 1
+)VERSE
+AV CDATA 2
+(VERSE
+-verse 2
+)VERSE
+)STANZA
+)OPEN
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} af-4-onsgmls.ok af-4-onsgmls.out
+result=$?
+test $result = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles af-4-norm.out"
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >af-4-norm.out -A open af-4.sgml
+tmpfiles="$tmpfiles af-4-norm.ok"
+
+cat <<EOF >af-4-norm.ok
+<OPEN>
+<STANZA>
+<VERSE V="1">verse 1</VERSE>
+<VERSE V="2">verse 2</VERSE>
+</STANZA>
+</OPEN>
+EOF
+
+${DIFF} af-4-norm.ok af-4-norm.out
+result=$?
+test $result = 0 || result=$(($result + 1))
+
+rm -fr $tmpfiles
+
+exit $result

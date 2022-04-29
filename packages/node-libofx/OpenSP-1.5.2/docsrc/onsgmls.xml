@@ -1,0 +1,564 @@
+<?xml version='1.0'?> 
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+ "/usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd">
+<article>
+  <articleinfo>
+    <title>onsgmls</title>
+    <author>
+       <firstname>James</firstname>
+       <surname>Clark</surname>
+    </author>
+    <author>
+       <firstname>Ian</firstname>
+       <surname>Castle</surname>
+       <affiliation><address><email>ian.castle@openjade.org</email></address></affiliation>
+    </author>
+
+    <copyright>
+       <year>2002</year>
+       <holder>OpenJade Project</holder>
+    </copyright>
+  </articleinfo>
+
+  <section>
+    <title>Reference</title>
+    
+    <refentry>
+      <refentryinfo>
+        <title>onsgmls</title>
+        <date>November 2002</date>
+        <productname>OpenSP</productname>
+      </refentryinfo>
+    
+      <refmeta>
+        <refentrytitle>onsgmls</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </refmeta>
+
+      <refnamediv>
+        <refname>onsgmls</refname>
+        <refpurpose>An SGML/XML parser and validator</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>onsgmls</command>
+<!--
+ [ -BCdeglprsuv ] [ -alinktype ] [ -bbctf ] [ -csysid ] [
+   -Ddirectory ] [ -Emax_errors ] [ -ffile ] [ -iname ] [ -ooutput_option
+   ] [ -tfile ] [ -wwarning_type ] [ sysid... ]
+-->
+          <arg choice="opt"><option>-BCdeghlnpRrsuvx</option></arg>
+          <arg choice="opt"><option>-a<replaceable>linktype</replaceable></option></arg>
+          <arg choice="opt"><option>-A<replaceable>architecture</replaceable></option></arg>
+          <arg choice="opt"><option>-b<replaceable>bctf</replaceable></option></arg>
+          <arg choice="opt" rep="repeat"><option>-c<replaceable>sysid</replaceable></option></arg>
+          <arg choice="opt"><option>-D<replaceable>directory</replaceable></option></arg>
+          <arg choice="opt"><option>-E<replaceable>max_errors</replaceable></option></arg>
+          <arg choice="opt"><option>-f<replaceable>file</replaceable></option></arg>
+          <arg choice="opt"><option>-i<replaceable>name</replaceable></option></arg>
+          <arg choice="opt" rep="repeat"><option>-o<replaceable>output_option</replaceable></option></arg>
+          <arg choice="opt"><option>-t<replaceable>file</replaceable></option></arg>
+          <arg choice="opt" rep="repeat"><option>-w<replaceable>warning_type</replaceable></option></arg>
+          <arg choice="opt" rep="repeat"><option><replaceable>sysid</replaceable></option></arg>
+       </cmdsynopsis>
+
+     </refsynopsisdiv>
+
+     <refsect1>
+       <title>Description</title>
+
+   <para><command>onsgmls</command> parses and validates the SGML document whose document entity is
+   specified by the system identifiers <cmdsynopsis><arg rep="repeat"><replaceable>sysid</replaceable></arg></cmdsynopsis> and prints on the
+   standard output a simple text representation of its Element Structure
+   Information Set. (This is the information set which a
+   structure-controlled conforming SGML application should act upon.) If
+   more than one system identifier is specified, then the corresponding
+   entities will be concatenated to form the document entity. Thus the
+   document entity may be spread among several files; for example, the
+   SGML declaration, prolog and document instance set could each be in a
+   separate file. If no system identifiers are specified, then onsgmls
+   will read the document entity from the standard input. A command line
+   system identifier of - can be used to refer to the standard input.
+   (Normally in a system identifier, &lt;OSFD&gt;0 is used to refer to standard
+   input.)</para>
+
+   <para>Part of an SGML System Conforming to International Standard ISO 8879 -- Standard Generalized Markup Language. An SGML Extended Facilities system conforming to Annex A of Internal Standard ISO/IEC 10744 -- Hypermedia/Time-based Structuring Language</para>
+
+   <para>The following options are available:</para>
+   
+<variablelist>
+  <varlistentry>
+   <term><option>-a<replaceable>linktype</replaceable></option></term>
+   <term><option>--activate=<replaceable>linktype</replaceable></option></term>
+   <listitem>
+          <para>Make link type <replaceable>linktype</replaceable> active. Not all ESIS information is
+          output in this case: the active LPDs are not explicitly
+          reported, although each link attribute is qualified with its
+          link type name; there is no information about result elements;
+          when there are multiple link rules applicable to the current
+          element, onsgmls always chooses the first.</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry>
+   <term><option>-A<replaceable>architecture</replaceable></option></term>
+   <term><option>--architecture=<replaceable>architecture</replaceable></option></term>
+   <listitem>
+          <para>Parse with respect to architecture <replaceable>architecture</replaceable>.</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-b<replaceable>bctf</replaceable></option></term>
+    <term><option>--bctf=<replaceable>bctf</replaceable></option></term>
+    <term><option>-b<replaceable>encoding</replaceable></option></term>
+    <term><option>--encoding=<replaceable>encoding</replaceable></option></term>
+    <listitem>
+          <para>This determines the encoding used for output. If in fixed
+          character set mode it specifies the name of an encoding; if
+          not, it specifies the name of a BCTF.</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-B</option></term>
+    <term><option>--batch_mode</option></term>
+    <listitem>
+          <para>Batch mode. Parse each <cmdsynopsis><arg rep="repeat"><option><replaceable>sysid</replaceable></option></arg></cmdsynopsis> specified on the command line
+          separately, rather than concatenating them. This is useful
+          mainly with <option>-s</option>.</para>
+          
+          <para>If <option>-t<replaceable>filename</replaceable></option> is also specified, then the specified filename
+          will be prefixed to the <replaceable>sysid</replaceable> to make the filename for the RAST
+          result for each <replaceable>sysid</replaceable>.</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-c<replaceable>sysid</replaceable></option></term>
+    <term><option>--catalog=<replaceable>sysid</replaceable></option></term>
+    <listitem>
+          <para>Map public identifiers and entity names to system identifiers
+          using the catalog entry file whose system identifier is sysid.
+          Multiple <option>-c</option> options are allowed.
+          If there is a catalog entry
+          file called catalog in the same place as the document entity,
+          it will be searched for immediately after those specified by
+          <option>-c</option>.</para>
+    </listitem>
+  </varlistentry>
+          
+  <varlistentry>
+    <term><option>-C</option></term>
+    <term><option>--catalogs</option></term>
+    <listitem>
+          <para>The <cmdsynopsis><arg rep="repeat"><option><replaceable>filename</replaceable></option></arg></cmdsynopsis> arguments specify catalog files rather than the
+          document entity. The document entity is specified by the first
+          DOCUMENT entry in the catalog files.</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-D<replaceable>directory</replaceable></option></term>
+    <term><option>--directory=<replaceable>directory</replaceable></option></term>
+    <listitem>
+          <para>Search <replaceable>directory</replaceable> for files specified in system identifiers.
+          Multiple <option>-D</option> options are allowed.
+          See the description of the
+          osfile storage manager for more information about file
+          searching.</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-e</option></term>
+    <term><option>--open-entities</option></term>
+    <listitem>
+          <para>Describe open entities in error messages. Error messages always
+          include the position of the most recently opened external
+          entity.</para>
+    </listitem>
+  </varlistentry>
+          
+  <varlistentry>
+    <term><option>-E<replaceable>max_errors</replaceable></option></term>
+    <term><option>--max-errors=<replaceable>max_errors</replaceable></option></term>
+    <listitem>
+          <para>onsgmls will exit after <replaceable>max_errors</replaceable> errors. If <replaceable>max_errors</replaceable> is 0,
+          there is no limit on the number of errors. The default is 200.</para>
+    </listitem>
+  </varlistentry>
+          
+  <varlistentry>
+    <term><option>-f<replaceable>file</replaceable></option></term>
+    <term><option>--error-file=<replaceable>file</replaceable></option></term>
+    <listitem>
+          <para>Redirect errors to <replaceable>file</replaceable>. This is useful mainly with shells that
+          do not support redirection of stderr.</para>
+    </listitem>
+  </varlistentry>
+          
+  <varlistentry>
+    <term><option>-g</option></term>
+    <term><option>--open-elements</option></term>
+    <listitem>
+          <para>Show the generic identifiers of open elements in error
+          messages.</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-h</option></term>
+    <term><option>--help</option></term>
+    <listitem>
+          <para>Show a help message and exit.</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-i<replaceable>name</replaceable></option></term>
+    <term><option>--include=<replaceable>name</replaceable></option></term>
+    <listitem>
+          <para>Pretend that</para>
+          
+<!-- icastle: wanted to use "screen" for this markup, but it doesn't work -->
+<para>&lt;!ENTITY % <replaceable>name</replaceable> "INCLUDE"&gt;</para>
+
+          <para>occurs at the start of the document type declaration subset in
+          the SGML document entity. Since repeated definitions of an
+          entity are ignored, this definition will take precedence over
+          any other definitions of this entity in the document type
+          declaration. Multiple -i options are allowed. If the SGML
+          declaration replaces the reserved name INCLUDE then the new
+          reserved name will be the replacement text of the entity.
+          Typically the document type declaration will contain</para>
+          
+<!-- icastle: wanted to use "screen" for this markup, but it doesn't work -->
+<para>&lt;!ENTITY % <replaceable>name</replaceable> "IGNORE"&gt;</para>
+
+          <para>and will use %<replaceable>name</replaceable>; in the status keyword specification of a
+          marked section declaration. In this case the effect of the
+          option will be to cause the marked section not to be ignored.</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-n</option></term>
+    <term><option>--error-numbers</option></term>
+    <listitem>
+          <para>Show message numbers in error messages.</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><option>-o<replaceable>output_option</replaceable></option></term>
+    <term><option>--option=<replaceable>output_option</replaceable></option></term>
+    <listitem>
+          <para>Output additional information according to <replaceable>output_option</replaceable>:</para>
+      <para><option>entity</option> Output definitions of all general entities not just for
+                data or subdoc entities that are referenced or named in
+                an ENTITY or ENTITIES attribute.</para>
+    	<para><option>id</option> Distinguish attributes whose declared value is ID.</para>
+    
+      <para><option>line</option> Output L commands giving the current line number and
+                filename.</para>
+
+      <para><option>included</option>
+                Output an i command for included sub-elements.</para>
+      <para><option>empty</option>
+                Output an e command for elements which are not allowed to
+                have an end-tag, that is those with a declared content of
+                empty or with a content reference attribute.</para>
+      <para><option>notation-sysid</option>
+                Output an f command before an N command, if a system
+                identifier could be generated for that notation.</para>
+      <para><option>nonsgml</option>
+                In fixed character set mode, output \% escape
+                sequences for non-SGML data characters. Non-SGML data
+                characters can result from numeric character references.</para>
+      <para><option>data-attribute</option>
+                Output the notation name and attributes for DATA attributes.
+                Otherwise, DATA attributes are treated like CDATA attributes.
+                For more details see clause 4.4.3 of Annex K of ISO 8879.</para>
+      <para><option>comment</option>
+                Output an _ command with the contents of a comment.
+                Multiple comments in a single comment declaration will result
+                in multiple distinct _ commands, just as if the comments
+                were each in a separate comment declaration.</para>
+      <para><option>omitted</option>
+                Output an o command before a command which was implied by the
+                input document, but omitted from the actual markup.
+                This currently affects (,), and A commands.</para>
+      <para><option>tagomit</option>
+                As <option>omitted</option>, but only for ( and ) commands.</para>
+      <para><option>attromit</option>
+                As <option>omitted</option>, but only for A commands.</para>
+      
+                
+      <para>Multiple <option>-o</option> options are allowed.</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>-p</option></term>
+      <term><option>--only-prolog</option></term>
+      <listitem>
+          <para>Parse only the prolog. <command>onsgmls</command> will exit after parsing the
+          document type declaration. Implies <option>-s</option>.</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>-R</option></term>
+      <term><option>--restricted</option></term>
+      <listitem>
+          <para>Restrict file reading. This option is intended for use with
+          onsgmls-based Web tools (e.g. CGI scripts) to prevent reading of
+          arbitrary files on the Web server. With this option enabled,
+          <command>onsgmls</command> will not read any local files unless
+          they are located in a directory (or subdirectory) specified by
+          the <option>-D</option> option or included in the SGML_SEARCH_PATH
+          environment variable. As a further security precaution, this
+          option limits filesnames to the characters A-Z, a-z, 0-9, '?', '.',
+          '_', '-' and does not allow filenames containing "..". On systems
+          with MS-DOS file names ':' and '\' are also allowed.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>-s</option></term>
+      <term><option>--no-output</option></term>
+      <listitem>
+          <para>Suppress output. Error messages will still be printed.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>-t<replaceable>file</replaceable></option></term>
+      <term><option>--rast-file=<replaceable>file</replaceable></option></term>
+      <listitem>
+          <para>Output to <replaceable>file</replaceable> the RAST result as defined by ISO/IEC 13673:1995
+          (actually this isn't quite an IS yet; this implements the
+          Intermediate Editor's Draft of 1994/08/29, with changes to
+          implement ISO/IEC JTC1/SC18/WG8 N1777). The normal output is
+          not produced.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>-v</option></term>
+      <term><option>--version</option></term>
+      <listitem>
+          <para>Print the version number.</para>
+      </listitem>
+    </varlistentry>
+          
+    <varlistentry>
+      <term><option>-w<replaceable>type</replaceable></option></term>
+      <term><option>--warning=<replaceable>type</replaceable></option></term>
+      <listitem>
+          <para>Control warnings and errors. Multiple <option>-w</option> options are allowed.
+          The following values of type enable warnings:</para>
+ 
+      <para><option>xml</option>
+                Warn about constructs that are not allowed by XML.</para>
+                
+        <para><option>mixed</option>
+                Warn about mixed content models that do not allow #PCDATA
+                anywhere.</para>
+                
+        <para><option>sgmldecl</option>
+                Warn about various dubious constructions in the SGML
+                declaration.</para>
+                
+        <para><option>should</option>
+                Warn about various recommendations made in ISO 8879 that
+                the document does not comply with. (Recommendations are
+                expressed with "should", as distinct from requirements
+                which are usually expressed with "shall".)</para>
+                
+        <para><option>default</option>
+                Warn about defaulted references.</para>
+                
+        <para><option>duplicate</option>
+                Warn about duplicate entity declarations.</para>
+                
+        <para><option>undefined</option>
+                Warn about undefined elements: elements used in the DTD
+                but not defined.</para>
+                
+        <para><option>unclosed</option>
+                Warn about unclosed start and end-tags.</para>
+                
+        <para><option>empty</option>
+                Warn about empty start and end-tags.</para>
+                
+        <para><option>net</option>
+                Warn about net-enabling start-tags and null end-tags.</para>
+                
+        <para><option>min-tag</option>
+                Warn about minimized start and end-tags. Equivalent to
+                combination of unclosed, empty and net warnings.</para>
+                
+        <para><option>unused-map</option>
+                Warn about unused short reference maps: maps that are
+                declared with a short reference mapping declaration but
+                never used in a short reference use declaration in the
+                DTD.</para>
+                
+        <para><option>unused-param</option>
+                Warn about parameter entities that are defined but not
+                used in a DTD. Unused internal parameter entities whose
+                text is INCLUDE or IGNORE won't get the warning.</para>
+                
+        <para><option>notation-sysid</option>
+                Warn about notations for which no system identifier could
+                be generated.</para>
+                
+        <para><option>all</option>
+                Warn about conditions that should usually be avoided (in
+                the opinion of the author). Equivalent to: mixed, should,
+                default, undefined, sgmldecl, unused-map, unused-param,
+                empty and unclosed.</para>
+        <para><option>immediate-recursion</option>
+                Warn about immediately recursive elements. For more detais
+                see clause 2.2.5 of Annex K of ISO 8879.</para>
+        <para><option>fully-declared</option>
+                Warn if the document instance fails to be fully declared.
+                This has the effect of changing the SGML declaration to 
+                specify IMPLYDEF ATTLIST NO ELEMENT NO ENTITY NO NOTATION NO.
+                For more details see clause 2.2.1 of Annex K of ISO 8879.</para>
+        <para><option>fully-tagged</option>
+                Warn if the document instance fails to be fully-tagged. 
+                This has the effect of changing the SGML declaration to
+                specify DATATAG NO, RANK NO, OMITTAG NO, SHORTTAG STARTTAG
+                EMPTY NO and SHORTTAG ATTRIB OMITNAME NO. For more details
+                see clause 2.2.2 of Annex K of ISO 8879.</para>
+        <para><option>amply-tagged, amply-tagged-recursive</option>
+                Warn if the doucment instance fails to be amply-tagged.
+                Implicitly defined elements may be immediately recurisve if
+                <option>amply-tagged-recursive</option> is specified.
+                This has the effect of changing the SGML declaration to
+                specify DATATAG NO, RANK NO, OMITTAG NO, SHORTTAG ATTRIB
+                OMITNAME NO and either IMPLYDEF ELEMENT ANYOTHER or
+                IMPLYDEF ELEMENT YES. For more details see clause 2.2.4 of
+                Annex K of ISO 8879.</para>
+
+         <para><option>type-valid</option>
+                Warn if the document instance fails to be type-valid.
+                This has the effect of changing the SGML declaration to 
+                specify VALIDITY YES. For more details see clause 2.2.3
+                of Annex K of ISO 8879.</para>
+
+         <para><option>entity-ref</option>
+                Warn about references to non-predefined entities. This 
+                has the effect of changing the SGML declaration to
+                specify ENTITIES REF NONE. For more details see clause
+                2.3.2 of Annex K of ISO 8879.</para>
+
+         <para><option>external-entity-ref</option>
+                Warn about references to external entities. This includes
+                references to an external DTD subset. This has the effect
+                of changing the SGML declaration to specify ENTITIES REF
+                INTERNAL. For more details see clause 2.3.3 of Annex K
+                of ISO 8879.</para>
+
+         <para><option>integral</option>
+                Warn if the document instance is not integrally stored.
+                This has the effect of changing the SGML declaration to
+                specify ENTITIES INTEGRAL YES. For more details see clause
+                2.3.1 of Annex K of ISO 8879.</para>
+
+          <para>A warning can be disabled by using its name prefixed with no-.
+          Thus <option>-wall</option> <option>-wno-duplicate</option> will enable all warnings except those
+          about duplicate entity declarations.</para>
+          
+          <para>The following values for <replaceable>warning_type</replaceable> disable errors:</para>
+          
+        <para><option>no-idref</option>
+                Do not give an error for an ID reference value which no
+                element has as its ID. The effect will be as if each
+                attribute declared as an ID reference value had been
+                declared as a name.</para>
+                
+        <para><option>no-significant</option>
+                Do not give an error when a character that is not a
+                significant character in the reference concrete syntax
+                occurs in a literal in the SGML declaration. This may be
+                useful in conjunction with certain buggy test suites.</para>
+                
+        <para><option>no-valid</option>
+                Do not require the document to be type-valid. This has
+                the effect of changing the SGML declaration to specify
+                VALIDITY NOASSERT and IMPLYDEF ATTLIST YES ELEMENT YES.
+                An option of <option>-wvalid</option> has the effect of changing the SGML
+                declaration to specify VALIDITY TYPE and IMPLYDEF ATTLIST
+                NO ELEMENT NO. If neither <option>-wvalid</option> nor <option>-wno-valid</option> are
+                specified, then the VALIDITY and IMPLYDEF specified in
+                the SGML declaration will be used.</para>
+
+         <para><option>no-afdr</option>
+                Do not give errors when AFDR meta-DTD notation features are
+                used in the DTD. These errors are normally produced when
+                parsing the DTD, but suppressed when parsing meta-DTDs.</para>
+  	</listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>-x</option></term>
+      <term><option>--references</option></term>
+      <listitem>
+          <para>Show information about relevant clauses
+          (from ISO 8879:1986) in error messages.</para>
+      </listitem>
+    </varlistentry>
+                
+   </variablelist>
+
+   <para>The following options are also supported for backward compatibility
+   with sgmls:</para>
+   <variablelist>
+   <varlistentry>
+   <term><option>-d</option></term>
+   <listitem>
+          <para>Same as <option>-wduplicate</option>.</para>
+   </listitem>
+   </varlistentry>
+   <varlistentry>
+     <term><option>-l</option></term>
+     <listitem>
+          <para>Same as <option>-oline</option>.</para>
+     </listitem>
+   </varlistentry>
+  
+   <varlistentry>
+     <term><option>-m<replaceable>sysid</replaceable></option></term>
+     <listitem>
+          <para>Same as <option>-c</option>.</para>
+     </listitem>
+   </varlistentry>
+
+   <varlistentry>
+     <term><option>-r</option></term>
+     <listitem>
+          <para>Same as <option>-wdefault</option>.</para>
+     </listitem>
+   </varlistentry>
+          
+   <varlistentry>
+     <term><option>-u</option></term>
+     <listitem>
+          <para>Same as <option>-wundef</option>.</para>
+     </listitem>
+   </varlistentry>
+   </variablelist>
+          
+     </refsect1>
+
+   <refsect1>
+     <title>See Also</title>
+     <para><command>ospent(1)</command>, <command>ospam(1)</command>,
+     <command>onsgmlnorm(1)</command>, <command>osx(1)</command></para>
+   </refsect1>
+
+   </refentry>
+  </section>
+</article>
+ 

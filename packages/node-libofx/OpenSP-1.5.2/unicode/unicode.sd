@@ -1,0 +1,24 @@
+<!SGML "ISO 8879:1986"
+CHARSET
+BASESET 
+"ISO Registration Number 176//CHARSET
+ISO/IEC 10646-1:1993 UCS-2 with implementation level 3//ESC 2/5 2/15 4/5"
+DESCSET     0    9   UNUSED
+	    9    2   9
+	   11    2   UNUSED
+	   13    1   13
+	   14   18   UNUSED
+	   32   95   32
+	  127    1   UNUSED
+          128   32   UNUSED
+          160  65376 160
+CAPACITY     PUBLIC "ISO 8879:1986//CAPACITY Reference//EN"
+
+SCOPE        DOCUMENT
+SYNTAX PUBLIC 
+"-//SGML Open:TR95xx//SYNTAX Extended (ISO/IEC 10646-1:1993 repertoire)//EN"
+FEATURES
+MINIMIZE   DATATAG   NO   OMITTAG    YES          RANK       NO    SHORTTAG YES
+LINK       SIMPLE    NO   IMPLICIT   NO           EXPLICIT   NO
+OTHER      CONCUR    NO   SUBDOC     YES 99999999 FORMAL     YES
+APPINFO    NONE>

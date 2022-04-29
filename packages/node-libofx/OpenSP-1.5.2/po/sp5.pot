@@ -1,0 +1,2182 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR HOLDER
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2005-11-05 09:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version:: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+
+msgid "no system identifier could be generated for meta-DTD for architecture %1"
+msgstr ""
+
+msgid "element type %1 not defined in meta-DTD"
+msgstr ""
+
+msgid "element %1 invalid in meta-DTD because excluded"
+msgstr ""
+
+msgid "meta-DTD does not allow element %1 at this point"
+msgstr ""
+
+msgid "document element must be instance of %1 element type form"
+msgstr ""
+
+msgid "element %1 unfinished in meta-DTD"
+msgstr ""
+
+msgid "missing substitute name"
+msgstr ""
+
+msgid "substitute for non-existent architecture attribute %1"
+msgstr ""
+
+msgid "substitute name for %1 already defined"
+msgstr ""
+
+msgid "substitute name %1 is not the name of an attribute"
+msgstr ""
+
+msgid "reference in architecture to non-existent ID %1"
+msgstr ""
+
+msgid "architectural content specified with #ARCCONT not allowed by meta-DTD"
+msgstr ""
+
+msgid "invalid value %1 for ArcSupr attribute"
+msgstr ""
+
+msgid "no declaration for meta-DTD parameter entity %1"
+msgstr ""
+
+msgid "no declaration for meta-DTD general entity %1"
+msgstr ""
+
+msgid "meta-DTD entity %1 must be external"
+msgstr ""
+
+msgid "no ArcDTD architecture support attribute specified"
+msgstr ""
+
+msgid "ArcDataF notation %1 not defined in meta-DTD"
+msgstr ""
+
+msgid "ID attribute %1 in meta-DTD not declared as ID in DTD"
+msgstr ""
+
+msgid "invalid value %1 for ArcAuto architectural support attribute"
+msgstr ""
+
+msgid "no notation declaration for architecture %1"
+msgstr ""
+
+msgid "meta-DTD does not allow data at this point"
+msgstr ""
+
+msgid "invalid value %1 for ArcIgnD attribute"
+msgstr ""
+
+msgid "unrecognized quantity name %1"
+msgstr ""
+
+msgid "no value specified for quantity %1"
+msgstr ""
+
+msgid "length of value %1 for quantity is too long"
+msgstr ""
+
+msgid "invalid digit %1"
+msgstr ""
+
+msgid "only value of nArcIndr for ArcIndr attribute supported"
+msgstr ""
+
+msgid "#ARCCONT attribute already specified"
+msgstr ""
+
+msgid "invalid value %1 for #ARCCONT"
+msgstr ""
+
+msgid "%1 already used as a substitute name"
+msgstr ""
+
+msgid "substitute name #CONTENT already specified"
+msgstr ""
+
+msgid "IS10744 PI keyword missing"
+msgstr ""
+
+msgid "invalid IS10744 PI keyword %1"
+msgstr ""
+
+msgid "architecture %1 already defined"
+msgstr ""
+
+msgid "the first definition"
+msgstr ""
+
+msgid "ignoring PI declaration of architecture %1"
+msgstr ""
+
+msgid "the ArcBase definition"
+msgstr ""
+
+msgid "ignoring ArcBase declaration of architecture %1"
+msgstr ""
+
+msgid "the PI definition"
+msgstr ""
+
+msgid "name expected"
+msgstr ""
+
+msgid "literal expected"
+msgstr ""
+
+msgid "name or literal expected"
+msgstr ""
+
+msgid "nul character"
+msgstr ""
+
+msgid "not a minimum data character"
+msgstr ""
+
+msgid "end of entity in comment"
+msgstr ""
+
+msgid "end of entity in literal"
+msgstr ""
+
+msgid "OVERRIDE requires argument of YES or NO"
+msgstr ""
+
+msgid "CATALOG entries cause loop"
+msgstr ""
+
+msgid "second argument for SYSTEM entry should be quoted to avoid ambiguity"
+msgstr ""
+
+msgid "no DOCUMENT entry in catalog %1"
+msgstr ""
+
+msgid "no entry for public identifier %1 in catalog %2"
+msgstr ""
+
+msgid "invalid option %1"
+msgstr ""
+
+msgid "missing argument for option %1"
+msgstr ""
+
+msgid "option %1 is ambiguous"
+msgstr ""
+
+msgid "option %1 doesn't allow an argument"
+msgstr ""
+
+msgid "Usage: %1"
+msgstr ""
+
+msgid "or: %1"
+msgstr ""
+
+msgid "%1 [OPTION] SYSID..."
+msgstr ""
+
+msgid "Short options need the same arguments as their long forms."
+msgstr ""
+
+msgid "%1 version %2"
+msgstr ""
+
+msgid "unknown BCTF %1"
+msgstr ""
+
+msgid "unknown encoding %1"
+msgstr ""
+
+msgid "cannot open output file %1 (%2)"
+msgstr ""
+
+msgid "cannot close output file %1 (%2)"
+msgstr ""
+
+msgid "Use bctf %1 for output."
+msgstr ""
+
+msgid "Use encoding %1 for output."
+msgstr ""
+
+msgid "Append error messages to file %1."
+msgstr ""
+
+msgid "Display the program version."
+msgstr ""
+
+msgid "Show this help text."
+msgstr ""
+
+msgid "NAME"
+msgstr ""
+
+msgid "FILE"
+msgstr ""
+
+msgid "NOTHING"
+msgstr ""
+
+msgid "Try the \"--help\" option for more information."
+msgstr ""
+
+msgid "ARG"
+msgstr ""
+
+msgid "Undocumented option (check the application's manual)."
+msgstr ""
+
+msgid "Use catalog %1."
+msgstr ""
+
+msgid "Arguments are catalogs, use DOCUMENT entry."
+msgstr ""
+
+msgid "Search files in directory %1."
+msgstr ""
+
+msgid "Restrict file reading (for use in Web apps)."
+msgstr ""
+
+msgid "DIRECTORY"
+msgstr ""
+
+msgid "SYSID"
+msgstr ""
+
+msgid "bad formal system identifier syntax in %1"
+msgstr ""
+
+msgid "value for attribute %1 missing in formal system identifier"
+msgstr ""
+
+msgid "%1 is a formal system identifier attribute value not an attribute name"
+msgstr ""
+
+msgid "value of smcrd attribute must be a single character not %1"
+msgstr ""
+
+msgid "unsupported record boundary indicator %1"
+msgstr ""
+
+msgid "unsupported formal system identifier attribute %1"
+msgstr ""
+
+msgid "unsupported formal system identifier attribute value %1"
+msgstr ""
+
+msgid "bad value %1 for formal system identifier tracking attribute"
+msgstr ""
+
+msgid "duplicate specification for formal system identifier attribute %1"
+msgstr ""
+
+msgid "bad value %1 for formal system identifier zapeof attribute"
+msgstr ""
+
+msgid "bad value %1 for formal system identifier search attribute"
+msgstr ""
+
+msgid "bad value %1 for formal system identifier fold attribute"
+msgstr ""
+
+msgid "fold attribute allowed only for neutral storage manager"
+msgstr ""
+
+msgid "bctf and encoding attributes not applicable to this storage manager"
+msgstr ""
+
+msgid "cannot specify both bctf and encoding attribute"
+msgstr ""
+
+msgid "zapeof attribute not applicable to this storage manager"
+msgstr ""
+
+msgid "records attribute not applicable to this storage manager"
+msgstr ""
+
+msgid "bad value %1 for formal system identifier indirect attribute"
+msgstr ""
+
+msgid "non-minimum data character (number %1) in value of formal system identifier lookup attribute"
+msgstr ""
+
+msgid "st"
+msgstr ""
+
+msgid "nd"
+msgstr ""
+
+msgid "rd"
+msgstr ""
+
+msgid "th"
+msgstr ""
+
+msgid "(invalid argument type)"
+msgstr ""
+
+msgid "(invalid message)"
+msgstr ""
+
+msgid "I"
+msgstr ""
+
+msgid "W"
+msgstr ""
+
+msgid "Q"
+msgstr ""
+
+msgid "X"
+msgstr ""
+
+msgid "E"
+msgstr ""
+
+msgid "open elements"
+msgstr ""
+
+msgid "In entity %1 included from %2"
+msgstr ""
+
+msgid "In entity included from %2"
+msgstr ""
+
+msgid "(invalid location)"
+msgstr ""
+
+msgid "offset "
+msgstr ""
+
+msgid "relevant clauses: "
+msgstr ""
+
+msgid "unknown warning type %1"
+msgstr ""
+
+msgid "invalid error limit"
+msgstr ""
+
+msgid "maximum number of errors (%1) reached; change with -E option"
+msgstr ""
+
+msgid "Make doctype or linktype %1 active."
+msgstr ""
+
+msgid "Parse wrt. architecture %1."
+msgstr ""
+
+msgid "Give up after %1 errors."
+msgstr ""
+
+msgid "Show open entities in error messages."
+msgstr ""
+
+msgid "Show open elements in error messages."
+msgstr ""
+
+msgid "Show error numbers in error messages."
+msgstr ""
+
+msgid "Show references in error messages."
+msgstr ""
+
+msgid "Define parameter entity %1 as \"INCLUDE\"."
+msgstr ""
+
+msgid "Enable warning %1."
+msgstr ""
+
+msgid "TYPE"
+msgstr ""
+
+msgid "NUMBER"
+msgstr ""
+
+msgid "length of name must not exceed NAMELEN (%1)"
+msgstr ""
+
+msgid "length of parameter entity name must not exceed NAMELEN less the length of the PERO delimiter (%1)"
+msgstr ""
+
+msgid "length of number must not exceed NAMELEN (%1)"
+msgstr ""
+
+msgid "length of attribute value must not exceed LITLEN less NORMSEP (%1)"
+msgstr ""
+
+msgid "a name group is not allowed in a parameter entity reference in the prolog"
+msgstr ""
+
+msgid "an entity end in a token separator must terminate an entity referenced in the same group"
+msgstr ""
+
+msgid "character %1 invalid: only %2 and token separators allowed"
+msgstr ""
+
+msgid "a parameter separator is required after a number that is followed by a name start character"
+msgstr ""
+
+msgid "character %1 invalid: only %2 and parameter separators allowed"
+msgstr ""
+
+msgid "an entity end in a parameter separator must terminate an entity referenced in the same declaration"
+msgstr ""
+
+msgid "an entity end is not allowed in a token separator that does not follow a token"
+msgstr ""
+
+msgid "%1 is not a valid token here"
+msgstr ""
+
+msgid "a parameter entity reference can only occur in a group where a token could occur"
+msgstr ""
+
+msgid "token %1 has already occurred in this group"
+msgstr ""
+
+msgid "the number of tokens in a group must not exceed GRPCNT (%1)"
+msgstr ""
+
+msgid "an entity end in a literal must terminate an entity referenced in the same literal"
+msgstr ""
+
+msgid "character %1 invalid: only minimum data characters allowed"
+msgstr ""
+
+msgid "a parameter literal in a data tag pattern must not contain a numeric character reference to a non-SGML character"
+msgstr ""
+
+msgid "a parameter literal in a data tag pattern must not contain a numeric character reference to a function character"
+msgstr ""
+
+msgid "a name group is not allowed in a general entity reference in a start tag"
+msgstr ""
+
+msgid "a name group is not allowed in a general entity reference in the prolog"
+msgstr ""
+
+msgid "%1 is not a function name"
+msgstr ""
+
+msgid "%1 is not a character number in the document character set"
+msgstr ""
+
+msgid "parameter entity %1 not defined"
+msgstr ""
+
+msgid "general entity %1 not defined and no default entity"
+msgstr ""
+
+msgid "RNI delimiter must be followed by name start character"
+msgstr ""
+
+msgid "unterminated comment: found end of entity inside comment"
+msgstr ""
+
+msgid "comment started here"
+msgstr ""
+
+msgid "only one type of connector should be used in a single group"
+msgstr ""
+
+msgid "%1 is not a reserved name"
+msgstr ""
+
+msgid "%1 is not allowed as a reserved name here"
+msgstr ""
+
+msgid "length of interpreted minimum literal must not exceed reference LITLEN (%1)"
+msgstr ""
+
+msgid "length of tokenized attribute value must not exceed LITLEN less NORMSEP (%1)"
+msgstr ""
+
+msgid "length of system identifier must not exceed LITLEN (%1)"
+msgstr ""
+
+msgid "length of interpreted parameter literal must not exceed LITLEN (%1)"
+msgstr ""
+
+msgid "length of interpreted parameter literal in data tag pattern must not exceed DTEMPLEN (%1)"
+msgstr ""
+
+msgid "literal is missing closing delimiter"
+msgstr ""
+
+msgid "%1 invalid: only %2 and parameter separators are allowed"
+msgstr ""
+
+msgid "%1 invalid: only %2 and token separators are allowed"
+msgstr ""
+
+msgid "unknown declaration type %1"
+msgstr ""
+
+msgid "%1 declaration not allowed in DTD subset"
+msgstr ""
+
+msgid "character %1 not allowed in declaration subset"
+msgstr ""
+
+msgid "end of document in DTD subset"
+msgstr ""
+
+msgid "character %1 not allowed in prolog"
+msgstr ""
+
+msgid "end of document in prolog"
+msgstr ""
+
+msgid "%1 declaration not allowed in prolog"
+msgstr ""
+
+msgid "%1 used both a rank stem and generic identifier"
+msgstr ""
+
+msgid "omitted tag minimization parameter can be omitted only if OMITTAG NO is specified"
+msgstr ""
+
+msgid "element type %1 already defined"
+msgstr ""
+
+msgid "entity reference with no applicable DTD"
+msgstr ""
+
+msgid "invalid comment declaration: found %1 outside comment but inside comment declaration"
+msgstr ""
+
+msgid "comment declaration started here"
+msgstr ""
+
+msgid "%1 declaration not allowed in instance"
+msgstr ""
+
+msgid "non-SGML character not allowed in content"
+msgstr ""
+
+msgid "no current rank for rank stem %1"
+msgstr ""
+
+msgid "duplicate attribute definition list for notation %1"
+msgstr ""
+
+msgid "duplicate attribute definition list for element %1"
+msgstr ""
+
+msgid "entity end not allowed in end tag"
+msgstr ""
+
+msgid "character %1 not allowed in end tag"
+msgstr ""
+
+msgid "%1 invalid: only S separators and TAGC allowed here"
+msgstr ""
+
+msgid "character data is not allowed here"
+msgstr ""
+
+msgid "document type does not allow element %1 here"
+msgstr ""
+
+msgid "document type does not allow element %1 here; missing one of %2 start-tag"
+msgstr ""
+
+msgid "document type does not allow element %1 here; assuming missing %2 start-tag"
+msgstr ""
+
+msgid "no start tag specified for implied empty element %1"
+msgstr ""
+
+msgid "end tag for %1 omitted, but its declaration does not permit this"
+msgstr ""
+
+msgid "start tag was here"
+msgstr ""
+
+msgid "end tag for %1 omitted, but OMITTAG NO was specified"
+msgstr ""
+
+msgid "start tag omitted for element %1 with declared content"
+msgstr ""
+
+msgid "end tag for %1 which is not finished"
+msgstr ""
+
+msgid "start tag for %1 omitted, but its declaration does not permit this"
+msgstr ""
+
+msgid "number of open elements exceeds TAGLVL (%1)"
+msgstr ""
+
+msgid "element %1 undefined"
+msgstr ""
+
+msgid "empty end tag but no open elements"
+msgstr ""
+
+msgid "%1 not finished but containing element ended"
+msgstr ""
+
+msgid "end tag for element %1 which is not open"
+msgstr ""
+
+msgid "internal parameter entity %1 cannot be CDATA or SDATA"
+msgstr ""
+
+msgid "character %1 not allowed in attribute specification list"
+msgstr ""
+
+msgid "an attribute value must be a literal unless it contains only name characters"
+msgstr ""
+
+msgid "entity end not allowed in attribute specification list except in attribute value literal"
+msgstr ""
+
+msgid "external parameter entity %1 cannot be CDATA, SDATA, NDATA or SUBDOC"
+msgstr ""
+
+msgid "duplicate declaration of entity %1"
+msgstr ""
+
+msgid "duplicate declaration of parameter entity %1"
+msgstr ""
+
+msgid "a reference to a PI entity is allowed only in a context where a processing instruction could occur"
+msgstr ""
+
+msgid "a reference to a CDATA or SDATA entity is allowed only in a context where a data character could occur"
+msgstr ""
+
+msgid "a reference to a subdocument entity or external data entity is allowed only in a context where a data character could occur"
+msgstr ""
+
+msgid "a reference to a subdocument entity or external data entity is not allowed in replaceable character data"
+msgstr ""
+
+msgid "the number of open entities cannot exceed ENTLVL (%1)"
+msgstr ""
+
+msgid "a reference to a PI entity is not allowed in replaceable character data"
+msgstr ""
+
+msgid "entity %1 is already open"
+msgstr ""
+
+msgid "short reference map %1 not defined"
+msgstr ""
+
+msgid "short reference map in DTD must specify associated element type"
+msgstr ""
+
+msgid "short reference map in document instance cannot specify associated element type"
+msgstr ""
+
+msgid "short reference map %1 for element %2 not defined in DTD"
+msgstr ""
+
+msgid "%1 is not a short reference delimiter"
+msgstr ""
+
+msgid "short reference delimiter %1 already mapped in this declaration"
+msgstr ""
+
+msgid "no document element"
+msgstr ""
+
+msgid "entity end not allowed in processing instruction"
+msgstr ""
+
+msgid "length of processing instruction must not exceed PILEN (%1)"
+msgstr ""
+
+msgid "missing PIC delimiter"
+msgstr ""
+
+msgid "an attribute specification must start with a name or name token"
+msgstr ""
+
+msgid "%1 is not a member of a group specified for any attribute"
+msgstr ""
+
+msgid "the name and VI delimiter can be omitted from an attribute specification only if SHORTTAG YES is specified"
+msgstr ""
+
+msgid "there is no attribute %1"
+msgstr ""
+
+msgid "an attribute value specification must start with a literal or a name character"
+msgstr ""
+
+msgid "length of name token must not exceed NAMELEN (%1)"
+msgstr ""
+
+msgid "an attribute value literal can occur in an attribute specification list only after a VI delimiter"
+msgstr ""
+
+msgid "duplicate specification of attribute %1"
+msgstr ""
+
+msgid "duplicate definition of attribute %1"
+msgstr ""
+
+msgid "data attribute specification must be omitted if attribute specification list is empty"
+msgstr ""
+
+msgid "marked section end not in marked section declaration"
+msgstr ""
+
+msgid "number of open marked sections must not exceed TAGLVL (%1)"
+msgstr ""
+
+msgid "missing marked section end"
+msgstr ""
+
+msgid "marked section started here"
+msgstr ""
+
+msgid "entity end in character data, replaceable character data or ignored marked section"
+msgstr ""
+
+msgid "normalized length of attribute value literal must not exceed LITLEN (%1); length was %2"
+msgstr ""
+
+msgid "syntax of attribute value does not conform to declared value"
+msgstr ""
+
+msgid "character %1 is not allowed in the value of attribute %2"
+msgstr ""
+
+msgid "value of attribute %1 must be a single token"
+msgstr ""
+
+msgid "value of attribute %2 invalid: %1 cannot start a number token"
+msgstr ""
+
+msgid "value of attribute %2 invalid: %1 cannot start a name"
+msgstr ""
+
+msgid "non-impliable attribute %1 not specified but OMITTAG NO and SHORTTAG NO"
+msgstr ""
+
+msgid "required attribute %1 not specified"
+msgstr ""
+
+msgid "first occurrence of CURRENT attribute %1 not specified"
+msgstr ""
+
+msgid "%1 is not a notation name"
+msgstr ""
+
+msgid "%1 is not a general entity name"
+msgstr ""
+
+msgid "value of attribute %2 cannot be %1; must be one of %3"
+msgstr ""
+
+msgid "%1 is not a data or subdocument entity"
+msgstr ""
+
+msgid "content model is ambiguous: when no tokens have been matched, both the %2 and %3 occurrences of %1 are possible"
+msgstr ""
+
+msgid "content model is ambiguous: when the current token is the %2 occurrence of %1, both the %4 and %5 occurrences of %3 are possible"
+msgstr ""
+
+msgid "content model is ambiguous: when the current token is the %2 occurrence of %1 and the innermost containing AND group has been matched, both the %4 and %5 occurrences of %3 are possible"
+msgstr ""
+
+msgid "content model is ambiguous: when the current token is the %2 occurrence of %1 and the innermost %3 containing AND groups have been matched, both the %5 and %6 occurrences of %4 are possible"
+msgstr ""
+
+msgid "invalid comment declaration: found character %1 outside comment but inside comment declaration"
+msgstr ""
+
+msgid "non SGML character number %1"
+msgstr ""
+
+msgid "data or replaceable character data in declaration subset"
+msgstr ""
+
+msgid "ID %1 already defined"
+msgstr ""
+
+msgid "ID %1 first defined here"
+msgstr ""
+
+msgid "value of fixed attribute %1 not equal to default"
+msgstr ""
+
+msgid "character %1 is not significant in the reference concrete syntax and so cannot occur in a comment in the SGML declaration"
+msgstr ""
+
+msgid "minimum data of first minimum literal in SGML declaration must be \"ISO 8879:1986\" or \"ISO 8879:1986 (ENR)\" or \"ISO 8879:1986 (WWW)\" not %1"
+msgstr ""
+
+msgid "parameter before LCNMSTRT must be NAMING not %1"
+msgstr ""
+
+msgid "unexpected entity end in SGML declaration: only %1, S separators and comments allowed"
+msgstr ""
+
+msgid "%1 invalid: only %2 and parameter separators allowed"
+msgstr ""
+
+msgid "magnitude of %1 too big"
+msgstr ""
+
+msgid "character %1 is not significant in the reference concrete syntax and so cannot occur in a literal in the SGML declaration except as the replacement of a character reference"
+msgstr ""
+
+msgid "%1 is not a valid syntax reference character number"
+msgstr ""
+
+msgid "a parameter entity reference cannot occur in an SGML declaration"
+msgstr ""
+
+msgid "cannot continue because of previous errors"
+msgstr ""
+
+msgid "SGML declaration cannot be parsed because the character set does not contain characters having the following numbers in ISO 646: %1"
+msgstr ""
+
+msgid "the specified character set is invalid because it does not contain the minimum data characters having the following numbers in ISO 646: %1"
+msgstr ""
+
+msgid "character numbers declared more than once: %1"
+msgstr ""
+
+msgid "character numbers should have been declared UNUSED: %1"
+msgstr ""
+
+msgid "character numbers missing in base set: %1"
+msgstr ""
+
+msgid "characters in the document character set with numbers exceeding %1 not supported"
+msgstr ""
+
+msgid "invalid formal public identifier %1: missing //"
+msgstr ""
+
+msgid "invalid formal public identifier %1: no SPACE after public text class"
+msgstr ""
+
+msgid "invalid formal public identifier %1: invalid public text class"
+msgstr ""
+
+msgid "invalid formal public identifier %1: public text language must be a name containing only upper case letters"
+msgstr ""
+
+msgid "invalid formal public identifer %1: public text display version not permitted with this text class"
+msgstr ""
+
+msgid "invalid formal public identifier %1: extra field"
+msgstr ""
+
+msgid "public text class of public identifier in notation identifier must be NOTATION"
+msgstr ""
+
+msgid "base character set %1 is unknown"
+msgstr ""
+
+msgid "delimiter set is ambiguous: %1 and %2 can be recognized in the same mode"
+msgstr ""
+
+msgid "characters with the following numbers in the syntax reference character set are significant in the concrete syntax but are not in the document character set: %1"
+msgstr ""
+
+msgid "there is no unique character in the document character set corresponding to character number %1 in the syntax reference character set"
+msgstr ""
+
+msgid "there is no unique character in the internal character set corresponding to character number %1 in the syntax reference character set"
+msgstr ""
+
+msgid "the character with number %1 in ISO 646 is significant but has no representation in the syntax reference character set"
+msgstr ""
+
+msgid "capacity set %1 is unknown"
+msgstr ""
+
+msgid "capacity %1 already specified"
+msgstr ""
+
+msgid "value of capacity %1 exceeds value of TOTALCAP"
+msgstr ""
+
+msgid "syntax %1 is unknown"
+msgstr ""
+
+msgid "UCNMSTRT must have the same number of characters as LCNMSTRT"
+msgstr ""
+
+msgid "UCNMCHAR must have the same number of characters as LCNMCHAR"
+msgstr ""
+
+msgid "number of open subdocuments exceeds quantity specified for SUBDOC parameter in SGML declaration (%1)"
+msgstr ""
+
+msgid "entity %1 declared SUBDOC, but SUBDOC NO specified in SGML declaration"
+msgstr ""
+
+msgid "a parameter entity referenced in a parameter separator must end in the same declaration"
+msgstr ""
+
+msgid "reference to non-existent ID %1"
+msgstr ""
+
+msgid "generic identifier %1 used in DTD but not defined"
+msgstr ""
+
+msgid "%1 not finished but document ended"
+msgstr ""
+
+msgid "cannot continue with subdocument because of previous errors"
+msgstr ""
+
+msgid "no document type declaration; will parse without validation"
+msgstr ""
+
+msgid "no internal or external document type declaration subset; will parse without validation"
+msgstr ""
+
+msgid "this is not an SGML document"
+msgstr ""
+
+msgid "length of start-tag before interpretation of literals must not exceed TAGLEN (%1)"
+msgstr ""
+
+msgid "a parameter entity referenced in a token separator must end in the same group"
+msgstr ""
+
+msgid "the following character numbers are shunned characters that are not significant and so should have been declared UNUSED: %1"
+msgstr ""
+
+msgid "there is no unique character in the specified document character set corresponding to character number %1 in ISO 646"
+msgstr ""
+
+msgid "length of attribute value must not exceed LITLEN less NORMSEP (-%1)"
+msgstr ""
+
+msgid "length of tokenized attribute value must not exceed LITLEN less NORMSEP (-%1)"
+msgstr ""
+
+msgid "concrete syntax scope is INSTANCE but value of %1 quantity is less than value in reference quantity set"
+msgstr ""
+
+msgid "public text class of formal public identifier of base character set must be CHARSET"
+msgstr ""
+
+msgid "public text class of formal public identifier of capacity set must be CAPACITY"
+msgstr ""
+
+msgid "public text class of formal public identifier of concrete syntax must be SYNTAX"
+msgstr ""
+
+msgid "when there is an MSOCHAR there must also be an MSICHAR"
+msgstr ""
+
+msgid "character number %1 in the syntax reference character set was specified as a character to be switched but is not a markup character"
+msgstr ""
+
+msgid "character number %1 was specified as a character to be switched but is not in the syntax reference character set"
+msgstr ""
+
+msgid "character numbers %1 in the document character set have been assigned the same meaning, but this is the meaning of a significant character"
+msgstr ""
+
+msgid "character number %1 assigned to more than one function"
+msgstr ""
+
+msgid "%1 is already a function name"
+msgstr ""
+
+msgid "characters with the following numbers in ISO 646 are significant in the concrete syntax but are not in the document character set: %1"
+msgstr ""
+
+msgid "general delimiter %1 consists solely of function characters"
+msgstr ""
+
+msgid "letters assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr ""
+
+msgid "digits assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr ""
+
+msgid "character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT because it is RE"
+msgstr ""
+
+msgid "character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT because it is RS"
+msgstr ""
+
+msgid "character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT because it is SPACE"
+msgstr ""
+
+msgid "separator characters assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr ""
+
+msgid "character number %1 cannot be switched because it is a Digit, LC Letter or UC Letter"
+msgstr ""
+
+msgid "pointless for number of characters to be 0"
+msgstr ""
+
+msgid "%1 cannot be the replacement for a reference reserved name because it is another reference reserved name"
+msgstr ""
+
+msgid "%1 cannot be the replacement for a reference reserved name because it is the replacement of another reference reserved name"
+msgstr ""
+
+msgid "replacement for reserved name %1 already specified"
+msgstr ""
+
+msgid "%1 is not a valid name in the declared concrete syntax"
+msgstr ""
+
+msgid "%1 is not a valid short reference delimiter because it has more than one B sequence"
+msgstr ""
+
+msgid "%1 is not a valid short reference delimiter because it is adjacent to a character that can occur in a blank sequence"
+msgstr ""
+
+msgid "length of delimiter %1 exceeds NAMELEN (%2)"
+msgstr ""
+
+msgid "length of reserved name %1 exceeds NAMELEN (%2)"
+msgstr ""
+
+msgid "character numbers assigned to both LCNMCHAR or UCNMCHAR and LCNMSTRT or UCNMSTRT: %1"
+msgstr ""
+
+msgid "when the concrete syntax scope is INSTANCE the syntax reference character set of the declared syntax must be the same as that of the reference concrete syntax"
+msgstr ""
+
+msgid "end-tag minimization should be O for element with declared content of EMPTY"
+msgstr ""
+
+msgid "end-tag minimization should be O for element %1 because it has CONREF attribute"
+msgstr ""
+
+msgid "element %1 has a declared content of EMPTY and a CONREF attribute"
+msgstr ""
+
+msgid "element %1 has a declared content of EMPTY and a NOTATION attribute"
+msgstr ""
+
+msgid "declared value of data attribute cannot be ENTITY, ENTITIES, ID, IDREF, IDREFS or NOTATION"
+msgstr ""
+
+msgid "default value of data attribute cannot be CONREF or CURRENT"
+msgstr ""
+
+msgid "number of attribute names and name tokens (%1) exceeds ATTCNT (%2)"
+msgstr ""
+
+msgid "if the declared value is ID the default value must be IMPLIED or REQUIRED"
+msgstr ""
+
+msgid "the attribute definition list already declared attribute %1 as the ID attribute"
+msgstr ""
+
+msgid "the attribute definition list already declared attribute %1 as the NOTATION attribute"
+msgstr ""
+
+msgid "token %1 occurs more than once in attribute definition list"
+msgstr ""
+
+msgid "no attributes defined for notation %1"
+msgstr ""
+
+msgid "notation %1 for entity %2 undefined"
+msgstr ""
+
+msgid "entity %1 undefined in short reference map %2"
+msgstr ""
+
+msgid "notation %1 is undefined but had attribute definition"
+msgstr ""
+
+msgid "length of interpreted parameter literal in bracketed text plus the length of the bracketing delimiters must not exceed LITLEN (%1)"
+msgstr ""
+
+msgid "length of rank stem plus length of rank suffix must not exceed NAMELEN (%1)"
+msgstr ""
+
+msgid "document instance must start with document element"
+msgstr ""
+
+msgid "content model nesting level exceeds GRPLVL (%1)"
+msgstr ""
+
+msgid "grand total of content tokens exceeds GRPGTCNT (%1)"
+msgstr ""
+
+msgid "unclosed start-tag requires SHORTTAG YES"
+msgstr ""
+
+msgid "NET-enabling start-tag requires SHORTTAG YES"
+msgstr ""
+
+msgid "unclosed end-tag requires SHORTTAG YES"
+msgstr ""
+
+msgid "DTDs other than base allowed only if CONCUR YES or EXPLICIT YES"
+msgstr ""
+
+msgid "end of entity other than document entity after document element"
+msgstr ""
+
+msgid "%1 declaration illegal after document element"
+msgstr ""
+
+msgid "character reference illegal after document element"
+msgstr ""
+
+msgid "entity reference illegal after document element"
+msgstr ""
+
+msgid "marked section illegal after document element"
+msgstr ""
+
+msgid "the %1 occurrence of %2 in the content model for %3 cannot be excluded at this point because it is contextually required"
+msgstr ""
+
+msgid "the %1 occurrence of %2 in the content model for %3 cannot be excluded because it is neither inherently optional nor a member of an OR group"
+msgstr ""
+
+msgid "an attribute value specification must be an attribute value literal unless SHORTTAG YES is specified"
+msgstr ""
+
+msgid "value cannot be specified both for notation attribute and content reference attribute"
+msgstr ""
+
+msgid "notation %1 already defined"
+msgstr ""
+
+msgid "short reference map %1 already defined"
+msgstr ""
+
+msgid "first defined here"
+msgstr ""
+
+msgid "general delimiter role %1 already defined"
+msgstr ""
+
+msgid "number of ID references in start-tag must not exceed GRPCNT (%1)"
+msgstr ""
+
+msgid "number of entity names in attribute specification list must not exceed GRPCNT (%1)"
+msgstr ""
+
+msgid "normalized length of attribute specification list must not exceed ATTSPLEN (%1); length was %2"
+msgstr ""
+
+msgid "short reference delimiter %1 already specified"
+msgstr ""
+
+msgid "single character short references were already specified for character numbers: %1"
+msgstr ""
+
+msgid "default entity used in entity attribute %1"
+msgstr ""
+
+msgid "reference to entity %1 uses default entity"
+msgstr ""
+
+msgid "entity %1 in short reference map %2 uses default entity"
+msgstr ""
+
+msgid "no DTD %1 declared"
+msgstr ""
+
+msgid "LPD %1 has neither internal nor external subset"
+msgstr ""
+
+msgid "element types have different link attribute definitions"
+msgstr ""
+
+msgid "link set %1 already defined"
+msgstr ""
+
+msgid "empty result attribute specification"
+msgstr ""
+
+msgid "no source element type %1"
+msgstr ""
+
+msgid "no result element type %1"
+msgstr ""
+
+msgid "end of document in LPD subset"
+msgstr ""
+
+msgid "%1 declaration not allowed in LPD subset"
+msgstr ""
+
+msgid "ID link set declaration not allowed in simple link declaration subset"
+msgstr ""
+
+msgid "link set declaration not allowed in simple link declaration subset"
+msgstr ""
+
+msgid "attributes can only be defined for base document element (not %1) in simple link declaration subset"
+msgstr ""
+
+msgid "a short reference mapping declaration is allowed only in the base DTD"
+msgstr ""
+
+msgid "a short reference use declaration is allowed only in the base DTD"
+msgstr ""
+
+msgid "default value of link attribute cannot be CURRENT or CONREF"
+msgstr ""
+
+msgid "declared value of link attribute cannot be ID, IDREF, IDREFS or NOTATION"
+msgstr ""
+
+msgid "only fixed attributes can be defined in simple LPD"
+msgstr ""
+
+msgid "only one ID link set declaration allowed in an LPD subset"
+msgstr ""
+
+msgid "no initial link set defined for LPD %1"
+msgstr ""
+
+msgid "notation %1 not defined in source DTD"
+msgstr ""
+
+msgid "result document type in simple link specification must be implied"
+msgstr ""
+
+msgid "simple link requires SIMPLE YES"
+msgstr ""
+
+msgid "implicit link requires IMPLICIT YES"
+msgstr ""
+
+msgid "explicit link requires EXPLICIT YES"
+msgstr ""
+
+msgid "LPD not allowed before first DTD"
+msgstr ""
+
+msgid "DTD not allowed after an LPD"
+msgstr ""
+
+msgid "definition of general entity %1 is unstable"
+msgstr ""
+
+msgid "definition of parameter entity %1 is unstable"
+msgstr ""
+
+msgid "multiple link rules for ID %1 but not all have link attribute specifications"
+msgstr ""
+
+msgid "multiple link rules for element type %1 but not all have link attribute specifications"
+msgstr ""
+
+msgid "link type %1 does not have a link set %2"
+msgstr ""
+
+msgid "link set use declaration for simple link process"
+msgstr ""
+
+msgid "no link type %1"
+msgstr ""
+
+msgid "both document type and link type %1"
+msgstr ""
+
+msgid "link type %1 already defined"
+msgstr ""
+
+msgid "document type %1 already defined"
+msgstr ""
+
+msgid "link set %1 used in LPD but not defined"
+msgstr ""
+
+msgid "#IMPLIED already linked to result element type %1"
+msgstr ""
+
+msgid "number of active simple link processes exceeds quantity specified for SIMPLE parameter in SGML declaration (%1)"
+msgstr ""
+
+msgid "only one chain of explicit link processes can be active"
+msgstr ""
+
+msgid "source document type name for link type %1 must be base document type since EXPLICIT YES 1"
+msgstr ""
+
+msgid "only one implicit link process can be active"
+msgstr ""
+
+msgid "sorry, link type %1 not activated: only one implicit or explicit link process can be active (with base document type as source document type)"
+msgstr ""
+
+msgid "name missing after name group in entity reference"
+msgstr ""
+
+msgid "source document type name for link type %1 must be base document type since EXPLICIT NO"
+msgstr ""
+
+msgid "link process must be activated before base DTD"
+msgstr ""
+
+msgid "unexpected entity end while starting second pass"
+msgstr ""
+
+msgid "type %1 of element with ID %2 not associated element type for applicable link rule in ID link set"
+msgstr ""
+
+msgid "DATATAG feature not implemented"
+msgstr ""
+
+msgid "generic identifier specification missing after document type specification in start-tag"
+msgstr ""
+
+msgid "generic identifier specification missing after document type specification in end-tag"
+msgstr ""
+
+msgid "a NET-enabling start-tag cannot include a document type specification"
+msgstr ""
+
+msgid "DTD did not contain element declaration for document type name"
+msgstr ""
+
+msgid "invalid default SGML declaration"
+msgstr ""
+
+msgid "reference to entity %1 for which no system identifier could be generated"
+msgstr ""
+
+msgid "entity was defined here"
+msgstr ""
+
+msgid "content model is mixed but does not allow #PCDATA everywhere"
+msgstr ""
+
+msgid "start or end of range must specify a single character"
+msgstr ""
+
+msgid "number of first character in range must not exceed number of second character in range"
+msgstr ""
+
+msgid "delimiter cannot be an empty string"
+msgstr ""
+
+msgid "too many characters assigned same meaning with minimum literal"
+msgstr ""
+
+msgid "earlier reference to entity %1 used default entity"
+msgstr ""
+
+msgid "empty start-tag"
+msgstr ""
+
+msgid "empty end-tag"
+msgstr ""
+
+msgid "unused short reference map %1"
+msgstr ""
+
+msgid "unused parameter entity %1"
+msgstr ""
+
+msgid "cannot generate system identifier for public text %1"
+msgstr ""
+
+msgid "cannot generate system identifier for general entity %1"
+msgstr ""
+
+msgid "cannot generate system identifier for parameter entity %1"
+msgstr ""
+
+msgid "cannot generate system identifier for document type %1"
+msgstr ""
+
+msgid "cannot generate system identifier for link type %1"
+msgstr ""
+
+msgid "cannot generate system identifier for notation %1"
+msgstr ""
+
+msgid "element type %1 both included and excluded"
+msgstr ""
+
+msgid "no document type declaration; implying %1"
+msgstr ""
+
+msgid "minimum data of AFDR declaration must be \"ISO/IEC 10744:1997\" not %1"
+msgstr ""
+
+msgid "AFDR declaration required before use of AFDR extensions"
+msgstr ""
+
+msgid "ENR extensions were used but minimum literal was not \"ISO 8879:1986 (ENR)\" or \"ISO 8879:1986 (WWW)\""
+msgstr ""
+
+msgid "illegal numeric character reference to non-SGML character %1 in literal"
+msgstr ""
+
+msgid "cannot convert character reference to number %1 because description %2 unrecognized"
+msgstr ""
+
+msgid "cannot convert character reference to number %1 because character %2 from baseset %3 unknown"
+msgstr ""
+
+msgid "character reference to number %1 cannot be converted because of problem with internal character set"
+msgstr ""
+
+msgid "cannot convert character reference to number %1 because character not in internal character set"
+msgstr ""
+
+msgid "Web SGML adaptations were used but minimum literal was not \"ISO 8879:1986 (WWW)\""
+msgstr ""
+
+msgid "token %1 can be value for multiple attributes so attribute name required"
+msgstr ""
+
+msgid "length of hex number must not exceed NAMELEN (%1)"
+msgstr ""
+
+msgid "CDATA declared content"
+msgstr ""
+
+msgid "RCDATA declared content"
+msgstr ""
+
+msgid "inclusion"
+msgstr ""
+
+msgid "exclusion"
+msgstr ""
+
+msgid "NUMBER or NUMBERS declared value"
+msgstr ""
+
+msgid "NAME or NAMES declared value"
+msgstr ""
+
+msgid "NUTOKEN or NUTOKENS declared value"
+msgstr ""
+
+msgid "CONREF attribute"
+msgstr ""
+
+msgid "CURRENT attribute"
+msgstr ""
+
+msgid "TEMP marked section"
+msgstr ""
+
+msgid "included marked section in the instance"
+msgstr ""
+
+msgid "ignored marked section in the instance"
+msgstr ""
+
+msgid "RCDATA marked section"
+msgstr ""
+
+msgid "processing instruction entity"
+msgstr ""
+
+msgid "bracketed text entity"
+msgstr ""
+
+msgid "internal CDATA entity"
+msgstr ""
+
+msgid "internal SDATA entity"
+msgstr ""
+
+msgid "external CDATA entity"
+msgstr ""
+
+msgid "external SDATA entity"
+msgstr ""
+
+msgid "attribute definition list declaration for notation"
+msgstr ""
+
+msgid "rank stem"
+msgstr ""
+
+msgid "no system id specified"
+msgstr ""
+
+msgid "comment in parameter separator"
+msgstr ""
+
+msgid "named character reference"
+msgstr ""
+
+msgid "AND group"
+msgstr ""
+
+msgid "attribute value not a literal"
+msgstr ""
+
+msgid "attribute name missing"
+msgstr ""
+
+msgid "element declaration for group of element types"
+msgstr ""
+
+msgid "attribute definition list declaration for group of element types"
+msgstr ""
+
+msgid "empty comment declaration"
+msgstr ""
+
+msgid "S separator in comment declaration"
+msgstr ""
+
+msgid "multiple comments in comment declaration"
+msgstr ""
+
+msgid "no status keyword"
+msgstr ""
+
+msgid "multiple status keywords"
+msgstr ""
+
+msgid "parameter entity reference in document instance"
+msgstr ""
+
+msgid "element type minimization parameter"
+msgstr ""
+
+msgid "reference not terminated by REFC delimiter"
+msgstr ""
+
+msgid "#PCDATA not first in model group"
+msgstr ""
+
+msgid "#PCDATA in SEQ group"
+msgstr ""
+
+msgid "#PCDATA in nested model group"
+msgstr ""
+
+msgid "#PCDATA in model group that does not have REP occurrence indicator"
+msgstr ""
+
+msgid "name group or name token group used connector other than OR"
+msgstr ""
+
+msgid "processing instruction does not start with name"
+msgstr ""
+
+msgid "S separator in status keyword specification in document instance"
+msgstr ""
+
+msgid "reference to external data entity"
+msgstr ""
+
+msgid "reference to external entity in attribute value"
+msgstr ""
+
+msgid "character %1 is the first character of a delimiter but occurred as data"
+msgstr ""
+
+msgid "SGML declaration was not implied"
+msgstr ""
+
+msgid "marked section in internal DTD subset"
+msgstr ""
+
+msgid "NET-enabling start-tag not immediately followed by null end-tag"
+msgstr ""
+
+msgid "entity end in different element from entity reference"
+msgstr ""
+
+msgid "NETENABL IMMEDNET requires EMPTYNRM YES"
+msgstr ""
+
+msgid "reference to non-SGML character"
+msgstr ""
+
+msgid "declaration of default entity"
+msgstr ""
+
+msgid "reference to parameter entity in parameter separator in internal subset"
+msgstr ""
+
+msgid "reference to parameter entity in token separator in internal subset"
+msgstr ""
+
+msgid "reference to parameter entity in parameter literal in internal subset"
+msgstr ""
+
+msgid "cannot generate system identifier for SGML declaration reference"
+msgstr ""
+
+msgid "public text class of formal public identifier of SGML declaration must be SD"
+msgstr ""
+
+msgid "SGML declaration reference was used but minimum literal was not \"ISO 8879:1986 (WWW)\""
+msgstr ""
+
+msgid "member of model group containing #PCDATA has occurrence indicator"
+msgstr ""
+
+msgid "member of model group containing #PCDATA is a model group"
+msgstr ""
+
+msgid "reference to non-predefined entity"
+msgstr ""
+
+msgid "reference to external entity"
+msgstr ""
+
+msgid "declaration of default entity conflicts with IMPLYDEF ENTITY YES"
+msgstr ""
+
+msgid "parsing with respect to more than one active doctype not supported"
+msgstr ""
+
+msgid "cannot have active doctypes and link types at the same time"
+msgstr ""
+
+msgid "number of concurrent document instances exceeds quantity specified for CONCUR parameter in SGML declaration (%1)"
+msgstr ""
+
+msgid "datatag group can only be specified in base document type"
+msgstr ""
+
+msgid "element not in the base document type can't have an empty start-tag"
+msgstr ""
+
+msgid "element not in base document type can't have an empty end-tag"
+msgstr ""
+
+msgid "immediately recursive element"
+msgstr ""
+
+msgid "invalid URN %1: missing \":\""
+msgstr ""
+
+msgid "invalid URN %1: missing \"urn:\" prefix"
+msgstr ""
+
+msgid "invalid URN %1: invalid namespace identifier"
+msgstr ""
+
+msgid "invalid URN %1: invalid namespace specific string"
+msgstr ""
+
+msgid "invalid URN %1: extra field"
+msgstr ""
+
+msgid "prolog can't be omitted unless CONCUR NO and LINK EXPLICIT NO and either IMPLYDEF ELEMENT YES or IMPLYDEF DOCTYPE YES"
+msgstr ""
+
+msgid "can't determine name of #IMPLIED document element"
+msgstr ""
+
+msgid "can't use #IMPLICIT doctype unless CONCUR NO and LINK EXPLICIT NO"
+msgstr ""
+
+msgid "Sorry, #IMPLIED doctypes not implemented"
+msgstr ""
+
+msgid "reference to DTD data entity ignored"
+msgstr ""
+
+msgid "notation %1 for parameter entity %2 undefined"
+msgstr ""
+
+msgid "notation %1 for external subset undefined"
+msgstr ""
+
+msgid "attribute %1 can't be redeclared"
+msgstr ""
+
+msgid "#IMPLICIT attributes have already been specified for notation %1"
+msgstr ""
+
+msgid "a name group is not allowed in a parameter entity reference in a start tag"
+msgstr ""
+
+msgid "name group in a parameter entity reference in an end tag (SGML forbids them in start tags)"
+msgstr ""
+
+msgid "if the declared value is NOTATION a default value of CONREF is useless"
+msgstr ""
+
+msgid "Sorry, #ALL and #IMPLICIT content tokens not implemented"
+msgstr ""
+
+msgid "delimiter "
+msgstr ""
+
+msgid "digit"
+msgstr ""
+
+msgid "name start character"
+msgstr ""
+
+msgid "sepchar"
+msgstr ""
+
+msgid "separator"
+msgstr ""
+
+msgid "name character"
+msgstr ""
+
+msgid "data character"
+msgstr ""
+
+msgid "minimum data character"
+msgstr ""
+
+msgid "significant character"
+msgstr ""
+
+msgid "record end character"
+msgstr ""
+
+msgid "record start character"
+msgstr ""
+
+msgid "space character"
+msgstr ""
+
+msgid ", "
+msgstr ""
+
+msgid "-"
+msgstr ""
+
+msgid "parameter literal"
+msgstr ""
+
+msgid "data tag group"
+msgstr ""
+
+msgid "model group"
+msgstr ""
+
+msgid "data tag template group"
+msgstr ""
+
+msgid "name"
+msgstr ""
+
+msgid "name token"
+msgstr ""
+
+msgid "element token"
+msgstr ""
+
+msgid "inclusions"
+msgstr ""
+
+msgid "exclusions"
+msgstr ""
+
+msgid "minimum literal"
+msgstr ""
+
+msgid "attribute value literal"
+msgstr ""
+
+msgid "system identifier"
+msgstr ""
+
+msgid "number"
+msgstr ""
+
+msgid "attribute value"
+msgstr ""
+
+msgid "name of capacity"
+msgstr ""
+
+msgid "name of general delimiter role"
+msgstr ""
+
+msgid "reference reserved name"
+msgstr ""
+
+msgid "name of quantity"
+msgstr ""
+
+msgid "entity end"
+msgstr ""
+
+msgid "short reference delimiter"
+msgstr ""
+
+msgid "error reading %1 (%2)"
+msgstr ""
+
+msgid "cannot open %1 (%2)"
+msgstr ""
+
+msgid "error closing %1 (%2)"
+msgstr ""
+
+msgid "error seeking on %1 (%2)"
+msgstr ""
+
+msgid "invalid filename %1"
+msgstr ""
+
+msgid "error reading file descriptor %1 (%2)"
+msgstr ""
+
+msgid "error seeking on file descriptor %1 (%2)"
+msgstr ""
+
+msgid "%1 is not a valid file descriptor number"
+msgstr ""
+
+msgid "cannot find %1; tried %2"
+msgstr ""
+
+msgid "error seeking %1 (%2)"
+msgstr ""
+
+msgid "empty host in HTTP URL %1"
+msgstr ""
+
+msgid "uncompletable relative HTTP URL %1"
+msgstr ""
+
+msgid "empty port number in HTTP URL %1"
+msgstr ""
+
+msgid "invalid port number in HTTP URL %1"
+msgstr ""
+
+msgid "host %1 not found"
+msgstr ""
+
+msgid "could not resolve host %1 (try again later)"
+msgstr ""
+
+msgid "could not resolve host %1 (unrecoverable error)"
+msgstr ""
+
+msgid "no address record for host name %1"
+msgstr ""
+
+msgid "could not resolve host %1 (%2)"
+msgstr ""
+
+msgid "could not resolve host %1 (unknown error)"
+msgstr ""
+
+msgid "cannot create socket (%1)"
+msgstr ""
+
+msgid "error connecting to %1 (%2)"
+msgstr ""
+
+msgid "error sending request to %1 (%2)"
+msgstr ""
+
+msgid "error receiving from host %1 (%2)"
+msgstr ""
+
+msgid "error closing connection to host %1 (%2)"
+msgstr ""
+
+msgid "invalid host number %1"
+msgstr ""
+
+msgid "could not get %2 from %1 (reason given was %3)"
+msgstr ""
+
+msgid "URL not supported by this version"
+msgstr ""
+
+msgid "only HTTP scheme supported"
+msgstr ""
+
+msgid "could not initialize Windows Sockets (%1)"
+msgstr ""
+
+msgid "incompatible Windows Sockets version"
+msgstr ""
+
+msgid "error number "
+msgstr ""
+
+msgid "URL Redirected to %1"
+msgstr ""
+
+msgid "cannot open URL %1 (%2)"
+msgstr ""
+
+msgid "error reading URL %1 (%2)"
+msgstr ""
+
+msgid "unknown output option %1"
+msgstr ""
+
+msgid "Enable batch mode."
+msgstr ""
+
+msgid "Produce output according to %1."
+msgstr ""
+
+msgid "Stop after the document prolog."
+msgstr ""
+
+msgid "Suppress output."
+msgstr ""
+
+msgid "Send RAST output to file %1."
+msgstr ""
+
+msgid "Same as -wduplicate."
+msgstr ""
+
+msgid "Same as -oline."
+msgstr ""
+
+msgid "Same as -c."
+msgstr ""
+
+msgid "Same as -wdefault."
+msgstr ""
+
+msgid "Same as -wundef."
+msgstr ""
+
+msgid "%1 parses and validates the SGML document whose document entity is"
+msgstr ""
+
+msgid "specified by the system identifiers SYSID... and prints on the standard"
+msgstr ""
+
+msgid "output a simple text representation of its Element Structure Information Set."
+msgstr ""
+
+msgid "If more than one system identifier is specified, then the corresponding"
+msgstr ""
+
+msgid "entities will be concatenated to form the document entity. If no system"
+msgstr ""
+
+msgid "identifiers are specified, then %1 will read the document entity from"
+msgstr ""
+
+msgid "the standard input. A command line system identifier of - can be used"
+msgstr ""
+
+msgid "to refer to the standard input."
+msgstr ""
+
+msgid "OPTION"
+msgstr ""
+
+msgid "invalid RAST processing instruction"
+msgstr ""
+
+msgid "invalid link type %1 in rast-active-lpd processing instruction"
+msgstr ""
+
+msgid "duplicate link type %1 in rast-active-lpd processing instruction"
+msgstr ""
+
+msgid "rast-link-rule: processing instruction matches more than one link rule"
+msgstr ""
+
+msgid "rast-link-rule: processing instruction does not match any link rules"
+msgstr ""
+
+msgid "multiple applicable link rules without disambiguating rast-link-rule: processing instruction"
+msgstr ""
+
+msgid "invalid argument for -m option"
+msgstr ""
+
+msgid "omitted start or end tag implied in CDATA or RCDATA marked section; not normalized"
+msgstr ""
+
+msgid "Hoist omitted tags."
+msgstr ""
+
+msgid "Prefer lowercase."
+msgstr ""
+
+msgid "Use markup option %1."
+msgstr ""
+
+msgid "Output the entity named %1."
+msgstr ""
+
+msgid "Output the prolog."
+msgstr ""
+
+msgid "Raw."
+msgstr ""
+
+msgid "Expand references."
+msgstr ""
+
+msgid "%1 is an SGML markup stream editor. %1 parses the SGML document"
+msgstr ""
+
+msgid "contained in SYSID... and copies portions of the document to the"
+msgstr ""
+
+msgid "standard output, adding or changing markup as specified by the options."
+msgstr ""
+
+msgid "Modify the XML output according to %1."
+msgstr ""
+
+msgid "%1 converts SGML to XML. %1 parses and validates the SGML document"
+msgstr ""
+
+msgid "contained in SYSID... and writes an equivalent XML document to the standard"
+msgstr ""
+
+msgid "output. %1 will warn about SGML constructs which have no XML equivalent."
+msgstr ""
+
+msgid "reference to internal SDATA entity %1 not allowed in XML"
+msgstr ""
+
+msgid "reference to external data entity %1 not allowed in XML"
+msgstr ""
+
+msgid "reference to subdocument entity %1 not allowed in XML"
+msgstr ""
+
+msgid "processing instruction containing \"?>\" not allowed in XML"
+msgstr ""
+
+msgid "XML requires processing instructions to start with a name"
+msgstr ""
+
+msgid "external data entity %1 is CDATA or SDATA, but XML allows only NDATA"
+msgstr ""
+
+msgid "attributes were defined for notation %1; not allowed in XML"
+msgstr ""
+
+msgid "cannot convert formal system identifier %1 to URL"
+msgstr ""
+
+msgid "cannot open output file %1"
+msgstr ""
+
+msgid "missing system ID for entity %1"
+msgstr ""
+
+msgid "unexpected entity type for entity named %1"
+msgstr ""
+
+msgid "cannot create directory %1"
+msgstr ""
+
+msgid "already wrote 99 versions of %1; will not overwrite"
+msgstr ""
+
+msgid "already wrote output file %1; will not overwrite"
+msgstr ""
+
+msgid "removing leading slashes from output filename %1"
+msgstr ""
+
+msgid "path %1 outside output directory"
+msgstr ""
+
+msgid "Output a document type declaration."
+msgstr ""
+
+msgid "Output marked sections."
+msgstr ""
+
+msgid "Output comments."
+msgstr ""
+
+msgid "Raw output."
+msgstr ""
+
+msgid "%1 prints on the standard output a normalized document instance"
+msgstr ""
+
+msgid "for the SGML document contained in the concatenation of the entities"
+msgstr ""
+
+msgid "with system identifiers SYSID..."
+msgstr ""
+
+msgid "Print the effective system id for the public id %1."
+msgstr ""
+
+msgid "Print the effective system id for system id %1."
+msgstr ""
+
+msgid "Print the effective system id for parameter entity %1."
+msgstr ""
+
+msgid "Print the effective system id for the doctype %1."
+msgstr ""
+
+msgid "Print the effective system id for the linktype %1."
+msgstr ""
+
+msgid "Print the effective system id for entity %1."
+msgstr ""
+
+msgid "Print the effective system id for notation %1."
+msgstr ""
+
+msgid "Print the effective system id for the SGML declaration for doctype %1."
+msgstr ""
+
+msgid "%1 prints effective system identifiers found in the catalogs on the"
+msgstr ""
+
+msgid "standard output. It doesn't check that the system identifiers correspond"
+msgstr ""
+
+msgid "to actual files. The return value is 0 if the last system identifier was"
+msgstr ""
+
+msgid "successfully created and 1 otherwise."
+msgstr ""
+
+msgid "LITERAL"
+msgstr ""
+
+msgid "non-SGML"
+msgstr ""
+
+msgid "raw"
+msgstr ""
+
+msgid "%1 prints the concatenation of the entities with system identifiers"
+msgstr ""
+
+msgid "SYSID... on the standard output"
+msgstr ""
+

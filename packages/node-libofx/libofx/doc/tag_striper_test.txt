@@ -1,0 +1,8 @@
+<OFX>
+<INTU.BID>This should be stripped<THIS_SHOULD_NOT_BE_STRIPPED>This should not be stripped
+<THIS_SHOULD_NOT_BE_STRIPPED>This should not be stripped<INTU.BID>This should be stripped<THIS_SHOULD_NOT_BE_STRIPPED>This should not be stripped
+<THIS_SHOULD_NOT_BE_STRIPPED>This should not be stripped<INTU.BID>This should be stripped</THIS_SHOULD_NOT_BE_STRIPPED>
+<THIS_SHOULD_NOT_BE_STRIPPED>This should not be stripped<INTU.BID>This should be stripped</INTU.BID><THIS_SHOULD_NOT_BE_STRIPPED>This should not be stripped
+<THIS_SHOULD_NOT_BE_STRIPPED>This should not be stripped<INTU.BID>This should be stripped
+<INTU.BID>This should be stripped
+</OFX>

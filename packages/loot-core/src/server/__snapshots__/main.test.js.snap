@@ -1,0 +1,197 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Accounts Transfers are properly updated 1`] = `
+Array [
+  Object {
+    "acct": "one",
+    "amount": 5000,
+    "category": null,
+    "cleared": 1,
+    "date": 20170101,
+    "description": "transfer-two",
+    "error": null,
+    "financial_id": null,
+    "id": "test-transfer",
+    "imported_description": null,
+    "isChild": 0,
+    "isParent": 0,
+    "location": null,
+    "notes": null,
+    "parent_id": null,
+    "pending": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transferred_id": "id2",
+    "type": null,
+  },
+  Object {
+    "acct": "two",
+    "amount": -5000,
+    "category": null,
+    "cleared": 0,
+    "date": 20170101,
+    "description": "transfer-one",
+    "error": null,
+    "financial_id": null,
+    "id": "id2",
+    "imported_description": null,
+    "isChild": 0,
+    "isParent": 0,
+    "location": null,
+    "notes": null,
+    "parent_id": null,
+    "pending": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transferred_id": "test-transfer",
+    "type": null,
+  },
+]
+`;
+
+exports[`Accounts Transfers are properly updated 2`] = `
+"Snapshot Diff:
+- First value
++ Second value
+
+@@ -2,12 +2,12 @@
+    Object {
+      \\"acct\\": \\"one\\",
+      \\"amount\\": 5000,
+      \\"category\\": null,
+      \\"cleared\\": 1,
+-     \\"date\\": 20170101,
+-     \\"description\\": \\"transfer-two\\",
++     \\"date\\": 20170103,
++     \\"description\\": \\"transfer-three\\",
+      \\"error\\": null,
+      \\"financial_id\\": null,
+      \\"id\\": \\"test-transfer\\",
+      \\"imported_description\\": null,
+      \\"isChild\\": 0,
+@@ -22,15 +22,15 @@
+      \\"tombstone\\": 0,
+      \\"transferred_id\\": \\"id2\\",
+      \\"type\\": null,
+    },
+    Object {
+-     \\"acct\\": \\"two\\",
++     \\"acct\\": \\"three\\",
+      \\"amount\\": -5000,
+      \\"category\\": null,
+      \\"cleared\\": 0,
+-     \\"date\\": 20170101,
++     \\"date\\": 20170103,
+      \\"description\\": \\"transfer-one\\",
+      \\"error\\": null,
+      \\"financial_id\\": null,
+      \\"id\\": \\"id2\\",
+      \\"imported_description\\": null,"
+`;
+
+exports[`Accounts Transfers are properly updated 3`] = `
+"Snapshot Diff:
+- First value
++ Second value
+
+@@ -17,12 +17,12 @@
+      \\"parent_id\\": null,
+      \\"pending\\": 0,
+      \\"schedule\\": null,
+      \\"sort_order\\": 123456789,
+      \\"starting_balance_flag\\": 0,
+-     \\"tombstone\\": 0,
+-     \\"transferred_id\\": \\"id2\\",
++     \\"tombstone\\": 1,
++     \\"transferred_id\\": null,
+      \\"type\\": null,
+    },
+    Object {
+      \\"acct\\": \\"three\\",
+      \\"amount\\": -5000,
+@@ -41,10 +41,10 @@
+      \\"parent_id\\": null,
+      \\"pending\\": 0,
+      \\"schedule\\": null,
+      \\"sort_order\\": 123456789,
+      \\"starting_balance_flag\\": 0,
+-     \\"tombstone\\": 0,
++     \\"tombstone\\": 1,
+      \\"transferred_id\\": \\"test-transfer\\",
+      \\"type\\": null,
+    },
+  ]"
+`;
+
+exports[`Budget budget updates when changing a category 1`] = `
+Array [
+  "budget201702!sum-amount-id2",
+]
+`;
+
+exports[`Budget budget updates when changing a category 2`] = `
+Array [
+  "budget201702!sum-amount-id2",
+]
+`;
+
+exports[`Budget budget updates when changing a category 3`] = `
+Array [
+  "budget201702!sum-amount-id2",
+]
+`;
+
+exports[`Budget new budgets should be created 1`] = `
+Set {
+  "2016-10",
+  "2016-11",
+  "2016-12",
+  "2017-01",
+  "2017-02",
+  "2017-03",
+  "2017-04",
+  "2017-05",
+  "2017-06",
+  "2017-07",
+  "2017-08",
+  "2017-09",
+  "2017-10",
+  "2017-11",
+  "2017-12",
+  "2018-01",
+}
+`;
+
+exports[`Budget new budgets should be created 2`] = `
+Set {
+  "2016-10",
+  "2016-11",
+  "2016-12",
+  "2017-01",
+  "2017-02",
+  "2017-03",
+  "2017-04",
+  "2017-05",
+  "2017-06",
+  "2017-07",
+  "2017-08",
+  "2017-09",
+  "2017-10",
+  "2017-11",
+  "2017-12",
+  "2018-01",
+  "2016-02",
+  "2016-03",
+  "2016-04",
+  "2016-05",
+  "2016-06",
+  "2016-07",
+  "2016-08",
+  "2016-09",
+  "2018-02",
+}
+`;

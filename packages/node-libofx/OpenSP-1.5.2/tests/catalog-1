@@ -1,0 +1,54 @@
+#!/bin/sh
+# Open SGML Catalog: test DTDDECL
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles cat-test1.in1 cat-test1.cat"
+cat <<EOF >cat-test1.in1
+<!DOCTYPE html PUBLIC "-//xxx//DTD yyy//EN" [
+<!ELEMENT html - o (#PCDATA)>
+]>
+<html>
+EOF
+cat <<EOF >cat-test1.cat
+PUBLIC "-//xxx//DTD yyy//EN" "/dev/null"
+EOF
+
+: ${top_srcdir=..}
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} -s -c cat-test1.cat cat-test1.in1
+test $? = 0 || { rm -fr $tmpfiles; exit 1; }
+${ONSGMLS} -s -c cat-test1.cat ${top_srcdir}/pubtext/html.dcl cat-test1.in1
+test $? = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles cat-test2.cat"
+cat <<EOF >cat-test2.cat
+SGMLDECL "${top_srcdir}/pubtext/xml.dcl"
+DTDDECL "-//xxx//DTD yyy//EN" "${top_srcdir}/pubtext/html.dcl"
+PUBLIC "-//xxx//DTD yyy//EN" "/dev/null"
+EOF
+${ONSGMLS} -s -c cat-test2.cat cat-test1.in1
+test $? = 0 || { rm -fr $tmpfiles; exit 1; }
+
+# Must fail since onsgmls will use the xml.dcl through SGMLDECL and xml.dcl does
+# not allow minimization (end tag omission).
+tmpfiles="$tmpfiles cat-test3.cat"
+cat <<EOF >cat-test3.cat
+SGMLDECL "${top_srcdir}/pubtext/xml.dcl"
+DTDDECL "-//xxx//DTD zzz" "${top_srcdir}/pubtext/html.dcl"
+PUBLIC "-//xxx//DTD yyy//EN" "/dev/null"
+EOF
+${ONSGMLS} -s -E 1 -c cat-test3.cat cat-test1.in1 >/dev/null 2>&1
+if [ "$?" -gt 0 ]; then
+  result=0
+else
+  result=1
+fi
+
+rm -fr $tmpfiles
+
+exit $result

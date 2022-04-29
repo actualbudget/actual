@@ -1,0 +1,98 @@
+#!/bin/sh
+# Architectural Form: test ArcDocF
+# test onsgmls and osgmlnorm
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles af-2.sgml af-2.dtd af-meta-2.dtd"
+cat <<EOF >af-2.sgml
+<!DOCTYPE doc SYSTEM "af-2.dtd">
+<doc>
+ <s>
+  <v n="1">verse 1</v>
+  <v n="2">verse 2</v>
+ </s>
+</doc>
+EOF
+cat <<EOF >af-2.dtd
+<!NOTATION SGML PUBLIC "-//ISO 8879:1986//NOTATION Standard Generalized Markup
+    Language//EN">
+
+<?IS10744 ArcBase open>
+<!NOTATION open PUBLIC "-//OpenJade Project//NOTATION AFDR ARCBASE open Architecture//EN">
+<!ATTLIST #NOTATION open
+    ArcDocF NAME #FIXED "doc"
+    ArcDTD CDATA #FIXED "opendtd">
+<!ENTITY opendtd SYSTEM "af-meta-2.dtd" CDATA SGML>
+
+<!ELEMENT doc - o (s+)>
+<!ATTLIST doc
+  open NMTOKEN #FIXED "doc">
+<!ELEMENT s   - o (v+)>
+<!ATTLIST s
+  open NMTOKEN #FIXED "stanza">
+<!ELEMENT v   - o (#PCDATA)>
+<!ATTLIST v
+  n CDATA #REQUIRED
+  open NMTOKEN #FIXED "verse">
+EOF
+
+cat <<EOF >af-meta-2.dtd
+<!ELEMENT doc      - o (stanza+)>
+<!ELEMENT stanza   - o (verse+)>
+<!ELEMENT verse    - o (#PCDATA)>
+<!ATTLIST verse
+  n CDATA #REQUIRED>
+EOF
+
+tmpfiles="$tmpfiles af-2-onsgmls.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >af-2-onsgmls.out -A open af-2.sgml
+
+tmpfiles="$tmpfiles af-2-onsgmls.ok"
+cat <<EOF >af-2-onsgmls.ok
+(DOC
+(STANZA
+AN CDATA 1
+(VERSE
+-verse 1
+)VERSE
+AN CDATA 2
+(VERSE
+-verse 2
+)VERSE
+)STANZA
+)DOC
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} af-2-onsgmls.ok af-2-onsgmls.out
+result=$?
+test $result = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles af-2-norm.out"
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >af-2-norm.out -A open af-2.sgml
+tmpfiles="$tmpfiles af-2-norm.ok"
+cat <<EOF >af-2-norm.ok
+<DOC>
+<STANZA>
+<VERSE N="1">verse 1</VERSE>
+<VERSE N="2">verse 2</VERSE>
+</STANZA>
+</DOC>
+EOF
+
+${DIFF} af-2-norm.ok af-2-norm.out
+result=$?
+test $result = 0 || result=$(($result + 1))
+
+rm -fr $tmpfiles
+
+exit $result

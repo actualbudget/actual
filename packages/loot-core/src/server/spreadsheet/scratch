@@ -1,0 +1,60 @@
+const query = (
+  from t in transactions
+  where t.amount == 700
+  select { t.amount, t.description }
+);
+
+const sqlgen = require("./sqlgen");
+const sqlinterp = require("./sqlinterp");
+const { Database } = require("sqlite3");
+const db = new Database("db.sqlite");
+
+const shemas = {};
+
+function makeRow(columns, data) {
+  return t.toObj(columns.map((name, i) => {
+    return [name, data[i]];
+  }));
+}
+
+function run(query, cb) {
+  console.log("running")
+  db.each(sqlgen(query) + " LIMIT 10", function(err, row) {
+    console.log(row);
+  }, cb);
+}
+
+db.addListener("preupdate", function(type, db, table, oldValues, newValues) {
+  let existed, exists;
+  debugger;
+  if(oldValues) {
+    const row = makeRow(schemas[table], oldValues);
+    existed = sqlinterp(query, row);
+  }
+  if(newValues) {
+    const row = makeRow(schemas[table], newValues);
+    exists = sqlinterp(query, row);
+  }
+
+  if(existed || exists) {
+    console.log("Running query...");
+    run(query, function() {});
+  }
+});
+
+db.all("PRAGMA table_info(transactions)", function(err, rows) {
+  schemas["transactions"] = rows.map(r => r.name);
+
+  run(query, function() {
+    console.log("\nCHANGING\n");
+
+    db.run("INSERT INTO transactions (acct, category, amount, description, date)" +
+           ' VALUES (1, 1, 3300, "foobar", 1456808400000)');
+    db.run("INSERT INTO transactions (acct, category, amount, description, date)" +
+           ' VALUES (1, 1, 700, "foobar", 1456808400000)');
+    db.run("INSERT INTO transactions (acct, category, amount, description, date)" +
+           ' VALUES (1, 1, -500, "foobar", 1456808400000)');
+    db.run("INSERT INTO transactions (acct, category, amount, description, date)" +
+           ' VALUES (1, 1, 200, "foobar", 1456808400000)');
+  });
+});

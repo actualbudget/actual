@@ -1,0 +1,17 @@
+STRINGTABLE
+BEGIN
+  0, "invalid argument for -m option"
+  1, "omitted start or end tag implied in CDATA or RCDATA marked section; not normalized"
+  2, "Hoist omitted tags."
+  3, "Prefer lowercase."
+  4, "Use markup option %1."
+  5, "Output the entity named %1."
+  6, "Output the prolog."
+  7, "Raw."
+  8, "Expand references."
+  9, "%1 is an SGML markup stream editor. %1 parses the SGML document"
+  10, "contained in SYSID... and copies portions of the document to the"
+  11, "standard output, adding or changing markup as specified by the options."
+  12, "OPTION"
+  13, "NAME"
+END

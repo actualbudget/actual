@@ -1,0 +1,19 @@
+STRINGTABLE
+BEGIN
+  100, "reference to internal SDATA entity %1 not allowed in XML"
+  101, "reference to external data entity %1 not allowed in XML"
+  102, "reference to subdocument entity %1 not allowed in XML"
+  103, "processing instruction containing ""?>"" not allowed in XML"
+  104, "XML requires processing instructions to start with a name"
+  105, "external data entity %1 is CDATA or SDATA, but XML allows only NDATA"
+  106, "attributes were defined for notation %1; not allowed in XML"
+  107, "cannot convert formal system identifier %1 to URL"
+  108, "cannot open output file %1"
+  109, "missing system ID for entity %1"
+  110, "unexpected entity type for entity named %1"
+  111, "cannot create directory %1"
+  112, "already wrote 99 versions of %1; will not overwrite"
+  113, "already wrote output file %1; will not overwrite"
+  114, "removing leading slashes from output filename %1"
+  115, "path %1 outside output directory"
+END

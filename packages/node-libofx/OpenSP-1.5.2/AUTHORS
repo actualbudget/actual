@@ -1,0 +1,15 @@
+James Clark:
+Original author of the SP suite, from which OpenSP is derived.
+
+Henry Thompson:
+Initial autoconf support for SP.
+
+Cees A. de Groot:
+Autoconf support for SP.
+
+Matthias Clasen:
+spcat, DTDDECL, CONCUR, improved support of Annex K, 
+autoconf & automake setup.
+
+Peter Newcomb, Epremis Corp.:
+MessageModule, support for HyTime Amendment 1 (IS10744:arch PI)

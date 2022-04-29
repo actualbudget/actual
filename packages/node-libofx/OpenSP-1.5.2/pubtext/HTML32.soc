@@ -1,0 +1,8 @@
+-- html32.soc: catalog for parsing HTML 3.2 documents --
+SGMLDECL "HTML32.dcl"
+PUBLIC "-//W3C//DTD HTML 3.2 Final//EN" HTML32.dtd
+PUBLIC "-//W3C//DTD HTML 3.2 Draft//EN" HTML32.dtd
+PUBLIC "-//W3C//DTD HTML 3.2//EN" HTML32.dtd
+PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN//HTML" ISOlat1.ent
+-- added by jjc --
+DOCTYPE html HTML32.dtd

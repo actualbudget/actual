@@ -1,0 +1,5 @@
+<!doctype doc [
+<!element doc - o empty>
+<!attlist doc a nmtokens #implied>
+]>
+<doc a="&#224;&#428;&#40869;x&#12526;y">

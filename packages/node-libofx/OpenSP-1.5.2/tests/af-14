@@ -1,0 +1,100 @@
+#!/bin/sh
+# Architectural Form: test ArcBridA:
+#    Resolving IDREFs (series: af-12 - af-15)
+#    Now throw away "stanza" part, mapping IDREFs to CDATA, no bridge required
+# test onsgmls and osgmlnorm
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles af-14.sgml af-14.dtd af-meta-14.dtd"
+cat <<EOF >af-14.sgml
+<!DOCTYPE doc SYSTEM "af-14.dtd">
+<doc>
+ <s>
+  <v n="n1">verse 1</v>
+  <v n="n2">verse 2</v>
+ </s>
+ <n>
+  <i r="n2">note on verse 2</i>
+ </n>
+</doc>
+EOF
+cat <<EOF >af-14.dtd
+<!NOTATION SGML PUBLIC "-//ISO 8879:1986//NOTATION Standard Generalized Markup
+    Language//EN">
+
+<?IS10744 ArcBase open>
+<!NOTATION open PUBLIC "-//OpenJade Project//NOTATION AFDR ARCBASE open Architecture//EN">
+<!ATTLIST #NOTATION open
+    ArcDTD CDATA #FIXED "opendtd">
+<!ENTITY opendtd SYSTEM "af-meta-14.dtd" CDATA SGML>
+
+<!ELEMENT doc - o (s+,n)>
+<!ATTLIST doc
+  open NMTOKEN   #FIXED "open">
+<!ELEMENT s   - o (v+)>
+<!ELEMENT v   - o (#PCDATA)>
+<!ATTLIST v
+  n ID        #REQUIRED>
+<!ELEMENT n   - o (i+)>
+<!ATTLIST n
+  open NMTOKEN   #FIXED "notes">
+<!ELEMENT i   - o (#PCDATA)>
+<!ATTLIST i
+  r IDREF        #REQUIRED>
+EOF
+
+cat <<EOF >af-meta-14.dtd
+<!ELEMENT open    - o (notes)>
+<!ELEMENT notes   - o (i+)>
+<!ELEMENT i       - o (#PCDATA)>
+<!ATTLIST i
+  r CDATA #IMPLIED>
+EOF
+
+tmpfiles="$tmpfiles af-14-onsgmls.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >af-14-onsgmls.out -A open af-14.sgml
+tmpfiles="$tmpfiles af-14-onsgmls.ok"
+cat <<EOF >af-14-onsgmls.ok
+(OPEN
+(NOTES
+AR CDATA N2
+(I
+-note on verse 2
+)I
+)NOTES
+)OPEN
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} af-14-onsgmls.ok af-14-onsgmls.out
+result=$?
+test $result = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles af-14-norm.out"
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >af-14-norm.out -A open af-14.sgml
+tmpfiles="$tmpfiles af-14-norm.ok"
+
+cat <<EOF >af-14-norm.ok
+<OPEN>
+<NOTES>
+<I R="N2">note on verse 2</I>
+</NOTES>
+</OPEN>
+EOF
+
+${DIFF} af-14-norm.ok af-14-norm.out
+result=$?
+test $result = 0 || result=$(($result + 1))
+
+rm -fr $tmpfiles
+
+exit $result

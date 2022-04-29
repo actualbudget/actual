@@ -1,0 +1,18 @@
+STRINGTABLE
+BEGIN
+  4200, "unknown warning type %1"
+  4201, "invalid error limit"
+  4202, "maximum number of errors (%1) reached; change with -E option"
+  4203, "Make doctype or linktype %1 active."
+  4204, "Parse wrt. architecture %1."
+  4205, "Give up after %1 errors."
+  4206, "Show open entities in error messages."
+  4207, "Show open elements in error messages."
+  4208, "Show error numbers in error messages."
+  4209, "Show references in error messages."
+  4210, "Define parameter entity %1 as ""INCLUDE""."
+  4211, "Enable warning %1."
+  4212, "TYPE"
+  4213, "NAME"
+  4214, "NUMBER"
+END

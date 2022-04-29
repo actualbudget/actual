@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>OpenSP - Character sets</TITLE>
+</HEAD>
+<BODY>
+<H1>Handling of character sets in OpenSP</H1>
+<P>
+The following description applies only to the multi-byte version of
+OpenSP.  In the single-byte version of OpenSP, each character is represented
+both internally and in storage objects by a single byte equal to the
+number of the character in the document character set.
+<P>
+OpenSP's entity manager converts the bytes comprising a storage object
+into a sequence of characters.
+This conversion is determined by the encoding associated with
+the storage object.
+<P>
+An encoding may be specified using the name of a mapping from
+sequences of characters to sequences of bytes.
+<P>
+An encoding can also be specified relative to the document character
+set.  This kind of an encoding maps a sequence of characters in the
+repertoire of the document character set into a sequence of bytes by
+<OL>
+<LI>
+mapping each character to its bit
+combination in the document character set, and then
+<LI>
+applying a transformation that maps sequences of bit combinations
+to sequences of bytes.
+</OL>
+<P>
+The transformation applied in the second step is called a bit
+combination transformation format (BCTF).
+A document character set relative encoding is specified by giving
+the name of a BCTF.
+<P>
+An application receives characters from OpenSP represented as non-negative
+integers.
+The mapping from characters to integers is determined by OpenSP's internal
+character set.
+OpenSP can operate in a mode in which the internal character set is the
+same as the document character set.
+(Versions of SP up to 1.1.1 always operated in this mode.)
+<A NAME="fixed">
+The multibyte version of OpenSP can also operate in a mode in which the
+internal character set does not vary with the document character set,
+but is always a fixed character set, known as the system character set;
+this mode of operation is called fixed character set mode.</A>
+
+<H2>Environment</H2>
+<P>
+SP's character set handling is controlled by the following
+environment variables:
+<DL>
+<DT>
+SP_CHARSET_FIXED
+<DD>
+If this variable is 1 or YES, then OpenSP will operate in fixed character set mode.
+<DT>
+SP_SYSTEM_CHARSET
+<DD>
+This identifies the system character set.  When in fixed character set
+mode, this character set is used as the internal character set.  When
+not in fixed character set mode this character set is used as the
+internal character set until the document character set has been read,
+at which point the document character set is used as the internal
+character set.
+<P>
+The only currently recognized value for this is <SAMP>JIS</SAMP>.
+This refers to a character set which combines JIS X 0201, JIS X 0208
+and JIS X 0212 by adding 0x8080 to the codes of characters in JIS X
+0208 and 0x8000 to the codes of characters in JIS X 0212.
+<P>
+The default system character set is Unicode 2.0.
+<DT>
+SP_ENCODING
+<DD>
+This specifies the default encoding when operating in fixed character set mode.
+The value must be the name of an available encoding.
+The default encoding cannot be document character set relative
+when operating in fixed character set mode.
+<DT>
+SP_BCTF
+<DD>
+This specifies the default encoding when not operating in fixed character set mode.
+The value must be the name of an available BCTF.
+When not operating in fixed character set mode, the default encoding is
+the document character set relative encoding with this BCTF.
+The default encoding is required to be document character set relative
+when not operating in fixed character set mode.
+</DL>
+<P>
+The default encoding is used for file input and output, and, except
+under Windows 95 and Windows NT, for all other interfaces with the
+operating system including filenames, environment varable names,
+environment variable values and command line arguments.
+<P>
+Under Windows 95 and Windows NT there are no restrictions on the
+default encoding.  Note that in order for non-ASCII characters to be
+correctly displayed on your console you must select a TrueType font,
+such as Lucida Console, as your console font.  (This seems to work
+only on Windows NT.)
+<P>
+Under other operating systems, the default encoding must be one in
+which ASCII characters are represented by a single byte.
+<P>
+Applications built with OpenSP may require fixed character set mode and a
+particular system character set; such applications will ignore the
+SP_SYSTEM_CHARSET and SP_CHARSET_FIXED environment variables.
+
+<H2><A NAME="encodings">Available encodings</A></H2>
+<P>
+Encoding names are case insensitive.
+The following named encodings are available:
+<DL>
+<DT>
+<SAMP>utf-8</SAMP>
+<DD>
+Each character is represented by a variable number of bytes
+according to UCS Transformation Format 8 defined in Annex P to be
+added by the first proposed drafted amendment (PDAM 1) to ISO/IEC
+10646-1:1993.
+<DT>
+<SAMP>utf-16</SAMP>
+<DD>
+Each character is represented by a variable number of bytes
+according to UCS Transformation Format 16 defined in Annex O to be
+added by the first proposed drafted amendment (PDAM 1) to ISO/IEC
+10646-1:1993.
+<DT>
+<SAMP>ucs-2</SAMP>
+<DT>
+<SAMP>iso-10646-ucs-2</SAMP>
+<DD>
+This is ISO/IEC 10646 with the UCS-2 transformation format.
+Each character is represented by 2 bytes.
+No special treatment is given to the byte order mark character.
+<DT>
+<SAMP>ucs-4</SAMP>
+<DT>
+<SAMP>iso-10646-ucs-4</SAMP>
+<DT>
+<SAMP>utf-32</SAMP>
+<DD>
+This is ISO/IEC 10646 with the UCS-4 transformation format.
+Each character is represented by 4 bytes.
+<DT>
+<SAMP>unicode</SAMP>
+<DD>
+Each character is represented according to the utf-16 encoding.  
+The bytes representing the entire storage object may be preceded by a pair of
+bytes representing the byte order mark character (0xFEFF).  The bytes
+representing each character are in the system byte order, unless
+the byte order mark character is present, in which case the order of
+its bytes determines the byte order.  When the storage object is read,
+any byte order mark character is discarded.
+<DT>
+<SAMP>euc-jp</SAMP>
+<DD>
+This is equivalent to
+the Extended_UNIX_Code_Packed_Format_for_Japanese Internet charset.
+Each character is encoded by a variable length sequence of octets.
+<DT>
+<SAMP>euc-kr</SAMP>
+<DD>
+This is ASCII and KSC 5601 encoded with the EUC encoding
+as defined by KS C 5861-1992.
+<DT>
+<SAMP>euc-cn</SAMP>
+<DT>
+<SAMP>cn-gb</SAMP>
+<DT>
+<SAMP>gb2312</SAMP>
+<DD>
+This is ASCII and GB 2312-80 encoded with the EUC encoding.
+It is equivalent to the CN-GB MIME charset defined in RFC 1922.
+<DT>
+<SAMP>sjis</SAMP>
+<DT>
+<SAMP>shift_jis</SAMP>
+<DD>
+This is equivalent to the Shift_JIS Internet charset.
+Each character is encoded by a variable length sequence of octets.
+This is Microsoft's standard encoding for Japanese.
+<DT>
+<SAMP>big5</SAMP>
+<DT>
+<SAMP>cn-big5</SAMP>
+<DD>
+This is equivalent to the CN-Big5 MIME charset defined in RFC 1922.
+<DT>
+<SAMP>is8859-<VAR>n</VAR></SAMP>
+<DT>
+<SAMP>iso-8859-<VAR>n</VAR></SAMP>
+<DD>
+<SAMP><VAR>n</VAR></SAMP> can be any single digit other than 0.  Each
+character in the repertoire of ISO 8859-<VAR>n</var> is represented
+by a single byte.
+<DT>
+<SAMP>koi8-r</SAMP>
+<DT>
+<SAMP>koi8</SAMP>
+<DD>
+The koi8-r encoding as defined in RFC 1489.
+<DT>
+<SAMP>xml</SAMP>
+<DD>
+On input, this uses XML's rules to determine the encoding.
+On output, this uses UTF-8.
+</DL>
+<P>
+The following additional encodings are supported under Windows 95
+and Windows NT:
+<DL>
+<DT>
+<SAMP>windows</SAMP>
+<DD>
+Specify this encoding when a storage object is encoded using your
+system's default Windows character set.
+This uses the so-called ANSI code page.
+<DT>
+<SAMP>wunicode</SAMP>
+<DD>
+This uses the <SAMP>unicode</SAMP> encoding if the storage object starts
+with a byte order mark and otherwise the <SAMP>windows</SAMP> encoding.
+If you are working with Unicode, this is probably the best value
+for <SAMP>SP_ENCODING</SAMP>.
+<DT>
+<SAMP>ms-dos</SAMP>
+<DD>
+Specify this encoding when a storage object (file) uses the OEM code page.
+The OEM code-page for a particular
+machine is the code-page used by FAT file-systems on that machine and
+is the default code-page for MS-DOS consoles.
+</DL>
+
+<H2><A NAME="bctfs">Available BCTFs</A></H2>
+<P>
+The following BCTFs are available:
+<DL>
+<DT>
+<SAMP>identity</SAMP>
+<DD>
+Each bit combination is represented by a single byte.
+<DT>
+<SAMP>fixed-2</SAMP>
+<DD>
+Each bit combination is represented by exactly 2 bytes,
+with the more significant byte first.
+<DT>
+<SAMP>fixed-4</SAMP>
+<DD>
+Each bit combination is represented by exactly 4 bytes,
+with the more significant byte first.
+<DT>
+<SAMP>utf-8</SAMP>
+<DD>
+Each bit combination is represented by a variable number of bytes
+according to UCS Transformation Format 8 defined in Annex P to be
+added by the first proposed drafted amendment (PDAM 1) to ISO/IEC
+10646-1:1993.
+<DT>
+<SAMP>euc</SAMP>
+<DD>
+Each bit combination is represented by a variable number of bytes
+depending on the values of the 0x80 and 0x8000 bits:
+<UL>
+<LI>
+if neither bits are set, then the bit combination is
+represented by a single byte equal to the bit combination;
+<LI>
+bit combinations with both bits set, are represented by the MSB of the
+bit combination followed by the LSB of the bit combination;
+<LI>
+bit combinations with just the 0x80 bit set are represented
+by 0x8E followed by a byte equal to the bit combination;
+<LI>
+bit combinations with just the 0x8000 bit set are represented
+by 0x8F followed by the MSB of the bit combination followed
+by the LSB of the bit combination.
+</UL>
+<DT>
+<SAMP>sjis</SAMP>
+<DD>
+A bit combination between 0 and 127 or between 161 and
+223 is encoded as a single byte with the same value as the bit combination.
+A bit combination with the 0x8000 and 0x80 bits set is encoded by the
+sequence of bytes with which the SJIS encoding encodes the character
+whose number in JIS X 0208 added to 0x8080 is equal to the bit
+combination.
+<DT>
+<SAMP>big5</SAMP>
+<DD>
+A bit combination less than 0x80 is encoded as a single byte.
+A bit combination with the 0x8000 bit set is encoded as two bytes,
+the MSB of the bit combination followed by the LSB of the bit
+combination.
+</DL>
+</BODY>
+</HTML>

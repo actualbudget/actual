@@ -1,0 +1,222 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>OSX</TITLE>
+</HEAD>
+<BODY>
+<H1>OSX</H1>
+<H4>
+An SGML System Conforming to International Standard ISO 8879 --
+Standard Generalized Markup Language
+</H4>
+<H4>
+An SGML Extended Facilities system conforming to
+Annex A of International Standard ISO/IEC 10744 --
+Hypermedia/Time-based Structuring Language
+</H4>
+<H2>
+SYNOPSIS
+</H2>
+<P>
+<CODE>osx</CODE> [ <CODE>option...</CODE> ] <CODE><VAR>sysid...</VAR></CODE>
+<H2>DESCRIPTION</H2>
+<P>
+Osx converts SGML to XML.
+Osx parses and validates the SGML document contained in
+<CODE><VAR>sysid...</VAR></CODE>
+and writes an equivalent XML document to the standard output.
+Osx will warn about SGML constructs which have no XML equivalent.
+<H2>OPTIONS</H2>
+<P>
+The following options are available:
+<DL>
+<DT>
+<CODE>-b<VAR>name</VAR></CODE>,
+<CODE>--encoding=<VAR>name</VAR></CODE>
+<DD>
+Use the <A HREF="sysid.htm#encodings">BCTF</A> <VAR>name</VAR> for output.
+By default osx uses UTF-8.
+<DT>
+<CODE>-c<VAR>sysid</VAR></CODE>,
+<CODE>--catalog=<VAR>sysid</VAR></CODE>
+<DD>
+Map public identifiers and entity names to system identifiers
+using the catalog entry file whose system identifier is <VAR>sysid</VAR>.
+This has the same effect as in <A HREF="nsgmls.htm#optc">onsgmls</A>.
+<DT>
+<CODE>-C</CODE>,
+<CODE>--catalogs</CODE>
+<DD>
+This has the same effect as in <A HREF="nsgmls.htm#optC">onsgmls</A>.
+<DT>
+<CODE>-d<VAR>directory</VAR></CODE>
+<DD>
+Place output files in
+<CODE><VAR>directory</VAR></CODE>.
+<DT>
+<CODE>-D<VAR>directory</VAR></CODE>,
+<CODE>--directory=<VAR>directory</VAR></CODE>
+<DD>
+Search
+<CODE><VAR>directory</VAR></CODE>
+for files specified in system identifiers.
+This has the same effect as in <A HREF="nsgmls.htm#optD">onsgmls</A>.
+<DT>
+<CODE>-e</CODE>,
+<CODE>--open-entities</CODE>
+<DD>
+Describe open entities in error messages.
+<DT>
+<CODE>-f<VAR>file</VAR></CODE>,
+<CODE>--error-file=<VAR>file</VAR></CODE>
+<DD>
+Redirect errors to
+<CODE><VAR>file</VAR></CODE>.
+This is useful mainly with shells that do not support redirection
+of stderr.
+<DT>
+<CODE>-i<VAR>name</VAR></CODE>,
+<CODE>--include=<VAR>name</VAR></CODE>
+<DD>
+This has the same effect as in <A HREF="nsgmls.htm#opti">onsgmls</A>.
+<DT>
+<CODE>-l<VAR>dtd_file</VAR></CODE>
+<DD>
+Specify that the resulting XML file should conform to the DTD in
+<CODE><VAR>dtd_file</VAR></CODE>.
+<DT>
+<CODE>-R</CODE>,
+<CODE>--restricted</CODE>
+<DD>
+This has the same effect as in <A HREF="nsgmls.htm#optR">onsgmls</A>.
+<DT>
+<CODE>-v</CODE>,
+<CODE>--version</CODE>
+<DD>
+Print the version number.
+<DT>
+<CODE>-w<VAR>type</VAR></CODE>,
+<CODE>--warning=<VAR>type</VAR></CODE>
+<DD>
+Control warnings and errors according to
+<CODE><VAR>type</VAR></CODE>.
+This has the same effect as in <A HREF="nsgmls.htm#optw">onsgmls</A>.
+<DT>
+<CODE>-x<VAR>option</VAR></CODE>,
+<CODE>--xml-output-option=<VAR>option</VAR></CODE>
+<DD>
+Control the XML output according to the value of
+<CODE><VAR>option</VAR></CODE> as follows:
+<DL>
+<DT>
+<CODE>no-nl-in-tag</CODE>
+<DD>
+Don't use newlines inside start-tags.
+Usually osx uses newlines inside start-tags so as to reduce the
+probability of excessively long lines.
+<DT>
+<CODE>id</CODE>
+<DD>
+Output attribute declarations for ID attributes.
+<DT>
+<CODE>notation</CODE>
+<DD>
+Output declarations for notations.
+<DT>
+<CODE>ndata</CODE>
+<DD>
+Output declarations for external data entities.
+XML requires these to be NDATA.
+Osx will warn about CDATA and SDATA external data entities and
+output them as NDATA entities.
+<DT>
+<CODE>cdata</CODE>
+<DD>
+Use XML CDATA sections for CDATA marked sections and for elements with a
+declared content of CDATA.
+<DT>
+<CODE>comment</CODE>
+<DD>
+Output comment declarations.  Comment declarations in the DTD will not
+be output.
+<DT>
+<CODE>lower</CODE>
+<DD>
+Prefer lower case.
+Names that were subjected to upper-case substitution by SGML will be folded
+to lower case.
+This does not include reserved names; XML requires these to be in upper-case.
+<DT>
+<CODE>pi-escape</CODE>
+<DD>
+Escape <CODE>&amp;&lt;&gt;</CODE> in the contents of processing
+instructions using the <CODE>amp</CODE>, <CODE>lt</CODE> and
+<CODE>gt</CODE> entities.  This allows processing instructions to
+contain the string <CODE>&gt;?</CODE>, but requires that applications
+handle the escapes.
+<DT>
+<CODE>empty</CODE>
+<DD>
+Use the <CODE>&lt;<VAR>e</VAR>/&gt;</CODE> syntax for element types
+<CODE><VAR>e</VAR></CODE> declared as EMPTY.
+<DT>
+<CODE>attlist</CODE>
+<DD>
+Output a ATTLIST declaration for every element specifying the type of
+all attributes.  The default will always be <CODE>#IMPLIED</CODE>.
+<DT>
+<CODE>report-input-sources</CODE>
+<DD>
+Output a processing instruction to report when an input source other
+than the main file is opened or closed in the instance. Do not report
+any input source changes in the DTD.
+<DT>
+<CODE>report-entities</CODE>
+<DD>
+Output a processing instruction to report when an external entity
+reference has been resolved in the instance. Do not report any entity
+resolutions in the DTD.
+<DT>
+<CODE>no-expand-external</CODE>
+<DD>
+Preserve external entities (producing a new output file for each input file processed), write a declaration driver file named "extEntities.dtf", and include that file in the instance's internal subset.
+<DT>
+<CODE>no-expand-internal</CODE>
+<DD>
+Preserve internal entities, write a declaration driver file named "intEntities.dtf", and include that file in the instance's internal subset.
+<DT>
+<CODE>preserve-case</CODE>
+<DD>
+Preserve casing as specified in the DTD for element names; attribute names; attribute values which are token lists.
+<DT>
+<CODE>no-external-decl
+<DD>
+Do not include the external entities declaration driver file in the instance's internal subset.
+<DT>
+<CODE>no-internal-decl
+<DD>
+Do not include the internal entities declaration driver file in the instance's internal subset.
+<DT>
+<CODE>sdata-as-pis
+<DD>
+When translating SDATA entities (whether expanding them or providing a
+definition for them in the output's internal subset), express them as
+processing instructions instead of as general internal entities.
+<DT>
+<CODE>no-output-outside-outdir
+<DD>
+When preserving external entities, do not write output files outside the specified output directory ("." by default). In other words, if an external entity's system identifier includes enough instances of ".." to cause osx to write a file outside (above) the output directory, exit. (By default, osx will issue a warning but will write the file and continue.)
+<DT>
+<CODE>no-overwrite
+<DD>
+When preserving internal or external entities, multiple output files will be written.
+If this option is specified, do not overwrite existing files; instead, attempt to append a number to the end of the original filename to create a unique filename.
+Exit with an error if too many (100) such files already exist.
+</DL>
+<P>
+Multiple
+<CODE>-x</CODE>
+options are allowed.
+</DL>
+</BODY>
+</HTML>

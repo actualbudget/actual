@@ -1,0 +1,114 @@
+#!/bin/sh
+# Architectural Form: test ArcBridF:
+#    Resolving IDREFs
+#    Throw away "stanza" part, keep IDREF as IDREF, bridge required
+# test onsgmls and osgmlnorm
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles af-15.sgml af-15.dtd af-meta-15.dtd"
+cat <<EOF >af-15.sgml
+<!DOCTYPE doc SYSTEM "af-15.dtd">
+<doc>
+ <s>
+  <v n="n1">verse 1</v>
+  <v n="n2">verse 2</v>
+ </s>
+ <n>
+  <i r="n2">note on verse 2</i>
+ </n>
+</doc>
+EOF
+cat <<EOF >af-15.dtd
+<!NOTATION SGML PUBLIC "-//ISO 8879:1986//NOTATION Standard Generalized Markup
+    Language//EN">
+
+<?IS10744 ArcBase open>
+<!NOTATION open PUBLIC "-//OpenJade Project//NOTATION AFDR ARCBASE open Architecture//EN">
+<!ATTLIST #NOTATION open
+    ArcBridF NAME #FIXED "bridge"
+    ArcDTD CDATA #FIXED "opendtd">
+<!ENTITY opendtd SYSTEM "af-meta-15.dtd" CDATA SGML>
+
+<!ELEMENT doc - o (s+,n)>
+<!ATTLIST doc
+  open NMTOKEN   #FIXED "open">
+<!ELEMENT s   - o (v+)>
+<!ELEMENT v   - o (#PCDATA)>
+<!ATTLIST v
+  n id        #REQUIRED>
+<!ELEMENT n   - o (i+)>
+<!ATTLIST n
+  open NMTOKEN   #FIXED "notes">
+<!ELEMENT i   - o (#PCDATA)>
+<!ATTLIST i
+  r IDREF        #REQUIRED>
+EOF
+
+cat <<EOF >af-meta-15.dtd
+<!ELEMENT open    - o (bridge*,notes)>
+<!ELEMENT bridge  - o ANY>
+<!ATTLIST bridge
+  n id        #REQUIRED>
+<!ELEMENT notes   - o (i+)>
+<!ELEMENT i       - o (#PCDATA)>
+<!ATTLIST i
+  r IDREF #IMPLIED>
+EOF
+
+tmpfiles="$tmpfiles af-15-onsgmls.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >af-15-onsgmls.out -A open af-15.sgml
+tmpfiles="$tmpfiles af-15-onsgmls.ok"
+cat <<EOF >af-15-onsgmls.ok
+(OPEN
+AN TOKEN N1
+(BRIDGE
+-verse 1
+)BRIDGE
+AN TOKEN N2
+(BRIDGE
+-verse 2
+)BRIDGE
+(NOTES
+AR TOKEN N2
+(I
+-note on verse 2
+)I
+)NOTES
+)OPEN
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} af-15-onsgmls.ok af-15-onsgmls.out
+result=$?
+test $result = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles af-15-norm.out"
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >af-15-norm.out -A open af-15.sgml
+tmpfiles="$tmpfiles af-15-norm.ok"
+
+cat <<EOF >af-15-norm.ok
+<OPEN>
+<BRIDGE N="N1">verse 1</BRIDGE>
+<BRIDGE N="N2">verse 2</BRIDGE>
+<NOTES>
+<I R="N2">note on verse 2</I>
+</NOTES>
+</OPEN>
+EOF
+
+${DIFF} af-15-norm.ok af-15-norm.out
+result=$?
+test $result = 0 || result=$(($result + 1))
+
+rm -fr $tmpfiles
+
+exit $result

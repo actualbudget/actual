@@ -1,0 +1,9 @@
+STRINGTABLE
+BEGIN
+  4100, "Use catalog %1."
+  4101, "Arguments are catalogs, use DOCUMENT entry."
+  4102, "Search files in directory %1."
+  4103, "Restrict file reading (for use in Web apps)."
+  4104, "DIRECTORY"
+  4105, "SYSID"
+END

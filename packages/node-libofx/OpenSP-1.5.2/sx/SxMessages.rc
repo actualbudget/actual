@@ -1,0 +1,9 @@
+STRINGTABLE
+BEGIN
+  0, "unknown output option %1"
+  1, "Modify the XML output according to %1."
+  2, "%1 converts SGML to XML. %1 parses and validates the SGML document"
+  3, "contained in SYSID... and writes an equivalent XML document to the standard"
+  4, "output. %1 will warn about SGML constructs which have no XML equivalent."
+  5, "OPTION"
+END

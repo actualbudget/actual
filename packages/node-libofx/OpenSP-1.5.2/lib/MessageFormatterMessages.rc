@@ -1,0 +1,9 @@
+STRINGTABLE
+BEGIN
+  5100, "st"
+  5101, "nd"
+  5102, "rd"
+  5103, "th"
+  5104, "(invalid argument type)"
+  5105, "(invalid message)"
+END

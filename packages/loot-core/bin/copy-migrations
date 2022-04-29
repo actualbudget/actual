@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+ROOT=`dirname "$0"`
+cd "$ROOT"
+
+# Copy them to the browser version
+$(
+  cd ../../desktop-client/public;
+  rm -rf ./data;
+  mkdir ./data;
+  cp -r ../../loot-core/migrations ./data;
+  cp ../../loot-core/default-db.sqlite ./data;
+  cd data && find * -type f > ../data-file-index.txt;
+)
+
+# Copy them to the mobile app
+rsync -av --delete ../migrations/ ../../mobile/nodejs-assets/nodejs-project/data/migrations
+
+
+

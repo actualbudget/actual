@@ -1,0 +1,34 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+   <title>OpenSP - System declaration</title>
+</head>
+<body>
+
+<h1>
+OpenSP System Declaration</h1>
+The system declaration for OpenSP is as follows:
+<pre>                        &lt;!SYSTEM "ISO 8879:1986"
+                                CHARSET
+BASESET  "ISO 646-1983//CHARSET
+          International Reference Version (IRV)//ESC 2/5 4/0"
+DESCSET  0 128 0
+CAPACITY PUBLIC  "ISO 8879:1986//CAPACITY Reference//EN"
+                               FEATURES
+MINIMIZE DATATAG NO        OMITTAG  YES     RANK     YES   SHORTTAG YES
+LINK     SIMPLE  YES 65535 IMPLICIT YES     EXPLICIT YES 1
+OTHER    CONCUR  YES 100   SUBDOC   YES 100 FORMAL   YES
+SCOPE    DOCUMENT
+SYNTAX   PUBLIC  "ISO 8879:1986//SYNTAX Reference//EN"
+SYNTAX   PUBLIC  "ISO 8879:1986//SYNTAX Core//EN"
+                               VALIDATE
+         GENERAL  YES      MODEL     YES     EXCLUDE  YES   CAPACITY NO
+         NONSGML  YES      SGML      YES     FORMAL   YES
+                                 SDIF
+         PACK     NO       UNPACK   NO
+                                 AFDR
+         VALIDATE YES      CONSTRUCT YES></pre>
+The limits for the SUBDOC and CONCUR parameters are memory dependent.
+<p>Any legal concrete syntax may be used.
+</body>
+</html>

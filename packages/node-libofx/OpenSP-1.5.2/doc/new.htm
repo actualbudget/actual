@@ -1,0 +1,141 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+   <title>What's new in SP?</title>
+</head>
+<body>
+
+<h1>
+What's new?</h1>
+This document describes user-visible changes in SP up to 1.3. Bug fixes are
+not described.
+<h2>
+Version 1.3</h2>
+Better <a href="xml.htm">support for XML</a> based on the Web SGML Adaptations
+Annex to ISO 8879.
+<p>New <a href="sx.htm">SX</a> application that converts SGML to XML.
+<p>The architecture engine has been updated to match HyTime 2nd Edition
+(This means that you must use
+<tt>&lt;?IS10744 ArcBase <i>arch</i>></tt>
+rather than
+<tt>&lt;?ArcBase <i>arch</i>></tt>.)
+<h2>
+Version 1.2</h2>
+The Extended Naming Rules TC is supported. The extensions supported in
+external concrete syntaxes have been changed for compatibility with this.
+<p>The handling of character sets in the multi-byte version is more sophisticated.
+The <a href="charset.htm">character sets</a> HTML page gives more information.
+<p>SP has built-in knowledge of many <a href="sgmldecl.htm#charset">more
+base character sets</a>.
+<p>nsgmls will report empty elements if the <tt>-oempty</tt> option is
+used.
+<p>DTD-less parsing is possible, by using the <tt>-wno-valid</tt> option
+to allow undefined elements and attributes. This allows parsing of well-formed
+XML documents, whether or not valid.
+<h2>
+Version 1.1</h2>
+There is now generalized support for <a href="archform.htm">architectural
+form processing</a>.
+<p>Documentation is now in HTML format.
+<p>A BASE catalog entry can be used to specify a base system identifier
+for resolving relative storage object identifiers occurring in the catalog.
+<p>A LITERAL storage manager is now provided.
+<p>Programs have a -E option that sets the maximum number of errors.
+<p>A DELEGATE catalog entry allows distributed resolution of public identifiers.
+<p>nsgmls has a -B (batch mode) option that allows you to parse multiple
+documents with a single invocation of nsgmls.
+<p>In nsgmls the -c option now specifies a catalog as it does in spam and
+sgmlnorm, in addition to the -m option that previously did this.
+<p>The <tt>-n</tt> option has been replaced by a
+<tt>-onotation-sysid</tt>
+which applies to nsgmls only, and a
+<tt>-wnotation-sysid</tt> which applies
+generally.
+<p>SP can be built as a DLL under Win32.
+<h2>
+Version 1.0</h2>
+The syntax of system identifiers has completely changed. The new syntax
+is based on the syntax of formal system identifiers defined in ISO/IEC
+10744 (HyTime) Technical Corrigendum 1, Annex D.
+<p>The NSGMLS_CODE environment variable has been renamed to SP_BCTF. nsgmls
+has a -b option to specify the bit combination transformation format to
+be used for output.
+<p>A list of directories in which files specified in system identifiers
+should be searched for can be specified using the environment variable
+SGML_SEARCH_PATH or the option -D.
+<p>Individual SYSTEM identifiers in external identifiers can be overridden
+using SYSTEM entries in the catalog.
+<p>The OVERRIDE catalog entry now takes a YES/NO argument. (This change
+was required for conformance to the SGML Open TR.) It applies to each entry
+individually rather than to the entire catalog.
+<p>The -w options of nsgmls and spam have been enhanced. In spam, the -w
+option takes an argument as with nsgmls. There are new warnings for minimized
+start and end tags (-wunclosed, -wempty, -wnet and -wmin-tag); for unused
+short reference maps (-wunused-maps); for unused parameter entities (-wunused-param).
+-wall now doesn't include those warnings that are about conditions that,
+in the opinion of the author, there is no reason to avoid. A warning can
+be turned off by using its name prefixed by no-; thus -wmin-tag -wno-net
+is equivalent to -wunclosed -wempty. The -w option is also used to turn
+off errors: -wno-idref replaces the -x option; -wno-significant replaces
+the -X option.
+<p>In the output of nsgmls, characters that cannot be represented in the
+encoding translation specified by the NSGMLS_BCTF environment variable
+are represented using an escape sequence of the form \#N; when N is a decimal
+integer.
+<p>In the multi-byte versions of nsgmls there are new BCTFs is8859-N for
+N = 1,...,9.
+<p>There is a -o option to nsgmls which makes it output additional information:
+-oentity outputs information about all entities; -oid distinguish attributes
+with a declared value of id; -oincluded distinguishes included subelements.
+<p>nsgmls now automatically searches for a catalog entry file called "catalog"
+in the same place as the document entity. Note that when the document entity
+is specified with a URL, this matches the behaviour of Panorama.
+<p>A catalog entry file can contain CATALOG entries specifying additional
+catalog entry files. This matches the behaviour of Panorama.
+<p>The parser can now make available to an application complete information
+about the markup of prologs and SGML declarations. It would now be possible,
+for example, to use SP to write a DTD editor. spam exploits this to a limited
+extent: if the -p option is specified twice, then parameter entity references
+between declarations will be expanded; the -mreserved option puts all reserved
+names in upper-case; with the -mshortref option short reference use declarations
+and short reference mapping declarations will be removed; attribute specification
+lists in data attribute specifications in entity declarations can be normalized
+like attribute specification lists in start-tags; with -mms it resolves
+IGNORE/INCLUDE marked sections.
+<p>nsgmls has a -C option which causes the command line filenames to be
+treated as a catalog whose DOCUMENT entry specifies the document entity.
+<p>nsgmls has a -n option which causes it to generate system identifiers
+for notations in the same way as it does for entities.
+<p>spam now has a -f option like nsgmls.
+<p>The interface between the parser and entity manager has been redesigned
+so that the entity manager can be used independently of the parser. This
+is exploited by a new program called spent that prints an entity with a
+specified system identifier on the standard output.
+<p>In most cases, a Control-Z occurring as the last byte in a file will
+be stripped. This is controlled by the zapeof attribute in formal system
+identifiers.
+<h2>
+Version 0.4</h2>
+External concrete syntaxes, character sets and capacity sets are supported
+using PUBLIC entries in catalog files. The multicode code core and reference
+syntaxes are no longer built-in. Only a few character sets are now built-in.
+<p>Within external concrete syntaxes, various useful extensions are permitted.
+In particular, an ellipsis syntax is allowed for the specification of name
+characters and single character short references. It is now practical to
+specify tens of thousands of additional name characters.
+<p>The default SGML declaration is more permissive.
+<p>nsgmls has a -x option that inhibits checking of idrefs.
+<p>nsgmls has a -w option that can enable additional warnings. In particular,
+-wmixed will warn about mixed content models that do not allow #pcdata
+everywhere.
+<p>The meaning of the f command in the output of nsgmls has changed slightly.
+It now gives the effective system identifier of the entity.
+<p>The functionality of the rast program has been merged into the nsgmls
+program and the rast program has been removed. The -t option makes nsgmls
+generate a RAST result.
+<p>spam has a -l option that uses lower-case for added names that were
+subject to upper-case substitution.
+<p>spam has a -mcurrent option that adds omitted attribute specifications
+for current attributes.
+</body>
+</html>

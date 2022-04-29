@@ -1,0 +1,1047 @@
+<?xml version='1.0'?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<book>
+  <bookinfo>
+    <title>OpenSP 1.5.2</title>
+    <subtitle>Release Notes</subtitle>
+    <corpauthor>OpenJade Project</corpauthor>
+    <edition>Release 1.5.2</edition>
+    <pubdate>September 2005</pubdate>
+    <copyright>
+      <year>2002</year>
+      <year>2003</year>
+      <year>2005</year>
+      <holder>OpenJade Project</holder>
+    </copyright>
+  </bookinfo>
+
+  <chapter><title>OpenSP 1.5.2 Release Notes</title>
+
+    <para>The OpenJade project provides a suite of tools and libraries for
+validating, processing and applying DSSSL (Document Style Semantics and
+Specification Language) style sheets to SGML and XML documents.</para>
+    <para>OpenJade is a project undertaken by the community to maintain and
+extend James Clark's Jade, as well as the related SP suite of SGML/XML
+processing tools. OpenJade and OpenSP are distributed under the same license
+as Jade.</para>
+    <para>OpenSP is written in C++ and provides a class library, libosp, which
+can be used as a basis for either open source or commerical projects. The
+library can be built as either a dynamic or static library.
+</para>
+    <sect1><title>Applications of OpenSP</title>
+      <para>The OpenSP library has been used in a number of projects. The
+World Wide Web consortium on-line HTML and XHTML validator is based on the
+OpenSP library. In addition to the OpenSP library a set of command line tools
+are provided to support the validation and transformation of SGML files. In
+particular <command>onsgmls</command> can validate both XML and SGML documents
+held on a local file system or accessed remotely via a web server using the
+HTTP protocol with standard URI notation; <command>osx</command> will convert
+SGML to XML to allow a library of SGML documents to be processed with XML
+tools.</para>
+    </sect1>
+
+    <sect1><title>Obtaining OpenSP</title>
+      <para>OpenSP is a project hosted at sourceforge.net and is available
+from the OpenJade web site at http://openjade.sourceforge.net or directly from
+the OpenJade project page at http://sourceforge.net/projects/openjade</para>
+      <para>OpenSP is provided in source code form. However, see <xref
+linkend="bindist"/> for information on how to obtain pre-compiled
+binary packages.</para>
+    </sect1>
+    <sect1><title>Supported Platforms</title>
+      <para>OpenSP is intended to be as portable as possible. It should be
+possible to compile and build on most contemporary UNIX type platforms. In
+addition OpenSP should also build on Microsoft's Win32 based operating
+systems.
+</para>
+      <para>OpenSP is known to compile with both the GNU gcc c++ compiler and
+Microsoft Visual C++. Other compilers have not been extensively tested.</para>
+      <para>OpenSP 1.5.2 should build with the GNU gcc c++ compiler from
+version 2.95 up to version 4.0. </para>
+      <para>OpenSP has been built on a number of architectures including Intel
+i386 and ia64, Alpha AXP, Sparc, PPC and S/390.</para>
+      <para>The following table details known successful builds</para>
+      <table id="platforms" frame="topbot"><title>Platforms on which OpenSP
+1.5 is known to build</title>
+	<tgroup cols="4" align="left" colsep="0" rowsep="0">
+	  <colspec align="left" colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="2*" />
+	  <colspec colname="c3" colwidth="2*" />
+	  <colspec colname="c4" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Arch.</entry>
+	      <entry>OS</entry>
+	      <entry>Compiler</entry>
+	      <entry>Notes</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry align="left">alpha</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">arm</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">hppa</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left" morerows="3">i386</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry>Red Hat Linux 7.3</entry>
+	      <entry>Red Hat gcc 2.96</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry>Red Hat Linux 7.3</entry>
+	      <entry>GNU gcc 3.2</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry>SuSE Linux 8.1</entry>
+	      <entry>GNU gcc 3.2</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">ia64</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">m68k</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">mips, mipsel</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">powerpc</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">s390</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">sparc</entry>
+	      <entry>Debian 3.1</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	    <row>
+	      <entry align="left">sparc</entry>
+	      <entry>Solaris 8/SunOS 5.8</entry>
+	      <entry>GNU gcc 4.0</entry>
+	      <entry></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+      <para>Please report any successful builds not mentioned above to
+<email>openjade-devel@lists.sourceforge.net</email>, including any
+diffs/patches you have used.</para>
+    </sect1>
+    <sect1><title>Building OpenSP from Source</title>
+      <para>OpenSP requires 20Mb to 50Mb of disk space to build. An
+installation will require around 10Mb to 20Mb depending on
+architecture.</para>
+      <para>On UNIX platforms, OpenSP makes use of the GNU software
+configuration tools (autoconf, libtool, automake etc). The GNU C++ compiler
+and make utility should also be used. The steps required to build the OpenSP
+tools (<command>onsgmls</command>, <command>osgmlnorm</command>,
+<command>ospam</command>, <command>ospcat</command>,
+<command>ospent</command>, <command>osx</command>) and libraries are as
+follows:
+<screen>gzip -d OpenSP-1.5.2.tar.gz | tar xvf - 
+cd OpenSP-1.5.2
+./configure <optional><option><replaceable>options...</replaceable></option></optional> 
+make</screen> You may need to switch to the super user
+<command>root</command> to complete the installation
+<screen>make install</screen>
+The <command>configure</command> script supports many options. These
+can be displayed using the command
+<screen>./configure --help</screen>
+In addition to the standard options, the following table describes options
+specific to OpenSP.</para>
+      <table id="configure" frame="topbot"><title>OpenSP specific configure
+options</title>
+	<tgroup cols="3" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="3*" />
+	  <colspec colname="c2" colwidth="1*" />
+	  <colspec colname="c3" colwidth="2*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Option</entry>
+	      <entry>Default</entry>
+	      <entry>Explanation</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><option>--enable-http</option></entry>
+	      <entry>No http support</entry>
+	      <entry>Include support for http. This allows the OpenSP tools to
+be used to validate or process SGML or XML documents directly from the World
+Wide Web. Example: <screen>onsgmls -s http://www.example.com</screen></entry>
+	    </row>
+	    <row>
+	      <entry><option>--enable-default-catalog=<replaceable>pathlist</replaceable></option></entry>
+	      <entry>Not enabled</entry>
+	      <entry>Provide one or more default catalog files or sysids, e.g.
+/usr/local/lib/sgml/catalog</entry>
+	    </row>
+	    <row>
+	      <entry><option>--enable-default-search-path=<replaceable>pathlist</replaceable></option></entry>
+	      <entry>Not enabled</entry>
+	      <entry>Provide a default value for
+<varname>SGML_SEARCH_PATH</varname></entry>
+	    </row>
+	    <row>
+	      <entry><option>--enable-xml-messages</option></entry>
+	      <entry>Not enabled</entry>
+	      <entry>Include support for XML Formatted Messages</entry>
+	    </row>
+	    <row>
+	      <entry><option>--disable-doc-build</option></entry>
+	      <entry>Enabled</entry>
+	      <entry>Do not build docs (man pages and release notes)</entry>
+	    </row>
+	    <row>
+	      <entry><option>--disable-dtddecl</option></entry>
+	      <entry>Enabled</entry>
+	      <entry>Do not include support for DTDDECL</entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+      <para>Please refer to the system documentation for details on building
+on the Win32 platform.</para>
+    </sect1>
+    <sect1 id="bindist"><title>Binary Distributions</title>
+      <para>In addition to binary packages availble from the project, OpenSP
+has been a part of many software distributions, including the major Linux
+distributions as well as FreeBSD. Expect pre-compiled and packaged versions of
+the latest version of OpenSP to be available from your distributor in due
+course.</para>
+    </sect1>
+    <sect1><title>Installation</title>
+      <para>In addition to the OpenSP executables and libraries you will also
+need various DTDs and declaration files. Some DTDs and associated files
+(entity definitions) are available in the <filename>pubtext</filename>
+directory of the distribution. However, more authoritative sources should be
+referenced to ensure that up-to-date versions are used. If you wish to process
+XML files, then suitable SGML declarations for valid XML documents should be
+used. Again, a sample set of declarations (<filename>xml.dcl</filename>) is
+provided in the <filename>pubtext</filename>, but more complete or recent
+versions may be available from other sources.</para>
+      <para>OpenSP supports the standard SGML catalog facility; it is
+recommended that you set up and use such a catalog system.
+</para>
+    </sect1>
+    <sect1><title>Support</title>
+      <para>If, after reading the documentation, you still have a problem,
+then you may require some additional help. The OpenJade project is a volunteer
+effort and as such does not provide any formal support. Instead, you should
+look to the community for support. Once part of the community, you, in turn,
+will be able to play your part in helping those that come after you. Here are
+some pointers to obtaining help:</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>If you obtained your OpenSP distribution in binary form from
+your operating system distributor and you have a build related problem - such
+as <command>onsgmls</command> crashing, then your first port of call should be
+your distributor.</para>
+	</listitem>
+
+	<listitem>
+	  <para>If you have a problem with the usage of the OpenSP tools, then
+you should try the openjade-users mailing list, see
+http://sf.net/projects/openjade/ for details.</para>
+	</listitem>
+
+	<listitem>
+	  <para>If you have a patch or bug fix for OpenJade, or are trying to
+use the OpenSP API then the openjade-devel mailing list is the appropriate
+forum.</para>
+	</listitem>
+
+      </itemizedlist>
+
+      <para>Please choose only one mailing list to post to, as cross-posting
+is generally frowned upon. The various mailing lists are archived and
+searchable. It is always worth searching for your problem first, as it is
+often the case that someone has had the same problem before.</para>
+
+    </sect1>
+    <sect1><title>Version 1.5.2</title>
+      <formalpara><title>Released December 2005.</title>
+	<para>The release contains a number of enhancements together with
+support for version 4.0 of the GNU C++ compiler.</para>
+      </formalpara>
+      <para>The following table details the major improvements in OpenSP
+1.5.2</para>
+      <table id="opensp152fixes" frame="topbot"><title>Changes for release
+1.5.2</title>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 1</entry>
+	      <entry>Added doc building and config option</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributors</para></entry>
+	      <entry><para>Terje Bless, Neil Roeth</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Enable creation of release notes and man pages as
+part of the standard build process.  Added option --disable-doc-build; this
+step requires several additional software packages, so a user who chooses not
+to install those tools or otherwise has problems building the docs can skip
+this step.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 2</entry>
+	      <entry>Updated local gettext</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Terje Bless</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>A local gettext is provided for those platforms
+	      that have an old or broken gettext.  This has been updated to
+	      version 0.14.5.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 3</entry>
+	      <entry>Added config option to turn off DTDDECL support</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Neil Roeth</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Added option --disable-dtddecl to disable DTDDECL
+support.  The combination of DTDDECL support and enabling a default catalog
+and default SGML search path can cause poor performance.  Using this option
+allows you to use a default catalog and search path and still get good
+performance if DTDDECL support is not needed.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 4</entry>
+	      <entry>Updated/added translations</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Karl Eichwalder</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Updated German and French translations, added
+Turkish translation.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+    </sect1>
+
+    <sect1><title>Version 1.5.1</title>
+      <formalpara><title>Released October 2003.</title>
+	<para>The release contains a number of new features together with
+support for version 3.3 for the GNU C++ compiler.</para>
+      </formalpara>
+      <para>The following table details the major improvements in OpenSP
+1.5.1</para>
+      <table id="opensp151fixes" frame="topbot"><title>Changes for release
+1.5.1</title>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 1</entry>
+	      <entry>Runtime selection of message format</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Nick Kew</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Enable run time selection of message format with
+<envar>SP_MESSAGE_FORMAT</envar> environment variable. Value is one of
+<constant>XML</constant>, <constant>NONE</constant>,
+<constant>TRADITIONAL</constant>.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 2</entry>
+	      <entry>Support for HTTP redirection</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Nick Kew</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>When validating/parseing a document using http,
+OpenSP will now follow any redirects headers/requests from the
+server</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 3</entry>
+	      <entry>Specification of http user agent header</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Nick Kew</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>The environment variable
+<envar>SP_HTTP_USER_AGENT</envar> can be used to specify a UserAgent:
+header.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 4</entry>
+	      <entry>Specification of http Accept: headers</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Nick Kew</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>The environment variable
+<envar>SP_HTTP_ACCEPT</envar> can be used to specify Accept:
+headers.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 5</entry>
+	      <entry>Enhancements to <command>osx</command></entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Jessica Perry Hekman</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>A number of enhancements have been made to the
+<command>osx</command> tool: security fixes in the handling of output files;
+addition of the "preserve case option".</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 6</entry>
+	      <entry>Addition of a test suite</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Karl Eichwalder</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>A testing framework together with some initial
+tests have been added. Currently there are 22 tests. 6 of which
+fail.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 7</entry>
+	      <entry>Sundry build improvments</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Neil Roeth, Peter O'Gorman et al</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Enhancement/Fixes</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Support for Mac OS/X, Darwin has been improved.
+Build infrastructure and localisation fixes and enhancements. Improved
+compiler support</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+    </sect1>
+
+    <sect1><title>Version 1.5</title>
+      <formalpara><title>Released November 2002.</title>
+	<para>In addition to many new features this version also supports the
+latest GNU C++ compiler: gcc 3.2 at the time of writing.</para>
+      </formalpara>
+      <para>The following table details the major improvements in OpenSP
+1.5</para>
+
+      <table id="opensp15fixes" frame="topbot"><title>Changes for release
+1.5.1</title>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 1</entry>
+	      <entry>"--restricted" option</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Liam Quinn</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Security Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>This new option restricts parsing of web based
+documents to local files. This can be classed as a security fix and is
+especially useful when using OpenSP within a CGI (Common Gateway Interface)
+application on a web server.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 2</entry>
+	      <entry>UNIX on-line manual pages</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Ian Castle</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Documentation Bug</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>on-line manual (man) pages for the commands
+included in the OpenSP package are now available for UNIX
+platforms</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 3</entry>
+	      <entry>Upgrade GNU source configuration tools</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Various</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Bug</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>If you wish to create the various autoconf files
+then newer versions are required (autoconf 2.52 and later). As a result of the
+upgrades more platforms are potentially supported.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 4</entry>
+	      <entry>"-x" option to <command>osx</command> and other
+enhancements</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Jessica Hekman</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>The "-x" command line option enables SDATA entities
+to be transformed into PIs or treated like normal entities (the
+default).</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 5</entry>
+	      <entry>New Translations</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributors</para></entry>
+	      <entry><para>Various</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Documentation Bug</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>New and updated translations are available for
+"ja", "fr", "de" and "sv" languages.</para></entry>
+	
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 6</entry>
+	      <entry>Enhanced Message Handling</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Epremis Corporation (Peter Newcomb)</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Improvement in message handling within the library.
+This allows Windows (Win32) applications which make use of the OpenSP DLL to
+include other DLLs which can also make use of the message handling
+facility.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 7</entry>
+	      <entry>Error Messages formatted as XML</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Nick Kew</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>A build time option to allow error messages to be
+output in XML format as opposed to plain old ASCII. Specify with the
+./configure option <command>--enable-xml-messages</command></para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 8</entry>
+	      <entry>New syntax for  PI based architecture
+declarations</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Epremis Corporation (Peter Newcomb)</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para> Added support for the PI-based architecture using
+declaration syntax defined by Amendment 1 to ISO/IEC 10744:1997 (HyTime). This
+makes it possible to specify architectural support attributes when using
+architectures with XML, and is generally simpler than the original syntax. See
+http://www.ornl.gov/sgml/wg8/document/1985.htm for details. </para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 9</entry>
+	      <entry>Support name based virtual hosts when parsing a
+URI</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Liam Quinn (and others)</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Adds an HTTP/1.0 host header to HTTP requests. This
+makes it possible to parse and fetch DTDs specified in SYSTEM identifiers when
+the DTD resides on a name-based "Virutal Host".</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 10</entry>
+	      <entry>64 Bit Platform Support</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancements</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Remove 32-bit assumptions so that 64 bit platforms
+such as Alpha, IA64, UltraSparc are supported.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 11</entry>
+	      <entry>New output options: comment, omitted, tagomit,
+attromit</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Contributor</para></entry>
+	      <entry><para>Robert Braddock</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>Support for new output options: this allows
+comments and implied elements and/or attributes to be produced.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 12</entry>
+	      <entry>Enhanced Support for Annex K of ISO 8879</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>More of Annex K is now supported. Common data
+attributes can now be specified in external entity
+declarations.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 13</entry>
+	      <entry>Support for GCC 3.2</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>GCC 3.2 is now supported.</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+	<tgroup cols="2" align="left" colsep="0" rowsep="0">
+	  <colspec colname="c1" colwidth="1*" />
+	  <colspec colname="c2" colwidth="3*" />
+	  <thead>
+	    <row rowsep="1">
+	      <entry>Item 14</entry>
+	      <entry>Enhance Unicode support</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para>Category</para></entry>
+	      <entry><para>Software Enhancement</para></entry>
+	    </row>
+	    <row>
+	      <entry><para>Description</para></entry>
+	      <entry><para>The multibyte version of OpenSP now uses 32 bit
+characters and supports the full UTF-16 range 0x000000-0x10ffff</para></entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+    </sect1>
+    <sect1>
+      <title>Version 1.4</title>
+      <formalpara><title>Released February 2000</title>
+	<para>Version 1.4 added many improvements. Changes
+included:</para></formalpara>
+
+      <itemizedlist>
+	<listitem>
+	  <para>Support for the koi8-r (RFC 1489) encoding.</para>
+	</listitem>
+
+	<listitem>
+	  <para>OpenSP now supports long (GNU Style) command line
+options.</para>
+	</listitem>
+
+	<listitem>
+	  <para>OpenSP is internationalized</para>
+	</listitem>
+
+	<listitem>
+	  <para>New option -h or --help shows a list of all available options
+with descriptions.</para>
+	</listitem>
+
+	<listitem>
+	  <para>New option -n and -x to see message numbers/relevant clauses
+with messages.</para>
+	</listitem>
+
+	<listitem>
+	  <para>More of Annex K of ISO 8879 supported: SGML declarations on
+subdocs, DATA declared value for attribures, DTD data entities and DTD
+notations for doctypes, complete IMPLYDEF support, ENTITIES REF constraints,
+URN parsing. Many new -w flags.</para>
+	</listitem>
+
+	<listitem>
+	  <para>DTDDECL support</para>
+	</listitem>
+
+	<listitem>
+	  <para>New spcat command line interface to the catalog
+manager.</para>
+	</listitem>
+      </itemizedlist>
+    </sect1>
+    <sect1><title>Version 1.3.4</title>
+      <formalpara><title>Released October 1999</title>
+	<para>The second release from the OpenJade project. This version was
+distributed as part of OpenJade 1.3</para>
+      </formalpara>
+
+      <para>Changes in OpenJade 1.3.4</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>
+Added the Entity classes to the public interface of the library/DLL.
+    </para>
+	</listitem>
+
+      </itemizedlist>
+    </sect1>
+    <sect1><title>Version 1.3.3</title>
+      <para>The first release from the OpenJade project</para>
+    </sect1>
+  </chapter>
+</book>

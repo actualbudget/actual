@@ -1,0 +1,17 @@
+default-db.sqlite
+migrations/1632571489012_remove_cache.js
+migrations/1615745967948_meta.sql
+migrations/1555786194328_remove_category_group_unique.sql
+migrations/1567699552727_budget.sql
+migrations/1608652596044_trans_views.sql
+migrations/1548957970627_remove-db-version.sql
+migrations/1561751833510_indexes.sql
+migrations/1550601598648_payees.sql
+migrations/1582384163573_cleared.sql
+migrations/1618975177358_schedules.sql
+migrations/.force-copy-windows
+migrations/1597756566448_rules.sql
+migrations/1616167010796_accounts_order.sql
+migrations/1608652596043_parent_field.sql
+migrations/1612625548236_optimize.sql
+migrations/1614782639336_trans_views2.sql

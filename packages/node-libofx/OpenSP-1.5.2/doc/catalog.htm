@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>OpenSP - Catalogs</TITLE>
+</HEAD>
+<BODY>
+<H1>Catalogs</H1>
+<P>
+The entity manager generates a system identifier for every external
+entity using catalog entry files in the format defined by <A
+HREF="http://www.oasis-open.org/a401.htm">SGML Open
+Technical Resolution TR9401:1997</A>.  The entity manager will give an
+error if it is unable to generate a system identifier for an external
+entity.  Normally if the external identifier for an entity includes a
+system identifier then the entity manager will use that as the
+effective system identifier for the entity; this behaviour can be
+changed using <CODE>OVERRIDE</CODE> or <CODE>SYSTEM</CODE> entries in
+a catalog entry file.
+<P>
+A catalog entry file contains a sequence of entries in one of the
+following forms:
+<DL>
+<DT>
+<SAMP>PUBLIC <VAR>pubid</VAR> <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that <SAMP><VAR>sysid</VAR></SAMP> should be used as
+the effective system identifier if the public identifier is
+<SAMP><VAR>pubid</VAR></SAMP>.  <SAMP><VAR>Sysid</VAR></SAMP> is a
+system identifier as defined in ISO 8879 and
+<SAMP><VAR>pubid</VAR></SAMP> is a public identifier as defined in ISO
+8879.
+<DT>
+<SAMP>ENTITY <VAR>name</VAR> <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that <VAR>sysid</VAR> should be used as the effective
+system identifier if the entity is a general entity whose name is
+<VAR>name</VAR>.
+<DT>
+<SAMP>ENTITY %<VAR>name</VAR> <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that <SAMP><VAR>sysid</VAR></SAMP> should be used as
+the effective system identifier if the entity is a parameter entity
+whose name is <VAR>name</VAR>.  Note that there is no space between
+the <SAMP>%</SAMP> and the <SAMP><VAR>name</VAR></SAMP>.
+<DT>
+<SAMP>DOCTYPE  <VAR>name</VAR> <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that <SAMP><VAR>sysid</VAR></SAMP> should be used as
+the effective system identifier if the entity is an entity declared in
+a document type declaration whose document type name is <VAR>name</VAR>.
+<DT>
+<SAMP>LINKTYPE <VAR>name</VAR> <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that <SAMP><VAR>sysid</VAR></SAMP> should be used as the
+effective system identifier if the entity is an entity declared in a
+link type declaration whose link type name is <VAR>name</VAR>.
+<DT>
+<SAMP>NOTATION <VAR>name</VAR> <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that <SAMP><VAR>sysid</VAR></SAMP> should be used as
+the effective system identifier for a notation whose name is
+<SAMP><VAR>name</VAR></SAMP>.
+This is relevant only with the <SAMP>-n</SAMP> option.
+<DT>
+<SAMP>OVERRIDE <VAR>bool</VAR></SAMP>
+<DD>
+<SAMP><VAR>bool</VAR></SAMP> may be <SAMP>YES</SAMP> or
+<SAMP>NO</SAMP>.  This sets the overriding mode for entries up to the
+next occurrence of OVERRIDE or the end of the catalog entry file.  At
+the beginning of a catalog entry file the overriding mode will be NO.
+A PUBLIC, ENTITY, DOCTYPE, LINKTYPE or NOTATION entry with an
+overriding mode of YES will be used whether or not the external
+identifier has an explicit system identifier; those with an overriding
+mode of NO will be ignored if external identifier has an explicit
+system identifier.
+<DT>
+<SAMP>SYSTEM <VAR>sysid1</VAR> <VAR>sysid2</VAR></SAMP>
+<DD>
+This specifies that <VAR>sysid2</VAR> should be used as the effective
+system identifier if the system identifier specified in the external
+identifier was <SAMP><VAR>sysid1</VAR></SAMP>.
+<VAR>sysid2</VAR> should always be quoted to
+ensure that it is not misinterpreted when parsed by a system that does
+not support this extension.
+<DT>
+<A NAME="sgmldecl"><SAMP>SGMLDECL <VAR>sysid</VAR></SAMP></A>
+<DD>
+This specifies that if the document does not contain an SGML declaration,
+the SGML declaration in <SAMP><VAR>sysid</VAR></SAMP> should be implied.
+<DT>
+<A NAME="dtddecl"><SAMP>DTDDECL <VAR>pubid</VAR> <VAR>sysid</VAR></SAMP></A>
+<DD>
+This specifies that if the document does not contain an SGML declaration
+and uses a doctype declaration with public identifier 
+<SAMP><VAR>pubid</VAR></SAMP>, the SGML declaration in 
+<SAMP><VAR>sysid</VAR></SAMP> should be implied.
+<DT>
+<SAMP>DOCUMENT <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that the document entity is <SAMP><VAR>sysid</VAR></SAMP>.
+This entry is used only with the <SAMP>-C</SAMP> option.
+<DT>
+<SAMP>CATALOG <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that <SAMP><VAR>sysid</VAR></SAMP> is the system
+identifier of an additional catalog entry file to be read after this
+one.  Multiple <SAMP>CATALOG</SAMP> entries are allowed and will be
+read in order.
+<DT>
+<SAMP>BASE <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that relative storage object identifiers in system
+identifiers in the catalog entry file following this entry should be
+resolved using first storage object identifier in
+<SAMP><VAR>sysid</VAR></SAMP> as the base, instead of the storage
+object identifiers of the storage objects comprising the catalog entry
+file.
+Note that the <CODE><VAR>sysid</VAR></CODE> must exist.
+<DT>
+<SAMP>DELEGATE <VAR>pubid-prefix</VAR> <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that entities with a public identifier that has
+<SAMP><VAR>pubid-prefix</VAR></SAMP> as a prefix should be resolved
+using a catalog whose system identfier is
+<SAMP><VAR>sysid</VAR></SAMP>.  For more details, see <A
+HREF="http://www.entmp.org/fpi-urn/delegate.html">A Proposal for
+Delegating SGML Open Catalogs</A>.
+<DT>
+<SAMP>SGML <VAR>name</VAR> <VAR>sysid</VAR></SAMP>
+<DD>
+This specifies that the SGML declaration body in <SAMP><VAR>sysid</VAR></SAMP>
+should be used when the document starts with a reference to an SGML
+declaration named <SAMP><VAR>name</VAR></SAMP>. This is an OpenSP-specific 
+extension of the SGML Open catalog format. SGML declaration references 
+are defined in 
+<A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K of ISO 8879</A>.
+</DL>
+<P>
+The delimiters can be omitted from the <SAMP><VAR>sysid</VAR></SAMP>
+provided it does not contain any white space.  Comments are allowed
+between parameters delimited by <SAMP>--</SAMP> as in SGML.
+<P>
+The entity manager will look for catalog entry files as follows:
+<OL>
+<LI>
+a file called <SAMP>catalog</SAMP> in the same directory as the
+document entity, unless the environment variable
+<SAMP>SP_USE_DOCUMENT_CATALOG</SAMP> has the value <SAMP>NO</SAMP> or
+<SAMP>0</SAMP>;
+<LI>
+any catalog entry files specified using the <SAMP>-c</SAMP> option;
+<LI>
+a list of files specified by the environment variable
+<SAMP>SGML_CATALOG_FILES</SAMP>; the list is separated by colons under
+Unix and by semi-colons under MS-DOS and Windows; if this environment
+variable is not set, then a system dependent list of catalog entry
+files will be used.
+</OL>
+<P>
+In fact catalog entry files are not restricted to being files: the
+name of a catalog entry file is interpreted as a system identifier.
+<P>
+A match in one catalog entry file will take precedence over any match
+in a later catalog entry file.  A more specific matching entry in one
+catalog entry file will take priority over a less specific matching
+entry in the same catalog entry file.  For this purpose, the order of
+specificity is (most specific first):
+<UL>
+<LI>
+<SAMP>SYSTEM</SAMP> entries;
+<LI>
+<SAMP>PUBLIC</SAMP> entries;
+<LI>
+<SAMP>DELEGATE</SAMP> entries ordered by the length of the prefix,
+longest first;
+<LI>
+<SAMP>ENTITY</SAMP>, <SAMP>DOCTYPE</SAMP>, <SAMP>LINKTYPE</SAMP>,
+<SAMP>NOTATION</SAMP> and <SAMP>SGML</SAMP> entries.
+</UL>
+<P>For the purpose of implying an SGML declaration, <SAMP>DTDDECL</SAMP>
+entries are more specific than <SAMP>SGMLDECL</SAMP> entries.
+</BODY>
+</HTML>

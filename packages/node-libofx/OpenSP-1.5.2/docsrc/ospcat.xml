@@ -1,0 +1,195 @@
+<?xml version='1.0'?> 
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+ "/usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd">
+<article>
+<articleinfo>
+<title>ospcat</title>
+<author><firstname>Ian</firstname><surname>Castle</surname>
+<affiliation><address><email>ian.castle@openjade.org</email></address>
+</affiliation></author>
+
+<copyright><year>2003</year><holder>OpenJade Project</holder>
+</copyright>
+</articleinfo>
+
+<section>
+<title>Reference</title>
+
+<refentry>
+  <refentryinfo>
+	  <title>ospcat</title>
+	  <date>September 2003</date>
+	  <productname>OpenSP</productname>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle>ospcat</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>ospcat</refname>
+    
+<refpurpose>
+SGML print catalog
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ospcat</command>
+<arg choice="opt"><option>-b <replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>--bctf=<replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>-C</option></arg>
+<arg choice="opt"><option>--catalogs</option></arg>
+<arg choice="opt"><option>-c <replaceable>sysid</replaceable></option></arg>
+<arg choice="opt"><option>--catalog=<replaceable>sysid</replaceable></option></arg>
+<arg choice="opt"><option>-f</option></arg>
+<arg choice="opt"><option>--error-file=<replaceable>file</replaceable></option></arg>
+<arg choice="opt"><option>-D <replaceable>directory</replaceable></option></arg>
+<arg choice="opt"><option>--directory=<replaceable>directory</replaceable></option></arg>
+<arg choice="opt"><option>-R</option></arg>
+<arg choice="opt"><option>--restricted</option></arg>
+<arg choice="opt"><option>-v</option></arg>
+<arg choice="opt"><option>-h</option></arg>
+<arg choice="opt"><option>--help</option></arg>
+<arg choice="opt"><option>-P <replaceable>literal</replaceable></option></arg>
+<arg choice="opt"><option>--public-id=<replaceable>literal</replaceable></option></arg>
+<arg choice="opt"><option>-S <replaceable>literal</replaceable></option></arg>
+<arg choice="opt"><option>--system_id=<replaceable>literal</replaceable></option></arg>
+<arg choice="opt"><option>-p <replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>--parameter-entity=<replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>-d <replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>--doctype=<replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>-l <replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>--linktype=<replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>-e <replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>--entity=<replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>-n <replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>--notation=<replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>-s <replaceable>name</replaceable></option></arg>
+<arg choice="opt"><option>--declaration=<replaceable>name</replaceable></option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para><command>ospcat</command> prints effective system identifiers found in the catalogs 
+on the standard output. It doesn't check that the system identifiers 
+correspond to actual files. The return value is 0 if the last system 
+identifier was successfully created and 1 otherwise.
+</para>
+</refsect1>
+
+<refsect1><title>Options</title>
+<para>The following options are available:</para>
+
+<variablelist>
+<varlistentry>
+<term><option>-b <replaceable>name</replaceable></option></term>
+<term><option>--bctf=<replaceable>name</replaceable></option></term>
+<listitem><para>Use bctf <replaceable>name</replaceable> for output.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-f <replaceable>file</replaceable></option></term>
+<term><option>--error-file=<replaceable>file</replaceable></option></term>
+<listitem><para>Append error messages to file <replaceable>file</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-v</option></term>
+<term><option>--version</option></term>
+<listitem><para>Display the program version.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-h</option></term>
+<term><option>--help</option></term>
+<listitem><para>Show this help text.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-c <replaceable>sysid</replaceable></option></term>
+<term><option>--catalog=<replaceable>sysid</replaceable></option></term>
+<listitem><para>Use catalog <replaceable>sysid</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-C</option></term>
+<term><option>--catalogs</option></term>
+<listitem><para>Arguments are catalogs, use DOCUMENT entry.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-D <replaceable>directory</replaceable></option></term>
+<term><option>--directory=<replaceable>directory</replaceable></option></term>
+<listitem><para>Search files in directory <replaceable>directory</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-R</option></term>
+<term><option>--restricted</option></term>
+<listitem><para>Restrict file reading (for use in Web apps).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-P <replaceable>literal</replaceable></option></term>
+<term><option>--public-id=<replaceable>literal</replaceable></option></term>
+<listitem><para>Print the effective system id for the public id <replaceable>literal</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-S <replaceable>literal</replaceable></option></term>
+<term><option>--system-id=<replaceable>literal</replaceable></option></term>
+<listitem><para>Print the effective system id for system id <replaceable>literal</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-p <replaceable>name</replaceable></option></term>
+<term><option>--parameter-entity=<replaceable>name</replaceable></option></term>
+<listitem><para>Print the effective system id for parameter entity <replaceable>name</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-d <replaceable>name</replaceable></option></term>
+<term><option>--doctype=<replaceable>name</replaceable></option></term>
+<listitem><para>Print the effective system id for the doctype <replaceable>name</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-l <replaceable>name</replaceable></option></term>
+<term><option>--linktype=<replaceable>name</replaceable></option></term>
+<listitem><para>Print the effective system id for the linktype <replaceable>name</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-e <replaceable>name</replaceable></option></term>
+<term><option>--entity=<replaceable>name</replaceable></option></term>
+<listitem><para>Print the effective system id for entity <replaceable>name</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-n <replaceable>name</replaceable></option></term>
+<term><option>--notation=<replaceable>name</replaceable></option></term>
+<listitem><para>Print the effective system id for notation <replaceable>name</replaceable>.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-s <replaceable>name</replaceable></option></term>
+<term><option>--declaration=<replaceable>name</replaceable></option></term>
+<listitem><para>Print the effective system id for the SGML declaration for doctype <replaceable>name</replaceable>.</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsect1>
+
+<refsect1>
+<title>See Also</title>
+<para><command>onsgmls(1)</command>, <command>ospam(1)</command>,
+<command>onsgmlnorm(1)</command>, <command>ospent(1)</command></para>
+</refsect1>
+</refentry>
+</section>
+</article>

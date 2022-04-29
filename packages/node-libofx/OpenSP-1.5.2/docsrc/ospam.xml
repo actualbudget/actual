@@ -1,0 +1,362 @@
+<?xml version='1.0'?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+ "/usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd">
+<article>
+  <articleinfo>
+    <title>ospam</title>
+    <author>
+      <firstname>James</firstname>
+      <surname>Clark</surname>
+    </author>
+    <author>
+      <firstname>Ian</firstname>
+      <surname>Castle</surname>
+      <affiliation><address><email>ian.castle@openjade.org</email></address></affiliation>
+    </author>
+  
+    <copyright>
+      <year>2002</year>
+      <holder>OpenJade Project</holder>
+    </copyright>
+  </articleinfo>
+
+                                       
+  <section>
+    <title>Reference</title>
+
+    <refentry>
+      <refentryinfo>
+        <title>ospam</title>
+        <date>November 2002</date>
+        <productname>OpenJade</productname>
+      </refentryinfo>
+
+      <refmeta>
+        <refentrytitle>ospam</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </refmeta>
+
+      <refnamediv>
+        <refname>ospam</refname>
+	<refpurpose>An SGML/XML markup stream editor</refpurpose>
+      </refnamediv>
+    
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>ospam</command>
+          <arg choice="opt"><option>-CeghilprRvx</option></arg>
+          <arg choice="opt"><option>-a<replaceable>linktype</replaceable></option></arg>
+          <arg choice="opt"><option>-A<replaceable>architecture</replaceable></option></arg>
+          <arg choice="opt"><option>-b<replaceable>bctf</replaceable></option></arg>
+          <arg choice="opt"><option>-c<replaceable>catalog_file</replaceable></option></arg>
+          <arg choice="opt"><option>-D<replaceable>directory</replaceable></option></arg>
+          <arg choice="opt"><option>-f<replaceable>file</replaceable></option></arg>
+          <arg choice="opt"><option>-m<replaceable>markup_option</replaceable></option></arg>
+          <arg choice="opt"><option>-o<replaceable>entity_name</replaceable></option></arg>
+          <arg choice="opt"><option>-w<replaceable>warning_type</replaceable></option></arg>
+          <arg rep="repeat"><replaceable>sysid</replaceable></arg>
+<!--
+   spam [ -Cehilprvx ] [ -ccatalog_file ] [ -Ddirectory ] [ -ffile ] [
+   -mmarkup_option ] [ -oentity_name ] [ -wwarning_type ] sysid...
+-->
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>Description</title>
+
+   <para><command>ospam</command> (OpenSP Add Markup) is an SGML markup stream editor implemented using
+   the OpenSP parser. <command>ospam</command> parses the SGML document contained in <replaceable>sysid</replaceable> and
+   copies to the standard output the portion of the document entity
+   containing the document instance, adding or changing markup as
+   specified by the <option>-m</option> options. The <option>-p</option> option can be used to include the
+   SGML declaration and prolog in the output. The <option>-o</option> option can be used
+   to output other entities. The <option>-x</option> option can be used to expand entity
+   references.</para>
+   
+   <para>Part of an SGML System Conforming to International Standard ISO 8879 -- Standard Generalized Markup Language. An SGML Extended Facilities system conforming to Annex A of Internation Standard ISO/IEC 10744 -- Hypermedia/Time-based Structuring Language.</para>
+
+   <para>The following options are available:</para>
+   
+   <variablelist>
+     <varlistentry>
+       <term><option>-a<replaceable>name</replaceable></option></term>
+       <term><option>--activate=<replaceable>name</replaceable></option></term>
+       <listitem>
+          <para>Make doctype or linktype <replaceable>name</replaceable> active.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-A<replaceable>architecture</replaceable></option></term>
+       <term><option>--architecture=<replaceable>architecture</replaceable></option></term>
+       <listitem>
+          <para>Parse with respect to architecture <replaceable>architecture</replaceable>.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-b<replaceable>bctf</replaceable></option></term>
+       <term><option>--bctf=<replaceable>bctf</replaceable></option></term>
+       <listitem>
+          <para>Use bctf <replaceable>bctf</replaceable> for output.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-c<replaceable>sysid</replaceable></option></term>
+       <term><option>--catalog=<replaceable>sysid</replaceable></option></term>
+       <listitem>
+          <para>Use the catalog entry file <replaceable>sysid</replaceable>.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-C</option></term>
+       <term><option>--catalogs</option></term>
+       <listitem>
+          <para>This has the same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-D<replaceable>directory</replaceable></option></term>
+       <term><option>--directory=<replaceable>directory</replaceable></option></term>
+       <listitem>
+          <para>Search directory for files specified in system identifiers.
+          This has the same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+     <varlistentry>
+       <term><option>-e</option></term>
+       <term><option>--open-entities</option></term>
+       <listitem>
+          <para>Describe open entities in error messages.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-E<replaceable>max_errors</replaceable></option></term>
+       <term><option>--max-errors=<replaceable>max_errors</replaceable></option></term>
+       <listitem>
+          <para>Exit after <replaceable>max_errors</replaceable> errors are encountered.</para>
+       </listitem>
+     </varlistentry>
+     <varlistentry>
+       <term><option>-f<replaceable>file</replaceable></option></term>
+       <term><option>--error-file=<replaceable>file</replaceable></option></term>
+       <listitem>
+          <para>Redirect errors to <replaceable>file</replaceable>.
+          This is useful mainly with shells that do not support redirection
+          of stderr.</para>
+       </listitem>
+     </varlistentry>
+     <varlistentry>
+       <term><option>-h</option></term>
+       <term><option>--hoist-omitted-tags</option></term>
+       <listitem>
+          <para>Hoist omitted tags out from the start of internal entities. If
+          the text at the beginning of an internal entity causes a tag to
+          be implied, the tag will usually be treated as being in that
+          internal entity; this option will instead cause it to be
+          treated as being in the entity that referenced the internal
+          entity. This option makes a difference in conjunction with
+          <option>-momittag</option> or <option>-x</option> <option>-x</option>.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>--help</option></term>
+       <listitem>
+          <para>Display a help text and exit.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-i<replaceable>name</replaceable></option></term>
+       <term><option>--include=<replaceable>name</replaceable></option></term>
+       <listitem>
+          <para>This has the same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-l</option></term>
+       <term><option>--lowercase</option></term>
+       <listitem>
+         <para>Prefer lower-case. Added names that were subject to upper-case
+          substitution will be converted to lower-case.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-m<replaceable>markup_option</replaceable></option></term>
+       <term><option>--markup-option=<replaceable>markup_option</replaceable></option></term>
+       <listitem>
+          <para>Change the markup in the output according to the value of
+          <replaceable>markup_option</replaceable> as follows:</para>
+          
+        <para><option>omittag</option>
+                Add tags that were omitted using omitted tag
+                minimization. End tags that were omitted because the
+                element has a declared content of EMPTY or an explicit
+                content reference will not be added.</para>
+                
+        <para><option>shortref</option>
+                Replace short references by named entity references.</para>
+                
+        <para><option>net</option>
+                Change null end-tags into unminimized end-tags, and
+                change net-enabling start-tags into unminimized
+                start-tags.</para>
+                
+        <para><option>emptytag</option>
+                Change empty tags into unminimized tags.</para>
+                
+        <para><option>unclosed</option>
+                Change unclosed tags into unminimized tags.</para>
+                
+        <para><option>attname</option>
+                Add omitted attribute names and vis.</para>
+                
+        <para><option>attvalue</option>
+                Add literal delimiters omitted from attribute values.</para>
+                
+        <para><option>attspec</option>
+                Add omitted attribute specifications.</para>
+                
+        <para><option>current</option>
+                Add omitted attribute specifications for current
+                attributes. This option is implied by the attspec option.</para>
+                
+        <para><option>shorttag</option>
+                Equivalent to combination of net, emptytag, unclosed,
+                attname, attvalue and attspec options.</para>
+                
+        <para><option>rank</option>
+                Add omitted rank suffixes.</para>
+                
+        <para><option>reserved</option>
+                Put reserved names in upper-case.</para>
+                
+        <para><option>ms</option>
+                Remove marked section declarations whose effective status
+                is IGNORE, and replace each marked section declaration
+                whose effective status is INCLUDE by its marked section.
+                In the document instance, empty comments will be added
+                before or after the marked section declaration to ensure
+                that ignored record ends remain ignored.</para>
+                
+          <para>Multiple -m options are allowed.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-n</option></term>
+       <term><option>--error-numbers</option></term>
+       <listitem>
+          <para>Show error numbers in error messages.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-o<replaceable>name</replaceable></option></term>
+       <term><option>--output-entity=<replaceable>name</replaceable></option></term>
+       <listitem>
+          <para>Output the general entity name instead of the document entity.
+          The output will correspond to the first time that the entity is
+          referenced in content.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-p</option></term>
+       <term><option>--output-prolog</option></term>
+       <listitem>
+          <para>Output the part of the document entity containing the SGML
+          declaration (if it was explicitly present in the document
+          entity) and the prolog before anything else. If this option is
+          specified two or more times, then all entity references
+          occurring between declarations in the prolog will be expanded;
+          this includes the implicit reference to the entity containing
+          the external subset of the DTD, if there is one. Note that the
+          SGML declaration will not be included if it was specified by an
+          SGMLDECL entry in a catalog.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-r</option></term>
+       <term><option>--raw</option></term>
+       <listitem>
+          <para>Don't perform any conversion on RSs and REs when outputting the
+          entity. The entity would typically have the storage manager
+          attribute records=asis.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-R</option></term>
+       <term><option>--restricted</option></term>
+       <listitem>
+          <para>This as the same effect as in <command>onsgmls(1)</command></para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-v</option></term>
+       <term><option>--version</option></term>
+       <listitem>
+          <para>Print the version number.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-w<replaceable>type</replaceable></option></term>
+       <term><option>--warning=<replaceable>type</replaceable></option></term>
+       <listitem>
+          <para>Control warnings and errors according to type. This has the
+          same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-x</option></term>
+       <term><option>--expand-references</option></term>
+       <listitem>
+          <para>Expand references to entities that are changed. If this option
+          is specified two or more times, then all references to entities
+          that contain tags will be expanded.</para>
+       </listitem>
+     </varlistentry>
+   </variablelist>
+ </refsect1>
+
+ <refsect1>
+   <title>Bugs</title>
+
+   <para>Omitted tags are added at the point where they are implied by the SGML
+   parser (except as modified by the <option>-h</option> option); this is often not quite
+   where they are wanted.</para>
+   
+   <para>The case of general delimiters is not preserved.</para>
+   
+   <para>Incorrect results may be produced if a variant concrete syntax is used
+   which is such that there are delimiters in markup to be added that
+   have a prefix that is a proper suffix of some other delimiter.</para>
+   
+   <para>If an entity reference in a default value uses the default entity and
+   an entity with that name is subsequently defined and that default
+   value is added to the document instance, then the resulting document
+   may not be equivalent to the original document. <command>ospam</command> will give a
+   warning when the first two conditions are met.</para>
+
+   </refsect1>
+   <refsect1>
+     <title>See Also</title>
+     <para><command>onsgmls(1)</command>, <command>ospent(1)</command>,
+     <command>onsgmlnorm(1)</command>, <command>osx(1)</command></para>
+   </refsect1>
+ </refentry>
+ </section>
+</article>

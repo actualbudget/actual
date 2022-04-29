@@ -1,0 +1,271 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Database transactions are sorted by date 1`] = `
+Array [
+  Object {
+    "amount": -23,
+    "date": "2018-01-05",
+    "id": "id2",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 12,
+    "date": "2018-01-04",
+    "id": "id4",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -5,
+    "date": "2018-01-03",
+    "id": "id6",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -24,
+    "date": "2018-01-02",
+    "id": "id3",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 2,
+    "date": "2018-01-01",
+    "id": "id5",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": false,
+  },
+]
+`;
+
+exports[`Database transactions are sorted by id as a last resort 1`] = `
+Array [
+  Object {
+    "amount": -23,
+    "date": "2018-01-05",
+    "id": "id2",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 5,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 12,
+    "date": "2018-01-03",
+    "id": "foo1",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 4,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 2,
+    "date": "2018-01-03",
+    "id": "foo2",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 4,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -24,
+    "date": "2018-01-03",
+    "id": "foo3",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 4,
+    "starting_balance_flag": false,
+  },
+]
+`;
+
+exports[`Database transactions are sorted by sort order 1`] = `
+Array [
+  Object {
+    "amount": -23,
+    "date": "2018-01-05",
+    "id": "id2",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 5,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -24,
+    "date": "2018-01-03",
+    "id": "id3",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 8,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 2,
+    "date": "2018-01-03",
+    "id": "id5",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 4,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 12,
+    "date": "2018-01-03",
+    "id": "id4",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 2,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -5,
+    "date": "2018-01-03",
+    "id": "id6",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 1,
+    "starting_balance_flag": false,
+  },
+]
+`;
+
+exports[`Database transactions are sorted by starting balance flag 1`] = `
+Array [
+  Object {
+    "amount": -23,
+    "date": "2018-01-05",
+    "id": "id2",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -25,
+    "date": "2018-01-03",
+    "id": "id4",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -5,
+    "date": "2018-01-03",
+    "id": "id5",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 12,
+    "date": "2018-01-03",
+    "id": "id3",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": true,
+  },
+]
+`;
+
+exports[`Database transactions don't show orphaned child transactions 1`] = `
+Array [
+  Object {
+    "amount": -23,
+    "date": "2018-01-05",
+    "id": "id2",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 5,
+    "starting_balance_flag": false,
+  },
+]
+`;
+
+exports[`Database transactions get child transactions in the right order 1`] = `
+Array [
+  Object {
+    "amount": -23,
+    "date": "2018-01-05",
+    "id": "id2",
+    "is_child": false,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 5,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -24,
+    "date": "2018-01-03",
+    "id": "foo",
+    "is_child": false,
+    "is_parent": true,
+    "payee": null,
+    "sort_order": 8,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 12,
+    "date": "2018-01-03",
+    "id": "child1",
+    "is_child": true,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 7.99,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": 2,
+    "date": "2018-01-03",
+    "id": "child2",
+    "is_child": true,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 7.98,
+    "starting_balance_flag": false,
+  },
+  Object {
+    "amount": -5,
+    "date": "2018-01-03",
+    "id": "child3",
+    "is_child": true,
+    "is_parent": false,
+    "payee": null,
+    "sort_order": 7.97,
+    "starting_balance_flag": false,
+  },
+]
+`;

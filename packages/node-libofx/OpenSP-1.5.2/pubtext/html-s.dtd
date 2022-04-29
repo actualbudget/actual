@@ -1,0 +1,29 @@
+<!--	html-s.dtd
+
+        Document Type Definition for the HyperText Markup Language
+	with strict validation (HTML Strict DTD).
+
+	$Id: html-s.dtd,v 1.1 1999/11/04 08:36:16 clasen Exp $
+
+	Author: Daniel W. Connolly <connolly@w3.org>
+	See Also: http://www.w3.org/hypertext/WWW/MarkUp/MarkUp.html
+-->
+
+<!ENTITY % HTML.Version
+	"-//IETF//DTD HTML 2.0 Strict//EN"
+
+        -- Typical usage:
+
+            <!DOCTYPE HTML PUBLIC
+		"-//IETF//DTD HTML Strict//EN">
+	    <html>
+	    ...
+	    </html>
+	--
+	>
+
+<!-- Feature Test Entities -->
+<!ENTITY % HTML.Recommended "INCLUDE">
+
+<!ENTITY % html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+%html;

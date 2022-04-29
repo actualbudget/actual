@@ -1,0 +1,5 @@
+// Copyright (c) 1997 James Clark
+// See the file COPYING for copying permission.
+
+#include "XmlOutputMessages.rc"
+#include "SxMessages.rc"

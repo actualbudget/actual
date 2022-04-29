@@ -1,0 +1,18 @@
+There is an OFX test server which is used by the developers to ensure
+that the OFX connection works correctly.  The providers of this server
+have asked us not to post the connection information publically.
+
+Therefore, the test script file which connects to this server is 
+encrypted using a GnuPG key: OFX Test Server <libofx-devel@lists.sf.net>.
+
+You will need this private key to unlock this file.  If you are an
+active, contributing member of the open source OFX community, please
+e-mail me for this key.  Please do not share the key with anyone who does
+not fit this description.  Please do not post the key on any mailing list
+or any other archived forum.  If the key does become comprimised, please
+e-mail me, or the libofx-devel list and we'll cancel that key and 
+encrypt it using a new one.
+
+Thanks
+
+Ace Jones <acejones@users.sf.net>

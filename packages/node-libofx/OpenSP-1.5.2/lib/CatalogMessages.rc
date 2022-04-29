@@ -1,0 +1,15 @@
+STRINGTABLE
+BEGIN
+  2100, "name expected"
+  2101, "literal expected"
+  2102, "name or literal expected"
+  2103, "nul character"
+  2104, "not a minimum data character"
+  2105, "end of entity in comment"
+  2106, "end of entity in literal"
+  2107, "OVERRIDE requires argument of YES or NO"
+  2108, "CATALOG entries cause loop"
+  2109, "second argument for SYSTEM entry should be quoted to avoid ambiguity"
+  2110, "no DOCUMENT entry in catalog %1"
+  2111, "no entry for public identifier %1 in catalog %2"
+END

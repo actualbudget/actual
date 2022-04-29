@@ -1,0 +1,587 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+   <title>ONSGMLS</title>
+</head>
+<body>
+
+<h1>ONSGMLS</h1>
+
+<h4>
+An SGML System Conforming to International Standard ISO 8879 --
+Standard Generalized Markup Language</h4>
+
+<h4>
+An SGML Extended Facilities system conforming to Annex A of International
+Standard ISO/IEC 10744 -- Hypermedia/Time-based Structuring Language</h4>
+
+<h2>
+SYNOPSIS</h2>
+<tt>onsgmls</tt> [ <tt>option...</tt> ] <tt><i>sysid</i>...</tt>
+<h2>
+DESCRIPTION</h2>
+Onsgmls parses and validates the SGML document whose document entity is
+specified by the
+<a href="sysid.htm">system identifiers</a><tt> <i>sysid</i>...</tt>
+and prints on the standard output a simple text representation of its Element
+Structure Information Set. (This is the information set which a structure-controlled
+conforming SGML application should act upon.) If more than one system identifier
+is specified, then the corresponding entities will be concatenated to form
+the document entity. Thus the document entity may be spread amongst several
+files; for example, the SGML declaration, prolog and document instance
+set could each be in a separate file. If no system identifiers are specified,
+then nsgmls will read the document entity from the standard input. A command
+line system identifier of
+<tt>-</tt> can be used to refer to the standard
+input. (Normally in a system identifier,
+<tt>&lt;osfd>0</tt> is used to
+refer to standard input.)
+<h2>
+OPTIONS</h2>
+The following options are available:
+<dl>
+<dt><tt>-a<i>name</i></tt>, <tt>--activate=<i>name</i></tt></dt>
+
+<dd>
+Make link type or doctype <i><tt>name</tt></i> active. Not all ESIS
+information is output in this case: the active LPDs are not explicitly
+reported, although each link attribute is qualified with its link type name; there is no information
+about result elements; when there are multiple link rules applicable to
+the current element, nsgmls always chooses the first. You cannot mix
+active link types and doctypes. Only one active doctype can be specified.</dd>
+
+<dt><tt>-b<i>name</i></tt>, <tt>--bctf=<i>name</i></tt></dt>
+<dt><tt>-b<i>name</i></tt>, <tt>--encoding=<i>name</i></tt></dt>
+
+<dd>
+This determines the encoding used for output. If in <a href="charset.htm#fixed">fixed
+character set mode</a> it specifies the name of an encoding; if not, it
+specifies the name of a BCTF.</dd>
+
+<dt><tt>-B</tt>, <tt>--batch-mode</tt></dt>
+
+<dd>
+Batch mode. Parse each <i><tt>sysid...</tt></i> specified on the command
+line separately, rather than concatenating them. This is useful mainly
+with <tt>-s</tt>.
+<p><br>If <tt>-t<i>filename</i></tt> is also specified, then the specified
+<i><tt>filename</tt></i> will be prefixed to the <i><tt>sysid</tt></i>
+to make the filename for the RAST result for each <i><tt>sysid</tt></i>.</dd>
+
+<dt><a NAME="optc"></a><tt>-c<i>sysid</i></tt>, <tt>--catalog=<i>sysid</i></tt></dt>
+
+<dd>
+Map public identifiers and entity names to system identifiers using the
+catalog entry file whose system identifier is
+<i><tt>sysid</tt></i>. Multiple
+<tt>-c</tt>
+options are allowed. If there is a catalog entry file called
+<tt>catalog</tt>
+in the same place as the document entity, it will be searched for immediately
+after those specified by
+<tt>-c</tt>.</dd>
+
+<dt><a NAME="optC"></a><tt>-C</tt>, <tt>--catalogs</tt></dt>
+
+<dd>
+The <tt><i>filename</i>...</tt> arguments specify catalog files rather
+than the document entity. The document entity is specified by the first
+<tt>DOCUMENT</tt>
+entry in the catalog files.</dd>
+
+<dt><a NAME="optD"></a><tt>-D<i>directory</i></tt>, <tt>--directory=<i>directory</i></tt></dt>
+
+<dd>
+Search <i><tt>directory</tt></i> for files specified in system identifiers.
+Multiple <tt>-D</tt> options are allowed. See the description of the
+<tt>osfile</tt> storage manager for more information about file searching.</dd>
+
+<dt><tt>-e</tt>, <tt>--open-entities</tt></dt>
+
+<dd>
+Describe open entities in error messages. Error messages always include
+the position of the most recently opened external entity.</dd>
+
+<dt><tt>-E<i>number</i></tt>, <tt>--max-errors=<i>number</i></tt></dt>
+
+<dd>
+Onsgmls will exit after <tt><i>number</i></tt> errors. If <tt><i>number</i></tt>
+is 0, there is no limit on the number of errors. The default is 200.</dd>
+
+<dt><tt>-f<i>file</i></tt>, <tt>--error-file=<i>file</i></tt></dt>
+
+<dd>
+Redirect errors to <i><tt>file</tt></i>. This is useful mainly with shells
+that do not support redirection of stderr.</dd>
+
+<dt><tt>-g</tt>, <tt>--open-elements</tt></dt>
+
+<dd>
+Show the generic identifiers of open elements in error messages.</dd>
+
+<dt><tt>-h</tt>, <tt>--help</tt></dt>
+
+<dd>
+Show a help message and exit.
+
+<dt>
+<a NAME="opti"></a><tt>-i<i>name</i></tt>, <tt>--include=<i>name</i></tt></dt>
+
+<dd>
+Pretend that
+
+<pre>&lt;!ENTITY % <i>name</i> "INCLUDE"></pre>
+occurs at the start of the document type declaration subset in the SGML
+document entity. Since repeated definitions of an entity are ignored, this
+definition will take precedence over any other definitions of this entity
+in the document type declaration. Multiple <tt>-i</tt> options are allowed.
+If the SGML declaration replaces the reserved name <tt>INCLUDE</tt> then
+the new reserved name will be the replacement text of the entity. Typically
+the document type declaration will contain 
+<pre>&lt;!ENTITY % <i>name</i> "IGNORE"></pre>
+and will use <tt>%<i>name</i>;</tt> in the status keyword specification
+of a marked section declaration. In this case the effect of the option
+will be to cause the marked section not to be ignored.</dd>
+
+<dt><tt>-n</tt>, <tt>--error-numbers</tt></dt>
+
+<dd>
+Show message numbers in error messages.</dd>
+
+<dt><tt>-o<i>option</i></tt>, <tt>--option=<i>option</i></tt></dt>
+
+<dd>
+Output additional information according to
+<i><tt>option</tt></i>:
+
+<dl>
+<dt>
+<tt>entity</tt></dt>
+
+<dd>
+Output definitions of all general entities not just for data or subdoc
+entities that are referenced or named in an ENTITY or ENTITIES attribute.</dd>
+
+<dt>
+<tt>id</tt></dt>
+
+<dd>
+Distinguish attributes whose declared value is ID.</dd>
+
+<dt>
+<tt>line</tt></dt>
+
+<dd>
+Output
+<tt>L</tt> commands giving the current line number and filename.</dd>
+
+<dt>
+<tt>included</tt></dt>
+
+<dd>
+Output an
+<tt>i</tt> command for included subelements.</dd>
+
+<dt>
+<tt>empty</tt></dt>
+
+<dd>
+Output an <tt>e</tt> command for elements which are not allowed to have
+an end-tag, that is those with a declared content of empty or with a content
+reference attribute.</dd>
+
+<dt>
+<tt>notation-sysid</tt></dt>
+
+<dd>
+Output an <tt>f</tt> command before an <tt>N</tt> command, if a system
+identifier could be generated for that notation.</dd>
+
+<dt>
+<tt>nonsgml</tt></dt>
+
+<dd>
+In <a href="charset.htm#fixed">fixed character set mode</a>, output <tt>\%</tt>
+escape sequences for non-SGML data characters. Non-SGML data characters
+can result from numeric character references.</dd>
+
+<dt>
+<tt>data-attribute</tt></dt>
+
+<dd>
+Output the notation name and attributes for DATA attributes. Otherwise,
+DATA attributes are treated like CDATA attributes. For more details, see clause
+4.4.3 of <A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+
+<dt>
+<tt>comment</tt></dt>
+
+<dd>
+Output an <tt>_</tt> command with the contents of a comment. Multiple comments
+in a single comment declaration will result in multiple distinct <tt>_</tt>
+commands, just as if the comments were each in a separate comment
+declaration.</dd>
+
+<dt>
+<tt>omitted</tt></dt>
+
+<dd>
+
+Output an <tt>o</tt> command before a command which was implied by the input
+document, but omitted from the actual markup. This currently affects
+<tt>(</tt>, <tt>)</tt>, and <tt>A</tt> commands.</dd>
+
+<dt>
+<tt>tagomit</tt></dt>
+
+<dd>
+As <tt>omitted</tt>, but only for <tt>(</tt> and <tt>)</tt> commands.</dd>
+
+<dt>
+<tt>attromit</tt></dt>
+
+<dd>
+As <tt>omitted</tt>, but only for <tt>A</tt> commands.</dd>
+</dl>
+Multiple
+<tt>-o</tt> options are allowed.</dd>
+
+<dt><tt>-p</tt>, <tt>--only-prolog</tt></dt>
+
+<dd>
+Parse only the prolog. Onsgmls will exit after parsing the document type
+declaration. Implies <tt>-s</tt>.</dd>
+
+<dt><a NAME="optR"></a><tt>-R</tt>, <tt>--restricted</tt></dt>
+
+<dd>
+Restrict file reading. This option is intended for use with onsgmls-based
+Web tools (e.g., CGI scripts) to prevent reading of arbitrary
+files on the Web server. With this option enabled, onsgmls will not
+read any local files unless they are located in a directory (or
+subdirectory) specified by the <tt>-D</tt> option or included in the
+SGML_SEARCH_PATH environment variable. As a further security
+precaution, this option limits filenames to the characters
+A-Z, a-z, 0-9, '/', '.', '_', '-' and does not allow filenames
+containing "..".</dd>
+
+<dt><tt>-s</tt>, <tt>--no-output</tt></dt>
+
+<dd>
+Suppress output. Error messages will still be printed.</dd>
+
+<dt><tt>-t<i>file</i></tt>, <tt>--rast-file=<i>file</i></tt></dt>
+
+<dd>
+Output to <i><tt>file</tt></i> the RAST result as defined by ISO/IEC 13673:1995
+(actually this isn't quite an IS yet; this implements the Intermediate
+Editor's Draft of 1994/08/29, with changes to implement ISO/IEC JTC1/SC18/WG8
+N1777). The normal output is not produced.</dd>
+
+<dt><tt>-v</tt>, <tt>--version</tt></dt>
+
+<dd>
+Print the version number.</dd>
+
+<dt><a NAME="optw"></a><tt>-w<i>type</i></tt>, <tt>--warning=<i>type</i></tt></dt>
+
+<dd>
+Control warnings and errors. Multiple <tt>-w</tt> options are allowed.
+The following values of <i><tt>type</tt></i> enable warnings:
+
+<dl>
+<dt>
+<tt>xml</tt></dt>
+
+<dd>
+Warn about constructs that are not allowed by <a href="http://www.w3.org/TR/1998/REC-xml-19980210">XML</a>.
+The warnings can be enabled <a href="xmlwarn.htm">individually.</a></dd>
+
+<dt>
+<tt>mixed</tt></dt>
+
+<dd>
+Warn about mixed content models that do not allow #PCDATA anywhere.</dd>
+
+<dt>
+<tt>sgmldecl</tt></dt>
+
+<dd>
+Warn about various dubious constructions in the SGML declaration.</dd>
+
+<dt>
+<tt>should</tt></dt>
+
+<dd>
+Warn about various recommendations made in ISO 8879 that the document does
+not comply with. (Recommendations are expressed with ``should'', as distinct
+from requirements which are usually expressed with ``shall''.)</dd>
+
+<dt>
+<tt>default</tt></dt>
+
+<dd>
+Warn about defaulted references.</dd>
+
+<dt>
+<tt>duplicate</tt></dt>
+
+<dd>
+Warn about duplicate entity declarations.</dd>
+
+<dt>
+<tt>undefined</tt></dt>
+
+<dd>
+Warn about undefined elements: elements used in the DTD but not defined.</dd>
+
+<dt>
+<tt>unclosed</tt></dt>
+
+<dd>
+Warn about unclosed start and end-tags.</dd>
+
+<dt>
+<tt>empty</tt></dt>
+
+<dd>
+Warn about empty start and end-tags.</dd>
+
+<dt>
+<tt>net</tt></dt>
+
+<dd>
+Warn about net-enabling start-tags and null end-tags.</dd>
+
+<dt>
+<tt>min-tag</tt></dt>
+
+<dd>
+Warn about minimized start and end-tags. Equivalent to combination of
+<tt>unclosed</tt>, <tt>empty</tt> and <tt>net</tt> warnings.</dd>
+
+<dt>
+<tt>unused-map</tt></dt>
+
+<dd>
+Warn about unused short reference maps: maps that are declared with a short
+reference mapping declaration but never used in a short reference use 
+declaration in the DTD.</dd>
+
+<dt>
+<tt>unused-param</tt></dt>
+
+<dd>
+Warn about parameter entities that are defined but not used in a DTD. Unused
+internal parameter entities whose text is <tt>INCLUDE</tt> or <tt>IGNORE</tt> 
+won't get the warning.</dd>
+
+<dt>
+<tt>notation-sysid</tt></dt>
+
+<dd>
+Warn about notations for which no system identifier could be generated.</dd>
+
+<dt>
+<tt>all</tt></dt>
+
+<dd>
+Warn about conditions that should usually be avoided (in the opinion of
+the author). Equivalent to:
+<tt>mixed</tt>,
+<tt>should</tt>,
+<tt>default</tt>,
+<tt>undefined</tt>,
+<tt>sgmldecl</tt>,
+<tt>unused-map</tt>,
+<tt>unused-param</tt>,
+<tt>empty</tt>
+and
+<tt>unclosed</tt>.</dd>
+
+<dt>
+<tt>immediate-recursion</tt></dt>
+
+<dd>
+Warn about immediately recursive elements. For more details, see clause
+2.2.5 of <A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+
+<dt>
+<tt>fully-declared</tt></dt>
+
+<dd>
+Warn if the document instance fails to be fully-declared.  
+This has the effect of changing the SGML declaration to specify 
+<tt>IMPLYDEF ATTLIST NO ELEMENT NO ENTITY NO NOTATION NO</tt>.
+For more details, see clause 2.2.1 of 
+<A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+
+<dt>
+<tt>fully-tagged</tt></dt>
+
+<dd>
+Warn if the document instance fails to be fully-tagged. 
+This has the effect of changing the SGML declaration to specify 
+<tt>DATATAG NO</tt>, <tt>RANK NO</tt>, <tt>OMITTAG NO</tt>, 
+<tt>SHORTTAG STARTTAG EMPTY NO</tt> and 
+<tt>SHORTTAG ATTRIB OMITNAME NO</tt>.
+For more details, see clause 2.2.2 of 
+<A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+
+<dt>
+<tt>amply-tagged</tt>, <tt>amply-tagged-recursive</tt></dt>
+
+<dd>
+Warn if the document instance fails to be amply-tagged. Implicitly defined
+elements may be immediately recursive if <tt>-recursive</tt> is specified. 
+This has the effect of changing the SGML declaration to specify 
+<tt>DATATAG NO</tt>, <tt>RANK NO</tt>, <tt>OMITTAG NO</tt>, 
+<tt>SHORTTAG ATTRIB OMITNAME NO</tt> and either
+<tt>IMPLYDEF ELEMENT ANYOTHER</tt> or
+<tt>IMPLYDEF ELEMENT YES</tt>.
+For more details, see clause 2.2.4 of 
+<A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+
+<dt>
+<tt>type-valid</tt></dt>
+
+<dd>
+Warn if the document instance fails to be type-valid.
+This has the effect of changing the SGML declaration to specify 
+<tt>VALIDITY YES</tt>.
+For more details, see clause 2.2.3 of 
+<A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+
+<dt>
+<tt>entity-ref</tt></dt>
+
+<dd>
+Warn about references to non-predefined entities. 
+This has the effect of changing the SGML declaration to specify 
+<tt>ENTITIES REF NONE</tt>.
+For more details, see clause 2.3.2 of 
+<A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+
+<dt>
+<tt>external-entity-ref</tt></dt>
+
+<dd>
+Warn about references to external entities. This includes references to an
+external DTD subset. 
+This has the effect of changing the SGML declaration to specify 
+<tt>ENTITIES REF INTERNAL</tt>.
+For more details, see clause 2.3.3 of 
+<A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+
+<dt>
+<tt>integral</tt></dt>
+
+<dd>
+Warn if the document instance is not integrally stored. i
+This has the effect of changing the SGML declaration to specify 
+<tt>ENTITIES INTEGRAL YES</tt>.
+For more details, see clause 2.3.1 of 
+<A HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K 
+of ISO 8879</A>.</dd>
+</dl>
+A warning can be disabled by using its name prefixed with
+<tt>no-</tt>.
+Thus
+<tt>-wall -wno-duplicate</tt> will enable all warnings except those
+about duplicate entity declarations.
+<p>The following values for
+<i><tt>warning_type</tt></i> disable errors:
+<dl>
+<dt>
+<tt>no-idref</tt></dt>
+
+<dd>
+Do not give an error for an ID reference value which no element has as
+its ID. The effect will be as if each attribute declared as an ID reference
+value had been declared as a name.</dd>
+
+<dt>
+<tt>no-significant</tt></dt>
+
+<dd>
+Do not give an error when a character that is not a significant character
+in the reference concrete syntax occurs in a literal in the SGML declaration.
+This may be useful in conjunction with certain buggy test suites.</dd>
+
+<dt>
+<tt>no-valid</tt></dt>
+
+<dd>
+Do not require the document to be type-valid. This has the effect of changing
+the SGML declaration to specify <tt>VALIDITY NOASSERT</tt> and <tt>IMPLYDEF
+ATTLIST YES ELEMENT YES ENTITY YES NOTATION YES</tt>. An option of 
+<tt>-wvalid</tt> has the effect
+of changing the SGML declaration to specify <tt>VALIDITY TYPE</tt> and
+<tt>IMPLYDEF ATTLIST NO ELEMENT NO ENTITY NO NOTATION NO</tt>. 
+If neither <tt>-wvalid</tt> nor
+<tt>-wno-valid</tt> are specified, then the <tt>VALIDITY</tt> and <tt>IMPLYDEF</tt>
+specified in the SGML declaration will be used.</dd>
+
+<dt>
+<tt>no-afdr</tt></dt>
+
+<dd>
+Do not give errors when AFDR meta-DTD notation features are used in the
+DTD. These errors are normally produced when parsing the DTD, but suppressed
+when parsing meta-DTDs.</dd>
+</dl></dd>
+
+<dt><tt>-x</tt>, <tt>--references</tt></dt>
+
+<dd>
+Show information about relevant clauses (from ISO 8879:1986) in error messages.</dd> 
+
+</dl>
+The following options are also supported for backwards compatibility with
+sgmls:
+<dl>
+<dt>
+<tt>-d</tt></dt>
+
+<dd>
+Same as
+<tt>-wduplicate</tt>.</dd>
+
+<dt>
+<tt>-l</tt></dt>
+
+<dd>
+Same as
+<tt>-oline</tt>.</dd>
+
+<dt>
+<tt>-m<i>sysid</i></tt></dt>
+
+<dd>
+Same as <tt>-c</tt>.</dd>
+
+<dt>
+<tt>-r</tt></dt>
+
+<dd>
+Same as
+<tt>-wdefault</tt>.</dd>
+
+<dt>
+<tt>-u</tt></dt>
+
+<dd>
+Same as
+<tt>-wundef</tt>.</dd>
+</dl>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+*.la
+*.lo
+.deps
+.libs
+Makefile
+Makefile.in
+html
+doxygen.log

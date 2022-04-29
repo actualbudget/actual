@@ -1,0 +1,2634 @@
+2005-12-11  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* docsrc/releasenotes.xml:
+	Changed release date to December 2005 from November 2005.
+
+	* docsrc/Makefile.am:
+	Redefined XMLDCL to be one included here, $(top_srcdir)/pubtext/xml.dcl.
+	Use EXTRADOCS variable now defined in configure step to determine if PDF and
+	PS format release notes will be built.
+
+	* configure.in:
+	Added --enable-full-doc-build option to build PDF and PS docs as well as man
+	and HTML.  Only check for necessary tools if enabled.
+	Removed search for xml.dcl, we will always use the one in pubtext.
+
+2005-12-10  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* sx/Makefile.am, spent/Makefile.am, spcat/Makefile.am, spam/Makefile.am, sgmlnorm/Makefile.am, nsgmls/Makefile.am, lib/Makefile.am:
+	Gerrit Haase's patch: add LTLIBINTL to avoid undefined references.
+
+2005-12-09  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* po/fr.po: Fixed typo.
+
+	* autoinit.sh: Added libtoolize to avoid error of missing ltmain.sh.
+
+2005-12-07  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* docsrc/osx.xml:
+	Made purpose a one-liner because it is used for man -k and apropos, so it
+	should be short.  Moved long paragraph that was there to description section.
+
+	* docsrc/ospent.xml:
+	Made purpose a bit more descriptive so it makes more sense without context.
+
+	* docsrc/ospam.xml, docsrc/onsgmls.xml, docsrc/osgmlnorm.xml:
+	Made purpose a one-liner because it is used for man -k and apropos, so it
+	should be short.  Moved long paragraph that was there to description section.
+
+2005-12-07  Karl Eichwalder  <ke@suse.de>
+
+	* include/InternalInputSource.h: Prepare for gcc 4.1.
+
+2005-10-23  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* lib/Text.cxx, lib/Attribute.cxx: Make operator= return *this.
+
+	* lib/ExtendEntityManager.cxx:
+	Fix operator= to return *this (two places).
+
+	* lib/ArcEngine.cxx:
+	Ensure that toIndex and fromIndex are not invalidAtt OR contentPseudoAtt
+	before using to index into arrays.  Those constants are defined to be the
+	unsigned version of -1 and -2, which are very large numbers, and cause
+	segfaults when array elements with those indexes are accessed.
+
+	* nsgmls/RastEventHandler.h, lib/Text.cxx, lib/Syntax.cxx, lib/SdText.cxx, lib/Sd.cxx, lib/Recognizer.h, lib/Recognizer.cxx, lib/Notation.cxx, lib/MessageFormatter.cxx, lib/Message.cxx, lib/Markup.cxx, lib/Lpd.cxx, lib/Location.cxx, lib/ExtendEntityManager.cxx, lib/Event.cxx, lib/EntityCatalog.cxx, lib/ElementType.cxx, lib/Dtd.cxx:
+	Added functions to eliminate g++ 4.0 warnings.
+
+2005-10-22  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* lib/ContentToken.cxx, lib/CodingSystemKit.cxx, lib/CodingSystem.cxx:
+	Added functions to eliminate g++ 4.0 warnings.
+
+	* include/Vector.h:
+	Changed order of initializations to match order of declaration in class.
+
+	* include/UnivCharsetDesc.h, include/Text.h, include/Syntax.h, include/ShortReferenceMap.h, include/SdText.h, include/Sd.h, include/OpenElement.h, include/Notation.h:
+	Added functions to eliminate g++ 4.0 warnings.
+
+	* include/MessageFormatter.h:
+	Added functions to eliminate g++ 4.0 warnings.
+	Changed order of initializations to match order of declaration in class.
+
+	* include/MessageBuilder.h, include/Message.h, include/Markup.h, include/Lpd.h, include/Location.h, include/ExtendEntityManager.h, include/Event.h, include/EntityCatalog.h, include/Entity.h, include/ElementType.h, include/Dtd.h, include/ContentToken.h, include/CodingSystemKit.h, include/CodingSystem.h, include/CharsetInfo.h, lib/CharsetDecl.cxx, include/CharsetDecl.h, lib/Attribute.cxx:
+	Added functions to eliminate g++ 4.0 warnings.
+
+	* include/Attribute.h:
+	Added missing prototypes to eliminate g++ 4.0 warnings.
+
+	* configure.in:
+	Incremented SP_LIBOSP_CUR in preparation for upcoming checkins that will
+	technically break binary compatilibility.
+
+	* Makefile.am: Added autoinit.sh to EXTRA_DIST.
+
+2005-09-30  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* tests/Makefile.am:
+	Revert to using SHOWSTOPPERS variable after discussion with Karl Eichwalder.
+	Changed EXTRA_DIST and other variables so that all tests get put into dist
+	regardless of whether they are being run or not, e.g., if you run
+	"make distcheck SHOWSTOPPERS=" then only the tests that are known to pass will
+	be run during the make check part, but all tests, including the ones that are
+	known to pass, will be in the dist tarball.
+	Added comment that the tests that fail imply there are problems that need to
+	be tracked down and fixed.
+
+2005-09-27  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* docsrc/releasenotes.xml: Initial update for 1.5.2.
+
+2005-09-24  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* tests/Makefile.am:
+	Changed name of variable from SHOWSTOPPERS to XFAIL_TESTS.  These are tests
+	that are expected to fail, and the latter name is known by automake to tag
+	them as such.  This allows a "make check" to complete with a message that some
+	tests failed, but were expected to, and the make returns a normal exit code.
+	Use DTDDECL automake conditional to control whether catalog-1 is in
+	XFAIL_TESTS.  This test is the one that tests DTDDECL support, so if that is
+	disabled then the test is expected to fail.
+
+	* lib/SOEntityCatalog.cxx:
+	Use new config preprocessor directive SP_DTDDECL to control whether DTDDECL
+	support is enabled or not.
+
+	* configure.in:
+	Added option to disable DTDDECL support. If a default catalog is used, then
+	the DTDDECL support causes it to be read over and over again, causing a huge
+	performance hit if there are a significant number of entries in it.
+
+2005-09-23  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* po/Makefile.in.in:
+	Be more precise about updating $(srcdir)/$(DOMAIN).pot so that both a normal
+	make and a make distcheck work.
+
+	* po/Makefile.in.in: Added PERL variable to enable running msggen.pl.
+	Use old method of generating $(DOMAIN).pot with msggen.pl instead of newer
+	method using xgettext.  Should update to use the latter eventually.
+
+	* docsrc/Makefile.am:
+	Put man page XML sources, releasenotes.{xml,dsl} and logo.png in EXTRA_DIST
+	variable so they get put into dist tarball.
+	Added $(srcdir)/ prefix to files where necessary so docs will build even when
+	build area differs from source area, e.g., as when make distcheck is done.
+	Added (define %openjade-logo% "$(srcdir)/logo.png") so the logo can be found
+	when creating releasenotes.{pdf,ps}
+
+	* Makefile.am:
+	Use @DOCSRC@ variable in SUBDIRS so that it will not be included if doc
+	building is disabled.
+
+2005-09-19  Neil Roeth  <neilroeth@users.sourceforge.net>
+
+	* configure.in:
+	Change AM_PROG_LIBTOOL to AC_PROG_LIBTOOL.
+	Added --disable-doc-build option.
+	Moved checks for doc building so they are only executed if building docs.
+	Added error messages for doc building programs so it is more clear what is
+	missing.
+	Added /usr/share/sgml/declaration to search path for xml.dcl.
+
+2005-08-28  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* docsrc/onsgmls.xml:
+	added documentation for the revised restricted file reading
+	behavior on win32, etc
+
+2005-08-27  Terje Bless <link@pobox.com>
+
+	* include/UnivCharsetDesc.h:
+	Fiddle #include's around as it seems to appease GCC 3.4 and does no harm
+	for GCC 4.0.
+
+2005-08-26  Terje Bless <link@pobox.com>
+
+	* configure.in: Bump version to 1.5.2, to shut check-news up.
+
+	* po/Makefile.in.in: Restore Neil Roeth's domain=soname for .po files.
+
+	* po/remove-potcdate.sed: Add another missing gettext file.
+
+	* po/remove-potcdate.sed: New file.
+
+	* configure.in, docsrc/Makefile.am:
+	Make autoconf check for the utils needed for docsrc/ building, and let
+	xmlto choose the stylesheet to use for the manpages.
+
+	( The rest of the docs should probably also be made by xmlto, but it's
+	  not currently working on my box so we'll do iut the old way for now. )
+
+	* configure.in, intl/dcigettext.c, intl/langprefs.c, intl/libgnuintl.h.in, intl/localcharset.h, intl/log.c, intl/printf-args.c, intl/printf-args.h, intl/printf-parse.c, intl/printf-parse.h, intl/printf.c, intl/relocatable.c, intl/relocatable.h, intl/vasnprintf.c, intl/vasnprintf.h, intl/vasnwprintf.h, intl/wprintf-parse.h, intl/xsize.h, po/ChangeLog, po/Makevars, po/Rules-quot, po/boldquot.sed, po/en@boldquot.header, po/en@quot.header, po/insert-header.sin, po/quot.sed, po/remove-potcdate.sin:
+	Add (new) files left out of previous checkin.
+
+	* intl/langprefs.c, intl/libgnuintl.h.in, intl/localcharset.h, intl/log.c, intl/printf-args.c, intl/printf-args.h, intl/printf-parse.c, intl/printf-parse.h, intl/printf.c, intl/relocatable.c, intl/relocatable.h, intl/vasnprintf.c, intl/vasnprintf.h, intl/vasnwprintf.h, intl/wprintf-parse.h, intl/xsize.h, po/ChangeLog, po/Makevars, po/Rules-quot, po/boldquot.sed, po/en@boldquot.header, po/en@quot.header, po/insert-header.sin, po/quot.sed, po/remove-potcdate.sin, m4/codeset.m4, m4/gettext.m4, m4/glibc2.m4, m4/glibc21.m4, m4/iconv.m4, m4/intdiv0.m4, m4/intmax.m4, m4/inttypes-pri.m4, m4/inttypes.m4, m4/inttypes_h.m4, m4/isc-posix.m4, m4/lcmessage.m4, m4/lib-ld.m4, m4/lib-link.m4, m4/lib-prefix.m4, m4/longdouble.m4, m4/longlong.m4, m4/nls.m4, m4/po.m4, m4/printf-posix.m4, m4/progtest.m4, m4/signed.m4, m4/size_max.m4, m4/stdint_h.m4, m4/uintmax_t.m4, m4/ulonglong.m4, m4/wchar_t.m4, m4/wint_t.m4, m4/xsize.m4:
+	New file.
+
+	* ABOUT-NLS, ChangeLog, Makefile.am, config.rpath, configure.in, intl/COPYING.LIB-2.0, intl/COPYING.LIB-2.1, intl/ChangeLog, intl/Makefile.in, intl/VERSION, intl/bindtextdom.c, intl/config.charset, intl/dcgettext.c, intl/dcigettext.c, intl/dcngettext.c, intl/dgettext.c, intl/dngettext.c, intl/eval-plural.h, intl/explodename.c, intl/finddomain.c, intl/gettext.c, intl/gettextP.h, intl/gmo.h, intl/hash-string.h, intl/intl-compat.c, intl/l10nflist.c, intl/libgnuintl.h, intl/loadinfo.h, intl/loadmsgcat.c, intl/localcharset.c, intl/locale.alias, intl/localealias.c, intl/localename.c, intl/ngettext.c, intl/os2compat.c, intl/os2compat.h, intl/osdep.c, intl/plural-exp.c, intl/plural-exp.h, intl/plural.c, intl/plural.y, intl/ref-add.sin, intl/ref-del.sin, intl/textdomain.c, m4/codeset.m4, m4/gettext.m4, m4/glibc2.m4, m4/glibc21.m4, m4/iconv.m4, m4/intdiv0.m4, m4/intmax.m4, m4/inttypes-pri.m4, m4/inttypes.m4, m4/inttypes_h.m4, m4/isc-posix.m4, m4/lcmessage.m4, m4/lib-ld.m4, m4/lib-link.m4, m4/lib-prefix.m4, m4/longdouble.m4, m4/longlong.m4, m4/nls.m4, m4/po.m4, m4/printf-posix.m4, m4/progtest.m4, m4/signed.m4, m4/size_max.m4, m4/stdint_h.m4, m4/uintmax_t.m4, m4/ulonglong.m4, m4/wchar_t.m4, m4/wint_t.m4, m4/xsize.m4, po/Makefile.in.in, po/de.po, po/fr.po, po/ja.po, po/sv.po, po/tr.po:
+	Upgrading gettext to 0.14.5 and including necessary .m4 files.
+
+	* spec.in: Slightly tweak spec towards Fedora guidelines;
+	for Vendor, Packager, Copyright vs. License, and BuildRoot.
+
+	* configure.in: Tell automake about our embedded gettext version.
+
+
+2005-08-26  Terje Bless <link@pobox.com> (via gettextize)
+
+	* m4/codeset.m4: Upgrade to gettext-0.14.5.
+	* m4/gettext.m4: Upgrade to gettext-0.14.5.
+	* m4/glibc2.m4: New file, from gettext-0.14.5.
+	* m4/glibc21.m4: Upgrade to gettext-0.14.5.
+	* m4/iconv.m4: Upgrade to gettext-0.14.5.
+	* m4/intdiv0.m4: New file, from gettext-0.14.5.
+	* m4/intmax.m4: New file, from gettext-0.14.5.
+	* m4/inttypes.m4: New file, from gettext-0.14.5.
+	* m4/inttypes_h.m4: New file, from gettext-0.14.5.
+	* m4/inttypes-pri.m4: New file, from gettext-0.14.5.
+	* m4/isc-posix.m4: Upgrade to gettext-0.14.5.
+	* m4/lcmessage.m4: Upgrade to gettext-0.14.5.
+	* m4/lib-ld.m4: Upgrade to gettext-0.14.5.
+	* m4/lib-link.m4: Upgrade to gettext-0.14.5.
+	* m4/lib-prefix.m4: Upgrade to gettext-0.14.5.
+	* m4/longdouble.m4: New file, from gettext-0.14.5.
+	* m4/longlong.m4: New file, from gettext-0.14.5.
+	* m4/nls.m4: New file, from gettext-0.14.5.
+	* m4/po.m4: New file, from gettext-0.14.5.
+	* m4/printf-posix.m4: New file, from gettext-0.14.5.
+	* m4/progtest.m4: Upgrade to gettext-0.14.5.
+	* m4/signed.m4: New file, from gettext-0.14.5.
+	* m4/size_max.m4: New file, from gettext-0.14.5.
+	* m4/stdint_h.m4: New file, from gettext-0.14.5.
+	* m4/uintmax_t.m4: New file, from gettext-0.14.5.
+	* m4/ulonglong.m4: New file, from gettext-0.14.5.
+	* m4/wchar_t.m4: New file, from gettext-0.14.5.
+	* m4/wint_t.m4: New file, from gettext-0.14.5.
+	* m4/xsize.m4: New file, from gettext-0.14.5.
+	* Makefile.am (SUBDIRS): Remove intl.
+	(ACLOCAL_AMFLAGS): New variable.
+	(EXTRA_DIST): Add mkinstalldirs.
+	* configure.in (AM_GNU_GETTEXT_VERSION): Bump to 0.14.5.
+	(AC_CONFIG_FILES): Add intl/Makefile.
+
+2005-08-15 02:25  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* sx/XmlOutputEventHandler.cxx: explicit const char* to char*
+	  conversion for VS.NET 2005 Beta2
+
+2005-08-15 02:09  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* lib/xentmgr_inst.m4: fix for vs.net when building with
+	  /Zc:wchar_t
+
+2005-08-15 00:05  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* lib/Sd.cxx: make gcc happy again
+
+2005-08-14 22:49  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* lib/Sd.cxx: initialize implydefElement_ so OpenSP does not assume
+	  some random value
+
+2005-07-21 16:12  Terje Bless  <link@pobox.com>
+
+	* Makefile.am, configure.in, docsrc/Makefile, docsrc/Makefile.am:
+	  Use automake/autoconf to generate man pages and
+	  releasenotes.{ps|pdf|html}.
+
+2005-07-15 16:03  Terje Bless  <link@pobox.com>
+
+	* acinclude.m4: Adding copious quoting for Automake >= 1.8; cf.
+	  <http://sources.redhat.com/automake/automake.html#Extending-aclocal>
+
+2005-07-15 16:01  Terje Bless  <link@pobox.com>
+
+	* BUILDING: Add note about missing gettext-devel/gettext.m4 causing
+	  aclocal complaints for undefined AM_GNU_GETTEXT macro.
+
+2004-09-07 06:45  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* lib/PosixStorage.cxx: make -R consistent with common practise on
+	  Win32
+
+2004-09-07 05:15  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* lib/parseDecl.cxx: allow applications to get non-random location
+	  information for dtd events for implied dtds
+
+2004-09-04 18:41  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* doc/generic.htm, generic/ParserEventGeneratorKit.h,
+	  lib/ParserEventGeneratorKit.cxx: adding --error-numbers to
+	  generic interface
+
+2004-08-29 14:57  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* lib/lib.dsp: use proper paths to refer to source files of the
+	  generic interface
+
+2004-08-28 21:11  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* sp-generate.mak: turn off error checking for `del`, the relevant
+	  files do not exist for builds from CVS which causes the entire
+	  make process to fail
+
+2004-08-26 05:58  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* sx/: XmlOutputEventHandler.cxx, XmlOutputEventHandler.h: [ 970258
+	  ] Patch to make osx compile in MSVC -- Thanks to Tony Dodd
+
+2004-08-26 05:39  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* lib/parseParam.cxx: fix for markup declaration memory leak, see
+	  http://sourceforge.net/mailarchive/forum.php?thread_id=5381372&forum_id=2437
+
+2004-08-23 02:01  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* lib/parseDecl.cxx: Dead memory-leaking code, see
+	  http://sourceforge.net/mailarchive/forum.php?thread_id=5381372&forum_id=2437
+
+2004-06-30  Karl Eichwalder  <ke@suse.de>
+
+	* acinclude.m4: Add missing quotations.
+
+2004-06-26 19:11  liamquinn
+
+	* doc/index.htm: Fixed broken link to NEWS (bug 666497).
+
+2004-06-26 19:05  liamquinn
+
+	* docsrc/osx.xml: Fixed -l option in man page synopsis (bug
+	  891323).
+
+2004-06-09  Karl Eichwalder  <ke@gnu.franken.de>
+
+	* tests/onsgmls-2: Make sure path to the binary will not come
+	into the way.
+
+2004-06-09  Karl Eichwalder  <ke@gnu.franken.de>
+
+	* configure.in (ALL_LINGUAS): Remove it; only po/LINGUAS is required.
+
+2004-06-09  Karl Eichwalder  <ke@suse.de>
+
+	* include/MessageReporter.h: Add missing return; (thanks to Marcus
+	Meissner).
+	* lib/URLStorage.cxx (open): Likewise.
+
+2004-05-23 01:57  Bjoern Hoehrmann  <bjoern@hoehrmann.de>
+
+	* SP.dsw, msggen.pl.in, sp-generate.mak, include/Message.h,
+	  include/MessageReporter.h, include/config.h.old.in,
+	  lib/MessageTable.cxx, lib/lib.dsp: Win32 patch, see
+	  http://lists.w3.org/Archives/Public/www-archive/2004Jan/0081.html
+
+2004-04-09 04:14  Terje Bless  <link@pobox.com>
+
+	* spec.in: Merge "today" changelog entires into one entry (dunno
+	  what I was thinking).
+
+2004-04-09 03:58  Terje Bless  <link@pobox.com>
+
+	* spec.in: Merging in spec file changes from HEAD; add man pages to
+	  %files section and change the *.mo files to include the library
+	  major revision.
+
+2004-04-09 03:54  Terje Bless  <link@pobox.com>
+
+	* spec.in: Adding man pages to the %files section for the OpenSP
+	  package.
+
+2004-04-09 03:51  Terje Bless  <link@pobox.com>
+
+	* spec.in: Use _datadir macro for doc files; merged from
+	  opensp_1_5_branch, change by Karl Eichwalder and Ville Skytta.
+
+2004-04-09 03:38  Terje Bless  <link@pobox.com>
+
+	* spec.in: Tweak names of l10n/*.mo files in the %files section.
+	  These seem to get the library's major revision appended to the
+	  basename for some reason.
+
+2004-01-16  Karl Eichwalder  <ke@suse.de>
+
+	* include/RangeMap.cxx: Include "constant.h" to make it compile
+	with GCC 3.4 (thanks to Marcus Meissner).
+
+2003-11-03  Karl Eichwalder  <ke@suse.de>
+
+	* po/LINGUAS (Tag): Add 'tr'
+	* po/tr.po (Tag): New file from
+	http://www.iro.umontreal.ca/~gnutra/maint/sp/ .
+	* po/de.po (Tag): Update from
+	http://www.iro.umontreal.ca/~gnutra/maint/sp/ .
+	* po/fr.po (Tag): Likewise.
+
+2003-10-19  Karl Eichwalder  <ke@suse.de>
+
+	* tests/onsgmls-2: New file.  Test --restricted and --directory= .
+
+	* tests/Makefile.am (TESTS): Add onsgmls-2.
+
+2003-10-10  Karl Eichwalder  <ke@suse.de>
+
+	* Makefile.am (pkgdoc_DATA): Add BUGS.
+
+	* BUGS: New file.
+
+	* tests/Makefile.am (TESTS_ENVIRONMENT): Add
+	../sgmlnorm:../sx:../spent:../spcat:../spam to PATH.
+
+2003-09-14 08:26  Neil Roeth
+
+	  Make sure DESTDIR is handled correctly in po/Makefile
+
+2003-09-13 08:48  Ian Castle <ian.castle@openjade.org>
+
+	* Add ospcat man page
+
+2003-09-03  Karl Eichwalder  <ke@suse.de>
+
+	* Add testsuite from opensp_1_5_tests_branch.
+
+2003-08-31 12:09  Jessica Perry Hekman
+
+	  Add new options (-x preserve-case, -x no-overwrite ) to osx
+
+	  preserve-case:
+
+	  Preserve casing as specified in the DTD for element names;
+	  attribute names; attribute values which are token lists.
+
+	  no-overwrite:
+
+	  When preserving internal or external entities, multiple output
+	  files will be written.  If this option is specified, do not
+	  overwrite existing files; instead, attempt to append a number to
+	  the end of the original filename to create a unique filename.
+	  Exit with an error if too many (100) such files already exist.
+
+2003-08-30 11:54  Neil Roeth
+
+	  Build Infrastructure/Localisation Changes
+
+	  The change is to add versions to the translations so that
+	  multiple versions of libosp, i.e., with different SONAMEs, can
+	  exist simultaneously without stomping on each other's files.
+
+	  Without this, the Debian package would not upgrade properly.Â 
+	  Since the next release will require a new SONAME (recent changes
+	  made the ABI different), it makes sense to include this change in
+	  the next release.
+
+	  I accomplished the versioning by adding a version number to
+	  SP_MESSAGE_DOMAIN, and it made sense to use the library SONAME
+	  for that.  So, I created a new variable in configure.in called
+	  SP_LIBOSP_CUR to be the "current" part of the SONAME, and used
+	  that in SP_MESSAGE_DOMAIN, and also referenced that in
+	  lib/Makefile to to actually set the SONAME.
+
+2003-08-30 09:56  Peter O'Gorman
+
+	  Fix for Mac OS X/Darwin compiliation.
+
+2003-08-30 09:26  Nick Kew
+
+	  MessageReporter: to enable selection of [XML|TRADITIONAL|NONE] at
+	  run time.
+
+	  The message format can now be set at run time using the
+	  environment variable	  SP_MESSAGE_FORMAT e.g.	  export
+	  SP_MESSAGE_FORMAT=XML
+
+	  ParserEventGeneratorKit: enable Liam's restrictFileReading from
+	  the "generic API".
+
+	  Improvements to http:// support. Allow http redirection.  The
+	  User-Agent: header can be specified by the environment variable
+	  SP_HTTP_USER_AGENT It defaults to "libosp 1.5" if not set.  The
+	  environment variable SP_HTTP_ACCEPT can contain the argument to
+	  the Accept: header (was hard coded as "Accept: */*"). There is no
+	  default, so to obtain the same behaviour do	export
+	  SP_HTTP_ACCEPT="*/*"
+
+2003-07-17 19:41  Patrick Smith
+
+	* Make opensp compile with gcc 3.3
+
+2003-07-17 19:16  Jessica Perry Hekman
+
+	* Fixed bug reported by Neil Roeth: nested entities were being
+	  mishandled; also sdata entities were being misquoted; note,
+	  modified outputData to have additional argument, and added
+	  getQuoteMark method
+
+	* added contents() for use by osx
+
+	* added asInternalInputSource for use by osx
+
+2003-05-08 16:57  Jessica Perry Hekman
+
+	* New command line argument
+
+	* Warn before removing leading slashes in output file pathnames,
+	  and remove them; added no-write-outside-outdir to request
+	  exiting instead of writing output file outside (above) output
+	  directory
+
+2003-04-29 22:08  Jessica Perry Hekman
+
+	* handle schemes such as http://
+	  correctly in external entity filenames
+
+2003-02-10 21:05  Jessica Perry Hekman
+
+	* - include appropriate quotation marks in entity declarations
+	  - print correct output filenames for external entity files in
+	    driver file
+	  - print correct output directory name in for driver files in
+	    internal subset
+	  - create directories where needed when writing files
+	  - output all under output directory, even absolute
+	    filenames
+	  - don't define predefined entities (like lt)
+
+2002-12-01  Karl Eichwalder  <ke@suse.de>
+
+	* doc/Makefile.am (docdir): Set to $(datadir)/doc.
+	* doc/Makefile.am (pkgdochtmldir): New variable; set to
+	$(pkgdocdir)/doc to make it compatible with description in README.
+	* doc/Makefile.am (pkgdochtml_DATA): Use it instead of
+	pkgdoc_DATA.
+	* spec.in: Change it accordingly.
+	Reported by Ville SkyttÃ¤.
+
+	* include/Makefile.am (EXTRA_DIST): Add NCVector.sed.
+	* include/NCVector.sed: Add it; required by sunfix.sh.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/ospam.xml: file ospam.xml was initially added on branch
+	opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/logo.png: file logo.png was initially added on branch
+	opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/: .cvsignore, Makefile, jadetex.cfg, logo.png,
+	onsgmls.xml, osgmlnorm.xml, ospam.xml, ospent.xml, osx.xml,
+	releasenotes.dsl, releasenotes.xml: Documentation
+	
+	Added manual pages and release notes
+
+2002-11-24 17:04  icastle
+
+	* docsrc/releasenotes.xml: file releasenotes.xml was initially
+	added on branch opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/.cvsignore: file .cvsignore was initially added on branch
+	opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/Makefile: file Makefile was initially added on branch
+	opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/jadetex.cfg: file jadetex.cfg was initially added on
+	branch opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/osx.xml: file osx.xml was initially added on branch
+	opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/releasenotes.dsl: file releasenotes.dsl was initially
+	added on branch opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/osgmlnorm.xml: file osgmlnorm.xml was initially added on
+	branch opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/ospent.xml: file ospent.xml was initially added on branch
+	opensp_1_5_branch.
+
+2002-11-24 17:04  icastle
+
+	* docsrc/onsgmls.xml: file onsgmls.xml was initially added on
+	branch opensp_1_5_branch.
+
+2002-11-24 09:48  icastle
+
+	* po/fr.po: file fr.po was initially added on branch
+	opensp_1_5_branch.
+
+2002-11-24 09:48  icastle
+
+	* po/: LINGUAS, de.po, fr.po, ja.po, sv.po: Updated translation
+	files (.po). Translation file for "fr" added.
+	
+	The files are held at the "Translation Project"
+	
+	http://www.iro.umontreal.ca/contrib/po/HTML/index.html
+	
+	The textual domain for OpenSP is "sp".
+	
+	The French (fr) translation has been contributed by Michel
+	Robitaille The German (de) translation has been updated for 1.5 by
+	Karl Eichwalder
+
+2002-11-23 18:18  icastle
+
+	* configure.in: Make sure compiler doesn't emit warnings when
+	compiling openjade 1.3.2 with the config.h file
+
+2002-11-23 15:05  icastle
+
+	* nsgmls/: NsgmlsMessages.msg, nsgmls.cxx: "-m" is an alias for
+	"-c". As such, it needs to take a SYSID as a parameter, otherwise
+	it will crash.
+
+2002-11-22 18:08  icastle
+
+	* doc/index.htm: Correct URLS (download, mailing list etc).
+	
+	Ref: Source Forge Patch #641163 (Karl Eichwalder).
+
+2002-11-16 07:46  icastle
+
+	* Makefile.am: Make sure docdir is in a structure like /usr/share
+	instead of /usr for LSB compliance etc.
+
+2002-11-16 00:14  icastle
+
+	* Makefile.am: Add config.rpath
+
+2002-11-15 18:25  icastle
+
+	* NEWS, config.rpath, configure.in: Add config.rpath from/for
+	gettext. Update NEWS and configure.in
+
+2002-11-15 18:25  icastle
+
+	* config.rpath: file config.rpath was initially added on branch
+	opensp_1_5_branch.
+
+2002-08-23 02:14  liamquinn
+
+	* doc/nsgmls.htm, doc/sgmlnorm.htm, doc/spam.htm, doc/spcat.htm,
+	doc/spent.htm, doc/sx.htm, include/EntityApp.h,
+	include/PosixStorage.h, lib/EntityApp.cxx,
+	lib/EntityAppMessages.msg, lib/PosixStorage.cxx: Added a new
+	command-line option, -R or --restricted, to restrict file reading
+	(intended for use in OpenSP-based Web applications).
+
+2002-07-10 17:08  icastle
+
+	* configure.in: Make sure that SP_MULTI_BYTE is set by default
+	(reverts mistake in previous commit).
+
+2002-07-08 06:14  Terje Bless  <link@pobox.com>
+
+	* lib/ParserMessages.msg: Demote duplicateAttributeDef from Error
+	to Warning. This closes SF Bug Tracker bug #578543.
+
+2002-07-07 17:42  Terje Bless  <link@pobox.com>
+
+	* pubtext/xml.dcl: Update to canonical SGML Declaration for XML
+	from the W3C. Changes ISO Registration number for the BASESET from
+	176 (UCS-2) to 177 (UCS-4).  UCS-2 only allows 2^16 code points;
+	UCS-4 allows the full 2^31.
+
+2002-06-13 21:16  icastle
+
+	* NEWS, doc/sx.htm, sx/XmlOutputEventHandler.cxx,
+	sx/XmlOutputEventHandler.h, sx/sx.cxx: Added a -x command line
+	option to osx, which allows users to say whether they want sdata
+	entities transformed into PIs or treated like normal entities (the
+	default is the latter, which is how osx always behaved before these
+	changes). Contributed by Jessica Hekman.
+
+2002-06-13 12:45  icastle
+
+	* .cvsignore, NEWS, acconfig.h, configure.in: More work on upgrade
+	to newer autoconf etc.
+	
+	Remove obsolete acconfig.h. Update .cvsignore for new files/dir
+	created by new autoconf tools. Change the version number.
+	
+	Need to be careful that config.h.in hasn't been perturbed by the
+	changes....
+
+2002-06-12 13:43  icastle
+
+	* intl/gmo.h: file gmo.h was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/dcigettext.c: file dcigettext.c was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/ref-del.sin: file ref-del.sin was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/plural.c: file plural.c was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/osdep.c: file osdep.c was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/libgnuintl.h: file libgnuintl.h was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/ref-add.sin: file ref-add.sin was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/plural.y: file plural.y was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/localename.c: file localename.c was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/localcharset.c: file localcharset.c was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/os2compat.c: file os2compat.c was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/os2compat.h: file os2compat.h was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* po/LINGUAS: file LINGUAS was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/eval-plural.h: file eval-plural.h was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/dcngettext.c: file dcngettext.c was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/dngettext.c: file dngettext.c was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/locale.alias: file locale.alias was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/ngettext.c: file ngettext.c was initially added on branch
+	opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/plural-exp.h: file plural-exp.h was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/plural-exp.c: file plural-exp.c was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/COPYING.LIB-2.0: file COPYING.LIB-2.0 was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/config.charset: file config.charset was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* intl/COPYING.LIB-2.1: file COPYING.LIB-2.1 was initially added on
+	branch opensp_1_5_branch.
+
+2002-06-12 13:43  icastle
+
+	* configure.in, intl/COPYING.LIB-2.0, intl/COPYING.LIB-2.1,
+	intl/ChangeLog, intl/Makefile.in, intl/VERSION, intl/bindtextdom.c,
+	intl/cat-compat.c, intl/config.charset, intl/dcgettext.c,
+	intl/dcigettext.c, intl/dcngettext.c, intl/dgettext.c,
+	intl/dngettext.c, intl/eval-plural.h, intl/explodename.c,
+	intl/finddomain.c, intl/gettext.c, intl/gettext.h, intl/gettextP.h,
+	intl/gmo.h, intl/hash-string.h, intl/intl-compat.c,
+	intl/l10nflist.c, intl/libgettext.h, intl/libgnuintl.h,
+	intl/linux-msg.sed, intl/loadinfo.h, intl/loadmsgcat.c,
+	intl/localcharset.c, intl/locale.alias, intl/localealias.c,
+	intl/localename.c, intl/ngettext.c, intl/os2compat.c,
+	intl/os2compat.h, intl/osdep.c, intl/plural-exp.c,
+	intl/plural-exp.h, intl/plural.c, intl/plural.y,
+	intl/po2tbl.sed.in, intl/ref-add.sin, intl/ref-del.sin,
+	intl/textdomain.c, intl/xopen-msg.sed, po/LINGUAS: Upgrade autoconf
+	framework
+	
+	In the absence of a nice set of portability tools to cope with
+	different versions of autoconf, automake etc.;-) upgrade to	
+	autoconf-2.53	automake-1.5	gettext-0.11.1	libtool-1.4.2
+	
+	Hopefully, this will reduce the problems people have had recently
+	when building from CVS
+	
+	- Run autoupgrade on configure.in.  - update the built-in "intl" to
+	version 0.11.  - no longer need to define extra commands to handle
+	POFILE substitution   in configure.  - Use "LINGUAS" file in the
+	"po" directory rather than in ALL_LINGUAS in   the configure.in as
+	this is the modern way of doing it (allows support   for multiple
+	po directories in the project).
+
+2002-06-10 18:22  icastle
+
+	* configure.in: LIBOBJS is obsolete in autoconf 2.53. As it isn't
+	used, the simplest thing is to remove it.
+
+2002-04-13 13:48  icastle
+
+	* NEWS, include/ArcEngine.h, lib/ArcEngine.cxx: architecture public
+	id reporting
+	
+	Ref: Sourceforge #532322, Peter Newcomb, Epremis
+	
+	Adds the architecture public id to the information passed to
+	implementations of ArcDirector. This is especially important when
+	using the PI-based architecture use declaration syntax, since there
+	may be no Notation object from which to get the information.
+
+2002-04-13 13:19  icastle
+
+	* AUTHORS, NEWS, include/Mode.h, include/SgmlParser.h,
+	lib/ArcEngine.cxx, lib/ArcEngineMessages.msg, lib/ArcProcessor.h,
+	lib/MessageReporter.cxx, lib/ModeInfo.cxx, lib/Parser.h,
+	lib/ParserState.h, lib/parseAttribute.cxx, lib/parseDecl.cxx,
+	lib/parseInstance.cxx, lib/parseMode.cxx: PI architecture
+	declaration support
+	
+	Ref: Sourceforge #532318, Peter Newcomb, Epremis (patch #19689)
+	
+	Adds support for the PI-based architecture use declaration syntax
+	defined by Amendment 1 to ISO/IEC 10744:1997 (HyTime). This makes
+	it possible to specify architectural support attributes when using
+	architectures with XML, and is generally simpler than the original
+	syntax. See http://www.ornl.gov/sgml/wg8/document/1985.htm for
+	details.  This patch also makes it possible to, and provides an
+	example of how to, use the exisiting attribute specification
+	parsing machinery to process attribute specifications within
+	processing instructions.
+
+2002-04-13 12:57  icastle
+
+	* include/MessageFormatter.h: MessageFormatter::Builder private
+	
+	Ref: Source Forge #532046, Peter Newcomb, Epremis
+	
+	XMLMessageFormatter::formatMessage() needs to instantiate a
+	MessageFormatter::Builder, but cannot because Builder is private.
+	This patch adds makes Builder protected instead of private.
+	
+	This problem crops up with Red Hat gcc 2.96
+
+2002-04-13 12:53  icastle
+
+	* lib/ArcEngine.cxx: defaulting invalid arc att segfault fix
+	
+	Ref: Sourceforge patch #530152
+	
+	Fixes a segfault that occurred when an attempt was made to map a
+	nonexistent architectural attribute to #DEFAULT.
+
+2002-04-13 12:41  icastle
+
+	* NEWS, doc/sx.htm, include/Event.h, include/OutputByteStream.h,
+	include/OutputCharStream.h, include/Owner.h, include/Vector.h,
+	lib/Event.cxx, lib/ParserState.cxx, sx/XmlOutputEventHandler.cxx,
+	sx/XmlOutputEventHandler.h, sx/XmlOutputMessages.msg, sx/sx.cxx:
+	Various enhancements to osx from Jessica Perry Hekman, Dynamic
+	Diagrams
+
+2002-03-16 08:55  icastle
+
+	* lib/Makefile.am: Read the libtool manual and work out the
+	"correct" rules for bumping the library version
+
+2002-03-15 15:56  icastle
+
+	* lib/Makefile.am: Bump version number as API has changed with new
+	Message Module capability
+
+2002-03-15 11:57  icastle
+
+	* include/MessageModule.h: file MessageModule.h was initially added
+	on branch opensp_1_5_branch.
+
+2002-03-15 11:57  icastle
+
+	* include/MessageModule.h: Extensible message modules
+	
+	In order to support Windows applications that use DLLs that use
+	SP's DLL, where the intervening DLLs also define messages to be
+	used with the SP message handling infrastructure, this patch
+	reworks the way in which MessageFragments identify the module
+	within which their text resides by replacing the (libModule,
+	appModule, xModule) enumeration with a pointer to a global, opaque
+	MessageModule object. This MessageModule object then contains
+	whatever data is needed to identify sets of text resources on the
+	host system, e.g. an HINSTANCE DLL handle under Windows, or a
+	message domain string for gettext.
+	
+	Only the implementation of the message handling infrastructure is
+	changed; use of the patch does require regeneration of .h and .cxx
+	files from .msg files and recompilation of everything, its general
+	usage does not change.
+	
+	Ref: Peter Newcomb, Epremis Corp. Source Forge patch #530161
+
+2002-03-15 11:53  icastle
+
+	* AUTHORS, NEWS, msggen.pl.in, include/Makefile.am,
+	include/Message.h, include/MessageTable.h, lib/CmdLineApp.cxx,
+	lib/Message.cxx, lib/MessageTable.cxx: Extensible message modules
+	
+	In order to support Windows applications that use DLLs that use
+	SP's DLL, where the intervening DLLs also define messages to be
+	used with the SP message handling infrastructure, this patch
+	reworks the way in which MessageFragments identify the module
+	within which their text resides by replacing the (libModule,
+	appModule, xModule) enumeration with a pointer to a global, opaque
+	MessageModule object. This MessageModule object then contains
+	whatever data is needed to identify sets of text resources on the
+	host system, e.g. an HINSTANCE DLL handle under Windows, or a
+	message domain string for gettext.
+	
+	Only the implementation of the message handling infrastructure is
+	changed; use of the patch does require regeneration of .h and .cxx
+	files from .msg files and recompilation of everything, its general
+	usage does not change.
+	
+	Ref: Peter Newcomb, Epremis Corp. Source Forge patch #530161
+
+2002-03-15 10:15  icastle
+
+	* include/constant.h: Include types.h in constant.h
+	
+	Allows "constant.h" to be independently included by source files by
+	making explicit its dependency on "types.h".
+	
+	Ref: Peter Newcomb, Epremis Corporation, Source Forge patch #530157
+
+2002-03-15 10:12  icastle
+
+	* include/CmdLineApp.h: main() missing extern "C" fix
+	
+	Adds missing `extern "C"' to non-multi-byte main() definition macro
+	in "CmdLineApp.h".
+	
+	Ref: Peter Newcomb, Epremis Corporation, Source Forge patch #530158
+
+2002-03-15 10:10  icastle
+
+	* include/Entity.h: Makes PiEntity a part of the public API.
+	
+	Ref: Peter Newcomb, Epremis Corporation, Source Forge patch #530154
+
+2002-03-15 10:00  icastle
+
+	* lib/ArcEngine.cxx: Fixes cut-and-paste error that made undeclared
+	architectural DTD general entities reported as if they were
+	expected to be parameter entities.
+	
+	Ref: Peter Newcomb, Epremis Corporation, SourceForge Patch #530150
+
+2002-03-14 17:50  icastle
+
+	* configure.in: Revert change to package name opensp -> OpenSP. It
+	may look nicer but it is too gratuitous a change - affects external
+	interfaces etc.
+
+2002-03-14 13:33  icastle
+
+	* nsgmls/Makefile.am: Add new header file nsgmls.h
+
+2002-03-14 12:35  icastle
+
+	* nsgmls/nsgmls.h: Add new output options "all" and "version" to
+	onsgmls
+	
+	--option=all --option=version
+	
+	Option "all" is shorthand to turn on all available options
+	
+	Option "version" causes details of onsgmls to be output under a new
+	output code "V".  A version line and a mini-report of features will
+	be  utput.  For example (p=package, v=version, c=possible codes,
+	o=output options):
+	
+	Vp opensp Vv 1.5pre7 Vc -?C#()&ADaNEISTps{}fLie_oV Vo esis line
+	entity id included notation-sysid nonsgml empty data-attribute
+	comment omitted tagomit attromit version
+	
+	Robert Braddock notes "I think this will be useful, based on
+	working on (Perl tools) SGMLSpm and XML::Parser::ESISParser, to
+	help applications know what kind of info they'll be getting. 
+	Ideally, the "Vc" line would only list commands that might be
+	issued, but right now, I just have it list all commands the onsgmls
+	knows about. I'm not particularly happy with this change, because I
+	needed to split out a couple things from nsgmls.cxx and make a
+	nsgmls.h to keep down the duplication of lists of options, but it's
+	not clear to me the best way to lay things out (and I think that
+	needs to be found before there will be a clean way to reduce the Vc
+	line)."
+	
+	Ref: Robert Braddock, Source Forge patch #476642
+
+2002-03-14 12:35  icastle
+
+	* nsgmls/nsgmls.h: file nsgmls.h was initially added on branch
+	opensp_1_5_branch.
+
+2002-03-14 11:26  icastle
+
+	* nsgmls/: SgmlsEventHandler.cxx, SgmlsEventHandler.h, nsgmls.cxx:
+	Add new output options "all" and "version" to onsgmls
+	
+	--option=all --option=version
+	
+	Option "all" is shorthand to turn on all available options
+	
+	Option "version" causes details of onsgmls to be output under a new
+	output code "V".  A version line and a mini-report of features will
+	be  utput.  For example (p=package, v=version, c=possible codes,
+	o=output options):
+	
+	Vp opensp Vv 1.5pre7 Vc -?C#()&ADaNEISTps{}fLie_oV Vo esis line
+	entity id included notation-sysid nonsgml empty data-attribute
+	comment omitted tagomit attromit version
+	
+	Robert Braddock notes "I think this will be useful, based on
+	working on (Perl tools) SGMLSpm and XML::Parser::ESISParser, to
+	help applications know what kind of info they'll be getting. 
+	Ideally, the "Vc" line would only list commands that might be
+	issued, but right now, I just have it list all commands the onsgmls
+	knows about. I'm not particularly happy with this change, because I
+	needed to split out a couple things from nsgmls.cxx and make a
+	nsgmls.h to keep down the duplication of lists of options, but it's
+	not clear to me the best way to lay things out (and I think that
+	needs to be found before there will be a clean way to reduce the Vc
+	line)."
+	
+	Ref: Robert Braddock, Source Forge patch #476642
+
+2002-03-14 11:08  icastle
+
+	* nsgmls/: SgmlsEventHandler.cxx, SgmlsEventHandler.h: Simple
+	onsgmls char type changes
+	
+	Some minor changes to character typing, and move all character
+	constants to const variables. (This is desirable because it
+	simplifies working on wide character support and it looks nice.  It
+	also removes a FIXME, which is probably good.)
+	
+	Ref: Robert Braddock, sourceforge patch #476606
+
+2002-03-14 10:57  icastle
+
+	* lib/UTF8CodingSystem.cxx: Accept Byte Order Marks as valid XML
+	
+	Ref: Source Forge #442560 (Terje Bless/Liam Quinn)
+	
+	Determination of Character Encoding of an XML file brought in line
+	with Second Edition XML 1.0 Specification (REC-xml-20001006) - Byte
+	Order Marks now accepted as valid XML in UTF8 encoded documents.
+
+2002-03-14 10:37  icastle
+
+	* lib/lib.dsp: Update from jade RELEASE-1_3 branch.
+	
+	Win32: Can't use precompiled header when header file is not
+	included...
+
+2002-03-14 10:34  icastle
+
+	* include/config.h.old.in: Update from jade RELEASE-1_3 branch.
+	
+	Support for new std namespace in GNU C++ >= 2.9
+
+2002-03-14 10:12  icastle
+
+	* nsgmls/nsgmls.cxx: Update from jade RELEASE-1_3 branch.
+	
+	Better support for newer compilers
+	
+	Ref: Red Hat openjade-1.3-decl.patch
+
+2002-03-14 08:47  icastle
+
+	* configure.in: Updates for new versions of automake
+
+2002-03-13 16:00  icastle
+
+	* NEWS, configure.in: Update for 1.5-pre7. Also change package name
+	to "opensp" (looks more natural, consistent with previous releases
+	and most other things and best to avoid case signficance when
+	dealing with cross platform stuff.  And I like it this way).
+
+2002-03-13 14:40  icastle
+
+	* configure.in, include/CmdLineApp.h, include/MessageFormatter.h,
+	include/MessageReporter.h, lib/CmdLineApp.cxx,
+	lib/MessageReporter.cxx: Add Nick Kew's option for producing
+	messages in XML format (taken from MAIN). Also add support for
+	configure to enable this with
+	
+	./configure --enable-xml-messages
+	
+	See http://valet.webthing.com/xml/ for some info about this
+	feature.
+
+2002-03-13 13:43  icastle
+
+	* configure.in, po/ja.po: Add Japanese Support contributed by SATO
+	Satoru (from MAIN branch)
+
+2002-03-13 13:13  icastle
+
+	* ChangeLog: file ChangeLog was initially added on branch
+	opensp_1_5_branch.
+
+2002-03-13 13:13  icastle
+
+	* ChangeLog: Add missing ChangeLog
+
+2001-08-31 08:29  adicarlo
+
+	* NEWS, configure.in: fix the wchar_t check; remove redundant
+	RANLIB check
+
+2001-08-31 08:15  adicarlo
+
+	* acconfig.h: autoconf 2.52 doesn't liek these silly error messages
+	I guess
+
+2001-08-31 08:01  adicarlo
+
+	* debian/: changelog, control: reburn this version; require
+	autoconf 2.52 or better
+
+2001-08-31 08:00  adicarlo
+
+	* NEWS, configure.in: require autoconf 2.52; remove reference to
+	OJ_CHECK_SIZEOF, which was causing autoheader to puke; if this
+	works ok, I'll remove the definition of that from acinclude.m4,
+	since I think it was just a temporary workaround for an autoconf
+	bug....
+
+2001-08-31 07:25  adicarlo
+
+	* debian/changelog: burn 1.5pre5-4
+
+2001-08-06 16:00  adicarlo
+
+	* debian/: changelog, rules: libosp-dev now has proper depends on
+	libosp2 and opensp, modified patch from Yann Dirson; closes:
+	#107239
+
+2001-07-30 05:51  adicarlo
+
+	* debian/: changelog, control: 1.5pre5-3: fix missing build-depends
+	on gettext, closes: #105961
+
+2001-07-10 21:07  adicarlo
+
+	* debian/: changelog, control, rules: use dh_shlibdeps, remove some
+	hand-rolled stuff here which was unnecessary and in fact adding two
+	libosp deps on the opensp package, not to mention that it stopped
+	working
+
+2001-07-10 17:03  adicarlo
+
+	* debian/changelog: uh, change version 1.5pre5-1.5pre6-1 to just
+	1.5pre5-2, the other seems like asking for trouble
+
+2001-07-10 17:02  adicarlo
+
+	* debian/changelog: Debian version 1.5pre5-1.5pre6-1
+
+2001-07-10 17:02  adicarlo
+
+	* NEWS: trivial recent news
+
+2001-07-10 17:00  adicarlo
+
+	* Makefile.am: deal with the config.h in 'make dist' situation, I
+	hope
+
+2001-07-10 16:58  adicarlo
+
+	* debian/rules: libtoolize --force during building; tolerate errors
+	in 'make maintainer-clean'
+
+2001-07-10 16:57  adicarlo
+
+	* nsgmls/nsgmls.cxx: fix for GCC 3.0 compilation, doesn't seem to
+	hurt the older GCCs (I hope!)
+
+2001-07-10 06:44  adicarlo
+
+	* NEWS: document Terje Bless's documentation improvements
+
+2001-05-11 14:08  twaugh
+
+	* po/ja.po: Japanese translations.
+
+2001-03-19 17:01  adicarlo
+
+	* doc/sysid.htm: more discussion of <osd>, thanks to Terje Bless
+
+2001-03-19 16:39  adicarlo
+
+	* NEWS: document gcc 2.96 fixes
+
+2001-03-19 16:37  adicarlo
+
+	* BUILDING, nsgmls/RastEventHandler.h: merged from HEAD (latest
+	head merge is opensp_1_5_branch_merged)
+
+2001-03-17 10:34  adicarlo
+
+	* configure.in: bump up to 1.5pre6
+
+2001-02-22 21:42  adicarlo
+
+	* NEWS, lib/URLStorage.cxx: Adapt SP patch from Liam Quinn that
+	adds a HTTP/1.0 Host header to HTTP requests. Necessary to fetch
+	DTDs specified in SYSTEM identifiers when the DTD resides on a
+	name-based "Virtual Host".  Thanks to 'tbe'.
+
+2001-02-22 21:32  adicarlo
+
+	* debian/: changelog, rules: hmm, it turns out that Debian wasn't
+	shipping the gettext files properly, oops
+
+2001-02-22 21:30  adicarlo
+
+	* NEWS, spec.in: RPM spec file updates and corrections from Terje
+	Bless
+
+2001-02-19 06:08  adicarlo
+
+	* msggen.pl.in: use @PERL@ setting here, thanks to Michael Wiedmann
+
+2001-02-19 06:04  adicarlo
+
+	* debian/changelog: prepare 1.5pre5-1
+
+2001-02-19 06:03  adicarlo
+
+	* debian/rules: do make clean, then make maintainer clean
+
+2001-02-10 08:28  adicarlo
+
+	* debian/changelog: prepare 1.5pre5-1
+
+2001-02-10 08:20  adicarlo
+
+	* configure.in: version bumped to 1.5pre5
+
+2001-02-09 23:22  adicarlo
+
+	* lib/Mutex.h: #include <pthread.h> now put outside of
+	SP_NAMESPACE; patch from Robert Braddock
+
+2001-02-09 23:18  adicarlo
+
+	* debian/rules: make some rules depends on 'Makefile', and use that
+
+2001-02-09 23:17  adicarlo
+
+	* debian/control: libosp2 goes in libs (override disparity);
+	libosp-dev goes in devel (request change from text, mail sent to
+	override-change@debian.org)
+
+2001-02-09 23:15  adicarlo
+
+	* NEWS, doc/nsgmls.htm, doc/sgmlsout.htm,
+	nsgmls/SgmlsEventHandler.cxx, nsgmls/SgmlsEventHandler.h,
+	nsgmls/nsgmls.cxx: New -output options: comment, omitted, tagomit
+	and attromit; this shows comments and implied elements and/or
+	attributes.  Patch from Robert Braddock.
+
+2001-02-08 05:44  adicarlo
+
+	* include/SubstTable.h: fix a c++ warning, warning: nsigned int
+	SubstTable::operator [](unsigned int) const' was used before it was
+	declared inline
+
+2001-02-08 03:19  adicarlo
+
+	* configure.in: mere cosmetic
+
+2001-02-03 02:42  adicarlo
+
+	* debian/changelog: clarify
+
+2001-02-03 02:41  adicarlo
+
+	* debian/changelog: re-burn this
+
+2001-01-31 09:41  adicarlo
+
+	* NEWS: document autoconf fix
+
+2001-01-31 09:40  adicarlo
+
+	* debian/changelog: prepare 1.5pre4-5
+
+2001-01-31 09:39  adicarlo
+
+	* debian/rules: handle DEB_BUILD_OPTIONS
+
+2001-01-31 09:39  adicarlo
+
+	* debian/control: update standards to 3.5.0
+
+2001-01-31 09:36  adicarlo
+
+	* configure.in: fix bug triggered on gcc 2.7.x at least, fixing
+	'checking whether to declare set_new_handler extern C'
+
+2000-10-16 00:00  adicarlo
+
+	* NEWS: oops, it would be 1.5pre5
+
+2000-10-15 23:42  adicarlo
+
+	* NEWS: reconstruct changes for a projected 1.5pre5 based on CVS
+	logs
+
+2000-10-15 23:10  adicarlo
+
+	* intl/: ChangeLog, Makefile.in, bindtextdom.c, cat-compat.c,
+	dcgettext.c, dgettext.c, explodename.c, finddomain.c, gettext.c,
+	gettext.h, gettextP.h, hash-string.h, l10nflist.c, libgettext.h,
+	loadinfo.h, loadmsgcat.c, localealias.c, textdomain.c: rerun
+	gettextize, gettting newer versions of intl stuff; all of this is
+	straight out of the gettext package w/o modification
+
+2000-10-15 23:10  adicarlo
+
+	* intl/l10nflist.c: file l10nflist.c was initially added on branch
+	opensp_1_5_branch.
+
+2000-10-15 23:10  adicarlo
+
+	* intl/ChangeLog: file ChangeLog was initially added on branch
+	opensp_1_5_branch.
+
+2000-10-15 23:10  adicarlo
+
+	* intl/loadinfo.h: file loadinfo.h was initially added on branch
+	opensp_1_5_branch.
+
+2000-10-15 23:10  adicarlo
+
+	* intl/explodename.c: file explodename.c was initially added on
+	branch opensp_1_5_branch.
+
+2000-10-15 07:50  adicarlo
+
+	* debian/rules: put doc/*.htm in opensp doc dir (closes: Bug#68002)
+
+2000-10-15 07:49  adicarlo
+
+	* debian/changelog: 1.5pre4-4
+
+2000-10-15 07:43  adicarlo
+
+	* configure.in: be more careful about po/Makefile.in, although we
+	still seem to get some circular situations
+
+2000-10-15 07:41  adicarlo
+
+	* lib/parseDecl.cxx: patch from Christopher C. Chimelis to enable
+	compilation on 64-bit platforms, Alpha in particular
+
+2000-06-26 10:00  murray
+
+	* BUILDING: This file documents the build process as decribed in
+	the jade-devel mailing list by Adam Di Carlo.
+
+2000-05-20 09:40  adicarlo
+
+	* debian/: changelog, control: we gotta conflict with libosp1
+
+2000-05-20 06:52  adicarlo
+
+	* debian/libosp2.postinst: file libosp2.postinst was initially
+	added on branch opensp_1_5_branch.
+
+2000-05-20 06:52  adicarlo
+
+	* debian/: changelog, control, libosp-dev.README,
+	libosp1.README.Debian.in, libosp1.postinst,
+	libosp2.README.Debian.in, libosp2.postinst, rules: major number on
+	the shared library changed; libosp1 is libosp2
+
+2000-05-20 06:52  adicarlo
+
+	* debian/libosp2.README.Debian.in: file libosp2.README.Debian.in
+	was initially added on branch opensp_1_5_branch.
+
+2000-05-16 08:19  clasen
+
+	* msggen.pl.in, sp-generate.mak, doc/build.htm: Support localized
+	builds on Win32.
+
+2000-05-15 13:53  clasen
+
+	* lib/ParserApp.cxx: Reinstate the -widref option which was
+	accidentally removed.
+
+2000-05-09 04:18  adicarlo
+
+	* debian/: changelog, rules: fix aclocal/autoheader ordering bug
+
+2000-05-09 03:27  adicarlo
+
+	* debian/changelog: first cut for 1.5pre4-2
+
+2000-05-08 08:37  adicarlo
+
+	* acconfig.h: undo bad change I made before
+
+2000-05-06 20:40  adicarlo
+
+	* debian/: changelog, control: add build-depends for next version
+
+2000-05-06 05:20  adicarlo
+
+	* debian/: changelog, rules: lintian and lib dep change
+
+2000-05-06 00:25  adicarlo
+
+	* debian/changelog: document Makefile.am changes
+
+2000-05-06 00:10  adicarlo
+
+	* Makefile.am, doc/Makefile.am, generic/Makefile.am,
+	include/Makefile.am, lib/Makefile.am, nsgmls/Makefile.am,
+	pubtext/Makefile.am, sgmlnorm/Makefile.am, spam/Makefile.am,
+	spcat/Makefile.am, spent/Makefile.am, sx/Makefile.am,
+	unicode/Makefile.am: 'maintainer-clean' is now closer to CVS-level
+	pristineness
+
+2000-05-05 22:26  adicarlo
+
+	* spent/Makefile.am: SpentMessages.msg should not be in
+	BUILT_SOURCES
+
+2000-05-05 22:25  adicarlo
+
+	* debian/libosp1.postinst: add newline at end of file
+
+2000-05-05 19:02  adicarlo
+
+	* debian/changelog: more updates
+
+2000-05-05 19:01  adicarlo
+
+	* debian/libosp-dev.README: file libosp-dev.README was initially
+	added on branch opensp_1_5_branch.
+
+2000-05-05 19:01  adicarlo
+
+	* debian/libosp-dev.README: new file
+
+2000-05-05 17:47  adicarlo
+
+	* debian/changelog: uh, change the numbering a bit
+
+2000-05-05 16:54  adicarlo
+
+	* debian/changelog: recent updates documented
+
+2000-05-05 16:53  adicarlo
+
+	* debian/copyright.Debian: update download/cvs locations
+
+2000-05-05 16:52  adicarlo
+
+	* README: point to project home page, and bug reporting URL
+
+2000-05-05 16:42  adicarlo
+
+	* debian/: changelog, rules: finalize for 1.5-0.pre4-1, we hope
+
+2000-05-05 15:27  adicarlo
+
+	* acconfig.h: add HAVE_BOOL
+
+2000-05-04 16:50  adicarlo
+
+	* debian/changelog: new version started
+
+2000-04-28 08:15  clasen
+
+	* lib/PosixStorage.cxx: Fix a typo which caused problems with
+	filenames on Win32.
+
+2000-03-30 07:55  pnil
+
+	* include/config.h.old.in: (SP_PACKAGE, SP_VERSION): Use @PACKAGE@
+	and @VERSION@ instead of the SP_ prefixed ones.
+
+2000-03-29 19:49  clasen
+
+	* spec.in: Remove braces since rpm apparently doesn't support brace
+	expansion.
+
+2000-03-29 18:00  clasen
+
+	* Makefile.am, NEWS, configure.in, include/SubstTable.h,
+	lib/CmdLineApp.cxx, lib/SubstTable.cxx, lib/Win32CodingSystem.cxx,
+	lib/WinApp.cxx, lib/lib.dsp, po/de.po: More Win32 fixes.
+
+2000-03-28 18:21  clasen
+
+	* spec.in: Include message catalogs.
+
+2000-03-27 18:33  clasen
+
+	* lib/xentmgr_inst.m4, po/Makefile.in.in: More Win32 fixes.
+
+2000-03-25 22:15  clasen
+
+	* lib/CmdLineApp.cxx: One more Win32 fix.
+
+2000-03-25 21:31  clasen
+
+	* lib/: ArcEngine.cxx, Win32CodingSystem.cxx, entmgr_inst.m4,
+	xentmgr_inst.m4: More Win32 fixes and a fix for a segfault caused
+	by the recent architecture engine changes.
+
+2000-03-23 22:37  clasen
+
+	* lib/ArcEngine.cxx: Fix a segfault.
+
+2000-03-22 14:36  clasen
+
+	* lib/: lib.dsp, splibpch.h, xentmgr_inst.m4: More Win32 fixes.
+
+2000-03-21 10:04  pnil
+
+	* msggen.pl.in: Added Peter Nilsson as copyright holder.
+
+2000-03-21 09:25  pnil
+
+	* msggen.pl.in: (read_po_translations, po_flush): New functions.
+
+2000-03-18 21:08  clasen
+
+	* Makefile.am, NEWS, configure.in, spec.in, include/MessageArg.h,
+	include/SubstTable.h, lib/ArcEngine.cxx, lib/entmgr_inst.m4,
+	lib/lib.dsp: More Win32 build fixes.
+
+2000-03-16 20:47  clasen
+
+	* NEWS, configure.in, lib/Group.cxx, lib/Group.h,
+	lib/ParserMessages.msg, lib/lib.dsp, lib/parseParam.cxx, po/de.po,
+	po/sv.po: Annex K: Parse #ALL/#IMPLICIT content tokens and issue a
+	proper error message.
+
+2000-03-16 16:49  clasen
+
+	* spec.in, lib/CmdLineApp.cxx, lib/PosixStorage.cxx,
+	lib/Win32CodingSystem.cxx, lib/WinApp.cxx, lib/lib.dsp,
+	nsgmls/nsgmls.dsp, sgmlnorm/sgmlnorm.dsp, spam/spam.dsp,
+	spcat/spcat.dsp, spent/spent.dsp, sx/sx.dsp: Incorporate spec
+	changes proposed by Karl Eichwalder; change SP_NAMESPACE to
+	"OpenSP" on Win32; remove silent assumption sizeof(Char) ==
+	sizeof(wchar_t) in Win32-only files.
+
+2000-03-15 16:24  clasen
+
+	* po/de.po: More german translations.
+
+2000-03-14 23:17  clasen
+
+	* include/Syntax.h, lib/Parser.h, lib/ParserMessages.msg,
+	lib/Syntax.cxx, lib/parseDecl.cxx, lib/parseSd.cxx: Check that
+	added function names are valid in the concrete syntax; warn about
+	notation attributes which are CONREF; use the proper syntax for
+	delimiters in bracketed text entities.
+
+2000-03-14 12:26  clasen
+
+	* lib/parseParam.cxx: Fix a typo.
+
+2000-03-14 12:22  clasen
+
+	* lib/Parser.h, lib/ParserMessages.msg, lib/ParserState.cxx,
+	lib/ParserState.h, lib/parseInstance.cxx, lib/parseParam.cxx,
+	po/de.po, po/sv.po: Correctly recognize parameter entities with an
+	active document type name; disallow name group in parameter entity
+	references in document type specifications in tags.
+
+2000-03-13 15:59  clasen
+
+	* lib/parseDecl.cxx: A fix for the (nonworking) #IMPLIED doctypes.
+
+2000-03-09 18:30  clasen
+
+	* NEWS, doc/xml.htm, include/Attribute.h, lib/Attribute.cxx,
+	lib/ParserMessages.msg, lib/ParserState.cxx,
+	lib/parseAttribute.cxx, lib/parseDecl.cxx: Annex K support
+	improvements: common data attributes can now be specified in entity
+	declarations.
+
+2000-03-08 18:25  clasen
+
+	* spec.in: Split the rpm into OpenSP, OpenSP and OpenSP-devel
+	packages.
+
+2000-03-08 16:28  clasen
+
+	* .cvsignore, Makefile.am, configure.in, spec.in, po/de.po,
+	po/sv.po: First cut at RPM packaging support. It should be able to
+	generate a .rpm package simply by applying rpm -tb to the tarball.
+
+2000-03-08 16:28  clasen
+
+	* spec.in: file spec.in was initially added on branch
+	opensp_1_5_branch.
+
+2000-03-07 12:25  clasen
+
+	* NEWS, configure.in, doc/Makefile.am, generic/Makefile.am,
+	include/Makefile.am, intl/Makefile.in, lib/Makefile.am,
+	lib/lib.dsp, lib/memcmp.c, lib/memmove.c, lib/strerror.c,
+	nsgmls/Makefile.am, po/Makefile.in.in, pubtext/Makefile.am,
+	sgmlnorm/Makefile.am, spam/Makefile.am, spcat/Makefile.am,
+	spent/Makefile.am, sx/Makefile.am: Minor improvements.
+
+2000-03-07 12:23  clasen
+
+	* autoinit.sh: A little shell script to ease working from CVS.
+
+2000-03-07 12:23  clasen
+
+	* autoinit.sh: file autoinit.sh was initially added on branch
+	opensp_1_5_branch.
+
+2000-03-07 12:03  clasen
+
+	* unicode/.cvsignore: file .cvsignore was initially added on branch
+	opensp_1_5_branch.
+
+2000-03-07 12:03  clasen
+
+	* Makefile.am, all/Makefile.am, unicode/.cvsignore,
+	unicode/Makefile.am: Add all and unicode directories to dist;
+	install unicode stuff in pkgdatadir.
+
+2000-03-07 12:03  clasen
+
+	* unicode/Makefile.am: file Makefile.am was initially added on
+	branch opensp_1_5_branch.
+
+2000-03-07 10:21  clasen
+
+	* NEWS: Add a forgotten headline.
+
+2000-03-07 10:15  clasen
+
+	* lib/parseDecl.cxx: Merge the post-1.4 fix.
+
+2000-03-07 10:13  clasen
+
+	* lib/lib.dsp: Change dll name to be in sync with $VERSION.
+
+2000-03-07 10:12  clasen
+
+	* lib/Makefile.am: Bump so version, since the SubstTable and Char
+	changes are interface changes.
+
+2000-03-07 10:10  clasen
+
+	* NEWS, doc/archform.htm, lib/ArcEngine.cxx,
+	lib/ArcEngineMessages.msg, lib/ArcProcessor.h: Implement #MAPTOKEN,
+	fix architectural content handling and remove some cruft.
+
+2000-03-06 16:24  clasen
+
+	* lib/: ArcEngine.cxx, ArcEngineMessages.msg, ArcProcessor.h:
+	Stricter error-catching in the architecture engine; parse
+	#maptoken.
+
+2000-03-03 10:44  clasen
+
+	* lib/ParserMessages.msg, msggen.pl.in: Add standard identification
+	to relevant clauses.
+
+2000-03-01 19:57  clasen
+
+	* lib/SubstTable.cxx: Fix a coredump.
+
+2000-03-01 18:59  clasen
+
+	* lib/XMLCodingSystem.cxx: Fix some byte order bugs.
+
+2000-03-01 14:19  clasen
+
+	* lib/: Fixed4CodingSystem.cxx, XMLCodingSystem.cxx: Fix
+	compilation failures.
+
+2000-02-29 18:08  clasen
+
+	* include/CodingSystem.h, include/Fixed2CodingSystem.h,
+	include/Fixed4CodingSystem.h, lib/Fixed2CodingSystem.cxx,
+	lib/Fixed4CodingSystem.cxx, lib/UTF16CodingSystem.cxx,
+	lib/XMLCodingSystem.cxx: Support autodetection of 4-byte coding
+	systems in XML. This needs testing.
+
+2000-02-28 17:36  clasen
+
+	* pubtext/xml.dcl: Use the full UTF-16 char range in the XML
+	declaration.
+
+2000-02-28 17:21  clasen
+
+	* doc/: features.htm, xml.htm: Updates for 32bit chars.
+
+2000-02-28 16:25  clasen
+
+	* NEWS, doc/charset.htm, include/CodingSystem.h,
+	include/UTF16CodingSystem.h, include/UnicodeCodingSystem.h,
+	lib/CodingSystemKit.cxx, lib/Fixed2CodingSystem.cxx,
+	lib/UTF16CodingSystem.cxx, lib/UnicodeCodingSystem.cxx,
+	lib/XMLCodingSystem.cxx: Adapt the coding systems to the new
+	character range. fixed-2 now handles unencodable chars, unicode and
+	xml use a utf-16 subdecoder/subencoder to handle utf-16.
+
+2000-02-28 09:53  pnil
+
+	* include/XcharMap.cxx: (XcharMap::setRange): Tighten loop. Also
+	fixes a bug where == should be >=.
+
+2000-02-27 22:20  pnil
+
+	* po/sv.po: More translations.
+
+2000-02-27 22:12  pnil
+
+	* include/: CharMap.cxx, CharMap.h: Cleanups.
+
+2000-02-26 21:52  clasen
+
+	* generic/SGMLApplication.h, include/constant.h, include/types.h:
+	Switch to 32bit Chars. charMax stays at 0x10ffff.
+
+2000-02-25 16:55  clasen
+
+	* include/CharsetInfo.h, include/RangeMap.cxx, lib/CharsetInfo.cxx,
+	lib/SOEntityCatalog.cxx, lib/Syntax.cxx, lib/UnivCharsetDesc.cxx:
+	Replace uses of {Wide,Syntax,Univ,}Char(-1) by the appropriate
+	constants.
+
+2000-02-25 15:27  clasen
+
+	* include/: XcharMap.cxx, XcharMap.h: Fix the size of the flat
+	array to 2^8/2^16 independent of charMax. For SP_MULTI_BYTE, add a
+	CharMap to XcharMap to store the values for higher planes.
+
+2000-02-25 15:25  clasen
+
+	* include/: CharMap.cxx, CharMap.h: Change levels to 5,8,4,4.
+	Rename block to plane.
+
+2000-02-25 13:19  clasen
+
+	* include/Syntax.h, lib/Syntax.cxx: Delay instantiation of
+	Syntax::markupScanTable_ to save 64k with most SGML declarations.
+
+2000-02-24 19:00  clasen
+
+	* include/: CharMap.cxx, CharMap.h: Add another level of
+	indirection to CharMap in order to accomodate 20bits.  This needs
+	severe testing.
+
+2000-02-24 18:07  clasen
+
+	* include/Fixed4CodingSystem.h, include/Makefile.am,
+	include/UTF16CodingSystem.h, lib/CodingSystemKit.cxx,
+	lib/Fixed4CodingSystem.cxx, lib/Makefile.am,
+	lib/UTF16CodingSystem.cxx: First cut at utf16 and fixed4 encodings.
+	Known to compile, but untested.
+
+2000-02-24 17:45  clasen
+
+	* lib/SubstTable.cxx: Add forgotten file.
+
+2000-02-24 00:34  clasen
+
+	* lib/Partition.cxx: Remove forgotten debugging printf.
+
+2000-02-23 22:42  clasen
+
+	* include/SubstTable.h, lib/Partition.cxx: Change SubstTable
+	implementation to a sparse array with binary search.  This should
+	work with 32bit Chars.
+
+2000-02-21 20:12  clasen
+
+	* include/Makefile.am: Remove SubstTable.cxx.
+
+2000-02-21 20:10  clasen
+
+	* lib/: ParserState.cxx, SOEntityCatalog.cxx, parseDecl.cxx,
+	parseSd.cxx: Replace loops over strings by calls of
+	SubstTable::subst(StringC &).
+
+2000-02-21 19:46  clasen
+
+	* include/ArcEngine.h, include/EntityCatalog.h,
+	include/SubstTable.h, include/Syntax.h, include/Text.h,
+	lib/ArcEngine.cxx, lib/Makefile.am, lib/ParserState.cxx,
+	lib/ParserState.h, lib/Partition.cxx, lib/Partition.h,
+	lib/SOEntityCatalog.cxx, lib/SubstTable.cxx, lib/Syntax.cxx,
+	lib/Text.cxx, lib/entmgr_inst.m4, lib/parseDecl.cxx,
+	lib/parseSd.cxx, spam/CopyEventHandler.h,
+	sx/XmlOutputEventHandler.h: Detemplatize SubstTable. We never used
+	anything but SubstTable<Char>.
+
+2000-02-08 16:59  clasen
+
+	* .cvsignore, Makefile.am, NEWS, SP.dsw, acconfig.h, acinclude.m4,
+	build-win32.bat, configure.in, msggen.pl.in, sp-generate.mak,
+	debian/README.Debian.in, debian/changelog, debian/control,
+	debian/copyright.Debian, debian/libosp1.README.Debian.in,
+	debian/libosp1.postinst, debian/opensp.doc-base, debian/rules,
+	doc/.cvsignore, doc/autoconf.htm, doc/build.htm, doc/charset.htm,
+	doc/ideas.htm, doc/index.htm, doc/new.htm, generic/.cvsignore,
+	include/.cvsignore, include/CharsetRegistry.h, include/Dtd.h,
+	include/ExternalId.h, include/MessageArg.h, include/SubstTable.h,
+	include/config.h.old.in, intl/.cvsignore, lib/.cvsignore,
+	lib/Attribute.cxx, lib/CharsetRegistry.cxx, lib/CmdLineApp.cxx,
+	lib/CodingSystemKit.cxx, lib/Makefile.am, lib/MessageArg.cxx,
+	lib/MessageTable.cxx, lib/ParserState.cxx, lib/ParserState.h,
+	lib/koi8-r.h, lib/lib.dsp, lib/parseInstance.cxx, lib/splibpch.h,
+	nsgmls/.cvsignore, nsgmls/Makefile.am, nsgmls/nsgmls.dsp,
+	po/.cvsignore, po/Makefile.in.in, po/de.po, pubtext/.cvsignore,
+	pubtext/Makefile.am, pubtext/opensp-implied.dcl,
+	sgmlnorm/.cvsignore, sgmlnorm/Makefile.am, sgmlnorm/sgmlnorm.dsp,
+	spam/.cvsignore, spam/Makefile.am, spam/spam.dsp, spcat/.cvsignore,
+	spcat/Makefile.am, spcat/spcat.dsp, spcat/spcat_inst.m4,
+	spent/.cvsignore, spent/Makefile.am, spent/spent.dsp,
+	sx/.cvsignore, sx/Makefile.am, sx/sx.dsp: Merge the
+	opensp_1_4_branch up to tag opensp_1_4_merge.
+
+2000-01-21 22:02  clasen
+
+	* doc/autoconf.htm: file autoconf.htm was initially added on branch
+	opensp_1_4_branch.
+
+2000-01-20 23:39  pn
+
+	* .cvsignore, doc/.cvsignore, generic/.cvsignore,
+	include/.cvsignore, intl/.cvsignore, lib/.cvsignore,
+	nsgmls/.cvsignore, po/.cvsignore, pubtext/.cvsignore,
+	sgmlnorm/.cvsignore, spam/.cvsignore, spcat/.cvsignore,
+	spent/.cvsignore, sx/.cvsignore: file .cvsignore was initially
+	added on branch opensp_1_4_branch.
+
+2000-01-20 21:15  clasen
+
+	* lib/koi8-r.h: file koi8-r.h was initially added on branch
+	opensp_1_4_branch.
+
+2000-01-08 14:01  clasen
+
+	* lib/Makefile.am, nsgmls/Makefile.am, sgmlnorm/Makefile.am,
+	spam/Makefile.am, spcat/Makefile.am, spent/Makefile.am,
+	sx/Makefile.am: Fix building with builddir!=srcdir.
+
+1999-12-30 00:37  debian
+
+	* debian/README.Debian.in: file README.Debian.in was initially
+	added on branch opensp_1_4_branch.
+
+1999-12-30 00:37  debian
+
+	* debian/libosp1.postinst: file libosp1.postinst was initially
+	added on branch opensp_1_4_branch.
+
+1999-12-30 00:37  debian
+
+	* debian/libosp1.README.Debian.in: file libosp1.README.Debian.in
+	was initially added on branch opensp_1_4_branch.
+
+1999-12-23 06:30  debian
+
+	* debian/copyright.Debian: file copyright.Debian was initially
+	added on branch opensp_1_4_branch.
+
+1999-12-22 18:44  debian
+
+	* pubtext/opensp-implied.dcl: file opensp-implied.dcl was initially
+	added on branch opensp_1_4_branch.
+
+1999-12-22 08:26  debian
+
+	* debian/changelog: file changelog was initially added on branch
+	opensp_1_4_branch.
+
+1999-12-22 08:26  debian
+
+	* debian/opensp.doc-base: file opensp.doc-base was initially added
+	on branch opensp_1_4_branch.
+
+1999-12-22 08:26  debian
+
+	* debian/rules: file rules was initially added on branch
+	opensp_1_4_branch.
+
+1999-12-22 08:26  debian
+
+	* debian/control: file control was initially added on branch
+	opensp_1_4_branch.
+
+1999-12-21 22:32  pn
+
+	* include/config.h.old.in: file config.h.old.in was initially added
+	on branch opensp_1_4_branch.
+
+1999-12-16 23:11  pn
+
+	* Makefile.am, msggen.pl.in: Merge with 1.4 branch.
+
+1999-12-16 22:11  pn
+
+	* lib/lib.dsp, lib/lib.rc, spcat/spcat.dsp, SP.dsw,
+	include/Attribute.h, include/Message.h, include/Options.cxx,
+	lib/app_inst.m4, lib/assert.cxx: MSVC (and other) small fixes.
+
+1999-12-13 07:54  pn
+
+	* po/sv.po: Merge from 1.4 branch.
+
+1999-12-12 08:43  clasen
+
+	* configure.in: Change version to 1.5-devel
+
+1999-12-11 21:34  clasen
+
+	* configure.in, lib/Group.cxx, lib/Param.cxx,
+	lib/ParserMessages.msg, lib/TokenMessageArg.cxx, lib/parseSd.cxx,
+	po/de.po: Remove delimEnd message, change version number to
+	1.4-pre1.
+
+1999-12-11 00:41  pn
+
+	* po/sv.po: Many new translations.
+
+1999-12-10 15:38  pn
+
+	* lib/CmdLineApp.cxx: (cmdLineApp::usage): Create output stream
+	with default coding system.
+
+1999-12-09 23:32  clasen
+
+	* doc/: archform.htm, build.htm, catalog.htm, charset.htm,
+	features.htm, generic.htm, ideas.htm, index.htm, new.htm,
+	nsgmls.htm, sgmldecl.htm, sgmlnorm.htm, sgmlsout.htm, spam.htm,
+	spcat.htm, spent.htm, sx.htm, sysdecl.htm, sysid.htm, xml.htm:
+	Updated docs for long options, removed james' mail address
+	throughout.
+
+1999-12-09 18:45  clasen
+
+	* NEWS: Mention --help.
+
+1999-12-09 18:39  clasen
+
+	* include/CmdLineApp.h, lib/CmdLineApp.cxx,
+	lib/CmdLineAppMessages.msg, nsgmls/NsgmlsMessages.msg,
+	nsgmls/nsgmls.cxx, po/de.po, sgmlnorm/SgmlnormMessages.msg,
+	sgmlnorm/sgmlnorm.cxx, spam/SpamMessages.msg, spam/spam.cxx,
+	spcat/SpcatMessages.msg, spcat/spcat.cxx, spent/SpentMessages.msg,
+	spent/spent.cxx, sx/SxMessages.msg, sx/sx.cxx: Add info lines to
+	the usage messages, extracted from the html docs. Change the
+	CmdLineApp interface once more: info lines now have one argument,
+	the program name.
+
+1999-12-09 15:58  clasen
+
+	* intl/: Makefile.in, VERSION: Add the VERSION file, so we know
+	which version of GNU gettext we use.
+
+1999-12-09 11:25  pn
+
+	* lib/CmdLineAppMessages.msg: (bHelp, eHelp): Clarified
+	documentation.
+
+1999-12-09 08:54  pn
+
+	* NEWS: Update.
+
+1999-12-08 21:25  pn
+
+	* po/Makefile.in.in: DISTFILES: Remove non-existent ChangeLog file.
+
+1999-12-08 21:24  pn
+
+	* lib/Makefile.am: Typo fix.
+
+1999-12-08 21:23  pn
+
+	* intl/Makefile.in: Deps on non-existent files removed.
+	check-install target added.
+
+1999-12-08 07:45  clasen
+
+	* lib/Makefile.am, nsgmls/Makefile.am, sx/Makefile.am: Remove
+	unnecessary dependencies.
+
+1999-12-08 00:56  pn
+
+	* lib/CmdLineApp.cxx: CmdLineApp::usage(): Clean up. Avoid using
+	messages in some places.
+
+1999-12-08 00:55  pn
+
+	* configure.in: AC_OUTPUT: Generate msggen.pl.
+
+1999-12-08 00:54  pn
+
+	* Makefile.am: BUILT_SOURCES: Add msggen.pl (remove from
+	EXTRA_DIST)
+
+1999-12-08 00:53  pn
+
+	* msggen.pl.in: Generate msggen.pl from msggen.pl.in. Add header to
+	generated .po file.
+
+1999-12-07 13:19  pn
+
+	* include/CmdLineApp.h, lib/CmdLineApp.cxx,
+	lib/CmdLineAppMessages.msg: CmdLineApp::registerOption(): Added
+	back the old form registering an undocumented option.
+
+1999-12-07 08:56  pn
+
+	* po/sv.po: New translations added.
+
+1999-12-07 08:53  pn
+
+	* lib/CmdLineAppMessages.msg: tryHelpOptionFor INfo added.
+
+1999-12-07 08:50  pn
+
+	* include/CmdLineApp.h, lib/CmdLineApp.cxx: Help message lokks more
+	like GNU tools. --help prints help message on stdout and exits
+	successfully.  Help message lokks more like GNU tools. --help
+	prints help message on stdout and exits successfully.
+
+1999-12-07 08:35  clasen
+
+	* lib/CmdLineApp.cxx: Make sure arg names in usage() get
+	translated.
+
+1999-12-06 16:09  clasen
+
+	* po/de.po: More german translations.
+
+1999-12-06 15:54  clasen
+
+	* include/CmdLineApp.h, lib/CmdLineApp.cxx,
+	lib/CmdLineAppMessages.msg, lib/EntityApp.cxx,
+	lib/EntityAppMessages.msg, lib/ParserApp.cxx,
+	lib/ParserAppMessages.msg, sgmlnorm/sgmlnorm.cxx, sx/sx.cxx: Add a
+	way to add information before the options list in usage() output,
+	some options got shorter names, resolved option name conficts, some
+	doc rewording.
+
+1999-12-06 14:28  clasen
+
+	* acinclude.m4, configure.in, include/CmdLineApp.h,
+	lib/CmdLineApp.cxx, lib/EntityApp.cxx, spam/spam.cxx: Fix bug in
+	redefining cmdline options.
+
+1999-12-05 22:51  clasen
+
+	* lib/EntityAppMessages.msg, sgmlnorm/SgmlnormMessages.msg,
+	spcat/SpcatMessages.msg, spent/SpentMessages.msg: add new messages
+	for translatable usage messages.
+
+1999-12-05 22:49  clasen
+
+	* include/CmdLineApp.h, include/MessageFormatter.h,
+	include/Options.cxx, include/Options.h, include/sptchar.h,
+	lib/CmdLineApp.cxx, lib/CmdLineAppMessages.msg, lib/EntityApp.cxx,
+	lib/Makefile.am, lib/MessageFormatter.cxx, lib/ParserApp.cxx,
+	lib/ParserAppMessages.msg, nsgmls/NsgmlsMessages.msg,
+	nsgmls/nsgmls.cxx, po/POTFILES.in, sgmlnorm/Makefile.am,
+	sgmlnorm/sgmlnorm.cxx, spam/SpamMessages.msg, spam/spam.cxx,
+	spcat/Makefile.am, spcat/spcat.cxx, spent/Makefile.am,
+	spent/spent.cxx, sx/SxMessages.msg, sx/sx.cxx: Revamp long options
+	and usage message.
+
+1999-12-04 13:07  pn
+
+	* po/sv.po: Updated after Matthias msggen.pl changes.
+
+1999-12-03 23:31  pn
+
+	* po/sv.po: First Swedish messages. Most missing, and many
+	translated need review.
+
+1999-12-03 23:30  pn
+
+	* configure.in: ALL_LINGUAS: Added Swedish translation.
+
+1999-12-03 18:48  clasen
+
+	* lib/Makefile.am: Typo fix.
+
+1999-12-03 17:14  clasen
+
+	* lib/Makefile.am, lib/ParserMessages.msg, nsgmls/Makefile.am,
+	po/Makefile.in.in, po/POTFILES.in, po/de.po, spam/Makefile.am,
+	sx/Makefile.am: Improve the build process for I18N: no more
+	intermediate .po files, msggen.pl now directly produces OpenSP.pot
+	from the .msg files when called with -p OpenSP.pot.
+
+1999-12-02 22:06  clasen
+
+	* po/de.po: Latest and greatest translations.
+
+1999-12-01 22:01  clasen
+
+	* NEWS, lib/ParserMessages.msg, po/de.po: More German translations,
+	fix some glitches in the English messages.
+
+1999-12-01 19:48  clasen
+
+	* sx/sx.cxx: Typo fix.
+
+1999-12-01 19:46  clasen
+
+	* spent/spent.cxx, sgmlnorm/sgmlnorm.cxx, sx/sx.cxx: Add a needed
+	include.
+
+1999-12-01 19:43  clasen
+
+	* lib/ParserApp.cxx: Typo fix.
+
+1999-12-01 19:41  clasen
+
+	* nsgmls/nsgmls.cxx, sgmlnorm/sgmlnorm.cxx, spam/spam.cxx,
+	spcat/spcat.cxx, spent/spent.cxx, sx/sx.cxx: Add long variants for
+	all options. This was done in a hurry and the names may be
+	improvable.
+
+1999-12-01 19:27  clasen
+
+	* lib/: EntityApp.cxx, ParserApp.cxx: More long options.
+
+1999-12-01 19:08  clasen
+
+	* include/CmdLineApp.h, include/Options.cxx, include/Options.h,
+	lib/CmdLineApp.cxx, lib/CmdLineAppMessages.msg, po/de.po: Long
+	options. Currently only CmdLineApp has some.
+
+1999-12-01 00:18  clasen
+
+	* po/de.po: More german translations.
+
+1999-11-30 22:25  pn
+
+	* acconfig.h: Add HAVE_GETTEXT and #define SP_ANSI_LIB to 1 to
+	match OJ definition.
+
+1999-11-30 19:16  clasen
+
+	* lib/ParserMessages.msg: Remove some unwanted trailing spaces in
+	messages.
+
+1999-11-30 18:52  clasen
+
+	* lib/Makefile.am, nsgmls/Makefile.am, spam/Makefile.am,
+	sx/Makefile.am: Add rules for .rc and .po files.
+
+1999-11-30 18:22  clasen
+
+	* acconfig.h, configure.in, lib/MessageTable.cxx: Remove a
+	generated file in intl/, cosmetic fixes.
+
+1999-11-30 18:04  clasen
+
+	* nsgmls/RastEventHandlerMessages.msg: Fix a typo.
+
+1999-11-30 17:46  clasen
+
+	* acconfig.h: Re-add HAVE_GETTEXT which was accidentally removed.
+
+1999-11-29 17:37  clasen
+
+	* lib/MessageTable.cxx: Make it compile.
+
+1999-11-29 17:32  clasen
+
+	* acconfig.h, acinclude.m4, configure.in, include/MessageTable.h,
+	lib/CmdLineApp.cxx, lib/MessageTable.cxx: support ./configure
+	--disable-nls, use bindtextdomain() to find translated messages
+	where they are installed.
+
+1999-11-29 16:49  clasen
+
+	* po/de.po: Remove illegal linebreak
+
+1999-11-29 16:33  clasen
+
+	* Makefile.am, configure.in, include/Makefile.am: Generate config.h
+	at top level, since GNU gettext depends on it.
+
+1999-11-29 15:29  clasen
+
+	* ABOUT-NLS: Apparently automake wants this to exist.
+
+1999-11-28 22:47  clasen
+
+	* configure.in, po/de.po: Add beginning of german translation for
+	OpenSP.
+
+1999-11-28 22:46  clasen
+
+	* lib/: Entity.cxx, EntityManagerMessages.msg, ParserMessages.msg,
+	StdioStorageMessages.msg: Message uniformity improvements.
+
+1999-11-27 01:00  clasen
+
+	* configure.in: Cosmetic fix.
+
+1999-11-27 00:54  clasen
+
+	* acconfig.h: Add gettext defines.
+
+1999-11-27 00:51  clasen
+
+	* Makefile.am, configure.in, intl/Makefile.in, intl/bindtextdom.c,
+	intl/cat-compat.c, intl/dcgettext.c, intl/dgettext.c,
+	intl/finddomain.c, intl/gettext.c, intl/gettext.h, intl/gettextP.h,
+	intl/hash-string.h, intl/intl-compat.c, intl/libgettext.h,
+	intl/linux-msg.sed, intl/loadmsgcat.c, intl/localealias.c,
+	intl/po2tbl.sed.in, intl/textdomain.c, intl/xopen-msg.sed,
+	lib/Makefile.am, nsgmls/Makefile.am, po/Makefile.in.in,
+	po/POTFILES.in, spam/Makefile.am, sx/Makefile.am: First cut at GNU
+	gettext integration.
+
+1999-11-26 10:07  clasen
+
+	* doc/: catalog.htm, nsgmls.htm, xml.htm: Update links to WebSGML
+	adaptations.
+
+1999-11-23 20:52  clasen
+
+	* acconfig.h, acinclude.m4, configure.in, lib/EntityApp.cxx: Some
+	define cleanups.
+
+1999-11-22 22:40  clasen
+
+	* README, doc/nsgmls.htm, lib/CatalogMessages.msg: Cleanups.
+
+1999-11-22 17:21  clasen
+
+	* NEWS, doc/nsgmls.htm, pubtext/Makefile.am, pubtext/japan.dcl:
+	Document -n and -x, move japan.sgmldecl to pubtext/japan.dcl.
+
+1999-11-22 16:37  clasen
+
+	* sp-generate.mak: Try to adapt win build. Here we go again: Win
+	users, test this !!!
+
+1999-11-21 02:27  clasen
+
+	* include/Message.h, include/MessageReporter.h,
+	include/MessageTable.h, lib/CmdLineApp.cxx, lib/Makefile.am,
+	lib/Message.cxx, lib/MessageReporter.cxx,
+	lib/MessageReporterMessages.msg, lib/MessageTable.cxx,
+	lib/ParserApp.cxx, nsgmls/Makefile.am, spam/Makefile.am,
+	spcat/Makefile.am, sx/Makefile.am: Changes to the message reporting
+	system: make the message domain for gettext settable and set it to
+	OpenSP for all messages, make the `relevant clauses' info and
+	message numbers available via -x and -n; related changes to
+	msggen.pl.
+
+1999-11-20 22:23  clasen
+
+	* lib/ParserMessages.msg: Move a comment.
+
+1999-11-15 21:19  pn
+
+	* configure.in, lib/CmdLineApp.cxx: Change Package to SP_PACKAGE
+	and VERSION to SP_VERSION to avoid conflicts, since
+	include/config.h gets included by users.
+
+1999-11-14 14:03  clasen
+
+	* configure.in: Remove AC_CONFIG_AUX_DIR(config). All aux files are
+	toplevel now (automake prefers this).
+
+1999-11-14 12:30  clasen
+
+	* Makefile.am: Remove all from SUBDIRS.
+
+1999-11-14 12:22  clasen
+
+	* all/Makefile.am: Add a forgotten Makefile.
+
+1999-11-14 00:40  clasen
+
+	* Makefile.am: Remove unneccessary EXTRA_DIST stuff (automake knows
+	to include the config stuff if it is toplevel).
+
+1999-11-13 22:13  clasen
+
+	* Makefile.am, acconfig.h, acinclude.m4, configure.in,
+	doc/Makefile.am, generic/Makefile.am, include/Makefile.am,
+	lib/Makefile.am, nsgmls/Makefile.am, pubtext/Makefile.am,
+	sgmlnorm/Makefile.am, spam/Makefile.am, spcat/Makefile.am,
+	spent/Makefile.am, sx/Makefile.am: More C++ autoconf tests, some
+	caching fixes in configure, add windows-only stuff to distribution,
+	add dist-zip target for windows distribution.
+
+1999-11-12 21:52  clasen
+
+	* acinclude.m4: Fix a typo.
+
+1999-11-12 21:50  clasen
+
+	* acinclude.m4, configure.in: remove unneeded test for RTTI.
+
+1999-11-12 21:45  clasen
+
+	* acconfig.h, configure.in, include/Vector.cxx: Remove
+	SP_QUAL_TEMPLATE_DTOR_BROKEN, since the macro DTOR() whose
+	definition it influences is unused.
+
+1999-11-12 21:09  clasen
+
+	* configure.in: Add test for `fancy' new_handler.
+
+1999-11-12 18:48  clasen
+
+	* configure.in: Add forgotten type check.
+
+1999-11-12 18:15  clasen
+
+	* lib/ExtendEntityManager.cxx: Fix a typo·
+
+1999-11-12 17:17  clasen
+
+	* acconfig.h, acinclude.m4, configure.in,
+	lib/DtdDeclEventHandler.cxx, lib/DtdDeclEventHandler.h: Remove
+	erroneous SP_API on internal headers, add test for placement
+	operator delete.
+
+1999-11-11 21:45  clasen
+
+	* instmac.pl: Move instmac.pl to toplevel.
+
+1999-11-11 19:09  clasen
+
+	* README: Remove pointers to removed files.
+
+1999-11-11 17:54  clasen
+
+	* configure.in: Some reorganization.
+
+1999-11-11 17:03  clasen
+
+	* lib/CmdLineApp.cxx: Remove forgotten include of version.h
+
+1999-11-11 16:29  clasen
+
+	* Makefile.am, configure.in, lib/CmdLineApp.cxx,
+	lib/CmdLineAppMessages.msg, lib/Makefile.am, nsgmls/Makefile.am,
+	spam/Makefile.am, spcat/Makefile.am, sx/Makefile.am: Directly use
+	the #defined VERSION instead of producing two intermediate files.
+
+1999-11-10 00:51  clasen
+
+	* acconfig.h, configure.in, lib/memcmp.c: Add better thread support
+	detection, add check for memcmp with replacement.
+
+1999-11-09 21:15  pn
+
+	* Makefile.am: EXTRA_DIST: Distribute files in config/.
+
+1999-11-09 11:07  clasen
+
+	* acconfig.h, configure.in: A few more checks for #defines found by
+	ifnames.
+
+1999-11-09 10:16  pn
+
+	* nsgmls/Makefile.am, sgmlnorm/Makefile.am, spent/Makefile.am,
+	sx/Makefile.am: INCLUDES: Added "-I" before directory names.
+
+1999-11-09 09:20  pn
+
+	* spam/Makefile.am, spcat/Makefile.am: INCLUDES: Add "-I" before
+	include path.
+
+1999-11-08 16:29  clasen
+
+	* acconfig.h, nsgmls/Makefile.am, sgmlnorm/Makefile.am,
+	spam/Makefile.am, spcat/Makefile.am, spent/Makefile.am,
+	sx/Makefile.am: More fixes, it should actually compile and work
+	now.
+
+1999-11-08 14:53  clasen
+
+	* acconfig.h, acinclude.m4, configure.in: Added some cxx checks
+	found in the autoconf macro archive.
+
+1999-11-07 23:04  clasen
+
+	* acconfig.h, configure.in, include/Makefile.am, lib/Makefile.am,
+	nsgmls/Makefile.am: Initial attempt to let configure create
+	config.h.
+
+1999-11-07 20:52  clasen
+
+	* AUTHORS, Makefile.am, NEWS, README, configure.in,
+	doc/Makefile.am, generic/Makefile.am, include/Makefile.am,
+	lib/Makefile.am, nsgmls/Makefile.am, pubtext/Makefile.am,
+	sgmlnorm/Makefile.am, spam/Makefile.am, spcat/Makefile.am,
+	spent/Makefile.am, sx/Makefile.am: First attempt to automakify
+	OpenSP.
+
+1999-11-07 20:15  clasen
+
+	* doc/xmlwarn.htm: Add forgotten file.
+
+1999-11-06 13:10  clasen
+
+	* configure.in: Install headers in $(includedir)/OpenSP, move
+	configure.in to toplevel, remove generated file aclocal.m4.
+
+1999-11-04 08:35  clasen
+
+	* COPYING, README, SP.dsw, SP.mak, build-win32.bat,
+	sp-generate.mak, sunfix.sh, all/README, all/all.dsp,
+	doc/archform.htm, doc/build.htm, doc/catalog, doc/catalog.htm,
+	doc/charset.htm, doc/features.htm, doc/generic.htm, doc/ideas.htm,
+	doc/index.htm, doc/new.htm, doc/nsgmls.htm, doc/sgmldecl.htm,
+	doc/sgmlnorm.htm, doc/sgmlsout.htm, doc/spam.htm, doc/spcat.htm,
+	doc/spent.htm, doc/sx.htm, doc/sysdecl.htm, doc/sysid.htm,
+	doc/xml.htm, generic/EventGenerator.h,
+	generic/ParserEventGeneratorKit.h, generic/SGMLApplication.h,
+	include/Allocator.h, include/ArcEngine.h, include/Attribute.h,
+	include/Attributed.h, include/Big5CodingSystem.h,
+	include/Boolean.h, include/CharMap.cxx, include/CharMap.h,
+	include/CharsetDecl.h, include/CharsetInfo.h,
+	include/CharsetRegistry.h, include/CmdLineApp.h,
+	include/CodingSystem.h, include/CodingSystemKit.h,
+	include/ConsoleOutput.h, include/ContentState.h,
+	include/ContentToken.h, include/CopyOwner.cxx, include/CopyOwner.h,
+	include/DescriptorManager.h, include/Dtd.h,
+	include/EUCJPCodingSystem.h, include/ElementType.h,
+	include/Entity.h, include/EntityApp.h, include/EntityCatalog.h,
+	include/EntityDecl.h, include/EntityManager.h,
+	include/ErrnoMessageArg.h, include/ErrorCountEventHandler.h,
+	include/Event.h, include/EventsWanted.h,
+	include/ExtendEntityManager.h, include/ExternalId.h,
+	include/Fixed2CodingSystem.h, include/GenericEventHandler.h,
+	include/Hash.h, include/HashTable.cxx, include/HashTable.h,
+	include/HashTableItemBase.cxx, include/HashTableItemBase.h,
+	include/IList.h, include/IListBase.h, include/IListIter.h,
+	include/IListIterBase.h, include/IQueue.cxx, include/IQueue.h,
+	include/ISet.cxx, include/ISet.h, include/ISetIter.h,
+	include/IdentityCodingSystem.h, include/InputSource.h,
+	include/InternalInputSource.h, include/Link.h,
+	include/LinkProcess.h, include/List.cxx, include/List.h,
+	include/ListIter.h, include/LiteralStorage.h, include/Location.h,
+	include/Lpd.h, include/Markup.h, include/Message.h,
+	include/MessageArg.h, include/MessageBuilder.h,
+	include/MessageEventHandler.h, include/MessageFormatter.h,
+	include/MessageReporter.h, include/MessageTable.h, include/Mode.h,
+	include/NCVector.h, include/NCVector.sed, include/Named.h,
+	include/NamedResource.h, include/NamedResourceTable.h,
+	include/NamedTable.h, include/Notation.h,
+	include/NotationStorage.h, include/OpenElement.h,
+	include/Options.cxx, include/Options.h, include/OutputByteStream.h,
+	include/OutputCharStream.h, include/Owner.cxx, include/Owner.h,
+	include/OwnerTable.cxx, include/OwnerTable.h, include/ParserApp.h,
+	include/ParserOptions.h, include/PointerTable.cxx,
+	include/PointerTable.h, include/PosixStorage.h, include/Ptr.cxx,
+	include/Ptr.h, include/RangeMap.cxx, include/RangeMap.h,
+	include/Resource.h, include/RewindStorageObject.h,
+	include/SJISCodingSystem.h, include/SOEntityCatalog.h,
+	include/Sd.h, include/SdText.h, include/SearchResultMessageArg.h,
+	include/SgmlParser.h, include/ShortReferenceMap.h,
+	include/StdioStorage.h, include/StorageManager.h,
+	include/StringC.h, include/StringOf.cxx, include/StringOf.h,
+	include/StringResource.h, include/SubstTable.h, include/Syntax.h,
+	include/Text.h, include/TranslateCodingSystem.h, include/TypeId.h,
+	include/URLStorage.h, include/UTF8CodingSystem.h,
+	include/UnicodeCodingSystem.h, include/UnivCharsetDesc.h,
+	include/Vector.cxx, include/Vector.h, include/Win32CodingSystem.h,
+	include/WinApp.h, include/WinInetStorage.h,
+	include/XMLCodingSystem.h, include/XcharMap.cxx,
+	include/XcharMap.h, include/constant.h, include/macros.h,
+	include/rtti.h, include/sptchar.h, include/types.h, include/xnew.h,
+	lib/Allocator.cxx, lib/ArcEngine.cxx, lib/ArcEngineMessages.msg,
+	lib/ArcProcessor.h, lib/Attribute.cxx, lib/Big5CodingSystem.cxx,
+	lib/CatalogEntry.h, lib/CatalogMessages.msg, lib/CharsetDecl.cxx,
+	lib/CharsetInfo.cxx, lib/CharsetRegistry.cxx, lib/CmdLineApp.cxx,
+	lib/CmdLineAppMessages.msg, lib/CodingSystem.cxx,
+	lib/CodingSystemKit.cxx, lib/ConsoleOutput.cxx,
+	lib/ContentState.cxx, lib/ContentToken.cxx,
+	lib/DescriptorManager.cxx, lib/Dtd.cxx,
+	lib/DtdDeclEventHandler.cxx, lib/DtdDeclEventHandler.h,
+	lib/EUCJPCodingSystem.cxx, lib/ElementType.cxx, lib/Entity.cxx,
+	lib/EntityApp.cxx, lib/EntityCatalog.cxx, lib/EntityDecl.cxx,
+	lib/EntityManager.cxx, lib/EntityManagerMessages.msg,
+	lib/EquivClass.h, lib/ErrnoMessageArg.cxx,
+	lib/ErrorCountEventHandler.cxx, lib/Event.cxx,
+	lib/EventGenerator.cxx, lib/EventQueue.h,
+	lib/ExtendEntityManager.cxx, lib/ExternalId.cxx,
+	lib/Fixed2CodingSystem.cxx, lib/GenericEventHandler.cxx,
+	lib/Group.cxx, lib/Group.h, lib/Hash.cxx, lib/IListBase.cxx,
+	lib/Id.cxx, lib/Id.h, lib/IdentityCodingSystem.cxx,
+	lib/InputSource.cxx, lib/InternalInputSource.cxx, lib/Link.cxx,
+	lib/LinkProcess.cxx, lib/LiteralStorage.cxx, lib/Location.cxx,
+	lib/Lpd.cxx, lib/LpdEntityRef.h, lib/Markup.cxx, lib/MarkupScan.h,
+	lib/Message.cxx, lib/MessageArg.cxx, lib/MessageEventHandler.cxx,
+	lib/MessageFormatter.cxx, lib/MessageFormatterMessages.msg,
+	lib/MessageReporter.cxx, lib/MessageReporterMessages.msg,
+	lib/MessageTable.cxx, lib/ModeInfo.cxx, lib/ModeInfo.h,
+	lib/Mutex.h, lib/NameToken.h, lib/Notation.cxx,
+	lib/NotationStorage.cxx, lib/NumericCharRefOrigin.cxx,
+	lib/NumericCharRefOrigin.h, lib/OffsetOrderedList.cxx,
+	lib/OffsetOrderedList.h, lib/OpenElement.cxx,
+	lib/OutputByteStream.cxx, lib/OutputCharStream.cxx,
+	lib/OutputState.cxx, lib/OutputState.h, lib/Param.cxx, lib/Param.h,
+	lib/Parser.cxx, lib/Parser.h, lib/ParserApp.cxx,
+	lib/ParserAppMessages.msg, lib/ParserEventGeneratorKit.cxx,
+	lib/ParserMessages.msg, lib/ParserOptions.cxx, lib/ParserState.cxx,
+	lib/ParserState.h, lib/Partition.cxx, lib/Partition.h,
+	lib/PosixStorage.cxx, lib/PosixStorageMessages.msg, lib/Priority.h,
+	lib/Recognizer.cxx, lib/Recognizer.h, lib/RewindStorageObject.cxx,
+	lib/SGMLApplication.cxx, lib/SJISCodingSystem.cxx,
+	lib/SOEntityCatalog.cxx, lib/Sd.cxx, lib/SdFormalError.h,
+	lib/SdText.cxx, lib/SearchResultMessageArg.cxx, lib/SgmlParser.cxx,
+	lib/ShortReferenceMap.cxx, lib/SrInfo.h, lib/StdioStorage.cxx,
+	lib/StdioStorageMessages.msg, lib/StorageManager.cxx,
+	lib/StorageObjectPosition.h, lib/Syntax.cxx, lib/Text.cxx,
+	lib/TokenMessageArg.cxx, lib/TokenMessageArg.h,
+	lib/TranslateCodingSystem.cxx, lib/Trie.h, lib/TrieBuilder.cxx,
+	lib/TrieBuilder.h, lib/TypeId.cxx, lib/URLStorage.cxx,
+	lib/URLStorageMessages.msg, lib/UTF8CodingSystem.cxx, lib/Undo.cxx,
+	lib/Undo.h, lib/UnicodeCodingSystem.cxx, lib/UnivCharsetDesc.cxx,
+	lib/Win32CodingSystem.cxx, lib/WinApp.cxx, lib/WinInetStorage.cxx,
+	lib/WinInetStorageMessages.msg, lib/XMLCodingSystem.cxx,
+	lib/app_inst.m4, lib/arc_inst.m4, lib/assert.cxx, lib/big5.h,
+	lib/entmgr_inst.m4, lib/events.h, lib/gb2312.h, lib/iso646-jis.h,
+	lib/iso8859-2.h, lib/iso8859-3.h, lib/iso8859-4.h, lib/iso8859-5.h,
+	lib/iso8859-6.h, lib/iso8859-7.h, lib/iso8859-8.h, lib/iso8859-9.h,
+	lib/jis0201.h, lib/jis0208.h, lib/jis0212.h, lib/ksc5601.h,
+	lib/lib.dsp, lib/lib.rc, lib/memmove.c, lib/parseAttribute.cxx,
+	lib/parseCommon.cxx, lib/parseDecl.cxx, lib/parseInstance.cxx,
+	lib/parseMode.cxx, lib/parseParam.cxx, lib/parseSd.cxx,
+	lib/parser_inst.m4, lib/splib.cxx, lib/splib.h, lib/splibpch.h,
+	lib/strerror.c, lib/token.h, lib/xentmgr_inst.m4,
+	nsgmls/NsgmlsMessages.msg, nsgmls/RastEventHandler.cxx,
+	nsgmls/RastEventHandler.h, nsgmls/RastEventHandlerMessages.msg,
+	nsgmls/SgmlsEventHandler.cxx, nsgmls/SgmlsEventHandler.h,
+	nsgmls/StringSet.cxx, nsgmls/StringSet.h, nsgmls/nsgmls.cxx,
+	nsgmls/nsgmls.dsp, nsgmls/nsgmls.rc, nsgmls/nsgmls_inst.m4,
+	pubtext/HTML32.dcl, pubtext/HTML32.dtd, pubtext/HTML32.soc,
+	pubtext/HTML4-f.dtd, pubtext/HTML4-s.dtd, pubtext/HTML4.dcl,
+	pubtext/HTML4.dtd, pubtext/HTML4.soc, pubtext/HTMLlat1.ent,
+	pubtext/HTMLspec.ent, pubtext/HTMLsym.ent, pubtext/ISOlat1.ent,
+	pubtext/ISOlat1.sgm, pubtext/html-1.dtd, pubtext/html-1s.dtd,
+	pubtext/html-s.dtd, pubtext/html.dcl, pubtext/html.dtd,
+	pubtext/html.soc, pubtext/xml.dcl, pubtext/xml.soc,
+	sgmlnorm/SGMLGenerator.cxx, sgmlnorm/SGMLGenerator.h,
+	sgmlnorm/sgmlnorm.cxx, sgmlnorm/sgmlnorm.dsp,
+	spam/CopyEventHandler.cxx, spam/CopyEventHandler.h,
+	spam/MarkupEventHandler.cxx, spam/MarkupEventHandler.h,
+	spam/SpamMessages.msg, spam/spam.cxx, spam/spam.dsp, spam/spam.rc,
+	spam/spam_inst.m4, spcat/spcat.cxx, spcat/spcat.dsp,
+	spcat/spcat_inst.m4, spent/spent.cxx, spent/spent.dsp,
+	sx/SxMessages.msg, sx/XmlOutputEventHandler.cxx,
+	sx/XmlOutputEventHandler.h, sx/XmlOutputMessages.msg, sx/sx.cxx,
+	sx/sx.dsp, sx/sx.rc, sx/sx_inst.m4, unicode/catalog,
+	unicode/demo.sgm, unicode/gensyntax.pl, unicode/unicode.sd,
+	unicode/unicode.syn: Initial revision, taken from the current jade
+	repository at tag before_split.
+

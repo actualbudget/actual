@@ -1,0 +1,48 @@
+#!/bin/sh
+# onsgmls: test --restricted and --directory=
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles onsgmls-2.sgml"
+cat <<EOF >onsgmls-2.sgml
+<!DOCTYPE doc [
+<!ELEMENT doc - o (#PCDATA)>
+<!ATTLIST doc
+  n CDATA #IMPLIED>
+]>
+<doc n=1>
+EOF
+tmpfiles="$tmpfiles onsgmls-2-dir onsgmls-2.out"
+
+: ${ONSGMLS=onsgmls}
+mkdir onsgmls-2-dir || { echo "cannot create onsgmls-2-dir"; exit 1; }
+touch onsgmls-2-dir/o2.cat
+echo onsgmls-2a >onsgmls-2.out
+cat onsgmls-2.sgml | ${ONSGMLS} -c onsgmls-2-dir/o2.cat 2>>onsgmls-2.out \
+  1>/dev/null 
+echo onsgmls-2b >>onsgmls-2.out
+cat onsgmls-2.sgml | ${ONSGMLS} --restricted -c onsgmls-2-dir/o2.cat \
+  2>&1 1>/dev/null | sed 's/.*onsgmls://' >>onsgmls-2.out
+echo onsgmls-2c >>onsgmls-2.out
+cat onsgmls-2.sgml | ${ONSGMLS} --restricted --directory=onsgmls-2-dir \
+  -c onsgmls-2-dir/o2.cat 2>>onsgmls-2.out 1>/dev/null 
+
+tmpfiles="$tmpfiles onsgmls-2.ok"
+cat <<EOF >onsgmls-2.ok
+onsgmls-2a
+onsgmls-2b
+E: cannot find "onsgmls-2-dir/o2.cat"; tried 
+onsgmls-2c
+EOF
+
+: ${DIFF=diff}
+${DIFF} onsgmls-2.ok onsgmls-2.out
+result=$?
+
+rm -fr $tmpfiles
+
+exit $result

@@ -1,0 +1,358 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>Architectural Form Processing</TITLE>
+</HEAD>
+<BODY>
+<H1>Architectural Form Processing</H1>
+<P>
+The Hytime standard (ISO/IEC 10744) introduced the concept of
+architectural forms.  This document assumes you are already familiar
+with this concept. HyTime 2nd Edition generalizes this, and makes it
+possible to have an <I>architecture engine</I> which can perform
+architectural form processing for arbitrary architectures.  OpenSP
+includes such an architecture engine.
+<P>
+Non-markup sensitive applications built using OpenSP now support
+architectural form processing using the <SAMP>-A
+<VAR>archname</VAR></SAMP> option.  When this option is specified, the
+document will be validated against all declared base architectures,
+and the output will be for the architectural document for that
+architecture: the element types, notations and attributes will be
+those defined in the meta-DTD.
+<P>
+Although spam does not support the <SAMP>-A</SAMP> option because it
+works with the markup of your document, sgmlnorm does.
+
+<H2>Architectural Support Attributes</H2>
+<P>
+To use the <SAMP>-A</SAMP> option with a document, you must add
+<UL>
+<LI>
+an architecture base declaration for <SAMP><VAR>archname</VAR></SAMP>,
+<LI>
+a notation declaration and associated attribute definition list
+declaration for <SAMP><VAR>archname</VAR></SAMP>;
+this is called the <I>architecture notation declaration</I>.
+</UL>
+<P>
+An architecture base declaration is a processing instruction of the form:
+<PRE>
+&lt;?IS10744 ArcBase <VAR>archname</VAR>&gt;
+</PRE>
+<P>
+The processing instruction is recognized either in the DTD or in an
+active LPD.
+<P>
+The architecture notation declaration and associated attribute
+definition list declaration serve to declare a number of architectural
+support attributes which control the architecture engine.  The value
+for each architecture support attribute is taken from the default
+value, if any, specified for that attribute in the attribute
+definition list declaration.  It is an error to declare an
+architecture support attribute as <SAMP>#REQUIRED</SAMP>.
+<P>
+The following architectural support attributes are recognized:
+<DL>
+<DT>
+<SAMP>ArcDTD</SAMP>
+<DD>
+The name of an external entity that contains the meta-DTD.
+This attribute is required.
+If the name starts with the PERO delimiter <SAMP>%</SAMP>,
+the entity is a parameter entity,
+otherwise it is a general entity.
+<DT>
+<SAMP>ArcQuant</SAMP>
+<DD>
+A list of tokens that looks like what follows <SAMP>QUANTITY SGMLREF</SAMP>
+in the quantity set section of an SGML declaration.
+The quantities used for parsing the meta-DTD
+and validating the architectural document
+will be the maximum of the quantities in the document's concrete syntax
+and the quantities specified here.
+<DT>
+<SAMP>ArcDocF</SAMP>
+<DD>
+The name of the document element type in the meta-DTD.
+This would be <SAMP>HyDoc</SAMP> for HyTime.
+This defaults to <SAMP><VAR>archname</VAR></SAMP>.
+<DT>
+<SAMP>ArcFormA</SAMP>
+<DD>
+The name of the attribute that elements use to specify the
+corresponding element type, if any, in the meta-DTD.
+Data entities also use this attribute to specify the corresponding
+notation in the meta-DTD.
+This would be <SAMP>HyTime</SAMP> for HyTime.
+This defaults to <SAMP><VAR>archname</VAR></SAMP>.
+<DT>
+<SAMP>ArcNamrA</SAMP>
+<DD>
+The name of the attribute that elements use to specify substitutes for
+the names of attributes in the meta-DTD.  A value of
+<SAMP>#DEFAULT</SAMP> is allowed for a substitute name; this inhibits
+mapping of an attribute to an architectural attribute, but specifies
+that the value of the architectural attribute should be defaulted
+rather than taken from the value of another attribute in the document.
+For HyTime the value of this attribute would be <SAMP>HyNames</SAMP>.
+By default no attribute name substitutition is done.
+<DT>
+<SAMP>ArcSuprA</SAMP>
+<DD>
+The name of an attribute that elements may use to suppress processing
+of their descendants.  This attribute is not recognized for data
+entities.  The value of the attribute must be one of the following
+tokens:
+<DL>
+<DT>
+<SAMP>sArcAll</SAMP>
+<DD>
+Completely suppress all architectural processing of descendants.
+It is not possible to restore architectural processing
+for a descendant.
+<DT>
+<SAMP>sArcForm</SAMP>
+<DD>
+Suppress processing of the <SAMP>ArcFormA</SAMP> attribute of all
+descendants of this element, except for those elements that have a
+non-implied <SAMP>ArcSuprA</SAMP> attribute.
+<DT>
+<SAMP>sArcNone</SAMP>
+<DD>
+Don't suppress architectural processing for the descendants of
+this element.
+</DL>
+<P>
+The value may also be implied, in which case the state of
+architectural processing is inherited.
+<P>
+If an element has an ArcSuprA attribute that was processed, its
+ArcFormA attribute will always be processed.  Otherwise its ArcFormA
+attribute will be processed unless its closest ancestor that has a
+non-implied value for the ArcSuprA attribute suppressed processing of
+the ArcFormA attribute.  An element whose ArcFormA attribute is
+processed will not be treated as architectural if it has an implied
+value for the ArcFormA attribute.
+<DT>
+<SAMP>ArcSuprF</SAMP>
+<DD>
+The name of the element type in the meta-DTD that suppresses
+architectural processing in the same manner as does the
+<SAMP>sHyTime</SAMP> form in HyTime.  By default, no element type
+does.  This behaves like an element with an
+<SAMP>ArcSuprA</SAMP> attribute of <SAMP>sArcForm</SAMP>.  The element
+type should be declared in the meta-DTD.  You should not specify a
+value for this attribute if you specified a value for the
+<SAMP>ArcSuprA</SAMP> attribute.
+<P>
+This is a non-standardized extension.
+<DT>
+<SAMP>ArcIgnDA</SAMP>
+<DD>
+The name of an attribute that elements may use to control whether
+data is ignored.
+The value of the attribute must be one of the following values:
+<DL>
+<DT>
+<SAMP>nArcIgnD</SAMP>
+<DD>
+Data is not ignored.
+It is an error if data occurs where not allowed by the meta-DTD.
+<DT>
+<SAMP>cArcIgnD</SAMP>
+<DD>
+Data is conditionally ignored.
+Data will be ignored only when it occurs where the meta-DTD
+does not allow it.
+<DT>
+<SAMP>ArcIgnD</SAMP>
+<DD>
+Data is always ignored.
+</DL>
+<P>
+The value may also be implied, in which case the state of
+architectural processing is inherited.
+If no the document element has no value specified,
+<SAMP>cArcIgnD</SAMP> will be used.
+<DT>
+<SAMP>ArcBridF</SAMP>
+<DD>
+The name of a default element type declared in a meta-DTD,
+to which elements in the document should be automatically mapped
+if they have an ID and would not otherwise be considered
+architectural.
+This would be <SAMP>HyBrid</SAMP> for HyTime.
+If your meta-DTD declares IDREF attributes, it will
+usually be appropriate to specify a value for
+<SAMP>ArcBridF</SAMP>, and to declare an ID attribute
+for that form in your meta-DTD.
+<DT>
+<SAMP>ArcDataF</SAMP>
+<DD>
+The name of a default notation declared in the meta-DTD,
+to which the external data entities in the document
+should be automatically mapped if they would
+not otherwise be considered architectural.
+If this attribute is defined,
+then general entities will be automatically architectural:
+any external data entity whose notation cannot otherwise be mapped
+into a notation in the meta-DTD will be automatically treated
+as an instance of the <SAMP>ArcDataF</SAMP> notation.
+This would be <SAMP>data</SAMP> for HyTime.
+If your meta-DTD declares entity attributes, it will usually
+be appropriate to specify a value for <SAMP>ArcDataF</SAMP>
+even if your meta-DTD declares no data attributes for the
+notation.
+<DT>
+<SAMP>ArcAuto</SAMP>
+<DD>
+This must have one of the following values:
+<DL>
+<DT>
+<SAMP>ArcAuto</SAMP>
+<DD>
+If an element does not have an <SAMP>ArcFormA</SAMP> attribute and the
+meta-DTD defines an element type with the same name as the element's
+type, the element will be automatically treated as being an instance
+of the meta-type.  This rule does not apply to the
+document element type; this is automatically treated as being an
+instance of the meta-DTD's document element type.
+Note that this automatic mapping is prevented if
+the element has an <SAMP>ArcFormA</SAMP> attribute with an implied
+value.  It is also prevented if processing of the
+<SAMP>ArcFormA</SAMP> attribute is suppressed.  This applies equally
+to the notations of external data entities.
+The default element or notation specified with the
+<SAMP>ArcBridF</SAMP> or <SAMP>ArcDfltN</SAMP> attribute
+is only considered after the mapping specified by <SAMP>ArcAuto</SAMP>.
+<DT>
+<SAMP>nArcAuto</SAMP>
+<DD>
+Automatic mapping is not performed.
+</DL>
+<P>
+The default value is <SAMP>ArcAuto</SAMP>.
+<DT>
+<SAMP>ArcOptSA</SAMP>
+<DD>
+A list of names of architectural support attributes,
+each of which is interpreted as a list of parameter entities
+to be defined with a replacement text of <SAMP>INCLUDE</SAMP>
+when parsing the meta-DTD.
+The default value is <SAMP>ArcOpt</SAMP>.
+</DL>
+<H2>Meta-DTDs</H2>
+<P>
+A meta-DTD is allowed to use the following extensions:
+<UL>
+<LI>
+a single element type or notation is allowed to be an associated
+element type or associated notation name for multiple attribute
+definition lists.
+<LI>
+<SAMP>#ALL</SAMP> can be used as an associated element type
+or associated notation name in an attribute definition list
+to define attributes for all element types or notations
+in the meta-DTD
+</UL>
+<P>
+Before any of these extensions can be used, the meta-DTD must include a
+declaration
+<PRE>
+&lt;!AFDR "ISO/IEC 10744:1997"&gt;
+</PRE>
+<P>
+This declaration should only be included if the extensions are used.
+<P>
+In all other respects a meta-DTD must be a valid SGML DTD.
+<P>
+A declared value of ENTITY for an attribute in a meta-DTD means that
+the value of the attribute must be an entity declared in
+the (non-meta) DTD that is architectural.
+An external data entity is architectural only if its notation can be
+mapped into a notation in the meta-DTD.
+All other kinds of data entities and subdoc entities are automatically
+architectural.
+<P>
+An IDREF attribute in the meta-document must have a corresponding ID
+in the meta-document.  An attribute with a declared value of ID in the
+document will be automatically mapped to an attribute with a declared
+value of ID in the meta-DTD.
+<P>
+A declared value of NOTATION in the meta-DTD means that the value of
+the attribute must have one the values specified in the name group and
+that it must be a notation in the meta-DTD.
+(Perhaps if the attribute also has a declared value of NOTATION
+in the non-meta-DTD, the value should be mapped in a similar
+way to the notation of an external data entity.)
+
+<H2>Differences from HyTime</H2>
+<P>
+There are a number of differences from how architectural processing is
+defined in the pre-Corringendum version of the HyTime standard.
+<UL>
+<LI>
+The <SAMP>ArcNamrA</SAMP> and <SAMP>ArcFormA</SAMP> attributes are not
+part of the meta-DTD.  Rather they are used by the architecture engine
+in deriving the meta-document that is validated against the meta-DTD.
+<LI>
+The <SAMP>use:</SAMP> conventional comment is not recognized.  Instead
+a single element type is allowed to be an associated element type for
+multiple attribute definition lists.
+<LI>
+The notation and data attributes of an external data entity are
+treated just like the element type and attributes of an element.  The
+notation of an external data entity is mapped into a notation in the
+meta-DTD and the data attributes of the entity are mapped onto
+attributes defined for the meta-DTD notation.
+<LI>
+<SAMP>#FIXED</SAMP> has the same meaning in a meta-DTD that it does in
+a regular DTD: the value of the attribute must be the same as the
+default value of the attribute specified in the meta-DTD.
+</UL>
+
+<H2>Specifying architectural processing with an LPD</H2>
+<P>
+Link attributes defined by an implicit link process are treated in the
+same way as non-link attributes.  The only complication is that SGML
+allows link attributes to have the same name as non-link attributes.
+If there is a link attribute and a non-link attribute with the same
+name, the architecture engine will only look at the link attribute,
+even if the value of the link attribute is implied.  The only
+exception is the <SAMP>ArcNamrA</SAMP> attribute: the architecture
+engine will use both the link attribute and the non-link attribute,
+but the substitute names in the value of the non-link attribute cannot
+refer to link attribute names.
+<P>
+The <SAMP>-A <VAR>archname</VAR></SAMP> option automatically activates
+any link type <SAMP><VAR>archname</VAR></SAMP>.
+<P>
+The architecture notation declaration and associated attribute
+definition list declaration are allowed in the LPD.  Although the
+productions of ISO 8879 do not allow a notation declaration in a link
+type declaration subset, it is clearly the intent of the standard that
+they be allowed.  You can use a <SAMP>-wlpd-notation</SAMP> option to
+disallow them.
+
+<H2>Derived architectures</H2>
+<P>
+A meta-DTD can have one or more base architectures in the same way as
+a normal DTD.  Multiple <SAMP>-A</SAMP> options can be used to exploit
+this.  For example,
+<PRE>
+-A <VAR>arch1</VAR> -A <VAR>arch2</VAR>
+</PRE>
+<P>
+will perform architectural processing on the source document to
+produce an architectural document conforming to the architecture
+<SAMP><VAR>arch1</VAR></SAMP> declared in the source document, and
+will then perform architectural processing on this architectural
+document to produce an architectural document conforming to the
+<SAMP><VAR>arch2</VAR></SAMP> architecture declared in
+<SAMP><VAR>arch1</VAR></SAMP>'s meta-DTD.
+<P>
+A document that is validated against a meta-DTD will automatically
+be validated against any base architectures of that meta-DTD.
+</BODY>
+</HTML>

@@ -1,0 +1,106 @@
+#!/bin/sh
+# Architectural Form: test ArcOptSA's default ArcOpt (A.3.4.2)
+# test onsgmls and osgmlnorm
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles af-18.sgml af-18.dtd af-meta-18.dtd"
+cat <<EOF >af-18.sgml
+<!DOCTYPE doc SYSTEM "af-18.dtd">
+<doc>
+ <s>
+  <v n="1">verse 1</v>
+  <v n="2">verse 2</v>
+ </s>
+</doc>
+EOF
+cat <<EOF >af-18.dtd
+<!NOTATION SGML PUBLIC "-//ISO 8879:1986//NOTATION Standard Generalized Markup
+    Language//EN">
+
+<?IS10744 ArcBase open>
+<!-- IS10744:arch name="open" options="included" included="complex" -->
+<!NOTATION open PUBLIC "-//OpenJade Project//NOTATION AFDR ARCBASE open Architecture//EN">
+<!ATTLIST #NOTATION open
+    -- ArcOptSA NMTOKENS #FIXED "complex" --
+    -- complex CDATA "complex" cf. af-19     --
+    ArcOpt CDATA "complex"
+    ArcDTD CDATA #FIXED "opendtd">
+<!ENTITY opendtd SYSTEM "af-meta-18.dtd" CDATA SGML>
+
+<!ELEMENT doc - o (s+)>
+<!ATTLIST doc
+  open NMTOKEN #FIXED "open">
+<!ELEMENT s   - o (v+)>
+<!ATTLIST s
+  open NMTOKEN #FIXED "stanza">
+<!ELEMENT v   - o (#PCDATA)>
+<!ATTLIST v
+  n CDATA #REQUIRED
+  open NMTOKEN #FIXED "verse">
+EOF
+
+cat <<EOF >af-meta-18.dtd
+<!ENTITY % complex "IGNORE">
+<!ELEMENT open     - o (stanza+)>
+<![%complex;[
+  <!ENTITY % stanza.content "(verse+)">
+]]>
+<!ENTITY % stanza.content "(#PCDATA)">
+<!ELEMENT stanza   - o %stanza.content;>
+<!ELEMENT verse    - o (#PCDATA)>
+<!ATTLIST verse
+  n CDATA #REQUIRED>
+EOF
+
+tmpfiles="$tmpfiles af-18-onsgmls.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >af-18-onsgmls.out -A open af-18.sgml
+
+tmpfiles="$tmpfiles af-18-onsgmls.ok"
+cat <<EOF >af-18-onsgmls.ok
+(OPEN
+(STANZA
+AN CDATA 1
+(VERSE
+-verse 1
+)VERSE
+AN CDATA 2
+(VERSE
+-verse 2
+)VERSE
+)STANZA
+)OPEN
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} af-18-onsgmls.ok af-18-onsgmls.out
+result=$?
+test $result = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles af-18-norm.out"
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >af-18-norm.out -A open af-18.sgml
+tmpfiles="$tmpfiles af-18-norm.ok"
+cat <<EOF >af-18-norm.ok
+<OPEN>
+<STANZA>
+<VERSE N="1">verse 1</VERSE>
+<VERSE N="2">verse 2</VERSE>
+</STANZA>
+</OPEN>
+EOF
+
+${DIFF} af-18-norm.ok af-18-norm.out
+result=$?
+test $result = 0 || result=$(($result + 1))
+
+rm -fr $tmpfiles
+
+exit $result

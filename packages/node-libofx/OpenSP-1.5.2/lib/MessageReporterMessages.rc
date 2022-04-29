@@ -1,0 +1,14 @@
+STRINGTABLE
+BEGIN
+  5000, "I"
+  5001, "W"
+  5002, "Q"
+  5003, "X"
+  5004, "E"
+  5005, "open elements"
+  5006, "In entity %1 included from %2"
+  5007, "In entity included from %2"
+  5008, "(invalid location)"
+  5009, "offset "
+  5010, "relevant clauses: "
+END

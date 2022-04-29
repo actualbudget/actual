@@ -1,0 +1,18 @@
+// Copyright (c) 1996 James Clark
+// See the file COPYING for copying permission.
+
+#include "ArcEngineMessages.rc"
+#include "CatalogMessages.rc"
+#include "CmdLineAppMessages.rc"
+#include "EntityAppMessages.rc"
+#include "EntityManagerMessages.rc"
+#include "MessageFormatterMessages.rc"
+#include "MessageReporterMessages.rc"
+#include "ParserAppMessages.rc"
+#include "ParserMessages.rc"
+#include "PosixStorageMessages.rc"
+#include "StdioStorageMessages.rc"
+#include "URLStorageMessages.rc"
+#ifdef SP_WININET
+#include "WinInetStorageMessages.rc"
+#endif

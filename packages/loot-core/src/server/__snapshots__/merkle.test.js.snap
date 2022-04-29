@@ -1,0 +1,367 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`merkle trie adding an item works 1`] = `
+Object {
+  "1": Object {
+    "2": Object {
+      "1": Object {
+        "0": Object {
+          "1": Object {
+            "0": Object {
+              "0": Object {
+                "2": Object {
+                  "0": Object {
+                    "1": Object {
+                      "1": Object {
+                        "0": Object {
+                          "2": Object {
+                            "2": Object {
+                              "0": Object {
+                                "0": Object {
+                                  "hash": 1983295247,
+                                },
+                                "hash": 1983295247,
+                              },
+                              "hash": 1983295247,
+                            },
+                            "hash": 1983295247,
+                          },
+                          "hash": 1983295247,
+                        },
+                        "hash": 1983295247,
+                      },
+                      "hash": 1983295247,
+                    },
+                    "hash": 1983295247,
+                  },
+                  "1": Object {
+                    "0": Object {
+                      "1": Object {
+                        "0": Object {
+                          "2": Object {
+                            "0": Object {
+                              "0": Object {
+                                "0": Object {
+                                  "hash": 1469038940,
+                                },
+                                "hash": 1469038940,
+                              },
+                              "hash": 1469038940,
+                            },
+                            "hash": 1469038940,
+                          },
+                          "hash": 1469038940,
+                        },
+                        "hash": 1469038940,
+                      },
+                      "hash": 1469038940,
+                    },
+                    "hash": 1469038940,
+                  },
+                  "hash": 565800531,
+                },
+                "hash": 565800531,
+              },
+              "hash": 565800531,
+            },
+            "hash": 565800531,
+          },
+          "hash": 565800531,
+        },
+        "hash": 565800531,
+      },
+      "hash": 565800531,
+    },
+    "hash": 565800531,
+  },
+  "hash": 565800531,
+}
+`;
+
+exports[`merkle trie pruning works and keeps correct hashes 1`] = `
+Object {
+  "1": Object {
+    "2": Object {
+      "1": Object {
+        "0": Object {
+          "0": Object {
+            "2": Object {
+              "2": Object {
+                "2": Object {
+                  "1": Object {
+                    "2": Object {
+                      "2": Object {
+                        "0": Object {
+                          "0": Object {
+                            "1": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1000,
+                                },
+                                "hash": 1000,
+                              },
+                              "hash": 1000,
+                            },
+                            "2": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1100,
+                                },
+                                "hash": 1100,
+                              },
+                              "hash": 1100,
+                            },
+                            "hash": 1956,
+                          },
+                          "1": Object {
+                            "0": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1200,
+                                },
+                                "hash": 1200,
+                              },
+                              "hash": 1200,
+                            },
+                            "1": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1300,
+                                },
+                                "hash": 1300,
+                              },
+                              "hash": 1300,
+                            },
+                            "2": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1400,
+                                },
+                                "hash": 1400,
+                              },
+                              "hash": 1400,
+                            },
+                            "hash": 1244,
+                          },
+                          "2": Object {
+                            "0": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1500,
+                                },
+                                "hash": 1500,
+                              },
+                              "hash": 1500,
+                            },
+                            "1": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1600,
+                                },
+                                "hash": 1600,
+                              },
+                              "hash": 1600,
+                            },
+                            "2": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1700,
+                                },
+                                "hash": 1700,
+                              },
+                              "hash": 1700,
+                            },
+                            "hash": 1336,
+                          },
+                          "hash": 1600,
+                        },
+                        "1": Object {
+                          "0": Object {
+                            "0": Object {
+                              "1": Object {
+                                "1": Object {
+                                  "hash": 1800,
+                                },
+                                "hash": 1800,
+                              },
+                              "hash": 1800,
+                            },
+                            "1": Object {
+                              "1": Object {
+                                "1": Object {
+                                  "hash": 1900,
+                                },
+                                "hash": 1900,
+                              },
+                              "hash": 1900,
+                            },
+                            "2": Object {
+                              "1": Object {
+                                "1": Object {
+                                  "hash": 2000,
+                                },
+                                "hash": 2000,
+                              },
+                              "hash": 2000,
+                            },
+                            "hash": 1972,
+                          },
+                          "1": Object {
+                            "0": Object {
+                              "1": Object {
+                                "1": Object {
+                                  "hash": 2100,
+                                },
+                                "hash": 2100,
+                              },
+                              "hash": 2100,
+                            },
+                            "hash": 2100,
+                          },
+                          "hash": 3968,
+                        },
+                        "hash": 2496,
+                      },
+                      "hash": 2496,
+                    },
+                    "hash": 2496,
+                  },
+                  "hash": 2496,
+                },
+                "hash": 2496,
+              },
+              "hash": 2496,
+            },
+            "hash": 2496,
+          },
+          "hash": 2496,
+        },
+        "hash": 2496,
+      },
+      "hash": 2496,
+    },
+    "hash": 2496,
+  },
+  "hash": 2496,
+}
+`;
+
+exports[`merkle trie pruning works and keeps correct hashes 2`] = `
+Object {
+  "1": Object {
+    "2": Object {
+      "1": Object {
+        "0": Object {
+          "0": Object {
+            "2": Object {
+              "2": Object {
+                "2": Object {
+                  "1": Object {
+                    "2": Object {
+                      "2": Object {
+                        "0": Object {
+                          "1": Object {
+                            "1": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1300,
+                                },
+                                "hash": 1300,
+                              },
+                              "hash": 1300,
+                            },
+                            "2": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1400,
+                                },
+                                "hash": 1400,
+                              },
+                              "hash": 1400,
+                            },
+                            "hash": 1244,
+                          },
+                          "2": Object {
+                            "1": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1600,
+                                },
+                                "hash": 1600,
+                              },
+                              "hash": 1600,
+                            },
+                            "2": Object {
+                              "2": Object {
+                                "0": Object {
+                                  "hash": 1700,
+                                },
+                                "hash": 1700,
+                              },
+                              "hash": 1700,
+                            },
+                            "hash": 1336,
+                          },
+                          "hash": 1600,
+                        },
+                        "1": Object {
+                          "0": Object {
+                            "1": Object {
+                              "1": Object {
+                                "1": Object {
+                                  "hash": 1900,
+                                },
+                                "hash": 1900,
+                              },
+                              "hash": 1900,
+                            },
+                            "2": Object {
+                              "1": Object {
+                                "1": Object {
+                                  "hash": 2000,
+                                },
+                                "hash": 2000,
+                              },
+                              "hash": 2000,
+                            },
+                            "hash": 1972,
+                          },
+                          "1": Object {
+                            "0": Object {
+                              "1": Object {
+                                "1": Object {
+                                  "hash": 2100,
+                                },
+                                "hash": 2100,
+                              },
+                              "hash": 2100,
+                            },
+                            "hash": 2100,
+                          },
+                          "hash": 3968,
+                        },
+                        "hash": 2496,
+                      },
+                      "hash": 2496,
+                    },
+                    "hash": 2496,
+                  },
+                  "hash": 2496,
+                },
+                "hash": 2496,
+              },
+              "hash": 2496,
+            },
+            "hash": 2496,
+          },
+          "hash": 2496,
+        },
+        "hash": 2496,
+      },
+      "hash": 2496,
+    },
+    "hash": 2496,
+  },
+  "hash": 2496,
+}
+`;

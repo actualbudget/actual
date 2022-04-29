@@ -1,0 +1,4789 @@
+<!--
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE OFX  PUBLIC "-//Open Financial Exchange//DTD OFX Version 2.0.0//EN">
+
+*********************************************************************************
+*                     Open Financial Exchange (OFX) DTD                         *
+*********************************************************************************
+*   Revision 2.0.1                                                              *
+*   Date:    06 February 2001                                                   *
+*********************************************************************************
+*                           Formal Public Identifier                            *
+*                                                                               *
+*           -//Open Financial Enchange//DTD OFX Version 2.0.1//EN               *
+*********************************************************************************
+*                                                                               *
+*   Copyright 1997, 1998, 1999, 2001 CheckFree Corp., Intuit Inc., Microsoft Corp*
+*   All rights reserved                                                         *
+*********************************************************************************
+-->
+
+<!--
+*********************************************************************************
+*     !!!!!!!!!!! IF YOU ARE EDITING THIS FILE PLEASE READ !!!!!!!!!!!!!!       *
+*********************************************************************************
+Documentation Note:
+The comment immediately preceding each element is used as the element description
+in the HTML pages on the www.ofx.net SpecView pages for 2.x.  Be sure the
+comment preceding any element is what you wish to have seen on the web site.
+-->
+
+<!-- 
+*********************************************************************************
+*                            Change Log                                         *
+*********************************************************************************
+
+Revisions 052401 Gil Clark
+        Reverted aggregates that were added for Tax TY01 back to individual tags
+		to preserver backward compatibility with TY00 forms.
+
+Revisions 052401 Gil Clark
+        Added comments to better support specview.
+        
+Revisions 041201 Gil Clark
+        Added the ballist to statement and cc statement download rs.
+        Added BILLPUBINFO to PAYMENT and BILLPUBCONTEXT to payment profile.
+        
+Revisions 020601 Gil Clark
+        Added reversal id and bill presentment tags to payments.
+        
+Revisions 041500 Gil Clark
+        Remove all references to V2.
+
+Revisions 031900 Betty Harvey
+	1.  Converted SGML DTD for XML Compliancy.
+		a.  Eliminated tag minimalization.
+        b.  Character entities for less than, greater than and
+            ampersand were deleted. They are not required to be 
+            declared in the DTD.
+	2.  Ensured all places where entities were used contained a ;.
+        3.  Commented out the following entities:
+			EXTRARQMSGSETS 
+			EXTRARSMSGSETS 
+			EXTRAMSGSETS  
+            These are currently empty elements and will cause parsing
+            errors until populated.  When they are used, they should
+            be uncommented.
+        4.  Cured ambiguity with element MSGSETLIST.
+        5.  Commented out the entity ACCOUNTENUM2 because it isn't used
+            in any declarations.
+
+
+Revisions 022800 Tom Lebhar
+Because NAME tokens cannot begin with digits, all elements and entities beginning with 401K are preprended with "INV"
+
+	1. Added INV401KDNLD to INVSTMTMSGSETV1, INVSTMTMSGSETV2
+	2. Added INV401K and INV401KBAL aggregates to INVSTMTRS
+	3. Added INV401KSOURCE to INVBUY, INVPOS, INVSELL, INCOME, INVEXPENSE, REINVEST, RETOFCAP, 
+                 SPLIT, TRANSFER, INVPOS, and STMTTRN.
+	4. Added DTPAYROLL to INVBUY.
+	5. Added STATEWITHHOLDING to INVSELL.
+	6. Added LOANID to INVBUY and INVSELL.
+	7. Added LOANPRINCIPAL to INVBUY.
+	8. Added LOANINTEREST to INVBUY.
+	9. Added PENALTY to INVSELL.
+	10. Added PRIORYEARCONTRIB to INVBUY.
+
+Revisions 031000 Tom Lebhar
+	1. Added % LOANIDTYPE entity
+	2. Added % GENCONTACTINFOTYPE entity
+	3. Added % GENDESCTYPE entity
+	4. Added % NUMPMTS entity; number of payments
+
+-->
+
+
+<!--
+
+============================================================================= -->
+
+<!-- ENTITIES - Extensions
+
+    This entity allows users of this DTD to add new message sets
+    to the DTD.
+
+    
+
+    Note:  Since these entities are currently empty placeholders, they appear
+    at the end of lists without a preceding comma or vertical bar.  Once these
+    entities assume real values, a comma or vertical bar should be added
+    before each occurrence in a list.
+    In particular, new message set request and response aggregates should be
+    separated and preceded by a comma and must be optional (followed by a
+    question mark).
+
+    New message set profile aggregates should be separated and preceded by
+    vertical bars.
+-->
+
+<!-- ============================================================================= -->
+
+
+<!-- Add extra xxxMSGSETRQVn here 
+
+<!ENTITY % EXTRARQMSGSETS "">
+
+-->
+
+<!-- Add extra xxxMSGSETRSVn here 
+
+<!ENTITY % EXTRARSMSGSETS "">
+
+-->
+
+
+<!-- Add extra XXXMSGSET here 
+
+<!ENTITY % EXTRAMSGSETS   "">
+
+-->
+
+
+<!-- ============================================================================= -->
+
+<!-- ENTITIES - types
+
+    This section defines entities as 'types' for all 
+    primitive element values.  This is the only place
+    that #PCDATA and #Datatype should appear.  
+
+-->
+
+<!-- ============================================================================= -->
+
+
+
+<!-- Server ID : encoding for <TOKEN>s, <SERVERTID>s, etc -->
+
+<!ENTITY % SRVRIDTYPE "(#PCDATA)" >
+
+<!--#ENTITY % SRVRIDTYPE		#Datatype(A-10)-->
+
+
+<!-- UUID : a universal ID, up to 36 char hexadecimal -->
+
+<!ENTITY % UUIDTYPE "(#PCDATA)" >
+
+<!--#ENTITY % UUIDTYPE			#Datatype(A-36)-->
+
+<!-- Single character data -->
+
+<!ENTITY % CHARTYPE "(#PCDATA)">
+
+<!--#ENTITY % CHARTYPE			#Datatype(A-1)-->
+
+
+<!-- URL -->
+
+<!ENTITY % URLTYPE  "(#PCDATA)">
+
+<!--#ENTITY % URLTYPE			#Datatype(A-255)-->
+
+<!-- Integer -->
+
+<!ENTITY % INTTYPE  "(#PCDATA)">
+
+<!--#ENTITY % INTTYPE			#Datatype(I-4)-->
+
+
+<!-- Rate, percentage -->
+
+<!ENTITY % RATETYPE "(#PCDATA)">
+
+<!--#ENTITY % RATETYPE			#DataType(A-32)-->
+
+
+<!-- Current Amount: Used for specifying an amount.
+
+ may be signed; comma or period for decimal point
+
+-->
+
+<!ENTITY % AMTTYPE  "(#PCDATA)">
+
+<!--#ENTITY % AMTTYPE			#DataType(N-32)-->
+
+
+<!--  Date and Time: Used for specifying
+
+ the date and time. All date-time pairs
+
+ are based on local time of the server or client.
+
+-->
+
+<!ENTITY % DTTMTYPE "(#PCDATA)">
+
+<!--#ENTITY % DTTMTYPE			#DataType(DATE)-->
+
+
+<!-- Datatype with time only, no date -->
+
+<!ENTITY % TMTYPE "(#PCDATA)">
+
+<!--#ENTITY % TMTYPE 			#DataType(TIME)-->
+
+
+<!-- Boolean : Y/N -->
+
+<!ENTITY % BOOLTYPE "(#PCDATA)">
+
+<!--#ENTITY % BOOLTYPE			#DataType(BOOL)-->
+
+
+<!-- a general purpose identifier type -->
+
+<!ENTITY % IDTYPE   "(#PCDATA)">
+
+<!--#ENTITY % IDTYPE			#DataType(A-32)-->
+
+
+<!-- a general purpose name type -->
+
+<!ENTITY % GENNAMETYPE   "(#PCDATA)">
+
+<!--#ENTITY % GENNAMETYPE		#DataType(A-32)-->
+
+
+<!-- Profile data types brought from MIFST 1.0 -->
+
+<!ENTITY % EMPTYTYPE "(#PCDATA)">
+
+<!--#ENTITY % EMPTYTYPE 		#DataType(A0-0)-->
+
+<!ENTITY % STATETYPE "(#PCDATA)">
+
+<!--#ENTITY % STATETYPE 		#DataType(A-5)-->
+
+<!ENTITY % STATECODETYPE "(#PCDATA)">
+
+<!--#ENTITY % STATECODETYPE 		#DataType(A-2)-->
+
+<!ENTITY % APPIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % APPIDTYPE			#DataType(A-5)-->
+
+<!ENTITY % BANKIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % BANKIDTYPE		#DataType(A-9)-->
+
+<!ENTITY % RATINGTYPE "(#PCDATA)">
+
+<!--#ENTITY % RATINGTYPE		#DataType(A-10)-->
+
+<!ENTITY % COUNTRYTYPE "(#PCDATA)">
+
+<!--#ENTITY % COUNTRYTYPE		#DataType(A-3)-->
+
+<!ENTITY % COUNTRYSTRINGTYPE "(#PCDATA)">
+
+<!--#ENTITY % COUNTRYSTRINGTYPE		#DataType(A-32)-->
+
+<!ENTITY % ZIPTYPE "(#PCDATA)">
+
+<!--#ENTITY % ZIPTYPE			#DataType(A-11)-->
+
+<!ENTITY % PAYEEIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % PAYEEIDTYPE	    	#DataType(A-12)-->
+
+<!ENTITY % CHECKNUMTYPE "(#PCDATA)">
+
+<!--#ENTITY % CHECKNUMTYPE		#DataType(A-12)-->
+
+<!ENTITY % NONCETYPE "(#PCDATA)">
+
+<!--#ENTITY % NONCETYPE	    		#DataType(A-16)-->
+
+<!ENTITY % BROKERIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % BROKERIDTYPE 		#DataType(A-22)-->
+
+<!ENTITY % ACCTIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % ACCTIDTYPE		#DataType(A-22)-->
+
+<!ENTITY % TICKERTYPE "(#PCDATA)">
+
+<!--#ENTITY % TICKERTYPE		#DataType(A-32)-->
+
+<!ENTITY % FIIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % FIIDTYPE			#DataType(A-32)-->
+
+<!ENTITY % TYPEDESCTYPE "(#PCDATA)">
+
+<!--#ENTITY % TYPEDESCTYPE		#DataType(A-32)-->
+
+<!ENTITY % PHONETYPE "(#PCDATA)">
+
+<!--#ENTITY % PHONETYPE			#DataType(A-32)-->
+
+<!ENTITY % ADDRESSTYPE "(#PCDATA)">
+
+<!--#ENTITY % ADDRESSTYPE		#DataType(A-32)-->
+
+<!ENTITY % OPTIONLEVELTYPE "(#PCDATA)">
+
+<!--#ENTITY % OPTIONLEVELTYPE		#DataType(A-40)-->
+
+<!ENTITY % SUBJECTTYPE "(#PCDATA)">
+
+<!--#ENTITY % SUBJECTTYPE		#DataType(A-60)-->
+
+<!ENTITY % FICERTIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % FICERTIDTYPE		#DataType(A-64)-->
+
+<!ENTITY % USERKEYTYPE "(#PCDATA)">
+
+<!--#ENTITY % USERKEYTYPE		#DataType(A-64)-->
+
+<!ENTITY % SHORTMSGTYPE "(#PCDATA)">
+
+<!--#ENTITY % SHORTMSGTYPE		#DataType(A-80)-->
+
+<!ENTITY % SECNAMETYPE "(#PCDATA)">
+
+<!--#ENTITY % SECNAMETYPE		#DataType(A-120)-->
+
+<!ENTITY % PASSWORDTYPE "(#PCDATA)">
+
+<!--#ENTITY % PASSWORDTYPE		#DataType(A-171)-->
+
+<!ENTITY % FITIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % FITIDTYPE			#DataType(A-255)-->
+
+<!ENTITY % MSGTYPE "(#PCDATA)">
+
+<!--#ENTITY % MSGTYPE			#DataType(A-255)-->
+
+<!ENTITY % LONGMSGTYPE "(#PCDATA)">
+
+<!--#ENTITY % LONGMSGTYPE		#DataType(A-2000)-->
+
+<!ENTITY % MEMO2TYPE "(#PCDATA)">
+
+<!--#ENTITY % MEMO2TYPE			#DataType(A-390)-->
+
+<!ENTITY % INFOTYPE "(#PCDATA)">
+
+<!--#ENTITY % INFOTYPE			#DataType(A-360)-->
+
+<!ENTITY % SESSCOOKIETYPE "(#PCDATA)">
+
+<!--#ENTITY % SESSCOOKIETYPE		#DataType(A-1000)-->
+
+<!ENTITY % MSGBODYTYPE "(#PCDATA)">
+
+<!--#ENTITY % MSGBODYTYPE		#DataType(R-10000)-->
+
+<!ENTITY % INVNOTYPE "(#PCDATA)">
+
+<!--#ENTITY % INVNOTYPE			#DataType(A-32)-->
+
+<!ENTITY % CNTRLNOTYPE "(#PCDATA)">
+
+<!--#ENTITY % CNTRLNOTYPE			#DataType(A-32)-->
+
+<!ENTITY % NINSTSTYPE "(#PCDATA)">
+
+<!--#ENTITY % NINSTSTYPE		#DataType(I-3)-->
+
+<!ENTITY % TEMPPASSTYPE "(#PCDATA)">
+
+<!--#ENTITY % TEMPPASSTYPE		#DataType(A-32)-->
+
+<!ENTITY % DAYSPANTYPE "(#PCDATA)">
+
+<!--#ENTITY % DAYSPANTYPE		#DataType(I-3)-->
+
+<!ENTITY % REFNUMTYPE "(#PCDATA)">
+
+<!--#ENTITY % REFNUMTYPE		#DataType(A-32)-->
+
+<!ENTITY % MAXMINTYPE "(#PCDATA)">
+
+<!--#ENTITY % MAXMINTYPE		#DataType(I-2)-->
+
+<!ENTITY % VERTYPE "(#PCDATA)">
+
+<!--#ENTITY % VERTYPE			#DataType(I-5)-->
+
+<!ENTITY % SHARESPERTYPE "(#PCDATA)">
+
+<!--#ENTITY % SHARESPERTYPE		#DataType(I-5)-->
+
+<!ENTITY % ERRORTYPE "(#PCDATA)">
+
+<!--#ENTITY % ERRORTYPE  		#DataType(I-6)-->
+
+<!ENTITY % SICTYPE "(#PCDATA)">
+
+<!--#ENTITY % SICTYPE    		#DataType(I-6)-->
+
+<!ENTITY % CUSIPTYPE "(#PCDATA)">
+
+<!--#ENTITY % CUSIPTYPE			#DataType(A-32)-->
+
+<!ENTITY % EXTTYPE "(#PCDATA)">
+
+<!--#ENTITY % EXTTYPE			#DataType(I-10)-->
+
+<!ENTITY % BILLREFINFOTYPE "(#PCDATA)">
+
+<!--#ENTITY % BILLREFINFOTYPE		#DataType(A-80)-->
+
+<!ENTITY % BOOKINGTEXTTYPE "(#PCDATA)">
+
+<!--#ENTITY % BOOKINGTEXTTYPE		#DataType(A-40)-->
+
+<!ENTITY % NAMEACCTHELDTYPE "(#PCDATA)">
+
+<!--#ENTITY % NAMEACCTHELDTYPE	#DataType(A-96)-->
+
+<!ENTITY % COLUMNTYPE "(#PCDATA)">
+
+<!--#ENTITY % COLUMNTYPE		#DataType(A-8)-->
+
+<!ENTITY % TANTYPE "(#PCDATA)">
+
+<!--#ENTITY % TANTYPE			#DataType(A-80)-->
+
+<!ENTITY % SECUIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % SECUIDTYPE 		#DataType(A-10)-->
+
+<!ENTITY % LOANIDTYPE "(#PCDATA)">
+
+<!--#ENTITY % LOANIDTYPE 		#DataType(A-32)-->
+
+<!ENTITY % GENCONTACTINFOTYPE "(#PCDATA)">
+
+<!--#ENTITY % GENCONTACTINFOTYPE	#DataType(A-255)-->
+
+<!ENTITY % GENDESCTYPE "(#PCDATA)">
+
+<!--#ENTITY % GENDESCTYPE		#DataType(A-32)-->
+
+<!ENTITY % NUMPMTS "(#PCDATA)">
+
+<!--#ENTITY % NUMPMTS			#DataType(I-5)-->
+
+<!ENTITY % YEARTYPE "(#PCDATA)">
+
+<!--#ENTITY % YEARTYPE			#DataType(N-4)-->
+
+
+<!-- Country-specific data types follow -->
+
+<!ENTITY % ITACAUSALETYPE "(#PCDATA)">
+
+<!--#ENTITY % ITACAUSALETYPE		#DataType(I-2)-->
+
+
+<!-- Enumerated data types follow-->
+
+<!ENTITY % ASSETCLASSENUM "(#PCDATA)">
+
+<!--#ENTITY % ASSETCLASSENUM		#Enum("DOMESTICBOND", "INTLBOND","LARGESTOCK","SMALLSTOCK",
+							  "INTLSTOCK","MONEYMRKT","OTHER")-->
+
+<!ENTITY % CALLTYPEENUM "(#PCDATA)">
+
+<!--#ENTITY % CALLTYPEENUM		#Enum("CALL", "PUT","PREFUND","MATURITY")-->
+
+<!ENTITY % STOCKENUM "(#PCDATA)">
+
+<!--#ENTITY % STOCKENUM			#Enum("COMMON", "PREFERRED","CONVERTIBLE","OTHER")-->
+
+<!ENTITY % BUYENUM "(#PCDATA)">
+
+<!--#ENTITY % BUYENUM			#Enum("BUY", "BUYTOCOVER")-->
+
+<!ENTITY % INCOMEENUM "(#PCDATA)">
+
+<!--#ENTITY % INCOMEENUM		#Enum("CGLONG", "CGSHORT","DIV","INTEREST", "MISC")-->
+
+<!ENTITY % OPTACTIONENUM "(#PCDATA)">
+
+<!--#ENTITY % OPTACTIONENUM		#Enum("EXERCISE", "ASSIGN","EXPIRE")-->
+
+<!ENTITY % OPTBUYENUM "(#PCDATA)">
+
+<!--#ENTITY % OPTBUYENUM		#Enum("BUYTOOPEN", "BUYTOCLOSE")-->
+
+<!ENTITY % OPTSELLENUM "(#PCDATA)">
+
+<!--#ENTITY % OPTSELLENUM		#Enum("SELLTOOPEN", "SELLTOCLOSE")-->
+
+<!ENTITY % POSTYPEENUM "(#PCDATA)">
+
+<!--#ENTITY % POSTYPEENUM		#Enum("LONG", "SHORT")-->
+
+<!ENTITY % RELATEDENUM "(#PCDATA)">
+
+<!--#ENTITY % RELATEDENUM		#Enum("SPREAD", "STRADDLE","NONE","OTHER")-->
+
+<!ENTITY % SECUREDENUM "(#PCDATA)">
+
+<!--#ENTITY % SECUREDENUM		#Enum("NAKED", "COVERED")-->
+
+<!ENTITY % SELLREASONENUM "(#PCDATA)">
+
+<!--#ENTITY % SELLREASONENUM		#Enum("CALL", "MATURITY", "SELL")-->
+
+<!ENTITY % SELLTYPEENUM "(#PCDATA)">
+
+<!--#ENTITY % SELLTYPEENUM		#Enum("SELL", "SELLSHORT")-->
+
+<!ENTITY % DURATIONENUM "(#PCDATA)">
+
+<!--#ENTITY % DURATIONENUM		#Enum("DAY", "GOODTILCANCEL","IMMEDIATE")-->
+
+<!ENTITY % RESTRICTIONENUM "(#PCDATA)">
+
+<!--#ENTITY % RESTRICTIONENUM		#Enum("ALLORNONE", "MINUNITS","NONE")-->
+
+<!ENTITY % INOUTENUM "(#PCDATA)">
+
+<!--#ENTITY % INOUTENUM			#Enum("IN", "OUT")-->
+
+<!ENTITY % UNITTYPEENUM "(#PCDATA)">
+
+<!--#ENTITY % UNITTYPEENUM		#Enum("SHARES", "CURRENCY")-->
+
+<!ENTITY % SUBACCTENUM "(#PCDATA)">
+
+<!--#ENTITY % SUBACCTENUM		#Enum("CASH", "MARGIN","SHORT","OTHER")-->
+
+<!ENTITY % OPTTYPEENUM "(#PCDATA)">
+
+<!--#ENTITY % OPTTYPEENUM		#Enum("CALL", "PUT")-->
+
+<!ENTITY % MFTENUM "(#PCDATA)">
+
+<!--#ENTITY % MFTENUM			#Enum("OPENEND", "CLOSEEND","OTHER")-->
+
+<!ENTITY % DEBTENUM "(#PCDATA)">
+
+<!--#ENTITY % DEBTENUM			#Enum("COUPON","ZERO")-->
+
+<!ENTITY % DEBTCLASSENUM "(#PCDATA)">
+
+<!--#ENTITY % DEBTCLASSENUM		#Enum("TREASURY", "MUNICIPAL","CORPORATE","OTHER")-->
+
+<!ENTITY % EXTDPMTFORENUM "(#PCDATA)">
+
+<!--#ENTITY % EXTDPMTFORENUM		#Enum("INDIVIDUAL","BUSINESS")-->
+
+<!ENTITY % COUPONFREQENUM "(#PCDATA)">
+
+<!--#ENTITY % COUPONFREQENUM		#Enum("MONTHLY","QUARTERLY","SEMIANNUALLY","ANUALLY","OTHER")-->
+
+<!ENTITY % CHARTYPEENUM "(#PCDATA)">
+
+<!--#ENTITY % CHARTYPEENUM		#Enum("ALPHAONLY","NUMERICONLY","ALPHAORNUMERIC","ALPHAANDNUMERIC")-->
+
+<!ENTITY % BALANCEENUM "(#PCDATA)">
+
+<!--#ENTITY % BALANCEENUM		#Enum("DOLLAR","PERCENT","NUMBER")-->
+
+<!ENTITY % ACCOUNTENUM "(#PCDATA)">
+
+<!--#ENTITY % ACCOUNTENUM		#Enum("CHECKING","SAVINGS","MONEYMRKT","CREDITLINE")-->
+
+<!--
+	***********************************
+	*   Entity Unused in the DTD      *
+        ***********************************
+-->
+
+<!ENTITY % FREQENUM "(#PCDATA)">
+
+<!--#ENTITY % FREQENUM			#Enum("WEEKLY","BIWEEKLY","TWICEMONTHLY","MONTHLY","FOURWEEKS","BIMONTHLY",
+
+							"QUARTERLY","SEMIANNUALLY","TRIANNUALLY","ANUALLY")-->
+
+<!ENTITY % DAYSENUM "(#PCDATA)">
+
+<!--#ENTITY % DAYSENUM			#Enum("MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY",
+							"SATURDAY","SUNDAY")-->
+
+<!ENTITY % CLIENTROUTINGENUM "(#PCDATA)">
+
+<!--#ENTITY % CLIENTROUTINGENUM	#Enum("NONE","SERVICE","MSGSET")-->
+
+<!ENTITY % XFERSTATUSENUM "(#PCDATA)">
+
+<!--#ENTITY % XFERSTATUSENUM		#Enum("WILLPROCESSON","POSTEDON","NOFUNDSON", "CANCELEDON", "FAILEDON")-->
+
+<!ENTITY % TRANSACTIONENUM "(#PCDATA)">
+
+<!--#ENTITY % TRANSACTIONENUM		#Enum("CREDIT","DEBIT","INT","DIV","FEE","SRVCHG","DEP","ATM",
+
+			       			"POS","XFER","CHECK","PAYMENT","CASH","DIRECTDEP","DIRECTDEBIT",
+
+			       			"REPEATPMT","OTHER")-->		
+
+<!ENTITY % PMTPROCESSSTATUSENUM "(#PCDATA)">
+
+<!--#ENTITY % PMTPROCESSSTATUSENUM	#Enum("WILLPROCESSON","PROCESSEDON","NOFUNDSON","FAILEDON",
+
+							"CANCELEDON")-->
+
+<!ENTITY % USPRODUCTENUM "(#PCDATA)">
+
+<!--#ENTITY % USPRODUCTENUM		#Enum("401K","403B","IRA","KEOGH","OTHER","SARSEP","SIMPLE","NORMAL",
+
+				   			"TDA","TRUST","UGMA")-->
+
+<!ENTITY % SEVERITYENUM "(#PCDATA)">
+
+<!--#ENTITY % SEVERITYENUM		#Enum("INFO","WARN","ERROR")-->
+
+<!ENTITY % SECURITYENUM "(#PCDATA)">
+
+<!--#ENTITY % SECURITYENUM		#Enum("NONE","TYPE1")-->
+
+<!ENTITY % SYNCENUM "(#PCDATA)">
+
+<!--#ENTITY % SYNCENUM			#Enum("FULL","LITE")-->
+
+<!ENTITY % SERVICESTATUSENUM "(#PCDATA)">
+
+<!--#ENTITY % SERVICESTATUSENUM	#Enum("AVAIL","PEND", "ACTIVE")-->
+
+<!ENTITY % SERVICESTATUS2ENUM "(#PCDATA)">
+
+<!--#ENTITY % SERVICESTATUS2ENUM	#Enum("AVAIL","PEND", "ACTIVE", "REJECTED")-->
+
+<!ENTITY % SERVICEENUM "(#PCDATA)">
+
+<!--#ENTITY % SERVICEENUM		#Enum("BANKSVC","BPSVC", "INVSVC", "PRESSVC")-->
+
+<!ENTITY % CORRECTIVEACTENUM "(#PCDATA)">
+
+<!--#ENTITY % CORRECTIVEACTENUM	#Enum("REPLACE","DELETE")-->
+
+<!ENTITY % CHECKSTATUSENUM "(#PCDATA)">
+
+<!--#ENTITY % CHECKSTATUSENUM		#Enum("0","1","100","101")-->
+
+<!ENTITY % IDSCOPEENUM "(#PCDATA)">
+
+<!--#ENTITY % IDSCOPEENUM		#Enum("GLOBAL","USER")-->
+
+<!ENTITY % INVESTMENTACCOUNTENUM "(#PCDATA)">
+
+<!--#ENTITY % INVESTMENTACCOUNTENUM	#Enum("INDIVIDUAL","JOINT", "TRUST", "CORPORATE")-->
+
+<!ENTITY % PWTYPEENUM "(#PCDATA)">
+
+<!--#ENTITY % PWTYPEENUM 		#Enum("FIXED","ONETIME","HWTOKEN")-->
+
+<!ENTITY % PMTINSTRUMENTENUM "(#PCDATA)">
+
+<!--#ENTITY % PMTINSTRUMENTENUM 	#Enum("CONCENTRATOR","CHECKINGACCOUNT","CREDITCARD","ECOIN")-->
+
+
+<!ENTITY % LANGUAGEENUM "(#PCDATA)">
+
+<!--#ENTITY % LANGUAGEENUM		#Enum("AAR","ABK","ACE","ACH","ADA","AFA","AFH","AFR",
+ 					"AJM","AKA","AKK","ALB","ALE","ALG","AMH","ANG",
+					"APA","ARA","ARC","ARM","ARN","ARP","ART","ARW",
+					"ASM","ATH","AVA","AVE","AWA","AYM","AZE","BAD",
+					"BAI","BAK","BAL","BAM","BAN","BAQ","BAS","BAT",
+ 					"BEJ","BEL","BEM","BEN","BER","BHO","BIH","BIK",
+		 			"BIN","BIS","BLA","BOD","BRA","BRE","BUG","BUL",
+					"BUR","CAD","CAI","CAR","CAT","CAU","CEB","CEL",
+					"CES","CHA","CHB","CHE","CHG","CHI","CHN","CHO",
+					"CHR","CHU","CHV","CHY","COP","COR","COS","CPE",
+					"CPF","CPP","CRE","CRP","CUS","CYM","CZE","DAK",
+					"DAN","DEL","DEU","DIN","DOI","DRA","DUA","DUM",
+					"DUT","DYU","DZO","EFI","EGY","EKA","ELL","ELX",
+					"ENG","ENM","EPO","ESK","ESL","EST","ETH","EUS",
+					"EWE","EWO","FAN","FAO","FAS","FAT","FIJ","FIN",
+					"FIU","FON","FRA","FRE","FRM","FRO","FRY","FUL",
+					"GAA","GAE","GAI","GAY","GDH","GEM","GEO","GER",
+					"GIL","GLG","GMH","GOH","GON","GOT","GRB","GRC",
+					"GRE","GRN","GUJ","HAI","HAU","HAW","HEB","HER",
+					"HIL","HIM","HIN","HMO","HUN","HUP","HYE","IBA",
+					"IBO","ICE","IJO","IKU","ILE","ILO","INA","INC",
+					"IND","INE","IPK","IRA","IRI","IRO","ISL","ITA",
+					"JAV","JAW","JPN","JPR","JRB","KAA","KAB","KAC",
+					"KAL","KAM","KAN","KAR","KAS","KAT","KAU","KAW",
+					"KAZ","KHA","KHI","KHM","KHO","KIK","KIN","KIR",
+					"KOK","KON","KOR","KPE","KRO","KRU","KUA","KUR",
+					"KUS","KUT","LAD","LAH","LAM","LAO","LAP","LAT",
+					"LAV","LIN","LIT","LOL","LOZ","LUB","LUG","LUI",
+					"LUN","LUO","MAC","MAD","MAG","MAH","MAI","MAK",
+					"MAL","MAN","MAO","MAP","MAR","MAS","MAX","MAY",
+					"MEN","MIC","MIN","MIS","MKE","MKH","MLG","MLT",
+					"MNI","MNO","MOH","MOL","MON","MOS","MRI","MSA",
+					"MUL","MUN","MUS","MWR","MYA","MYN","NAH","NAI",
+					"NAU","NAV","NDE","NLD","NDO","NEP","NEW","NIC",
+					"NIU","NON","NOR","NSO","NUB","NYA","NYM","NYN",
+					"NYO","NZI","OCI","OJI","ORI","ORM","OSA","OSS",
+					"OTA","OTO","PAA","PAG","PAL","PAM","PAN","PAP",
+					"PAU","PEO","PER","PLI","POL","PON","POR","PRA",
+					"PRO","PUS","QUE","RAJ","RAR","ROA","ROH","ROM",
+					"RON","RUM","RUN","RUS","SAD","SAG","SAI","SAL",
+					"SAM","SAN","SCO","SCR","SEL","SEM","SHN","SID",
+					"SIN","SIO","SIT","SLA","SLK","SLO","SLV","SMO",
+					"SNA","SND","SOG","SOM","SON","SOT","SPA","SQI",
+					"SRR","SSA","SSW","SUK","SUN","SUS","SUX","SVE",
+					"SWA","SWE","SYR","TAH","TAM","TAT","TEL","TEM",
+					"TER","TGK","TGL","THA","TIB","TIG","TIR","TIV",
+					"TLI","TOG","TON","TRU","TSI","TSN","TSO","TUK",
+					"TUM","TUR","TUT","TWI","UGA","UIG","UKR","UMB",
+					"UND","URD","UZB","VAI","VEN","VIE","VOL","VOT",
+					"WAK","WAL","WAR","WAS","WEL","WEN","WOL","XHO",
+					"YAO","YAP","YID","YOR","ZAP","ZEN","ZHA","ZHO",
+					"ZUL","ZUN")-->
+
+
+<!ENTITY % CURRENCYENUM "(#PCDATA)">
+
+<!--#ENTITY % CURRENCYENUM		#Enum("ADP","AED","AFA","ALL","ANG","AOK","ARA","ATS","AUD",
+					"AWG","BBD","BDT","BEF","BGL","BHD","BIF","BMD","BND",
+					"BOB","BRC","BSD","BTN","BUK","BWP","BZD","CAD","CHF",
+					"CLF","CLP","CNY","COP","CRC","CSK","CUP","CVE","CYP",
+					"DDM","DEM","DJF","DKK","DOP","DZD","ECS","EGP","ESP",
+					"ETB","EUR","FIM","FJD","FKP","FRF","GBP","GHC","GIP","GMD",
+					"GNF","GRD","GTQ","GWP","GYD","HKD","HNL","HTG","HUF",
+					"IDR","IEP","ILS","INR","IQD","IRR","ISK","ITL","JMD",
+					"JOD","JPY","KES","KHR","KMF","KPW","KRW","KWD","KYD",
+					"LAK","LBP","LKR","LRD","LSL","LUF","LYD","MAD","MGF",
+					"MNT","MOP","MRO","MTL","MUR","MVR","MWK","MXP","MYR",
+					"MZM","NGN","NIC","NLG","NOK","NPR","NZD","OMR","PAB",
+					"PEI","PGK","PHP","PKR","PLZ","PTE","PYG","QAR","ROL",
+					"RWF","SAR","SBD","SCR","SDP","SEK","SGD","SHP","SLL",
+					"SOS","SRG","STD","SUR","SVC","SYP","SZL","THB","TND",
+					"TOP","TPE","TRL","TTD","TWD","TZS","UGS","USD","UYP",
+					"VEB","VND","VUV","WST","YDD","YER","YUD","ZAR","ZMK",
+					"ZRZ","ZWD")-->
+
+
+<!ENTITY % PAYEEMODENUM "(#PCDATA)">
+
+<!--#ENTITY % PAYEEMODENUM	#Enum("NEVER", "IFREQUESTED")-->
+
+<!ENTITY % BILLTYPEENUM "(#PCDATA)">
+
+<!--#ENTITY % BILLTYPEENUM	#Enum("BILL", "STATEMENT", "NOTICE")-->
+
+<!ENTITY % BILLSTATUSCODEENUM "(#PCDATA)">
+
+<!--#ENTITY % BILLSTATUSCODEENUM	#Enum("NEW", "DELIVERED", "VIEWED", "RETIRED", 
+                                          "WITHDRAWN", "UNDELIVERABLE")-->
+
+<!ENTITY % BILLPMTSTATUSCODEENUM "(#PCDATA)">
+
+<!--#ENTITY % BILLPMTSTATUSCODEENUM	#Enum("NONE", "SCHEDULED", "PROCESSED", "POSTED", 
+                                          "PAIDOUTOFBAND", "AUTOPAY", "CANCELLED", 
+                                          "UNPAYABLE")-->
+
+<!ENTITY % STATUSMODBYENUM "(#PCDATA)">
+
+<!--#ENTITY % STATUSMODBYENUM	#Enum("CUSTOMER", "CUSTAGENT", "BILLPUBLISHER", 
+                                      "BILLPUBLISHERSR", "PMTPROVIDER", 
+                                      "PMTPROVIDERSR", "BILLER", "BILLERSR")-->
+
+
+<!ENTITY %  INV401KSOURCEENUM "(#PCDATA)" >
+
+<!--#ENTITY %  INV401KSOURCEENUM #Enum("PRETAX", "AFTERTAX", "MATCH", "PROFITSHARING", "ROLLOVER", 
+                                       "OTHERVEST", "OTHERNONVEST") -->
+
+<!ENTITY %  LONGSHORTENUM "(#PCDATA)" >
+
+<!--#ENTITY %  LONGSHORTENUM   #Enum("LONG", "SHORT", "QUAL5YEAR") -->
+
+<!-- ============================================================================= -->
+
+<!-- ENTITIES - macros
+
+    This section defines macros used in one or more modules
+    where a new level of aggregation was not desired but
+    common structure is present
+
+-->
+
+<!-- ============================================================================= -->
+
+
+<!-- 
+     Sync macros: all sync requests/responses have same form, but
+     have own name.  Although we could use the multiple-element syntax and put
+     them all here, we'd rather keep service-specific names in the service files.
+     Thus, we have a macro here that is trivially referenced in each service module 
+-->
+
+<!ENTITY % SYNCRQMACRO "((TOKEN | TOKENONLY | REFRESH ), REJECTIFMISSING)" >   
+
+<!ENTITY % SYNCRSMACRO "(TOKEN, LOSTSYNC?)">
+
+
+<!-- 
+     Transaction Macro: all transaction requests have same form
+     but own name.  Didn't want to create a new sub-aggregate
+     to hold these elements so use a macro to incorporate them
+     into each XXXTRNRQ and XXXTRNRS 
+-->
+
+<!ENTITY % TRNRQMACRO "(TRNUID, CLTCOOKIE?, TAN?)">
+
+<!ENTITY % TRNRSMACRO "(TRNUID, STATUS, CLTCOOKIE?)">
+
+
+<!-- 
+     Account from and account info: if you add a new service and it adds
+     a specific account from or account info aggregate, add it here so it will be
+     known to aggregates such as the account info request 
+-->
+
+<!ENTITY % ACCTFROMMACRO "(BANKACCTFROM | CCACCTFROM | INVACCTFROM| PRESACCTFROM)">
+
+<!ENTITY % ACCTTOMACRO "(BANKACCTTO | CCACCTTO | INVACCTTO | PRESACCTTO)">
+
+<!ENTITY % ACCTINFOMACRO "(BANKACCTINFO | CCACCTINFO | BPACCTINFO | INVACCTINFO | PRESACCTINFO)">
+
+
+<!-- ============================================================================= -->
+
+<!--
+*********************************************************************************
+*                          OFX  Root Element                                    *
+*********************************************************************************
+-->
+
+<!-- ============================================================================= -->
+
+<!--
+
+    Open Financial Exchange Element Structure
+    This section defines common and high-level elements.
+    New requests and responses need to be added to the TRNRQ/TRNRS elements here
+-->
+
+<!-- ============================================================================= -->
+
+
+<!-- Top-level -->
+
+<!-- Add the 'meta-token' for sync requests from each
+     service module here -->
+
+<!--
+***************************************************************
+*  Version 2.0 Modification:  Deleted entity %EXTRARQMSGSETS; *
+*              at the end of the the %OFXRQMSGSETS entity.    *
+***************************************************************
+-->
+
+<!ENTITY % OFXRQMSGSETS  "SIGNONMSGSRQV1,
+                          SIGNUPMSGSRQV1?,
+                          BANKMSGSRQV1?,
+                          CREDITCARDMSGSRQV1?,
+                          INVSTMTMSGSRQV1?,
+                          INTERXFERMSGSRQV1?,
+                          WIREXFERMSGSRQV1?,
+                          BILLPAYMSGSRQV1?,
+                          EMAILMSGSRQV1?,
+                          SECLISTMSGSRQV1?,
+                          PRESDIRMSGSRQV1?,
+                          PRESDLVMSGSRQV1?,
+                          PROFMSGSRQV1?,
+                          TAX1098MSGSRQV1?,
+                          TAX1099MSGSRQV1?,
+                          TAXW2MSGSRQV1?">
+
+<!--
+***************************************************************
+*  Version 2.0 Modification:  Deleted entity %EXTRARQMSGSETS; *
+*              at the end of the the %OFXRSMSGSETS entity.    *
+***************************************************************
+-->
+
+<!ENTITY % OFXRSMSGSETS    "SIGNONMSGSRSV1,
+                            SIGNUPMSGSRSV1?,
+                            BANKMSGSRSV1?,
+                            CREDITCARDMSGSRSV1?,
+                            INVSTMTMSGSRSV1?,
+                            INTERXFERMSGSRSV1?,
+                            WIREXFERMSGSRSV1?,
+                            BILLPAYMSGSRSV1?,
+                            EMAILMSGSRSV1?,
+                            SECLISTMSGSRSV1?,
+                            PRESDIRMSGSRSV1?,
+                            PRESDLVMSGSRSV1?,
+                            PROFMSGSRSV1?,
+                            TAX1098MSGSRSV1?, 
+                            TAX1099MSGSRSV1?, 
+                            TAXW2MSGSRSV1?">                
+
+<!-- OFX Root element -->
+
+<!ELEMENT OFX    ((%OFXRQMSGSETS;) | (%OFXRSMSGSETS;))>
+
+
+<!-- Different from most: only one sonrq and at most one
+     pin change allowed 
+-->
+<!-- Signon Message set Request and Response -->
+
+<!ELEMENT SIGNONMSGSRQV1     (SONRQ, PINCHTRNRQ?, CHALLENGETRNRQ?)>
+
+<!ELEMENT SIGNONMSGSRSV1     (SONRS, PINCHTRNRS?, CHALLENGETRNRS?)>
+
+
+<!-- Signon message set profile entry -->
+
+<!ELEMENT SIGNONMSGSET       (SIGNONMSGSETV1)>
+
+<!ELEMENT SIGNONMSGSETV1          (MSGSETCORE)>
+
+
+<!-- Pin transactions -->
+
+<!ELEMENT PINCHTRNRQ     (%TRNRQMACRO;, PINCHRQ)>
+
+<!ELEMENT PINCHTRNRS     (%TRNRSMACRO;, PINCHRS?)>
+
+<!-- Challenge transactions -->
+
+<!ELEMENT CHALLENGETRNRQ     (%TRNRQMACRO;, CHALLENGERQ)>
+
+<!ELEMENT CHALLENGETRNRS     (%TRNRSMACRO;, CHALLENGERS?)>
+
+
+<!-- Signon Request and Response -->
+
+<!ELEMENT SONRQ 	 (DTCLIENT, ((USERID, USERPASS) | USERKEY),
+                          GENUSERKEY?, LANGUAGE, FI?, SESSCOOKIE?, APPID, 
+                          APPVER)>
+
+<!ELEMENT SONRS		 (STATUS, DTSERVER, USERKEY?, 
+                          TSKEYEXPIRE?, LANGUAGE,
+                          DTPROFUP?, DTACCTUP?, FI?, SESSCOOKIE?)>
+                          
+<!-- FI info -->
+<!ELEMENT FI             (ORG, FID?)>
+
+<!-- Organization name -->
+<!ELEMENT ORG            %GENNAMETYPE;>
+
+<!-- FI record ID -->
+<!ELEMENT FID            %FIIDTYPE;>
+
+<!-- Session cookie -->
+<!ELEMENT SESSCOOKIE     %SESSCOOKIETYPE;>
+
+<!-- PIN Change request and response -->
+
+<!ELEMENT PINCHRQ    (USERID, NEWUSERPASS)>
+
+<!ELEMENT PINCHRS    (USERID, DTCHANGED?)>
+
+<!-- New password for pin change -->
+<!ELEMENT NEWUSERPASS	 %PASSWORDTYPE;>
+
+<!-- Date password changed -->
+<!ELEMENT DTCHANGED      %DTTMTYPE;>
+
+<!-- Challenge request and response -->
+
+<!ELEMENT CHALLENGERQ    (USERID, FICERTID?)>
+
+<!ELEMENT CHALLENGERS    (USERID, NONCE, FICERTID)>
+
+<!-- Random data -->
+<!ELEMENT NONCE 	 %NONCETYPE;>
+
+<!-- Identifier of FI certificate -->
+<!ELEMENT FICERTID 	 %FICERTIDTYPE;>
+
+
+<!-- ============================================================================= -->
+<!--            Message Entries for Message Sets                                   -->
+
+<!ELEMENT BANKMSGSET         (BANKMSGSETV1)>
+
+<!ELEMENT CREDITCARDMSGSET   (CREDITCARDMSGSETV1)>
+
+<!ELEMENT INTERXFERMSGSET    (INTERXFERMSGSETV1)>
+
+<!ELEMENT WIREXFERMSGSET     (WIREXFERMSGSETV1)>
+
+
+<!-- ============================================================================= -->
+<!--            Message Set Profile Data                                           -->
+
+<!-- Banking Message Set -->
+
+<!ELEMENT BANKMSGSETV1         (MSGSETCORE, INVALIDACCTTYPE*, CLOSINGAVAIL, XFERPROF?,
+                                STPCHKPROF?, EMAILPROF)>
+
+<!-- Credit Card Message Set -->
+
+<!ELEMENT CREDITCARDMSGSETV1   (MSGSETCORE, CLOSINGAVAIL)>
+
+<!-- Interbank Transfer Message Set -->
+
+<!ELEMENT INTERXFERMSGSETV1     (MSGSETCORE, XFERPROF, CANBILLPAY, CANCELWND, DOMXFERFEE, 
+                                 INTLXFERFEE)>
+
+<!-- Wire Transfer Message Set -->
+
+<!ELEMENT WIREXFERMSGSETV1        (MSGSETCORE, PROCDAYSOFF*, PROCENDTM, CANSCHED, DOMXFERFEE, 
+                                   INTLXFERFEE)>
+
+<!-- Transfer profile -->
+<!ELEMENT XFERPROF     (PROCDAYSOFF*, PROCENDTM, CANSCHED, CANRECUR, CANMODXFERS, 
+                        CANMODMDLS, MODELWND, DAYSWITH, DFLTDAYSTOPAY)>
+
+<!-- Stop check profile -->
+<!ELEMENT STPCHKPROF   (PROCDAYSOFF*, PROCENDTM, CANUSERANGE, CANUSEDESC, STPCHKFEE)>
+
+<!-- Email profile -->
+<!ELEMENT EMAILPROF   (CANEMAIL, CANNOTIFY)>
+
+
+<!--    Can schedule transfers -->
+
+<!ELEMENT CANSCHED	 %BOOLTYPE;>
+
+<!--    Can modify pending transfers -->
+
+<!ELEMENT CANMODXFERS	 %BOOLTYPE;>
+
+<!-- 	Can use description to stop a check -->
+
+<!ELEMENT CANUSEDESC	 %BOOLTYPE;>
+
+<!-- 	Can use range to stop checks -->
+
+<!ELEMENT CANUSERANGE	 %BOOLTYPE;>
+
+<!--    Default stop check fee -->
+
+<!ELEMENT STPCHKFEE      %AMTTYPE;>
+
+<!-- 	Can handle email -->
+
+<!ELEMENT CANEMAIL	 %BOOLTYPE;>
+
+<!-- 	Can send notifications -->
+
+<!ELEMENT CANNOTIFY	 %BOOLTYPE;>
+
+<!--    Unsupported account types -->
+
+<!ELEMENT INVALIDACCTTYPE  %ACCOUNTENUM;>
+
+<!-- 	Can return closing statement info -->
+
+<!ELEMENT CLOSINGAVAIL	 %BOOLTYPE;>
+
+<!-- 	Can use interbank transfers for bill pay -->
+
+<!ELEMENT CANBILLPAY	 %BOOLTYPE;>
+
+<!-- Number of days after which a transfer is processed that it can be canceled -->
+
+<!ELEMENT CANCELWND		%DAYSPANTYPE;>	
+
+<!-- Fee for sending a domestic transfer transfer -->
+
+<!ELEMENT DOMXFERFEE		%AMTTYPE;>	
+
+<!-- Fee for sending an international transfer -->
+
+<!ELEMENT INTLXFERFEE		%AMTTYPE;>	
+
+
+<!-- ============================================================================= -->
+<!--             Message Sets                                                      -->
+<!-- ============================================================================= -->
+
+
+<!-- Banking Messages Request Set and its contained TRN requests -->
+
+<!ELEMENT BANKMSGSRQV1         ((STMTTRNRQ   | STMTENDTRNRQ  | INTRATRNRQ | RECINTRATRNRQ | 
+                                STPCHKTRNRQ  | BANKMAILTRNRQ | BANKMAILSYNCRQ |
+                                STPCHKSYNCRQ | INTRASYNCRQ   | RECINTRASYNCRQ)+) >
+
+<!-- Credit Card Messages Request Set and its contained TRN requests -->
+
+<!ELEMENT  CREDITCARDMSGSRQV1   ((CCSTMTTRNRQ | CCSTMTENDTRNRQ)+)>
+
+<!-- Wire Transfer Messages Request Set and its contained TRN requests -->
+
+<!ELEMENT WIREXFERMSGSRQV1      ((WIRETRNRQ   | WIRESYNCRQ)+)>
+
+<!-- Interbank Transfer Messages Request Set and its contained TRN requests -->
+
+<!ELEMENT INTERXFERMSGSRQV1    ((INTERTRNRQ  | RECINTERTRNRQ | INTERSYNCRQ | 
+                                 RECINTERSYNCRQ)+)>  
+
+<!-- Banking Message Set Requests -->
+
+<!ELEMENT STMTTRNRQ      (%TRNRQMACRO;, STMTRQ)>
+
+<!ELEMENT STMTENDTRNRQ   (%TRNRQMACRO;, STMTENDRQ)>
+
+<!ELEMENT STPCHKTRNRQ    (%TRNRQMACRO;, STPCHKRQ)>
+
+<!ELEMENT INTRATRNRQ     (%TRNRQMACRO;, (INTRARQ | INTRAMODRQ | INTRACANRQ))>
+
+<!ELEMENT RECINTRATRNRQ  (%TRNRQMACRO;, (RECINTRARQ | RECINTRAMODRQ | RECINTRACANRQ))>
+
+<!ELEMENT BANKMAILTRNRQ  (%TRNRQMACRO;, BANKMAILRQ)>
+
+<!-- Credit Card Message Set Requests -->
+
+<!ELEMENT CCSTMTTRNRQ       (%TRNRQMACRO;, CCSTMTRQ)>
+
+<!ELEMENT CCSTMTENDTRNRQ    (%TRNRQMACRO;, CCSTMTENDRQ)>
+
+<!-- Interbank Transfer Message Set Requests -->
+
+<!ELEMENT INTERTRNRQ       (%TRNRQMACRO;, (INTERRQ | INTERMODRQ | INTERCANRQ))>
+
+<!ELEMENT RECINTERTRNRQ    (%TRNRQMACRO;, (RECINTERRQ | RECINTERMODRQ | RECINTERCANRQ))>
+
+<!-- Wire Transfer Message Set Request -->
+
+<!ELEMENT WIRETRNRQ      (%TRNRQMACRO;, (WIRERQ | WIRECANRQ))>
+
+<!-- Banking Messages Response Set and its contained TRN responses -->
+
+<!ELEMENT BANKMSGSRSV1     ((STMTTRNRS   | STMTENDTRNRS  | INTRATRNRS | RECINTRATRNRS | 
+                            STPCHKTRNRS  | BANKMAILTRNRS | BANKMAILSYNCRS |
+                            STPCHKSYNCRS | INTRASYNCRS   | RECINTRASYNCRS)+)>
+
+<!-- Credit Card Messages Response Set and its contained TRN responses -->
+
+<!ELEMENT CREDITCARDMSGSRSV1  ((CCSTMTTRNRS | CCSTMTENDTRNRS)+)>
+
+<!-- Wire Transfer Messages Response Set and its contained TRN responses -->
+
+<!ELEMENT WIREXFERMSGSRSV1    ((WIRETRNRS   | WIRESYNCRS)+)>
+                                  
+<!-- Interbank Transfer Messages Response Set and its contained TRN responses -->
+
+<!ELEMENT INTERXFERMSGSRSV1    ((INTERTRNRS  | RECINTERTRNRS | INTERSYNCRS | RECINTERSYNCRS)+)>  
+
+<!-- Banking TRN responses -->
+
+<!-- Banking Message Set Responses -->
+
+<!ELEMENT STMTTRNRS      (%TRNRSMACRO;, STMTRS?)>
+
+<!ELEMENT STMTENDTRNRS   (%TRNRSMACRO;, STMTENDRS?)>
+
+<!ELEMENT STPCHKTRNRS    (%TRNRSMACRO;, STPCHKRS?)>
+
+<!ELEMENT INTRATRNRS     (%TRNRSMACRO;, (INTRARS | INTRAMODRS | INTRACANRS)?)>
+
+<!ELEMENT RECINTRATRNRS  (%TRNRSMACRO;, (RECINTRARS | RECINTRAMODRS | RECINTRACANRS)?)>
+
+<!ELEMENT BANKMAILTRNRS  (%TRNRSMACRO;, (BANKMAILRS | CHKMAILRS | DEPMAILRS)?)>
+
+<!-- Credit Card Message Set Responses -->
+
+<!ELEMENT CCSTMTTRNRS     (%TRNRSMACRO;, CCSTMTRS?)>
+
+<!ELEMENT CCSTMTENDTRNRS  (%TRNRSMACRO;, CCSTMTENDRS?)>
+
+<!-- Interbank Transfer Message Set Responses -->
+
+<!ELEMENT INTERTRNRS       (%TRNRSMACRO;, (INTERRS | INTERMODRS | INTERCANRS)?)>
+
+<!ELEMENT RECINTERTRNRS    (%TRNRSMACRO;, (RECINTERRS | RECINTERMODRS | RECINTERCANRS)?)>
+
+<!-- Wire Transfer Message Set -->
+
+<!ELEMENT WIRETRNRS      (%TRNRSMACRO;, (WIRERS | WIRECANRS)?)>
+
+<!-- ============================================================================= -->
+<!--            Requests                                                           -->
+<!-- ============================================================================= -->
+
+<!-- Statement Request -->
+
+<!ELEMENT STMTRQ  (BANKACCTFROM, INCTRAN?)>
+
+<!-- Credit Card statement request -->
+
+<!ELEMENT CCSTMTRQ  (CCACCTFROM, INCTRAN?)>
+
+<!-- Closing Statement Request Request -->
+
+<!ELEMENT STMTENDRQ  (BANKACCTFROM, DTSTART?, DTEND?)>
+
+<!-- Credit Card Closing Statement Request  -->
+
+<!ELEMENT CCSTMTENDRQ  (CCACCTFROM, DTSTART?, DTEND?)>
+
+<!-- Stop Check Request -->
+
+<!ELEMENT STPCHKRQ  (BANKACCTFROM, (CHKRANGE|CHKDESC))> 
+
+					
+<!-- Intrabank Transfer Request -->
+
+<!ELEMENT INTRARQ  (XFERINFO)>
+
+<!-- Intrabank Transfer Modification Request -->
+
+<!ELEMENT INTRAMODRQ  (SRVRTID, XFERINFO)> 
+
+<!-- Intrabank Transfer Cancel Request -->
+
+<!ELEMENT INTRACANRQ  (SRVRTID)>
+
+<!-- Interbank Transfer Request -->
+
+<!ELEMENT INTERRQ  (XFERINFO)> 
+
+<!-- Interbank Transfer Modification Request -->
+
+<!ELEMENT INTERMODRQ  (SRVRTID, XFERINFO )>
+
+<!-- Interbank Transfer Cancel Request -->
+
+<!ELEMENT INTERCANRQ  (SRVRTID)>
+
+<!-- Wire Transfer Request -->
+
+<!ELEMENT WIRERQ  (BANKACCTFROM, WIREBENEFICIARY, WIREDESTBANK?, TRNAMT, DTDUE?, 
+                   PAYINSTRUCT?)> 
+
+<!-- Wire Transfer Cancel Request -->
+
+<!ELEMENT WIRECANRQ  (SRVRTID)>
+
+<!-- Recurring Intrabank Transfer Request -->
+
+<!ELEMENT RECINTRARQ  (RECURRINST, INTRARQ)>
+
+<!--Recurring Intrabank Transfer Modification Request -->
+
+<!ELEMENT RECINTRAMODRQ  (RECSRVRTID, RECURRINST, INTRARQ, MODPENDING)>
+
+<!-- Recurring Intrabank Transfer Cancellation Request -->
+
+<!ELEMENT RECINTRACANRQ  (RECSRVRTID, CANPENDING)>
+
+<!-- Recurring Interbank Transfer Request -->
+
+<!ELEMENT RECINTERRQ  (RECURRINST, INTERRQ )>
+
+<!-- Recurring Interbank Transfer Modification Request -->
+
+<!ELEMENT RECINTERMODRQ  (RECSRVRTID, RECURRINST, INTERRQ, MODPENDING)>
+
+<!-- Recurring Interbank Transfer Cancellation Request -->
+
+<!ELEMENT RECINTERCANRQ  (RECSRVRTID, CANPENDING)> 
+
+<!-- Bank E-Mail Request -->
+
+<!ELEMENT BANKMAILRQ  ((BANKACCTFROM | CCACCTFROM), MAIL)>
+
+
+<!-- ============================================================================= -->
+<!--            Synchronization                                                    -->
+<!-- ============================================================================= -->
+
+<!-- Stop Check Synchronization Request -->
+
+<!ELEMENT STPCHKSYNCRQ  (%SYNCRQMACRO;, BANKACCTFROM, STPCHKTRNRQ*)>
+
+<!-- OFX 2.0 -->
+<!-- FROM BANKACCTFROM to (BANKACCTFROM | CCACCTFROM) -->
+<!-- Intrabank Transfer Sync Request -->
+<!ELEMENT INTRASYNCRQ  (%SYNCRQMACRO;, (BANKACCTFROM | CCACCTFROM), INTRATRNRQ*)>
+
+<!-- OFX 2.0 -->
+<!-- FROM BANKACCTFROM to (BANKACCTFROM | CCACCTFROM) -->
+<!-- Interbank Transfer Sync Request -->
+<!ELEMENT INTERSYNCRQ  (%SYNCRQMACRO;, (BANKACCTFROM | CCACCTFROM), INTERTRNRQ*)>
+
+<!-- Wire Transfer Synchronization Request -->
+
+<!ELEMENT WIRESYNCRQ  (%SYNCRQMACRO;, BANKACCTFROM, WIRETRNRQ*)>
+
+<!--
+  recurring intra transfer synchronization request, 
+  for transactions <RECINTRARQ>,<RECINTRAMODRQ>, and/or <RECINTRACANRQ>
+-->
+
+<!-- OFX 2.0 -->
+<!-- FROM BANKACCTFROM to (BANKACCTFROM | CCACCTFROM) -->
+<!-- Recurring Intrabank Transfer Sync Request -->
+<!ELEMENT RECINTRASYNCRQ  (%SYNCRQMACRO;, (BANKACCTFROM | CCACCTFROM), RECINTRATRNRQ*)>
+
+<!--
+  recurring inter transfer synchronization request, 
+  for transactions <RECINTERRQ>,<RECINTERMODRQ>, and/or <RECINTERCANRQ>
+-->
+
+<!-- OFX 2.0 -->
+<!-- FROM BANKACCTFROM to (BANKACCTFROM | CCACCTFROM) -->
+<!-- Recurring Interbank Transfer Sync Request -->
+<!ELEMENT RECINTERSYNCRQ  (%SYNCRQMACRO;, (BANKACCTFROM | CCACCTFROM), RECINTERTRNRQ*)>
+
+<!-- Bank E-Mail Synchronization Request -->
+
+<!ELEMENT BANKMAILSYNCRQ  (%SYNCRQMACRO;, INCIMAGES, USEHTML, (BANKACCTFROM | CCACCTFROM), 
+                           BANKMAILTRNRQ*)>
+
+
+<!-- ============================================================================= -->
+<!--            Responses                                                          -->
+<!-- ============================================================================= -->
+
+<!-- Statement Download Response -->
+
+<!ELEMENT STMTRS    (CURDEF, BANKACCTFROM, BANKTRANLIST?, LEDGERBAL, AVAILBAL?, 
+                     BALLIST?, MKTGINFO?)>
+
+<!-- Credit Card Statement Download Response -->
+
+<!ELEMENT CCSTMTRS  (CURDEF, CCACCTFROM, BANKTRANLIST?, LEDGERBAL, AVAILBAL?, 
+                     BALLIST?, MKTGINFO?)>
+
+<!-- Closing Information Response -->
+
+<!ELEMENT STMTENDRS 	(CURDEF, BANKACCTFROM, CLOSING*)>
+
+<!-- Credit Card Closing Information Response -->
+
+<!ELEMENT CCSTMTENDRS 	(CURDEF, CCACCTFROM, CCCLOSING*)>
+
+<!-- Stop Check Response -->
+
+<!ELEMENT STPCHKRS  (CURDEF, BANKACCTFROM, STPCHKNUM+,
+                        FEE, FEEMSG)>
+
+<!-- Intrabank Transfer Response -->
+
+<!ELEMENT INTRARS  (CURDEF, SRVRTID, XFERINFO, (DTXFERPRJ|DTPOSTED)?, 
+                    RECSRVRTID?, XFERPRCSTS?)>	
+
+<!-- Intrabank Transfer Modification Response -->
+
+<!ELEMENT INTRAMODRS  (SRVRTID, XFERINFO, XFERPRCSTS?)>
+
+<!-- Intrabank Transfer Cancel Response -->
+
+<!ELEMENT INTRACANRS  (SRVRTID)>
+
+<!-- Interbank Transfer Response -->
+
+<!ELEMENT INTERRS  (CURDEF, SRVRTID, XFERINFO,
+                    (DTXFERPRJ | DTPOSTED)?, REFNUM?, RECSRVRTID?, 
+                    XFERPRCSTS?)>
+
+<!-- Interbank Transfer Modification Response -->
+
+<!ELEMENT INTERMODRS  (SRVRTID, XFERINFO, XFERPRCSTS?)>
+
+<!-- Interbank Transfer Cancel Response -->
+
+<!ELEMENT INTERCANRS  (SRVRTID)>
+
+<!-- Wire  Transfer Response -->
+
+<!ELEMENT WIRERS  (CURDEF, SRVRTID, BANKACCTFROM, WIREBENEFICIARY,
+                   WIREDESTBANK?, TRNAMT, DTDUE?, PAYINSTRUCT?,
+                   (DTXFERPRJ | DTPOSTED)?, FEE?, CONFMSG?)>
+
+<!-- Wire  Transfer Cancel Response -->
+
+<!ELEMENT WIRECANRS	 (SRVRTID)>
+
+<!-- Recurring Intrabank Transfer Response -->
+
+<!ELEMENT RECINTRARS  (RECSRVRTID, RECURRINST, INTRARS)>
+
+<!-- Recurring Intrabank Transfer Modification Request -->
+
+<!ELEMENT RECINTRAMODRS  (RECSRVRTID, RECURRINST, INTRARS, MODPENDING)>
+
+<!-- Recurring Intrabank Transfer Cancellation Response -->
+
+<!ELEMENT RECINTRACANRS	 (RECSRVRTID, CANPENDING)>
+
+<!-- Recurring Interbank Transfer Response -->
+
+<!ELEMENT RECINTERRS  (RECSRVRTID, RECURRINST, INTERRS)>
+
+<!-- Recurring Interbank Transfer Modification Request -->
+
+<!ELEMENT RECINTERMODRS	 (RECSRVRTID, RECURRINST, INTERRS, MODPENDING)>
+
+<!-- Recurring Inter Transfer Cancellation Response -->
+
+<!ELEMENT RECINTERCANRS	 (RECSRVRTID, CANPENDING)>
+
+<!-- Bank E-Mail Response -->
+
+<!ELEMENT BANKMAILRS  ((BANKACCTFROM | CCACCTFROM), MAIL)>
+
+<!-- Returned Check Mail Response -->
+
+<!ELEMENT CHKMAILRS  (BANKACCTFROM, MAIL, CHECKNUM, TRNAMT?, DTUSER?, FEE?)>
+
+<!-- Returned Deposit Mail Response -->
+
+<!ELEMENT DEPMAILRS  (BANKACCTFROM, MAIL, TRNAMT, DTUSER?, FEE?)>
+
+<!-- Stop Check Synchronization Response -->
+
+<!ELEMENT STPCHKSYNCRS  (%SYNCRSMACRO;, BANKACCTFROM,  STPCHKTRNRS*)>
+
+
+<!-- OFX 2.0 -->
+<!-- FROM BANKACCTFROM to (BANKACCTFROM | CCACCTFROM) -->
+<!-- Intrabank Transfer Sync Response -->
+<!ELEMENT INTRASYNCRS  (%SYNCRSMACRO;, (BANKACCTFROM | CCACCTFROM), INTRATRNRS*)>
+
+
+<!-- OFX 2.0 -->
+<!-- FROM BANKACCTFROM to (BANKACCTFROM | CCACCTFROM) -->
+<!-- Interbank Transfer Sync Response -->
+<!ELEMENT INTERSYNCRS  (%SYNCRSMACRO;, (BANKACCTFROM | CCACCTFROM), INTERTRNRS*)>
+
+<!-- Wire Transfer Synchronization Response -->
+
+<!ELEMENT WIRESYNCRS  (%SYNCRSMACRO;, BANKACCTFROM, WIRETRNRS*)>
+
+
+<!-- OFX 2.0 -->
+<!-- FROM BANKACCTFROM to (BANKACCTFROM | CCACCTFROM) -->
+<!-- Intrabank Transfer Synchronization Response -->
+<!ELEMENT RECINTRASYNCRS      (%SYNCRSMACRO;, (BANKACCTFROM | CCACCTFROM), RECINTRATRNRS*)>
+
+<!-- OFX 2.0 -->
+<!-- FROM BANKACCTFROM to (BANKACCTFROM | CCACCTFROM) -->
+<!-- Recurring Interbank Rransfer Synchronization Response -->
+<!ELEMENT RECINTERSYNCRS	 (%SYNCRSMACRO;, (BANKACCTFROM | CCACCTFROM), RECINTERTRNRS*)>
+
+<!-- Bank E-Mail Synchronization Request -->
+
+<!ELEMENT BANKMAILSYNCRS  (%SYNCRSMACRO;, (BANKACCTFROM | CCACCTFROM), BANKMAILTRNRS*)>
+
+
+<!-- ============================================================================= -->
+<!--            Aggregates                                                         -->
+<!-- ============================================================================= -->
+
+<!-- Banking Account Information -->
+
+<!ELEMENT BANKACCTINFO   (BANKACCTFROM, SUPTXDL, XFERSRC, XFERDEST, SVCSTATUS)>
+
+<!-- Credit Card Account Information -->
+
+<!ELEMENT CCACCTINFO     (CCACCTFROM, SUPTXDL, XFERSRC, XFERDEST, SVCSTATUS)>
+
+<!-- Does FI support transaction detail in statement download -->
+<!ELEMENT SUPTXDL        %BOOLTYPE;>
+
+<!-- Can the account be the source for intra and interbank transfers -->
+<!ELEMENT XFERSRC        %BOOLTYPE;>
+
+<!-- Can the account be the destination for intra and interbank transfers -->
+<!ELEMENT XFERDEST       %BOOLTYPE;>
+
+<!-- Statement Transaction List -->
+
+<!ELEMENT BANKTRANLIST    	 (DTSTART, DTEND, STMTTRN*)>
+
+
+<!-- Ledger Balance -->
+
+<!ELEMENT LEDGERBAL      (BALAMT, DTASOF)>
+
+
+<!-- Available Balance -->
+
+<!ELEMENT AVAILBAL       (BALAMT, DTASOF)>
+
+<!-- Credit Card Statement Closing Information -->
+
+<!ELEMENT CCCLOSING	 (FITID, DTOPEN?, DTCLOSE, DTNEXT?, BALOPEN?, BALCLOSE ,
+			  DTPMTDUE?, MINPMTDUE?, FINCHG?, PAYANDCREDIT?, 
+                          PURANDADV?, DEBADJ?, CREDITLIMIT?, DTPOSTSTART, 
+                          DTPOSTEND, MKTGINFO?, (CURRENCY | ORIGCURRENCY)? )>
+
+<!-- non-Credit Card account types -->
+<!-- Statement Closing Information -->
+
+<!ELEMENT CLOSING	(FITID, DTOPEN?, DTCLOSE, DTNEXT?, BALOPEN?, BALCLOSE, BALMIN? ,
+                         DEPANDCREDIT?, CHKANDDEB?, TOTALFEES?, TOTALINT? ,
+                         DTPOSTSTART, DTPOSTEND, MKTGINFO?, (CURRENCY | ORIGCURRENCY)? )>
+
+
+<!-- Opening Statement Date -->
+
+<!ELEMENT DTOPEN		%DTTMTYPE;>
+
+
+<!-- Closing Statement Date -->
+
+<!ELEMENT DTCLOSE		%DTTMTYPE;>
+
+
+<!-- Closing Date of Next Statement -->
+
+<!ELEMENT DTNEXT		%DTTMTYPE;>
+
+	
+
+<!-- Opening Statement Balance -->
+
+<!ELEMENT BALOPEN		%AMTTYPE;>
+
+
+<!-- Closing Statement Balance -->
+
+<!ELEMENT BALCLOSE	 %AMTTYPE;>
+
+
+<!-- Payment Due Date -->
+
+<!ELEMENT DTPMTDUE		%DTTMTYPE;>
+
+<!-- Minimum Amount Due -->
+
+<!ELEMENT MINPMTDUE		%AMTTYPE;>
+
+
+<!-- Finance Charges -->
+
+<!ELEMENT FINCHG	 %AMTTYPE;>
+
+
+<!-- Total Amount of Payments and Credits -->
+
+<!ELEMENT PAYANDCREDIT		%AMTTYPE;>
+
+
+<!-- Total Amount of Purchases and Cash Advance -->
+
+<!ELEMENT PURANDADV		%AMTTYPE;>
+
+
+<!-- Debit Adjustments -->
+
+<!ELEMENT DEBADJ		%AMTTYPE;>
+
+
+<!-- Current Credit Limit -->
+
+<!ELEMENT CREDITLIMIT			%AMTTYPE;>
+
+
+<!-- Minimum Balance in Statement Period -->
+
+<!ELEMENT BALMIN	 %AMTTYPE;>
+
+
+<!-- Total Amount of Deposits and Credits -->
+
+<!ELEMENT DEPANDCREDIT	 %AMTTYPE;>
+
+
+<!-- Total Amount of Checks and Debits	-->
+
+<!ELEMENT CHKANDDEB		%AMTTYPE;>
+
+<!-- Total Fees	-->
+
+<!ELEMENT TOTALFEES		%AMTTYPE;>
+
+<!-- Total Interest	-->
+
+<!ELEMENT TOTALINT		%AMTTYPE;>
+
+<!-- Start Date for Posted Transactions -->
+
+<!ELEMENT DTPOSTSTART  %DTTMTYPE;>
+
+<!-- End Date for Posted Transactions -->
+
+<!ELEMENT DTPOSTEND  %DTTMTYPE;>
+
+<!-- Statement Transaction Aggregate -->
+
+<!ELEMENT STMTTRN	 (TRNTYPE, DTPOSTED, DTUSER?, DTAVAIL?, TRNAMT, FITID,
+ 		          (CORRECTFITID, CORRECTACTION)?, ( SPNAME?, SRVRTID )?, 
+                          CHECKNUM?, REFNUM?, SIC?, PAYEEID?, 
+                          (NAME | PAYEE)?, (BANKACCTTO | CCACCTTO)?, 
+                          MEMO?, (CURRENCY | ORIGCURRENCY)?, INV401KSOURCE?)> 
+
+<!-- Type of Rransaction -->
+
+<!ELEMENT TRNTYPE	 %TRANSACTIONENUM;>
+
+<!-- Date Transaction Was Posted to Account -->
+
+<!ELEMENT DTPOSTED		%DTTMTYPE;>
+
+<!-- Date User Initiated Transaction -->	
+
+<!ELEMENT DTUSER	 %DTTMTYPE;>
+
+<!-- Standard Industrial Code -->
+
+<!ELEMENT SIC		%SICTYPE;>	
+
+<!--  Source of cash used for 401K security. Allowed values are
+      PRETAX, AFTERTAX, MATCH, PROFITSHARING, ROLLOVER, OTHERVEST, 
+      OTHERNONVEST 
+-->
+<!--  Source of Cash Used for 401K Security -->
+
+<!ELEMENT INV401KSOURCE  %INV401KSOURCEENUM; >
+
+<!-- Check Range Aggregate. -->
+
+<!ELEMENT CHKRANGE		(CHKNUMSTART, CHKNUMEND?)>
+
+<!-- Check Description Aggregate. -->
+
+<!ELEMENT CHKDESC	 (NAME, CHECKNUM?, DTUSER?, TRNAMT?)>	
+
+<!-- Start Check Number -->
+
+<!ELEMENT CHKNUMSTART	 %CHECKNUMTYPE;>
+
+<!-- Ending Check Number to Cancel -->
+
+<!ELEMENT CHKNUMEND	 %CHECKNUMTYPE;>
+
+<!-- Reference Number -->
+
+<!ELEMENT REFNUM		%REFNUMTYPE;>
+
+<!-- Stopped Check Detail -->
+
+<!ELEMENT STPCHKNUM	(CHECKNUM, NAME?, DTUSER?, TRNAMT?, 
+                         CHKSTATUS, CHKERROR?, (CURRENCY | ORIGCURRENCY)?)>
+
+<!-- Status Code for Individual Stop Check Request -->
+
+<!ELEMENT CHKSTATUS		%CHECKSTATUSENUM;>	
+
+<!-- Further Textual Error Explanation -->
+
+<!ELEMENT CHKERROR	 %MSGTYPE;>	
+
+<!-- Transfer Information Aggregate -->
+
+<!ELEMENT XFERINFO		((BANKACCTFROM | CCACCTFROM), (BANKACCTTO | CCACCTTO), 
+                                 TRNAMT, DTDUE?)>
+
+<!-- Transfer Processing Status -->
+
+<!ELEMENT XFERPRCSTS		(XFERPRCCODE, DTXFERPRC)>
+
+<!--  Transfers Processing Code -->
+
+<!ELEMENT XFERPRCCODE	 %XFERSTATUSENUM;>		
+
+<!-- Date Transfer is Expected to be Processed -->
+
+<!ELEMENT DTXFERPRC 	%DTTMTYPE;>
+
+<!-- Date Transaction is Projected for Posting to Account -->
+
+<!ELEMENT DTXFERPRJ 	%DTTMTYPE;>
+
+<!-- Beneficiary of a Wire Transfer -->
+
+<!ELEMENT WIREBENEFICIARY  (NAME, BANKACCTTO, MEMO?)>
+
+<!-- Beneficiary's Bank for a Wire Transfer -->
+
+<!ELEMENT WIREDESTBANK  (EXTBANKDESC)>
+
+<!-- Extended description of a bank for a wire transfer -->
+
+<!ELEMENT EXTBANKDESC  (NAME, BANKID, (ADDR1,(ADDR2,ADDR3?)?), CITY, 
+                        STATE, POSTALCODE, COUNTRY?, PHONE?)>
+
+<!-- Payment instructions for a wire transfer -->
+
+<!ELEMENT PAYINSTRUCT		%MSGTYPE;>
+
+<!-- Fee assessed for the transfer -->
+
+<!ELEMENT FEE		%AMTTYPE;>
+
+<!-- Description of fee -->
+
+<!ELEMENT FEEMSG     %SHORTMSGTYPE;>
+
+<!-- Transfer confirmation message -->
+
+<!ELEMENT CONFMSG		%MSGTYPE;>
+
+
+<!-- Bill Pay Message Set Wrappers -->
+
+<!ELEMENT BILLPAYMSGSRQV1            ((PAYEETRNRQ | PAYEESYNCRQ)*,
+                                     (PMTTRNRQ | RECPMTTRNRQ | PMTINQTRNRQ | PMTMAILTRNRQ |
+                                     PMTSYNCRQ | RECPMTSYNCRQ | PMTMAILSYNCRQ)*)>
+
+<!ELEMENT BILLPAYMSGSRSV1            ((PAYEETRNRS | PAYEESYNCRS)*,
+                                     (PMTTRNRS | RECPMTTRNRS | PMTINQTRNRS | PMTMAILTRNRS |
+                                      PMTSYNCRS | RECPMTSYNCRS | PMTMAILSYNCRS)*)>
+
+<!ELEMENT BILLPAYMSGSET              (BILLPAYMSGSETV1)>
+
+<!-- Bill Pay Message Set Profile -->
+
+<!ELEMENT BILLPAYMSGSETV1            (MSGSETCORE,  DAYSWITH, DFLTDAYSTOPAY,
+                                      XFERDAYSWITH, XFERDFLTDAYSTOPAY, 
+                                      PROCDAYSOFF*, PROCENDTM, 
+                                      MODELWND, POSTPROCWND, STSVIAMODS,
+                                      PMTBYADDR, PMTBYXFER, PMTBYPAYEEID,
+                                      CANADDPAYEE, HASEXTDPMT, 
+                                      CANMODPMTS, CANMODMDLS, DIFFFIRSTPMT, 
+                                      DIFFLASTPMT, BILLPUBCONTEXT?)>
+
+<!-- Number of days before the processing date that funds are withdrawn -->
+<!ELEMENT DAYSWITH                   %DAYSPANTYPE;>
+
+<!-- The default number of days to pay -->
+<!ELEMENT DFLTDAYSTOPAY              %DAYSPANTYPE;>
+
+<!-- Number of days before the processing date that funds are withdrawn for transfers -->
+<!ELEMENT XFERDAYSWITH               %DAYSPANTYPE;>
+
+<!-- The default njumber of days to pay for transfers -->
+<!ELEMENT XFERDFLTDAYSTOPAY          %DAYSPANTYPE;>
+
+<!--  The number of days after a transaction is processed that it is acessible for status inquiries -->
+<!ELEMENT POSTPROCWND                %DAYSPANTYPE;>       
+
+<!--  server supports communication of server-initiated payment status changes via the PMTMODRS -->
+<!ELEMENT STSVIAMODS                 %BOOLTYPE;>          
+
+<!--  the payment provider supports payments to payees identified by billing address, i.e. the PAYEE aggregate -->
+<!ELEMENT PMTBYADDR                  %BOOLTYPE;>          
+
+<!-- Can pay by transfers -->
+<!ELEMENT PMTBYXFER                  %BOOLTYPE;>
+
+<!-- Can pay by user supplied payee IDs -->
+<!ELEMENT PMTBYPAYEEID               %BOOLTYPE;>          
+
+ <!-- User can add payees if no, the user is restricted to payees added to the users payee list by the payment system -->
+<!ELEMENT CANADDPAYEE                %BOOLTYPE;>         
+
+ <!-- Supports the EXTDPMT business payment aggregate -->
+<!ELEMENT HASEXTDPMT                 %BOOLTYPE;>         
+
+<!-- Permit modifications to payments, i.e. PMTMODRQ -->
+<!ELEMENT CANMODPMTS                 %BOOLTYPE;>          
+
+<!-- Support for specifying a different amount for the first payment generated by a model -->
+<!ELEMENT DIFFFIRSTPMT               %BOOLTYPE;>          
+
+<!-- Support for specifying a different amount for the last payment generated  by a model -->
+<!ELEMENT DIFFLASTPMT                %BOOLTYPE;>          
+
+<!-- Support for bill presentment context information in payment operations -->
+
+<!ELEMENT BILLPUBCONTEXT             %BOOLTYPE;>                                                                          
+
+<!-- Bill Payment Transactions Wrappers -->
+
+<!ELEMENT PMTTRNRQ       (%TRNRQMACRO;, (PMTRQ | PMTMODRQ | PMTCANCRQ))>
+
+<!ELEMENT RECPMTTRNRQ    (%TRNRQMACRO;, (RECPMTRQ | RECPMTMODRQ | RECPMTCANCRQ))>
+
+<!ELEMENT PAYEETRNRQ     (%TRNRQMACRO;, (PAYEERQ | PAYEEMODRQ | PAYEEDELRQ))>
+
+<!ELEMENT PMTINQTRNRQ    (%TRNRQMACRO;, PMTINQRQ)>
+
+<!ELEMENT PMTMAILTRNRQ   (%TRNRQMACRO;, PMTMAILRQ)>
+
+<!ELEMENT PMTTRNRS       (%TRNRSMACRO;, (PMTRS | PMTMODRS | PMTCANCRS)?)>
+
+<!ELEMENT RECPMTTRNRS    (%TRNRSMACRO;, (RECPMTRS | RECPMTMODRS | RECPMTCANCRS)?)>
+
+<!ELEMENT PAYEETRNRS     (%TRNRSMACRO;, (PAYEERS | PAYEEMODRS | PAYEEDELRS)?)>
+
+<!ELEMENT PMTINQTRNRS        (%TRNRSMACRO;, PMTINQRS?)>
+
+<!ELEMENT PMTMAILTRNRS   (%TRNRSMACRO;, PMTMAILRS?)>
+
+
+<!-- ============================================================================= -->
+<!-- Requests                                                                      -->
+<!-- ============================================================================= -->
+
+<!--  Payment Request -->
+
+<!ELEMENT PMTRQ      (PMTINFO)>              
+
+<!--  Payment Modification Request -->
+
+<!ELEMENT PMTMODRQ       (SRVRTID, PMTINFO)>             
+
+<!--  Payment Cancellation Request -->
+
+<!ELEMENT PMTCANCRQ      (SRVRTID)>
+
+<!--  Recurring Payment Request -->
+
+<!ELEMENT RECPMTRQ           (RECURRINST, PMTINFO, INITIALAMT?, FINALAMT?)>          
+
+<!-- Recurring Payment Modification Request -->
+
+<!ELEMENT RECPMTMODRQ        (RECSRVRTID, RECURRINST, PMTINFO,
+			       INITIALAMT?, FINALAMT?, MODPENDING)>          
+
+<!--  Recurring Payment Cancellation Request -->
+
+<!ELEMENT RECPMTCANCRQ       (RECSRVRTID, CANPENDING)>
+
+<!-- Payment Status Inquiry Request -->
+
+<!ELEMENT PMTINQRQ           (SRVRTID)>
+
+<!-- Payee Request - Add a Payee to the Payee List -->
+
+<!ELEMENT PAYEERQ            ((PAYEEID | PAYEE), BANKACCTTO?, PAYACCT*)>
+
+<!-- payee modification request -->
+
+<!ELEMENT PAYEEMODRQ     (PAYEELSTID, (PAYEE, BANKACCTTO?)?, PAYACCT*)>
+
+<!-- Payee Deletion Request -->
+
+<!ELEMENT PAYEEDELRQ     (PAYEELSTID)>
+
+
+<!-- ============================================================================= -->
+<!-- Responses                                                                     -->
+<!-- ============================================================================= -->
+
+<!--  Payment Response -->
+
+<!ELEMENT PMTRS          (SRVRTID, PAYEELSTID, CURDEF, 
+                          PMTINFO, EXTDPAYEE?, CHECKNUM?, PMTPRCSTS, 
+                          RECSRVRTID?)>
+
+<!-- Payment Modification Response -->
+
+<!ELEMENT PMTMODRS      (SRVRTID, PMTINFO, PMTPRCSTS?)>         
+
+<!-- Payment Cancellation Response -->
+
+<!ELEMENT PMTCANCRS          (SRVRTID)>              
+
+<!--  Recurring Payment Response -->
+
+<!ELEMENT RECPMTRS           (RECSRVRTID, PAYEELSTID, 
+                              CURDEF, RECURRINST, PMTINFO, INITIALAMT?, 
+                              FINALAMT?, EXTDPAYEE?)>
+
+<!-- Modification Response -->
+
+<!ELEMENT RECPMTMODRS        (RECSRVRTID, RECURRINST, PMTINFO,
+			      INITIALAMT?, FINALAMT?, MODPENDING)>          
+
+<!-- Recurring Payment Modification Response --> 
+
+<!ELEMENT RECPMTCANCRS       (RECSRVRTID, CANPENDING)>               
+
+<!-- Payment Status Inquiry Response -->
+
+<!ELEMENT PMTINQRS           (SRVRTID, PMTPRCSTS, CHECKNUM?)>
+
+<!-- Payee Response - Payee Added to the Payee List -->
+
+<!ELEMENT PAYEERS            (PAYEELSTID, (PAYEE, BANKACCTTO?)?, 
+                              EXTDPAYEE?, PAYACCT*)>
+
+<!-- Payee Modification Response -->
+
+<!ELEMENT PAYEEMODRS     (PAYEELSTID, (PAYEE, BANKACCTTO?)?, PAYACCT*, EXTDPAYEE?)>
+
+<!-- Payee Deletion Response -->
+
+<!ELEMENT PAYEEDELRS     (PAYEELSTID)>
+
+
+<!-- ============================================================================= -->
+<!--                    Aggregates                                                         -->
+<!-- ============================================================================= -->
+
+
+<!-- Bill Payment Account Information -->
+
+<!ELEMENT BPACCTINFO   (BANKACCTFROM, SVCSTATUS)>
+
+<!-- Payment Detail Information Aggregate -->
+
+<!ELEMENT PMTINFO   (BANKACCTFROM, TRNAMT, 
+                     (PAYEEID|PAYEE), PAYEELSTID?, BANKACCTTO?,
+                      EXTDPMT*, PAYACCT, DTDUE, 
+                      MEMO?, BILLREFINFO?, BILLPUBINFO?)>
+
+<!--  Payment Processing Status -->
+
+<!ELEMENT PMTPRCSTS          (PMTPRCCODE, DTPMTPRC)>
+
+<!--  Payment Processing Date: Enum for Processing Date Interpretation -->
+
+<!ELEMENT PMTPRCCODE     %PMTPROCESSSTATUSENUM;>           
+
+<!--  Payment Processing Date: Interpretation Depends on <PMTPRCCODE> -->
+
+<!ELEMENT DTPMTPRC       %DTTMTYPE;>          
+
+<!-- Billing Reference Information -->
+
+<!ELEMENT BILLREFINFO  %BILLREFINFOTYPE;>
+ 
+ <!-- Bill Publisher Information -->
+ 
+ <!ELEMENT BILLPUBINFO       (BILLPUB, BILLID)>
+
+<!--  Either extdpmtdsc or extdpmtinv, or both, but at least one required -->
+<!--  Extended Payment Aggregate -->
+
+<!ELEMENT EXTDPMT            (EXTDPMTFOR?, EXTDPMTCHK?, 
+                             ((EXTDPMTDSC, EXTDPMTINV?) | EXTDPMTINV))>
+
+<!-- Extended Payment Invoice Aggregate -->
+<!ELEMENT EXTDPMTINV     (INVOICE+)>
+
+<!-- Extended Payment Invoice Detail -->
+<!ELEMENT INVOICE        (INVNO, INVTOTALAMT, INVPAIDAMT,
+                          INVDATE, INVDESC, DISCOUNT?,
+                          ADJUSTMENT?, LINEITEM*)>
+
+<!-- Invoice discount detail -->
+<!ELEMENT DISCOUNT       (DSCRATE, DSCAMT, DSCDATE?, DSCDESC)>
+
+<!-- Invoice adjustment detail -->
+<!ELEMENT ADJUSTMENT     (ADJNO?, ADJDESC, ADJAMT, ADJDATE?)>
+
+<!-- Invoice line item aggregate -->
+<!ELEMENT LINEITEM       (LITMAMT, LITMDESC)>
+
+<!-- Usage of extended payment -->
+<!ELEMENT EXTDPMTFOR     %EXTDPMTFORENUM;>
+
+<!-- gilb fix this -->
+<!ELEMENT EXTDPMTCHK     %EXTTYPE;>
+
+<!-- Extended payment description -->
+<!ELEMENT EXTDPMTDSC     %MSGTYPE;>
+
+<!-- Number of the invoice -->
+<!ELEMENT INVNO          %INVNOTYPE;>
+
+<!-- Invoice total amount -->
+<!ELEMENT INVTOTALAMT    %AMTTYPE;>
+
+<!-- Amount paid on the invoice -->
+<!ELEMENT INVPAIDAMT     %AMTTYPE;>
+
+<!-- Invoice date -->
+<!ELEMENT INVDATE        %DTTMTYPE;>
+
+<!-- Invoice description -->
+<!ELEMENT INVDESC        %SHORTMSGTYPE;>
+
+<!-- Discount rate -->
+<!ELEMENT DSCRATE        %RATETYPE;>
+
+<!-- Discount amount -->
+<!ELEMENT DSCAMT         %AMTTYPE;>
+
+<!-- Date of discount -->
+<!ELEMENT DSCDATE        %DTTMTYPE;>
+
+<!-- Discount description -->
+<!ELEMENT DSCDESC        %SHORTMSGTYPE;>
+
+<!-- Adjustment number -->
+<!ELEMENT ADJNO          %INVNOTYPE;>
+
+<!-- Adjustment description -->
+<!ELEMENT ADJDESC        %SHORTMSGTYPE;>   
+
+<!-- Adjustment amount -->
+<!ELEMENT ADJAMT         %AMTTYPE;>
+
+<!-- Date of adjustment -->
+<!ELEMENT ADJDATE        %DTTMTYPE;>
+
+<!-- Line item amount -->
+<!ELEMENT LITMAMT        %AMTTYPE;>
+
+<!-- Line item description -->
+<!ELEMENT LITMDESC       %SHORTMSGTYPE;>
+
+ 
+<!--  Initial Amount -->
+
+<!ELEMENT INITIALAMT     %AMTTYPE;>           
+ 
+
+<!--  Final Amount -->
+
+<!ELEMENT FINALAMT       %AMTTYPE;>           
+ 
+
+<!-- Standard Payee Detail -->
+
+<!ELEMENT EXTDPAYEE      ( (PAYEEID, IDSCOPE, NAME)?, DAYSTOPAY)>
+
+<!--  Server-assigned standard payee ID -->             
+
+<!ELEMENT PAYEEID        %PAYEEIDTYPE;>                
+
+<!--  Payee ID scope enumeration: currently one of {GLOBAL,USER} -->
+
+<!ELEMENT IDSCOPE        %IDSCOPEENUM;>           
+
+<!--  Minimum number of days needed to process -->   
+
+<!ELEMENT DAYSTOPAY      %DAYSPANTYPE;>           
+
+<!-- Check Number -->
+
+<!ELEMENT CHECKNUM       %CHECKNUMTYPE;>
+
+<!-- Payee Detail Aggregate -->
+
+<!ELEMENT PAYEE      (NAME, (ADDR1,(ADDR2,ADDR3?)?), CITY, STATE, POSTALCODE, COUNTRY?, PHONE)>      
+
+<!--  Server-assigned payee list ID -->         
+
+<!ELEMENT PAYEELSTID     %PAYEEIDTYPE;>                
+
+
+<!--
+
+        synchronization request messages
+
+  -->
+
+<!--  Payment Synchronization Request -->
+
+<!ELEMENT PMTSYNCRQ          (%SYNCRQMACRO;, BANKACCTFROM, PMTTRNRQ*)>                
+
+<!--  Recurring Payment Synchronization Request -->
+
+<!ELEMENT RECPMTSYNCRQ       (%SYNCRQMACRO;, BANKACCTFROM, RECPMTTRNRQ*)>
+
+<!-- Payee List Synchronization Request -->
+
+<!ELEMENT PAYEESYNCRQ    (%SYNCRQMACRO;, PAYEETRNRQ*)>
+
+<!-- Bill Pay Mail Sync Request -->
+
+<!ELEMENT PMTMAILSYNCRQ      (%SYNCRQMACRO;, INCIMAGES, USEHTML, PMTMAILTRNRQ*)>
+
+<!-- Synchronization Response Messages -->
+
+<!-- Payment Synchronization Response -->
+
+<!ELEMENT PMTSYNCRS          (%SYNCRSMACRO;, BANKACCTFROM, PMTTRNRS*)>                
+
+<!--  Recurring Payment Synchronization Response -->
+
+<!ELEMENT RECPMTSYNCRS       (%SYNCRSMACRO;, BANKACCTFROM, RECPMTTRNRS*)>
+
+<!-- Payee List Synchronization Response -->
+
+<!ELEMENT PAYEESYNCRS    (%SYNCRSMACRO;, PAYEETRNRS*)>
+
+<!-- Bill Pay Mail Sync Response -->
+
+<!ELEMENT PMTMAILSYNCRS      (%SYNCRSMACRO;, PMTMAILTRNRS*)>
+
+
+<!-- Payment mail messages --> 
+
+<!-- Payment Inquiry Mail Message Request --> 
+
+<!ELEMENT PMTMAILRQ          (MAIL,(SRVRTID,PMTINFO)?)>
+
+<!-- Payment Inquiry Mail Message Response --> 
+
+<!ELEMENT PMTMAILRS          (MAIL,(SRVRTID,PMTINFO)?)>
+
+<!-- Signup Message Sets -->
+
+<!ELEMENT SIGNUPMSGSRQV1        ((ENROLLTRNRQ | ACCTINFOTRNRQ | 
+                                 CHGUSERINFOTRNRQ | CHGUSERINFOSYNCRQ |
+                                 ACCTTRNRQ | ACCTSYNCRQ)+ )> 
+
+<!ELEMENT SIGNUPMSGSRSV1        ((ENROLLTRNRS | ACCTINFOTRNRS | 
+                                 CHGUSERINFOTRNRS | CHGUSERINFOSYNCRS |
+                                 ACCTTRNRS | ACCTSYNCRS)+ )>
+
+<!-- Profile Entry for Signup Message Set -->
+
+<!ELEMENT SIGNUPMSGSET         (SIGNUPMSGSETV1)>
+
+<!-- Profile Entry for Signup Message Set -->
+
+<!ELEMENT SIGNUPMSGSETV1       (MSGSETCORE, (CLIENTENROLL | WEBENROLL | OTHERENROLL),
+                                CHGUSERINFO, AVAILACCTS, CLIENTACTREQ)>
+
+<!-- Enrollment Details -->
+
+<!ELEMENT CLIENTENROLL           (ACCTREQUIRED)>
+
+<!ELEMENT WEBENROLL              (URL)>
+
+<!ELEMENT OTHERENROLL              (MESSAGE)>
+
+<!ELEMENT ACCTREQUIRED           %BOOLTYPE;>
+
+<!ELEMENT CHGUSERINFO            %BOOLTYPE;>
+
+<!ELEMENT AVAILACCTS             %BOOLTYPE;>
+
+<!ELEMENT CLIENTACTREQ           %BOOLTYPE;>
+
+<!-- Enrollment Transactions -->
+
+<!ELEMENT ENROLLTRNRQ        (%TRNRQMACRO;, ENROLLRQ)>
+
+<!ELEMENT ENROLLTRNRS        (%TRNRSMACRO;, ENROLLRS?)>
+
+<!ELEMENT ACCTINFOTRNRQ      (%TRNRQMACRO;, ACCTINFORQ)>
+
+<!ELEMENT ACCTTRNRQ          (%TRNRQMACRO;, ACCTRQ)>
+
+<!ELEMENT ACCTINFOTRNRS      (%TRNRSMACRO;, ACCTINFORS?)>
+
+<!ELEMENT ACCTTRNRS          (%TRNRSMACRO;, ACCTRS?)>
+
+<!ELEMENT CHGUSERINFOTRNRQ   (%TRNRQMACRO;, CHGUSERINFORQ)>
+
+<!ELEMENT CHGUSERINFOTRNRS   (%TRNRSMACRO;, CHGUSERINFORS?)>
+
+<!-- ================== -->
+<!-- Enrollment         -->
+<!-- ==================  -->
+
+<!-- Enrollment request -->
+<!ELEMENT ENROLLRQ        (FIRSTNAME, MIDDLENAME ,
+                           LASTNAME, (ADDR1,(ADDR2,ADDR3?)?) ,
+                           CITY, STATE, POSTALCODE ,
+                           COUNTRY, DAYPHONE, EVEPHONE ,
+                           EMAIL, USERID?, TAXID ,
+                           SECURITYNAME, DATEBIRTH ,
+                           (%ACCTFROMMACRO;)? )>
+
+<!-- Tax ID of enroller -->
+<!ELEMENT TAXID          %IDTYPE;>
+
+<!-- gilb ?? -->
+<!ELEMENT SECURITYNAME   %GENNAMETYPE;>
+
+<!-- Date of birth -->
+<!ELEMENT DATEBIRTH      %DTTMTYPE;>
+
+<!-- Enrollment response -->
+<!ELEMENT ENROLLRS       (TEMPPASS?, USERID?, DTEXPIRE?)>
+
+    <!-- NOTE: could constrain  DTEXPIRE -->
+
+<!-- Temporary password -->
+<!ELEMENT TEMPPASS       %TEMPPASSTYPE;>
+
+<!-- gilb ?? -->
+<!ELEMENT DTEXPIRE       %DTTMTYPE;>
+
+<!-- Change User Information Request -->
+
+<!ELEMENT CHGUSERINFORQ      (FIRSTNAME?, MIDDLENAME?, LASTNAME?,
+                             (ADDR1,(ADDR2,ADDR3?)?)?,
+                             CITY?, STATE?, POSTALCODE?, COUNTRY?,
+                             DAYPHONE?, EVEPHONE?, EMAIL?)>
+
+<!-- Change User Information Response -->
+
+<!ELEMENT CHGUSERINFORS      (FIRSTNAME?, MIDDLENAME?, LASTNAME?,
+                             (ADDR1,(ADDR2,ADDR3?)?)?,
+                             CITY?, STATE?, POSTALCODE?, COUNTRY?,
+                             DAYPHONE?, EVEPHONE?, EMAIL?,
+                             DTINFOCHG)>
+
+<!-- Date of user information change -->
+<!ELEMENT DTINFOCHG      %DTTMTYPE;>                             
+
+<!-- Change User Information Sync Request -->
+<!ELEMENT CHGUSERINFOSYNCRQ     (%SYNCRQMACRO;, CHGUSERINFOTRNRQ*)>
+
+<!-- Change User Information Sync Response -->
+<!ELEMENT CHGUSERINFOSYNCRS     (%SYNCRSMACRO;, CHGUSERINFOTRNRS*)>
+
+<!-- Account Information Request -->
+<!ELEMENT ACCTINFORQ     (DTACCTUP)>
+
+<!-- Account Information Response -->
+<!ELEMENT ACCTINFORS     (DTACCTUP, ACCTINFO*)>
+
+<!-- Account Info aggregate
+     Note: this refers to a macro in ofxmain that
+     list all of the account info aggregates
+-->
+
+<!-- Account Information Aggregate -->
+<!ELEMENT ACCTINFO       (DESC?, PHONE?, (%ACCTINFOMACRO;)+ )>
+
+<!-- Service status - should be included as part of
+     the ACCTINFOMACRO aggregates.  Values
+     are AVAIL, PEND, ACTIVE 
+-->
+
+<!-- Service Status Enumeration -->
+<!ELEMENT SVCSTATUS      %SERVICESTATUSENUM;>      
+
+<!-- Service Activation Request -->
+
+<!ELEMENT ACCTRQ         ((SVCADD | SVCCHG | SVCDEL),
+                          SVC)>
+
+<!-- Service Activation Response -->
+<!ELEMENT ACCTRS          ((SVCADD | SVCCHG | SVCDEL), SVC, SVCSTATUS)>
+
+<!-- Add the service for the account -->
+<!ELEMENT SVCADD         (%ACCTTOMACRO;)>
+
+<!-- Delete the service for the account -->
+<!ELEMENT SVCDEL         (%ACCTFROMMACRO;)>
+
+<!-- gilb ??? -->
+<!-- Change the service for the account -->
+<!ELEMENT SVCCHG         (%ACCTFROMMACRO;, %ACCTTOMACRO;)>
+
+<!-- Service type -->
+<!ELEMENT SVC            %SERVICEENUM;>
+
+<!-- Account Synchronization Request -->
+
+<!ELEMENT ACCTSYNCRQ     (%SYNCRQMACRO;, ACCTTRNRQ*)>
+
+<!-- Account Synchronization Response -->
+
+<!ELEMENT ACCTSYNCRS     (%SYNCRSMACRO;, ACCTTRNRS*)>
+
+
+<!-- Investment Message Set -->
+
+<!ELEMENT INVSTMTMSGSET   (INVSTMTMSGSETV1) >
+
+<!-- Investment Message Set: Version 1-->
+
+<!ELEMENT INVSTMTMSGSETV1   (MSGSETCORE, TRANDNLD, OODNLD, POSDNLD, 
+                             BALDNLD, INV401KDNLD?, CANEMAIL) >
+
+<!-- Investment Statement Messages -->
+
+<!ELEMENT INVSTMTMSGSRQV1    ((INVSTMTTRNRQ | INVMAILTRNRQ | INVMAILSYNCRQ)+) >
+
+<!ELEMENT INVSTMTMSGSRSV1    ((INVSTMTTRNRS | INVMAILTRNRS | INVMAILSYNCRS)+) >
+
+<!-- Security List Messages -->
+
+<!ELEMENT SECLISTMSGSRQV1   (SECLISTTRNRQ+) >
+
+<!ELEMENT SECLISTMSGSRSV1   (SECLISTTRNRS*, SECLIST?) >
+
+<!-- **** SECURITIES *** -->
+
+<!-- Security List Transaction Request -->
+
+<!ELEMENT SECLISTTRNRQ   (%TRNRQMACRO;, SECLISTRQ) >
+
+<!-- Security List Transaction Response -->
+
+<!ELEMENT SECLISTTRNRS   (%TRNRSMACRO;, SECLISTRS?) >
+
+<!-- Security List Request -->
+
+<!ELEMENT SECLISTRQ   (SECRQ+)>
+
+<!-- Security Being Requested -->
+
+<!ELEMENT SECRQ       (SECID | TICKER | FIID) >
+
+<!-- Security List Response -->
+
+<!ELEMENT SECLISTRS   %EMPTYTYPE; >
+
+            
+<!-- Security Ticker Symbol -->
+
+<!ELEMENT TICKER   %TICKERTYPE; >
+
+
+<!-- Financial Institution ID for the Security -->                      
+
+<!ELEMENT FIID   %FIIDTYPE; >
+
+<!-- Security Identifier -->
+
+<!ELEMENT SECID   (UNIQUEID, UNIQUEIDTYPE) >
+
+<!-- Unique ID for the Security -->
+
+<!ELEMENT UNIQUEID   %CUSIPTYPE; >
+
+<!-- Standard Used for Unique ID - Currently Only CUSIP -->
+
+<!ELEMENT UNIQUEIDTYPE   %SECUIDTYPE; >
+
+<!-- *** Security Information *** -->
+
+<!-- Security List -->
+
+<!ELEMENT SECLIST   ((MFINFO | STOCKINFO | OPTINFO | DEBTINFO | 
+                     OTHERINFO)*) >
+
+<!-- Info all security types have in common -->
+
+<!ELEMENT SECINFO   (SECID, SECNAME, TICKER?, FIID? , 
+                     RATING?, UNITPRICE?, DTASOF? ,
+                     CURRENCY?, MEMO?) >
+
+<!-- Security Name -->
+
+<!ELEMENT SECNAME    %SECNAMETYPE;>
+              
+
+<!-- Rating for Security -->
+
+<!ELEMENT RATING   %RATINGTYPE; >
+
+<!-- Unitprice for Security -->
+
+<!ELEMENT UNITPRICE   %AMTTYPE; >
+
+<!--  Debt Information Detail -->
+
+<!ELEMENT DEBTINFO   (SECINFO, PARVALUE, DEBTTYPE, DEBTCLASS? ,
+                      COUPONRT?, DTCOUPON?, COUPONFREQ?, CALLPRICE?, 
+                      YIELDTOCALL?, DTCALL?, CALLTYPE?, YIELDTOMAT?, 
+                      DTMAT?, ASSETCLASS?, FIASSETCLASS?) >
+
+<!-- Debt Detail Elements -->
+
+<!ELEMENT PARVALUE   %AMTTYPE; >
+
+<!ELEMENT DEBTTYPE   %DEBTENUM; >
+
+<!ELEMENT DEBTCLASS   %DEBTCLASSENUM; >
+
+<!ELEMENT COUPONRT   %RATETYPE; >
+
+<!ELEMENT DTCOUPON   %DTTMTYPE; >
+
+<!ELEMENT COUPONFREQ   %COUPONFREQENUM; >
+
+<!ELEMENT CALLPRICE   %AMTTYPE; >
+
+<!ELEMENT YIELDTOCALL   %RATETYPE; >
+
+<!ELEMENT DTCALL   %DTTMTYPE; >
+
+<!ELEMENT CALLTYPE  %CALLTYPEENUM; >
+
+<!ELEMENT YIELDTOMAT   %RATETYPE; >
+
+<!ELEMENT DTMAT   %DTTMTYPE; >
+
+<!-- Asset Class for Security -->
+
+<!ELEMENT ASSETCLASS   %ASSETCLASSENUM; >
+
+<!-- Fincial Institution Asset Class for Security -->
+
+<!ELEMENT FIASSETCLASS   %GENNAMETYPE; >
+
+<!-- Mutual Fund Information Detail -->
+
+<!ELEMENT MFINFO   (SECINFO, MFTYPE?, YIELD?, DTYIELDASOF?, 
+                    MFASSETCLASS?, FIMFASSETCLASS?) >
+
+<!ELEMENT MFTYPE   %MFTENUM; >
+
+<!ELEMENT YIELD   %RATETYPE; >
+
+<!ELEMENT DTYIELDASOF   %DTTMTYPE; >
+
+<!-- Asset Class for Mutual Funds -->
+
+<!ELEMENT MFASSETCLASS   (PORTION+) >
+
+<!-- Asset Class Portion -->
+
+<!ELEMENT PORTION   (ASSETCLASS, PERCENT) >
+
+<!-- Percent Rate -->
+
+<!ELEMENT PERCENT   %RATETYPE; >
+
+<!-- Financial Institution Asset Class for Mutual Funds  -->
+
+<!ELEMENT FIMFASSETCLASS   (FIPORTION+) >
+
+<!-- Financial Institution Asset Class Portion -->
+
+<!ELEMENT FIPORTION   (FIASSETCLASS, PERCENT) >
+
+<!-- Option Information Detail -->
+
+<!ELEMENT OPTINFO   (SECINFO, OPTTYPE, STRIKEPRICE, DTEXPIRE, 
+                     SHPERCTRCT, SECID?, ASSETCLASS?, FIASSETCLASS?) >
+
+<!ELEMENT OPTTYPE   %OPTTYPEENUM; >
+
+<!ELEMENT STRIKEPRICE   %AMTTYPE; >
+
+<!-- Number of shares per contract -->
+
+<!ELEMENT SHPERCTRCT   %SHARESPERTYPE; >
+
+<!-- Other Security Type Information Detail -->
+
+<!ELEMENT OTHERINFO   (SECINFO, TYPEDESC?, ASSETCLASS?, FIASSETCLASS?) >
+
+<!ELEMENT TYPEDESC   %TYPEDESCTYPE; >
+
+
+<!-- Stock Information Detail -->
+
+<!ELEMENT STOCKINFO   (SECINFO, STOCKTYPE?, YIELD?, DTYIELDASOF?, 
+                       ASSETCLASS?, FIASSETCLASS?) >
+
+<!ELEMENT STOCKTYPE   %STOCKENUM; >
+
+
+<!-- ***** Investment Accounts ****** -->
+
+<!-- Investment Account From -->
+
+<!ELEMENT INVACCTFROM   (BROKERID, ACCTID) >
+
+<!-- Investment Account To -->
+
+<!ELEMENT INVACCTTO   (BROKERID, ACCTID) >
+
+<!-- Broker ID -->
+
+<!ELEMENT BROKERID   %BROKERIDTYPE; >
+
+<!-- Investment Account Information Detail -->
+
+<!ELEMENT INVACCTINFO  (INVACCTFROM, USPRODUCTTYPE, CHECKING, 
+                       SVCSTATUS, INVACCTTYPE?, OPTIONLEVEL?) >
+
+<!-- US Product Type -->
+<!ELEMENT USPRODUCTTYPE  %USPRODUCTENUM; >
+
+<!-- Investment account can do checking -->
+<!ELEMENT CHECKING  %BOOLTYPE; >
+
+<!-- Investment Account Type -->
+<!ELEMENT INVACCTTYPE  %INVESTMENTACCOUNTENUM; >
+
+<!-- gilb ???-->
+<!ELEMENT OPTIONLEVEL  %OPTIONLEVELTYPE; >  
+
+
+<!-- ****** INVESTMENT STATEMENT DOWNLOAD ****** -->
+
+<!-- Investment Statement Transaction Request -->
+
+<!ELEMENT INVSTMTTRNRQ   (%TRNRQMACRO;, INVSTMTRQ)  >  
+
+<!-- Investment Statement Transaction Request -->
+
+<!ELEMENT INVSTMTTRNRS   (%TRNRSMACRO;, INVSTMTRS?) >
+
+<!-- Investment Statement Request -->
+
+<!ELEMENT INVSTMTRQ   (INVACCTFROM, INCTRAN, INCOO, INCPOS ,
+                       INCBAL, INC401K?, INC401KBAL?) >
+
+<!-- Include Transactions Aggregate -->
+
+<!ELEMENT INCTRAN   (DTSTART?, DTEND?, INCLUDE) >
+
+<!-- Include Open Orders -->
+
+<!ELEMENT INCOO   %BOOLTYPE; >
+
+<!-- Include Positions -->
+
+<!ELEMENT INCPOS   (DTASOF?, INCLUDE) >
+
+<!-- Include Balances -->
+
+<!ELEMENT INCBAL   %BOOLTYPE; >
+
+<!-- Include 401K info -->
+
+<!ELEMENT INC401K   %BOOLTYPE; >
+
+<!-- Include 401K Balances -->
+
+<!ELEMENT INC401KBAL   %BOOLTYPE; >
+
+<!-- Investment Statement Response -->
+
+<!ELEMENT INVSTMTRS   (DTASOF, CURDEF, INVACCTFROM, INVTRANLIST? ,
+                       INVPOSLIST?, INVBAL?, INVOOLIST?, INV401K?, 
+                       INV401KBAL?,  MKTGINFO?) >
+
+<!-- Marketing Message -->
+
+<!ELEMENT MKTVAL   %AMTTYPE; >
+
+<!-- Investment Transaction List -->
+
+<!ELEMENT INVTRANLIST   (DTSTART, DTEND, (BUYDEBT | BUYMF | BUYOPT | BUYOTHER |
+                         BUYSTOCK | CLOSUREOPT | INCOME | INVEXPENSE | JRNLFUND |
+                         JRNLSEC | MARGININTEREST | REINVEST | RETOFCAP| SELLDEBT |
+                         SELLMF | SELLOPT | SELLOTHER |  SELLSTOCK |
+                         SPLIT | TRANSFER)*, INVBANKTRAN*) >
+
+<!-- Investment Banking Transaction -->
+
+<!ELEMENT INVBANKTRAN   (STMTTRN, SUBACCTFUND) >
+
+<!-- Transaction fields common to many types of investment transactions -->
+
+<!ELEMENT INVTRAN       (FITID, SRVRTID?, DTTRADE, DTSETTLE?, REVERSALFITID?,
+                         MEMO?) >
+
+<!-- Trade Date -->
+
+<!ELEMENT DTTRADE   %DTTMTYPE; >
+
+<!-- Settlement Date -->
+
+<!ELEMENT DTSETTLE   %DTTMTYPE; >
+
+<!-- Reversal FI Tran ID -->
+
+<!ELEMENT REVERSALFITID   %FITIDTYPE; >
+
+<!-- Transaction fields common to BUY types of investment transactions -->
+
+<!ELEMENT INVBUY   (INVTRAN, SECID, UNITS, UNITPRICE, MARKUP?, 
+                    COMMISSION?, TAXES?, FEES?, LOAD?, TOTAL,
+                    CURRENCY?, ORIGCURRENCY?, SUBACCTSEC, SUBACCTFUND, 
+                    (LOANID, LOANPRINCIPAL, LOANINTEREST)?, INV401KSOURCE?, 
+                    DTPAYROLL?, PRIORYEARCONTRIB?) >
+
+<!ELEMENT UNITS   %AMTTYPE; >
+
+<!ELEMENT MARKUP   %AMTTYPE; >
+
+<!ELEMENT COMMISSION   %AMTTYPE; >
+
+<!ELEMENT TAXES   %AMTTYPE; >
+
+<!ELEMENT FEES   %AMTTYPE; >
+
+<!ELEMENT LOAD   %AMTTYPE; >
+
+<!ELEMENT TOTAL   %AMTTYPE; >
+
+<!-- Sub Account for the Security -->
+
+<!ELEMENT SUBACCTSEC   %SUBACCTENUM; >
+
+<!-- Sub Account for the Funds Involved in the Trade: CASH, SHORT, MARGIN, OTHER -->
+
+<!ELEMENT SUBACCTFUND   %SUBACCTENUM; >
+
+<!-- Loan ID -->
+<!ELEMENT LOANID  %LOANIDTYPE; >
+
+<!-- Loan Principal Amount -->
+<!ELEMENT LOANPRINCIPAL  %AMTTYPE; >
+
+<!-- Loan Interest Rate -->
+<!ELEMENT LOANINTEREST  %RATETYPE; >
+
+<!-- gilb ???? Loan ID -->
+<!ELEMENT DTPAYROLL  %DTTMTYPE; >
+
+<!-- Prior Year Contributions -->
+<!ELEMENT PRIORYEARCONTRIB  %BOOLTYPE; >
+
+<!--  Transaction fields common to SELL types of transactions -->
+
+<!ELEMENT INVSELL   (INVTRAN, SECID, UNITS, UNITPRICE, MARKDOWN?, 
+                     COMMISSION?, TAXES?, FEES?, LOAD?, WITHHOLDING? ,
+                     TAXEXEMPT?, TOTAL,
+                     GAIN?, CURRENCY?, ORIGCURRENCY?, SUBACCTSEC, SUBACCTFUND, 
+                     LOANID?, STATEWITHHOLDING?, PENALTY?, INV401KSOURCE?) >
+
+<!ELEMENT MARKDOWN   %AMTTYPE; >
+
+<!ELEMENT WITHHOLDING   %AMTTYPE; >
+
+<!ELEMENT GAIN   %AMTTYPE; >
+
+<!ELEMENT STATEWITHHOLDING  %AMTTYPE; >
+
+<!ELEMENT PENALTY  %AMTTYPE; >
+
+<!-- Buy Debt Transaction -->
+
+<!ELEMENT BUYDEBT   (INVBUY, ACCRDINT?) >
+
+<!-- gilb -->
+<!ELEMENT ACCRDINT   %AMTTYPE; >
+
+<!-- Buy Mutual Fund Transaction -->
+
+<!ELEMENT BUYMF   (INVBUY, BUYTYPE, RELFITID?) >
+
+<!-- Buy Type -->
+
+<!ELEMENT BUYTYPE   %BUYENUM; >
+
+<!-- Related Transaction ID for a Mutual Fund Buy -->
+
+<!ELEMENT RELFITID   %FITIDTYPE; >
+
+<!-- Buy Option Transaction -->
+
+<!ELEMENT BUYOPT   (INVBUY, OPTBUYTYPE, SHPERCTRCT) >
+
+<!-- Option Buy Type -->
+
+<!ELEMENT OPTBUYTYPE   %OPTBUYENUM; >
+
+<!-- Buy Other Transaction -->
+
+<!ELEMENT BUYOTHER   (INVBUY) >
+
+<!-- Buy Stock Transaction -->
+
+<!ELEMENT BUYSTOCK   (INVBUY, BUYTYPE) >
+
+<!-- Closure of Option Transaction -->
+
+<!ELEMENT CLOSUREOPT   (INVTRAN, SECID, OPTACTION, UNITS, SHPERCTRCT ,
+                        SUBACCTSEC, RELFITID?, GAIN?) >      
+
+<!-- Closure of Option Action -->
+
+<!ELEMENT OPTACTION   %OPTACTIONENUM; >
+
+<!-- Income Transaction -->
+
+<!ELEMENT INCOME   (INVTRAN, SECID, INCOMETYPE, TOTAL, SUBACCTSEC ,
+                    SUBACCTFUND, TAXEXEMPT?, WITHHOLDING? ,CURRENCY? ,
+                    ORIGCURRENCY?, INV401KSOURCE? ) >
+
+<!-- Type of Income -->
+
+<!ELEMENT INCOMETYPE   %INCOMEENUM; >
+
+<!-- Income Is Tax Exempt -->
+
+<!ELEMENT TAXEXEMPT  %BOOLTYPE; >
+
+<!-- Investment Related Expense Transaction -->
+
+<!ELEMENT INVEXPENSE   (INVTRAN, SECID, TOTAL, SUBACCTSEC ,
+                        SUBACCTFUND, CURRENCY?, ORIGCURRENCY?, 
+                        INV401KSOURCE? ) >
+
+<!-- Journaling of Funds Between Sub Accounts Transaction -->
+
+<!ELEMENT JRNLFUND  (INVTRAN, SUBACCTTO, SUBACCTFROM, TOTAL) >
+
+<!-- Journal Sub Account To -->
+<!ELEMENT SUBACCTTO  %SUBACCTENUM; >
+
+<!-- Journal Sub Account To -->
+<!ELEMENT SUBACCTFROM  %SUBACCTENUM; >
+
+<!-- Journaling of Security Between Sub Accounts Transaction -->
+
+<!ELEMENT JRNLSEC  (INVTRAN, SECID, SUBACCTTO, SUBACCTFROM, UNITS) >
+
+<!-- Margin Interest Transaction -->
+
+<!ELEMENT MARGININTEREST   (INVTRAN, TOTAL, SUBACCTFUND, CURRENCY? ,
+                            ORIGCURRENCY?) >
+
+<!-- Reinvest Transaction -->
+
+<!ELEMENT REINVEST   (INVTRAN, SECID, INCOMETYPE, TOTAL, SUBACCTSEC ,
+                      UNITS, UNITPRICE, COMMISSION?, TAXES?, FEES?, LOAD? ,
+                      TAXEXEMPT?, CURRENCY?, ORIGCURRENCY?, INV401KSOURCE? ) >
+
+<!-- Return Of Capital Transaction -->
+
+<!ELEMENT RETOFCAP  (INVTRAN, SECID, TOTAL, SUBACCTSEC ,
+                     SUBACCTFUND, CURRENCY?, ORIGCURRENCY?, 
+                     INV401KSOURCE? ) >
+
+<!-- Sell Debt Transaction -->
+
+<!ELEMENT SELLDEBT   (INVSELL, SELLREASON, ACCRDINT?) >
+
+<!-- Reason Sell of Debt Generated -->
+
+<!ELEMENT SELLREASON  %SELLREASONENUM; >
+
+<!-- Sell Mutual Fund Transaction -->
+
+<!ELEMENT SELLMF   (INVSELL, SELLTYPE, AVGCOSTBASIS?, RELFITID?) >
+
+<!-- Sell Type -->
+
+<!ELEMENT SELLTYPE   %SELLTYPEENUM; >
+
+<!-- Average Cost Basis -->
+
+<!ELEMENT AVGCOSTBASIS   %AMTTYPE; >
+
+<!-- Sell Option Transaction -->
+
+<!ELEMENT SELLOPT   (INVSELL, OPTSELLTYPE, SHPERCTRCT ,
+                     RELFITID?, RELTYPE?, SECURED?) >
+
+<!-- Option Sell Type -->
+
+<!ELEMENT OPTSELLTYPE   %OPTSELLENUM; >
+
+<!-- Related Option Transaction Type -->
+
+<!ELEMENT RELTYPE   %RELATEDENUM; >
+
+<!-- How the Option is Secured -->          
+
+<!ELEMENT SECURED   %SECUREDENUM; >
+
+<!-- Sell Other Transaction -->
+
+<!ELEMENT SELLOTHER   (INVSELL) >
+
+<!-- Sell Stock Transaction -->
+
+<!ELEMENT SELLSTOCK   (INVSELL, SELLTYPE) >
+
+<!-- Split Transaction Detail Fields -->
+
+<!ELEMENT SPLIT   (INVTRAN, SECID, SUBACCTSEC ,
+                   OLDUNITS, NEWUNITS, NUMERATOR, DENOMINATOR ,
+                   CURRENCY?, ORIGCURRENCY?, FRACCASH?, SUBACCTFUND?, 
+                   INV401KSOURCE? ) >
+
+<!ELEMENT OLDUNITS   %AMTTYPE; >
+
+<!ELEMENT NEWUNITS   %AMTTYPE; >
+
+<!ELEMENT NUMERATOR   %AMTTYPE; >
+
+<!ELEMENT DENOMINATOR   %AMTTYPE; >
+
+<!-- Amount of cash recieved from fractional shares -->
+
+<!ELEMENT FRACCASH   %AMTTYPE; >
+
+<!-- Transfer Transaction -->
+
+<!ELEMENT TRANSFER   (INVTRAN, SECID, SUBACCTSEC, UNITS ,
+                      TFERACTION, POSTYPE, INVACCTFROM?,
+                      AVGCOSTBASIS?, UNITPRICE?, DTPURCHASE?, 
+                      INV401KSOURCE? ) >
+
+<!-- Transfer Action -->
+
+<!ELEMENT TFERACTION   %INOUTENUM; >
+
+<!-- Date of Purchase -->
+
+<!ELEMENT DTPURCHASE   %DTTMTYPE;>
+
+<!-- Open Orders List -->
+
+<!ELEMENT INVOOLIST   ((OOBUYDEBT | OOBUYMF | OOBUYOPT | OOBUYOTHER |
+                       OOBUYSTOCK | OOSELLDEBT | OOSELLMF | OOSELLOPT |
+                       OOSELLOTHER | OOSELLSTOCK | OOSWITCHMF)*) >
+
+<!-- Open Order fields common to all open orders -->
+
+<!ELEMENT OO   (FITID, SRVRTID?, SECID, DTPLACED, UNITS, SUBACCT,
+                DURATION, RESTRICTION, MINUNITS?, LIMITPRICE?,
+                STOPPRICE?, MEMO?, CURRENCY?, INV401KSOURCE? ) >
+
+<!ELEMENT DTPLACED   %DTTMTYPE; >
+
+<!ELEMENT SUBACCT   %SUBACCTENUM; >
+
+<!ELEMENT DURATION   %DURATIONENUM; >
+
+<!ELEMENT RESTRICTION   %RESTRICTIONENUM; >
+
+<!ELEMENT MINUNITS   %AMTTYPE; >
+
+<!ELEMENT LIMITPRICE   %AMTTYPE; >
+
+<!ELEMENT STOPPRICE   %AMTTYPE; >
+
+<!-- Buy Debt Open Order -->
+
+<!ELEMENT OOBUYDEBT   (OO, AUCTION, DTAUCTION?) >
+
+<!-- gilb -->
+<!ELEMENT AUCTION   %BOOLTYPE; >
+
+<!-- Date of Auction -->
+<!ELEMENT DTAUCTION   %DTTMTYPE; >
+
+<!-- Buy Mutual Fund Open Order -->
+
+<!ELEMENT OOBUYMF   (OO, BUYTYPE, UNITTYPE) >
+
+<!-- Type of Units: SHARES or CURRENCY -->
+
+<!ELEMENT UNITTYPE   %UNITTYPEENUM; >
+
+<!-- Buy Option Open Order -->
+
+<!ELEMENT OOBUYOPT   (OO, OPTBUYTYPE) >
+
+<!-- Buy Other Open Order -->
+
+<!ELEMENT OOBUYOTHER   (OO, UNITTYPE) >
+
+<!-- Buy Stock Open Order -->
+
+<!ELEMENT OOBUYSTOCK   (OO, BUYTYPE) >
+
+<!-- Sell Debt Open Order -->
+
+<!ELEMENT OOSELLDEBT   (OO) >
+
+<!-- Sell Mutual Fund Open Order -->
+
+<!ELEMENT OOSELLMF   (OO, SELLTYPE, UNITTYPE, SELLALL) >
+
+<!-- Sell All Open Orders -->
+
+<!ELEMENT SELLALL   %BOOLTYPE; >
+
+<!-- Sell Option Open Order -->
+
+<!ELEMENT OOSELLOPT   (OO, OPTSELLTYPE) >
+
+<!-- Sell Other Security Type Open Order -->
+
+<!ELEMENT OOSELLOTHER   (OO, UNITTYPE) >
+
+<!-- Sell Stock Open Order -->
+
+<!ELEMENT OOSELLSTOCK   (OO, SELLTYPE) >
+
+<!-- Switch Mutual Fund Open Order -->
+
+<!ELEMENT OOSWITCHMF   (OO, SECID, UNITTYPE, SWITCHALL) >
+
+<!ELEMENT SWITCHALL   %BOOLTYPE; >
+
+<!-- User 401(k) Plan Information Fields -->
+
+<!ELEMENT INV401K      (EMPLOYERNAME, PLANID?, PLANJOINDATE?, EMPLOYERCONTACTINFO?, 
+                        BROKERCONTACTINFO?, DEFERPCTPRETAX?, DEFERPCTAFTERTAX?, MATCHINFO?, 
+                        CONTRIBINFO?, CURRENTVESTPCT?, VESTINFO?, LOANINFO*, INV401KSUMMARY?)  >
+
+<!ELEMENT EMPLOYERNAME   %GENNAMETYPE; >
+
+<!ELEMENT PLANID   %IDTYPE;  >
+
+<!ELEMENT PLANJOINDATE   %DTTMTYPE;>
+
+<!ELEMENT EMPLOYERCONTACTINFO  %GENCONTACTINFOTYPE; >
+
+<!ELEMENT BROKERCONTACTINFO  %GENCONTACTINFOTYPE; >
+
+<!ELEMENT DEFERPCTPRETAX  %RATETYPE; >
+
+<!ELEMENT DEFERPCTAFTERTAX  %RATETYPE; >
+
+<!ELEMENT CURRENTVESTPCT  %RATETYPE; >
+
+<!ELEMENT MATCHINFO      (MATCHPCT, MAXMATCHAMT?, MAXMATCHPCT?, STARTOFYEAR?, 
+                          BASEMATCHAMT?, BASEMATCHPCT?)  >
+
+<!ELEMENT MATCHPCT  %RATETYPE; >
+
+<!ELEMENT MAXMATCHAMT  %AMTTYPE; >
+
+<!ELEMENT MAXMATCHPCT  %RATETYPE; >
+
+<!ELEMENT STARTOFYEAR  %DTTMTYPE; >
+
+<!ELEMENT BASEMATCHAMT  %AMTTYPE; >
+
+<!ELEMENT BASEMATCHPCT  %RATETYPE; >
+
+<!-- Contribution Information Detail Fields -->
+
+<!ELEMENT CONTRIBINFO  (CONTRIBSECURITY+)  >
+
+<!ELEMENT CONTRIBSECURITY  (SECID,((PRETAXCONTRIBPCT | AFTERTAXCONTRIBPCT |  MATCHCONTRIBPCT | 
+                            PROFITSHARINGCONTRIBPCT | ROLLOVERCONTRIBPCT | OTHERVESTPCT | 
+                            OTHERNONVESTPCT)+ |  (PRETAXCONTRIBAMT | AFTERTAXCONTRIBAMT | 
+                            MATCHCONTRIBAMT | PROFITSHARINGCONTRIBAMT | ROLLOVERCONTRIBAMT | 
+                            OTHERVESTAMT |OTHERNONVESTAMT)+)) >
+
+<!ELEMENT PRETAXCONTRIBPCT  %RATETYPE; >
+
+<!ELEMENT PRETAXCONTRIBAMT  %AMTTYPE; >
+
+<!ELEMENT AFTERTAXCONTRIBPCT  %RATETYPE; >
+
+<!ELEMENT AFTERTAXCONTRIBAMT  %AMTTYPE; >
+
+<!ELEMENT MATCHCONTRIBPCT  %RATETYPE; >
+
+<!ELEMENT MATCHCONTRIBAMT  %AMTTYPE; >
+
+<!ELEMENT PROFITSHARINGCONTRIBPCT  %RATETYPE; >
+
+<!ELEMENT PROFITSHARINGCONTRIBAMT  %AMTTYPE; >
+
+<!ELEMENT ROLLOVERCONTRIBPCT  %RATETYPE; >
+
+<!ELEMENT ROLLOVERCONTRIBAMT  %AMTTYPE; >
+
+<!ELEMENT OTHERVESTPCT        %RATETYPE; >
+
+<!ELEMENT OTHERVESTAMT  %AMTTYPE; >
+
+<!ELEMENT OTHERNONVESTPCT  %RATETYPE; >
+
+<!ELEMENT OTHERNONVESTAMT  %AMTTYPE; >
+
+<!ELEMENT VESTINFO  (VESTDATE?, VESTPCT )  >
+
+<!ELEMENT VESTDATE  %DTTMTYPE; >
+
+<!ELEMENT VESTPCT  %RATETYPE; >
+
+<!-- 401(k) Loan Information Detail Fields -->
+<!ELEMENT LOANINFO  (LOANID, LOANDESC?, INITIALLOANBAL?, LOANSTARTDATE?, 
+                     CURRENTLOANBAL, DTASOF, LOANRATE?, LOANPMTAMT?, 
+                     LOANPMTFREQ?, LOANPMTSINITIAL?, LOANPMTSREMAINING?, 
+                     LOANMATURITYDATE?, LOANTOTALPROJINTEREST?, LOANINTERESTTODATE?, 
+                     LOANNEXTPMTDATE? )  >
+
+<!ELEMENT LOANDESC  %GENDESCTYPE; >
+
+<!ELEMENT INITIALLOANBAL  %AMTTYPE; >
+
+<!ELEMENT LOANSTARTDATE  %DTTMTYPE; >
+
+<!ELEMENT CURRENTLOANBAL  %AMTTYPE; >
+
+<!ELEMENT LOANRATE  %RATETYPE; >
+
+<!ELEMENT LOANPMTAMT  %AMTTYPE; >
+
+<!ELEMENT LOANPMTFREQ  %FREQENUM; >
+
+<!ELEMENT LOANPMTSINITIAL  %NUMPMTS; >
+
+<!ELEMENT LOANPMTSREMAINING  %NUMPMTS; >
+
+<!ELEMENT LOANMATURITYDATE  %DTTMTYPE; >
+
+<!ELEMENT LOANTOTALPROJINTEREST  %AMTTYPE; >
+
+<!ELEMENT LOANINTERESTTODATE  %AMTTYPE; >
+
+<!ELEMENT LOANNEXTPMTDATE  %DTTMTYPE; >
+
+<!-- 401(k) Plan Summary Information Fields -->
+
+<!ELEMENT INV401KSUMMARY  (YEARTODATE, INCEPTTODATE?, PERIODTODATE? )  >
+
+<!ELEMENT YEARTODATE      (DTSTART, DTEND, CONTRIBUTIONS?, WITHDRAWALS?, 
+                           EARNINGS?)  >
+
+<!ELEMENT INCEPTTODATE    (DTSTART, DTEND, CONTRIBUTIONS?, WITHDRAWALS?, EARNINGS?)  >
+
+<!ELEMENT PERIODTODATE    (DTSTART, DTEND, CONTRIBUTIONS?, WITHDRAWALS?, EARNINGS?)  >
+
+<!ELEMENT CONTRIBUTIONS   (PRETAX?, AFTERTAX?, MATCH?, PROFITSHARING?, ROLLOVER?, OTHERVEST?, 
+                           OTHERNONVEST?, TOTAL )  >
+
+<!ELEMENT PRETAX  %AMTTYPE; >
+
+<!ELEMENT AFTERTAX  %AMTTYPE; >
+
+<!ELEMENT MATCH  %AMTTYPE; >
+
+<!ELEMENT PROFITSHARING  %AMTTYPE; >
+
+<!ELEMENT ROLLOVER  %AMTTYPE; >
+
+<!ELEMENT OTHERVEST  %AMTTYPE; >
+
+<!ELEMENT OTHERNONVEST  %AMTTYPE; >
+
+<!ELEMENT WITHDRAWALS   (PRETAX?, AFTERTAX?, MATCH?, PROFITSHARING?, ROLLOVER?, 
+                         OTHERVEST?, OTHERNONVEST?, TOTAL )  >
+
+<!ELEMENT EARNINGS      (PRETAX?, AFTERTAX?, MATCH?, PROFITSHARING?, ROLLOVER?, 
+                         OTHERVEST?, OTHERNONVEST?, TOTAL )  >
+
+<!ELEMENT INV401KBAL    (CASHBAL?, PRETAX?, AFTERTAX?, MATCH?, PROFITSHARING?, 
+                         ROLLOVER?, OTHERVEST?, OTHERNONVEST?, TOTAL, BALLIST?) >
+
+<!ELEMENT CASHBAL  %AMTTYPE; >
+
+
+<!-- Position List -->
+
+<!ELEMENT INVPOSLIST   ((POSMF | POSSTOCK | POSDEBT| POSOPT |
+                         POSOTHER)*) >
+
+<!-- Position fields common to and types of positions -->
+
+<!ELEMENT INVPOS   (SECID, HELDINACCT, POSTYPE, UNITS, UNITPRICE, 
+                    MKTVAL, DTPRICEASOF, CURRENCY?, MEMO?, 
+                    INV401KSOURCE? ) >
+
+<!-- Which sub-account the position is held in: CASH, MARGIN, SHORT, OTHER -->
+
+<!ELEMENT HELDINACCT   %SUBACCTENUM; >
+
+<!-- Position Type: SHORT, LONG -->
+
+<!ELEMENT POSTYPE   %POSTYPEENUM; >
+
+<!ELEMENT DTPRICEASOF   %DTTMTYPE; >
+
+<!-- Debt Position -->
+
+<!ELEMENT POSDEBT   (INVPOS) >
+
+<!-- Mutual Fund Position Fields -->
+
+<!ELEMENT POSMF   (INVPOS, UNITSSTREET?, UNITSUSER?, REINVDIV? ,
+                   REINVCG?) >
+
+<!ELEMENT UNITSSTREET   %AMTTYPE; >
+
+<!ELEMENT UNITSUSER   %AMTTYPE; >
+
+<!ELEMENT REINVDIV   %BOOLTYPE; >
+
+<!ELEMENT REINVCG   %BOOLTYPE; >
+
+<!-- Option Position -->
+
+<!ELEMENT POSOPT   (INVPOS, SECURED?) >
+
+<!-- Other Security Type Position -->
+
+<!ELEMENT POSOTHER   (INVPOS) >
+
+<!-- Stock Position -->
+
+<!ELEMENT POSSTOCK   (INVPOS, UNITSSTREET?, UNITSUSER?, REINVDIV?) >
+
+<!-- Investment Balances -->
+
+<!ELEMENT INVBAL   (AVAILCASH, MARGINBALANCE, SHORTBALANCE ,
+                    BUYPOWER?, BALLIST?) >
+
+<!ELEMENT MARGINBALANCE   %AMTTYPE; >
+
+<!ELEMENT SHORTBALANCE   %AMTTYPE; >
+
+<!ELEMENT AVAILCASH   %AMTTYPE; >
+
+<!ELEMENT BUYPOWER   %AMTTYPE; >
+
+<!ELEMENT BALLIST   (BAL*) >
+
+<!-- Investment Statement Message Set -->
+
+<!-- FI supports download of transactions -->
+
+<!ELEMENT TRANDNLD   %BOOLTYPE; >
+
+<!-- FI supports download of open orders -->
+
+<!ELEMENT OODNLD   %BOOLTYPE; >
+
+<!-- FI supports download of positions -->
+
+<!ELEMENT POSDNLD   %BOOLTYPE; >
+
+<!-- FI supports download of balances -->
+
+<!ELEMENT BALDNLD   %BOOLTYPE; >
+
+<!-- FI supports download of 401K information -->
+
+<!ELEMENT INV401KDNLD   %BOOLTYPE; >
+
+<!-- Security List Message Set -->
+
+<!ELEMENT SECLISTMSGSET   (SECLISTMSGSETV1) >
+
+<!ELEMENT SECLISTMSGSETV1   (MSGSETCORE, SECLISTRQDNLD) >
+
+<!-- FI supports SECLISTRQ -->
+
+<!ELEMENT SECLISTRQDNLD   %BOOLTYPE; >
+
+<!-- Investment Email Transaction Request -->
+
+<!ELEMENT INVMAILTRNRQ       (%TRNRQMACRO;, INVMAILRQ)>
+
+<!-- Investment Email Transaction Response -->
+
+<!ELEMENT INVMAILTRNRS       (%TRNRSMACRO;, INVMAILRS?)>
+
+<!-- Investment Email Sync Request -->
+
+<!ELEMENT INVMAILSYNCRQ      (%SYNCRQMACRO;, INCIMAGES, USEHTML, INVACCTFROM, INVMAILTRNRQ*)>
+
+<!-- Investment Email Sync Response -->
+
+<!ELEMENT INVMAILSYNCRS      (%SYNCRSMACRO;, INVACCTFROM, INVMAILTRNRS*)>
+
+<!-- Investment Email Request -->
+
+<!ELEMENT INVMAILRQ          (INVACCTFROM, MAIL)>
+
+<!-- Investment Email Response -->
+
+<!ELEMENT INVMAILRS          (INVACCTFROM, MAIL)>
+
+<!-- Email Message sets -->
+
+<!ELEMENT EMAILMSGSRQV1      ((MAILTRNRQ | MAILSYNCRQ | GETMIMETRNRQ)+ )>
+
+<!ELEMENT EMAILMSGSRSV1      ((MAILTRNRS | MAILSYNCRS | GETMIMETRNRS)+ )>
+
+
+<!-- Email Profile Fields -->
+
+<!ELEMENT EMAILMSGSET        (EMAILMSGSETV1)>
+
+<!ELEMENT EMAILMSGSETV1      (MSGSETCORE, MAILSUP, GETMIMESUP)>
+
+<!ELEMENT MAILSUP            %BOOLTYPE;>
+
+<!ELEMENT GETMIMESUP         %BOOLTYPE;>
+
+<!-- Email Transactions -->
+
+<!ELEMENT MAILTRNRQ      (%TRNRQMACRO;, MAILRQ)>
+
+<!ELEMENT MAILTRNRS      (%TRNRSMACRO;, MAILRS?)>
+
+<!ELEMENT GETMIMETRNRQ   (%TRNRQMACRO;, GETMIMERQ)>
+
+<!ELEMENT GETMIMETRNRS   (%TRNRSMACRO;, GETMIMERS?)>
+
+<!-- Email Request -->
+
+<!ELEMENT MAILRQ         (MAIL)>
+
+<!-- Email Detail Fields -->
+<!ELEMENT MAIL           (USERID, DTCREATED, FROM, TO ,
+                          SUBJECT, MSGBODY, INCIMAGES ,
+                          USEHTML)>
+
+<!ELEMENT DTCREATED      %DTTMTYPE;>
+
+<!ELEMENT FROM           %GENNAMETYPE;> 
+
+<!ELEMENT TO             %GENNAMETYPE;>
+
+<!ELEMENT SUBJECT        %SUBJECTTYPE;>
+
+<!ELEMENT USEHTML        %BOOLTYPE;>
+
+<!ELEMENT MSGBODY        %MSGBODYTYPE;>
+
+<!-- Email Response -->
+
+<!ELEMENT MAILRS         (MAIL)>
+
+<!-- Email Sync Request -->
+
+<!ELEMENT MAILSYNCRQ     (%SYNCRQMACRO;, INCIMAGES, USEHTML, MAILTRNRQ*)>
+
+<!-- Email Sync Response -->
+
+<!ELEMENT MAILSYNCRS     (%SYNCRSMACRO;, MAILTRNRS*)>
+
+<!-- HTML GET -->
+
+<!ELEMENT GETMIMERQ      (URL)>
+
+<!ELEMENT GETMIMERS      (URL)>
+
+
+<!-- BILL PRESENTMENT   -->
+<!-- gil here -->
+
+<!-- Profile entry for message set -->
+
+<!ELEMENT PRESDIRMSGSET         (PRESDIRMSGSETV1+)>
+
+<!ELEMENT PRESDIRMSGSETV1       (MSGSETCORE, PRESDIRPROF?)>
+
+<!ELEMENT PRESDIRPROF       (PROCDAYSOFF*, CANSUPPORTIMAGES, PROCENDTM)>
+
+<!-- No synchronization in this module -->
+
+<!-- ================== -->
+<!-- DIRECTORY MESSAGES -->
+<!-- ================== -->
+
+    
+<!-- FIND BILLER -->
+
+    
+<!-- Find Biller Message set -->
+
+<!ELEMENT PRESDIRMSGSRQV1     (FINDBILLERTRNRQ)>
+
+<!ELEMENT PRESDIRMSGSRSV1     (FINDBILLERTRNRS)>
+
+    
+<!-- Find Biller Transactions -->
+
+<!ELEMENT FINDBILLERTRNRQ     (%TRNRQMACRO;, FINDBILLERRQ)>
+
+<!ELEMENT FINDBILLERTRNRS     (%TRNRSMACRO;, FINDBILLERRS?)>
+
+<!-- Find Biller Request and Response -->
+
+<!ELEMENT FINDBILLERRQ   (DTUPDATE?, BILLERID?, NAME?, ADDR1?,
+                          ADDR2?, ADDR3?, CITY?, STATE?,  
+                          POSTALCODE?, COUNTRY?, SIC?,
+                          CONSUPOSTALCODE?, INCIMAGES)>                                   
+
+<!ELEMENT FINDBILLERRS   (DTUPDATE ,BILLERINFO*)>
+    
+
+<!ELEMENT BILLERINFO     (BILLPUB, BILLERID, NAME, ADDR1,
+                          ADDR2?, ADDR3?, CITY, STATE,  
+                          POSTALCODE ,COUNTRY ,SIC ,PHONE ,
+                          PAYMENTINSTRUMENTS?, ACCTFORMAT?,
+                          ACCTEDITMASK?, HELPMESSAGE?, RESTRICT?, LOGO?,
+                          VALIDATE?, BILLERINFOURL?)>
+
+<!ELEMENT PAYMENTINSTRUMENTS       (PAYMENTINSTRUMENT+)>
+
+<!ELEMENT PAYMENTINSTRUMENT        (PMTINSTRUMENTTYPE, BRAND?)>
+
+<!ELEMENT DTUPDATE       %DTTMTYPE;>
+
+<!ELEMENT CONSUPOSTALCODE  %ZIPTYPE;>
+
+<!ELEMENT BILLPUB        %GENNAMETYPE;>
+
+<!ELEMENT BILLERID       %IDTYPE;>
+
+<!ELEMENT ACCTFORMAT     %MSGTYPE;>
+
+<!ELEMENT ACCTEDITMASK   %MSGTYPE;>
+
+<!ELEMENT HELPMESSAGE    %MSGTYPE;>
+
+<!ELEMENT RESTRICT       %MSGTYPE;>
+
+<!ELEMENT VALIDATE       %URLTYPE;>
+
+<!ELEMENT BILLERINFOURL  %URLTYPE;>
+
+<!ELEMENT LOGO           %URLTYPE;>
+    
+
+<!-- ================== -->
+<!-- SIGNUP MESSAGES    -->
+<!-- ================== -->
+
+<!-- ENROLL SAME AS STANDARD OFX ENROLL-->
+
+<!-- ACTIVATION SAME AS STANDARD OFX -->
+
+<!ELEMENT PRESNAMEADDRESS  (NAMEACCTHELD?, BUSNAMEACCTHELD?, ADDR1?, ADDR2?,
+		            ADDR3?, CITY?, STATE?, POSTALCODE?, COUNTRY?,
+		            DAYPHONE?, EVEPHONE?)>
+
+<!-- ACCOUNT INFO SAME AS STANDARD OFX EXCEPT FOR GROUP Messages-->
+
+<!ELEMENT NAMEACCTHELD  %NAMEACCTHELDTYPE;>
+
+<!ELEMENT BUSNAMEACCTHELD  %NAMEACCTHELDTYPE;>
+
+<!-- ====================== -->
+<!-- BILL DELIVERY MESSAGES -->
+<!-- ====================== -->
+
+<!-- Bill Delivery -->
+
+<!-- Bill Delivery Message set     -->
+<!-- Profile entry for message set -->
+
+<!ELEMENT PRESDLVMSGSET         (PRESDLVMSGSETV1+)>
+
+<!ELEMENT PRESDLVMSGSETV1       (MSGSETCORE, PRESDLVPROF?, EMAILPROF)>
+
+<!ELEMENT PRESDLVPROF           (CANSUPPORTGROUPID, PROCDAYSOFF*, CANSUPPORTIMAGES, 
+                                 PROCENDTM, CANUPDATEPRESNAMEADDRESS)>
+
+<!-- No synchronization in this module -->
+
+<!ELEMENT PRESDLVMSGSRQV1   ((PRESLISTTRNRQ | PRESGRPACCTINFOTRNRQ | PRESDETAILTRNRQ | 
+                             BILLTBLSTRUCTTRNRQ | PRESNOTIFYTRNRQ | BILLSTATUSMODTRNRQ | 
+                             PRESMAILSYNCRQ | PRESMAILTRNRQ)+ )>
+
+<!ELEMENT PRESDLVMSGSRSV1   ((PRESLISTTRNRS | PRESGRPACCTINFOTRNRS | PRESDETAILTRNRS |
+                             BILLTBLSTRUCTTRNRS | PRESNOTIFYTRNRS | BILLSTATUSMODTRNRS |
+                             PRESMAILSYNCRS | PRESMAILTRNRS)+ )>
+
+<!-- Account Info Group Transactions -->
+
+<!ELEMENT PRESGRPACCTINFOTRNRQ     (%TRNRQMACRO;, (USERID | GROUPID)?, ACCTINFORQ)>
+
+<!ELEMENT PRESGRPACCTINFOTRNRS     (%TRNRSMACRO;, ACCTINFORS?)>  
+
+<!ELEMENT PRESACCTINFO               (PRESACCTFROM, SVCSTATUS, REASON?)>
+
+<!ELEMENT PRESACCTFROM  (BILLPUB, BILLERID, BILLERNAME?, ACCTID, PRESNAMEADDRESS?,
+                         USERID?, ( SPNAME?, ((PAYEEID, PAYEELSTID?) | PAYEELSTID ))?)>
+
+<!ELEMENT PRESACCTTO    (BILLPUB, BILLERID, BILLERNAME?, ACCTID, PRESNAMEADDRESS?,
+                         USERID?, ( SPNAME?, ((PAYEEID, PAYEELSTID?) | PAYEELSTID ))?)>
+ 
+<!ELEMENT GROUPID                  %IDTYPE;>
+
+<!ELEMENT REASON                   %MSGTYPE;>
+
+<!ELEMENT PMTINSTRUMENTTYPE        %PMTINSTRUMENTENUM;>
+
+<!ELEMENT BRAND                    %GENNAMETYPE;>
+
+<!ELEMENT BILLERNAME	           %GENNAMETYPE;>
+
+<!-- Bill Delivery Transactions -->
+
+<!ELEMENT PRESLISTTRNRQ     (%TRNRQMACRO;,  (USERID|GROUPID)?, PRESLISTRQ)>
+
+<!ELEMENT PRESLISTTRNRS     (%TRNRSMACRO;, PRESLISTRS?)>
+
+<!ELEMENT PRESNOTIFYTRNRQ     (%TRNRQMACRO;, PRESNOTIFYRQ)>
+
+<!ELEMENT PRESNOTIFYTRNRS     (%TRNRSMACRO;, PRESNOTIFYRS?)>
+
+<!ELEMENT BILLSTATUSMODTRNRQ     (%TRNRQMACRO;, BILLSTATUSMODRQ)>
+
+<!ELEMENT BILLSTATUSMODTRNRS     (%TRNRSMACRO;, BILLSTATUSMODRS?)>
+
+<!ELEMENT PRESLISTRQ        (BILLPUB, DTSTART?, DTEND?, DTDUEBY?, BILLERID?, 
+                             BILLID?, BILLTYPE*, BILLSTATUSCODE*, 
+                             BILLPMTSTATUSCODE*, NOTIFYWILLING, INCLUDEDETAIL, 
+                             INCLUDEBILLSTATUS?, INCLUDEBILLPMTSTATUS?, 
+                             INCLUDESTATUSHIST?, INCLUDECOUNTS?, INCLUDESUMMARY?)>
+
+<!ELEMENT DTDUEBY                   %DTTMTYPE;>
+
+<!ELEMENT BILLTYPE                  %BILLTYPEENUM;>
+
+<!ELEMENT BILLSTATUSCODE            %BILLSTATUSCODEENUM;>
+
+<!ELEMENT BILLPMTSTATUSCODE         %BILLPMTSTATUSCODEENUM;>
+
+<!ELEMENT INCLUDEBILLSTATUS         %BOOLTYPE;>
+
+<!ELEMENT INCLUDEBILLPMTSTATUS      %BOOLTYPE;> 
+
+<!ELEMENT INCLUDESTATUSHIST         %BOOLTYPE;>
+
+<!ELEMENT INCLUDECOUNTS             %BOOLTYPE;>
+
+<!ELEMENT INCLUDESUMMARY            %BOOLTYPE;>
+                                
+
+<!ELEMENT PRESLISTRS        (BILLPUB, USERID, DTSTART, DTEND, 
+                             PRESLIST?, PRESCOUNTS?)>
+
+<!ELEMENT PRESCOUNTS              (BILLSTATUSCOUNTS*, BILLPMTSTATUSCOUNTS*)>      
+
+<!ELEMENT BILLSTATUSCOUNTS        (BILLSTATUSCODE, COUNT)>  
+
+<!ELEMENT BILLPMTSTATUSCOUNTS     (BILLPMTSTATUSCODE, COUNT)>  
+
+<!ELEMENT COUNT                   %IDTYPE;>
+
+<!ELEMENT PRESLIST          (PRESBILLINFO*)>
+
+
+<!ELEMENT PRESBILLINFO      (BILLID, PRESACCTFROM, PAYEEID?, BILLREFINFO?, AMTDUE,
+                             MINAMTDUE?, DTPMTDUE, DTBILL, DTOPEN?, DTCLOSE?,
+                             PREVBAL?, ACTIVITY?, ACCTBAL?, INVOICE?, NOTIFYDESIRED,
+                             BILLTYPE?, BILLSTATUS*, BILLPMTSTATUS*,
+                             STMNTIMAGE?, (DETAILAVAILABLE|BILLDETAILTABLE))>
+
+<!ELEMENT BILLSTATUS        (BILLSTATUSCODE, DTEFF, STATUSMODBY?)>  
+
+<!ELEMENT BILLPMTSTATUS     (SRVRTID?, BILLPMTSTATUSCODE, DTEFF, STATUSMODBY?)>
+
+<!ELEMENT DTEFF             %DTTMTYPE;> 
+
+<!ELEMENT STATUSMODBY       %STATUSMODBYENUM;>                                
+
+<!ELEMENT BILLSTATUSMODRQ   (BILLID?, BILLSTATUS?, BILLPMTSTATUS?)>
+
+<!ELEMENT BILLSTATUSMODRS   (BILLID?, BILLSTATUS?, BILLPMTSTATUS?)>
+
+<!ELEMENT STMNTIMAGE      ( IMAGEURL, PREFETCHURL*, DTEXPIRE? )>
+
+<!ELEMENT PRESDETAILTRNRQ   (%TRNRQMACRO;, PRESDETAILRQ)>
+
+<!ELEMENT PRESDETAILRQ      (BILLID, BILLDETAILTABLETYPE?)>
+
+<!ELEMENT PRESDETAILTRNRS   (%TRNRSMACRO;, PRESDETAILRS?)>
+
+<!ELEMENT PRESDETAILRS    (PRESDETAIL*)>
+
+<!ELEMENT PRESDETAIL        (BILLID, PRESACCTFROM?, BILLDETAILTABLE*)>
+
+<!ELEMENT BILLDETAILTABLE         (TABLENAME, BILLDETAILTABLETYPE, BILLDETAILROW*)>
+
+<!ELEMENT BILLDETAILROW           (C | N)*>
+
+<!ELEMENT BILLTBLSTRUCTTRNRQ     (%TRNRQMACRO;, BILLTBLSTRUCTRQ)>
+
+<!ELEMENT BILLTBLSTRUCTTRNRS     (%TRNRSMACRO;, BILLTBLSTRUCTRS?)>
+
+<!ELEMENT BILLTBLSTRUCTRQ        (BILLID, BILLDETAILTABLETYPE)>
+
+<!ELEMENT BILLTBLSTRUCTRS        (BILLID, BILLDETAILTABLETYPE, COLDEF*)>
+
+<!ELEMENT COLDEF                 (COLNAME, COLTYPE)>
+    
+
+<!ELEMENT PRESNOTIFYRQ      (PRESDELIVERYID)>
+
+<!ELEMENT PRESNOTIFYRS      (PRESDELIVERYID)>
+
+<!ELEMENT PRESDELIVERYID    (PRESACCTFROM,BILLID,DTSEEN)>
+
+<!ELEMENT NOTIFYWILLING   %BOOLTYPE;>
+
+<!ELEMENT INCLUDEDETAIL   %BOOLTYPE;>
+
+<!ELEMENT AMTDUE          %AMTTYPE;>
+
+<!ELEMENT MINAMTDUE       %AMTTYPE;>
+
+<!ELEMENT DTBILL          %DTTMTYPE;>
+
+<!ELEMENT PREVBAL         %AMTTYPE;>
+
+<!ELEMENT ACTIVITY        %AMTTYPE;>
+
+<!ELEMENT ACCTBAL         %AMTTYPE;>
+
+<!ELEMENT NOTIFYDESIRED   %BOOLTYPE;>
+
+<!ELEMENT DETAILAVAILABLE  %BOOLTYPE;>
+
+<!ELEMENT IMAGEURL        %URLTYPE;>
+
+<!ELEMENT PREFETCHURL     %URLTYPE;>
+
+<!ELEMENT TABLENAME       %GENNAMETYPE;>
+
+<!ELEMENT BILLDETAILTABLETYPE       %GENNAMETYPE;>
+
+<!ELEMENT C               %MSGTYPE;>
+
+<!ELEMENT N               %CHARTYPE;>
+
+<!ELEMENT COLNAME         %GENNAMETYPE;>
+
+<!ELEMENT COLTYPE         %COLUMNTYPE;>
+
+<!ELEMENT DTSEEN          %DTTMTYPE;>
+
+<!ELEMENT BILLID          %IDTYPE;>
+    
+
+<!-- =============================== -->
+<!-- BILL PRESENTMENT EMAIL MESSAGES -->
+<!-- =============================== -->
+
+<!-- Synchronization -->
+
+<!ELEMENT PRESMAILSYNCRQ    (%SYNCRQMACRO;, INCIMAGES, USEHTML, PRESACCTFROM, PRESMAILTRNRQ*)>
+
+<!ELEMENT PRESMAILSYNCRS    (%SYNCRSMACRO;, PRESACCTFROM, PRESMAILTRNRS*)>
+
+
+<!-- Bill Presentment Mail -->
+
+<!ELEMENT PRESMAILTRNRQ     (%TRNRQMACRO;, PRESMAILRQ)>
+
+<!ELEMENT PRESMAILTRNRS     (%TRNRSMACRO;, PRESMAILRS?)>
+
+<!ELEMENT PRESMAILRQ        (PRESACCTFROM, MAIL)>
+
+<!ELEMENT PRESMAILRS        (PRESACCTFROM, MAIL)>
+
+
+<!-- Profile message set -->
+
+<!ELEMENT PROFMSGSRQV1          ((PROFTRNRQ)+ )>
+
+<!ELEMENT PROFMSGSRSV1          ((PROFTRNRS)+ )>
+
+<!-- Profile entry for message set -->
+
+<!ELEMENT PROFMSGSET         (PROFMSGSETV1)>
+
+<!ELEMENT PROFMSGSETV1       (MSGSETCORE)>
+
+<!-- No synchronization in this module -->
+
+<!-- Transactions -->
+
+<!ELEMENT PROFTRNRQ      (%TRNRQMACRO;, PROFRQ)>
+
+<!ELEMENT PROFTRNRS      (%TRNRSMACRO;, PROFRS?)>
+
+<!-- Messages -->
+
+<!-- Message List -->
+
+<!ENTITY % MSGSETMACRO "(SIGNUPMSGSET | BANKMSGSET | CREDITCARDMSGSET |
+     		           INVSTMTMSGSET | INTERXFERMSGSET | WIREXFERMSGSET |
+ 		               BILLPAYMSGSET | EMAILMSGSET | SECLISTMSGSET |
+		               PRESDIRMSGSET | PRESDLVMSGSET | TAX1099MSGSET | TAX1098MSGSET |
+    			       TAXW2MSGSET)">
+
+<!ELEMENT MSGSETLIST  (((( SIGNONMSGSET , (%MSGSETMACRO;)+, PROFMSGSET) | 
+                         (PROFMSGSET, (%MSGSETMACRO;)*, SIGNONMSGSET)), (%MSGSETMACRO;)*) |
+          		 ((%MSGSETMACRO;)+, (( SIGNONMSGSET | PROFMSGSET), (%MSGSETMACRO;)*, 
+                         (PROFMSGSET | SIGNONMSGSET)), (%MSGSETMACRO;)*)) >
+
+<!ELEMENT PROFRQ     (CLIENTROUTING, DTPROFUP)>
+
+<!ELEMENT CLIENTROUTING  %CLIENTROUTINGENUM;>
+
+<!ELEMENT PROFRS     (MSGSETLIST, SIGNONINFOLIST, DTPROFUP,
+                      FINAME, (ADDR1,(ADDR2,ADDR3?)?), CITY, STATE, POSTALCODE, COUNTRY,
+                      CSPHONE?, TSPHONE?, FAXPHONE?, URL?, EMAIL? )>
+
+<!ELEMENT FINAME         %GENNAMETYPE;>
+
+<!ELEMENT CSPHONE        %PHONETYPE;>
+
+<!ELEMENT TSPHONE        %PHONETYPE;>
+
+<!ELEMENT FAXPHONE       %PHONETYPE;>
+
+<!-- Signon realm info -->
+
+<!ELEMENT SIGNONINFOLIST     (SIGNONINFO*)>
+
+<!ELEMENT SIGNONINFO         (SIGNONREALM, MIN, MAX ,
+                              CHARTYPE, CASESEN, SPECIAL, SPACES, 
+                              PINCH, CHGPINFIRST)>
+
+<!ELEMENT SIGNONREALM        %GENNAMETYPE;>
+
+<!ELEMENT MIN                %MAXMINTYPE;>
+
+<!ELEMENT MAX                %MAXMINTYPE;>
+
+<!ELEMENT CHARTYPE           %CHARTYPEENUM;>
+
+<!ELEMENT CASESEN            %BOOLTYPE;>
+
+<!ELEMENT SPECIAL            %BOOLTYPE;>
+
+<!ELEMENT SPACES             %BOOLTYPE;>
+
+<!ELEMENT PINCH              %BOOLTYPE;>
+
+<!ELEMENT CHGPINFIRST        %BOOLTYPE;>
+
+<!-- Message set core info - used by all XXXMSGSETVn -->
+
+<!ELEMENT MSGSETCORE     (VER, URL, OFXSEC, TRANSPSEC, SIGNONREALM ,
+                          LANGUAGE+, SYNCMODE, REFRESHSUPT?,
+		          RESPFILEER, SPNAME? )>
+
+<!ELEMENT VER            %VERTYPE;>
+
+<!ELEMENT OFXSEC         %SECURITYENUM;>
+
+<!ELEMENT TRANSPSEC      %BOOLTYPE;> 
+
+<!ELEMENT SYNCMODE       %SYNCENUM;>
+
+<!ELEMENT REFRESHSUPT	 %BOOLTYPE;>
+
+<!ELEMENT RESPFILEER     %BOOLTYPE;>
+
+<!ELEMENT SPNAME         %GENNAMETYPE;>
+
+
+<!-- Generic Elements and Common Aggregates -->
+
+<!ELEMENT DTCLIENT   %DTTMTYPE;>
+
+<!ELEMENT USERID     %IDTYPE;>
+
+<!ELEMENT USERPASS   %PASSWORDTYPE;>
+
+<!ELEMENT USERKEY    %USERKEYTYPE;>
+
+<!ELEMENT GENUSERKEY         %BOOLTYPE;>
+
+<!ELEMENT APPID      %APPIDTYPE;>
+
+<!ELEMENT APPVER     %INTTYPE;>
+
+<!ELEMENT DTSERVER   %DTTMTYPE;>
+
+<!ELEMENT TSKEYEXPIRE            %DTTMTYPE;>
+
+<!ELEMENT CLTCOOKIE  %IDTYPE;>
+
+<!ELEMENT TAN        %TANTYPE;>
+
+<!ELEMENT DESC       %SHORTMSGTYPE;>
+
+<!ELEMENT PHONE      %PHONETYPE;>
+
+<!-- general error reporting aggregate -->
+
+<!ELEMENT STATUS         (CODE, SEVERITY, MESSAGE? )> 
+
+<!ELEMENT CODE                   %ERRORTYPE;>
+
+<!ELEMENT SEVERITY       %SEVERITYENUM;>
+
+<!-- OFX 1.02 A-255 -->
+
+<!ELEMENT MESSAGE        %MSGTYPE;>
+
+<!-- Balance record -->
+
+<!ELEMENT BAL            (NAME, DESC, BALTYPE, VALUE, 
+                         DTASOF?, CURRENCY?)>
+
+<!ELEMENT BALTYPE    %BALANCEENUM;>
+
+<!ELEMENT VALUE      %AMTTYPE;>
+
+<!--
+
+    TRNUID - a UUID that uniquely identifies transactions
+
+-->
+
+<!ELEMENT TRNUID                         %UUIDTYPE;>
+
+<!-- Server ID -->
+
+<!ELEMENT SRVRTID    %SRVRIDTYPE;>
+
+<!-- Transaction ID issued by financial institution.This ID is used to detect duplicate downloads -->
+
+<!ELEMENT FITID          %FITIDTYPE;>
+
+<!-- starting date -->
+
+<!ELEMENT DTSTART        %DTTMTYPE;>
+
+<!-- ending date -->
+
+<!ELEMENT DTEND          %DTTMTYPE;>
+
+<!ELEMENT DTPROFUP       %DTTMTYPE;>
+
+<!ELEMENT DTACCTUP       %DTTMTYPE;>
+
+<!-- Sync-related -->
+
+<!ELEMENT TOKENONLY          %BOOLTYPE;>
+
+<!ELEMENT TOKEN              %SRVRIDTYPE;>
+
+<!ELEMENT REFRESH            %BOOLTYPE;>
+
+<!ELEMENT REJECTIFMISSING    %BOOLTYPE;>
+
+<!ELEMENT LOSTSYNC           %BOOLTYPE;>
+
+<!ELEMENT URL                %URLTYPE;>
+
+<!ELEMENT INCIMAGES      %BOOLTYPE;>
+
+<!-- Name & Address-related fields used in several messages -->
+
+<!ELEMENT FIRSTNAME      %GENNAMETYPE;>
+
+<!ELEMENT MIDDLENAME     %GENNAMETYPE;>
+
+<!ELEMENT LASTNAME       %GENNAMETYPE;>
+
+<!--  Payees address lines (1 or more) -->
+
+<!ELEMENT ADDR1      %ADDRESSTYPE;>           
+
+<!ELEMENT ADDR2      %ADDRESSTYPE;>           
+
+<!ELEMENT ADDR3      %ADDRESSTYPE;>           
+
+<!--  Payees city  -->
+
+<!ELEMENT CITY       %ADDRESSTYPE;>           
+
+<!--  Payees state -->
+
+<!ELEMENT STATE      %STATETYPE;>           
+
+<!--  Zip code -->
+
+<!ELEMENT POSTALCODE         %ZIPTYPE;>           
+
+<!--  Payees country -->
+
+<!ELEMENT COUNTRY    %COUNTRYTYPE;>   
+    
+<!ELEMENT DAYPHONE       %PHONETYPE;>
+
+<!ELEMENT EVEPHONE       %PHONETYPE;>
+
+<!ELEMENT EMAIL          %SHORTMSGTYPE;>
+
+
+<!-- ============================================================================= -->
+<!--            Common between banking, billpay and/or investments                 -->
+<!-- ============================================================================= -->
+
+<!-- Bank account -->
+
+<!ELEMENT BANKACCTFROM  (BANKID, BRANCHID?, ACCTID,
+                        ACCTTYPE, ACCTKEY?)>
+
+<!ELEMENT BANKACCTTO  (BANKID, BRANCHID?, ACCTID ,
+                      ACCTTYPE, ACCTKEY?)>
+
+<!-- Credit card account -->
+
+<!ELEMENT CCACCTFROM  (ACCTID, ACCTKEY?)>
+
+<!ELEMENT CCACCTTO  (ACCTID, ACCTKEY?)>
+
+<!-- Routing & transit number -->
+
+<!ELEMENT BANKID                 %BANKIDTYPE;>
+
+<!-- Bank identifier for international banks -->
+
+<!ELEMENT BRANCHID               %ACCTIDTYPE;>
+
+<!-- Account number -->
+
+<!ELEMENT ACCTID             %ACCTIDTYPE;>
+
+<!-- Type of account.  -->
+
+<!ELEMENT ACCTTYPE           %ACCOUNTENUM;>
+
+<!-- Checksum for international banks -->
+
+<!ELEMENT ACCTKEY            %ACCTIDTYPE;>
+
+<!-- User account number for a merchant -->
+
+<!ELEMENT PAYACCT            %IDTYPE;>
+
+<!--
+ If present, this is the FITID of a previously sent transaction that is corrected by this record.
+ This transaction replaces or deletes the transaction that it corrects.
+-->
+
+<!ELEMENT CORRECTFITID       %FITIDTYPE;>
+
+<!--
+ Actions can be REPLACE or DELETE.
+ REPLACE replaces the transaction referenced by CORRECTFITID; DELETE deletes it.
+-->
+
+<!ELEMENT CORRECTACTION          %CORRECTIVEACTENUM;>
+
+<!-- Payee name or description -->
+
+<!ELEMENT NAME               %GENNAMETYPE;>
+
+<!-- Extra information (not in <NAME>), A-255 -->
+
+<!ELEMENT MEMO           %MSGTYPE;>       
+
+<!-- Marketing information -->
+
+<!ELEMENT MKTGINFO   %INFOTYPE;>
+
+<!-- Include flag -->
+
+<!ELEMENT INCLUDE   %BOOLTYPE; >
+
+<!-- ============================================================================= -->
+<!--            Common amounts                                                     -->
+<!-- ============================================================================= -->
+
+<!-- Balance amount -->
+
+<!ELEMENT BALAMT         %AMTTYPE;>
+
+<!-- Amount of transaction -->
+
+<!ELEMENT TRNAMT         %AMTTYPE;>
+
+<!-- ============================================================================= -->
+<!--            Common dates                                                       -->
+<!-- ============================================================================= -->
+
+<!--        Date funds are available -->
+
+<!ELEMENT DTDUE      %DTTMTYPE;>
+
+<!-- Balance date -->
+
+<!ELEMENT DTASOF         %DTTMTYPE;>
+
+<!-- Value date, not used in US -->
+
+<!ELEMENT DTAVAIL        %DTTMTYPE;>
+
+<!-- ============================================================================= -->
+<!--        Recurring models and instances                                         -->
+<!-- ============================================================================= -->
+
+<!-- If the response is generated by a recurring model, this ID references it -->
+
+<!ELEMENT RECSRVRTID             %SRVRIDTYPE;>    
+
+<!-- Recurring Instructions aggregate -->
+
+<!ELEMENT RECURRINST  (NINSTS?, FREQ)>
+
+<!-- Number of instances. If this tag is omitted, the schedule is open-ended -->
+
+<!ELEMENT NINSTS         %NINSTSTYPE;>
+
+<!-- Frequency -->
+
+<!ELEMENT FREQ           %FREQENUM;>
+
+<!--
+
+ Modify pending flag, boolean
+
+ Note: if this flag is set, the server should modify pending as well as future transfers.
+
+-->
+
+<!ELEMENT MODPENDING             %BOOLTYPE;>
+
+<!--
+
+ Cancel pending flag, boolean
+
+ Note: if this flag is set, the server should cancel pending as well as future transfers.
+
+-->
+
+<!ELEMENT CANPENDING             %BOOLTYPE;>
+
+<!-- International -->
+
+<!ELEMENT LANGUAGE   %LANGUAGEENUM;>
+
+<!ELEMENT CURRENCY       (CURRATE, CURSYM)>
+
+<!ELEMENT ORIGCURRENCY   (CURRATE, CURSYM)>
+
+<!ELEMENT CURSYM         %CURRENCYENUM;>
+
+<!ELEMENT CURRATE        %RATETYPE;>
+
+<!ELEMENT CURDEF         %CURRENCYENUM;>
+
+<!-- ============================================================================= -->
+<!--            Common Profile Stuff                                               -->
+<!-- ============================================================================= -->
+
+<!--    Recurring transfers and payments -->
+
+<!--    Supports recurring -->
+
+<!ELEMENT CANRECUR   %BOOLTYPE;>
+
+<!--    Can modify recurring models -->
+
+<!ELEMENT CANMODMDLS         %BOOLTYPE;>
+
+<!-- Number of days prior to processing that server makes a recurring transaction available to the client -->
+
+<!ELEMENT MODELWND       %DAYSPANTYPE;>       
+
+<!-- Day where processing is unavailable (MONDAY, TUESDAY, etc) -->
+
+<!ELEMENT PROCDAYSOFF            %DAYSENUM;>       
+
+<!-- Cut off time for day's processing -->
+
+<!ELEMENT PROCENDTM              %TMTYPE;>    
+
+<!-- supports delivery of images as multi-part MIME -->
+
+<!ELEMENT CANSUPPORTIMAGES       %BOOLTYPE;>    
+
+<!-- supports GROUPID transactions -->
+
+<!ELEMENT CANSUPPORTGROUPID       %BOOLTYPE;>    
+
+<!-- supports updating PRESNAMEADDRESS on the server using SVCCHG in ACCTRQ -->
+
+<!ELEMENT CANUPDATEPRESNAMEADDRESS       %BOOLTYPE;>    
+
+ 
+<!--
+
+<!DOCTYPE OFX  PUBLIC "-//Open Financial Exchange//DTD Tax 1099 Version 1.0//EN">
+
+*********************************************************************************
+*                     Open Financial Exchange (OFX)TAX DTD                      *
+*********************************************************************************
+*   Revision        1.0                                                         *
+*   Date:           30 March 2000                                               *
+*********************************************************************************
+*                           Formal Public Identifier                            *
+*                                                                               *
+*        -//Open Financial Exchange//DTD Tax 1099 Version 1.0//EN               *
+*********************************************************************************
+*                                                                               *
+*   Copyright 1997, 1998, 1999 CheckFree Corp., Intuit Inc., Microsoft Corp.    *
+*   All rights reserved                                                         *
+*********************************************************************************
+-->
+
+
+<!-- Profile message sets for Tax -->
+<!-- 1098                         -->
+<!ELEMENT TAX1098MSGSET   (TAX1098MSGSETV1)>
+
+<!ELEMENT TAX1098MSGSETV1 (MSGSETCORE, TAX1098DNLD, TAXYEARSUPPORTED+)>
+
+<!ELEMENT TAX1098DNLD       %BOOLTYPE;>
+
+<!-- 1099                         -->
+<!ELEMENT TAX1099MSGSET   (TAX1099MSGSETV1)>
+
+<!ELEMENT TAX1099MSGSETV1 (MSGSETCORE, TAX1099DNLD, EXTD1099B, TAXYEARSUPPORTED+)>
+
+<!ELEMENT TAX1099DNLD       %BOOLTYPE;>
+
+<!ELEMENT EXTD1099B         %BOOLTYPE;>
+
+<!ELEMENT TAXYEARSUPPORTED  %YEARTYPE;>
+
+<!-- W2                           -->
+<!ELEMENT TAXW2MSGSET     (TAXW2MSGSETV1)>
+
+<!ELEMENT TAXW2MSGSETV1   (MSGSETCORE, TAXW2DNLD, TAXYEARSUPPORTED+)>
+
+<!ELEMENT TAXW2DNLD         %BOOLTYPE;>
+
+
+<!--    Tax Request Wrappers    -->
+
+<!ELEMENT TAX1098MSGSRQV1 (TAX1098TRNRQ)+>
+
+<!ELEMENT TAX1099MSGSRQV1 (TAX1099TRNRQ)+>
+
+<!ELEMENT TAXW2MSGSRQV1   (TAXW2TRNRQ)+>
+
+<!--   Tax Request Transactions                                           -->
+
+<!ELEMENT TAX1098TRNRQ    (TRNUID, CLTCOOKIE?, TAN?, TAX1098RQ)>
+
+<!ELEMENT TAX1099TRNRQ    (TRNUID, CLTCOOKIE?, TAN?, TAX1099RQ)>
+
+<!ELEMENT TAXW2TRNRQ      (TRNUID, CLTCOOKIE?, TAN?, TAXW2RQ)>
+
+<!ELEMENT TAX1098RQ     (ACCTNUM?, SSN?, TAXYEAR*)>
+
+<!ELEMENT TAX1099RQ     (ACCTNUM?, RECID?, TAXYEAR*)>
+
+<!ELEMENT TAXW2RQ       (SSN, TAXYEAR*)>
+
+<!ELEMENT ACCTNUM     %ACCTIDTYPE;>
+
+<!ELEMENT RECID       %IDTYPE;>
+
+<!ELEMENT TAXYEAR     %YEARTYPE;>
+
+<!ELEMENT TAX1098MSGSRSV1 (TAX1098TRNRS)+>
+
+<!ELEMENT TAX1099MSGSRSV1 (TAX1099TRNRS)+>
+
+<!ELEMENT TAXW2MSGSRSV1 (TAXW2TRNRS)+>
+
+<!--   1098 Response Transaction                                            -->
+<!ELEMENT TAX1098TRNRS (TRNUID, STATUS, CLTCOOKIE?, TAX1098RS?)>
+
+<!ELEMENT TAX1098RS    (ACCTNUM?, SSN?, (TAX1098_V100)+)>
+                      
+<!--   
+                 *************************************************************
+                 *              Status Codes for 1098                        *
+                 *************************************************************
+                 * 0     * Success (INFO)                                    *
+                 * 2000  * General error (ERROR)                             *
+                 * 2001  * Invalid account (ERROR)                           *
+                 * 2002  * General account error (ERROR)                     *
+                 * 2003  * Account not found (ERROR)                         *
+                 * 2004  * Account closed (ERROR)                            *
+                 * 2005  * Account not authorized (ERROR)                    *
+                 * 14700 * 1098 forms not yet available for tax year (INFO)  *
+                 * 14701 * 1098 forms not available for user ID (ERROR)      *
+                 * 15000 * Must change user password (INFO)                  *
+                 * 15500 * Unsuccessful <SONRQ> (ERROR)                      *
+                 * 15501 * Customer account already in use (ERROR)           *
+                 * 15502 * User password lockout (ERROR)                     *
+                 *************************************************************
+-->
+
+<!--   1099 Response Transaction                                            -->
+<!ELEMENT TAX1099TRNRS (TRNUID, STATUS, CLTCOOKIE?, TAX1099RS?)>
+
+<!ELEMENT TAX1099RS  (ACCTNUM?, RECID?, (TAX1099MISC_V100 | TAX1099R_V100 |
+                      TAX1099B_V100 | TAX1099INT_V100 | TAX1099DIV_V100 |
+                      TAX1099OID_V100)+)>
+                      
+<!--   
+                 *************************************************************
+                 *              Status Codes for 1099                        *
+                 *************************************************************
+                 * 0     * Success (INFO)                                    *
+                 * 2000  * General error (ERROR)                             *
+                 * 2001  * Invalid account (ERROR)                           *
+                 * 2002  * General account error (ERROR)                     *
+                 * 2003  * Account not found (ERROR)                         *
+                 * 2004  * Account closed (ERROR)                            *
+                 * 2005  * Account not authorized (ERROR)                    *
+                 * 14500 * 1099 forms not yet available for tax year (INFO)  *
+                 * 14501 * 1099 forms not available for user ID (ERROR)      *
+                 * 15000 * Must change user password (INFO)                  *
+                 * 15500 * Unsuccessful <SONRQ> (ERROR)                      *
+                 * 15501 * Customer account already in use (ERROR)           *
+                 * 15502 * User password lockout (ERROR)                     *
+                 *************************************************************
+-->
+                      
+<!--   W2 Response Transaction                                            -->
+<!ELEMENT TAXW2TRNRS (TRNUID, STATUS, CLTCOOKIE?, TAXW2RS?)>
+
+<!ELEMENT TAXW2RS  (SSN?, (TAXW2_V100 | TAXW2_V200)+)>
+
+<!--   
+                 *************************************************************
+                 *              Status Codes for  W2                         *
+                 *************************************************************
+                 * 0     * Success (INFO)                                    *
+                 * 2000  * General error (ERROR)                             *
+                 * 2001  * Invalid account (ERROR)                           *
+                 * 2002  * General account error (ERROR)                     *
+                 * 2003  * Account not found (ERROR)                         *
+                 * 2004  * Account closed (ERROR)                            *
+                 * 2005  * Account not authorized (ERROR)                    *
+                 * 14500 * W2 forms not yet available for tax year (INFO)  *
+                 * 14501 * W2 forms not available for user ID (ERROR)      *
+                 * 15000 * Must change user password (INFO)                  *
+                 * 15500 * Unsuccessful <SONRQ> (ERROR)                      *
+                 * 15501 * Customer account already in use (ERROR)           *
+                 * 15502 * User password lockout (ERROR)                     *
+                 *************************************************************
+-->
+
+<!--
+*********************************************************************************
+*                                     Tax Form 1098                             *
+*********************************************************************************
+-->
+
+<!ELEMENT TAX1098_V100 (SRVRTID, TAXYEAR, MORTGAGEINTEREST?, POINTS?,
+                        OVERPAIDREFUND?, OTHERLOANINFO?, LENDERADDR?,
+                        LENDERID?, BORROWERADDR?, BORROWERID?)>
+
+<!--  Mortgage interest                                                 -->
+
+<!ELEMENT  MORTGAGEINTEREST             %AMTTYPE;>
+
+<!--  Points paid                                                       -->
+
+<!ELEMENT  POINTS                       %AMTTYPE;>
+
+<!--  Refund of overpaid interest                                       -->
+
+<!ELEMENT  OVERPAIDREFUND               %AMTTYPE;>
+
+<!--  Additional details                                                -->
+
+<!ELEMENT  OTHERLOANINFO                %GENDESCTYPE;>
+
+<!--  Lender Address                                                    -->
+
+<!ELEMENT LENDERADDR  (LENDERNAME, ADDR1?, ADDR2?, ADDR3?, CITY?, STATE?,
+                       POSTALCODE?)>
+
+<!ELEMENT LENDERNAME               %GENNAMETYPE;>
+
+<!--  Lender Address                                                    -->
+
+<!ELEMENT BORROWERADDR  (BORROWERNAME, ADDR1?, ADDR2?, ADDR3?, CITY?, STATE?,
+                         POSTALCODE?)>
+
+<!ELEMENT BORROWERNAME              %GENNAMETYPE;>
+
+<!--  Fed ID number of lender                                           -->
+
+<!ELEMENT  LENDERID                 %GENDESCTYPE;>
+
+<!--  SSN of Borrower                                                   -->
+
+<!ELEMENT  BORROWERID               %GENDESCTYPE;>
+
+
+<!--
+*********************************************************************************
+*                                     Tax Form 1099MISC                         *
+*********************************************************************************
+-->
+
+<!ELEMENT TAX1099MISC_V100 (SRVRTID, TAXYEAR, VOID?, CORRECTED?, RENTS?,
+                            ROYALTIES?, OTHERINCOME?, FEDTAXWH?, FISHBOATPRO?,
+                            MEDHEALTHPAY?, NONEMPCOMP?, SUBPMTS?, PAYER5KSALES?,
+                            CROPINSPRO?,
+                            ((STTAXWH?, PAYERSTATE?, PAYERSTID?, STINCOME?) | ADDLSTTAXWHAGG*),
+                            GROSSATTOR?, EXCSGLDN?, PAYERADDR, PAYERID, 
+                            RECADDR?, RECID, RECACCT?, TINNOT?)>
+
+<!--   Y if the form is void, Boolean                                         -->
+
+<!ELEMENT VOID              %BOOLTYPE;>
+
+<!--   Y if this is a corrected form, Boolean                                 -->
+
+<!ELEMENT CORRECTED         %BOOLTYPE;>
+
+<!--  Rents, Amount                                                           -->
+
+<!ELEMENT RENTS             %AMTTYPE;>
+
+<!--  Royalties, Amount							      -->
+
+<!ELEMENT ROYALTIES         %AMTTYPE;>
+
+<!--  Other Income, Amount                                                    -->
+
+<!ELEMENT OTHERINCOME       %AMTTYPE;>
+
+<!-- Federal Tax Withheld, Amount                                             -->
+
+<!ELEMENT FEDTAXWH          %AMTTYPE;>
+
+<!-- Fishing Boat proceeds, Amount                                            -->
+
+<!ELEMENT FISHBOATPRO       %AMTTYPE;>
+
+<!-- Medical/health payments, amount                                          -->
+
+<!ELEMENT MEDHEALTHPAY      %AMTTYPE;>
+
+<!--  Nonemployee compensation, amount                                        -->
+
+<!ELEMENT NONEMPCOMP        %AMTTYPE;>
+
+<!--  Substitute payments in lieur of dividends or interest, Amount           -->
+
+<!ELEMENT SUBPMTS           %AMTTYPE;>
+
+<!--  Payer made direct sales of $5,000 or more of consumer products to       -->
+<!--  a buyer (recipient) for resale, Boolean                                 -->
+
+<!ELEMENT PAYER5KSALES      %BOOLTYPE;>
+
+<!--  Crop insurance proceeds, Amount                                         -->
+
+<!ELEMENT CROPINSPRO        %AMTTYPE;>
+
+<!--  State tax withheld, Amount                                              -->
+
+<!ELEMENT STTAXWH           %AMTTYPE;>
+
+<!-- Payers state code                                                        -->
+
+<!ELEMENT PAYERSTATE        %STATECODETYPE;>
+
+<!-- Payers state ID number                                                   -->
+
+<!ELEMENT PAYERSTID         %IDTYPE;>
+
+<!-- Gross proceeds paid to an attorney (Code A), Amount                      -->
+
+<!ELEMENT GROSSATTOR         %AMTTYPE;>
+
+<!--  Excess golden parachute payments (Code EPP), Amount                     -->
+
+<!ELEMENT EXCSGLDN          %AMTTYPE;>
+
+<!--   Additional State Tax Withheld information for MISC form                                       -->
+
+<!ELEMENT ADDLSTTAXWHAGG   (STTAXWH, PAYERSTATE, PAYERSTID?, STINCOME?)>
+
+<!ELEMENT STINCOME         %AMTTYPE;>
+
+<!--   Payers Address                                                          -->
+
+<!ELEMENT PAYERADDR        (PAYERNAME1, PAYERNAME2?, ADDR1, ADDR2?, ADDR3?, CITY, STATE,
+                            POSTALCODE, PHONE?)>
+
+<!ELEMENT PAYERNAME1        %GENNAMETYPE;>
+
+<!ELEMENT PAYERNAME2        %GENNAMETYPE;>
+
+<!ELEMENT PAYERID           %GENNAMETYPE;>
+
+<!--  Receivers Address          					       -->
+
+<!ELEMENT RECADDR          (RECNAME1, RECNAME2?, ADDR1, ADDR2?, ADDR3?, CITY?, STATE?,
+                            POSTALCODE?, COUNTRYSTRING?, PHONE?)>
+
+<!ELEMENT RECNAME1	   %GENNAMETYPE;>
+
+<!ELEMENT RECNAME2	   %GENNAMETYPE;>
+
+<!ELEMENT COUNTRYSTRING	   %COUNTRYSTRINGTYPE;>
+
+<!--  Receivers Account Number                                                 -->
+
+<!ELEMENT RECACCT          %GENNAMETYPE;>
+
+<!-- Second TIN notification, Boolean                                          -->
+
+<!ELEMENT TINNOT           %BOOLTYPE;>
+
+<!--
+*********************************************************************************
+*                                     Tax Form 1099R                            *
+*********************************************************************************
+-->
+
+
+<!ELEMENT TAX1099R_V100     (SRVRTID, TAXYEAR, VOID?, CORRECTED?, GROSSDIST?, TAXAMT?,
+                             TAXAMTND?, TOTALDIST?, CAPGAIN?, FEDTAXWH?, EMPCONTINS?,
+                             NETUNAPEMP?, DISTCODE+, IRASEPSIMP?, ANNCTRCTDIST?, 
+                             ANNCTRCTPER?, PERTOTDIST?, TOTEMPCONT?, STTAXWHAGG*,
+                             LCLTAXWHAGG*, PAYERADDR, PAYERID, RECADDR?, RECID,
+                             RECACCT?)>
+ 
+<!ELEMENT GROSSDIST         %AMTTYPE;>
+
+<!--   Tax Amount                                                            -->
+
+<!ELEMENT TAXAMT            %AMTTYPE;>
+
+<!--   Taxable amount not determined, boolean                                -->
+
+<!ELEMENT TAXAMTND          %BOOLTYPE;>
+
+<!--  Total Distribution, Amount                                             -->
+
+<!ELEMENT TOTALDIST         %BOOLTYPE;>
+
+<!-- Capital Gain, Amount                                                    -->
+
+<!ELEMENT CAPGAIN           %AMTTYPE;>
+
+<!--   Employee contributions or insurance premiums, amount                  -->
+
+<!ELEMENT EMPCONTINS        %AMTTYPE;>
+
+<!--   Net unrealized appreciation in employer's securities, amount          -->
+
+<!ELEMENT NETUNAPEMP        %AMTTYPE;>
+
+<!--   Distribution Code                                                      -->
+
+<!ELEMENT DISTCODE          %CHARTYPE;>
+
+<!--   IRA/SEP/SIMPLE, boolean.  The <IRASEPSIMP> element is required if      -->
+<!--                             and of the following elements are present    -->
+<!--                             in the 1099R content:  <GROSSDIST>, <TAXAMT>,-->
+<!--                             <FEDTAXWH>, <STTAXWH>, or <LCLTAXWH>.        -->
+
+<!ELEMENT IRASEPSIMP        %BOOLTYPE;>
+
+<!--  Anuual contract distribution, amount                                    -->
+
+<!ELEMENT ANNCTRCTDIST      %AMTTYPE;>
+
+<!--  Annual contract percentage rate                                         -->
+
+<!ELEMENT ANNCTRCTPER       %RATETYPE;> 
+
+
+<!--  Your percentage of total distribution rate                              -->
+
+<!ELEMENT PERTOTDIST        %RATETYPE;>
+
+<!-- Total employee contributions, amount                                   -->
+
+<!ELEMENT TOTEMPCONT        %AMTTYPE;>
+
+<!--   State Tax Withheld                                                    -->
+
+<!ELEMENT STTAXWHAGG        (AMOUNT, PAYERSTATE, PAYERSTID?, STDIST?)>
+
+<!--   State Distribution - Amount                                            -->
+
+<!ELEMENT STDIST            %AMTTYPE;>
+
+<!--   Local Tax Withheld                                                     -->
+
+<!ELEMENT LCLTAXWHAGG       (AMOUNT, NAMELCL, LCLDIST?)>
+
+<!ELEMENT AMOUNT             %AMTTYPE;>
+
+<!--   Name of Locality                                                       -->
+
+<!ELEMENT NAMELCL            %GENNAMETYPE;>
+
+<!--   Local Distribution - Amount                                            -->
+
+<!ELEMENT LCLDIST           %AMTTYPE;>
+
+<!--
+*********************************************************************************
+*                                     Tax Form 1099B                            *
+*********************************************************************************
+-->
+
+<!ELEMENT TAX1099B_V100       (SRVRTID, TAXYEAR, VOID?, CORRECTED?, DTSALE?, 
+                               CUSIPNUM?, STKBND?, BARTERING?, FEDTAXWH?, 
+                               DSCR?, PROFIT?, UNRELPROFITPREV?, UNRELPROFIT?,
+                               AGGPROFIT?, EXTDBINFO_V100?, PAYERADDR, PAYERID,
+                               RECADDR?, RECID, RECACCT?, TINNOT?)>
+
+<!--   Date of Sale                                                           -->
+
+<!ELEMENT DTSALE            %DTTMTYPE;>
+
+<!--   Committee on Uniform Security Identity Procedures number.              -->
+
+<!ELEMENT CUSIPNUM          %CUSIPTYPE;>
+
+<!--   Stocks, Bonds, etc.                                                    -->
+
+<!ELEMENT STKBND            (STKBNDAMT, SBGROS?, SBGROSLESS?)>
+
+<!--   Amount of Stocks, Bonds, etc.                                          -->
+
+<!ELEMENT STKBNDAMT         %AMTTYPE;>
+
+<!--   Stocks, bonds, etc., gross proceeds, boolean                           -->
+
+<!ELEMENT SBGROS            %BOOLTYPE;>
+
+<!--   Stocks, bonds, etc., gross proceeds less commissions and option        -->
+<!--   premiums, boolean                                                      -->
+
+<!ELEMENT SBGROSLESS        %BOOLTYPE;>
+
+<!--  Bartering, amount                 				      -->
+
+<!ELEMENT BARTERING         %AMTTYPE;>
+
+<!--   Description                                                            -->
+
+<!ELEMENT DSCR              %SHORTMSGTYPE;>
+
+<!ELEMENT PROFIT            %AMTTYPE;>
+
+<!--   Unrealized profit or loss on open contracts in previous tax year       -->
+<!--   amount                                                                 -->
+
+<!ELEMENT UNRELPROFITPREV   %AMTTYPE;>
+
+<!--    Unrealized profit or loss on open contracts in this year, amount      -->
+
+<!ELEMENT UNRELPROFIT       %AMTTYPE;>
+
+<!--    Aggregate profit or loss, amount                                      -->
+
+<!ELEMENT AGGPROFIT         %AMTTYPE;>
+
+<!--    Extended 1099B information typically found in 1099B broker summary reports.  -->
+
+<!ELEMENT EXTDBINFO_V100    (PROCDET_V100*, TEINTEREST?, PABINTEREST?, TEINTDIVIDEND?,
+                             PABDIVIDEND?)>
+
+<!--	1099 proceeds description                                             -->
+
+<!ELEMENT PROCDET_V100      ((DTAQD | DTVAR)?, DTSALE, SECNAME, NUMSHRS?, COSTBASIS?, 
+                             SALESPR, LONGSHORT?, WASHSALE?, FEDTAXWH?)>
+
+<!--	Date acquired.                                                        -->
+
+<!ELEMENT DTAQD             %DTTMTYPE;>
+
+<!--	Date various.                                                         -->
+
+<!ELEMENT DTVAR             %BOOLTYPE;>
+
+<!--	Number of shares, quantity                                            -->
+
+<!ELEMENT NUMSHRS           %AMTTYPE;>
+
+<!--  	Cost basis of sale, amount                                            -->
+
+<!ELEMENT COSTBASIS         %AMTTYPE;>
+
+<!--  	Sales price                                                           -->
+
+<!ELEMENT SALESPR           %AMTTYPE;>
+
+<!--	Long or Short or Qualified 5 Year Sale                                -->
+
+<!ELEMENT LONGSHORT         %LONGSHORTENUM;>
+
+<!--	Wash sale, Boolean                                                    -->
+
+<!ELEMENT WASHSALE          %BOOLTYPE;>
+
+<!--	Tax-exempt Interest, amount                                           -->
+
+<!ELEMENT TEINTEREST        %AMTTYPE;>
+
+<!--	Private activity bond interest included in total tax-exempt interest, -->
+<!--    amount                                                                -->
+
+<!ELEMENT PABINTEREST       %AMTTYPE;>
+
+<!--	Tax-exempt interest divident, amount                                  -->
+
+<!ELEMENT TEINTDIVIDEND     %AMTTYPE;>
+
+<!-- 	Private activity bond dividends included in total tax-exempt interest -->
+<!-- 	dividends, amount                                                     -->
+
+<!ELEMENT PABDIVIDEND       %AMTTYPE;>
+
+<!--
+*********************************************************************************
+*                                   Tax Form 1099INT                            *
+*********************************************************************************
+-->
+
+<!ELEMENT TAX1099INT_V100     (SRVRTID, TAXYEAR, VOID?, CORRECTED?, PAYERRTN?,
+                               INTINCOME?, ERLWITHPEN?, INTUSBNDTRS?, FEDTAXWH?,
+                               INVESTEXP?, FORTAXPD?, FORCNT?, PAYERADDR, 
+                               PAYERID, RECADDR?, RECID, RECACCT?, TINNOT?)>
+
+<!-- Payer's RTN                                                              -->	
+
+<!ELEMENT PAYERRTN	      %GENNAMETYPE;>
+
+<!-- Payer's Interest Income, amount                                          -->	
+
+<!ELEMENT INTINCOME	      %AMTTYPE;>
+
+<!-- Early withdrawl penalty, amount                                          -->	
+
+<!ELEMENT ERLWITHPEN          %AMTTYPE;>
+
+<!-- Interest on U.S. Savings Bonds and Treasury abligations, amount          -->	
+
+<!ELEMENT INTUSBNDTRS         %AMTTYPE;>
+
+<!-- Investment expenses, amount                                              -->	
+
+<!ELEMENT INVESTEXP           %AMTTYPE;>
+
+<!-- Foreign tax paid, amount                                                 -->	
+
+<!ELEMENT FORTAXPD            %AMTTYPE;>
+
+<!-- Foreign country or U.S. possession                                       -->	
+
+<!ELEMENT FORCNT              %GENNAMETYPE;>
+
+<!--
+*********************************************************************************
+*                                   Tax Form 1099DIV                            *
+*********************************************************************************
+-->
+
+<!ELEMENT TAX1099DIV_V100     (SRVRTID, TAXYEAR, VOID?, CORRECTED?, ORDDIV?,
+                               TOTCAPGAIN?, P28GAIN?, UNRECSEC1250?, SEC1202?, QUAL5YEAR?,
+                               NONTAXDIST?, FEDTAXWH?, INVESTEXP?, FORTAXPD?,
+                               FORCNT?, CASHLIQ?, NONCASHLIQ?, PAYERADDR, 
+                               PAYERID, RECADDR?, RECID, RECACCT?, TINNOT?)>
+
+<!-- Ordinary dividends, amount                                                -->	
+
+<!ELEMENT ORDDIV  	       %AMTTYPE;>
+
+<!-- Total capital gain distribution, amount                                  -->	
+
+<!ELEMENT TOTCAPGAIN	       %AMTTYPE;>
+
+<!-- 28% rate gain, amount                                                    -->	
+
+<!ELEMENT P28GAIN	       %AMTTYPE;>
+
+<!-- Unrecap. Section 1250 gain, amount                                       -->	
+
+<!ELEMENT UNRECSEC1250         %AMTTYPE;>
+
+<!-- Section 1202 gain, amount                                                -->	
+
+<!ELEMENT SEC1202              %AMTTYPE;>
+
+<!-- Qualified 5 year gain, amount                                             -->	
+
+<!ELEMENT QUAL5YEAR            %AMTTYPE;>
+
+<!-- Nontaxable distributions, amount                                         -->	
+
+<!ELEMENT NONTAXDIST           %AMTTYPE;>
+
+<!-- Cash liquidation distribution, amount                                    -->	
+
+<!ELEMENT CASHLIQ              %AMTTYPE;>
+
+<!-- Noncash liquidation distribution, amount                                 -->	
+
+<!ELEMENT NONCASHLIQ           %AMTTYPE;>
+
+<!--
+*********************************************************************************
+*                                   Tax Form 1099OID                            *
+*********************************************************************************
+-->
+
+<!ELEMENT TAX1099OID_V100     (SRVRTID, TAXYEAR, VOID?, CORRECTED?, ORIGISDISC?,
+                               OTHERPERINT?, ERLWITHPEN?, FEDTAXWH?, DESCRIPTION?,
+                               OIDONUSTRES?, INVESTEXP?, PAYERADDR, PAYERID, 
+                               RECADDR?, RECID, RECACCT?, TINNOT?)>
+
+<!-- Original issue discount, amount                                            -->
+
+<!ELEMENT ORIGISDISC             %AMTTYPE;>
+
+<!-- Other periodic interest, amount                                            -->
+
+<!ELEMENT OTHERPERINT            %AMTTYPE;>
+
+<!-- Original issue discount on U.S. Treasury obligations, amount               -->
+
+<!ELEMENT OIDONUSTRES            %AMTTYPE;>
+
+
+<!-- Description -->
+
+<!ELEMENT DESCRIPTION            %LONGMSGTYPE;>
+
+
+<!--
+*********************************************************************************
+*                             Tax Form W2, version 100                          *
+*********************************************************************************
+-->
+
+<!ELEMENT TAXW2_V100    (TAXYEAR, CNTRLNO?, VOID?, EMPLOYER, EMPLOYEE, WAGES?,
+                         FEDTAXWH?, SSWAGES?, SSTAXWH?, MEDICAREWAGES?, MEDICARETAXWH?,
+                         SSTIPS?, ALLOCATEDTIPS?, ADVANCEDEIC?, DEPCAREBENEFIT?, 
+                         NONQUALPLAN?, BENEFITSBOX1?, CODES*, OTHER*, STATUTORY?,
+                         DECEASED?, PENSIONPLAN?, LEGALREP?, DEFERREDCOMP?, 
+                         STATEINFO*, LOCALINFO*)>
+
+
+<!ELEMENT CNTRLNO        %CNTRLNOTYPE;>
+
+<!--  Employer Information                                                     -->
+
+<!ELEMENT EMPLOYER       (FEDIDNUMBER, NAME1, NAME2?, ADDR1, ADDR2?, ADDR3?,
+                          CITY, STATE, POSTALCODE, COUNTRYSTRING?)>
+
+<!--  Federal Identification Number                                            -->
+
+<!ELEMENT FEDIDNUMBER     %GENNAMETYPE;>
+
+<!ELEMENT NAME1           %GENNAMETYPE;>
+
+<!ELEMENT NAME2           %GENNAMETYPE;>
+
+<!ELEMENT EMPLOYEE        (SSN, FIRSTNAME, MIDDLENAME?, LASTNAME, ADDR1?, ADDR2?, ADDR3?, CITY?,
+                           STATE?, POSTALCODE?, COUNTRYSTRING?)>
+
+<!-- Social Security Number                                                    -->
+
+<!ELEMENT SSN              %GENNAMETYPE;>
+
+<!ELEMENT WAGES            %AMTTYPE;>
+
+<!--  Social Security Wages, amount                                            -->
+
+<!ELEMENT SSWAGES          %AMTTYPE;>
+
+<!--  Social Security Wages Withheld, amount                                   -->
+
+<!ELEMENT SSTAXWH          %AMTTYPE;>
+
+<!ELEMENT MEDICAREWAGES    %AMTTYPE;>
+
+<!--  Medicare tax withheld, amount                                            -->
+
+<!ELEMENT MEDICARETAXWH       %AMTTYPE;>
+
+<!--  Social Security Tips, amount                                             -->
+
+<!ELEMENT SSTIPS           %AMTTYPE;>
+
+<!--  Allocated tips, amount                                                   -->
+
+<!ELEMENT ALLOCATEDTIPS    %AMTTYPE;>
+
+<!-- Advance EIC payment, amount                                               -->
+
+<!ELEMENT ADVANCEDEIC      %AMTTYPE;>
+
+<!-- Dependent care benefits, amount                                           -->
+
+<!ELEMENT DEPCAREBENEFIT   %AMTTYPE;>
+
+<!-- Nonqualified plan, amount                                                 -->
+
+<!ELEMENT NONQUALPLAN      %AMTTYPE;>
+
+<!-- Benefits included in Box 1, amount                                        -->
+
+<!ELEMENT BENEFITSBOX1     %AMTTYPE;>
+
+<!-- Code and amount, 1 or more                                                -->
+
+<!ELEMENT CODES            (CODE, CODEAMOUNT)>
+
+<!ELEMENT CODEAMOUNT       %AMTTYPE;>
+
+<!--  Other description and amount for Box 14, 1 or More                       -->
+
+<!ELEMENT OTHER            (OTHERDESC, OTHERAMOUNT)>
+
+<!ELEMENT OTHERDESC        %GENDESCTYPE;>
+
+<!ELEMENT OTHERAMOUNT      %AMTTYPE;>
+
+<!--  Statutory employee, Boolean                                              -->
+
+<!ELEMENT STATUTORY        %BOOLTYPE;>
+
+<!--  Deceased, Boolean                                                        -->
+
+<!ELEMENT DECEASED         %BOOLTYPE;>
+
+<!ELEMENT PENSIONPLAN      %BOOLTYPE;>
+
+<!--  Legal Representation, Boolean                                            -->
+
+<!ELEMENT LEGALREP         %BOOLTYPE;>
+
+<!--  Deferred compensation, Boolean                                           -->
+
+<!ELEMENT DEFERREDCOMP     %BOOLTYPE;>
+
+<!--  State Information, 1 or more                                             -->
+
+<!ELEMENT STATEINFO        (STATECODE, EMPLOYERSTID?, STATEWAGES?, STATETAXWH?)>
+
+<!ELEMENT STATECODE        %STATECODETYPE;>
+
+<!ELEMENT EMPLOYERSTID     %IDTYPE;>
+
+<!ELEMENT STATEWAGES       %AMTTYPE;>
+
+<!ELEMENT STATETAXWH       %AMTTYPE;>
+
+<!--  LocalInformation, 1 or more                                             -->
+
+<!ELEMENT LOCALINFO        (LOCALITY, LOCALWAGES?, LOCALTAXWH?)>
+
+<!ELEMENT LOCALITY         %GENNAMETYPE;>
+
+<!ELEMENT LOCALWAGES       %AMTTYPE;>
+
+<!ELEMENT LOCALTAXWH       %AMTTYPE;>
+
+<!--
+*********************************************************************************
+*                             Tax Form W2, version 200                          *
+*********************************************************************************
+-->
+
+<!ELEMENT TAXW2_V200    (TAXYEAR, CNTRLNO?, VOID?, EMPLOYER, EMPLOYEE, WAGES?,
+                         FEDTAXWH?, SSWAGES?, SSTAXWH?, MEDICAREWAGES?, MEDICARETAXWH?,
+                         SSTIPS?, ALLOCATEDTIPS?, ADVANCEDEIC?, DEPCAREBENEFIT?, 
+                         NONQUALPLAN?, CODES*, OTHER*, STATUTORY?, RETIREMENTPLAN?,
+                         THIRDPARTYSICKPAY?, DEFERREDCOMP?, STATEINFO*, LOCALINFO*)>
+                         
+<!ELEMENT RETIREMENTPLAN      %BOOLTYPE;>
+
+<!ELEMENT THIRDPARTYSICKPAY   %BOOLTYPE;>

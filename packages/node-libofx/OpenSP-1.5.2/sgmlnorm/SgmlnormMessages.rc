@@ -1,0 +1,10 @@
+STRINGTABLE
+BEGIN
+  0, "Output a document type declaration."
+  1, "Output marked sections."
+  2, "Output comments."
+  3, "Raw output."
+  4, "%1 prints on the standard output a normalized document instance"
+  5, "for the SGML document contained in the concatenation of the entities"
+  6, "with system identifiers SYSID..."
+END

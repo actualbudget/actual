@@ -1,0 +1,33 @@
+# Name of your program
+#package "ofxconnect"
+# Version of your program
+# don't use version if you're using automake
+purpose "prints to stdout the created OFX file based on the options you pass it. currently it will only create a statement request file.  you can POST this to an OFX server to request a statement from that financial institution for that account."
+
+# Options
+# option <long> <short> <desc> {argtype} {typestr="<type descr>"} {default="<default value>"} {required} {argoptional} {multiple}
+#section "Parameters"
+option "fipid" - "FI partner identifier (looks up fid, org & url from partner server)" string no
+option "fid" - "FI identifier" string no
+option "org" - "FI org tag" string no
+option "bank" - "IBAN bank identifier" string no
+option "broker" - "Broker identifier" string no
+option "user" - "User name" string no
+option "pass" - "Password" string no
+option "acct" - "Account ID" string no
+option "type" - "Account Type 1=checking 2=invest 3=ccard" int no
+option "past" - "How far back to look from today (in days)" long no
+option "url" - "Url to POST the data to (otherwise goes to stdout)" string no
+option "trid" - "Transaction id" int no
+
+#section "Commands"
+defgroup "command"
+# groupdesc="command to exectute" (Does not work properly with gengetopt 2.10)
+groupoption "statement-req"  s  "Request for a statement" group="command"
+groupoption "accountinfo-req"  a  "Request for a list of accounts" group="command"
+groupoption "payment-req"  p  "Request to make a payment" group="command"
+groupoption "paymentinquiry-req" i "Request to inquire about the status of a payment" group="command"
+groupoption "bank-list"  b  "List all known banks" group="command"
+groupoption "bank-fipid"  f  "List all fipids for a given bank" group="command"
+groupoption "bank-services"  v  "List supported services for a given fipid" group="command"
+groupoption "allsupport"  -  "List all banks which support online banking" group="command"

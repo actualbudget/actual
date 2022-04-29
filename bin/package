@@ -1,0 +1,174 @@
+#!/bin/bash -e
+
+
+ROOT=`dirname $0`
+VERSION=""
+BETA=""
+RELEASE=""
+RELEASE_NOTES=""
+
+cd "$ROOT/.."
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+      --version)
+      VERSION="$2"
+      shift
+      shift
+      ;;
+      --beta)
+      RELEASE="beta"
+      shift
+      ;;
+      --release)
+      RELEASE="production"
+      shift
+      ;;
+      *)
+      POSITIONAL+=("$1")
+      shift
+      ;;
+  esac
+done
+set -- "${POSITIONAL[@]}"
+
+if [ -z "$VERSION" ] && [ -n "$RELEASE" ]; then
+    echo "Version is required if making a release"
+    exit 1
+fi
+
+if [ -n "$RELEASE" ]; then
+    if [ -z "$CIRCLE_TAG" ]; then
+        read -p "Make release: $RELEASE v$VERSION? [y/N] " -r
+        if [ -z "$REPLY" ] || [ "$REPLY" != "y" ]; then
+            exit 2
+        fi
+    fi
+
+    if [ "$RELEASE" == "production" ]; then
+        if [ -z "$CIRCLE_TAG" ]; then
+            RELEASE_NOTES=`git tag -l --format="%(contents:subject)" "$VERSION"`
+        else
+            RELEASE_NOTES=`git tag -l --format="%(contents:subject)" "$CIRCLE_TAG"`
+        fi
+    fi
+
+    PACKAGE_VERSION=`node -p -e "require('./packages/desktop-electron/package.json').version"`
+    if [ "$VERSION" != "$PACKAGE_VERSION" ]; then
+        echo "Version in desktop-electron/package.json does not match given version! ($PACKAGE_VERSION)"
+        exit 4
+    fi
+fi
+
+if [ "$OSTYPE" == "msys" ]; then
+    if [ -z "$CIRCLE_TAG" ]; then
+        read -s -p "Windows certificate password: " -r CSC_KEY_PASSWORD
+        export CSC_KEY_PASSWORD
+    else
+        certutil -f -p ${CSC_KEY_PASSWORD} -importPfx ~/windows-shift-reset-llc.p12
+    fi
+fi
+
+# We only need to run linting once (and this doesn't seem to work on
+# Windows for some reason)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    yarn lint
+fi
+
+./node_modules/.bin/patch-package
+
+(
+  cd packages/loot-design;
+  ../../node_modules/.bin/patch-package
+)
+
+(
+  cd packages/mobile;
+  ../../node_modules/.bin/patch-package
+)
+
+(
+  cd packages/loot-core;
+  NODE_ENV=production yarn build:node
+)
+
+(
+  cd packages/desktop-client;
+  yarn build
+)
+
+rm -fr packages/desktop-electron/client-build
+cp -r packages/desktop-client/build packages/desktop-electron/client-build
+# Remove the embedded backend for the browser version. Will improve
+# this process
+rm -fr packages/desktop-electron/client-build/data
+rm -fr packages/desktop-electron/client-build/*kcab.*
+rm -fr packages/desktop-electron/client-build/*.wasm
+rm -fr packages/desktop-electron/client-build/*.map
+
+
+if [ -n "$RELEASE" ]; then
+  SENTRY_CLI="./packages/desktop-electron/node_modules/.bin/sentry-cli"
+  "$SENTRY_CLI" releases -o shift-reset-llc -p actual set-commits "$VERSION" --auto
+
+  echo "Uploading frontend sourcemaps to sentry for version $VERSION..."
+  "$SENTRY_CLI" releases -o shift-reset-llc -p actual files "$VERSION" \
+      upload-sourcemaps --url-prefix app://actual/static/js/ --rewrite ./packages/desktop-client/build/static/js
+
+  echo "Uploading backend sourcemaps to sentry for version $VERSION..."
+  "$SENTRY_CLI" releases -o shift-reset-llc -p actual files "$VERSION" \
+      delete app:///node_modules/loot-core/lib-dist/bundle.desktop.js
+
+  "$SENTRY_CLI" releases -o shift-reset-llc -p actual files "$VERSION" \
+      delete app:///node_modules/loot-core/lib-dist/bundle.desktop.js.map
+
+  "$SENTRY_CLI" releases -o shift-reset-llc -p actual files "$VERSION" \
+      upload-sourcemaps --url-prefix 'app:///node_modules/loot-core/lib-dist/' ./packages/loot-core/lib-dist/bundle.desktop*
+fi
+
+(
+    cd packages/desktop-electron;
+    rm -rf dist;
+
+    export npm_config_better_sqlite3_binary_host="https://static.actualbudget.com/prebuild/better-sqlite3"
+
+    if [ "$RELEASE" == "production" ]; then
+        if [ -f ../../.secret-tokens ]; then
+            source ../../.secret-tokens
+        fi
+        ./node_modules/.bin/electron-builder --publish always -c.releaseInfo.releaseNotes="$RELEASE_NOTES" --arm64 --x64
+
+        echo "\nCreated release $VERSION with release notes \"$RELEASE_NOTES\""
+    elif [ "$RELEASE" == "beta" ]; then
+        ./node_modules/.bin/electron-builder --publish never --arm64 --x64
+
+        WINDOWS_FILE="./dist/Actual Setup $VERSION.exe"
+        if [ -f "$WINDOWS_FILE" ]; then
+            scp "$WINDOWS_FILE" "jlongster.com:/sites/static.actualbudget/Actual-Setup-$VERSION.exe"
+            echo "Windows: https://static.actualbudget.com/Actual-Setup-$VERSION.exe"
+        else
+            echo "No Windows file found"
+        fi
+
+        MAC_FILE="./dist/Actual-$VERSION.dmg"
+        if [ -f "$MAC_FILE" ]; then
+            scp "$MAC_FILE" "jlongster.com:/sites/static.actualbudget.com/Actual-$VERSION.dmg"
+            echo "macOS: https://static.actualbudget.com/Actual-$VERSION.dmg"
+        else
+            echo "No macOS file found"
+        fi
+
+        LINUX_FILE="./dist/Actual-$VERSION-x86_64.AppImage"
+        if [ -f "$LINUX_FILE" ]; then
+            scp "$LINUX_FILE" "jlongster.com:/sites/static.actualbudget/Actual-$VERSION-x86_64.AppImage"
+            echo "Linux: https://static.actualbudget.com/Actual-$VERSION-x86_64.AppImage"
+        else
+            echo "No linux file found"
+        fi
+    else
+        SKIP_NOTARIZATION=true ./node_modules/.bin/electron-builder --publish never --x64
+    fi
+)

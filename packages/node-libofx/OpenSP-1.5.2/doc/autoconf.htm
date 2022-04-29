@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<title>OpenSP autoconf support</title>
+<body bgcolor="#ffffff">
+<h1>OpenSP autoconf support</h1>
+
+<p>We have dropped the old SP Makefiles in favour of the GNU
+configuration tools automake, autoconf and libtool. If building 
+OpenSP doesn't work out of the box on your system, we'd like to 
+receive feedback and patches for your operating system. 
+</p>
+
+<h2>Usage</h2>
+
+<pre>
+% ./configure; make; make install
+</pre>
+
+<h2>configure options</h2>
+
+<dl>
+
+<dt><code>--help</code></dt>
+
+<dd>Print a full list of options. This document only deals with the 
+non-standard options.</dd>
+
+<dt><code>--enable-http</code>
+<dd>Include support for HTTP.</dd>
+
+<dt><code>--enable-default-catalog=pathlist</code>
+<dd>Provide one or more default catalog files or sysids.</dd>
+
+<dt><code>--enable-default-search-path=pathlist</code>
+<dd>Provide a default value for SGML_SEARCH_PATH.</dd>
+
+</dl>
+
+<h2>Local defines</h2>
+
+<p>If you have some extra additions to OpenSP, you can set
+CFLAGS/CXXFLAGS and/or LDFLAGS/LIBS at configure time:</p>
+
+<pre>
+CXXFLAGS=-Dmyhacks LDFLAGS=-L/opt/myhacks LIBS=-lmyhacks ./configure
+</pre>
+
+<p>Check the invocation of ld in Makefile for the exact semantics
+of LDFLAGS and LIBS.</p>
+
+<h2>Tested platforms</h2>
+
+<ul>
+<li>RedHat Linux 5.2 (egcs 1.0.3, glibc 2.0.7)</li>
+<li>RedHat Linux 6.0 (gcc 2.95.1, glibc 2.1.1)</li>
+<li>SuSE Linux 5.3 (gcc 2.7.2.1, libc 5.5.46)</li>
+<li>Solaris 2.6 (gcc 2.8.1)</li>
+</ul>
+
+<h2>Shared library support</h2>
+
+<p>By default, <code>./configure</code> attempts to build shared
+libraries and link against them. This is done via the
+<code>libtool</code> utility, a utility that knows how to build shared
+libraries on a number of platforms.</p>
+    
+<p>By default, only shared libraries are built. If you have
+difficulties building shared libraries, or you want to build static
+versions, you can use the
+<code>--{enable,disable}-{shared,static}</code> options to configure
+libtool to your likings.</p>
+
+<p>According to the libtool 1.2 docs, shared libraries work on:</p>
+<ul>
+<li>AIX 3.x (*-*-aix3*)</li>
+<li>AIX 4.x (*-*-aix4*)</li>
+<li>AmigaOS (*-*-amigaos*)</li>
+<li>Digital/UNIX 3.x, 4.x, a.k.a. OSF/1 (*-*-osf3*, *-*-osf4*)</li>
+<li>FreeBSD 2.x, 3.x (*-*-freebsd2*, *-*-freebsd3*)</li>
+<li>GNU/Linux ELF (*-*-linux-gnu*, except aout, coff, and oldld)</li>
+<li>HP-UX 9.x, 10.x (*-*-hpux9*, *-*-hpux10*) [see note]</li>
+<li>IRIX 5.x, 6.x (*-*-irix5*, *-*-irix6*)</li>
+<li>NetBSD 1.x (*-*-netbsd*)</li>
+<li>OpenBSD 2.x (*-*-openbsd*)</li>
+<li>OS/2 using EMX (*-*-os2*)</li>
+<li>SCO OpenServer 5.x (*-*-sco3.2v5*)</li>
+<li>Solaris 2.x (*-*-solaris2*)</li>
+<li>SunOS 4.x, a.k.a. Solaris 1.x  (*-*-sunos4*)</li>
+<li>UnixWare 2.x (*-*-sysv4.2uw2*)</li>
+<li>UTS 4.x (*-*-uts4*)</li>
+<li>All ELF targets that use both the GNU C compiler (gcc) and GNU ld</li>
+</ul>
+
+<p>One more note from the libtool documentation: the HP/UX sed seems
+to be badly broken, install GNU sed before attempting to build -
+libtool depends on a working sed.</p>
+
+<p><strong>Note:</strong> shared libraries seem to be broken on
+HP-UX 10.* with gcc-2.95.2. Use <code>--disable-shared</code>.</p>
+</body>
+</html>

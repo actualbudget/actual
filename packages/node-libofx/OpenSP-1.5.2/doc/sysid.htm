@@ -1,0 +1,259 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>OpenSP - System identifiers</TITLE>
+</HEAD>
+<BODY>
+<H1>System identifiers</H1>
+<P>
+There are two kinds of system identifier: formal system identifiers
+and simple system identifiers.  A system identifier that does not
+start with <SAMP>&lt;</SAMP> will always be interpreted as a simple
+system identifier.  A simple system identifier will always be
+interpreted either as a filename or as a URL.
+
+<H2>Formal system identifiers</H2>
+<P>
+Formal system identifiers are based on the
+System Identifier facility defined in ISO/IEC 10744 (HyTime) Technical
+Corrigendum 1, Annex D.
+A system identifier that is a formal system
+identifier consists of a sequence of one or more storage object
+specifications.  The objects specified by the storage object
+specifications are concatenated to form the entity.  A storage object
+specification consists of an SGML start-tag in the reference concrete
+syntax followed by character data content.  The generic identifier of
+the start-tag is the name of a storage manager.  The content is a
+storage object identifier which identifies the storage object in a
+manner dependent on the storage manager.  The start-tag can also
+specify attributes giving additional information about the storage
+object.  Numeric character references are recognized in storage object
+identifiers and attribute value literals in the start-tag.  Record
+ends are ignored in the storage object identifier as with SGML.  A
+system identifier will be interpreted as a formal system identifier if
+it starts with a <SAMP>&lt;</SAMP> followed by a storage manager name,
+followed by either <SAMP>></SAMP> or white-space; otherwise it will be
+interpreted as a simple system identifier.  A storage object
+identifier extends until the end of the system identifier or until the
+first occurrence of <SAMP>&lt;</SAMP> followed by a storage manager
+name, followed by either <SAMP>></SAMP> or white-space.
+<P>
+The following storage managers are available:
+<DL>
+<DT>
+<A NAME="osfile"><SAMP>osfile</SAMP></A>
+<DD>
+The storage object identifier is a filename.  If the filename is
+relative it is resolved using a base filename.  Normally the base
+filename is the name of the file in which the storage object
+identifier was specified, but this can be changed using the
+<SAMP>base</SAMP> attribute.  The filename will be searched for first
+in the directory of the base filename.  If it is not found there, then
+it will be searched for in directories specified with the
+<SAMP>-D</SAMP> option in the order in which they were specified on
+the command line, and then in the list of directories specified by the
+environment variable <SAMP>SGML_SEARCH_PATH</SAMP>.  The list
+is separated by colons under Unix and by semi-colons under MSDOS.
+<DT>
+<SAMP>osfd</SAMP>
+<DD>
+The storage object identifier is an integer specifying a file
+descriptor. Thus a system identifier of <SAMP>&lt;osfd>0</SAMP> will
+refer to the standard input (<CODE>STDIN</code>), 1 to standard output
+(<code>STDOUT</code>), and 2 to standard error
+(<code>STDERR</code>). Arbitrary file descriptors may be used so you
+could say <samp>&lt;osfd&gt;3</samp> to get an extra input or output
+stream independant of the usual three. This is useful, e.g., for
+generating catalog entries or SGML declarations on the fly. You can
+use an osfd storage object anywhere you can use a sysid, including on
+the command line.
+<DT>
+<SAMP>url</SAMP>
+<DD>
+The storage object identifier is a URL.  Only the <SAMP>http</SAMP>
+scheme is currently supported and not on all systems.
+<DT>
+<SAMP>neutral</SAMP>
+<DD>
+The storage manager is the storage manager of storage object in which
+the system identifier was specified (the <I>underlying storage
+manager</I>).  However if the underlying storage manager does not
+support named storage objects (ie it is <SAMP>osfd</SAMP>), then the
+storage manager will be <SAMP>osfile</SAMP>.  The storage object
+identifier is treated as a relative, hierarchical name separated by
+slashes (<SAMP>/</SAMP>) and will be transformed as appropriate for
+the underlying storage manager.
+<DT>
+<SAMP>literal</SAMP>
+<DD>
+The bit combinations of the storage object identifier are
+the contents of the storage object.
+</DL>
+<P>
+The following attributes are supported:
+<DL>
+<DT>
+<SAMP>records</SAMP>
+<DD>
+This describes how records are delimited in the storage object:
+<DL>
+<DT><SAMP>cr</SAMP>
+<DD>
+Records are terminated by a carriage return.
+<DT>
+<SAMP>lf</SAMP>
+<DD>
+Records are terminated by a line feed.
+<DT>
+<SAMP>crlf</SAMP>
+<DD>
+Records are terminated by a carriage return followed by a line feed.
+<DT>
+<SAMP>find</SAMP>
+<DD>
+Records are terminated by whichever of
+<SAMP>cr</SAMP>,
+<SAMP>lf</SAMP>
+or
+<SAMP>crlf</SAMP>
+is first encountered in the storage object.
+<DT>
+<SAMP>asis</SAMP>
+<DD>
+No recognition of records is performed.
+</DL>
+<P>
+The default is <SAMP>find</SAMP> except for NDATA entities for which
+the default is <SAMP>asis</SAMP>.  This attribute is not applicable to
+the <SAMP>literal</SAMP> storage manager.
+<P>
+When records are recognized in a storage object, a record start is
+inserted at the beginning of each record, and a record end at the end
+of each record.  If there is a partial record (a record that doesn't
+end with the record terminator) at the end of the entity, then a
+record start will be inserted before it but no record end will be
+inserted after it.
+<P>
+The attribute name and <SAMP>=</SAMP> can be omitted for this attribute.
+<DT>
+<SAMP>zapeof</SAMP>
+<DD>
+This specifies whether a Control-Z character that occurs as the final byte
+in the storage object should be stripped.
+The following values are allowed:
+<DL>
+<DT><SAMP>zapeof</SAMP>
+<DD>
+A final Control-Z should be stripped.
+<DT><SAMP>nozapeof</SAMP>
+<DD>
+A final Control-Z should not be stripped.
+</DL>
+<P>
+The default is <SAMP>zapeof</SAMP> except for NDATA entities, entities
+declared in storage objects with <SAMP>zapeof=nozapeof</SAMP> and
+storage objects with <SAMP>records=asis</SAMP>.  This attribute is not
+applicable to the <SAMP>literal</SAMP> storage manager.
+<P>
+The attribute name and <SAMP>=</SAMP> can be omitted for this
+attribute.
+<DT>
+<A NAME="encoding"><SAMP>encoding</SAMP></A>
+<DD>
+The encoding attribute specifies the encoding of the storage object.
+This attribute is used when the encoding is independent of the
+document character set.
+The value must be the <A HREF="charset.htm#encodings">name of an encoding</A>.
+This attribute is not applicable to the
+<SAMP>literal</SAMP> storage manager.
+<DT>
+<A NAME="bctf"><SAMP>bctf</SAMP></A>
+<DD>
+The BCTF attribute specifies that the encoding of the storage
+object.
+This attribute is used when the encoding is
+document character set dependent.
+The value must be the <A HREF="charset.htm#bctfs">name of a BCTF</A>.
+This attribute is not applicable to the
+<SAMP>literal</SAMP> storage manager.
+<DT>
+<SAMP>tracking</SAMP>
+<DD>
+This specifies whether line boundaries should be tracked for this
+object: a value of <SAMP>track</SAMP> specifies that they should; a
+value of <SAMP>notrack</SAMP> specifies that they should not.  The
+default value is <SAMP>track</SAMP>.  Keeping track of where line
+boundaries occur in a storage object requires approximately one byte
+of storage per line and it may be desirable to disable this for very
+large storage objects.
+<P>
+The attribute name and
+<SAMP>=</SAMP>
+can be omitted for this attribute.
+<DT>
+<SAMP>base</SAMP>
+<DD>
+When the storage object identifier specified in the content of the
+storage object specification is relative, this specifies the base
+storage object identifier relative to which that storage object
+identifier should be resolved.
+When not specified a storage object identifier is interpreted
+relative to the storage object in which it is specified,
+provided that this has the same storage manager.
+This applies both to system identifiers specified in SGML
+documents and to system identifiers specified in the catalog entry
+files.
+<DT>
+<SAMP>smcrd</SAMP>
+<DD>
+The value is a single character that will be recognized in storage
+object identifiers (both in the content of storage object
+specifications and in the value of <SAMP>base</SAMP> attributes) as a
+storage manager character reference delimiter when followed by a
+digit.  A storage manager character reference is like an SGML numeric
+character reference except that the number is interpreted as a
+character number in the inherent character set of the storage manager
+rather than the document character set.  The default is for no
+character to be recognized as a storage manager character reference
+delimiter.  Numeric character references cannot be used to prevent
+recognition of storage manager character reference delimiters.
+<DT>
+<SAMP>fold</SAMP>
+<DD>
+This applies only to the <SAMP>neutral</SAMP> storage manager.  It
+specifies whether the storage object identifier should be folded to
+the customary case of the underlying storage manager if storage object
+identifiers for the underlying storage manager are case sensitive.
+The following values are allowed:
+<DL>
+<DT><SAMP>fold</SAMP>
+<DD>
+The storage object identifier will be folded.
+<DT>
+<SAMP>nofold</SAMP>
+<DD>
+The storage object identifier will not be folded.
+</DL>
+<P>
+The default value is <SAMP>fold</SAMP>.  The attribute name and
+<SAMP>=</SAMP> can be omitted for this attribute.
+<P>
+For example, on Unix filenames are case-sensitive and the customary
+case is lower-case.  So if the underlying storage manager were
+<SAMP>osfile</SAMP> and the system was a Unix system, then
+<SAMP>&lt;neutral>FOO.SGM</SAMP> would be equivalent to
+<SAMP>&lt;osfile>foo.sgm</SAMP>.
+</DL>
+<H2>Simple system identfiers</H2>
+<P>
+A simple system identifier is interpreted as a storage object
+identifier with a storage manager that depends on where the system
+identifier was specified: if it was specified in a storage object
+whose storage manager was <SAMP>url</SAMP> or if the system identifier
+looks like an absolute URL in a supported scheme, the storage manager
+will be <SAMP>url</SAMP>; otherwise the storage manager will be
+<SAMP>osfile</SAMP>.  The storage manager attributes are defaulted as
+for a formal system identifier.  Numeric character references are not
+recognized in simple system identifiers.
+</BODY>
+</HTML>

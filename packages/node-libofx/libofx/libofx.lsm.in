@@ -1,0 +1,14 @@
+Begin3
+Title:          LibOFX 
+Version:        @LIBOFX_VERSION_RELEASE_STRING@
+Entered-date:   
+Description:    
+Keywords:       OFX, OFX, Open Financial eXchange, Open Financial Connectivity
+Author:         Benoit Grégoire <benoitg@coeus.ca> 
+Maintained-by:  Benoit Grégoire <benoitg@coeus.ca> 
+Primary-site:   	        
+Home-page:      http://libofx.sourceforge.net/
+Original-site:  
+Platforms:       Linux and other Unices, Windows
+Copying-policy: GNU Public License
+End

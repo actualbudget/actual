@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sync should send messages to the server 1`] = `
+Array [
+  Object {
+    "column": "amount",
+    "dataset": "transactions",
+    "id": 1,
+    "row": "foo",
+    "timestamp": "1970-01-02T10:17:36.789Z-0000-0000000000000id1",
+    "value": "N:3200",
+  },
+  Object {
+    "column": "amount",
+    "dataset": "transactions",
+    "id": 2,
+    "row": "foo",
+    "timestamp": "1970-01-02T10:17:37.789Z-0000-0000000000000id1",
+    "value": "N:4200",
+  },
+]
+`;
+
+exports[`Sync should send messages to the server 2`] = `
+Array [
+  Object {
+    "clock": "{\\"timestamp\\":\\"1970-01-02T10:17:37.789Z-0000-0000000000000id1\\",\\"merkle\\":{\\"2\\":{\\"2\\":{\\"1\\":{\\"1\\":{\\"0\\":{\\"1\\":{\\"2\\":{\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180},\\"hash\\":-1992470180}}",
+    "id": 1,
+  },
+]
+`;

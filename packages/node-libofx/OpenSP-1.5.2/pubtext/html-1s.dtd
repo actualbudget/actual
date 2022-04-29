@@ -1,0 +1,29 @@
+<!--	html-1s.dtd
+
+        Document Type Definition for the HyperText Markup Language
+	Struct Level 1
+
+	$Id: html-1s.dtd,v 1.1 1999/11/04 08:36:16 clasen Exp $
+
+	Author: Daniel W. Connolly <connolly@w3.org>
+	See Also: http://www.w3.org/hypertext/WWW/MarkUp/MarkUp.html
+-->
+
+<!ENTITY % HTML.Version
+	"-//IETF//DTD HTML 2.0 Strict Level 1//EN"
+
+        -- Typical usage:
+
+            <!DOCTYPE HTML PUBLIC
+		"-//IETF//DTD HTML Strict Level 1//EN">
+	    <html>
+	    ...
+	    </html>
+	--
+	>
+
+<!-- Feature Test Entities -->
+<!ENTITY % HTML.Recommended "INCLUDE">
+
+<!ENTITY % html-1 PUBLIC "-//IETF//DTD HTML 2.0 Level 1//EN">
+%html-1;

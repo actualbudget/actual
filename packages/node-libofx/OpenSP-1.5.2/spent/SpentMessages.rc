@@ -1,0 +1,7 @@
+STRINGTABLE
+BEGIN
+  0, "non-SGML"
+  1, "raw"
+  2, "%1 prints the concatenation of the entities with system identifiers"
+  3, "SYSID... on the standard output"
+END

@@ -1,0 +1,37 @@
+#!/bin/sh
+# Open SGML Catalog: test BASE
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles cat-test2.in1 cat-2 cat-test2.cat"
+cat <<EOF >cat-test2.in1
+<!DOCTYPE html SYSTEM "cat-test2.dtd">
+<html>
+EOF
+
+mkdir -p cat-2
+cat <<EOF >cat-2/cat-test2.dtd
+<!ELEMENT html - o (#PCDATA)>
+<!ATTLIST html
+  x CDATA #FIXED y>
+EOF
+
+# osgmls complains:
+#     error reading "./cat-2/" (Is a directory)
+cat <<EOF >cat-test2.cat
+BASE "./cat-2/"
+SYSTEM "cat-test2.dtd" "cat-test2.dtd"
+EOF
+
+: ${top_srcdir=..}
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} -s -c cat-test2.cat cat-test2.in1
+result=$?
+
+rm -fr $tmpfiles
+
+exit $result

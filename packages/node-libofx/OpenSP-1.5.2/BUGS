@@ -1,0 +1,4 @@
+Some tests of the testsuite will fail at the moment, if you run
+'make check'; test which are known to fail (mostly Architectual Forms
+(SF) processing related) are listed as SHOWSTOPPERS in
+tests/Makefile.am. (2003-10-10).

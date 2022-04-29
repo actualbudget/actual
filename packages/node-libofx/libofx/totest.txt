@@ -1,0 +1,24 @@
+This is a list of implemented but untested features
+
+OFX aggregates:
+inside <STMTTRN>
+    -<CORRECTFITID> and <CORRECACTION>
+    -<SRVRTID> and <SRVRTID2> (trivial)
+    -<REFNUM> (trivial)
+    -<SIC> (trivial)
+    -<PAYEEID> and <PAYEEID2> (trivial)
+
+TODO:
+-Write checking after tag closing that all ofx mandatory structures are present
+-Write currency conversion routine inside transaction lists
+-Stock and investment account support.  This is not trivial
+-OFX export
+
+UNIMPLEMENTED:
+-In <BANKACCTFROM>, the field <ACCTKEY>, some sort of checksum.  See spec 1.6, p. 179.
+I dont know how to use it.  This fiels represents "Check digits" in Belgium, D.C. in Spain,
+ "Clé" in France and "CIN" in Italy.  Can someone from one of these country telle me how to use it?
+
+-Fully implemented structures (all mandatory and all optional information):
+Bank Statement Download:
+-<STMTRS>

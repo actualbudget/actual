@@ -1,0 +1,11 @@
+*.la
+*.lo
+*.o
+.deps
+.libs
+Makefile
+Makefile.in
+ofxdump
+cmdline.c
+cmdline.h
+*.1

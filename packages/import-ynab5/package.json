@@ -1,0 +1,22 @@
+{
+  "name": "@actual-app/import-ynab5",
+  "description": "A tool for importing nYNAB data into Actual",
+  "version": "1.0.2",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/importer-nynab.git"
+  },
+  "author": "James Long",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/actualbudget/importer-nynab/issues"
+  },
+  "bin": "./index.js",
+  "homepage": "https://github.com/actualbudget/importer-nynab#readme",
+  "dependencies": {
+    "@actual-app/api": "^1.0.0",
+    "date-fns": "2.0.0-alpha.27",
+    "uuid": "3.3.2"
+  }
+}

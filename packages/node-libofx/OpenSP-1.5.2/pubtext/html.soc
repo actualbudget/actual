@@ -1,0 +1,31 @@
+	-- catalog: SGML Open style entity catalog for HTML --
+	-- $Id: html.soc,v 1.1 1999/11/04 08:36:17 clasen Exp $ --
+	-- Hacked by jjc --
+
+	-- Ways to refer to Level 2: most general to most specific --
+PUBLIC	"-//IETF//DTD HTML//EN"			html.dtd
+PUBLIC	"-//IETF//DTD HTML 2.0//EN"		html.dtd
+PUBLIC	"-//IETF//DTD HTML Level 2//EN"		html.dtd
+PUBLIC	"-//IETF//DTD HTML 2.0 Level 2//EN"	html.dtd
+
+	-- Ways to refer to Level 1: most general to most specific --
+PUBLIC	"-//IETF//DTD HTML Level 1//EN"		html-1.dtd
+PUBLIC	"-//IETF//DTD HTML 2.0 Level 1//EN"	html-1.dtd
+
+	-- Ways to refer to
+		 Strict Level 2: most general to most specific --
+PUBLIC	"-//IETF//DTD HTML Strict//EN"			html-s.dtd
+PUBLIC	"-//IETF//DTD HTML 2.0 Strict//EN"		html-s.dtd
+PUBLIC	"-//IETF//DTD HTML Strict Level 2//EN"		html-s.dtd
+PUBLIC	"-//IETF//DTD HTML 2.0 Strict Level 2//EN"	html-s.dtd
+
+	-- Ways to refer to
+		 Strict Level 1: most general to most specific --
+PUBLIC	"-//IETF//DTD HTML Strict Level 1//EN"		html-1s.dtd
+PUBLIC	"-//IETF//DTD HTML 2.0 Strict Level 1//EN"	html-1s.dtd
+
+	-- ISO latin 1 entity set for HTML -- 
+PUBLIC	"ISO 8879-1986//ENTITIES Added Latin 1//EN//HTML"	ISOlat1.sgm
+
+SGMLDECL html.dcl
+DOCTYPE html html.dtd

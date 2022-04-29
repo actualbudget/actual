@@ -1,0 +1,26 @@
+#/bin/sh
+#
+# End-to-end test
+#
+# This will use libofx to create an OFX statement request, post it to your
+# bank, and send the input back into libofx to display in a human readable
+# way.
+#
+# Ultimately, I'll make ofxconnect itself POST the file using libcurl,
+# but this will at least get us started.
+#
+# Parameters:
+#  $1 org
+#  $2 fid
+#  $3 bank
+#  $4 user
+#  $5 pass
+#  $6 acct
+#  $7 type
+#  $8 past
+#  $9 url
+#
+# See the ofxconnect help for explanation of parameters 1-8.  9 is the URL of your OFX server
+#
+rm -f out
+./ofxconnect -s --org=$1 --fid=$2 --bank=$3 --user=$4 --pass=$5 --acct=$6 --type=$7 --past=$8 | ./postofx.py $9 > out && ../ofxdump/ofxdump out

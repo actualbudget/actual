@@ -1,0 +1,562 @@
+AC_REVISION([$Id: configure.in,v 1.29.2.41 2005/12/16 08:12:19 tbe Exp $])
+dnl
+dnl  Process this file with autoconf to produce a configure script.
+dnl
+dnl  Copyright (C) 1998 Cees A. de Groot
+dnl
+
+dnl
+dnl  Credits: this autoconf script was largely "inspired" <g> by the
+dnl  autoconf script around SP made by Henry Thompson.
+dnl
+
+dnl Initialization.
+AC_INIT
+AC_CONFIG_SRCDIR([pubtext])
+AM_INIT_AUTOMAKE(OpenSP, 1.5.2, no-define)
+AM_MAINTAINER_MODE
+AC_PREREQ(2.53)
+AM_CONFIG_HEADER(config.h)
+AM_SANITY_CHECK
+
+dnl Autoheader definitions
+
+AH_TEMPLATE([HAVE_CATGETS],[Define if you have the gettext() function])
+AH_TEMPLATE([SGML_CATALOG_FILES_DEFAULT],[set this to the default catalog files list])
+AH_TEMPLATE([SGML_SEARCH_PATH_DEFAULT],[set this to the default SGML search path])
+AH_TEMPLATE([SP_DECLARE_H_ERRNO],[define this if h_errno should be declared extern int])
+AH_TEMPLATE([DECLARE_MEMMOVE],[define this if memmove  should be declared extern "C"])
+AH_TEMPLATE([DECLARE_STRERROR],[define this if strerror should be declared extern "C"])
+AH_TEMPLATE([SP_HAVE_SOCKET],[define this if sockets are available])
+AH_TEMPLATE([sig_atomic_t],[define this appropriately if the type sig_atomic_t is not available])
+AH_TEMPLATE([SP_NEW_H_MISSING],[define this if your system misses new.h])
+AH_TEMPLATE([SP_SET_NEW_HANDLER_EXTERN_C],[define this if  set_new_handler() has to be declared extern "C"])
+AC_DEFINE(SP_MULTI_BYTE,[1],[define this to build a multi-byte version])
+AH_TEMPLATE([SP_DEFINE_TEMPLATES],[define this to include template definitions in the headers])
+AH_TEMPLATE([SP_MANUAL_INST],[define this to compile explicit template instantiations])
+AH_TEMPLATE([SP_FANCY_NEW_HANDLER],[define this if the new handler takes size_t and returns int.])
+AH_TEMPLATE([PATH_SEPARATOR],[set this to the path separator])
+AH_TEMPLATE([DEFAULT_ERROR_LIMIT],[if this is not set it defaults to 200 ])
+AH_TEMPLATE([SP_USE_OWN_ASSERT],[define this if you can't or don't want to use the builtin assert() macro])
+AH_TEMPLATE([SP_LINE_TERM1],[set this to the first line term character])
+AH_TEMPLATE([SP_LINE_TERM2],[set this to the second line term character])
+
+dnl These are really windows only
+
+AH_TEMPLATE([SP_MUTEX_WIN32],[define this to use win32 mutex mechanisms])
+AH_TEMPLATE([SP_HAVE_SETMODE],[define this if _setmode is supported])
+AH_TEMPLATE([SP_NO_MESSAGE_TEXT],[define this to not compile message texts in])
+AH_TEMPLATE([SP_USE_DLL],[define this to build a dll])
+AH_TEMPLATE([SP_DLLEXPORT],[define this to build a dll])
+AH_TEMPLATE([SP_DLLIMPORT],[define this tobuild a dll])
+AH_TEMPLATE([SP_WIDE_SYSTEM],[define this if the OS provides wide character interfaces])
+AH_TEMPLATE([SP_PCH],[define this to enable precompiled header support])
+AH_TEMPLATE([SP_LOCALE_DIR],[the location we install our messages])
+
+AH_TEMPLATE([SIZEOF_WCHAR_T],[size of wchar_t])
+
+AH_BOTTOM([
+#ifdef HAVE_UNISTD_H
+#define SP_INCLUDE_UNISTD_H
+#endif
+
+#ifdef HAVE_IO_H
+#undef SP_INCLUDE_IO_H
+#endif
+
+#ifdef HAVE_OSFCN_H
+#undef SP_INCLUDE_OSFCN_H
+#endif
+
+#ifndef SP_MSDOS_FILENAMES
+#define SP_POSIX_FILENAMES
+#endif
+
+#ifdef HAVE_ST_BLKSIZE
+#define SP_STAT_BLKSIZE
+#endif
+
+#ifdef HAVE_BOOL
+#ifndef SP_HAVE_BOOL
+#define SP_HAVE_BOOL
+#endif
+#endif /* HAVE_BOOL */
+
+#ifdef HAVE_TYPENAME
+#define SP_HAVE_TYPENAME
+#endif /* HAVE_TYPENAME */
+
+#if (SIZEOF_BOOL == 1)
+#define SP_SIZEOF_BOOL_1
+#endif
+
+#if (SIZEOF_WCHAR_T == SIZEOF_UNSIGNED_SHORT)
+#define SP_WCHAR_T_USHORT
+#endif
+
+#ifdef SP_HAVE_SETMODE
+#ifndef SP_LINE_TERM1
+#define SP_LINE_TERM1 '\r'
+#define SP_LINE_TERM2 '\n'
+#endif
+#endif /* not SP_HAVE_SETMODE */
+
+#ifndef SP_LINE_TERM1
+#define SP_LINE_TERM1 '\n'
+#endif
+
+#ifndef HAVE_NEW_FOR_SCOPING
+// This simulates the new ANSI "for" scope rules
+#define for if (0); else for
+#endif /* HAVE_NEW_FOR_SCOPING */
+
+#ifndef SP_HAVE_TYPENAME
+#define typename /* as nothing */
+#endif
+
+#ifndef SP_DLLEXPORT
+#define SP_DLLEXPORT /* as nothing */
+#endif
+
+#ifndef SP_DLLIMPORT
+#define SP_DLLIMPORT /* as nothing */
+#endif
+
+#ifdef SP_USE_DLL
+
+#ifdef BUILD_LIBSP
+#define SP_API SP_DLLEXPORT
+#else
+#define SP_API SP_DLLIMPORT
+#endif
+
+#else /* not SP_USE_DLL */
+
+#define SP_API /* as nothing */
+
+#endif /* not SP_USE_DLL */
+
+#ifdef SP_WIDE_SYSTEM
+#ifndef SP_MULTI_BYTE
+#define SP_MULTI_BYTE
+#endif
+#endif
+
+#ifdef HAVE_NAMESPACES
+#define SP_NAMESPACE OpenSP
+#endif /* HAVE_NAMESPACES */
+
+#ifdef SP_NAMESPACE
+#define SP_NAMESPACE_SCOPE SP_NAMESPACE::
+#else
+#define SP_NAMESPACE_SCOPE
+#endif /* SP_NAMESPACE */
+
+#ifdef HAVE_DYNAMIC_CAST
+#define SP_HAVE_RTTI
+#endif /* HAVE_DYNAMIC_CAST */
+
+#ifdef HAVE_PATHNAME_STYLE_DOS
+#define SP_MSDOS_FILENAMES
+#else
+#define SP_POSIX_FILENAMES
+#endif /* HAVE_PATHNAME_STYLE_DOS */
+
+#ifdef HAVE_INSTANTIATIONS
+#ifndef SP_ANSI_CLASS_INST
+#define SP_ANSI_CLASS_INST
+#endif
+#endif /* HAVE_INSTANTIATIONS */
+
+#ifdef HAVE_SETLOCALE
+#ifndef SP_HAVE_LOCALE
+#define SP_HAVE_LOCALE
+#endif
+#endif /* HAVE_SETLOCALE */
+
+#if defined(HAVE_GETTEXT) && defined(ENABLE_NLS)
+#ifndef SP_HAVE_GETTEXT
+#define SP_HAVE_GETTEXT
+#endif
+#endif /* HAVE_GETTEXT && ENABLE_NLS */
+
+#ifdef WORDS_BIGENDIAN
+#define SP_BIG_ENDIAN
+#endif /* WORDS_BIGENDIAN */
+
+#ifdef HAVE_LIBTHREADS
+#define SP_MUTEX_MACH
+#endif /* HAVE_LIBTHREADS */
+
+#ifdef HAVE_LIBPTHREAD
+#define SP_MUTEX_PTHREADS
+#endif /* HAVE_LIBPTHREAD */
+
+#ifdef HAVE_PLACEMENT_OPERATOR_DELETE
+#define SP_HAVE_PLACEMENT_OPERATOR_DELETE
+#endif /* HAVE_PLACEMENT_OPERATOR_DELETE */
+
+#ifndef HAVE_PLACEMENT_OPERATOR_NEW
+#define SP_DECLARE_PLACEMENT_OPERATOR_NEW
+#endif /* HAVE_PLACEMENT_OPERATOR_NEW */
+
+#ifndef HAVE_NAMESPACE_STD
+#define SP_NO_STD_NAMESPACE
+#endif /* HAVE_NAMESPACE_STD */
+
+#if defined(HAVE_NEW) && defined(HAVE_CASSERT)
+#define SP_ANSI_LIB 1
+#endif /* HAVE_NEW && HAVE_CASSERT */
+
+#ifndef HAVE_MUTABLE
+#define mutable
+#endif /* HAVE_MUTABLE */
+])
+
+dnl Since config.h gets included by user programs, we use special names
+dnl for PACKAGE and VERSION.
+AC_DEFINE_UNQUOTED(SP_PACKAGE, "$PACKAGE", [Package name])
+AC_DEFINE_UNQUOTED(SP_VERSION, "$VERSION", [Package version])
+
+dnl libosp current:revision:age
+SP_LIBOSP_CUR=5
+dnl AC_DEFINE_UNQUOTED(SP_LIBOSP_CUR, "$SP_LIBOSP_CUR", [libosp current])
+AC_SUBST(SP_LIBOSP_CUR)
+AC_SUBST(SP_LIBOSP_REV, 0)
+AC_SUBST(SP_LIBOSP_AGE, 0)
+
+dnl Check for programs.
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PATH_PROGS(PERL, perl, perl)
+AC_PROG_LIBTOOL
+dnl Checks for libraries.
+AC_CHECK_LIB(pthread,pthread_create,,AC_CHECK_LIB(threads,cthread_fork))
+
+AM_GNU_GETTEXT
+AM_GNU_GETTEXT_VERSION([0.14.5])
+AC_CHECK_HEADERS(locale.h)
+AC_DEFINE_DIR(SP_LOCALE_DIR, datadir/locale, [location of message catalogs])
+SP_MESSAGE_DOMAIN="sp$SP_LIBOSP_CUR"
+AC_DEFINE_UNQUOTED(SP_MESSAGE_DOMAIN, "$SP_MESSAGE_DOMAIN", [message domain])
+AC_SUBST(SP_MESSAGE_DOMAIN)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(limits.h unistd.h io.h osfcn.h)
+AC_LANG([C++])
+AC_CHECK_HEADERS(new cassert)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_BIGENDIAN
+AC_TYPE_SIZE_T
+AC_DIAGNOSE([obsolete],[AC_DIAGNOSE([obsolete],[AC_STRUCT_ST_BLKSIZE:
+        your code should no longer depend upon `HAVE_ST_BLKSIZE', but
+        `HAVE_STRUCT_STAT_ST_BLKSIZE'.  Remove this warning and
+        the `AC_DEFINE' when you adjust the code.])
+AC_CHECK_MEMBERS([struct stat.st_blksize],[AC_DEFINE(HAVE_ST_BLKSIZE, 1,
+                            [Define to 1 if your `struct stat' has
+                             `st_blksize'.  Deprecated, use
+                             `HAVE_STRUCT_STAT_ST_BLKSIZE' instead.])])
+:
+        your code should no longer depend upon `HAVE_ST_BLKSIZE', but
+        `HAVE_STRUCT_STAT_ST_BLKSIZE'.  Remove this warning and
+        the `AC_DEFINE' when you adjust the code.])
+AC_CHECK_MEMBERS([struct stat.st_blksize],[AC_DEFINE(HAVE_ST_BLKSIZE, 1,
+                            [Define if your `struct stat' has
+                             `st_blksize'.  Deprecated, use
+                             `HAVE_STRUCT_STAT_ST_BLKSIZE' instead.])])
+
+AC_CACHE_CHECK(for sig_atomic_t in signal.h,
+    ac_cv_have_sig_atomic_t,
+    AC_TRY_LINK([#include <signal.h>],sig_atomic_t x;,
+	ac_cv_have_sig_atomic_t=yes,
+	ac_cv_have_sig_atomic_t=no))
+if test "$ac_cv_have_sig_atomic_t" = "no"
+then
+    AC_CHECK_TYPE(sig_atomic_t,int)
+fi
+AC_CHECK_SIZEOF(size_t)
+AC_CHECK_SIZEOF(unsigned int)
+AC_CHECK_SIZEOF(unsigned short)
+AC_CHECK_SIZEOF(wchar_t,,[
+  #include <stdio.h>
+  #include <wchar.h>])
+AC_CXX_BOOL
+if test "$ac_cv_cxx_bool" = yes; then
+  AC_CHECK_SIZEOF(bool)
+fi
+AC_CXX_MUTABLE
+AC_CXX_TYPENAME
+AC_CXX_NEW_FOR_SCOPING
+AC_CXX_PLACEMENT_OPERATOR_DELETE
+AC_CXX_DYNAMIC_CAST
+AC_CXX_NAMESPACES
+AC_CXX_EXPLICIT_INSTANTIATIONS
+AC_CACHE_CHECK(for placement operator new,
+ac_cv_cxx_placement_operator_new,
+[AC_TRY_COMPILE([#include <stddef.h>
+#ifdef HAVE_NEW
+#include <new>
+#else
+#include <new.h>
+#endif
+class A {
+public:
+  A() {};
+};
+A* foo()
+{
+  void *x;
+  A *bar = new (x) A;
+  return bar;
+};],,
+   ac_cv_cxx_placement_operator_new=yes,
+   ac_cv_cxx_placement_operator_new=no)
+])
+if test "$ac_cv_cxx_placement_operator_new" = yes; then
+  AC_DEFINE(HAVE_PLACEMENT_OPERATOR_NEW,1,
+            [define if placement operator new is declared])
+fi
+AC_CACHE_CHECK(whether the C++ compiler supports the std namespace,
+ac_cv_cxx_namespace_std,
+[AC_TRY_COMPILE([
+#ifdef HAVE_NEW
+#include <new>
+#else
+#include <new.h>
+#endif],[
+std::set_new_handler(0);],
+   ac_cv_cxx_namespace_std=yes,
+   ac_cv_cxx_namespace_std=no)
+])
+if test "$ac_cv_cxx_namespace_std" = yes; then
+  AC_DEFINE(HAVE_NAMESPACE_STD,1,
+            [define if the C++ compiler supports the std namespace])
+fi
+if test "$GXX"; then
+dnl FIXME these need tests for non-GNU compilers
+  AC_CACHE_CHECK(whether GNU C++ supports automatic template instantiation,
+	         ac_cv_c_gnu_automatic_templates,
+                  [AC_EGREP_CPP(yes,[
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 8)
+  yes
+#endif
+	            ],
+                    ac_cv_c_gnu_automatic_templates=yes,
+                    ac_cv_c_gnu_automatic_templates=no)
+                  ])
+  if test "$ac_cv_c_gnu_automatic_templates" = yes; then
+    AC_DEFINE(SP_DEFINE_TEMPLATES,1,
+              [define this to include template definitions in the headers])
+  else
+    AC_DEFINE(SP_MANUAL_INST,1,
+              [define this to compile explicit template instantiations])
+    CXXFLAGS="$CXXFLAGS -fno-implicit-templates"
+  fi
+  AC_CACHE_CHECK(whether GNU C++ links with libg++ if we include new.h,
+	         ac_cv_cxx_gnu_avoid_new_h,
+                 [AC_EGREP_CPP(yes,[
+#if (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
+  yes
+#endif
+	            ],
+	            ac_cv_cxx_gnu_avoid_new_h=yes,
+	            ac_cv_cxx_gnu_avoid_new_h=no)
+                  ])
+  if test "$ac_cv_cxx_gnu_avoid_new_h" = yes; then
+    AC_DEFINE(SP_NEW_H_MISSING,1,
+              [define this if your system misses new.h])
+    AC_CACHE_CHECK(whether to declare set_new_handler extern "C",
+                    ac_cv_cxx_new_handler_extern_c,
+                    [AC_TRY_LINK([
+typedef void (*new_handler)();
+new_handler set_new_handler(new_handler);],[
+set_new_handler(0);],
+                      ac_cv_cxx_new_handler_extern_c=no,
+                      ac_cv_cxx_new_handler_extern_c=yes)
+                     ])
+    if test "$ac_cv_cxx_new_handler_extern_c" = yes; then
+      AC_DEFINE(SP_SET_NEW_HANDLER_EXTERN_C,1,
+                [define this if  set_new_handler() has to be declared extern "C"])
+    fi
+  fi
+fi
+AC_CACHE_CHECK(whether new_handler accepts size_t and returns int,
+ac_cv_cxx_fancy_new_handler,
+[AC_TRY_COMPILE([
+#include <stddef.h>
+#include <new.h>
+int oom(size_t) { }],[set_new_handler(oom);],
+   ac_cv_cxx_fancy_new_handler=yes,
+   ac_cv_cxx_fancy_new_handler=no)
+ ])
+if test "$ac_cv_cxx_fancy_new_handler" = yes; then
+  AC_DEFINE(SP_FANCY_NEW_HANDLER,1,
+            [define this if the new handler takes size_t and returns int])
+fi
+
+dnl Checks for library functions.
+AC_REPLACE_FUNCS(memmove memcmp strerror strtoul)
+AC_CHECK_FUNCS(setlocale)
+
+dnl Checks for system services.
+ACX_CHECK_PATHNAME_STYLE_DOS
+
+AC_MSG_CHECKING(whether to include support for http)
+AC_ARG_ENABLE(http,
+[  --enable-http           include support for http],
+    if test $enableval
+    then
+        AC_MSG_RESULT(yes)
+	AC_DEFINE(SP_HAVE_SOCKET,1,
+                  [define this if sockets are available])
+	AC_CHECK_LIB(nsl,main,LIBS="$LIBS -lnsl")
+	AC_CHECK_LIB(socket,main,LIBS="$LIBS -lsocket")
+	AC_MSG_CHECKING(h_errno in netdb.h)
+	AC_EGREP_HEADER(h_errno,netdb.h,
+	    AC_MSG_RESULT(yes),
+	    AC_DEFINE(SP_DECLARE_H_ERRNO,1,
+                      [define this if h_errno should be declared extern int])
+	    AC_MSG_RESULT(no))
+    else
+        AC_MSG_RESULT(no)
+    fi,
+    AC_MSG_RESULT(no))
+AC_MSG_CHECKING(for default catalog)
+AC_ARG_ENABLE(default-catalog,
+[  --enable-default-catalog=pathlist
+                          provide one or more default catalog files or
+                          sysids, e.g. /usr/local/lib/sgml/catalog],
+              if test $enableval
+               then
+                AC_MSG_RESULT($enableval)
+                AC_DEFINE_UNQUOTED(SGML_CATALOG_FILES_DEFAULT,"$enableval",
+                              [set this to the default catalog files list])
+               else
+                AC_MSG_RESULT(none)
+              fi,
+              AC_MSG_RESULT(none))
+AC_MSG_CHECKING(for default search path)
+AC_ARG_ENABLE(default-search-path,
+[  --enable-default-search-path=pathlist
+                          provide a default value for SGML_SEARCH_PATH],
+    if test $enableval
+    then
+        AC_MSG_RESULT($enableval)
+	AC_DEFINE_UNQUOTED(SGML_SEARCH_PATH_DEFAULT,"$enableval",
+                       [set this to the default SGML search path])
+    else
+        AC_MSG_RESULT(none)
+    fi,
+    AC_MSG_RESULT(none))
+AC_MSG_CHECKING(whether to include support for XML Formatted Messages)
+AC_ARG_ENABLE(xml-messages,
+[  --enable-xml-messages   include support for XML Formatted Messages],
+        if test $enableval
+           then
+              AC_MSG_RESULT(yes)
+              AC_DEFINE(SP_XML,1,[set this to enable XML Formatted Messages])
+           else
+                AC_MSG_RESULT(no)
+         fi,
+      AC_MSG_RESULT(no))
+DTDDECL=yes
+AC_MSG_CHECKING(whether to include DTDDECL support)
+AC_ARG_ENABLE(dtddecl,
+[  --disable-dtddecl       disable support for DTDDECL catalog entries],
+    if test "$enableval" = "no"
+    then
+        AC_MSG_RESULT(no)
+	DTDDECL=no
+    else
+        AC_MSG_RESULT(yes)
+    fi,
+    AC_MSG_RESULT(yes))
+if test "$DTDDECL" = "yes"
+then
+    AC_DEFINE(SP_DTDDECL,1,[set this to enable DTDDECL support])
+    AM_CONDITIONAL(DTDDECL,true)
+else
+    AM_CONDITIONAL(DTDDECL,false)
+fi
+
+dnl Output.
+AC_CONFIG_FILES([${PACKAGE}-${VERSION}.spec:spec.in Makefile msggen.pl
+	lib/Makefile nsgmls/Makefile spent/Makefile
+	spam/Makefile sgmlnorm/Makefile sx/Makefile spcat/Makefile
+	include/Makefile include/config.h.old generic/Makefile doc/Makefile
+	pubtext/Makefile tests/Makefile unicode/Makefile intl/Makefile
+	po/Makefile.in])
+
+BUILDDOCS=yes
+AC_MSG_CHECKING([whether to build docs (man and html)])
+AC_ARG_ENABLE(doc-build,
+    [  --disable-doc-build     do not build docs from source],
+    if test "$enableval" = "no"
+    then
+        AC_MSG_RESULT(no)
+        BUILDDOCS=no
+    else
+	AC_MSG_RESULT(yes)
+    fi,
+    AC_MSG_RESULT(yes))
+
+if test "$BUILDDOCS" = "yes"
+then
+    AC_PATH_PROG(XMLTO, xmlto)
+    if test -z "$XMLTO"
+    then AC_MSG_ERROR(
+[could not find xmlto; set XMLTO or consider --disable-doc-build])
+    fi
+    AC_SUBST(DOCSRC, docsrc)
+    AC_CONFIG_FILES(docsrc/Makefile)
+fi
+
+BUILDFULLDOCS=no
+AC_MSG_CHECKING([whether to build all docs (man, html, pdf, ps)])
+AC_ARG_ENABLE(full-doc-build,
+    [  --enable-full-doc-build build all docs from source],
+    if test "$enableval" = "yes"
+    then
+        AC_MSG_RESULT(yes)
+        BUILDFULLDOCS=yes
+    else
+	AC_MSG_RESULT(no)
+    fi,
+    AC_MSG_RESULT(no))
+
+if test "$BUILDFULLDOCS" = "yes"
+then
+    AC_PATH_PROG(PDF2PS, pdf2ps)
+    if test -z "$PDF2PS"
+    then AC_MSG_ERROR(
+[could not find pdf2ps; set PDF2PS or consider --disable-doc-build])
+    fi
+    AC_PATH_PROG(JADE, openjade jade)
+    if test -z "$JADE"
+    then
+	AC_MSG_ERROR(
+[could not find openjade or jade; set JADE or consider --disable-doc-build])
+    fi
+    AC_PATH_PROG(JADETEX, jadetex)
+    if test -z "$JADETEX"
+    then
+	AC_MSG_ERROR(
+[could not find jadetex; set JADETEX or consider --disable-doc-build])
+    fi
+    AC_PATH_PROG(PDFJADETEX, pdfjadetex)
+    if test -z "$PDFJADETEX"
+    then
+	AC_MSG_ERROR(
+[could not find pdfjadetex; set PDFJADETEX or consider --disable-doc-build])
+    fi
+    AC_SUBST(EXTRADOCS,["releasenotes.pdf releasenotes.ps"])
+fi
+
+AC_OUTPUT

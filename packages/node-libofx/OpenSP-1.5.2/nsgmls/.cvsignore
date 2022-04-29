@@ -1,0 +1,11 @@
+Makefile
+Makefile.in
+.libs
+.deps
+*.la
+*.lo
+*Messages.h
+*Messages.rc
+*Messages.cxx
+*_inst.cxx
+onsgmls

@@ -1,0 +1,2613 @@
+# Japanese message catalog for opensp (cvs/HEAD)
+# Copyright (C) 2001 SATO Satoru
+# SATO Satoru <ss@gnome.gr.jp>, 2001.
+#
+# I'm not much familiar with the SGML techinical term, so if you
+# found any bugs in this message catalog, tell me or fix it, please.
+msgid ""
+msgstr ""
+"Project-Id-Version: opensp cvs20010327\n"
+"POT-Creation-Date: 2005-11-05 09:50+0000\n"
+"PO-Revision-Date: 2001-03-27 09:04+09:00\n"
+"Last-Translator: SATO Satoru <ss@gnome.gr.jp>\n"
+"Language-Team: Japanese <translation@gnome.gr.jp>\n"
+"MIME-Version:: 1.0\n"
+"Content-Type: text/plain; charset=euc-jp\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid ""
+"no system identifier could be generated for meta-DTD for architecture %1"
+msgstr "構造 %1 のメタDTDに対してシステム識別子を生成できませんでした"
+
+msgid "element type %1 not defined in meta-DTD"
+msgstr "要素型 %1 はメタDTD内では未定義です"
+
+msgid "element %1 invalid in meta-DTD because excluded"
+msgstr "exclude されているのでメタDTD内では要素 %1 は不正です"
+
+msgid "meta-DTD does not allow element %1 at this point"
+msgstr "メタDTDではここでの要素 %1 の存在を禁止しています"
+
+msgid "document element must be instance of %1 element type form"
+msgstr "文書要素は要素型形式 %1 のインスタンスでなければなりません"
+
+msgid "element %1 unfinished in meta-DTD"
+msgstr "要素 %1 はメタDTD内では未定義です"
+
+msgid "missing substitute name"
+msgstr "代替名(substitute name)がみつかりません"
+
+msgid "substitute for non-existent architecture attribute %1"
+msgstr "存在しない構造属性 %1 に対する代替"
+
+msgid "substitute name for %1 already defined"
+msgstr "既に定義済みの %1 の代替名"
+
+msgid "substitute name %1 is not the name of an attribute"
+msgstr "代替名 %1 は構造名ではありません"
+
+msgid "reference in architecture to non-existent ID %1"
+msgstr "構造内に、存在しないID %1への参照"
+
+msgid "architectural content specified with #ARCCONT not allowed by meta-DTD"
+msgstr "#ARCCONTで指定された構造内容はメタDTDでは禁止されています"
+
+msgid "invalid value %1 for ArcSupr attribute"
+msgstr "ArcSupr属性に対して不適切な値 %1"
+
+msgid "no declaration for meta-DTD parameter entity %1"
+msgstr "メタDTDパラメタ実体 %1 の宣言がありません"
+
+msgid "no declaration for meta-DTD general entity %1"
+msgstr "メタDTD一般実体 %1 の宣言がありません"
+
+msgid "meta-DTD entity %1 must be external"
+msgstr "メタDTD実体 %1 は外部でなければなりません"
+
+msgid "no ArcDTD architecture support attribute specified"
+msgstr "ArcDTD構造サポート属性が未指定です"
+
+msgid "ArcDataF notation %1 not defined in meta-DTD"
+msgstr "ArcDataF記述 %1 がメタDTD内では未定義です"
+
+msgid "ID attribute %1 in meta-DTD not declared as ID in DTD"
+msgstr "メタDTD内のID属性 %1 はDTD内のIDとして宣言されていません"
+
+msgid "invalid value %1 for ArcAuto architectural support attribute"
+msgstr "ArcAutoサポート属性に対して不適切な値 %1"
+
+msgid "no notation declaration for architecture %1"
+msgstr "構造 %1 に対して宣言の記述がありません"
+
+msgid "meta-DTD does not allow data at this point"
+msgstr "メタDTDはこの位置でのデータを禁止しています"
+
+msgid "invalid value %1 for ArcIgnD attribute"
+msgstr "ArcIgnD属性に対して不適切な値 %1"
+
+msgid "unrecognized quantity name %1"
+msgstr "認識されていない量名 %1"
+
+msgid "no value specified for quantity %1"
+msgstr "量 %1 に対して値が未指定です"
+
+msgid "length of value %1 for quantity is too long"
+msgstr "%1 の値の長さが量に対して長すぎます"
+
+msgid "invalid digit %1"
+msgstr "不正なディジット %1"
+
+msgid "only value of nArcIndr for ArcIndr attribute supported"
+msgstr "ArcIndr属性に対してはnArcIndr値だけがサポートされています"
+
+msgid "#ARCCONT attribute already specified"
+msgstr "#ARCCONT属性は既に指定済みです"
+
+msgid "invalid value %1 for #ARCCONT"
+msgstr "#ARCCONTに対して不正な値 %1"
+
+msgid "%1 already used as a substitute name"
+msgstr "%1 は既に代替名として使用されています"
+
+msgid "substitute name #CONTENT already specified"
+msgstr "代替名 #CONTENTは既に指定されています"
+
+msgid "IS10744 PI keyword missing"
+msgstr ""
+
+msgid "invalid IS10744 PI keyword %1"
+msgstr ""
+
+#, fuzzy
+msgid "architecture %1 already defined"
+msgstr "リンクセット %1 は既に定義済みです"
+
+msgid "the first definition"
+msgstr ""
+
+#, fuzzy
+msgid "ignoring PI declaration of architecture %1"
+msgstr "構造 %1 に対して宣言の記述がありません"
+
+msgid "the ArcBase definition"
+msgstr ""
+
+#, fuzzy
+msgid "ignoring ArcBase declaration of architecture %1"
+msgstr "構造 %1 に対して宣言の記述がありません"
+
+msgid "the PI definition"
+msgstr ""
+
+msgid "name expected"
+msgstr "予期される名前"
+
+msgid "literal expected"
+msgstr "予期されるリテラル"
+
+msgid "name or literal expected"
+msgstr "予期される名前あるいはリテラル"
+
+msgid "nul character"
+msgstr "nul文字"
+
+msgid "not a minimum data character"
+msgstr "最小データ文字ではありません"
+
+msgid "end of entity in comment"
+msgstr "コメント内での実体の終端"
+
+msgid "end of entity in literal"
+msgstr "リテラル内での実体の終端"
+
+msgid "OVERRIDE requires argument of YES or NO"
+msgstr "OVERRIDEは引数YESあるいはNOを必要とします"
+
+msgid "CATALOG entries cause loop"
+msgstr "CATALOG実体がループを引き起こしています"
+
+msgid "second argument for SYSTEM entry should be quoted to avoid ambiguity"
+msgstr ""
+"SYSTEM実体の第二引数はあいまいさをさけるためにクォートされているべきです"
+
+msgid "no DOCUMENT entry in catalog %1"
+msgstr "カタログ %1 内にDOCUMENTエントリがありません"
+
+msgid "no entry for public identifier %1 in catalog %2"
+msgstr "公開識別子 %1 の実体がありません(カタログ %2 内)"
+
+msgid "invalid option %1"
+msgstr "不正なオプション %1"
+
+msgid "missing argument for option %1"
+msgstr "オプション %1 に対して引数がありません"
+
+msgid "option %1 is ambiguous"
+msgstr "オプション %1 はあいまいです"
+
+msgid "option %1 doesn't allow an argument"
+msgstr "オプション %1 には引数を必要としません"
+
+msgid "Usage: %1"
+msgstr "使い方: %1"
+
+msgid "or: %1"
+msgstr "あるいは: %1"
+
+msgid "%1 [OPTION] SYSID..."
+msgstr "%1 [オプション] SYSID..."
+
+msgid "Short options need the same arguments as their long forms."
+msgstr "短かいオプションは長いオプション形式の場合と同じ引数を必要とします"
+
+msgid "%1 version %2"
+msgstr "%1 バージョン %2"
+
+msgid "unknown BCTF %1"
+msgstr "不明なBCTF %1"
+
+msgid "unknown encoding %1"
+msgstr "不明なエンコーディング %1"
+
+msgid "cannot open output file %1 (%2)"
+msgstr "出力ファイル %1 (%2)を開けません"
+
+msgid "cannot close output file %1 (%2)"
+msgstr "出力ファイル %1 (%2)を閉じることができません"
+
+msgid "Use bctf %1 for output."
+msgstr "出力に対して利用するBCTF %1"
+
+msgid "Use encoding %1 for output."
+msgstr "出力にエンコーディング %1 を利用します"
+
+msgid "Append error messages to file %1."
+msgstr "エラーメッセージをファイル %1 に追加します"
+
+msgid "Display the program version."
+msgstr "プログラムのバージョンを表示"
+
+msgid "Show this help text."
+msgstr "このヘルプテキストを表示"
+
+msgid "NAME"
+msgstr "NAME"
+
+msgid "FILE"
+msgstr "FILE"
+
+msgid "NOTHING"
+msgstr "NOTHING"
+
+msgid "Try the \"--help\" option for more information."
+msgstr "より詳細な情報については\"--help\"をご利用下さい"
+
+msgid "ARG"
+msgstr "ARG"
+
+msgid "Undocumented option (check the application's manual)."
+msgstr ""
+"文書化されていないオプション(アプリケーションのマニュアルを参照して下さい)"
+
+msgid "Use catalog %1."
+msgstr "カタログ %1 を使用します"
+
+msgid "Arguments are catalogs, use DOCUMENT entry."
+msgstr "引数はカタログです。DOCUMENTエントリをご利用下さい"
+
+msgid "Search files in directory %1."
+msgstr "ディレクトリ %1 内でファイルを検索します"
+
+msgid "Restrict file reading (for use in Web apps)."
+msgstr ""
+
+msgid "DIRECTORY"
+msgstr "DIRECTORY"
+
+msgid "SYSID"
+msgstr "SYSID"
+
+msgid "bad formal system identifier syntax in %1"
+msgstr "%1 内に不正な公式のシステム識別子"
+
+msgid "value for attribute %1 missing in formal system identifier"
+msgstr "属性 %1 に対する値は公式なシステム識別子の中にはみつかりません"
+
+msgid "%1 is a formal system identifier attribute value not an attribute name"
+msgstr "%1 は属性名ではなく、公式なシステム識別子の属性値です"
+
+msgid "value of smcrd attribute must be a single character not %1"
+msgstr "smcrd属性値は %1 ではなく、単一文字でなければなりません"
+
+msgid "unsupported record boundary indicator %1"
+msgstr "サポートされていないレコード境界指示子 %1"
+
+msgid "unsupported formal system identifier attribute %1"
+msgstr "サポートされていない公式システム識別子属性 %1"
+
+msgid "unsupported formal system identifier attribute value %1"
+msgstr "サポートされていない公式システム識別子の属性値 %1"
+
+msgid "bad value %1 for formal system identifier tracking attribute"
+msgstr "属性を補足する公式なシステム識別子に対して不正な値 %1"
+
+msgid "duplicate specification for formal system identifier attribute %1"
+msgstr "公式のシステム識別子の属性 %1 に対して重複する指定"
+
+msgid "bad value %1 for formal system identifier zapeof attribute"
+msgstr "公式のシステム識別子 zapeof 属性に対して不正な値 %1"
+
+msgid "bad value %1 for formal system identifier search attribute"
+msgstr "公式のシステム識別子の検索属性に対して不正な値 %1"
+
+msgid "bad value %1 for formal system identifier fold attribute"
+msgstr "公式のシステム識別子の fold 属性に対して不正な値 %1"
+
+msgid "fold attribute allowed only for neutral storage manager"
+msgstr "fold属性はニュートラルストレージマネージャに対してのみ許可されます"
+
+msgid "bctf and encoding attributes not applicable to this storage manager"
+msgstr ""
+"BCTFとエンコーディング属性はこのストレージマネージャについては適用できません"
+
+msgid "cannot specify both bctf and encoding attribute"
+msgstr "BCTF、エンコーディングの両方の属性は指定できません"
+
+msgid "zapeof attribute not applicable to this storage manager"
+msgstr "zapeof属性はこのストレージマネージャについては適用できません"
+
+msgid "records attribute not applicable to this storage manager"
+msgstr "レコード属性はこのストレージマネージャについては適用できません"
+
+msgid "bad value %1 for formal system identifier indirect attribute"
+msgstr "公式のシステム識別子の間接属性に対して不正な値 %1"
+
+msgid ""
+"non-minimum data character (number %1) in value of formal system identifier "
+"lookup attribute"
+msgstr "公式システム識別子の検索属性の値内に非最小データ文字(番号 %1)"
+
+msgid "st"
+msgstr "st"
+
+msgid "nd"
+msgstr "nd"
+
+msgid "rd"
+msgstr "rd"
+
+msgid "th"
+msgstr "th"
+
+msgid "(invalid argument type)"
+msgstr "(不正な引数タイプ)"
+
+msgid "(invalid message)"
+msgstr "(不正なメッセージ)"
+
+msgid "I"
+msgstr "I"
+
+msgid "W"
+msgstr "W"
+
+msgid "Q"
+msgstr "Q"
+
+msgid "X"
+msgstr "X"
+
+msgid "E"
+msgstr "E"
+
+msgid "open elements"
+msgstr "エレメントが開いています"
+
+msgid "In entity %1 included from %2"
+msgstr "実体 %1 (%2 から include)内"
+
+msgid "In entity included from %2"
+msgstr "%2 から include された実体内"
+
+msgid "(invalid location)"
+msgstr "(不正な位置)"
+
+msgid "offset "
+msgstr "オフセット"
+
+msgid "relevant clauses: "
+msgstr "適切な節: "
+
+msgid "unknown warning type %1"
+msgstr "不明な警告タイプ %1"
+
+msgid "invalid error limit"
+msgstr "不適切なエラー制限"
+
+msgid "maximum number of errors (%1) reached; change with -E option"
+msgstr ""
+"エラー数の上限数 (%1) に達しました。エラー数上限を変更するには -E オプション"
+"をご利用下さい"
+
+msgid "Make doctype or linktype %1 active."
+msgstr "DOCTYPEあるいはLINKTYPE %1 をアクティブにして下さい"
+
+msgid "Parse wrt. architecture %1."
+msgstr "wrt 解析。構造 %1"
+
+msgid "Give up after %1 errors."
+msgstr "%1 エラーの後で中断しました"
+
+msgid "Show open entities in error messages."
+msgstr "エラーメッセージ内で開いた実体を表示"
+
+msgid "Show open elements in error messages."
+msgstr "エラーメッセージ内で開いた要素を表示"
+
+msgid "Show error numbers in error messages."
+msgstr "エラーメッセージ内のエラー数を表示"
+
+msgid "Show references in error messages."
+msgstr "エラーメッセージ内の参照を表示"
+
+msgid "Define parameter entity %1 as \"INCLUDE\"."
+msgstr "変数実体 %1 を \"INCLUDE\" で定義して下さい"
+
+msgid "Enable warning %1."
+msgstr "警告 %1 を有効にする"
+
+msgid "TYPE"
+msgstr "TYPE"
+
+msgid "NUMBER"
+msgstr "NUMBER"
+
+msgid "length of name must not exceed NAMELEN (%1)"
+msgstr "名前の長さはNAMELEN(%1)を越えてはいけません"
+
+msgid ""
+"length of parameter entity name must not exceed NAMELEN less the length of "
+"the PERO delimiter (%1)"
+msgstr ""
+"変数実体長はPEROデリミタ(%1)より長く、NAMELENより短かくなければいけません"
+
+msgid "length of number must not exceed NAMELEN (%1)"
+msgstr "名前の長さはNAMELEN (%1) を越えてはいけません"
+
+msgid "length of attribute value must not exceed LITLEN less NORMSEP (%1)"
+msgstr ""
+"属性値の長さはNORMSEP (%1) より長く、LITLENより短かくなければなりません"
+
+msgid ""
+"a name group is not allowed in a parameter entity reference in the prolog"
+msgstr "プロローグ内の変数実体参照内でのグループ名は禁止されています"
+
+msgid ""
+"an entity end in a token separator must terminate an entity referenced in "
+"the same group"
+msgstr ""
+"トークン区切り子内での実体の終端は同じグループ内での実体参照で終っていなけれ"
+"ばなりません"
+
+msgid "character %1 invalid: only %2 and token separators allowed"
+msgstr "不正なキャラクタ %1: 可能なのは %2 とトークン区切り子だけです"
+
+msgid ""
+"a parameter separator is required after a number that is followed by a name "
+"start character"
+msgstr "名前開始文字が後に続く数字の後には変数区切り子が必要です"
+
+msgid "character %1 invalid: only %2 and parameter separators allowed"
+msgstr "不正なキャラクタ %1: 可能なのは %2 と変数区切り子だけです"
+
+#, fuzzy
+msgid ""
+"an entity end in a parameter separator must terminate an entity referenced "
+"in the same declaration"
+msgstr ""
+"変数区切り子内での実体の終端で同じ宣言内で参照されている実体を終らせていなけ"
+"ればなりません"
+
+msgid ""
+"an entity end is not allowed in a token separator that does not follow a "
+"token"
+msgstr ""
+"トークンが後に続かない、トークン区切り子内の実体の終端は禁止されています"
+
+msgid "%1 is not a valid token here"
+msgstr "ここでは %1 は適切なトークンではありません"
+
+msgid ""
+"a parameter entity reference can only occur in a group where a token could "
+"occur"
+msgstr "変数実体参照はトークンのあるグループ内でのみ可能です"
+
+msgid "token %1 has already occurred in this group"
+msgstr "トークン %1 は既にこのグループ内にあります"
+
+msgid "the number of tokens in a group must not exceed GRPCNT (%1)"
+msgstr "グループ内でのトークン数はGRPCNT (%1) を越えてはいけません"
+
+#, fuzzy
+msgid ""
+"an entity end in a literal must terminate an entity referenced in the same "
+"literal"
+msgstr ""
+"リテラル内での実体の終端は同じリテラル内で参照されている実体で終っていなけれ"
+"ばなりません"
+
+msgid "character %1 invalid: only minimum data characters allowed"
+msgstr "不正な文字 %1: 可能なのは最小データ文字だけです"
+
+msgid ""
+"a parameter literal in a data tag pattern must not contain a numeric "
+"character reference to a non-SGML character"
+msgstr ""
+"データタグパターン内の変数リテラルは非SGML文字への数字参照を含んでいてはいけ"
+"ません"
+
+msgid ""
+"a parameter literal in a data tag pattern must not contain a numeric "
+"character reference to a function character"
+msgstr ""
+"データタグパターンン内の変数リテラルは関数文字への数字参照を含んでいてはいけ"
+"ません"
+
+msgid ""
+"a name group is not allowed in a general entity reference in a start tag"
+msgstr "開始タグ内の一般実体参照内では名前グループは禁止されています"
+
+msgid "a name group is not allowed in a general entity reference in the prolog"
+msgstr "プロローグ内の一般実体参照内では名前グループは禁止されています"
+
+msgid "%1 is not a function name"
+msgstr "%1 は関数名ではありません"
+
+msgid "%1 is not a character number in the document character set"
+msgstr "%1 は文書文字セット内の文字番号ではありません"
+
+msgid "parameter entity %1 not defined"
+msgstr "変数実体 %1 は未定義です"
+
+msgid "general entity %1 not defined and no default entity"
+msgstr "一般実体 %1 は未定義でデフォルト実体もありません"
+
+msgid "RNI delimiter must be followed by name start character"
+msgstr "RNIデリミタは名前開始文字が後に続かなければなりません"
+
+msgid "unterminated comment: found end of entity inside comment"
+msgstr "閉じられていないコメント: コメント内に実体の終端があります"
+
+msgid "comment started here"
+msgstr "コメント開始"
+
+msgid "only one type of connector should be used in a single group"
+msgstr "単一グループ内では一種類のコネクタだけを利用するべきです"
+
+msgid "%1 is not a reserved name"
+msgstr "%1 は確保していた名前ではありません"
+
+msgid "%1 is not allowed as a reserved name here"
+msgstr "%1 は確保していた名前としてここで利用することは禁止されています"
+
+msgid ""
+"length of interpreted minimum literal must not exceed reference LITLEN (%1)"
+msgstr "解釈された最小リテラルの長さはLITLEN (%1)を越えてはいけません"
+
+msgid ""
+"length of tokenized attribute value must not exceed LITLEN less NORMSEP (%1)"
+msgstr ""
+"トークン化属性値の長さはNORMSEP (%1)より長く、LITLENより短かくなければなりま"
+"せん"
+
+msgid "length of system identifier must not exceed LITLEN (%1)"
+msgstr "システム識別子の長さはLITLEN (%1)を越えてはいけません"
+
+msgid "length of interpreted parameter literal must not exceed LITLEN (%1)"
+msgstr "解釈された変数リテラルの長さはLITLEN (%1)を越えてはいけません"
+
+msgid ""
+"length of interpreted parameter literal in data tag pattern must not exceed "
+"DTEMPLEN (%1)"
+msgstr ""
+"データタグパターン内の解釈された変数リテラルの長さはDTEMPLEN (%1)を越えてはい"
+"けません"
+
+msgid "literal is missing closing delimiter"
+msgstr "リテラルは閉デリミタをもっていません"
+
+msgid "%1 invalid: only %2 and parameter separators are allowed"
+msgstr "%1 は不適切です: 可能なのは %2 と変数区切り子だけです"
+
+msgid "%1 invalid: only %2 and token separators are allowed"
+msgstr "%1 は不適切です: 可能なのは %2 とトークン区切り子だけです"
+
+msgid "unknown declaration type %1"
+msgstr "不明な宣言タイプ %1"
+
+msgid "%1 declaration not allowed in DTD subset"
+msgstr "DTDサブセット内では %1 宣言は禁止されています"
+
+msgid "character %1 not allowed in declaration subset"
+msgstr "宣言サブセット内では文字 %1 は禁止されています"
+
+msgid "end of document in DTD subset"
+msgstr "DTDサブセット内に文書の終端があります"
+
+msgid "character %1 not allowed in prolog"
+msgstr "プロローグ内では文字 %1 は禁止されています"
+
+msgid "end of document in prolog"
+msgstr "プロローグ内に文書の終端があります"
+
+msgid "%1 declaration not allowed in prolog"
+msgstr "プロローグ内では %1 宣言は禁止されています"
+
+msgid "%1 used both a rank stem and generic identifier"
+msgstr "%1 はランクステムと一般識別子の両方で利用されています"
+
+msgid ""
+"omitted tag minimization parameter can be omitted only if OMITTAG NO is "
+"specified"
+msgstr "省略タグ最小化変数はOMITTAG NO が指定されている場合のみ省略できます"
+
+msgid "element type %1 already defined"
+msgstr "要素タイプ %1 は既に定義されています"
+
+msgid "entity reference with no applicable DTD"
+msgstr "適切なDTDなしの実体参照"
+
+msgid ""
+"invalid comment declaration: found %1 outside comment but inside comment "
+"declaration"
+msgstr ""
+"不正なコメント宣言: %1 をコメント外にみつけましたがコメント宣言内部です"
+
+msgid "comment declaration started here"
+msgstr "コメント宣言開始"
+
+msgid "%1 declaration not allowed in instance"
+msgstr "インスタンス内では %1 宣言は禁止されています"
+
+msgid "non-SGML character not allowed in content"
+msgstr "内容内では非SGML文字は禁止されています"
+
+msgid "no current rank for rank stem %1"
+msgstr "ランクステム %1 に対してランクがありません"
+
+msgid "duplicate attribute definition list for notation %1"
+msgstr "記述 %1 に対して重複する属性定義リスト"
+
+msgid "duplicate attribute definition list for element %1"
+msgstr "要素 %1 に対して重複する属性定義リスト"
+
+msgid "entity end not allowed in end tag"
+msgstr "終了タグ内での実体の終端は禁止されています"
+
+msgid "character %1 not allowed in end tag"
+msgstr "終了タグ内での文字 %1 は禁止されています"
+
+msgid "%1 invalid: only S separators and TAGC allowed here"
+msgstr "%1 は不正です: 可能なのはS区切り子とTAGCだけです"
+
+msgid "character data is not allowed here"
+msgstr "文字データはここでは禁止されています"
+
+msgid "document type does not allow element %1 here"
+msgstr "文書型はここでの要素 %1 を禁止しています"
+
+msgid ""
+"document type does not allow element %1 here; missing one of %2 start-tag"
+msgstr ""
+"文書型はここでの要素 %1 を禁止しています。%2 開始タグの一つがみつかりません"
+
+msgid ""
+"document type does not allow element %1 here; assuming missing %2 start-tag"
+msgstr "文書型はここでの要素 %1 を禁止しています。%2 開始タグがないようです"
+
+msgid "no start tag specified for implied empty element %1"
+msgstr "暗黙の空要素 %1 に対して開始タグが指定されていません"
+
+msgid "end tag for %1 omitted, but its declaration does not permit this"
+msgstr "%1 の終了タグが省略されていますが宣言ではこれは禁止されています"
+
+msgid "start tag was here"
+msgstr "開始タグはここでした"
+
+msgid "end tag for %1 omitted, but OMITTAG NO was specified"
+msgstr "%1 の終了タグが省略されていますがOMITTAG NO が指定されていました"
+
+msgid "start tag omitted for element %1 with declared content"
+msgstr "宣言された内容を伴う要素 %1 について開始タグが省略されています"
+
+msgid "end tag for %1 which is not finished"
+msgstr "閉じていない %1 の終了タグ"
+
+msgid "start tag for %1 omitted, but its declaration does not permit this"
+msgstr "%1 の開始タグが省略されていますが宣言ではこれは禁止されています"
+
+msgid "number of open elements exceeds TAGLVL (%1)"
+msgstr "開いた要素数がTAGLVL (%1) を越えています"
+
+msgid "element %1 undefined"
+msgstr "要素 %1 は未定義"
+
+msgid "empty end tag but no open elements"
+msgstr "空終了タグがありますが、開いた要素はありません"
+
+msgid "%1 not finished but containing element ended"
+msgstr "%1 は閉じていませんが、要素を終端に含んでいます"
+
+msgid "end tag for element %1 which is not open"
+msgstr "開いていない要素 %1 に対する終了タグ"
+
+msgid "internal parameter entity %1 cannot be CDATA or SDATA"
+msgstr "内部変数実体 %1 は CDATA あるいは SDATA にはなりえません"
+
+msgid "character %1 not allowed in attribute specification list"
+msgstr "属性指定リスト内では文字 %1 は禁止されています"
+
+msgid ""
+"an attribute value must be a literal unless it contains only name characters"
+msgstr "属性値は、名前文字だけを含むのでなければリテラルでなければなりません"
+
+msgid ""
+"entity end not allowed in attribute specification list except in attribute "
+"value literal"
+msgstr ""
+"属性値リテラル内を除けば属性指定リスト内では実体の終端は禁止されています"
+
+msgid "external parameter entity %1 cannot be CDATA, SDATA, NDATA or SUBDOC"
+msgstr ""
+"外部変数実体 %1 はCDATA、SDATA、NDATA、あるいは SUBDOC にはなりえません"
+
+msgid "duplicate declaration of entity %1"
+msgstr "実体 %1 の重複する宣言"
+
+msgid "duplicate declaration of parameter entity %1"
+msgstr "変数実体 %1 の重複する宣言"
+
+msgid ""
+"a reference to a PI entity is allowed only in a context where a processing "
+"instruction could occur"
+msgstr "PI 実体への参照は起りうる指令を処理中の文脈内では禁止されています"
+
+msgid ""
+"a reference to a CDATA or SDATA entity is allowed only in a context where a "
+"data character could occur"
+msgstr ""
+"起りうるデータ文字の文脈内での CDATA あるいは SDATA 実体への参照は禁止されて"
+"います"
+
+msgid ""
+"a reference to a subdocument entity or external data entity is allowed only "
+"in a context where a data character could occur"
+msgstr ""
+"起りうるデータ文字の文脈内での外部データ実体あるいはサブ文書実体への参照は禁"
+"止されています"
+
+msgid ""
+"a reference to a subdocument entity or external data entity is not allowed "
+"in replaceable character data"
+msgstr ""
+"置き換え可能な文字データ内での外部データ実体あるいはサブ文書実体への参照は禁"
+"止されています"
+
+msgid "the number of open entities cannot exceed ENTLVL (%1)"
+msgstr "開いた実体数はENTLVL (%1) を越えてはいけません"
+
+msgid "a reference to a PI entity is not allowed in replaceable character data"
+msgstr "置き換え可能な文字データ内でのPI実体への参照は禁止されています"
+
+msgid "entity %1 is already open"
+msgstr "実体 %1 は既に開いています"
+
+msgid "short reference map %1 not defined"
+msgstr "短縮参照マップ %1 は未定義です"
+
+msgid "short reference map in DTD must specify associated element type"
+msgstr "DTD 内での短縮参照マップは関連する要素タイプを指定しなければなりません"
+
+msgid ""
+"short reference map in document instance cannot specify associated element "
+"type"
+msgstr ""
+"文書インスタンス内での短縮参照マップでは関連する要素タイプを指定できません"
+
+msgid "short reference map %1 for element %2 not defined in DTD"
+msgstr "要素 %2 に対する短縮参照マップ %1 はDTD内では未定義です"
+
+msgid "%1 is not a short reference delimiter"
+msgstr "%1 は短縮参照デリミタではありません"
+
+msgid "short reference delimiter %1 already mapped in this declaration"
+msgstr "短縮参照デリミタ %1 は既にこの宣言内でマップされています"
+
+msgid "no document element"
+msgstr "文書要素がみつかりません"
+
+msgid "entity end not allowed in processing instruction"
+msgstr "実体の終端は指令処理内では禁止されています"
+
+msgid "length of processing instruction must not exceed PILEN (%1)"
+msgstr "指令処理の長さはPILEN (%1)を越えてはいけません"
+
+msgid "missing PIC delimiter"
+msgstr "PICデリミタがみつかりません"
+
+msgid "an attribute specification must start with a name or name token"
+msgstr "属性指定は名前か名前トークンで始まらなければなりません"
+
+msgid "%1 is not a member of a group specified for any attribute"
+msgstr ""
+"%1 はいかなる属性についても、指定されたグループのメンバーではありません"
+
+msgid ""
+"the name and VI delimiter can be omitted from an attribute specification "
+"only if SHORTTAG YES is specified"
+msgstr ""
+"名前とVIデリミタはSHORTTAG YESが指定されているときのみ属性指定から省略するこ"
+"とができます"
+
+msgid "there is no attribute %1"
+msgstr "属性 %1 は存在しません"
+
+msgid ""
+"an attribute value specification must start with a literal or a name "
+"character"
+msgstr "属性値指定はリテラルか名前文字で始まらなければなりません"
+
+msgid "length of name token must not exceed NAMELEN (%1)"
+msgstr "名前トークンの長さはNAMELEN (%1) を越えてはいけません"
+
+msgid ""
+"an attribute value literal can occur in an attribute specification list only "
+"after a VI delimiter"
+msgstr "属性値リテラルはVIデリミタの後の属性指定リスト内にのみ配置できます"
+
+msgid "duplicate specification of attribute %1"
+msgstr "重複する属性指定 %1"
+
+msgid "duplicate definition of attribute %1"
+msgstr "重複する属性定義 %1"
+
+msgid ""
+"data attribute specification must be omitted if attribute specification list "
+"is empty"
+msgstr "データの属性指定は属性指定リストが空の場合は省略しなければなりません"
+
+msgid "marked section end not in marked section declaration"
+msgstr "マークされた節の終端がマークされた節の宣言内にありません"
+
+msgid "number of open marked sections must not exceed TAGLVL (%1)"
+msgstr "開いた、マークされた節の数はTAGLVL(%1)を越えてはいけません"
+
+msgid "missing marked section end"
+msgstr "マークされた節の終端がありません"
+
+msgid "marked section started here"
+msgstr "マークされた節の開始"
+
+msgid ""
+"entity end in character data, replaceable character data or ignored marked "
+"section"
+msgstr ""
+"文字データ内の実体の終端、置き換え可能な文字データ、あるいは無視された、マー"
+"クされた節"
+
+msgid ""
+"normalized length of attribute value literal must not exceed LITLEN (%1); "
+"length was %2"
+msgstr ""
+"正規化された属性値リテラルの長さはLITLEN (%1)を越えてはいけません(長さは %2 "
+"でした)"
+
+msgid "syntax of attribute value does not conform to declared value"
+msgstr "属性値の構文は宣言された値を受け付けません"
+
+msgid "character %1 is not allowed in the value of attribute %2"
+msgstr "文字 %1 は属性 %2 の値内では使えません"
+
+msgid "value of attribute %1 must be a single token"
+msgstr "属性 %1 の値は単一トークンでなくてはなりません"
+
+msgid "value of attribute %2 invalid: %1 cannot start a number token"
+msgstr "不正な属性値 %2: %1 は数字トークンで始めることはできません"
+
+msgid "value of attribute %2 invalid: %1 cannot start a name"
+msgstr "不正な属性値 %2: %1 は名前で始めることはできません"
+
+msgid "non-impliable attribute %1 not specified but OMITTAG NO and SHORTTAG NO"
+msgstr "OMITTAG NO、SHORTTAG NO なしに明示属性 %1 を指定することはできません"
+
+msgid "required attribute %1 not specified"
+msgstr "要求された属性 %1 は未指定です"
+
+#, fuzzy
+msgid "first occurrence of CURRENT attribute %1 not specified"
+msgstr "最初の CURRENT属性 %1 は未指定です"
+
+msgid "%1 is not a notation name"
+msgstr "%1 は記述名ではありません"
+
+msgid "%1 is not a general entity name"
+msgstr "%1 は一般実体名ではありません"
+
+msgid "value of attribute %2 cannot be %1; must be one of %3"
+msgstr "属性 %2 の値は %1 にはできず、%3 の内のどれかでなければなりません"
+
+msgid "%1 is not a data or subdocument entity"
+msgstr "%1 はデータでも副文書実体でもありません"
+
+#, fuzzy
+msgid ""
+"content model is ambiguous: when no tokens have been matched, both the %2 "
+"and %3 occurrences of %1 are possible"
+msgstr ""
+"あいまいな内容モデル: 一致するトークンがない場合、%2 と %3 (%1 の、)が可能"
+
+#, fuzzy
+msgid ""
+"content model is ambiguous: when the current token is the %2 occurrence of %"
+"1, both the %4 and %5 occurrences of %3 are possible"
+msgstr ""
+"あいまいな内容モデル: トークン %2 (%1 の)である場合、%4、%5 (%3 の、)両方が可"
+"能"
+
+#, fuzzy
+msgid ""
+"content model is ambiguous: when the current token is the %2 occurrence of %"
+"1 and the innermost containing AND group has been matched, both the %4 and %"
+"5 occurrences of %3 are possible"
+msgstr ""
+"あいまいな内容モデル: トークン %2 (%1 の、)であり、innermost に一致する AND "
+"グループが含まれている場合、%4、%5(%3 の、)両方が可能"
+
+#, fuzzy
+msgid ""
+"content model is ambiguous: when the current token is the %2 occurrence of %"
+"1 and the innermost %3 containing AND groups have been matched, both the %5 "
+"and %6 occurrences of %4 are possible"
+msgstr ""
+"あいまいな内容モデル: トークン %2 (%1 の、)であり、innermost %3 に一致する "
+"AND グループが含まれている場合、%5、%6 (%4 の参照)両方が可能"
+
+msgid ""
+"invalid comment declaration: found character %1 outside comment but inside "
+"comment declaration"
+msgstr ""
+"不適切なコメント宣言: コメントの外側に文字 %1 がありますがコメント宣言の内側"
+"です"
+
+msgid "non SGML character number %1"
+msgstr "非SGML数字 %1"
+
+msgid "data or replaceable character data in declaration subset"
+msgstr "宣言サブセット内にデータあるいは置換可能な文字データ"
+
+msgid "ID %1 already defined"
+msgstr "ID %1 は既に定義されています"
+
+msgid "ID %1 first defined here"
+msgstr "ID %1 は最初ここで定義されました"
+
+msgid "value of fixed attribute %1 not equal to default"
+msgstr "固定属性値 %1 はデフォルト値に等しくありません"
+
+msgid ""
+"character %1 is not significant in the reference concrete syntax and so "
+"cannot occur in a comment in the SGML declaration"
+msgstr ""
+"文字 %1 は参照具象構文内では意味がないのでSGML宣言内のコメント内に含めること"
+"はできません"
+
+msgid ""
+"minimum data of first minimum literal in SGML declaration must be \"ISO "
+"8879:1986\" or \"ISO 8879:1986 (ENR)\" or \"ISO 8879:1986 (WWW)\" not %1"
+msgstr ""
+"SGML宣言内の最小リテラルの最小データは %1 ではなく、\"ISO 8879:1986\"、\"ISO "
+"8879:1986 (ENR)\"、\"ISO 8879:1986 (WWW)\"でなければなりません"
+
+msgid "parameter before LCNMSTRT must be NAMING not %1"
+msgstr "LCNSTRTの前の変数は %1 ではなく、NAMINGでなければなりません"
+
+msgid ""
+"unexpected entity end in SGML declaration: only %1, S separators and "
+"comments allowed"
+msgstr ""
+"SGML宣言内に予期せぬ実体の終端: 可能なのは %1、S区切り子とコメントだけです"
+
+msgid "%1 invalid: only %2 and parameter separators allowed"
+msgstr "%1 は不正: %2 と変数区切り子だけが可能"
+
+msgid "magnitude of %1 too big"
+msgstr "%1 の大きさが大きすぎます"
+
+msgid ""
+"character %1 is not significant in the reference concrete syntax and so "
+"cannot occur in a literal in the SGML declaration except as the replacement "
+"of a character reference"
+msgstr ""
+"文字 %1 は参照具象構文内では意味がないので文字参照の代替とする場合を除いて"
+"SGML宣言内のリテラル内に含めることはできません"
+
+msgid "%1 is not a valid syntax reference character number"
+msgstr "%1 は適切な構文参照文字番号ではありません"
+
+msgid "a parameter entity reference cannot occur in an SGML declaration"
+msgstr "変数実体参照をSGML宣言内に含めることはできません"
+
+msgid "cannot continue because of previous errors"
+msgstr "前のエラーのために続けることができません"
+
+msgid ""
+"SGML declaration cannot be parsed because the character set does not contain "
+"characters having the following numbers in ISO 646: %1"
+msgstr ""
+"文字セットがISO 646内の次の番号を含んでいないのでSGML宣言は解析不能です: %1"
+
+msgid ""
+"the specified character set is invalid because it does not contain the "
+"minimum data characters having the following numbers in ISO 646: %1"
+msgstr ""
+"ISO 646 内の次の番号の最小データ文字を含んでいないので指定された文字セットは"
+"不適切です: %1"
+
+msgid "character numbers declared more than once: %1"
+msgstr "文字番号は複数回宣言されました: %1"
+
+msgid "character numbers should have been declared UNUSED: %1"
+msgstr "文字番号は UNUSED として宣言されているべきです: %1"
+
+msgid "character numbers missing in base set: %1"
+msgstr "基本セット内に文字番号がありません: %1"
+
+msgid ""
+"characters in the document character set with numbers exceeding %1 not "
+"supported"
+msgstr "%1 を越える数の文書文字セット内の文字は未サポート"
+
+msgid "invalid formal public identifier %1: missing //"
+msgstr "不適切な公式公開識別子 %1: // がありません"
+
+msgid "invalid formal public identifier %1: no SPACE after public text class"
+msgstr "不適切な公式公開識別子 %1: 公開テキストクラスの後にSPACEがありません"
+
+msgid "invalid formal public identifier %1: invalid public text class"
+msgstr "不適切な公式公開識別子 %1: 不正な公開テキストクラス"
+
+msgid ""
+"invalid formal public identifier %1: public text language must be a name "
+"containing only upper case letters"
+msgstr ""
+"不適切な公式公開識別子 %1: 公開テキスト言語は大文字だけを含む名前でなければな"
+"りません"
+
+msgid ""
+"invalid formal public identifer %1: public text display version not "
+"permitted with this text class"
+msgstr ""
+"不適切な公式公開識別子 %1: 公式テキスト表示バージョンはこのテキストクラスでは"
+"許されていません"
+
+msgid "invalid formal public identifier %1: extra field"
+msgstr "不適切な公式公開識別子 %1: 余分なフィールド"
+
+msgid ""
+"public text class of public identifier in notation identifier must be "
+"NOTATION"
+msgstr ""
+"記述識別子内での公開識別子の公開テキストクラスは NOTATION でなければなりませ"
+"ん"
+
+msgid "base character set %1 is unknown"
+msgstr "基本文字セット %1 は不明です"
+
+msgid ""
+"delimiter set is ambiguous: %1 and %2 can be recognized in the same mode"
+msgstr "あいまいなデリミタセット: %1 と %2 は同じモードで認識されます"
+
+msgid ""
+"characters with the following numbers in the syntax reference character set "
+"are significant in the concrete syntax but are not in the document character "
+"set: %1"
+msgstr ""
+"構文参照文字セット内の次の番号の文字は具象構文内では意味がありますが文書文字"
+"セット内ではそうではありません: %1"
+
+msgid ""
+"there is no unique character in the document character set corresponding to "
+"character number %1 in the syntax reference character set"
+msgstr ""
+"構文参照文字セット内の文字番号 %1 に対する文書文字セット内には固有な文字はあ"
+"りません"
+
+msgid ""
+"there is no unique character in the internal character set corresponding to "
+"character number %1 in the syntax reference character set"
+msgstr ""
+"構文参照文字セット内の文字番号 %1 に対する内部文字セット内には固有な文字はあ"
+"りません"
+
+msgid ""
+"the character with number %1 in ISO 646 is significant but has no "
+"representation in the syntax reference character set"
+msgstr ""
+"ISO 646 内の番号 %1 の文字は重要ですが構文参照文字セット内で表現されていませ"
+"ん"
+
+msgid "capacity set %1 is unknown"
+msgstr "不明なキャパシティセット %1"
+
+msgid "capacity %1 already specified"
+msgstr "キャパシティ %1 は既に指定されています"
+
+msgid "value of capacity %1 exceeds value of TOTALCAP"
+msgstr "キャパシティ値 %1 は TOTALCAP 値を越えています"
+
+msgid "syntax %1 is unknown"
+msgstr "不明な構文 %1"
+
+msgid "UCNMSTRT must have the same number of characters as LCNMSTRT"
+msgstr "UCNMSTRT は LCNMSTRT と同数の文字を持っていなければなりません"
+
+msgid "UCNMCHAR must have the same number of characters as LCNMCHAR"
+msgstr "UCNMCHAR は LCNMCHAR と同数の文字を持っていなければなりません"
+
+msgid ""
+"number of open subdocuments exceeds quantity specified for SUBDOC parameter "
+"in SGML declaration (%1)"
+msgstr ""
+"開いた副文書数がSGML宣言(%1)内のSUBDOC変数について指定された値を越えています"
+
+msgid "entity %1 declared SUBDOC, but SUBDOC NO specified in SGML declaration"
+msgstr ""
+"実体 %1 はSUBDOCを宣言していますがSGML宣言内でSUBDOC NOが指定されています"
+
+msgid ""
+"a parameter entity referenced in a parameter separator must end in the same "
+"declaration"
+msgstr "変数区切り子内の変数実体参照は同じ宣言内で終っていなければなりません"
+
+msgid "reference to non-existent ID %1"
+msgstr "存在しないID %1への参照"
+
+msgid "generic identifier %1 used in DTD but not defined"
+msgstr "一般識別子 %1 はDTD内で使用されていますが未定義です"
+
+msgid "%1 not finished but document ended"
+msgstr "%1 は終っていないのに文書は終端です"
+
+msgid "cannot continue with subdocument because of previous errors"
+msgstr "前のエラーのために副文書について続けることができません"
+
+msgid "no document type declaration; will parse without validation"
+msgstr "文書型宣言がないので妥当性の検証なしに解析"
+
+msgid ""
+"no internal or external document type declaration subset; will parse without "
+"validation"
+msgstr "内、外部とも文書型宣言サブセットがないので妥当性の検証なしに解析"
+
+msgid "this is not an SGML document"
+msgstr "SGML文書ではありません"
+
+msgid ""
+"length of start-tag before interpretation of literals must not exceed TAGLEN "
+"(%1)"
+msgstr "リテラルを解釈する前に開始タグ長がTAGLEN(%1)を越えました"
+
+msgid ""
+"a parameter entity referenced in a token separator must end in the same group"
+msgstr ""
+"トークン区切り子内の変数実体参照は同グループ内で終っていなければなりません"
+
+msgid ""
+"the following character numbers are shunned characters that are not "
+"significant and so should have been declared UNUSED: %1"
+msgstr ""
+"次の文字番号は重要でないエスケープ文字なのでUNUSEDとして宣言するべきでしょ"
+"う: %1"
+
+msgid ""
+"there is no unique character in the specified document character set "
+"corresponding to character number %1 in ISO 646"
+msgstr ""
+"ISO 646内の文字番号 %1 に対応する指定文書文字セット内に固有な文字はありません"
+
+msgid "length of attribute value must not exceed LITLEN less NORMSEP (-%1)"
+msgstr "属性値長はNORMSEP(-%1)よりも長く、LITLENより短かくなければなりません"
+
+msgid ""
+"length of tokenized attribute value must not exceed LITLEN less NORMSEP (-%1)"
+msgstr ""
+"トークン化属性値長はNORMSEP(-%1)より長く、LITLENより短くなければなりません"
+
+msgid ""
+"concrete syntax scope is INSTANCE but value of %1 quantity is less than "
+"value in reference quantity set"
+msgstr ""
+"具象構文スコープはINSTANCEですが %1 quantity の値は参照量セット内の値よりも小"
+"さくなっています"
+
+msgid ""
+"public text class of formal public identifier of base character set must be "
+"CHARSET"
+msgstr ""
+"公式公開識別子の基本文字セットの公開テキストクラスはCHARSETでなければなりませ"
+"ん"
+
+msgid ""
+"public text class of formal public identifier of capacity set must be "
+"CAPACITY"
+msgstr ""
+"公式公開識別子のキャパシティセットの公開テキストクラスはCAPACITYでなければな"
+"りません"
+
+msgid ""
+"public text class of formal public identifier of concrete syntax must be "
+"SYNTAX"
+msgstr ""
+"具象構文の公式公開識別子の公開テキストクラスはSYNTAXでなければなりません"
+
+msgid "when there is an MSOCHAR there must also be an MSICHAR"
+msgstr "MSOCHARがあるなら同様にMSICHARもないといけません"
+
+msgid ""
+"character number %1 in the syntax reference character set was specified as a "
+"character to be switched but is not a markup character"
+msgstr ""
+"構文参照文字セット内の文字番号 %1 はマークアップ文字ではないのにその種の文字"
+"に交換されるべきものとして指定されました"
+
+msgid ""
+"character number %1 was specified as a character to be switched but is not "
+"in the syntax reference character set"
+msgstr ""
+"構文参照文字セット内の文字番号 %1 は構文参照文字セットではないのにその種の文"
+"字に交換されるべきものとして指定されました"
+
+#, fuzzy
+msgid ""
+"character numbers %1 in the document character set have been assigned the "
+"same meaning, but this is the meaning of a significant character"
+msgstr ""
+"文書文字セット内の文字番号 %1 は重要文字の意味を持ちますが、同じ意味に割当て"
+"られています"
+
+msgid "character number %1 assigned to more than one function"
+msgstr "文字番号 %1 は一つ以上の機能に割当てられています"
+
+msgid "%1 is already a function name"
+msgstr "既に使われている関数名 %1"
+
+msgid ""
+"characters with the following numbers in ISO 646 are significant in the "
+"concrete syntax but are not in the document character set: %1"
+msgstr ""
+"ISO 646 内の次の番号の文字は文書文字セット内にはありませんが具象構文内で重要"
+"なものとされています: %1"
+
+msgid "general delimiter %1 consists solely of function characters"
+msgstr "一般デリミタ %1 は関数文字のみで構成されます"
+
+msgid "letters assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr ""
+"文字はLCNMCHAR、UCNMCHAR、LCNMSTARTあるいはUCNMSTARTに割当てられます: %1"
+
+msgid "digits assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr ""
+"ディジットはLCNMCHAR、UCNMCHAR、LCNMSTRTあるいはUCNMSTRTに割当てられます: %1"
+
+msgid ""
+"character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or "
+"UCNMSTRT because it is RE"
+msgstr ""
+"文字番号 %1 はREなのでLCNMCHAR、UCNMCHAR、LCNMSTRT、UCNMSTRTには割当てられま"
+"せん"
+
+msgid ""
+"character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or "
+"UCNMSTRT because it is RS"
+msgstr ""
+"文字番号 %1 はRSなのでLCNMCHAR、UCNMCHAR、LCNMSTRT、UCNMSTRTには割当てられま"
+"せん"
+
+msgid ""
+"character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or "
+"UCNMSTRT because it is SPACE"
+msgstr ""
+"文字番号 %1 はSPACEなのでLCNMCHAR、UCNMCHAR、LCNMSTRT、UCNMSTRTには割当てられ"
+"ません"
+
+msgid ""
+"separator characters assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr "区切り子文字をLCNMCHAR、UCNMCHAR、LCNMSTRT、UCNMSTRTに割当てます: %1"
+
+msgid ""
+"character number %1 cannot be switched because it is a Digit, LC Letter or "
+"UC Letter"
+msgstr "文字番号 %1 はディジット、LC文字あるいはUC文字なので交換できません"
+
+#, fuzzy
+msgid "pointless for number of characters to be 0"
+msgstr "文字の番号が何も差し示していない場合は 0 になります"
+
+msgid ""
+"%1 cannot be the replacement for a reference reserved name because it is "
+"another reference reserved name"
+msgstr ""
+"%1 は他の確保された名前参照なので確保された名前参照に対する代替にはなりえませ"
+"ん"
+
+msgid ""
+"%1 cannot be the replacement for a reference reserved name because it is the "
+"replacement of another reference reserved name"
+msgstr ""
+"%1 は他の確保された名前参照の代替なので確保された名前に対する代替にはなりえま"
+"せん"
+
+msgid "replacement for reserved name %1 already specified"
+msgstr "確保された名前 %1 に対する代替は既に指定されています"
+
+msgid "%1 is not a valid name in the declared concrete syntax"
+msgstr "名前 %1 は宣言された具象構文内では不適切です"
+
+msgid ""
+"%1 is not a valid short reference delimiter because it has more than one B "
+"sequence"
+msgstr "短縮参照デリミタ %1 は一つ以上のBシーケンスを持つので不適切です"
+
+msgid ""
+"%1 is not a valid short reference delimiter because it is adjacent to a "
+"character that can occur in a blank sequence"
+msgstr ""
+"短縮参照デリミタ %1 は空白シーケンス内に存在しうる文字に隣接しているので不適"
+"切です"
+
+msgid "length of delimiter %1 exceeds NAMELEN (%2)"
+msgstr "デリミタ長 %1 はNAMELEN(%2)を越えています"
+
+msgid "length of reserved name %1 exceeds NAMELEN (%2)"
+msgstr "確保された名前長 %1 はNAMELEN(%2)を越えています"
+
+msgid ""
+"character numbers assigned to both LCNMCHAR or UCNMCHAR and LCNMSTRT or "
+"UCNMSTRT: %1"
+msgstr ""
+"LCNMCHARあるいはUCNMCHARとLCNMSTRTあるいはUCNMSTRT両方に割当てられた文字数: %"
+"1"
+
+msgid ""
+"when the concrete syntax scope is INSTANCE the syntax reference character "
+"set of the declared syntax must be the same as that of the reference "
+"concrete syntax"
+msgstr ""
+"具象構文スコープがINSTANCEであるときは宣言された構文の構文参照文字セットは参"
+"照具象構文のそれと同じでなければなりません"
+
+msgid ""
+"end-tag minimization should be O for element with declared content of EMPTY"
+msgstr "終了タグ最小化は空の宣言内容の要素について0であるべきです"
+
+msgid ""
+"end-tag minimization should be O for element %1 because it has CONREF "
+"attribute"
+msgstr "CONREF属性を持つので、終了タグ最小化は要素 %1 について0であるべきです"
+
+msgid "element %1 has a declared content of EMPTY and a CONREF attribute"
+msgstr "要素 %1 は宣言されたEMPTY内容とCONREF属性を持っています"
+
+msgid "element %1 has a declared content of EMPTY and a NOTATION attribute"
+msgstr "要素 %1 は宣言されたEMPTY内容とNOTATION属性を持っています"
+
+msgid ""
+"declared value of data attribute cannot be ENTITY, ENTITIES, ID, IDREF, "
+"IDREFS or NOTATION"
+msgstr ""
+"宣言されたデータ属性値はENTITY、ENTITIES、ID、IDREF、IDREFSあるいはNOTATIONに"
+"はなりえません"
+
+msgid "default value of data attribute cannot be CONREF or CURRENT"
+msgstr "データ属性のデフォルト値はCONREFあるいはCURRENTにはなりえません"
+
+msgid "number of attribute names and name tokens (%1) exceeds ATTCNT (%2)"
+msgstr "属性名と名前トークン(%1)の数はATTCNT(%2)を越えています"
+
+msgid ""
+"if the declared value is ID the default value must be IMPLIED or REQUIRED"
+msgstr ""
+"もし宣言値がIDならデフォルト値はIMPLIEDあるいはREQUIREDでなければなりません"
+
+msgid ""
+"the attribute definition list already declared attribute %1 as the ID "
+"attribute"
+msgstr "属性定義リストは既に属性 %1 をID属性として宣言しています"
+
+msgid ""
+"the attribute definition list already declared attribute %1 as the NOTATION "
+"attribute"
+msgstr "属性定義リストは既に属性 %1 をNOTATION属性として宣言しています"
+
+msgid "token %1 occurs more than once in attribute definition list"
+msgstr "トークン%1 は属性定義リスト内で一つ以上存在しています"
+
+msgid "no attributes defined for notation %1"
+msgstr "記述 %1 に対しては何も属性が定義されていません"
+
+msgid "notation %1 for entity %2 undefined"
+msgstr "記述 %1 (実体 %2 に対する、)は未定義です"
+
+msgid "entity %1 undefined in short reference map %2"
+msgstr "実体 %1 は短縮参照マップ %2 内では未定義です"
+
+msgid "notation %1 is undefined but had attribute definition"
+msgstr "記述 %1 は属性定義を持ちますが未定義です"
+
+msgid ""
+"length of interpreted parameter literal in bracketed text plus the length of "
+"the bracketing delimiters must not exceed LITLEN (%1)"
+msgstr ""
+"囲まれたテキスト内の解釈された変数リテラルと囲んでいるデリミタの合計長は"
+"LITLEN(%1)を越えてはいけません"
+
+msgid ""
+"length of rank stem plus length of rank suffix must not exceed NAMELEN (%1)"
+msgstr "ランクステムとランク接尾辞の合計長はNAMELEN(%1)を越えてはいけません"
+
+msgid "document instance must start with document element"
+msgstr "文書インスタンスは文書要素で始まっていなければなりません"
+
+msgid "content model nesting level exceeds GRPLVL (%1)"
+msgstr "内容モデルの入れ子レベルがGRPLVL(%1)を越えています"
+
+msgid "grand total of content tokens exceeds GRPGTCNT (%1)"
+msgstr "内容トークンの総計がGRPGTCNT(%1)を越えています"
+
+msgid "unclosed start-tag requires SHORTTAG YES"
+msgstr "閉じていない開始タグを使うにはSHORTTAG YESが必要です"
+
+msgid "NET-enabling start-tag requires SHORTTAG YES"
+msgstr "NET可能な開始タグを使うにはSHORTTAG YESが必要です"
+
+msgid "unclosed end-tag requires SHORTTAG YES"
+msgstr "閉じていない終了タグを使うにはSHORTTAG YESが必要です"
+
+msgid "DTDs other than base allowed only if CONCUR YES or EXPLICIT YES"
+msgstr ""
+"baseより他にDTDを使うのはCONCUR YESあるいはEXPLICIT YESでないとだめです"
+
+#, fuzzy
+msgid "end of entity other than document entity after document element"
+msgstr "文書要素の後の文書実体より他の実体の終端"
+
+msgid "%1 declaration illegal after document element"
+msgstr "文書要素の後の %1 宣言は不正です"
+
+msgid "character reference illegal after document element"
+msgstr "文書要素の後の文字参照は不正です"
+
+msgid "entity reference illegal after document element"
+msgstr "文書要素の後の実体参照は不正です"
+
+msgid "marked section illegal after document element"
+msgstr "文書要素の後のマーク付けセクションは不正です"
+
+msgid ""
+"the %1 occurrence of %2 in the content model for %3 cannot be excluded at "
+"this point because it is contextually required"
+msgstr ""
+"%1 (%2の、%3 に対する内容モデル内)は文脈的に必要なのでここでは省略できません"
+
+msgid ""
+"the %1 occurrence of %2 in the content model for %3 cannot be excluded "
+"because it is neither inherently optional nor a member of an OR group"
+msgstr ""
+"%1 (%2の、%3 に対する内容モデル内)は文脈的に必要なのでここでは省略できません"
+
+msgid ""
+"an attribute value specification must be an attribute value literal unless "
+"SHORTTAG YES is specified"
+msgstr ""
+"属性値指定はSHORTTAG YESが未指定であれば属性値リテラルでなければなりません"
+
+msgid ""
+"value cannot be specified both for notation attribute and content reference "
+"attribute"
+msgstr "記述属性、内容参照属性どちらに対しても値は指定できません"
+
+msgid "notation %1 already defined"
+msgstr "記述 %1 は既に定義済みです"
+
+msgid "short reference map %1 already defined"
+msgstr "短縮参照マップ %1 は既に定義済みです"
+
+msgid "first defined here"
+msgstr "ここで最初に定義されています"
+
+msgid "general delimiter role %1 already defined"
+msgstr "一般デリミタロール %1 は既に定義済みです"
+
+msgid "number of ID references in start-tag must not exceed GRPCNT (%1)"
+msgstr "開始タグ内のID参照番号はGRPCNT(%1)を越えてはいけません"
+
+msgid ""
+"number of entity names in attribute specification list must not exceed "
+"GRPCNT (%1)"
+msgstr "属性指定リスト内の実体名番号はGRPCNT(%1)を越えてはいけません"
+
+msgid ""
+"normalized length of attribute specification list must not exceed ATTSPLEN (%"
+"1); length was %2"
+msgstr ""
+"属性指定リストの正規化長はATTSPLEN(%1)を越えてはいけません; 長さは %2 でした"
+
+msgid "short reference delimiter %1 already specified"
+msgstr "短縮参照デリミタ %1 は既に指定済みです"
+
+msgid ""
+"single character short references were already specified for character "
+"numbers: %1"
+msgstr "単一文字短縮参照は既に文字番号 %1 に対して指定済みです"
+
+msgid "default entity used in entity attribute %1"
+msgstr "実体属性 %1 内で使われているデフォルト実体"
+
+msgid "reference to entity %1 uses default entity"
+msgstr "実体 %1 への参照はデフォルト実体を使用します"
+
+msgid "entity %1 in short reference map %2 uses default entity"
+msgstr "実体 %1 (短縮参照マップ %2 内)はデフォルト実体を使用します"
+
+msgid "no DTD %1 declared"
+msgstr "DTD %1 は宣言されていません"
+
+msgid "LPD %1 has neither internal nor external subset"
+msgstr "LPD %1 は内外部ともにサブセットを持ちません"
+
+msgid "element types have different link attribute definitions"
+msgstr "要素型は異なるリンク属性定義を持っています"
+
+msgid "link set %1 already defined"
+msgstr "リンクセット %1 は既に定義済みです"
+
+msgid "empty result attribute specification"
+msgstr "空の結果属性指定"
+
+msgid "no source element type %1"
+msgstr "要素型 %1 のソースがありません"
+
+msgid "no result element type %1"
+msgstr "要素型 %1 の結果がありません"
+
+msgid "end of document in LPD subset"
+msgstr "LPDサブセット内で文書の終端"
+
+msgid "%1 declaration not allowed in LPD subset"
+msgstr "%1 宣言はLPDサブセット内では使えません"
+
+msgid "ID link set declaration not allowed in simple link declaration subset"
+msgstr "IDリンクセット宣言は単一リンク宣言サブセット内では使えません"
+
+msgid "link set declaration not allowed in simple link declaration subset"
+msgstr "リンクセット宣言は単純リンク宣言サブセット内では使えません"
+
+msgid ""
+"attributes can only be defined for base document element (not %1) in simple "
+"link declaration subset"
+msgstr ""
+"属性は単純リンク宣言サブセット内の基底文書要素 (%1 でなく)に対してのみ定義で"
+"きます"
+
+msgid "a short reference mapping declaration is allowed only in the base DTD"
+msgstr "短縮参照マッピング宣言は基底DTD内でのみ可能です"
+
+msgid "a short reference use declaration is allowed only in the base DTD"
+msgstr "宣言を使用する短縮参照は基底DTD内でのみ可能です"
+
+msgid "default value of link attribute cannot be CURRENT or CONREF"
+msgstr "リンク属性のデフォルト値はCURRENTあるいはCONREFにはなりえません"
+
+msgid ""
+"declared value of link attribute cannot be ID, IDREF, IDREFS or NOTATION"
+msgstr ""
+"リンク属性の宣言値はID、IDREF、IDREFS、あるいはNOTATIONにはなりえません"
+
+msgid "only fixed attributes can be defined in simple LPD"
+msgstr "単純LPD内では固定属性のみを定義できます"
+
+msgid "only one ID link set declaration allowed in an LPD subset"
+msgstr "LPDサブセット内で可能なのはただ一つのIDリンクセット宣言だけです"
+
+msgid "no initial link set defined for LPD %1"
+msgstr "LPD %1 に対して初期リンクセットが未定義です"
+
+msgid "notation %1 not defined in source DTD"
+msgstr "記述 %1 はソースDTD内では未定義です"
+
+#, fuzzy
+msgid "result document type in simple link specification must be implied"
+msgstr "単純リンク指定内での結果文書型は暗示されていなければなりません"
+
+msgid "simple link requires SIMPLE YES"
+msgstr "単純リンクにはSIMPLE YESが必要です"
+
+msgid "implicit link requires IMPLICIT YES"
+msgstr "省略リンクにはIMPLICIT YESが必要です"
+
+msgid "explicit link requires EXPLICIT YES"
+msgstr "明示リンクにはEXPLICIT YESが必要です"
+
+msgid "LPD not allowed before first DTD"
+msgstr "LPDは最初のDTDの前におくことはできません"
+
+msgid "DTD not allowed after an LPD"
+msgstr "DTDはLPDの後におくことはできません"
+
+msgid "definition of general entity %1 is unstable"
+msgstr "一般実体定義 %1 は不安定です"
+
+msgid "definition of parameter entity %1 is unstable"
+msgstr "変数実体定義 %1 は不安定です"
+
+msgid ""
+"multiple link rules for ID %1 but not all have link attribute specifications"
+msgstr ""
+"ID %1 に対してリンクルールが重複していますが中にリンク属性指定を持っていない"
+"ものがあります"
+
+msgid ""
+"multiple link rules for element type %1 but not all have link attribute "
+"specifications"
+msgstr ""
+"要素型 %1 に対してリンクルールが重複していますが中にリンク属性指定を持ってい"
+"ないものがあります"
+
+msgid "link type %1 does not have a link set %2"
+msgstr "リンク型 %1 はリンクセット %2 を持ちません"
+
+msgid "link set use declaration for simple link process"
+msgstr "リンクセットは単純リンク処理のための宣言を使います"
+
+msgid "no link type %1"
+msgstr "リンク型 %1 はありません"
+
+msgid "both document type and link type %1"
+msgstr "両方の 文書、リンク型 %1"
+
+msgid "link type %1 already defined"
+msgstr "リンク型 %1 は既に定義済みです"
+
+msgid "document type %1 already defined"
+msgstr "文書型 %1 は既に定義済みです"
+
+msgid "link set %1 used in LPD but not defined"
+msgstr "リンクセット %1 はLPD内で使用されていますが未定義です"
+
+msgid "#IMPLIED already linked to result element type %1"
+msgstr "#IMPLIEDは既に結果要素型 %1 へリンク済みです"
+
+msgid ""
+"number of active simple link processes exceeds quantity specified for SIMPLE "
+"parameter in SGML declaration (%1)"
+msgstr ""
+"アクティブな単純リンク処理数がSGML宣言(%1)内でSIMPLE変数に対して指定された数"
+"を越えています"
+
+msgid "only one chain of explicit link processes can be active"
+msgstr "明示的なリンク処理のチェインは一つだけしかアクティブにできません"
+
+msgid ""
+"source document type name for link type %1 must be base document type since "
+"EXPLICIT YES 1"
+msgstr ""
+"EXPLICIT YES が 1 なのでリンク型 %1 に対するソース文書型名は基底文書型でなけ"
+"ればなりません"
+
+msgid "only one implicit link process can be active"
+msgstr "暗黙のリンク処理は一つだけしかアクティブにできません"
+
+msgid ""
+"sorry, link type %1 not activated: only one implicit or explicit link "
+"process can be active (with base document type as source document type)"
+msgstr ""
+"申し訳ありませんが、リンク型 %1 はアクティブになっていません: 暗黙、あるいは"
+"明示的リンク処理は(基底文書型がソース文書型であるときに)一つだけアクティブに"
+"できます"
+
+msgid "name missing after name group in entity reference"
+msgstr "実体参照内で新規グループの後の名前がありません"
+
+msgid ""
+"source document type name for link type %1 must be base document type since "
+"EXPLICIT NO"
+msgstr ""
+"EXPLICIT NOであるので、リンク型 %1 に対するソース文書型名は基底文書型でなけれ"
+"ばなりません"
+
+msgid "link process must be activated before base DTD"
+msgstr "リンク処理は基底DTDより前にアクティブになっていないといけません"
+
+msgid "unexpected entity end while starting second pass"
+msgstr "第二段階を開始する間に予期せぬ実体の終端"
+
+#, fuzzy
+msgid ""
+"type %1 of element with ID %2 not associated element type for applicable "
+"link rule in ID link set"
+msgstr ""
+"型 %1 (ID %2 の要素の、)はIDリンクセット内の利用可能なリンクルールに対して要"
+"素型を関連づけていません"
+
+msgid "DATATAG feature not implemented"
+msgstr "TATATAG機能は実装されていません"
+
+msgid ""
+"generic identifier specification missing after document type specification "
+"in start-tag"
+msgstr "開始タグ内の文書型指定の後の一般識別子指定がありません"
+
+msgid ""
+"generic identifier specification missing after document type specification "
+"in end-tag"
+msgstr "終了タグ内の文書型指定の後の一般識別子指定がありません"
+
+msgid "a NET-enabling start-tag cannot include a document type specification"
+msgstr "NET有効な開始タグに文書型指定を含めることはできません"
+
+msgid "DTD did not contain element declaration for document type name"
+msgstr "DTDは文書型名に対する要素宣言を含んでいませんでした"
+
+msgid "invalid default SGML declaration"
+msgstr "不適切なデフォルトSGML宣言"
+
+msgid ""
+"reference to entity %1 for which no system identifier could be generated"
+msgstr "実体 %1 への参照するシステム識別子を生成できませんでした"
+
+msgid "entity was defined here"
+msgstr "実体はここで定義されました"
+
+msgid "content model is mixed but does not allow #PCDATA everywhere"
+msgstr "制御モデルが混在していますが #PCDATAはどこでも許されていません"
+
+msgid "start or end of range must specify a single character"
+msgstr "領域の開始あるいは終端では一文字で指定しなければなりません"
+
+msgid ""
+"number of first character in range must not exceed number of second "
+"character in range"
+msgstr "領域内の最初の文字数は領域内の二番目の文字数を越えてはいけません"
+
+msgid "delimiter cannot be an empty string"
+msgstr "デリミタは空文字にできません"
+
+msgid "too many characters assigned same meaning with minimum literal"
+msgstr "最小リテラルについて同じ意味に割当てている文字が多すぎます"
+
+msgid "earlier reference to entity %1 used default entity"
+msgstr "実体 %1 へのより前の参照はデフォルト実体を使っています"
+
+msgid "empty start-tag"
+msgstr "空の開始タグ"
+
+msgid "empty end-tag"
+msgstr "空の終了タグ"
+
+msgid "unused short reference map %1"
+msgstr "未使用の短縮参照マップ %1"
+
+msgid "unused parameter entity %1"
+msgstr "未使用の変数実体 %1"
+
+msgid "cannot generate system identifier for public text %1"
+msgstr "公開テキスト %1 に対する一般システム識別子を生成できません"
+
+msgid "cannot generate system identifier for general entity %1"
+msgstr "一般実体 %1 に対する一般システム識別子を生成できません"
+
+msgid "cannot generate system identifier for parameter entity %1"
+msgstr "変数実体 %1 に対する一般システム識別子を生成できません"
+
+msgid "cannot generate system identifier for document type %1"
+msgstr "文書型 %1 に対する一般システム識別子を生成できません"
+
+msgid "cannot generate system identifier for link type %1"
+msgstr "リンク型 %1 に対する一般システム識別子を生成できません"
+
+msgid "cannot generate system identifier for notation %1"
+msgstr "記述 %1 に対する一般システム識別子を生成できません"
+
+msgid "element type %1 both included and excluded"
+msgstr "要素型 %1 はincludeかつexcludeされています"
+
+msgid "no document type declaration; implying %1"
+msgstr "文書型宣言がありません、%1 として解釈します"
+
+msgid "minimum data of AFDR declaration must be \"ISO/IEC 10744:1997\" not %1"
+msgstr ""
+"AFDR宣言の最小データは %1 ではなく、\"ISO/IEC 10744:1997\"でなければなりませ"
+"ん"
+
+msgid "AFDR declaration required before use of AFDR extensions"
+msgstr "AFDR宣言はAFDR拡張の使用の前で必要です"
+
+msgid ""
+"ENR extensions were used but minimum literal was not \"ISO 8879:1986 (ENR)\" "
+"or \"ISO 8879:1986 (WWW)\""
+msgstr ""
+"ENR拡張が使用されていますが最小リテラルは \"ISO 8879:1986 (ENR)\" あるいは "
+"\"ISO 8879:1986 (WWW)\"ではありませんでした"
+
+msgid "illegal numeric character reference to non-SGML character %1 in literal"
+msgstr "リテラル内で非SGML文字 %1 への不正な番号文字参照"
+
+msgid ""
+"cannot convert character reference to number %1 because description %2 "
+"unrecognized"
+msgstr "文字参照を番号 %1 へ変換できません(説明 %2 を理解不能なため)"
+
+msgid ""
+"cannot convert character reference to number %1 because character %2 from "
+"baseset %3 unknown"
+msgstr ""
+"文字参照を番号 %1 へ変換できません(不明な文字 %2 [基底セット %3 から、])"
+
+msgid ""
+"character reference to number %1 cannot be converted because of problem with "
+"internal character set"
+msgstr "内部文字セットの問題で文字参照から番号 %1 への変換はできません"
+
+msgid ""
+"cannot convert character reference to number %1 because character not in "
+"internal character set"
+msgstr ""
+"内部文字セット内に文字が存在しないため文字参照を番号 %1 へ変換できません"
+
+msgid ""
+"Web SGML adaptations were used but minimum literal was not \"ISO 8879:1986 "
+"(WWW)\""
+msgstr ""
+"ウェブSGML適合が使用されていますが最小リテラルは \"ISO 8879:1986 (WWW)\"では"
+"ありませんでした"
+
+msgid ""
+"token %1 can be value for multiple attributes so attribute name required"
+msgstr "トークン %1 は複合属性に対する値になりえるので属性名が必要です"
+
+msgid "length of hex number must not exceed NAMELEN (%1)"
+msgstr "十六進数値長はNAMELEN(%1)を越えてはいけません"
+
+msgid "CDATA declared content"
+msgstr "CDATA宣言内容"
+
+msgid "RCDATA declared content"
+msgstr "RCDATA宣言内容"
+
+msgid "inclusion"
+msgstr "inclusion"
+
+msgid "exclusion"
+msgstr "exclusion"
+
+msgid "NUMBER or NUMBERS declared value"
+msgstr "NUMBERあるいはNUMBERS宣言値"
+
+msgid "NAME or NAMES declared value"
+msgstr "NAMEあるいはNAMES宣言値"
+
+msgid "NUTOKEN or NUTOKENS declared value"
+msgstr "NUTOKENあるいはNUTOKENS宣言値"
+
+msgid "CONREF attribute"
+msgstr "CONREF属性"
+
+msgid "CURRENT attribute"
+msgstr "CURRENT属性"
+
+msgid "TEMP marked section"
+msgstr "TEMPマーク付きセクション"
+
+msgid "included marked section in the instance"
+msgstr "インスタンス内のマーク付きセクションがincludeされました"
+
+msgid "ignored marked section in the instance"
+msgstr "インスタンス内のマーク付きセクションが無視されました"
+
+msgid "RCDATA marked section"
+msgstr "RCDATAマーク付きセクション"
+
+msgid "processing instruction entity"
+msgstr "命令実体を処理中"
+
+msgid "bracketed text entity"
+msgstr "括弧付きテキスト実体"
+
+msgid "internal CDATA entity"
+msgstr "内部CDATA実体"
+
+msgid "internal SDATA entity"
+msgstr "内部SDATA実体"
+
+msgid "external CDATA entity"
+msgstr "外部CDATA実体"
+
+msgid "external SDATA entity"
+msgstr "外部SDATA実体"
+
+msgid "attribute definition list declaration for notation"
+msgstr "記述に対する属性定義リスト宣言"
+
+msgid "rank stem"
+msgstr "ランクステム"
+
+msgid "no system id specified"
+msgstr "システムID指定がありません"
+
+msgid "comment in parameter separator"
+msgstr "変数セパレー内にコメント"
+
+msgid "named character reference"
+msgstr "名前付き文字参照"
+
+msgid "AND group"
+msgstr "ANDグループ"
+
+msgid "attribute value not a literal"
+msgstr "属性値がリテラルではありません"
+
+msgid "attribute name missing"
+msgstr "属性名がみつかりません"
+
+msgid "element declaration for group of element types"
+msgstr "要素型のグループに対する要素宣言"
+
+msgid "attribute definition list declaration for group of element types"
+msgstr "要素型のグループに対する属性定義リスト宣言"
+
+msgid "empty comment declaration"
+msgstr "空のコメント宣言"
+
+msgid "S separator in comment declaration"
+msgstr "コメント宣言内のS区切り子"
+
+msgid "multiple comments in comment declaration"
+msgstr "コメント宣言内の複合コメント"
+
+msgid "no status keyword"
+msgstr "ステータスキーワードがありません"
+
+msgid "multiple status keywords"
+msgstr "複合ステータスキーワード"
+
+msgid "parameter entity reference in document instance"
+msgstr "文書インスタンス内の変数実体参照"
+
+msgid "element type minimization parameter"
+msgstr "要素型最小変数"
+
+msgid "reference not terminated by REFC delimiter"
+msgstr "参照がREFCデリミタで終っていません"
+
+msgid "#PCDATA not first in model group"
+msgstr "モデルグループ内の最初が #PCDATAではありません"
+
+msgid "#PCDATA in SEQ group"
+msgstr "SEQグループ内の #PCDATA"
+
+msgid "#PCDATA in nested model group"
+msgstr "入れ子モデルグループ内の #PCDATA"
+
+msgid "#PCDATA in model group that does not have REP occurrence indicator"
+msgstr "REP発生インディケータを持たない、モデルグループ内の #PCDATA"
+
+msgid "name group or name token group used connector other than OR"
+msgstr ""
+"名前グループあるいは名前トークングループがORでなくコネクタを使用していました"
+
+msgid "processing instruction does not start with name"
+msgstr "名前で開始されていない命令を処理中"
+
+msgid "S separator in status keyword specification in document instance"
+msgstr "文書インスタンス内のステータスキーワード指定内のS区切り子"
+
+msgid "reference to external data entity"
+msgstr "外部データ実体への参照"
+
+msgid "reference to external entity in attribute value"
+msgstr "属性値内の外部実体への参照"
+
+msgid "character %1 is the first character of a delimiter but occurred as data"
+msgstr "文字 %1 はデリミタの最初の文字ですがデータである可能性があります"
+
+msgid "SGML declaration was not implied"
+msgstr "SGML宣言が暗示されませんでした"
+
+msgid "marked section in internal DTD subset"
+msgstr "内部DTDサブセット内のマーク付きセクション"
+
+msgid "NET-enabling start-tag not immediately followed by null end-tag"
+msgstr "NET有効な開始タグのすぐ後にnull終了タグが続いていません"
+
+msgid "entity end in different element from entity reference"
+msgstr "実体参照からの異なる要素内の実体の終端"
+
+msgid "NETENABL IMMEDNET requires EMPTYNRM YES"
+msgstr "NETENABL IMMEDNETはEMPTYNRM YESを必要とします"
+
+msgid "reference to non-SGML character"
+msgstr "非SGML文字への参照"
+
+msgid "declaration of default entity"
+msgstr "デフォルト実体の宣言"
+
+msgid "reference to parameter entity in parameter separator in internal subset"
+msgstr "内部サブセット内の変数区切り子内の変数実体への参照"
+
+msgid "reference to parameter entity in token separator in internal subset"
+msgstr "内部サブセット内のトークン区切り子内の変数実体への参照"
+
+msgid "reference to parameter entity in parameter literal in internal subset"
+msgstr "内部サブセット内の変数リテラル内の変数実体への参照"
+
+msgid "cannot generate system identifier for SGML declaration reference"
+msgstr "SGML宣言参照に対してシステム識別子を生成できません"
+
+msgid ""
+"public text class of formal public identifier of SGML declaration must be SD"
+msgstr "SGML宣言の公式公開識別子の公開テキストクラスはSDでなければなりません"
+
+msgid ""
+"SGML declaration reference was used but minimum literal was not \"ISO "
+"8879:1986 (WWW)\""
+msgstr ""
+"SGML宣言参照が使用されていますが最小リテラルは \"ISO 8879:1986 (WWW)\"ではあ"
+"りませんでした"
+
+msgid "member of model group containing #PCDATA has occurrence indicator"
+msgstr ""
+"モデルグループのメンバーはインディケータを持ちうる #PCDATA を含んでいます"
+
+msgid "member of model group containing #PCDATA is a model group"
+msgstr "モデルグループのメンバーはモデルグループである、#PCDATA を含んでいます"
+
+msgid "reference to non-predefined entity"
+msgstr "定義済みでない実体への参照"
+
+msgid "reference to external entity"
+msgstr "外部実体への参照"
+
+msgid "declaration of default entity conflicts with IMPLYDEF ENTITY YES"
+msgstr "デフォルト実体の宣言はIMPLYDEF ENTITY YESと矛盾します"
+
+msgid "parsing with respect to more than one active doctype not supported"
+msgstr "二つ以上のアクティブな文書型についての解析はサポートされていません"
+
+msgid "cannot have active doctypes and link types at the same time"
+msgstr "アクティブな文書型とリンク型を同時に持つことはできません"
+
+msgid ""
+"number of concurrent document instances exceeds quantity specified for "
+"CONCUR parameter in SGML declaration (%1)"
+msgstr ""
+"同時文書インスタンスがSGML宣言(%1)内のCONCUR変数に対して指定された値を越えて"
+"います"
+
+msgid "datatag group can only be specified in base document type"
+msgstr "データタググループは基底文書型内でのみ指定できます"
+
+msgid "element not in the base document type can't have an empty start-tag"
+msgstr "基底文書型外の要素は空開始タグを持てません"
+
+msgid "element not in base document type can't have an empty end-tag"
+msgstr "基底文書型外の要素は空終了タグを持てません"
+
+#, fuzzy
+msgid "immediately recursive element"
+msgstr "すぐの再帰要素"
+
+msgid "invalid URN %1: missing \":\""
+msgstr "不正なURN %1: \":\" がありません"
+
+msgid "invalid URN %1: missing \"urn:\" prefix"
+msgstr "不正なURN %1: \"urn:\"接頭辞がありません"
+
+msgid "invalid URN %1: invalid namespace identifier"
+msgstr "不正なURN %1: 不適切な名前空間識別子"
+
+msgid "invalid URN %1: invalid namespace specific string"
+msgstr "不正なURN %1: 不適切な名前空間識別子文字列"
+
+msgid "invalid URN %1: extra field"
+msgstr "不正なURN %1: 余分なフィールド"
+
+msgid ""
+"prolog can't be omitted unless CONCUR NO and LINK EXPLICIT NO and either "
+"IMPLYDEF ELEMENT YES or IMPLYDEF DOCTYPE YES"
+msgstr ""
+"CONCUR NOとLINK EXPLICIT NOとIMPLYDEF ELEMENT YESあるいはIMPLYDEF DOCTYPE YES"
+"がありませんではプロローグは省略できません"
+
+msgid "can't determine name of #IMPLIED document element"
+msgstr "#IMPLIED文書要素の名前を特定できません"
+
+msgid "can't use #IMPLICIT doctype unless CONCUR NO and LINK EXPLICIT NO"
+msgstr ""
+"CONCUR NOとLINK EXPLICIT NOがありませんでは #IMPLICIT文書型を使うことはできま"
+"せん"
+
+#, fuzzy
+msgid "Sorry, #IMPLIED doctypes not implemented"
+msgstr "申し分けありませんが #IMPLICIT文書型は実装されていません"
+
+msgid "reference to DTD data entity ignored"
+msgstr "DTDデータ実体への参照は無視されます"
+
+msgid "notation %1 for parameter entity %2 undefined"
+msgstr "記述 %1 (変数実体 %2 に対する、)は未定義です"
+
+msgid "notation %1 for external subset undefined"
+msgstr "外部サブセットに対する記述 %1 は未定義です"
+
+msgid "attribute %1 can't be redeclared"
+msgstr ""
+
+#, fuzzy
+msgid "#IMPLICIT attributes have already been specified for notation %1"
+msgstr "記述 %1 に対しては何も属性が定義されていません"
+
+#, fuzzy
+msgid ""
+"a name group is not allowed in a parameter entity reference in a start tag"
+msgstr "開始タグ内の一般実体参照内では名前グループは禁止されています"
+
+#, fuzzy
+msgid ""
+"name group in a parameter entity reference in an end tag (SGML forbids them "
+"in start tags)"
+msgstr "開始タグ内の一般実体参照内では名前グループは禁止されています"
+
+#, fuzzy
+msgid "if the declared value is NOTATION a default value of CONREF is useless"
+msgstr ""
+"もし宣言値がIDならデフォルト値はIMPLIEDあるいはREQUIREDでなければなりません"
+
+#, fuzzy
+msgid "Sorry, #ALL and #IMPLICIT content tokens not implemented"
+msgstr "申し分けありませんが #IMPLICIT文書型は実装されていません"
+
+msgid "delimiter "
+msgstr "デリミタ "
+
+msgid "digit"
+msgstr "ディジット"
+
+msgid "name start character"
+msgstr "名前開始文字"
+
+msgid "sepchar"
+msgstr "区切り子文字"
+
+msgid "separator"
+msgstr "区切り子"
+
+msgid "name character"
+msgstr "名前文字"
+
+msgid "data character"
+msgstr "データ文字"
+
+msgid "minimum data character"
+msgstr "最小データ文字"
+
+msgid "significant character"
+msgstr "明示文字"
+
+msgid "record end character"
+msgstr "レコード終端文字"
+
+msgid "record start character"
+msgstr "レコード開始文字"
+
+msgid "space character"
+msgstr "スペース文字"
+
+msgid ", "
+msgstr ","
+
+msgid "-"
+msgstr "-"
+
+msgid "parameter literal"
+msgstr "変数リテラル"
+
+msgid "data tag group"
+msgstr "データタググループ"
+
+msgid "model group"
+msgstr "モデルグループ"
+
+msgid "data tag template group"
+msgstr "データタグテンプレートグループ"
+
+msgid "name"
+msgstr "名前"
+
+msgid "name token"
+msgstr "名前トークン"
+
+msgid "element token"
+msgstr "要素トークン"
+
+msgid "inclusions"
+msgstr "inclusions"
+
+msgid "exclusions"
+msgstr "exclusions"
+
+msgid "minimum literal"
+msgstr "最小リテラル"
+
+msgid "attribute value literal"
+msgstr "属性値リテラル"
+
+msgid "system identifier"
+msgstr "システム識別子"
+
+msgid "number"
+msgstr "数字"
+
+msgid "attribute value"
+msgstr "属性値"
+
+msgid "name of capacity"
+msgstr "キャパシティ名"
+
+msgid "name of general delimiter role"
+msgstr "一般デリミタロール名"
+
+msgid "reference reserved name"
+msgstr "確保された名前の参照"
+
+msgid "name of quantity"
+msgstr "quantity名"
+
+msgid "entity end"
+msgstr "実体の終端"
+
+msgid "short reference delimiter"
+msgstr "短縮参照デリミタ"
+
+msgid "error reading %1 (%2)"
+msgstr "%1 (%2)を読み込み中にエラー"
+
+msgid "cannot open %1 (%2)"
+msgstr "%1 (%2)を開けません"
+
+msgid "error closing %1 (%2)"
+msgstr "%1 (%2)を閉じている間にエラー"
+
+msgid "error seeking on %1 (%2)"
+msgstr "%1 (%2)を検索中にエラー"
+
+msgid "invalid filename %1"
+msgstr "不適切なファイル名 %1"
+
+msgid "error reading file descriptor %1 (%2)"
+msgstr "ファイルデスクリプタ %1 (%2)を読み込み中にエラー"
+
+msgid "error seeking on file descriptor %1 (%2)"
+msgstr "ファイルデスクリプタ %1 (%2)を検索中にエラー"
+
+msgid "%1 is not a valid file descriptor number"
+msgstr "%1 は不適切なファイルディスクリプタ番号です"
+
+msgid "cannot find %1; tried %2"
+msgstr "%1 をみつけられません、%2 を試します"
+
+msgid "error seeking %1 (%2)"
+msgstr "%1 (%2)を検索中にエラー"
+
+msgid "empty host in HTTP URL %1"
+msgstr "HTTP URL %1内に空のホスト"
+
+msgid "uncompletable relative HTTP URL %1"
+msgstr "不完全な相対HTTP URL %1"
+
+msgid "empty port number in HTTP URL %1"
+msgstr "HTTP URL %1内に空のポート番号"
+
+msgid "invalid port number in HTTP URL %1"
+msgstr "HTTP URL %1内に不適切なポート番号"
+
+msgid "host %1 not found"
+msgstr "ホスト %1 がみつかりません"
+
+msgid "could not resolve host %1 (try again later)"
+msgstr "ホスト %1の名前解決ができませんでした(後で再度試します)"
+
+msgid "could not resolve host %1 (unrecoverable error)"
+msgstr "ホスト %1の名前解決ができませんでした(回復不能なエラー)"
+
+msgid "no address record for host name %1"
+msgstr "ホスト名 %1 に対するアドレスレコードがありません"
+
+msgid "could not resolve host %1 (%2)"
+msgstr "ホスト %1 (%2)の名前解決ができませんでした"
+
+msgid "could not resolve host %1 (unknown error)"
+msgstr "ホスト %1 の名前解決ができませんでした(不明なエラー)"
+
+msgid "cannot create socket (%1)"
+msgstr "ソケット(%1)を生成できません"
+
+msgid "error connecting to %1 (%2)"
+msgstr "%1 (%2)に接続中にエラー"
+
+msgid "error sending request to %1 (%2)"
+msgstr "%1 (%2)にリクエスト送信中にエラー"
+
+msgid "error receiving from host %1 (%2)"
+msgstr "ホスト %1 (%2)から受信中にエラー"
+
+msgid "error closing connection to host %1 (%2)"
+msgstr "ホスト %1 (%2)への接続を閉じる際にエラー"
+
+msgid "invalid host number %1"
+msgstr "不適切なホスト番号 %1"
+
+msgid "could not get %2 from %1 (reason given was %3)"
+msgstr "%2 (%1 から、)取得できませんでした(理由: %3)"
+
+msgid "URL not supported by this version"
+msgstr "このバージョンではURLはサポートされていません"
+
+msgid "only HTTP scheme supported"
+msgstr "HTTPスキームだけがサポートされています"
+
+msgid "could not initialize Windows Sockets (%1)"
+msgstr "Windows ソケット (%1)を初期化できませんでした"
+
+msgid "incompatible Windows Sockets version"
+msgstr "互換性のないWindowsソケットバージョン"
+
+msgid "error number "
+msgstr "エラー番号"
+
+msgid "URL Redirected to %1"
+msgstr ""
+
+msgid "cannot open URL %1 (%2)"
+msgstr "URL %1 (%2)を開けません"
+
+msgid "error reading URL %1 (%2)"
+msgstr "URL %1 (%2)を読み込み中にエラー"
+
+msgid "unknown output option %1"
+msgstr "不明な出力オプション %1"
+
+msgid "Enable batch mode."
+msgstr "バッチモードを有効化"
+
+msgid "Produce output according to %1."
+msgstr "%1 への出力を生成"
+
+msgid "Stop after the document prolog."
+msgstr "文書プロローグ後に停止"
+
+msgid "Suppress output."
+msgstr "出力を強制"
+
+msgid "Send RAST output to file %1."
+msgstr "ファイル %1 へのRAST出力を送出"
+
+msgid "Same as -wduplicate."
+msgstr "-wduplicateと同一"
+
+msgid "Same as -oline."
+msgstr "-olineと同一"
+
+msgid "Same as -c."
+msgstr "-cと同一"
+
+msgid "Same as -wdefault."
+msgstr "-wdefaultと同一"
+
+msgid "Same as -wundef."
+msgstr "-wundefと同一"
+
+msgid "%1 parses and validates the SGML document whose document entity is"
+msgstr ""
+"%1 はSGML文書を解析、妥当性の検証を行います。対象の文書はシステム識別子"
+
+msgid "specified by the system identifiers SYSID... and prints on the standard"
+msgstr "SYSIDによって指定され、その要素構造情報セットの単純なテキスト表現を"
+
+msgid ""
+"output a simple text representation of its Element Structure Information Set."
+msgstr "標準出力に出力します。"
+
+msgid "If more than one system identifier is specified, then the corresponding"
+msgstr "もし一つ以上のシステム識別子が指定されていると、対応する実体群は"
+
+msgid "entities will be concatenated to form the document entity. If no system"
+msgstr "文書実体から一つにまとめられます。もしシステム識別子が未指定ならば"
+
+msgid "identifiers are specified, then %1 will read the document entity from"
+msgstr "%1 は標準入力から文書実体を読み込みます。- のコマンド行システム"
+
+msgid "the standard input. A command line system identifier of - can be used"
+msgstr "識別子も標準入力を参照するために使うことができます。"
+
+msgid "to refer to the standard input."
+msgstr " "
+
+msgid "OPTION"
+msgstr "オプション"
+
+msgid "invalid RAST processing instruction"
+msgstr "不正なRAST処理命令"
+
+msgid "invalid link type %1 in rast-active-lpd processing instruction"
+msgstr "rast-active-lpd 処理命令内に不正なリンク型 %1"
+
+msgid "duplicate link type %1 in rast-active-lpd processing instruction"
+msgstr "rast-active-lpd 処理命令内に重複するリンク型 %1"
+
+msgid "rast-link-rule: processing instruction matches more than one link rule"
+msgstr "rast-link-rule: 処理命令は一つ以上のリンクルールに一致します"
+
+msgid "rast-link-rule: processing instruction does not match any link rules"
+msgstr "rast-link-rule: 処理命令はいかなるリンクルールにも一致しません"
+
+#, fuzzy
+msgid ""
+"multiple applicable link rules without disambiguating rast-link-rule: "
+"processing instruction"
+msgstr "dsiambiguating なrast-link-rule: 処理命令なしの複合可能なリンクルール"
+
+msgid "invalid argument for -m option"
+msgstr "-m オプションに対して不適切な引数"
+
+msgid ""
+"omitted start or end tag implied in CDATA or RCDATA marked section; not "
+"normalized"
+msgstr ""
+"省略された開始あるいは終了タグがCDATAあるいはRCDATAマーク付きセクション内で暗"
+"示されています。正規化しません"
+
+#, fuzzy
+msgid "Hoist omitted tags."
+msgstr "省略されたタグを掲揚"
+
+#, fuzzy
+msgid "Prefer lowercase."
+msgstr "小文字優先"
+
+msgid "Use markup option %1."
+msgstr "マークアップオプション %1を使用"
+
+msgid "Output the entity named %1."
+msgstr "%1 という名前の実体を出力"
+
+msgid "Output the prolog."
+msgstr "プロローグを出力"
+
+#, fuzzy
+msgid "Raw."
+msgstr "Raw."
+
+msgid "Expand references."
+msgstr "参照を展開"
+
+msgid "%1 is an SGML markup stream editor. %1 parses the SGML document"
+msgstr "%1 はSGMLマークアップストリームエディタです。%1 はSYSID...内に含まれる"
+
+msgid "contained in SYSID... and copies portions of the document to the"
+msgstr ""
+"SGML文書を解析し、文書の部分を標準出力に出力し、オプションによって指定された"
+
+msgid "standard output, adding or changing markup as specified by the options."
+msgstr "マーックアップを変更、追加します。"
+
+msgid "Modify the XML output according to %1."
+msgstr "%1 についてXML出力を変更"
+
+msgid "%1 converts SGML to XML. %1 parses and validates the SGML document"
+msgstr "%1 はSGMLをXMLに変換します。%1はSYSID...内に含まれるSGML文書を"
+
+msgid ""
+"contained in SYSID... and writes an equivalent XML document to the standard"
+msgstr "解析し、標準出力に相当するXML文書を書き出します。%1 はXML互換性の"
+
+msgid ""
+"output. %1 will warn about SGML constructs which have no XML equivalent."
+msgstr "ないSGML構造について警告します。"
+
+msgid "reference to internal SDATA entity %1 not allowed in XML"
+msgstr "内部SDATA実体 %1 への参照はXMLでは禁止されています"
+
+msgid "reference to external data entity %1 not allowed in XML"
+msgstr "外部データ実体 %1 への参照はXMLでは禁止されています"
+
+msgid "reference to subdocument entity %1 not allowed in XML"
+msgstr "副文書実体 %1 への参照はXMLでは禁止されています"
+
+msgid "processing instruction containing \"?>\" not allowed in XML"
+msgstr "処理命令が含む \"?>\" はXMLでは禁止されています"
+
+msgid "XML requires processing instructions to start with a name"
+msgstr "XMLは名前と一緒に開始するための処理命令を必要とします"
+
+msgid "external data entity %1 is CDATA or SDATA, but XML allows only NDATA"
+msgstr ""
+"外部データ実体 %1 はCDATAあるいはSDATAが可能ですが、XMLで許されるのはNDATAだ"
+"けです"
+
+msgid "attributes were defined for notation %1; not allowed in XML"
+msgstr "記述 %1 に対する属性が定義されていますがXMLではそれは禁止されています"
+
+msgid "cannot convert formal system identifier %1 to URL"
+msgstr "公式システム識別子 %1 をURLに変換できません"
+
+#, fuzzy
+msgid "cannot open output file %1"
+msgstr "出力ファイル %1 (%2)を開けません"
+
+#, fuzzy
+msgid "missing system ID for entity %1"
+msgstr "実体 %1 に対して有効なシステムIDを表示"
+
+#, fuzzy
+msgid "unexpected entity type for entity named %1"
+msgstr "%1 という名前の実体を出力"
+
+#, fuzzy
+msgid "cannot create directory %1"
+msgstr "ソケット(%1)を生成できません"
+
+msgid "already wrote 99 versions of %1; will not overwrite"
+msgstr ""
+
+msgid "already wrote output file %1; will not overwrite"
+msgstr ""
+
+msgid "removing leading slashes from output filename %1"
+msgstr ""
+
+msgid "path %1 outside output directory"
+msgstr ""
+
+msgid "Output a document type declaration."
+msgstr "文書型宣言を出力"
+
+msgid "Output marked sections."
+msgstr "マーク付きセクションを出力"
+
+msgid "Output comments."
+msgstr "コメントを出力"
+
+msgid "Raw output."
+msgstr "そのまま出力"
+
+msgid "%1 prints on the standard output a normalized document instance"
+msgstr "%1 はシステム識別子SYSIDの実体群の連結内に含まれる、SGML文書"
+
+msgid "for the SGML document contained in the concatenation of the entities"
+msgstr "に対して、正規化された文書インスタンスを標準出力に出力します"
+
+msgid "with system identifiers SYSID..."
+msgstr " "
+
+msgid "Print the effective system id for the public id %1."
+msgstr "公開ID %1 に対して有効なシステムIDを表示"
+
+msgid "Print the effective system id for system id %1."
+msgstr "システムID %1 に対して有効なシステムIDを表示"
+
+msgid "Print the effective system id for parameter entity %1."
+msgstr "変数実体 %1 に対して有効なシステムIDを表示"
+
+msgid "Print the effective system id for the doctype %1."
+msgstr "文書型 %1 に対して有効なシステムIDを表示"
+
+msgid "Print the effective system id for the linktype %1."
+msgstr "リンク型 %1 に対して有効なシステムIDを表示"
+
+msgid "Print the effective system id for entity %1."
+msgstr "実体 %1 に対して有効なシステムIDを表示"
+
+msgid "Print the effective system id for notation %1."
+msgstr "記述 %1 に対して有効なシステムIDを表示"
+
+msgid "Print the effective system id for the SGML declaration for doctype %1."
+msgstr "文書型 %1 に対するSGML宣言に対する、有効なシステムIDを表示"
+
+msgid "%1 prints effective system identifiers found in the catalogs on the"
+msgstr "%1 はカタログ内にみつかった有効なシステム識別子を標準出力に"
+
+msgid ""
+"standard output. It doesn't check that the system identifiers correspond"
+msgstr "表示します。システム識別子が実際のファイルとして存在するか"
+
+msgid ""
+"to actual files. The return value is 0 if the last system identifier was"
+msgstr "どうかは確認しません。もし最後のシステム識別子が生成できれば"
+
+msgid "successfully created and 1 otherwise."
+msgstr "返り値は0、そうでなければ1を返します。"
+
+msgid "LITERAL"
+msgstr "LITERAL"
+
+msgid "non-SGML"
+msgstr "非SGML"
+
+msgid "raw"
+msgstr "raw"
+
+msgid "%1 prints the concatenation of the entities with system identifiers"
+msgstr "%1 はシステム識別子SYSIDの実体の連結内容を標準出力へ"
+
+msgid "SYSID... on the standard output"
+msgstr "出力します"

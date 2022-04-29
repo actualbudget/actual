@@ -1,0 +1,1088 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<html>
+<head>
+<title>The generic API to OpenSP</title>
+</head>
+<body>
+<h1>The generic API to OpenSP</h1>
+<p>
+OpenSP provides a generic API in addition to its native API.  The generic
+interface is much simpler than the native interface.  It is generic in
+the sense that it could be easily implemented using parsers other than
+OpenSP.  It provides all ESIS information as well as some other
+information about the instance that is commonly needed by
+applications.  However, it doesn't provide access to all information
+available from OpenSP; in particular, it doesn't provide information about
+the DTD.  It is also slightly less efficient than the native
+interface.
+<p>
+The interface uses two related abstract classes.  An
+<code>SGMLApplication</code> is an object that can handle a number of
+different kinds of event which correspond to information in an SGML
+document.  An <code>EventGenerator</code> is an object that can
+generate a sequence of events of the kinds handled by an
+<code>SGMLApplication</code>.  The
+<code>ParserEventGeneratorKit</code> class makes an
+<code>EventGenerator</code> that generates events using OpenSP.
+
+<h2>Types</h2>
+<p>
+<code>SGMLApplication</code> has a number of local types that are used
+in several contexts:
+<dl>
+<dt>
+<code>Char</code>
+<dd>
+This typedef is an unsigned integral type that represents a single bit
+combination (character).  It is <code>unsigned short</code> if
+<code>SP_MULTI_BYTE</code> is defined and <code>unsigned char</code>
+otherwise.
+<dt>
+<code>CharString</code>
+<dd>
+This struct represents a string of <code>Char</code>.
+It has the following members:
+<dl>
+<dt>
+<code>const Char *ptr</code>
+<dd>
+A pointer to the <code>Char</code>s of the string.
+<dt>
+<code>size_t len</code>
+<dd>
+The number of <code>Char</code>s in the string.
+</dl>
+<dt>
+<code>Location</code>
+<dd>
+This struct holds information about a location in the entity structure
+of a document.  It is constucted using an <code>OpenEntityPtr</code>
+and a <code>Position</code>.  The <code>CharString</code>s in it will
+remain valid as long as the <code>OpenEntity</code> that is pointed to
+by the <code>OpenEntityPtr</code> that was used to construct it
+remains valid.
+<p>
+It has the following members:
+<dl>
+<dt>
+<code>unsigned long lineNumber</code>
+<dd>
+The line number.
+<code>(unsigned long)-1</code> if invalid.
+<dt>
+<code>unsigned long columnNumber</code>
+<dd>
+The column number.
+Note that tabs are not treated specially.
+<code>(unsigned long)-1</code> if invalid.
+<dt>
+<code>unsigned long byteOffset</code>
+<dd>
+The number of bytes in the storage object preceding the location.
+<code>(unsigned long)-1</code> if invalid.
+<dt>
+<code>unsigned long entityOffset</code>
+<dd>
+The number of bit combinations in the entity preceding the location.
+<code>(unsigned long)-1</code> if invalid.
+<dt>
+<code>CharString entityName</code>
+<dd>
+The name of the external entity containing the location.
+An empty string if invalid.
+<dt>
+<code>CharString filename</code>
+<dd>
+The name of the file containing the location.
+An empty string if invalid.
+<dt>
+<code>const void *other</code>
+<dd>
+Other implementation-dependent information about the location.  In the
+OpenSP implementation it will be a pointer to a StorageObjectSpec.  0 if
+invalid.
+</dl>
+<p>
+When a location is in an internal entity, the location of the reference
+to the entity will be used instead.
+<dt>
+<code>OpenEntity</code>
+<dd>
+This class represents a currently open entity.  The only use for an
+<code>OpenEntity</code> is, in conjunction with a
+<code>Position</code>, to create a <code>Location</code>.  An
+<code>OpenEntity</code> is accessed using an
+<code>OpenEntityPtr</code>.
+<dt>
+<code>OpenEntityPtr</code>
+<dd>
+This class is a reference-counted pointer to an <code>OpenEntity</code>.
+<dt>
+<code>Position</code>
+<dd>
+This is an integral type that represents a position in an open entity.
+The meaning of a <code>Position</code> is completely determined by the
+<code>OpenEntity</code> object with which it is associated.  The only
+use for an <code>Position</code> is, in conjunction with an
+<code>OpenEntity</code>, to create a <code>Location</code>.
+<dt>
+<code>ExternalId</code>
+<dd>
+This struct represents an external identifier.  It has the following
+members:
+<dl>
+<dt>
+<code>bool haveSystemId</code>
+<dd>
+True iff the external identifier included an explicit system identifier.
+<dt>
+<code>CharString systemId</code>
+<dd>
+The system identifier included in the external identifier.
+Valid only if <code>havePublicId</code> is true.
+<dt>
+<code>bool havePublicId</code>
+<dd>
+True iff the external identifier included an explicit public identifier.
+<dt>
+<code>CharString publicId</code>
+<dd>
+The public identifier included in the external identifier.
+Valid only if <code>havePublicId</code> is true.
+<dt>
+<code>bool haveGeneratedSystemId</code>
+<dd>
+True iff a system identifier was generated for the external identifier.
+<dt>
+<dt>
+<code>CharString generatedSystemId</code>
+<dd>
+The system identifier generated for the external identifier.
+Valid only if <code>haveGeneratedSystemId</code> is true.
+</dl>
+<dt>
+<code>Notation</code>
+<dd>
+This struct represents a notation.
+It has the following members:
+<dl>
+<dt>
+<code>CharString name</code>
+<dd>
+The name of the notation.
+<dt>
+<code>ExternalId externalId</code>
+<dd>
+The external identifier of the notation.
+</dl>
+<dt>
+<code>Entity</code>
+<dd>
+This struct represents an entity.
+It has the following members.
+<dl>
+<dt>
+<code>CharString name</code>
+<dd>
+The name of the entity.
+<dt>
+<code>Entity::DataType dataType</code>
+<dd>
+The type of the data of the entity.
+<p>
+<code>Entity::DataType</code> is a local enum with the following possible
+values:
+<dl>
+<dt>
+<code>Entity::sgml</code>
+<dd>
+<dt>
+<code>Entity::cdata</code>
+<dd>
+<dt>
+<code>Entity::sdata</code>
+<dd>
+<dt>
+<code>Entity::ndata</code>
+<dd>
+<dt>
+<code>Entity::subdoc</code>
+<dd>
+<dt>
+<code>Entity::pi</code>
+<dd>
+</dl>
+<dt>
+<code>Entity::DeclType declType</code>
+<dd>
+The type of the declaration of the entity.
+<p>
+<code>Entity::DeclType</code> is a local enum with the following possible
+values:
+<dl>
+<dt>
+<code>Entity::general</code>
+<dd>
+The entity is a general entity.
+<dt>
+<code>Entity::parameter</code>
+<dd>
+The entity is a parameter entity.
+<dt>
+<code>Entity::doctype</code>
+<dd>
+The entity was declared in a doctype declaration.
+<dt>
+<code>Entity::linktype</code>
+<dd>
+The entity was declared in a linktype declaration.
+</dl>
+<dt>
+<code>bool isInternal</code>
+<dd>
+True iff the entity is internal rather than external.
+<dt>
+<code>CharString text</code>
+<dd>
+The replacement text of the entity.
+Valid only if <code>isInternal</code> is true.
+<dt>
+<code>ExternalId externalId</code>
+<dd>
+The external identifier of the entity.
+Valid only if <code>isInternal</code> is false.
+<dt>
+<code>const Attribute *attributes</code>
+<dd>
+Pointer to the data attributes of the entity.
+Valid only if <code>isInternal</code> is false.
+<dt>
+<code>size_t nAttributes</code>
+<dd>
+The number of data attributes of the entity.
+Valid only if <code>isInternal</code> is false.
+<dt>
+<code>Notation notation</code>
+<dd>
+The entity's notation.
+An empty string if the entity has no notation.
+Valid only if <code>isInternal</code> is false.
+</dl>
+<dt>
+<code>Attribute</code>
+<dd>
+This struct represents an attribute.  More precisely it represents the
+assignment of an attribute value to an attribute name.
+It has the following members:
+<dl>
+<dt>
+<code>CharString name</code>
+<dd>
+The attribute name.
+<dt>
+<code>Attribute::Type type</code>
+<dd>
+An enumeration describing the type of the attribute.
+<p>
+<code>Attribute::Type</code> is a local type with the following possible
+values:
+<dl>
+<dt><code>Attribute::invalid</code>
+<dd>
+The attribute is invalid.
+<dt><code>Attribute::implied</code>
+<dd>
+The attribute is an impliable attribute for which
+no value was specified.
+<dt><code>Attribute::cdata</code>
+<dd>
+The attribute is a CDATA attribute.
+<dt><code>Attribute::tokenized</code>
+<dd>
+The attribute is a tokenized attribute.
+</dl>
+<dt>
+<code>Attribute::Defaulted defaulted</code>
+<dd>
+An enumeration specifying whether the entity was defaulted, and, if
+so, how.
+This is non-ESIS information.
+<p>
+<code>Attribute::Defaulted</code> is a local enum with the following
+possible values:
+<dl>
+<dt>
+<code>Attribute::specified</code>
+<dd>
+The value was explicitly specified.
+<dt>
+<code>Attribute::definition</code>
+<dd>
+The value was defaulted from the attribute definition.
+<dt>
+<code>Attribute::current</code>
+<dd>
+The value was defaulted using the CURRENT value of the attribute.
+</dl>
+<dt>
+<code>size_t nCdataChunks</code>
+<dd>
+The number of <code>Attribute::CdataChunk</code>s comprising the value
+of the attribute.  Valid only if <code>type</code> is
+<code>cdata</code>.
+<dt>
+<code>const Attribute::CdataChunk *cdataChunks</code>
+<dd>
+The <code>Attribute::CdataChunk</code>s comprising the value of this attribute.
+Valid only if <code>type</code> is <code>cdata</code>.
+<p>
+<code>Attribute::CdataChunk</code> is a local struct with the
+following members:
+<dl>
+<dt>
+<code>bool isSdata</code>
+<dd>
+True iff this chunk is the replacement text of an internal SDATA entity.
+<dt>
+<code>CharString data</code>
+<dd>
+The data of this chunk.
+<dt>
+<code>CharString entityName</code>
+<dd>
+The name of the internal SDATA entity that this chunk is the
+replacement text of.  Valid only if <code>isSdata</code> is true.
+This is non-ESIS information.
+</dl>
+<dt>
+<code>CharString tokens</code>
+<dd>
+Valid only if <code>type</code> is <code>Attribute::tokenized</code>.
+<dt>
+<code>bool isId</code>
+<dd>
+True iff the declared value is ID.
+This is non-ESIS information.
+<dt>
+<code>size_t nEntities</code>
+<dd>
+The number of entities associated with this attribute.
+This will be zero unless the declared value is ENTITY or ENTITIES.
+<dt>
+<code>const Entity *entities</code>
+<dd>
+The entities associated with this attribute.
+<dt>
+<code>Notation notation</code>
+<dd>
+The notation associated with this attribute.
+If the declared value of the attribute is not NOTATION,
+then the name member will be an empty string.
+</dl>
+</dl>
+<h2>Events</h2>
+<p>
+For each event <code><var>xyz</var>Event</code> handled by
+<code>SGMLApplication</code>, there is a virtual function of
+<code>SGMLApplication</code> named <code><var>xyz</var></code> to
+handle the event, and a local struct of <code>SGMLApplication</code>
+named <code><var>Xyz</var>Event</code>.
+<p>
+Pointers within an event <code><var>xyz</var>Event</code> are valid
+only during the call to <code><var>xyz</var></code>.  None of the
+structs in events have copy constructors or assignment operators
+defined.  It is up to the event handling function to make a copy of
+any data that it needs to preserve after the function returns.
+<p>
+Except as otherwise stated,
+the information in events is ESIS information.
+All position information is non-ESIS information.
+<p>
+There are the following types of event:
+<dl>
+<dt>
+<code>AppinfoEvent</code>
+<dd>
+Generated for the APPINFO section of the SGML declaration.
+The event has the following members:
+<dl>
+<dt><code>Position pos</code>
+<dd>
+The position of APPINFO parameter of the SGML declaration.
+<dt><code>bool none</code>
+<dd>
+True iff APPINFO NONE was specified.
+<dt><code>CharString string</code>
+<dd>
+The interpreted value of the minimum literal specified
+in the appinfo parameter of the SGML declaration.
+Valid only if <code>none</code> is false.
+</dl>
+<dt>
+<code>PiEvent</code>
+<dd>
+Generated for a processing instruction.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the processing instruction.
+<dt>
+<code>CharString data</code>
+<dd>
+The system data of the processing instuction.
+<dt>
+<code>CharString entityName</code>
+<dd>
+If the processing instruction was the result of the
+reference to a PI entity, the name of the entity.
+If not, an empty string.
+This is non-ESIS information.
+</dl>
+<dt>
+<code>StartElementEvent</code>
+<dd>
+Generated for the start of an element.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the start of the element.
+<dt>
+<code>CharString gi</code>
+<dd>
+The generic identifier of the element.
+<dt>
+<code>Element::ContentType contentType</code>
+<dd>
+The type of the element's content.
+This is non-ESIS information.
+<p>
+<code>Element::ContentType</code> is an enum with the following
+possible values:
+<dl>
+<dt>
+<code>Element::empty</code>
+<dd>
+The element has empty content, either because it was
+declared as EMPTY or because there was a #CONREF attribute.
+<dt>
+<code>Element::cdata</code>
+<dd>
+The element has CDATA content.
+<dt>
+<code>Element::rcdata</code>
+<dd>
+The element has RCDATA content.
+<dt>
+<code>Element::mixed</code>
+<dd>
+The element has mixed content.
+<dt>
+<code>Element::element</code>
+<dd>
+The element has element content.
+</dl>
+<dt>
+<code>bool included</code>
+<dd>
+True iff the element was an included subelement
+(rather than a proper subelement).
+This is non-ESIS information.
+<dt>
+<code>size_t nAttributes</code>
+<dd>
+The number of attributes of this element.
+<dt>
+<code>const Attribute *attributes</code>
+<dd>
+A pointer to the attributes for this element.
+</dl>
+<dt>
+<code>EndElementEvent</code>
+<dd>
+Generated for the end of an elemenet.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the end of the element.
+<dt>
+<code>CharString gi</code>
+<dd>
+The generic identifier of the element.
+</dl>
+<dt>
+<code>DataEvent</code>
+<dd>
+Generated for character data.
+Separate data events may be generated for consecutive data characters.
+Applications should make no assumptions about how character data is split
+into <code>DataEvent</code>s.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the first character of the data.
+<dt>
+<code>CharString data</code>
+<dd>
+The data.
+</dl>
+<dt>
+<code>SdataEvent</code>
+<dd>
+Generated for a reference to an internal sdata entity in content.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the entity reference.
+<dt>
+<code>CharString text</code>
+<dd>
+The replacement text of the entity.
+<dt>
+<code>CharString entityName</code>
+<dd>
+The entity name.
+This is non-ESIS information.
+</dl>
+<dt>
+<code>ExternalDataEntityRefEvent</code>
+<dd>
+Generated for a reference to an external data entity.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the entity reference.
+<dt>
+<code>Entity entity</code>
+<dd>
+The referenced entity.
+</dl>
+<dt>
+<code>SubdocEntityRefEvent</code>
+<dd>
+Generated for a reference to a subdoc entity.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the entity reference.
+<dt>
+<code>Entity entity</code>
+<dd>
+The referenced entity.
+</dl>
+<dt>
+<code>StartDtdEvent</code>
+<dd>
+Generated at the start of a document type declaration.
+This is non-ESIS information.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the start of the document type declaration.
+<dt>
+<code>CharString name</code>
+<dd>
+The document type name.
+<dt>
+<code>bool haveExternalId</code>
+<dd>
+The external identifier for the entity declared in the document type
+declaration.
+<dt>
+<code>ExternalId externalId</code>
+<dd>
+Valid iff haveExternalId is true.
+</dl>
+<dt>
+<code>EndDtdEvent</code>
+<dd>
+Generated at the end of a document type declaration.
+This is non-ESIS information.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the end of the DTD.
+<dt>
+<code>CharString name</code>
+<dd>
+</dl>
+<dt>
+<code>EndPrologEvent</code>
+<dd>
+Generated at the end of the prolog.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the start of the instance.
+</dl>
+<dt>
+<code>GeneralEntityEvent</code>
+<dd>
+Generated for each general entity in the name space of the governing
+doctype, but only if the
+<code>ParserEventGeneratorKit::outputGeneralEntities</code> option is
+enabled.  This is non-ESIS information.  The event has the following
+members:
+<dl>
+<dt>
+<code>Entity entity</code>
+<dd>
+The entity.
+</dl>
+<p>
+No event will be generated for the declaration of the
+<code>#default</code> entity; instead an event will be generated when
+an entity reference uses the <code>#default</code> entity if that is
+the first time on which an entity with that name is used.  This means
+that <code>GeneralEntityEvent</code> can occur after the end of the
+prolog.
+<dt>
+<code>CommentDeclEvent</code>
+<dd>
+Generated for each comment declaration in the instance, but only if
+<code>ParserEventGeneratorKit::outputCommentDecls</code> option is
+enabled.  This is non-ESIS information.  The event has the following
+members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the start of the comment declaration.
+<dt>
+<code>size_t nComments</code>
+<dd>
+The number of comments in the comment declaration.
+<dt>
+<code>const CharString *comments</code>
+<dd>
+The content of each comment in the declaration.
+This excludes the com delimiters.
+<dt>
+<code>const CharString *seps</code>
+<dd>
+The separator following each comment in the declaration.
+</dl>
+<dt>
+<code>MarkedSectionStartEvent</code>
+<dd>
+Generated for the start of a marked section in the instance,
+but only if the <code>ParserEventGeneratorKit::outputMarkedSections</code>
+option is enabled.
+This is non-ESIS information.
+The event has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the start of the marked section declaration.
+<dt>
+<code>MarkedSectionStartEvent::Status status</code>
+<dd>
+The effective status of the marked section.
+<p>
+<code>MarkedSectionStartEvent::Status</code> is a local enum with the
+following possible values:
+<ul>
+<li><code>MarkedSectionStartEvent::include</code>
+<li><code>MarkedSectionStartEvent::rcdata</code>
+<li><code>MarkedSectionStartEvent::cdata</code>
+<li><code>MarkedSectionStartEvent::ignore</code>
+</ul>
+<dt>
+<code>size_t nParams</code>
+<dd>
+The number of top-level parameters in the status keyword specification.
+<dt>
+<code>const MarkedSectionStartEvent::Param *params</code>
+<dd>
+The top-level parameters in the status keyword specification.
+<p>
+<code>Param</code> is a local struct with the following members:
+<dl>
+<dt>
+<code>MarkedSectionStartEvent::Param::Type type</code>
+<dd>
+The type of top-level parameter:
+<p>
+<code>MarkedSectionStartEvent::Param::Type</code> is a local enum with the
+following possible values:
+<dl>
+<dt>
+<code>MarkedSectionStartEvent::Param::temp</code>
+<dt>
+<code>MarkedSectionStartEvent::Param::include</code>
+<dt>
+<code>MarkedSectionStartEvent::Param::rcdata</code>
+<dt>
+<code>MarkedSectionStartEvent::Param::cdata</code>
+<dt>
+<code>MarkedSectionStartEvent::Param::ignore</code>
+<dd>
+The parameter is the corresponding keyword.
+<dt>
+<code>MarkedSectionStartEvent::Param::entityRef</code>
+<dd>
+The parameter is an entity reference.
+</dl>
+<dt>
+<code>CharString entityName</code>
+<dd>
+Valid when <code>type</code> is
+<code>MarkedSectionStartEvent::Param::entityRef</code>.
+</dl>
+</dl>
+<dt>
+<code>MarkedSectionEndEvent</code>
+<dd>
+Generated for the end of a marked section in the instance, but only if
+the <code>ParserEventGeneratorKit::outputMarkedSections</code> option is
+enabled.  This is non-ESIS information.  The event has the following
+members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the end of the marked section declaration.
+<dt>
+<code>MarkedSectionEndEvent::Status status</code>
+<dd>
+The effective status of the marked section.
+<p>
+<code>MarkedSectionEndEvent::Status</code> is a local enum with the
+following possible values:
+<ul>
+<li><code>MarkedSectionEndEvent::include</code>
+<li><code>MarkedSectionEndEvent::rcdata</code>
+<li><code>MarkedSectionEndEvent::cdata</code>
+<li><code>MarkedSectionEndEvent::ignore</code>
+</ul>
+</dl>
+<dt>
+<code>IgnoredCharsEvent</code>
+<dd>
+Generated for a sequence of characters in an ignored marked section in
+the instance, but only if the
+<code>ParserEventGeneratorKit::outputMarkedSections</code> option is
+enabled.  This is non-ESIS information.  The event has the following
+members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position of the first of the ignored characters.
+<dt>
+<code>CharString data</code>
+<dd>
+The ignored characters.
+</dl>
+<dt>
+<code>ErrorEvent</code>
+<dd>
+Generated for each error detected by the parser,
+and also for any other cases where the parser produces a message.
+This is non-ESIS information.
+It has the following members:
+<dl>
+<dt>
+<code>Position pos</code>
+<dd>
+The position at which the error was detected.
+<dt>
+<code>ErrorEvent::Type type</code>
+<dd>
+The type of error.
+<p>
+<code>ErrorEvent::Type</code> is a local enum with the following possible
+values:
+<dl>
+<dt>
+<code>ErrorEvent::quantity</code>
+<dd>
+Exceeding a quantity limit.
+<dt>
+<code>ErrorEvent::idref</code>
+<dd>
+An IDREF to a non-existent ID.
+<dt>
+<code>ErrorEvent::capacity</code>
+<dd>
+Exceeding a capacity limit.
+<dt>
+<code>ErrorEvent::otherError</code>
+<dd>
+Any other kind of error.
+<dt>
+<code>ErrorEvent::warning</code>
+<dd>
+A warning.  Not actually an error.
+<dt>
+<code>ErrorEvent::info</code>
+<dd>
+An informational message.  Not actually an error.
+</dl>
+<dt>
+<code>CharString message</code>
+<dd>
+The message produced by the parser.
+If messages are not disabled, this will be the same as the message
+printed to standard error.
+</dl>
+</dl>
+<p>
+<code>SGMLApplication</code> also has a virtual function
+<pre>
+void openEntityChange(const OpenEntityPtr &);
+</pre>
+<p>
+which is similar to an event.  An application that wishes to makes use
+of position information must maintain a variable of type
+<code>OpenEntityPtr</code> representing the current open entity, and
+must provide an implementation of the <code>openEntityChange</code>
+function that updates this variable.  It can then use the value of
+this variable in conjunction with a <code>Position</code> to obtain a
+<code>Location</code>; this can be relatively slow.  Unlike events, an
+<code>OpenEntityPtr</code> has copy constructors and assignment
+operators defined.
+
+<h2>EventGenerator</h2>
+<p>
+The <code>EventGenerator</code> interface provides the following
+functions:
+<dl>
+<dt>
+<code>unsigned run(SGMLApplication &<var>app</var>)</code>
+<dd>
+Generate the sequence of events, calling the corresponding member of
+<code><var>app</var></code> for each event.  Returns the number of
+errors.  This must not be called more than once for any
+<code>EventGenerator</code>object.
+<dt>
+<code>
+EventGenerator *makeSubdocEventGenerator(const SGMLApplication::Char *<var>s</var>, size_t <var>n</var>)
+</code>
+<dd>
+Makes a new <code>EventGenerator</code> for a subdocument of the
+current document.  <var>s</var> and <var>n</var> together specify the
+system identifier of the subdocument entity.  These should usually be
+obtained from the <code>generatedSystemId</code> member of the
+<code>externalId</code> member of the <code>Entity</code> object for
+the subdocument entity.  This function can only be called after
+<code>run</code> has been called; the call to <code>run</code> need
+not have returned, but the <code>SGMLApplication
+</code>
+must have been passed events from the prolog or instance (ie the SGML
+declaration must have been parsed).
+<dt>
+<code>void inhibitMessages(bool <var>b</var>)</code>
+<dd>
+If <var>b</var> is true, disables error and warning messages,
+otherwise enables them.  Initially errors and warnings are enabled.
+This function may be called at any time, including while
+<code>run()</code> is executing.
+<dt>
+<code>void halt()</code>
+<dd>
+Halt the generation of events by <code>run()</code>.
+This can be at any point during the execution of <code>run()</code>.
+It is safe to call this function from a different thread from that which
+called <code>run()</code>.
+</dl>
+<h2>ParserEventGeneratorKit</h2>
+<p>
+The <code>ParserEventGeneratorKit</code> class is used to create an
+<code>EventGenerator</code> that  generate events using OpenSP.  It
+provides the following members:
+<dl>
+<dt>
+<code>EventGenerator *makeEventGenerator(int <var>nFiles</var>, char *const *<var>files</var>)</code>
+<dd>
+This returns a new <code>EventGenerator</code> that will generate events
+for the SGML document whose document entity is contained in the
+<code><var>files</var></code>.
+The returned <code>EventGenerator</code> should be deleted when it
+is no longer needed.
+<code>makeEventGenerator</code> may be called more than once.
+<dt>
+<code>void setOption(ParserEventGeneratorKit::Option <var>opt</var>)</code>
+<dd>
+This can be called any time before <code>makeEventGenerator()</code> is called.
+<p>
+<code>ParserEventGeneratorKit::Option</code> is a local enum with the following possible
+values:
+<dl>
+<dt>
+<code>ParserEventGeneratorKit::showOpenEntities</code>
+<dd>
+This corresponds to the <code>-e</code> option of nsgmls.
+<dt>
+<code>ParserEventGeneratorKit::showOpenElements</code>
+<dd>
+This corresponds to the <code>-g</code> option of nsgmls.
+<dt>
+<code>ParserEventGeneratorKit::outputCommentDecls</code>
+<dd>
+This will cause <code>CommentDeclEvent</code>s to be generated.
+<dt>
+<code>ParserEventGeneratorKit::outputMarkedSections</code>
+<dd>
+This will cause
+<code>MarkedSectionStartEvent</code>s,
+<code>MarkedSectionStartEvent</code>s
+and <code>IgnoredCharsEvent</code>s
+to be generated.
+<dt>
+<code>ParserEventGeneratorKit::outputGeneralEntities</code>
+<dd>
+This will cause <code>GeneralEntityEvent</code>s to be generated.
+<dt>
+<code>ParserEventGeneratorKit::showErrorNumbers</code>
+<dd>
+This corresponds to the <code>-n</code> option of nsgmls.
+</dl>
+<dt>
+<code>
+void setOption(ParserEventGeneratorKit::OptionWithArg <var>opt</var>, const char *<var>arg</var>)
+</code>
+<dd>
+This can be called any time before <code>makeEventGenerator()</code> is called.
+<p>
+<code>ParserEventGeneratorKit::OptionWithArg</code> is a local enum with the following possible
+values:
+<dl>
+<dt>
+<code>ParserEventGeneratorKit::addCatalog</code>
+<dd>
+This corresponds to the <code>-m</code> option of nsgmls.
+<dt>
+<code>ParserEventGeneratorKit::includeParam</code>
+<dd>
+This corresponds to the <code>-i</code> option of nsgmls.
+<dt>
+<code>ParserEventGeneratorKit::enableWarning</code>
+<dd>
+This corresponds to the <code>-w</code> option of nsgmls.
+<dt>
+<code>ParserEventGeneratorKit::addSearchDir</code>
+<dd>
+This corresponds to the <code>-D</code> option of nsgmls.
+</dl>
+</dl>
+
+<h2>Using the interface</h2>
+<p>
+Creating an application with this interface involves the following steps:
+<ul>
+<li>
+Derive a class from <code>SGMLApplication</code>,
+called, say, <code>MyApplication</code>.
+<li>
+For each kind of event <code><var>Foo</var>Event</code> that the application
+needs information from, define a member of <code>MyApplication</code>
+<code>void MyApplication::<var>foo</var>(const <var>Foo</var>Event &)</code>.
+<li>
+Declare an object of type <code>ParserEventGeneratorKit</code>.
+<li>
+Optionally set options for the <code>ParserEventGeneratorKit</code> using
+<code>ParserEventGeneratorKit::setOption</code>.
+<li>
+Create an <code>EventGenerator</code> using
+<code>ParserEventGeneratorKit::makeEventGenerator</code>.
+<li>
+Create an instance of <code>MyApplication</code>
+(usually on the stack).
+<li>
+Call <code>EventGenerator::run</code> passing it a reference to
+the instance of <code>MyApplication</code>.
+<li>
+Delete the <code>EventGenerator</code>.
+</ul>
+<p>
+The application must include the <code>ParserEventGeneratorKit.h</code>
+file (which in turn includes <code>EventGenerator.h</code> and
+<code>SGMLApplication.h</code>), which is in the <code>generic</code>
+directory.  If your compiler does not support the standard C++
+<code>bool</code> type, you must ensure that <code>bool</code> is
+defined as a typedef for <code>int</code>, before including this.  One
+way to do this is to include <code>config.h</code> and then
+<code>Boolean.h</code> from the <code>lib</code> subdirectory of the OpenSP
+distribution.
+<p>
+On Unix, the application must be linked with the
+<code>lib/libsp.a</code> library.
+
+<h2>Example</h2>
+<p>
+Here's a simple example of an application that uses this interface.
+The application prints an outline of the element structure of a
+document, using indentation to represent nesting.
+<pre>
+// The next two lines are only to ensure bool gets defined appropriately.
+#include "config.h"
+#include "Boolean.h"
+
+#include "ParserEventGeneratorKit.h"
+#include &lt;iostream.h>
+
+ostream &amp;operator<<<!>(ostream &amp;os, SGMLApplication::CharString s)
+{
+  for (size_t i = 0; i < s.len; i++)
+    os << char(s.ptr[i]);
+  return os;
+}
+
+class OutlineApplication : public SGMLApplication {
+public:
+  OutlineApplication() : depth_(0) { }
+  void startElement(const StartElementEvent &amp;event) {
+    for (unsigned i = 0; i < depth_; i++)
+      cout << "    ";
+    cout << event.gi << '\n';
+    depth_++;
+  }
+  void endElement(const EndElementEvent &amp;) { depth_--; }
+private:
+  unsigned depth_;
+};
+
+int main(int argc, char **argv)
+{
+  ParserEventGeneratorKit parserKit;
+  // Use all the arguments after argv[0] as filenames.
+  EventGenerator *egp = parserKit.makeEventGenerator(argc - 1, argv + 1);
+  OutlineApplication app;
+  unsigned nErrors = egp->run(app);
+  delete egp;
+  return nErrors > 0;
+}
+</pre>
+<p>
+This example will only work for the non-multibyte version of OpenSP;
+for the multibyte version you will need to use the standard C++ library's
+facilities for wide character output, or roll your own equivalents
+(like the OutputCharStream used by OpenSP applications).
+<p>
+There's a bigger example in the <code>osgmlnorm</code> directory in the OpenSP
+distribution.
+This uses the <code>SGMLApplication</code> interface, but it doesn't
+use the <code>ParserEventGeneratorKit</code> interface.
+</body>
+</html>

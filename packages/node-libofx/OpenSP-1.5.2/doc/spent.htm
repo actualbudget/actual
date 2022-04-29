@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>OSPENT</TITLE>
+</HEAD>
+<BODY>
+<H1>OSPENT</H1>
+<H2>SYNOPSIS</H2>
+<P>
+<CODE>ospent</CODE> [ <CODE>option...</CODE> ] <CODE><VAR>sysid...</VAR></CODE>
+
+<H2>DESCRIPTION</H2>
+<P>
+Ospent (SGML print entity) prints the concatenation of the entities with
+<A HREF="sysid">system identifiers</A> <CODE><VAR>sysid...</VAR></CODE>
+on the standard output.
+
+<H2>OPTIONS</H2>
+<P>
+The following options are available:
+<DL>
+<DT>
+<CODE>-b<VAR>name</VAR></CODE>,
+<CODE>--bctf=<VAR>name</VAR></CODE>
+<DD>
+Use the <A HREF="sysid.htm#bctf">BCTF</A> <VAR>name</VAR> for output.
+<DT>
+<CODE>-c<VAR>sysid</VAR></CODE>,
+<CODE>--catalog=<VAR>sysid</VAR></CODE>
+<DD>
+Map public identifiers and entity names to system identifiers
+using the catalog entry file whose system identifier is <VAR>sysid</VAR>.
+This has the same effect as in <A HREF="nsgmls.htm#optc">onsgmls</A>.
+<DT>
+<CODE>-C</CODE>,
+<CODE>--catalogs</CODE>
+<DD>
+This has the same effect as in <A HREF="nsgmls.htm#optC">onsgmls</A>.
+<DT>
+<CODE>-D<VAR>directory</VAR></CODE>,
+<CODE>--directory=<VAR>directory</VAR></CODE>
+<DD>
+Search
+<CODE><VAR>directory</VAR></CODE>
+for files specified in system identifiers.
+This has the same effect as in <A HREF="nsgmls.htm#optD">onsgmls</A>.
+<DT>
+<CODE>-h</CODE>,
+<CODE>--help</CODE>
+<DD>Show a help message and exit.
+<DT>
+<CODE>-n</CODE>,
+<CODE>--non-sgml</CODE>
+<DD>
+The entity is a non-SGML data entity.
+This option forces the octets in the storage objects comprising the entity
+to be copied exactly without any of the conversions that are done for
+text entities.
+Implies <CODE>-r</CODE>.
+<DT>
+<CODE>-r</CODE>,
+<CODE>--raw</CODE>
+<DD>
+Raw output.
+Don't perform any conversion on RSs and REs when printing the entity.
+The entity would typically have the storage manager attribute
+<CODE>records=asis</CODE>.
+<DT>
+<CODE>-R</CODE>,
+<CODE>--restricted</CODE>
+<DD>
+This has the same effect as in <A HREF="nsgmls.htm#optR">onsgmls</A>.
+<DT>
+<CODE>-v</CODE>,
+<CODE>--version</CODE>
+<DD>
+Print the version number.
+</DL>
+</BODY>
+</HTML>

@@ -1,0 +1,104 @@
+#!/bin/sh
+# Architectural Form: test ArcNamrA:
+#    Deriving attribute values from content; data from element "v" goes
+#    to attribute "text" of "verse", and delete it as element content
+#    makes onsgmls segfault; nsgmls.jc accepts this input:
+#        ONSGMLS=nsgmls.jc OSGMLNORM=sgmlnorm.jc ./af-10
+# test onsgmls and osgmlnorm
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles af-10.sgml af-10.dtd af-meta-10.dtd"
+cat <<EOF >af-10.sgml
+<!DOCTYPE doc SYSTEM "af-10.dtd">
+<doc>
+ <s>
+  <v n="1">verse 1</v>
+  <v n="2">verse 2</v>
+ </s>
+</doc>
+EOF
+cat <<EOF >af-10.dtd
+<!NOTATION SGML PUBLIC "-//ISO 8879:1986//NOTATION Standard Generalized Markup
+    Language//EN">
+
+<?IS10744 ArcBase open>
+<!NOTATION open PUBLIC "-//OpenJade Project//NOTATION AFDR ARCBASE open Architecture//EN">
+<!ATTLIST #NOTATION open
+    ArcNamrA NAME #FIXED "doc-attr"
+    ArcDTD CDATA #FIXED "opendtd">
+<!ENTITY opendtd SYSTEM "af-meta-10.dtd" CDATA SGML>
+
+<!ELEMENT doc - o (s+)>
+<!ATTLIST doc
+  open NMTOKEN #FIXED "open">
+<!ELEMENT s   - o (v+)>
+<!ATTLIST s
+  open NMTOKEN   #FIXED "stanza">
+<!ELEMENT v   - o (#PCDATA)>
+<!ATTLIST v
+  n CDATA        #REQUIRED
+  open NMTOKEN   #FIXED "verse"
+  doc-attr CDATA #FIXED "text #CONTENT">
+EOF
+
+cat <<EOF >af-meta-10.dtd
+<!ELEMENT open     - o (stanza+)>
+<!ELEMENT stanza   - o (verse+)>
+<!ELEMENT verse    - o EMPTY>
+<!ATTLIST verse
+  n CDATA #REQUIRED
+  text CDATA #IMPLIED>
+EOF
+
+tmpfiles="$tmpfiles af-10-onsgmls.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >af-10-onsgmls.out -A open af-10.sgml
+tmpfiles="$tmpfiles af-10-onsgmls.ok"
+cat <<EOF >af-10-onsgmls.ok
+(OPEN
+(STANZA
+AN CDATA 1
+ATEXT CDATA verse 1
+(VERSE
+)VERSE
+AN CDATA 2
+ATEXT CDATA verse 2
+(VERSE
+)VERSE
+)STANZA
+)OPEN
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} af-10-onsgmls.ok af-10-onsgmls.out
+result=$?
+test $result = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles af-10-norm.out"
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >af-10-norm.out -A open af-10.sgml
+tmpfiles="$tmpfiles af-10-norm.ok"
+
+cat <<EOF >af-10-norm.ok
+<OPEN>
+<STANZA>
+<VERSE N="1" TEXT="verse 1">
+<VERSE N="2" TEXT="verse 2">
+</STANZA>
+</OPEN>
+EOF
+
+${DIFF} af-10-norm.ok af-10-norm.out
+result=$?
+test $result = 0 || result=$(($result + 1))
+
+rm -fr $tmpfiles
+
+exit $result

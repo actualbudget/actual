@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>OSPCAT</TITLE>
+</HEAD>
+<BODY>
+<H1>OSPCAT</H1>
+<H2>SYNOPSIS</H2>
+<P>
+<CODE>ospcat</CODE> [ <CODE>option...</CODE> ] 
+<H2>DESCRIPTION</H2>
+<P>
+Ospcat (SGML print catalog)
+prints effective system identifiers found in the catalogs 
+on the standard output. It doesn't check that the system identifiers 
+correspond to actual files. The return value is 0 if the last system 
+identifier was successfully created and 1 otherwise. 
+<H2>OPTIONS</H2>
+<P>
+The following options are available:
+<DL>
+<DT>
+<CODE>-C</CODE>,
+<CODE>--catalogs</CODE>
+<DT>
+<CODE>-b<VAR>name</VAR></CODE>,
+<CODE>--bctf=<VAR>name</VAR></CODE>
+<DT>
+<CODE>-f<VAR>file</VAR></CODE>,
+<CODE>--error-file=<VAR>file</VAR></CODE><BR>
+<DT>
+<CODE>-c<VAR>sysid</VAR></CODE>,
+<CODE>--catalog=<VAR>sysid</VAR></CODE>,
+<DT>
+<CODE>-D<VAR>directory</VAR></CODE>,
+<CODE>--directory=<VAR>directory</VAR></CODE>
+<DT>
+<CODE>-R</CODE>,
+<CODE>--restricted</CODE>
+<DD>
+These options have the same effect as in <A HREF="nsgmls.htm">onsgmls</A>.
+<DT>
+<CODE>-v</CODE>,
+<CODE>--version</CODE>
+<DD>
+Print the version number.
+<DT>
+<CODE>-h</CODE>,
+<CODE>--help</CODE>
+<DD>
+Print a help message and exit.
+<DT>
+<CODE>-P<VAR>literal</VAR></CODE>,
+<CODE>--public-id=<VAR>literal</VAR></CODE>
+<DD>
+Print the effective system identifier for the public identifier 
+<CODE><VAR>literal</VAR></CODE>.
+<DT>
+<CODE>-S<VAR>literal</VAR></CODE>,
+<CODE>-system_id=<VAR>literal</VAR></CODE>
+<DD>
+Print the effective system identifier for the system identifier
+<CODE><VAR>literal</VAR></CODE>.
+<DT>
+<CODE>-p<VAR>name</VAR></CODE>,
+<CODE>--parameter-entity=<VAR>name</VAR></CODE>
+<DD>
+Print the effective system identifier for the parameter entity
+<CODE><VAR>name</VAR></CODE>.
+<DT>
+<CODE>-d<VAR>name</VAR></CODE>,
+<CODE>--doctype=<VAR>name</VAR></CODE>
+<DD>
+Print the effective system identifier for the declaration of the 
+document type <CODE><VAR>name</VAR></CODE>.
+<DT>
+<CODE>-l<VAR>name</VAR></CODE>,
+<CODE>--linktype=<VAR>name</VAR></CODE>
+<DD>
+Print the effective system identifier for the declaration of the 
+link type <CODE><VAR>name</VAR></CODE>.
+<DT>
+<CODE>-e<VAR>name</VAR></CODE>,
+<CODE>--entity=<VAR>name</VAR></CODE>
+<DD>
+Print the effective system identifier for the general entity 
+<CODE><VAR>name</VAR></CODE>.
+<DT>
+<CODE>-n<VAR>name</VAR></CODE>,
+<CODE>--notation=<VAR>name</VAR></CODE>
+<DD>
+Print the effective system identifier for the notation
+<CODE><VAR>name</VAR></CODE>.
+<DT>
+<CODE>-s<VAR>name</VAR></CODE>,
+<CODE>--declaration=<VAR>name</VAR></CODE>
+<DD>
+Print the effective system identifier for the SGML declaration
+associated with the document type <CODE><VAR>name</VAR></CODE>. 
+This currently ignores <CODE>DTDDECL</CODE> catalog entries and
+just returns the value of the <CODE>SGMLDECL</CODE> entry.
+</DL>
+</BODY>
+</HTML>

@@ -1,0 +1,403 @@
+<?xml version='1.0'?> <!-- -*- xml -*- -->
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+ "/usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd">
+<article>
+  <articleinfo>
+    <title>osx</title>
+    <author>
+       <firstname>James</firstname>
+       <surname>Clark</surname>
+    </author>
+    <author>
+       <firstname>Ian</firstname>
+       <surname>Castle</surname>
+       <affiliation><address><email>ian.castle@openjade.org</email></address></affiliation>
+    </author>
+
+    <copyright>
+       <year>2002</year>
+       <holder>OpenJade Project</holder>
+    </copyright>
+  </articleinfo>
+
+  <section>
+    <title>Reference</title>
+    
+    <refentry>
+      <refentryinfo>
+        <title>osx</title>
+        <date>November 2002</date>
+        <productname>OpenJade</productname>
+      </refentryinfo>
+    
+      <refmeta>
+        <refentrytitle>osx</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </refmeta>
+
+      <refnamediv>
+        <refname>osx</refname>
+	<refpurpose>An SGML to XML converter</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+<!--
+ [sx [ -Cehilprvx ] [ -bencoding ] [ -ccatalog_file ] [ -Ddirectory ] [
+   -ffile ] [ -wwarning_type ] [ -xxml_output_option ] sysid... ]
+-->
+        <cmdsynopsis>
+          <command>osx</command>
+          <arg choice="opt"><option>-CeghnRvx</option></arg>
+	  <arg choice="opt"><option>-a<replaceable>name</replaceable></option></arg>
+	  <arg choice="opt"><option>-A<replaceable>architecture</replaceable></option></arg>
+	  <arg choice="opt"><option>-b<replaceable>encoding</replaceable></option></arg>
+	  <arg choice="opt"><option>-c<replaceable>catalog_file</replaceable></option></arg>
+	  <arg choice="opt"><option>-d<replaceable>directory</replaceable></option></arg>
+	  <arg choice="opt"><option>-D<replaceable>directory</replaceable></option></arg>
+	  <arg choice="opt"><option>-i<replaceable>name</replaceable></option></arg>
+	  <arg choice="opt"><option>-f<replaceable>file</replaceable></option></arg>
+	  <arg choice="opt"><option>-l<replaceable>dtd_file</replaceable></option></arg>
+	  <arg choice="opt"><option>-w<replaceable>warning_type</replaceable></option></arg>
+	  <arg choice="opt" rep="repeat"><option>-x<replaceable>xml_output_option</replaceable></option></arg>
+	  <arg choice="opt" rep="repeat"><option><replaceable>sysid</replaceable></option></arg>
+       </cmdsynopsis>
+
+     </refsynopsisdiv>
+
+     <refsect1>
+       <title>Description</title>
+<para>
+   <command>osx</command> converts SGML to XML. <command>osx</command> parses and validates the SGML document
+   contained in <cmdsynopsis><arg rep="repeat"><option><replaceable>sysid</replaceable></option></arg></cmdsynopsis> and writes an equivalent XML document to the
+   standard output. <command>osx</command> will warn about SGML constructs which have no XML
+   equivalent.
+</para>
+
+        <para>Part of an SGML System Conforming to International Standard ISO 8879 -- Standard Generalized Markup Language. An SGML Extended Facilities system conforming to Annex A of International Standard ISO/IEC 10744 -- Hypermedia/Time-based Structuring Language.</para>
+     </refsect1>
+   
+   <refsect1>
+     <title>Options</title>   
+<para>
+   The following options are available:
+</para>
+<variablelist>
+ <varlistentry>
+  <term><option>-a<replaceable>name</replaceable></option></term>
+  <term><option>--activate=<replaceable>name</replaceable></option></term>
+  <listitem>
+   <para>
+        Make doctype or linkname <replaceable>name</replaceable> active.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-A<replaceable>name</replaceable></option></term>
+  <term><option>--architecture=<replaceable>name</replaceable></option></term>
+  <listitem>
+   <para>
+        Parse with respect to architecture <replaceable>name</replaceable>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-b<replaceable>encoding</replaceable></option></term>
+  <term><option>--encoding=<replaceable>encoding</replaceable></option></term>
+  <listitem>
+   <para>
+          Use the BCTF <replaceable>encoding</replaceable> for output. By default <command>osx</command> uses UTF-8.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-c<replaceable>sysid</replaceable></option></term>
+  <term><option>--catalog=<replaceable>sysid</replaceable></option></term>
+  <listitem>
+   <para>
+        Map public identifiers and entity names to system identifiers using
+        the catalog entry file whose system identifier is
+        <replaceable>sysid</replaceable>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-C</option></term>
+  <term><option>--catalogs</option></term>
+  <listitem>
+   <para>
+          This has the same effect as in <command>onsgmls(1)</command>.
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term><option>-d<replaceable>directory</replaceable></option></term>
+  <term><option>--entity_output_location=<replaceable>directory</replaceable></option></term>
+  <listitem>
+   <para>
+          Place output files in <replaceable>directory</replaceable>.
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term><option>-D<replaceable>directory</replaceable></option></term>
+  <term><option>--directory=<replaceable>directory</replaceable></option></term>
+  <listitem>
+   <para>
+          Search <replaceable>directory</replaceable> for files specified in system identifiers.
+          This has the same effect as in <command>onsgmls(1)</command>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-e</option></term>
+  <term><option>--open-entities</option></term>
+  <listitem>
+   <para>
+          Describe open entities in error messages.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-E<replaceable>max_errors</replaceable></option></term>
+  <term><option>--max-errors=<replaceable>max_errors</replaceable></option></term>
+  <listitem>
+   <para>
+          Give up after <replaceable>max_errors</replaceable> errors.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-f<replaceable>file</replaceable></option></term>
+  <term><option>--error-file=<replaceable>file</replaceable></option></term>
+  <listitem>
+   <para>
+          Redirect errors to <replaceable>file</replaceable>.
+          This is useful mainly with shells that do not support redirection
+          of stderr.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-g</option></term>
+  <term><option>--open-elements</option></term>
+  <listitem>
+   <para>
+          Describe open elements in error messages.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-h</option></term>
+  <term><option>--help</option></term>
+  <listitem>
+   <para>
+          Display a help text and exit.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-i<replaceable>name</replaceable></option></term>
+  <term><option>--include=<replaceable>name</replaceable></option></term>
+  <listitem>
+   <para>
+          This has the same effect as in <command>onsgmls(1)</command>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-l<replaceable>dtd-file</replaceable></option></term>
+  <term><option>--dtd_location=<replaceable>dtd-file</replaceable></option></term>
+  <listitem>
+   <para>
+          Specify that the resulting XML file should conform to the DTD in
+	  <replaceable>dtd-file</replaceable>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-n</option></term>
+  <term><option>--error-numbers</option></term>
+  <listitem>
+   <para>
+          Show error numbers in error messages.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>--references</option></term>
+  <listitem>
+   <para>
+          Show references in error messages.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-R</option></term>
+  <term><option>--restricted</option></term>
+  <listitem>
+   <para>
+          This has the same effect as in <command>onsgmls(1)</command>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry>
+  <term><option>-v</option></term>
+  <term><option>--version</option></term>
+  <listitem>
+   <para>
+          Print the version number and exit.
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term><option>-w<replaceable>type</replaceable></option></term>
+  <term><option>--warning=<replaceable>type</replaceable></option></term>
+  <listitem>
+   <para>
+          Control warnings and errors according to type. This has the
+          same effect as in <command>onsgmls(1)</command>.
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term><option>-x<replaceable>xml_output_option</replaceable></option></term>
+  <term><option>--xml-output-option=<replaceable>xml_output_option</replaceable></option></term>
+  <listitem>
+   <para>
+          Control the XML output according to the value of
+          <replaceable>xml_output_option</replaceable> as follows:
+   </para>
+     <para><option>no-nl-in-tag</option>
+                Don't use newlines inside start-tags.
+                Usually <command>osx</command> uses
+                newlines inside start-tags so as to reduce the
+                probability of excessively long lines.
+      </para>
+     <para><option>id</option>
+                Output attribute declarations for ID attributes.
+      </para>
+     <para><option>notation</option>
+                Output declarations for notations.
+      </para>
+     <para><option>ndata</option>
+                Output declarations for external data entities.
+                XML requires these to be NDATA.
+                <command>osx</command> will warn about CDATA and
+                SDATA external data entities and output them as NDATA
+                entities.
+      </para>
+     <para><option>cdata</option>
+                Use XML CDATA sections for CDATA marked sections and for
+                elements with a declared content of CDATA.
+      </para>
+     <para><option>comment</option>
+                Output comment declarations. Comment declarations in the
+                DTD will not be output. </para>
+     <para><option>lower</option>
+                Prefer lower case. Names that were subjected to
+                upper-case substitution by SGML will be folded to lower
+                case. This does not include reserved names; XML requires
+                these to be in upper-case.
+      </para>
+     <para><option>pi-escape</option>
+                Escape &amp;&lt;&gt; in the contents of processing instructions
+                using the amp, lt and gt entities. This allows processing
+                instructions to contain the string &gt;?, but requires that
+                applications handle the escapes.
+      </para>
+     <para><option>empty</option>
+      Use the &lt;e/&gt; syntax for element types e declared as EMPTY.
+      </para>
+     <para><option>attlist</option>
+      Output an ATTLIST declaration for every element specifying
+                the type of all attributes. The default will always be
+                #IMPLIED.
+      </para>
+
+      <para><option>report-input-sources</option>
+                Output a processing instruction to report when an input
+                source other than the main file is opened or closed in the
+                instance. Do not report any input source changes in
+                the DTD.</para>
+
+      <para><option>report-entities</option>
+                Output a processing instruction to report when an external
+                entity reference has been resolved in the instance.
+                Do not report any entity resolutions in the DTD.</para>
+
+      <para><option>no-expand-external</option>
+                Preserve external entities, write a declaration driver
+                file named "extEntities.dtf", and include that file
+                in the instance's internal subset.</para>
+
+      <para><option>no-expand-internal</option>
+                Preserve internal entities, write a declaration driver file
+                named "intEntities.dtf", and include that file in the 
+                instance's internal subset.</para>
+
+      <para><option>no-external-decl</option>
+                Do not include the external entities declaration driver file
+                in the instance's internal subset.</para>
+
+      <para><option>no-internal-decl</option>
+                Do not include the internal entities declaration driver file
+                in the instance's internal subset.</para>
+
+      <para><option>no-output-outside-outdir</option>
+                When preserving external entities, do not write output files
+                outside the specified output directory ("." by default).
+                In other words, if an external entity's system identifier
+                includes enough instances of ".." to cause osx to write
+                a file outside (above) the output directory, exit (by default
+                osx will issue a warning but will write the file and
+                continue.</para>
+
+      <para><option>no-overwrite</option>
+                When preserving internal or external entities, multiple 
+                output files will be written. If this option is specified,
+                do not overwrite existing files; instead, attempt to append
+                a number to the end of the original filename to create a
+                unique filename. Exit with an error if too many (100)
+                such files already exist.</para>
+
+      <para><option>preserve-case</option>
+                Preserve casing as specified in the DTD for element names;
+                attribute names; attribute values which are token lists.</para>
+
+      <para><option>sdata-as-pis</option>
+                When translating SDATA entities (whether expanding them or
+                providing a definition for them in the output's internal
+                subset), express them as processing instructions instead
+                of as general internal entities.</para>
+    
+   <para>Multiple <option>-x</option> options are allowed. </para>
+  </listitem>
+ </varlistentry>    
+</variablelist>
+
+</refsect1>
+
+   <refsect1>
+     <title>See Also</title>
+     <para><command>onsgmls(1)</command>, <command>ospam(1)</command>,
+     <command>onsgmlnorm(1)</command>, <command>ospent(1)</command></para>
+   </refsect1>
+   </refentry>
+  </section>
+</article>
+   

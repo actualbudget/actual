@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>Building OpenSP</TITLE>
+</HEAD>
+<BODY>
+<H1>Building OpenSP</H1>
+<P>
+<h3><A NAME=building-win32>Win32</A></h3>
+<p>
+Only Microsoft Visual C++ 6.0 is supported. Also, Perl 5 is required; the
+executable must be on your PATH.
+</p>
+<p>
+To build on the command line, ensure that the directories
+containing <code>msdev</code> and <code>nmake</code> are in your path,
+typically by executing
+the command:
+<pre>
+path C:/Program Files/Microsoft Visual Studio/Common/MSDev98/Bin;
+    C:/Program Files/Microsoft Visual Studio/VC98/Bin;%path%
+</pre>
+<p>
+(all in one long line) then run the command:
+
+<pre>
+build-win32.bat
+</pre>
+<p>
+To build using the Visual
+Studio GUI, open the workspace <code>SP.dsw</code> and build the
+<code>Win32&nbsp;Release</code> configuration of the <code>all</code>
+project.  You must first do a command-line build, however, to get
+the perl-generated files.
+</p>
+<h4>Localized Win32 builds</h4>
+<p>
+The messages issued by the OpenSP programs have been translated 
+(currently German and Swedish are supported). Although it is not
+yet possible to select the language at runtime under Windows, it
+is possible to select the language at build time. To do so, you
+have to set the variable <code>LANG</code> in 
+<code>sp-generate.mak</code> to one of the following values:
+</p>
+<ul>
+<li><code>en</code> for English (default)
+<li><code>de</code> for German
+<li><code>sv</code> for Swedish
+</ul>
+<p>After that you have to regenerate all <code>.rc</code> files.</p>
+<h3><A NAME=building-unix>Unix</A></h3>
+<p>
+Use the <a HREF="autoconf.htm">autoconf support</a>.
+</body>
+</html>

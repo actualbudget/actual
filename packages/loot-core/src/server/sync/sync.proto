@@ -1,0 +1,34 @@
+
+syntax = "proto3";
+
+message EncryptedData {
+        bytes iv = 1;
+        bytes authTag = 2;
+        bytes data = 3;
+}
+
+message Message {
+        string dataset = 1;
+        string row = 2;
+        string column = 3;
+        string value = 4;
+}
+
+message MessageEnvelope {
+        string timestamp = 1;
+        bool isEncrypted = 2;
+        bytes content = 3;
+}
+
+message SyncRequest {
+        repeated MessageEnvelope messages = 1;
+        string fileId = 2;
+        string groupId = 3;
+        string keyId = 5;
+        string since = 6;
+}
+
+message SyncResponse {
+        repeated MessageEnvelope messages = 1;
+        string merkle = 2;
+}

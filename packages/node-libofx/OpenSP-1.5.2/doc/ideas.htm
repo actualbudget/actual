@@ -1,0 +1,515 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>Ideas for improving SP</TITLE>
+</HEAD>
+<BODY>
+<H1>Ideas for improving SP</H1>
+<H2>
+Parser
+</H2>
+<P>
+When !internalCharsetIsDocCharset, need to check that every
+significant character is an SGML character.
+<P>
+Treat "ISO Registration Number NNN//" public ids specially.  Warn if
+they use designating sequence inconsistently.
+<P>
+Pass non-declared attributes through to application.
+<P>
+Avoid expensive overflow test in stringToNumber when length of number
+is less then something guaranteed not to overflow.
+<P>
+Allow external character set to be complete character set description.
+<P>
+Maybe distinguish non-SGML characters as separate event even when
+internalCharsetIsDocCharset.
+<P>
+Supporting caching across multiple runs of parser in single
+process.
+<P>
+Make Dtd copiable.
+<P>
+?Subdoc parser needs character set for system id (should be system
+character set).
+<P>
+Recover better from non-existent documents or subdocuments.
+<P>
+Think about entity declarations/references in inactive LPDs.
+<P>
+Don't allow name groups in parameter entity references in document
+type specifications in start-/end-tags.
+<P>
+With link, don't do a pass 2 unless we replace a referenced entity
+(what about default entity?).
+<P>
+Options to warn about things that HTML disallows: marked sections in
+instance, explicit subsets.
+<P>
+Option to warn about MDCs in comments in comment declarations.
+<P>
+Option to warn about omitted REFC.
+<P>
+Check that names of added functions are valid names in concrete syntax
+(both characters and lengths).  Also need to do upper-case
+substitution on them?
+<P>
+Recover from nested doctype declaration intelligently.
+<P>
+Recover from missing doctype declaration intelligently. 
+<P>
+Could optimize parsing of attribute literals using technique similar
+to extendData().
+<P>
+attributeValueLength error should give actual length of value.
+<P>
+Recover better from entity reference with name group in literal.
+<P>
+At start of pass 2 clear everything in pass1LPDs except entity sets.
+<P>
+Give an error if EXPLICIT > 1 and LPDs don't chain as required by
+436:5-7 and 436:18-20.
+<P>
+Handle quantity errors by reporting at the end of the prolog and the
+end of the instance any quantities that need to be increased.
+<P>
+Make noSuchReservedName error more helpful.
+<P>
+Function characters should perform their function even when markup
+recognition is suppressed. (I think I've handled this.)
+<P>
+Give a warning for notation attribute that is #CONREF.
+<P>
+Try to separate out Parser::compileModes().
+<P>
+In CompiledModelGroup have vector that gives an index for each element type
+that occurs in the model group.  Then in each leaf content token have a
+vector that maps this index to a LeafContentToken *, if there
+is a simple transition (no and groups involved) to that element type.
+<P>
+MatchState::minAndDepth and MatchState::AndInfo should be separated
+off info object pointed to from MatchState; pointer would be null for
+elements with no AND groups.
+<P>
+What to do if we encounter USELINK or USEMAP declaration after DTD in
+prolog?  Should stop prolog and start DTD.  If we have SCOPE INSTANCE
+then if we get an unknown declaration type in prolog, don't give
+error, but unget token and start instance.
+<P>
+?Have separate version of reportNonSgml() for case where datachar is allowed.
+<P>
+Implement CONCUR.
+<P>
+AttributeDefinition constructors should have Owner&lt;DeclaredValue> &,
+arguments to avoid storage leaks when exceptions are thrown.
+<P>
+Create a list like IList but which keeps track of length.  Then
+combine tagLevel into openElement stack, and inputLevel into
+inputStack.
+<P>
+AttributeDefinition::makeValue should return
+ConstResourcePointer&lt;AttributeValue>.
+<P>
+Syntax member functions should use reference for result.
+<P>
+Have a LocationKey data structure that can be used to determine the
+relative order of locations in possibly different concurrent
+instances.  Contains: offset in document instance; is it a replacement
+of named character reference; for each entity and numeric character
+reference: location in entity and index of dtd in which instance is
+declared.
+<P>
+On systems with fixed stacks, avoid unlimited stack growth: hard
+limits on number of SUBDOCS and GRPLVL.
+<P>
+With extendData and extendS don't extend more than some fixed amount
+(eg 1024), otherwise could overrun InputSource buffer on 16-bit
+system.
+<P>
+Have a location in ElementType saying where the first mention of the
+element name was.  Useful for giving warnings about undefined
+elements.
+<P>
+How to detect 310:8-10?
+<P>
+AttributeSemantics should return const pointers rather than ResourcePointer's
+<P>
+Rename Parser -> ParserImpl SgmlParser -> Parser
+Syntax::isB -> Syntax::isBlank
+<P>
+What mode should be used for parsing other prolog after document element?
+<P>
+Flag out of context data.
+<P>
+Provide mechanism to allow character names to be mapped onto universal
+character numbers.
+<P>
+Provide mechanism to allow specification of wbat characters are
+control characters (for the purposes of SHUNCHAR controls).
+<P>
+With SCOPE INSTANCE, which syntax should be used for delimiters in
+bracketed text entities?
+<P>
+Better error messages for ambiguous delimiters.
+<P>
+Do we need both EndLpd and ComplexLink/SimpleLink events?
+<P>
+What to do about 457:19-21?
+<P>
+Rename lpd_ to activeLpd_; allLpd_ to lpd_.
+<P>
+Test for validity of character numbers in syn ref charset (perhaps
+unnecessary, because bad numbers won't be translateable into doc
+charset).
+<P>
+Option to read bootstrap character set from entity.
+<P>
+In AttributeDefinitionList have a flag that is true if any checking of
+unspecified values in attribute list is needed (ie CURRENT, REQUIRED,
+non-implied ENTITY, non-implied NOTATION).  In this case can avoid
+running over attributes in AttributeList::finish, by computing value
+only when user calls Attribute::value().
+<P>
+Construct link attributes from definition if no applicable link rule.
+(RAST maybe doesn't want this.  Make it a separate method in LinkProcess and
+use in SgmlsEventHandler. Very useful with ArcEngine.)
+<P>
+Shouldn't have OpenElementInfo in Message.  Instead use RTTI.
+<P>
+noSuchAttribute: include gi in message; if element is undefined, don't
+give error at all
+<P>
+noSuchAttributeToken: say what element or entity
+<P>
+nonExistentEntityRef should say document/link type
+<P>
+Distinguish errors that are totally recoverable.
+<P>
+Find better way to unpack entity information in entity attribute.
+
+<H2>
+Entity Manager
+</H2>
+<P>
+Build document<->internal translation tables once per document not
+once per entity.
+<P>
+Avoid document<->internal translations when one is the subset of the other
+(or something like that).
+<P>
+In cases where it won't cause problems, don't translate
+non-SGML/unrepresentable characters when doing document<->internal
+translations, so that user gets better error message.
+<P>
+Recover better from unknown document character sets (shouldn't report
+them as non-SGML characters).
+<P>
+Maybe need to keep track of set of SGML characters as numbers in document
+character set.
+<P>
+Optimize TranslateDecoder where underlying codingSystem is identity by
+using simple lookup table.
+<P>
+Make use of charset parameter in MIME header for HTTP.  Also generate
+AcceptCharsets line in request.
+<P>
+Implement .mim files (if extension of file is same as environment variable
+SP_MIME_EXT assume it has a MIME header).
+<P>
+Avoid using TranslateCodingSystem when translation is a no-op.
+<P>
+Make SP_CONVERT when !SP_MULTI_BYTE.
+<P>
+Avoid requiring that BASE sysid exist.
+<P>
+When FSI has only a single storage manager and that is a literal,
+return an InternalInputSource.
+<P>
+Allow user of InputSource to specify what bit combinations they
+want to see for RS and RE.
+<P>
+Have environment variable SP_INPUT_BCTF that overrides SP_BCTF for
+input.
+<P>
+Avoid using numeric character references for all characters in storage
+object identifier of literal storage manager in effective system
+identifier.
+<P>
+Instead of registering coding system pass CodingSystemKit that can create
+that can create coding systems.
+<P>
+Need BCTF entry in catalog that specifies default BCTF.
+<P>
+Allow encodings to be externally specified (eg in a catalog) as a
+combination of a BCTF and a character set.
+<P>
+An SOEntityCatalog should consist of a Vector&lt;ConstPtr&lt;EntityCatalog>
+> which can be shared between several catalogs.  This would facilitate
+> caching.
+<P>
+Maybe need to be able to specify two types of catalog entry file: one
+used for all documents; one used for this document alone.
+<P>
+Allow end-tags in FSIs.  Support alternative SOSs.
+<P>
+Character sets in the catalog need rethinking.  Also character set of
+ParsedSystemId::Map::publicId.
+<P>
+Allow for HTTP proxy.
+<P>
+Cache catalogs.
+<P>
+Use Microsoft ActiveX (formerly Sweeper) DLL on Win95 or NT.
+<P>
+Support FILE URLs.
+<P>
+Perhaps don't want to do searching for catalog files (and perhaps
+command line files).
+<P>
+Provide mechanism for specifying when (if at all) base dir is searched
+relative to other dirs.
+<P>
+Provide extension to catalog format to distinguish entities declared
+in non-base DTDs. Perhaps precede entity name by document type name
+surrounded by GRPO/GRPC delimiters.
+<P>
+URLStorageManager should use a DescriptorManager shared with
+PosixStorageManager.
+<P>
+URLStorageManager::resolveRelative should delete "xxx/../" and "./"
+components.  Might also be a good idea to resolve host names.
+<P>
+Implement JIS encoding system (what should be done with half-width yen
+and overbar in JIS-Roman? translate to Unicode).
+<P>
+ExternalInfoImpl::convertOffset: when the position is the character
+past the last character and the last character was a newline, line
+number should be number of lines + 1.
+<P>
+Try harder to rewind in StdioStorageObject.
+
+<H2>
+Generic
+</H2>
+<P>
+Provide mechanism to access data entities using generated system id.
+<P>
+Support IMPLICIT/SIMPLE LINK.
+<P>
+Character set information.
+<P>
+Need to know space character that separates token.  Alternatively
+provide broken down view of tokens.
+<P>
+Need to know IDREF (and other declared values)?
+
+<H2>
+nsgmls
+</H2>
+<P>
+Problem with "\#n;" escape sequence is that it might get used other
+than in data.  Probably should get rid of this feature, and give
+a warning when there's an unencodable character.
+
+<H2>
+Internal
+</H2>
+<P>
+Make sure all files use #pragma i/i.
+<P>
+Get rid of assumption that Vector&lt;T>::size_type, String&lt;T>::size_type
+is size_t.
+<P>
+Maybe align Owner with auto_ptr.
+<P>
+Get rid of uses of string as identifier.
+<P>
+?Maybe support non-const copy constructors for NCVector/Owner.
+<P>
+Get rid of asEntityOrigin (as far as possible).  Make
+InputSourceOrigin::defLocation virtual on origin.  Avoid excessive use
+of asInputSourceOrigin.
+<P>
+Hash should define Hash(String&lt;unsigned char>),
+Hash(String&lt;unsigned short>) etc.
+<P>
+Invert sense of SP_HAVE_BOOL define.
+<P>
+Get rid of OutputCharStream::open.  Instead have
+OutputCharStream::setEncoding.  (Perhaps make a friend so we can use
+ostream if we're not interested in encodings.)  Allow use of ostream
+instead of OutputCharStream.  Change ParserToolkit::errorStream_'s coding
+system when we change the coding system.
+<P>
+Support 32-bit Char. Need to fix XcharMap and SubstTable.
+Detemplatize SubstTable.  Then support UTF-16.
+<P>
+Have a common version of Ptr for things that have a virtual
+destructor.
+<P>
+Have a common version of Owner for all things that have a virtual
+destructor.
+<P>
+Inheritance in AttributeSemantics unnecesary.
+<P>
+Rename ISet -> RangeSet.
+<P>
+ISet and RangeMap should use binary search.
+<P>
+Better hash function for wide characters.
+<P>
+OutputCharStream should canonically use RS/RE and translate to system
+newline char with raw option that prevents this.
+<P>
+Avoid having Entity.h depend on ParserState, perhaps by double
+dispatching.
+<P>
+Add uses of explicit keyword.
+<P>
+When generating message.h file; if we don't have .cxx file and
+namespaces are supported, use anonymous namespace.
+
+<H2>
+Application framework
+</H2>
+<P>
+Only use static programName for outOfMemory message.
+<P>
+Need to use AppChar *const * not AppChar ** in CmdLineApp.
+<P>
+When reporting message with MessageEventHandler need to be able to
+update error count.
+<P>
+Option argument names need to be internationalized.
+<P>
+Support response files for DOS.
+<P>
+Sort options in usage message.
+<P>
+StringMessageArg should be associated with a character set (in
+particular, need to distinguish parser character sets from
+StorageManager character sets).
+<P>
+Should translate StringMessageArg from document character set to
+system character set.  Have MessageReporter::setDocumentCharacter
+function.
+<P>
+In MessageReporter, maybe distinguish messages coming from the parser.
+<P>
+Don't ever give a non-existent file as a location in a error message.
+<P>
+Text of messages should be able to specify that an open quote or close
+quote should be inserted at a particular point.
+<P>
+When outputting a StringMessageArg translate \r to \n.
+<P>
+Make sure wild cards work in VC++ and MS-DOS.
+
+<H2>
+Win32
+</H2>
+<P>
+Remove path and extension from program name in error messages.
+<P>
+Compilers can typically eliminate unused templates.  Reengineer Vector
+to reduce code size with such compilers.
+<P>
+Store messages in resources; requires numeric tags for messages.
+<P>
+Should automatically register all available code pages.
+<P>
+Make use of IsTextUnicode() API.
+<P>
+Have StorageManager that uses Win32 API directly.  Would avoid limits
+on number of open files. Also use flag that says file is being
+accessed sequentially.
+<P>
+Allow DTDs to be compiled into binary by having storage manager that
+uses resource ids.
+
+<H2>
+Architecture engine
+</H2>
+<P>
+Should give an error with -A if the specified arch does not exist.
+<P>
+Interpret APPINFO parameter, and automatically enable architectural
+processing based on this.
+<P>
+Handle derived architecture support attributes.
+<P>
+When doing architectural processing in link type, not possible to have
+notation declaration, so need some other way to specify public
+identifier for architecture.
+<P>
+Allow DOCTYPE to be declared inline (as with CONCUR or EXPLICIT LINK).
+<P>
+Grok conventional comments.
+<P>
+Make work automatically with EventHandlers that process subdoc.  Make
+references to subdocs architectural.
+<P>
+Support different SGML declaration for meta-DTD.
+<P>
+Maybe should map internal sdata/cdata entities to copies in meta-DTD.
+<P>
+Perhaps when getting open element info should indicate that gis are
+architectural.
+<P>
+Think about references to SDATA entities in default values in meta-DTD.
+<P>
+Add default entity from real DTD to meta-DTD.
+<P>
+Tokenize ArcForm attribute appropriately.
+<P>
+Make special case for parsing DTD when entity can't be accessed.
+<P>
+Try to provide extension that would allow architecture elements be
+asynchronous with actual elements?  This would provide CONCUR
+functionality.
+
+<H2>
+sgmlnorm
+</H2>
+<P>
+Avoid bogus newline from invalid empty document.
+<P>
+Avoid always escaping >.
+<P>
+Option to say whether to use character references for 8-bit characters.
+<P>
+Option to output implied attributes.
+<P>
+Option to output all non-implied attributes.
+<P>
+Option to omit attribute name with name tokens.
+<P>
+Protect against recognition of short references.
+<P>
+Option to preserve CDATA entity references.
+<P>
+Option to output general entity declarations in DTD subset
+(but what about data attributes)?
+
+<H2>
+spam
+</H2>
+<P>
+Option to normalize names.
+<P>
+Add comments round expanded entities to prevent false delimiter
+recognition.
+<P>
+Add newline at the end if last thing was omitted tag.
+<P>
+Option to warn about changes in internal entities when not expanding.
+
+<H2>
+Documentation
+</H2>
+<P>
+Error message format.
+<P>
+&lt;catalog&gt; FSI tag.
+</BODY>
+</HTML>

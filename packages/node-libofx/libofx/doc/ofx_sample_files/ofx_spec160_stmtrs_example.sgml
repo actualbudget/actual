@@ -1,0 +1,57 @@
+<OFX>                                    <!-- Begin response data -->
+  <SIGNONMSGSRSV1>
+     <SONRS>                             <!-- Begin signon -->
+          <STATUS>                       <!-- Begin status aggregate -->
+            <CODE>0                      <!-- OK -->
+            <SEVERITY>INFO
+          </STATUS>
+          <DTSERVER>19961029101003       <!-- Oct. 29, 1996, 10:10:03 am -->
+          <LANGUAGE>ENG                  <!-- Language used in response -->
+          <DTPROFUP>19961029101003       <!-- Last update to profile -->
+          <DTACCTUP>19961029101003       <!-- Last account update -->
+     </SONRS>                            <!-- End of signon -->
+  </SIGNONMSGSRSV1>
+  <BANKMSGSRSV1>
+     <STMTTRNRS>                         <!-- Begin response -->
+          <TRNUID>1001                   <!-- Client ID sent in request -->
+          <STATUS>                       <!-- Start status aggregate -->
+            <CODE>0                      <!-- OK -->
+            <SEVERITY>INFO
+          </STATUS>
+          <STMTRS>                       <!-- Begin statement response -->
+            <CURDEF>USD
+            <BANKACCTFROM>               <!-- Identify the account -->
+              <BANKID>121099999          <!-- Routing transit or other FI ID -->
+              <ACCTID>999988             <!-- Account number -->
+              <ACCTTYPE>CHECKING         <!-- Account type -->
+            </BANKACCTFROM>              <!-- End of account ID -->
+            <BANKTRANLIST>               <!-- Begin list of statement trans. -->
+              <DTSTART>19961001          <!-- Start date: Oct. 1, 1996 -->
+              <DTEND>19961028            <!-- End date: Oct. 28, 1996 -->
+              <STMTTRN>                  <!-- First statement transaction -->
+                      <TRNTYPE>CHECK     <!--Check -->
+                      <DTPOSTED>19961004 <!-- Posted on Oct. 4, 1996 -->
+                      <TRNAMT>-200.00    <!-- $200.00 -->
+                      <FITID>00002       <!-- Unique ID -->
+                      <CHECKNUM>1000     <!-- Check number -->
+            </STMTTRN>                   <!-- End statement transaction -->
+            <STMTTRN>                    <!-- Second transaction -->
+                   <TRNTYPE>ATM          <!-- ATM transaction -->
+                      <DTPOSTED>19961020 <!-- Posted on Oct. 20, 1996 -->
+                   <DTUSER>19961020      <!-- User date of Oct. 20, 1996 -->
+                   <TRNAMT>-300.00       <!-- $300.00 -->
+                   <FITID>00003          <!-- Unique ID -->
+            </STMTTRN>                   <!-- End statement transaction -->
+          </BANKTRANLIST>                <!-- End list of statement trans. -->
+          <LEDGERBAL>                    <!-- Ledger balance aggregate -->
+            <BALAMT>200.29               <!-- Bal amount: $200.29 -->
+            <DTASOF>199610291120         <!-- Bal date: 10/29/96, 11:20 am -->
+          </LEDGERBAL>                   <!-- End ledger balance -->
+          <AVAILBAL>                     <!-- Available balance aggregate -->
+            <BALAMT>200.29               <!-- Bal amount: $200.29 -->
+            <DTASOF>199610291120         <!-- Bal date: 10/29/96, 11:20 am -->
+          </AVAILBAL>                    <!-- End available balance -->
+	</STMTRS>                        <!-- End statement response -->
+     </STMTTRNRS>                        <!-- End of transaction -->
+  </BANKMSGSRSV1>
+</OFX>                                   <!-- End of response data -->

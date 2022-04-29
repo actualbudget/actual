@@ -1,0 +1,9 @@
+STRINGTABLE
+BEGIN
+  100, "invalid RAST processing instruction"
+  101, "invalid link type %1 in rast-active-lpd processing instruction"
+  102, "duplicate link type %1 in rast-active-lpd processing instruction"
+  103, "rast-link-rule: processing instruction matches more than one link rule"
+  104, "rast-link-rule: processing instruction does not match any link rules"
+  105, "multiple applicable link rules without disambiguating rast-link-rule: processing instruction"
+END

@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>OpenSP - XML support</TITLE>
+</HEAD>
+<BODY>
+<H1>XML support</H1>
+<H2>Using OpenSP to parse XML</H2>
+<P>
+To enable OpenSP's support for <A
+HREF="http://www.w3.org/TR/1998/REC-xml-19980210">XML 1.0</A>:
+<UL>
+<LI>
+Set the <SAMP>SP_CHARSET_FIXED</SAMP> environment variable to <SAMP>YES</SAMP>.
+<LI>
+Set the <SAMP>SP_ENCODING</SAMP> environment variable to <SAMP>XML</SAMP>.
+<LI>
+Set the <SAMP>SGML_CATALOG_FILES</SAMP> environment variable to
+point to the file <SAMP>pubtext/xml.soc</SAMP>.
+<LI>
+Use the <SAMP>-wxml</SAMP> option.
+<LI>
+If the document is not supposed to be valid, use <SAMP>-wno-valid</SAMP>
+option.
+</UL>
+
+<H2>Limitations</H2>
+<P>
+OpenSP does not enforce the following XML constraints:
+<UL>
+<LI>
+XML constrains processing instructions
+with a target matching <CODE>[Xx][Mm][Ll]</CODE>,
+both in terms of where they can occur and their content.
+<LI>
+XML does not allow a parameter separator that is adjacent to a
+delimiter to be omitted.
+<LI>
+XML has constraints on the use of <CODE>&amp;</CODE> in parameter
+literals.  In SGML terms, XML says that the <b>ero</b> delimiter is
+recognized in a parameter literal, and that it must be followed by an
+entity reference, but the entity reference is not expanded.
+</UL>
+<P>
+Line ends are normalized using SGML conventions to a CR/LF character
+pair rather than using the XML convention of a single LF character.
+<P>
+OpenSP does not enforce XML's rules on not continuing normal processing
+after an error.  Applications can enforce these if they choose.
+
+<H2>Web SGML Adaptations Annex</H2>
+<P>
+OpenSP's support for XML is based on <A
+HREF="http://www.ornl.gov/sgml/sc34/document/0029.htm">Annex K of ISO
+8879</A> (the Web SGML Adaptations Annex).
+The following features of Annex K are not yet implemented:
+<UL>
+<LI>
+<SAMP>#IMPLIED</SAMP> document type name
+<LI>
+<SAMP>#ALL</SAMP> and <SAMP>#IMPLICIT</SAMP> in model groups and exceptions
+</UL>
+</BODY>
+</HTML>

@@ -1,0 +1,253 @@
+<?xml version='1.0'?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+ "/usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd">
+<article>
+  <articleinfo>
+    <title>osgmlnorm</title>
+    <author>
+      <firstname>James</firstname>
+      <surname>Clark</surname>
+    </author>
+    <author>
+      <firstname>Ian</firstname>
+      <surname>Castle</surname>
+      <affiliation><address><email>ian.castle@openjade.org</email></address></affiliation>
+    </author>
+    <copyright>
+      <year>2002</year>
+      <holder>OpenJade Project</holder>
+    </copyright>
+  </articleinfo>
+
+  <section>
+    <title>Reference</title>
+    
+    <refentry>
+      <refentryinfo>
+        <title>osgmlnorm</title>
+        <date>January 2002</date>
+        <productname>OpenJade</productname>
+      </refentryinfo>
+
+      <refmeta>
+        <refentrytitle>osgmlnorm</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </refmeta>
+
+      <refnamediv>
+        <refname>osgmlnorm</refname>
+	<refpurpose>An SGML/XML document normalizer</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>osgmlnorm</command>
+          <arg choice="opt"><option>-CdeghmnrRvx</option></arg>
+          <arg choice="opt"><option>-a<replaceable>linktype</replaceable></option></arg>
+          <arg choice="opt"><option>-A<replaceable>architecture</replaceable></option></arg>
+          <arg choice="opt"><option>-b<replaceable>bctf</replaceable></option></arg>
+          <arg choice="opt"><option>-c<replaceable>catalog</replaceable></option></arg>
+          <arg choice="opt" rep="repeat"><option>-D<replaceable>directory</replaceable></option></arg>
+          <arg choice="opt" rep="repeat"><option>-E<replaceable>max_errors</replaceable></option></arg>
+          <arg choice="opt" rep="repeat"><option>-i<replaceable>name</replaceable></option></arg>
+          <arg choice="opt" rep="repeat"><option>-f<replaceable>name</replaceable></option></arg>
+	  <arg choice="opt" rep="repeat"><option>-w<replaceable>warning</replaceable></option></arg>
+          <arg rep="repeat"><replaceable>sysid</replaceable></arg>
+    
+<!--
+   sgmlnorm [ -Cdemnv ] [ -bbctf ] [ -ccatalog ] [ -Ddir ] [ -iname ] [
+   -wwarning ] sysid...
+-->
+        </cmdsynopsis>
+      </refsynopsisdiv>
+   
+      <refsect1>
+        <title>Description</title>
+
+   <para><command>osgmlnorm</command> prints on the standard output a normalized document instance
+   for the SGML document contained in the concatenation of the entities
+   with system identifiers <cmdsynopsis><arg rep="repeat"><replaceable>sysid</replaceable></arg></cmdsynopsis>.</para>
+   
+   <para>When the normalized instance is prefixed with the original SGML
+   declaration and prolog, it will have the same ESIS as the original
+   SGML document, with the following exceptions:</para>
+<para>* The output of osgmlnorm does not protect against the recognition of
+       short reference delimiters, so any USEMAP declarations must be
+       removed from the DTD.</para>
+     <para>* The normalized instance will use the reference delimiters, even if
+       the original instance did not.</para>
+     <para>* If marked sections are included in the output using the -m option,
+       the reference reserved names will be used for the status keywords
+       even if the original instance did not.</para>
+     <para>* Any ESIS information relating to the SGML LINK feature will be
+       lost.</para>
+       
+   <para>The normalized instance will not use any markup minimization features
+   except that:</para>
+<para>* Any attributes that were not specified in the original instance
+       will not be included in the normalized instance. (Current
+       attributes will be included.)</para>
+     <para>* If the declared value of an attribute was a name token group, and
+       a value was specified that was the same as the name of the
+       attribute, then the attribute name and value indicator will be
+       omitted. For example, with HTML osgmlnorm would output &lt;DL COMPACT&gt;
+       rather than &lt;DL COMPACT="COMPACT"&gt;</para>
+       
+        <para>Part of an SGML System Conforming to International Standard ISO 8879 -- Standard Generalized Markup Language. An SGML Extended Facilities system conforming to Annex A of International Standard ISO/IEC 10744 -- Hypermedia/Time-based Structuring Language.</para>
+   <para>The following options are available:</para>
+   
+   <variablelist>
+     <varlistentry>
+       <term><option>-a<replaceable>name</replaceable></option></term>
+       <term><option>--activate=<replaceable>name</replaceable></option></term>
+       <listitem>
+          <para>Make doctype or linktype <replaceable>name</replaceable> active.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-A<replaceable>architecture</replaceable></option></term>
+       <term><option>--architecture=<replaceable>architecture</replaceable></option></term>
+       <listitem>
+          <para>Parse with respect to architecture <replaceable>architecture</replaceable>.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-b<replaceable>bctf</replaceable></option></term>
+       <term><option>--bctf=<replaceable>bctf</replaceable></option></term>
+       <listitem>
+          <para>Use the BCTF with name <replaceable>bctf</replaceable> for output.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-c<replaceable>sysid</replaceable></option></term>
+       <term><option>--catalog=<replaceable>sysid</replaceable></option></term>
+       <listitem>
+          <para>Map public identifiers and entity names to system identifiers
+          using the catalog entry file whose system identifier is
+          <replaceable>sysid</replaceable>.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-C</option></term>
+       <term><option>--catalogs</option></term>
+       <listitem>
+          <para>This has the same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-d</option></term>
+       <term><option>--dtd</option></term>
+       <listitem>
+          <para>Output a document type declaration with the same external
+          identifier as the input document, and with no internal
+          declaration subset. No check is performed that the document
+          instance is valid with respect to this DTD.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-D<replaceable>directory</replaceable></option></term>
+       <term><option>--directory=<replaceable>directory</replaceable></option></term>
+       <listitem>
+          <para>Search <replaceable>directory</replaceable> for files specified in system identifiers.</para>
+          <para>This has the same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-e</option></term>
+       <term><option>--open-entities</option></term>
+       <listitem>
+          <para>Describe open entities in error messages.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>--error-numbers</option></term>
+       <listitem>
+          <para>Show error numbers in error messages.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-h</option></term>
+       <term><option>--help</option></term>
+       <listitem>
+          <para>Display a help text and exit.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-i<replaceable>name</replaceable></option></term>
+       <term><option>--include=<replaceable>name</replaceable></option></term>
+       <listitem>
+          <para>This has the same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+          
+     <varlistentry>
+       <term><option>-m</option></term>
+       <term><option>--marked-sections</option></term>
+       <listitem>
+          <para>Output any marked sections that were in the input document
+          instance.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-n</option></term>
+       <term><option>--comments</option></term>
+       <listitem>
+          <para>Output any comments that were in the input document instance.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-r</option></term>
+       <term><option>--raw</option></term>
+       <listitem>
+          <para>Raw output. Don't perform any conversion on RSs and REs when
+          printing the entity. The entity would typically have the
+          storage manager attribute records=asis.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-R</option></term>
+       <term><option>--restricted</option></term>
+       <listitem>
+          <para>This has the same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-v</option></term>
+       <term><option>--version</option></term>
+       <listitem>
+          <para>Print the version number.</para>
+       </listitem>
+     </varlistentry>
+
+     <varlistentry>
+       <term><option>-w<replaceable>type</replaceable></option></term>
+       <listitem>
+          <para>Control warnings and errors according to type. This has the
+          same effect as in <command>onsgmls(1)</command>.</para>
+       </listitem>
+     </varlistentry>
+     </variablelist>
+   </refsect1>
+
+   <refsect1>
+     <title>See Also</title>
+     <para><command>onsgmls(1)</command>, <command>ospam(1)</command>,
+     <command>ospent(1)</command>, <command>osx(1)</command></para>
+   </refsect1>
+ </refentry>
+</section>
+</article>

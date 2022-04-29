@@ -1,0 +1,155 @@
+Changes in OpenSP 1.5.2
+
+* Support for version 4.0 and 4.1 of the GNU C++ compiler.
+* Added doc building and config option.
+* Updated local gettext.
+* Added config option to turn off DTDDECL support.
+* Update 'de' and 'fr' translations; add new 'tr' translation.
+* Add more tests. (Karl Eichwalder)
+
+Changes in OpenSP 1.5.1
+
+* Enable run time selection of message format with SP_MESSAGE_FORMAT
+  environment variable. Value is one of XML, NONE, TRADITIONAL (Nick Kew)
+
+* Add support for restricted files option to generic API (Nick Kew)
+
+* Add support for http redirection (Nick Kew)
+
+* Add support for specifying the user agent at run time with the 
+  SP_HTTP_USER_AGENT environment variable (Nick Kew)
+
+* Add support for specifying Accept: headers with the
+  SP_HTTP_ACCEPT environment variable (Nick Kew)
+
+* Fix for Mac OS X/Darwin compilation (Peter O'Gorman)
+
+* Build Infrastructure/Localisation enhancements (Neil Roeth)
+
+* Enhancements to osx. Preserve case option, security fixes (Jessica Perry Hekman)
+
+* Start adding a testsuite. (Karl Eichwalder)
+
+Changes in OpenSP 1.5
+
+* Fix crash when "-m" option specified.
+
+* Updated Translations (new "fr" translation).
+
+Changes in OpenSP 1.5pre9
+
+* Support for "--restricted" option to restrict parsing of web based documents
+  to local files only.
+
+Changes in OpenSP 1.5pre8
+
+* Support for newer autoconf, gettext tools
+
+* Added a -x command line option to osx, which allows users to
+  say whether they want sdata entities transformed into PIs or treated like
+  normal entities (the default is the latter, which is how osx always
+  behaved before this change). Contributed by Jessica Hekman.
+
+Changes in OpenSP 1.5pre7
+
+* Option to produce error messages formatted as XML from Nick Kew
+  enable with ./configure --enable-xml-messages
+
+* Japanese Translation from SATO Satoru
+
+* Changed the way in which MessageFragments identify the module within
+  which their text resides (libModule, appModule, xModule) in order to
+  support Windows applications that use DLLs that use SP's DLL, where
+  the intervening DLLs also define messages to be used with the SP
+  message handling infrastructure.  Patch contributed by Peter Newcomb
+  of Epremis Corp.
+
+* Enhancements to osx. Contributed by Jessica Perry Hekman, Dynamic Diagrams.
+
+* Added support for the PI-based architecture use declaration syntax
+  defined by Amendment 1 to ISO/IEC 10744:1997 (HyTime).  This makes
+  it possible to specify architectural support attributes when using
+  architectures with XML, and is generally simpler than the original
+  syntax.  See http://www.y12.doe.gov/sgml/wg8/document/1985.htm for
+  details.  Patch contributed by Peter Newcomb of Epremis Corp.
+
+* Adds the architecture public id to the information passed to
+  implementations of ArcDirector.  This is especially important when
+  using the PI-based architecture use declaration syntax, since there
+  may be no Notation object from which to get the information.  Patch
+  contributed by Peter Newcomb of Epremis Corp.
+
+Changes in OpenSP 1.5pre6
+
+* RPM spec file updates and corrections from Terje Bless
+
+* Adapt SP patch from Liam Quinn that adds a HTTP/1.0 Host header to HTTP
+  requests. Necessary to fetch DTDs specified in SYSTEM identifiers
+  when the DTD resides on a name-based "Virtual Host".
+  Thanks to 'tbe'.
+
+* Some GCC >= 2.96 fixes and other build improvements
+
+* A few minor documentation improvements, thanks to Terje Bless
+
+* require autoconf 2.52; fix some autoconf problems for the new version
+
+Changes in OpenSP 1.5pre5
+
+* Fix 32-bit assumptions so we build on 64-bit platforms such
+  as Alpha.
+
+* Enable internationalized builds on Win32
+
+* Other Win32 fixes
+
+* Re-instate the '-widref' option which was accidentally removed.
+
+* New output options (--option): comment, omitted, tagomit and attromit;
+  this shows comments and implied elements and/or attributes.  
+  Patch from Robert Braddock.
+
+* German translation updates
+
+* Build hygene
+
+* Autoconf fix affecting at least some gcc 2.7.x installations
+
+Changes in OpenSP 1.5pre4
+
+* More of Annex K supported: Common data attributes can now be
+  specified in external entity declarations.
+  
+* The architecture engine supports #MAPTOKEN.
+
+* The multibyte version of OpenSP now uses 32bit chars and supports
+  the full UTF-16 range 0x0000-0x10ffff.
+
+Changes in OpenSP 1.4
+
+* Support for the koi8-r (RFC 1489) encoding.
+ 
+* OpenSP now supports long cmdline options. 
+
+* OpenSP is internationalized (currenly German and Swedish translations are
+  provided).
+
+* New option -h or --help shows a list of all available options with
+  descriptions.
+
+* New options -n and -x to see message numbers/relevant clauses with messages.
+
+* More of Annex K supported: SGML declarations on subdocs,
+  DATA declared value for attributes, DTD data entities and 
+  DTD notations for doctypes, complete IMPLYDEF support, 
+  ENTITIES REF constraints, URN parsing. Many new -w flags. 
+
+* DTDDECL supported.
+
+* New spcat cmdline interface to the catalog manager. 
+
+Changes in OpenSP 1.3.4
+
+* Added the Entity classes to the public interface of the library/dll. 
+
+1.3.3 The begin

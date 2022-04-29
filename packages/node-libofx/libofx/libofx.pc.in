@@ -1,0 +1,16 @@
+# libofx pkg-config source file
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libofx
+Description: libofx is a library for processing Open Financial eXchange (OFX) data
+Version: @VERSION@
+Requires:
+Conflicts:
+#Libs: -L${libdir} @OPENSPLIBS@ -lofx
+#Cflags: -I${includedir} -I@OPENSPINCLUDES@ 
+Libs: -L${libdir} -lofx
+Cflags: -I${includedir}

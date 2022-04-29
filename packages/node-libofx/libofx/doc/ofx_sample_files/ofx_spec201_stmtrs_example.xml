@@ -1,0 +1,62 @@
+<OFX>                                   <!-- Begin response data -->
+   <SIGNONMSGSRSV1>
+       <SONRS>                          <!-- Begin signon -->
+          <STATUS>                      <!-- Begin status aggregate -->
+            <CODE>0</CODE>              <!-- OK -->
+            <SEVERITY>INFO</SEVERITY>
+          </STATUS>
+          <DTSERVER>19991029101003</DTSERVER><!-- Oct. 29, 1999, 10:10:03 am -->
+          <LANGUAGE>ENG</LANGUAGE>                <!-- Language used in response -->
+          <DTPROFUP>19991029101003</DTPROFUP><!-- Last update to profile-->
+          <DTACCTUP>19991029101003</DTACCTUP><!-- Last account update -->
+          <FI>                          <!-- ID of receiving institution -->
+            <ORG>NCH</ORG>              <!-- Name of ID owner -->
+            <FID>1001</FID>             <!-- Actual ID -->
+          </FI>
+       </SONRS>                         <!-- End of signon -->
+     </SIGNONMSGSRSV1>
+     <BANKMSGSRSV1>
+       <STMTTRNRS>                      <!-- Begin response -->
+          <TRNUID>1001</TRNUID>         <!-- Client ID sent in request -->
+          <STATUS>                      <!-- Start status aggregate -->
+            <CODE>0</CODE>              <!-- OK -->
+            <SEVERITY>INFO</SEVERITY>
+          </STATUS>
+          <STMTRS>                      <!-- Begin statement response -->
+            <CURDEF>USD</CURDEF>
+            <BANKACCTFROM>              <!-- Identify the account -->
+                  <BANKID>121099999</BANKID><!-- Routing transit or other FI ID -->
+                  <ACCTID>999988</ACCTID><!-- Account number -->
+                  <ACCTTYPE>CHECKING</ACCTTYPE><!-- Account type -->
+            </BANKACCTFROM>             <!-- End of account ID -->
+            <BANKTRANLIST>              <!-- Begin list of statement
+                                        trans. -->
+                  <DTSTART>19991001</DTSTART><!-- Start date: Oct. 1, 1999 -->
+                       <DTEND>19991028</DTEND><!-- End date: Oct. 28, 1999 -->
+                       <STMTTRN>                      <!-- First statement transaction -->
+                            <TRNTYPE>CHECK</TRNTYPE><!--Check -->
+                            <DTPOSTED>19991004</DTPOSTED><!-- Posted on Oct. 4, 1999 -->
+                            <TRNAMT>-200.00</TRNAMT><!-- $200.00 -->
+                            <FITID>00002</FITID><!-- Unique ID -->
+                            <CHECKNUM>1000</CHECKNUM><!-- Check number -->
+                       </STMTTRN>                     <!-- End statement transaction -->
+                       <STMTTRN>                      <!-- Second transaction -->
+                            <TRNTYPE>ATM</TRNTYPE><!-- ATM transaction -->
+                            <DTPOSTED>19991020</DTPOSTED><!-- Posted on Oct. 20, 1999 -->
+                            <DTUSER>19991020</DTUSER><!-- User date of Oct. 20, 1999 -->
+                            <TRNAMT>-300.00</TRNAMT><!-- $300.00 -->
+                            <FITID>00003</FITID><!-- Unique ID -->
+                       </STMTTRN>                     <!-- End statement transaction -->
+                    </BANKTRANLIST>                   <!-- End list of statement trans. -->
+                    <LEDGERBAL>                       <!-- Ledger balance aggregate -->
+                       <BALAMT>200.29</BALAMT><!-- Bal amount: $200.29 -->
+                       <DTASOF>199910291120</DTASOF><!-- Bal date: 10/29/99, 11:20 am -->
+                    </LEDGERBAL>                      <!-- End ledger balance -->
+                    <AVAILBAL>                        <!-- Available balance aggregate -->
+                       <BALAMT>200.29</BALAMT><!-- Bal amount: $200.29 -->
+                       <DTASOF>199910291120</DTASOF><!-- Bal date: 10/29/99, 11:20 am -->
+                    </AVAILBAL>                       <!-- End available balance -->
+                 </STMTRS>                            <!-- End statement response -->
+               </STMTTRNRS>                           <!-- End of transaction -->
+             </BANKMSGSRSV1>
+       </OFX>                                         <!-- End of response data -->

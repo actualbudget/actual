@@ -1,0 +1,18 @@
+Copyright (c) 1994, 1995, 1996 James Clark, 1999 Matthias Clasen
+
+This directory contains an SGML parser called OpenSP.
+
+See the file COPYING for copying permission.
+
+This is a production release.
+
+All documentation is in HTML format in the doc directory.  Start with
+doc/index.htm.
+
+The home page for OpenSP and OpenJade can be found at 
+<URL:http://openjade.sourceforge.net/>
+
+Please report any bugs you find.  
+See <URL:http://openjade.sourceforge.net/bugs.html>.
+ 
+The OpenJade Team

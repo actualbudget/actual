@@ -1,0 +1,6 @@
+STRINGTABLE
+BEGIN
+  2400, "cannot open %1 (%2)"
+  2401, "error reading %1 (%2)"
+  2402, "error seeking %1 (%2)"
+END

@@ -1,0 +1,35 @@
+#!/bin/sh
+# basic osgmlnorm test
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles osnorm-1.sgml"
+cat <<EOF >osnorm-1.sgml
+<!DOCTYPE doc [
+<!ELEMENT doc - o (#PCDATA)>
+<!ATTLIST doc
+  n CDATA #IMPLIED>
+]>
+<doc n=1>
+EOF
+tmpfiles="$tmpfiles osnorm-1.out"
+
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >osnorm-1.out osnorm-1.sgml
+
+tmpfiles="$tmpfiles osnorm-1.ok"
+cat <<EOF >osnorm-1.ok
+<DOC N="1"></DOC>
+EOF
+
+: ${DIFF=diff}
+${DIFF} osnorm-1.ok osnorm-1.out
+result=$?
+
+rm -fr $tmpfiles
+
+exit $result

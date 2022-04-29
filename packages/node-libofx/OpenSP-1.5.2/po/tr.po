@@ -1,0 +1,2691 @@
+# Turkish translations for opensp messages.
+# Copyright (C) 2003 Free Software Foundation, Inc.
+# Nilgün Belma Bugüner <nilgun@superonline.com>, 2002,2003.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sp 1.5.1pre1\n"
+"POT-Creation-Date: 2005-11-05 09:50+0000\n"
+"PO-Revision-Date: 2003-10-10 21:33+0300\n"
+"Last-Translator: Nilgün Belma Bugüner <nilgun@superonline.com>\n"
+"Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.0\n"
+
+msgid ""
+"no system identifier could be generated for meta-DTD for architecture %1"
+msgstr "%1 mimarisi için meta-DTD sistem belirteci üretilmemiş"
+
+msgid "element type %1 not defined in meta-DTD"
+msgstr "meta-DTD'de %1 elemanı tanımlı değil"
+
+msgid "element %1 invalid in meta-DTD because excluded"
+msgstr "meta-DTD'de dışlandığından, %1 elemanı geçersiz"
+
+msgid "meta-DTD does not allow element %1 at this point"
+msgstr "meta-DTD bu noktada %1 elemanının kullanılmasına izin vermiyor"
+
+msgid "document element must be instance of %1 element type form"
+msgstr "document elemanı, %1 eleman türü biçiminin bir gerçeklemesi olmalı"
+
+msgid "element %1 unfinished in meta-DTD"
+msgstr "meta-DTD'de %1 elemanı bitmemiş"
+
+msgid "missing substitute name"
+msgstr "ikame isim yok"
+
+msgid "substitute for non-existent architecture attribute %1"
+msgstr "desteklenmeyen mimari özelliği %1 için ikame yapılıyor"
+
+msgid "substitute name for %1 already defined"
+msgstr "%1 için ikame ismi zaten tanımlı"
+
+msgid "substitute name %1 is not the name of an attribute"
+msgstr "ikame ismi %1 bir özellik ismi değil"
+
+msgid "reference in architecture to non-existent ID %1"
+msgstr "mimarideki başvuru mevcut olmayan %1 ID'sine yapılmış"
+
+msgid "architectural content specified with #ARCCONT not allowed by meta-DTD"
+msgstr "meta-DTD, #ARCCONT ile belirtilen mimari içeriğe izin vermiyor"
+
+msgid "invalid value %1 for ArcSupr attribute"
+msgstr " %1 değeri, ArcSupr özelliği için geçersiz"
+
+msgid "no declaration for meta-DTD parameter entity %1"
+msgstr "meta-DTD parametre öğesi %1 için bildirim içermiyor"
+
+msgid "no declaration for meta-DTD general entity %1"
+msgstr "meta-DTD genel öğe %1 için bildirim içermiyor"
+
+msgid "meta-DTD entity %1 must be external"
+msgstr "meta-DTD öğesi %1 external olmalı"
+
+msgid "no ArcDTD architecture support attribute specified"
+msgstr "ArcDTD mimari destekleme özelliği belirtilmemiş"
+
+msgid "ArcDataF notation %1 not defined in meta-DTD"
+msgstr "ArcDataF sözdizimi %1 meta-DTD'de tanımlı değil"
+
+msgid "ID attribute %1 in meta-DTD not declared as ID in DTD"
+msgstr "meta-DTD'deki ID özelliği %1, bir DTD ID'si olarak bildirilmemiş"
+
+msgid "invalid value %1 for ArcAuto architectural support attribute"
+msgstr "%1 değeri, ArcAuto mimari destekleme özelliği için geçersiz"
+
+msgid "no notation declaration for architecture %1"
+msgstr "%1 mimarisi için sözdizimi bildirimi yok"
+
+msgid "meta-DTD does not allow data at this point"
+msgstr "meta-DTD bu noktada veriye izin vermiyor"
+
+msgid "invalid value %1 for ArcIgnD attribute"
+msgstr "%1 değeri, ArcIgnD özelliği için geçersiz"
+
+msgid "unrecognized quantity name %1"
+msgstr "büyüklük ismi %1 tanınmıyor"
+
+msgid "no value specified for quantity %1"
+msgstr "%1 büyüklüğü için değer belirtilmemiş"
+
+msgid "length of value %1 for quantity is too long"
+msgstr "büyüklük için %1 değeri çok uzun"
+
+msgid "invalid digit %1"
+msgstr "%1 rakam olarak geçersiz"
+
+msgid "only value of nArcIndr for ArcIndr attribute supported"
+msgstr "ArcIndr özelliği için tek nArcIndr değeri destekleniyor"
+
+msgid "#ARCCONT attribute already specified"
+msgstr "#ARCCONT özelliği zaten belirtilmiş"
+
+msgid "invalid value %1 for #ARCCONT"
+msgstr "%1 değeri, #ARCCONT için geçersiz"
+
+msgid "%1 already used as a substitute name"
+msgstr "%1 bir ikame isim olarak zaten kullanılmış"
+
+msgid "substitute name #CONTENT already specified"
+msgstr "ikame ismi #CONTENT  zaten belirtilmiş"
+
+msgid "IS10744 PI keyword missing"
+msgstr "IS10744 PI anahtar sözcüğü eksik"
+
+msgid "invalid IS10744 PI keyword %1"
+msgstr "IS10744 PI anahtar sözcüğü olarak %1 geçersiz"
+
+msgid "architecture %1 already defined"
+msgstr "%1 mimarisi zaten tanımlı"
+
+msgid "the first definition"
+msgstr "ilk tanımı"
+
+msgid "ignoring PI declaration of architecture %1"
+msgstr "%1 mimarisinin PI bildirimi yoksayılıyor"
+
+msgid "the ArcBase definition"
+msgstr "ArcBase tanımı"
+
+msgid "ignoring ArcBase declaration of architecture %1"
+msgstr "%1 mimarisinin ArcBase bildirimi yoksayılıyor"
+
+msgid "the PI definition"
+msgstr "PI tanımı"
+
+msgid "name expected"
+msgstr "bir isim beklendi"
+
+msgid "literal expected"
+msgstr "bir sabit değer beklendi"
+
+msgid "name or literal expected"
+msgstr "bir isim ya da sabit değer beklendi"
+
+msgid "nul character"
+msgstr "boş karakter"
+
+msgid "not a minimum data character"
+msgstr "bir en küçük veri karakteri değil"
+
+msgid "end of entity in comment"
+msgstr "açıklama içinde öğe sonu"
+
+msgid "end of entity in literal"
+msgstr "sabit değer içinde öğe sonu"
+
+msgid "OVERRIDE requires argument of YES or NO"
+msgstr "OVERRIDE argüman olarak YES ya da NO alır"
+
+msgid "CATALOG entries cause loop"
+msgstr "CATALOG girdileri döngü oluşturuyor"
+
+msgid "second argument for SYSTEM entry should be quoted to avoid ambiguity"
+msgstr ""
+"SYSTEM girdisinin ikinci argümanı, yanlış yorumlanmaması için tırnak içine "
+"alınmalıydı"
+
+msgid "no DOCUMENT entry in catalog %1"
+msgstr "%1 kataloğunda DOCUMENT girdisi yok"
+
+msgid "no entry for public identifier %1 in catalog %2"
+msgstr "%1 genel belirteci için %2 kataloğunda girdi yok"
+
+msgid "invalid option %1"
+msgstr "%1 seçeneği geçersiz"
+
+msgid "missing argument for option %1"
+msgstr "%1 seçeneğinin argümanı eksik"
+
+msgid "option %1 is ambiguous"
+msgstr "%1 seçeneği hatalı"
+
+msgid "option %1 doesn't allow an argument"
+msgstr "%1 seçeneği bir argüman almaz"
+
+msgid "Usage: %1"
+msgstr "Kullanımı: %1"
+
+msgid "or: %1"
+msgstr "     veya: %1"
+
+msgid "%1 [OPTION] SYSID..."
+msgstr "%1 [SEÇENEK] SİSTEM_KİMLİĞİ..."
+
+msgid "Short options need the same arguments as their long forms."
+msgstr ""
+"Uzun seçeneklerde kullanılan argümanlar kısa seçeneklerde de kullanılır."
+
+msgid "%1 version %2"
+msgstr "%1, %2 sürümü"
+
+msgid "unknown BCTF %1"
+msgstr "BCTF %1 bilinmiyor"
+
+msgid "unknown encoding %1"
+msgstr "%1 karakter kodlaması bilinmiyor"
+
+msgid "cannot open output file %1 (%2)"
+msgstr "çıktı dosyası %1 açılamıyor (%2)"
+
+msgid "cannot close output file %1 (%2)"
+msgstr "çıktı dosyası %1 kapatılamıyor (%2)"
+
+msgid "Use bctf %1 for output."
+msgstr "Çıktı için bctf %1 kullanılır."
+
+msgid "Use encoding %1 for output."
+msgstr "Çıktı için %1 karakter kodlaması kullanılır."
+
+msgid "Append error messages to file %1."
+msgstr "Hata iletileri %1 dosyasına eklenir."
+
+msgid "Display the program version."
+msgstr "Program sürümünü gösterir."
+
+msgid "Show this help text."
+msgstr "Bu yardım iletisini gösterir."
+
+msgid "NAME"
+msgstr "İSİM"
+
+msgid "FILE"
+msgstr "DOSYA"
+
+msgid "NOTHING"
+msgstr "HİÇBİRİ"
+
+msgid "Try the \"--help\" option for more information."
+msgstr "Ayrıntılı bilgi için \"--help\" seçeneğini kullanınız."
+
+msgid "ARG"
+msgstr "ARG"
+
+msgid "Undocumented option (check the application's manual)."
+msgstr "Seçenek belgelendirilmedi (uygulama kılavuzuna bakın)."
+
+msgid "Use catalog %1."
+msgstr "%1 kataloğu kullanılır."
+
+msgid "Arguments are catalogs, use DOCUMENT entry."
+msgstr "Argümanları kataloglardır ve DOCUMENT girdisi kullanılır."
+
+msgid "Search files in directory %1."
+msgstr "Dosyalar %1 dizininde aranır."
+
+msgid "Restrict file reading (for use in Web apps)."
+msgstr "Dosya okumasını sınırlar (web uygulamalarıda kullanmak için)"
+
+msgid "DIRECTORY"
+msgstr "DİZİN"
+
+msgid "SYSID"
+msgstr "SİSTEM_KİMLİĞİ"
+
+msgid "bad formal system identifier syntax in %1"
+msgstr "%1 içindeki resmi sistem belirteci sözdizimi hatalı"
+
+msgid "value for attribute %1 missing in formal system identifier"
+msgstr "resmi sistem belirtecinde %1 özelliğinin değeri eksik"
+
+msgid "%1 is a formal system identifier attribute value not an attribute name"
+msgstr "%1 bir resmi sistem belirteç değeridir, bir özellik ismi değildir"
+
+msgid "value of smcrd attribute must be a single character not %1"
+msgstr "smcrd özelliğinin değeri tek bir karakter olmalı, %1 değil"
+
+msgid "unsupported record boundary indicator %1"
+msgstr "kayıt sınırı belirleyici olarak %1 desteklenmiyor"
+
+msgid "unsupported formal system identifier attribute %1"
+msgstr "resmi sistem belirteci özelliği olarak %1 desteklenmiyor"
+
+msgid "unsupported formal system identifier attribute value %1"
+msgstr "resmi sistem belirteci değeri olarak %1 desteklenmiyor"
+
+msgid "bad value %1 for formal system identifier tracking attribute"
+msgstr "resmi sistem belirteci izleme özelliği için %1 değeri hatalı"
+
+msgid "duplicate specification for formal system identifier attribute %1"
+msgstr "resmi sistem belirtecinin %1 özelliği için belirtim tekrarlanmış"
+
+msgid "bad value %1 for formal system identifier zapeof attribute"
+msgstr "resmi sistem belirtecinin zapeof özelliği için %1 değeri hatalı"
+
+msgid "bad value %1 for formal system identifier search attribute"
+msgstr "resmi sistem belirtecinin arama özelliği için %1 değeri hatalı"
+
+msgid "bad value %1 for formal system identifier fold attribute"
+msgstr "resmi sistem belirtecinin tutma özelliği için %1 değeri hatalı"
+
+msgid "fold attribute allowed only for neutral storage manager"
+msgstr "tutma özelliği sadece kutupsuz saklama yöneticisi içindir."
+
+msgid "bctf and encoding attributes not applicable to this storage manager"
+msgstr ""
+"bctf ve karakter kodlaması özellikleri bu saklama yöneticisinde uygulanamıyor"
+
+msgid "cannot specify both bctf and encoding attribute"
+msgstr "bctf ve karakter kodlaması birlikte belirtilemez"
+
+msgid "zapeof attribute not applicable to this storage manager"
+msgstr "zapeof özelliği bu saklama yöneticisinde uygulanamıyor"
+
+msgid "records attribute not applicable to this storage manager"
+msgstr "kayıtlar özelliği bu saklama yöneticisinde uygulanamıyor"
+
+msgid "bad value %1 for formal system identifier indirect attribute"
+msgstr "resmi sistem belirtecinin dolaylı özelliği için %1 değeri hatalı"
+
+msgid ""
+"non-minimum data character (number %1) in value of formal system identifier "
+"lookup attribute"
+msgstr ""
+"resmi sistem belirtecinin karşılaştırma özelliğinin değerinde (%1 sayısı) "
+"minimum olmayan veri karakteri hatası var"
+
+msgid "st"
+msgstr "."
+
+msgid "nd"
+msgstr "."
+
+msgid "rd"
+msgstr "."
+
+msgid "th"
+msgstr "."
+
+msgid "(invalid argument type)"
+msgstr "(argümanın türü geçersiz)"
+
+msgid "(invalid message)"
+msgstr "(geçersiz ileti)"
+
+msgid "I"
+msgstr "I"
+
+msgid "W"
+msgstr "W"
+
+msgid "Q"
+msgstr "Q"
+
+msgid "X"
+msgstr "X"
+
+msgid "E"
+msgstr "E"
+
+msgid "open elements"
+msgstr "açık elemanlar"
+
+msgid "In entity %1 included from %2"
+msgstr "%1 öğesinin içindeki, %2 den kullanılmış"
+
+msgid "In entity included from %2"
+msgstr "Öğenin içindeki, %2 den kullanılmış"
+
+msgid "(invalid location)"
+msgstr "(geçersiz konum)"
+
+msgid "offset "
+msgstr "göreli konum "
+
+msgid "relevant clauses: "
+msgstr "ilgili sözcükler:"
+
+msgid "unknown warning type %1"
+msgstr "bilinmeyen uyarı türü %1"
+
+msgid "invalid error limit"
+msgstr "geçersiz hata sınırı"
+
+msgid "maximum number of errors (%1) reached; change with -E option"
+msgstr "maksimum hata adedi (%1) aşıldı; -E seçeneği ile değiştirilebilir"
+
+msgid "Make doctype or linktype %1 active."
+msgstr "Belge türü ve bağ türü olarak %1 etkinleştirilir."
+
+msgid "Parse wrt. architecture %1."
+msgstr "Çözümleme %1 mimarisi için yapılır."
+
+msgid "Give up after %1 errors."
+msgstr "%1 hatadan sonra bırakır."
+
+msgid "Show open entities in error messages."
+msgstr "Açık öğeleri hata iletilerinde gösterir."
+
+msgid "Show open elements in error messages."
+msgstr "Açık elemanları hata iletilerinde gösterir."
+
+msgid "Show error numbers in error messages."
+msgstr "Hata numaralarını hata iletilerinde gösterir."
+
+msgid "Show references in error messages."
+msgstr "Başvuruları hata iletilerinde gösterir."
+
+msgid "Define parameter entity %1 as \"INCLUDE\"."
+msgstr "%1 parametre öğesini \"INCLUDE\" olarak tanımlar."
+
+msgid "Enable warning %1."
+msgstr "Uyarı %1 etkinleştirilir."
+
+msgid "TYPE"
+msgstr "TÜRÜ"
+
+msgid "NUMBER"
+msgstr "SAYI"
+
+msgid "length of name must not exceed NAMELEN (%1)"
+msgstr "isim uzunluğu NAMELEN'den (%1) büyük olmamalı"
+
+msgid ""
+"length of parameter entity name must not exceed NAMELEN less the length of "
+"the PERO delimiter (%1)"
+msgstr ""
+"parametre öğesinin isminin uzunluğu NAMELEN eksi PERO ayracının uzunluğundan "
+"büyük olmamalı (%1)"
+
+msgid "length of number must not exceed NAMELEN (%1)"
+msgstr "sayı uzunluğu NAMELEN'den (%1) büyük olmamalı"
+
+msgid "length of attribute value must not exceed LITLEN less NORMSEP (%1)"
+msgstr ""
+"özniteliğin uzunluğu LITLEN eksi NORMSEP değerinden büyük olmamalı (%1)"
+
+msgid ""
+"a name group is not allowed in a parameter entity reference in the prolog"
+msgstr ""
+"bir isim grubuna, öndeyiş içindeki parametre öğe başvurusunun içinde izin "
+"verilmez"
+
+msgid ""
+"an entity end in a token separator must terminate an entity referenced in "
+"the same group"
+msgstr ""
+"bir sözcük ayracının içindeki bir öğe sonu, aynı grup içinde referanslı bir "
+"öğeyi sonlandırmalıdır"
+
+msgid "character %1 invalid: only %2 and token separators allowed"
+msgstr "%1 karakteri geçersiz: sadece %2 ve sözcük ayraçlarına izin var"
+
+msgid ""
+"a parameter separator is required after a number that is followed by a name "
+"start character"
+msgstr ""
+"bir sayıdan sonra bir isim başlatma karakteri geliyorsa bir parametre ayracı "
+"gerekir"
+
+msgid "character %1 invalid: only %2 and parameter separators allowed"
+msgstr "%1 karakteri geçersiz: sadece %2 ve parametre ayraçlarına izin var"
+
+msgid ""
+"an entity end in a parameter separator must terminate an entity referenced "
+"in the same declaration"
+msgstr ""
+"bir parametre ayracının içindeki bir öğe sonu, aynı bildirim içinde "
+"referanslı bir öğeyi sonlandırmalıdır"
+
+msgid ""
+"an entity end is not allowed in a token separator that does not follow a "
+"token"
+msgstr "bir sözcüğü başlatmayan bir sözcük ayracı içinde bir öğe sonu olmamalı"
+
+msgid "%1 is not a valid token here"
+msgstr "%1 burada geçerli bir sözcük değil"
+
+msgid ""
+"a parameter entity reference can only occur in a group where a token could "
+"occur"
+msgstr ""
+"bir parametre öğesi başvurusu, sadece içinde bir sözcük bulunması gereken "
+"bir grubun içinde olabilir"
+
+msgid "token %1 has already occurred in this group"
+msgstr "%1 sözcüğü bu grup içinde zaten var"
+
+msgid "the number of tokens in a group must not exceed GRPCNT (%1)"
+msgstr ""
+"bir gruptaki sözcüklerin sayısı  GRPCNT ile belirtilenden büyük olmamalı (%1)"
+
+msgid ""
+"an entity end in a literal must terminate an entity referenced in the same "
+"literal"
+msgstr ""
+"bir sabit içindeki bir öğe sonu, aynı sabit içinde referanslı bir öğeyi "
+"sonlandırmalıdır"
+
+msgid "character %1 invalid: only minimum data characters allowed"
+msgstr "%1 karakteri geçersiz: sadece minimum veri karakterlerine izin var"
+
+msgid ""
+"a parameter literal in a data tag pattern must not contain a numeric "
+"character reference to a non-SGML character"
+msgstr ""
+"bir veri etiketi içindeki bir parametre sabiti, SGML olmayan bir karaktere "
+"bir sayısal karakter başvurusu içermemelidir"
+
+msgid ""
+"a parameter literal in a data tag pattern must not contain a numeric "
+"character reference to a function character"
+msgstr ""
+"bir veri etiketi içindeki bir parametre sabiti, bir işlev karakterine bir "
+"sayısal karakter başvurusu içermemelidir"
+
+msgid ""
+"a name group is not allowed in a general entity reference in a start tag"
+msgstr ""
+"bir isim grubuna bir başlangıç etiketi içindeki bir genel öğe başvurusu "
+"içinde izin verilmez"
+
+msgid "a name group is not allowed in a general entity reference in the prolog"
+msgstr ""
+"bir genel öğe başvurusu için izin verilmeyen bir isim grubu öndeyiş içinde"
+
+msgid "%1 is not a function name"
+msgstr "%1 bir işlev ismi değil"
+
+msgid "%1 is not a character number in the document character set"
+msgstr "%1 belge karakter kümesindeki bir karakter numarası değil"
+
+msgid "parameter entity %1 not defined"
+msgstr "parametre öğesi %1 tanımlı değil"
+
+msgid "general entity %1 not defined and no default entity"
+msgstr "genel öğe %1 tanımlı değil ve öntanımlı öğe yok"
+
+msgid "RNI delimiter must be followed by name start character"
+msgstr "RNI ayracının ardından bir isim başlangıç karakteri gelmeli"
+
+msgid "unterminated comment: found end of entity inside comment"
+msgstr "sonlandırımamış açıklama: açıklama içinde öğe sonuna rastlandı"
+
+msgid "comment started here"
+msgstr "açıklama burada başlıyor"
+
+msgid "only one type of connector should be used in a single group"
+msgstr "bir tek grup içinde sadece bir bağlayıcı türü kullanılmış olmalı"
+
+msgid "%1 is not a reserved name"
+msgstr "%1 bir ayrılmış (rezervli) isim değil"
+
+msgid "%1 is not allowed as a reserved name here"
+msgstr "burada %1 ayrılmış (rezervli) isim olarak kullanılamaz"
+
+msgid ""
+"length of interpreted minimum literal must not exceed reference LITLEN (%1)"
+msgstr ""
+"yorumlanmış en küçük sabitin uzunluğu başvuru LITLEN değerini aşmamalı (%1)"
+
+msgid ""
+"length of tokenized attribute value must not exceed LITLEN less NORMSEP (%1)"
+msgstr ""
+"kısaltılmış öznitelik değerinin uzunluğu LITLEN eksi NORMSEP değerinden "
+"büyük olmamalı (%1)"
+
+msgid "length of system identifier must not exceed LITLEN (%1)"
+msgstr "sistem belirtecinin uzunluğu LITLEN değerinden büyük olmamalı (%1)"
+
+msgid "length of interpreted parameter literal must not exceed LITLEN (%1)"
+msgstr ""
+"yorumlanmış parametre sabitinin uzunluğu LITLEN değerinden büyük olmamalı (%"
+"1)"
+
+msgid ""
+"length of interpreted parameter literal in data tag pattern must not exceed "
+"DTEMPLEN (%1)"
+msgstr ""
+"bir veri etiketi kalıbı içindeki yorumlanmış parametre sabitinin uzunluğu "
+"DTEMPLEN değerinden büyük olmamalı (%1)"
+
+msgid "literal is missing closing delimiter"
+msgstr "sabitte kapatma ayracı eksik"
+
+msgid "%1 invalid: only %2 and parameter separators are allowed"
+msgstr "%1 geçersiz: sadece %2 ve parametre ayracına izin var"
+
+msgid "%1 invalid: only %2 and token separators are allowed"
+msgstr "%1 geçersiz: sadece %2 ve sözcük ayracına izin var"
+
+msgid "unknown declaration type %1"
+msgstr "bildirim türü %1 bilinmiyor"
+
+msgid "%1 declaration not allowed in DTD subset"
+msgstr "%1 bildirimine DTD alt kümesinde izin verilmiyor"
+
+msgid "character %1 not allowed in declaration subset"
+msgstr "%1 karakterine DTD alt kümesinde izin verilmiyor"
+
+msgid "end of document in DTD subset"
+msgstr "DTD alt kümesinde belge sonu"
+
+msgid "character %1 not allowed in prolog"
+msgstr "öndeyiş içinde %1 karakterine izin verilmez"
+
+msgid "end of document in prolog"
+msgstr "öndeyiş içinde belge sonu"
+
+msgid "%1 declaration not allowed in prolog"
+msgstr "öndeyiş içinde %1 bildirimine izin verilmez"
+
+msgid "%1 used both a rank stem and generic identifier"
+msgstr "%1 hem bir sıralama kökü hem de genel belirteç olarak kullanılmış"
+
+msgid ""
+"omitted tag minimization parameter can be omitted only if OMITTAG NO is "
+"specified"
+msgstr ""
+"etiket küçültme parametresi atlanmış; bu sadece OMITTAG NO belirtilmişse "
+"yapılabilir"
+
+msgid "element type %1 already defined"
+msgstr "eleman türü %1 zaten tanımlı"
+
+msgid "entity reference with no applicable DTD"
+msgstr "uygulanabilir olmayan DTD ile öğe başvurusu"
+
+msgid ""
+"invalid comment declaration: found %1 outside comment but inside comment "
+"declaration"
+msgstr ""
+"açıklama bildirimi geçersiz: %1 açıklamanın dışında, açıklama bildiriminin "
+"iseiçinde bulunuyor"
+
+msgid "comment declaration started here"
+msgstr "açıklama bildirimi burada başlıyor"
+
+msgid "%1 declaration not allowed in instance"
+msgstr "%1 bildirimine belge içinde izin verilmez"
+
+msgid "non-SGML character not allowed in content"
+msgstr "içerikte SGML olmayan karaktere izin verilmez"
+
+msgid "no current rank for rank stem %1"
+msgstr "sıralama kökü %1 için mevcut bir sıralama yok"
+
+msgid "duplicate attribute definition list for notation %1"
+msgstr "%1 sözdizimi için öznitelik tanım listesi tekrarlanmış"
+
+msgid "duplicate attribute definition list for element %1"
+msgstr "eleman %1 için öznitelik tanım listesi tekrarlanmış"
+
+msgid "entity end not allowed in end tag"
+msgstr "bitiş etiketinde öğe sonuna izin verilmez"
+
+msgid "character %1 not allowed in end tag"
+msgstr "bitiş etiketinde %1 karakterine izin verilmez"
+
+msgid "%1 invalid: only S separators and TAGC allowed here"
+msgstr "%1 geçersiz: burada sadece S ayraçlarına ve TAGC'ye izin var"
+
+msgid "character data is not allowed here"
+msgstr "burada karakter verisine izin verilmez"
+
+msgid "document type does not allow element %1 here"
+msgstr "belge türü burada %1 elemanına izin vermez"
+
+msgid ""
+"document type does not allow element %1 here; missing one of %2 start-tag"
+msgstr ""
+"belge türü burada %1 elemanına izin vermez; %2 başlangıç etiketinin biri "
+"eksik"
+
+msgid ""
+"document type does not allow element %1 here; assuming missing %2 start-tag"
+msgstr ""
+"belge türü burada %1 elemanına izin vermez; %2 başlangıç etiketi eksik kabul "
+"ediliyor"
+
+msgid "no start tag specified for implied empty element %1"
+msgstr "örtük boş eleman %1 için başlangıç etiketi belirtilmemiş"
+
+msgid "end tag for %1 omitted, but its declaration does not permit this"
+msgstr "%1 için bitiş etiketi eksik ama bildirimi buna izin vermez"
+
+msgid "start tag was here"
+msgstr "başlangıç etiketi buradaydı"
+
+msgid "end tag for %1 omitted, but OMITTAG NO was specified"
+msgstr "%1 için bitiş etiketi eksik, ama OMITTAG NO belirtilmişti."
+
+msgid "start tag omitted for element %1 with declared content"
+msgstr "bildirimli içeriği olan %1 elemanının başlangıç etiketi eksik"
+
+msgid "end tag for %1 which is not finished"
+msgstr "bitirilmemiş olan %1 için bitiş etiketi"
+
+msgid "start tag for %1 omitted, but its declaration does not permit this"
+msgstr "%1 için başlangıç etiketi eksik, ama bildirimi buna izin vermiyor"
+
+msgid "number of open elements exceeds TAGLVL (%1)"
+msgstr "açık elemanların sayısı TAGLVL değerinden büyük (%1)"
+
+msgid "element %1 undefined"
+msgstr "eleman %1 tanımsız"
+
+msgid "empty end tag but no open elements"
+msgstr "bitiş etiketi boş ama açık eleman yok"
+
+msgid "%1 not finished but containing element ended"
+msgstr "%1 bitmemiş ama onu içeren eleman bitti"
+
+msgid "end tag for element %1 which is not open"
+msgstr "açılmamış %1 elemanı için bitiş etiketi"
+
+msgid "internal parameter entity %1 cannot be CDATA or SDATA"
+msgstr "dahili parametre öğesi %1 CDATA ya da SDATA olamaz"
+
+msgid "character %1 not allowed in attribute specification list"
+msgstr "öznitelik belirtim listesinde %1 karakterine izin verilmez"
+
+msgid ""
+"an attribute value must be a literal unless it contains only name characters"
+msgstr ""
+"sadece isim karakterleri içermedikçe bir öznitelik değeri bir sabit değer "
+"olmalıdır"
+
+msgid ""
+"entity end not allowed in attribute specification list except in attribute "
+"value literal"
+msgstr ""
+"öznitelik belirtim listesi içinde öğe sonuna izin verilmez, istisnası "
+"öznitelik değer sabiti içinde olmasıdır"
+
+msgid "external parameter entity %1 cannot be CDATA, SDATA, NDATA or SUBDOC"
+msgstr "harici parametre öğesi %1 CDATA, SDATA, NDATA ya da SUBDOC olamaz"
+
+msgid "duplicate declaration of entity %1"
+msgstr "%1 öğesinin bildirimi tekrarlanmış"
+
+msgid "duplicate declaration of parameter entity %1"
+msgstr "%1 parametre öğesinin bildirimi tekrarlanmış"
+
+msgid ""
+"a reference to a PI entity is allowed only in a context where a processing "
+"instruction could occur"
+msgstr ""
+"bir PI öğesine bir başvuruya sadece PI'yi içeren bağlam içinde izin verilir"
+
+msgid ""
+"a reference to a CDATA or SDATA entity is allowed only in a context where a "
+"data character could occur"
+msgstr ""
+"bir CDATA veya SDATA öğesine başvuruya sadece bir veri karakteri içeren bir "
+"bağlam içinde izin verilir"
+
+msgid ""
+"a reference to a subdocument entity or external data entity is allowed only "
+"in a context where a data character could occur"
+msgstr ""
+"bir alt belge öğesine ya da bir dış veri öğesine bir başvuruya sadece bir "
+"veri karakteri içeren bir bağlam içinde izin verilir"
+
+msgid ""
+"a reference to a subdocument entity or external data entity is not allowed "
+"in replaceable character data"
+msgstr ""
+"bir alt belge öğesine ya da bir dış veri öğesine bir başvuruya "
+"değiştirilebilir karakter verisi içinde izin verilmez"
+
+msgid "the number of open entities cannot exceed ENTLVL (%1)"
+msgstr "açık öğelerin sayısı ENTLVL'den (%1) fazla olamaz"
+
+msgid "a reference to a PI entity is not allowed in replaceable character data"
+msgstr ""
+"bir PI öğesine bir başvuruya değiştirilebilir karakter verisi içinde izin "
+"verilmez"
+
+msgid "entity %1 is already open"
+msgstr "%1 öğesi zaten açık"
+
+msgid "short reference map %1 not defined"
+msgstr "kısa başvuru eşlemi %1 tanımlı değil"
+
+msgid "short reference map in DTD must specify associated element type"
+msgstr "DTD içinde kısa başvuru eşlemi, eleman türü ile ilişkili belirtilmeli"
+
+msgid ""
+"short reference map in document instance cannot specify associated element "
+"type"
+msgstr "belge içinde kısa başvuru eşlemi, ilişkili eleman türünü belirtemez"
+
+msgid "short reference map %1 for element %2 not defined in DTD"
+msgstr "eleman %2 için kısa başvuru eşlemi %1 DTD içinde tanımlı değil"
+
+msgid "%1 is not a short reference delimiter"
+msgstr "%1 bir kısa başvuru ayracı değil"
+
+msgid "short reference delimiter %1 already mapped in this declaration"
+msgstr "kısa başvuru ayracı %1 bu bildirimde zaten eşleştirilmiş"
+
+msgid "no document element"
+msgstr "belge elemanı yok"
+
+msgid "entity end not allowed in processing instruction"
+msgstr "işlem komutunda öğe sonuna izin verilmez"
+
+msgid "length of processing instruction must not exceed PILEN (%1)"
+msgstr "PI uzunluğu PILEN'den (%1) büyük olmamalı"
+
+msgid "missing PIC delimiter"
+msgstr "PIC ayracı eksik"
+
+msgid "an attribute specification must start with a name or name token"
+msgstr "bir öznitelik belirtimi bir isim ya da isim sözcüğü ile başlamalı"
+
+msgid "%1 is not a member of a group specified for any attribute"
+msgstr "%1 herhangi bir öznitelik için belirtilmiş bir grubun bir üyesi değil"
+
+msgid ""
+"the name and VI delimiter can be omitted from an attribute specification "
+"only if SHORTTAG YES is specified"
+msgstr ""
+"isim ve VI ayracı sadece SHORTTAG YES belirtilmişse bir öznitelik "
+"belirtiminde atlanabilir"
+
+msgid "there is no attribute %1"
+msgstr "öznitelik %1 yok"
+
+msgid ""
+"an attribute value specification must start with a literal or a name "
+"character"
+msgstr ""
+"bir öznitelik değer belirtimi bir sabit değer ya da bir isim karakteri ile "
+"başlamalı"
+
+msgid "length of name token must not exceed NAMELEN (%1)"
+msgstr "isim sözcüğünün uzunluğu NAMELEN'den (%1) büyük olmamalı"
+
+msgid ""
+"an attribute value literal can occur in an attribute specification list only "
+"after a VI delimiter"
+msgstr ""
+"bir öznitelik değer sabiti sadece bir VI ayracından sonra bir öznitelik "
+"belirtim listesi içinde bulunabilir."
+
+msgid "duplicate specification of attribute %1"
+msgstr "%1 öznitelik belirtimi tekrarlanmış"
+
+msgid "duplicate definition of attribute %1"
+msgstr "%1 öznitelik tanımı tekrarlanmış"
+
+msgid ""
+"data attribute specification must be omitted if attribute specification list "
+"is empty"
+msgstr "öznitelik belirtimi, öznitelik belirtim listesi boşsa atlanmalıdır"
+
+msgid "marked section end not in marked section declaration"
+msgstr "imli bölüm sonu imli bölüm bildirimi içinde değil"
+
+msgid "number of open marked sections must not exceed TAGLVL (%1)"
+msgstr "açık imli bölümlerin sayısı TAGLVL'den (%1) büyük olmamalı"
+
+msgid "missing marked section end"
+msgstr "imli bölüm sonu eksik"
+
+msgid "marked section started here"
+msgstr "imli bölüm burada başlıyor"
+
+msgid ""
+"entity end in character data, replaceable character data or ignored marked "
+"section"
+msgstr ""
+"karakter verisi, değiştirilebilir karakter verisi ya da yoksayılmış imli "
+"bölüm içinde öğe sonu"
+
+msgid ""
+"normalized length of attribute value literal must not exceed LITLEN (%1); "
+"length was %2"
+msgstr ""
+"öznitelik değer sabitinin normalleştirilmiş uzunluğu LITLEN'den (%1) büyük "
+"olmamalı; uzunluğu %2"
+
+msgid "syntax of attribute value does not conform to declared value"
+msgstr "öznitelik değerinin yazımı bildirilen değere uygun değil"
+
+msgid "character %1 is not allowed in the value of attribute %2"
+msgstr "%1 karakterine, %2 öznitelik değerinin içinde izin verilmez"
+
+msgid "value of attribute %1 must be a single token"
+msgstr "%1 öznitelik değeri bir tek sözcük olmalı"
+
+msgid "value of attribute %2 invalid: %1 cannot start a number token"
+msgstr "%2 öznitelik değeri geçersiz: %1 bir sayı sözcüğü başlatamaz"
+
+msgid "value of attribute %2 invalid: %1 cannot start a name"
+msgstr "%2 öznitelik değeri geçersiz: %1 bir isim başlatamaz"
+
+msgid "non-impliable attribute %1 not specified but OMITTAG NO and SHORTTAG NO"
+msgstr ""
+"OMITTAG NO ve SHORTTAG NO olduğu halde örtük olamayan öznitelik %1 "
+"belirtilmemiş"
+
+msgid "required attribute %1 not specified"
+msgstr "gerekli öznitelik %1 belirtilmemiş"
+
+msgid "first occurrence of CURRENT attribute %1 not specified"
+msgstr "%1 CURRENT özniteliğinin ilk kullanımı belirtilmemiş"
+
+msgid "%1 is not a notation name"
+msgstr "%1 bir sözdizimi ismi değil"
+
+msgid "%1 is not a general entity name"
+msgstr "%1 bir genel öğe ismi değil"
+
+msgid "value of attribute %2 cannot be %1; must be one of %3"
+msgstr "%2 özniteliğinin değeri %1 olamaz; %3 ün biri olmalı"
+
+msgid "%1 is not a data or subdocument entity"
+msgstr "%1 bir veri ya da alt belge öğesi değil"
+
+msgid ""
+"content model is ambiguous: when no tokens have been matched, both the %2 "
+"and %3 occurrences of %1 are possible"
+msgstr ""
+"içerik modeli belirsiz:  hiç bir sözcük eşleşmediğinde %1 in hem %2, hem de %"
+"3 kullanımı mümkün."
+
+msgid ""
+"content model is ambiguous: when the current token is the %2 occurrence of %"
+"1, both the %4 and %5 occurrences of %3 are possible"
+msgstr ""
+"içerik modeli belirsiz: sözcük, %1 in %2 kullanımı olduğunda, %3 ün hem %4, "
+"hem de %5 kullanımı mümkün."
+
+msgid ""
+"content model is ambiguous: when the current token is the %2 occurrence of %"
+"1 and the innermost containing AND group has been matched, both the %4 and %"
+"5 occurrences of %3 are possible"
+msgstr ""
+"içerik modeli belirsiz: sözcük, %1 in %2 kullanımında ve en içte eşleşmiş "
+"AND grubunu içerdiğinde, %3 ün hem %4, hem de %5 kullanımı  mümkün."
+
+msgid ""
+"content model is ambiguous: when the current token is the %2 occurrence of %"
+"1 and the innermost %3 containing AND groups have been matched, both the %5 "
+"and %6 occurrences of %4 are possible"
+msgstr ""
+"içerik modeli belirsiz: sözcük, %1 in %2 kullanımında ve en içte %3 eşleşmiş "
+"AND grubunu içerdiğinde, %4 ün hem %5, hem de %6 kullanımı  mümkün."
+
+msgid ""
+"invalid comment declaration: found character %1 outside comment but inside "
+"comment declaration"
+msgstr ""
+"açıklama bildirimi geçersiz: %1 karakteri açıklamanın dışında ama açıklama "
+"bildiriminin içinde bulunuyor"
+
+msgid "non SGML character number %1"
+msgstr "SGML olmayan karakter numarası %1"
+
+msgid "data or replaceable character data in declaration subset"
+msgstr "bildirim alt kümesi içinde veri ya da değiştirilebilir karakter verisi"
+
+msgid "ID %1 already defined"
+msgstr "ID %1 zaten tanımlı"
+
+msgid "ID %1 first defined here"
+msgstr "ID %1 ilk burada tanımlı"
+
+msgid "value of fixed attribute %1 not equal to default"
+msgstr "%1 sabit özniteliğinin değeri öntanımlısına eşit değil"
+
+msgid ""
+"character %1 is not significant in the reference concrete syntax and so "
+"cannot occur in a comment in the SGML declaration"
+msgstr ""
+"%1. karakter başvuru belirleme yazımı içinde anlamlı değil, dolayısıyla SGML "
+"bildirimindeki bir açıklama içinde olamaz"
+
+msgid ""
+"minimum data of first minimum literal in SGML declaration must be \"ISO "
+"8879:1986\" or \"ISO 8879:1986 (ENR)\" or \"ISO 8879:1986 (WWW)\" not %1"
+msgstr ""
+"SGML bildirimindeki ilk en küçük sabitin en küçük verisi %1 değil, \"ISO "
+"8879:1986\" veya \"ISO 8879:1986 (ENR)\" ya da \"ISO 8879:1986 (WWW)\" olmalı"
+
+msgid "parameter before LCNMSTRT must be NAMING not %1"
+msgstr "LCNMSTRT'den önceki parametre %1 değil NAMING olmalı"
+
+msgid ""
+"unexpected entity end in SGML declaration: only %1, S separators and "
+"comments allowed"
+msgstr ""
+"SGML bildirimde beklenmeyen öğe sonu: sadece %1, S ayracı ve açıklamalar "
+"bulunabilir"
+
+msgid "%1 invalid: only %2 and parameter separators allowed"
+msgstr "%1 geçersiz: sadece %2 ve parametre ayraçlarına izin var"
+
+msgid "magnitude of %1 too big"
+msgstr "%1 im genliği çok büyük"
+
+msgid ""
+"character %1 is not significant in the reference concrete syntax and so "
+"cannot occur in a literal in the SGML declaration except as the replacement "
+"of a character reference"
+msgstr ""
+"%1. karakter başvuru belirleme yazımı içinde anlamlı değil, dolayısıyla bir "
+"karakter başvurusu ile yerdeğiştirmek dışında SGML bildirimindeki bir sabit "
+"içinde olamaz "
+
+msgid "%1 is not a valid syntax reference character number"
+msgstr "%1 geçerli bir yazım başvurusu karakter numarası değil"
+
+msgid "a parameter entity reference cannot occur in an SGML declaration"
+msgstr "bir parametre öğesi başvurusu bir SGML bildirimi içinde görünemez"
+
+msgid "cannot continue because of previous errors"
+msgstr "önceki hatalardan dolayı devam edilemiyor"
+
+msgid ""
+"SGML declaration cannot be parsed because the character set does not contain "
+"characters having the following numbers in ISO 646: %1"
+msgstr ""
+"SGML bildirimi, karakter kümesi aşağıdaki ISO 646 karakter numaralarını "
+"içermediğinden çözümlenemiyor: %1"
+
+msgid ""
+"the specified character set is invalid because it does not contain the "
+"minimum data characters having the following numbers in ISO 646: %1"
+msgstr ""
+"belirtilen karakter kümesi, aşağıdaki ISO 646 karakter numaralarını "
+"içermediğinden geçersizdir: %1"
+
+msgid "character numbers declared more than once: %1"
+msgstr "bir defadan fazla bildirilen karakter numaraları: %1"
+
+msgid "character numbers should have been declared UNUSED: %1"
+msgstr "UNUSED olarak bildirilmiş olması gereken karakter numaraları: %1"
+
+msgid "character numbers missing in base set: %1"
+msgstr "temel kümede olmayan karakter numaraları: %1"
+
+msgid ""
+"characters in the document character set with numbers exceeding %1 not "
+"supported"
+msgstr ""
+"belge karakter kümesindeki %1 den büyük numaralı karakterler desteklenmiyor"
+
+msgid "invalid formal public identifier %1: missing //"
+msgstr "biçimsel genel belirteç %1 geçersiz: // eksik"
+
+msgid "invalid formal public identifier %1: no SPACE after public text class"
+msgstr ""
+"biçimsel genel belirteç %1 geçersiz: genel metin sınıfından sonra SPACE yok"
+
+msgid "invalid formal public identifier %1: invalid public text class"
+msgstr "biçimsel genel belirteç %1 geçersiz: genel metin sınıfı geçersiz"
+
+msgid ""
+"invalid formal public identifier %1: public text language must be a name "
+"containing only upper case letters"
+msgstr ""
+"biçimsel genel belirteç %1 geçersiz: genel metin dili sadece büyük harfler "
+"içeren bir isim olmalı"
+
+msgid ""
+"invalid formal public identifer %1: public text display version not "
+"permitted with this text class"
+msgstr ""
+"biçimsel genel belirteç %1 geçersiz: genel metin bu metin sınıfına izin "
+"vermeyen bir sürümü gösteriyor"
+
+msgid "invalid formal public identifier %1: extra field"
+msgstr "biçimsel genel belirteç %1 geçersiz: fazladan alan"
+
+msgid ""
+"public text class of public identifier in notation identifier must be "
+"NOTATION"
+msgstr ""
+"notation belirtecindeki public belirtecinin genel metin sınıfı NOTATION "
+"olmalı"
+
+msgid "base character set %1 is unknown"
+msgstr "temel karakter kümesi %1 bilinmiyor"
+
+msgid ""
+"delimiter set is ambiguous: %1 and %2 can be recognized in the same mode"
+msgstr "ayraç kümesi belirsiz: %1 ve %2 aynı kipte tanınamıyor"
+
+msgid ""
+"characters with the following numbers in the syntax reference character set "
+"are significant in the concrete syntax but are not in the document character "
+"set: %1"
+msgstr ""
+"aşağıda yazım başvuru karakter kümesindeki numaraları bulunan karakterler, "
+"ana sözdizimi için önemlidir, fakat belge karakter kümesinde mevcut "
+"değildir: %1"
+
+msgid ""
+"there is no unique character in the document character set corresponding to "
+"character number %1 in the syntax reference character set"
+msgstr ""
+"belge karakter kümesinde, yazım başvuru karakter kümesi içindeki %1 numaralı "
+"karaktere karşı düşen hiçbir karakter yok"
+
+msgid ""
+"there is no unique character in the internal character set corresponding to "
+"character number %1 in the syntax reference character set"
+msgstr ""
+"dahili karakter kümesinde, yazım başvuru karakter kümesi içindeki %1 "
+"numaralı karaktere karşı düşen hiçbir karakter yok"
+
+msgid ""
+"the character with number %1 in ISO 646 is significant but has no "
+"representation in the syntax reference character set"
+msgstr ""
+"ISO 646 içinde %1 numara ile gösterilen karakter önemli ama yazım başvuru "
+"karakter kümesinde karşılığı yok"
+
+msgid "capacity set %1 is unknown"
+msgstr "sığa kümesi %1 bilinmiyor"
+
+msgid "capacity %1 already specified"
+msgstr "sığa %1 zaten belirtilmiş"
+
+msgid "value of capacity %1 exceeds value of TOTALCAP"
+msgstr "%1 sığa değeri TOTALCAP değerinden büyük"
+
+msgid "syntax %1 is unknown"
+msgstr "%1 yazımı bilinmiyor"
+
+msgid "UCNMSTRT must have the same number of characters as LCNMSTRT"
+msgstr "UCNMSTRT, LCNMSTRT ile aynı sayıda karaktere sahip olmalı"
+
+msgid "UCNMCHAR must have the same number of characters as LCNMCHAR"
+msgstr "UCNMCHAR, LCNMCHAR ile aynı sayıda karaktere sahip olmalı"
+
+msgid ""
+"number of open subdocuments exceeds quantity specified for SUBDOC parameter "
+"in SGML declaration (%1)"
+msgstr ""
+"açık alt belgelerin sayısı, SGML bildirimindeki SUBDOC parametresi için "
+"belirtilen değerden büyük (%1)"
+
+msgid "entity %1 declared SUBDOC, but SUBDOC NO specified in SGML declaration"
+msgstr ""
+"%1 öğesi SUBDOC olarak bildirilmiş ama SGML bildiriminde SUBDOC NO "
+"belirtilmiş"
+
+msgid ""
+"a parameter entity referenced in a parameter separator must end in the same "
+"declaration"
+msgstr ""
+"bir parametre ayracında referanslı bir parametre öğesi aynı bildirimin "
+"içinde bitmeli"
+
+msgid "reference to non-existent ID %1"
+msgstr "mevcut olmayan %1 kimliğine başvuru"
+
+msgid "generic identifier %1 used in DTD but not defined"
+msgstr "genel belirteç %1 kullanılmış ama DTD içinde tanımlı değil"
+
+msgid "%1 not finished but document ended"
+msgstr "%1 bitmemiş ama belge bitti"
+
+msgid "cannot continue with subdocument because of previous errors"
+msgstr "önceki hatalardan dolayı alt belgeye devam edilemiyor"
+
+msgid "no document type declaration; will parse without validation"
+msgstr ""
+"belge türü bildirimi yok; DTD doğrulaması olmaksızın çözümleme yapılacak"
+
+msgid ""
+"no internal or external document type declaration subset; will parse without "
+"validation"
+msgstr ""
+"dahili ya da harici belge türü bildirim alt kümesi yok;\n"
+"DTD doğrulaması olmaksızın çözümleme yapılacak"
+
+msgid "this is not an SGML document"
+msgstr "bu bir SGML biçemli belge değil"
+
+msgid ""
+"length of start-tag before interpretation of literals must not exceed TAGLEN "
+"(%1)"
+msgstr ""
+"sabitlerin yorumlanmasından önce başlangıç etiketinin uzunluğu TAGLEN "
+"değerinden büyük olmamalı (%1)"
+
+msgid ""
+"a parameter entity referenced in a token separator must end in the same group"
+msgstr ""
+"bir sözcük ayracında referanslı bir parametre öğesi aynı grubun içinde "
+"bitmeli"
+
+msgid ""
+"the following character numbers are shunned characters that are not "
+"significant and so should have been declared UNUSED: %1"
+msgstr ""
+"aşağıdaki karakterler önemli değil ve dolayısıyla UNUSED olarak bildirilmesi "
+"gereken karakterlerdir: %1"
+
+msgid ""
+"there is no unique character in the specified document character set "
+"corresponding to character number %1 in ISO 646"
+msgstr ""
+"belge karakter kümesinde, ISO 646 içinde %1 numarasını alan karaktere karşı "
+"düşen hiçbir karakter yok"
+
+msgid "length of attribute value must not exceed LITLEN less NORMSEP (-%1)"
+msgstr ""
+"öznitelik değerinin uzunluğu LITLEN eksi NORMSEP'den küçük olmamalı (-%1)"
+
+msgid ""
+"length of tokenized attribute value must not exceed LITLEN less NORMSEP (-%1)"
+msgstr ""
+"kısaltılmış öznitelik değerinin uzunluğu LITLEN eksi NORMSEP'den küçük "
+"olmamalı (-%1)"
+
+msgid ""
+"concrete syntax scope is INSTANCE but value of %1 quantity is less than "
+"value in reference quantity set"
+msgstr ""
+"somut yazım etki alanı INSTANCE ama %1 nicelik değeri, başvuru nicelik "
+"kümesindeki değerden daha küçük"
+
+msgid ""
+"public text class of formal public identifier of base character set must be "
+"CHARSET"
+msgstr ""
+"ana karakter kümesinin biçimsel genel belirtecinin genel metin sınıfı "
+"CHARSET olmalı"
+
+msgid ""
+"public text class of formal public identifier of capacity set must be "
+"CAPACITY"
+msgstr ""
+"kapasite biçimsel genel belirtecinin genel metin sınıfı CAPACITY olmalı"
+
+msgid ""
+"public text class of formal public identifier of concrete syntax must be "
+"SYNTAX"
+msgstr ""
+"somut yazımın biçimsel genel belirtecinin genel metin sınıfı SYNTAX olmalı"
+
+msgid "when there is an MSOCHAR there must also be an MSICHAR"
+msgstr "bir MSOCHAR'ın olduğu yerde bir de MSICHAR olmalı"
+
+msgid ""
+"character number %1 in the syntax reference character set was specified as a "
+"character to be switched but is not a markup character"
+msgstr ""
+"yazım karakter kümesi içindeki %1 numaralı karakter, değiştirilecek karakter "
+"olarak belirtilmiş ama bir etiketleme dili karakteri değil"
+
+msgid ""
+"character number %1 was specified as a character to be switched but is not "
+"in the syntax reference character set"
+msgstr ""
+"%1 numaralı karakter, değiştirilecek karakter olarak belirtilmiş ama yazım "
+"başvuru karakter kümesi içinde yok"
+
+msgid ""
+"character numbers %1 in the document character set have been assigned the "
+"same meaning, but this is the meaning of a significant character"
+msgstr ""
+"belge karakter kümesindeki %1 numaralı karakter aynı manada atanmış, ama bu "
+"bir anlamlı karakter manasında"
+
+msgid "character number %1 assigned to more than one function"
+msgstr "%1 numaralı karakter birden fazla işleve atanmış"
+
+msgid "%1 is already a function name"
+msgstr "%1 zaten bir işlev ismi"
+
+msgid ""
+"characters with the following numbers in ISO 646 are significant in the "
+"concrete syntax but are not in the document character set: %1"
+msgstr ""
+"aşağıda ISO 646 numaraları yer alan karakterler somut yazım içinde anlamlı "
+"ama belge karakter kümesinde yok: %1"
+
+msgid "general delimiter %1 consists solely of function characters"
+msgstr "%1 genel ayracı sadece işlev karakterlerinden oluşuyor"
+
+msgid "letters assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr "LCNMCHAR, UCNMCHAR, LCNMSTRT veya UCNMSTRT olarak atanmış harfler: %1"
+
+msgid "digits assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr "LCNMCHAR, UCNMCHAR, LCNMSTRT veya UCNMSTRT olarak atanmış rakamlar: %1"
+
+msgid ""
+"character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or "
+"UCNMSTRT because it is RE"
+msgstr ""
+"%1 numaralı karakter bir RE olduğundan LCNMCHAR, UCNMCHAR, LCNMSTRT veya "
+"UCNMSTRT olarak atanamaz"
+
+msgid ""
+"character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or "
+"UCNMSTRT because it is RS"
+msgstr ""
+"%1 numaralı karakter bir RS olduğundan LCNMCHAR, UCNMCHAR, LCNMSTRT veya "
+"UCNMSTRT olarak atanamaz"
+
+msgid ""
+"character number %1 cannot be assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or "
+"UCNMSTRT because it is SPACE"
+msgstr ""
+"%1 numaralı karakter bir SPACE olduğundan LCNMCHAR, UCNMCHAR, LCNMSTRT veya "
+"UCNMSTRT olarak atanamaz"
+
+msgid ""
+"separator characters assigned to LCNMCHAR, UCNMCHAR, LCNMSTRT or UCNMSTRT: %1"
+msgstr ""
+"LCNMCHAR, UCNMCHAR, LCNMSTRT veya UCNMSTRT olarak atanmış ayraç "
+"karakterleri: %1"
+
+msgid ""
+"character number %1 cannot be switched because it is a Digit, LC Letter or "
+"UC Letter"
+msgstr ""
+"%1 karakter numarası bir rakam, bir büyük ya da küçük harf olmadığından "
+"seçilemez."
+
+msgid "pointless for number of characters to be 0"
+msgstr "karakter adedinin 0 olması anlamlı değildir"
+
+msgid ""
+"%1 cannot be the replacement for a reference reserved name because it is "
+"another reference reserved name"
+msgstr ""
+"%1 başka bir başvuru ayrılmış (rezervli) isim olduğundan bir başvuru "
+"ayrılmış isim yerine kullanılamaz"
+
+msgid ""
+"%1 cannot be the replacement for a reference reserved name because it is the "
+"replacement of another reference reserved name"
+msgstr ""
+"%1 başka bir başvuru ayrılmış (rezervli) isim yerine kullanıldığından bir "
+"başvuru ayrılmış (rezervli) isim yerine kullanılamaz"
+
+msgid "replacement for reserved name %1 already specified"
+msgstr "ayrılmış (rezervli) isim %1 yerine geçecek isim zaten belirtilmiş"
+
+msgid "%1 is not a valid name in the declared concrete syntax"
+msgstr "%1, bildirimli somut yazım içinde geçerli bir isim değil"
+
+msgid ""
+"%1 is not a valid short reference delimiter because it has more than one B "
+"sequence"
+msgstr ""
+"%1, birden fazla B dizilimine sahip olduğundan geçerli bir kısa başvuru "
+"ayracı değil"
+
+msgid ""
+"%1 is not a valid short reference delimiter because it is adjacent to a "
+"character that can occur in a blank sequence"
+msgstr ""
+"%1, bir boş dizilim içinde görülebilen bir karaktere bitişik olduğundan "
+"geçerli bir kısa başvuru ayracı değil"
+
+msgid "length of delimiter %1 exceeds NAMELEN (%2)"
+msgstr "%1 ayracının uzunluğu NAMELEN ile belirtilen değeri (%2) aşıyor"
+
+msgid "length of reserved name %1 exceeds NAMELEN (%2)"
+msgstr "yedek isim %1 uzunluğu NAMELEN ile belirtilen değeri (%2) aşıyor"
+
+msgid ""
+"character numbers assigned to both LCNMCHAR or UCNMCHAR and LCNMSTRT or "
+"UCNMSTRT: %1"
+msgstr ""
+"LCNMCHAR veya UCNMCHAR ile LCNMSTRT veya UCNMSTRT birlikte atanmış "
+"karakterlerin numaraları: %1"
+
+msgid ""
+"when the concrete syntax scope is INSTANCE the syntax reference character "
+"set of the declared syntax must be the same as that of the reference "
+"concrete syntax"
+msgstr ""
+"somut yazım bağlamı INSTANCE olduğu zaman, belirtilen yazımın yazım referans "
+"karakter kümesi referans somut yazımı ile aynı olmalıdır"
+
+msgid ""
+"end-tag minimization should be O for element with declared content of EMPTY"
+msgstr ""
+"içeriği EMPTY olarak bildirilen eleman için bitiş etiketinin küçültülmesi O "
+"olmalı"
+
+msgid ""
+"end-tag minimization should be O for element %1 because it has CONREF "
+"attribute"
+msgstr ""
+"CONREF özniteliğine sahip olduğundan bitiş etiketinin küçültülmesi %1 "
+"elemanı için O olmalı"
+
+msgid "element %1 has a declared content of EMPTY and a CONREF attribute"
+msgstr ""
+"%1 elemanı, EMPTY olarak bildirilmiş bir değer ve bir CONREF özniteliğine "
+"sahip"
+
+msgid "element %1 has a declared content of EMPTY and a NOTATION attribute"
+msgstr ""
+"%1 elemanı, EMPTY olarak bildirilmiş bir değer ve bir NOTATION özniteliğine "
+"sahip"
+
+msgid ""
+"declared value of data attribute cannot be ENTITY, ENTITIES, ID, IDREF, "
+"IDREFS or NOTATION"
+msgstr ""
+"veri özniteliğinin bildirim değeri ENTITY, ENTITIES, ID, IDREF, IDREFS ya da "
+"NOTATION olamaz"
+
+msgid "default value of data attribute cannot be CONREF or CURRENT"
+msgstr "veri özniteliğinin öntanımlı değeri CONREF veya CURRENT olamaz"
+
+msgid "number of attribute names and name tokens (%1) exceeds ATTCNT (%2)"
+msgstr ""
+"öznitelik isimlerinin ve isim sözcüklerinin sayısı (%1) ATTCNT ile "
+"belirlenen sayıyı (%2) aşıyor"
+
+msgid ""
+"if the declared value is ID the default value must be IMPLIED or REQUIRED"
+msgstr "Belirtilmiş değer ID ise öntanımlı değer IMPLIED veya REQUIRED olmalı"
+
+msgid ""
+"the attribute definition list already declared attribute %1 as the ID "
+"attribute"
+msgstr ""
+"öznitelik %1, öznitelik tanım listesinde zaten ID özniteliği olarak "
+"belirtilmiş"
+
+msgid ""
+"the attribute definition list already declared attribute %1 as the NOTATION "
+"attribute"
+msgstr ""
+"öznitelik %1, öznitelik tanım listesinde zaten NOTATION özniteliği olarak "
+"belirtilmiş"
+
+msgid "token %1 occurs more than once in attribute definition list"
+msgstr "%1 sözcüğü öznitelik tanım listesinde birden fazla yerde görünüyor"
+
+msgid "no attributes defined for notation %1"
+msgstr "%1 sözdizimi için öznitelik atanmamış"
+
+msgid "notation %1 for entity %2 undefined"
+msgstr "öğe %2 için %1 sözdizimi tanımsız"
+
+msgid "entity %1 undefined in short reference map %2"
+msgstr "%2 kısa başvuru eşleminde öğe %1 tanımsız"
+
+msgid "notation %1 is undefined but had attribute definition"
+msgstr "öznitelik tanımı var ama %1 sözdizimi tanımsız"
+
+msgid ""
+"length of interpreted parameter literal in bracketed text plus the length of "
+"the bracketing delimiters must not exceed LITLEN (%1)"
+msgstr ""
+"parantezli ayraçlarla parantezli metinin yorumlanmış parametre sabitinin "
+"toplamuzunluğu LITLEN ile belirtilmiş değeri (%1) aşmamalıdır"
+
+msgid ""
+"length of rank stem plus length of rank suffix must not exceed NAMELEN (%1)"
+msgstr ""
+"sıralama kökü ile sıralama sonekinin uzunluklarının toplamı NAMELEN (%1) ile "
+"belirtilen değeri aşmamalıdır"
+
+msgid "document instance must start with document element"
+msgstr "belge document elemanı ile başlamalı"
+
+msgid "content model nesting level exceeds GRPLVL (%1)"
+msgstr ""
+"içerik modelinin iç içelik sayısı GRPLVL ile belirtilen değeri (%1) aşıyor"
+
+msgid "grand total of content tokens exceeds GRPGTCNT (%1)"
+msgstr ""
+"içerik sözcüklerinin genel toplamı GRPGTCNT ile belirtilen değeri (%1) aşıyor"
+
+msgid "unclosed start-tag requires SHORTTAG YES"
+msgstr "kapanmayan başlangıç etiketleri SHORTTAG YES gerektirir"
+
+msgid "NET-enabling start-tag requires SHORTTAG YES"
+msgstr "NET-etkin başlangıç etiketleri SHORTTAG YES gerektirir"
+
+msgid "unclosed end-tag requires SHORTTAG YES"
+msgstr "kapanmayan bitiş etiketleri SHORTTAG YES gerektirir"
+
+msgid "DTDs other than base allowed only if CONCUR YES or EXPLICIT YES"
+msgstr ""
+"ana DTD dışındaki DTD'lere sadece CONCUR YES ya da EXPLICIT YES ise izin "
+"verilir"
+
+msgid "end of entity other than document entity after document element"
+msgstr ""
+"document elemanından sonraki öğe sonlandırması document öğesininkinden farklı"
+
+msgid "%1 declaration illegal after document element"
+msgstr "document elemanından sonraki %1 bildirimi kuraldışı"
+
+msgid "character reference illegal after document element"
+msgstr "document elemanından sonraki karakter başvurusu kuraldışı"
+
+msgid "entity reference illegal after document element"
+msgstr "document elemanından sonraki öğe başvurusu kuraldışı"
+
+msgid "marked section illegal after document element"
+msgstr "document elemanından sonraki imli bölüm kuraldışı"
+
+msgid ""
+"the %1 occurrence of %2 in the content model for %3 cannot be excluded at "
+"this point because it is contextually required"
+msgstr ""
+"%3 içerik modelindeki %2 nin %1 görünümü bağlamsal olarak gerekli olduğundan "
+"bu noktada dışlanamaz. "
+
+msgid ""
+"the %1 occurrence of %2 in the content model for %3 cannot be excluded "
+"because it is neither inherently optional nor a member of an OR group"
+msgstr ""
+"%3 içerik modelindeki %2 nin %1 görünümü, kalıtsal olarak seçimlik ya da bir "
+"OR grubunun üyesi olmadığından dışlanamaz"
+
+msgid ""
+"an attribute value specification must be an attribute value literal unless "
+"SHORTTAG YES is specified"
+msgstr ""
+"bir öznitelik değer belirtimi SHORTTAG YES belirtilmedikçe bir öznitelik "
+"değeri sabiti olmalıdır"
+
+msgid ""
+"value cannot be specified both for notation attribute and content reference "
+"attribute"
+msgstr ""
+"değer, hem sözdizimi özniteliği hem de içerik başvurusu özniteliği olarak "
+"belirtilemez"
+
+msgid "notation %1 already defined"
+msgstr "%1 sözdizimi zaten tanımlı"
+
+msgid "short reference map %1 already defined"
+msgstr "%1 kısa başvuru eşlemi zaten tanımlı"
+
+msgid "first defined here"
+msgstr "ilk burada tanımlanmış"
+
+msgid "general delimiter role %1 already defined"
+msgstr "genel ayraç rolü %1 zaten tanımlı"
+
+msgid "number of ID references in start-tag must not exceed GRPCNT (%1)"
+msgstr ""
+"başlangıç etiktindeki ID başvurularının sayısı GRPCNT ile belirtilen değeri "
+"(%1) aşamaz"
+
+msgid ""
+"number of entity names in attribute specification list must not exceed "
+"GRPCNT (%1)"
+msgstr ""
+"öznitelik belirtim listesindeki öğe isimlerinin sayısı GRPCNT ile belirtilen "
+"değeri (%1) aşmamalıdır"
+
+msgid ""
+"normalized length of attribute specification list must not exceed ATTSPLEN (%"
+"1); length was %2"
+msgstr ""
+"öznitelik belirtim listesinin normalleştirilmiş uzunluğu ATTSPLEN ile "
+"belirtilen değeri (%1) aşmamalıdır; uzunluk %2 idi"
+
+msgid "short reference delimiter %1 already specified"
+msgstr "kısa başvuru ayracı %1 zaten belirtilmiş"
+
+msgid ""
+"single character short references were already specified for character "
+"numbers: %1"
+msgstr ""
+"tek karakter kısa başvuruları bu karakterler için zaten belirtilmiş: %1"
+
+msgid "default entity used in entity attribute %1"
+msgstr "öntanımlı öğe, öğe özniteliği %1 içinde kullanılmış"
+
+msgid "reference to entity %1 uses default entity"
+msgstr "%1 öğesine başvuru öntanımlı öğe kullanıyor"
+
+msgid "entity %1 in short reference map %2 uses default entity"
+msgstr ""
+"kısa başvuru listesi %2 içindeki %1 öğesine başvuru öntanımlı öğe kullanıyor"
+
+msgid "no DTD %1 declared"
+msgstr "%1 diye bir DTD bildirilmemiş"
+
+msgid "LPD %1 has neither internal nor external subset"
+msgstr "LPD %1, ne iç ne de dış alt kümeye sahip"
+
+msgid "element types have different link attribute definitions"
+msgstr "eleman türleri farklı öznitelik tanımlarına sahip"
+
+msgid "link set %1 already defined"
+msgstr "bağ kümesi %1 zaten tanımlı"
+
+msgid "empty result attribute specification"
+msgstr "sonuç öznitelik belirtimi boş"
+
+msgid "no source element type %1"
+msgstr "%1 diye bir kaynak eleman türü yok"
+
+msgid "no result element type %1"
+msgstr "%1 diye bir sonuç eleman türü yok"
+
+msgid "end of document in LPD subset"
+msgstr "LPD alt kümesinde belge sonu"
+
+msgid "%1 declaration not allowed in LPD subset"
+msgstr "LPD alt kümesinde %1 bildirimine izin verilmez"
+
+msgid "ID link set declaration not allowed in simple link declaration subset"
+msgstr ""
+"basit bağ bildirimi alt kümesi içinde ID bağ kümesi bildirimine izin verilmez"
+
+msgid "link set declaration not allowed in simple link declaration subset"
+msgstr ""
+"basit bağ bildirimi alt kümesi içinde bağ kümesi bildirimine izin verilmez"
+
+msgid ""
+"attributes can only be defined for base document element (not %1) in simple "
+"link declaration subset"
+msgstr ""
+"öznitelikler sadece basit bağ bildirimi alt kümesi içindeki (%1 değil) ana "
+"belge elemanı için tanımlı olmalıdır"
+
+msgid "a short reference mapping declaration is allowed only in the base DTD"
+msgstr "bir kısa başvuru eşleme bildirimine sadece ana DTD içinde izin verilir"
+
+msgid "a short reference use declaration is allowed only in the base DTD"
+msgstr ""
+"bir kısa başvuru kullanma bildirimine sadece ana DTD içinde izin verilir"
+
+msgid "default value of link attribute cannot be CURRENT or CONREF"
+msgstr "bağ özniteliğinin öntanımlı değeri CURRENT ya da CONREF olamaz"
+
+msgid ""
+"declared value of link attribute cannot be ID, IDREF, IDREFS or NOTATION"
+msgstr ""
+"bağ özniteliğinin bildirim değeri ID, IDREF, IDREFS ya da NOTATION olamaz"
+
+msgid "only fixed attributes can be defined in simple LPD"
+msgstr "sadece sabit öznitelikler, basit LPD içinde tanımlı olabilir"
+
+msgid "only one ID link set declaration allowed in an LPD subset"
+msgstr ""
+"bir LPD alt kümesi içinde sadece bir ID bağ kümesi bildirimine izin verilir"
+
+msgid "no initial link set defined for LPD %1"
+msgstr "LPD %1 için tanımlı bir iç bağ kümesi yok"
+
+msgid "notation %1 not defined in source DTD"
+msgstr "%1 sözdizimi kaynak DTD içinde tanımlı değil"
+
+msgid "result document type in simple link specification must be implied"
+msgstr "basit bağ belirtimi içindeki sonuç belge türü örtük olmalı"
+
+msgid "simple link requires SIMPLE YES"
+msgstr "basit bağ SIMPLE YES gerektirir"
+
+msgid "implicit link requires IMPLICIT YES"
+msgstr "örtük bağ IMPLICIT YES gerektirir"
+
+msgid "explicit link requires EXPLICIT YES"
+msgstr "belirgin bağ EXPLICIT YES gerektirir"
+
+msgid "LPD not allowed before first DTD"
+msgstr "ilk DTD'den önce LPD kullanılmaz"
+
+msgid "DTD not allowed after an LPD"
+msgstr "bir LPD'den sonra DTD kullanılmaz"
+
+msgid "definition of general entity %1 is unstable"
+msgstr "genel öğe %1 için tanım kararsız"
+
+msgid "definition of parameter entity %1 is unstable"
+msgstr "parametre öğesi %1 için tanım kararsız"
+
+msgid ""
+"multiple link rules for ID %1 but not all have link attribute specifications"
+msgstr ""
+"ID %1 için çok sayıda bağ kuralı var ama tamamı bağ özniteliği belirtimine "
+"sahip değil"
+
+msgid ""
+"multiple link rules for element type %1 but not all have link attribute "
+"specifications"
+msgstr ""
+"eleman türü %1 için çok sayıda bağ kuralı var ama tamamı bağ özniteliği "
+"belirtimine sahip değil"
+
+msgid "link type %1 does not have a link set %2"
+msgstr "bağ türü %1 bir %2 bağ kümesi içermiyor"
+
+msgid "link set use declaration for simple link process"
+msgstr "bağ kümesi, basit bağ işlemi bildirimini kullanıyor"
+
+msgid "no link type %1"
+msgstr "bağ türü %1 yok"
+
+msgid "both document type and link type %1"
+msgstr "%1 hem belge türü hem de bağ türü"
+
+msgid "link type %1 already defined"
+msgstr "bağ türü %1 zaten tanımlı"
+
+msgid "document type %1 already defined"
+msgstr "belge türü %1 zaten tanımlı"
+
+msgid "link set %1 used in LPD but not defined"
+msgstr "bağ türü %1 LPD içinde kullanılmış ama tanımlı değil"
+
+msgid "#IMPLIED already linked to result element type %1"
+msgstr "#IMPLIED, %1 sonuç eleman türüne zaten bağlı"
+
+msgid ""
+"number of active simple link processes exceeds quantity specified for SIMPLE "
+"parameter in SGML declaration (%1)"
+msgstr ""
+"etkin basit bağ işlemi sayısı, SGML bildirimindeki SIMPLE parametresi için "
+"belirtilen miktarı aşıyor (%1)"
+
+msgid "only one chain of explicit link processes can be active"
+msgstr "doğrudan bağ işleminin sadece bir zinciri etkin olabilir"
+
+msgid ""
+"source document type name for link type %1 must be base document type since "
+"EXPLICIT YES 1"
+msgstr ""
+"EXPLICIT YES 1 olduğundan, bağ türü %1 için kaynak belge türü ismi temel "
+"belge türü olmalı"
+
+msgid "only one implicit link process can be active"
+msgstr "sadece bir örtük bağ işlemi etkinleştirilebilir"
+
+msgid ""
+"sorry, link type %1 not activated: only one implicit or explicit link "
+"process can be active (with base document type as source document type)"
+msgstr ""
+"bağ türü %1 etkinleştirilmedi: sadece bir örtük ya da doğrudan bağ işlemi "
+"etkinleştirilebilir (kaynak belge türü olarak temel belge türü ile)"
+
+msgid "name missing after name group in entity reference"
+msgstr "öğe başvurusu içinde isim grubundan sonra isim eksik"
+
+msgid ""
+"source document type name for link type %1 must be base document type since "
+"EXPLICIT NO"
+msgstr ""
+"EXPLICIT NO olduğundan, bağ türü %1 için kaynak belge türü ismi temel belge "
+"türü olmalı"
+
+msgid "link process must be activated before base DTD"
+msgstr "bağ işlemi temel DTD'den önce etkinleştirilmeli"
+
+msgid "unexpected entity end while starting second pass"
+msgstr "ikinci tura başlarken anlaşılmayan öğe sonu"
+
+msgid ""
+"type %1 of element with ID %2 not associated element type for applicable "
+"link rule in ID link set"
+msgstr ""
+"%2 kimlikli %1 türündeki eleman, ID bağ kümesi içinde uygulanabilir bağ "
+"kuralı için eleman türü ile ilişkili değil"
+
+msgid "DATATAG feature not implemented"
+msgstr "DATATAG özelliği henüz programlanmadı"
+
+msgid ""
+"generic identifier specification missing after document type specification "
+"in start-tag"
+msgstr ""
+"başlangıç etiketinde belge türü belirtiminden sonra genel belirteç belirtimi "
+"yok"
+
+msgid ""
+"generic identifier specification missing after document type specification "
+"in end-tag"
+msgstr ""
+"bitiş etiketinde belge türü belirtiminden sonra genel belirteç belirtimi yok"
+
+msgid "a NET-enabling start-tag cannot include a document type specification"
+msgstr "bir NET-etkin başlangıç etiketi, bir belge türü belirtimi içeremez"
+
+msgid "DTD did not contain element declaration for document type name"
+msgstr "DTD, belge türü ismi için eleman bildirimi içermiyor"
+
+msgid "invalid default SGML declaration"
+msgstr "öntanımlı SGML bildirimi geçersiz"
+
+msgid ""
+"reference to entity %1 for which no system identifier could be generated"
+msgstr "sistem belirteci üretilemeyen için %1 öğesine başvuru"
+
+msgid "entity was defined here"
+msgstr "öğe burada tanımlıydı"
+
+msgid "content model is mixed but does not allow #PCDATA everywhere"
+msgstr "içerik modeli karışık ama heryerinde #PCDATA'ya izin vermiyor"
+
+msgid "start or end of range must specify a single character"
+msgstr "aralığın başlangıç ve bitişi bir tek karakter olmalı"
+
+msgid ""
+"number of first character in range must not exceed number of second "
+"character in range"
+msgstr ""
+"aralıktaki ilk karakterin numarası, ikinci karakterin numarasından büyük "
+"olmamalı"
+
+msgid "delimiter cannot be an empty string"
+msgstr "ayraç bir boş dizge olamaz"
+
+msgid "too many characters assigned same meaning with minimum literal"
+msgstr "en küçük sabit değerle aynı anlama gelen çok fazla karakter atanmış"
+
+msgid "earlier reference to entity %1 used default entity"
+msgstr "%1 öğesine daha önceki başvuru öntanımlı öğeyi kullanmış"
+
+msgid "empty start-tag"
+msgstr "boş başlangıç etiketi"
+
+msgid "empty end-tag"
+msgstr "boş bitiş etiketi"
+
+msgid "unused short reference map %1"
+msgstr "kısa başvuru eşlemi %1 kullanılmamış"
+
+msgid "unused parameter entity %1"
+msgstr "parametre öğesi %1 kullanılmamış"
+
+msgid "cannot generate system identifier for public text %1"
+msgstr "genel metin %1 için sistem belirteci üretilemiyor"
+
+msgid "cannot generate system identifier for general entity %1"
+msgstr "genel öğe %1 için sistem belirteci üretilemiyor"
+
+msgid "cannot generate system identifier for parameter entity %1"
+msgstr "parametre öğesi %1 için sistem belirteci üretilemiyor"
+
+msgid "cannot generate system identifier for document type %1"
+msgstr "belge türü %1 için sistem belirteci üretilemiyor"
+
+msgid "cannot generate system identifier for link type %1"
+msgstr "bağ türü %1 için sistem belirteci üretilemiyor"
+
+msgid "cannot generate system identifier for notation %1"
+msgstr "%1 sözdizimi için sistem belirteci üretilemiyor"
+
+msgid "element type %1 both included and excluded"
+msgstr "eleman türü %1 hem içsel hem de dışsal"
+
+msgid "no document type declaration; implying %1"
+msgstr "belge türü bildirimi yok; %1 uygulanıyor"
+
+msgid "minimum data of AFDR declaration must be \"ISO/IEC 10744:1997\" not %1"
+msgstr ""
+"AFDR bildiriminin en küçük verisi \"ISO/IEC 10744:1997\" olmalı, %1 değil"
+
+msgid "AFDR declaration required before use of AFDR extensions"
+msgstr "AFDR bildirimi AFDR uzantılarından önce kullanılmalıdır"
+
+msgid ""
+"ENR extensions were used but minimum literal was not \"ISO 8879:1986 (ENR)\" "
+"or \"ISO 8879:1986 (WWW)\""
+msgstr ""
+"ENR uzantıları kullanılmış ama en küçük sabit değer \"ISO 8879:1986 (ENR)\" "
+"ya da \"ISO 8879:1986 (WWW)\" değil"
+
+msgid "illegal numeric character reference to non-SGML character %1 in literal"
+msgstr ""
+"sabit değer içindeki SGML olmayan %1 karakterine kuraldışı sayısal karakter "
+"başvurusu"
+
+msgid ""
+"cannot convert character reference to number %1 because description %2 "
+"unrecognized"
+msgstr ""
+"karakter başvurusu %1 sayısına dönüştürülemiyor, çünkü %2 açıklaması "
+"bilinmiyor"
+
+msgid ""
+"cannot convert character reference to number %1 because character %2 from "
+"baseset %3 unknown"
+msgstr ""
+"karakter başvurusu %1 sayısına dönüştürülemez, çünkü temel küme %3 içindeki %"
+"2 karakteri bilinmiyor"
+
+msgid ""
+"character reference to number %1 cannot be converted because of problem with "
+"internal character set"
+msgstr ""
+"dahili karakter kümesi sorunlarından dolayı karakter başvurusu %1 olarak "
+"dönüştürülemiyor"
+
+msgid ""
+"cannot convert character reference to number %1 because character not in "
+"internal character set"
+msgstr ""
+"karakter, dahili karakter kümesi içinde olmadığından karakter başvurusu %1 "
+"olarak dönüştürülemez"
+
+msgid ""
+"Web SGML adaptations were used but minimum literal was not \"ISO 8879:1986 "
+"(WWW)\""
+msgstr ""
+"Web SGML uyarlamaları kullanılmış ama en küçük sabit değer \"ISO 8879:1986 "
+"(WWW)\" değil"
+
+msgid ""
+"token %1 can be value for multiple attributes so attribute name required"
+msgstr ""
+"%1 sözcüğü çok sayıda özniteliğin değeri olabildiğinden öznitelik ismi "
+"gerekli"
+
+msgid "length of hex number must not exceed NAMELEN (%1)"
+msgstr "onaltılık sayının uzunluğu NAMELEN'i aşmamalıdır (%1)"
+
+msgid "CDATA declared content"
+msgstr "CDATA bildirimli içerik"
+
+msgid "RCDATA declared content"
+msgstr "RCDATA bildirimli içerik"
+
+msgid "inclusion"
+msgstr "içselleştirme"
+
+msgid "exclusion"
+msgstr "dışlama"
+
+msgid "NUMBER or NUMBERS declared value"
+msgstr "NUMBER ya da NUMBERS bildirimli değer"
+
+msgid "NAME or NAMES declared value"
+msgstr "NAME ya da NAMES bildirimli değer"
+
+msgid "NUTOKEN or NUTOKENS declared value"
+msgstr "NUTOKEN ya da NUTOKENS bildirimli değer"
+
+msgid "CONREF attribute"
+msgstr "CONREF özniteliği"
+
+msgid "CURRENT attribute"
+msgstr "CURRENT özniteliği"
+
+msgid "TEMP marked section"
+msgstr "TEMP imli bölüm"
+
+msgid "included marked section in the instance"
+msgstr "belgedeki imli bölüm içerildi"
+
+msgid "ignored marked section in the instance"
+msgstr "belgedeki imli bölüm yoksayıldı"
+
+msgid "RCDATA marked section"
+msgstr "RCDATA imli bölüm"
+
+msgid "processing instruction entity"
+msgstr "işlem komutu öğesi"
+
+msgid "bracketed text entity"
+msgstr "parantezli metin öğesi"
+
+msgid "internal CDATA entity"
+msgstr "dahili CDATA öğesi"
+
+msgid "internal SDATA entity"
+msgstr "dahili SDATA öğesi"
+
+msgid "external CDATA entity"
+msgstr "harici CDATA öğesi"
+
+msgid "external SDATA entity"
+msgstr "harici SDATA öğesi"
+
+msgid "attribute definition list declaration for notation"
+msgstr "sözdizimi için öznitelik tanım listesi bildirimi"
+
+msgid "rank stem"
+msgstr "sıralama kökü"
+
+msgid "no system id specified"
+msgstr "sistem kimliği belirtilmemiş"
+
+msgid "comment in parameter separator"
+msgstr "parametre ayracında açıklama"
+
+msgid "named character reference"
+msgstr "isimli karakter başvurusu"
+
+msgid "AND group"
+msgstr "AND grubu"
+
+msgid "attribute value not a literal"
+msgstr "öznitelik değeri bir sabit değer değil"
+
+msgid "attribute name missing"
+msgstr "öznitelik ismi yok"
+
+msgid "element declaration for group of element types"
+msgstr "eleman türlerinin grubu için eleman bildirimi"
+
+msgid "attribute definition list declaration for group of element types"
+msgstr "eleman türlerinin grubu için öznitelik tanım listesi bildirimi"
+
+msgid "empty comment declaration"
+msgstr "boş comment bildirimi"
+
+msgid "S separator in comment declaration"
+msgstr "comment bildiriminde S ayracı"
+
+msgid "multiple comments in comment declaration"
+msgstr "comment bildiriminde çok sayıda açıklama"
+
+msgid "no status keyword"
+msgstr "status anahtar sözcüğü yok"
+
+msgid "multiple status keywords"
+msgstr "çok sayıda status anahtar sözcüğü"
+
+msgid "parameter entity reference in document instance"
+msgstr "belge içinde parametre öğe başvurusu"
+
+msgid "element type minimization parameter"
+msgstr "eleman türü küçültme parametresi"
+
+msgid "reference not terminated by REFC delimiter"
+msgstr "başvuru REFC ayracı ile sonlandırılmamış"
+
+msgid "#PCDATA not first in model group"
+msgstr "#PCDATA model grubunda ilk değil"
+
+msgid "#PCDATA in SEQ group"
+msgstr "SEQ grubunda #PCDATA"
+
+msgid "#PCDATA in nested model group"
+msgstr "iç içe model grubunda #PCDATA"
+
+msgid "#PCDATA in model group that does not have REP occurrence indicator"
+msgstr "REP oluşum göstergesi olmayan model grubunda #PCDATA"
+
+msgid "name group or name token group used connector other than OR"
+msgstr "isim grubu ya da isim sözcük grubu OR dışında bir bağlayıcı kullanmış"
+
+msgid "processing instruction does not start with name"
+msgstr "işlem komutu isimle başlamıyor"
+
+msgid "S separator in status keyword specification in document instance"
+msgstr "status anahtar sözcüğü belirtimindeki S ayracı belgenin içinde"
+
+msgid "reference to external data entity"
+msgstr "harici veri öğesine başvuru"
+
+msgid "reference to external entity in attribute value"
+msgstr "öznitelik değerindeki harici öğeye başvuru"
+
+msgid "character %1 is the first character of a delimiter but occurred as data"
+msgstr ""
+"%1 karakteri ayracın ilk  karakteri olmasına rağmen veri olarak görünüyor"
+
+msgid "SGML declaration was not implied"
+msgstr "SGML bildirimi örtük değildi"
+
+msgid "marked section in internal DTD subset"
+msgstr "dahili DTD alt kümesi içinde imli bölüm"
+
+msgid "NET-enabling start-tag not immediately followed by null end-tag"
+msgstr ""
+"NET-etkin başlangıç etiketinin ardından hemen boş sonlandıma etiketi gelmiyor"
+
+msgid "entity end in different element from entity reference"
+msgstr "öğe sonu öğe başvurusundan farklı bir elemanın içinde"
+
+msgid "NETENABL IMMEDNET requires EMPTYNRM YES"
+msgstr "NETENABL IMMEDNET, EMPTYNRM YES gerektirir"
+
+msgid "reference to non-SGML character"
+msgstr "SGML olmayan karaktere başvuru"
+
+msgid "declaration of default entity"
+msgstr "öntanımlı öğe bildirimi"
+
+msgid "reference to parameter entity in parameter separator in internal subset"
+msgstr "parametre ayracındaki parametre öğesine başvuru dahili alt küme içinde"
+
+msgid "reference to parameter entity in token separator in internal subset"
+msgstr "sözcük ayracındaki parametre öğesine başvuru dahili alt küme içinde"
+
+msgid "reference to parameter entity in parameter literal in internal subset"
+msgstr ""
+"parametre sabit değerindeki parametre öğesine başvuru dahili alt küme içinde"
+
+msgid "cannot generate system identifier for SGML declaration reference"
+msgstr "SGML bildirim başvurusu için sistem belirteci üretilemiyor"
+
+msgid ""
+"public text class of formal public identifier of SGML declaration must be SD"
+msgstr ""
+"SGML bildiriminin biçimsel genel belirtecinin genel metin sınıfı SD olmalı"
+
+msgid ""
+"SGML declaration reference was used but minimum literal was not \"ISO "
+"8879:1986 (WWW)\""
+msgstr ""
+"SGML bildirim başvurusu kullanılmış ama en küçük sabit değer \"ISO 8879:1986 "
+"(WWW)\" değil"
+
+msgid "member of model group containing #PCDATA has occurrence indicator"
+msgstr "#PCDATA içeren model grubu üyesi oluş göstergesine sahip"
+
+msgid "member of model group containing #PCDATA is a model group"
+msgstr "#PCDATA içeren model grubunun üyesi de bir model grubu"
+
+msgid "reference to non-predefined entity"
+msgstr "önceden tanımlı olmayan öğeye başvuru"
+
+msgid "reference to external entity"
+msgstr "harici öğeye başvuru"
+
+msgid "declaration of default entity conflicts with IMPLYDEF ENTITY YES"
+msgstr "öntanımlı öğenin bildirimi IMPLYDEF ENTITY YES ile çelişiyor"
+
+msgid "parsing with respect to more than one active doctype not supported"
+msgstr "birden fazla etkin belge türüne göre çözümleme desteklenmiyor"
+
+msgid "cannot have active doctypes and link types at the same time"
+msgstr "belgetürleri ve bağ türleri aynı anda etkin olamıyor"
+
+msgid ""
+"number of concurrent document instances exceeds quantity specified for "
+"CONCUR parameter in SGML declaration (%1)"
+msgstr ""
+"koşutzamanlı belgelerin sayısı, SGML bildiriminde CONCUR parametresi ile "
+"belirtilen miktarı aşıyor (%1)"
+
+msgid "datatag group can only be specified in base document type"
+msgstr "veri etiketi grubu sadece temel belge türünde belirtilebilir"
+
+msgid "element not in the base document type can't have an empty start-tag"
+msgstr "temel belge türünde olmayan eleman, başlangıç etiketsiz kullanılamaz"
+
+msgid "element not in base document type can't have an empty end-tag"
+msgstr "temel belge türünde olmayan eleman, sonlandırma etiketsiz kullanılamaz"
+
+msgid "immediately recursive element"
+msgstr "doğrudan iç içe geçmiş eleman"
+
+msgid "invalid URN %1: missing \":\""
+msgstr "URN %1 geçersiz: \":\" yok"
+
+msgid "invalid URN %1: missing \"urn:\" prefix"
+msgstr "URN %1 geçersiz: \"urn:\" öneki yok"
+
+msgid "invalid URN %1: invalid namespace identifier"
+msgstr "URN %1 geçersiz: namespace belirteci geçersiz"
+
+msgid "invalid URN %1: invalid namespace specific string"
+msgstr "URN %1 geçersiz:  namespace'e özel dizge geçersiz"
+
+msgid "invalid URN %1: extra field"
+msgstr "URN %1 geçersiz: fazladan alan"
+
+msgid ""
+"prolog can't be omitted unless CONCUR NO and LINK EXPLICIT NO and either "
+"IMPLYDEF ELEMENT YES or IMPLYDEF DOCTYPE YES"
+msgstr ""
+"CONCUR NO ve LINK EXPLICIT NO ve ister IMPLYDEF ELEMENT YES ister IMPLYDEF "
+"DOCTYPE YES olmaksızın öndeyiş atlanamaz"
+
+msgid "can't determine name of #IMPLIED document element"
+msgstr "#IMPLIED belge eleman ismi saptanamaz"
+
+msgid "can't use #IMPLICIT doctype unless CONCUR NO and LINK EXPLICIT NO"
+msgstr ""
+"#IMPLICIT belgetürü, CONCUR NO ve LINK EXPLICIT NO olmadıkça kullanılamaz"
+
+msgid "Sorry, #IMPLIED doctypes not implemented"
+msgstr "#IMPLIED belge türü henüz programlanmadı"
+
+msgid "reference to DTD data entity ignored"
+msgstr "DTD veri öğesine başvuru yoksayıldı"
+
+msgid "notation %1 for parameter entity %2 undefined"
+msgstr "parametre öğesi %2 için %1 sözdizimi tanımlanmamış"
+
+msgid "notation %1 for external subset undefined"
+msgstr "harici alt küme için %1 sözdizimi tanımlanmamış"
+
+msgid "attribute %1 can't be redeclared"
+msgstr "%1 özniteliği yeniden bildirilemez"
+
+msgid "#IMPLICIT attributes have already been specified for notation %1"
+msgstr "#IMPLICIT öznitelikleri %1 sözdizimi için zaten belirtilmişti"
+
+msgid ""
+"a name group is not allowed in a parameter entity reference in a start tag"
+msgstr ""
+"bir parametre öğesi başvurusunda izin verilen bir isim grubu bir başlangıç "
+"etiketinin içinde"
+
+msgid ""
+"name group in a parameter entity reference in an end tag (SGML forbids them "
+"in start tags)"
+msgstr ""
+"bir parametre öğesi başvurusundaki isim grubu bir bitiş etiketi içinde (SGML "
+"onların başlangıç etiketlerinde olmasına izin vermez)"
+
+msgid "if the declared value is NOTATION a default value of CONREF is useless"
+msgstr ""
+"Değer NOTATION olarak bildirilmişse bir CONREF öntanımlı değeri "
+"kullanışsızdır"
+
+msgid "Sorry, #ALL and #IMPLICIT content tokens not implemented"
+msgstr "İçerik sözcükleri #ALL ve #IMPLICIT henüz programlanmadı"
+
+msgid "delimiter "
+msgstr "ayraç"
+
+msgid "digit"
+msgstr "rakam"
+
+msgid "name start character"
+msgstr "isim başlangıç karakteri"
+
+msgid "sepchar"
+msgstr "ayrkrkt"
+
+msgid "separator"
+msgstr "ayraç"
+
+msgid "name character"
+msgstr "isim karakteri"
+
+msgid "data character"
+msgstr "veri karakteri"
+
+msgid "minimum data character"
+msgstr "en küçük veri karakteri"
+
+msgid "significant character"
+msgstr "belirleyici karakter"
+
+msgid "record end character"
+msgstr "kayıt sonlandırma karakteri"
+
+msgid "record start character"
+msgstr "kayıt başlatma karakteri"
+
+msgid "space character"
+msgstr "boşluk karakteri"
+
+msgid ", "
+msgstr ", (virgül)"
+
+msgid "-"
+msgstr "- (tire)"
+
+msgid "parameter literal"
+msgstr "parametre sabit değer"
+
+msgid "data tag group"
+msgstr "veri etiketi grubu"
+
+msgid "model group"
+msgstr "model grubu"
+
+msgid "data tag template group"
+msgstr "veri etiketi şablon grubu"
+
+msgid "name"
+msgstr "isim"
+
+msgid "name token"
+msgstr "isim sözcüğü"
+
+msgid "element token"
+msgstr "eleman sözcüğü"
+
+msgid "inclusions"
+msgstr "içselleştirmeler"
+
+msgid "exclusions"
+msgstr "dışsallaştırmalar"
+
+msgid "minimum literal"
+msgstr "en küçük sabit değer"
+
+msgid "attribute value literal"
+msgstr "öznitelik değeri sabit değer"
+
+msgid "system identifier"
+msgstr "sistem belirteci"
+
+msgid "number"
+msgstr "numara"
+
+msgid "attribute value"
+msgstr "öznitelik değeri"
+
+msgid "name of capacity"
+msgstr "sığa ismi"
+
+msgid "name of general delimiter role"
+msgstr "genel ayraç rolü ismi"
+
+msgid "reference reserved name"
+msgstr "ilerde kullanmak üzere ayrılmış isme başvuru"
+
+msgid "name of quantity"
+msgstr "büyüklük ismi"
+
+msgid "entity end"
+msgstr "öğe sonu"
+
+msgid "short reference delimiter"
+msgstr "kısa başvuru ayracı"
+
+msgid "error reading %1 (%2)"
+msgstr "%1 okunurken hata (%2)"
+
+msgid "cannot open %1 (%2)"
+msgstr "%1 açılamıyor (%2)"
+
+msgid "error closing %1 (%2)"
+msgstr "%1 kapatılırken hata (%2)"
+
+msgid "error seeking on %1 (%2)"
+msgstr "%1 üzerinden erişimde hata (%2)"
+
+msgid "invalid filename %1"
+msgstr "dosya ismi %1 geçersiz"
+
+msgid "error reading file descriptor %1 (%2)"
+msgstr "dosya belirteci %1 okunurken hata (%2)"
+
+msgid "error seeking on file descriptor %1 (%2)"
+msgstr "dosya belirteci %1 üzerinden erişimde hata (%2)"
+
+msgid "%1 is not a valid file descriptor number"
+msgstr "%1 geçerli bir dosya belirteci değil"
+
+msgid "cannot find %1; tried %2"
+msgstr "%1 bulunamıyor; %2 deneme yapıldı"
+
+msgid "error seeking %1 (%2)"
+msgstr "%1 erişiminde hata (%2)"
+
+msgid "empty host in HTTP URL %1"
+msgstr "HTTP URL %1 deki makina boş"
+
+msgid "uncompletable relative HTTP URL %1"
+msgstr "göreli HTTP URL %1 hatalı"
+
+msgid "empty port number in HTTP URL %1"
+msgstr "HTTP URL %1 için port numarası boş"
+
+msgid "invalid port number in HTTP URL %1"
+msgstr "HTTP URL %1 için port numarası geçersiz"
+
+msgid "host %1 not found"
+msgstr "%1 makinası yok"
+
+msgid "could not resolve host %1 (try again later)"
+msgstr "makina %1 çözümlenemedi (daha sonra tekrar deneyin)"
+
+msgid "could not resolve host %1 (unrecoverable error)"
+msgstr "makina %1 çözümlenemedi (kurtarılamayan hata)"
+
+msgid "no address record for host name %1"
+msgstr "makina ismi %1 için adres kaydı yok"
+
+msgid "could not resolve host %1 (%2)"
+msgstr "makina %1 çözümlenemedi (%2)"
+
+msgid "could not resolve host %1 (unknown error)"
+msgstr "makina %1 çözümlenemedi (hata bilinmiyor)"
+
+msgid "cannot create socket (%1)"
+msgstr "soket oluşturulamıyor (%1)"
+
+msgid "error connecting to %1 (%2)"
+msgstr "%1 e bağlanılırken hata (%2)"
+
+msgid "error sending request to %1 (%2)"
+msgstr "%1 e istek gönderilirken hata (%2)"
+
+msgid "error receiving from host %1 (%2)"
+msgstr "%1 makinasından alış hatası (%2)"
+
+msgid "error closing connection to host %1 (%2)"
+msgstr "%1 makinasıyla bağlantı kesilirken hata (%2)"
+
+msgid "invalid host number %1"
+msgstr "makina numarası %1 geçersiz"
+
+msgid "could not get %2 from %1 (reason given was %3)"
+msgstr "%2, %1 den alınamadı (sebebi %3 olarak verilmiş)"
+
+msgid "URL not supported by this version"
+msgstr "bu sürümde URL desteklenmiyor"
+
+msgid "only HTTP scheme supported"
+msgstr "sadece HTTP şeması destekleniyor"
+
+msgid "could not initialize Windows Sockets (%1)"
+msgstr "Windows Sockets ilklendirilemedi (%1)"
+
+msgid "incompatible Windows Sockets version"
+msgstr "Windows Sockets sürümü uyumsuz"
+
+msgid "error number "
+msgstr "hata numarası "
+
+msgid "URL Redirected to %1"
+msgstr "URL %1 adresine yönlendirildi"
+
+msgid "cannot open URL %1 (%2)"
+msgstr "URL %1 açılamıyor (%2)"
+
+msgid "error reading URL %1 (%2)"
+msgstr "URL %1 okunurken hata (%2)"
+
+msgid "unknown output option %1"
+msgstr "çıktı seçeneği %1 bilinmiyor"
+
+msgid "Enable batch mode."
+msgstr "Betik kipi etkinleştirilir."
+
+msgid "Produce output according to %1."
+msgstr "%1 e göre çıktı üretilir."
+
+msgid "Stop after the document prolog."
+msgstr "Belge öndeyişinden sonra durur."
+
+msgid "Suppress output."
+msgstr "Çıktı engellenir."
+
+msgid "Send RAST output to file %1."
+msgstr "RAST çıktıyı %1 dosyasına gönderir."
+
+msgid "Same as -wduplicate."
+msgstr "-wduplicate ile aynı."
+
+msgid "Same as -oline."
+msgstr "-oline ile aynı"
+
+msgid "Same as -c."
+msgstr "-c ile aynı."
+
+msgid "Same as -wdefault."
+msgstr "-wdefault ile aynı."
+
+msgid "Same as -wundef."
+msgstr "-wundef ile aynı."
+
+msgid "%1 parses and validates the SGML document whose document entity is"
+msgstr "%1, belge öğesi SİSTEM KİMLİĞİ... ile belirtilen SGML biçemli belgeyi"
+
+msgid "specified by the system identifiers SYSID... and prints on the standard"
+msgstr "çözümler, değerlendirir ve belgenin Eleman Yapısı Bilgileri Kümesini"
+
+msgid ""
+"output a simple text representation of its Element Structure Information Set."
+msgstr "basit bir metin olarak standart çıktıya basar."
+
+msgid "If more than one system identifier is specified, then the corresponding"
+msgstr ""
+"Birden fazla sistem belirteci belirtilmişse, ilgili öğeler tek bir belge"
+
+msgid "entities will be concatenated to form the document entity. If no system"
+msgstr "oluşturacak şekilde birleştirilecektir. Bir sistem belirteci"
+
+msgid "identifiers are specified, then %1 will read the document entity from"
+msgstr "belirtilmemişse, %1 belgeyi standart girdiden okuyacaktır."
+
+msgid "the standard input. A command line system identifier of - can be used"
+msgstr "Sistem belirteci olarak - belirtilmişse girdiler standart girdiden"
+
+msgid "to refer to the standard input."
+msgstr "alınabilir."
+
+msgid "OPTION"
+msgstr "SEÇENEK"
+
+msgid "invalid RAST processing instruction"
+msgstr "RAST işlem komutu geçersiz"
+
+msgid "invalid link type %1 in rast-active-lpd processing instruction"
+msgstr "rast-active-lpd işlem komutunda bağ türü %1 geçersiz"
+
+msgid "duplicate link type %1 in rast-active-lpd processing instruction"
+msgstr "rast-active-lpd işlem komutunda bağ türü %1 tekrarlanıyor"
+
+msgid "rast-link-rule: processing instruction matches more than one link rule"
+msgstr "rast-link-rule: işlem komutu birden fazla bağ kuralı ile eşleşiyor"
+
+msgid "rast-link-rule: processing instruction does not match any link rules"
+msgstr "rast-link-rule: işlem komutu herhangi bir bağ kuralı ile eşleşmiyor"
+
+msgid ""
+"multiple applicable link rules without disambiguating rast-link-rule: "
+"processing instruction"
+msgstr ""
+"anlamlılaştıran rast-link-rule olmaksızın çok sayıda uygulanabilir bağ "
+"kuralı: işlem komutu (PI)"
+
+msgid "invalid argument for -m option"
+msgstr "-m seçeneği için belirtilen argüman geçersiz"
+
+msgid ""
+"omitted start or end tag implied in CDATA or RCDATA marked section; not "
+"normalized"
+msgstr ""
+"CDATA ve RCDATA imli bölümlerdeki başlangıç ve bitiş etiketleri atlandı; "
+"normalleştirilmedi"
+
+msgid "Hoist omitted tags."
+msgstr "Atlanan etiketleri çıkarır."
+
+msgid "Prefer lowercase."
+msgstr "Küçük harfler önerilir."
+
+msgid "Use markup option %1."
+msgstr "Etiketleme seçeneği %1 kullanılır."
+
+msgid "Output the entity named %1."
+msgstr "%1 isimli öğeyi çıktılar."
+
+msgid "Output the prolog."
+msgstr "Öndeyiş çıktılar."
+
+msgid "Raw."
+msgstr "Temel."
+
+msgid "Expand references."
+msgstr "Başvuruları genişletir."
+
+msgid "%1 is an SGML markup stream editor. %1 parses the SGML document"
+msgstr ""
+"%1 bir SGML artalan düzenleyicidir. %1, SİSTEM_KİMLİĞİ... ile belirtilen"
+
+msgid "contained in SYSID... and copies portions of the document to the"
+msgstr "belgeleri çözümler ve seçeneklerle belirtilen etiketleri ekleyerek"
+
+msgid "standard output, adding or changing markup as specified by the options."
+msgstr "ya da değiştirerek belge parçalarını standart çıktıya kopyalar."
+
+msgid "Modify the XML output according to %1."
+msgstr "XML çıktıyı %1 e bağlı olarak değiştirir."
+
+msgid "%1 converts SGML to XML. %1 parses and validates the SGML document"
+msgstr "%1 SGML'den XML'e dönüşüm yapar. %1, SİSTEM_KİMLİĞİ... ile belirtilen"
+
+msgid ""
+"contained in SYSID... and writes an equivalent XML document to the standard"
+msgstr ""
+"SGML belgeleri çözümler değerlendirir ve  XML eşdeğerlerini standart çıktıya"
+
+msgid ""
+"output. %1 will warn about SGML constructs which have no XML equivalent."
+msgstr "yazar. %1, XML eşdeğeri olmayan SGML yapıları bulursa uyarı verir."
+
+msgid "reference to internal SDATA entity %1 not allowed in XML"
+msgstr "%1 dahili SDATA öğesi başvurusuna XML'de izin verilmez"
+
+msgid "reference to external data entity %1 not allowed in XML"
+msgstr "%1 harici veri öğesi başvurusuna XML'de izin verilmez"
+
+msgid "reference to subdocument entity %1 not allowed in XML"
+msgstr "%1 alt belge öğesi başvurusuna XML'de izin verilmez"
+
+msgid "processing instruction containing \"?>\" not allowed in XML"
+msgstr "işlem komutu \"?>\" içeriyor, XML'de buna izin verilmez"
+
+msgid "XML requires processing instructions to start with a name"
+msgstr "XML'de işlem komutlarının (PI) bir isimle başlaması gerekir"
+
+msgid "external data entity %1 is CDATA or SDATA, but XML allows only NDATA"
+msgstr ""
+"harici veri öğesi %1 ya CDATA ya da SDATA, ancak XML sadece NDATA'ya izin "
+"verir"
+
+msgid "attributes were defined for notation %1; not allowed in XML"
+msgstr "%1 sözdizimi için XML'de izin verilmeyen özellikler tanımlanmış"
+
+msgid "cannot convert formal system identifier %1 to URL"
+msgstr "biçimsel sistem belirteci %1 URL'ye dönüştürülemiyor"
+
+msgid "cannot open output file %1"
+msgstr "çıktı dosyası %1 açılamıyor"
+
+msgid "missing system ID for entity %1"
+msgstr "%1 öğesi için sistem kimliği yok"
+
+msgid "unexpected entity type for entity named %1"
+msgstr "%1 isimli öğenin öğe türü anlaşılamadı"
+
+msgid "cannot create directory %1"
+msgstr "%1 dizini oluşturulamıyor"
+
+msgid "already wrote 99 versions of %1; will not overwrite"
+msgstr "zaten %1 sürümün 99 u yazıldı; üzerine yazılmayacak"
+
+msgid "already wrote output file %1; will not overwrite"
+msgstr "%1 çıktı dosyası zaten yazıldı; üzerine yazılmayacak"
+
+msgid "removing leading slashes from output filename %1"
+msgstr "%1 çıktı dosyasının başındaki bölü çizgileri kaldırılıyor"
+
+msgid "path %1 outside output directory"
+msgstr "dosya yolu %1, çıktı dizininin dışında"
+
+msgid "Output a document type declaration."
+msgstr "Bir belge türü bildirimi çıktılar."
+
+msgid "Output marked sections."
+msgstr "İmli bölümleri çıktılar."
+
+msgid "Output comments."
+msgstr "Açıklamaları çıktılar."
+
+msgid "Raw output."
+msgstr "Temel çıktı."
+
+msgid "%1 prints on the standard output a normalized document instance"
+msgstr "%1, SİSTEM_KİMLİĞİ... ile sistem belirteçleri belirtilen belgelerin"
+
+msgid "for the SGML document contained in the concatenation of the entities"
+msgstr "birleşiminden oluşan belgeyi normalleştirerek standart çıktıya"
+
+msgid "with system identifiers SYSID..."
+msgstr "basar."
+
+msgid "Print the effective system id for the public id %1."
+msgstr "Genel kimlik %1 için etkin sistem kimliğini basar."
+
+msgid "Print the effective system id for system id %1."
+msgstr "Sistem kimliği %1 için etkin sistem kimliğini basar."
+
+msgid "Print the effective system id for parameter entity %1."
+msgstr "Parametre öğesi %1 için etkin sistem kimliğini basar."
+
+msgid "Print the effective system id for the doctype %1."
+msgstr "Belge türü %1 için etkin sistem kimliğini basar."
+
+msgid "Print the effective system id for the linktype %1."
+msgstr "Bağ türü %1 için etkin sistem kimliğini basar."
+
+msgid "Print the effective system id for entity %1."
+msgstr "%1 öğesi için etkin sistem kimliğini basar."
+
+msgid "Print the effective system id for notation %1."
+msgstr "%1 sözdizimi için etkin sistem kimliğini basar."
+
+msgid "Print the effective system id for the SGML declaration for doctype %1."
+msgstr "Belge türü %1 için SGML bildiriminin etkin sistem kimliğini basar."
+
+msgid "%1 prints effective system identifiers found in the catalogs on the"
+msgstr "%1, kataloglarda bulduğu etkin sistem belirteçlerini standart çıktıya"
+
+msgid ""
+"standard output. It doesn't check that the system identifiers correspond"
+msgstr "basar. İlgili dosyalarla sistem belirteçlerinin ilgilerini denetlemez."
+
+msgid ""
+"to actual files. The return value is 0 if the last system identifier was"
+msgstr "Son sistem belirteci başarıyla oluşturulmuşsa 0,"
+
+msgid "successfully created and 1 otherwise."
+msgstr "aksi takdirde 1 çıktılar."
+
+msgid "LITERAL"
+msgstr "SABİT_DEĞER"
+
+msgid "non-SGML"
+msgstr "SGML olmayan"
+
+msgid "raw"
+msgstr "temel"
+
+msgid "%1 prints the concatenation of the entities with system identifiers"
+msgstr "%1, SİSTEM_KİMLİĞİ... ile belirtilen öğelerin birleşimlerini standart"
+
+msgid "SYSID... on the standard output"
+msgstr "çıktıya basar."

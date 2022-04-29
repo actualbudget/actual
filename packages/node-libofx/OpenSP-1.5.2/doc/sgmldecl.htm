@@ -1,0 +1,296 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>OpenSP - SGML declaration</TITLE>
+</HEAD>
+<BODY>
+<H1>Handling of the SGML declaration in OpenSP</H1>
+<H2>Extended Naming Rules</H2>
+<P>
+OpenSP supports the Extended Naming Rules as specified in Annex J
+of ISO 8879:1986 (added by the 1996 technical corrigendum).
+<H2>Web SGML Adaptations</H2>
+<P>
+OpenSP supports most of the Web SGML Adaptations as specified in
+Annex K of ISO 8879:1996 (added by the second technical corrigendum, 1998)
+<H2>Default SGML declaration</H2>
+<P>
+If the SGML declaration is omitted
+and there is no applicable
+<A HREF="catalog.htm#sgmldecl"><SAMP>SGMLDECL</SAMP></A>
+or <A HREF="catalog.htm#dtddecl"><SAMP>DTDDECL</SAMP></A>
+entry in a catalog,
+the following declaration will be implied:
+<PRE>
+		    &lt;!SGML "ISO 8879:1986"
+			    CHARSET
+BASESET  "ISO 646-1983//CHARSET
+	  International Reference Version (IRV)//ESC 2/5 4/0"
+DESCSET    0  9 UNUSED
+	   9  2  9
+	  11  2 UNUSED
+	  13  1 13
+	  14 18 UNUSED
+	  32 95 32
+	 127  1 UNUSED
+CAPACITY PUBLIC    "ISO 8879:1986//CAPACITY Reference//EN"
+SCOPE    DOCUMENT
+SYNTAX
+SHUNCHAR CONTROLS 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+	 18 19 20 21 22 23 24 25 26 27 28 29 30 31 127 255
+BASESET  "ISO 646-1983//CHARSET International Reference Version
+	  (IRV)//ESC 2/5 4/0"
+DESCSET  0 128 0
+FUNCTION RE                    13
+	 RS                    10
+	 SPACE                 32
+	 TAB       SEPCHAR     9
+NAMING   LCNMSTRT  ""
+	 UCNMSTRT  ""
+	 LCNMCHAR  "-."
+	 UCNMCHAR  "-."
+	 NAMECASE  GENERAL     YES
+		   ENTITY      NO
+DELIM    GENERAL   SGMLREF
+	 SHORTREF  SGMLREF
+NAMES    SGMLREF
+QUANTITY SGMLREF
+	 ATTCNT    99999999
+	 ATTSPLEN  99999999
+	 DTEMPLEN  24000
+	 ENTLVL    99999999
+	 GRPCNT    99999999
+	 GRPGTCNT  99999999
+	 GRPLVL    99999999
+	 LITLEN    24000
+	 NAMELEN   99999999
+	 PILEN     24000
+	 TAGLEN    99999999
+	 TAGLVL    99999999
+			   FEATURES
+MINIMIZE DATATAG   NO
+	 OMITTAG   YES
+	 RANK      YES
+	 SHORTTAG  YES
+LINK     SIMPLE    YES 1000
+	 IMPLICIT  YES
+	 EXPLICIT  YES 1
+OTHER    CONCUR    NO
+	 SUBDOC    YES 99999999
+	 FORMAL    YES
+			  APPINFO NONE>
+</PRE>
+<P>
+with the exception that all characters that are neither significant
+nor shunned will be assigned to DATACHAR.
+<H2><A NAME="charset">Character sets</A></H2>
+<P>
+A character in a base character set is described either by giving its
+number in a <i>universal</i> character set, or by specifying a minimum
+literal.
+The first 65536 character numbers in the <i>universal</i> character
+set are assumed to be the same as in Unicode 2.0 (ISO/IEC 10646).
+The remaining character numbers can be assigned in any way convenient.
+<P>
+The public identifier of a base character set can be associated
+with an entity that describes it by using a
+<SAMP>PUBLIC</SAMP>
+entry in the catalog entry file.
+The entity must be a fragment
+of an SGML declaration
+consisting of the
+portion of a character set description,
+following the DESCSET keyword,
+that is, it must be a sequence of character descriptions,
+where each character description specifies a described character
+number, the number of characters and
+either a character number in the universal character set, a minimum literal
+or the keyword
+<SAMP>UNUSED</SAMP>.
+Character numbers in the universal character set can be as big as
+99999999.
+<P>
+In addition OpenSP has built in knowledge of many character sets.
+These are identified using the designating sequence in the
+public identifier.  The following designating sequences are
+recognized:
+<DL>
+<DT>
+<SAMP>ESC 2/5 4/0</SAMP>
+<DD>
+The full set of ISO 646 IRV.
+This is not a registered character set,
+but is recommended by ISO 8879 (clause 10.2.2.4).
+<DT>
+<SAMP>ESC 2/8 4/0</SAMP>
+<DD>
+G0 set of ISO 646 IRV,
+ISO Registration Number 2.
+<DT>
+<SAMP>ESC 2/8 4/2</SAMP>
+<DD>
+G0 set of ASCII,
+ISO Registration Number 6.
+<DT>
+<SAMP>ESC 2/1 4/0</SAMP>
+<DD>
+C0 set of ISO 646,
+ISO Registration Number 1.
+<DT>
+<SAMP>ESC 2/13 4/1</SAMP>
+<DD>
+G1 set of ISO 8859-1
+<DT>
+<SAMP>ESC 2/13 4/2</SAMP>
+<DD>
+G1 set of ISO 8859-2
+<DT>
+<SAMP>ESC 2/13 4/3</SAMP>
+<DD>
+G1 set of ISO 8859-3
+<DT>
+<SAMP>ESC 2/13 4/4</SAMP>
+<DD>
+G1 set of ISO 8859-4
+<DT>
+<SAMP>ESC 2/13 4/12</SAMP>
+<DD>
+G1 set of ISO 8859-5
+<DT>
+<SAMP>ESC 2/13 4/7</SAMP>
+<DD>
+G1 set of ISO 8859-6
+<DT>
+<SAMP>ESC 2/13 4/6</SAMP>
+<DD>
+G1 set of ISO 8859-7
+<DT>
+<SAMP>ESC 2/13 4/8</SAMP>
+<DD>
+G1 set of ISO 8859-8
+<DT>
+<SAMP>ESC 2/13 4/13</SAMP>
+<DD>
+G1 set of ISO 8859-9
+<DT>
+<SAMP>ESC 2/8 4/10</SAMP>
+<DD>
+Roman set from JIS-X-0202.
+JIS version of ISO 646.
+ISO Registration Number 14.
+<DT>
+<SAMP>ESC 2/8 4/9</SAMP>
+<DD>
+Katakana set from JIS X 0201.
+ISO Registration Number 13.
+<DT>
+<SAMP>ESC 2/4 4/2</SAMP>
+<DT>
+<SAMP>ESC 2/6 4/0 ESC 2/4 4/2</SAMP>
+<DD>
+JIS X 0208-1990.
+ISO Registration Numbers 87 and 168.
+<DT>
+<SAMP>ESC 2/4 2/8 4/4</SAMP>
+<DD>
+JIS X 0212-1990.
+ISO Registration Number 159.
+<DT>
+<SAMP>ESC 2/4 4/1</SAMP>
+<DD>
+GB 2312-80.
+ISO Registration Number 58.
+<DT>
+<SAMP>ESC 2/4 2/8 4/3</SAMP>
+<DD>
+KS C 5601-1992.
+ISO Registration Number 149.
+<DT>
+<SAMP>ESC 2/5 2/15 4/0</SAMP>
+<DT>
+<SAMP>ESC 2/5 2/15 4/3</SAMP>
+<DT>
+<SAMP>ESC 2/5 2/15 4/5</SAMP>
+<DD>
+ISO/IEC 10646 UCS-2
+<DT>
+<SAMP>ESC 2/5 2/15 4/1</SAMP>
+<DT>
+<SAMP>ESC 2/5 2/15 4/4</SAMP>
+<DT>
+<SAMP>ESC 2/5 2/15 4/6</SAMP>
+<DD>
+ISO/IEC 10646 UCS-4
+</DL>
+
+<H2>Concrete syntaxes</H2>
+<P>
+The public identifier for a public concrete syntax can be associated
+with an entity that describes using a
+<SAMP>PUBLIC</SAMP>
+entry in the catalog entry file.
+The entity must be a fragment of an SGML declaration
+consisting of a concrete syntax description
+starting with the
+<SAMP>SHUNCHAR</SAMP>
+keyword
+as in an SGML declaration.
+The entity can also make use of the following extensions:
+<UL>
+<LI>
+The Extended Naming Rules extensions can be used regardless of the minimum
+literal used in the SGML declaration.
+<LI>
+An
+<I>added function</I>
+can be expressed as a parameter literal
+instead of a name.
+<LI>
+The replacement for a reference reserved name
+can be expressed as a parameter literal instead of a name.
+<LI>
+The total number of characters specified for
+<SAMP>UCNMCHAR</SAMP>
+or
+<SAMP>UCNMSTRT</SAMP>
+may exceed the total number of characters specified for
+<SAMP>LCNMCHAR</SAMP>
+or
+<SAMP>LCNMSTRT</SAMP>
+respectively.
+Each character in
+<SAMP>UCNMCHAR</SAMP>
+or
+<SAMP>UCNMSTRT</SAMP>
+which does not have a corresponding character in the same position in
+<SAMP>LCNMCHAR</SAMP>
+or
+<SAMP>LCNMSTRT</SAMP>
+is simply assigned to <SAMP>UCNMCHAR</SAMP> or <SAMP>UCNMSTRT</SAMP>
+without making it the upper-case form of any character.
+<LI>
+Within the specification of the short reference delimiters,
+a parameter literal containing exactly one character
+may be followed by the delimiter <SAMP>-</SAMP>
+and another parameter literal containing exactly one character.
+This has the same meaning as a sequence of parameter literals
+one for each character number that is greater than or equal
+to the number of the character in the first parameter literal
+and less than or equal to the number of the character in the
+second parameter literal.
+<LI>
+A number may be used as a delimiter in the
+<SAMP>DELIM</SAMP>
+section with the same meaning as a parameter literal
+containing just a numeric character reference with that number.
+</UL>
+<H2>Capacity sets</H2>
+<P>
+The public identifier for a public capacity set can be associated
+with an entity that describes using a
+<SAMP>PUBLIC</SAMP>
+entry in the catalog entry file.
+The entity must be a fragment of an SGML declaration
+consisting of a sequence of capacity names and numbers.
+</BODY>
+</HTML>

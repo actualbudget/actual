@@ -1,0 +1,470 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict//EN">
+<HTML>
+<HEAD>
+<TITLE>Onsgmls Output Format</TITLE>
+</HEAD>
+<BODY>
+<H1>Onsgmls Output Format</H1>
+<P>
+The output is a series of lines.
+Lines can be arbitrarily long.
+Each line consists of an initial command character
+and one or more arguments.
+Arguments are separated by a single space,
+but when a command takes a fixed number of arguments
+the last argument can contain spaces.
+There is no space between the command character and the first argument.
+Arguments can contain the following escape sequences:
+<DL>
+<DT>
+<CODE>\\</CODE>
+<DD>
+A
+<CODE>\</CODE>.
+<DT>
+<CODE>\n</CODE>
+<DD>
+A record end character.
+<DT>
+<CODE>\|</CODE>
+<DD>
+Internal SDATA entities are bracketed by these.
+<DT>
+<CODE>\<VAR>nnn</VAR></CODE>
+<DD>
+The character whose code is
+<CODE><VAR>nnn</VAR></CODE>
+octal.
+<P>
+A record start character will be represented by
+<CODE>\012</CODE>.
+Most applications will need to ignore
+<CODE>\012</CODE>
+and translate
+<CODE>\n</CODE>
+into newline.
+<DT>
+<CODE>\#<VAR>n</VAR>;</CODE>
+<DD>
+The character whose number is
+<CODE><VAR>n</VAR></CODE>
+decimal in the internal character set.
+<CODE><VAR>n</VAR></CODE>
+can have any number of digits.
+This is used for characters that are not representable by the
+encoding used for output.
+This will only occur with the multibyte version of nsgmls.
+<DT>
+<CODE>\%<VAR>n</VAR>;</CODE>
+<DD>
+The character whose number is
+<CODE><VAR>n</VAR></CODE>
+decimal in the document character set.
+<CODE><VAR>n</VAR></CODE>
+can have any number of digits.
+This is used for data characters resulting from numeric
+character references to non-SGML characters
+in <A HREF="charset.htm#fixed">fixed character set mode</A>.
+</DL>
+<P>
+The possible command characters and arguments are as follows:
+<DL>
+<DT>
+<CODE>(<VAR>gi</VAR></CODE>
+<DD>
+The start of an element whose generic identifier is
+<CODE><VAR>gi</VAR></CODE>.
+Any attributes for this element
+will have been specified with
+<CODE>A</CODE>
+commands.
+<DT>
+<CODE>)<VAR>gi</VAR></CODE>
+<DD>
+The end of an element whose generic identifier is
+<CODE><VAR>gi</VAR></CODE>.
+<DT>
+<CODE>-<VAR>data</VAR></CODE>
+<DD>
+Data.
+<DT>
+<CODE>&amp;<VAR>name</VAR></CODE>
+<DD>
+A reference to an external data entity
+<CODE><VAR>name</VAR></CODE>;
+<CODE><VAR>name</VAR></CODE>
+will have been defined using an
+<CODE>E</CODE>
+command.
+<DT>
+<CODE>?<VAR>pi</VAR></CODE>
+<DD>
+A processing instruction with data
+<CODE><VAR>pi</VAR></CODE>.
+<DT>
+<CODE>A<VAR>name</VAR> <VAR>val</VAR></CODE>
+<DD>
+The next element to start has an attribute
+<CODE><VAR>name</VAR></CODE>
+with value
+<CODE><VAR>val</VAR></CODE>
+which takes one of the following forms:
+<DL>
+<DT>
+<CODE>IMPLIED</CODE>
+<DD>
+The value of the attribute is implied.
+<DT>
+<CODE>CDATA <VAR>data</VAR></CODE>
+<DD>
+The attribute is character data.
+This is used for attributes whose declared value is
+<CODE>CDATA</CODE>.
+<DT>
+<CODE>NOTATION <VAR>nname</VAR></CODE>
+<DD>
+The attribute is a notation name;
+<CODE><VAR>nname</VAR></CODE>
+will have been defined using a
+<CODE>N</CODE>
+command.
+This is used for attributes whose declared value is
+<CODE>NOTATION</CODE>.
+<DT>
+<CODE>ENTITY <VAR>name...</VAR></CODE>
+<DD>
+The attribute is a list of general entity names.
+Each entity name will have been defined using an
+<CODE>I</CODE>,
+<CODE>E</CODE>
+or
+<CODE>S</CODE>
+command.
+This is used for attributes whose declared value is
+<CODE>ENTITY</CODE>
+or
+<CODE>ENTITIES</CODE>.
+<DT>
+<CODE>TOKEN <VAR>token...</VAR></CODE>
+<DD>
+The attribute is a list of tokens.
+This is used for attributes whose declared value is anything else.
+<DT>
+<CODE>ID <VAR>token</VAR></CODE>
+<DD>
+The attribute is an ID value.
+This will be output only if the
+<CODE>-oid</CODE>
+option is specified.
+Otherwise
+<CODE>TOKEN</CODE>
+will be used for ID values.
+
+<DT>
+<CODE>DATA <VAR>nname</VAR> <VAR>data</VAR></CODE>
+<DD>
+The attribute is character data with an associated notation.
+The definition of the notation and any applicable attributes of the notation
+will be given using subsequent <CODE>D<VAR>name</VAR> <VAR>val</VAR></CODE> 
+lines. This is used for attributes whose declared value is <CODE>DATA</CODE>. 
+It will be output only if the <CODE>-odata-attribute</CODE>
+option is specified. Otherwise <CODE>CDATA</CODE> will be used for DATA values.
+<DT>
+
+</DL>
+<DT>
+<CODE>D<VAR>ename</VAR> <VAR>name</VAR> <VAR>val</VAR></CODE>
+<DD>
+This is the same as the
+<CODE>A</CODE>
+command, except that it specifies a data attribute for an
+external entity named
+<CODE><VAR>ename</VAR></CODE>.
+Any
+<CODE>D</CODE>
+commands will come after the
+<CODE>E</CODE>
+command that defines the entity to which they apply, but
+before any
+<CODE>&amp;</CODE>
+or
+<CODE>A</CODE>
+commands that reference the entity.
+<DT>
+<CODE>a<VAR>type</VAR> <VAR>name</VAR> <VAR>val</VAR></CODE>
+<DD>
+The next element to start has a link attribute with link type
+<CODE><VAR>type</VAR></CODE>,
+name
+<CODE><VAR>name</VAR></CODE>,
+and value
+<CODE><VAR>val</VAR></CODE>,
+which takes the same form as with the
+<CODE>A</CODE>
+command.
+<DT>
+<CODE>N<VAR>nname</VAR></CODE>
+<DD>
+Define a notation <CODE><VAR>nname</VAR></CODE>.
+This command will be preceded by a
+<CODE>p</CODE>
+command if the notation was declared with a public identifier,
+and by a
+<CODE>s</CODE>
+command if the notation was declared with a system identifier.
+If the
+<CODE>-onotation-sysid</CODE>
+option was specified,
+this command will also be preceded by an
+<CODE>f</CODE>
+command giving the system identifier generated by the entity manager
+(unless it was unable to generate one).
+A notation will only be defined if it is to be referenced
+in an
+<CODE>E</CODE>
+command or in an
+<CODE>A</CODE>
+command for an attribute with a declared value of
+<CODE>NOTATION</CODE>.
+<DT>
+<CODE>E<VAR>ename</VAR> <VAR>typ</VAR> <VAR>nname</VAR></CODE>
+<DD>
+Define an external data entity named
+<CODE><VAR>ename</VAR></CODE>
+with type
+<CODE><VAR>typ</VAR></CODE>
+(<CODE>CDATA</CODE>, <CODE>NDATA</CODE> or <CODE>SDATA</CODE>)
+and notation <CODE><VAR>not</VAR></CODE>.
+Thiscommand will be preceded by an
+<CODE>f</CODE>
+command giving the system identifier generated by the entity manager
+(unless it was unable to generate one),
+by a
+<CODE>p</CODE>
+command if a public identifier was declared for the entity,
+and by a
+<CODE>s</CODE>
+command if a system identifier was declared for the entity.
+<CODE><VAR>not</VAR></CODE>
+will have been defined using a
+<CODE>N</CODE>
+command.
+Data attributes may be specified for the entity using
+<CODE>D</CODE>
+commands.
+If the
+<CODE>-oentity</CODE>
+option is not specified,
+an external data entity will only be defined if it is to be referenced in a
+<CODE>&amp;</CODE>
+command or in an
+<CODE>A</CODE>
+command for an attribute whose declared value is
+<CODE>ENTITY</CODE>
+or
+<CODE>ENTITIES</CODE>.
+<DT>
+<CODE>I<VAR>ename</VAR> <VAR>typ</VAR> <VAR>text</VAR></CODE>
+<DD>
+Define an internal data entity named
+<CODE><VAR>ename</VAR></CODE>
+with type
+<CODE><VAR>typ</VAR></CODE>
+and entity text
+<CODE><VAR>text</VAR></CODE>.
+The
+<CODE><VAR>typ</VAR></CODE>
+will be
+<CODE>CDATA</CODE>
+or
+<CODE>SDATA</CODE>
+unless the
+<CODE>-oentity</CODE>
+option was specified,
+in which case it can also be
+<CODE>PI</CODE>
+or
+<CODE>TEXT</CODE>
+(for an SGML text entity).
+If the
+<CODE>-oentity</CODE>
+option is not specified,
+an internal data entity will only be defined if it is referenced in an
+<CODE>A</CODE>
+command for an attribute whose declared value is
+<CODE>ENTITY</CODE>
+or
+<CODE>ENTITIES</CODE>.
+<DT>
+<CODE>S<VAR>ename</VAR></CODE>
+<DD>
+Define a subdocument entity named
+<CODE><VAR>ename</VAR></CODE>.
+This command will be preceded by an
+<CODE>f</CODE>
+command giving the system identifier generated by the entity manager
+(unless it was unable to generate one),
+by a
+<CODE>p</CODE>
+command if a public identifier was declared for the entity,
+and by a
+<CODE>s</CODE>
+command if a system identifier was declared for the entity.
+If the
+<CODE>-oentity</CODE>
+option is not specified,
+a subdocument entity will only be defined if it is referenced
+in a
+<CODE>{</CODE>
+command
+or in an
+<CODE>A</CODE>
+command for an attribute whose declared value is
+<CODE>ENTITY</CODE>
+or
+<CODE>ENTITIES</CODE>.
+<DT>
+<CODE>T<VAR>ename</VAR></CODE>
+<DD>
+Define an external SGML text entity named
+<CODE><VAR>ename</VAR></CODE>.
+This command will be preceded by an
+<CODE>f</CODE>
+command giving the system identifier generated by the entity manager
+(unless it was unable to generate one),
+by a
+<CODE>p</CODE>
+command if a public identifier was declared for the entity,
+and by a
+<CODE>s</CODE>
+command if a system identifier was declared for the entity.
+This command will be output only if the
+<CODE>-oentity</CODE>
+option is specified.
+<DT>
+<CODE>s<VAR>sysid</VAR></CODE>
+<DD>
+This command applies to the next
+<CODE>E</CODE>,
+<CODE>S</CODE>,
+<CODE>T</CODE>
+or
+<CODE>N</CODE>
+command and specifies the associated system identifier.
+<DT>
+<CODE>p<VAR>pubid</VAR></CODE>
+<DD>
+This command applies to the next
+<CODE>E</CODE>,
+<CODE>S</CODE>,
+<CODE>T</CODE>
+or
+<CODE>N</CODE>
+command and specifies the associated public identifier.
+<DT>
+<CODE>f<VAR>sysid</VAR></CODE>
+<DD>
+This command applies to the next
+<CODE>E</CODE>,
+<CODE>S</CODE>,
+<CODE>T</CODE>
+or, if the
+<CODE>-onotation-sysid</CODE>
+option was specified,
+<CODE>N</CODE>
+command and specifies the system identifier
+generated by the entity manager from the specified external identifier
+and other information about the entity or notation.
+<DT>
+<CODE>{<VAR>ename</VAR></CODE>
+<DD>
+The start of the SGML subdocument entity
+<CODE><VAR>ename</VAR></CODE>;
+<CODE><VAR>ename</VAR></CODE>
+will have been defined using a
+<CODE>S</CODE>
+command.
+<DT>
+<CODE>}<VAR>ename</VAR></CODE>
+<DD>
+The end of the SGML subdocument entity
+<CODE><VAR>ename</VAR></CODE>.
+<DT>
+<CODE>L<VAR>lineno</VAR> <VAR>file</VAR></CODE>
+<DT>
+<CODE>L<VAR>lineno</VAR></CODE>
+<DD>
+Set the current line number and filename.
+The
+<CODE><VAR>file</VAR></CODE>
+argument will be omitted if only the line number has changed.
+This will be output only if the
+<CODE>-l</CODE>
+option has been given.
+<DT>
+<CODE>#<VAR>text</VAR></CODE>
+<DD>
+An APPINFO parameter of
+<CODE><VAR>text</VAR></CODE>
+was specified in the SGML declaration.
+This is not strictly part of the ESIS, but a structure-controlled
+application is permitted to act on it.
+No
+<CODE>#</CODE>
+command will be output if
+<CODE>APPINFO NONE</CODE>
+was specified.
+A
+<CODE>#</CODE>
+command will occur at most once,
+and may be preceded only by a single
+<CODE>L</CODE>
+command.
+<DT>
+<CODE>C</CODE>
+<DD>
+This command indicates that the document was a conforming SGML document.
+If this command is output, it will be the last command.
+An SGML document is not conforming if it references a subdocument entity
+that is not conforming.
+<DT>
+<CODE>i</CODE>
+<DD>
+The next element to start is an included subelement.
+This will be output only if the
+<CODE>-oincluded</CODE>
+option is specified.
+<DT>
+<CODE>e</CODE>
+<DD>
+The next element to start has a declared content of EMPTY or a content
+reference attribute, and so its end-tag must be omitted.
+This will be output only if the
+<CODE>-oempty</CODE>
+option is specified.
+<DT>
+<CODE>_<VAR>comment</VAR></CODE>
+<DD>
+A comment with data
+<CODE><VAR>comment</VAR></CODE>.
+This will be output only if the
+<CODE>-ocomment</CODE>
+option is specified.
+<DT>
+<CODE>o</CODE>
+<DD>
+The actual markup for the next
+<CODE>(</CODE>,
+<CODE>)</CODE>,
+or
+<CODE>A</CODE>
+command was omitted from the input.
+This will be output only if one of the
+<CODE>-oomitted</CODE>,
+<CODE>-otagomit</CODE>,
+or
+<CODE>-oattromit</CODE>
+options is specified.
+</DL>
+</BODY>
+</HTML>

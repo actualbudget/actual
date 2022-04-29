@@ -1,0 +1,103 @@
+#!/bin/sh
+# Architectural Form: test ArcNamrA:
+#    Deriving attribute values from content; data from element "v" goes
+#    to attribute "n" of "verse", but also keep it as element content
+#    makes onsgmls segfault; nsgmls.jc accepts this input:
+#        ONSGMLS=nsgmls.jc OSGMLNORM=sgmlnorm.jc ./af-9
+# test onsgmls and osgmlnorm
+
+LANG=C; export LANG
+LC_ALL=C; export LC_ALL
+
+tmpfiles=""
+trap 'rm -fr $tmpfiles' 1 2 3 15
+
+tmpfiles="$tmpfiles af-9.sgml af-9.dtd af-meta-9.dtd"
+cat <<EOF >af-9.sgml
+<!DOCTYPE doc SYSTEM "af-9.dtd">
+<doc>
+ <s>
+  <v n="1">verse 1</v>
+  <v n="2">verse 2</v>
+ </s>
+</doc>
+EOF
+cat <<EOF >af-9.dtd
+<!NOTATION SGML PUBLIC "-//ISO 8879:1986//NOTATION Standard Generalized Markup
+    Language//EN">
+
+<?IS10744 ArcBase open>
+<!NOTATION open PUBLIC "-//OpenJade Project//NOTATION AFDR ARCBASE open Architecture//EN">
+<!ATTLIST #NOTATION open
+    ArcNamrA NAME #FIXED "doc-attr"
+    ArcDTD CDATA #FIXED "opendtd">
+<!ENTITY opendtd SYSTEM "af-meta-9.dtd" CDATA SGML>
+
+<!ELEMENT doc - o (s+)>
+<!ATTLIST doc
+  open NMTOKEN #FIXED "open">
+<!ELEMENT s   - o (v+)>
+<!ATTLIST s
+  open NMTOKEN   #FIXED "stanza">
+<!ELEMENT v   - o (#PCDATA)>
+<!ATTLIST v
+  n CDATA        #REQUIRED
+  open NMTOKEN   #FIXED "verse"
+  doc-attr CDATA #FIXED "n #CONTENT">
+EOF
+
+cat <<EOF >af-meta-9.dtd
+<!ELEMENT open     - o (stanza+)>
+<!ELEMENT stanza   - o (verse+)>
+<!ELEMENT verse    - o (#PCDATA)>
+<!ATTLIST verse
+  n CDATA #REQUIRED>
+EOF
+
+tmpfiles="$tmpfiles af-9-onsgmls.out"
+
+: ${ONSGMLS=onsgmls}
+${ONSGMLS} >af-9-onsgmls.out -A open af-9.sgml
+tmpfiles="$tmpfiles af-9-onsgmls.ok"
+cat <<EOF >af-9-onsgmls.ok
+(OPEN
+(STANZA
+AN CDATA verse 1
+(VERSE
+-verse 1
+)VERSE
+AN CDATA verse 2
+(VERSE
+-verse 2
+)VERSE
+)STANZA
+)OPEN
+C
+EOF
+
+: ${DIFF=diff}
+${DIFF} af-9-onsgmls.ok af-9-onsgmls.out
+result=$?
+test $result = 0 || { rm -fr $tmpfiles; exit 1; }
+
+tmpfiles="$tmpfiles af-9-norm.out"
+: ${OSGMLNORM=osgmlnorm}
+${OSGMLNORM} >af-9-norm.out -A open af-9.sgml
+tmpfiles="$tmpfiles af-9-norm.ok"
+
+cat <<EOF >af-9-norm.ok
+<OPEN>
+<STANZA>
+<VERSE N="verse 1">verse 1</VERSE>
+<VERSE N="verse 2">verse 2</VERSE>
+</STANZA>
+</OPEN>
+EOF
+
+${DIFF} af-9-norm.ok af-9-norm.out
+result=$?
+test $result = 0 || result=$(($result + 1))
+
+rm -fr $tmpfiles
+
+exit $result

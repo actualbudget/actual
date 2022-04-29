@@ -1,0 +1,23 @@
+# Name of your program
+# don't use package if you're using automake
+# Version of your program
+# don't use version if you're using automake
+purpose "ofxdump prints to stdout, in human readable form, everything the library 
+understands about a particular file or response, and sends errors to
+stderr.  To know exactly what the library understands about of a particular
+ofx response file, just call ofxdump on that file."
+
+# Options
+# option <long> <short> <desc> {argtype} {typestr="<type descr>"} {default="<default value>"} {required} {argoptional} {multiple}
+
+#section "File options"
+option  "import-format"	f	"Force the file format of the file(s) specified" string default="AUTODETECT" no
+option	"list-import-formats"	-	"List available import file formats 'import-format' command"	no
+
+#section "Debug output options"
+option	"msg_parser"	-	"Output file parsing messages"	flag	off
+option	"msg_debug"	-	"Output messages meant for debugging"	flag	off
+option	"msg_warning"	-	"Output warning messages about abnormal conditions and unknown constructs"	flag	on
+option	"msg_error"	-	"Output error messages"	flag	on
+option	"msg_info"	-	"Output informational messages about the progress of the library"	flag	on
+option	"msg_status"	-	"Output status messages"	flag	on
