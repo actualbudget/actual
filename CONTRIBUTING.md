@@ -27,6 +27,18 @@ Here are some initial guidelines for how contributions will be treated:
 
 The code needs a lot of improvements. When it was just me (@jlongster) I would often find myself halfway through an improvement overall, but always had to put it aside to work on something else. This shows in the code; there's a lot of things that I wanted to improve but was never able to complete. These are list of projects on the top of my mind that I would love to see progress on.
 
+### A mobile web app
+
+One of the most pressing needs is a mobile app based on the web app. This could mean making the web app responsive, or a separate app that does a few basic things.
+
+We are deprecating the native iOS/Android apps because we don't have bandwidth to support development and distribution of them (it's complicating submitting them to the app stores, etc).
+
+Ideally you'd be able to enter transactions on mobile.
+
+### Transitioning to TypeScript
+
+This is something I should have done a long time ago. I'd love any help setting up infrastructure for TypeScript and starting to transitioning code to it, particularly the backend.
+
 ### Rewriting the transaction table
 
 The transaction table is a very complex component because of all the interactions. The original goal was to embrace inline editing fully and never pull the user out into something like a modal or a drawer. I like how this worked out for some workflows, but it made other workflows plain awkward.
@@ -51,7 +63,7 @@ We should switch to [swc](https://swc.rs). That would also have another benefit:
 
 One of my mistakes with Actual was rebuilding everything from scratch, even the design system. While I was able to make it look good for the current version of Actual, it makes it a lot of work to build new designs. We should choose a 3rd party library and start using it in Actual. It would make it way faster to build new designs.
 
-There aren't many good 3rd party library unfortunately. API, accessibility, and general thoughtful-ness are important. The two that come to my mind are [Radix](https://www.radix-ui.com) and [react-aria](https://react-spectrum.adobe.com/react-aria/). I'm leaning towards react-aria.
+There aren't many good 3rd party library unfortunately. API, accessibility, and general thoughtful-ness are important. The two that come to my mind are [Radix](https://www.radix-ui.com) and [react-aria](https://react-spectrum.adobe.com/react-aria/)1. I'm leaning towards react-aria.
 
 I'm open to other things, but we really need something to take the weight off of building UI.
 
