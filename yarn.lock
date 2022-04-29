@@ -11,10 +11,10 @@
     node-fetch "^1.6.3"
     uuid "3.3.2"
 
-"@actual-app/web@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@actual-app/web/-/web-4.0.1.tgz#721cf61f3876d384bef56d96cfa40e4ffcfb9ba5"
-  integrity sha512-t1UalReT23O6cjeWBOZr+oymuASXEeE+ClSd9PSggcT3lMq8QWGjxL7qYbCpYTpGJv/ZD7vD/zS1vzmJXwp6Yg==
+"@actual-app/web@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@actual-app/web/-/web-4.0.2.tgz#9311274bbe3464106d4b1d994947128c672d11d0"
+  integrity sha512-UGsZ1PBZuFM8temch6J8t6Z18JzFqDvrweWg77Vje1nyBFqwTKzsWrABbinxJF9fI+qiYH5T/eTftj7/JB0f3A==
 
 "@babel/code-frame@^7.0.0":
   version "7.0.0"
@@ -356,11 +356,6 @@ brace-expansion@^1.1.7:
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
-
-buffer-from@^1.0.0:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.2.tgz#2b146a6fd72e80b4f55d255f35ed59a3a9a41bd5"
-  integrity sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==
 
 buffer@^5.5.0:
   version "5.7.1"
@@ -2058,23 +2053,10 @@ slice-ansi@2.0.0:
     astral-regex "^1.0.0"
     is-fullwidth-code-point "^2.0.0"
 
-source-map-support@^0.5.21:
-  version "0.5.21"
-  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
-  integrity sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==
-  dependencies:
-    buffer-from "^1.0.0"
-    source-map "^0.6.0"
-
 source-map@^0.5.0:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
   integrity sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=
-
-source-map@^0.6.0:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
-  integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
 spdx-correct@^3.0.0:
   version "3.1.0"

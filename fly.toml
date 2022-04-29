@@ -1,4 +1,4 @@
-app = "actual-server"
+app = "%NAME%"
 
 kill_signal = "SIGINT"
 kill_timeout = 5

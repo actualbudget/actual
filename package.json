@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@actual-app/api": "^4.0.1",
-    "@actual-app/web": "^4.0.1",
+    "@actual-app/web": "^4.0.2",
     "adm-zip": "^0.5.9",
     "bcrypt": "^5.0.1",
     "better-sqlite3": "^7.5.0",
