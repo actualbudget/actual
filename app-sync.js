@@ -19,7 +19,7 @@ const app = express();
 app.use(errorMiddleware);
 
 async function init() {
-  let fileDir = join(__dirname, process.env.ACTUAL_USER_FILES || config.files);
+  let fileDir = join(__dirname, process.env.ACTUAL_USER_FILES || config.userFiles);
 
   console.log('Initializing Actual with user file dir:', fileDir);
 
@@ -279,12 +279,12 @@ app.post('/upload-user-file', async (req, res) => {
   // supported yet in the self-hosted version because it's unclear if
   // it's still needed, given that you own your server
   //
-  // await fs.writeFile(join(config.files, `${fileId}.blob`), req.body);
+  // await fs.writeFile(join(config.userFiles, `${fileId}.blob`), req.body);
 
   let zip = new AdmZip(req.body);
 
   try {
-    zip.extractAllTo(join(config.files, fileId), true);
+    zip.extractAllTo(join(config.userFiles, fileId), true);
   } catch (err) {
     console.log('Error writing file', err);
     res.send(JSON.stringify({ status: 'error' }));
@@ -339,7 +339,7 @@ app.get('/download-user-file', async (req, res) => {
 
   let zip = new AdmZip();
   try {
-    zip.addLocalFolder(join(config.files, fileId), '/');
+    zip.addLocalFolder(join(config.userFiles, fileId), '/');
   } catch (e) {
     res.status(500).send('Error reading files');
     return;
