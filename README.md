@@ -1,7 +1,7 @@
 
 This is the main project to run [Actual](XXX), a local-first personal finance tool. It comes with the latest version of Actual, and a server to persist changes and make data available across all devices.
 
-### Non-technical users
+## Non-technical users
 
 We are looking into a feature for one-button click click deployment of Actual. This will reduce the friction for people not as comfortable with the command line.
 
