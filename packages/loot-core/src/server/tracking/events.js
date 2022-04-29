@@ -1,6 +1,5 @@
 import asyncStorage from '../../platform/server/asyncStorage';
 import { sha256String } from '../encryption-internals';
-let Mixpanel = require('@jlongster/mixpanel');
 let uuid = require('../../platform/uuid');
 
 let currentUniqueId;
@@ -28,53 +27,9 @@ function isAnonymous(id) {
 }
 
 export async function init() {
-  mixpanel = Mixpanel.init('7e6461b8dde1d5dbf04ed1711768257a');
-
-  let [
-    [, distinctId],
-    [, userId],
-    [, trackUsage]
-  ] = await asyncStorage.multiGet(['distinct-id-v2', 'user-id', 'track-usage']);
-
-  toggle(trackUsage);
-
-  if (distinctId == null) {
-    if (userId) {
-      let hashedId = await hash(userId);
-      currentUniqueId = hashedId;
-      setProfile({ $name: hashedId });
-    } else {
-      currentUniqueId = uuid.v4Sync();
-    }
-
-    await asyncStorage.setItem('distinct-id-v2', currentUniqueId);
-  } else {
-    currentUniqueId = distinctId;
-
-    if (!isAnonymous(distinctId)) {
-      setProfile({ $name: distinctId });
-    }
-  }
 }
 
 export async function login(userId) {
-  let hashedId = await hash(userId);
-  await asyncStorage.setItem('distinct-id-v2', hashedId);
-
-  if (isAnonymous(currentUniqueId)) {
-    mixpanel.identify(hashedId, currentUniqueId);
-
-    startBuffering();
-    // So ridiculous. https://help.mixpanel.com/hc/en-us/articles/115004497803-Identity-Management-Best-Practices#serverside-aliasing
-    setTimeout(() => {
-      stopBuffering();
-    }, 2000);
-
-    currentUniqueId = hashedId;
-    setProfile({ $name: hashedId });
-  } else {
-    currentUniqueId = hashedId;
-  }
 }
 
 let BUFFERING = false;

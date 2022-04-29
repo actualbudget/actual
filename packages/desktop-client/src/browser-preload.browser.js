@@ -1,5 +1,3 @@
-import * as Sentry from '@sentry/browser';
-import { SentryMetricIntegration } from '@jlongster/sentry-metrics-actual';
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import BackendWorker from 'worker-loader!./browser-server';
@@ -12,23 +10,6 @@ import BackendWorker from 'worker-loader!./browser-server';
 let IS_DEV = process.env.NODE_ENV === 'development';
 let IS_PERF_BUILD = process.env.PERF_BUILD != null;
 let ACTUAL_VERSION = process.env.REACT_APP_ACTUAL_VERSION;
-
-if (!IS_DEV) {
-  Sentry.init({
-    dsn: 'https://9e6094adfc9f43b5b5b9994cee44d7c2@sentry.io/5169928',
-    release: ACTUAL_VERSION,
-    ignoreErrors: ['ResizeObserver loop'],
-    integrations: [
-      new SentryMetricIntegration({
-        url: 'https://sync.actualbudget.com/metrics',
-        metric: 'app-errors',
-        dimensions: { platform: 'web' }
-      })
-    ]
-  });
-
-  window.SentryClient = Sentry;
-}
 
 // *** Start the backend ***
 let worker;
@@ -67,8 +48,6 @@ function createBackendWorker() {
 }
 
 createBackendWorker();
-
-global.SentryClient = Sentry;
 
 if (IS_DEV || IS_PERF_BUILD) {
   import('perf-deets/frontend').then(({ listenForPerfData }) => {

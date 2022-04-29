@@ -5,7 +5,7 @@ If you are only interested in running the latest version, you don't need this re
 
 More docs are available in the [docs](https://github.com/actualbudget/actual/tree/master/docs) folder.
 
-If you are interested in contributed, or want to know how development works, see [CONTRIBUTING.md](https://github.com/actualbudget/actual/blob/master/CONTRIBUTING.md)
+If you are interested in contributing, or want to know how development works, see [CONTRIBUTING.md](https://github.com/actualbudget/actual/blob/master/CONTRIBUTING.md)
 
 ## Installation
 
@@ -56,7 +56,6 @@ In the root of the project:
 ```
 yarn start            # Run the electron app
 yarn start:browser    # Run the web app
-
 ```
 
 ## Code structure
