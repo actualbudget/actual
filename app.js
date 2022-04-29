@@ -1,4 +1,3 @@
-require('source-map-support').install();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');

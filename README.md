@@ -22,9 +22,9 @@ You should deploy your server so it's always running. We recommend [fly.io](http
 
 Next, [install the `flyctl`](https://fly.io/docs/flyctl/installing/) utility. Run `flyctl auth login` to sign into your account.
 
-Now, run `flyctl deploy` from `actual-server`. You should have a running app now!
+Now, run `flyctl launch` from `actual-server`. You should have a running app now!
 
-Whenever you want to update Actual, update the versions of `@actual-app/api` and `@actual-app/web` in `package.json` and deploy again.
+Whenever you want to update Actual, update the versions of `@actual-app/api` and `@actual-app/web` in `package.json` and run `flyctl  deploy`.
 
 **Note:** if you don't want to use fly, we still provide a `Dockerfile` to build the app so it should work anywhere that can compile a docker image.
 

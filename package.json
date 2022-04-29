@@ -18,7 +18,6 @@
     "express": "^4.16.3",
     "express-response-size": "^0.0.3",
     "node-fetch": "^2.2.0",
-    "source-map-support": "^0.5.21",
     "uuid": "^3.3.2"
   },
   "eslintConfig": {
