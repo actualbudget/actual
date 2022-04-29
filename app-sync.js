@@ -6,7 +6,7 @@ let uuid = require('uuid');
 let AdmZip = require('adm-zip');
 let { validateUser } = require('./util/validate-user');
 let errorMiddleware = require('./util/error-middleware');
-let config = require('./config');
+let config = require('./load-config');
 let { getAccountDb } = require('./account-db');
 
 let simpleSync = require('./sync-simple');

@@ -2,7 +2,7 @@ require('source-map-support').install();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const config = require('./config');
+const config = require('./load-config');
 
 const accountApp = require('./app-account');
 const syncApp = require('./app-sync');
@@ -21,8 +21,14 @@ app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 
-app.get('/', (req, res) => {
+app.get('/mode', (req, res) => {
   res.send(config.mode);
+});
+
+// The web frontend
+app.use(express.static(__dirname + '/node_modules/@actual-app/web/build'));
+app.get('/*', (req, res) => {
+  res.sendFile(__dirname + '/node_modules/@actual-app/web/build/index.html');
 });
 
 async function run() {

@@ -9,7 +9,6 @@ function validateUser(req, res) {
 
   let db = getAccountDb();
   let rows = db.all('SELECT * FROM sessions WHERE token = ?', [token]);
-  console.log(req.url, rows, token);
 
   if (rows.length === 0) {
     res.status(401);

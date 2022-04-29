@@ -5,7 +5,7 @@ const plaid = require('plaid');
 const { middleware: connectDb } = require('./db');
 const { handleError } = require('./util/handle-error');
 const { validateSubscribedUser } = require('./util/validate-user');
-const config = require('./config');
+const config = require('./load-config');
 
 const app = express();
 
