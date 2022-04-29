@@ -28,13 +28,35 @@ You should deploy your server so it's always running. We recommend [fly.io](http
 
 Next, [install the `flyctl`](https://fly.io/docs/flyctl/installing/) utility. Run `flyctl auth login` to sign into your account.
 
-Open `fly.toml` and customize the app name on the first line of the file.
+Copy `fly.template.toml` to `fly.toml`. Open `fly.toml` and customize the app name on the first line of the file.
 
 Now, run `flyctl launch` from `actual-server`. You should have a running app now!
 
 Whenever you want to update Actual, update the versions of `@actual-app/api` and `@actual-app/web` in `package.json` and run `flyctl  deploy`.
 
 **Note:** if you don't want to use fly, we still provide a `Dockerfile` to build the app so it should work anywhere that can compile a docker image.
+
+### Persisting server data
+
+One problem with the above setup is every time you deploy, it will wipe away all the data on the server. You'll need to bootstrap the instance again and upload your files.
+
+Let's move the data somewhere that persists. With [fly.io](https://fly.io) we can create a [volume](https://fly.io/docs/reference/volumes/). Run this command:
+
+```
+flyctl volumes create actual_data
+```
+
+Now we need to tell Actual to use this volume. Add this in `fly.toml`:
+
+```
+[mounts]
+  source="actual_data"
+  destination="/data"
+```
+
+That's it! Actual will automatically check if the `/data` directory exists and use it automatically.
+
+_You can also configure the data dir with the `ACTUAL_USER_FILES` environment variable._
 
 ## Configuring the server URL
 

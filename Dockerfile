@@ -10,5 +10,8 @@ ENV NODE_ENV=production
 ADD . .
 
 RUN yarn install --production
+RUN mkdir ./server-files
+RUN mkdir ./user-files
+RUN cp ./sql/default-account.sqlite ./server-files/account.sqlite
 
 CMD ["yarn", "start"]

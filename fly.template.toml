@@ -1,4 +1,4 @@
-app = "actual-server"
+app = "%NAME%"
 
 kill_signal = "SIGINT"
 kill_timeout = 5
@@ -10,10 +10,6 @@ processes = []
 [experimental]
   allowed_public_ports = []
   auto_rollback = true
-
-[mounts]
-  source="actual_data"
-  destination="/data"
 
 [[services]]
   http_checks = []

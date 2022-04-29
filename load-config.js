@@ -2,10 +2,12 @@ let config;
 try {
   config = require('./config');
 } catch (e) {
+  let fs = require('fs');
+
   config = {
     mode: 'development',
     port: 5006,
-    files: './user-files'
+    files: fs.existsSync('/data') ? '/data' : './user-files'
   };
 }
 
