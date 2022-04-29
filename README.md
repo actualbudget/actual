@@ -1,6 +1,10 @@
 
 This is the main project to run [Actual](XXX), a local-first personal finance tool. It comes with the latest version of Actual, and a server to persist changes and make data available across all devices.
 
+### Non-technical users
+
+We are looking into a feature for one-button click click deployment of Actual. This will reduce the friction for people not as comfortable with the command line.
+
 ## Running
 
 It's very easy to get started. Clone this repo, install deps, and start it:
@@ -28,6 +32,10 @@ Whenever you want to update Actual, update the versions of `@actual-app/api` and
 
 **Note:** if you don't want to use fly, we still provide a `Dockerfile` to build the app so it should work anywhere that can compile a docker image.
 
-### Non-technical users
+## Configuring the server URL
 
-We are looking into a feature for one-button click click deployment of Actual. This will reduce the friction for people not as comfortable with the command line.
+The Actual app is totally separate from the server. In this project, they happen to both be served by the same server, but the app doesn't know where the server lives.
+
+The server could live on a completely different domain. You might setup Actual so that the app and server are running in completely separate places.
+
+Since Actual doesn't know what server to use, the first thing it does is asks you for the server URL. If you are running this project, simply click "Use this domain" and it will automatically fill it in with the current domain. This works because we are serving the app and server in the same place.
