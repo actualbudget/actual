@@ -24,7 +24,7 @@ Go to https://localhost:5006 in your browser and you'll see Actual.
 
 You should deploy your server so it's always running. We recommend [fly.io](https://fly.io) which makes it incredibly easy and provides a free plan.
 
-[Create an account](https://fly.io/app/sign-in). Once you see the credit card page, you don't actually have to enter it. Just navigate to https://fly.io/apps to see the dashboard.
+[Create an account](https://fly.io/app/sign-in). Although you are required to enter payment details, everything we do here will work on the free tier and you won't be charged.
 
 Next, [install the `flyctl`](https://fly.io/docs/flyctl/installing/) utility. Run `flyctl auth login` to sign into your account.
 
