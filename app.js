@@ -1,3 +1,4 @@
+const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -31,6 +32,14 @@ app.get('/*', (req, res) => {
 });
 
 async function run() {
+  if (!fs.existsSync(config.serverFiles)) {
+    fs.mkdirSync(config.serverFiles);
+  }
+
+  if (!fs.existsSync(config.userFiles)) {
+    fs.mkdirSync(config.userFiles);
+  }
+
   await accountApp.init();
   await syncApp.init();
 

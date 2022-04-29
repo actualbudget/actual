@@ -4,7 +4,7 @@ try {
 } catch (e) {
   let fs = require('fs');
   let { join } = require('path');
-  let root = fs.existsSync('/data') ? '/data' : './';
+  let root = fs.existsSync('/data') ? '/data' : __dirname;
 
   config = {
     mode: 'development',
