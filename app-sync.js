@@ -21,7 +21,7 @@ app.use(errorMiddleware);
 async function init() {
   await actual.init({
     config: {
-      dataDir: join(__dirname, 'user-files')
+      dataDir: join(__dirname, process.env.ACTUAL_USER_FILES || config.files)
     }
   });
 }
