@@ -3,24 +3,26 @@ This is the source code for [Actual](https://actualbudget.com), a local-first pe
 
 If you are only interested in running the latest version, you don't need this repo. You can get the latest version through npm.
 
-More docs are available in the [docs](XXX) folder.
+More docs are available in the [docs](https://github.com/actualbudget/actual/tree/master/docs) folder.
+
+If you are interested in contributed, or want to know how development works, see [CONTRIBUTING.md](https://github.com/actualbudget/actual/blob/master/CONTRIBUTING.md)
 
 ## Installation
 
 ### The easy way: using a server (recommended)
 
-The easiest way to get Actual running is to use the [actual-sync](XXX) project. That is the server for syncing changes across devices, and it comes with the latest version of Actual. The server will provide both the web project and a server for syncing.
+The easiest way to get Actual running is to use the [actual-server](https://github.com/actualbudget/actual-server) project. That is the server for syncing changes across devices, and it comes with the latest version of Actual. The server will provide both the web project and a server for syncing.
 
 ```
-git clone XXX
-cd actual-sync
+git clone https://github.com/actualbudget/actual-server.git
+cd actual-server
 yarn install
 yarn start
 ```
 
 Navigate to https://localhost:5006 in your browser and you will see Actual.
 
-You should deploy the server somewhere so you can access your data from anywhere. See instructions on the [actual-sync](XXX) repo.
+You should deploy the server somewhere so you can access your data from anywhere. See instructions on the [actual-server](https://github.com/actualbudget/actual-server) repo.
 
 ### Without a server
 
@@ -41,7 +43,7 @@ Navigate to http://localhost:8080 and you should see Actual.
 
 ## Building
 
-If you want to build the latest version, see [releasing.md](XXX). It provides instructions for building this code into the same artifacts that come from npm.
+If you want to build the latest version, see [releasing.md](https://github.com/actualbudget/actual/blob/master/docs/releasing.md). It provides instructions for building this code into the same artifacts that come from npm.
 
 ## Run locally
 
@@ -67,4 +69,4 @@ The app is split up into a few packages:
 * desktop-electron - The desktop app
 * mobile - The mobile app
 
-More docs are available in the [docs](XXX) folder.
+More docs are available in the [docs](https://github.com/actualbudget/actual/tree/master/docs) folder.
