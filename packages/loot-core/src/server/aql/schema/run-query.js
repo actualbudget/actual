@@ -1,5 +1,5 @@
 import { schema, schemaConfig } from './index';
-import schemaExecutors from './executors';
+import { default as schemaExecutors } from './executors';
 import {
   runQuery as _runQuery,
   runCompiledQuery as _runCompiledQuery

@@ -116,4 +116,4 @@ function getNumClients() {
 
 function tapIntoAPI() {}
 
-module.exports = { init, send, getNumClients, tapIntoAPI };
+export default { init, send, getNumClients, tapIntoAPI };

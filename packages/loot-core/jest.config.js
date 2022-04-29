@@ -5,11 +5,12 @@ module.exports = {
     .concat(isReactNative ? ['ios.js', 'mobile.js'] : [])
     .concat(['mjs', 'js', 'json']),
   setupFilesAfterEnv: ['<rootDir>/src/mocks/setup.js'],
-  testEnvironment: 'node',
+  // This may be the wrong environment but it fixes tests for now.
+  testEnvironment: 'jsdom',
   testPathIgnorePatterns: ['/node_modules/', '/lib/', 'index.web.test.js'],
   transformIgnorePatterns: ['__mocks__'],
   transform: {
-    '^.+\\.(js|ts|tsx)?$': '<rootDir>/../../jest-babel-transformer'
+    '^.+\\.(js|ts|tsx)?$': '@swc/jest'
   },
   globals: {
     __TESTING__: true

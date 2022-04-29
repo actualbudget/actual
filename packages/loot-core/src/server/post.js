@@ -1,4 +1,4 @@
-import Platform from './platform';
+import { default as Platform } from './platform';
 const { PostError, HTTPError } = require('./errors');
 const { fetch } = require('../platform/server/fetch');
 

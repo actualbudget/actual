@@ -1,5 +1,5 @@
 import { send } from '../../platform/client/fetch';
-import constants from '../constants';
+import { default as constants } from '../constants';
 import { loadPrefs } from './prefs';
 import { createBudget, loadBudget } from './budgets';
 import { getCategories, getAccounts, getPayees } from './queries';

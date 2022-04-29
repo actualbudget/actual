@@ -1,5 +1,5 @@
 import { send } from '../platform/client/fetch';
-import Platform from './platform';
+import { default as Platform } from './platform';
 
 export default function checkForUpgradeNotifications(
   addNotification,

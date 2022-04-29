@@ -1,4 +1,4 @@
-import encryption from '../encryption';
+import { default as encryption } from '../encryption';
 let SyncPb = require('./proto/sync_pb');
 
 async function randomString() {

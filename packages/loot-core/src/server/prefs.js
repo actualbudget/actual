@@ -1,5 +1,5 @@
 import { sendMessages } from './sync';
-import Timestamp from './timestamp';
+import { default as Timestamp } from './timestamp';
 const fs = require('../platform/server/fs');
 
 let prefs = null;

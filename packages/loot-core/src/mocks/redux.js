@@ -1,8 +1,8 @@
-import React from 'react';
+import { default as React } from 'react';
 import { Provider } from 'react-redux';
-import thunk from 'redux-thunk';
+import { default as thunk } from 'redux-thunk';
 import { createStore, combineReducers, applyMiddleware } from 'redux';
-import reducers from '../client/reducers';
+import { default as reducers } from '../client/reducers';
 
 let appReducer = combineReducers(reducers);
 let store = null;

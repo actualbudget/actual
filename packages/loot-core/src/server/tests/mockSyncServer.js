@@ -1,4 +1,4 @@
-import dateFns from 'date-fns';
+import { default as dateFns } from 'date-fns';
 import * as merkle from '../merkle';
 import Timestamp, { makeClock } from '../timestamp';
 const defaultMockData = require('./mockData').basic;

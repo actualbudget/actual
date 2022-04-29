@@ -1,5 +1,5 @@
 import { addSyncListener, applyMessages } from './index';
-import Timestamp from '../timestamp';
+import { default as Timestamp } from '../timestamp';
 
 function migrateParentIds(oldValues, newValues) {
   newValues.forEach((items, table) => {

@@ -315,7 +315,7 @@ async function getModifiedTime(filepath) {
   );
 }
 
-module.exports = {
+export default {
   pathToId,
   populateFileHeirarchy,
   init,

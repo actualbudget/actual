@@ -6,4 +6,4 @@ function fetchBinary() {
   throw new Error('fetchBinary not implemented');
 }
 
-module.exports = { fetch, fetchBinary };
+export default { fetch, fetchBinary };

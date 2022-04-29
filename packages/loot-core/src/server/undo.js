@@ -1,6 +1,6 @@
 import { sendMessages } from './sync';
 import { getIn } from '../shared/util';
-import Timestamp from './timestamp';
+import { default as Timestamp } from './timestamp';
 import { withMutatorContext, getMutatorContext } from './mutators';
 const connection = require('../platform/server/connection');
 

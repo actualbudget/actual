@@ -1,4 +1,4 @@
-import query from '../../shared/query';
+import { default as query } from '../../shared/query';
 import { generateSQLWithState } from './compiler';
 
 function sqlLines(str) {

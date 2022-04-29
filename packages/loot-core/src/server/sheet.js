@@ -1,9 +1,9 @@
-import Spreadsheet from './spreadsheet/spreadsheet';
+import { default as Spreadsheet } from './spreadsheet/spreadsheet';
 import * as prefs from './prefs';
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
-import Platform from './platform';
+import { default as Platform } from './platform';
 const { resolveName } = require('./spreadsheet/util');
 
 let globalSheet, globalOnChange;

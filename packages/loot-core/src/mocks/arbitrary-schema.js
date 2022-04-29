@@ -1,4 +1,4 @@
-import fc from 'fast-check';
+import { default as fc } from 'fast-check';
 import { schema } from '../server/aql/schema';
 import { addDays } from '../shared/months';
 

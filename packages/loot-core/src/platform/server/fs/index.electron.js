@@ -11,7 +11,7 @@ if (__filename.match('bundle')) {
   rootPath = path.join(__dirname, '..');
 }
 
-module.exports = {
+const test = {
   init: () => {
     // Nothing to do
   },
@@ -46,7 +46,7 @@ module.exports = {
       );
     }
 
-    return path.join(module.exports.getDocumentDir(), id);
+    return path.join(test.getDocumentDir(), id);
   },
   bundledDatabasePath: path.join(rootPath, 'default-db.sqlite'),
   migrationsPath: path.join(rootPath, 'migrations'),
@@ -139,7 +139,7 @@ module.exports = {
     });
   },
   removeDirRecursively: async dirpath => {
-    const f = module.exports;
+    const f = test;
     if (await f.exists(dirpath)) {
       for (let file of await f.listDir(dirpath)) {
         const fullpath = f.join(dirpath, file);
@@ -165,3 +165,5 @@ module.exports = {
     });
   }
 };
+
+export default test

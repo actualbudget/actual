@@ -1,4 +1,4 @@
-import title from './title';
+import { default as title } from './title';
 import * as db from '../db';
 import {
   mergeObjects,

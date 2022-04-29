@@ -17,7 +17,7 @@ import {
   sortNumbers,
   getApproxNumberThreshold
 } from '../../shared/rules';
-import q from '../../shared/query';
+import { default as q } from '../../shared/query';
 import { requiredFields, toDateRepr } from '../models';
 import { currentDay } from '../../shared/months';
 import { partitionByField, fastSetMerge } from '../../shared/util';

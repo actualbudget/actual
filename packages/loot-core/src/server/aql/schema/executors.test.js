@@ -1,11 +1,11 @@
-import fc from 'fast-check';
+import { default as fc } from 'fast-check';
 import * as db from '../../db';
-import query from '../../../shared/query';
+import { default as query } from '../../../shared/query';
 import { makeChild } from '../../../shared/transactions';
 import { batchMessages, setSyncingMode } from '../../sync/index';
 import { setClock } from '../../timestamp';
 import { groupById } from '../../../shared/util';
-import arbs from '../../../mocks/arbitrary-schema';
+import { default as arbs } from '../../../mocks/arbitrary-schema';
 import { isAggregateQuery } from '../compiler';
 import { runQuery } from './run-query';
 import { toGroup, isHappyPathQuery } from './executors';

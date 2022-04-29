@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
   transform: {
-    '.*': '<rootDir>/../../jest-babel-transformer'
+    '.*': '@swc/jest'
   },
   testPathIgnorePatterns: [
     '/node_modules/',

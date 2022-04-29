@@ -1,4 +1,4 @@
-import initSqlJS from '@jlongster/sql.js';
+import { default as initSqlJS } from '@jlongster/sql.js';
 import * as perf from 'perf-deets';
 
 let SQL = null;

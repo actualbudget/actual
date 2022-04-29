@@ -1,5 +1,5 @@
-import constants from '../constants';
-import memoizeOne from 'memoize-one';
+import { default as constants } from '../constants';
+import { default as memoizeOne } from 'memoize-one';
 import { groupById } from '../../shared/util';
 
 const initialState = {

@@ -24,7 +24,7 @@ import { getClock } from './timestamp';
 import { runMutator } from './mutators';
 import { integerToAmount } from '../shared/util';
 import { runQuery as aqlQuery } from './aql/schema/run-query';
-import q from '../shared/query';
+import { default as q } from '../shared/query';
 
 const { resolveName } = require('./spreadsheet/util');
 const connection = require('../platform/server/connection');

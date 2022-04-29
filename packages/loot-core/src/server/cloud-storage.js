@@ -1,5 +1,5 @@
-import fs from '../platform/server/fs';
-import asyncStorage from '../platform/server/asyncStorage';
+import { default as fs } from '../platform/server/fs';
+import { default as asyncStorage } from '../platform/server/asyncStorage';
 import { fetch } from '../platform/server/fetch';
 import * as monthUtils from '../shared/months';
 import * as sqlite from '../platform/server/sqlite';
@@ -12,7 +12,7 @@ import {
   FileDownloadError,
   FileUploadError
 } from './errors';
-import encryption from './encryption';
+import { default as encryption } from './encryption';
 import { post } from './post';
 let uuid = require('../platform/uuid');
 let AdmZip = require('adm-zip');

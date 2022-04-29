@@ -90,4 +90,4 @@ function unlisten(name) {
   listeners.set(name, []);
 }
 
-module.exports = { init, send, sendCatch, listen, unlisten };
+export default { init, send, sendCatch, listen, unlisten };

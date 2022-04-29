@@ -1,4 +1,4 @@
-import mitt from 'mitt';
+import { default as mitt } from 'mitt';
 import { schema, schemaConfig } from '../aql/schema';
 import { compileQuery } from '../aql/compiler';
 import { runCompiledQuery } from '../aql/schema/run-query';

@@ -14,7 +14,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/register": "^7.12.10",
     "@jlongster/mixpanel": "^0.13.4",
     "@jlongster/sql.js": "^1.6.7",
     "@rschedule/core": "^1.2.0",
@@ -49,7 +48,7 @@
     "@swc/core": "^1.2.206",
     "@swc/jest": "^0.2.21",
     "adm-zip": "cthackers/adm-zip#ff17ae85",
-    "babel-jest": "25.2.6",
+    "babel-eslint": "9.0.0",
     "buffer": "^5.5.0",
     "damerau-levenshtein": "^1.0.4",
     "date-fns": "2.0.0-alpha.27",

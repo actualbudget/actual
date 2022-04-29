@@ -81,7 +81,7 @@ function normalizePath(path) {
   return path;
 }
 
-module.exports = function join(...args) {
+export default function join(...args) {
   if (args.length === 0) return '.';
   let joined;
   for (var i = 0; i < args.length; ++i) {

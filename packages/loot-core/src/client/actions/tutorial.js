@@ -1,6 +1,6 @@
-import constants from '../constants';
+import { default as constants } from '../constants';
 import { send } from '../../platform/client/fetch';
-import Platform from '../platform';
+import { default as Platform } from '../platform';
 import { pushModal } from './modals';
 
 export function startTutorialFirstTime() {

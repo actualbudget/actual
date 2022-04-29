@@ -6,7 +6,6 @@
     "build"
   ],
   "devDependencies": {
-    "@babel/core": "~7.14.3",
     "@jlongster/lively": "0.0.4",
     "@jlongster/sentry-metrics-actual": "^0.0.10",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.2",
@@ -17,7 +16,6 @@
     "@swc/core": "^1.2.206",
     "add": "^2.0.6",
     "babel-eslint": "9.0.0",
-    "babel-preset-jwl-app": "6.1.12",
     "bezier-easing": "^2.0.3",
     "bfj": "6.1.1",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
