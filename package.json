@@ -2,6 +2,15 @@
   "name": "actual",
   "version": "0.0.1",
   "private": true,
+  "description": "A local-first personal finance system"
+  "homepage": "https://github.com/actualbudget/actual/",
+  "bugs": {
+    "url": "https://github.com/actualbudget/actual/issues/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:actualbudget/actual.git"
+  },
   "license": "MIT",
   "workspaces": {
     "packages": [
