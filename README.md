@@ -7,6 +7,8 @@ More docs are available in the [docs](https://github.com/actualbudget/actual/tre
 
 If you are interested in contributing, or want to know how development works, see [CONTRIBUTING.md](https://github.com/actualbudget/actual/blob/master/CONTRIBUTING.md)
 
+Join the [discord](https://discord.gg/pRYNYr4W5A)!
+
 ## Installation
 
 ### The easy way: using a server (recommended)
