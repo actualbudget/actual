@@ -20,6 +20,17 @@ yarn start
 
 Go to https://localhost:5006 in your browser and you'll see Actual.
 
+## Running via Docker
+To run using a Docker container you can use following commands;
+
+```
+git clone https://github.com/actualbudget/actual-server.git
+cd actual-server
+docker build -t actual-server .
+docker run -p 5006:5006 actual-server
+```
+
+
 ## Deploying
 
 You should deploy your server so it's always running. We recommend [fly.io](https://fly.io) which makes it incredibly easy and provides a free plan.
