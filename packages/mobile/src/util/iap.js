@@ -35,17 +35,16 @@ let IS_SETUP = false;
 
 export async function setupPurchases(userData) {
   // eslint-disable-next-line
-  Purchases.debugLogsEnabled = __DEV__;
-  Purchases.setup('bjOGsQWPvvMoNGoYCtfqFTGDGLGCskNn', userData.id);
-  await Purchases.identify(userData.id);
-  await Purchases.setEmail(userData.email);
-  await Purchases.setAttributes({ userId: userData.id });
+  // Purchases.debugLogsEnabled = __DEV__;
+  // await Purchases.identify(userData.id);
+  // await Purchases.setEmail(userData.email);
+  // await Purchases.setAttributes({ userId: userData.id });
 }
 
 export async function invalidatePurchaserInfoCache() {
-  if (IS_SETUP) {
-    await Purchases.invalidatePurchaserInfoCache();
-  }
+  // if (IS_SETUP) {
+  //   await Purchases.invalidatePurchaserInfoCache();
+  // }
 }
 
 export async function resetUser() {
