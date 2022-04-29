@@ -1,3 +1,6 @@
+// This app is unused right now. Maybe you could use it as a starting
+// point for Plaid integration!
+
 const express = require('express');
 const uuid = require('uuid');
 const fetch = require('node-fetch');

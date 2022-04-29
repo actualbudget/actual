@@ -1,5 +1,0 @@
-#!/bin/sh
-
-NODE="/home/ec2-user/.nvm/versions/node/v10.15.1/bin/node"
-export VERSION=`"$NODE" ./node_modules/.bin/sentry-cli releases propose-version`
-exec chpst -uec2-user "$NODE" app.js 2>&1
