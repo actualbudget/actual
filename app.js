@@ -43,8 +43,8 @@ async function run() {
   await accountApp.init();
   await syncApp.init();
 
-  console.log('Listening on ' + config.port + '...');
-  app.listen(config.port);
+  console.log('Listening on ' + config.hostname + ':' + config.port + '...');
+  app.listen(config.port, config.hostname);
 }
 
 run().catch(err => {
