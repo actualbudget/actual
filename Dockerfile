@@ -7,9 +7,6 @@ RUN mkdir /app
 WORKDIR /app
 ENV NODE_ENV=production
 
-
-
-
 ADD . .
 
 RUN yarn install --production
