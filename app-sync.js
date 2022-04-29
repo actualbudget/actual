@@ -19,9 +19,13 @@ const app = express();
 app.use(errorMiddleware);
 
 async function init() {
+  let fileDir = join(__dirname, process.env.ACTUAL_USER_FILES || config.files);
+
+  console.log('Initializing Actual with user file dir:', fileDir);
+
   await actual.init({
     config: {
-      dataDir: join(__dirname, process.env.ACTUAL_USER_FILES || config.files)
+      dataDir: fileDir
     }
   });
 }
