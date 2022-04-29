@@ -63,7 +63,7 @@ We should switch to [swc](https://swc.rs). That would also have another benefit:
 
 One of my mistakes with Actual was rebuilding everything from scratch, even the design system. While I was able to make it look good for the current version of Actual, it makes it a lot of work to build new designs. We should choose a 3rd party library and start using it in Actual. It would make it way faster to build new designs.
 
-There aren't many good 3rd party library unfortunately. API, accessibility, and general thoughtful-ness are important. The two that come to my mind are [Radix](https://www.radix-ui.com) and [react-aria](https://react-spectrum.adobe.com/react-aria/)1. I'm leaning towards react-aria.
+There aren't many good 3rd party library unfortunately. API, accessibility, and general thoughtful-ness are important. The two that come to my mind are [Radix](https://www.radix-ui.com) and [react-aria](https://react-spectrum.adobe.com/react-aria/). I'm leaning towards react-aria.
 
 I'm open to other things, but we really need something to take the weight off of building UI.
 
