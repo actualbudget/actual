@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    // DOM for URL global in Node 16+
+    "lib": ["ES2021", "DOM"],
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "downlevelIteration": true,
+    "jsx": "preserve",
+    // Check JS files too
+    "allowJs": true,
+    "checkJs": true,
+    // Used for temp builds
+    "outDir": "build",
+    "moduleResolution": "Node",
+    "module": "ESNext"
+  },
+  "exclude": ["node_modules", "build"]
+}
