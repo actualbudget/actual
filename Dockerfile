@@ -1,16 +1,15 @@
-# base node image
 FROM node:16-bullseye as base
 
 RUN apt-get update && apt-get install -y openssl
-
 RUN mkdir /app
 WORKDIR /app
 ENV NODE_ENV=production
-
 ADD . .
-
 RUN yarn install --production
-RUN mkdir ./server-files
-RUN mkdir ./user-files
 
+FROM node:16-bullseye-slim as prod
+
+RUN apt-get update && apt-get install openssl && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=base /app /app
 CMD ["yarn", "start"]
