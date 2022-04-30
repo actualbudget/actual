@@ -1,0 +1,19 @@
+version: "3.9"
+
+# $DOCKERDIR references a location you want to persist data on the machine running docker.
+
+networks:
+  default:
+    driver: bridge
+
+services:
+  actual:
+    image: kovah/actual-budget-server
+    restart: unless-stopped
+    container_name: actual
+    networks:
+      - default
+    ports:
+      - 5006:5006
+    volumes:
+      - $DOCKERDIR/actual/data:/data
