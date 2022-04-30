@@ -1,16 +1,18 @@
-FROM node:16-bullseye as base
+FROM alpine as base
 
-RUN apt-get update && apt-get install -y openssl
+RUN apk add --no-cache nodejs yarn openssl tini
 RUN mkdir /app
 WORKDIR /app
 ENV NODE_ENV=production
 ADD yarn.lock package.json ./
 RUN yarn install --production
 
-FROM node:16-bullseye-slim as prod
+FROM alpine as prod
 
-RUN apt-get update && apt-get install openssl && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache nodejs yarn openssl tini
 WORKDIR /app
 COPY --from=base /app /app
 ADD . .
+
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["yarn", "start"]
