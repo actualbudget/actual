@@ -2,7 +2,7 @@
   "name": "actual",
   "version": "0.0.1",
   "private": true,
-  "description": "A local-first personal finance system"
+  "description": "A local-first personal finance system",
   "homepage": "https://github.com/actualbudget/actual/",
   "bugs": {
     "url": "https://github.com/actualbudget/actual/issues/"
