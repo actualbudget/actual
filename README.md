@@ -2,9 +2,11 @@ This is the main project to run [Actual](https://github.com/actualbudget/actual)
 
 Join the [discord](https://discord.gg/pRYNYr4W5A)!
 
-## Non-technical users
+## One-Click Setup
 
-We are looking into a feature for one-button click click deployment of Actual. This will reduce the friction for people not as comfortable with the command line.
+The button below deploys the Actual server on [PikaPods](https://www.pikapods.com). Just choose a name and geographic region. All files are accessible over SFTP, if you need to migrate or access them. The free welcome credit is enough to run Actual for around 3.5 months.
+
+[![Run on PikaPods](https://www.pikapods.com/static/run-button.svg)](https://www.pikapods.com/pods?run=actual)
 
 ## Running
 
