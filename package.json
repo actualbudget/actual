@@ -17,6 +17,7 @@
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "express": "^4.16.3",
+    "express-actuator": "^1.8.1",
     "express-response-size": "^0.0.3",
     "node-fetch": "^2.2.0",
     "uuid": "^3.3.2"

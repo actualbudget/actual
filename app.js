@@ -1,5 +1,6 @@
 const fs = require('fs');
 const express = require('express');
+const actuator = require('express-actuator');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const config = require('./load-config');
@@ -24,6 +25,8 @@ app.use('/account', accountApp.handlers);
 app.get('/mode', (req, res) => {
   res.send(config.mode);
 });
+
+app.use(actuator()); // Provides /health, /metrics, /info
 
 // The web frontend
 app.use(express.static(__dirname + '/node_modules/@actual-app/web/build'));
