@@ -6,10 +6,13 @@ Many of the build scripts are bash scripts and not natively invokable in Windows
 4. From the root of this repo, run `sh` to launch a bash shell
 5. From inside the bash shell, run `yarn install`
 6. From still inside the shell, run `yarn start:browser`
+7. Lastly, copy the files from `loot-core/lib-dist/browser/*` to `desktop-client/kcab/` (you will have to do this everytime the worker rebuilds from editing source files until the symlink on Windows issue is addressed)
+
+# How to build electron for Windows
+1. Follow steps 1 - 6 above.
+2. Kill the watch process and run `yarn rebuild-electron`
+3. Run `yarn start`;
 
 ## rsync: command not found
 If you run into this error, you will need to install the rsync binary to Git Bash. Follow the [directions here](https://prasaz.medium.com/add-rsync-to-windows-git-bash-f42736bae1b3). When you get to the final step - installing the libxxhash dll - rename the dll from `msys-xxhash-0.8.0.dll` to `msys-xxhash-0.dll`
 
-## TODO:
-* Fix build process for desktop apps on Windows
-* Fix mimetype error in browser app
