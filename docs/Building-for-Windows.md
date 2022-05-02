@@ -6,7 +6,7 @@ Many of the build scripts are bash scripts and not natively invokable in Windows
 4. From the root of this repo, run `sh` to launch a bash shell
 5. From inside the bash shell, run `yarn install`
 6. From still inside the shell, run `yarn start:browser`
-7. Lastly, copy the files from `loot-core/lib-dist/browser/*` to `desktop-client/kcab/` (you will have to do this everytime the worker rebuilds from editing source files until the symlink on Windows issue is addressed)
+7. Open your browser to `localhost:3001`
 
 # How to build electron for Windows
 1. Follow steps 1 - 6 above.
