@@ -24,10 +24,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push standard image
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ secrets.DOCKERHUB_PROJECT }}:latest
+
+      - name: Build and push Alpine image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          file: Dockerfile.alpine
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ secrets.DOCKERHUB_PROJECT }}:alpine
