@@ -96,7 +96,7 @@ rm -fr packages/desktop-electron/client-build/*.map
     export npm_config_better_sqlite3_binary_host="https://static.actualbudget.com/prebuild/better-sqlite3"
 
     if [ "$RELEASE" == "production" ]; then
-        SKIP_NOTARIZATION=true ./node_modules/.bin/electron-builder --publish always -c.releaseInfo.releaseNotes="$RELEASE_NOTES" --arm64 --x64
+        SKIP_NOTARIZATION=true ./node_modules/.bin/electron-builder --publish never --arm64 --x64
 
         echo "\nCreated release $VERSION with release notes \"$RELEASE_NOTES\""
     elif [ "$RELEASE" == "beta" ]; then
