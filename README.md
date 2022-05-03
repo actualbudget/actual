@@ -2,11 +2,6 @@ This is the main project to run [Actual](https://github.com/actualbudget/actual)
 
 Join the [discord](https://discord.gg/pRYNYr4W5A)!
 
-## One-Click Setup
-
-The button below deploys the Actual server on [PikaPods](https://www.pikapods.com). Just choose a name and geographic region. All files are accessible over SFTP, if you need to migrate or access them. The free welcome credit is enough to run Actual for around 3.5 months.
-
-[![Run on PikaPods](https://www.pikapods.com/static/run-button.svg)](https://www.pikapods.com/pods?run=actual)
 
 ## Running
 
@@ -34,7 +29,8 @@ docker run -p 5006:5006 actual-server
 
 ## Deploying
 
-You should deploy your server so it's always running. We recommend [fly.io](https://fly.io) which makes it incredibly easy and provides a free plan.
+### Fly.io
+[fly.io](https://fly.io) allows running the application directly and provides a free tier. You should be comfortable with using the command line.
 
 [Create an account](https://fly.io/app/sign-in). Although you are required to enter payment details, everything we do here will work on the free tier and you won't be charged.
 
@@ -74,6 +70,18 @@ Now we need to tell Actual to use this volume. Add this in `fly.toml`:
 That's it! Actual will automatically check if the `/data` directory exists and use it automatically.
 
 _You can also configure the data dir with the `ACTUAL_USER_FILES` environment variable._
+
+
+### Docker
+We also provide a `Dockerfile` to deploy Actual to any platform that supports Docker. (official Docker image coming soon)
+
+
+### PikaPods
+Allows running Actual without using the command line via a pre-configured Docker image. Data is persisted and accessible via SFTP.
+
+[![Run on PikaPods](https://www.pikapods.com/static/run-button.svg)](https://www.pikapods.com/pods?run=actual)
+
+
 
 ## Configuring the server URL
 
