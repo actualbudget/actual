@@ -30,7 +30,7 @@ docker run -p 5006:5006 actual-server
 ## Deploying
 
 ### Fly.io
-[fly.io](https://fly.io) allows running the application directly and provides a free tier. You should be comfortable with using the command line.
+[fly.io](https://fly.io) allows running the application directly and provides a free tier. You should be comfortable with using the command line to set it up though.
 
 [Create an account](https://fly.io/app/sign-in). Although you are required to enter payment details, everything we do here will work on the free tier and you won't be charged.
 
@@ -70,10 +70,6 @@ Now we need to tell Actual to use this volume. Add this in `fly.toml`:
 That's it! Actual will automatically check if the `/data` directory exists and use it automatically.
 
 _You can also configure the data dir with the `ACTUAL_USER_FILES` environment variable._
-
-
-### Docker
-We also provide a `Dockerfile` to deploy Actual to any platform that supports Docker. (official Docker image coming soon)
 
 
 ### PikaPods
