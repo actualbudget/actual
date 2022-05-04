@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node app",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "types": "tsc --noEmit --incremental",
+    "verify": "yarn -s lint && yarn types"
   },
   "dependencies": {
     "@actual-app/api": "^4.0.1",
