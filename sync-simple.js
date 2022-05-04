@@ -75,7 +75,6 @@ function sync(messages, since, fileId) {
          WHERE timestamp > ?
          ORDER BY timestamp`,
     [since],
-    true
   );
 
   let trie = addMessages(db, messages);
