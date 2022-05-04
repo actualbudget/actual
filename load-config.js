@@ -1,5 +1,6 @@
 let config;
 try {
+  // @ts-expect-error TS2307: we expect this file may not exist
   config = require('./config');
 } catch (e) {
   let fs = require('fs');
