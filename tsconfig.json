@@ -4,6 +4,7 @@
     // DOM for URL global in Node 16+
     "lib": ["ES2021", "DOM"],
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
@@ -11,10 +12,9 @@
     // Check JS files too
     "allowJs": true,
     "checkJs": true,
-    // Used for temp builds
-    "outDir": "build",
-    "moduleResolution": "Node",
-    "module": "ESNext"
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "outDir": "build"
   },
   "exclude": ["node_modules", "build", "./app-plaid.js"]
 }
