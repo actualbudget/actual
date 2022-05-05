@@ -39,6 +39,21 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=sha
 
+      - name: Docker meta for Alpine image
+        id: alpine-meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            actualbudget/actual-server
+            ghcr.io/actualbudget/actual-server
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,suffix=-alpine
+            type=semver,pattern={{version}},suffix=-alpine
+            type=semver,pattern={{major}}.{{minor}},suffix=-alpine
+            type=sha,suffix=-alpine
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
@@ -58,7 +73,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_PROJECT }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build and push Alpine image
         uses: docker/build-push-action@v2
@@ -67,4 +82,4 @@ jobs:
           push: true
           file: Dockerfile.alpine
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.alpine-meta.outputs.tags }}
