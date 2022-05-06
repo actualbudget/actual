@@ -25,7 +25,7 @@ jobs:
         with:
           # Push to both Docker Hub and Github Container Registry
           images: |
-            actualbudget/actual-server
+            jlongster/actual-server
             ghcr.io/actualbudget/actual-server
           # Creates the following tags:
           # - actual-server:latest
@@ -44,7 +44,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            actualbudget/actual-server
+            jlongster/actual-server
             ghcr.io/actualbudget/actual-server
           tags: |
             type=ref,event=branch
