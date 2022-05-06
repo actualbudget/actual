@@ -265,7 +265,16 @@ module.exports = function(webpackEnv) {
         // please link the files into your node_modules/ and let module-resolution kick in.
         // Make sure your source files are compiled, as they will not be processed in any way.
         new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])
-      ]
+      ],
+      // Some libraries import Node modules but don't use them in the browser.
+      // Tell Webpack to provide empty mocks for them so importing them works.
+      fallback: {
+        dgram: false,
+        fs: false,
+        net: false,
+        tls: false,
+        child_process: false
+      },
     },
     resolveLoader: {
       plugins: [
@@ -517,9 +526,9 @@ module.exports = function(webpackEnv) {
       // solution that requires the user to opt into importing specific locales.
       // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
       // You can remove this if you don't use Moment.js:
-      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+      new webpack.IgnorePlugin({resourceRegExp:/^\.\/locale$/, contextRegExp: /moment$/}),
       !(isEnvDevelopment || process.env.PERF_BUILD) &&
-        new webpack.IgnorePlugin(/perf-deets\/frontend/),
+        new webpack.IgnorePlugin({resourceRegExp: /perf-deets\/frontend/}),
       // Generate a service worker script that will precache, and keep up to date,
       // the HTML & assets that are part of the Webpack build.
       isEnvProduction &&
@@ -567,15 +576,6 @@ module.exports = function(webpackEnv) {
           silent: true,
         })
     ].filter(Boolean),
-    // Some libraries import Node modules but don't use them in the browser.
-    // Tell Webpack to provide empty mocks for them so importing them works.
-    node: {
-      dgram: 'empty',
-      fs: 'empty',
-      net: 'empty',
-      tls: 'empty',
-      child_process: 'empty'
-    },
     // Turn off performance processing because we utilize
     // our own hints via the FileSizeReporter
     performance: false
