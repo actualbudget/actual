@@ -5,15 +5,16 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actualbudget/importer-ynab4.git"
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/import-ynab4"
   },
   "author": "James Long",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/actualbudget/importer-ynab4/issues"
+    "url": "https://github.com/actualbudget/actual/issues"
   },
   "bin": "./index.js",
-  "homepage": "https://github.com/actualbudget/importer-ynab4#readme",
+  "homepage": "https://github.com/actualbudget/actual/tree/master/packages/import-ynab4#readme",
   "dependencies": {
     "@actual-app/api": "^1.0.0",
     "adm-zip": "^0.5.9",
