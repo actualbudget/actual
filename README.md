@@ -55,7 +55,12 @@ Now, run `flyctl launch` from `actual-server`. You should have a running app now
 
 Whenever you want to update Actual, update the versions of `@actual-app/api` and `@actual-app/web` in `package.json` and run `flyctl  deploy`.
 
-**Note:** if you don't want to use fly, we still provide a `Dockerfile` to build the app so it should work anywhere that can compile a docker image.
+### Using a custom Docker setup
+
+Actual is also available as a Docker image ready to be run in your own custom environment.
+
+- Docker Hub: `jlongster/actual-server`
+- Github Registry: `ghcr.io/actualbudget/actual-server`
 
 ### Persisting server data
 
