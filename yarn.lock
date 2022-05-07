@@ -11328,10 +11328,10 @@ currency-formatter@jlongster/currency-formatter:
   languageName: node
   linkType: hard
 
-"hotkeys-js@npm:^3.8.2":
-  version: 3.8.7
-  resolution: "hotkeys-js@npm:3.8.7"
-  checksum: 1eb6df2781e8e49a80c72930d5c69ed50ea16d1dbef0667512059f5b5d1551bfdce3024c25d99275ab567e0b7ae0fbf292971542ea347ed8b7b585eab4e99287
+"hotkeys-js@npm:3.8.2":
+  version: 3.8.2
+  resolution: "hotkeys-js@npm:3.8.2"
+  checksum: 0fbe8e4a1b3091b9bb1ed2ca220509bda5337a0ab6a90b963ee2a942e06aef25eb4294ca7048f30a00be41f14002691e153c17797a4c0604fde71011318bb05f
   languageName: node
   linkType: hard
 
@@ -14462,7 +14462,7 @@ jest-snapshot@test:
     fast-glob: ^2.2.2
     formik: ^0.11.10
     glamor: ^2.20.40
-    hotkeys-js: ^3.8.2
+    hotkeys-js: 3.8.2
     memoize-one: ^4.0.0
     memoizee: ^0.4.12
     node-noop: 1.0.0
