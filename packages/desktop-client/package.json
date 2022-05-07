@@ -83,7 +83,6 @@
     "workbox-webpack-plugin": "3.6.3",
     "worker-loader": "^3.0.8"
   },
-  "dependencies": {},
   "scripts": {
     "start": "cross-env PORT=3001 node scripts/start.js",
     "start:browser": "./bin/watch-browser",
