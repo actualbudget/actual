@@ -9,7 +9,8 @@
     "android:prod": "rm -f ./android/app/build/generated/assets/react/release/index.android.bundle && npx react-native run-android --appId com.shiftreset.actual --variant=release",
     "ios": "react-native run-ios",
     "test": "jest",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "lint": "eslint ./"
   },
   "jest": {
     "preset": "react-native"
@@ -50,6 +51,7 @@
     "rn-fetch-blob": "^0.11.2"
   },
   "devDependencies": {
+    "eslint": "^8.15.0",
     "rn-snoopy": "^2.0.2"
   }
 }

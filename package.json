@@ -57,7 +57,7 @@
     "make-fresh-db": "./packages/loot-core/src/bin/migrate reset --db ./data/user1/db.sqlite",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "yarn workspace loot-core lint",
+    "lint": "yarn workspaces foreach --parallel --verbose run lint",
     "postinstall": "rm -rf ./packages/loot-design/node_modules/react && rm -rf ./packages/mobile/node_modules/react && rm -rf ./node_modules/react-native && patch-package"
   },
   "devDependencies": {
@@ -70,18 +70,6 @@
     "pretty-quick": "^1.11.1",
     "shelljs": "^0.8.2",
     "source-map-support": "^0.5.21"
-  },
-  "eslintConfig": {
-    "extends": "react-app",
-    "rules": {
-      "no-unused-vars": "off",
-      "no-loop-func": "off",
-      "no-restricted-globals": "off"
-    }
-  },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "none"
   },
   "resolutions": {
     "@babel/preset-env": "^7.15.1",
