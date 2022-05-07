@@ -1,5 +1,4 @@
 import { sequential, once } from '../../shared/async';
-import * as perf from '../perf';
 import * as prefs from '../prefs';
 import app from '../main-app';
 import asyncStorage from '../../platform/server/asyncStorage';

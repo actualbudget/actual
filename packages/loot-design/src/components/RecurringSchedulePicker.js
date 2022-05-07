@@ -1,8 +1,5 @@
-import PropTypes from 'prop-types';
 import React, { useEffect, useReducer, useState } from 'react';
-import * as d from 'date-fns';
 import { useSelector } from 'react-redux';
-import { parse as parseDate } from 'date-fns';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
@@ -16,7 +13,7 @@ import {
   Text,
   Stack
 } from '../components/common';
-import { colors, styles } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 import { useTooltip } from 'loot-design/src/components/tooltips';
 import SubtractIcon from 'loot-design/src/svg/Subtract';
 import AddIcon from 'loot-design/src/svg/Add';
