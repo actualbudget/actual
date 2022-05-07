@@ -1,5 +1,4 @@
 import './polyfills';
-import { differenceInDays } from 'date-fns';
 import asyncStorage from '../platform/server/asyncStorage';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import * as prefs from './prefs';

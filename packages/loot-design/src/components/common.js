@@ -4,7 +4,6 @@ import React, {
   useLayoutEffect,
   useState,
   useCallback,
-  useMemo
 } from 'react';
 import { css } from 'glamor';
 import mergeRefs from 'react-merge-refs';
@@ -18,7 +17,6 @@ import {
   useRouteMatch
 } from 'react-router-dom';
 import {
-  Listbox,
   ListboxInput,
   ListboxButton,
   ListboxPopover,

@@ -4,18 +4,9 @@ import React from "react";
 import {
   Svg,
   Circle,
-  Ellipse,
   G,
   LinearGradient,
-  RadialGradient,
-  Line,
   Path,
-  Polygon,
-  Polyline,
-  Rect,
-  Symbol,
-  Text,
-  Use,
   Defs,
   Stop
 } from "mobile/node_modules/react-native-svg";
