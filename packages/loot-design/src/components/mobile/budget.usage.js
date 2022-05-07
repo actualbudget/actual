@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { MobileSection } from '../../guide/components';
-import { BudgetTable, BudgetHeader, BudgetAccessoryView } from './budget';
+import { BudgetTable, BudgetAccessoryView } from './budget';
 import InputAccessoryView from './InputAccessoryView';
 import { generateCategoryGroups } from 'loot-core/src/mocks';
 import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';

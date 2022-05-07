@@ -22,7 +22,7 @@ import {
   deleteTransaction,
   realizeTempTransactions
 } from 'loot-core/src/shared/transactions';
-import { applyChanges, titleFirst } from 'loot-core/src/shared/util';
+import { titleFirst } from 'loot-core/src/shared/util';
 import {
   integerToCurrency,
   integerToAmount,
@@ -48,9 +48,6 @@ import {
 
 import EditSkull1 from '../../svg/v2/EditSkull1';
 import AlertTriangle from '../../svg/v2/AlertTriangle';
-import CalendarIcon from '../../svg/v2/Calendar';
-import ValidationCheck from '../../svg/v2/ValidationCheck';
-import FavoriteStar from '../../svg/v2/FavoriteStar';
 import CheckCircle1 from '../../svg/v2/CheckCircle1';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 

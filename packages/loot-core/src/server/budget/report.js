@@ -1,5 +1,4 @@
 import * as sheet from '../sheet';
-import * as monthUtils from '../../shared/months';
 import { number, sumAmounts } from './util';
 const { resolveName } = require('../spreadsheet/util');
 
