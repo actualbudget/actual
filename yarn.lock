@@ -68,7 +68,7 @@ __metadata:
     "@pmmmwh/react-refresh-webpack-plugin": ^0.4.2
     "@reach/listbox": ^0.11.2
     "@reactions/component": ^2.0.2
-    "@sentry/browser": 6.7.1
+    "@sentry/browser": 6.12.0
     "@svgr/webpack": 2.4.1
     add: ^2.0.6
     babel-eslint: 9.0.0
@@ -85,7 +85,7 @@ __metadata:
     dotenv: 6.0.0
     dotenv-expand: 4.2.0
     eslint: 5.6.0
-    eslint-config-react-app: ^3.0.5
+    eslint-config-react-app: 3.0.5
     eslint-loader: 2.1.1
     eslint-plugin-flowtype: 2.50.1
     eslint-plugin-import: 2.14.0
@@ -119,7 +119,7 @@ __metadata:
     react-autosuggest: 9.3.2
     react-dnd: ^10.0.2
     react-dom: 16.13.1
-    react-modal: ^3.0.0
+    react-modal: 3.4.4
     react-redux: 7.2.1
     react-router: 5.2.0
     react-router-dom: 5.2.0
@@ -6839,7 +6839,7 @@ accounting@jlongster/accounting.js:
   languageName: node
   linkType: hard
 
-"confusing-browser-globals@npm:^1.0.6":
+"confusing-browser-globals@npm:^1.0.5":
   version: 1.0.11
   resolution: "confusing-browser-globals@npm:1.0.11"
   checksum: 3afc635abd37e566477f610e7978b15753f0e84025c25d49236f1f14d480117185516bdd40d2a2167e6bed8048641a9854964b9c067e3dcdfa6b5d0ad3c3a5ef
@@ -9184,11 +9184,11 @@ currency-formatter@jlongster/currency-formatter:
   languageName: node
   linkType: hard
 
-"eslint-config-react-app@npm:^3.0.5":
-  version: 3.0.8
-  resolution: "eslint-config-react-app@npm:3.0.8"
+"eslint-config-react-app@npm:3.0.5":
+  version: 3.0.5
+  resolution: "eslint-config-react-app@npm:3.0.5"
   dependencies:
-    confusing-browser-globals: ^1.0.6
+    confusing-browser-globals: ^1.0.5
   peerDependencies:
     babel-eslint: 9.x
     eslint: 5.x
@@ -9196,7 +9196,7 @@ currency-formatter@jlongster/currency-formatter:
     eslint-plugin-import: 2.x
     eslint-plugin-jsx-a11y: 6.x
     eslint-plugin-react: 7.x
-  checksum: d17e61fc99a12f1466d2ae927ffded3df351fa482ce0fa9c2aef4451278f4e29d8b4b581610f07eb9d3abee3642f71acc7928176918b5f97066e99f0af7af27b
+  checksum: b9bfabe5e7b4cb657abb6c4b2dbbc86525207c078a6d8a3476b1d750faadadaa0386c4b1329b9aad6136ef5168afc87a112ad14240ec76520e72557a4dd9a808
   languageName: node
   linkType: hard
 
@@ -14467,7 +14467,7 @@ jest-snapshot@test:
     memoizee: ^0.4.12
     node-noop: 1.0.0
     patch-package: ^6.1.2
-    pikaday: ^1.8.0
+    pikaday: 1.8.0
     polished: ^1.8.1
     postinstall-postinstall: ^2.0.0
     prettier: ^1.14.2
@@ -15546,10 +15546,10 @@ jest-snapshot@test:
     memoize-one: ^4.0.0
     metro-react-native-babel-preset: ^0.66.2
     nodejs-mobile-gyp: ^0.3.1
-    nodejs-mobile-react-native: ^0.6.3
+    nodejs-mobile-react-native: 0.6.3
     patch-package: ^6.1.2
     react: 16.9.0
-    react-native: ^0.65.1
+    react-native: 0.65.1
     react-native-codegen: ^0.0.7
     react-native-gesture-handler: 1.10.3
     react-native-purchases: ^4.3.1
@@ -16062,9 +16062,9 @@ jest-snapshot@test:
   languageName: node
   linkType: hard
 
-"nodejs-mobile-react-native@npm:^0.6.3":
-  version: 0.6.4
-  resolution: "nodejs-mobile-react-native@npm:0.6.4"
+"nodejs-mobile-react-native@npm:0.6.3":
+  version: 0.6.3
+  resolution: "nodejs-mobile-react-native@npm:0.6.3"
   dependencies:
     mkdirp: ^0.5.1
     ncp: ^2.0.0
@@ -16072,7 +16072,7 @@ jest-snapshot@test:
     xcode: ^2.0.0
   peerDependencies:
     react-native: ">=0.60.0"
-  checksum: 293afa4b6a7f06016aee1995ce8bb6ce234ba0d1b93604b87e52b07f4016be195bd569f6bb5072a0f4996438ded0f0f8ec71951d701e5b65ea25d424a20ee901
+  checksum: 8965d5faff470f351041bb7e8ed02101a854e465ac822450f09c8c6c8ae4253623fc50c968d99c74287a3e6741ffaa02743b1d22680ffd08a5f179e3a8dcef51
   languageName: node
   linkType: hard
 
@@ -17150,10 +17150,10 @@ jest-snapshot@test:
   languageName: node
   linkType: hard
 
-"pikaday@npm:^1.8.0":
-  version: 1.8.2
-  resolution: "pikaday@npm:1.8.2"
-  checksum: 579e9397f4f40cf98879b41dcc958d2a055aac213e9c3a5cee3e81585e72d4c925facbd9942453a873053ca957407d9ed0cbd226c165fd59cab5b780b7db718a
+"pikaday@npm:1.8.0":
+  version: 1.8.0
+  resolution: "pikaday@npm:1.8.0"
+  checksum: 24ccacade714468741bcf71cd6eb5c300b047265ce9cdb7bd73910abf6acc62ffe14eafd9e25e6307cfd897603ab252ba8f6326f5911e45d2a9a3ec7bfd51765
   languageName: node
   linkType: hard
 
@@ -18829,6 +18829,21 @@ jest-snapshot@test:
   languageName: node
   linkType: hard
 
+"react-modal@npm:3.4.4":
+  version: 3.4.4
+  resolution: "react-modal@npm:3.4.4"
+  dependencies:
+    exenv: ^1.2.0
+    prop-types: ^15.5.10
+    react-lifecycles-compat: ^3.0.0
+    warning: ^3.0.0
+  peerDependencies:
+    react: ^0.14.0 || ^15.0.0 || ^16
+    react-dom: ^0.14.0 || ^15.0.0 || ^16
+  checksum: d01d83e7081fcfaea9556bf0aaa460c4ae2f7c371df2ce4e7bac7d4eac884970d57ec89d27c04b4adeb56488801558e0784925c996488747a592ce700f059be9
+  languageName: node
+  linkType: hard
+
 "react-modal@npm:^3.0.0":
   version: 3.14.4
   resolution: "react-modal@npm:3.14.4"
@@ -18969,9 +18984,9 @@ jest-snapshot@test:
   languageName: node
   linkType: hard
 
-"react-native@npm:^0.65.1":
-  version: 0.65.2
-  resolution: "react-native@npm:0.65.2"
+"react-native@npm:0.65.1":
+  version: 0.65.1
+  resolution: "react-native@npm:0.65.1"
   dependencies:
     "@jest/create-cache-key-function": ^27.0.1
     "@react-native-community/cli": ^6.0.0
@@ -19007,7 +19022,7 @@ jest-snapshot@test:
     react: 17.0.2
   bin:
     react-native: cli.js
-  checksum: fdb3240921b541a8708376d6c4a95aa6457ef08c367c4d29006b8dbd1bce2f582402eeb1f68e2a18d15a6c5f9e6194f1ae4d7b7e4e06e8f2027b9ae940ec0d55
+  checksum: 4462aa29ad940dc797b150cb6af9b481e6a013d5201818299e203e36f23bce389d705af25d75eea9e9fb31c0bcafdc349fd23fb6628db0a4cdadde6e1fbd3902
   languageName: node
   linkType: hard
 
