@@ -3,7 +3,6 @@
   "description": "A tool for importing YNAB4 data into Actual",
   "version": "1.0.6",
   "main": "index.js",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/actualbudget/importer-ynab4.git"
