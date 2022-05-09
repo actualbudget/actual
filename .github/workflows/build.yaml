@@ -88,22 +88,33 @@ jobs:
       - uses: dkershner6/switch-case-action@v1
         id: switch-case
         with:
-          default: ""
+          default: 0
           conditionals-with-values: |
-            ${{ matrix.os == 'ubuntu-latest' }} => |
-              packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage
-              packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.AppImage
-            ${{ matrix.os == 'windows-latest' }} => |
-              packages/desktop-electron/dist/Actual Setup ${{ env.BUILD_VERSION }}.exe
-            ${{ matrix.os == 'macos-latest' }} => |
-              packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}.dmg
-              packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.dmg
+            ${{ matrix.os == 'ubuntu-latest' }} => "packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage"
+            ${{ matrix.os == 'windows-latest' }} => "packages/desktop-electron/dist/Actual Setup ${{ env.BUILD_VERSION }}.exe"
+            ${{ matrix.os == 'macos-latest' }} => "packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}.dmg"
+
+      - uses: dkershner6/switch-case-action@v1
+        id: switch-case-2
+        with:
+          default: 0
+          conditionals-with-values: |
+            ${{ matrix.os == 'ubuntu-latest' }} => "packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.AppImage"
+            ${{ matrix.os == 'macos-latest' }} => "packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.dmg"
 
       - name: Upload artifact
+        if: steps.switch-case.outputs.value !== 0
         uses: actions/upload-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-${{ matrix.os }}
           path: ${{ steps.switch-case.outputs.value }}
+
+      - name: Upload artifact arm
+        if: steps.switch-case-2.outputs.value !== 0
+        uses: actions/upload-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-${{ matrix.os }}
+          path: ${{ steps.switch-case-2.outputs.value }}
   release:
     needs: build
     runs-on: ubuntu-latest
@@ -192,6 +203,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/windows/Actual Setup ${{ env.BUILD_VERSION }}.exe
+          asset_path: "artifacts/windows/Actual Setup ${{ env.BUILD_VERSION }}.exe"
           asset_name: Actual Setup ${{ env.BUILD_VERSION }}.exe
           asset_content_type: application/x-executable
