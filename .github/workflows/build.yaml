@@ -103,14 +103,14 @@ jobs:
             ${{ matrix.os == 'macos-latest' }} => "packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.dmg"
 
       - name: Upload artifact
-        if: steps.switch-case.outputs.value !== 0
+        if: steps.switch-case.outputs.value != 0
         uses: actions/upload-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-${{ matrix.os }}
           path: ${{ steps.switch-case.outputs.value }}
 
       - name: Upload artifact arm
-        if: steps.switch-case-2.outputs.value !== 0
+        if: steps.switch-case-2.outputs.value != 0
         uses: actions/upload-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-${{ matrix.os }}
