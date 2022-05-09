@@ -128,31 +128,31 @@ jobs:
           echo "BUILD_VERSION=$version-collective" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
       - name: Download Linux x86_64 Artifacts
-        uses: actions/dowload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-x86_64-ubuntu-latest
           path: artifacts/linux/x86_64
 
       - name: Download Windows x86_64 Artifacts
-        uses: actions/dowload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-x86_64-windows-latest
           path: artifacts/windows/x86_64
 
       - name: Download MacOS x86_64 Artifacts
-        uses: actions/dowload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-x86_64-macos-latest
           path: artifacts/macos/x86_64
 
       - name: Download Linux arm64 Artifacts
-        uses: actions/dowload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-arm64-ubuntu-latest
           path: artifacts/linux/arm64
 
       - name: Download MacOS arm64 Artifacts
-        uses: actions/dowload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-arm64-macos-latest
           path: artifacts/macos/arm64
