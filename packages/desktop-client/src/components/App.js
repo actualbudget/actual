@@ -118,7 +118,7 @@ class App extends React.Component {
               initializing={initializing}
               loadingText={loadingText}
             />
-            <ManagementApp />
+            <ManagementApp getUserData={send('subscribe-get-user')} />
           </React.Fragment>
         )}
 
