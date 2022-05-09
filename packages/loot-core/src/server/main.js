@@ -1405,10 +1405,10 @@ handlers['subscribe-needs-bootstrap'] = async function({ url } = {}) {
   return { bootstrapped: res.data.bootstrapped };
 };
 
-handlers['subscribe-bootstrap'] = async function({ password }) {
+handlers['subscribe-bootstrap'] = async function({ username, password, email }) {
   let res;
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/bootstrap', { password });
+    res = await post(getServer().SIGNUP_SERVER + '/signup', { username, password, email });
   } catch (err) {
     return { error: err.reason || 'network-failure' };
   }
@@ -1447,7 +1447,7 @@ handlers['subscribe-get-user'] = async function() {
         return { offline: true };
       }
 
-      return { offline: false };
+      return { offline: false, user: res.data.user };
     } catch (e) {
       console.log(e);
       return { offline: true };
@@ -1472,8 +1472,9 @@ handlers['subscribe-change-password'] = async function({ password }) {
   return {};
 };
 
-handlers['subscribe-sign-in'] = async function({ password }) {
+handlers['subscribe-sign-in'] = async function({ username, password }) {
   let res = await post(getServer().SIGNUP_SERVER + '/login', {
+    username,
     password
   });
 
