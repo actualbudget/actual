@@ -90,12 +90,12 @@ jobs:
         with:
           default: ""
           conditionals-with-values: |
-            ${{ matrix.os == ubuntu-latest }} => |
+            ${{ matrix.os == 'ubuntu-latest' }} => |
               packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage
               packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.AppImage
-            ${{ matrix.os == windows-latest }} => |
+            ${{ matrix.os == 'windows-latest' }} => |
               packages/desktop-electron/dist/Actual Setup ${{ env.BUILD_VERSION }}.exe
-            ${{ matrix.os == macos-latest }} => |
+            ${{ matrix.os == 'macos-latest' }} => |
               packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}.dmg
               packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.dmg
 
