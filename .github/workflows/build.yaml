@@ -86,3 +86,10 @@ jobs:
         run: |
           set -ex
           ./bin/package-oss --release --version '${{ env.BUILD_VERSION }}'
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-${{ matrix.os }}
+          path: |
+            packages/desktop-electron/dist/
