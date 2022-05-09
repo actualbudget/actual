@@ -1,26 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import * as actions from 'loot-core/src/client/actions';
-import { View, Text, Button } from 'loot-design/src/components/common';
+import { View, Text, Button, Tooltip } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 import { loggedIn } from 'loot-core/src/client/actions/user';
-import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-import { useBootstrapped, Title, Input, Link, ExternalLink } from './common';
+import { RegisterForm } from './RegisterForm';
+import { Title, Input, Link, ExternalLink } from './common';
 
-export default function Bootstrap() {
+export default function Register() {
   let dispatch = useDispatch();
   let history = useHistory();
   let [error, setError] = useState(null);
-
-  let { checked } = useBootstrapped();
 
   function getErrorMessage(error) {
     switch (error) {
       case 'invalid-password':
         return 'Password cannot be empty';
+      case 'invalid-username':
+        return 'Username is already given';
       case 'password-match':
         return 'Passwords do not match';
       case 'network-failure':
@@ -30,9 +28,9 @@ export default function Bootstrap() {
     }
   }
 
-  async function onSetPassword(password) {
+  async function onRegister(username, password, email) {
     setError(null);
-    let { error } = await send('subscribe-bootstrap', { password });
+    let { error } = await send('subscribe-bootstrap', { username, password, email });
 
     if (error) {
       setError(error);
@@ -41,18 +39,14 @@ export default function Bootstrap() {
     }
   }
 
-  async function onDemo() {
-    await dispatch(createBudget({ demoMode: true }));
-  }
-
-  if (!checked) {
-    return null;
+  async function onLogin() {
+    history.push('/login');
   }
 
   return (
     <>
       <View style={{ width: 450, marginTop: -30 }}>
-        <Title text="Bootstrap this Actual instance" />
+        <Title text="Register" />
         <Text
           style={{
             fontSize: 16,
@@ -60,9 +54,8 @@ export default function Bootstrap() {
             lineHeight: 1.4
           }}
         >
-          Set a password for this server instance
+          Thanks for your interest in actualcollective! We work hard to provide you with a <b>free</b> hosted alternative.
         </Text>
-
         {error && (
           <Text
             style={{
@@ -76,19 +69,25 @@ export default function Bootstrap() {
           </Text>
         )}
 
-        <ConfirmPasswordForm
-          buttons={
-            <Button
-              bare
-              style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
-              onClick={onDemo}
-            >
-              Try Demo
-            </Button>
-          }
-          onSetPassword={onSetPassword}
+        <RegisterForm
+          onRegister={onRegister}
           onError={setError}
         />
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 15
+          }}
+        >
+          <Button
+            bare
+            style={{ fontSize: 15, color: colors.b4, marginLeft: 10 }}
+            onClick={onLogin}
+          >
+            Login instead &rarr;
+          </Button>
+        </View>
       </View>
     </>
   );
