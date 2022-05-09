@@ -3,11 +3,8 @@ name: "Build"
 on:
   workflow_dispatch:
   push:
-    branches:
-      - master
-  schedule:
-    # Random time each week.
-    - cron:  '48 9 * * 2'
+    tags:
+      - *
 
 jobs:
   build:
@@ -27,10 +24,11 @@ jobs:
         shell: pwsh
         run: |
           $hash = (git rev-parse --short HEAD)
+          $version = (git describe --tags --abbrev=0)
           $date = (Get-Date).ToString("yyyyMMdd")
           echo "ACTUAL_HASH=$hash" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
           echo "BUILD_DATE=$date" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-          echo "BUILD_VERSION=0.0.1-$hash-$date" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          echo "BUILD_VERSION=$version-collective" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
       # - name: Cache Node Modules
       #   id: cache
@@ -87,9 +85,112 @@ jobs:
           set -ex
           ./bin/package-oss --release --version '${{ env.BUILD_VERSION }}'
 
+      - uses: dkershner6/switch-case-action@v1
+        id: switch-case
+        with:
+          default: ""
+          conditionals-with-values: |
+            ${{ matrix.os == ubuntu-latest }} => |
+              packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage
+              packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.AppImage
+            ${{ matrix.os == windows-latest }} => |
+              packages/desktop-electron/dist/Actual Setup ${{ env.BUILD_VERSION }}.exe
+            ${{ matrix.os == macos-latest }} => |
+              packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}.dmg
+              packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.dmg
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: Actual-${{ env.BUILD_VERSION }}-${{ matrix.os }}
-          path: |
-            packages/desktop-electron/dist/
+          path: ${{ steps.switch-case.outputs.value }}
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Actual Hash
+        shell: pwsh
+        run: |
+          $version = (git describe --tags --abbrev=0)
+          echo "BUILD_VERSION=$version-collective" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+      - name: Download Linux Artifacts
+        uses: actions/dowload-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-ubuntu-latest
+          path: artifacts/linux
+
+      - name: Download Windows Artifacts
+        uses: actions/dowload-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-windows-latest
+          path: artifacts/windows
+
+      - name: Download MacOS Artifacts
+        uses: actions/dowload-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-macos-latest
+          path: artifacts/macos
+
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ env.BUILD_VERSION }}
+          tag_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: upload linux x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/linux/Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage
+          asset_name: Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage
+          asset_content_type: application/x-executable
+
+      - name: upload linux arm64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/linux/Actual-${{ env.BUILD_VERSION }}-arm64.AppImage
+          asset_name: Actual-${{ env.BUILD_VERSION }}-arm64.AppImage
+          asset_content_type: application/x-executable
+
+      - name: upload macos x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/macos/Actual-${{ env.BUILD_VERSION }}.dmg
+          asset_name: Actual-${{ env.BUILD_VERSION }}.dmg
+          asset_content_type: application/x-executable
+
+      - name: upload macos arm64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/macos/Actual-${{ env.BUILD_VERSION }}-arm64.dmg
+          asset_name: Actual-${{ env.BUILD_VERSION }}-arm64.dmg
+          asset_content_type: application/x-executable
+
+      - name: upload windows x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/windows/Actual Setup ${{ env.BUILD_VERSION }}.exe
+          asset_name: Actual Setup ${{ env.BUILD_VERSION }}.exe
+          asset_content_type: application/x-executable
