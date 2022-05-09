@@ -105,6 +105,7 @@ jobs:
           name: Actual-${{ env.BUILD_VERSION }}-${{ matrix.os }}
           path: ${{ steps.switch-case.outputs.value }}
   release:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
