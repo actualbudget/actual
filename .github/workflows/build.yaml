@@ -1,0 +1,220 @@
+# creds to https://github.com/Silvenga
+name: "Build"
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 12.13
+      - name: Setup Actual Hash
+        shell: pwsh
+        run: |
+          $hash = (git rev-parse --short HEAD)
+          $version = (git describe --tags --abbrev=0)
+          $date = (Get-Date).ToString("yyyyMMdd")
+          echo "ACTUAL_HASH=$hash" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          echo "BUILD_DATE=$date" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          echo "BUILD_VERSION=$version-collective" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+      # - name: Cache Node Modules
+      #   id: cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: |
+      #        ./vendor/node_modules
+      #        ./vendor/packages/desktop-electron/node_modules
+      #        ./vendor/packages/loot-core/node_modules
+      #        ./vendor/mobile/node_modules
+      #        ./vendor/import-ynab4/node_modules
+      #        ./vendor/api/node_modules
+      #        ./vendor/node-libofx/node_modules
+      #        ./vendor/loot-design/node_modules
+      #        ./vendor/desktop-client/node_modules
+      #     key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}-yarn-lock
+
+      - name: Restore Actual
+        shell: bash
+        run: |
+          # TODO Double check if this unset is needed. Was used to bypass some hard fails by the patcher.
+          unset CI
+          yarn install --pure-lockfile
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Set Actual Version
+        shell: bash
+        run: |
+          set -ex
+          files=(
+            "./"
+            "./packages/mobile/"
+            "./packages/mobile/nodejs-assets/nodejs-project/"
+            "./packages/desktop-client/"
+            "./packages/node-libofx/"
+            "./packages/import-ynab4/"
+            "./packages/loot-core/"
+            "./packages/import-ynab5/"
+            "./packages/loot-design/"
+            "./packages/desktop-electron/"
+            "./packages/api/"
+          )
+          for i in "${files[@]}";
+          do
+            (
+              cd $i
+              npm version '${{ env.BUILD_VERSION }}' --no-commit-hooks --no-git-tag-version
+            )
+          done
+
+      - name: Build Actual
+        shell: bash
+        run: |
+          set -ex
+          ./bin/package-oss --release --version '${{ env.BUILD_VERSION }}'
+
+      - uses: dkershner6/switch-case-action@v1
+        id: switch-case
+        with:
+          default: 0
+          conditionals-with-values: |
+            ${{ matrix.os == 'ubuntu-latest' }} => packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage
+            ${{ matrix.os == 'windows-latest' }} => packages/desktop-electron/dist/Actual Setup ${{ env.BUILD_VERSION }}.exe
+            ${{ matrix.os == 'macos-latest' }} => packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}.dmg
+
+      - uses: dkershner6/switch-case-action@v1
+        id: switch-case-2
+        with:
+          default: 0
+          conditionals-with-values: |
+            ${{ matrix.os == 'ubuntu-latest' }} => packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.AppImage
+            ${{ matrix.os == 'macos-latest' }} => packages/desktop-electron/dist/Actual-${{ env.BUILD_VERSION }}-arm64.dmg
+
+      - name: Upload artifact
+        if: steps.switch-case.outputs.value != 0
+        uses: actions/upload-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-x86_64-${{ matrix.os }}
+          path: ${{ steps.switch-case.outputs.value }}
+
+      - name: Upload artifact arm
+        if: steps.switch-case-2.outputs.value != 0
+        uses: actions/upload-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-arm64-${{ matrix.os }}
+          path: ${{ steps.switch-case-2.outputs.value }}
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Actual Hash
+        shell: pwsh
+        run: |
+          $version = (git describe --tags --abbrev=0)
+          echo "BUILD_VERSION=$version-collective" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+      - name: Download Linux x86_64 Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-x86_64-ubuntu-latest
+          path: artifacts/linux/x86_64
+
+      - name: Download Windows x86_64 Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-x86_64-windows-latest
+          path: artifacts/windows/x86_64
+
+      - name: Download MacOS x86_64 Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-x86_64-macos-latest
+          path: artifacts/macos/x86_64
+
+      - name: Download Linux arm64 Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-arm64-ubuntu-latest
+          path: artifacts/linux/arm64
+
+      - name: Download MacOS arm64 Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: Actual-${{ env.BUILD_VERSION }}-arm64-macos-latest
+          path: artifacts/macos/arm64
+
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ env.BUILD_VERSION }}
+          tag_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: upload linux x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/linux/x86_64/Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage
+          asset_name: Actual-${{ env.BUILD_VERSION }}-x86_64.AppImage
+          asset_content_type: application/x-executable
+
+      - name: upload linux arm64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/linux/arm64/Actual-${{ env.BUILD_VERSION }}-arm64.AppImage
+          asset_name: Actual-${{ env.BUILD_VERSION }}-arm64.AppImage
+          asset_content_type: application/x-executable
+
+      - name: upload macos x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/macos/x86_64/Actual-${{ env.BUILD_VERSION }}.dmg
+          asset_name: Actual-${{ env.BUILD_VERSION }}.dmg
+          asset_content_type: application/x-executable
+
+      - name: upload macos arm64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/macos/arm64/Actual-${{ env.BUILD_VERSION }}-arm64.dmg
+          asset_name: Actual-${{ env.BUILD_VERSION }}-arm64.dmg
+          asset_content_type: application/x-executable
+
+      - name: upload windows x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/windows/x86_64/Actual Setup ${{ env.BUILD_VERSION }}.exe
+          asset_name: Actual Setup ${{ env.BUILD_VERSION }}.exe
+          asset_content_type: application/x-executable

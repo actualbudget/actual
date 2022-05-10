@@ -12,16 +12,15 @@ import { colors, styles } from 'loot-design/src/style';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { useBootstrapped, Title, Input, Link, ExternalLink } from './common';
+import { Title, Input, Link, ExternalLink } from './common';
 
 export default function Login() {
   let dispatch = useDispatch();
   let history = useHistory();
   let [password, setPassword] = useState('');
+  let [username, setUsername] = useState('');
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState(null);
-
-  let { checked } = useBootstrapped();
 
   function getErrorMessage(error) {
     switch (error) {
@@ -42,7 +41,7 @@ export default function Login() {
 
     setError(null);
     setLoading(true);
-    let { error } = await send('subscribe-sign-in', { password });
+    let { error } = await send('subscribe-sign-in', { username, password });
     setLoading(false);
 
     if (error) {
@@ -52,18 +51,14 @@ export default function Login() {
     }
   }
 
-  async function onDemo() {
-    await dispatch(createBudget({ demoMode: true }));
-  }
-
-  if (!checked) {
-    return null;
+  async function onRegister() {
+    history.push('/register');
   }
 
   return (
     <>
       <View style={{ width: 450, marginTop: -30 }}>
-        <Title text="Sign in to this Actual instance" />
+        <Title text="Sign in" />
         <Text
           style={{
             fontSize: 16,
@@ -71,8 +66,7 @@ export default function Login() {
             lineHeight: 1.4
           }}
         >
-          If you lost your password, you likely still have access to your server
-          to manually reset it.
+
         </Text>
 
         {error && (
@@ -94,6 +88,12 @@ export default function Login() {
         >
           <Input
             autoFocus={true}
+            placeholder="Username"
+            type="text"
+            onChange={e => setUsername(e.target.value)}
+            style={{ flex: 1, marginRight: 10 }}
+          />
+          <Input
             placeholder="Password"
             type="password"
             onChange={e => setPassword(e.target.value)}
@@ -113,9 +113,9 @@ export default function Login() {
           <Button
             bare
             style={{ fontSize: 15, color: colors.b4, marginLeft: 10 }}
-            onClick={onDemo}
+            onClick={onRegister}
           >
-            Try Demo &rarr;
+            Register instead &rarr;
           </Button>
         </View>
       </View>

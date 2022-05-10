@@ -14,6 +14,8 @@ export function getUploadError({ reason, meta }) {
       return 'Something went wrong while resetting your file. Please try again.';
     case 'file-has-new-key':
       return 'Unable to encrypt your data because you are missing the key. Create the latest key in the next step.';
+    case 'account-mismatch':
+      return 'Your file is already linked to an account, please log into the right account to re-activate sync.'
     case 'network':
       return 'Uploading the file failed. Check your network connection.';
     case 'beta-version':

@@ -362,7 +362,7 @@ function Titlebar({
         localPrefs={localPrefs}
         onSync={sync}
       />
-      <LoggedInUser style={{ marginLeft: 10 }} />
+      <LoggedInUser style={{ marginLeft: 10 }} signOut={() => history.push('/login')}/>
     </View>
   );
 }

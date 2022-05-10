@@ -1,0 +1,107 @@
+#!/bin/bash -e
+
+ROOT=`dirname $0`
+VERSION=""
+BETA=""
+RELEASE=""
+RELEASE_NOTES=""
+
+cd "$ROOT/.."
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+      --version)
+      VERSION="$2"
+      shift
+      shift
+      ;;
+      --beta)
+      RELEASE="beta"
+      shift
+      ;;
+      --release)
+      RELEASE="production"
+      shift
+      ;;
+      *)
+      POSITIONAL+=("$1")
+      shift
+      ;;
+  esac
+done
+set -- "${POSITIONAL[@]}"
+
+if [ -z "$VERSION" ] && [ -n "$RELEASE" ]; then
+    echo "Version is required if making a release"
+    exit 1
+fi
+
+if [ -n "$RELEASE" ]; then
+
+    if [ "$RELEASE" == "production" ]; then
+        RELEASE_NOTES=`git tag -l --format="%(contents:subject)" "$VERSION"`
+    fi
+
+    PACKAGE_VERSION=`node -p -e "require('./packages/desktop-electron/package.json').version"`
+    if [ "$VERSION" != "$PACKAGE_VERSION" ]; then
+        echo "Version in desktop-electron/package.json does not match given version! ($PACKAGE_VERSION)"
+        exit 4
+    fi
+fi
+
+# We only need to run linting once (and this doesn't seem to work on
+# Windows for some reason)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    yarn lint
+fi
+
+./node_modules/.bin/patch-package
+
+(
+  cd packages/loot-design;
+  ../../node_modules/.bin/patch-package
+)
+
+(
+  cd packages/mobile;
+  ../../node_modules/.bin/patch-package
+)
+
+(
+  cd packages/loot-core;
+  NODE_ENV=production yarn build:node
+)
+
+(
+  cd packages/desktop-client;
+  yarn build
+)
+
+rm -fr packages/desktop-electron/client-build
+cp -r packages/desktop-client/build packages/desktop-electron/client-build
+# Remove the embedded backend for the browser version. Will improve
+# this process
+rm -fr packages/desktop-electron/client-build/data
+rm -fr packages/desktop-electron/client-build/*kcab.*
+rm -fr packages/desktop-electron/client-build/*.wasm
+rm -fr packages/desktop-electron/client-build/*.map
+
+(
+    cd packages/desktop-electron;
+    rm -rf dist;
+
+    export npm_config_better_sqlite3_binary_host="https://static.actualbudget.com/prebuild/better-sqlite3"
+
+    if [ "$RELEASE" == "production" ]; then
+        SKIP_NOTARIZATION=true ./node_modules/.bin/electron-builder --publish never --arm64 --x64
+
+        echo "\nCreated release $VERSION with release notes \"$RELEASE_NOTES\""
+    elif [ "$RELEASE" == "beta" ]; then
+        SKIP_NOTARIZATION=true ./node_modules/.bin/electron-builder --publish never --arm64 --x64
+    else
+        SKIP_NOTARIZATION=true ./node_modules/.bin/electron-builder --publish never --x64
+    fi
+)
