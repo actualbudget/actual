@@ -17,7 +17,7 @@ import * as prefs from './prefs';
 import * as monthUtils from '../shared/months';
 import * as cloudStorage from './cloud-storage';
 import { setSyncingMode, batchMessages } from './sync';
-import { getClock } from './timestamp';
+import { getClock } from './crdt';
 import { runMutator } from './mutators';
 import { integerToAmount } from '../shared/util';
 import { runQuery as aqlQuery } from './aql/schema/run-query';
