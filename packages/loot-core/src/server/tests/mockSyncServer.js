@@ -1,5 +1,5 @@
-import * as merkle from '../merkle';
-import Timestamp, { makeClock } from '../timestamp';
+import dateFns from 'date-fns';
+import { makeClock, Timestamp, merkle } from '../crdt';
 const defaultMockData = require('./mockData').basic;
 const SyncPb = require('../sync/proto/sync_pb');
 
