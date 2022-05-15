@@ -8,7 +8,9 @@ let { getAccountDb } = require('./account-db');
 let app = express();
 app.use(errorMiddleware);
 
-function init() {}
+function init() {
+  // eslint-disable-previous-line @typescript-eslint/no-empty-function
+}
 
 function hashPassword(password) {
   return bcrypt.hashSync(password, 12);
