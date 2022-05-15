@@ -1,4 +1,4 @@
-export default async function runMigration(db, uuid) {
+export default async function runMigration(db) {
   function getValue(node) {
     return node.expr != null ? node.expr : node.cachedValue;
   }

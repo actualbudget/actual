@@ -1,5 +1,4 @@
 let { Buffer } = require('buffer');
-let fs = require('fs/promises');
 let { join } = require('path');
 let express = require('express');
 let uuid = require('uuid');
@@ -9,7 +8,6 @@ let errorMiddleware = require('./util/error-middleware');
 let config = require('./load-config');
 let { getAccountDb } = require('./account-db');
 
-let simpleSync = require('./sync-simple');
 let fullSync = require('./sync-full');
 
 let actual = require('@actual-app/api');

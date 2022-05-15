@@ -6,6 +6,6 @@ function handleError(func) {
       res.send({ status: 'error', reason: 'internal-error' });
     });
   };
-};
+}
 
 module.exports = { handleError }
