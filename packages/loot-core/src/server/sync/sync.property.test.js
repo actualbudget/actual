@@ -2,7 +2,7 @@ import * as prefs from '../prefs';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import * as sync from './index';
-import Timestamp, { getClock } from '../timestamp';
+import { getClock, Timestamp } from '../crdt';
 import * as merkle from '../merkle';
 import * as encoder from './encoder';
 const jsc = require('jsverify');

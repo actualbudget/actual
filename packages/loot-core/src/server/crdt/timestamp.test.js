@@ -1,4 +1,4 @@
-import Timestamp from './timestamp';
+import { Timestamp } from './timestamp';
 
 describe('Timestamp', function() {
   let now = 0;

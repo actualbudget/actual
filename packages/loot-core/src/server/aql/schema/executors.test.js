@@ -2,7 +2,7 @@ import fc from 'fast-check';
 import * as db from '../../db';
 import query from '../../../shared/query';
 import { batchMessages, setSyncingMode } from '../../sync/index';
-import { setClock } from '../../timestamp';
+import { setClock } from '../../crdt';
 import { groupById } from '../../../shared/util';
 import arbs from '../../../mocks/arbitrary-schema';
 import { runQuery } from './run-query';
