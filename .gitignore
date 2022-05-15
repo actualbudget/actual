@@ -19,4 +19,14 @@ bundle.mobile.js.map
 .sentryclirc
 export-2020-01-10.csv
 
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 **/*.log
