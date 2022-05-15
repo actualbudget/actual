@@ -7,7 +7,6 @@ import {
   Modal,
   Button,
   ButtonWithLoading,
-  Link,
   P
 } from '../common';
 import { styles, colors } from '../../style';
