@@ -278,7 +278,7 @@ module.exports = function(webpackEnv) {
         // guards against forgotten dependencies and such.
         PnpWebpackPlugin,
         // Prevents users from importing files from outside of src/ (or node_modules/).
-        // This often causes confusion because we only process files within src/ with babel.
+        // This often causes confusion because we only process files within src/ with SWC.
         // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
         // please link the files into your node_modules/ and let module-resolution kick in.
         // Make sure your source files are compiled, as they will not be processed in any way.
@@ -310,50 +310,16 @@ module.exports = function(webpackEnv) {
           // match the requirements. When no loader matches it will fall
           // back to the "file" loader at the end of the loader list.
           oneOf: [
-            // Process application JS with Babel.
-            // The preset includes JSX, Flow, TypeScript, and some ESnext features.
+            // Process application JS with SWC.
             {
               test: /\.(js|mjs|jsx|ts|tsx)$/,
               exclude: /node_modules/,
               loader: require.resolve('swc-loader'),
-              options: {
-              // TODO: check if we need to set any swc equivalents here
-              //   customize: require.resolve(
-              //     'babel-preset-jwl-app/webpack-overrides'
-              //   ),
-              //   babelrc: false,
-              //   configFile: false,
-              //   presets: [require.resolve('babel-preset-jwl-app')],
-
-              //   // This is a feature of `babel-loader` for webpack (not Babel itself).
-              //   // It enables caching results in ./node_modules/.cache/babel-loader/
-              //   // directory for faster rebuilds.
-              //   cacheDirectory: true,
-              //   cacheCompression: isEnvProduction,
-              //   compact: isEnvProduction
-              }
             },
-            // Process any JS outside of the app with Babel.
-            // Unlike the application JS, we only compile the standard ES features.
+            // Process any JS outside of the app with SWC.
             {
               test: /\.(js|mjs)$/,
-              exclude: /@babel(?:\/|\\{1,2})runtime/,
               loader: require.resolve('swc-loader'),
-              options: {
-              // TODO: check if we need to set any swc equivalents here
-              //   babelrc: false,
-              //   configFile: false,
-              //   compact: false,
-              //   presets: [require.resolve('babel-preset-jwl-app')],
-              //   cacheDirectory: true,
-              //   cacheCompression: isEnvProduction,
-
-              //   // If an error happens in a package, it's possible to be
-              //   // because it was compiled. Thus, we don't want the browser
-              //   // debugger to show the original code. Instead, the code
-              //   // being evaluated would be much more helpful.
-              //   sourceMaps: false
-              }
             },
             // "postcss" loader applies autoprefixer to our CSS.
             // "css" loader resolves paths in CSS and adds assets as dependencies.
