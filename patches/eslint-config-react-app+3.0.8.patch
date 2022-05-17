@@ -1,8 +1,8 @@
 diff --git a/node_modules/eslint-config-react-app/index.js b/node_modules/eslint-config-react-app/index.js
-index ca232b8..2d88066 100644
+index f83ed06..b0857ce 100644
 --- a/node_modules/eslint-config-react-app/index.js
 +++ b/node_modules/eslint-config-react-app/index.js
-@@ -126,13 +126,6 @@ module.exports = {
+@@ -132,13 +132,6 @@ module.exports = {
        },
      ],
      'no-unused-labels': 'warn',

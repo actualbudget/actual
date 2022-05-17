@@ -1,5 +1,5 @@
 diff --git a/node_modules/hotkeys-js/dist/hotkeys.common.js b/node_modules/hotkeys-js/dist/hotkeys.common.js
-index bc18534..34c0d7d 100644
+index ed95889..faab803 100644
 --- a/node_modules/hotkeys-js/dist/hotkeys.common.js
 +++ b/node_modules/hotkeys-js/dist/hotkeys.common.js
 @@ -22,7 +22,6 @@ function addEvent(object, event, method) {
@@ -19,7 +19,7 @@ index bc18534..34c0d7d 100644
    if (typeof key !== 'string') key = '';
    key = key.replace(/\s/g, ''); // 匹配任何空白字符,包括空格、制表符、换页符等等
 diff --git a/node_modules/hotkeys-js/dist/hotkeys.esm.js b/node_modules/hotkeys-js/dist/hotkeys.esm.js
-index 90295a5..f998483 100644
+index 69833cf..fb8024e 100644
 --- a/node_modules/hotkeys-js/dist/hotkeys.esm.js
 +++ b/node_modules/hotkeys-js/dist/hotkeys.esm.js
 @@ -9,6 +9,8 @@
@@ -54,7 +54,7 @@ index 90295a5..f998483 100644
    }
  
    return mods;
-@@ -145,6 +155,9 @@ var elementHasBindEvent = []; // 已绑定事件的节点记录
+@@ -161,6 +171,9 @@ var elementHasBindEvent = []; // 已绑定事件的节点记录
  // 返回键码
  
  var code = function code(x) {
@@ -64,7 +64,7 @@ index 90295a5..f998483 100644
    return _keyMap[x.toLowerCase()] || _modifier[x.toLowerCase()] || x.toUpperCase().charCodeAt(0);
  }; // 设置获取当前范围（默认为'所有'）
  
-@@ -319,7 +332,6 @@ function eventHandler(event, handler, scope) {
+@@ -335,7 +348,6 @@ function eventHandler(event, handler, scope) {
        }
      } // 调用处理程序，如果是修饰键不做处理
  
@@ -73,7 +73,7 @@ index 90295a5..f998483 100644
        if (handler.method(event, handler) === false) {
          if (event.preventDefault) event.preventDefault();else event.returnValue = false;
 diff --git a/node_modules/hotkeys-js/dist/hotkeys.js b/node_modules/hotkeys-js/dist/hotkeys.js
-index 15480e8..d203a42 100644
+index d3d974c..cdb4046 100644
 --- a/node_modules/hotkeys-js/dist/hotkeys.js
 +++ b/node_modules/hotkeys-js/dist/hotkeys.js
 @@ -26,7 +26,6 @@
