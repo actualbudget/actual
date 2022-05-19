@@ -1,0 +1,4 @@
+Transaction Date,Transaction Type,Sort Code,Account Number,Transaction Description,Debit Amount,Credit Amount,Balance
+09/05/2022,DD,'11-44-99,12345678,THING,9.07,,243.59
+09/05/2022,DEB,'11-44-99,12345678,THING2,1000.00,,252.66
+06/05/2022,TFR,'11-44-99,12345678,THING3,,3012.12,7252.66

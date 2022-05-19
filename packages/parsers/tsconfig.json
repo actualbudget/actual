@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "types": ["node", "jest"],
+    "declaration": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+  },
+  "include": ["./src"]
+}

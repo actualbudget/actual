@@ -41,6 +41,7 @@
   "devDependencies": {
     "@actual-app/api": "*",
     "@actual-app/import-ynab4": "*",
+    "@actual-app/parsers": "*",
     "@babel/core": "~7.14.3",
     "adm-zip": "cthackers/adm-zip#ff17ae85",
     "babel-jest": "25.2.6",
