@@ -23,7 +23,7 @@ import { groupById, cleanUUID } from '../shared/util';
 import { getClock } from './timestamp';
 import { runMutator } from './mutators';
 import { integerToAmount } from '../shared/util';
-import { runQuery as aqlQuery } from './aql/schema/run-query';
+import { runQuery as aqlQuery } from './aql';
 import q from '../shared/query';
 
 const { resolveName } = require('./spreadsheet/util');

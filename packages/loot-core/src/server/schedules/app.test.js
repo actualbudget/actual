@@ -1,5 +1,5 @@
 import * as db from '../db';
-import { runQuery as aqlQuery } from '../aql/schema/run-query';
+import { runQuery as aqlQuery } from '../aql';
 import q from '../../shared/query';
 import { loadRules, updateRule } from '../accounts/transaction-rules';
 import { loadMappings } from '../db/mappings';

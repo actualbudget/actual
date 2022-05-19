@@ -4,9 +4,7 @@ import { createApp } from '../app';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import { toDateRepr } from '../models';
-import { runQuery as aqlQuery } from '../aql/schema/run-query';
-import { compileQuery } from '../aql/compiler';
-import { schema, schemaConfig } from '../aql/schema';
+import { runQuery as aqlQuery } from '../aql';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import {
