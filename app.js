@@ -29,7 +29,16 @@ app.get('/mode', (req, res) => {
 app.use(actuator()); // Provides /health, /metrics, /info
 
 // The web frontend
-app.use(express.static(__dirname + '/node_modules/@actual-app/web/build'));
+app.use((req, res, next) => {
+  res.set('Cross-Origin-Opener-Policy', 'same-origin');
+  res.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  next();
+});
+app.use(
+  express.static(__dirname + '/node_modules/@actual-app/web/build', {
+    index: false
+  })
+);
 app.get('/*', (req, res) => {
   res.sendFile(__dirname + '/node_modules/@actual-app/web/build/index.html');
 });
