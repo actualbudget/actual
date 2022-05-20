@@ -377,7 +377,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
 export async function doTransfer(categoryIds, transferId) {
   let { createdMonths: months } = sheet.get().meta();
 
-  [...months].map(month => {
+  [...months].forEach(month => {
     let totalValue = categoryIds
       .map(id => {
         return budgetActions.getBudget({ month, category: id });
