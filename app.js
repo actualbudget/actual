@@ -10,7 +10,7 @@ const syncApp = require('./app-sync');
 
 const app = express();
 
-process.on('unhandledRejection', reason => {
+process.on('unhandledRejection', (reason) => {
   console.log('Rejection:', reason);
 });
 
@@ -59,7 +59,7 @@ async function run() {
   app.listen(config.port, config.hostname);
 }
 
-run().catch(err => {
+run().catch((err) => {
   console.log('Error starting app:', err);
   process.exit(1);
 });

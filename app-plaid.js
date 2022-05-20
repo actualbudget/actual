@@ -190,7 +190,7 @@ app.post(
         'Content-Type': 'application/json',
         'User-Agent': 'Actual Budget'
       }
-    }).then(res => res.json());
+    }).then((res) => res.json());
 
     await req.runQuery(
       'INSERT INTO access_tokens (item_id, user_id, access_token) VALUES ($1, $2, $3)',
@@ -233,7 +233,7 @@ app.post(
         'Content-Type': 'application/json',
         'User-Agent': 'Actual Budget'
       }
-    }).then(res => res.json());
+    }).then((res) => res.json());
 
     if (resData.removed !== true) {
       console.log('[Error] Item not removed: ' + access_token.slice(0, 3));
@@ -286,7 +286,7 @@ app.post(
         'Content-Type': 'application/json',
         'User-Agent': 'Actual Budget'
       }
-    }).then(res => res.json());
+    }).then((res) => res.json());
 
     res.send(
       JSON.stringify({
@@ -342,7 +342,7 @@ app.post(
         'Content-Type': 'application/json',
         'User-Agent': 'Actual Budget'
       }
-    }).then(res => res.json());
+    }).then((res) => res.json());
 
     res.send(
       JSON.stringify({

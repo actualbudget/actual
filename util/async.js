@@ -17,11 +17,11 @@ function sequential(fn) {
     sequenceState.running = fn(...args);
 
     sequenceState.running.then(
-      val => {
+      (val) => {
         pump();
         resolve(val);
       },
-      err => {
+      (err) => {
         pump();
         reject(err);
       }
