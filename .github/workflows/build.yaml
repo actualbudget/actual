@@ -1,0 +1,98 @@
+name: "Build"
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  schedule:
+    # Random time each week to keep artifacts fresh.
+    - cron:  '48 9 * * 2'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 14
+    - name: Setup Actual Hash
+      shell: pwsh
+      run: |
+        $hash = (git rev-parse --short HEAD)
+        $date = (Get-Date).ToString("yyyyMMdd")
+        echo "ACTUAL_HASH=$hash" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        echo "BUILD_DATE=$date" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        echo "BUILD_VERSION=0.0.1-$hash-$date" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+    # - name: Cache Node Modules
+    #   id: cache
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: |
+    #        ./vendor/node_modules
+    #        ./vendor/packages/desktop-electron/node_modules
+    #        ./vendor/packages/loot-core/node_modules
+    #        ./vendor/mobile/node_modules
+    #        ./vendor/import-ynab4/node_modules
+    #        ./vendor/api/node_modules
+    #        ./vendor/node-libofx/node_modules
+    #        ./vendor/loot-design/node_modules
+    #        ./vendor/desktop-client/node_modules
+    #     key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}-yarn-lock
+
+    - name: Restore Actual
+      shell: bash
+      run: |
+        # TODO Double check if this unset is needed. Was used to bypass some hard fails by the patcher.
+        unset CI
+        yarn install --pure-lockfile
+      if: steps.cache.outputs.cache-hit != 'true'
+
+    - name: Set Actual Version
+      shell: bash
+      run: |
+        set -ex
+        files=(
+          "./"
+          "./packages/mobile/"
+          "./packages/mobile/nodejs-assets/nodejs-project/"
+          "./packages/desktop-client/"
+          "./packages/node-libofx/"
+          "./packages/import-ynab4/"
+          "./packages/loot-core/"
+          "./packages/import-ynab5/"
+          "./packages/loot-design/"
+          "./packages/desktop-electron/"
+          "./packages/api/"
+        )
+        for i in "${files[@]}";
+        do
+          (
+            cd $i
+            npm version '${{ env.BUILD_VERSION }}' --no-commit-hooks --no-git-tag-version
+          )
+        done
+
+    - name: Build Actual
+      shell: bash
+      run: |
+        set -ex
+        ./bin/package --release --version '${{ env.BUILD_VERSION }}'
+
+    - name: Publish (Artifacts)
+      uses: actions/upload-artifact@v3
+      with:
+        name: electron-${{ matrix.os }}
+        path: |
+          ./packages/desktop-electron/dist/*.AppImage
+          ./packages/desktop-electron/dist/*.exe
+          ./packages/desktop-electron/dist/*.exe.blockmap
+          ./packages/desktop-electron/dist/*.dmg
+          ./packages/desktop-electron/dist/*.dmg.blockmap
