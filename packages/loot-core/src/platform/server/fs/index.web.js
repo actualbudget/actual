@@ -17,11 +17,15 @@ function pathToId(filepath) {
 
 function _exists(filepath) {
   try {
+    FS.readlink(filepath);
+    return true;
+  } catch (e) {}
+
+  try {
     FS.stat(filepath);
-  } catch (e) {
-    return false;
-  }
-  return true;
+    return true;
+  } catch (e) {}
+  return false;
 }
 
 function _mkdirRecursively(dir) {

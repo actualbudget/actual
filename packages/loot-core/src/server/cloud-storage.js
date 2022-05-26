@@ -154,7 +154,60 @@ export async function exportBuffer() {
     zipped.addFile('metadata.json', metaContent);
   });
 
-  return zipped.toBuffer();
+  return Buffer.from(zipped.toBuffer());
+}
+
+export async function importBuffer(fileData, buffer) {
+  let zipped = new AdmZip(buffer);
+  let entries = zipped.getEntries();
+  let dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
+  let metaEntry = entries.find(e => e.entryName.includes('metadata.json'));
+
+  if (!dbEntry || !metaEntry) {
+    throw FileDownloadError('invalid-zip-file');
+  }
+
+  let dbContent = zipped.readFile(dbEntry);
+  let metaContent = zipped.readFile(metaEntry);
+
+  let meta;
+  try {
+    meta = JSON.parse(metaContent.toString('utf8'));
+  } catch (err) {
+    throw FileDownloadError('invalid-meta-file');
+  }
+
+  // Update the metadata. The stored file on the server might be
+  // out-of-date with a few keys
+  meta = {
+    ...meta,
+    cloudFileId: fileData.fileId,
+    groupId: fileData.groupId,
+    lastUploaded: monthUtils.currentDay(),
+    encryptKeyId: fileData.encryptMeta ? fileData.encryptMeta.keyId : null
+  };
+
+  let budgetDir = fs.getBudgetDir(meta.id);
+
+  if (await fs.exists(budgetDir)) {
+    // Don't remove the directory so that backups are retained
+    let dbFile = fs.join(budgetDir, 'db.sqlite');
+    let metaFile = fs.join(budgetDir, 'metadata.json');
+
+    if (await fs.exists(dbFile)) {
+      await fs.removeFile(dbFile);
+    }
+    if (await fs.exists(metaFile)) {
+      await fs.removeFile(metaFile);
+    }
+  } else {
+    await fs.mkdir(budgetDir);
+  }
+
+  await fs.writeFile(fs.join(budgetDir, 'db.sqlite'), dbContent);
+  await fs.writeFile(fs.join(budgetDir, 'metadata.json'), JSON.stringify(meta));
+
+  return { id: meta.id };
 }
 
 export async function upload() {
@@ -355,58 +408,5 @@ export async function download(fileId, replace) {
     }
   }
 
-  let zipped = new AdmZip(buffer);
-  let entries = zipped.getEntries();
-  let dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
-  let metaEntry = entries.find(e => e.entryName.includes('metadata.json'));
-
-  if (!dbEntry || !metaEntry) {
-    throw FileDownloadError('invalid-zip-file');
-  }
-
-  let dbContent = zipped.readFile(dbEntry);
-  let metaContent = zipped.readFile(metaEntry);
-
-  let meta;
-  try {
-    meta = JSON.parse(metaContent.toString('utf8'));
-  } catch (err) {
-    throw FileDownloadError('invalid-meta-file');
-  }
-
-  // Update the metadata. The stored file on the server might be
-  // out-of-date with a few keys
-  meta = {
-    ...meta,
-    cloudFileId: fileData.fileId,
-    groupId: fileData.groupId,
-    lastUploaded: monthUtils.currentDay(),
-    encryptKeyId: fileData.encryptMeta ? fileData.encryptMeta.keyId : null
-  };
-
-  let budgetDir = fs.getBudgetDir(meta.id);
-
-  if (await fs.exists(budgetDir)) {
-    if (replace) {
-      // Don't remove the directory so that backups are retained
-      let dbFile = fs.join(budgetDir, 'db.sqlite');
-      let metaFile = fs.join(budgetDir, 'metadata.json');
-
-      if (await fs.exists(dbFile)) {
-        await fs.removeFile(dbFile);
-      }
-      if (await fs.exists(metaFile)) {
-        await fs.removeFile(metaFile);
-      }
-    } else {
-      throw FileDownloadError('file-exists', { id: meta.id });
-    }
-  } else {
-    await fs.mkdir(budgetDir);
-  }
-
-  await fs.writeFile(fs.join(budgetDir, 'db.sqlite'), dbContent);
-  await fs.writeFile(fs.join(budgetDir, 'metadata.json'), JSON.stringify(meta));
-
-  return { id: meta.id };
+  return importBuffer(fileData, buffer, replace);
 }
