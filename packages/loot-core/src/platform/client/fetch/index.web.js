@@ -8,7 +8,7 @@ let socketClient = null;
 function connectSocket(name, onOpen) {
   global.Actual.ipcConnect(name, function(client) {
     client.on('message', data => {
-      const msg = JSON.parse(data);
+      const msg = data;
 
       if (msg.type === 'error') {
         // An error happened while handling a message so cleanup the
@@ -19,7 +19,15 @@ function connectSocket(name, onOpen) {
         const { id } = msg;
         replyHandlers.delete(id);
       } else if (msg.type === 'reply') {
-        const { id, result, mutated, undoTag } = msg;
+        let { id, result, mutated, undoTag } = msg;
+
+        // Check if the result is a serialized buffer, and if so
+        // convert it to a Uint8Array. This is only needed when working
+        // with node; the web version connection layer automatically
+        // supports buffers
+        if (result && result.type === 'Buffer' && Array.isArray(result.data)) {
+          result = new Uint8Array(result.data);
+        }
 
         const handler = replyHandlers.get(id);
         if (handler) {
@@ -53,9 +61,7 @@ function connectSocket(name, onOpen) {
 
       // Send any messages that were queued while closed
       if (messageQueue.length > 0) {
-        messageQueue.forEach(msg =>
-          client.emit('message', JSON.stringify(msg))
-        );
+        messageQueue.forEach(msg => client.emit('message', msg));
         messageQueue = [];
       }
 
@@ -78,16 +84,13 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
       replyHandlers.set(id, { resolve, reject });
 
       if (socketClient) {
-        socketClient.emit(
-          'message',
-          JSON.stringify({
-            id,
-            name,
-            args,
-            undoTag: undo.snapshot(),
-            catchErrors: !!catchErrors
-          })
-        );
+        socketClient.emit('message', {
+          id,
+          name,
+          args,
+          undoTag: undo.snapshot(),
+          catchErrors: !!catchErrors
+        });
       } else {
         messageQueue.push({
           id,

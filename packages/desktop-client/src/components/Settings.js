@@ -334,7 +334,7 @@ function FileSettings({
 
   async function onExport() {
     let data = await send('export-budget');
-    window.Actual.saveFile(data, 'budget.zip', 'Export budget');
+    window.Actual.saveFile(data, `${prefs.id}.zip`, 'Export budget');
   }
 
   let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
@@ -431,12 +431,10 @@ function FileSettings({
         </View>
       </View>
 
-      {Platform.isBrowser && (
-        <View style={{ marginTop: 30, alignItems: 'flex-start' }}>
-          <Title name="Export" />
-          <Button onClick={onExport}>Export data</Button>
-        </View>
-      )}
+      <View style={{ marginTop: 30, alignItems: 'flex-start' }}>
+        <Title name="Export" />
+        <Button onClick={onExport}>Export data</Button>
+      </View>
 
       <Advanced
         prefs={prefs}
