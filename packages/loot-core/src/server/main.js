@@ -973,6 +973,7 @@ handlers['account-move'] = mutator(async function({ id, targetId }) {
 });
 
 handlers['create-web-token'] = async function () {
+  //i THINK i need to generate a session token here...i THINK
   let data = await post(getServer().PLAID_SERVER + '/create-web-token');
   if (data.status !== 'ok') {
     return { error: '', code: data.error_code, type: data.error_type };
@@ -1303,7 +1304,7 @@ handlers['key-make'] = async function({ password }) {
   let salt = encryption.randomBytes(32).toString('base64');
   let id = uuid.v4Sync();
   let key = await encryption.createKey({ id, password, salt });
-
+console.log(key);
   // Load the key
   await encryption.loadKey(key);
 
