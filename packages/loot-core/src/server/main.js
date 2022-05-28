@@ -972,6 +972,15 @@ handlers['account-move'] = mutator(async function({ id, targetId }) {
   });
 });
 
+handlers['create-web-token'] = async function () {
+  let data = await post(getServer().PLAID_SERVER + '/create-web-token');
+  if (data.status !== 'ok') {
+    return { error: '', code: data.error_code, type: data.error_type };
+  }
+
+  return { webToken: data.token };
+};
+
 let stopPolling = false;
 
 handlers['poll-web-token'] = async function({ token }) {
