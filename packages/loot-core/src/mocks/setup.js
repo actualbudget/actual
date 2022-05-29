@@ -5,7 +5,6 @@ import * as sheet from '../server/sheet';
 import * as rules from '../server/accounts/transaction-rules';
 import * as tracking from '../server/tracking/events';
 import { setSyncingMode } from '../server/sync';
-import * as monthUtils from '../shared/months';
 import { updateVersion } from '../server/update';
 import { resetTracer, tracer } from '../shared/test-helpers';
 import {

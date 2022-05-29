@@ -52,7 +52,7 @@ export default function ChangePassword() {
   return (
     <>
       <View style={{ width: 500, marginTop: -30 }}>
-        <Title text="Change server password" />
+        <Title text="Change account password" />
         <Text
           style={{
             fontSize: 16,
@@ -60,7 +60,7 @@ export default function ChangePassword() {
             lineHeight: 1.4
           }}
         >
-          This will change the password for this server instance. All existing
+          This will change the password for this account. All existing
           sessions will stay logged in.
         </Text>
 

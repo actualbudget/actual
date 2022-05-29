@@ -240,6 +240,14 @@ export function listenForSyncEvent(actions, store) {
               'and it has been reported.'
           };
           break;
+        case 'account-mismatch':
+          notif = {
+            title: 'Account mismatch!',
+            message:
+              "We couldn't sync your file, as it is already linked with another account. " +
+              'Please consider logging into the right account to activate sync.',
+            type: 'error'
+          };
         case 'beta-version':
         case 'network':
           // Show nothing

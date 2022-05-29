@@ -4,7 +4,6 @@ import React, {
   useLayoutEffect,
   useState,
   useCallback,
-  useMemo
 } from 'react';
 import { css } from 'glamor';
 import mergeRefs from 'react-merge-refs';
@@ -18,7 +17,6 @@ import {
   useRouteMatch
 } from 'react-router-dom';
 import {
-  Listbox,
   ListboxInput,
   ListboxButton,
   ListboxPopover,
@@ -32,12 +30,11 @@ import Loading from '../svg/v1/AnimatedLoading';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import View from './View';
 import Text from './Text';
-import Stack from './Stack';
 import { useProperFocus } from './useProperFocus';
 
-export View from './View';
-export Text from './Text';
-export Stack from './Stack';
+export { default as View } from './View';
+export { default as Text } from './Text';
+export { default as Stack } from './Stack';
 
 export const useStableCallback = callback => {
   const callbackRef = useRef();

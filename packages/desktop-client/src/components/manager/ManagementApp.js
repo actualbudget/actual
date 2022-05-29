@@ -12,7 +12,7 @@ import Notifications from '../Notifications';
 
 import Modals from './Modals';
 import Login from './subscribe/Login';
-import Bootstrap from './subscribe/Bootstrap';
+import Register from './subscribe/Register';
 import Error from './subscribe/Error';
 import ChangePassword from './subscribe/ChangePassword';
 import ConfigServer from './ConfigServer';
@@ -211,9 +211,9 @@ class ManagementApp extends React.Component {
                   <Route exact path="/login" component={Login} />
                   <Route exact path="/error" component={Error} />
                   <Route exact path="/config-server" component={ConfigServer} />
-                  <Route exact path="/bootstrap" component={Bootstrap} />
+                  <Route exact path="/register" component={Register} />
                   {/* Redirect all other pages to this route */}
-                  <Route path="/" render={() => <Redirect to="/bootstrap" />} />
+                  <Route path="/" render={() => <Redirect to="/login" />} />
                 </Switch>
               )}
             </View>

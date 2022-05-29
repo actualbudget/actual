@@ -1,4 +1,3 @@
-import dateFns from 'date-fns';
 const uuid = require('../platform/uuid');
 
 export function generateAccount(balance) {

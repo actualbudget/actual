@@ -70,7 +70,7 @@ function LoggedInUser({
     return (
       <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
         <Button bare onClick={onClick} style={{ color }}>
-          Server
+          {userData.user ? (userData.user.username) : 'Account'}
         </Button>
 
         {menuOpen && (

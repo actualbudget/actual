@@ -1,5 +1,4 @@
 import * as nodes from './nodes';
-const uuid = require('../../../platform/uuid');
 
 let _uid = 0;
 function resetUid() {

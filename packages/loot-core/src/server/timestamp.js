@@ -75,6 +75,9 @@ var config = {
   maxDrift: 5 * 60 * 1000
 };
 
+const MAX_COUNTER = parseInt('0xFFFF');
+const MAX_NODE_LENGTH = 16;
+
 /**
  * timestamp instance class
  */
@@ -191,7 +194,7 @@ Timestamp.send = function() {
   if (lNew - phys > config.maxDrift) {
     throw new Timestamp.ClockDriftError(lNew, phys, config.maxDrift);
   }
-  if (cNew > 65535) {
+  if (cNew > MAX_COUNTER) {
     throw new Timestamp.OverflowError();
   }
 
@@ -253,7 +256,7 @@ Timestamp.recv = function(msg) {
   if (lNew - phys > config.maxDrift) {
     throw new Timestamp.ClockDriftError();
   }
-  if (cNew > 65535) {
+  if (cNew > MAX_COUNTER) {
     throw new Timestamp.OverflowError();
   }
 
@@ -279,8 +282,16 @@ Timestamp.parse = function(timestamp) {
       var millis = Date.parse(parts.slice(0, 3).join('-')).valueOf();
       var counter = parseInt(parts[3], 16);
       var node = parts[4];
-      if (!isNaN(millis) && !isNaN(counter))
+      if (
+        !isNaN(millis) &&
+        millis >= 0 &&
+        !isNaN(counter) &&
+        counter <= MAX_COUNTER &&
+        typeof node === 'string' &&
+        node.length <= MAX_NODE_LENGTH
+      ) {
         return new Timestamp(millis, counter, node);
+      }
     }
   }
   return null;

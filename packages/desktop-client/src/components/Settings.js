@@ -416,10 +416,7 @@ function FileSettings({
                   <Button
                     style={{ marginTop: 10 }}
                     onClick={() => {
-                      alert(
-                        'End-to-end encryption is not supported on the self-hosted service yet'
-                      );
-                      // pushModal('create-encryption-key');
+                      pushModal('create-encryption-key');
                     }}
                   >
                     Enable encryption

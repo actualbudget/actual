@@ -1,4 +1,3 @@
-import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';

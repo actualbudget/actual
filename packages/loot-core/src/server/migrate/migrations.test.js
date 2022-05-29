@@ -3,8 +3,7 @@ import {
   withMigrationsDir,
   getAppliedMigrations,
   getMigrationList,
-  getPending,
-  applyMigration
+  getPending
 } from './migrations';
 import * as db from '../db';
 

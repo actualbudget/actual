@@ -34,7 +34,6 @@ import { keys } from '../util/keys';
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
-  focusElement
 } from './useProperFocus';
 import { useSelectedItems } from './useSelected';
 

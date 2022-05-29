@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { styles, colors } from '../../style';
 import { View, Text, Modal, P, Button } from '../common';
-import { amountToPrettyCurrency } from 'loot-core/src/shared/util';
 import {
   fromPlaidAccountType,
   prettyAccountType
