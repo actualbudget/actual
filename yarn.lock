@@ -2,19 +2,19 @@
 # yarn lockfile v1
 
 
-"@actual-app/api@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@actual-app/api/-/api-4.0.1.tgz#65800a44b84f82525f58c89a71e5fa65caa0f40f"
-  integrity sha512-/Nuv55MAZKDFgwBg3tT+NZmliAZm+jRqbC7IT5X3RBGJ2Cy3shEzF6Cd46Vrz89zVrdFMeiSQ5AJPtyvndzPjQ==
+"@actual-app/api@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@actual-app/api/-/api-4.1.0.tgz#43580a56a370a12dae5668b8d56c540c1849c4c9"
+  integrity sha512-8tLuA6zDnN0NjD9wui5fB/cSe0hr/iYWOHGyW/ikJoGPrCu8N8zIITz2FhfplD2QDszgAsTRt48H2YtPmR9plg==
   dependencies:
     better-sqlite3 "^7.5.0"
     node-fetch "^1.6.3"
     uuid "3.3.2"
 
-"@actual-app/web@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@actual-app/web/-/web-4.0.2.tgz#9311274bbe3464106d4b1d994947128c672d11d0"
-  integrity sha512-UGsZ1PBZuFM8temch6J8t6Z18JzFqDvrweWg77Vje1nyBFqwTKzsWrABbinxJF9fI+qiYH5T/eTftj7/JB0f3A==
+"@actual-app/web@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@actual-app/web/-/web-4.1.0.tgz#9a5c5d5fd3c6e5a1a34dcaf087fb1920a27f13eb"
+  integrity sha512-QgxrHBUoDXsUCRzQTD4PmDkTt27UUcPfFJMqXPHtk2lP0ey7iVsZIW7AUeYkEs1+ghmqVVqk+jw3OAD4XQzbRA==
 
 "@eslint/eslintrc@^1.2.3":
   version "1.2.3"
