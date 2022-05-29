@@ -21,7 +21,9 @@ if [ $NODE_ENV == 'development' ]; then
   # In dev mode, always enable watch mode and symlink the build files.
   # Make sure to do this before starting the build since watch mode
   # will block
+  mkdir -p "$ROOT"/../lib-dist/browser
   WEBPACK_ARGS="$WEBPACK_ARGS --watch"
+  export MSYS=winsymlinks:nativestrict
   ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
 fi
 
