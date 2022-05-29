@@ -6,6 +6,7 @@ VERSION=""
 BETA=""
 RELEASE=""
 RELEASE_NOTES=""
+CI=${CI:-false}
 
 cd "$ROOT/.."
 
@@ -74,7 +75,7 @@ fi
 
 # We only need to run linting once (and this doesn't seem to work on
 # Windows for some reason)
-if [[ "$OSTYPE" == "darwin"* ]]; then
+if [[ $CI != true && "$OSTYPE" == "darwin"* ]]; then
     yarn lint
 fi
 
