@@ -139,9 +139,16 @@ app.post('/sync', async (req, res) => {
   for (let i = 0; i < newMessages.length; i++) {
     let msg = newMessages[i];
     let envelopePb = new SyncPb.MessageEnvelope();
+    let messagePb = new SyncPb.Message();
+
+    messagePb.setDataset(msg.dataset);
+    messagePb.setRow(msg.row);
+    messagePb.setColumn(msg.column);
+    messagePb.setValue(msg.value);
+
     envelopePb.setTimestamp(msg.timestamp);
-    envelopePb.setIsencrypted(msg.is_encrypted === 1);
-    envelopePb.setContent(msg.content);
+    envelopePb.setContent(messagePb.serializeBinary());
+
     responsePb.addMessages(envelopePb);
   }
 

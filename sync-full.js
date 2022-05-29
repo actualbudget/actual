@@ -27,7 +27,7 @@ const sync = sequential(async function syncAPI(messages, since, fileId) {
     };
   });
 
-  let newMessages = actual.internal.syncAndReceiveMessages(messages, since);
+  let newMessages = await actual.internal.syncAndReceiveMessages(messages, since);
 
   return {
     trie: actual.internal.timestamp.getClock().merkle,
