@@ -70,7 +70,7 @@ jobs:
         id: cache
         with:
           path: '**/node_modules'
-          key: yarn-v1-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-v1-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install
         run: yarn --immutable
         if: steps.cache.outputs.cache-hit != 'true'
