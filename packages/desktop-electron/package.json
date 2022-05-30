@@ -12,7 +12,6 @@
   "main": "index.js",
   "build": {
     "appId": "com.shiftreset.actual",
-    "afterSign": "./afterSignHook.js",
     "files": [
       "!node_modules/loot-core/src{,/**/*}",
       "!node_modules/loot-core/lib-dist/{browser,bundle.mobile*}",
@@ -40,8 +39,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "icons/icon.ico",
-      "certificateSubjectName": "Shift Reset LLC"
+      "icon": "icons/icon.ico"
     }
   },
   "dependencies": {
