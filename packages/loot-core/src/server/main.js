@@ -973,7 +973,6 @@ handlers['account-move'] = mutator(async function({ id, targetId }) {
 });
 
 handlers['create-web-token'] = async function () {
-  //i THINK i need to generate a session token here...i THINK
   let data = await post(getServer().PLAID_SERVER + '/create-web-token');
   if (data.status === 'undefined') {
     return { error: 'undefined token', code: data.error_code, type: data.error_type };
@@ -985,10 +984,10 @@ handlers['create-web-token'] = async function () {
 let stopPolling = false;
 
 handlers['poll-web-token'] = async function({ token }) {
-  // let [[, userId], [, key]] = await asyncStorage.multiGet([
-  //   'user-id',
-  //   'user-key'
-  // ]);
+  let [[, userId], [, key]] = await asyncStorage.multiGet([
+    'user-id',
+    'user-key'
+  ]);
 
   let startTime = Date.now();
   stopPolling = false;
@@ -1006,8 +1005,8 @@ handlers['poll-web-token'] = async function({ token }) {
     let data = await post(
       getServer().PLAID_SERVER + '/get-web-token-contents',
       {
-        // userId,
-        // key,
+        userId,
+        key,
         token
       }
     );
