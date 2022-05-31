@@ -131,7 +131,7 @@ fi
 
 (
     cd packages/desktop-electron;
-    rm -rf dist;
+    yarn clean;
 
     export npm_config_better_sqlite3_binary_host="https://static.actualbudget.com/prebuild/better-sqlite3"
 
