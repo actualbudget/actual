@@ -508,7 +508,7 @@ export function ImportTransactions({
   let [fieldMappings, setFieldMappings] = useState(null);
   let [splitMode, setSplitMode] = useState(false);
   let [flipAmount, setFlipAmount] = useState(false);
-  let { accountId, onImported } = options;
+  let { accountId, accounts, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -653,9 +653,23 @@ export function ImportTransactions({
         break;
       }
 
+      let payee = null;
+      const accountWithId = accounts.filter((a) => (a.id === trans.payee_name));
+
+      if (accountWithId.length === 1) {
+        const account = accountWithId[0];
+
+        const payees = await getPayees();
+        // Accounts should already have a payee
+        payee = payees.filter((p) => {
+          return p.name === account.name && p.transfer_acct === account.id
+        })[0].id;
+      }
+
       let { inflow, outflow, ...finalTransaction } = trans;
       finalTransactions.push({
         ...finalTransaction,
+        payee,
         date,
         amount: amountToInteger(amount)
       });
