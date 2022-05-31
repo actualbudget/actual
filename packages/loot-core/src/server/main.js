@@ -1006,8 +1006,8 @@ handlers['poll-web-token'] = async function({ token }) {
     let data = await post(
       getServer().PLAID_SERVER + '/get-web-token-contents',
       {
-        userId, //NOT DEFINED
-        key,
+        // userId,
+        // key,
         token
       }
     );
