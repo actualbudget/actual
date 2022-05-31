@@ -139,11 +139,11 @@ fi
         if [ -f ../../.secret-tokens ]; then
             source ../../.secret-tokens
         fi
-        ./node_modules/.bin/electron-builder --publish always -c.releaseInfo.releaseNotes="$RELEASE_NOTES" --arm64 --x64
+        yarn build --publish always -c.releaseInfo.releaseNotes="$RELEASE_NOTES" --arm64 --x64
 
         echo "\nCreated release $VERSION with release notes \"$RELEASE_NOTES\""
     elif [ "$RELEASE" == "beta" ]; then
-        ./node_modules/.bin/electron-builder --publish never --arm64 --x64
+        yarn build --publish never --arm64 --x64
 
         WINDOWS_FILE="./dist/Actual Setup $VERSION.exe"
         if [ -f "$WINDOWS_FILE" ]; then
@@ -169,6 +169,6 @@ fi
             echo "No linux file found"
         fi
     else
-        SKIP_NOTARIZATION=true ./node_modules/.bin/electron-builder --publish never --x64
+        SKIP_NOTARIZATION=true yarn build --publish never --x64
     fi
 )
