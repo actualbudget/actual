@@ -49,7 +49,7 @@
 
             // Validate token
             let data = await post(config.url + '/validate-web-token', {
-                webToken: token
+                token
             });
 
             if (data.status !== 'ok') {
