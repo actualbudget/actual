@@ -148,29 +148,39 @@ function getInitialMappings(transactions) {
   }
 
   let dateField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('date')) ||
-      fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/))
+    fields.find(([name, _value]) => name.toLowerCase().includes('date')) ||
+      fields.find(([_name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/))
   );
 
   let amountField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([name, value]) => value.match(/^-?[.,\d]+$/))
+    fields.find(([name, _value]) => name.toLowerCase().includes('amount')) ||
+      fields.find(([_name, value]) => value.match(/^-?[.,\d]+$/))
   );
 
+  let takenNames = [dateField, amountField];
+
   let payeeField = key(
-    fields.find(([name, value]) => name !== dateField && name !== amountField)
+    fields.find(([name, _value]) => !takenNames.includes(name))
   );
+
+  takenNames.push(payeeField);
+
+  let categoryField = key(
+    fields.find(([name, _value]) => !takenNames.includes(name))
+  );
+
+  takenNames.push(categoryField);
 
   let notesField = key(
     fields.find(
-      ([name, value]) =>
-        name !== dateField && name !== amountField && name !== payeeField
+      ([name, _value]) =>! takenNames.includes(name)
     )
   );
 
   return {
     date: dateField,
     amount: amountField,
+    category: categoryField,
     payee: payeeField,
     notes: notesField
   };
@@ -444,6 +454,16 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
           />
         </View>
         <View style={{ flex: 1 }}>
+          <SubLabel title="Category" />
+          <SelectField
+            width="flex"
+            options={options}
+            value={mappings.category || ''}
+            style={{ marginRight: 5 }}
+            onChange={name => onChange('category', name)}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
           <SubLabel title="Notes" />
           <SelectField
             width="flex"
@@ -508,7 +528,7 @@ export function ImportTransactions({
   let [fieldMappings, setFieldMappings] = useState(null);
   let [splitMode, setSplitMode] = useState(false);
   let [flipAmount, setFlipAmount] = useState(false);
-  let { accountId, onImported } = options;
+  let { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -698,6 +718,7 @@ export function ImportTransactions({
   let headers = [
     { name: 'Date', width: 200 },
     { name: 'Payee', width: 'flex' },
+    { name: 'Category', width: 'flex' },
     { name: 'Notes', width: 'flex' }
   ];
 
