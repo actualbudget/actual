@@ -58,5 +58,5 @@ export function cache(sql) {
 }
 
 function resetQueryCache() {
-    _queryCache = new LRU({ max: 100 });
-} 
+  _queryCache = new LRU({ max: 100 });
+}
