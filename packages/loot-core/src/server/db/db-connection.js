@@ -5,8 +5,6 @@ import fs from '../../platform/server/fs';
 let dbPath;
 let db;
 
-// Util
-
 export function getDatabasePath() {
   return dbPath;
 }
