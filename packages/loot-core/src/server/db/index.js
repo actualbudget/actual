@@ -1,6 +1,4 @@
-import LRU from 'lru-cache';
 import * as sqlite from '../../platform/server/sqlite';
-import fs from '../../platform/server/fs';
 import { sendMessages } from '../sync';
 import { schema, schemaConfig } from '../aql/schema';
 import {
@@ -24,55 +22,16 @@ import {
   convertForUpdate,
   convertFromSelect
 } from '../aql/schema-helpers';
+import { getDatabase } from './db-connection';
 
 export { toDateRepr, fromDateRepr } from '../models';
+export * from "./db-connection"
 export * from "./accounts";
 export * from "./categories";
 export * from "./payees";
 export * from "./transactions";
 
 const uuid = require('../../platform/uuid');
-
-let dbPath;
-let db;
-
-// Util
-
-export function getDatabasePath() {
-  return dbPath;
-}
-
-export async function openDatabase(id) {
-  if (db) {
-    await sqlite.closeDatabase(db);
-  }
-
-  dbPath = fs.join(fs.getBudgetDir(id), 'db.sqlite');
-  setDatabase(await sqlite.openDatabase(dbPath));
-
-  // await execQuery('PRAGMA journal_mode = WAL');
-}
-
-export async function reopenDatabase() {
-  await sqlite.closeDatabase(db);
-  setDatabase(await sqlite.openDatabase(dbPath));
-}
-
-export async function closeDatabase() {
-  if (db) {
-    await sqlite.closeDatabase(db);
-    setDatabase(null);
-  }
-}
-
-export function setDatabase(db_) {
-  db = db_;
-  resetQueryCache();
-}
-
-export function getDatabase() {
-  return db;
-}
 
 export async function loadClock() {
   let row = await first('SELECT * FROM messages_clock');
@@ -97,39 +56,21 @@ export async function loadClock() {
 
 export function runQuery(sql, params, fetchAll) {
   // const unrecord = perf.record('sqlite');
-  const result = sqlite.runQuery(db, sql, params, fetchAll);
+  const result = sqlite.runQuery(getDatabase(), sql, params, fetchAll);
   // unrecord();
   return result;
 }
 
 export function execQuery(sql) {
-  sqlite.execQuery(db, sql);
-}
-
-// This manages an LRU cache of prepared query statements. This is
-// only needed in hot spots when you are running lots of queries.
-let _queryCache = new LRU({ max: 100 });
-export function cache(sql) {
-  let cached = _queryCache.get(sql);
-  if (cached) {
-    return cached;
-  }
-
-  let prepared = sqlite.prepare(db, sql);
-  _queryCache.set(sql, prepared);
-  return prepared;
-}
-
-function resetQueryCache() {
-  _queryCache = new LRU({ max: 100 });
+  sqlite.execQuery(getDatabase(), sql);
 }
 
 export function transaction(fn) {
-  return sqlite.transaction(db, fn);
+  return sqlite.transaction(getDatabase(), fn);
 }
 
 export function asyncTransaction(fn) {
-  return sqlite.asyncTransaction(db, fn);
+  return sqlite.asyncTransaction(getDatabase(), fn);
 }
 
 // This function is marked as async because `runQuery` is no longer
