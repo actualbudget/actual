@@ -12,7 +12,7 @@ module.exports = {
     publicPath: '/kcab/'
   },
   resolve: {
-    extensions: ['.web.js', '.js', '.json'],
+    extensions: ['.web.js', '.js', '.ts', '.json'],
     alias: {
       fs: 'memfs',
       path: 'path-browserify',
@@ -25,6 +25,11 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.ts?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.m?js$/,
         use: {

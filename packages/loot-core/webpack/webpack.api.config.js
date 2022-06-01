@@ -2,7 +2,7 @@ let path = require('path');
 let webpack = require('webpack');
 let config = require('./webpack.desktop.config');
 
-config.resolve.extensions = ['.api.js', '.electron.js', '.js', '.json'];
+config.resolve.extensions = ['.api.js', '.electron.js', '.js', '.ts', '.json'];
 config.output.filename = 'bundle.api.js';
 config.output.sourceMapFilename = 'bundle.api.js.map';
 

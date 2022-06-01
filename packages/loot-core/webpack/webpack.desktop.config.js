@@ -14,7 +14,7 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
   resolve: {
-    extensions: ['.electron.js', '.js', '.json'],
+    extensions: ['.electron.js', '.js', '.ts', '.json'],
     alias: {
       'perf-deets': require.resolve('perf-deets/noop')
     }
@@ -28,6 +28,11 @@ module.exports = {
   ],
   module: {
     rules: [
+      {
+        test: /\.ts?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.m?js$/,
         use: {
