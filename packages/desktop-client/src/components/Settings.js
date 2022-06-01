@@ -24,6 +24,8 @@ import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import ExclamationSolid from 'loot-design/src/svg/v1/ExclamationSolid';
 import Platform from 'loot-core/src/client/platform';
 
+// import { startPlaidSyncInterval, stopPlaidSyncInterval } from 'loot-core/src/server/tools/plaid-sync-interval';
+
 let dateFormats = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
@@ -181,6 +183,18 @@ function GlobalSettings({
     saveGlobalPrefs({ trackUsage: e.target.checked });
   }
 
+  function onPlaidLinkAuto(e) {
+    saveGlobalPrefs({ plaidLinkAuto: e.target.checked });
+  }
+
+  function onPlaidLinkClientID(e) {
+    saveGlobalPrefs({ plaidLinkClientID: e.target.value });
+  }
+
+  function onPlaidLinkSecret(e) {
+    saveGlobalPrefs({ plaidLinkSecret: e.target.value });
+  }
+
   return (
     <View>
       <View>
@@ -237,7 +251,7 @@ function GlobalSettings({
         <View
           style={{
             flexDirection: 'row',
-            marginTop: 30,
+            marginTop: 0,
             alignItems: 'flex-start'
           }}
         >
@@ -274,7 +288,7 @@ function GlobalSettings({
         <View
           style={{
             flexDirection: 'row',
-            marginTop: 30,
+            marginTop: 0,
             alignItems: 'flex-start'
           }}
         >
@@ -300,6 +314,70 @@ function GlobalSettings({
               We don{"'"}t track anything specific &mdash; only the fact that
               you{"'"}ve opened Actual. This helps by giving us important
               feedback about how popular new features are.
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <View style={{ marginTop: 30 }}>
+        <Title name="Plaid Link" />
+        <View style={{
+          flexDirection: 'row',
+          marginTop: 0,
+          alignItems: 'flex-start'
+        }}>
+        </View>
+        <View>
+          <View>
+            <Text style={{ fontSize: 15 }}>
+              Plaid Client ID:
+            </Text>
+            <input type="text" value={globalPrefs.plaidLinkClientID} onChange={onPlaidLinkClientID} style={{ maxWidth: 300 }} />
+          </View>
+          <View>
+            <Text style={{ fontSize: 15, marginTop: 15 }}>
+              Plaid Secret:
+            </Text>
+            <input type="text" value={globalPrefs.plaidLinkSecret} onChange={onPlaidLinkSecret} style={{ maxWidth: 300 }} />
+          </View>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginTop: 20,
+            alignItems: 'flex-start'
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={globalPrefs.plaidLinkAuto}
+            style={{ marginRight: 5 }}
+            onChange={onPlaidLinkAuto}
+          />
+
+          <View>
+            <Text style={{ fontSize: 15 }}>
+              Enable automatic syncing of Plaid
+            </Text>
+            <View
+              style={{
+                color: colors.n2,
+                marginTop: 10,
+                maxWidth: 600,
+                lineHeight: '1.4em'
+              }}
+            >
+              When this is checked, Plaid will auto-sync every 30 minutes.
+              When unchecked, Plaid must be manually synced for each account.
+            </View>
+            <View
+              style={{
+                color: colors.n2,
+                marginTop: 10,
+                maxWidth: 600,
+                lineHeight: '1.4em'
+              }}
+            >
             </View>
           </View>
         </View>
