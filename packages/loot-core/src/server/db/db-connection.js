@@ -47,12 +47,12 @@ export function getDatabase() {
 // only needed in hot spots when you are running lots of queries.
 let _queryCache = new LRU({ max: 100 });
 export function cache(sql) {
-  let cached = _queryCache.get(sql);
+  const cached = _queryCache.get(sql);
   if (cached) {
     return cached;
   }
 
-  let prepared = sqlite.prepare(db, sql);
+  const prepared = sqlite.prepare(db, sql);
   _queryCache.set(sql, prepared);
   return prepared;
 }

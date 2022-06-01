@@ -20,11 +20,11 @@ let unlistenSync;
 export async function loadMappings() {
   // The mappings are separated into tables specific to the type of
   // data. But you know, we really could keep a global mapping table.
-  let categories = (await db.all('SELECT * FROM category_mapping')).map(r => [
+  const categories = (await db.all('SELECT * FROM category_mapping')).map(r => [
     r.id,
     r.transferId
   ]);
-  let payees = (await db.all('SELECT * FROM payee_mapping')).map(r => [
+  const payees = (await db.all('SELECT * FROM payee_mapping')).map(r => [
     r.id,
     r.targetId
   ]);
@@ -41,7 +41,7 @@ export async function loadMappings() {
 function onApplySync(oldValues, newValues) {
   newValues.forEach((items, table) => {
     if (table.indexOf('mapping') !== -1) {
-      let field = table === 'category_mapping' ? 'transferId' : 'targetId';
+      const field = table === 'category_mapping' ? 'transferId' : 'targetId';
 
       items.forEach(newValue => {
         allMappings.set(newValue.id, newValue[field]);

@@ -53,7 +53,7 @@ export async function moveCategoryGroup(id, targetId) {
   );
 
   const { updates, sort_order } = shoveSortOrders(groups, targetId);
-  for (let info of updates) {
+  for (const info of updates) {
     await update('category_groups', info);
   }
   await update('category_groups', { id, sort_order });
@@ -91,7 +91,7 @@ export async function insertCategory(category, { atEnd } = {}) {
         categories,
         categories.length > 0 ? categories[0].id : null
       );
-      for (let info of updates) {
+      for (const info of updates) {
         await update('categories', info);
       }
       sort_order = order;
@@ -126,7 +126,7 @@ export async function moveCategory(id, groupId, targetId) {
   );
 
   const { updates, sort_order } = shoveSortOrders(categories, targetId);
-  for (let info of updates) {
+  for (const info of updates) {
     await update('categories', info);
   }
   await update('categories', { id, sort_order, cat_group: groupId });
@@ -141,7 +141,7 @@ export async function deleteCategory(category, transferId) {
       'SELECT * FROM category_mapping WHERE transferId = ?',
       [category.id]
     );
-    for (let mapping of existingTransfers) {
+    for (const mapping of existingTransfers) {
       await update('category_mapping', { id: mapping.id, transferId });
     }
 

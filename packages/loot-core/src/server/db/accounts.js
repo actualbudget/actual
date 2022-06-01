@@ -13,7 +13,7 @@ export function getAccounts() {
 }
 
 function _addFragmentForAccount(accountId, addWhere, options = {}) {
-  let { showClosed = false, showOffbudget = true } = options;
+  const { showClosed = false, showOffbudget = true } = options;
 
   let fragment = addWhere ? ' WHERE (' : ' AND ';
   let params = [];
@@ -57,7 +57,7 @@ export async function insertAccount(account) {
   );
 
   // Don't pass a target in, it will default to appending at the end
-  let { sort_order } = shoveSortOrders(accounts);
+  const { sort_order } = shoveSortOrders(accounts);
 
   account = accountModel.validate({ ...account, sort_order });
   return insertWithUUID('accounts', account);
@@ -73,7 +73,7 @@ export function deleteAccount(account) {
 }
 
 export async function moveAccount(id, targetId) {
-  let account = await first('SELECT * FROM accounts WHERE id = ?', [id]);
+  const account = await first('SELECT * FROM accounts WHERE id = ?', [id]);
   let accounts;
   if (account.closed) {
     accounts = await all(
@@ -88,7 +88,7 @@ export async function moveAccount(id, targetId) {
 
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
   await batchMessages(() => {
-    for (let info of updates) {
+    for (const info of updates) {
       update('accounts', info);
     }
     update('accounts', { id, sort_order });
