@@ -78,15 +78,18 @@ const SyncPb = require('./sync/proto/sync_pb');
 // let indexeddb = require('../platform/server/indexeddb');
 
 let VERSION;
-let DEMO_BUDGET_ID = '_demo-budget';
-let TEST_BUDGET_ID = '_test-budget';
-let UNCONFIGURED_SERVER = 'https://not-configured/';
+const DEMO_BUDGET_ID = '_demo-budget';
+const TEST_BUDGET_ID = '_test-budget';
+const UNCONFIGURED_SERVER = 'https://not-configured/';
+
+// Injected by Webpack at build time.
+declare const ACTUAL_APP_VERSION: boolean;
 
 // util
 
 function onSheetChange({ names }) {
   const nodes = names.map(name => {
-    let node = sheet.get()._getNode(name);
+    const node = sheet.get()._getNode(name);
     return { name: node.name, value: node.value };
   });
   connection.send('cells-changed', nodes);
@@ -111,7 +114,7 @@ handlers['transactions-batch-update'] = mutator(async function({
   learnCategories
 }) {
   return withUndo(async () => {
-    let result = await batchUpdateTransactions({
+    const result = await batchUpdateTransactions({
       added,
       updated,
       deleted,
@@ -149,9 +152,9 @@ handlers['transactions-filter'] = async function({
   return db.getTransactions(
     term,
     accountId,
-    latestDate,
-    notPaged ? null : count == null ? undefined : count,
-    options
+    // latestDate,
+    // notPaged ? null : count == null ? undefined : count,
+    // options
   );
 };
 
@@ -180,7 +183,7 @@ handlers['get-categories'] = async function() {
 };
 
 handlers['get-earliest-transaction'] = async function() {
-  let { data } = await aqlQuery(
+  const { data } = await aqlQuery(
     q('transactions')
       .options({ splits: 'none' })
       .orderBy({ date: 'asc' })
@@ -195,11 +198,11 @@ handlers['get-budget-bounds'] = async function() {
 };
 
 handlers['rollover-budget-month'] = async function({ month }) {
-  let groups = await db.getCategoriesGrouped();
-  let sheetName = monthUtils.sheetForMonth(month);
+  const groups = await db.getCategoriesGrouped();
+  const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
-    let v = sheet.getCellValue(sheetName, name);
+    const v = sheet.getCellValue(sheetName, name);
     return { value: v === '' ? 0 : v, name: resolveName(sheetName, name) };
   }
 
@@ -216,11 +219,11 @@ handlers['rollover-budget-month'] = async function({ month }) {
     value('total-leftover')
   ];
 
-  for (let group of groups) {
+  for (const group of groups) {
     if (group.is_income) {
       values.push(value('total-income'));
 
-      for (let cat of group.categories) {
+      for (const cat of group.categories) {
         values.push(value(`sum-amount-${cat.id}`));
       }
     } else {
@@ -230,7 +233,7 @@ handlers['rollover-budget-month'] = async function({ month }) {
         value(`group-leftover-${group.id}`)
       ]);
 
-      for (let cat of group.categories) {
+      for (const cat of group.categories) {
         values = values.concat([
           value(`budget-${cat.id}`),
           value(`sum-amount-${cat.id}`),
@@ -245,11 +248,11 @@ handlers['rollover-budget-month'] = async function({ month }) {
 };
 
 handlers['report-budget-month'] = async function({ month }) {
-  let groups = await db.getCategoriesGrouped();
-  let sheetName = monthUtils.sheetForMonth(month);
+  const groups = await db.getCategoriesGrouped();
+  const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
-    let v = sheet.getCellValue(sheetName, name);
+    const v = sheet.getCellValue(sheetName, name);
     return { value: v === '' ? 0 : v, name: resolveName(sheetName, name) };
   }
 
@@ -263,14 +266,14 @@ handlers['report-budget-month'] = async function({ month }) {
     value('total-leftover')
   ];
 
-  for (let group of groups) {
+  for (const group of groups) {
     values = values.concat([
       value(`group-budget-${group.id}`),
       value(`group-sum-amount-${group.id}`),
       value(`group-leftover-${group.id}`)
     ]);
 
-    for (let cat of group.categories) {
+    for (const cat of group.categories) {
       values = values.concat([
         value(`budget-${cat.id}`),
         value(`sum-amount-${cat.id}`),
@@ -345,7 +348,7 @@ handlers['category-delete'] = mutator(async function({ id, transferId }) {
   return withUndo(async () => {
     let result = {};
     await batchMessages(async () => {
-      let row = await db.first(
+      const row = await db.first(
         'SELECT is_income FROM categories WHERE id = ?',
         [id]
       );
@@ -354,7 +357,7 @@ handlers['category-delete'] = mutator(async function({ id, transferId }) {
         return;
       }
 
-      let transfer =
+      const transfer =
         transferId &&
         (await db.first('SELECT is_income FROM categories WHERE id = ?', [
           transferId
@@ -412,7 +415,7 @@ handlers['category-group-delete'] = mutator(async function({ id, transferId }) {
     const groupCategories = await db.all(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
       [id]
-    );
+    ) as any[];
 
     return batchMessages(async () => {
       if (transferId) {
@@ -459,8 +462,8 @@ handlers['payees-get'] = async function() {
 };
 
 handlers['payees-get-rule-counts'] = async function() {
-  let payeeCounts = {};
-  let allRules = rules.getRules();
+  const payeeCounts = {};
+  const allRules = rules.getRules();
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
     if (payeeCounts[id] == null) {
@@ -504,7 +507,7 @@ handlers['payees-batch-change'] = mutator(async function({
 });
 
 handlers['payees-check-orphaned'] = async function({ ids }) {
-  let orphaned = new Set(await db.getOrphanedPayees());
+  const orphaned = new Set(await db.getOrphanedPayees());
   return ids.filter(id => orphaned.has(id));
 };
 
@@ -533,7 +536,7 @@ handlers['payees-update-rule'] = mutator(async function(rule) {
 handlers['payees-add-rule'] = mutator(async function(rule) {
   return withUndo(
     async () => {
-      let id = await db.insertPayeeRule(rule);
+      const id = await db.insertPayeeRule(rule);
       return { ...rule, id };
     },
     { payeeId: rule.payee_id }
@@ -544,7 +547,7 @@ function validateRule(rule) {
   // Returns an array of errors, the array is the same link as the
   // passed-in `array`, or null if there are no errors
   function runValidation(array, validate) {
-    let result = array.map(item => {
+    const result = array.map(item => {
       try {
         validate(item);
       } catch (e) {
@@ -560,7 +563,7 @@ function validateRule(rule) {
     return result.some(Boolean) ? result : null;
   }
 
-  let conditionErrors = runValidation(
+  const conditionErrors = runValidation(
     rule.conditions,
     cond =>
       new Condition(
@@ -572,7 +575,7 @@ function validateRule(rule) {
       )
   );
 
-  let actionErrors = runValidation(
+  const actionErrors = runValidation(
     rule.actions,
     action =>
       new Action(
@@ -595,22 +598,22 @@ function validateRule(rule) {
 }
 
 handlers['rule-validate'] = async function(rule) {
-  let error = validateRule(rule);
+  const error = validateRule(rule);
   return { error };
 };
 
 handlers['rule-add'] = mutator(async function(rule) {
-  let error = validateRule(rule);
+  const error = validateRule(rule);
   if (error) {
     return { error };
   }
 
-  let id = await rules.insertRule(rule);
+  const id = await rules.insertRule(rule);
   return { id };
 });
 
 handlers['rule-update'] = mutator(async function(rule) {
-  let error = validateRule(rule);
+  const error = validateRule(rule);
   if (error) {
     return { error };
   }
@@ -627,8 +630,8 @@ handlers['rule-delete-all'] = mutator(async function(ids) {
   let someDeletionsFailed = false;
 
   await batchMessages(async () => {
-    for (let id of ids) {
-      let res = await rules.deleteRule({ id });
+    for (const id of ids) {
+      const res = await rules.deleteRule({ id });
       if (res === false) {
         someDeletionsFailed = true;
       }
@@ -654,7 +657,7 @@ handlers['rules-get'] = async function() {
 };
 
 handlers['rule-get'] = async function({ id }) {
-  let rule = rules.getRules().find(rule => rule.id === id);
+  const rule = rules.getRules().find(rule => rule.id === id);
   return rule ? rule.serialize() : null;
 };
 
@@ -672,10 +675,10 @@ handlers['make-filters-from-conditions'] = async function({ conditions }) {
 
 handlers['getCell'] = async function({ sheetName, name }) {
   // Fields is no longer used - hardcode
-  let fields = ['name', 'value'];
-  let node = sheet.get()._getNode(resolveName(sheetName, name));
+  const fields = ['name', 'value'];
+  const node = sheet.get()._getNode(resolveName(sheetName, name));
   if (fields) {
-    let res = {};
+    const res = {};
     fields.forEach(field => {
       if (field === 'run') {
         res[field] = node._run ? node._run.toString() : null;
@@ -694,12 +697,12 @@ handlers['getCells'] = async function({ names }) {
 };
 
 handlers['getCellNamesInSheet'] = async function({ sheetName }) {
-  let names = [];
-  for (let name of sheet
+  const names = [];
+  for (const name of sheet
     .get()
     .getNodes()
     .keys()) {
-    let { sheet: nodeSheet, name: nodeName } = unresolveName(name);
+    const { sheet: nodeSheet, name: nodeName } = unresolveName(name);
     if (nodeSheet === sheetName) {
       names.push(nodeName);
     }
@@ -708,7 +711,7 @@ handlers['getCellNamesInSheet'] = async function({ sheetName }) {
 };
 
 handlers['debugCell'] = async function({ sheetName, name }) {
-  let node = sheet.get().getNode(resolveName(sheetName, name));
+  const node = sheet.get().getNode(resolveName(sheetName, name));
   return {
     ...node,
     _run: node._run && node._run.toString()
@@ -735,7 +738,7 @@ handlers['bank-delete'] = async function({ id }) {
     'SELECT * FROM accounts WHERE bank = ?',
     [id],
     true
-  );
+  ) as any[];
 
   await db.delete_('banks', id);
   await Promise.all(
@@ -779,16 +782,16 @@ handlers['accounts-link'] = async function({
   accountId,
   upgradingId
 }) {
-  let bankId = await link.handoffPublicToken(institution, publicToken);
+  const bankId = await link.handoffPublicToken(institution, publicToken);
 
-  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
+  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
   ]);
 
   // Get all the available accounts and find the selected one
-  let accounts = await bankSync.getAccounts(userId, userKey, bankId);
-  let account = accounts.find(acct => acct.account_id === accountId);
+  const accounts = await bankSync.getAccounts(userId, userKey, bankId);
+  const account = accounts.find(acct => acct.account_id === accountId);
 
   await db.update('accounts', {
     id: upgradingId,
@@ -824,8 +827,8 @@ handlers['accounts-connect'] = async function({
   accountIds,
   offbudgetIds
 }) {
-  let bankId = await link.handoffPublicToken(institution, publicToken);
-  let ids = await link.addAccounts(bankId, accountIds, offbudgetIds);
+  const bankId = await link.handoffPublicToken(institution, publicToken);
+  const ids = await link.addAccounts(bankId, accountIds, offbudgetIds);
   return ids;
 };
 
@@ -850,7 +853,7 @@ handlers['account-create'] = mutator(async function({
     });
 
     if (balance != null) {
-      let payee = await getStartingBalancePayee();
+      const payee = await getStartingBalancePayee();
 
       await db.insertTransaction({
         account: id,
@@ -879,7 +882,7 @@ handlers['account-close'] = mutator(async function({
   await handlers['account-unlink']({ id });
 
   return withUndo(async () => {
-    let account = await db.first(
+    const account = await db.first(
       'SELECT * FROM accounts WHERE id = ? AND tombstone = 0',
       [id]
     );
@@ -898,13 +901,13 @@ handlers['account-close'] = mutator(async function({
     if (numTransactions === 0) {
       await db.deleteAccount({ id });
     } else if (forced) {
-      let rows = await db.runQuery(
+      const rows = await db.runQuery(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
         [id],
         true
-      );
+      ) as any[];
 
-      let { id: payeeId } = await db.first(
+      const { id: payeeId } = await db.first(
         'SELECT id FROM payees WHERE transfer_acct = ?',
         [id]
       );
@@ -941,7 +944,7 @@ handlers['account-close'] = mutator(async function({
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0) {
-        let { id: payeeId } = await db.first(
+        const { id: payeeId } = await db.first(
           'SELECT id FROM payees WHERE transfer_acct = ?',
           [transferAccountId]
         );
@@ -975,12 +978,12 @@ handlers['account-move'] = mutator(async function({ id, targetId }) {
 let stopPolling = false;
 
 handlers['poll-web-token'] = async function({ token }) {
-  let [[, userId], [, key]] = await asyncStorage.multiGet([
+  const [[, userId], [, key]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
   ]);
 
-  let startTime = Date.now();
+  const startTime = Date.now();
   stopPolling = false;
 
   async function getData(cb) {
@@ -993,7 +996,7 @@ handlers['poll-web-token'] = async function({ token }) {
       return;
     }
 
-    let data = await post(
+    const data = await post(
       getServer().PLAID_SERVER + '/get-web-token-contents',
       {
         userId,
@@ -1030,7 +1033,7 @@ handlers['poll-web-token-stop'] = async function() {
 };
 
 handlers['accounts-sync'] = async function({ id }) {
-  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
+  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
   ]);
@@ -1040,20 +1043,20 @@ handlers['accounts-sync'] = async function({ id }) {
          WHERE a.tombstone = 0 AND a.closed = 0`,
     [],
     true
-  );
+  ) as any[];
 
   if (id) {
     accounts = accounts.filter(acct => acct.id === id);
   }
 
-  let errors = [];
+  const errors = [];
   let newTransactions = [];
   let matchedTransactions = [];
   let updatedAccounts = [];
 
-  let { groupId } = prefs.getPrefs();
+  const { groupId } = prefs.getPrefs();
 
-  for (var i = 0; i < accounts.length; i++) {
+  for (let i = 0; i < accounts.length; i++) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
@@ -1064,7 +1067,7 @@ handlers['accounts-sync'] = async function({ id }) {
           acct.account_id,
           acct.bankId
         );
-        let { added, updated } = res;
+        const { added, updated } = res;
 
         newTransactions = newTransactions.concat(added);
         matchedTransactions = matchedTransactions.concat(updated);
@@ -1136,7 +1139,7 @@ handlers['transactions-import'] = mutator(function({
 });
 
 handlers['account-unlink'] = mutator(async function({ id }) {
-  let { bank: bankId } = await db.first(
+  const { bank: bankId } = await db.first(
     'SELECT bank FROM accounts WHERE id = ?',
     [id]
   );
@@ -1154,7 +1157,7 @@ handlers['account-unlink'] = mutator(async function({ id }) {
     balance_limit: null
   });
 
-  let { count } = await db.first(
+  const { count } = await db.first(
     'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
     [bankId]
   );
@@ -1163,7 +1166,7 @@ handlers['account-unlink'] = mutator(async function({ id }) {
     // No more accounts are associated with this bank. We can remove
     // it from Plaid.
 
-    let [[, userId], [, key]] = await asyncStorage.multiGet([
+    const [[, userId], [, key]] = await asyncStorage.multiGet([
       'user-id',
       'user-key'
     ]);
@@ -1179,12 +1182,12 @@ handlers['account-unlink'] = mutator(async function({ id }) {
 });
 
 handlers['make-plaid-public-token'] = async function({ bankId }) {
-  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
+  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
   ]);
 
-  let data = await post(getServer().PLAID_SERVER + '/make-public-token', {
+  const data = await post(getServer().PLAID_SERVER + '/make-public-token', {
     userId: userId,
     key: userKey,
     item_id: '' + bankId
@@ -1221,7 +1224,7 @@ handlers['save-global-prefs'] = async function(prefs) {
 };
 
 handlers['load-global-prefs'] = async function() {
-  let [
+  const [
     [, floatingSidebar],
     [, seenTutorial],
     [, maxMonths],
@@ -1251,11 +1254,11 @@ handlers['load-global-prefs'] = async function() {
 };
 
 handlers['save-prefs'] = async function(prefsToSet) {
-  let { cloudFileId } = prefs.getPrefs();
+  const { cloudFileId } = prefs.getPrefs();
 
   // Need to sync the budget name on the server as well
   if (prefsToSet.budgetName && cloudFileId) {
-    let userToken = await asyncStorage.getItem('user-token');
+    const userToken = await asyncStorage.getItem('user-token');
 
     await post(getServer().SYNC_SERVER + '/update-user-filename', {
       token: userToken,
@@ -1289,17 +1292,17 @@ handlers['key-make'] = async function({ password }) {
     throw new Error('user-set-key must be called with file loaded');
   }
 
-  let cloudFileId = prefs.getPrefs().cloudFileId;
+  const cloudFileId = prefs.getPrefs().cloudFileId;
 
-  let salt = encryption.randomBytes(32).toString('base64');
-  let id = uuid.v4Sync();
-  let key = await encryption.createKey({ id, password, salt });
+  const salt = encryption.randomBytes(32).toString('base64');
+  const id = uuid.v4Sync();
+  const key = await encryption.createKey({ id, password, salt });
 
   // Load the key
   await encryption.loadKey(key);
 
   // Make some test data to use if the key is valid or not
-  let testContent = await makeTestMessage(key.getId());
+  const testContent = await makeTestMessage(key.getId());
 
   // Changing your key necessitates a sync reset as well. This will
   // clear all existing encrypted data from the server so you won't
@@ -1317,7 +1320,7 @@ handlers['key-make'] = async function({ password }) {
 // This can be called both while a file is already loaded or not. This
 // will see if a key is valid and if so save it off.
 handlers['key-test'] = async function({ fileId, password }) {
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
 
   if (fileId == null) {
     fileId = prefs.getPrefs().cloudFileId;
@@ -1342,7 +1345,7 @@ handlers['key-test'] = async function({ fileId, password }) {
 
   test = JSON.parse(test);
 
-  let key = await encryption.createKey({ id, password, salt });
+  const key = await encryption.createKey({ id, password, salt });
   encryption.loadKey(key);
 
   try {
@@ -1356,7 +1359,7 @@ handlers['key-test'] = async function({ fileId, password }) {
   }
 
   // Persist key in async storage
-  let keys = JSON.parse((await asyncStorage.getItem(`encrypt-keys`)) || '{}');
+  const keys = JSON.parse((await asyncStorage.getItem(`encrypt-keys`)) || '{}');
   keys[fileId] = key.serialize();
   await asyncStorage.setItem('encrypt-keys', JSON.stringify(keys));
 
@@ -1371,7 +1374,7 @@ handlers['key-test'] = async function({ fileId, password }) {
 };
 
 handlers['should-pitch-subscribe'] = async function() {
-  let seenSubscribe = await asyncStorage.getItem('seenSubscribe');
+  const seenSubscribe = await asyncStorage.getItem('seenSubscribe');
   return seenSubscribe !== 'true';
 };
 
@@ -1380,7 +1383,7 @@ handlers['has-pitched-subscribe'] = async function() {
   return 'ok';
 };
 
-handlers['subscribe-needs-bootstrap'] = async function({ url } = {}) {
+handlers['subscribe-needs-bootstrap'] = async function({ url }: { url?: string}) {
   if (getServer(url).BASE_SERVER === UNCONFIGURED_SERVER) {
     return { bootstrapped: true };
   }
@@ -1429,16 +1432,16 @@ handlers['subscribe-get-user'] = async function() {
     return { offline: false };
   }
 
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
 
   if (userToken) {
     try {
-      let res = await get(getServer().SIGNUP_SERVER + '/validate', {
+      const resString = await get(getServer().SIGNUP_SERVER + '/validate', {
         headers: {
           'X-ACTUAL-TOKEN': userToken
         }
       });
-      res = JSON.parse(res);
+      const res = JSON.parse(resString);
 
       if (res.status === 'error') {
         if (res.reason === 'unauthorized') {
@@ -1458,7 +1461,7 @@ handlers['subscribe-get-user'] = async function() {
 };
 
 handlers['subscribe-change-password'] = async function({ password }) {
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
   let res;
   try {
     res = await post(getServer().SIGNUP_SERVER + '/change-password', {
@@ -1473,7 +1476,7 @@ handlers['subscribe-change-password'] = async function({ password }) {
 };
 
 handlers['subscribe-sign-in'] = async function({ password }) {
-  let res = await post(getServer().SIGNUP_SERVER + '/login', {
+  const res = await post(getServer().SIGNUP_SERVER + '/login', {
     password
   });
 
@@ -1503,7 +1506,7 @@ handlers['get-server-url'] = async function() {
 handlers['set-server-url'] = async function({ url }) {
   if (url != null) {
     // Validate the server is running
-    let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
+    const { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
       url
     });
     if (error) {
@@ -1577,7 +1580,7 @@ handlers['reset-budget-cache'] = mutator(async function() {
   await sheet.waitOnSpreadsheet();
 });
 
-handlers['upload-budget'] = async function({ id } = {}) {
+handlers['upload-budget'] = async function({ id }: { id?: string }) {
   if (id) {
     if (prefs.getPrefs()) {
       throw new Error('upload-budget: id given but prefs already loaded');
@@ -1612,7 +1615,7 @@ handlers['download-budget'] = async function({ fileId, replace }) {
     if (e.type === 'FileDownloadError') {
       if (e.reason === 'file-exists' && e.meta.id) {
         await prefs.loadPrefs(e.meta.id);
-        let name = prefs.getPrefs().budgetName;
+        const name = prefs.getPrefs().budgetName;
         prefs.unloadPrefs();
 
         e.meta = { ...e.meta, name };
@@ -1625,7 +1628,7 @@ handlers['download-budget'] = async function({ fileId, replace }) {
     }
   }
 
-  let id = result.id;
+  const id = result.id;
 
   // Load the budget and do a full sync
   result = await loadBudget(result.id, VERSION, { showUpdate: true });
@@ -1642,7 +1645,7 @@ handlers['download-budget'] = async function({ fileId, replace }) {
 };
 
 handlers['load-budget'] = async function({ id }) {
-  let currentPrefs = prefs.getPrefs();
+  const currentPrefs = prefs.getPrefs();
 
   if (currentPrefs) {
     if (currentPrefs.id === id) {
@@ -1654,11 +1657,11 @@ handlers['load-budget'] = async function({ id }) {
     }
   }
 
-  let res = await loadBudget(id, VERSION, { showUpdate: true });
+  const res = await loadBudget(id, VERSION, { showUpdate: true });
 
   async function trackSizes() {
-    let getFileSize = async name => {
-      let dbFile = fs.join(fs.getBudgetDir(id), name);
+    const getFileSize = async name => {
+      const dbFile = fs.join(fs.getBudgetDir(id), name);
       try {
         return await fs.size(dbFile);
       } catch (err) {
@@ -1667,8 +1670,8 @@ handlers['load-budget'] = async function({ id }) {
     };
 
     try {
-      let dbSize = await getFileSize('db.sqlite');
-      let cacheSize = await getFileSize('cache.sqlite');
+      const dbSize = await getFileSize('db.sqlite');
+      const cacheSize = await getFileSize('cache.sqlite');
       tracking.track('app:load-budget', { size: dbSize, cacheSize });
     } catch (err) {
       console.warn(err);
@@ -1726,7 +1729,7 @@ handlers['delete-budget'] = async function({ id, cloudFileId }) {
 
   // If a local file exists, you can delete it by passing its local id
   if (id) {
-    let budgetDir = fs.getBudgetDir(id);
+    const budgetDir = fs.getBudgetDir(id);
     await fs.removeDirRecursively(budgetDir);
   }
 
@@ -1738,7 +1741,12 @@ handlers['create-budget'] = async function({
   avoidUpload,
   testMode,
   testBudgetId
-} = {}) {
+}: {  
+  budgetName?: string,
+  avoidUpload?: boolean,
+  testMode?: boolean,
+  testBudgetId?: string
+}) {
   let id;
   if (testMode) {
     budgetName = budgetName || 'Test Budget';
@@ -1752,14 +1760,14 @@ handlers['create-budget'] = async function({
     if (!budgetName) {
       // Unfortunately we need to load all of the existing files first
       // so we can detect conflicting names.
-      let files = await handlers['get-budgets']();
+      const files = await handlers['get-budgets']();
       budgetName = await uniqueFileName(files);
     }
 
     id = await idFromFileName(budgetName);
   }
 
-  let budgetDir = fs.getBudgetDir(id);
+  const budgetDir = fs.getBudgetDir(id);
   await fs.mkdir(budgetDir);
 
   // Create the initial database
@@ -1772,7 +1780,7 @@ handlers['create-budget'] = async function({
   );
 
   // Load it in
-  let { error } = await loadBudget(id, VERSION);
+  const { error } = await loadBudget(id, VERSION);
   if (error) {
     console.log('Error creating budget: ' + error);
     return { error };
@@ -1805,14 +1813,14 @@ handlers['import-budget'] = async function({ filepath, type }) {
       throw new Error(`File not found at the provided path: ${filepath}`);
     }
 
-    let buffer = Buffer.from(await fs.readFile(filepath, 'binary'));
+    const buffer = Buffer.from(await fs.readFile(filepath, 'binary'));
 
     switch (type) {
       case 'ynab4':
         try {
           await YNAB4.importBuffer(filepath, buffer);
         } catch (e) {
-          let msg = e.message.toLowerCase();
+          const msg = e.message.toLowerCase();
           if (
             msg.includes('not a ynab4') ||
             msg.includes('could not find file')
@@ -1821,7 +1829,7 @@ handlers['import-budget'] = async function({ filepath, type }) {
           }
         }
         break;
-      case 'ynab5':
+      case 'ynab5': {
         let data;
         try {
           data = JSON.parse(buffer.toString());
@@ -1835,7 +1843,8 @@ handlers['import-budget'] = async function({ filepath, type }) {
           return { error: 'not-ynab5' };
         }
         break;
-      case 'actual':
+      }
+      case 'actual': {
         // We should pull out import/export into its own app so this
         // can be abstracted out better. Importing Actual files is a
         // special case because we can directly write down the files,
@@ -1843,14 +1852,14 @@ handlers['import-budget'] = async function({ filepath, type }) {
         // duplicate some of the workflow
         await handlers['close-budget']();
 
-        let { id } = await cloudStorage.importBuffer(
+        const { id } = await cloudStorage.importBuffer(
           { cloudFileId: null, groupId: null },
           buffer
         );
 
         // We never want to load cached data from imported files, so
         // delete the cache
-        let sqliteDb = await sqlite.openDatabase(
+        const sqliteDb = await sqlite.openDatabase(
           fs.join(fs.getBudgetDir(id), 'db.sqlite')
         );
         sqlite.execQuery(
@@ -1870,6 +1879,7 @@ handlers['import-budget'] = async function({ filepath, type }) {
         await cloudStorage.upload().catch(err => {});
 
         break;
+      }
       default:
     }
   } catch (err) {
@@ -1885,7 +1895,7 @@ handlers['export-budget'] = async function() {
   return await cloudStorage.exportBuffer();
 };
 
-async function loadBudget(id, appVersion, { showUpdate } = {}) {
+async function loadBudget(id, appVersion, { showUpdate = false } = {}) {
   let dir;
   try {
     dir = fs.getBudgetDir(id);
@@ -1916,14 +1926,14 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
   // Older versions didn't tag the file with the current user, so do
   // so now
   if (!prefs.getPrefs().userId) {
-    let [[, userId]] = await asyncStorage.multiGet(['user-token']);
+    const [[, userId]] = await asyncStorage.multiGet(['user-token']);
     prefs.savePrefs({ userId });
   }
 
-  let { budgetVersion, budgetId } = prefs.getPrefs();
+  const { budgetVersion, budgetId } = prefs.getPrefs();
 
   try {
-    await updateVersion(budgetVersion, showUpdate);
+    await updateVersion();
   } catch (e) {
     console.warn('Error updating', e);
     let result;
@@ -2008,16 +2018,16 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
 }
 
 handlers['get-upgrade-notifications'] = async function() {
-  let { id } = prefs.getPrefs();
+  const { id } = prefs.getPrefs();
   if (id === TEST_BUDGET_ID || id === DEMO_BUDGET_ID) {
     return [];
   }
 
-  let types = ['schedules', 'repair-splits'];
-  let unseen = [];
+  const types = ['schedules', 'repair-splits'];
+  const unseen = [];
 
-  for (let type of types) {
-    let key = `notifications.${type}`;
+  for (const type of types) {
+    const key = `notifications.${type}`;
     if (prefs.getPrefs()[key] == null) {
       unseen.push(type);
     }
@@ -2027,7 +2037,7 @@ handlers['get-upgrade-notifications'] = async function() {
 };
 
 handlers['seen-upgrade-notification'] = async function({ type }) {
-  let key = `notifications.${type}`;
+  const key = `notifications.${type}`;
   prefs.savePrefs({ [key]: true });
 };
 
@@ -2132,10 +2142,10 @@ export async function initApp(version, isDev, socketName) {
   await tracking.init();
   await setupDocumentsDir();
 
-  let keysStr = await asyncStorage.getItem('encrypt-keys');
+  const keysStr = await asyncStorage.getItem('encrypt-keys');
   if (keysStr) {
     try {
-      let keys = JSON.parse(keysStr);
+      const keys = JSON.parse(keysStr);
 
       // Load all the keys
       await Promise.all(
@@ -2168,7 +2178,7 @@ export async function initApp(version, isDev, socketName) {
   });
 
   if (!isDev && !Platform.isMobile && !Platform.isWeb) {
-    let autoUpdate = await asyncStorage.getItem('auto-update');
+    const autoUpdate = await asyncStorage.getItem('auto-update');
     process.send({
       type: 'shouldAutoUpdate',
       flag: autoUpdate == null || autoUpdate === 'true'
@@ -2226,7 +2236,7 @@ export const lib = {
   getDataDir: fs.getDataDir,
   sendMessage: (msg, args) => connection.send(msg, args),
   send: async (name, args) => {
-    let res = await runHandler(app.handlers[name], args);
+    const res = await runHandler(app.handlers[name], args);
     return res;
   },
   on: (name, func) => app.events.on(name, func),

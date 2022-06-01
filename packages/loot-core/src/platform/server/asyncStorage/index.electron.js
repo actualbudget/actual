@@ -20,6 +20,8 @@ function init({ persist = true } = {}) {
   persisted = persist;
 }
 
+function shutdown() {}
+
 function _saveStore() {
   if (persisted) {
     return new Promise(function(resolve, reject) {
@@ -75,6 +77,7 @@ function multiRemove(keys) {
 
 module.exports = {
   init,
+  shutdown,
   getItem,
   setItem,
   removeItem,

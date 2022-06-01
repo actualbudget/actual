@@ -4,7 +4,7 @@ let webpack = require('webpack');
 module.exports = {
   mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
   target: 'node',
-  entry: path.join(__dirname, '../src/server/main.js'),
+  entry: path.join(__dirname, '../src/server/main.ts'),
   context: path.resolve(__dirname, '../../..'),
   devtool: 'source-map',
   output: {

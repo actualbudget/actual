@@ -1,6 +1,8 @@
 const store = {};
 
-function init() {}
+function init({ persist = true } = {}) {
+  // eslint-disable-previous-line @typescript-eslint/no-empty-function
+}
 
 function getItem(key) {
   return new Promise(function(resolve) {

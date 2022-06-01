@@ -4,7 +4,7 @@ let webpack = require('webpack');
 module.exports = {
   mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
   target: 'node',
-  entry: path.join(__dirname, '../src/server/main.js'),
+  entry: path.join(__dirname, '../src/server/main.ts'),
   output: {
     path: path.resolve(path.join(__dirname, '/../lib-dist')),
     filename: 'bundle.mobile.js',
