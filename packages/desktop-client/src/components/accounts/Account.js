@@ -1775,7 +1775,7 @@ export default function Account(props) {
     accounts: state.queries.accounts,
     failedAccounts: state.account.failedAccounts,
     categoryGroups: state.queries.categories.grouped,
-    syncEnabled: state.prefs.local['flags.syncAccount'],
+    syncEnabled: true, //state.prefs.local['flags.syncAccount'],
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     expandSplits: props.match && state.prefs.local['expand-splits'],
     showBalances:

@@ -101,7 +101,8 @@ function SidebarWithData({
       onReorder={onReorder}
       onAddAccount={() =>
         replaceModal(
-          prefs['flags.syncAccount'] ? 'add-account' : 'add-local-account'
+          // prefs['flags.syncAccount'] ? 'add-account' : 'add-local-account'
+          'add-account'
         )
       }
       showClosedAccounts={prefs['ui.showClosedAccounts']}

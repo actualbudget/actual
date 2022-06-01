@@ -92,6 +92,30 @@ function onSheetChange({ names }) {
   connection.send('cells-changed', nodes);
 }
 
+let plaidSyncInterval;
+let interval = 18000000; //Default is 18000000ms, 30 minutes
+function startPlaidSyncInterval() {
+  console.log('start-plaid-sync-auto');
+  plaidSyncInterval = setInterval(runPlaidSync, interval);
+}
+
+function stopPlaidSyncInterval() {
+  console.log('stop-plaid-sync-auto');
+  clearInterval(plaidSyncInterval);
+}
+
+function runPlaidSync() {
+  asyncStorage.getItem('plaid-link-auto').then((value) => {
+    console.log(value);
+    if (value) {
+      console.log('running plaid sync');
+      runHandler(handlers['accounts-sync'], {}).then((value) => {
+
+      });
+    }
+  });
+}
+
 // handlers
 
 export let handlers = {};
@@ -972,6 +996,15 @@ handlers['account-move'] = mutator(async function({ id, targetId }) {
   });
 });
 
+handlers['create-web-token'] = async function () {
+  let data = await post(getServer().PLAID_SERVER + '/create-web-token');
+  if (data.status === 'undefined') {
+    return { error: 'undefined token', code: data.error_code, type: data.error_type };
+  }
+
+  return { webToken: data };
+};
+
 let stopPolling = false;
 
 handlers['poll-web-token'] = async function({ token }) {
@@ -1217,6 +1250,28 @@ handlers['save-global-prefs'] = async function(prefs) {
   if ('floatingSidebar' in prefs) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
+  if ('plaidLinkAuto' in prefs) {
+    await asyncStorage.setItem('plaid-link-auto', '' + prefs.plaidLinkAuto);
+    if (prefs.plaidLinkAuto === true) {
+      startPlaidSyncInterval();
+    } else {
+      stopPlaidSyncInterval();
+    }
+  }
+  if ('plaidLinkClientID' in prefs) {
+    await asyncStorage.setItem('plaid-link-client-id', '' + prefs.plaidLinkClientID);
+    let clientID = prefs.plaidLinkClientID;
+    post(getServer().PLAID_SERVER + '/add-plaid-client-id', { clientID }).then((value) => {
+
+    });
+  }
+  if ('plaidLinkSecret' in prefs) {
+    await asyncStorage.setItem('plaid-link-secret', '' + prefs.plaidLinkSecret);
+    let secret = prefs.plaidLinkSecret;
+    post(getServer().PLAID_SERVER + '/add-plaid-secret', { secret }).then((value) => {
+      
+    });
+  }
   return 'ok';
 };
 
@@ -1228,7 +1283,10 @@ handlers['load-global-prefs'] = async function() {
     [, trackUsage],
     [, autoUpdate],
     [, documentDir],
-    [, encryptKey]
+    [, encryptKey],
+    [, plaidLinkAuto],
+    [, plaidLinkClientID],
+    [, plaidLinkSecret],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'seen-tutorial',
@@ -1236,7 +1294,10 @@ handlers['load-global-prefs'] = async function() {
     'track-usage',
     'auto-update',
     'document-dir',
-    'encrypt-key'
+    'encrypt-key',
+    'plaid-link-auto',
+    'plaid-link-client-id',
+    'plaid-link-secret'
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1246,7 +1307,10 @@ handlers['load-global-prefs'] = async function() {
     trackUsage: trackUsage == null || trackUsage === 'true' ? true : false,
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
-    keyId: encryptKey && JSON.parse(encryptKey).id
+    keyId: encryptKey && JSON.parse(encryptKey).id,
+    plaidLinkAuto: plaidLinkAuto === 'true' ? true : false,
+    plaidLinkClientID: plaidLinkClientID,
+    plaidLinkSecret: plaidLinkSecret
   };
 };
 
@@ -1294,7 +1358,7 @@ handlers['key-make'] = async function({ password }) {
   let salt = encryption.randomBytes(32).toString('base64');
   let id = uuid.v4Sync();
   let key = await encryption.createKey({ id, password, salt });
-
+console.log(key);
   // Load the key
   await encryption.loadKey(key);
 

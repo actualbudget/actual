@@ -74,13 +74,11 @@ export async function getAccounts(userId, userKey, id) {
     item_id: id
   });
 
-  let { accounts } = res;
+  for (var i = 0; i < res.length; i++) {
+    res[i].balances.current = getAccountBalance(res[i]);
+  }
 
-  accounts.forEach(acct => {
-    acct.balances.current = getAccountBalance(acct);
-  });
-
-  return accounts;
+  return res;
 }
 
 export function fromPlaid(trans) {

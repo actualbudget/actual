@@ -1,0 +1,132 @@
+<body>
+    <div class="success"
+        style="display: none; position: absolute; top: 0; left: 0; bottom: 0; right: 0; align-items: center; justify-content: center">
+        <div
+            style="display: flex; align-items: center; background-color: #EFFCF6; color: #0C6B58; padding: 12px 15px; border-radius: 4px; box-shadow: 0 2px 4px 0 rgba(0,0,0,0.10); border: 1px solid #65D6AD">
+            <img src="svg/check-circle-1.svg" width="16" style="margin-right: 5px" />
+            Your account has been linked. You can go back to Actual now.
+        </div>
+    </div>
+
+    <div class="error"
+        style="display: none; position: absolute; top: 0; left: 0; bottom: 0; right: 0; align-items: center; justify-content: center">
+        <div
+            style="background-color: #FFE3E3; color: #610316; padding: 12px 15px; border-radius: 4px; box-shadow: 0 2px 4px 0 rgba(0,0,0,0.10); border: 1px solid #FFBDBD">
+            An error occurred: <span class="error-msg" />
+        </div>
+    </div>
+
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <script type="text/javascript">
+        let config = {
+            // url: 'https://sync.actualbudget.com/plaid',
+            url: 'http://localhost:5006/plaid',
+            plaid: {
+                env: 'development',
+                key: '25b3c7e18fa05f2bdbb0ad0640fdfe'
+            }
+        };
+        function post(url, data) {
+            return fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json());
+        }
+
+        async function connect() {
+            let m = window.location.search.match(/token=([^&]*)/);
+            if (!m) {
+                renderError('missing-token');
+                return;
+            }
+            let token = m[1];
+
+            m = window.location.search.match(/plaidToken=([^&]*)/);
+            let plaidToken = m && m[1];
+
+            // Validate token
+            let data = await post(config.url + '/validate-web-token', {
+                token
+            });
+
+            if (data.status !== 'ok') {
+                console.log('[Error]', data);
+                renderError(data.reason);
+                return;
+            }
+
+            if (plaidToken == null) {
+                let res = await post(config.url + '/make_link_token', {
+                    token
+                });
+                console.log(res);
+                plaidToken = res.data;
+            }
+
+            console.log(plaidToken);
+
+            // Open Plaid
+            let plaid = Plaid.create({
+                token: plaidToken,
+                onSuccess: async (publicToken, metadata) => {
+                    await post(config.url + '/put-web-token-contents', {
+                        token,
+                        data: { publicToken, metadata }
+                    });
+                    renderSuccess();
+                },
+                onExit: async (err, metadata) => {
+                    if (plaidToken) {
+                        // If the user is re-authorizing an account, it could be the
+                        // case that it didn't need any change. If there is no error,
+                        // notify the user as a success if so
+                        await post(config.url + '/put-web-token-contents', {
+                            token,
+                            data: {}
+                        });
+                        renderSuccess();
+                    } else if (err) {
+                        await post(config.url + '/put-web-token-contents', {
+                            token,
+                            data: { error: true }
+                        });
+                        renderError('plaid');
+                    } else {
+                        // Otherwise, the user manually exited so just close the
+                        // window
+                        window.close();
+                    }
+                }
+            });
+
+            plaid.open();
+        }
+
+        function renderError(error) {
+            let msg;
+            switch (error) {
+                case 'plaid':
+                    msg = 'something went wrong with our provider';
+                    break;
+                case 'expired':
+                    msg = 'this token has expired';
+                    break;
+                default:
+                    msg = 'a valid token is missing';
+                    break;
+            }
+
+            document.querySelector('.error').style.display = 'flex';
+            document.querySelector('.error-msg').textContent = msg;
+        }
+
+        function renderSuccess() {
+            document.querySelector('.success').style.display = 'flex';
+        }
+
+        connect();
+    </script>
+</body>

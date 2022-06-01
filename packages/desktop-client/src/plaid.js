@@ -1,11 +1,14 @@
 import { send } from 'loot-core/src/platform/client/fetch';
+import { getServer, setServer } from 'loot-core/src/server/server-config';
 
 function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
   pushModal('plaid-external-msg', {
     onMoveExternal: async () => {
+      setServer('http://localhost:5006');
       let token = await send('create-web-token');
-      let url = 'http://link.actualbudget.com/?token=' + token;
+      // let url = 'http://link.actualbudget.com/?token=' + token.webToken;
       // let url = 'http://localhost:8080/?token=' + token;
+      let url = 'http://localhost:3001/plaid-link.html?token=' + token.webToken;
       if (plaidToken) {
         url = url + '&plaidToken=' + plaidToken;
       }
