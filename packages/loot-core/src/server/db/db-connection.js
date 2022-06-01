@@ -5,6 +5,15 @@ import fs from '../../platform/server/fs';
 let dbPath;
 let db;
 
+export function getDatabase() {
+  return db;
+}
+
+export function setDatabase(db_) {
+  db = db_;
+  resetQueryCache();
+}
+
 export function getDatabasePath() {
   return dbPath;
 }
@@ -30,15 +39,6 @@ export async function closeDatabase() {
     await sqlite.closeDatabase(db);
     setDatabase(null);
   }
-}
-
-export function setDatabase(db_) {
-  db = db_;
-  resetQueryCache();
-}
-
-export function getDatabase() {
-  return db;
 }
 
 // This manages an LRU cache of prepared query statements. This is
