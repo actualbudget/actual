@@ -1720,6 +1720,18 @@ handlers['load-budget'] = async function({ id }) {
 
   let res = await loadBudget(id, VERSION, { showUpdate: true });
 
+  asyncStorage.getItem('plaid-link-client-id').then((clientID) => {
+    post(getServer().PLAID_SERVER + '/add-plaid-client-id', { clientID }).then((value) => {
+
+    });
+  });
+
+  asyncStorage.getItem('plaid-link-secret').then((secret) => {
+    post(getServer().PLAID_SERVER + '/add-plaid-secret', { secret }).then((value) => {
+
+    });
+  });
+
   async function trackSizes() {
     let getFileSize = async name => {
       let dbFile = fs.join(fs.getBudgetDir(id), name);
