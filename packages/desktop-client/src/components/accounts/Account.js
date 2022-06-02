@@ -119,10 +119,6 @@ function EmptyMessage({ onAdd }) {
         <Button primary style={{ marginTop: 20 }} onClick={onAdd}>
           Add account
         </Button>
-
-        <View style={{ marginTop: 20, fontSize: 13, color: colors.n5 }}>
-          In the future, you can add accounts from the sidebar.
-        </View>
       </View>
     </View>
   );

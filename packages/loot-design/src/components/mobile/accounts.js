@@ -149,10 +149,6 @@ function EmptyMessage({ onAdd }) {
       >
         Add Account
       </Button>
-
-      <Text style={{ marginTop: 20, color: colors.n5, lineHeight: 19 }}>
-        In the future, you can add accounts using the add button in the header.
-      </Text>
     </View>
   );
 }
