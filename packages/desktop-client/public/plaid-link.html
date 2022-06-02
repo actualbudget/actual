@@ -18,9 +18,14 @@
 
     <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
     <script type="text/javascript">
+        const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+        });
+        let serverURL = params.serverurl + '/plaid';
+
         let config = {
             // url: 'https://sync.actualbudget.com/plaid',
-            url: 'http://localhost:5006/plaid',
+            url: serverURL,
             plaid: {
                 env: 'development',
                 key: '25b3c7e18fa05f2bdbb0ad0640fdfe'

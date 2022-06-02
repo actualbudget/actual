@@ -187,14 +187,6 @@ function GlobalSettings({
     saveGlobalPrefs({ plaidLinkAuto: e.target.checked });
   }
 
-  function onPlaidLinkClientID(e) {
-    saveGlobalPrefs({ plaidLinkClientID: e.target.value });
-  }
-
-  function onPlaidLinkSecret(e) {
-    saveGlobalPrefs({ plaidLinkSecret: e.target.value });
-  }
-
   return (
     <View>
       <View>
@@ -326,20 +318,6 @@ function GlobalSettings({
           marginTop: 0,
           alignItems: 'flex-start'
         }}>
-        </View>
-        <View>
-          <View>
-            <Text style={{ fontSize: 15 }}>
-              Plaid Client ID:
-            </Text>
-            <input type="text" value={globalPrefs.plaidLinkClientID} onChange={onPlaidLinkClientID} style={{ maxWidth: 300 }} />
-          </View>
-          <View>
-            <Text style={{ fontSize: 15, marginTop: 15 }}>
-              Plaid Secret:
-            </Text>
-            <input type="text" value={globalPrefs.plaidLinkSecret} onChange={onPlaidLinkSecret} style={{ maxWidth: 300 }} />
-          </View>
         </View>
         <View
           style={{

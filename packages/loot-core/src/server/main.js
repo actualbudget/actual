@@ -1258,20 +1258,6 @@ handlers['save-global-prefs'] = async function(prefs) {
       stopPlaidSyncInterval();
     }
   }
-  if ('plaidLinkClientID' in prefs) {
-    await asyncStorage.setItem('plaid-link-client-id', '' + prefs.plaidLinkClientID);
-    let clientID = prefs.plaidLinkClientID;
-    post(getServer().PLAID_SERVER + '/add-plaid-client-id', { clientID }).then((value) => {
-
-    });
-  }
-  if ('plaidLinkSecret' in prefs) {
-    await asyncStorage.setItem('plaid-link-secret', '' + prefs.plaidLinkSecret);
-    let secret = prefs.plaidLinkSecret;
-    post(getServer().PLAID_SERVER + '/add-plaid-secret', { secret }).then((value) => {
-      
-    });
-  }
   return 'ok';
 };
 
@@ -1285,8 +1271,6 @@ handlers['load-global-prefs'] = async function() {
     [, documentDir],
     [, encryptKey],
     [, plaidLinkAuto],
-    [, plaidLinkClientID],
-    [, plaidLinkSecret],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'seen-tutorial',
@@ -1295,9 +1279,7 @@ handlers['load-global-prefs'] = async function() {
     'auto-update',
     'document-dir',
     'encrypt-key',
-    'plaid-link-auto',
-    'plaid-link-client-id',
-    'plaid-link-secret'
+    'plaid-link-auto'
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1308,9 +1290,7 @@ handlers['load-global-prefs'] = async function() {
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
-    plaidLinkAuto: plaidLinkAuto === 'true' ? true : false,
-    plaidLinkClientID: plaidLinkClientID,
-    plaidLinkSecret: plaidLinkSecret
+    plaidLinkAuto: plaidLinkAuto === 'true' ? true : false
   };
 };
 
@@ -1719,18 +1699,6 @@ handlers['load-budget'] = async function({ id }) {
   }
 
   let res = await loadBudget(id, VERSION, { showUpdate: true });
-
-  asyncStorage.getItem('plaid-link-client-id').then((clientID) => {
-    post(getServer().PLAID_SERVER + '/add-plaid-client-id', { clientID }).then((value) => {
-
-    });
-  });
-
-  asyncStorage.getItem('plaid-link-secret').then((secret) => {
-    post(getServer().PLAID_SERVER + '/add-plaid-secret', { secret }).then((value) => {
-
-    });
-  });
 
   async function trackSizes() {
     let getFileSize = async name => {
