@@ -151,7 +151,7 @@ handlers['transactions-filter'] = async function({
 }) {
   return db.getTransactions(
     term,
-    accountId,
+    accountId
     // latestDate,
     // notPaged ? null : count == null ? undefined : count,
     // options
@@ -412,14 +412,17 @@ handlers['category-group-move'] = mutator(async function({ id, targetId }) {
 
 handlers['category-group-delete'] = mutator(async function({ id, transferId }) {
   return withUndo(async () => {
-    const groupCategories = await db.all(
+    const groupCategories = (await db.all(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
       [id]
-    ) as any[];
+    )) as any[];
 
     return batchMessages(async () => {
       if (transferId) {
-        await budget.doTransfer(groupCategories.map(c => c.id), transferId);
+        await budget.doTransfer(
+          groupCategories.map(c => c.id),
+          transferId
+        );
       }
       await db.deleteCategoryGroup({ id }, transferId);
     });
@@ -734,11 +737,11 @@ handlers['query'] = async function(query) {
 };
 
 handlers['bank-delete'] = async function({ id }) {
-  const accts = await db.runQuery(
+  const accts = (await db.runQuery(
     'SELECT * FROM accounts WHERE bank = ?',
     [id],
     true
-  ) as any[];
+  )) as any[];
 
   await db.delete_('banks', id);
   await Promise.all(
@@ -764,11 +767,15 @@ handlers['accounts-get'] = async function() {
 };
 
 handlers['account-properties'] = async function({ id }) {
-  const { balance } = await db.first(
+  const {
+    balance
+  } = await db.first(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
     [id]
   );
-  const { count } = await db.first(
+  const {
+    count
+  } = await db.first(
     'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
     [id]
   );
@@ -901,16 +908,15 @@ handlers['account-close'] = mutator(async function({
     if (numTransactions === 0) {
       await db.deleteAccount({ id });
     } else if (forced) {
-      const rows = await db.runQuery(
+      const rows = (await db.runQuery(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
         [id],
         true
-      ) as any[];
+      )) as any[];
 
-      const { id: payeeId } = await db.first(
-        'SELECT id FROM payees WHERE transfer_acct = ?',
-        [id]
-      );
+      const {
+        id: payeeId
+      } = await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [id]);
 
       await batchMessages(() => {
         // TODO: what this should really do is send a special message that
@@ -944,10 +950,11 @@ handlers['account-close'] = mutator(async function({
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0) {
-        const { id: payeeId } = await db.first(
-          'SELECT id FROM payees WHERE transfer_acct = ?',
-          [transferAccountId]
-        );
+        const {
+          id: payeeId
+        } = await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [
+          transferAccountId
+        ]);
 
         await handlers['transaction-add']({
           id: uuid.v4Sync(),
@@ -1037,13 +1044,13 @@ handlers['accounts-sync'] = async function({ id }) {
     'user-id',
     'user-key'
   ]);
-  let accounts = await db.runQuery(
+  let accounts = (await db.runQuery(
     `SELECT a.*, b.id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
          WHERE a.tombstone = 0 AND a.closed = 0`,
     [],
     true
-  ) as any[];
+  )) as any[];
 
   if (id) {
     accounts = accounts.filter(acct => acct.id === id);
@@ -1087,9 +1094,7 @@ handlers['accounts-sync'] = async function({ id }) {
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account "${
-              acct.name
-            }" is not linked properly. Please link it again`
+            message: `Account "${acct.name}" is not linked properly. Please link it again`
           });
         } else {
           errors.push({
@@ -1139,10 +1144,9 @@ handlers['transactions-import'] = mutator(function({
 });
 
 handlers['account-unlink'] = mutator(async function({ id }) {
-  const { bank: bankId } = await db.first(
-    'SELECT bank FROM accounts WHERE id = ?',
-    [id]
-  );
+  const {
+    bank: bankId
+  } = await db.first('SELECT bank FROM accounts WHERE id = ?', [id]);
 
   if (!bankId) {
     return 'ok';
@@ -1157,10 +1161,11 @@ handlers['account-unlink'] = mutator(async function({ id }) {
     balance_limit: null
   });
 
-  const { count } = await db.first(
-    'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
-    [bankId]
-  );
+  const {
+    count
+  } = await db.first('SELECT COUNT(*) as count FROM accounts WHERE bank = ?', [
+    bankId
+  ]);
 
   if (count === 0) {
     // No more accounts are associated with this bank. We can remove
@@ -1383,7 +1388,11 @@ handlers['has-pitched-subscribe'] = async function() {
   return 'ok';
 };
 
-handlers['subscribe-needs-bootstrap'] = async function({ url }: { url?: string}) {
+handlers['subscribe-needs-bootstrap'] = async function({
+  url
+}: {
+  url?: string;
+}) {
   if (getServer(url).BASE_SERVER === UNCONFIGURED_SERVER) {
     return { bootstrapped: true };
   }
@@ -1532,35 +1541,37 @@ handlers['get-version'] = async function() {
 
 handlers['get-budgets'] = async function() {
   const paths = await fs.listDir(fs.getDocumentDir());
-  const budgets = (await Promise.all(
-    paths.map(async name => {
-      const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
-      if (await fs.exists(prefsPath)) {
-        let prefs;
-        try {
-          prefs = JSON.parse(await fs.readFile(prefsPath));
-        } catch (e) {
-          console.log('Error parsing metadata:', e.stack);
-          return;
+  const budgets = (
+    await Promise.all(
+      paths.map(async name => {
+        const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
+        if (await fs.exists(prefsPath)) {
+          let prefs;
+          try {
+            prefs = JSON.parse(await fs.readFile(prefsPath));
+          } catch (e) {
+            console.log('Error parsing metadata:', e.stack);
+            return;
+          }
+
+          // We treat the directory name as the canonical id so that if
+          // the user moves it around/renames/etc, nothing breaks. The
+          // id is stored in prefs just for convenience (and the prefs
+          // will always update to the latest given id)
+          if (name !== DEMO_BUDGET_ID) {
+            return {
+              id: name,
+              cloudFileId: prefs.cloudFileId,
+              groupId: prefs.groupId,
+              name: prefs.budgetName || '(no name)'
+            };
+          }
         }
 
-        // We treat the directory name as the canonical id so that if
-        // the user moves it around/renames/etc, nothing breaks. The
-        // id is stored in prefs just for convenience (and the prefs
-        // will always update to the latest given id)
-        if (name !== DEMO_BUDGET_ID) {
-          return {
-            id: name,
-            cloudFileId: prefs.cloudFileId,
-            groupId: prefs.groupId,
-            name: prefs.budgetName || '(no name)'
-          };
-        }
-      }
-
-      return null;
-    })
-  )).filter(x => x);
+        return null;
+      })
+    )
+  ).filter(x => x);
 
   return budgets;
 };
@@ -1741,11 +1752,11 @@ handlers['create-budget'] = async function({
   avoidUpload,
   testMode,
   testBudgetId
-}: {  
-  budgetName?: string,
-  avoidUpload?: boolean,
-  testMode?: boolean,
-  testBudgetId?: string
+}: {
+  budgetName?: string;
+  avoidUpload?: boolean;
+  testMode?: boolean;
+  testBudgetId?: string;
 }) {
   let id;
   if (testMode) {
