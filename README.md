@@ -18,7 +18,7 @@ Join the [discord](https://discord.gg/pRYNYr4W5A)!
 ### The easy way: using a server (recommended)
 
 The easiest way to get Actual running is to use the [actual-server][repositoryUrl] project. That is the server for syncing changes across devices, and it comes with the latest version of Actual. The server will provide both the web project and a server for syncing.
-- This project use Yarn as main package manager as *yarn.lock* file is provided but feel free to delete the file and use NPM, PNPM, etc... and use proper commands.
+- This project uses Yarn as its main package manager, other package managers may be used but stability can't be guaranteed.
 
 ```bash
 git clone https://github.com/actualbudget/actual-server.git
