@@ -76,8 +76,10 @@ function getCurrentMonth() {
 // Importer
 
 async function importAccounts(data, entityIdMap) {
+  const accounts = sortByKey(data.accounts, 'sortableIndex');
+
   return Promise.all(
-    data.accounts.map(async account => {
+    accounts.map(async account => {
       if (!account.isTombstone) {
         const id = await actual.createAccount({
           type: mapAccountType(account.accountType),
