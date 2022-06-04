@@ -276,12 +276,8 @@ function fillInBudgets(data, categoryBudgets) {
 
 async function importBudgets(data, entityIdMap) {
   let budgets = sortByKey(data.monthlyBudgets, 'month');
-  let earliestMonth = monthFromDate(budgets[0].month);
-  let currentMonth = getCurrentMonth();
 
   await actual.batchBudgetUpdates(async () => {
-    const carryoverFlags = {};
-
     for (let budget of budgets) {
       let filled = fillInBudgets(
         data,
@@ -300,17 +296,8 @@ async function importBudgets(data, entityIdMap) {
           await actual.setBudgetAmount(month, catId, amount);
 
           if (catBudget.overspendingHandling === 'AffectsBuffer') {
-            // Turn off the carryover flag so it doesn't propagate
-            // to future months
-            carryoverFlags[catId] = false;
-          } else if (
-            catBudget.overspendingHandling === 'Confined' ||
-            carryoverFlags[catId]
-          ) {
-            // Overspending has switched to carryover, set the
-            // flag so it propagates to future months
-            carryoverFlags[catId] = true;
-
+            await actual.setBudgetCarryover(month, catId, false);
+          } else if (catBudget.overspendingHandling === 'Confined') {
             await actual.setBudgetCarryover(month, catId, true);
           }
         })
