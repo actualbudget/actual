@@ -178,6 +178,12 @@ async function importTransactions(data, entityIdMap) {
   // reliably resolve transfers
   for (let transaction of data.transactions) {
     entityIdMap.set(transaction.entityId, uuid.v4());
+
+    if (transaction.subTransactions) {
+      for (let subTransaction of transaction.subTransactions) {
+        entityIdMap.set(subTransaction.entityId, uuid.v4());
+      }
+    }
   }
 
   let sortOrder = 1;
@@ -194,17 +200,22 @@ async function importTransactions(data, entityIdMap) {
           }
 
           let id = entityIdMap.get(transaction.entityId);
-          let transferId =
-            entityIdMap.get(transaction.transferTransactionId) || null;
 
-          let payee = null;
-          if (transferId) {
-            payee = payees.find(
-              p =>
-                p.transfer_acct === entityIdMap.get(transaction.targetAccountId)
-            ).id;
-          } else {
-            payee = entityIdMap.get(transaction.payeeId);
+          function transferProperties(t) {
+            let transferId =
+             entityIdMap.get(t.transferTransactionId) || null;
+
+            let payee = null;
+            if (transferId) {
+              payee = payees.find(
+                p =>
+                  p.transfer_acct === entityIdMap.get(t.targetAccountId)
+              ).id;
+            } else {
+              payee = entityIdMap.get(t.payeeId);
+            }
+
+            return { transfer_id: transferId, payee }
           }
 
           let newTransaction = {
@@ -215,8 +226,7 @@ async function importTransactions(data, entityIdMap) {
               : getCategory(transaction.categoryId),
             date: transaction.date,
             notes: transaction.memo || null,
-            payee,
-            transfer_id: transferId
+            ...transferProperties(transaction),
           };
 
           newTransaction.subtransactions =
@@ -224,8 +234,9 @@ async function importTransactions(data, entityIdMap) {
             transaction.subTransactions.map((t, i) => {
               return {
                 amount: amountToInteger(t.amount),
-                category: getCategory(t.categoryId)
-              };
+                category: getCategory(t.categoryId),
+                ...transferProperties(t),
+          };
             });
 
           return newTransaction;
