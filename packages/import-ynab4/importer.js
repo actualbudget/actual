@@ -235,6 +235,7 @@ async function importTransactions(data, entityIdMap) {
               return {
                 amount: amountToInteger(t.amount),
                 category: getCategory(t.categoryId),
+                notes: t.memo || null,
                 ...transferProperties(t),
           };
             });
