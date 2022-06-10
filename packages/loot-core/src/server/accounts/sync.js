@@ -103,54 +103,34 @@ async function downloadTransactions(
   let accountBalance = null;
   let pageSize = 100;
   let offset = 0;
-  let numDownloaded = 0;
 
-  while (1) {
-    const endDate = monthUtils.currentDay();
+  const endDate = monthUtils.currentDay();
 
-    const res = await post(getServer().PLAID_SERVER + '/transactions', {
-      userId: userId,
-      key: userKey,
-      item_id: '' + bankId,
-      account_id: acctId,
-      start_date: since,
-      end_date: endDate,
-      count: pageSize,
-      offset
-    });
+  const res = await post(getServer().PLAID_SERVER + '/transactions', {
+    userId: userId,
+    key: userKey,
+    item_id: '' + bankId,
+    account_id: acctId,
+    start_date: since,
+    end_date: endDate,
+    count: pageSize,
+    offset
+  });
 
-    if (res.error_code) {
-      throw BankSyncError(res.error_type, res.error_code);
-    }
-
-    if (res.transactions.length === 0) {
-      break;
-    }
-
-    numDownloaded += res.transactions.length;
-
-    // Remove pending transactions for now - we will handle them in
-    // the future.
-    allTransactions = allTransactions.concat(
-      res.transactions.filter(t => !t.pending)
-    );
-    accountBalance = getAccountBalance(res.accounts[0]);
-
-    if (
-      numDownloaded === res.total_transactions ||
-      (count != null && allTransactions.length >= count)
-    ) {
-      break;
-    }
-
-    offset += pageSize;
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
   }
 
-  allTransactions =
-    count != null ? allTransactions.slice(0, count) : allTransactions;
+  // Handling pending transactions so no more need to remove them from the list
+  // allTransactions = allTransactions.concat(res.transactions.filter(t => !t.pending));
+  allTransactions = allTransactions.concat(res.transactions);
+  accountBalance = getAccountBalance(res.accounts[0]);
+
+  allTransactions = count != null ? allTransactions.slice(0, count) : allTransactions;
 
   return {
-    transactions: allTransactions.map(fromPlaid),
+    // transactions: allTransactions.map(fromPlaid),
+    transactions: allTransactions,
     accountBalance
   };
 }
@@ -268,7 +248,8 @@ export async function reconcileTransactions(acctId, transactions) {
       );
 
       // TODO: Pending transactions
-
+      // console.log(trans);
+      // console.log(match);
       if (match) {
         hasMatched.add(match.id);
       }
@@ -412,6 +393,11 @@ export async function addTransactions(
       cleared: trans.cleared != null ? trans.cleared : true
     };
 
+    // if (finalTransaction.cleared === false) {
+    //   finalTransaction.id = 'preview/' + finalTransaction.id;
+    // }
+
+
     // Add split transactions if they are given
     if (subtransactions && subtransactions.length > 0) {
       added.push(...makeSplitTransaction(finalTransaction, subtransactions));
@@ -473,6 +459,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       bankId,
       date
     );
+
     if (transactions.length === 0) {
       return { added: [], updated: [] };
     }
