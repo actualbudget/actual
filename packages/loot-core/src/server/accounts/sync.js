@@ -129,8 +129,7 @@ async function downloadTransactions(
   allTransactions = count != null ? allTransactions.slice(0, count) : allTransactions;
 
   return {
-    // transactions: allTransactions.map(fromPlaid),
-    transactions: allTransactions,
+    transactions: allTransactions.map(fromPlaid),
     accountBalance
   };
 }
