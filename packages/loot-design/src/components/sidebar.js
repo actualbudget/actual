@@ -126,8 +126,8 @@ function Account({
     ? account.closed
       ? 'account-closed'
       : account.offbudget
-      ? 'account-offbudget'
-      : 'account-onbudget'
+        ? 'account-offbudget'
+        : 'account-onbudget'
     : 'title';
 
   let { dragRef } = useDraggable({
@@ -383,6 +383,9 @@ const MenuButton = withRouter(function MenuButton({ history }) {
       case 'open-payees':
         dispatch(pushModal('manage-payees'));
         break;
+      case 'open-plaid-accounts':
+        dispatch(pushModal('manage-plaid-accounts'));
+        break;
       case 'open-rules':
         dispatch(pushModal('manage-rules'));
         break;
@@ -404,6 +407,7 @@ const MenuButton = withRouter(function MenuButton({ history }) {
 
   let items = [
     { name: 'open-payees', text: 'Manage Payees' },
+    { name: 'open-plaid-accounts', text: 'Manage Plaid Accounts' },
     { name: 'open-rules', text: 'Manage Rules' },
     { name: 'find-schedules', text: 'Find schedules' },
     { name: 'repair-splits', text: 'Repair split transactions' },
