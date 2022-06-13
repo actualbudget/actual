@@ -1116,10 +1116,12 @@ handlers['accounts-sync'] = async function({ id }) {
           });
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
+            type: err.error_type,
             accountId: acct.id,
             message: `Account "${
               acct.name
-            }" is not linked properly. Please link it again`
+            }" is not linked properly. Please link it again`,
+            code: err.error_code
           });
         } else {
           errors.push({

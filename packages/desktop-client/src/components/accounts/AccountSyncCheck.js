@@ -56,13 +56,19 @@ function AccountSyncCheck({
   getAccounts,
   addNotification
 }) {
-  if (!failedAccounts) {
-    return null;
-  }
+  // console.log(id);
+  // if (!failedAccounts) {
+  //   return null;
+  // }
 
-  let error = failedAccounts.get(id);
-  if (!error) {
-    return null;
+  // let error = failedAccounts.get(id);
+  // if (!error) {
+  //   return null;
+  // }
+
+  let error = {
+    type: 'ITEM_ERROR',
+    code: 'ITEM_LOGIN_REQUIRED'
   }
 
   let [open, setOpen] = useState(false);

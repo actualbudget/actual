@@ -25,6 +25,7 @@ import ImportTransactions from 'loot-design/src/components/modals/ImportTransact
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
 import FixEncryptionKey from './modals/FixEncryptionKey';
 import EditField from 'loot-design/src/components/modals/EditField';
+import ManagePlaidAccounts from './modals/ManagePlaidAccounts';
 
 function Modals({
   history,
@@ -159,6 +160,19 @@ function Modals({
                 initialSelectedIds={
                   options.selectedPayee ? [options.selectedPayee] : undefined
                 }
+              />
+            );
+          }}
+        />
+
+        <Route
+          path="/manage-plaid-accounts"
+          render={() => {
+            return (
+              <ManagePlaidAccounts
+                history={history}
+                modalProps={modalProps}
+                accounts={options.accounts}
               />
             );
           }}
