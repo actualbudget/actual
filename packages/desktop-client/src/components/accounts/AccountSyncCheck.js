@@ -66,6 +66,12 @@ function AccountSyncCheck({
   //   return null;
   // }
 
+  let hasUpdated;
+  syncAndDownload(id).then((value) => {
+    console.log(value);
+  });
+  
+
   let error = {
     type: 'ITEM_ERROR',
     code: 'ITEM_LOGIN_REQUIRED'
