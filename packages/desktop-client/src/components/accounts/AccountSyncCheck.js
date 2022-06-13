@@ -8,6 +8,8 @@ import { colors } from 'loot-design/src/style';
 import { reauthorizeBank } from '../../plaid';
 
 function getErrorMessage(type, code) {
+  console.log(type);
+  console.log(code);
   switch (type.toUpperCase()) {
     case 'ITEM_ERROR':
       switch (code.toUpperCase()) {
@@ -56,26 +58,25 @@ function AccountSyncCheck({
   getAccounts,
   addNotification
 }) {
-  // console.log(id);
-  // if (!failedAccounts) {
-  //   return null;
-  // }
-
-  // let error = failedAccounts.get(id);
-  // if (!error) {
-  //   return null;
-  // }
-
-  let hasUpdated;
-  syncAndDownload(id).then((value) => {
-    console.log(value);
-  });
   
-
-  let error = {
-    type: 'ITEM_ERROR',
-    code: 'ITEM_LOGIN_REQUIRED'
+  if (!failedAccounts) {
+    return null;
   }
+
+  let error = failedAccounts.get(id);
+  if (!error) {
+    return null;
+  }
+
+  // let hasUpdated;
+  // syncAndDownload(id).then((value) => {
+  //   console.log(value);
+  // });
+  
+  // let error = {
+  //   type: 'ITEM_ERROR',
+  //   code: 'ITEM_LOGIN_REQUIRED'
+  // }
 
   let [open, setOpen] = useState(false);
 

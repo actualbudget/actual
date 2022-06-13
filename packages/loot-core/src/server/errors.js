@@ -5,6 +5,8 @@ export class PostError extends Error {
     this.type = 'PostError';
     this.reason = reason;
     this.meta = meta;
+    console.log(reason);
+    console.log(meta);
   }
 }
 
@@ -13,6 +15,16 @@ export class HTTPError extends Error {
     super(`HTTPError: unsuccessful status code (${code}): ${body}`);
     this.statusCode = code;
     this.responseBody = body;
+  }
+}
+
+export class PlaidError extends Error {
+  constructor(res) {
+    super(res);
+    this.type = 'PlaidSyncError';
+    this.error_type = res.error_type;
+    this.error_code = res.error_code;
+    this.res = res;
   }
 }
 

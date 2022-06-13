@@ -96,12 +96,12 @@ export function syncAccounts(id) {
 
     if (id) {
       let error = errors.find(error => error.accountId === id);
-
+console.log(error);
       if (error) {
         // We only want to mark the account as having problem if it
         // was a real syncing error.
-        if (error.type === 'SyncError') {
-          dispatch(markAccountFailed(id, error.category, error.code));
+        if (error.type === 'ITEM_ERROR') {
+          dispatch(markAccountFailed(id, error.type, error.code));
         }
       } else {
         dispatch(markAccountSuccess(id));

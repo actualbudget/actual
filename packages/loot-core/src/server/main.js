@@ -120,15 +120,15 @@ function runPlaidSync() {
 
 export let handlers = {};
 
-handlers['undo'] = mutator(async function() {
+handlers['undo'] = mutator(async function () {
   return undo();
 });
 
-handlers['redo'] = mutator(function() {
+handlers['redo'] = mutator(function () {
   return redo();
 });
 
-handlers['transactions-batch-update'] = mutator(async function({
+handlers['transactions-batch-update'] = mutator(async function ({
   added,
   deleted,
   updated,
@@ -147,22 +147,22 @@ handlers['transactions-batch-update'] = mutator(async function({
   });
 });
 
-handlers['transaction-add'] = mutator(async function(transaction) {
+handlers['transaction-add'] = mutator(async function (transaction) {
   await handlers['transactions-batch-update']({ added: [transaction] });
   return {};
 });
 
-handlers['transaction-update'] = mutator(async function(transaction) {
+handlers['transaction-update'] = mutator(async function (transaction) {
   await handlers['transactions-batch-update']({ updated: [transaction] });
   return {};
 });
 
-handlers['transaction-delete'] = mutator(async function(transaction) {
+handlers['transaction-delete'] = mutator(async function (transaction) {
   await handlers['transactions-batch-update']({ deleted: [transaction] });
   return {};
 });
 
-handlers['transactions-filter'] = async function({
+handlers['transactions-filter'] = async function ({
   term,
   accountId,
   latestDate,
@@ -179,11 +179,11 @@ handlers['transactions-filter'] = async function({
   );
 };
 
-handlers['transactions-parse-file'] = async function({ filepath, options }) {
+handlers['transactions-parse-file'] = async function ({ filepath, options }) {
   return parseFile(filepath, options);
 };
 
-handlers['transactions-export'] = async function({
+handlers['transactions-export'] = async function ({
   transactions,
   accounts,
   categoryGroups,
@@ -192,18 +192,18 @@ handlers['transactions-export'] = async function({
   return exportToCSV(transactions, accounts, categoryGroups, payees);
 };
 
-handlers['transactions-export-query'] = async function({ query: queryState }) {
+handlers['transactions-export-query'] = async function ({ query: queryState }) {
   return exportQueryToCSV(new Query(queryState));
 };
 
-handlers['get-categories'] = async function() {
+handlers['get-categories'] = async function () {
   return {
     grouped: await db.getCategoriesGrouped(),
     list: await db.getCategories()
   };
 };
 
-handlers['get-earliest-transaction'] = async function() {
+handlers['get-earliest-transaction'] = async function () {
   let { data } = await aqlQuery(
     q('transactions')
       .options({ splits: 'none' })
@@ -214,11 +214,11 @@ handlers['get-earliest-transaction'] = async function() {
   return data[0] || null;
 };
 
-handlers['get-budget-bounds'] = async function() {
+handlers['get-budget-bounds'] = async function () {
   return budget.createAllBudgets();
 };
 
-handlers['rollover-budget-month'] = async function({ month }) {
+handlers['rollover-budget-month'] = async function ({ month }) {
   let groups = await db.getCategoriesGrouped();
   let sheetName = monthUtils.sheetForMonth(month);
 
@@ -268,7 +268,7 @@ handlers['rollover-budget-month'] = async function({ month }) {
   return values;
 };
 
-handlers['report-budget-month'] = async function({ month }) {
+handlers['report-budget-month'] = async function ({ month }) {
   let groups = await db.getCategoriesGrouped();
   let sheetName = monthUtils.sheetForMonth(month);
 
@@ -310,7 +310,7 @@ handlers['report-budget-month'] = async function({ month }) {
   return values;
 };
 
-handlers['budget-set-type'] = async function({ type }) {
+handlers['budget-set-type'] = async function ({ type }) {
   if (type !== 'rollover' && type !== 'report') {
     throw new Error('Invalid budget type: ' + type);
   }
@@ -324,7 +324,7 @@ handlers['budget-set-type'] = async function({ type }) {
   return prefs.savePrefs({ budgetType: type });
 };
 
-handlers['category-create'] = mutator(async function({
+handlers['category-create'] = mutator(async function ({
   name,
   groupId,
   isIncome
@@ -342,7 +342,7 @@ handlers['category-create'] = mutator(async function({
   });
 });
 
-handlers['category-update'] = mutator(async function(category) {
+handlers['category-update'] = mutator(async function (category) {
   return withUndo(async () => {
     try {
       await db.updateCategory(category);
@@ -356,7 +356,7 @@ handlers['category-update'] = mutator(async function(category) {
   });
 });
 
-handlers['category-move'] = mutator(async function({ id, groupId, targetId }) {
+handlers['category-move'] = mutator(async function ({ id, groupId, targetId }) {
   return withUndo(async () => {
     await batchMessages(async () => {
       await db.moveCategory(id, groupId, targetId);
@@ -365,7 +365,7 @@ handlers['category-move'] = mutator(async function({ id, groupId, targetId }) {
   });
 });
 
-handlers['category-delete'] = mutator(async function({ id, transferId }) {
+handlers['category-delete'] = mutator(async function ({ id, transferId }) {
   return withUndo(async () => {
     let result = {};
     await batchMessages(async () => {
@@ -407,7 +407,7 @@ handlers['category-delete'] = mutator(async function({ id, transferId }) {
   });
 });
 
-handlers['category-group-create'] = mutator(async function({ name, isIncome }) {
+handlers['category-group-create'] = mutator(async function ({ name, isIncome }) {
   return withUndo(async () => {
     return db.insertCategoryGroup({
       name,
@@ -416,13 +416,13 @@ handlers['category-group-create'] = mutator(async function({ name, isIncome }) {
   });
 });
 
-handlers['category-group-update'] = mutator(async function(group) {
+handlers['category-group-update'] = mutator(async function (group) {
   return withUndo(async () => {
     return db.updateCategoryGroup(group);
   });
 });
 
-handlers['category-group-move'] = mutator(async function({ id, targetId }) {
+handlers['category-group-move'] = mutator(async function ({ id, targetId }) {
   return withUndo(async () => {
     await batchMessages(async () => {
       await db.moveCategoryGroup(id, targetId);
@@ -431,7 +431,7 @@ handlers['category-group-move'] = mutator(async function({ id, targetId }) {
   });
 });
 
-handlers['category-group-delete'] = mutator(async function({ id, transferId }) {
+handlers['category-group-delete'] = mutator(async function ({ id, transferId }) {
   return withUndo(async () => {
     const groupCategories = await db.all(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
@@ -447,7 +447,7 @@ handlers['category-group-delete'] = mutator(async function({ id, transferId }) {
   });
 });
 
-handlers['must-category-transfer'] = async function({ id }) {
+handlers['must-category-transfer'] = async function ({ id }) {
   const res = await db.runQuery(
     `SELECT count(t.id) as count FROM transactions t
        LEFT JOIN category_mapping cm ON cm.id = t.category
@@ -472,17 +472,17 @@ handlers['must-category-transfer'] = async function({ id }) {
   });
 };
 
-handlers['payee-create'] = mutator(async function({ name }) {
+handlers['payee-create'] = mutator(async function ({ name }) {
   return withUndo(async () => {
     return db.insertPayee({ name });
   });
 });
 
-handlers['payees-get'] = async function() {
+handlers['payees-get'] = async function () {
   return db.getPayees();
 };
 
-handlers['payees-get-rule-counts'] = async function() {
+handlers['payees-get-rule-counts'] = async function () {
   let payeeCounts = {};
   let allRules = rules.getRules();
 
@@ -496,7 +496,7 @@ handlers['payees-get-rule-counts'] = async function() {
   return payeeCounts;
 };
 
-handlers['payees-merge'] = mutator(async function({ targetId, mergeIds }) {
+handlers['payees-merge'] = mutator(async function ({ targetId, mergeIds }) {
   return withUndo(
     async () => {
       return db.mergePayees(targetId, mergeIds);
@@ -505,7 +505,7 @@ handlers['payees-merge'] = mutator(async function({ targetId, mergeIds }) {
   );
 });
 
-handlers['payees-batch-change'] = mutator(async function({
+handlers['payees-batch-change'] = mutator(async function ({
   added,
   deleted,
   updated
@@ -527,16 +527,16 @@ handlers['payees-batch-change'] = mutator(async function({
   });
 });
 
-handlers['payees-check-orphaned'] = async function({ ids }) {
+handlers['payees-check-orphaned'] = async function ({ ids }) {
   let orphaned = new Set(await db.getOrphanedPayees());
   return ids.filter(id => orphaned.has(id));
 };
 
-handlers['payees-get-rules'] = async function({ id }) {
+handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
-handlers['payees-delete-rule'] = mutator(async function({ id, payee_id }) {
+handlers['payees-delete-rule'] = mutator(async function ({ id, payee_id }) {
   return withUndo(
     async () => {
       return await db.deletePayeeRule({ id });
@@ -545,7 +545,7 @@ handlers['payees-delete-rule'] = mutator(async function({ id, payee_id }) {
   );
 });
 
-handlers['payees-update-rule'] = mutator(async function(rule) {
+handlers['payees-update-rule'] = mutator(async function (rule) {
   return withUndo(
     async () => {
       return await db.updatePayeeRule(rule);
@@ -554,7 +554,7 @@ handlers['payees-update-rule'] = mutator(async function(rule) {
   );
 });
 
-handlers['payees-add-rule'] = mutator(async function(rule) {
+handlers['payees-add-rule'] = mutator(async function (rule) {
   return withUndo(
     async () => {
       let id = await db.insertPayeeRule(rule);
@@ -618,12 +618,12 @@ function validateRule(rule) {
   return null;
 }
 
-handlers['rule-validate'] = async function(rule) {
+handlers['rule-validate'] = async function (rule) {
   let error = validateRule(rule);
   return { error };
 };
 
-handlers['rule-add'] = mutator(async function(rule) {
+handlers['rule-add'] = mutator(async function (rule) {
   let error = validateRule(rule);
   if (error) {
     return { error };
@@ -633,7 +633,7 @@ handlers['rule-add'] = mutator(async function(rule) {
   return { id };
 });
 
-handlers['rule-update'] = mutator(async function(rule) {
+handlers['rule-update'] = mutator(async function (rule) {
   let error = validateRule(rule);
   if (error) {
     return { error };
@@ -643,11 +643,11 @@ handlers['rule-update'] = mutator(async function(rule) {
   return {};
 });
 
-handlers['rule-delete'] = mutator(async function(rule) {
+handlers['rule-delete'] = mutator(async function (rule) {
   return rules.deleteRule(rule);
 });
 
-handlers['rule-delete-all'] = mutator(async function(ids) {
+handlers['rule-delete-all'] = mutator(async function (ids) {
   let someDeletionsFailed = false;
 
   await batchMessages(async () => {
@@ -662,39 +662,39 @@ handlers['rule-delete-all'] = mutator(async function(ids) {
   return { someDeletionsFailed };
 });
 
-handlers['rule-apply-actions'] = mutator(async function({
+handlers['rule-apply-actions'] = mutator(async function ({
   transactionIds,
   actions
 }) {
   return rules.applyActions(transactionIds, actions, handlers);
 });
 
-handlers['rule-add-payee-rename'] = mutator(async function({ fromNames, to }) {
+handlers['rule-add-payee-rename'] = mutator(async function ({ fromNames, to }) {
   return rules.updatePayeeRenameRule(fromNames, to);
 });
 
-handlers['rules-get'] = async function() {
+handlers['rules-get'] = async function () {
   return rankRules(rules.getRules()).map(rule => rule.serialize());
 };
 
-handlers['rule-get'] = async function({ id }) {
+handlers['rule-get'] = async function ({ id }) {
   let rule = rules.getRules().find(rule => rule.id === id);
   return rule ? rule.serialize() : null;
 };
 
-handlers['rules-run'] = async function({ transaction }) {
+handlers['rules-run'] = async function ({ transaction }) {
   return rules.runRules(transaction);
 };
 
-handlers['rules-migrate'] = async function() {
+handlers['rules-migrate'] = async function () {
   await rules.migrateOldRules();
 };
 
-handlers['make-filters-from-conditions'] = async function({ conditions }) {
+handlers['make-filters-from-conditions'] = async function ({ conditions }) {
   return rules.conditionsToAQL(conditions);
 };
 
-handlers['getCell'] = async function({ sheetName, name }) {
+handlers['getCell'] = async function ({ sheetName, name }) {
   // Fields is no longer used - hardcode
   let fields = ['name', 'value'];
   let node = sheet.get()._getNode(resolveName(sheetName, name));
@@ -713,11 +713,11 @@ handlers['getCell'] = async function({ sheetName, name }) {
   }
 };
 
-handlers['getCells'] = async function({ names }) {
+handlers['getCells'] = async function ({ names }) {
   return names.map(name => ({ value: sheet.get()._getNode(name).value }));
 };
 
-handlers['getCellNamesInSheet'] = async function({ sheetName }) {
+handlers['getCellNamesInSheet'] = async function ({ sheetName }) {
   let names = [];
   for (let name of sheet
     .get()
@@ -731,7 +731,7 @@ handlers['getCellNamesInSheet'] = async function({ sheetName }) {
   return names;
 };
 
-handlers['debugCell'] = async function({ sheetName, name }) {
+handlers['debugCell'] = async function ({ sheetName, name }) {
   let node = sheet.get().getNode(resolveName(sheetName, name));
   return {
     ...node,
@@ -739,14 +739,14 @@ handlers['debugCell'] = async function({ sheetName, name }) {
   };
 };
 
-handlers['create-query'] = async function({ sheetName, name, query }) {
+handlers['create-query'] = async function ({ sheetName, name, query }) {
   // Always run it regardless of cache. We don't know anything has changed
   // between the cache value being saved and now
   sheet.get().createQuery(sheetName, name, query);
   return 'ok';
 };
 
-handlers['query'] = async function(query) {
+handlers['query'] = async function (query) {
   if (query.table == null) {
     throw new Error('query has no table, did you forgot to call `.serialize`?');
   }
@@ -754,7 +754,7 @@ handlers['query'] = async function(query) {
   return aqlQuery(query);
 };
 
-handlers['bank-delete'] = async function({ id }) {
+handlers['bank-delete'] = async function ({ id }) {
   const accts = await db.runQuery(
     'SELECT * FROM accounts WHERE bank = ?',
     [id],
@@ -773,18 +773,18 @@ handlers['bank-delete'] = async function({ id }) {
   return 'ok';
 };
 
-handlers['account-update'] = mutator(async function({ id, name }) {
+handlers['account-update'] = mutator(async function ({ id, name }) {
   return withUndo(async () => {
     await db.update('accounts', { id, name });
     return {};
   });
 });
 
-handlers['accounts-get'] = async function() {
+handlers['accounts-get'] = async function () {
   return db.getAccounts();
 };
 
-handlers['account-properties'] = async function({ id }) {
+handlers['account-properties'] = async function ({ id }) {
   const { balance } = await db.first(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
     [id]
@@ -797,7 +797,7 @@ handlers['account-properties'] = async function({ id }) {
   return { balance: balance || 0, numTransactions: count };
 };
 
-handlers['accounts-link'] = async function({
+handlers['accounts-link'] = async function ({
   institution,
   publicToken,
   accountId,
@@ -842,7 +842,7 @@ handlers['accounts-link'] = async function({
   return 'ok';
 };
 
-handlers['accounts-connect'] = async function({
+handlers['accounts-connect'] = async function ({
   institution,
   publicToken,
   accountIds,
@@ -853,7 +853,7 @@ handlers['accounts-connect'] = async function({
   return ids;
 };
 
-handlers['account-create'] = mutator(async function({
+handlers['account-create'] = mutator(async function ({
   name,
   type,
   balance,
@@ -891,7 +891,7 @@ handlers['account-create'] = mutator(async function({
   });
 });
 
-handlers['account-close'] = mutator(async function({
+handlers['account-close'] = mutator(async function ({
   id,
   transferAccountId,
   categoryId,
@@ -984,13 +984,13 @@ handlers['account-close'] = mutator(async function({
   });
 });
 
-handlers['account-reopen'] = mutator(async function({ id }) {
+handlers['account-reopen'] = mutator(async function ({ id }) {
   return withUndo(async () => {
     await db.update('accounts', { id, closed: 0 });
   });
 });
 
-handlers['account-move'] = mutator(async function({ id, targetId }) {
+handlers['account-move'] = mutator(async function ({ id, targetId }) {
   return withUndo(async () => {
     await db.moveAccount(id, targetId);
   });
@@ -1007,7 +1007,7 @@ handlers['create-web-token'] = async function () {
 
 let stopPolling = false;
 
-handlers['poll-web-token'] = async function({ token }) {
+handlers['poll-web-token'] = async function ({ token }) {
   let [[, userId], [, key]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
@@ -1057,12 +1057,12 @@ handlers['poll-web-token'] = async function({ token }) {
   });
 };
 
-handlers['poll-web-token-stop'] = async function() {
+handlers['poll-web-token-stop'] = async function () {
   stopPolling = true;
   return 'ok';
 };
 
-handlers['accounts-sync'] = async function({ id }) {
+handlers['accounts-sync'] = async function ({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
@@ -1106,21 +1106,30 @@ handlers['accounts-sync'] = async function({ id }) {
           updatedAccounts = updatedAccounts.concat(acct.id);
         }
       } catch (err) {
+        console.log(err.type);
         if (err.type === 'BankSyncError') {
           errors.push({
             type: 'SyncError',
             accountId: acct.id,
             message: 'Failed syncing account "' + acct.name + '".',
             category: err.category,
-            code: err.code
+            code: err.error_code
           });
-        } else if (err instanceof PostError && err.reason !== 'internal') {
+        }
+        else if (err.type === 'PlaidSyncError') {
           errors.push({
             type: err.error_type,
             accountId: acct.id,
-            message: `Account "${
-              acct.name
-            }" is not linked properly. Please link it again`,
+            message: 'Failed syncing account "' + acct.name + '".',
+            code: err.error_code
+          });
+        }
+        else if (err instanceof PostError && err.reason !== 'internal') {
+          errors.push({
+            type: err.error_type,
+            accountId: acct.id,
+            message: `Account "${acct.name
+              }" is not linked properly. Please link it again`,
             code: err.error_code
           });
         } else {
@@ -1149,7 +1158,7 @@ handlers['accounts-sync'] = async function({ id }) {
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
 };
 
-handlers['transactions-import'] = mutator(function({
+handlers['transactions-import'] = mutator(function ({
   accountId,
   transactions
 }) {
@@ -1170,7 +1179,7 @@ handlers['transactions-import'] = mutator(function({
   });
 });
 
-handlers['account-unlink'] = mutator(async function({ id }) {
+handlers['account-unlink'] = mutator(async function ({ id }) {
   let { bank: bankId } = await db.first(
     'SELECT bank FROM accounts WHERE id = ?',
     [id]
@@ -1213,7 +1222,7 @@ handlers['account-unlink'] = mutator(async function({ id }) {
   return 'ok';
 });
 
-handlers['make-plaid-public-token'] = async function({ bankId }) {
+handlers['make-plaid-public-token'] = async function ({ bankId }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
@@ -1232,7 +1241,7 @@ handlers['make-plaid-public-token'] = async function({ bankId }) {
   return { linkToken: data.link_token };
 };
 
-handlers['save-global-prefs'] = async function(prefs) {
+handlers['save-global-prefs'] = async function (prefs) {
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
@@ -1263,7 +1272,7 @@ handlers['save-global-prefs'] = async function(prefs) {
   return 'ok';
 };
 
-handlers['load-global-prefs'] = async function() {
+handlers['load-global-prefs'] = async function () {
   let [
     [, floatingSidebar],
     [, seenTutorial],
@@ -1296,7 +1305,7 @@ handlers['load-global-prefs'] = async function() {
   };
 };
 
-handlers['save-prefs'] = async function(prefsToSet) {
+handlers['save-prefs'] = async function (prefsToSet) {
   let { cloudFileId } = prefs.getPrefs();
 
   // Need to sync the budget name on the server as well
@@ -1314,15 +1323,15 @@ handlers['save-prefs'] = async function(prefsToSet) {
   return 'ok';
 };
 
-handlers['load-prefs'] = async function() {
+handlers['load-prefs'] = async function () {
   return prefs.getPrefs();
 };
 
-handlers['sync-reset'] = async function() {
+handlers['sync-reset'] = async function () {
   return await resetSync();
 };
 
-handlers['sync-repair'] = async function() {
+handlers['sync-repair'] = async function () {
   await repairSync();
 };
 
@@ -1330,7 +1339,7 @@ handlers['sync-repair'] = async function() {
 // will change in the future: during onboarding the user should be
 // able to enable encryption. (Imagine if they are importing data from
 // another source, they should be able to encrypt first)
-handlers['key-make'] = async function({ password }) {
+handlers['key-make'] = async function ({ password }) {
   if (!prefs.getPrefs()) {
     throw new Error('user-set-key must be called with file loaded');
   }
@@ -1340,7 +1349,7 @@ handlers['key-make'] = async function({ password }) {
   let salt = encryption.randomBytes(32).toString('base64');
   let id = uuid.v4Sync();
   let key = await encryption.createKey({ id, password, salt });
-console.log(key);
+  console.log(key);
   // Load the key
   await encryption.loadKey(key);
 
@@ -1362,7 +1371,7 @@ console.log(key);
 
 // This can be called both while a file is already loaded or not. This
 // will see if a key is valid and if so save it off.
-handlers['key-test'] = async function({ fileId, password }) {
+handlers['key-test'] = async function ({ fileId, password }) {
   let userToken = await asyncStorage.getItem('user-token');
 
   if (fileId == null) {
@@ -1416,17 +1425,17 @@ handlers['key-test'] = async function({ fileId, password }) {
   return {};
 };
 
-handlers['should-pitch-subscribe'] = async function() {
+handlers['should-pitch-subscribe'] = async function () {
   let seenSubscribe = await asyncStorage.getItem('seenSubscribe');
   return seenSubscribe !== 'true';
 };
 
-handlers['has-pitched-subscribe'] = async function() {
+handlers['has-pitched-subscribe'] = async function () {
   await asyncStorage.setItem('seenSubscribe', 'true');
   return 'ok';
 };
 
-handlers['subscribe-needs-bootstrap'] = async function({ url } = {}) {
+handlers['subscribe-needs-bootstrap'] = async function ({ url } = {}) {
   if (getServer(url).BASE_SERVER === UNCONFIGURED_SERVER) {
     return { bootstrapped: true };
   }
@@ -1451,7 +1460,7 @@ handlers['subscribe-needs-bootstrap'] = async function({ url } = {}) {
   return { bootstrapped: res.data.bootstrapped };
 };
 
-handlers['subscribe-bootstrap'] = async function({ password }) {
+handlers['subscribe-bootstrap'] = async function ({ password }) {
   let res;
   try {
     res = await post(getServer().SIGNUP_SERVER + '/bootstrap', { password });
@@ -1466,11 +1475,11 @@ handlers['subscribe-bootstrap'] = async function({ password }) {
   return { error: 'internal' };
 };
 
-handlers['subscribe-set-user'] = async function({ token }) {
+handlers['subscribe-set-user'] = async function ({ token }) {
   await asyncStorage.setItem('user-token', token);
 };
 
-handlers['subscribe-get-user'] = async function() {
+handlers['subscribe-get-user'] = async function () {
   if (getServer() && getServer().BASE_SERVER === UNCONFIGURED_SERVER) {
     return { offline: false };
   }
@@ -1503,7 +1512,7 @@ handlers['subscribe-get-user'] = async function() {
   return null;
 };
 
-handlers['subscribe-change-password'] = async function({ password }) {
+handlers['subscribe-change-password'] = async function ({ password }) {
   let userToken = await asyncStorage.getItem('user-token');
   let res;
   try {
@@ -1518,7 +1527,7 @@ handlers['subscribe-change-password'] = async function({ password }) {
   return {};
 };
 
-handlers['subscribe-sign-in'] = async function({ password }) {
+handlers['subscribe-sign-in'] = async function ({ password }) {
   let res = await post(getServer().SIGNUP_SERVER + '/login', {
     password
   });
@@ -1531,7 +1540,7 @@ handlers['subscribe-sign-in'] = async function({ password }) {
   return { error: 'invalid-password' };
 };
 
-handlers['subscribe-sign-out'] = async function() {
+handlers['subscribe-sign-out'] = async function () {
   encryption.unloadAllKeys();
   await asyncStorage.multiRemove([
     'user-token',
@@ -1542,11 +1551,11 @@ handlers['subscribe-sign-out'] = async function() {
   return 'ok';
 };
 
-handlers['get-server-url'] = async function() {
+handlers['get-server-url'] = async function () {
   return getServer() && getServer().BASE_SERVER;
 };
 
-handlers['set-server-url'] = async function({ url }) {
+handlers['set-server-url'] = async function ({ url }) {
   if (url != null) {
     // Validate the server is running
     let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
@@ -1565,15 +1574,15 @@ handlers['set-server-url'] = async function({ url }) {
   return {};
 };
 
-handlers['sync'] = async function() {
+handlers['sync'] = async function () {
   return fullSync();
 };
 
-handlers['get-version'] = async function() {
+handlers['get-version'] = async function () {
   return { version: VERSION };
 };
 
-handlers['get-budgets'] = async function() {
+handlers['get-budgets'] = async function () {
   const paths = await fs.listDir(fs.getDocumentDir());
   const budgets = (await Promise.all(
     paths.map(async name => {
@@ -1608,22 +1617,22 @@ handlers['get-budgets'] = async function() {
   return budgets;
 };
 
-handlers['get-ynab4-files'] = async function() {
+handlers['get-ynab4-files'] = async function () {
   return YNAB4.findBudgets();
 };
 
-handlers['get-remote-files'] = async function() {
+handlers['get-remote-files'] = async function () {
   return cloudStorage.listRemoteFiles();
 };
 
-handlers['reset-budget-cache'] = mutator(async function() {
+handlers['reset-budget-cache'] = mutator(async function () {
   // Recomputing everything will update the cache
   await sheet.loadUserBudgets(db);
   sheet.get().recomputeAll();
   await sheet.waitOnSpreadsheet();
 });
 
-handlers['upload-budget'] = async function({ id } = {}) {
+handlers['upload-budget'] = async function ({ id } = {}) {
   if (id) {
     if (prefs.getPrefs()) {
       throw new Error('upload-budget: id given but prefs already loaded');
@@ -1650,7 +1659,7 @@ handlers['upload-budget'] = async function({ id } = {}) {
   return {};
 };
 
-handlers['download-budget'] = async function({ fileId, replace }) {
+handlers['download-budget'] = async function ({ fileId, replace }) {
   let result;
   try {
     result = await cloudStorage.download(fileId, replace);
@@ -1687,7 +1696,7 @@ handlers['download-budget'] = async function({ fileId, replace }) {
   return { id };
 };
 
-handlers['load-budget'] = async function({ id }) {
+handlers['load-budget'] = async function ({ id }) {
   let currentPrefs = prefs.getPrefs();
 
   if (currentPrefs) {
@@ -1725,7 +1734,7 @@ handlers['load-budget'] = async function({ id }) {
   return res;
 };
 
-handlers['create-demo-budget'] = async function() {
+handlers['create-demo-budget'] = async function () {
   // Make sure the read only flag isn't leftover (normally it's
   // reset when signing in, but you don't have to sign in for the
   // demo budget)
@@ -1738,7 +1747,7 @@ handlers['create-demo-budget'] = async function() {
   });
 };
 
-handlers['close-budget'] = async function() {
+handlers['close-budget'] = async function () {
   captureBreadcrumb({ message: 'Closing budget' });
 
   // The spreadsheet may be running, wait for it to complete
@@ -1763,11 +1772,11 @@ handlers['close-budget'] = async function() {
   return 'ok';
 };
 
-handlers['delete-budget'] = async function({ id, cloudFileId }) {
+handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId && !process.env.IS_BETA) {
-    await cloudStorage.removeFile(cloudFileId).catch(err => {});
+    await cloudStorage.removeFile(cloudFileId).catch(err => { });
   }
 
   // If a local file exists, you can delete it by passing its local id
@@ -1779,7 +1788,7 @@ handlers['delete-budget'] = async function({ id, cloudFileId }) {
   return 'ok';
 };
 
-handlers['create-budget'] = async function({
+handlers['create-budget'] = async function ({
   budgetName,
   avoidUpload,
   testMode,
@@ -1840,12 +1849,12 @@ handlers['create-budget'] = async function({
   return {};
 };
 
-handlers['set-tutorial-seen'] = async function() {
+handlers['set-tutorial-seen'] = async function () {
   await asyncStorage.setItem('seen-tutorial', 'true');
   return 'ok';
 };
 
-handlers['import-budget'] = async function({ filepath, type }) {
+handlers['import-budget'] = async function ({ filepath, type }) {
   try {
     if (!(await fs.exists(filepath))) {
       throw new Error(`File not found at the provided path: ${filepath}`);
@@ -1913,7 +1922,7 @@ handlers['import-budget'] = async function({ filepath, type }) {
         await handlers['load-budget']({ id });
         await handlers['get-budget-bounds']();
         await sheet.waitOnSpreadsheet();
-        await cloudStorage.upload().catch(err => {});
+        await cloudStorage.upload().catch(err => { });
 
         break;
       default:
@@ -1927,7 +1936,7 @@ handlers['import-budget'] = async function({ filepath, type }) {
   return {};
 };
 
-handlers['export-budget'] = async function() {
+handlers['export-budget'] = async function () {
   return await cloudStorage.exportBuffer();
 };
 
@@ -2053,7 +2062,7 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
   return {};
 }
 
-handlers['get-upgrade-notifications'] = async function() {
+handlers['get-upgrade-notifications'] = async function () {
   let { id } = prefs.getPrefs();
   if (id === TEST_BUDGET_ID || id === DEMO_BUDGET_ID) {
     return [];
@@ -2072,12 +2081,12 @@ handlers['get-upgrade-notifications'] = async function() {
   return unseen;
 };
 
-handlers['seen-upgrade-notification'] = async function({ type }) {
+handlers['seen-upgrade-notification'] = async function ({ type }) {
   let key = `notifications.${type}`;
   prefs.savePrefs({ [key]: true });
 };
 
-handlers['upload-file-web'] = async function({ filename, contents }) {
+handlers['upload-file-web'] = async function ({ filename, contents }) {
   if (!Platform.isWeb) {
     return null;
   }
@@ -2086,19 +2095,19 @@ handlers['upload-file-web'] = async function({ filename, contents }) {
   return 'ok';
 };
 
-handlers['backups-get'] = async function({ id }) {
+handlers['backups-get'] = async function ({ id }) {
   return getAvailableBackups(id);
 };
 
-handlers['backup-load'] = async function({ id, backupId }) {
+handlers['backup-load'] = async function ({ id, backupId }) {
   await loadBackup(id, backupId);
 };
 
-handlers['backup-make'] = async function({ id }) {
+handlers['backup-make'] = async function ({ id }) {
   await makeBackup(id);
 };
 
-handlers['get-last-opened-backup'] = async function() {
+handlers['get-last-opened-backup'] = async function () {
   const id = await asyncStorage.getItem('lastBudget');
   if (id && id !== '') {
     const budgetDir = fs.getBudgetDir(id);
@@ -2112,14 +2121,14 @@ handlers['get-last-opened-backup'] = async function() {
   return null;
 };
 
-handlers['app-focused'] = async function() {
+handlers['app-focused'] = async function () {
   if (prefs.getPrefs() && prefs.getPrefs().id) {
     // First we sync
     fullSync();
   }
 };
 
-handlers['track'] = async function({ name, props }) {
+handlers['track'] = async function ({ name, props }) {
   tracking.track(name, props);
 };
 

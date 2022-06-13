@@ -1,5 +1,5 @@
 import Platform from './platform';
-const { PostError, HTTPError } = require('./errors');
+const { PostError, HTTPError, PlaidError } = require('./errors');
 const { fetch } = require('../platform/server/fetch');
 
 function throwIfNot200(res, text) {
@@ -46,6 +46,7 @@ export async function post(url, data) {
   }
 
   if (res.status !== 'ok') {
+    console.log(res);
     console.log(
       'API call failed: ' +
         url +
@@ -55,7 +56,11 @@ export async function post(url, data) {
         JSON.stringify(res, null, 2)
     );
 
-    throw new PostError(res.description || res.reason || 'unknown');
+    if ((res.error_code) && (res.error_code === 'ITEM_LOGIN_REQUIRED')) {
+      throw new PlaidError(res);
+    }
+
+    throw new PostError(res.description || res.reason || res.error_code || 'unknown', res);
   }
 
   return res.data;

@@ -7,6 +7,7 @@ const initialState = {
 };
 
 export default function update(state = initialState, action) {
+  console.log(action);
   switch (action.type) {
     case constants.LOAD_BANKS:
       return {
