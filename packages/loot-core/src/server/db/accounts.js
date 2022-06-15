@@ -1,7 +1,7 @@
 import { batchMessages } from '../sync';
 import { accountModel } from '../models';
 import { shoveSortOrders } from './sort';
-import { all, delete_, first, insertWithUUID, update } from './index';
+import { all, delete_, first, insertWithUUID, update } from './db-actions';
 
 export function getAccounts() {
   return all(

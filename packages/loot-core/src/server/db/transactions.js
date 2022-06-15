@@ -3,7 +3,7 @@ import {
   insertWithSchema,
   selectWithSchema,
   updateWithSchema
-} from './index';
+} from './db-actions';
 
 export async function getTransaction(id) {
   const rows = await selectWithSchema(

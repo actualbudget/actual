@@ -1,7 +1,7 @@
 import { batchMessages } from '../sync';
 import { payeeModel, payeeRuleModel } from '../models';
 import { groupById } from '../../shared/util';
-import { all, delete_, first, insert, insertWithUUID, update } from './index';
+import { all, delete_, first, insert, insertWithUUID, update } from './db-actions';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
