@@ -17,25 +17,28 @@ describe('parseFile', () => {
       },
     });
     expect(errors.length).toBe(0);
-    console.log(transactions);
+    expect(transactions).toMatchSnapshot();
   });
 
   it('qif import works', async () => {
     const filePath = __dirname + '/data/data.qif';
     const { errors, transactions } = await parseFile(filePath);
     expect(errors.length).toBe(0);
+    expect(transactions).toMatchSnapshot();
   });
 
   it('ofx import works', async () => {
     const filePath = __dirname + '/data/data.ofx';
     const { errors, transactions } = await parseFile(filePath);
     expect(errors.length).toBe(0);
+    expect(transactions).toMatchSnapshot();
   }, 45000);
 
   it('qfx import works', async () => {
     const filePath = __dirname + '/data/data.qfx';
     const { errors, transactions } = await parseFile(filePath);
     expect(errors.length).toBe(0);
+    expect(transactions).toMatchSnapshot();
   }, 45000);
 
   it('unsupported file type import fails', async () => {

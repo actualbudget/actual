@@ -1,5 +1,0 @@
-STRINGTABLE
-BEGIN
-  2500, "cannot open URL %1 (%2)"
-  2501, "error reading URL %1 (%2)"
-END

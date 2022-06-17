@@ -75,26 +75,4 @@ describe('File import', () => {
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
   }, 45000);
-
-  test('matches extensions correctly (case-insensitive, etc)', async () => {
-    prefs.loadPrefs();
-    await db.insertAccount({ id: 'one', name: 'one' });
-
-    let res = await importFileWithRealTime(
-      'one',
-      __dirname + '/../../mocks/files/best.data-ever$.QFX'
-    );
-    expect(res.errors.length).toBe(0);
-
-    res = await importFileWithRealTime(
-      'one',
-      __dirname + '/../../mocks/files/big.data.QiF',
-      'MM/dd/yy'
-    );
-    expect(res.errors.length).toBe(0);
-
-    res = await importFileWithRealTime('one', 'foo.txt');
-    expect(res.errors.length).toBe(1);
-    expect(res.errors[0].message).toBe('Invalid file type');
-  }, 45000);
 });
