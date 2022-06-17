@@ -77,13 +77,13 @@ const SyncPb = require('./sync/proto/sync_pb');
 
 // let indexeddb = require('../platform/server/indexeddb');
 
-let VERSION;
+let VERSION: string;
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
 const UNCONFIGURED_SERVER = 'https://not-configured/';
 
 // Injected by Webpack at build time.
-declare const ACTUAL_APP_VERSION: boolean;
+declare const ACTUAL_APP_VERSION: string;
 
 // util
 
