@@ -25,7 +25,6 @@
     "@react-navigation/native-stack": "^6.1.0",
     "@reactions/component": "^2.0.2",
     "@sentry/react-native": "3.0.2",
-    "currency-formatter": "jlongster/currency-formatter",
     "jsc-android": "^241213.1.0",
     "loot-core": "*",
     "memoize-one": "^4.0.0",
