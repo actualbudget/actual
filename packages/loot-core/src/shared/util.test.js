@@ -1,4 +1,4 @@
-import { looselyParseAmount } from './util';
+import { looselyParseAmount, getNumberFormat, setNumberFormat } from './util';
 
 describe('utility functions', () => {
   test('looseParseAmount works with basic numbers', () => {
@@ -27,5 +27,27 @@ describe('utility functions', () => {
     // `3_45_23` (it needs a decimal amount). This function should be
     // thought through more.
     expect(looselyParseAmount('3_45_23.10')).toBe(34523.1);
+  });
+
+  test('number formatting works with comma-dot format', () => {
+    setNumberFormat('comma-dot');
+    const formatter = getNumberFormat().formatter;
+
+    expect(formatter.format('1234.56')).toBe('1,234.56');
+  });
+
+  test('number formatting works with dot-comma format', () => {
+    setNumberFormat('dot-comma');
+    const formatter = getNumberFormat().formatter;
+
+    expect(formatter.format('1234.56')).toBe('1.234,56');
+  });
+
+  test('number formatting works with space-comma format', () => {
+    setNumberFormat('space-comma');
+    const formatter = getNumberFormat().formatter;
+
+    // grouping separator space char is a non-breaking space, or UTF-16 \xa0
+    expect(formatter.format('1234.56')).toBe('1\xa0234,56');
   });
 });

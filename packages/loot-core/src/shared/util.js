@@ -1,5 +1,3 @@
-let currencyFormatter = require('currency-formatter');
-
 export function cleanUUID(uuid) {
   return uuid.replace(/-/g, '');
 }
@@ -267,7 +265,7 @@ export function setNumberFormat(format) {
 
   switch (format) {
     case 'space-comma':
-      locale = 'za-ZA';
+      locale = 'en-ZA';
       regex = /[^-0-9,]/g;
       separator = ',';
       break;
@@ -286,12 +284,10 @@ export function setNumberFormat(format) {
   numberFormat = {
     value: format,
     separator,
-    // This is the keep in line with the Intl API which we might
-    // switch to when it's available on all mobile platforms
-    formatter: {
-      format: number =>
-        currencyFormatter.format(number, { locale, format: '%v' })
-    },
+    formatter: new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }),
     regex
   };
 }
@@ -300,7 +296,7 @@ export function getNumberFormat() {
   return numberFormat;
 }
 
-setNumberFormat('1,000.33');
+setNumberFormat('comma-dot');
 
 export function toRelaxedNumber(value) {
   return integerToAmount(currencyToInteger(value) || 0);
@@ -317,10 +313,6 @@ export function integerToCurrency(n) {
 
 export function amountToCurrency(n) {
   return numberFormat.formatter.format(n);
-}
-
-export function amountToPrettyCurrency(n, code) {
-  return currencyFormatter.format(n, { code });
 }
 
 export function currencyToAmount(str) {

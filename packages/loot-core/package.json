@@ -43,7 +43,6 @@
     "babel-jest": "25.2.6",
     "babel-loader": "^8.0.6",
     "buffer": "^5.5.0",
-    "currency-formatter": "jlongster/currency-formatter",
     "damerau-levenshtein": "^1.0.4",
     "date-fns": "2.0.0-alpha.27",
     "esm": "^3.0.82",
