@@ -1,6 +1,8 @@
 let { getDatabase, closeDatabase } = require('../indexeddb');
 
-function init() {}
+function init({ persist = true } = {}) {
+  // eslint-disable-previous-line @typescript-eslint/no-empty-function
+}
 
 function shutdown() {
   closeDatabase();

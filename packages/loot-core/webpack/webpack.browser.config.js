@@ -3,7 +3,7 @@ let webpack = require('webpack');
 
 module.exports = {
   mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
-  entry: path.join(__dirname, '../src/server/main.js'),
+  entry: path.join(__dirname, '../src/server/main.ts'),
   context: path.resolve(__dirname, '../../..'),
   devtool: false,
   output: {
@@ -12,7 +12,7 @@ module.exports = {
     publicPath: '/kcab/'
   },
   resolve: {
-    extensions: ['.web.js', '.js', '.json'],
+    extensions: ['.web.js', '.js', '.ts', '.json'],
     alias: {
       fs: 'memfs',
       path: 'path-browserify',
@@ -25,6 +25,11 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.ts?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.m?js$/,
         use: {
