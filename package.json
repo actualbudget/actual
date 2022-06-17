@@ -58,7 +58,7 @@
     "postinstall": "rm -rf ./packages/loot-design/node_modules/react && rm -rf ./packages/mobile/node_modules/react && rm -rf ./node_modules/react-native && patch-package"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.15.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.18.2",
     "cross-env": "^5.1.5",
     "husky": "^3.0.4",
     "npm-run-all": "^4.1.3",
