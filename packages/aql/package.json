@@ -1,0 +1,47 @@
+{
+  "name": "@actual-app/aql",
+  "version": "1.0.0",
+  "description": "Actual Query Langauge",
+  "license": "ISC",
+  "homepage": "https://github.com/actualbudget/actual/tree/master/packages/aql#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/actualbudget/actual.git",
+    "directory": "packages/aql"
+  },
+  "bugs": {
+    "url": "https://github.com/actualbudget/actual/issues"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest",
+    "lint": "eslint ./src --ext .ts --max-warnings 0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@types/jest": "^28.1.2",
+    "@types/node": "^15.12.4",
+    "@typescript-eslint/eslint-plugin": "^4.1.1",
+    "@typescript-eslint/parser": "^4.1.1",
+    "babel-jest": "^28.1.1",
+    "eslint": "^7.9.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "jest": "^28.1.1",
+    "prettier": "^2.1.2",
+    "rollup": "^2.52.8",
+    "rollup-plugin-dts": "^3.0.2",
+    "ts-jest": "^28.0.5",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.0.2"
+  }
+}
