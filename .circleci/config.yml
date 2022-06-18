@@ -45,13 +45,13 @@ jobs:
 
       - restore_cache:
           keys:
-          - v3-dependencies-{{ checksum "yarn.lock" }}
+            - v3-dependencies-{{ checksum "yarn.lock" }}
 
       - run: yarn install --pure-lockfile
 
       - save_cache:
           <<: *cached_files
-        
+
       - run: yarn test
 
   build_windows:
@@ -94,7 +94,7 @@ jobs:
 
       - restore_cache:
           keys:
-          - v3-dependencies-{{ checksum "yarn.lock" }}
+            - v3-dependencies-{{ checksum "yarn.lock" }}
 
       - run: yarn install --pure-lockfile
 
