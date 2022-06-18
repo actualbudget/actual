@@ -36,7 +36,7 @@ jobs:
     <<: *default_config
 
     docker:
-      - image: circleci/node:12.13
+      - image: circleci/node:16.15.0
 
     working_directory: ~/repo
 
@@ -85,7 +85,7 @@ jobs:
     <<: *default_config
 
     docker:
-      - image: circleci/node:12.13
+      - image: circleci/node:16.15.0
 
     working_directory: ~/repo
 
