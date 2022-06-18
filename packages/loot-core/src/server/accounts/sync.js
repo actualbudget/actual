@@ -87,7 +87,8 @@ export function fromPlaid(trans) {
     payee_name: trans.name,
     imported_payee: trans.name,
     amount: -amountToInteger(trans.amount),
-    date: trans.date
+    date: trans.date,
+    cleared: !trans.pending
   };
 }
 

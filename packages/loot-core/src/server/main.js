@@ -1106,7 +1106,6 @@ handlers['accounts-sync'] = async function ({ id }) {
           updatedAccounts = updatedAccounts.concat(acct.id);
         }
       } catch (err) {
-        console.log(err.type);
         if (err.type === 'BankSyncError') {
           errors.push({
             type: 'SyncError',

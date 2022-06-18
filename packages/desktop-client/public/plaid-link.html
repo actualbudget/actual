@@ -76,6 +76,7 @@
             // Open Plaid
             let plaid = Plaid.create({
                 token: plaidToken,
+                webhook: (config.url + '/plaid-webhook'),
                 onSuccess: async (publicToken, metadata) => {
                     await post(config.url + '/put-web-token-contents', {
                         token,

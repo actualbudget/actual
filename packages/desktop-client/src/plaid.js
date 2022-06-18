@@ -1,4 +1,6 @@
 import { send } from 'loot-core/src/platform/client/fetch';
+import { post } from 'loot-core/src/server/post';
+import { usePlaidLink } from 'react-plaid-link';
 
 function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
   pushModal('plaid-external-msg', {
@@ -10,6 +12,16 @@ function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
         url = url + '&plaidToken=' + plaidToken;
       }
       window.Actual.openURLInBrowser(url);
+      // const { open, ready } = usePlaidLink({
+      //   token: token,
+      //   onSuccess: (public_token, metadata) => {
+      //     post(serverURL + '/plaid/put-web-token-contents', {
+      //       token,
+      //       data: { public_token, metadata }
+      //     });
+      //   },
+      // });
+      // open();
 
       let { error, data } = await send('poll-web-token', { token });
 
