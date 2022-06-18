@@ -1,3 +1,5 @@
+import { CompilerState } from "./types";
+
 export class CompileError extends Error {
     constructor(message: string = "") {
       super(message);
@@ -6,7 +8,6 @@ export class CompileError extends Error {
     }
 }
 
-type CompilerState = any;
 type StackElement = {
     type: "expr" | "function" | "op" | "filter" | "select" | "groupBy" | "orderBy" | "value";
     value?: any;

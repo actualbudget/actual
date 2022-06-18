@@ -1,17 +1,8 @@
 import { QueryState } from "../query";
 import { CompileError, getCompileError, saveStack } from "./errors"
+import { resetUid, makePath, resolvePath, popPath } from "./paths";
 
-let _uid = 0;
-function resetUid() {
-  _uid = 0;
-}
-
-function uid(tableName) {
-  _uid++;
-  return tableName + _uid;
-}
-
-function nativeDateToInt(date) {
+function nativeDateToInt(date: Date): string {
   let pad = x => (x < 10 ? '0' : '') + x;
   return date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate());
 }
@@ -23,11 +14,6 @@ function dateToInt(date) {
 export function addTombstone(schema, tableName, tableId, whereStr) {
   let hasTombstone = schema[tableName].tombstone != null;
   return hasTombstone ? `${whereStr} AND ${tableId}.tombstone = 0` : whereStr;
-}
-
-function popPath(path) {
-  let parts = path.split('.');
-  return { path: parts.slice(0, -1).join('.'), field: parts[parts.length - 1] };
 }
 
 function isKeyword(str) {
@@ -54,78 +40,6 @@ function getFieldDescription(schema, tableName, field) {
     );
   }
   return fieldDesc;
-}
-
-function makePath(state, path) {
-  let { schema, paths } = state;
-
-  let parts = path.split('.');
-  if (parts.length < 2) {
-    throw new CompileError('Invalid path: ' + path);
-  }
-
-  let initialTable = parts[0];
-
-  let tableName = parts.slice(1).reduce((tableName, field) => {
-    let table = schema[tableName];
-
-    if (table == null) {
-      throw new CompileError(`Path error: ${tableName} table does not exist`);
-    }
-
-    if (!table[field] || table[field].ref == null) {
-      throw new CompileError(
-        `Field not joinable on table ${tableName}: "${field}"`
-      );
-    }
-
-    return table[field].ref;
-  }, initialTable);
-
-  let joinTable;
-  let parentParts = parts.slice(0, -1);
-  if (parentParts.length === 1) {
-    joinTable = parentParts[0];
-  } else {
-    let parentPath = parentParts.join('.');
-    let parentDesc = paths.get(parentPath);
-    if (!parentDesc) {
-      throw new CompileError('Path does not exist: ' + parentPath);
-    }
-    joinTable = parentDesc.tableId;
-  }
-
-  return {
-    tableName: tableName,
-    tableId: uid(tableName),
-    joinField: parts[parts.length - 1],
-    joinTable
-  };
-}
-
-function resolvePath(state, path) {
-  let paths = path.split('.');
-  let tableId;
-
-  paths = paths.reduce(
-    (acc, name) => {
-      let fullName = acc.context + '.' + name;
-      return {
-        context: fullName,
-        path: [...acc.path, fullName]
-      };
-    },
-    { context: state.implicitTableName, path: [] }
-  ).path;
-
-  paths.forEach(path => {
-    if (!state.paths.get(path)) {
-      state.paths.set(path, makePath(state, path));
-    }
-  });
-
-  let pathInfo = state.paths.get(paths[paths.length - 1]);
-  return pathInfo;
 }
 
 function transformField(state, name) {
