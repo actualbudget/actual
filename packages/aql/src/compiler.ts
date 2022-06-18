@@ -973,8 +973,8 @@ export function isAggregateQuery(queryState: QueryState) {
 
   return queryState.selectExpressions.find(expr => {
     if (typeof expr !== 'string') {
-      let [name, value] = Object.entries(expr)[0];
-      return isAggregateFunction(value);
+      const [firstValue] = Object.values(expr);
+      return isAggregateFunction(firstValue);
     }
     return false;
   });
@@ -1030,7 +1030,6 @@ export function compileQuery(queryState: QueryState, schema, schemaConfig: Parti
     orderExpressions,
     limit,
     offset,
-    calculation
   } = customizeQuery(queryState);
 
   let select = '';
@@ -1038,7 +1037,6 @@ export function compileQuery(queryState: QueryState, schema, schemaConfig: Parti
   let joins = '';
   let groupBy = '';
   let orderBy = '';
-  let dependences = [];
   let state = {
     schema,
     implicitTableName: tableName,
