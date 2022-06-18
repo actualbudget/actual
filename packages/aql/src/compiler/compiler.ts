@@ -235,7 +235,7 @@ function inferParam(param, type) {
   }
 }
 
-function castInput(state, expr, type) {
+function castInput(expr, type) {
   if (expr.type === type) {
     return expr;
   } else if (expr.type === 'param') {
@@ -331,13 +331,12 @@ function castInput(state, expr, type) {
   throw new CompileError(`Can't convert ${expr.type} to ${type}`);
 }
 
-// TODO: remove state from these functions
-function val(state, expr, type?) {
+function val(expr, type?) {
   let castedExpr = expr;
 
   // Cast the type if necessary
   if (type) {
-    castedExpr = castInput(state, expr, type);
+    castedExpr = castInput(expr, type);
   }
 
   if (castedExpr.literal) {
@@ -353,8 +352,8 @@ function val(state, expr, type?) {
   return castedExpr.value;
 }
 
-function valArray(state, arr, types?) {
-  return arr.map((value, idx) => val(state, value, types ? types[idx] : null));
+function valArray(arr, types?) {
+  return arr.map((value, idx) => val(value, types ? types[idx] : null));
 }
 
 function validateArgLength(arr: unknown[], min: number, max: number | null = null) {
@@ -553,12 +552,12 @@ const compileFunction = saveStack('function', (state, func) => {
     // aggregate functions
     case '$sum': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['float']);
+      let [arg1] = valArray(args, ['float']);
       return typed(`SUM(${arg1})`, args[0].type);
     }
 
     case '$sumOver': {
-      let [arg1] = valArray(state, args, ['float']);
+      let [arg1] = valArray(args, ['float']);
       let order = state.orders
         ? 'ORDER BY ' + compileOrderBy(state, state.orders)
         : '';
@@ -571,14 +570,14 @@ const compileFunction = saveStack('function', (state, func) => {
 
     case '$count': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args);
+      let [arg1] = valArray(args);
       return typed(`COUNT(${arg1})`, 'integer');
     }
 
     // string functions
     case '$substr': {
       validateArgLength(args, 2, 3);
-      let [arg1, arg2, arg3] = valArray(state, args, [
+      let [arg1, arg2, arg3] = valArray(args, [
         'string',
         'integer',
         'integer'
@@ -587,26 +586,26 @@ const compileFunction = saveStack('function', (state, func) => {
     }
     case '$lower': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['string']);
+      let [arg1] = valArray(args, ['string']);
       return typed(`LOWER(${arg1})`, 'string');
     }
 
     // integer/float functions
     case '$neg': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['float']);
-      return typed(`(-${val(state, args[0])})`, args[0].type);
+      let [arg1] = valArray(args, ['float']);
+      return typed(`(-${val(args[0])})`, args[0].type);
     }
     case '$abs': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['float']);
-      return typed(`ABS(${val(state, args[0])})`, args[0].type);
+      let [arg1] = valArray(args, ['float']);
+      return typed(`ABS(${val(args[0])})`, args[0].type);
     }
     case '$idiv': {
       validateArgLength(args, 2);
-      let [arg1, arg2] = valArray(state, args, ['integer', 'integer']);
+      let [arg1, arg2] = valArray(args, ['integer', 'integer']);
       return typed(
-        `(${val(state, args[0])} / ${val(state, args[1])})`,
+        `(${val(args[0])} / ${val(args[1])})`,
         args[0].type
       );
     }
@@ -614,11 +613,11 @@ const compileFunction = saveStack('function', (state, func) => {
     // date functions
     case '$month': {
       validateArgLength(args, 1);
-      return castInput(state, args[0], 'date-month');
+      return castInput(args[0], 'date-month');
     }
     case '$year': {
       validateArgLength(args, 1);
-      return castInput(state, args[0], 'date-year');
+      return castInput(args[0], 'date-year');
     }
 
     // various functions
@@ -629,7 +628,7 @@ const compileFunction = saveStack('function', (state, func) => {
 
     case '$nocase':
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['string']);
+      let [arg1] = valArray(args, ['string']);
       return typed(`${arg1} COLLATE NOCASE`, args[0].type);
 
     case '$literal': {
@@ -662,27 +661,27 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
 
   switch (op) {
     case '$gte': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      let [left, right] = valArray([lhs, rhs], [null, lhs.type]);
       return `${left} >= ${right}`;
     }
     case '$lte': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      let [left, right] = valArray([lhs, rhs], [null, lhs.type]);
       return `${left} <= ${right}`;
     }
     case '$gt': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      let [left, right] = valArray([lhs, rhs], [null, lhs.type]);
       return `${left} > ${right}`;
     }
     case '$lt': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      let [left, right] = valArray([lhs, rhs], [null, lhs.type]);
       return `${left} < ${right}`;
     }
     case '$eq': {
-      if (castInput(state, rhs, lhs.type).type === 'null') {
-        return `${val(state, lhs)} IS NULL`;
+      if (castInput(rhs, lhs.type).type === 'null') {
+        return `${val(lhs)} IS NULL`;
       }
 
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      let [left, right] = valArray([lhs, rhs], [null, lhs.type]);
 
       if (rhs.type === 'param') {
         let orders = state.namedParameters.map(param => {
@@ -699,13 +698,13 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       return `${left} = ${right}`;
     }
     case '$oneof': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, 'array']);
+      let [left, right] = valArray([lhs, rhs], [null, 'array']);
       // Dedupe the ids
       let ids = [...new Set(right)];
       return `${left} IN (` + ids.map(id => `'${id}'`).join(',') + ')';
     }
     case '$like': {
-      let [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
+      let [left, right] = valArray([lhs, rhs], ['string', 'string']);
       return `${left} LIKE ${right}`;
     }
     default:
