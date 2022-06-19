@@ -6,8 +6,16 @@ export class CompileError extends Error {
     }
 }
 
-export function saveStack(type, func) {
-    return (state, ...args) => {
+type CompilerState = any;
+type StackElement = {
+    type: "expr" | "function" | "op" | "filter" | "select" | "groupBy" | "orderBy" | "value";
+    value?: any;
+    args?: any[];
+}
+type Tail<T extends any[]> = T extends [ x: any, ...xs: infer XS] ? XS : never;
+
+export function saveStack<F extends (state: CompilerState, ...args: any[]) => any>(type: StackElement["type"], func: F): (state: CompilerState, ...args: Tail<Parameters<F>>) => ReturnType<F> {
+    return (state: CompilerState, ...args: Tail<Parameters<F>>) => {
         if (state == null || state.compileStack == null) {
             throw new CompileError(
                 'This function cannot track error data. ' +
@@ -37,7 +45,7 @@ function prettyValue(value: any): string {
     return str;
 }
 
-export function getCompileError(error, stack) {
+export function getCompileError(error: CompileError, stack: StackElement[]): CompileError {
     if (stack.length === 0) {
         return error;
     }
