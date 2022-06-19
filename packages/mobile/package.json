@@ -8,7 +8,7 @@
     "android": "npx react-native run-android --appId com.shiftreset.actual",
     "android:prod": "rm -f ./android/app/build/generated/assets/react/release/index.android.bundle && npx react-native run-android --appId com.shiftreset.actual --variant=release",
     "ios": "react-native run-ios",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "postinstall": "patch-package"
   },
   "dependencies": {
