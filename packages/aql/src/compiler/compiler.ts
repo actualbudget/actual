@@ -8,20 +8,20 @@ function nativeDateToInt(date: Date): string {
   return date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate());
 }
 
-function dateToInt(date) {
+function dateToInt(date: string): number {
   return parseInt(date.replace(/-/g, ''));
 }
 
-export function addTombstone(schema: Schema, tableName, tableId, whereStr) {
+export function addTombstone(schema: Schema, tableName: string, tableId: string, whereStr: string): string {
   let hasTombstone = schema[tableName].tombstone != null;
   return hasTombstone ? `${whereStr} AND ${tableId}.tombstone = 0` : whereStr;
 }
 
-function isKeyword(str) {
+function isKeyword(str: string): boolean {
   return str === 'group';
 }
 
-export function quoteAlias(alias) {
+export function quoteAlias(alias: string): string {
   return alias.indexOf('.') === -1 && !isKeyword(alias) ? alias : `"${alias}"`;
 }
 
@@ -29,7 +29,7 @@ function typed(value, type, { literal = false } = {}) {
   return { value, type, literal };
 }
 
-function getFieldDescription(schema: Schema, tableName, field) {
+function getFieldDescription(schema: Schema, tableName: string, field: string)  {
   if (schema[tableName] == null) {
     throw new CompileError(`Table "${tableName}" does not exist in the schema`);
   }
@@ -43,7 +43,7 @@ function getFieldDescription(schema: Schema, tableName, field) {
   return fieldDesc;
 }
 
-function transformField(state: CompilerState, name) {
+function transformField(state: CompilerState, name: string) {
   if (typeof name !== 'string') {
     throw new CompileError('Invalid field name, must be a string');
   }
@@ -91,7 +91,7 @@ function transformField(state: CompilerState, name) {
   return typed(fieldStr, fieldDesc.type);
 }
 
-function parseDate(str) {
+function parseDate(str: string) {
   let m = str.match(/^(\d{4}-\d{2}-\d{2})$/);
   if (m) {
     return typed(dateToInt(m[1]), 'date', { literal: true });
@@ -99,7 +99,7 @@ function parseDate(str) {
   return null;
 }
 
-function parseMonth(str) {
+function parseMonth(str: string) {
   let m = str.match(/^(\d{4}-\d{2})$/);
   if (m) {
     return typed(dateToInt(m[1]), 'date', { literal: true });
@@ -107,7 +107,7 @@ function parseMonth(str) {
   return null;
 }
 
-function parseYear(str) {
+function parseYear(str: string) {
   let m = str.match(/^(\d{4})$/);
   if (m) {
     return typed(dateToInt(m[1]), 'date', { literal: true });
@@ -115,11 +115,11 @@ function parseYear(str) {
   return null;
 }
 
-function badDateFormat(str, type) {
+function badDateFormat(str: string, type: string): never {
   throw new CompileError(`Bad ${type} format: ${str}`);
 }
 
-function inferParam(param, type) {
+function inferParam(param, type): void {
   let existingType = param.paramType;
   if (existingType) {
     let casts = {
@@ -264,7 +264,7 @@ function valArray(arr, types?) {
   return arr.map((value, idx) => val(value, types ? types[idx] : null));
 }
 
-function validateArgLength(arr: unknown[], min: number, max: number | null = null) {
+function validateArgLength(arr: unknown[], min: number, max: number | null = null): void {
   if (max == null) {
     max = min;
   }
@@ -342,7 +342,7 @@ const compileExpr = saveStack('expr', (state: CompilerState, expr) => {
   return compileLiteral(expr);
 });
 
-function assertType(name, data, acceptedTypes) {
+function assertType(name: string, data, acceptedTypes) {
   if (acceptedTypes.indexOf(data.type) === -1) {
     throw new CompileError(
       `Invalid type of expression to ${name}, must be one of ${JSON.stringify(
@@ -352,7 +352,7 @@ function assertType(name, data, acceptedTypes) {
   }
 }
 
-function assertArgLength(name, args, len) {
+function assertArgLength(name: string, args: unknown[], len: number): void {
   if (args.length !== len) {
     throw new CompileError(
       `Invalid number of args to ${name}: expected ${len} but received ${args.length}`
@@ -474,7 +474,7 @@ const compileFunction = saveStack('function', (state: CompilerState, func) => {
   }
 });
 
-const compileOp = saveStack('op', (state: CompilerState, fieldRef, opData) => {
+const compileOp = saveStack('op', (state: CompilerState, fieldRef: string, opData): string => {
   let { $transform, ...opExpr } = opData;
   let [op] = Object.keys(opExpr);
 
@@ -543,7 +543,7 @@ const compileOp = saveStack('op', (state: CompilerState, fieldRef, opData) => {
   }
 });
 
-function compileConditions(state: CompilerState, conds) {
+function compileConditions(state: CompilerState, conds): string[] {
   if (!Array.isArray(conds)) {
     // Convert the object form `{foo: 1, bar:2}` into the array form
     // `[{foo: 1}, {bar:2}]`
@@ -552,9 +552,9 @@ function compileConditions(state: CompilerState, conds) {
     });
   }
 
-  return conds.filter(Boolean).reduce((res, condsObj) => {
-    let compiled = Object.entries(condsObj)
-      .map(([field, cond]) => {
+  return conds.filter(Boolean).reduce((res: string[], condsObj) => {
+    const compiled = Object.entries(condsObj)
+      .map(([field, cond]): string => {
         // Allow a falsy value in the lhs of $and and $or to allow for
         // quick forms like `$or: amount != 0 && ...`
         if (field === '$and') {
@@ -591,7 +591,7 @@ function compileConditions(state: CompilerState, conds) {
   }, []);
 }
 
-function compileOr(state: CompilerState, conds) {
+function compileOr(state: CompilerState, conds): string {
   // Same as above
   if (!conds) {
     return '0';
@@ -603,7 +603,7 @@ function compileOr(state: CompilerState, conds) {
   return '(' + res.join('\n  OR ') + ')';
 }
 
-function compileAnd(state: CompilerState, conds) {
+function compileAnd(state: CompilerState, conds): string {
   // Same as above
   if (!conds) {
     return '1';
@@ -615,11 +615,9 @@ function compileAnd(state: CompilerState, conds) {
   return '(' + res.join('\n  AND ') + ')';
 }
 
-const compileWhere = saveStack('filter', (state: CompilerState, conds) => {
-  return compileAnd(state, conds);
-});
+const compileWhere = saveStack('filter', (state: CompilerState, conds): string => compileAnd(state, conds));
 
-function compileJoins(state: CompilerState, tableRef, internalTableFilters) {
+function compileJoins(state: CompilerState, tableRef: (name: string, isJoin?: boolean) => string, internalTableFilters): string {
   let joins = [];
   state.paths.forEach((desc, path) => {
     let {
@@ -655,7 +653,7 @@ function compileJoins(state: CompilerState, tableRef, internalTableFilters) {
   return joins.join('\n');
 }
 
-function expandStar(state: CompilerState, expr) {
+function expandStar(state: CompilerState, expr: string): string[] {
   let path;
   let pathInfo;
   if (expr === '*') {
@@ -679,7 +677,7 @@ function expandStar(state: CompilerState, expr) {
 
 const compileSelect = saveStack(
   'select',
-  (state: CompilerState, exprs, isAggregate, orders) => {
+  (state: CompilerState, exprs, isAggregate: boolean, orders): string => {
     // Always include the id if it's not an aggregate
     if (!isAggregate && !exprs.includes('id') && !exprs.includes('*')) {
       exprs = exprs.concat(['id']);
@@ -727,7 +725,7 @@ const compileSelect = saveStack(
   }
 );
 
-const compileGroupBy = saveStack('groupBy', (state: CompilerState, exprs) => {
+const compileGroupBy = saveStack('groupBy', (state: CompilerState, exprs): string => {
   let groupBy = exprs.map(expr => {
     if (typeof expr === 'string') {
       return compileExpr(state, '$' + expr).value;
@@ -739,7 +737,7 @@ const compileGroupBy = saveStack('groupBy', (state: CompilerState, exprs) => {
   return groupBy.join(', ');
 });
 
-const compileOrderBy = saveStack('orderBy', (state: CompilerState, exprs) => {
+const compileOrderBy = saveStack('orderBy', (state: CompilerState, exprs): string => {
   let orderBy = exprs.map(expr => {
     let compiled;
     let dir = null;
@@ -792,7 +790,7 @@ function isAggregateFunction(expr): boolean {
   return argExprs.some(ex => isAggregateFunction(ex));
 }
 
-export function isAggregateQuery(queryState: QueryState) {
+export function isAggregateQuery(queryState: QueryState): boolean {
   // it's aggregate if:
   // either an aggregate function is used in `select`
   // or a `groupBy` exists
@@ -942,7 +940,7 @@ export function compileQuery(queryState: QueryState, schema: Schema, schemaConfi
   };
 }
 
-export function defaultConstructQuery(queryState: QueryState, state: CompilerState, sqlPieces) {
+export function defaultConstructQuery(queryState: QueryState, state: CompilerState, sqlPieces): string {
   let s = sqlPieces;
 
   let where = queryState.withDead
@@ -965,11 +963,11 @@ export function defaultConstructQuery(queryState: QueryState, state: CompilerSta
   `;
 }
 
-export function generateSQLWithState(queryState: QueryState, schema?: Schema, schemaConfig: Partial<SchemaConfig> = {}) {
+export function generateSQLWithState(queryState: QueryState, schema?: Schema, schemaConfig: Partial<SchemaConfig> = {}): { sql: string, state: CompilerState } {
   let { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   return { sql: defaultConstructQuery(queryState, state, sqlPieces), state };
 }
 
-export function generateSQL(queryState: QueryState) {
+export function generateSQL(queryState: QueryState): string {
   return generateSQLWithState(queryState).sql;
 }
