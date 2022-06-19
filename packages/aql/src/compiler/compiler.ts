@@ -1,7 +1,7 @@
 import { QueryState } from "../query";
 import { CompileError, getCompileError, saveStack } from "./errors"
 import { resetUid, makePath, resolvePath, popPath } from "./paths";
-import { CompilerState, Schema } from "./types";
+import { CompilerState, Param, Schema, TypedValue } from "./types";
 
 function nativeDateToInt(date: Date): string {
   let pad = x => (x < 10 ? '0' : '') + x;
@@ -25,7 +25,7 @@ export function quoteAlias(alias: string): string {
   return alias.indexOf('.') === -1 && !isKeyword(alias) ? alias : `"${alias}"`;
 }
 
-function typed(value, type, { literal = false } = {}) {
+function typed(value: TypedValue["value"], type: TypedValue["type"], { literal = false } = {}): TypedValue {
   return { value, type, literal };
 }
 
@@ -279,7 +279,7 @@ function validateArgLength(arr: unknown[], min: number, max: number | null = nul
 
 //// Compiler
 
-function compileLiteral(value) {
+function compileLiteral(value): TypedValue {
   if (value === undefined) {
     throw new CompileError('`undefined` is not a valid query value');
   } else if (value === null) {
@@ -306,7 +306,7 @@ function compileLiteral(value) {
   }
 }
 
-const compileExpr = saveStack('expr', (state: CompilerState, expr) => {
+const compileExpr = saveStack('expr', (state: CompilerState, expr): TypedValue | Param => {
   if (typeof expr === 'string') {
     // Field reference
     if (expr[0] === '$') {
@@ -321,7 +321,7 @@ const compileExpr = saveStack('expr', (state: CompilerState, expr) => {
 
     // Named parameter
     if (expr[0] === ':') {
-      let param = { value: '?', type: 'param', paramName: expr.slice(1) };
+      const param: Param = { value: '?', type: 'param', paramName: expr.slice(1) };
       state.namedParameters.push(param);
       return param;
     }
@@ -360,7 +360,7 @@ function assertArgLength(name: string, args: unknown[], len: number): void {
   }
 }
 
-const compileFunction = saveStack('function', (state: CompilerState, func) => {
+const compileFunction = saveStack('function', (state: CompilerState, func): TypedValue => {
   let [name] = Object.keys(func);
   let argExprs = func[name];
   if (!Array.isArray(argExprs)) {
@@ -480,14 +480,15 @@ const compileOp = saveStack('op', (state: CompilerState, fieldRef: string, opDat
 
   let rhs = compileExpr(state, opData[op]);
 
-  let lhs;
+  let lhs: TypedValue;
   if ($transform) {
     lhs = compileFunction(
       { ...state, implicitField: fieldRef },
       typeof $transform === 'string' ? { [$transform]: '$' } : $transform
     );
   } else {
-    lhs = compileExpr(state, '$' + fieldRef);
+    // As we are passing a field reference, we know we receive back a TypedValue
+    lhs = compileExpr(state, '$' + fieldRef) as TypedValue;
   }
 
   switch (op) {

@@ -1,3 +1,15 @@
+export type TypedValue = {
+    value: string | number | string[];
+    type: "id" | "boolean" | "string" | "integer" | "float" | "date" | 'date-year' | 'date-month' | "array" | "json" | "json/fallback" | "null";
+    literal: boolean;
+}
+
+export type Param = {
+    value: unknown;
+    type: "param";
+    paramName: string;
+}
+
 // Schema
 
 type SchemaFieldDefinition = {
