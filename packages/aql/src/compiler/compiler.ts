@@ -1,6 +1,7 @@
 import { QueryState } from "../query";
 import { CompileError, getCompileError, saveStack } from "./errors"
 import { resetUid, makePath, resolvePath, popPath } from "./paths";
+import { CompilerState } from "./types";
 
 function nativeDateToInt(date: Date): string {
   let pad = x => (x < 10 ? '0' : '') + x;
@@ -42,7 +43,7 @@ function getFieldDescription(schema, tableName, field) {
   return fieldDesc;
 }
 
-function transformField(state, name) {
+function transformField(state: CompilerState, name) {
   if (typeof name !== 'string') {
     throw new CompileError('Invalid field name, must be a string');
   }
@@ -305,7 +306,7 @@ function compileLiteral(value) {
   }
 }
 
-const compileExpr = saveStack('expr', (state, expr) => {
+const compileExpr = saveStack('expr', (state: CompilerState, expr) => {
   if (typeof expr === 'string') {
     // Field reference
     if (expr[0] === '$') {
@@ -359,7 +360,7 @@ function assertArgLength(name, args, len) {
   }
 }
 
-const compileFunction = saveStack('function', (state, func) => {
+const compileFunction = saveStack('function', (state: CompilerState, func) => {
   let [name] = Object.keys(func);
   let argExprs = func[name];
   if (!Array.isArray(argExprs)) {
@@ -473,7 +474,7 @@ const compileFunction = saveStack('function', (state, func) => {
   }
 });
 
-const compileOp = saveStack('op', (state, fieldRef, opData) => {
+const compileOp = saveStack('op', (state: CompilerState, fieldRef, opData) => {
   let { $transform, ...opExpr } = opData;
   let [op] = Object.keys(opExpr);
 
@@ -542,7 +543,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
   }
 });
 
-function compileConditions(state, conds) {
+function compileConditions(state: CompilerState, conds) {
   if (!Array.isArray(conds)) {
     // Convert the object form `{foo: 1, bar:2}` into the array form
     // `[{foo: 1}, {bar:2}]`
@@ -590,7 +591,7 @@ function compileConditions(state, conds) {
   }, []);
 }
 
-function compileOr(state, conds) {
+function compileOr(state: CompilerState, conds) {
   // Same as above
   if (!conds) {
     return '0';
@@ -602,7 +603,7 @@ function compileOr(state, conds) {
   return '(' + res.join('\n  OR ') + ')';
 }
 
-function compileAnd(state, conds) {
+function compileAnd(state: CompilerState, conds) {
   // Same as above
   if (!conds) {
     return '1';
@@ -614,11 +615,11 @@ function compileAnd(state, conds) {
   return '(' + res.join('\n  AND ') + ')';
 }
 
-const compileWhere = saveStack('filter', (state, conds) => {
+const compileWhere = saveStack('filter', (state: CompilerState, conds) => {
   return compileAnd(state, conds);
 });
 
-function compileJoins(state, tableRef, internalTableFilters) {
+function compileJoins(state: CompilerState, tableRef, internalTableFilters) {
   let joins = [];
   state.paths.forEach((desc, path) => {
     let {
@@ -654,7 +655,7 @@ function compileJoins(state, tableRef, internalTableFilters) {
   return joins.join('\n');
 }
 
-function expandStar(state, expr) {
+function expandStar(state: CompilerState, expr) {
   let path;
   let pathInfo;
   if (expr === '*') {
@@ -678,7 +679,7 @@ function expandStar(state, expr) {
 
 const compileSelect = saveStack(
   'select',
-  (state, exprs, isAggregate, orders) => {
+  (state: CompilerState, exprs, isAggregate, orders) => {
     // Always include the id if it's not an aggregate
     if (!isAggregate && !exprs.includes('id') && !exprs.includes('*')) {
       exprs = exprs.concat(['id']);
@@ -726,7 +727,7 @@ const compileSelect = saveStack(
   }
 );
 
-const compileGroupBy = saveStack('groupBy', (state, exprs) => {
+const compileGroupBy = saveStack('groupBy', (state: CompilerState, exprs) => {
   let groupBy = exprs.map(expr => {
     if (typeof expr === 'string') {
       return compileExpr(state, '$' + expr).value;
@@ -738,7 +739,7 @@ const compileGroupBy = saveStack('groupBy', (state, exprs) => {
   return groupBy.join(', ');
 });
 
-const compileOrderBy = saveStack('orderBy', (state, exprs) => {
+const compileOrderBy = saveStack('orderBy', (state: CompilerState, exprs) => {
   let orderBy = exprs.map(expr => {
     let compiled;
     let dir = null;
@@ -815,7 +816,7 @@ type SchemaConfig = {
   customizeQuery: (state: QueryState) => QueryState;
 }
 
-export function compileQuery(queryState: QueryState, schema, schemaConfig: Partial<SchemaConfig> = {}) {
+export function compileQuery(queryState: QueryState, schema, schemaConfig: Partial<SchemaConfig> = {}): {sqlPieces: any, state: CompilerState} {
   let { withDead, validateRefs = true, tableOptions, rawMode } = queryState;
 
   let {
@@ -866,7 +867,7 @@ export function compileQuery(queryState: QueryState, schema, schemaConfig: Parti
   let joins = '';
   let groupBy = '';
   let orderBy = '';
-  let state = {
+  let state: CompilerState = {
     schema,
     implicitTableName: tableName,
     implicitTableId: tableRef(tableName),
@@ -941,7 +942,7 @@ export function compileQuery(queryState: QueryState, schema, schemaConfig: Parti
   };
 }
 
-export function defaultConstructQuery(queryState: QueryState, state, sqlPieces) {
+export function defaultConstructQuery(queryState: QueryState, state: CompilerState, sqlPieces) {
   let s = sqlPieces;
 
   let where = queryState.withDead

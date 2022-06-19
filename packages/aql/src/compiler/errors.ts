@@ -1,4 +1,4 @@
-import { CompilerState } from "./types";
+import { CompilerState, StackElement } from "./types";
 
 export class CompileError extends Error {
     constructor(message: string = "") {
@@ -8,11 +8,6 @@ export class CompileError extends Error {
     }
 }
 
-type StackElement = {
-    type: "expr" | "function" | "op" | "filter" | "select" | "groupBy" | "orderBy" | "value";
-    value?: any;
-    args?: any[];
-}
 type Tail<T extends any[]> = T extends [ x: any, ...xs: infer XS] ? XS : never;
 
 export function saveStack<F extends (state: CompilerState, ...args: any[]) => any>(type: StackElement["type"], func: F): (state: CompilerState, ...args: Tail<Parameters<F>>) => ReturnType<F> {
