@@ -1,7 +1,7 @@
 import { QueryState } from "../query";
 import { CompileError, getCompileError, saveStack } from "./errors"
 import { resetUid, makePath, resolvePath, popPath } from "./paths";
-import { CompilerState } from "./types";
+import { CompilerState, Schema } from "./types";
 
 function nativeDateToInt(date: Date): string {
   let pad = x => (x < 10 ? '0' : '') + x;
@@ -12,7 +12,7 @@ function dateToInt(date) {
   return parseInt(date.replace(/-/g, ''));
 }
 
-export function addTombstone(schema, tableName, tableId, whereStr) {
+export function addTombstone(schema: Schema, tableName, tableId, whereStr) {
   let hasTombstone = schema[tableName].tombstone != null;
   return hasTombstone ? `${whereStr} AND ${tableId}.tombstone = 0` : whereStr;
 }
@@ -29,7 +29,7 @@ function typed(value, type, { literal = false } = {}) {
   return { value, type, literal };
 }
 
-function getFieldDescription(schema, tableName, field) {
+function getFieldDescription(schema: Schema, tableName, field) {
   if (schema[tableName] == null) {
     throw new CompileError(`Table "${tableName}" does not exist in the schema`);
   }
@@ -816,7 +816,7 @@ type SchemaConfig = {
   customizeQuery: (state: QueryState) => QueryState;
 }
 
-export function compileQuery(queryState: QueryState, schema, schemaConfig: Partial<SchemaConfig> = {}): {sqlPieces: any, state: CompilerState} {
+export function compileQuery(queryState: QueryState, schema: Schema, schemaConfig: Partial<SchemaConfig> = {}): {sqlPieces: any, state: CompilerState} {
   let { withDead, validateRefs = true, tableOptions, rawMode } = queryState;
 
   let {
@@ -965,7 +965,7 @@ export function defaultConstructQuery(queryState: QueryState, state: CompilerSta
   `;
 }
 
-export function generateSQLWithState(queryState: QueryState, schema?: any, schemaConfig: Partial<SchemaConfig> = {}) {
+export function generateSQLWithState(queryState: QueryState, schema?: Schema, schemaConfig: Partial<SchemaConfig> = {}) {
   let { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   return { sql: defaultConstructQuery(queryState, state, sqlPieces), state };
 }

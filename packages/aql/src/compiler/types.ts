@@ -1,3 +1,18 @@
+// Schema
+
+type SchemaFieldDefinition = {
+    type: "id" | "boolean" | "string" | "integer" | "float" | "date" | "json" | "json/fallback";
+    ref?: string;
+    required?: boolean;
+    default?: () => number;
+}
+
+type SchemaTableDefinition = Record<string, SchemaFieldDefinition>
+
+export type Schema = Record<string, SchemaTableDefinition>
+
+// CompilerState
+
 export type PathInfo = {
     tableName: string,
     tableId: string,
@@ -13,7 +28,7 @@ export type StackElement = {
 }
 
 export type CompilerState = {
-    schema: any;
+    schema: Schema;
     implicitTableName: string;
     implicitTableId: string;
     paths: Map<string, PathInfo>;

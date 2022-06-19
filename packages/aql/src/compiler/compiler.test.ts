@@ -1,5 +1,6 @@
 import { q } from '../query';
 import { generateSQLWithState } from '.';
+import { Schema } from './types';
 
 function sqlLines(str: string): string[] {
   return str
@@ -8,7 +9,7 @@ function sqlLines(str: string): string[] {
     .map(line => line.trim());
 }
 
-let basicSchema = {
+const basicSchema: Schema = {
   transactions: {
     id: { type: 'id' },
     date: { type: 'date' },
@@ -19,7 +20,7 @@ let basicSchema = {
   }
 };
 
-let schemaWithRefs = {
+const schemaWithRefs: Schema = {
   transactions: {
     id: { type: 'id' },
     payee: { type: 'id', ref: 'payees' },
@@ -39,7 +40,7 @@ let schemaWithRefs = {
   }
 };
 
-let schemaWithTombstone = {
+const schemaWithTombstone: Schema = {
   transactions: {
     id: { type: 'id' },
     payee: { type: 'id', ref: 'payees' },
