@@ -1,5 +1,5 @@
-import { q } from './query';
-import { generateSQLWithState } from './compiler';
+import { q } from '../query';
+import { generateSQLWithState } from '.';
 
 function sqlLines(str: string): string[] {
   return str

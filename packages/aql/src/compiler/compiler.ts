@@ -1,4 +1,4 @@
-import { QueryState } from "./query";
+import { QueryState } from "../query";
 
 let _uid = 0;
 function resetUid() {
