@@ -1,11 +1,11 @@
 export type TypedValue = {
     value: string | number | string[];
-    type: "id" | "boolean" | "string" | "integer" | "float" | "date" | 'date-year' | 'date-month' | "array" | "json" | "json/fallback" | "null";
+    type: "id" | "boolean" | "string" | "integer" | "float" | "date" | 'date-year' | 'date-month' | "array" | "json" | "json/fallback" | "null" | "any";
     literal: boolean;
 }
 
 export type Param = {
-    value: unknown;
+    value: string | number;
     type: "param";
     paramName: string;
 }

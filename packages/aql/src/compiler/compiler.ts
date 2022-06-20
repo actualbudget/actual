@@ -144,7 +144,7 @@ function inferParam(param, type): void {
   }
 }
 
-function castInput(expr, type) {
+function castInput(expr: TypedValue | Param, type: TypedValue["type"] ): TypedValue {
   if (expr.type === type) {
     return expr;
   } else if (expr.type === 'param') {
@@ -164,8 +164,9 @@ function castInput(expr, type) {
   // These are all things that can be safely casted automatically
   if (type === 'date') {
     if (expr.type === 'string') {
+      const dateString: string = expr.value as string;
       if (expr.literal) {
-        return parseDate(expr.value) || badDateFormat(expr.value, 'date');
+        return parseDate(dateString) || badDateFormat(dateString, 'date');
       } else {
         throw new CompileError(
           'Casting string fields to dates is not supported'
@@ -179,10 +180,11 @@ function castInput(expr, type) {
     if (expr.type === 'date') {
       expr2 = expr;
     } else if (expr.type === 'string' || expr.type === 'any') {
+      const dateString: string = expr.value as string;
       expr2 =
-        parseMonth(expr.value) ||
-        parseDate(expr.value) ||
-        badDateFormat(expr.value, 'date-month');
+        parseMonth(dateString) ||
+        parseDate(dateString) ||
+        badDateFormat(dateString, 'date-month');
     } else {
       throw new CompileError(`Can't cast ${expr.type} to date-month`);
     }
@@ -204,11 +206,12 @@ function castInput(expr, type) {
     if (expr.type === 'date' || expr.type === 'date-month') {
       expr2 = expr;
     } else if (expr.type === 'string') {
+      const dateString: string = expr.value as string;
       expr2 =
-        parseYear(expr.value) ||
-        parseMonth(expr.value) ||
-        parseDate(expr.value) ||
-        badDateFormat(expr.value, 'date-year');
+        parseYear(dateString) ||
+        parseMonth(dateString) ||
+        parseDate(dateString) ||
+        badDateFormat(dateString, 'date-year');
     } else {
       throw new CompileError(`Can't cast ${expr.type} to date-year`);
     }
@@ -240,20 +243,20 @@ function castInput(expr, type) {
   throw new CompileError(`Can't convert ${expr.type} to ${type}`);
 }
 
-function val(expr, type?) {
-  let castedExpr = expr;
+function val(expr: TypedValue | Param, type?: TypedValue["type"]): TypedValue["value"] {
+  let castedExpr: TypedValue | Param = expr;
 
   // Cast the type if necessary
   if (type) {
     castedExpr = castInput(expr, type);
   }
 
-  if (castedExpr.literal) {
+  if (castedExpr.type !== "param" && castedExpr.literal) {
     if (castedExpr.type === 'id') {
       return `'${castedExpr.value}'`;
     } else if (castedExpr.type === 'string') {
       // Escape quotes
-      let value = castedExpr.value.replace(/'/g, "''");
+      const value = (castedExpr.value as string).replace(/'/g, "''");
       return `'${value}'`;
     }
   }
@@ -261,7 +264,7 @@ function val(expr, type?) {
   return castedExpr.value;
 }
 
-function valArray(arr, types?) {
+function valArray(arr: (TypedValue | Param)[], types?: TypedValue["type"][]): TypedValue["value"][] {
   return arr.map((value, idx) => val(value, types ? types[idx] : null));
 }
 
@@ -361,7 +364,14 @@ function assertArgLength(name: string, args: unknown[], len: number): void {
   }
 }
 
-const compileFunction = saveStack('function', (state: CompilerState, func): TypedValue => {
+type AggregateFunction = "$sum" | "$sumOver" | "$count"
+type StringFunction = "$substr" | "$lower"
+type NumberFunction = "$neg" | "$abs" | "$idiv"
+type DateFunction = "$month" | "$year"
+type MiscFunction = "$condition" | "$nocase" | "$literal"
+type Function = AggregateFunction | StringFunction | NumberFunction | DateFunction | MiscFunction 
+
+const compileFunction = saveStack('function', (state: CompilerState, func: Partial<Record<Function, any[]>>): TypedValue => {
   let [name] = Object.keys(func);
   let argExprs = func[name];
   if (!Array.isArray(argExprs)) {
@@ -531,9 +541,9 @@ const compileOp = saveStack('op', (state: CompilerState, fieldRef: string, opDat
       return `${left} = ${right}`;
     }
     case '$oneof': {
-      let [left, right] = valArray([lhs, rhs], [null, 'array']);
+      const [left, right] = valArray([lhs, rhs], [null, 'array']) as [string, string[]];
       // Dedupe the ids
-      let ids = [...new Set(right)];
+      const ids = [...new Set(right)];
       return `${left} IN (` + ids.map(id => `'${id}'`).join(',') + ')';
     }
     case '$like': {
