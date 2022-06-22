@@ -509,6 +509,12 @@ function CellWithScheduleIcon({ scheduleId, children }) {
   );
 }
 
+//TODO: Use similar logic as 'CellWithScheduleIcon' to have a pending icon
+//be in place of the checkbox, if that is the desired functionality
+function CellWithPendingIcon({ pendingID, children }) {
+
+}
+
 export const Transaction = React.memo(function Transaction(props) {
   let {
     transaction: originalTransaction,
@@ -1119,6 +1125,10 @@ function isTemporaryId(id) {
 
 export function isPreviewId(id) {
   return id.indexOf('preview/') !== -1;
+}
+
+export function isPendingId(id) {
+  return id.indexOf('pending/') !== -1;
 }
 
 function NewTransaction({

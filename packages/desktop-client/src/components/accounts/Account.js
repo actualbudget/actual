@@ -285,11 +285,11 @@ function AccountMenu({
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
           syncEnabled &&
-            account &&
-            !account.closed &&
-            (canSync
-              ? { name: 'unlink', text: 'Unlink Account' }
-              : { name: 'link', text: 'Link Account' }),
+          account &&
+          !account.closed &&
+          (canSync
+            ? { name: 'unlink', text: 'Unlink Account' }
+            : { name: 'link', text: 'Link Account' }),
           account.closed
             ? { name: 'reopen', text: 'Reopen Account' }
             : { name: 'close', text: 'Close Account' }
@@ -468,6 +468,7 @@ function SelectedTransactionsButton({
   style,
   getTransaction,
   onShow,
+  onMatch,
   onDelete,
   onEdit,
   onUnlink,
@@ -504,6 +505,7 @@ function SelectedTransactionsButton({
       keyHandlers={
         types.trans && {
           f: () => onShow([...selectedItems]),
+          m: () => onMatch([...selectedItems]),
           d: () => onDelete([...selectedItems]),
           a: () => onEdit('account', [...selectedItems]),
           p: () => onEdit('payee', [...selectedItems]),
@@ -515,38 +517,39 @@ function SelectedTransactionsButton({
       items={[
         ...(!types.trans
           ? [
-              { name: 'view-schedule', text: 'View schedule' },
-              { name: 'post-transaction', text: 'Post transaction' },
-              { name: 'skip', text: 'Skip scheduled date' }
-            ]
+            { name: 'view-schedule', text: 'View schedule' },
+            { name: 'post-transaction', text: 'Post transaction' },
+            { name: 'skip', text: 'Skip scheduled date' }
+          ]
           : [
-              { name: 'show', text: 'Show', key: 'F' },
-              { name: 'delete', text: 'Delete', key: 'D' },
-              ...(linked
-                ? [
-                    {
-                      name: 'view-schedule',
-                      text: 'View schedule',
-                      disabled: selectedItems.size > 1
-                    },
-                    { name: 'unlink-schedule', text: 'Unlink schedule' }
-                  ]
-                : [
-                    {
-                      name: 'link-schedule',
-                      text: 'Link schedule'
-                    }
-                  ]),
-              Menu.line,
-              { type: Menu.label, name: 'Edit field' },
-              { name: 'date', text: 'Date' },
-              { name: 'account', text: 'Account', key: 'A' },
-              { name: 'payee', text: 'Payee', key: 'P' },
-              { name: 'notes', text: 'Notes', key: 'N' },
-              { name: 'category', text: 'Category', key: 'C' },
-              { name: 'amount', text: 'Amount' },
-              { name: 'cleared', text: 'Cleared', key: 'L' }
-            ])
+            { name: 'show', text: 'Show', key: 'F' },
+            { name: 'match', text: 'Match Transaction', key: 'M' },
+            { name: 'delete', text: 'Delete', key: 'D' },
+            ...(linked
+              ? [
+                {
+                  name: 'view-schedule',
+                  text: 'View schedule',
+                  disabled: selectedItems.size > 1
+                },
+                { name: 'unlink-schedule', text: 'Unlink schedule' }
+              ]
+              : [
+                {
+                  name: 'link-schedule',
+                  text: 'Link schedule'
+                }
+              ]),
+            Menu.line,
+            { type: Menu.label, name: 'Edit field' },
+            { name: 'date', text: 'Date' },
+            { name: 'account', text: 'Account', key: 'A' },
+            { name: 'payee', text: 'Payee', key: 'P' },
+            { name: 'notes', text: 'Notes', key: 'N' },
+            { name: 'category', text: 'Category', key: 'C' },
+            { name: 'amount', text: 'Amount' },
+            { name: 'cleared', text: 'Cleared', key: 'L' }
+          ])
       ]}
       onSelect={name => {
         switch (name) {
@@ -555,6 +558,9 @@ function SelectedTransactionsButton({
             break;
           case 'delete':
             onDelete([...selectedItems]);
+            break;
+          case 'match':
+            onMatch([...selectedItems]);
             break;
           case 'post-transaction':
           case 'skip':
@@ -619,6 +625,7 @@ const AccountHeader = React.memo(
     onSearch,
     onAddTransaction,
     onShowTransactions,
+    onMatchTransactions,
     onDoneReconciling,
     onToggleExtraBalances,
     onSaveName,
@@ -816,6 +823,7 @@ const AccountHeader = React.memo(
               <SelectedTransactionsButton
                 getTransaction={id => transactions.find(t => t.id === id)}
                 onShow={onShowTransactions}
+                onMatch={onMatchTransactions}
                 onDelete={onBatchDelete}
                 onEdit={onBatchEdit}
                 onUnlink={onBatchUnlink}
@@ -911,12 +919,12 @@ function AllTransactions({ transactions, filtered, children }) {
     () =>
       scheduleData
         ? scheduleData.schedules.filter(
-            s =>
-              !s.completed &&
-              ['due', 'upcoming', 'missed'].includes(
-                scheduleData.statuses.get(s.id)
-              )
-          )
+          s =>
+            !s.completed &&
+            ['due', 'upcoming', 'missed'].includes(
+              scheduleData.statuses.get(s.id)
+            )
+        )
         : [],
     [scheduleData]
   );
@@ -1414,6 +1422,32 @@ class AccountInternal extends React.PureComponent {
     });
   };
 
+  onMatchTransactions = async ids => {
+    //TODO: Need to think about how to combine / match transactions.
+    //If there is a transaction imported from a bank, that should take priority
+    //EXCEPT if it is pending as the amount may change.
+
+    //For now, only want to be able to merge two transactions at a time
+    if (ids.length === 2) {
+      this.setState({ workingHard: true });
+
+      let { data } = await runQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*')
+      );
+      let transactions = ungroupTransactions(data);
+
+      let changes = { deleted: [], updated: [] };
+
+      transactions.forEach(trans => {
+        console.log(trans);
+      });
+
+      await this.refetchTransactions();
+    }
+  };
+
   onBatchEdit = async (name, ids) => {
     let onChange = async (name, value) => {
       this.setState({ workingHard: true });
@@ -1660,6 +1694,7 @@ class AccountInternal extends React.PureComponent {
                   savePrefs={this.props.savePrefs}
                   onSearch={this.onSearch}
                   onShowTransactions={this.onShowTransactions}
+                  onMatchTransactions={this.onMatchTransactions}
                   onMenuSelect={this.onMenuSelect}
                   onAddTransaction={this.onAddTransaction}
                   onToggleExtraBalances={this.onToggleExtraBalances}
