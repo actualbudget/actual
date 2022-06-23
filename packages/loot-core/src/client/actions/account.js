@@ -96,7 +96,7 @@ export function syncAccounts(id) {
 
     if (id) {
       let error = errors.find(error => error.accountId === id);
-console.log(error);
+
       if (error) {
         // We only want to mark the account as having problem if it
         // was a real syncing error.

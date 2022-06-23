@@ -130,7 +130,7 @@ async function downloadTransactions(
   allTransactions = count != null ? allTransactions.slice(0, count) : allTransactions;
 
   return {
-    transactions: allTransactions.map(fromPlaid),
+    transactions: allTransactions, //.map(fromPlaid),
     accountBalance
   };
 }
@@ -224,6 +224,10 @@ export async function reconcileTransactions(acctId, transactions) {
   const updated = [];
   const added = [];
 
+  //Make a copy of the raw transactions to be able to look at additional fields
+  let rawTransactions = transactions;
+  transactions = transactions.map(fromPlaid);
+
   let { normalized, payeesToCreate } = await normalizeTransactions(
     transactions,
     acctId
@@ -316,7 +320,7 @@ export async function reconcileTransactions(acctId, transactions) {
     }
     return data;
   });
-
+console.log(hasMatched);
   // Finally, generate & commit the changes
   for (let { payee_name, trans, subtransactions, match } of transactionsStep3) {
     if (match) {
