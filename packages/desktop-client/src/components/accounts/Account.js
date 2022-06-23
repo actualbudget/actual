@@ -1438,12 +1438,41 @@ class AccountInternal extends React.PureComponent {
       );
       let transactions = ungroupTransactions(data);
 
+      let idSet = new Set(ids);
       let changes = { deleted: [], updated: [] };
 
-      transactions.forEach(trans => {
-        console.log(trans);
-      });
+      let importedTrans = transactions.filter(p => p.imported_id !== null);
 
+      let toUpdateTrans = null;
+      let toDeleteTrans = null;
+
+      if (importedTrans.length === 2) {
+        //If both transactions have been imported, use the most recent one
+        toUpdateTrans = importedTrans.reduce((a, b) => a.date > b.date ? a : b);
+      } else if (importedTrans.length === 1) {
+        toUpdateTrans = importedTrans[0];
+      }
+
+      toDeleteTrans = transactions.filter(p => p.id !== toUpdateTrans.id)[0];
+
+      let parentId = toDeleteTrans.parent_id;
+
+      if (!idSet.has(toDeleteTrans.id) || (parentId && idSet.has(parentId))) {
+        return;
+      }
+
+      let { diff } = deleteTransaction(transactions, toDeleteTrans.id);
+
+      transactions = applyChanges(diff, transactions);
+
+      changes.deleted = diff.deleted
+        ? changes.deleted.concat(diff.deleted)
+        : diff.deleted;
+      changes.updated = diff.updated
+        ? changes.updated.concat(diff.updated)
+        : diff.updated;
+
+      await send('transactions-batch-update', changes);
       await this.refetchTransactions();
     }
   };
