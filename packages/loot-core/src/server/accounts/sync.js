@@ -88,7 +88,8 @@ export function fromPlaid(trans) {
     imported_payee: trans.name,
     amount: -amountToInteger(trans.amount),
     date: trans.date,
-    cleared: !trans.pending
+    cleared: !trans.pending,
+    pending: trans.pending
   };
 }
 
@@ -251,12 +252,12 @@ export async function reconcileTransactions(acctId, transactions) {
         [trans.imported_id, acctId]
       );
 
-      // TODO: Pending transactions
-      // console.log(trans);
-      // console.log(match);
       if (match) {
         hasMatched.add(match.id);
       }
+
+      //Went from pending to posted
+      console.log(trans);
     }
 
     // If it didn't match, query data needed for fuzzy matching
