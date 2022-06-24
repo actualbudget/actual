@@ -407,7 +407,7 @@ const MenuButton = withRouter(function MenuButton({ history }) {
 
   let items = [
     { name: 'open-payees', text: 'Manage Payees' },
-    { name: 'open-plaid-accounts', text: 'Manage Plaid Accounts' },
+    // { name: 'open-plaid-accounts', text: 'Manage Plaid Accounts' },
     { name: 'open-rules', text: 'Manage Rules' },
     { name: 'find-schedules', text: 'Find schedules' },
     { name: 'repair-splits', text: 'Repair split transactions' },
