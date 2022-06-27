@@ -319,7 +319,7 @@ describe('transaction executors', () => {
       fc
         .asyncProperty(
           arbs.makeTransactionArray({
-            splitFreq: 0.1,
+            splitFreq: 10,
             payeeIds,
             maxLength: 100
           }),
