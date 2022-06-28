@@ -20,7 +20,7 @@ export async function insertPayee(payee) {
 }
 
 export async function deletePayee(payee) {
-  const { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
+  let { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
     payee.id
   ]);
   if (transfer_acct) {
@@ -35,7 +35,7 @@ export async function deletePayee(payee) {
   //   mappings.map(m => update('payee_mapping', { id: m.id, targetId: null }))
   // );
 
-  const rules = await all('SELECT * FROM payee_rules WHERE payee_id = ?', [
+  let rules = await all('SELECT * FROM payee_rules WHERE payee_id = ?', [
     payee.id
   ]);
   await Promise.all(rules.map(rule => deletePayeeRule({ id: rule.id })));
@@ -54,7 +54,7 @@ export function updatePayee(payee) {
 
 export async function mergePayees(target, ids) {
   // Load in payees so we can check some stuff
-  const payees = groupById(await all('SELECT * FROM payees'));
+  let payees = groupById(await all('SELECT * FROM payees'));
 
   // Filter out any transfer payees
   if (payees[target].transfer_acct != null) {
@@ -65,7 +65,7 @@ export async function mergePayees(target, ids) {
   await batchMessages(async () => {
     await Promise.all(
       ids.map(async id => {
-        const mappings = await all(
+        let mappings = await all(
           'SELECT id FROM payee_mapping WHERE targetId = ?',
           [id]
         );
@@ -98,7 +98,7 @@ export function getPayees() {
 }
 
 export async function getOrphanedPayees() {
-  const rows = await all(`
+  let rows = await all(`
         SELECT p.id FROM payees p
         LEFT JOIN payee_mapping pm ON pm.id = p.id
         LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId

@@ -45,12 +45,12 @@ export async function closeDatabase() {
 // only needed in hot spots when you are running lots of queries.
 let _queryCache = new LRU({ max: 100 });
 export function cache(sql) {
-  const cached = _queryCache.get(sql);
+  let cached = _queryCache.get(sql);
   if (cached) {
     return cached;
   }
 
-  const prepared = sqlite.prepare(db, sql);
+  let prepared = sqlite.prepare(db, sql);
   _queryCache.set(sql, prepared);
   return prepared;
 }

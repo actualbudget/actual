@@ -66,7 +66,7 @@ export async function select(table, id) {
 }
 
 export async function update(table, params) {
-  const fields = Object.keys(params).filter(k => k !== 'id');
+  let fields = Object.keys(params).filter(k => k !== 'id');
 
   if (params.id == null) {
     throw new Error('update: id is required');
@@ -99,7 +99,7 @@ export async function insertWithUUID(table, row) {
 }
 
 export async function insert(table, row) {
-  const fields = Object.keys(row).filter(k => k !== 'id');
+  let fields = Object.keys(row).filter(k => k !== 'id');
 
   if (row.id == null) {
     throw new Error('insert: id is required');
@@ -131,14 +131,14 @@ export async function delete_(table, id) {
 }
 
 export async function selectWithSchema(table, sql, params) {
-  const rows = await runQuery(sql, params, true);
+  let rows = await runQuery(sql, params, true);
   return rows
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
 }
 
 export async function selectFirstWithSchema(table, sql, params) {
-  const rows = await selectWithSchema(table, sql, params);
+  let rows = await selectWithSchema(table, sql, params);
   return rows.length > 0 ? rows[0] : null;
 }
 

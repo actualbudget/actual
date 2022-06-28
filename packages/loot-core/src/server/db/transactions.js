@@ -6,7 +6,7 @@ import {
 } from './db-actions';
 
 export async function getTransaction(id) {
-  const rows = await selectWithSchema(
+  let rows = await selectWithSchema(
     'transactions',
     'SELECT * FROM v_transactions WHERE id = ?',
     [id]
