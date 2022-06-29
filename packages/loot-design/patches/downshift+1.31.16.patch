@@ -1,8 +1,8 @@
 diff --git a/node_modules/downshift/dist/downshift.esm.js b/node_modules/downshift/dist/downshift.esm.js
-index b89f7d6..4020b47 100644
+index f39a298..da7b6f5 100644
 --- a/node_modules/downshift/dist/downshift.esm.js
 +++ b/node_modules/downshift/dist/downshift.esm.js
-@@ -1198,10 +1198,15 @@ var _initialiseProps = function () {
+@@ -1200,10 +1200,15 @@ var _initialiseProps = function () {
        // onMouseMove is used over onMouseEnter here. onMouseMove
        // is only triggered on actual mouse movement while onMouseEnter
        // can fire on DOM changes, interrupting keyboard navigation
