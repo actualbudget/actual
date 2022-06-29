@@ -23,8 +23,11 @@
     "@rschedule/standard-date-adapter": "^1.2.0",
     "@sentry/node": "^6.12.0",
     "absurd-sql": "0.0.53",
+    "assert": "^2.0.0",
     "better-sqlite3": "7.4.1",
+    "browserify-zlib": "^0.2.0",
     "core-js": "^3.8.3",
+    "crypto-browserify": "^3.12.0",
     "csv-parse": "^4.10.1",
     "csv-stringify": "^5.3.6",
     "deep-equal": "^2.0.5",
@@ -33,7 +36,10 @@
     "mitt": "^2.1.0",
     "node-fetch": "^1.6.3",
     "node-libofx": "*",
-    "regenerator-runtime": "^0.13.7"
+    "regenerator-runtime": "^0.13.7",
+    "source-map": "^0.7.3",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.4"
   },
   "devDependencies": {
     "@actual-app/api": "*",

@@ -270,6 +270,7 @@ module.exports = function(webpackEnv) {
         dgram: false,
         fs: false,
         net: false,
+        path: require.resolve("path-browserify"),
         tls: false,
         child_process: false
       },

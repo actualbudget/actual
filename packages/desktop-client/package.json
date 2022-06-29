@@ -48,6 +48,7 @@
     "mini-css-extract-plugin": "0.4.3",
     "mitt": "^1.1.2",
     "optimize-css-assets-webpack-plugin": "5.0.1",
+    "path-browserify": "^1.0.1",
     "perf-deets": "^1.0.15",
     "pnp-webpack-plugin": "1.1.0",
     "postcss-flexbugs-fixes": "4.1.0",
