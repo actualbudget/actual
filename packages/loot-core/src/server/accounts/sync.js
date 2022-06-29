@@ -88,8 +88,8 @@ export function fromPlaid(trans) {
     imported_payee: trans.name,
     amount: -amountToInteger(trans.amount),
     date: trans.date,
-    cleared: !trans.pending,
-    pending: trans.pending
+    cleared: !trans.pending
+    // pending: trans.pending
   };
 }
 
@@ -228,6 +228,8 @@ export async function reconcileTransactions(acctId, transactions) {
   //Make a copy of the raw transactions to be able to look at additional fields
   let rawTransactions = transactions;
   transactions = transactions.map(fromPlaid);
+
+  console.log(rawTransactions);
 
   let { normalized, payeesToCreate } = await normalizeTransactions(
     transactions,
