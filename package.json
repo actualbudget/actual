@@ -15,30 +15,6 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**/better-sqlite3",
-      "**/better-sqlite3/**",
-      "mobile/react-native",
-      "mobile/react-native-*",
-      "mobile/rn-fetch-blob",
-      "mobile/**/event-target-shim",
-      "mobile/@sentry/react-native",
-      "mobile/nodejs-mobile-react-native",
-      "**/mobile/nodejs-mobile-react-native/**",
-      "**/@react-native-community/**",
-      "**/@react-navigation/**",
-      "mobile/react-navigation",
-      "mobile/react-navigation-tabs",
-      "mobile/rn-snoopy",
-      "mobile/rn-snoopy/**",
-      "mobile/detox",
-      "mobile/detox/**",
-      "mobile/jsc-android",
-      "mobile/jsc-android/**",
-      "**/react-native-web",
-      "**/react-native-web/**",
-      "**/@sentry/cli"
     ]
   },
   "scripts": {
