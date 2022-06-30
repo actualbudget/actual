@@ -4,8 +4,8 @@ module.exports = {
   plugins: ['@typescript-eslint', 'prettier'],
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'react-app'
+    'react-app',
+    'plugin:@typescript-eslint/recommended'
   ],
   rules: {
     '@typescript-eslint/no-unused-vars': 'off',
