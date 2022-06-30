@@ -93,4 +93,4 @@ module.exports = function join(...args) {
   }
   if (joined === undefined) return '.';
   return normalizePath(joined);
-};
+}
