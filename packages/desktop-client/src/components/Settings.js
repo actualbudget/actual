@@ -24,8 +24,6 @@ import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import ExclamationSolid from 'loot-design/src/svg/v1/ExclamationSolid';
 import Platform from 'loot-core/src/client/platform';
 
-import { version } from '../../package.json'
-
 let dateFormats = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
@@ -475,6 +473,25 @@ function SettingsLink({ to, name, style, first, last }) {
   );
 }
 
+function Version() {
+  return (
+    <Text
+      style={[
+        {
+          alignSelf: 'center',
+          color: colors.n7,
+          ':hover': { color: colors.n2 },
+          padding: '6px 10px'
+        },
+        styles.staticText,
+        styles.smallText
+      ]}
+    >
+      v{window.Actual.ACTUAL_VERSION}
+    </Text>
+  );
+}
+
 class Settings extends React.Component {
   componentDidMount() {
     this.unlisten = listen('prefs-updated', () => {
@@ -503,15 +520,7 @@ class Settings extends React.Component {
         >
           <SettingsLink to={`${match.path}/file`} name="File" first={true} />
           <SettingsLink to={`${match.path}/global`} name="Global" last={true} />
-          <Text style={[
-                  {
-                    alignSelf: 'center',
-                    padding: '6px 10px',
-                  },
-                  styles.staticText,
-                  styles.smallText,
-                ]}
-            >v{ version }</Text>
+          <Version />
         </View>
 
         <View
