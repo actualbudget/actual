@@ -1,4 +1,4 @@
-import * as db from './index';
+import { all } from './db-actions';
 import { addSyncListener } from '../sync/index';
 
 // This file keeps all the mappings in memory so we can access it
@@ -20,11 +20,11 @@ let unlistenSync;
 export async function loadMappings() {
   // The mappings are separated into tables specific to the type of
   // data. But you know, we really could keep a global mapping table.
-  let categories = (await db.all('SELECT * FROM category_mapping')).map(r => [
+  let categories = (await all('SELECT * FROM category_mapping')).map(r => [
     r.id,
     r.transferId
   ]);
-  let payees = (await db.all('SELECT * FROM payee_mapping')).map(r => [
+  let payees = (await all('SELECT * FROM payee_mapping')).map(r => [
     r.id,
     r.targetId
   ]);
