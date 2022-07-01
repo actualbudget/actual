@@ -1,8 +1,6 @@
 export {
-  receiveMessages,
   batchMessages,
   sendMessages,
-  syncAndReceiveMessages,
   clearFullSyncTimeout,
   scheduleFullSync,
   initialFullSync,
@@ -14,6 +12,7 @@ export {
   addSyncListener,
   applyMessages,
 } from "./sync-apply"
+export { receiveMessages, syncAndReceiveMessages } from "./sync-receive"
 export { 
   checkSyncingMode,
   setSyncingMode,

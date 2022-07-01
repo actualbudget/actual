@@ -7,7 +7,6 @@ import logger from '../../platform/server/log';
 import { postBinary } from '../post';
 import * as db from '../db';
 import * as sheet from '../sheet';
-import { runMutator } from '../mutators';
 import Timestamp, {
   deserializeClock,
   getClock
@@ -18,19 +17,12 @@ import { getServer } from '../server-config';
 import { rebuildMerkleHash } from './repair';
 import { checkSyncingMode } from "./syncing-mode";
 import { applyMessages, deserializeValue } from "./sync-apply";
+import { receiveMessages } from "./sync-receive";
 import { getTablesFromMessages, getMessagesSince } from './utils';
 
 const { PostError, SyncError } = require('../errors');
 
 let FULL_SYNC_DELAY = 1000;
-
-export function receiveMessages(messages) {
-  messages.forEach(msg => {
-    Timestamp.recv(msg.timestamp);
-  });
-
-  return runMutator(() => applyMessages(messages));
-}
 
 async function _sendMessages(messages) {
   try {
@@ -88,18 +80,6 @@ export async function sendMessages(messages) {
   } else {
     return _sendMessages(messages);
   }
-}
-
-export async function syncAndReceiveMessages(messages, since) {
-  let localMessages = await getMessagesSince(since);
-  await receiveMessages(
-    messages.map(msg => ({
-      ...msg,
-      value: deserializeValue(msg.value),
-      timestamp: Timestamp.parse(msg.timestamp)
-    }))
-  );
-  return localMessages;
 }
 
 export function clearFullSyncTimeout() {
