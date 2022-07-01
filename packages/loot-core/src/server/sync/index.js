@@ -2,7 +2,6 @@ export {
   receiveMessages,
   batchMessages,
   sendMessages,
-  getMessagesSince,
   syncAndReceiveMessages,
   clearFullSyncTimeout,
   scheduleFullSync,
@@ -22,3 +21,4 @@ export {
 export { default as makeTestMessage } from './make-test-message';
 export { default as resetSync } from './reset';
 export { default as repairSync } from './repair';
+export { getMessagesSince } from "./utils"

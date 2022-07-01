@@ -18,7 +18,7 @@ import { getServer } from '../server-config';
 import { rebuildMerkleHash } from './repair';
 import { checkSyncingMode } from "./syncing-mode";
 import { applyMessages, deserializeValue } from "./sync-apply";
-import { getTablesFromMessages } from './utils';
+import { getTablesFromMessages, getMessagesSince } from './utils';
 
 const { PostError, SyncError } = require('../errors');
 
@@ -88,14 +88,6 @@ export async function sendMessages(messages) {
   } else {
     return _sendMessages(messages);
   }
-}
-
-export function getMessagesSince(since) {
-  return db.runQuery(
-    'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
-    [since],
-    true
-  );
 }
 
 export async function syncAndReceiveMessages(messages, since) {
