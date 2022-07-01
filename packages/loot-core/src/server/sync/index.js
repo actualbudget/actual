@@ -1,8 +1,4 @@
-export { 
-  serializeValue,
-  deserializeValue,
-  addSyncListener,
-  applyMessages,
+export {
   receiveMessages,
   batchMessages,
   sendMessages,
@@ -13,6 +9,12 @@ export {
   initialFullSync,
   fullSync
 } from "./sync"
+export { 
+  serializeValue,
+  deserializeValue,
+  addSyncListener,
+  applyMessages,
+} from "./sync-apply"
 export { 
   checkSyncingMode,
   setSyncingMode,
