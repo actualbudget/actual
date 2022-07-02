@@ -474,6 +474,23 @@ function SettingsLink({ to, name, style, first, last }) {
 }
 
 function Version() {
+  let [version, setVersion] = useState('');
+
+  useEffect(async () => {
+    const url = await send('get-server-url');
+    if (!url || url.indexOf('not-configured') !== -1) return;
+
+    try {
+      const res = await fetch(url + '/info');
+      if (!res.ok) return;
+
+      const info = await res.json();
+      setVersion((info && info.build.version) || '');
+    } catch (e) {
+      setVersion('');
+    }
+  }, []);
+
   return (
     <Text
       style={[
@@ -487,7 +504,7 @@ function Version() {
         styles.smallText
       ]}
     >
-      v{window.Actual.ACTUAL_VERSION}
+      v{window.Actual.ACTUAL_VERSION} | {version ? `v${version}` : 'N/A'}
     </Text>
   );
 }
