@@ -31,6 +31,18 @@ let dateFormats = [
   { format: 'dd mm yy', label: 'DD MM YY' }
 ];
 
+const reYearFirst = /^(\d{4})(?:[^\d]*)?(\d{2})(?:[^\d]*)?(\d{2})$/;
+const reYearLast = /^(\d{2})(?:[^\d]*)?(\d{2})(?:[^\d]*)?(\d{4})$/;
+const reTwoDig = /^(\d{2})(?:[^\d]*)?(\d{2})(?:[^\d]*)?(\d{2})$/;
+const re = {
+  'yyyy mm dd': reYearFirst,
+  'mm dd yyyy': reYearLast,
+  'dd mm yyyy': reYearLast,
+  'yy mm dd': reTwoDig,
+  'mm dd yy': reTwoDig,
+  'dd mm yy': reTwoDig
+};
+
 function parseDate(str, order) {
   if (typeof str !== 'string') {
     return null;
@@ -40,7 +52,10 @@ function parseDate(str, order) {
     return v && v.length === 1 ? '0' + v : v;
   }
 
-  let parts = str.replace(/ /g, '').split(/[^0-9]/);
+  let parts = str.replace(/\s+/g, '').match(re[order]);
+  if (!parts) return null;
+
+  parts = parts.slice(1);
 
   let year, month, day;
   switch (order) {
