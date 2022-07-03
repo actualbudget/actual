@@ -1,6 +1,6 @@
 import { send } from 'loot-core/src/platform/client/fetch';
 import { post } from 'loot-core/src/server/post';
-import { usePlaidLink } from 'react-plaid-link';
+// import { usePlaidLink } from 'react-plaid-link';
 
 function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
   pushModal('plaid-external-msg', {
