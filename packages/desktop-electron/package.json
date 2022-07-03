@@ -5,12 +5,13 @@
   "description": "A simple and powerful personal finance system",
   "version": "4.0.2",
   "scripts": {
+    "clean": "rm -rf dist",
+    "build": "electron-builder",
     "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
   "main": "index.js",
   "build": {
     "appId": "com.shiftreset.actual",
-    "afterSign": "./afterSignHook.js",
     "files": [
       "!node_modules/loot-core/src{,/**/*}",
       "!node_modules/loot-core/lib-dist/{browser,bundle.mobile*}",
@@ -38,8 +39,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "icons/icon.ico",
-      "certificateSubjectName": "Shift Reset LLC"
+      "icon": "icons/icon.ico"
     }
   },
   "dependencies": {

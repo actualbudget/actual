@@ -1,4 +1,4 @@
 module.exports = {
-  moduleFileExtensions: ['js', 'json', 'testing.js']
+  moduleFileExtensions: ['js', 'json', 'testing.js'],
   setupFiles: [],
 };
