@@ -43,7 +43,7 @@ const re = {
   'dd mm yy': reTwoDig
 };
 
-function parseDate(str, order) {
+export function parseDate(str, order) {
   if (typeof str !== 'string') {
     return null;
   }
