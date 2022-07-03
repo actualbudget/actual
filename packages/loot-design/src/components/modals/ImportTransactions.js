@@ -351,10 +351,7 @@ function DateFormatSelect({
   // try to figure out what delimiter the date is using, and default
   // to space if we can't figure it out.
   let delimiter = '-';
-  if (
-    transactions.length > 0 &&
-    (fieldMappings && fieldMappings.date != null)
-  ) {
+  if (transactions.length > 0 && fieldMappings && fieldMappings.date != null) {
     let date = transactions[0][fieldMappings.date];
     let m = date && date.match(/[/.,-/\\]/);
     delimiter = m ? m[0] : ' ';
