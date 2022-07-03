@@ -89,15 +89,10 @@ yarn workspace loot-core build:node
 yarn workspace @actual-app/web build
 
 
-rm -fr packages/desktop-electron/client-build
-cp -r packages/desktop-client/build packages/desktop-electron/client-build
-# Remove the embedded backend for the browser version. Will improve
-# this process
-rm -fr packages/desktop-electron/client-build/data
-rm -fr packages/desktop-electron/client-build/*kcab.*
-rm -fr packages/desktop-electron/client-build/*.wasm
-rm -fr packages/desktop-electron/client-build/*.map
-
+(
+  cd packages/desktop-electron;
+  yarn update-client
+)
 
 if [ -n "$RELEASE" ]; then
   SENTRY_CLI="./packages/desktop-electron/node_modules/.bin/sentry-cli"
