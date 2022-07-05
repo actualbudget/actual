@@ -55,6 +55,8 @@ export function parseDate(str, order) {
   let parts = str.replace(/\s+/g, '').match(re[order]);
   if (!parts) return null;
 
+  // We're only interested in the groups so slice the full matched string off
+  // of the array.
   parts = parts.slice(1);
 
   let year, month, day;
