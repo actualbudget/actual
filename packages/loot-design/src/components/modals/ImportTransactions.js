@@ -490,6 +490,30 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
   );
 }
 
+function DelimiterSelect({
+  setCsvDelimiter,
+  parse,
+  filename,
+  csvDelimiter,
+  style = {}
+}) {
+  return (
+    <View style={{ width: 130, ...style }}>
+      <SectionLabel title="CSV DELIMITER" />
+      <Select
+        value={csvDelimiter}
+        onChange={e => {
+          setCsvDelimiter(e.target.value);
+          parse(filename, { delimiter: e.target.value });
+        }}
+      >
+        <option value=",">,</option>
+        <option value=";">;</option>
+      </Select>
+    </View>
+  );
+}
+
 export function ImportTransactions({
   modalProps,
   options,
@@ -828,19 +852,15 @@ export function ImportTransactions({
         )}
 
         {filetype === 'csv' && (
-          <View style={{ marginLeft: 25 }}>
-            <SectionLabel title="CSV DELIMITER" />
-            <Select
-              value={csvDelimiter}
-              onChange={e => {
-                setCsvDelimiter(e.target.value);
-                parse(filename, { delimiter: e.target.value });
-              }}
-            >
-              <option value=",">,</option>
-              <option value=";">;</option>
-            </Select>
-          </View>
+          <DelimiterSelect
+            {...{
+              setCsvDelimiter,
+              parse,
+              filename,
+              csvDelimiter,
+              style: { marginLeft: 25 }
+            }}
+          />
         )}
 
         <View style={{ flex: 1 }} />
