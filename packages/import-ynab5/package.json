@@ -5,16 +5,15 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actualbudget/actual.git",
-    "directory": "packages/import-ynab5"
+    "url": "git+https://github.com/actualbudget/importer-nynab.git"
   },
   "author": "James Long",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/actualbudget/actual/issues"
+    "url": "https://github.com/actualbudget/importer-nynab/issues"
   },
   "bin": "./index.js",
-  "homepage": "https://github.com/actualbudget/actual/tree/master/packages/import-ynab5#readme",
+  "homepage": "https://github.com/actualbudget/importer-nynab#readme",
   "dependencies": {
     "@actual-app/api": "^1.0.0",
     "date-fns": "2.0.0-alpha.27",
