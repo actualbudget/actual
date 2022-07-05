@@ -794,20 +794,33 @@ export function ImportTransactions({
         </View>
       )}
       {error && error.parsed && (
-        <View
-          style={{
-            color: colors.r4,
-            alignItems: 'center',
-            marginTop: 10
-          }}
-        >
-          <Text style={{ maxWidth: 450, marginBottom: 15 }}>
-            <strong>Error:</strong> {error.message}
-          </Text>
-          {error.parsed && (
-            <Button onClick={() => onNewFile()}>Select new file...</Button>
-          )}
-        </View>
+        <>
+          <View
+            style={{
+              color: colors.r4,
+              alignItems: 'center',
+              marginTop: 10
+            }}
+          >
+            <Text style={{ maxWidth: 450, marginBottom: 15 }}>
+              <strong>Error:</strong> {error.message}
+            </Text>
+            {error.parsed && (
+              <Button onClick={() => onNewFile()}>Select new file...</Button>
+            )}
+            {getFileType(options.filename) === 'csv' && (
+              <DelimiterSelect
+                {...{
+                  setCsvDelimiter,
+                  parse,
+                  filename,
+                  csvDelimiter,
+                  style: { marginTop: 10 }
+                }}
+              />
+            )}
+          </View>
+        </>
       )}
 
       {filetype === 'csv' && (
