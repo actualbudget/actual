@@ -6,7 +6,6 @@ VERSION=""
 BETA=""
 RELEASE=""
 RELEASE_NOTES=""
-CI=${CI:-false}
 
 cd "$ROOT/.."
 
@@ -65,18 +64,17 @@ if [ -n "$RELEASE" ]; then
 fi
 
 if [ "$OSTYPE" == "msys" ]; then
-    if [ $CI != true ]; then
+    if [ -z "$CIRCLE_TAG" ]; then
         read -s -p "Windows certificate password: " -r CSC_KEY_PASSWORD
         export CSC_KEY_PASSWORD
-    elif [ -n "$CIRCLE_TAG" ]; then
-        # We only want to run this on CircleCI as Github doesn't have the CSC_KEY_PASSWORD secret set.
+    else
         certutil -f -p ${CSC_KEY_PASSWORD} -importPfx ~/windows-shift-reset-llc.p12
     fi
 fi
 
 # We only need to run linting once (and this doesn't seem to work on
 # Windows for some reason)
-if [[ $CI != true && "$OSTYPE" == "darwin"* ]]; then
+if [[ "$OSTYPE" == "darwin"* ]]; then
     yarn lint
 fi
 
@@ -133,7 +131,7 @@ fi
 
 (
     cd packages/desktop-electron;
-    yarn clean;
+    rm -rf dist;
 
     export npm_config_better_sqlite3_binary_host="https://static.actualbudget.com/prebuild/better-sqlite3"
 
@@ -141,11 +139,11 @@ fi
         if [ -f ../../.secret-tokens ]; then
             source ../../.secret-tokens
         fi
-        yarn build --publish always -c.releaseInfo.releaseNotes="$RELEASE_NOTES" --arm64 --x64
+        ./node_modules/.bin/electron-builder --publish always -c.releaseInfo.releaseNotes="$RELEASE_NOTES" --arm64 --x64
 
         echo "\nCreated release $VERSION with release notes \"$RELEASE_NOTES\""
     elif [ "$RELEASE" == "beta" ]; then
-        yarn build --publish never --arm64 --x64
+        ./node_modules/.bin/electron-builder --publish never --arm64 --x64
 
         WINDOWS_FILE="./dist/Actual Setup $VERSION.exe"
         if [ -f "$WINDOWS_FILE" ]; then
@@ -171,6 +169,6 @@ fi
             echo "No linux file found"
         fi
     else
-        SKIP_NOTARIZATION=true yarn build --publish never --x64
+        SKIP_NOTARIZATION=true ./node_modules/.bin/electron-builder --publish never --x64
     fi
 )

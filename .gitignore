@@ -18,5 +18,3 @@ bundle.mobile.js
 bundle.mobile.js.map
 .sentryclirc
 export-2020-01-10.csv
-
-**/*.log

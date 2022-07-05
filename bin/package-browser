@@ -1,9 +1,8 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 ROOT=`dirname $0`
 VERSION=""
 RELEASE=""
-CI=${CI:-false}
 
 cd "$ROOT/.."
 
@@ -51,10 +50,7 @@ if [ -n "$RELEASE" ]; then
     fi
 fi
 
-# There's no need to check linting in CI as it'll be done in a different step.
-if [ $CI != true ]; then
-    yarn lint
-fi
+yarn lint
 
 (
   cd packages/loot-design;
