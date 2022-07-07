@@ -24,7 +24,6 @@ module.exports = {
     'node-ipc',
     'electron-log',
     'node-fetch',
-    'node-libofx'
   ],
   module: {
     rules: [

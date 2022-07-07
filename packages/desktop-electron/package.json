@@ -18,8 +18,7 @@
       "!**/*.js.map",
       "!node_modules/@jlongster/sql.js",
       "!node_modules/absurd-sql",
-      "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
-      "!node_modules/node-libofx/{OpenSP-1.5.2,libofx,libofx.web.js,libofx.web.wasm,emscripten.cpp,Makefile}"
+      "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}"
     ],
     "publish": {
       "provider": "github",

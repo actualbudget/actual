@@ -14,7 +14,6 @@ cached_files: &cached_files
     - ./mobile/node_modules
     - ./import-ynab4/node_modules
     - ./api/node_modules
-    - ./node-libofx/node_modules
     - ./loot-design/node_modules
     - ./desktop-client/node_modules
   key: v3-dependencies-{{ checksum "yarn.lock" }}
