@@ -34,7 +34,7 @@
     "mitt": "^2.1.0",
     "mockdate": "^3.0.5",
     "node-fetch": "^1.6.3",
-    "node-libofx": "*",
+    "ofx-js": "^0.1.1",
     "regenerator-runtime": "^0.13.7",
     "source-map": "^0.7.3"
   },

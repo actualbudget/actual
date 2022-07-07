@@ -1,6 +1,7 @@
 import fs from '../../platform/server/fs';
 import qif2json from './qif2json';
 import csv2json from 'csv-parse/lib/sync';
+import { parse as ofx2json } from 'ofx-js';
 import { dayFromDate } from '../../shared/months';
 import { looselyParseAmount } from '../../shared/util';
 
@@ -83,17 +84,12 @@ async function parseQIF(filepath) {
 }
 
 async function parseOFX(filepath) {
-  let { getOFXTransactions, initModule } = await import(
-    /* webpackChunkName: 'xfo' */ 'node-libofx'
-  );
-  await initModule();
-
   let errors = [];
   let contents = await fs.readFile(filepath);
 
   let data;
   try {
-    data = getOFXTransactions(contents);
+    data = ofx2json(contents);
   } catch (err) {
     errors.push({
       message: 'Failed importing file',
@@ -102,15 +98,16 @@ async function parseOFX(filepath) {
     return { errors };
   }
 
+  const rawTransactions = data.OFX.BANKMSGSRSV1.STMTTRNRS.STMTRS.BANKTRANLIST.STMTTRN;
   return {
     errors,
-    transactions: data.map(trans => ({
-      amount: trans.amount,
-      imported_id: trans.fi_id,
-      date: trans.date ? dayFromDate(trans.date * 1000) : null,
-      payee_name: trans.name,
-      imported_payee: trans.name,
-      notes: trans.memo || null
-    }))
+    transactions: rawTransactions.map((trans) => ({
+      amount: trans.TRNAMT,
+      imported_id: trans.FITID,
+      date: trans.DTPOSTED ? dayFromDate(trans.DTPOSTED) : null,
+      payee_name: trans.NAME,
+      imported_payee: trans.NAME,
+      notes: trans.MEMO || null,
+    })),
   };
 }
