@@ -1,14 +1,3 @@
-
-**Note from maintainer: don't expect responses or PR merges until May 16th.** 🏖️
-
-I (@jlongster) am currently away on vacation and not checking this. I am currently the only maintainer of Actual (person able to merge PRs, etc). I'd like to fix this soon and if you are interested in helping, please help manage issues & PRs and I will bring on consistent contributors as maintainers.
-
-**Please help** by making it as clear as possible what changes are being made. When I get back this will greatly help triage the work.
-
-When I get back, I will work on guides and structure to help anyone get involved, particularly explaining how the code works.
-
----
-
 This is the source code for [Actual](https://actualbudget.com), a local-first personal finance tool. It is 100% free and open-source.
 
 If you are only interested in running the latest version, you don't need this repo. You can get the latest version through npm.
