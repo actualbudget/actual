@@ -24,7 +24,10 @@ describe('Import transactions', function() {
         { str: '04 31 2020', order: 'mm dd yyyy' },
         { str: '06 31 2020', order: 'mm dd yyyy' },
         { str: '09 31 2020', order: 'mm dd yyyy' },
-        { str: '11 31 2020', order: 'mm dd yyyy' }
+        { str: '11 31 2020', order: 'mm dd yyyy' },
+        { str: '2046 31 2020', order: 'mm dd yyyy' },
+        { str: '2011 31 2020', order: 'mm dd yy' },
+        { str: '2020', order: 'mm dd yy' }
       ];
 
       for (const { str, order } of invalidInputs) {
