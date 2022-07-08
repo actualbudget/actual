@@ -28,7 +28,7 @@
     "csv-parse": "^4.10.1",
     "csv-stringify": "^5.3.6",
     "deep-equal": "^2.0.5",
-    "fast-check": "^2.11.0",
+    "fast-check": "2.13.0",
     "google-protobuf": "^3.12.0-rc.1",
     "md5": "^2.3.0",
     "mitt": "^2.1.0",

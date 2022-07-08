@@ -116,7 +116,7 @@ function tableArbitrary(tableSchema, extraArbs, requiredKeys = []) {
   return arb;
 }
 
-function makeTransaction({ splitFreq = 100, payeeIds } = {}) {
+function makeTransaction({ splitFreq = 0.1, payeeIds } = {}) {
   let payeeField = payeeIds
     ? { payee: fc.oneof(...payeeIds.map(id => fc.constant(id))) }
     : null;
@@ -128,7 +128,7 @@ function makeTransaction({ splitFreq = 100, payeeIds } = {}) {
     {
       ...payeeField,
       subtransactions: fc.frequency(
-        { arbitrary: fc.constant([]), weight: 100 },
+        { arbitrary: fc.constant([]), weight: 1 },
         { arbitrary: fc.array(subtrans), weight: splitFreq }
       )
     },
