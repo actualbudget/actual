@@ -31,18 +31,6 @@ let dateFormats = [
   { format: 'dd mm yy', label: 'DD MM YY' }
 ];
 
-const reYearFirst = /^(\d{4})(?:[^\d]*)?(\d{2})(?:[^\d]*)?(\d{2})$/;
-const reYearLast = /^(\d{2})(?:[^\d]*)?(\d{2})(?:[^\d]*)?(\d{4})$/;
-const reTwoDig = /^(\d{2})(?:[^\d]*)?(\d{2})(?:[^\d]*)?(\d{2})$/;
-const re = {
-  'yyyy mm dd': reYearFirst,
-  'mm dd yyyy': reYearLast,
-  'dd mm yyyy': reYearLast,
-  'yy mm dd': reTwoDig,
-  'mm dd yy': reTwoDig,
-  'dd mm yy': reTwoDig
-};
-
 export function parseDate(str, order) {
   if (typeof str !== 'string') {
     return null;
@@ -52,42 +40,48 @@ export function parseDate(str, order) {
     return v && v.length === 1 ? '0' + v : v;
   }
 
-  let parts = str.replace(/\s+/g, '').match(re[order]);
-  if (!parts) return null;
+  const dateGroups = (a, b) => str => {
+    const digits = str.replace(/[^\d]/g, '');
+    return [digits.slice(0, a), digits.slice(a, a + b), digits.slice(a + b)];
+  };
+  const yearFirst = dateGroups(4, 2);
+  const twoDig = dateGroups(2, 2);
 
-  // We're only interested in the groups so slice the full matched string off
-  // of the array.
-  parts = parts.slice(1);
-
-  let year, month, day;
+  let parts, year, month, day;
   switch (order) {
     case 'dd mm yyyy':
+      parts = twoDig(str);
       year = parts[2];
       month = parts[1];
       day = parts[0];
       break;
     case 'dd mm yy':
+      parts = twoDig(str);
       year = `20${parts[2]}`;
       month = parts[1];
       day = parts[0];
       break;
     case 'yyyy mm dd':
+      parts = yearFirst(str);
       year = parts[0];
       month = parts[1];
       day = parts[2];
       break;
     case 'yy mm dd':
+      parts = twoDig(str);
       year = `20${parts[0]}`;
       month = parts[1];
       day = parts[2];
       break;
     case 'mm dd yy':
+      parts = twoDig(str);
       year = `20${parts[2]}`;
       month = parts[0];
       day = parts[1];
       break;
     default:
     case 'mm dd yyyy':
+      parts = twoDig(str);
       year = parts[2];
       month = parts[0];
       day = parts[1];
