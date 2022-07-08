@@ -42,7 +42,6 @@
     ]
   },
   "scripts": {
-    "bootstrap": "./bootstrap",
     "start": "npm-run-all --parallel start:desktop-*",
     "start:desktop-node": "cd packages/loot-core && yarn watch:node",
     "start:desktop-client": "cd packages/desktop-client && yarn watch",
@@ -53,8 +52,6 @@
     "test": "./node_modules/.bin/jest --maxWorkers=4",
     "test:debug": "node ./node_modules/.bin/jest --runInBand --useStderr",
     "test:debug-brk": "node --inspect-brk ./node_modules/.bin/jest --runInBand",
-    "make-test-db": "./packages/loot-core/src/bin/make-test-db ./data",
-    "make-fresh-db": "./packages/loot-core/src/bin/migrate reset --db ./data/user1/db.sqlite",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
     "rebuild-node": "cd packages/loot-core && npm rebuild",
     "lint": "cd packages/loot-core && yarn lint",
