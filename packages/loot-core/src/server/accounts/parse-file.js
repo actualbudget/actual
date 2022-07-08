@@ -87,9 +87,10 @@ async function parseOFX(filepath) {
   let errors = [];
   let contents = await fs.readFile(filepath);
 
-  let data;
+  let rawTransactions;
   try {
-    data = ofx2json(contents);
+    const data = ofx2json(contents);
+    rawTransactions = data.OFX.BANKMSGSRSV1.STMTTRNRS.STMTRS.BANKTRANLIST.STMTTRN;
   } catch (err) {
     errors.push({
       message: 'Failed importing file',
@@ -98,7 +99,6 @@ async function parseOFX(filepath) {
     return { errors };
   }
 
-  const rawTransactions = data.OFX.BANKMSGSRSV1.STMTTRNRS.STMTRS.BANKTRANLIST.STMTTRN;
   return {
     errors,
     transactions: rawTransactions.map((trans) => ({
