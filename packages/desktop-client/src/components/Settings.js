@@ -477,17 +477,12 @@ function Version() {
   let [version, setVersion] = useState('');
 
   useEffect(async () => {
-    const url = await send('get-server-url');
-    if (!url || url.indexOf('not-configured') !== -1) return;
+    const { error, version } = await send('get-server-version');
 
-    try {
-      const res = await fetch(url + '/info');
-      if (!res.ok) return;
-
-      const info = await res.json();
-      setVersion((info && info.build.version) || '');
-    } catch (e) {
+    if (error) {
       setVersion('');
+    } else {
+      setVersion(version);
     }
   }, []);
 
