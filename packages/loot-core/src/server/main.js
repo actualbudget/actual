@@ -1496,6 +1496,24 @@ handlers['subscribe-sign-out'] = async function() {
   return 'ok';
 };
 
+handlers['get-server-version'] = async function() {
+  if (!getServer() || getServer().BASE_SERVER === UNCONFIGURED_SERVER) {
+    return { error: 'no-server' };
+  }
+
+  let version;
+  try {
+    const res = await get(getServer().BASE_SERVER + '/info');
+
+    const info = JSON.parse(res);
+    version = info.build.version;
+  } catch (err) {
+    return { error: 'network-failure' };
+  }
+
+  return { version };
+};
+
 handlers['get-server-url'] = async function() {
   return getServer() && getServer().BASE_SERVER;
 };
