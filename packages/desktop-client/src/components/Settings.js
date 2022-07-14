@@ -476,14 +476,16 @@ function SettingsLink({ to, name, style, first, last }) {
 function Version() {
   let [version, setVersion] = useState('');
 
-  useEffect(async () => {
-    const { error, version } = await send('get-server-version');
+  useEffect(() => {
+    (async () => {
+      const { error, version } = await send('get-server-version');
 
-    if (error) {
-      setVersion('');
-    } else {
-      setVersion(version);
-    }
+      if (error) {
+        setVersion('');
+      } else {
+        setVersion(version);
+      }
+    })();
   }, []);
 
   return (
