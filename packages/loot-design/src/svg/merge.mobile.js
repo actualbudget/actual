@@ -1,7 +1,24 @@
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
 import React from "react";
 
-import { Svg, Path } from "mobile/node_modules/react-native-svg";
+import {
+  Svg,
+  Circle,
+  Ellipse,
+  G,
+  LinearGradient,
+  RadialGradient,
+  Line,
+  Path,
+  Polygon,
+  Polyline,
+  Rect,
+  Symbol,
+  Text,
+  Use,
+  Defs,
+  Stop
+} from "mobile/node_modules/react-native-svg";
 
 function Merge({ width, height, style, color = "black", ...props }) {
   return (
