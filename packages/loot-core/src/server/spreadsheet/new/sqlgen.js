@@ -239,9 +239,7 @@ export default function generate(table, where, groupby, select, deps) {
         joins.push(meta.sql(lookup.tableId));
       } else {
         joins.push(
-          `LEFT JOIN ${meta.table} ${lookup.tableId} ON ${
-            lookup.tableId
-          }.id = ${currentTable.id}.${lookup.field}`
+          `LEFT JOIN ${meta.table} ${lookup.tableId} ON ${lookup.tableId}.id = ${currentTable.id}.${lookup.field}`
         );
       }
 

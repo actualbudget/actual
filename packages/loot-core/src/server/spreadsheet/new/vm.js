@@ -74,7 +74,10 @@ export default class VM {
 
   call(callee, args) {
     const func = this.get(callee);
-    this.reg1 = func.apply(null, args.map(arg => this.get(arg)));
+    this.reg1 = func.apply(
+      null,
+      args.map(arg => this.get(arg))
+    );
   }
 
   query(sql, calculated) {
