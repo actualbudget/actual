@@ -9,9 +9,10 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const jsc = require('jsverify');
 const uuid = require('uuid');
-const uuidGenerator = jsc
-  .integer(97, 122)
-  .smap(x => String.fromCharCode(x), x => x.charCodeAt(x));
+const uuidGenerator = jsc.integer(97, 122).smap(
+  x => String.fromCharCode(x),
+  x => x.charCodeAt(x)
+);
 
 const mockSyncServer = require('../tests/mockSyncServer');
 
@@ -129,7 +130,10 @@ Object.keys(schema).forEach(table => {
       generators.push(
         makeGen({
           table,
-          row: jsc.asciinestring.smap(x => 'sheet!' + x, x => x),
+          row: jsc.asciinestring.smap(
+            x => 'sheet!' + x,
+            x => x
+          ),
           field: 'expr',
           value: jsc.constant(JSON.stringify('fooooo'))
         })
