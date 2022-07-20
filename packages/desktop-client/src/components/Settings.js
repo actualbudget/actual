@@ -24,6 +24,8 @@ import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import ExclamationSolid from 'loot-design/src/svg/v1/ExclamationSolid';
 import Platform from 'loot-core/src/client/platform';
 
+import useServerVersion from '../hooks/useServerVersion';
+
 let dateFormats = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
@@ -474,19 +476,7 @@ function SettingsLink({ to, name, style, first, last }) {
 }
 
 function Version() {
-  let [version, setVersion] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      const { error, version } = await send('get-server-version');
-
-      if (error) {
-        setVersion('');
-      } else {
-        setVersion(version);
-      }
-    })();
-  }, []);
+  const version = useServerVersion();
 
   return (
     <Text
@@ -501,8 +491,7 @@ function Version() {
         styles.smallText
       ]}
     >
-      {`App: v${window.Actual.ACTUAL_VERSION}` +
-        ` | Server: ${version ? `v${version}` : 'N/A'}`}
+      {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
     </Text>
   );
 }
