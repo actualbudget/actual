@@ -501,7 +501,8 @@ function Version() {
         styles.smallText
       ]}
     >
-      v{window.Actual.ACTUAL_VERSION} | {version ? `v${version}` : 'N/A'}
+      {`App: v${window.Actual.ACTUAL_VERSION}` +
+        ` | Server: ${version ? `v${version}` : 'N/A'}`}
     </Text>
   );
 }
@@ -529,11 +530,19 @@ class Settings extends React.Component {
           style={{
             flexDirection: 'row',
             alignSelf: 'center',
-            margin: '15px 0'
+            margin: '15px 0 5px 0'
           }}
         >
           <SettingsLink to={`${match.path}/file`} name="File" first={true} />
           <SettingsLink to={`${match.path}/global`} name="Global" last={true} />
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignSelf: 'center',
+            margin: '0 0 10px 0'
+          }}
+        >
           <Version />
         </View>
 
