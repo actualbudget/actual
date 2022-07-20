@@ -16,8 +16,11 @@ import Bootstrap from './subscribe/Bootstrap';
 import Error from './subscribe/Error';
 import ChangePassword from './subscribe/ChangePassword';
 import ConfigServer from './ConfigServer';
+import useServerVersion from '../../hooks/useServerVersion'
 
 function Version() {
+  const version = useServerVersion();
+
   return (
     <ExternalLink
       style={{
@@ -32,7 +35,7 @@ function Version() {
       }}
       href={'https://actualbudget.com/blog/' + window.Actual.ACTUAL_VERSION}
     >
-      {window.Actual.ACTUAL_VERSION}
+      {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
     </ExternalLink>
   );
 }
