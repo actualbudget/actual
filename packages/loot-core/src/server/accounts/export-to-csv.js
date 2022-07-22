@@ -1,6 +1,6 @@
 import fs from 'fs';
 import csvStringify from 'csv-stringify/lib/sync';
-import { runQuery as aqlQuery } from '../aql/schema/run-query';
+import { runQuery as aqlQuery } from '../aql';
 import { integerToAmount } from '../../shared/util';
 
 export async function exportToCSV(

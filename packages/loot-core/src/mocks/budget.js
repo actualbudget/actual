@@ -4,7 +4,7 @@ import * as budget from '../server/budget/base';
 import * as db from '../server/db';
 import * as prefs from '../server/prefs';
 import * as budgetActions from '../server/budget/actions';
-import { runQuery as aqlQuery } from '../server/aql/schema/run-query';
+import { runQuery as aqlQuery } from '../server/aql';
 import { batchMessages, setSyncingMode } from '../server/sync';
 import { runHandler, runMutator } from '../server/mutators';
 import { addTransactions } from '../server/accounts/sync';
