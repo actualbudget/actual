@@ -1,5 +1,5 @@
 import murmurhash from 'murmurhash';
-const uuid = require('../platform/uuid');
+const uuid = require('../../platform/uuid');
 
 /**
  * Hybrid Unique Logical Clock (HULC) timestamp generator
@@ -81,7 +81,7 @@ const MAX_NODE_LENGTH = 16;
 /**
  * timestamp instance class
  */
-export default class Timestamp {
+export class Timestamp {
   constructor(millis, counter, node) {
     this._state = {
       millis: millis,
@@ -124,7 +124,7 @@ export default class Timestamp {
   }
 }
 
-export class MutableTimestamp extends Timestamp {
+class MutableTimestamp extends Timestamp {
   setMillis(n) {
     this._state.millis = n;
   }

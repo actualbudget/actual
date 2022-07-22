@@ -3,7 +3,7 @@ import * as db from '../../db';
 import query from '../../../shared/query';
 import { makeChild } from '../../../shared/transactions';
 import { batchMessages, setSyncingMode } from '../../sync/index';
-import { setClock } from '../../timestamp';
+import { setClock } from '../../crdt';
 import { groupById } from '../../../shared/util';
 import arbs from '../../../mocks/arbitrary-schema';
 import { isAggregateQuery } from '../compiler';

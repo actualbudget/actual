@@ -20,7 +20,7 @@ import * as update from './update';
 import * as cloudStorage from './cloud-storage';
 import { setSyncingMode, batchMessages } from './sync';
 import { groupById, cleanUUID } from '../shared/util';
-import { getClock } from './timestamp';
+import { getClock } from './crdt';
 import { runMutator } from './mutators';
 import { integerToAmount } from '../shared/util';
 import { runQuery as aqlQuery } from './aql/schema/run-query';

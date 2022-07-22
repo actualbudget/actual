@@ -12,12 +12,13 @@ import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as undo from '../undo';
 import { runMutator } from '../mutators';
 import { setIn, getIn } from '../../shared/util';
-import Timestamp, {
+import {
   serializeClock,
   deserializeClock,
-  getClock
-} from '../timestamp';
-import * as merkle from '../merkle';
+  getClock,
+  Timestamp,
+  merkle
+} from '../crdt';
 import * as encoder from './encoder';
 import { getServer } from '../server-config';
 import { rebuildMerkleHash } from './repair';

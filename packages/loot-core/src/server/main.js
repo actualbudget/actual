@@ -31,8 +31,7 @@ import * as bankSync from './accounts/sync';
 import * as link from './accounts/link';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
 import { mutator, runHandler } from './mutators';
-import * as timestamp from './timestamp';
-import * as merkle from './merkle';
+import { getClock, setClock, makeClock, makeClientId, serializeClock, deserializeClock, Timestamp, merkle } from './crdt';
 import {
   initialFullSync,
   fullSync,
@@ -1951,10 +1950,10 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     //
     // TODO: The client id should be stored elsewhere. It shouldn't
     // work this way, but it's fine for now.
-    timestamp.getClock().timestamp.setNode(timestamp.makeClientId());
+    getClock().timestamp.setNode(makeClientId());
     await db.runQuery(
       'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-      [timestamp.serializeClock(timestamp.getClock())]
+      [serializeClock(getClock())]
     );
 
     await prefs.savePrefs({ resetClock: false });
@@ -2236,7 +2235,9 @@ export const lib = {
 
   // Expose CRDT mechanisms so server can use them
   merkle,
-  timestamp,
+  timestamp: {
+    getClock, setClock, makeClock, makeClientId, serializeClock, deserializeClock, Timestamp
+  },
   SyncProtoBuf: SyncPb
 };
 
