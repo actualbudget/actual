@@ -25,6 +25,7 @@ module.exports = {
       assert: require.resolve("assert/"),
       crypto: require.resolve("crypto-browserify"),
       path: require.resolve("path-browserify"),
+      process: require.resolve("process/browser"),
       stream: require.resolve("stream-browserify"),
       util: require.resolve("util/"),
       zlib: require.resolve("browserify-zlib"),
