@@ -17,13 +17,11 @@ import {
   sortNumbers,
   getApproxNumberThreshold
 } from '../../shared/rules';
-import q from '../../shared/query';
 import { requiredFields, toDateRepr } from '../models';
 import { currentDay } from '../../shared/months';
 import { partitionByField, fastSetMerge } from '../../shared/util';
 import { setSyncingMode, batchMessages } from '../sync';
 import { schemaConfig } from '../aql/schema';
-const uuid = require('../../platform/uuid');
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead

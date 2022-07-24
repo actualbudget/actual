@@ -7,7 +7,7 @@ import { runQuery as aqlQuery } from '../aql/schema/run-query';
 import q from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
-import { dayFromDate, parseDate, subDays } from '../../shared/months';
+import { dayFromDate, parseDate } from '../../shared/months';
 import { conditionsToAQL } from '../accounts/transaction-rules';
 const uuid = require('../../platform/uuid');
 

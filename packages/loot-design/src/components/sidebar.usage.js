@@ -8,7 +8,6 @@ import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 import { Sidebar } from './sidebar';
 import { Section } from '../guide/components';
 import { generateAccount } from 'loot-core/src/mocks';
-import { colors } from '../style';
 
 function withState(state, render) {
   const Component = lively(render, { getInitialState: () => state });

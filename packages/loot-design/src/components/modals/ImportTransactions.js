@@ -19,7 +19,7 @@ import {
 } from '../common';
 import { Checkbox } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
-import { SectionLabel, FieldLabel } from '../forms';
+import { SectionLabel } from '../forms';
 import { colors, styles } from '../../style';
 
 let dateFormats = [

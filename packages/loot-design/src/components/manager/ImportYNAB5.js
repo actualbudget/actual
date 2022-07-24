@@ -7,7 +7,6 @@ import {
   Modal,
   ButtonWithLoading,
   Button,
-  Link,
   P,
   ExternalLink
 } from '../common';
