@@ -15,8 +15,6 @@
     "preset": "react-native"
   },
   "dependencies": {
-    "@babel/core": "~7.12.9",
-    "@babel/runtime": "~7.12.18",
     "@expo/react-native-action-sheet": "^3.6.0",
     "@jlongster/sentry-metrics-actual": "^0.0.10",
     "@react-native-community/masked-view": "0.1.11",

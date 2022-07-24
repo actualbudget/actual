@@ -1,4 +1,4 @@
-import fs from '../platform/server/fs';
+import { default as fs } from '../platform/server/fs';
 import * as monthUtils from '../shared/months';
 import * as sqlite from '../platform/server/sqlite';
 import * as prefs from './prefs';

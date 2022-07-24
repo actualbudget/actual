@@ -1,4 +1,4 @@
-import fs from '../platform/server/fs';
+import { default as fs } from '../platform/server/fs';
 
 let config = null;
 

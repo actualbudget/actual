@@ -1,10 +1,10 @@
-import fc from 'fast-check';
+import { default as fc } from 'fast-check';
 import * as db from '../db';
 import { migrateParentIds, listen, unlisten } from './migrate';
 import { addSyncListener, batchMessages, sendMessages } from './index';
 import { execTracer } from '../../shared/test-helpers';
 import { schema, schemaConfig } from '../aql/schema';
-import arbs from '../../mocks/arbitrary-schema';
+import { default as arbs } from '../../mocks/arbitrary-schema';
 import { convertInputType } from '../aql/schema-helpers';
 import { groupBy } from '../../shared/util';
 

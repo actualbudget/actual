@@ -17,7 +17,7 @@ import {
 import { loadMappings } from '../db/mappings';
 import { applyMigration } from '../migrate/migrations';
 import { runQuery } from '../aql/schema/run-query';
-import q from '../../shared/query';
+import { default as q } from '../../shared/query';
 
 // TODO: write tests to make sure payee renaming is "pre" and category
 // setting is "null" stage

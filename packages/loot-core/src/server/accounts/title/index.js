@@ -28,7 +28,7 @@ function parseMatch(match) {
   return match;
 }
 
-module.exports = (str, options = {}) => {
+export default(str, options = {}) => {
   str = str
     .toLowerCase()
     .replace(regex, (m, lead = '', forced, lower, rest) => {

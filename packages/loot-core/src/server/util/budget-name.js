@@ -1,4 +1,4 @@
-import fs from '../../platform/server/fs';
+import { default as fs } from '../../platform/server/fs';
 const uuid = require('../../platform/uuid');
 
 export async function uniqueFileName(existingFiles) {

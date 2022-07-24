@@ -1,6 +1,6 @@
-import throttle from 'throttleit';
+import { default as throttle } from 'throttleit';
 import { send } from '../../platform/client/fetch';
-import constants from '../constants';
+import { default as constants } from '../constants';
 import { addNotification, addGenericErrorNotification } from './notifications';
 import { pushModal } from './modals';
 

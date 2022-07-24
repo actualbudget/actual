@@ -38,7 +38,7 @@ function multiRemove(keys) {
   });
 }
 
-module.exports = {
+export default {
   init,
   getItem,
   setItem,

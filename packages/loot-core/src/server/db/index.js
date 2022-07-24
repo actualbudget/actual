@@ -1,6 +1,6 @@
-import LRU from 'lru-cache';
+import { default as LRU } from 'lru-cache';
 import * as sqlite from '../../platform/server/sqlite';
-import fs from '../../platform/server/fs';
+import { default as fs } from '../../platform/server/fs';
 import { sendMessages, batchMessages } from '../sync';
 import { schema, schemaConfig } from '../aql/schema';
 import {

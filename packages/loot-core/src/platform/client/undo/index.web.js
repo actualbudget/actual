@@ -36,4 +36,4 @@ function gc(id) {
   UNDO_STATE_MRU = UNDO_STATE_MRU.filter(state => state.id !== id);
 }
 
-module.exports = { setUndoState, getUndoState, getTaggedState, snapshot, gc };
+export default { setUndoState, getUndoState, getTaggedState, snapshot, gc };

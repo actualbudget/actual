@@ -1,10 +1,10 @@
 import { sequential, once } from '../../shared/async';
 import * as perf from '../perf';
 import * as prefs from '../prefs';
-import app from '../main-app';
-import asyncStorage from '../../platform/server/asyncStorage';
+import { default as app } from '../main-app';
+import { default as asyncStorage } from '../../platform/server/asyncStorage';
 import { captureException } from '../../platform/exceptions';
-import logger from '../../platform/server/log';
+import { default as logger } from '../../platform/server/log';
 import { postBinary } from '../post';
 import * as db from '../db';
 import * as sheet from '../sheet';
@@ -64,9 +64,9 @@ export function checkSyncingMode(mode) {
   }
 }
 
-export makeTestMessage from './make-test-message';
-export resetSync from './reset';
-export repairSync from './repair';
+export { default as makeTestMessage } from './make-test-message';
+export { default as resetSync } from './reset';
+export { default as repairSync } from './repair';
 
 function apply(msg, prev) {
   let { dataset, row, column, value } = msg;

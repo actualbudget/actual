@@ -1,4 +1,4 @@
-import constants from '../constants';
+import { default as constants } from '../constants';
 const uuid = require('../../platform/uuid');
 
 export function addNotification(notification) {

@@ -1,5 +1,5 @@
-import fs from 'fs';
-import csvStringify from 'csv-stringify/lib/sync';
+import { default as fs } from 'fs';
+import { default as csvStringify } from 'csv-stringify/lib/sync';
 import { runQuery as aqlQuery } from '../aql/schema/run-query';
 import { integerToAmount } from '../../shared/util';
 

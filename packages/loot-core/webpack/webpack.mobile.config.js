@@ -8,7 +8,9 @@ module.exports = {
   output: {
     path: path.resolve(path.join(__dirname, '/../lib-dist')),
     filename: 'bundle.mobile.js',
-    libraryTarget: 'commonjs2'
+    library: {
+      type: 'commonjs2'
+    }
   },
   resolve: {
     extensions: ['.mobile.js', '.electron.js', '.js', '.json'],
@@ -22,10 +24,7 @@ module.exports = {
       {
         test: /\.m?js$/,
         use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['babel-preset-jwl-app']
-          }
+          loader: 'swc-loader',
         }
       }
     ]

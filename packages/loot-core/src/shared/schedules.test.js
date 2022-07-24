@@ -1,5 +1,5 @@
 import { getRecurringDescription } from './schedules';
-import MockDate from 'mockdate';
+import { default as MockDate } from 'mockdate';
 
 describe('recurring date description', () => {
   beforeEach(() => {

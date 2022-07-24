@@ -1,4 +1,4 @@
-import md5 from 'md5';
+import { default as md5 } from 'md5';
 import * as migrations from './migrate/migrations';
 import * as db from './db';
 import { schema, schemaConfig } from './aql/schema';

@@ -114,7 +114,7 @@ async function multiRemove(keys) {
   return promise;
 }
 
-module.exports = {
+export default {
   init,
   shutdown,
   getItem,

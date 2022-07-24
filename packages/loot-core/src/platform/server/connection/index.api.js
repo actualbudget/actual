@@ -4,4 +4,4 @@ function send(type, args) {
   // Nothing
 }
 
-module.exports = { init, send };
+export default { init, send };

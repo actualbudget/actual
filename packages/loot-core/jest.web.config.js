@@ -8,7 +8,7 @@ module.exports = {
     '/node_modules/(?!perf-deets|absurd-sql)'
   ],
   transform: {
-    '^.+\\.(js|ts|tsx)?$': '<rootDir>/../../jest-babel-transformer-esm'
+    '^.+\\.(js|ts|tsx)?$': '@swc/jest'
   },
   globals: {
     __TESTING__: true

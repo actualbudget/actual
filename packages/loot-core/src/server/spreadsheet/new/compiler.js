@@ -1,6 +1,6 @@
-import parse from './parser';
+import { default as parse } from './parser';
 import * as nodes from './nodes';
-import generateSql from './sqlgen';
+import { default as generateSql } from './sqlgen';
 import {
   MOV,
   CALL,
@@ -14,7 +14,7 @@ import {
   JUMPT,
   LABEL
 } from './ops';
-import getSqlFields from './get-sql-fields';
+import { default as getSqlFields } from './get-sql-fields';
 
 class Compiler {
   constructor() {

@@ -1,4 +1,4 @@
-import constants from '../constants';
+import { default as constants } from '../constants';
 
 export function debugCell(sheet, name) {
   return {

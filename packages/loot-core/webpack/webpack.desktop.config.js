@@ -11,13 +11,19 @@ module.exports = {
     path: path.resolve(path.join(__dirname, '/../lib-dist')),
     filename: 'bundle.desktop.js',
     sourceMapFilename: 'bundle.desktop.js.map',
-    libraryTarget: 'commonjs2'
+    library: {
+      type: 'commonjs2'
+    }
   },
   resolve: {
     extensions: ['.electron.js', '.js', '.json'],
     alias: {
       'perf-deets': require.resolve('perf-deets/noop')
-    }
+    },
+    fallback: {
+      __dirname: false,
+      __filename: false
+    },
   },
   externals: [
     'better-sqlite3',
@@ -31,10 +37,7 @@ module.exports = {
       {
         test: /\.m?js$/,
         use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['babel-preset-jwl-app']
-          }
+          loader: 'swc-loader',
         }
       }
     ]
@@ -43,9 +46,5 @@ module.exports = {
     new webpack.IgnorePlugin({
       resourceRegExp: /original-fs/
     })
-  ],
-  node: {
-    __dirname: false,
-    __filename: false
-  }
+  ]
 };

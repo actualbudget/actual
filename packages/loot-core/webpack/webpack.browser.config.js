@@ -15,29 +15,34 @@ module.exports = {
     extensions: ['.web.js', '.js', '.json'],
     alias: {
       fs: 'memfs',
-      path: 'path-browserify',
 
       'perf-deets':
         process.env.NODE_ENV === 'development' || process.env.PERF_BUILD
           ? 'perf-deets'
           : require.resolve('perf-deets/noop')
-    }
+    },
+    fallback: {
+      assert: require.resolve("assert/"),
+      crypto: require.resolve("crypto-browserify"),
+      path: require.resolve("path-browserify"),
+      process: require.resolve("process/browser"),
+      stream: require.resolve("stream-browserify"),
+      util: require.resolve("util/"),
+      zlib: require.resolve("browserify-zlib"),
+    },
   },
   module: {
     rules: [
       {
         test: /\.m?js$/,
         use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['babel-preset-jwl-app']
-          }
+          loader: 'swc-loader',
         }
       }
     ]
   },
   optimization: {
-    namedChunks: true
+    chunkIds: "named"
   },
   plugins: [
     new webpack.DefinePlugin({

@@ -4,6 +4,6 @@ module.exports = {
   testEnvironment: 'node',
   rootDir: '../',
   transform: {
-    '^.+\\.js?$': 'babel-jest'
+    '^.+\\.js?$': '@swc/jest'
   }
 };

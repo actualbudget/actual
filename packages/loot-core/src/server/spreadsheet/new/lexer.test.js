@@ -1,4 +1,4 @@
-import lex from './lexer';
+import { default as lex } from './lexer';
 
 function getTokens(tokens) {
   const toks = [];

@@ -73,7 +73,7 @@ function multiRemove(keys) {
   return _saveStore();
 }
 
-module.exports = {
+export default {
   init,
   getItem,
   setItem,

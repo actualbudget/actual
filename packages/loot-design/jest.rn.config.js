@@ -11,7 +11,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
   transform: {
-    '^.+\\.(js|ts|tsx)?$': '<rootDir>/../../jest-babel-transformer',
+    '^.+\\.(js|ts|tsx)?$': '@swc/jest',
   },
   testMatch: ['<rootDir>/src/components/mobile/**/*.test.js'],
   testPathIgnorePatterns: [

@@ -1,5 +1,5 @@
 import { send } from '../../platform/client/fetch';
-import constants from '../constants';
+import { default as constants } from '../constants';
 import { loadGlobalPrefs } from './prefs';
 import { loadAllFiles, closeBudget } from './budgets';
 

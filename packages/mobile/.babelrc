@@ -1,6 +1,0 @@
-{
-  "presets": ["module:metro-react-native-babel-preset"],
-  "plugins": [
-    "babel-preset-jwl-app/style-hoist.js"
-  ]
-}

@@ -1,6 +1,6 @@
 const mockServer = require('../tests/mockSyncServer');
 
-module.exports = {
+export default {
   post: mockServer.handleRequest,
   postBinary: mockServer.handleRequestBinary,
   get(url) {

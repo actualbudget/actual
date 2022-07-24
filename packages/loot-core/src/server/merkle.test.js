@@ -1,5 +1,5 @@
 import * as merkle from './merkle';
-import Timestamp from './timestamp';
+import { default as Timestamp } from './timestamp';
 
 function pretty(n) {
   if (n < 60) {

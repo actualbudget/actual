@@ -1,5 +1,5 @@
 import * as d from 'date-fns';
-import memoizeOne from 'memoize-one';
+import { default as memoizeOne } from 'memoize-one';
 
 function _parse(value) {
   if (typeof value === 'string') {

@@ -1,6 +1,6 @@
 import * as db from '../db';
 import { runQuery as aqlQuery } from '../aql/schema/run-query';
-import q from '../../shared/query';
+import { default as q } from '../../shared/query';
 import { loadRules, updateRule } from '../accounts/transaction-rules';
 import { loadMappings } from '../db/mappings';
 import {
@@ -12,7 +12,7 @@ import {
   deleteSchedule,
   setNextDate
 } from './app';
-import MockDate from 'mockdate';
+import { default as MockDate } from 'mockdate';
 
 beforeEach(async () => {
   await global.emptyDatabase()();

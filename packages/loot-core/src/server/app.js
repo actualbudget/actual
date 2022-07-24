@@ -1,4 +1,4 @@
-import mitt from 'mitt';
+import { default as mitt } from 'mitt';
 import { captureException } from '../platform/exceptions';
 
 // This is a simple helper abstraction for defining methods exposed to
