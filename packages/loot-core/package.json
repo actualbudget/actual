@@ -42,6 +42,7 @@
     "adm-zip": "cthackers/adm-zip#ff17ae85",
     "babel-jest": "25.2.6",
     "babel-loader": "^8.0.6",
+    "babel-preset-jwl-app": "6.1.12",
     "buffer": "^5.5.0",
     "cross-env": "^7.0.3",
     "damerau-levenshtein": "^1.0.4",

@@ -64,9 +64,9 @@ export function checkSyncingMode(mode) {
   }
 }
 
-export makeTestMessage from './make-test-message';
-export resetSync from './reset';
-export repairSync from './repair';
+export { default as makeTestMessage } from './make-test-message';
+export { default as resetSync } from './reset';
+export { default as repairSync } from './repair';
 
 function apply(msg, prev) {
   let { dataset, row, column, value } = msg;
