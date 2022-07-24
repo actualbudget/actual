@@ -25,6 +25,10 @@ import { rebuildMerkleHash } from './repair';
 const { PostError, SyncError } = require('../errors');
 const connection = require('../../platform/server/connection');
 
+export { default as makeTestMessage } from './make-test-message';
+export { default as resetSync } from './reset';
+export { default as repairSync } from './repair';
+
 let FULL_SYNC_DELAY = 1000;
 let SYNCING_MODE = 'enabled';
 
@@ -63,10 +67,6 @@ export function checkSyncingMode(mode) {
       throw new Error('checkSyncingMode: invalid mode: ' + mode);
   }
 }
-
-export makeTestMessage from './make-test-message';
-export resetSync from './reset';
-export repairSync from './repair';
 
 function apply(msg, prev) {
   let { dataset, row, column, value } = msg;
