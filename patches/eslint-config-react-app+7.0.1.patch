@@ -1,0 +1,19 @@
+diff --git a/node_modules/eslint-config-react-app/index.js b/node_modules/eslint-config-react-app/index.js
+index 8272d88..ad97726 100644
+--- a/node_modules/eslint-config-react-app/index.js
++++ b/node_modules/eslint-config-react-app/index.js
+@@ -78,14 +78,6 @@ module.exports = {
+             allowTaggedTemplates: true,
+           },
+         ],
+-        'no-unused-vars': 'off',
+-        '@typescript-eslint/no-unused-vars': [
+-          'warn',
+-          {
+-            args: 'none',
+-            ignoreRestSiblings: true,
+-          },
+-        ],
+         'no-useless-constructor': 'off',
+         '@typescript-eslint/no-useless-constructor': 'warn',
+       },
