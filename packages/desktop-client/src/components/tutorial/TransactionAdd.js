@@ -33,8 +33,8 @@ function TransactionAdd({ targetRect, navigationProps }) {
         </P>
 
         <P isLast={true}>
-          Try <strong>clicking "Add New"</strong> to see how adding
-          transactions affects your budget.
+          Try <strong>clicking "Add New"</strong> to see how adding transactions
+          affects your budget.
         </P>
 
         <Navigation {...navigationProps} showBack={false} />

@@ -81,28 +81,34 @@ describe('runQuery', () => {
     expect(data[0].date).toBe('2020-01-04');
 
     // date-month
-    data = (await runQuery(
-      query('transactions')
-        .select({ month: { $month: '$date' } })
-        .serialize()
-    )).data;
+    data = (
+      await runQuery(
+        query('transactions')
+          .select({ month: { $month: '$date' } })
+          .serialize()
+      )
+    ).data;
     expect(data[0].month).toBe('2020-01');
 
     // date-year
-    data = (await runQuery(
-      query('transactions')
-        .select({ year: { $year: '$date' } })
-        .serialize()
-    )).data;
+    data = (
+      await runQuery(
+        query('transactions')
+          .select({ year: { $year: '$date' } })
+          .serialize()
+      )
+    ).data;
     expect(data[0].year).toBe('2020');
 
     // boolean
-    data = (await runQuery(
-      query('transactions')
-        .select(['is_child', 'is_parent'])
-        .raw()
-        .serialize()
-    )).data;
+    data = (
+      await runQuery(
+        query('transactions')
+          .select(['is_child', 'is_parent'])
+          .raw()
+          .serialize()
+      )
+    ).data;
     expect(data[0].is_child).toBe(false);
     expect(data[0].is_parent).toBe(true);
     expect(data[1].is_child).toBe(true);
@@ -128,31 +134,37 @@ describe('runQuery', () => {
     );
     expect(data[0].id).toBe(transId);
 
-    data = (await runQuery(
-      query('transactions')
-        .filter({ date: { $transform: '$month', $eq: { $month: ':month' } } })
-        .select('date')
-        .serialize(),
-      { params: { month: '2020-01-02' } }
-    )).data;
+    data = (
+      await runQuery(
+        query('transactions')
+          .filter({ date: { $transform: '$month', $eq: { $month: ':month' } } })
+          .select('date')
+          .serialize(),
+        { params: { month: '2020-01-02' } }
+      )
+    ).data;
     expect(data[0].id).toBe(transId);
 
-    data = (await runQuery(
-      query('transactions')
-        .filter({ date: { $transform: '$year', $eq: { $year: ':month' } } })
-        .select('date')
-        .serialize(),
-      { params: { month: '2020-01-02' } }
-    )).data;
+    data = (
+      await runQuery(
+        query('transactions')
+          .filter({ date: { $transform: '$year', $eq: { $year: ':month' } } })
+          .select('date')
+          .serialize(),
+        { params: { month: '2020-01-02' } }
+      )
+    ).data;
     expect(data[0].id).toBe(transId);
 
-    data = (await runQuery(
-      query('transactions')
-        .filter({ cleared: ':cleared' })
-        .select('date')
-        .serialize(),
-      { params: { cleared: true } }
-    )).data;
+    data = (
+      await runQuery(
+        query('transactions')
+          .filter({ cleared: ':cleared' })
+          .select('date')
+          .serialize(),
+        { params: { cleared: true } }
+      )
+    ).data;
     expect(data[0].id).toBe(transId);
   });
 

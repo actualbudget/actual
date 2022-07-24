@@ -143,7 +143,10 @@ async function execTransactionsGrouped(
 
     rows = await db.all(rowSql, params);
     matched = new Set(
-      [].concat.apply([], rows.map(row => row.matched.split(',')))
+      [].concat.apply(
+        [],
+        rows.map(row => row.matched.split(','))
+      )
     );
   }
 

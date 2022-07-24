@@ -230,17 +230,14 @@ class ManagementApp extends React.Component {
   }
 }
 
-export default connect(
-  state => {
-    let { modalStack } = state.modals;
+export default connect(state => {
+  let { modalStack } = state.modals;
 
-    return {
-      files: state.budgets.allFiles,
-      userData: state.user.data,
-      managerHasInitialized: state.app.managerHasInitialized,
-      loadingText: state.app.loadingText,
-      currentModals: modalStack.map(modal => modal.name)
-    };
-  },
-  actions
-)(ManagementApp);
+  return {
+    files: state.budgets.allFiles,
+    userData: state.user.data,
+    managerHasInitialized: state.app.managerHasInitialized,
+    loadingText: state.app.loadingText,
+    currentModals: modalStack.map(modal => modal.name)
+  };
+}, actions)(ManagementApp);

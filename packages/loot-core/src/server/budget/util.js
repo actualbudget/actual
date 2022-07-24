@@ -19,4 +19,3 @@ export function unflatten2(arr) {
   }
   return res;
 }
-

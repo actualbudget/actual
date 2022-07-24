@@ -99,7 +99,9 @@ class FatalError extends React.Component {
               .
             </P>
             <P>
-              <Button onClick={() => window.Actual.relaunch()}>{buttonText}</Button>
+              <Button onClick={() => window.Actual.relaunch()}>
+                {buttonText}
+              </Button>
             </P>
             <P isLast={true} style={{ fontSize: 11 }}>
               <Link

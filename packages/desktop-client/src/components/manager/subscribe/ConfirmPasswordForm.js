@@ -69,10 +69,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         </label>
         <View style={{ flex: 1 }} />
         {buttons}
-        <ButtonWithLoading
-          primary
-          loading={loading}
-        >
+        <ButtonWithLoading primary loading={loading}>
           OK
         </ButtonWithLoading>
       </View>

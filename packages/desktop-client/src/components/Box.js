@@ -9,14 +9,18 @@ function getFlex(flex) {
 }
 
 function Box({ flex, children, direction, style }) {
-  return <div
+  return (
+    <div
       style={{
         ...style,
         flex: getFlex(flex),
         display: 'flex',
         flexDirection: direction || 'column'
       }}
-    >{children}</div>;
+    >
+      {children}
+    </div>
+  );
 }
 
 export default Box;

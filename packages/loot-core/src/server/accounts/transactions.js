@@ -117,9 +117,9 @@ export async function batchUpdateTransactions({
     await Promise.all(allAdded.map(t => transfer.onInsert(t)));
 
     // Return any updates from here
-    resultUpdated = (await Promise.all(
-      allUpdated.map(t => transfer.onUpdate(t))
-    )).filter(Boolean);
+    resultUpdated = (
+      await Promise.all(allUpdated.map(t => transfer.onUpdate(t)))
+    ).filter(Boolean);
 
     await Promise.all(allDeleted.map(t => transfer.onDelete(t)));
   });

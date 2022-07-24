@@ -10,7 +10,7 @@ describe('schema', () => {
   test('never returns transactions without a date', async () => {
     expect((await db.all('SELECT * FROM transactions')).length).toBe(0);
     expect((await db.all('SELECT * FROM v_transactions')).length).toBe(0);
-    await db.runQuery('INSERT INTO transactions (acct) VALUES (?)', ["foo"]);
+    await db.runQuery('INSERT INTO transactions (acct) VALUES (?)', ['foo']);
     expect((await db.all('SELECT * FROM transactions')).length).toBe(1);
     expect((await db.all('SELECT * FROM v_transactions')).length).toBe(0);
   });
@@ -28,7 +28,7 @@ describe('schema', () => {
     expect((await db.all('SELECT * FROM v_transactions')).length).toBe(0);
     await db.runQuery(
       'INSERT INTO transactions (date, acct, isChild) VALUES (?, ?, ?)',
-      [20200101, "foo", 1]
+      [20200101, 'foo', 1]
     );
     expect((await db.all('SELECT * FROM transactions')).length).toBe(1);
     expect((await db.all('SELECT * FROM v_transactions')).length).toBe(0);

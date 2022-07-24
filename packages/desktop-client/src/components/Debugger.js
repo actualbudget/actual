@@ -206,7 +206,7 @@ class Debugger extends React.Component {
                   height: 10,
                   backgroundColor: '#303030',
                   marginRight: 10,
-                  borderRadius: 10,
+                  borderRadius: 10
                 }}
               />
               <Button onClick={this.toggleRecord} style={{ marginRight: 10 }}>

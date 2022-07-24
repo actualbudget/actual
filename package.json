@@ -67,18 +67,6 @@
     "shelljs": "^0.8.2",
     "source-map-support": "^0.5.21"
   },
-  "eslintConfig": {
-    "extends": "react-app",
-    "rules": {
-      "no-unused-vars": "off",
-      "no-loop-func": "off",
-      "no-restricted-globals": "off"
-    }
-  },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "none"
-  },
   "resolutions": {
     "@babel/preset-env": "^7.15.1",
     "@babel/core": "^7.15.1",

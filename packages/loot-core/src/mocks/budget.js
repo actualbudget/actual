@@ -439,15 +439,19 @@ async function fillOther(handlers, account, payees, groups) {
 
 async function createBudget(accounts, payees, groups) {
   let primaryAccount = accounts.find(a => (a.name = 'Bank of America'));
-  let earliestDate = (await db.first(
-    `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
+  let earliestDate = (
+    await db.first(
+      `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`
-  )).date;
-  let earliestPrimaryDate = (await db.first(
-    `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
+    )
+  ).date;
+  let earliestPrimaryDate = (
+    await db.first(
+      `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.id = ? AND a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
-    [primaryAccount.id]
-  )).date;
+      [primaryAccount.id]
+    )
+  ).date;
 
   let start = monthUtils.monthFromDate(db.fromDateRepr(earliestDate));
   let end = monthUtils.currentMonth();

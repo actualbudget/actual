@@ -56,6 +56,9 @@ module.exports.listen = function listen(name, cb) {
 
   return () => {
     let arr = listeners.get(name);
-    listeners.set(name, arr.filter(cb_ => cb_ !== cb));
+    listeners.set(
+      name,
+      arr.filter(cb_ => cb_ !== cb)
+    );
   };
 };

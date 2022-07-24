@@ -149,7 +149,11 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
                       ['amount-outflow', 'Amount (outflow)']
                     ]
                   : field === 'date'
-                  ? [['date', 'Date'], ['month', 'Month'], ['year', 'Year']]
+                  ? [
+                      ['date', 'Date'],
+                      ['month', 'Month'],
+                      ['year', 'Year']
+                    ]
                   : null
               }
               value={subfield}
