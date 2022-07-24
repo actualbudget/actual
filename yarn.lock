@@ -98,7 +98,6 @@ __metadata:
     fs-extra: 7.0.0
     glamor: ^2.20.40
     html-webpack-plugin: 4.0.0-alpha.2
-    http-client: ^4.3.1
     identity-obj-proxy: 3.0.0
     load-js: ^3.0.3
     lodash.memoize: ^4.1.2
@@ -132,7 +131,6 @@ __metadata:
     sass-loader: 7.1.0
     style-loader: 0.23.0
     terser-webpack-plugin: 1.1.0
-    url-loader: 1.1.1
     victory: ^0.26.1
     webpack: 4.19.1
     webpack-dev-server: 3.11.0
@@ -6738,13 +6736,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"byte-length@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "byte-length@npm:0.1.1"
-  checksum: f161602284ecdd80b37a3cd1e257621a207c7340cd64a73c6715e5074069b7c9ea3da6d3faed5d395e8a7360a103f0b5aabcc78d06b529316f93d49dd0e3194e
-  languageName: node
-  linkType: hard
-
 "bytes@npm:3.0.0":
   version: 3.0.0
   resolution: "bytes@npm:3.0.0"
@@ -12377,16 +12368,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-client@npm:^4.3.1":
-  version: 4.3.1
-  resolution: "http-client@npm:4.3.1"
-  dependencies:
-    byte-length: ^0.1.1
-    query-string: ^4.1.0
-  checksum: e73e2a9a75db0833446b2d3d7dddafe6bdff30a3a832d08a9fa42079e6d6e86a87641d506946ad4da6a8332107309274d1c8305fda19a595a38ee3ab5ba5aa6a
-  languageName: node
-  linkType: hard
-
 "http-deceiver@npm:^1.2.7":
   version: 1.2.7
   resolution: "http-deceiver@npm:1.2.7"
@@ -16119,7 +16100,7 @@ jest-snapshot@test:
   languageName: node
   linkType: hard
 
-"mime@npm:^2.0.3, mime@npm:^2.4.1, mime@npm:^2.4.4, mime@npm:^2.5.0":
+"mime@npm:^2.4.1, mime@npm:^2.4.4, mime@npm:^2.5.0":
   version: 2.6.0
   resolution: "mime@npm:2.6.0"
   bin:
@@ -19455,16 +19436,6 @@ jest-snapshot@test:
   languageName: node
   linkType: hard
 
-"query-string@npm:^4.1.0":
-  version: 4.3.4
-  resolution: "query-string@npm:4.3.4"
-  dependencies:
-    object-assign: ^4.1.0
-    strict-uri-encode: ^1.0.0
-  checksum: 3b2bae6a8454cf0edf11cf1aa4d1f920398bbdabc1c39222b9bb92147e746fcd97faf00e56f494728fb66b2961b495ba0fde699d5d3bd06b11472d664b36c6cf
-  languageName: node
-  linkType: hard
-
 "query-string@npm:^7.0.0":
   version: 7.1.1
   resolution: "query-string@npm:7.1.1"
@@ -22178,13 +22149,6 @@ jest-snapshot@test:
   languageName: node
   linkType: hard
 
-"strict-uri-encode@npm:^1.0.0":
-  version: 1.1.0
-  resolution: "strict-uri-encode@npm:1.1.0"
-  checksum: 9466d371f7b36768d43f7803f26137657559e4c8b0161fb9e320efb8edba3ae22f8e99d4b0d91da023b05a13f62ec5412c3f4f764b5788fac11d1fea93720bb3
-  languageName: node
-  linkType: hard
-
 "strict-uri-encode@npm:^2.0.0":
   version: 2.0.0
   resolution: "strict-uri-encode@npm:2.0.0"
@@ -23451,21 +23415,6 @@ jest-snapshot@test:
   version: 0.1.0
   resolution: "urix@npm:0.1.0"
   checksum: 4c076ecfbf3411e888547fe844e52378ab5ada2d2f27625139011eada79925e77f7fbf0e4016d45e6a9e9adb6b7e64981bd49b22700c7c401c5fc15f423303b3
-  languageName: node
-  linkType: hard
-
-"url-loader@npm:1.1.1":
-  version: 1.1.1
-  resolution: "url-loader@npm:1.1.1"
-  dependencies:
-    loader-utils: ^1.1.0
-    mime: ^2.0.3
-    schema-utils: ^1.0.0
-  peerDependencies:
-    webpack: ^4.0.0
-  bin:
-    url-loader: ""
-  checksum: b5c62f01f50df8e2ec70c72610c1f5d7f1ec5fb0093debd73cbd8475124455eca42d638cad6b4368702ddfa4186281ad9d683b6bb3ff9dc560cd1f5b32899f8a
   languageName: node
   linkType: hard
 
