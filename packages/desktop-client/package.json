@@ -23,6 +23,7 @@
     "case-sensitive-paths-webpack-plugin": "2.1.2",
     "chalk": "2.4.1",
     "codemirror": "^5.37.0",
+    "cross-env": "^7.0.3",
     "css-loader": "1.0.0",
     "date-fns": "2.0.0-alpha.27",
     "debounce": "^1.2.0",

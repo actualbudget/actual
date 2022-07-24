@@ -1,7 +1,6 @@
 const d = require('date-fns');
 const uuid = require('uuid');
-const actual = require('@actual-app/api/methods');
-const { amountToInteger } = require('@actual-app/api/utils');
+const actual = require('@actual-app/api');
 
 function amountFromYnab(amount) {
   // ynabs multiplies amount by 1000 and actual by 100
