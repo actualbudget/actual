@@ -498,6 +498,30 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
   );
 }
 
+function DelimiterSelect({
+  setCsvDelimiter,
+  parse,
+  filename,
+  csvDelimiter,
+  style = {}
+}) {
+  return (
+    <View style={{ width: 130, ...style }}>
+      <SectionLabel title="CSV DELIMITER" />
+      <Select
+        value={csvDelimiter}
+        onChange={e => {
+          setCsvDelimiter(e.target.value);
+          parse(filename, { delimiter: e.target.value });
+        }}
+      >
+        <option value=",">,</option>
+        <option value=";">;</option>
+      </Select>
+    </View>
+  );
+}
+
 export function ImportTransactions({
   modalProps,
   options,
@@ -778,20 +802,33 @@ export function ImportTransactions({
         </View>
       )}
       {error && error.parsed && (
-        <View
-          style={{
-            color: colors.r4,
-            alignItems: 'center',
-            marginTop: 10
-          }}
-        >
-          <Text style={{ maxWidth: 450, marginBottom: 15 }}>
-            <strong>Error:</strong> {error.message}
-          </Text>
-          {error.parsed && (
-            <Button onClick={() => onNewFile()}>Select new file...</Button>
-          )}
-        </View>
+        <>
+          <View
+            style={{
+              color: colors.r4,
+              alignItems: 'center',
+              marginTop: 10
+            }}
+          >
+            <Text style={{ maxWidth: 450, marginBottom: 15 }}>
+              <strong>Error:</strong> {error.message}
+            </Text>
+            {error.parsed && (
+              <Button onClick={() => onNewFile()}>Select new file...</Button>
+            )}
+            {getFileType(options.filename) === 'csv' && (
+              <DelimiterSelect
+                {...{
+                  setCsvDelimiter,
+                  parse,
+                  filename,
+                  csvDelimiter,
+                  style: { marginTop: 10 }
+                }}
+              />
+            )}
+          </View>
+        </>
       )}
 
       {filetype === 'csv' && (
@@ -836,19 +873,15 @@ export function ImportTransactions({
         )}
 
         {filetype === 'csv' && (
-          <View style={{ marginLeft: 25 }}>
-            <SectionLabel title="CSV DELIMITER" />
-            <Select
-              value={csvDelimiter}
-              onChange={e => {
-                setCsvDelimiter(e.target.value);
-                parse(filename, { delimiter: e.target.value });
-              }}
-            >
-              <option value=",">,</option>
-              <option value=";">;</option>
-            </Select>
-          </View>
+          <DelimiterSelect
+            {...{
+              setCsvDelimiter,
+              parse,
+              filename,
+              csvDelimiter,
+              style: { marginLeft: 25 }
+            }}
+          />
         )}
 
         <View style={{ flex: 1 }} />
