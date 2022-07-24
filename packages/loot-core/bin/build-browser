@@ -6,7 +6,7 @@ WEBPACK_ARGS=""
 
 "$ROOT"/copy-migrations
 
-OUTPUT_HASH="[hash]"
+OUTPUT_HASH="[fullhash]"
 if [ $NODE_ENV == 'development' ]; then
     # Use a constant filename in development mode to make it easier to
     # rebuild the backend without having to rebuild the frontend
@@ -28,7 +28,7 @@ fi
 ../node_modules/.bin/webpack --config ../webpack/webpack.browser.config.js \
   --target "webworker" \
   --output-filename "kcab.worker.$OUTPUT_HASH.js" \
-  --output-chunkfilename "[id].[name].kcab.worker.$OUTPUT_HASH.js" \
+  --output-chunk-filename "[id].[name].kcab.worker.$OUTPUT_HASH.js" \
   --progress \
   $WEBPACK_ARGS
 

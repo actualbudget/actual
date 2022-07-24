@@ -11,7 +11,9 @@ module.exports = {
     path: path.resolve(path.join(__dirname, '/../lib-dist')),
     filename: 'bundle.desktop.js',
     sourceMapFilename: 'bundle.desktop.js.map',
-    libraryTarget: 'commonjs2'
+    library: {
+      type: 'commonjs2'
+    }
   },
   resolve: {
     extensions: ['.electron.js', '.js', '.json'],
