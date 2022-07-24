@@ -1212,6 +1212,7 @@ class AccountInternal extends React.PureComponent {
   onImport = async () => {
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
+    const categories = await this.props.getCategories();
 
     if (account) {
       const res = await window.Actual.openFileDialog({
@@ -1223,6 +1224,7 @@ class AccountInternal extends React.PureComponent {
       if (res) {
         this.props.pushModal('import-transactions', {
           accountId,
+          categories,
           filename: res[0],
           onImported: didChange => {
             if (didChange) {

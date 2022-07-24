@@ -35,6 +35,10 @@ function getScrollbarWidth() {
   return Math.max(styles.scrollbarWidth - 2, 0);
 }
 
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text);
+};
+
 export class BudgetTable extends React.Component {
   constructor(props) {
     super(props);
@@ -344,15 +348,22 @@ export function SidebarCategory({
           >
             <Menu
               onMenuSelect={type => {
-                if (type === 'rename') {
-                  onEditName(category.id);
-                } else {
-                  onDelete(category.id);
+                switch(type) {
+                  case 'rename':
+                    onEditName(category.id);
+                    break;
+                  case 'copy-id':
+                    copyToClipboard(category.id);
+                    break;
+                  case 'delete':
+                    onDelete(category.id);
+                    break;
                 }
                 setMenuOpen(false);
               }}
               items={[
                 { name: 'rename', text: 'Rename' },
+                { name: 'copy-id', text: `Copy ID to clipboard` },
                 { name: 'delete', text: 'Delete' }
               ]}
             />
