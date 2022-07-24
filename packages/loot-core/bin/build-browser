@@ -28,7 +28,7 @@ fi
 ../node_modules/.bin/webpack --config ../webpack/webpack.browser.config.js \
   --target "webworker" \
   --output-filename "kcab.worker.$OUTPUT_HASH.js" \
-  --output-chunkfilename "[id].[name].kcab.worker.$OUTPUT_HASH.js" \
+  --output-chunk-filename "[id].[name].kcab.worker.$OUTPUT_HASH.js" \
   --progress \
   $WEBPACK_ARGS
 
