@@ -6,6 +6,7 @@
   "version": "4.0.2",
   "scripts": {
     "clean": "rm -rf dist",
+    "update-client": "bin/update-client",
     "build": "electron-builder",
     "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
