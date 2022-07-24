@@ -45,8 +45,8 @@
   "devDependencies": {
     "@actual-app/api": "*",
     "@actual-app/import-ynab4": "*",
-    "@swc/core": "^1.2.206",
-    "@swc/jest": "^0.2.21",
+    "@swc/core": "^1.2.218",
+    "@swc/jest": "^0.2.22",
     "adm-zip": "cthackers/adm-zip#ff17ae85",
     "babel-eslint": "9.0.0",
     "buffer": "^5.5.0",
