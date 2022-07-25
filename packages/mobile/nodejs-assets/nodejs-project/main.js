@@ -26,7 +26,7 @@ rn_bridge.channel.on('message', msg => {
 
       let backend = require('./bundle.mobile.js');
 
-      backend.init(version, isDev).then(() => {
+      backend.initApp(version, isDev).then(() => {
         rn_bridge.channel.send(JSON.stringify({ type: 'ready' }));
       });
     }

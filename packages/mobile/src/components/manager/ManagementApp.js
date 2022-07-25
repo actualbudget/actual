@@ -13,6 +13,8 @@ import Subscribe from './Subscribe';
 import SubscribeEmail from './SubscribeEmail';
 import BudgetList from './BudgetList';
 import Login from './Login';
+import SetServer from './SetServer';
+import PasswordPrompt from './PasswordPrompt';
 import Confirm from './Confirm';
 import DeleteFile from './DeleteFile';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
@@ -29,6 +31,8 @@ function LoggedOutRoutes({ stack: Stack }) {
         animation: 'none'
       }}
     >
+      <Stack.Screen name="SetServer" component={SetServer} />
+      <Stack.Screen name="PasswordPrompt" component={PasswordPrompt} />
       <Stack.Screen name="Intro" component={Intro} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Subscribe" component={Subscribe} />

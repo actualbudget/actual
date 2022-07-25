@@ -1,6 +1,7 @@
 {
   "presets": ["module:metro-react-native-babel-preset"],
   "plugins": [
-    "babel-preset-jwl-app/style-hoist.js"
+    "babel-preset-jwl-app/style-hoist.js",
+    "react-native-reanimated/plugin"
   ]
 }
