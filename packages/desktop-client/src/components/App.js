@@ -13,7 +13,6 @@ import ManagementApp from './manager/ManagementApp';
 import FinancesApp from './FinancesApp';
 import AppBackground from './AppBackground';
 import UpdateNotification from './UpdateNotification';
-import MobileWebMessage from './MobileWebMessage';
 
 class App extends React.Component {
   state = {
@@ -123,7 +122,6 @@ class App extends React.Component {
         )}
 
         <UpdateNotification />
-        <MobileWebMessage />
       </div>
     );
   }

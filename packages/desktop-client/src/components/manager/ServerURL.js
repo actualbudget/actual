@@ -6,9 +6,13 @@ import {
   Button
 } from 'loot-design/src/components/common';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { colors } from 'loot-design/src/style';
+import { useSetThemeColor } from 'loot-design/src/components/hooks';
 
 export default function ServerURL() {
   let [url, setUrl] = useState(null);
+
+  useSetThemeColor(colors.p5);
 
   useEffect(() => {
     async function run() {

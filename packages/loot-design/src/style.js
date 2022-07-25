@@ -1,4 +1,5 @@
 import Platform from 'loot-core/src/client/platform';
+import { isMobile } from '../../desktop-client/src/util';
 
 export const debug = { borderWidth: 1, borderColor: 'red' };
 
@@ -84,62 +85,67 @@ colors.resolve = (name, offset) => {
   throw new Error('Unknown color name: ' + name);
 };
 
-export const styles = {
-  veryLargeText: {
-    fontSize: 30,
-    fontWeight: 600
-  },
-  largeText: {
-    fontSize: 20,
-    fontWeight: 700,
-    letterSpacing: 0.5
-  },
-  mediumText: {
-    fontSize: 15,
-    fontWeight: 500
-  },
-  smallText: {
-    fontSize: 13
-  },
-  verySmallText: {
-    fontSize: 13
-  },
-  page: {
-    // This is the height of the titlebar
-    paddingTop: 36,
-    minWidth: 500,
-    flex: 1
-  },
-  pageHeader: {
-    fontSize: 25,
-    borderBottomWidth: 5,
-    borderColor: colors.purple2,
-    borderStyle: 'solid',
-    display: 'inline',
-    flex: 0,
-    color: colors.grey4,
-    marginTop: 40,
-    marginBottom: 20,
-    paddingBottom: 5
-  },
-  pageContent: {
-    paddingLeft: 20,
-    paddingRight: 20
-  },
-  staticText: {
-    cursor: 'default',
-    userSelect: 'none'
-  },
-  shadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
-  shadowLarge: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
-  tnum:
-    Platform.env === 'web'
-      ? {
-          fontFeatureSettings: '"tnum"'
-        }
-      : null,
-  notFixed: { fontFeatureSettings: '' }
-};
+function getStyles(isMobile) {
+  return {
+    veryLargeText: {
+      fontSize: 30,
+      fontWeight: 600
+    },
+    largeText: {
+      fontSize: 20,
+      fontWeight: 700,
+      letterSpacing: 0.5
+    },
+    mediumText: {
+      fontSize: 15,
+      fontWeight: 500
+    },
+    smallText: {
+      fontSize: 13
+    },
+    verySmallText: {
+      fontSize: 13
+    },
+    page: {
+      // This is the height of the titlebar
+      paddingTop: isMobile ? 8 : 36,
+      minWidth: isMobile ? 360 : 500,
+      flex: 1
+    },
+    pageHeader: {
+      fontSize: 25,
+      borderBottomWidth: 5,
+      borderColor: colors.purple2,
+      borderStyle: 'solid',
+      display: 'inline',
+      flex: 0,
+      color: colors.grey4,
+      marginTop: 40,
+      marginBottom: 20,
+      paddingBottom: 5
+    },
+    pageContent: {
+      paddingLeft: isMobile ? 2 : 20,
+      paddingRight: isMobile ? 2 : 20
+    },
+    settingsPageContent: {
+      padding: isMobile ? 20 : 'inherit'
+    },
+    staticText: {
+      cursor: 'default',
+      userSelect: 'none'
+    },
+    shadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
+    shadowLarge:
+      '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
+    tnum: {
+      fontFeatureSettings: '"tnum"'
+    },
+    notFixed: { fontFeatureSettings: '' }
+  };
+}
+
+export const styles = getStyles(isMobile());
 
 let hiddenScrollbars = false;
 
@@ -215,13 +221,13 @@ export const mobileStyles = {
   },
   text: {
     color: colors.n1,
-    fontSize: 16,
-    lineHeight: 22.4
+    fontSize: 16
+    // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
   smallText: {
     color: colors.n1,
-    fontSize: 15,
-    lineHeight: 21
+    fontSize: 15
+    // lineHeight: 21 // TODO: This seems like trouble, but what's the right value?
   },
   shadow: {
     shadowColor: '#9594A8',

@@ -83,6 +83,22 @@
     "workbox-webpack-plugin": "3.6.3",
     "worker-loader": "^3.0.8"
   },
+  "dependencies": {
+    "@react-aria/checkbox": "^3.4.1",
+    "@react-aria/focus": "^3.6.1",
+    "@react-aria/listbox": "^3.5.0",
+    "@react-aria/separator": "^3.2.0",
+    "@react-aria/switch": "^3.2.0",
+    "@react-aria/table": "^3.3.0",
+    "@react-aria/toggle": "^3.3.0",
+    "@react-aria/utils": "^3.13.1",
+    "@react-aria/visually-hidden": "^3.3.1",
+    "@react-stately/collections": "^3.4.0",
+    "@react-stately/list": "^3.5.0",
+    "@react-stately/table": "^3.2.0",
+    "@react-stately/toggle": "^3.3.0",
+    "react-router-dom-v5-compat": "^6.3.0"
+  },
   "scripts": {
     "start": "cross-env PORT=3001 node scripts/start.js",
     "start:browser": "./bin/watch-browser",

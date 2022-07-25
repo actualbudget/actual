@@ -1,5 +1,10 @@
 import React from 'react';
-import { View, Text, SectionList, ScrollView, Animated } from 'react-native';
+import {
+  Button,
+  Text,
+  TextOneLine,
+  View
+} from 'loot-design/src/components/common';
 import memoizeOne from 'memoize-one';
 import {
   format as formatDate,
@@ -7,7 +12,6 @@ import {
   parseISO,
   isValid as isValidDate
 } from 'date-fns';
-// import { Swipeable, RectButton } from 'react-native-gesture-handler';
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   splitTransaction,
@@ -16,37 +20,40 @@ import {
   deleteTransaction,
   realizeTempTransactions
 } from 'loot-core/src/shared/transactions';
-import { applyChanges, titleFirst } from 'loot-core/src/shared/util';
+import { titleFirst } from 'loot-core/src/shared/util';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger,
   groupById
 } from 'loot-core/src/shared/util';
-import KeyboardAvoidingView from './KeyboardAvoidingView';
-import { ListItem } from './table';
-import { Button, TextOneLine } from './common';
-import { colors, mobileStyles as styles } from '../../style';
-import Add from '../../svg/v1/Add';
-import Trash from '../../svg/v1/Trash';
-import PencilWriteAlternate from '../../svg/v2/PencilWriteAlternate';
-import { FocusableAmountInput } from './AmountInput';
-import ExitTransition from 'ExitTransition';
+import { mobileStyles as styles, colors } from 'loot-design/src/style';
+import { AmountInput } from '../util/AmountInput';
 import {
   FieldLabel,
   InputField,
   TapField,
   BooleanField,
   EDITING_PADDING
-} from './forms';
+} from '../forms';
 
-import EditSkull1 from '../../svg/v2/EditSkull1';
-import AlertTriangle from '../../svg/v2/AlertTriangle';
-import CalendarIcon from '../../svg/v2/Calendar';
-import ValidationCheck from '../../svg/v2/ValidationCheck';
-import FavoriteStar from '../../svg/v2/FavoriteStar';
-import CheckCircle1 from '../../svg/v2/CheckCircle1';
+import Add from 'loot-design/src/svg/v1/Add';
+import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
+import EditSkull1 from 'loot-design/src/svg/v2/EditSkull1';
+import PencilWriteAlternate from 'loot-design/src/svg/v2/PencilWriteAlternate';
+import Trash from 'loot-design/src/svg/v1/Trash';
+
+import { useListState } from '@react-stately/list';
+import { useListBox, useListBoxSection, useOption } from '@react-aria/listbox';
+import { Item, Section } from '@react-stately/collections';
+import { useSeparator } from '@react-aria/separator';
+import { useFocusRing } from '@react-aria/focus';
+import { mergeProps } from '@react-aria/utils';
+import ConfirmCategoryDelete from '../modals/ConfirmCategoryDelete';
+
+const zIndices = { SECTION_HEADING: 10 };
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));
@@ -306,15 +313,15 @@ export class TransactionEdit extends React.Component {
       outputRange: [-6, -5, -5, 20]
     });
     return (
-      <RectButton
-        onPress={this.close}
+      <Button
+        onClick={this.close}
         style={{
-          flex: 1,
+          flex: '1 auto',
           justifyContent: 'center',
           backgroundColor: colors.r4
         }}
       >
-        <Animated.Text
+        <Text // TODO: animate
           style={{
             color: 'white',
             textAlign: 'right',
@@ -322,8 +329,8 @@ export class TransactionEdit extends React.Component {
           }}
         >
           Delete
-        </Animated.Text>
-      </RectButton>
+        </Text>
+      </Button>
     );
   };
 
@@ -362,7 +369,7 @@ export class TransactionEdit extends React.Component {
     );
 
     return (
-      <KeyboardAvoidingView>
+      <View>
         <View
           style={{
             margin: 10,
@@ -370,13 +377,8 @@ export class TransactionEdit extends React.Component {
             backgroundColor: 'white',
             flex: 1,
             borderRadius: 4,
-
-            // This shadow make the card "pop" off of the screen below
-            // it
-            shadowColor: colors.n3,
-            shadowOffset: { width: 0, height: 0 },
-            shadowRadius: 4,
-            shadowOpacity: 1
+            // make the card "pop" off of the screen below it
+            boxShadow: `0 0 ${colors.n3}`
           }}
         >
           <View style={{ borderRadius: 4, overflow: 'hidden', flex: 1 }}>
@@ -404,16 +406,16 @@ export class TransactionEdit extends React.Component {
               </TextOneLine>
             </View>
 
-            <ScrollView
-              ref={el => (this.scrollView = el)}
-              automaticallyAdjustContentInsets={false}
-              keyboardShouldPersistTaps="always"
+            <View // TODO: is this scrolling properly? Was ScrollView in React Native
+              //   ref={el => (this.scrollView = el)}
+              //   automaticallyAdjustContentInsets={false}
+              //   keyboardShouldPersistTaps="always"
               style={{
                 backgroundColor: colors.n11,
-                flexGrow: 1,
+                flex: '1 auto',
                 overflow: 'hidden'
               }}
-              contentContainerStyle={{ flexGrow: 1 }}
+              //   contentContainerStyle={{ flexGrow: 1 }}
             >
               <View
                 style={{
@@ -426,7 +428,7 @@ export class TransactionEdit extends React.Component {
                   flush
                   style={{ marginBottom: 0, paddingLeft: 0 }}
                 />
-                <FocusableAmountInput
+                <AmountInput
                   ref={el => (this.amount = el)}
                   value={transaction.amount}
                   zeroIsNegative={true}
@@ -471,7 +473,7 @@ export class TransactionEdit extends React.Component {
                           paddingHorizontal: 15,
                           margin: 0
                         }}
-                        onPress={this.onSplit}
+                        onClick={this.onSplit}
                       >
                         Split
                       </Button>
@@ -483,45 +485,45 @@ export class TransactionEdit extends React.Component {
                     {childTransactions.map((child, idx) => {
                       const isLast = idx === childTransactions.length - 1;
                       return (
-                        <Swipeable
-                          key={child.id}
-                          renderRightActions={this.renderActions}
-                          onSwipeableRightOpen={() => this.onDeleteSplit(child)}
-                          rightThreshold={100}
-                        >
-                          <TapField
-                            value={
-                              child.category
-                                ? lookupName(categories, child.category)
-                                : null
-                            }
-                            rightContent={
-                              <FocusableAmountInput
-                                ref={
-                                  isLast
-                                    ? el => (this.lastChildAmount = el)
-                                    : null
+                        // <Swipeable
+                        //   key={child.id}
+                        //   renderRightActions={this.renderActions}
+                        //   onSwipeableRightOpen={() => this.onDeleteSplit(child)}
+                        //   rightThreshold={100}
+                        // >
+                        <TapField
+                          value={
+                            child.category
+                              ? lookupName(categories, child.category)
+                              : null
+                          }
+                          rightContent={
+                            <AmountInput
+                              ref={
+                                isLast
+                                  ? el => (this.lastChildAmount = el)
+                                  : null
+                              }
+                              value={child.amount}
+                              sign={forcedSign}
+                              scrollIntoView={true}
+                              buttonProps={{
+                                paddingVertical: 5,
+                                style: {
+                                  width: 80,
+                                  alignItems: 'flex-end'
                                 }
-                                value={child.amount}
-                                sign={forcedSign}
-                                scrollIntoView={true}
-                                buttonProps={{
-                                  paddingVertical: 5,
-                                  style: {
-                                    width: 80,
-                                    alignItems: 'flex-end'
-                                  }
-                                }}
-                                textStyle={{ fontSize: 14 }}
-                                onBlur={value =>
-                                  this.onEdit(child, 'amount', value.toString())
-                                }
-                              />
-                            }
-                            style={{ marginTop: idx === 0 ? 0 : -1 }}
-                            onTap={() => this.openChildEdit(child)}
-                          />
-                        </Swipeable>
+                              }}
+                              textStyle={{ fontSize: 14 }}
+                              onBlur={value =>
+                                this.onEdit(child, 'amount', value.toString())
+                              }
+                            />
+                          }
+                          style={{ marginTop: idx === 0 ? 0 : -1 }}
+                          onTap={() => this.openChildEdit(child)}
+                        />
+                        // </Swipeable>
                       );
                     })}
 
@@ -543,7 +545,7 @@ export class TransactionEdit extends React.Component {
                           paddingVertical: 6,
                           paddingHorizontal: 15
                         }}
-                        onPress={this.onAddSplit}
+                        onClick={this.onAddSplit}
                       >
                         Add split
                       </Button>
@@ -575,14 +577,14 @@ export class TransactionEdit extends React.Component {
                   />
                 </View>
 
-                <View style={{ marginHorizontal: 35 }}>
+                <View style={{ margin: 'auto 35px' }}>
                   <FieldLabel title="Cleared" />
                   <BooleanField
                     value={transaction.cleared}
                     onUpdate={value =>
                       this.onEdit(transaction, 'cleared', value)
                     }
-                    style={{ marginTop: 4 }}
+                    style={{ marginTop: 5 }}
                   />
                 </View>
               </View>
@@ -599,7 +601,7 @@ export class TransactionEdit extends React.Component {
               {!adding && (
                 <View style={{ alignItems: 'center' }}>
                   <Button
-                    onPress={() => onDelete()}
+                    onClick={onDelete}
                     style={{
                       paddingVertical: 5,
                       marginHorizontal: EDITING_PADDING,
@@ -620,7 +622,7 @@ export class TransactionEdit extends React.Component {
                   </Button>
                 </View>
               )}
-            </ScrollView>
+            </View>
 
             <View
               style={{
@@ -632,7 +634,7 @@ export class TransactionEdit extends React.Component {
               }}
             >
               {adding ? (
-                <Button onPress={() => this.onAdd()}>
+                <Button onClick={this.onAdd}>
                   <Add width={17} height={17} style={{ color: colors.b3 }} />
                   <Text
                     style={[styles.text, { color: colors.b3, marginLeft: 5 }]}
@@ -641,7 +643,7 @@ export class TransactionEdit extends React.Component {
                   </Text>
                 </Button>
               ) : (
-                <Button onPress={() => this.onSave()}>
+                <Button onClick={this.onSave}>
                   <PencilWriteAlternate
                     style={{ width: 16, height: 16, color: colors.n1 }}
                   />
@@ -654,7 +656,7 @@ export class TransactionEdit extends React.Component {
               )}
             </View>
 
-            <ExitTransition
+            {/* <ExitTransition
               alive={editingChild}
               withProps={{
                 transaction:
@@ -674,10 +676,10 @@ export class TransactionEdit extends React.Component {
                   onClose: onDone
                 })
               }
-            </ExitTransition>
+            </ExitTransition> */}
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     );
   }
 }
@@ -777,97 +779,96 @@ export class Transaction extends React.PureComponent {
       fontStyle: 'italic',
       color: colors.n5
     };
-    let textStyleWithColor = [
-      textStyle,
-      isPreview && {
-        color:
-          notes === 'missed'
-            ? colors.r6
-            : notes === 'due'
-            ? colors.y4
-            : colors.n5
-      }
-    ];
 
     return (
-      <RectButton
-        onPress={() => onSelect(transaction)}
-        style={{ backgroundColor: 'white' }}
-        activeOpacity={0.1}
+      // <Button
+      //   onClick={() => onSelect(transaction)}
+      //   style={{
+      //     backgroundColor: 'white',
+      //     border: 'none',
+      //     width: '100%',
+      //     '&:active': { opacity: 0.1 }
+      //   }}
+      // >
+      <ListItem
+        style={[
+          { flex: 1, height: 60, padding: '5px 10px' }, // remove padding when Button is back
+          isPreview && { backgroundColor: colors.n11 },
+          style
+        ]}
       >
-        <ListItem
+        <View style={[{ flex: 1 }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {schedule && (
+              <ArrowsSynchronize
+                style={{
+                  width: 12,
+                  height: 12,
+                  marginRight: 5,
+                  color: textStyle.color || colors.n1
+                }}
+              />
+            )}
+            <TextOneLine
+              style={[
+                styles.text,
+                textStyle,
+                { fontSize: 14, fontWeight: added ? '600' : '400' },
+                prettyDescription === '' && {
+                  color: colors.n6,
+                  fontStyle: 'italic'
+                }
+              ]}
+            >
+              {prettyDescription || 'Empty'}
+            </TextOneLine>
+          </View>
+          {isPreview ? (
+            <Status status={notes} />
+          ) : (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 3
+              }}
+            >
+              <CheckCircle1
+                style={{
+                  width: 11,
+                  height: 11,
+                  color: cleared ? colors.g6 : colors.n8,
+                  marginRight: 5
+                }}
+              />
+              {showCategory && (
+                <TextOneLine
+                  style={{
+                    fontSize: 11,
+                    marginTop: 1,
+                    fontWeight: '400',
+                    color: prettyCategory ? colors.n3 : colors.p7,
+                    fontStyle: prettyCategory ? null : 'italic',
+                    textAlign: 'left'
+                  }}
+                >
+                  {prettyCategory || 'Uncategorized'}
+                </TextOneLine>
+              )}
+            </View>
+          )}
+        </View>
+        <Text
           style={[
-            { flex: 1, height: 60 },
-            isPreview && { backgroundColor: colors.n11 },
-            style
+            styles.text,
+            textStyle,
+            { marginLeft: 25, marginRight: 5, fontSize: 14 }
           ]}
         >
-          <View style={[{ flex: 1 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {schedule && (
-                <ArrowsSynchronize
-                  style={{
-                    width: 12,
-                    height: 12,
-                    marginRight: 5,
-                    color: textStyle.color || colors.n1
-                  }}
-                />
-              )}
-              <TextOneLine
-                style={[
-                  styles.text,
-                  textStyle,
-                  { fontSize: 14, fontWeight: added ? '600' : '400' },
-                  prettyDescription === '' && {
-                    color: colors.n6,
-                    fontStyle: 'italic'
-                  }
-                ]}
-              >
-                {prettyDescription || 'Empty'}
-              </TextOneLine>
-            </View>
-            {isPreview ? (
-              <Status status={notes} />
-            ) : (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <CheckCircle1
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: cleared ? colors.g6 : colors.n8,
-                    marginRight: 5
-                  }}
-                />
-                {showCategory && (
-                  <TextOneLine
-                    style={{
-                      fontSize: 11,
-                      marginTop: 1,
-                      fontWeight: '400',
-                      color: prettyCategory ? colors.n3 : colors.p7,
-                      fontStyle: prettyCategory ? null : 'italic',
-                      textAlign: 'left'
-                    }}
-                  >
-                    {prettyCategory || 'Uncategorized'}
-                  </TextOneLine>
-                )}
-              </View>
-            )}
-          </View>
-          <Text
-            style={[
-              styles.text,
-              textStyle,
-              { marginLeft: 25, marginRight: 5, fontSize: 14 }
-            ]}
-          >
-            {integerToCurrency(amount)}
-          </Text>
-        </ListItem>
-      </RectButton>
+          {integerToCurrency(amount)}
+        </Text>
+      </ListItem>
+      // </Button>
     );
   }
 }
@@ -903,25 +904,6 @@ export class TransactionList extends React.Component {
     return sections;
   });
 
-  renderSection({ section }) {
-    return <DateHeader date={section.date} />;
-  }
-
-  renderItem = ({ item }) => {
-    return (
-      <Transaction
-        transaction={item}
-        categories={this.props.categories}
-        accounts={this.props.accounts}
-        payees={this.props.payees}
-        showCategory={this.props.showCategory}
-        added={this.props.isNew(item.id)}
-        style={item.isLast && { borderColor: colors.n9 }}
-        onSelect={() => this.props.onSelect(item)}
-      />
-    );
-  };
-
   render() {
     const {
       transactions,
@@ -931,23 +913,185 @@ export class TransactionList extends React.Component {
       refreshControl
     } = this.props;
 
+    const sections = this.makeData(transactions);
+
     return (
-      <SectionList
-        style={[{ flex: 1 }, style]}
-        {...scrollProps}
-        ListHeaderComponent={
-          // Support pull to refresh by making sure it's always
-          // appended and composing the props
-          <React.Fragment>{scrollProps.ListHeaderComponent}</React.Fragment>
-        }
-        renderItem={this.renderItem}
-        renderSectionHeader={this.renderSection}
-        sections={this.makeData(transactions)}
-        keyExtractor={item => item.id}
-        refreshControl={refreshControl}
-        onEndReachedThreshold={0.5}
-        onEndReached={onLoadMore}
-      />
+      <>
+        {scrollProps.ListHeaderComponent}
+        <ListBox
+          {...scrollProps}
+          aria-label="transaction list"
+          label=""
+          selectionMode="none"
+          style={{ flex: '1 auto', height: '100%', overflowY: 'auto' }}
+        >
+          {sections.map(section => {
+            return (
+              <Section
+                title={monthUtils.format(section.date, 'MMMM dd, yyyy')}
+                key={section.id}
+              >
+                {section.data.map((transaction, index, transactions) => {
+                  return (
+                    <Item
+                      key={transaction.id}
+                      style={{
+                        fontSize:
+                          index === transactions.length - 1 ? 98 : 'inherit'
+                      }}
+                      textValue={transaction.id}
+                    >
+                      <Transaction
+                        transaction={transaction}
+                        categories={this.props.categories}
+                        accounts={this.props.accounts}
+                        payees={this.props.payees}
+                        showCategory={this.props.showCategory}
+                        added={this.props.isNew(transaction.id)}
+                        onSelect={() => {}} //this.props.onSelect(transaction)}
+                      />
+                    </Item>
+                  );
+                })}
+              </Section>
+            );
+          })}
+        </ListBox>
+      </>
     );
   }
 }
+
+function ListBox(props) {
+  let state = useListState(props);
+  let ref = React.useRef();
+  let { listBoxProps, labelProps } = useListBox(props, state, ref);
+
+  return (
+    <>
+      <div {...labelProps}>{props.label}</div>
+      <ul
+        {...listBoxProps}
+        ref={ref}
+        style={{
+          padding: 0,
+          listStyle: 'none',
+          margin: 0,
+          overflowY: 'auto',
+          width: '100%'
+        }}
+      >
+        {[...state.collection].map(item => (
+          <ListBoxSection key={item.key} section={item} state={state} />
+        ))}
+      </ul>
+    </>
+  );
+}
+
+function ListBoxSection({ section, state }) {
+  let { itemProps, headingProps, groupProps } = useListBoxSection({
+    heading: section.rendered,
+    'aria-label': section['aria-label']
+  });
+
+  // The heading is rendered inside an <li> element, which contains
+  // a <ul> with the child items.
+  return (
+    <>
+      <li {...itemProps} style={{ width: '100%' }}>
+        {section.rendered && (
+          <div
+            {...headingProps}
+            style={{
+              backgroundColor: colors.n10,
+              borderBottom: `1px solid ${colors.n9}`,
+              borderTop: `1px solid ${colors.n9}`,
+              color: colors.n5,
+              display: 'flex',
+              fontSize: 16,
+              justifyContent: 'center',
+              paddingBottom: 5,
+              paddingTop: 5,
+              position: 'sticky',
+              top: '0',
+              width: '100%',
+              zIndex: zIndices.SECTION_HEADING
+            }}
+          >
+            {section.rendered}
+          </div>
+        )}
+        <ul
+          {...groupProps}
+          style={{
+            padding: 0,
+            listStyle: 'none'
+          }}
+        >
+          {[...section.childNodes].map((node, index, nodes) => (
+            <Option
+              key={node.key}
+              item={node}
+              state={state}
+              isLast={index === nodes.length - 1}
+            />
+          ))}
+        </ul>
+      </li>
+    </>
+  );
+}
+
+function Option({ isLast, item, state }) {
+  // Get props for the option element
+  let ref = React.useRef();
+  let { optionProps, isSelected, isDisabled } = useOption(
+    { key: item.key },
+    state,
+    ref
+  );
+
+  // Determine whether we should show a keyboard
+  // focus ring for accessibility
+  let { isFocusVisible, focusProps } = useFocusRing();
+
+  return (
+    <li
+      {...mergeProps(optionProps, focusProps)}
+      ref={ref}
+      style={{
+        background: isSelected ? 'blueviolet' : 'transparent',
+        color: isSelected ? 'white' : null,
+        outline: isFocusVisible ? '2px solid orange' : 'none',
+        ...(!isLast && { borderBottom: `1px solid ${colors.border}` })
+      }}
+    >
+      {item.rendered}
+    </li>
+  );
+}
+
+export const ROW_HEIGHT = 50;
+
+export const ListItem = React.forwardRef(
+  ({ children, style, ...props }, ref) => {
+    return (
+      <View
+        style={[
+          {
+            height: ROW_HEIGHT,
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 10
+          },
+          style
+        ]}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </View>
+    );
+  }
+);

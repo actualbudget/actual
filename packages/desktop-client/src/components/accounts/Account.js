@@ -66,14 +66,11 @@ import { Query } from 'loot-core/src/shared/query';
 import * as aql from 'loot-core/src/client/query-helpers';
 import {
   deleteTransaction,
+  isPreviewId,
   updateTransaction,
   ungroupTransactions
 } from 'loot-core/src/shared/transactions';
-import {
-  SplitsExpandedProvider,
-  useSplitsExpanded,
-  isPreviewId
-} from './TransactionsTable';
+import { SplitsExpandedProvider, useSplitsExpanded } from './TransactionsTable';
 import { styles, colors } from 'loot-design/src/style';
 import TransactionList from './TransactionList';
 import { authorizeBank } from '../../plaid';
@@ -642,7 +639,7 @@ const AccountHeader = React.memo(
     let searchInput = useRef(null);
     let splitsExpanded = useSplitsExpanded();
 
-    let canSync = syncEnabled && (account && account.account_id);
+    let canSync = syncEnabled && account && account.account_id;
     if (!account) {
       // All accounts - check for any syncable account
       canSync = !!accounts.find(account => !!account.account_id);
@@ -1701,9 +1698,9 @@ class AccountInternal extends React.PureComponent {
                     }
                     showAccount={
                       !accountId ||
-                      (accountId === 'offbudget' ||
-                        accountId === 'budgeted' ||
-                        accountId === 'uncategorized')
+                      accountId === 'offbudget' ||
+                      accountId === 'budgeted' ||
+                      accountId === 'uncategorized'
                     }
                     isAdding={this.state.isAdding}
                     isNew={this.isNew}

@@ -170,13 +170,14 @@ class ManagementApp extends React.Component {
           {!isHidden && (
             <View
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
+                alignItems: 'center',
                 bottom: 0,
                 justifyContent: 'center',
-                alignItems: 'center'
+                left: 0,
+                padding: 20,
+                position: 'absolute',
+                right: 0,
+                top: 0
               }}
             >
               {userData ? (
@@ -221,7 +222,6 @@ class ManagementApp extends React.Component {
               )}
             </View>
           )}
-
           <ServerURL />
           <Version />
         </View>
@@ -230,17 +230,14 @@ class ManagementApp extends React.Component {
   }
 }
 
-export default connect(
-  state => {
-    let { modalStack } = state.modals;
+export default connect(state => {
+  let { modalStack } = state.modals;
 
-    return {
-      files: state.budgets.allFiles,
-      userData: state.user.data,
-      managerHasInitialized: state.app.managerHasInitialized,
-      loadingText: state.app.loadingText,
-      currentModals: modalStack.map(modal => modal.name)
-    };
-  },
-  actions
-)(ManagementApp);
+  return {
+    files: state.budgets.allFiles,
+    userData: state.user.data,
+    managerHasInitialized: state.app.managerHasInitialized,
+    loadingText: state.app.loadingText,
+    currentModals: modalStack.map(modal => modal.name)
+  };
+}, actions)(ManagementApp);

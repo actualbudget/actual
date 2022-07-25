@@ -1,4 +1,5 @@
 default-db.sqlite
+migrations/.force-copy-windows
 migrations/1548957970627_remove-db-version.sql
 migrations/1550601598648_payees.sql
 migrations/1555786194328_remove_category_group_unique.sql
@@ -14,4 +15,3 @@ migrations/1615745967948_meta.sql
 migrations/1616167010796_accounts_order.sql
 migrations/1618975177358_schedules.sql
 migrations/1632571489012_remove_cache.js
-migrations/.force-copy-windows

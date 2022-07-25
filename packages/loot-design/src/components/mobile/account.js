@@ -64,8 +64,6 @@ export function AccountDetails({
     return prependTransactions.concat(transactions);
   }, [prependTransactions, transactions]);
 
-  console.log('rendering')
-
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       <View style={{ alignItems: 'center', marginTop: 10, marginBottom: 10 }}>

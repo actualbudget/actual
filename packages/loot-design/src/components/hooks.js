@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { setThemeColor } from '../util/withThemeColor';
 
 export function useScrollFlasher() {
   let scrollRef = useRef(null);
@@ -12,4 +13,11 @@ export function useScrollFlasher() {
   }, []);
 
   return scrollRef;
+}
+
+export function useSetThemeColor(color, opts) {
+  useEffect(() => {
+    if (opts && opts.skip) return;
+    setThemeColor(color);
+  });
 }

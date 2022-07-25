@@ -221,7 +221,6 @@ class Intro extends React.Component {
   }
 }
 
-export default connect(
-  null,
-  dispatch => bindActionCreators(actions, dispatch)
-)(Intro);
+export default connect(null, dispatch => bindActionCreators(actions, dispatch))(
+  Intro
+);
