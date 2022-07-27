@@ -42,7 +42,7 @@ export function convertInputType(value, type) {
       }
       return value;
     case 'integer':
-      if (typeof value === 'number' && (value | 0) === value) {
+      if (typeof value === 'number' && Number.isInteger(value)) {
         return value;
       } else {
         throw new Error("Can't convert to integer: " + JSON.stringify(value));
