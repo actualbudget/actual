@@ -1,8 +1,8 @@
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
-import { batchMessages } from '../sync';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
+import { batchMessages } from '../sync';
 
 async function getSheetValue(sheetName, cell) {
   const node = await sheet.getCell(sheetName, cell);

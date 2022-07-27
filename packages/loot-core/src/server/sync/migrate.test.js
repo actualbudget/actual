@@ -1,11 +1,13 @@
 import fc from 'fast-check';
-import * as db from '../db';
-import { listen, unlisten } from './migrate';
-import { addSyncListener, sendMessages } from './index';
+
+import arbs from '../../mocks/arbitrary-schema';
 import { execTracer } from '../../shared/test-helpers';
 import { schema, schemaConfig } from '../aql/schema';
-import arbs from '../../mocks/arbitrary-schema';
 import { convertInputType } from '../aql/schema-helpers';
+import * as db from '../db';
+import { listen, unlisten } from './migrate';
+
+import { addSyncListener, sendMessages } from './index';
 
 beforeEach(() => {
   listen();

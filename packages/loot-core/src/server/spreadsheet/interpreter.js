@@ -1,4 +1,5 @@
 const escodegen = require('@jlongster/escodegen');
+
 const globals = require('./globals');
 
 // Unfortunately we need to use eval to bypass babel's transform of

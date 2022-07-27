@@ -1,9 +1,11 @@
 import * as sqlite from '../sqlite';
 
 require('fake-indexeddb/auto');
+
 let FDBFactory = require('fake-indexeddb/lib/FDBFactory');
 
 let idb = require('../indexeddb');
+
 let { init, readFile, writeFile, exists, pathToId, join } = require('./index');
 
 beforeAll(() => {

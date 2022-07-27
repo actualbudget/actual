@@ -1,4 +1,5 @@
 import VM from './vm';
+
 const { unresolveName } = require('../util');
 
 const db = {

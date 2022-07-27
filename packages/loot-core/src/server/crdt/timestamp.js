@@ -1,4 +1,5 @@
 import murmurhash from 'murmurhash';
+
 const uuid = require('../../platform/uuid');
 
 /**
