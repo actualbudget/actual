@@ -171,7 +171,7 @@ function shuffle(arr) {
   let shuffled = new Array(src.length);
   let item;
   while ((item = src.pop())) {
-    let idx = (Math.random() * shuffled.length) | 0;
+    let idx = Math.floor(Math.random() * shuffled.length);
     if (shuffled[idx]) {
       src.push(item);
     } else {

@@ -91,7 +91,7 @@ function expectTransactionOrder(data, fields) {
 }
 
 async function expectPagedData(query, numTransactions, allData) {
-  let pageCount = Math.max((numTransactions / 3) | 0, 3);
+  let pageCount = Math.max(Math.floor(numTransactions / 3), 3);
   let pagedData = [];
   let done = false;
 
