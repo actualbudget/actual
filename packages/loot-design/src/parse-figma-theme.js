@@ -7,7 +7,7 @@ let groups = ['y', 'r', 'b', 'n', 'g', 'p'];
 let colors = {};
 
 list.forEach((color, idx) => {
-  const group = (idx / 11) | 0;
+  const group = Math.floor(idx / 11);
   const n = idx % 11;
 
   colors[groups[group] + (n + 1)] = color;

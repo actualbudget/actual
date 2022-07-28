@@ -93,7 +93,7 @@ function initBasicServer(delay) {
 function initPagingServer(dataLength, { delay, eventType = 'select' } = {}) {
   let data = [];
   for (let i = 0; i < dataLength; i++) {
-    data.push({ id: i, date: subDays('2020-05-01', (i / 5) | 0) });
+    data.push({ id: i, date: subDays('2020-05-01', Math.floor(i / 5)) });
   }
 
   initServer({
