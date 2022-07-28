@@ -110,7 +110,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
     transactions.push(transaction);
 
     if (Math.random() < 0.2) {
-      let a = (transaction.amount / 3) | 0;
+      let a = Math.round(transaction.amount / 3);
       let pick = () =>
         payee === incomePayee
           ? incomeGroup.categories.find(c => c.name === 'Income').id
