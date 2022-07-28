@@ -199,5 +199,5 @@ export function makeValue(value, cond) {
 }
 
 export function getApproxNumberThreshold(number) {
-  return (Math.abs(number) * 0.075) | 0;
+  return Math.round(Math.abs(number) * 0.075);
 }
