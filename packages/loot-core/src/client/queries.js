@@ -9,10 +9,6 @@ import {
 } from '../shared/months';
 import q from '../shared/query';
 
-function isInteger(num) {
-  return (num | 0) === num;
-}
-
 export function getAccountFilter(accountId, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
@@ -81,7 +77,7 @@ export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
           amount: { $transform: '$abs', $eq: amountToInteger(amount) }
         },
         amount != null &&
-          isInteger(amount) && {
+          Number.isInteger(amount) && {
             amount: {
               $transform: { $abs: { $idiv: ['$', 100] } },
               $eq: amount
