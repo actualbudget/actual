@@ -185,7 +185,7 @@ export async function set3MonthAvg({ month }) {
         'sum-amount-' + cat.id
       );
 
-      const avg = ((spent1 + spent2 + spent3) / 3) | 0;
+      const avg = Math.round((spent1 + spent2 + spent3) / 3);
       setBudget({ category: cat.id, month, amount: -avg });
     }
   });
