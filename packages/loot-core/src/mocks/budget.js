@@ -11,7 +11,7 @@ import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 
 function pickRandom(list) {
-  return list[((Math.random() * list.length) | 0) % list.length];
+  return list[Math.floor(Math.random() * list.length) % list.length];
 }
 
 function number(start, end) {
@@ -19,7 +19,7 @@ function number(start, end) {
 }
 
 function integer(start, end) {
-  return number(start, end) | 0;
+  return Math.round(number(start, end));
 }
 
 function findMin(items, field) {
@@ -104,7 +104,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       amount,
       payee: payee.id,
       account: account.id,
-      date: monthUtils.subDays(monthUtils.currentDay(), (i / 3) | 0),
+      date: monthUtils.subDays(monthUtils.currentDay(), Math.floor(i / 3)),
       category: category.id
     };
     transactions.push(transaction);
@@ -244,7 +244,7 @@ async function fillChecking(handlers, account, payees, groups) {
       amount,
       payee: payee.id,
       account: account.id,
-      date: monthUtils.subDays(monthUtils.currentDay(), (i * 2) | 0),
+      date: monthUtils.subDays(monthUtils.currentDay(), i * 2),
       category: category.id
     });
   }
@@ -334,7 +334,7 @@ async function fillSavings(handlers, account, payees, groups) {
       amount,
       payee: payee.id,
       account: account.id,
-      date: monthUtils.subDays(monthUtils.currentDay(), (i * 5) | 0),
+      date: monthUtils.subDays(monthUtils.currentDay(), i * 5),
       category: category.id
     });
   }
