@@ -3,10 +3,11 @@ import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
+import { safeNumber } from './util';
 
 async function getSheetValue(sheetName, cell) {
   const node = await sheet.getCell(sheetName, cell);
-  return typeof node.value === 'number' ? node.value : 0;
+  return safeNumber(typeof node.value === 'number' ? node.value : 0);
 }
 
 // We want to only allow the positive movement of money back and
@@ -71,9 +72,7 @@ export function getBudget({ category, month }) {
 }
 
 export function setBudget({ category, month, amount }) {
-  if (typeof amount !== 'number') {
-    amount = 0;
-  }
+  amount = safeNumber(typeof amount === 'number' ? amount : 0);
   const table = getBudgetTable();
 
   let existing = db.firstSync(
