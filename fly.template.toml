@@ -11,6 +11,7 @@ processes = []
 [experimental]
   allowed_public_ports = []
   auto_rollback = true
+  cmd = ["node", "--max-old-space-size=180", "app.js"]
 
 [[services]]
   http_checks = []
