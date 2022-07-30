@@ -6,6 +6,7 @@ processes = []
 
 [env]
   PORT = "5006"
+  TINI_SUBREAPER = 1
 
 [experimental]
   allowed_public_ports = []
