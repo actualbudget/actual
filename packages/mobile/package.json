@@ -1,5 +1,5 @@
 {
-  "name": "mobile",
+  "name": "@actual-app/mobile",
   "version": "0.0.101",
   "private": true,
   "scripts": {
@@ -15,6 +15,7 @@
     "preset": "react-native"
   },
   "dependencies": {
+    "@actual-app/loot-core": "*",
     "@babel/core": "~7.12.9",
     "@babel/runtime": "~7.12.18",
     "@expo/react-native-action-sheet": "^3.6.0",
@@ -26,7 +27,6 @@
     "@reactions/component": "^2.0.2",
     "@sentry/react-native": "3.0.2",
     "jsc-android": "^241213.1.0",
-    "loot-core": "*",
     "memoize-one": "^4.0.0",
     "metro-react-native-babel-preset": "^0.66.2",
     "nodejs-mobile-gyp": "^0.3.1",

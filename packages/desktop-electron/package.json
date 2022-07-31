@@ -1,5 +1,5 @@
 {
-  "name": "Actual",
+  "name": "@actual-app/desktop-electron",
   "productName": "Actual",
   "author": "Shift Reset LLC",
   "description": "A simple and powerful personal finance system",
@@ -43,12 +43,12 @@
     }
   },
   "dependencies": {
+    "@actual-app/loot-core": "*",
     "@jlongster/sentry-metrics-actual": "^0.0.10",
     "@sentry/electron": "2.5.3",
     "electron-is-dev": "2.0.0",
     "electron-log": "4.3.2",
     "electron-updater": "4.3.8",
-    "loot-core": "*",
     "node-fetch": "^1.6.3",
     "node-ipc": "9.1.4"
   },

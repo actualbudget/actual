@@ -1,5 +1,5 @@
 {
-  "name": "loot-design",
+  "name": "@actual-app/loot-design",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
