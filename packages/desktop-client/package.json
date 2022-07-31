@@ -6,6 +6,7 @@
     "build"
   ],
   "devDependencies": {
+    "@actual-app/loot-core": "*",
     "@babel/core": "~7.14.3",
     "@jlongster/lively": "0.0.4",
     "@jlongster/sentry-metrics-actual": "^0.0.10",
