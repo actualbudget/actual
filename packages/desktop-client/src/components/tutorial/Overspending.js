@@ -1,10 +1,10 @@
 import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import * as spreadsheet from 'loot-core/src/client/sheetql/spreadsheet';
-import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import * as spreadsheet from '@actual-app/loot-core/src/client/sheetql/spreadsheet';
+import SheetValue from '@actual-app/loot-design/src/components/spreadsheet/SheetValue';
+import NamespaceContext from '@actual-app/loot-design/src/components/spreadsheet/NamespaceContext';
 import {
   Tooltip,
   Pointer,
@@ -12,11 +12,11 @@ import {
   View,
   Text,
   Button
-} from 'loot-design/src/components/common';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+} from '@actual-app/loot-design/src/components/common';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import { integerToCurrency } from '@actual-app/loot-core/src/shared/util';
 import Navigation from './Navigation';
-import { colors } from 'loot-design/src/style';
+import { colors } from '@actual-app/loot-design/src/style';
 import { Standalone, Title, useMinimized } from './common';
 
 function Overspending({ navigationProps, stepTwo }) {

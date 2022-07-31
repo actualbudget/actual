@@ -6,7 +6,7 @@ global.fetch = require('node-fetch');
 // Do this lazily so the backend code is loaded and executed after
 // Sentry is installed
 function getBackend() {
-  return require('loot-core/lib-dist/bundle.desktop.js');
+  return require('@actual-app/loot-core/lib-dist/bundle.desktop.js');
 }
 
 if (process.argv[2] === '--subprocess') {

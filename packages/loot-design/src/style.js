@@ -1,4 +1,4 @@
-import Platform from 'loot-core/src/client/platform';
+import Platform from '@actual-app/loot-core/src/client/platform';
 
 export const debug = { borderWidth: 1, borderColor: 'red' };
 

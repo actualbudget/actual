@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import * as actions from 'loot-core/src/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 import {
   View,
   Text,
   Button,
   Tooltip,
   Menu
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import ExclamationSolid from 'loot-design/src/svg/v1/ExclamationSolid';
+} from '@actual-app/loot-design/src/components/common';
+import { colors } from '@actual-app/loot-design/src/style';
+import ExclamationSolid from '@actual-app/loot-design/src/svg/v1/ExclamationSolid';
 
 function LoggedInUser({
   history,

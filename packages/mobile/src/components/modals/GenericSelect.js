@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, FlatList, Keyboard } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import { ListItem } from 'loot-design/src/components/mobile/table';
+import { ListItem } from '@actual-app/loot-design/src/components/mobile/table';
 class GenericSelect extends React.Component {
   onSelect = value => {
     const { navigation } = this.props;

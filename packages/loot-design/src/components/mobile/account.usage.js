@@ -1,6 +1,6 @@
 import React from 'react';
 import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
-import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
+import makeSpreadsheet from '@actual-app/loot-core/src/mocks/spreadsheet';
 import { MobileSection, WithHeader } from '../../guide/components';
 import { accounts, categories, transactions } from './accounts.usage';
 import { AccountDetails } from './account';

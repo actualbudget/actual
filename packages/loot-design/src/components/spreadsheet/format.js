@@ -1,4 +1,4 @@
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { integerToCurrency } from '@actual-app/loot-core/src/shared/util';
 
 export default function format(value, type = 'string') {
   switch (type) {

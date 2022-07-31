@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
 import {
   fromPlaidAccountType,
   prettyAccountType
-} from 'loot-core/src/shared/accounts';
+} from '@actual-app/loot-core/src/shared/accounts';
 
 export default function Account({ account, style, rightContent, onPress }) {
   return (

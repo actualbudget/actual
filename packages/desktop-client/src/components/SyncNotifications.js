@@ -5,8 +5,8 @@ import {
   Stack,
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/common';
+import { colors } from '@actual-app/loot-design/src/style';
 
 export function RepairSyncNotification() {}
 

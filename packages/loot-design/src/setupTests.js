@@ -1,8 +1,8 @@
 import { fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { resetStore } from 'loot-core/src/mocks/redux';
+import { resetStore } from '@actual-app/loot-core/src/mocks/redux';
 
-const uuid = require('loot-core/src/platform/uuid');
+const uuid = require('@actual-app/loot-core/src/platform/uuid');
 
 global.IS_TESTING = true;
 global.Actual = {};

@@ -3,16 +3,16 @@ import PropTypes from 'prop-types';
 import {
   send,
   init as initConnection
-} from 'loot-core/src/platform/client/fetch';
-import * as spreadsheet from 'loot-core/src/client/sheetql/spreadsheet';
+} from '@actual-app/loot-core/src/platform/client/fetch';
+import * as spreadsheet from '@actual-app/loot-core/src/client/sheetql/spreadsheet';
 import CodeMirror from 'codemirror';
 import {
   View,
   Button,
   Input,
   InlineField
-} from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/common';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 
 require('codemirror/lib/codemirror.css');
 require('codemirror/theme/monokai.css');

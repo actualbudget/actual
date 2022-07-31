@@ -1,13 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { css } from 'glamor';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import {
   init as initConnection,
   send
-} from 'loot-core/src/platform/client/fetch';
+} from '@actual-app/loot-core/src/platform/client/fetch';
 import installPolyfills from '../polyfills';
-import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
+import { styles, hasHiddenScrollbars } from '@actual-app/loot-design/src/style';
 import FatalError from './FatalError';
 import ManagementApp from './manager/ManagementApp';
 import FinancesApp from './FinancesApp';

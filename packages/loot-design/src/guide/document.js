@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Text, View, render as renderReactNative } from 'react-native';
-import Platform from 'loot-core/src/client/platform';
-import { TestProvider } from 'loot-core/src/mocks/redux';
+import Platform from '@actual-app/loot-core/src/client/platform';
+import { TestProvider } from '@actual-app/loot-core/src/mocks/redux';
 
 global.IS_DESIGN_MODE = true;
 window.Actual = {

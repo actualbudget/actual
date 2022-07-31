@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useMemo } from 'react';
 import LRU from 'lru-cache';
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
+import SpreadsheetContext from '@actual-app/loot-design/src/components/spreadsheet/SpreadsheetContext';
 import { listen, send } from '../platform/client/fetch';
 
 function makeSpreadsheet() {

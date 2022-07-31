@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, AnchorLink } from 'loot-design/src/components/common';
+import { View, AnchorLink } from '@actual-app/loot-design/src/components/common';
 import AnimateIn from './AnimateIn';
-import { colors } from 'loot-design/src/style';
+import { colors } from '@actual-app/loot-design/src/style';
 
 export function Title({ children }) {
   return (

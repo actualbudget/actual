@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Block } from 'loot-design/src/components/common';
+import { View, Block } from '@actual-app/loot-design/src/components/common';
 import { css } from 'glamor';
 import Background from './Background';
-import AnimatedLoading from 'loot-design/src/svg/v1/AnimatedLoading';
-import { colors } from 'loot-design/src/style';
+import AnimatedLoading from '@actual-app/loot-design/src/svg/v1/AnimatedLoading';
+import { colors } from '@actual-app/loot-design/src/style';
 
 function AppBackground({ initializing, loadingText }) {
   return (

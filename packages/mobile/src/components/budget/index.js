@@ -4,28 +4,28 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { connectActionSheet } from '@expo/react-native-action-sheet';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import * as actions from 'loot-core/src/client/actions';
-import * as monthUtils from 'loot-core/src/shared/months';
-import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
-import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
-import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import format from 'loot-design/src/components/spreadsheet/format';
-import { BudgetTable } from 'loot-design/src/components/mobile/budget';
-import AnimatedLoading from 'loot-design/src/svg/AnimatedLoading';
-import { Button } from 'loot-design/src/components/mobile/common';
+import { send, listen } from '@actual-app/loot-core/src/platform/client/fetch';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import NamespaceContext from '@actual-app/loot-design/src/components/spreadsheet/NamespaceContext';
+import SpreadsheetContext from '@actual-app/loot-design/src/components/spreadsheet/SpreadsheetContext';
+import FocusAwareStatusBar from '@actual-app/loot-design/src/components/mobile/FocusAwareStatusBar';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
+import SheetValue from '@actual-app/loot-design/src/components/spreadsheet/SheetValue';
+import CellValue from '@actual-app/loot-design/src/components/spreadsheet/CellValue';
+import format from '@actual-app/loot-design/src/components/spreadsheet/format';
+import { BudgetTable } from '@actual-app/loot-design/src/components/mobile/budget';
+import AnimatedLoading from '@actual-app/loot-design/src/svg/AnimatedLoading';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
 import SyncRefresh from '../SyncRefresh';
 import Modal from '../modals/Modal';
-import { rolloverBudget } from 'loot-core/src/client/queries';
+import { rolloverBudget } from '@actual-app/loot-core/src/client/queries';
 
 import {
   addCategory,
   moveCategory,
   moveCategoryGroup
-} from 'loot-core/src/shared/categories.js';
+} from '@actual-app/loot-core/src/shared/categories.js';
 
 function BudgetSummary({ month, onClose }) {
   const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');

@@ -5,8 +5,8 @@ import {
   fromPlaidAccountType,
   determineOffBudget,
   prettyAccountType
-} from 'loot-core/src/shared/accounts';
-import Checkmark from 'loot-design/src/svg/v1/Checkmark';
+} from '@actual-app/loot-core/src/shared/accounts';
+import Checkmark from '@actual-app/loot-design/src/svg/v1/Checkmark';
 
 function EmptyMessage() {
   return null;

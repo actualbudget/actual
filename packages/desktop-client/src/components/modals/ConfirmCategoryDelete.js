@@ -6,9 +6,9 @@ import {
   Modal,
   Button,
   Select
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import { NativeCategorySelect } from 'loot-design/src/components/CategorySelect';
+} from '@actual-app/loot-design/src/components/common';
+import { colors } from '@actual-app/loot-design/src/style';
+import { NativeCategorySelect } from '@actual-app/loot-design/src/components/CategorySelect';
 
 class ConfirmCategoryDelete extends React.Component {
   state = { transferCategory: null, error: null };

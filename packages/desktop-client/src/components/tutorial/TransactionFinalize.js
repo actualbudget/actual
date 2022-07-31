@@ -1,8 +1,8 @@
 import React from 'react';
-import { P } from 'loot-design/src/components/common';
+import { P } from '@actual-app/loot-design/src/components/common';
 import { css } from 'glamor';
 import Navigation from './Navigation';
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 import {Standalone} from './common';
 
 function TransactionFinalize({ navigationProps }) {

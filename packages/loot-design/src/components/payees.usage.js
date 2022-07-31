@@ -2,8 +2,8 @@ import React from 'react';
 import Component from '@reactions/component';
 import { Section, TestModal } from './../guide/components';
 import { ManagePayees } from './payees';
-import { applyChanges } from 'loot-core/src/shared/util';
-import { TestProvider } from 'loot-core/src/mocks/redux';
+import { applyChanges } from '@actual-app/loot-core/src/shared/util';
+import { TestProvider } from '@actual-app/loot-core/src/mocks/redux';
 
 let categoryGroups = [
   {

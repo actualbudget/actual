@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import {
   View,
   Text,
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
-import { send } from 'loot-core/src/platform/client/fetch';
+} from '@actual-app/loot-design/src/components/common';
+import { colors, styles } from '@actual-app/loot-design/src/style';
+import { signOut, loggedIn } from '@actual-app/loot-core/src/client/actions/user';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 import {
   useBootstrapped,
   Title,

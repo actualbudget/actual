@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState, useContext } from 'react';
-import q, { liveQuery, runQuery } from 'loot-core/src/client/query-helpers';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+import q, { liveQuery, runQuery } from '@actual-app/loot-core/src/client/query-helpers';
+import { getPayeesById } from '@actual-app/loot-core/src/client/reducers/queries';
 
 export function usePayees() {
   let [data, setData] = useState(null);

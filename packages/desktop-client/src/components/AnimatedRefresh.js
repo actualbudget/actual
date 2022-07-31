@@ -1,7 +1,7 @@
 import React from 'react';
 import { css } from 'glamor';
-import { View } from 'loot-design/src/components/common';
-import Refresh from 'loot-design/src/svg/v1/Refresh';
+import { View } from '@actual-app/loot-design/src/components/common';
+import Refresh from '@actual-app/loot-design/src/svg/v1/Refresh';
 
 let spin = css.keyframes({
   '0%': { transform: 'rotateZ(0deg)' },

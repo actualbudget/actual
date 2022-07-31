@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Animated, Dimensions } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import AndroidKeyboardAvoidingView from 'loot-design/src/components/mobile/AndroidKeyboardAvoidingView';
+import AndroidKeyboardAvoidingView from '@actual-app/loot-design/src/components/mobile/AndroidKeyboardAvoidingView';
 
 const windowHeight = Dimensions.get('window').height;
 

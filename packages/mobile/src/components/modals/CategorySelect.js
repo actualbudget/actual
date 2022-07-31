@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { colors } from 'loot-design/src/style';
+import { colors } from '@actual-app/loot-design/src/style';
 import GenericSearchableSelect from './GenericSearchableSelect';
 
 export default function CategorySelect({ route, navigation }) {

@@ -16,47 +16,47 @@ import {
   parseISO,
   isValid as isDateValid
 } from 'date-fns';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import q, { runQuery } from '@actual-app/loot-core/src/client/query-helpers';
 import {
   View,
   Text,
   Stack,
   Tooltip,
   Button
-} from 'loot-design/src/components/common';
-import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import DateSelect from 'loot-design/src/components/DateSelect';
-import RightArrow2 from 'loot-design/src/svg/RightArrow2';
-import LeftArrow2 from 'loot-design/src/svg/LeftArrow2';
-import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
-import DeleteIcon from 'loot-design/src/svg/Delete';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
-import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+} from '@actual-app/loot-design/src/components/common';
+import CategoryAutocomplete from '@actual-app/loot-design/src/components/CategorySelect';
+import PayeeAutocomplete from '@actual-app/loot-design/src/components/PayeeAutocomplete';
+import AccountAutocomplete from '@actual-app/loot-design/src/components/AccountAutocomplete';
+import DateSelect from '@actual-app/loot-design/src/components/DateSelect';
+import RightArrow2 from '@actual-app/loot-design/src/svg/RightArrow2';
+import LeftArrow2 from '@actual-app/loot-design/src/svg/LeftArrow2';
+import Hyperlink2 from '@actual-app/loot-design/src/svg/v2/Hyperlink2';
+import DeleteIcon from '@actual-app/loot-design/src/svg/Delete';
+import CheveronDown from '@actual-app/loot-design/src/svg/v1/CheveronDown';
+import CalendarIcon from '@actual-app/loot-design/src/svg/v2/Calendar';
+import ArrowsSynchronize from '@actual-app/loot-design/src/svg/v2/ArrowsSynchronize';
 import {
   integerToCurrency,
   amountToInteger,
   applyChanges,
   debugMemoFailure,
   titleFirst
-} from 'loot-core/src/shared/util';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+} from '@actual-app/loot-core/src/shared/util';
+import evalArithmetic from '@actual-app/loot-core/src/shared/arithmetic';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById
-} from 'loot-core/src/client/reducers/queries';
-import { currentDay, dayFromDate, addDays } from 'loot-core/src/shared/months';
+} from '@actual-app/loot-core/src/client/reducers/queries';
+import { currentDay, dayFromDate, addDays } from '@actual-app/loot-core/src/shared/months';
 import {
   splitTransaction,
   updateTransaction,
   deleteTransaction,
   addSplitTransaction,
   ungroupTransaction
-} from 'loot-core/src/shared/transactions';
-import { styles, colors } from 'loot-design/src/style';
+} from '@actual-app/loot-core/src/shared/transactions';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 import {
   Cell,
   Field,
@@ -69,16 +69,16 @@ import {
   useTableNavigator,
   Table,
   ROW_HEIGHT
-} from 'loot-design/src/components/table';
+} from '@actual-app/loot-design/src/components/table';
 import {
   useSelectedDispatch,
   useSelectedItems
-} from 'loot-design/src/components/useSelected';
-import { keys } from 'loot-design/src/util/keys';
-import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
+} from '@actual-app/loot-design/src/components/useSelected';
+import { keys } from '@actual-app/loot-design/src/util/keys';
+import { useMergedRefs } from '@actual-app/loot-design/src/components/useMergedRefs';
 import { getStatusProps } from '../schedules/StatusBadge';
-import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import { useCachedSchedules } from '@actual-app/loot-core/src/client/data-hooks/schedules';
+import { getScheduledAmount } from '@actual-app/loot-core/src/shared/schedules';
 
 let TABLE_BACKGROUND_COLOR = colors.n11;
 

@@ -26,10 +26,10 @@ import {
   ListboxOption
 } from '@reach/listbox';
 import { styles, colors } from '../style';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { integerToCurrency } from '@actual-app/loot-core/src/shared/util';
 import Delete from '../svg/Delete';
 import Loading from '../svg/v1/AnimatedLoading';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+import ExpandArrow from '@actual-app/loot-design/src/svg/ExpandArrow';
 import View from './View';
 import Text from './Text';
 import Stack from './Stack';

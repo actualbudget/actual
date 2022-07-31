@@ -1,7 +1,7 @@
 import React, { useLayoutEffect } from 'react';
 import { CommonActions } from '@react-navigation/native';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 
 function ModalListener({ modalStack, navigatorRef, popModal }) {
   useLayoutEffect(() => {

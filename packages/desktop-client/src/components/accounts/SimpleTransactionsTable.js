@@ -12,23 +12,23 @@ import {
   Field,
   Cell,
   SelectCell
-} from 'loot-design/src/components/table';
+} from '@actual-app/loot-design/src/components/table';
 import {
   useSelectedItems,
   useSelectedDispatch
-} from 'loot-design/src/components/useSelected';
+} from '@actual-app/loot-design/src/components/useSelected';
 import {
   integerToAmount,
   amountToInteger,
   integerToCurrency
-} from 'loot-core/src/shared/util';
+} from '@actual-app/loot-core/src/shared/util';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById
-} from 'loot-core/src/client/reducers/queries';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
-import { styles } from 'loot-design/src/style';
+} from '@actual-app/loot-core/src/client/reducers/queries';
+import ArrowsSynchronize from '@actual-app/loot-design/src/svg/v2/ArrowsSynchronize';
+import { styles } from '@actual-app/loot-design/src/style';
 import DisplayId from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {

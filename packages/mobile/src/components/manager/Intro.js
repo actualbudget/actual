@@ -8,13 +8,13 @@ import {
   Linking,
   Animated
 } from 'react-native';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
-import { Button } from 'loot-design/src/components/mobile/common';
-import ScalableImage from 'loot-design/src/components/mobile/ScalableImage';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
+import ScalableImage from '@actual-app/loot-design/src/components/mobile/ScalableImage';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import TransitionView from './TransitionView';
 import Icon from '../../../assets/icon.png';
 

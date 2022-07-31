@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import {
   View,
   Text,
@@ -8,8 +8,8 @@ import {
   Button,
   P,
   ExternalLink
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/common';
+import { colors } from '@actual-app/loot-design/src/style';
 
 function WelcomeScreen({ modalProps, actions }) {
   return (

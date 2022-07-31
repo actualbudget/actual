@@ -1,5 +1,5 @@
 import React from 'react';
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 
 export function getValidMonthBounds(bounds, startMonth, endMonth) {
   return {

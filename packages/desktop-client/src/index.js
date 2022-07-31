@@ -15,14 +15,14 @@ import {
   bindActionCreators
 } from 'redux';
 import { Provider } from 'react-redux';
-import constants from 'loot-core/src/client/constants';
-import reducers from 'loot-core/src/client/reducers';
-import { send } from 'loot-core/src/platform/client/fetch';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import * as actions from 'loot-core/src/client/actions';
+import constants from '@actual-app/loot-core/src/client/constants';
+import reducers from '@actual-app/loot-core/src/client/reducers';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import q, { runQuery } from '@actual-app/loot-core/src/client/query-helpers';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import thunk from 'redux-thunk';
 import { handleGlobalEvents } from './global-events';
-import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
+import { initialState as initialAppState } from '@actual-app/loot-core/src/client/reducers/app';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.

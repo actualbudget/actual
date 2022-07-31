@@ -12,9 +12,9 @@ import {
   Menu,
   Tooltip
 } from './common';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { closeBudget } from 'loot-core/src/client/actions/budgets';
-import Platform from 'loot-core/src/client/platform';
+import { pushModal } from '@actual-app/loot-core/src/client/actions/modals';
+import { closeBudget } from '@actual-app/loot-core/src/client/actions/budgets';
+import Platform from '@actual-app/loot-core/src/client/platform';
 import CellValue from './spreadsheet/CellValue';
 import Add from '../svg/v1/Add';
 import CalendarIcon from '../svg/v2/Calendar';
@@ -22,7 +22,7 @@ import { styles, colors } from '../style';
 import Wallet from '../svg/v1/Wallet';
 import Reports from '../svg/v1/Reports';
 import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
-import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
+import PiggyBank from '@actual-app/loot-design/src/svg/v1/PiggyBank';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
 

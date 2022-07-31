@@ -13,7 +13,7 @@ import {
   PanGestureHandler,
   NativeViewGestureHandler
 } from 'react-native-gesture-handler';
-import AndroidKeyboardAvoidingView from 'loot-design/src/components/mobile/AndroidKeyboardAvoidingView';
+import AndroidKeyboardAvoidingView from '@actual-app/loot-design/src/components/mobile/AndroidKeyboardAvoidingView';
 
 class ScrollableBottomSheet extends Component {
   state = { shouldCheckScrollPan: true };

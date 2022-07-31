@@ -2,17 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, Alert, StatusBar, Linking } from 'react-native';
 import { connect } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as actions from 'loot-core/src/client/actions';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { getSubscribeError } from 'loot-core/src/shared/errors';
-import Stack from 'loot-design/src/components/Stack';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { getSubscribeError } from '@actual-app/loot-core/src/shared/errors';
+import Stack from '@actual-app/loot-design/src/components/Stack';
 import {
   ButtonWithLoading,
   Button
-} from 'loot-design/src/components/mobile/common';
-import KeyboardAvoidingView from 'loot-design/src/components/mobile/KeyboardAvoidingView';
-import { InputField } from 'loot-design/src/components/mobile/forms';
+} from '@actual-app/loot-design/src/components/mobile/common';
+import KeyboardAvoidingView from '@actual-app/loot-design/src/components/mobile/KeyboardAvoidingView';
+import { InputField } from '@actual-app/loot-design/src/components/mobile/forms';
 import AccountButton from '../AccountButton';
 import Header from './Header';
 

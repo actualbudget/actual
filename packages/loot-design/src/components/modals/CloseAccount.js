@@ -10,7 +10,7 @@ import {
   FormError,
   AnchorLink
 } from '../common';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { integerToCurrency } from '@actual-app/loot-core/src/shared/util';
 import { colors } from '../../style';
 
 function needsCategory(account, currentTransfer, accounts) {

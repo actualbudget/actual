@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import mitt from 'mitt';
-import * as actions from 'loot-core/src/client/actions';
-import { View } from 'loot-design/src/components/common';
-import { SIDEBAR_WIDTH } from 'loot-design/src/components/sidebar';
-import { colors } from 'loot-design/src/style';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { View } from '@actual-app/loot-design/src/components/common';
+import { SIDEBAR_WIDTH } from '@actual-app/loot-design/src/components/sidebar';
+import { colors } from '@actual-app/loot-design/src/style';
 
 import SidebarWithData from './SidebarWithData';
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import Modal, { CloseButton } from '../Modal';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
-import { Button } from 'loot-design/src/components/mobile/common';
-import Checkmark from 'loot-design/src/svg/v1/Checkmark';
-import { useScrollFlasher } from 'loot-design/src/components/mobile/hooks';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
+import Checkmark from '@actual-app/loot-design/src/svg/v1/Checkmark';
+import { useScrollFlasher } from '@actual-app/loot-design/src/components/mobile/hooks';
 import Account from './Account';
 
 export default function SelectLinkedAccounts({ route, navigation }) {

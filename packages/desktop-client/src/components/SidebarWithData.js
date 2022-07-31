@@ -4,18 +4,18 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { select } from 'glamor';
 import lively from '@jlongster/lively';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { styles, colors } from 'loot-design/src/style';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 import {
   Button,
   Input,
   InitialFocus,
   View,
   Text
-} from 'loot-design/src/components/common';
-import { Sidebar } from 'loot-design/src/components/sidebar';
-import * as actions from 'loot-core/src/client/actions';
-import * as queries from 'loot-core/src/client/queries';
+} from '@actual-app/loot-design/src/components/common';
+import { Sidebar } from '@actual-app/loot-design/src/components/sidebar';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import * as queries from '@actual-app/loot-core/src/client/queries';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   const [editing, setEditing] = useState(false);

@@ -1,10 +1,10 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import Platform from 'loot-core/src/client/platform';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { send } from 'loot-core/src/platform/client/fetch';
+import q, { runQuery } from '@actual-app/loot-core/src/client/query-helpers';
+import Platform from '@actual-app/loot-core/src/client/platform';
+import { useSchedules } from '@actual-app/loot-core/src/client/data-hooks/schedules';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Button,
   ButtonWithLoading,
   P
-} from 'loot-design/src/components/common';
+} from '@actual-app/loot-design/src/components/common';
 import {
   Table,
   TableHeader,
@@ -20,14 +20,14 @@ import {
   Field,
   Cell,
   SelectCell
-} from 'loot-design/src/components/table';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import { colors, styles } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/table';
+import { getRecurringDescription } from '@actual-app/loot-core/src/shared/schedules';
+import { colors, styles } from '@actual-app/loot-design/src/style';
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
   SelectedProvider
-} from 'loot-design/src/components/useSelected';
+} from '@actual-app/loot-design/src/components/useSelected';
 import { Page } from '../Page';
 import { ScheduleAmountCell } from './SchedulesTable';
 import DisplayId from '../util/DisplayId';

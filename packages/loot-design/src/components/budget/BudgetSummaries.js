@@ -8,7 +8,7 @@ import React, {
 import { Spring } from 'wobble';
 import { css } from 'glamor';
 import { MonthsContext } from './MonthsContext';
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 import { View } from '../common';
 import useResizeObserver from '../useResizeObserver';
 

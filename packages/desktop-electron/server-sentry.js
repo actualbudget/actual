@@ -1,6 +1,6 @@
 let os = require('os');
 let Sentry = require('@sentry/node');
-let backend = require('loot-core/lib-dist/bundle.desktop.js');
+let backend = require('@actual-app/loot-core/lib-dist/bundle.desktop.js');
 
 function install(version) {
   Sentry.init({

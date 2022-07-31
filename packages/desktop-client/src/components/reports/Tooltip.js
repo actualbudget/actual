@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { VictoryTooltip } from 'victory';
 import { css, before } from 'glamor';
-import { colors } from 'loot-design/src/style';
+import { colors } from '@actual-app/loot-design/src/style';
 
 class Tooltip extends React.Component {
   static defaultEvents = VictoryTooltip.defaultEvents;

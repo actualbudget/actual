@@ -6,11 +6,11 @@ import {
   Block,
   P,
   AlignedText
-} from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+} from '@actual-app/loot-design/src/components/common';
+import { styles } from '@actual-app/loot-design/src/style';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import { integerToCurrency } from '@actual-app/loot-core/src/shared/util';
 import { fromDateRepr } from './util';
 import Header from './Header';
 import Change from './Change';
@@ -18,7 +18,7 @@ import CashFlowGraph from './graphs/CashFlowGraph';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
-import { colors } from 'loot-design/src/style';
+import { colors } from '@actual-app/loot-design/src/style';
 
 function CashFlow() {
   const [earliestMonth, setEarliestMonth] = useState(null);

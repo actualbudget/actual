@@ -10,10 +10,10 @@ import {
   Input,
   InitialFocus,
   ExternalLink
-} from 'loot-design/src/components/common';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { styles, colors } from 'loot-design/src/style';
-import { getTestKeyError } from 'loot-core/src/shared/errors';
+} from '@actual-app/loot-design/src/components/common';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { styles, colors } from '@actual-app/loot-design/src/style';
+import { getTestKeyError } from '@actual-app/loot-core/src/shared/errors';
 
 export default function FixEncryptionKey({
   modalProps,

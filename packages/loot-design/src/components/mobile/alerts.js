@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import InformationSolid from 'loot-design/src/svg/v1/InformationOutline';
-import { styles, colors } from 'loot-design/src/style';
+import InformationSolid from '@actual-app/loot-design/src/svg/v1/InformationOutline';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 
 export function Information({ style, children }) {
   return (

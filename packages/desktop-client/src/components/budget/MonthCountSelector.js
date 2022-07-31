@@ -1,8 +1,8 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { styles, colors } from 'loot-design/src/style';
-import { View, Text } from 'loot-design/src/components/common';
-import { useBudgetMonthCount } from 'loot-design/src/components/budget/BudgetMonthCountContext';
-import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
+import { styles, colors } from '@actual-app/loot-design/src/style';
+import { View, Text } from '@actual-app/loot-design/src/components/common';
+import { useBudgetMonthCount } from '@actual-app/loot-design/src/components/budget/BudgetMonthCountContext';
+import CalendarIcon from '@actual-app/loot-design/src/svg/v2/Calendar';
 
 function Calendar({ color, onClick }) {
   return (

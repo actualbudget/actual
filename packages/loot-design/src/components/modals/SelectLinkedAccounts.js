@@ -4,7 +4,7 @@ import { View, Text, Modal, P, Button } from '../common';
 import {
   fromPlaidAccountType,
   prettyAccountType
-} from 'loot-core/src/shared/accounts';
+} from '@actual-app/loot-core/src/shared/accounts';
 
 let selectedStyle = {
   color: colors.n1

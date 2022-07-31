@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text } from 'react-native';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import Modal from '../modals/Modal';
 import {
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/mobile/common';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/mobile/common';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
 
 function DeleteFile({ route, navigation, deleteBudget }) {
   let { file } = route.params;

@@ -7,11 +7,11 @@ import React, {
 } from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import * as queries from 'loot-core/src/client/queries';
-import { listen } from 'loot-core/src/platform/client/fetch';
-import Platform from 'loot-core/src/client/platform';
-import { colors } from 'loot-design/src/style';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import * as queries from '@actual-app/loot-core/src/client/queries';
+import { listen } from '@actual-app/loot-core/src/platform/client/fetch';
+import Platform from '@actual-app/loot-core/src/client/platform';
+import { colors } from '@actual-app/loot-design/src/style';
 import {
   View,
   Text,
@@ -20,13 +20,13 @@ import {
   ButtonWithLoading,
   Tooltip,
   P
-} from 'loot-design/src/components/common';
-import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
+} from '@actual-app/loot-design/src/components/common';
+import SheetValue from '@actual-app/loot-design/src/components/spreadsheet/SheetValue';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
-import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
-import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
-import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
+import ArrowButtonRight1 from '@actual-app/loot-design/src/svg/v2/ArrowButtonRight1';
+import NavigationMenu from '@actual-app/loot-design/src/svg/v2/NavigationMenu';
+import ArrowLeft from '@actual-app/loot-design/src/svg/v1/ArrowLeft';
+import AlertTriangle from '@actual-app/loot-design/src/svg/v2/AlertTriangle';
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import LoggedInUser from './LoggedInUser';
 import AnimatedRefresh from './AnimatedRefresh';

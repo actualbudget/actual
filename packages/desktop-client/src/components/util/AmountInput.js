@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import {
   integerToCurrency,
   currencyToInteger
-} from 'loot-core/src/shared/util';
+} from '@actual-app/loot-core/src/shared/util';
 import {
   View,
   Button,
   InputWithContent
-} from 'loot-design/src/components/common';
-import Add from 'loot-design/src/svg/v1/Add';
-import Subtract from 'loot-design/src/svg/v1/Subtract';
+} from '@actual-app/loot-design/src/components/common';
+import Add from '@actual-app/loot-design/src/svg/v1/Add';
+import Subtract from '@actual-app/loot-design/src/svg/v1/Subtract';
 
 export function AmountInput({ defaultValue, onChange }) {
   let [negative, setNegative] = useState(defaultValue <= 0);

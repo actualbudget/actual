@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, Switch } from 'react-native';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
 import {
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/mobile/common';
-import Checkmark from 'loot-design/src/svg/v1/Checkmark';
-import { useScrollFlasher } from 'loot-design/src/components/mobile/hooks';
+} from '@actual-app/loot-design/src/components/mobile/common';
+import Checkmark from '@actual-app/loot-design/src/svg/v1/Checkmark';
+import { useScrollFlasher } from '@actual-app/loot-design/src/components/mobile/hooks';
 import {
   determineOffBudget,
   fromPlaidAccountType
-} from 'loot-core/src/shared/accounts';
+} from '@actual-app/loot-core/src/shared/accounts';
 import Modal, { CloseButton } from '../Modal';
 import Account from './Account';
 

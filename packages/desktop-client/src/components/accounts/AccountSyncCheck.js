@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Route, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import { View, Text, Button, Tooltip } from 'loot-design/src/components/common';
-import ExclamationOutline from 'loot-design/src/svg/v1/ExclamationOutline';
-import { colors } from 'loot-design/src/style';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { View, Text, Button, Tooltip } from '@actual-app/loot-design/src/components/common';
+import ExclamationOutline from '@actual-app/loot-design/src/svg/v1/ExclamationOutline';
+import { colors } from '@actual-app/loot-design/src/style';
 import { reauthorizeBank } from '../../plaid';
 
 function getErrorMessage(type, code) {

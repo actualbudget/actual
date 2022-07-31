@@ -1,16 +1,16 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, fireEvent } from '@testing-library/react';
-import { debugDOM } from 'loot-core/src/mocks/util';
+import { debugDOM } from '@actual-app/loot-core/src/mocks/util';
 import { format as formatDate, parse as parseDate } from 'date-fns';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { initServer } from 'loot-core/src/platform/client/fetch';
+import { integerToCurrency } from '@actual-app/loot-core/src/shared/util';
+import { initServer } from '@actual-app/loot-core/src/platform/client/fetch';
 import {
   generateTransaction,
   generateAccount,
   generateCategoryGroups
-} from 'loot-core/src/mocks';
-const uuid = require('loot-core/src/platform/uuid');
+} from '@actual-app/loot-core/src/mocks';
+const uuid = require('@actual-app/loot-core/src/platform/uuid');
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [

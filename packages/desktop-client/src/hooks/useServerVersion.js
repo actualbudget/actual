@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 
 function useServerVersion() {
   let [version, setVersion] = useState('');

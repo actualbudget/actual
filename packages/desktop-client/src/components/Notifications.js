@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import {
   View,
   Text,
@@ -9,10 +9,10 @@ import {
   ButtonWithLoading,
   Stack,
   ExternalLink
-} from 'loot-design/src/components/common';
-import Delete from 'loot-design/src/svg/Delete';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
-import { styles, colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/common';
+import Delete from '@actual-app/loot-design/src/svg/Delete';
+import Loading from '@actual-app/loot-design/src/svg/v1/AnimatedLoading';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 
 function compileMessage(message, actions, setLoading, onRemove) {
   return (

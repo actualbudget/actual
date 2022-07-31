@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { colors, styles } from 'loot-design/src/style';
+import { integerToCurrency } from '@actual-app/loot-core/src/shared/util';
+import { colors, styles } from '@actual-app/loot-design/src/style';
 import {
   View,
   Text,
   Button,
   Tooltip,
   Menu
-} from 'loot-design/src/components/common';
+} from '@actual-app/loot-design/src/components/common';
 import {
   Table,
   TableHeader,
@@ -16,11 +16,11 @@ import {
   Field,
   Cell,
   SelectCell
-} from 'loot-design/src/components/table';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
-import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
-import Check from 'loot-design/src/svg/v2/Check';
+} from '@actual-app/loot-design/src/components/table';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import { getScheduledAmount } from '@actual-app/loot-core/src/shared/schedules';
+import DotsHorizontalTriple from '@actual-app/loot-design/src/svg/v1/DotsHorizontalTriple';
+import Check from '@actual-app/loot-design/src/svg/v2/Check';
 import DisplayId from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
 

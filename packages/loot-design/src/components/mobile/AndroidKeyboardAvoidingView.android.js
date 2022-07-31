@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { KeyboardAvoidingView, NativeModules, Keyboard } from 'react-native';
-import { AmountAccessoryView } from 'loot-design/src/components/mobile/AmountInput';
-import { BudgetAccessoryView } from 'loot-design/src/components/mobile/budget';
+import { AmountAccessoryView } from '@actual-app/loot-design/src/components/mobile/AmountInput';
+import { BudgetAccessoryView } from '@actual-app/loot-design/src/components/mobile/budget';
 
 let { StatusBarHeight } = NativeModules;
 

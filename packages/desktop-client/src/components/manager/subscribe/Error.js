@@ -5,8 +5,8 @@ import {
   Text,
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/common';
+import { colors, styles } from '@actual-app/loot-design/src/style';
 
 function getErrorMessage(reason) {
   switch (reason) {

@@ -5,17 +5,17 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { RectButton } from 'react-native-gesture-handler';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import { AppState } from 'react-native';
-import Wallet from 'loot-design/src/svg/v1/Wallet';
-import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
-import Cog from 'loot-design/src/svg/v1/Cog';
-import Add from 'loot-design/src/svg/v1/Add';
-import { colors } from 'loot-design/src/style';
-import { Button } from 'loot-design/src/components/mobile/common';
-import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
-import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
-import InputAccessoryView from 'loot-design/src/components/mobile/InputAccessoryView';
+import Wallet from '@actual-app/loot-design/src/svg/v1/Wallet';
+import PiggyBank from '@actual-app/loot-design/src/svg/v1/PiggyBank';
+import Cog from '@actual-app/loot-design/src/svg/v1/Cog';
+import Add from '@actual-app/loot-design/src/svg/v1/Add';
+import { colors } from '@actual-app/loot-design/src/style';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
+import { SpreadsheetProvider } from '@actual-app/loot-core/src/client/SpreadsheetProvider';
+import checkForUpgradeNotifications from '@actual-app/loot-core/src/client/upgrade-notifications';
+import InputAccessoryView from '@actual-app/loot-design/src/components/mobile/InputAccessoryView';
 import Notifications from './Notifications';
 import ModalListener from './ModalListener';
 
@@ -35,8 +35,8 @@ import AddAccount from './modals/AddAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
 import SelectLinkedAccounts from './modals/link-accounts/SelectLinkedAccounts';
 import ConfigureLinkedAccounts from './modals/link-accounts/ConfigureLinkedAccounts';
-import { AmountAccessoryView } from 'loot-design/src/components/mobile/AmountInput';
-import { BudgetAccessoryView } from 'loot-design/src/components/mobile/budget';
+import { AmountAccessoryView } from '@actual-app/loot-design/src/components/mobile/AmountInput';
+import { BudgetAccessoryView } from '@actual-app/loot-design/src/components/mobile/budget';
 
 function useForegroundSync(sync) {
   let appState = useRef(null);

@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getActivePayees } from 'loot-core/src/client/reducers/queries';
-import { createPayee } from 'loot-core/src/client/actions/queries';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
+import { getActivePayees } from '@actual-app/loot-core/src/client/reducers/queries';
+import { createPayee } from '@actual-app/loot-core/src/client/actions/queries';
+import { useCachedPayees } from '@actual-app/loot-core/src/client/data-hooks/payees';
+import { useCachedAccounts } from '@actual-app/loot-core/src/client/data-hooks/accounts';
 import { View } from './common';
 import Add from '../svg/v1/Add';
 import Autocomplete, {

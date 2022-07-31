@@ -14,11 +14,11 @@ import {
   addSplitTransaction,
   realizeTempTransactions,
   applyTransactionDiff
-} from 'loot-core/src/shared/transactions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
-const uuid = require('loot-core/src/platform/uuid');
+} from '@actual-app/loot-core/src/shared/transactions';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { pushModal } from '@actual-app/loot-core/src/client/actions/modals';
+import { getChangedValues, applyChanges } from '@actual-app/loot-core/src/shared/util';
+const uuid = require('@actual-app/loot-core/src/platform/uuid');
 
 // When data changes, there are two ways to update the UI:
 //

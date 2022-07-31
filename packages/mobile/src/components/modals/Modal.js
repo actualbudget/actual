@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Animated, Easing, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
-import { colors } from 'loot-design/src/style';
-import KeyboardAvoidingView from 'loot-design/src/components/mobile/KeyboardAvoidingView';
-import { Button } from 'loot-design/src/components/mobile/common';
-import Close from 'loot-design/src/svg/v1/Close';
+import FocusAwareStatusBar from '@actual-app/loot-design/src/components/mobile/FocusAwareStatusBar';
+import { colors } from '@actual-app/loot-design/src/style';
+import KeyboardAvoidingView from '@actual-app/loot-design/src/components/mobile/KeyboardAvoidingView';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
+import Close from '@actual-app/loot-design/src/svg/v1/Close';
 
 export function navigateToModal(navigation, name) {
   navigation.navigate({ name, key: 'modal' });

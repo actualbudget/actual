@@ -1,4 +1,4 @@
-import * as Sentry from 'mobile/node_modules/@sentry/react-native';
+import * as Sentry from '@actual-app/mobile/node_modules/@sentry/react-native';
 
 export function captureException(exc) {
   console.log('[Exception]', exc);

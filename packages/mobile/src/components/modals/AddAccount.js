@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 //import { openLink } from 'react-native-plaid-link-sdk';
-import { Button } from 'loot-design/src/components/mobile/common';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 import Modal, { CloseButton } from './Modal';
 
 let PLAID_CONFIG = {

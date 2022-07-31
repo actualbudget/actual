@@ -6,10 +6,10 @@ import {
   SafeAreaProvider,
   initialWindowMetrics
 } from 'react-native-safe-area-context';
-import * as actions from 'loot-core/src/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { colors } from 'loot-design/src/style';
-import AnimatedLoading from 'loot-design/src/svg/v1/AnimatedLoading';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { colors } from '@actual-app/loot-design/src/style';
+import AnimatedLoading from '@actual-app/loot-design/src/svg/v1/AnimatedLoading';
 import ManagementApp from './manager/ManagementApp';
 import FinancesApp from './FinancesApp';
 import logo from '../../assets/logo.png';

@@ -1,7 +1,7 @@
 import React from 'react';
-import { P, ModalButtons, Button } from 'loot-design/src/components/common';
+import { P, ModalButtons, Button } from '@actual-app/loot-design/src/components/common';
 import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 import { Standalone, Title, ExternalLink } from './common';
 
 function Final({ targetRect, navigationProps }) {

@@ -4,10 +4,10 @@ import { MemoryRouter as Router } from 'react-router-dom';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 import SpreadsheetContext from './spreadsheet/SpreadsheetContext';
-import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
+import makeSpreadsheet from '@actual-app/loot-core/src/mocks/spreadsheet';
 import { Sidebar } from './sidebar';
 import { Section } from '../guide/components';
-import { generateAccount } from 'loot-core/src/mocks';
+import { generateAccount } from '@actual-app/loot-core/src/mocks';
 import { colors } from '../style';
 
 function withState(state, render) {

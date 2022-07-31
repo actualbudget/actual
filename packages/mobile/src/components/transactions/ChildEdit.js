@@ -12,10 +12,10 @@ import {
   FieldLabel,
   TapField,
   InputField
-} from 'loot-design/src/components/mobile/forms';
-import { colors, mobileStyles } from 'loot-design/src/style';
-import { FocusableAmountInput } from 'loot-design/src/components/mobile/AmountInput';
-import { currencyToInteger, integerToAmount } from 'loot-core/src/shared/util';
+} from '@actual-app/loot-design/src/components/mobile/forms';
+import { colors, mobileStyles } from '@actual-app/loot-design/src/style';
+import { FocusableAmountInput } from '@actual-app/loot-design/src/components/mobile/AmountInput';
+import { currencyToInteger, integerToAmount } from '@actual-app/loot-core/src/shared/util';
 
 class ChildEdit extends React.PureComponent {
   gestureY = new Animated.Value(400);

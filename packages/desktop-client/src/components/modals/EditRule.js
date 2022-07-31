@@ -4,9 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   initiallyLoadPayees,
   setUndoEnabled
-} from 'loot-core/src/client/actions/queries';
-import * as undo from 'loot-core/src/platform/client/undo';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+} from '@actual-app/loot-core/src/client/actions/queries';
+import * as undo from '@actual-app/loot-core/src/platform/client/undo';
+import q, { runQuery } from '@actual-app/loot-core/src/client/query-helpers';
 import {
   View,
   Text,
@@ -17,15 +17,15 @@ import {
   Input,
   CustomSelect,
   Tooltip
-} from 'loot-design/src/components/common';
+} from '@actual-app/loot-design/src/components/common';
 import GenericInput from '../util/GenericInput';
-import { keys } from 'loot-design/src/util/keys';
-import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import { getStatus } from 'loot-core/src/shared/schedules';
-import { colors, styles } from 'loot-design/src/style';
-import SubtractIcon from 'loot-design/src/svg/Subtract';
-import AddIcon from 'loot-design/src/svg/Add';
-import InformationOutline from 'loot-design/src/svg/v1/InformationOutline';
+import { keys } from '@actual-app/loot-design/src/util/keys';
+import { send, listen, unlisten } from '@actual-app/loot-core/src/platform/client/fetch';
+import { getStatus } from '@actual-app/loot-core/src/shared/schedules';
+import { colors, styles } from '@actual-app/loot-design/src/style';
+import SubtractIcon from '@actual-app/loot-design/src/svg/Subtract';
+import AddIcon from '@actual-app/loot-design/src/svg/Add';
+import InformationOutline from '@actual-app/loot-design/src/svg/v1/InformationOutline';
 import {
   mapField,
   friendlyOp,
@@ -35,20 +35,20 @@ import {
   makeValue,
   FIELD_TYPES,
   TYPE_INFO
-} from 'loot-core/src/shared/rules';
+} from '@actual-app/loot-core/src/shared/rules';
 import useSelected, {
   SelectedProvider
-} from 'loot-design/src/components/useSelected';
+} from '@actual-app/loot-design/src/components/useSelected';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { StatusBadge } from '../schedules/StatusBadge';
 import DisplayId from '../util/DisplayId';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { useSchedules } from '@actual-app/loot-core/src/client/data-hooks/schedules';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger
-} from 'loot-core/src/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
+} from '@actual-app/loot-core/src/shared/util';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 import { BetweenAmountInput } from '../util/AmountInput';
 
 function updateValue(array, value, update) {

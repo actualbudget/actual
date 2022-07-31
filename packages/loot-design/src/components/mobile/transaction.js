@@ -14,21 +14,21 @@ import {
   isValid as isValidDate
 } from 'date-fns';
 import { Swipeable, RectButton } from 'react-native-gesture-handler';
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 import {
   splitTransaction,
   updateTransaction,
   addSplitTransaction,
   deleteTransaction,
   realizeTempTransactions
-} from 'loot-core/src/shared/transactions';
-import { applyChanges, titleFirst } from 'loot-core/src/shared/util';
+} from '@actual-app/loot-core/src/shared/transactions';
+import { applyChanges, titleFirst } from '@actual-app/loot-core/src/shared/util';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger,
   groupById
-} from 'loot-core/src/shared/util';
+} from '@actual-app/loot-core/src/shared/util';
 import KeyboardAvoidingView from './KeyboardAvoidingView';
 import { ListItem } from './table';
 import { Button, TextOneLine } from './common';
@@ -52,7 +52,7 @@ import CalendarIcon from '../../svg/v2/Calendar';
 import ValidationCheck from '../../svg/v2/ValidationCheck';
 import FavoriteStar from '../../svg/v2/FavoriteStar';
 import CheckCircle1 from '../../svg/v2/CheckCircle1';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+import ArrowsSynchronize from '@actual-app/loot-design/src/svg/v2/ArrowsSynchronize';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));

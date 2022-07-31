@@ -1,10 +1,10 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
-import { CachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
-import { groupById } from 'loot-core/src/shared/util';
-import { Text } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+import { CachedPayees } from '@actual-app/loot-core/src/client/data-hooks/payees';
+import { CachedAccounts } from '@actual-app/loot-core/src/client/data-hooks/accounts';
+import { getPayeesById } from '@actual-app/loot-core/src/client/reducers/queries';
+import { groupById } from '@actual-app/loot-core/src/shared/util';
+import { Text } from '@actual-app/loot-design/src/components/common';
+import { colors, styles } from '@actual-app/loot-design/src/style';
 
 export default function DisplayId({ type, id, noneColor = colors.n8 }) {
   let DataComponent;

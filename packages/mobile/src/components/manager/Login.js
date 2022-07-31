@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, StatusBar } from 'react-native';
 import { connect } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as actions from 'loot-core/src/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import KeyboardAvoidingView from 'loot-design/src/components/mobile/KeyboardAvoidingView';
-import Stack from 'loot-design/src/components/Stack';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import KeyboardAvoidingView from '@actual-app/loot-design/src/components/mobile/KeyboardAvoidingView';
+import Stack from '@actual-app/loot-design/src/components/Stack';
 import Header from './Header';
 import SingleInput from './SingleInput';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
 import TransitionView from './TransitionView';
 
 function getErrorMessage(error) {

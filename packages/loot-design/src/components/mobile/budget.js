@@ -15,8 +15,8 @@ import {
 } from 'react-native-gesture-handler';
 import Animated, { Easing } from 'react-native-reanimated';
 import AndroidKeyboardAvoidingView from './AndroidKeyboardAvoidingView';
-import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { amountToInteger, integerToAmount } from '@actual-app/loot-core/src/shared/util';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 import memoizeOne from 'memoize-one';
 import CellValue from '../spreadsheet/CellValue';
 import SheetValue from '../spreadsheet/SheetValue';
@@ -25,14 +25,14 @@ import { colors, mobileStyles as styles } from '../../style';
 import format from '../spreadsheet/format';
 import { Button, KeyboardButton, Card, Label } from './common';
 import { ListItem, ROW_HEIGHT } from './table';
-import Platform from 'loot-core/src/client/platform';
+import Platform from '@actual-app/loot-core/src/client/platform';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import AmountInput, {
   MathOperations,
   AmountAccessoryContext
 } from './AmountInput';
 import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
-import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
+import { rolloverBudget, reportBudget } from '@actual-app/loot-core/src/client/queries';
 
 import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';
 import ArrowThinRight from '../../svg/v1/ArrowThinRight';

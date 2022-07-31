@@ -21,9 +21,9 @@ import { css } from 'glamor';
 import Modal from 'react-modal';
 import Component from '@reactions/component';
 import { debounce } from 'debounce';
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import * as actions from 'loot-core/src/client/actions';
+import SpreadsheetContext from '@actual-app/loot-design/src/components/spreadsheet/SpreadsheetContext';
+import { send, listen } from '@actual-app/loot-core/src/platform/client/fetch';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import {
   View,
   Text,
@@ -35,60 +35,60 @@ import {
   Menu,
   Block,
   Stack
-} from 'loot-design/src/components/common';
+} from '@actual-app/loot-design/src/components/common';
 import {
   currencyToInteger,
   applyChanges,
   groupById
-} from 'loot-core/src/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
-import TutorialPoint from 'loot-design/src/components/TutorialPoint';
-import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
-import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
-import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
-import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
+} from '@actual-app/loot-core/src/shared/util';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import TutorialPoint from '@actual-app/loot-design/src/components/TutorialPoint';
+import DotsHorizontalTriple from '@actual-app/loot-design/src/svg/v1/DotsHorizontalTriple';
+import Pencil1 from '@actual-app/loot-design/src/svg/v2/Pencil1';
+import SearchAlternate from '@actual-app/loot-design/src/svg/v2/SearchAlternate';
+import DownloadThickBottom from '@actual-app/loot-design/src/svg/v2/DownloadThickBottom';
 import AnimatedRefresh from '../AnimatedRefresh';
-import Add from 'loot-design/src/svg/v1/Add';
-import format from 'loot-design/src/components/spreadsheet/format';
-import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
-import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
-import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
-import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
-import * as queries from 'loot-core/src/client/queries';
-import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
-import { queryContext } from 'loot-core/src/client/query-hooks';
-import { SelectedItemsButton } from 'loot-design/src/components/table';
-import { Query } from 'loot-core/src/shared/query';
-import * as aql from 'loot-core/src/client/query-helpers';
+import Add from '@actual-app/loot-design/src/svg/v1/Add';
+import format from '@actual-app/loot-design/src/components/spreadsheet/format';
+import useSheetValue from '@actual-app/loot-design/src/components/spreadsheet/useSheetValue';
+import CellValue from '@actual-app/loot-design/src/components/spreadsheet/CellValue';
+import ArrowButtonRight1 from '@actual-app/loot-design/src/svg/v2/ArrowButtonRight1';
+import CheveronDown from '@actual-app/loot-design/src/svg/v1/CheveronDown';
+import CheckCircle1 from '@actual-app/loot-design/src/svg/v2/CheckCircle1';
+import Loading from '@actual-app/loot-design/src/svg/v1/AnimatedLoading';
+import ArrowsExpand3 from '@actual-app/loot-design/src/svg/v2/ArrowsExpand3';
+import ArrowsShrink3 from '@actual-app/loot-design/src/svg/v2/ArrowsShrink3';
+import * as queries from '@actual-app/loot-core/src/client/queries';
+import q, { runQuery, pagedQuery } from '@actual-app/loot-core/src/client/query-helpers';
+import { queryContext } from '@actual-app/loot-core/src/client/query-hooks';
+import { SelectedItemsButton } from '@actual-app/loot-design/src/components/table';
+import { Query } from '@actual-app/loot-core/src/shared/query';
+import * as aql from '@actual-app/loot-core/src/client/query-helpers';
 import {
   deleteTransaction,
   updateTransaction,
   ungroupTransactions
-} from 'loot-core/src/shared/transactions';
+} from '@actual-app/loot-core/src/shared/transactions';
 import {
   SplitsExpandedProvider,
   useSplitsExpanded,
   isPreviewId
 } from './TransactionsTable';
-import { styles, colors } from 'loot-design/src/style';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 import TransactionList from './TransactionList';
 import { authorizeBank } from '../../plaid';
 import {
   SelectedProviderWithItems,
   useSelectedItems
-} from 'loot-design/src/components/useSelected';
-import { keys } from 'loot-design/src/util/keys';
-import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
+} from '@actual-app/loot-design/src/components/useSelected';
+import { keys } from '@actual-app/loot-design/src/util/keys';
+import { KeyHandlers } from '@actual-app/loot-design/src/components/KeyHandlers';
 import { FilterButton, AppliedFilters } from './Filters';
 import {
   SchedulesProvider,
   useCachedSchedules
-} from 'loot-core/src/client/data-hooks/schedules';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+} from '@actual-app/loot-core/src/client/data-hooks/schedules';
+import { getPayeesById } from '@actual-app/loot-core/src/client/reducers/queries';
 import { useActiveLocation } from '../ActiveLocation';
 
 function EmptyMessage({ onAdd }) {

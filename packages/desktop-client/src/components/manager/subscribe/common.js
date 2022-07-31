@@ -6,9 +6,9 @@ import {
   Button,
   ButtonLink,
   Input as BaseInput
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
+} from '@actual-app/loot-design/src/components/common';
+import { colors, styles } from '@actual-app/loot-design/src/style';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 
 // There are two URLs that dance with each other: `/login` and
 // `/bootstrap`. Both of these URLs check the state of the the server

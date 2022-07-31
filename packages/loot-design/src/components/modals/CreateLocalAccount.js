@@ -1,6 +1,6 @@
 import React from 'react';
-import { toRelaxedNumber } from 'loot-core/src/shared/util';
-import { determineOffBudget } from 'loot-core/src/shared/accounts';
+import { toRelaxedNumber } from '@actual-app/loot-core/src/shared/util';
+import { determineOffBudget } from '@actual-app/loot-core/src/shared/accounts';
 import { styles, colors } from '../../style';
 import {
   View,

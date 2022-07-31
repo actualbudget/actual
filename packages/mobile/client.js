@@ -7,10 +7,10 @@ import {
   bindActionCreators
 } from 'redux';
 import thunk from 'redux-thunk';
-import reducers from 'loot-core/src/client/reducers';
-import constants from 'loot-core/src/client/constants';
-import * as actions from 'loot-core/src/client/actions';
-import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
+import reducers from '@actual-app/loot-core/src/client/reducers';
+import constants from '@actual-app/loot-core/src/client/constants';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { initialState as initialAppState } from '@actual-app/loot-core/src/client/reducers/app';
 import { handleGlobalEvents } from './client-global-events';
 import App from './src/components/App';
 

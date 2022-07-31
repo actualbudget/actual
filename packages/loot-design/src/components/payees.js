@@ -19,7 +19,7 @@ import {
 } from './common';
 import memoizeOne from 'memoize-one';
 import Component from '@reactions/component';
-import { groupById } from 'loot-core/src/shared/util';
+import { groupById } from '@actual-app/loot-core/src/shared/util';
 import { colors } from '../style';
 import {
   Table,

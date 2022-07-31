@@ -2,14 +2,14 @@ import React from 'react';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { View, Text, FlatList, TextInput, NativeModules } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import q from 'loot-core/src/client/query-helpers';
-import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
-import KeyboardAvoidingView from 'loot-design/src/components/mobile/KeyboardAvoidingView';
-import { throwError } from 'loot-core/src/shared/util';
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { ListItem } from 'loot-design/src/components/mobile/table';
-import { colors } from 'loot-design/src/style';
-import Add from 'loot-design/src/svg/v1/Add';
+import q from '@actual-app/loot-core/src/client/query-helpers';
+import FocusAwareStatusBar from '@actual-app/loot-design/src/components/mobile/FocusAwareStatusBar';
+import KeyboardAvoidingView from '@actual-app/loot-design/src/components/mobile/KeyboardAvoidingView';
+import { throwError } from '@actual-app/loot-core/src/shared/util';
+import { useLiveQuery } from '@actual-app/loot-core/src/client/query-hooks';
+import { ListItem } from '@actual-app/loot-design/src/components/mobile/table';
+import { colors } from '@actual-app/loot-design/src/style';
+import Add from '@actual-app/loot-design/src/svg/v1/Add';
 
 const queries = {
   payees: q('payees').select('*'),

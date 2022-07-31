@@ -4,8 +4,8 @@ import {
   Text,
   AnchorLink,
   Button
-} from 'loot-design/src/components/common';
-import { send } from 'loot-core/src/platform/client/fetch';
+} from '@actual-app/loot-design/src/components/common';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 
 export default function ServerURL() {
   let [url, setUrl] = useState(null);

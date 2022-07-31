@@ -16,9 +16,9 @@ import {
   toRelaxedNumber,
   amountToCurrency,
   getNumberFormat
-} from 'loot-core/src/shared/util';
+} from '@actual-app/loot-core/src/shared/util';
 import MathIcon from '../../svg/Math';
-import Platform from 'loot-core/src/client/platform';
+import Platform from '@actual-app/loot-core/src/client/platform';
 import Add from '../../svg/v1/Add';
 import Subtract from '../../svg/v1/Subtract';
 import Equals from '../../svg/v1/Equals';

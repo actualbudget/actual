@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { css } from 'glamor';
 import Component from '@reactions/component';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { rolloverBudget } from 'loot-core/src/client/queries';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import { rolloverBudget } from '@actual-app/loot-core/src/client/queries';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import format from '../../spreadsheet/format';
 import SheetValue from '../../spreadsheet/SheetValue';

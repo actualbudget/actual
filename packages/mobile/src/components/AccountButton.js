@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Linking, Platform } from 'react-native';
 import { connect } from 'react-redux';
 import Purchases from 'react-native-purchases';
-import * as actions from 'loot-core/src/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 import {
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/mobile/common';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
-import { once } from 'loot-core/src/shared/async';
-import { captureException } from 'loot-core/src/platform/exceptions';
-import { colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/mobile/common';
+import Loading from '@actual-app/loot-design/src/svg/v1/AnimatedLoading';
+import { once } from '@actual-app/loot-core/src/shared/async';
+import { captureException } from '@actual-app/loot-core/src/platform/exceptions';
+import { colors } from '@actual-app/loot-design/src/style';
 import { setupPurchases, getOfferings, purchase, restore } from '../util/iap';
 
 function ExternalLink({ href, children }) {

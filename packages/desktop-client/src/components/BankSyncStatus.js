@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
-import * as actions from 'loot-core/src/client/actions';
-import { View, Text } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { View, Text } from '@actual-app/loot-design/src/components/common';
+import { colors, styles } from '@actual-app/loot-design/src/style';
 import AnimatedRefresh from './AnimatedRefresh';
 
 function BankSyncStatus({ accountsSyncing }) {

@@ -164,7 +164,7 @@ function transformContents(name, contents, isReactNative) {
 
   // prettier-ignore
   const reactNativeImport = `
-    import {${reactNativeTags.join(', ')}} from 'mobile/node_modules/react-native-svg'
+    import {${reactNativeTags.join(', ')}} from '@actual-app/mobile/node_modules/react-native-svg'
   `;
 
   output = `

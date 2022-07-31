@@ -1,14 +1,14 @@
 import React from 'react';
-import { colors, styles } from 'loot-design/src/style';
+import { colors, styles } from '@actual-app/loot-design/src/style';
 import {
   View,
   Select,
   Link,
   Button,
   ButtonLink
-} from 'loot-design/src/components/common';
-import * as monthUtils from 'loot-core/src/shared/months';
-import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
+} from '@actual-app/loot-design/src/components/common';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import ArrowLeft from '@actual-app/loot-design/src/svg/v1/ArrowLeft';
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;

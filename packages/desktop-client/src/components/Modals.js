@@ -4,27 +4,27 @@ import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 import { createLocation } from 'history';
 import Component from '@reactions/component';
-import * as actions from 'loot-core/src/client/actions';
-import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { send, listen, unlisten } from '@actual-app/loot-core/src/platform/client/fetch';
 import { getModalRoute } from '../util';
 
 import CreateAccount from './modals/CreateAccount';
-import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
-import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
-import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
-import ConfigureLinkedAccounts from 'loot-design/src/components/modals/ConfigureLinkedAccounts';
-import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
+import CreateLocalAccount from '@actual-app/loot-design/src/components/modals/CreateLocalAccount';
+import CloseAccount from '@actual-app/loot-design/src/components/modals/CloseAccount';
+import SelectLinkedAccounts from '@actual-app/loot-design/src/components/modals/SelectLinkedAccounts';
+import ConfigureLinkedAccounts from '@actual-app/loot-design/src/components/modals/ConfigureLinkedAccounts';
+import LoadBackup from '@actual-app/loot-design/src/components/modals/LoadBackup';
 import ManagePayeesWithData from './payees/ManagePayeesWithData';
 import ManageRules from './modals/ManageRules';
 import EditRule from './modals/EditRule';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
+import PlaidExternalMsg from '@actual-app/loot-design/src/components/modals/PlaidExternalMsg';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import WelcomeScreen from './modals/WelcomeScreen';
-import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
+import ImportTransactions from '@actual-app/loot-design/src/components/modals/ImportTransactions';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
 import FixEncryptionKey from './modals/FixEncryptionKey';
-import EditField from 'loot-design/src/components/modals/EditField';
+import EditField from '@actual-app/loot-design/src/components/modals/EditField';
 
 function Modals({
   history,

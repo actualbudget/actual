@@ -1,7 +1,7 @@
 let fs = require('fs');
 let path = require('path');
 let electron = require('electron');
-let backend = require('loot-core/lib-dist/bundle.desktop.js');
+let backend = require('@actual-app/loot-core/lib-dist/bundle.desktop.js');
 
 function loadState() {
   let state = {};

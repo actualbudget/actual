@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import { Button } from 'loot-design/src/components/mobile/common';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
 import { RectButton } from 'react-native-gesture-handler';
 import Modal, { CloseButton } from './Modal';
 import {
@@ -12,9 +12,9 @@ import {
   TapField,
   EDITING_PADDING,
   FIELD_HEIGHT
-} from 'loot-design/src/components/mobile/forms';
-import { toRelaxedNumber } from 'loot-core/src/shared/util';
-import { colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/mobile/forms';
+import { toRelaxedNumber } from '@actual-app/loot-core/src/shared/util';
+import { colors } from '@actual-app/loot-design/src/style';
 
 let accountTypes = [
   { value: 'checking', label: 'Checking' },

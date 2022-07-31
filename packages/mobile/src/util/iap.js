@@ -1,5 +1,5 @@
 import Purchases from 'react-native-purchases';
-import { captureException } from 'loot-core/src/platform/exceptions';
+import { captureException } from '@actual-app/loot-core/src/platform/exceptions';
 
 // This should stay in sync with the enum in RCPurchasesErrors.h
 function RCPurchasesErrorDescription(code) {

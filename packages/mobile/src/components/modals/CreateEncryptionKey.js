@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import { View, Text, Linking } from 'react-native';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import {
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/mobile/common';
+} from '@actual-app/loot-design/src/components/mobile/common';
 import {
   FieldLabel,
   InputField
-} from 'loot-design/src/components/mobile/forms';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { mobileStyles as styles, colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/mobile/forms';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { mobileStyles as styles, colors } from '@actual-app/loot-design/src/style';
 import Modal from '../modals/Modal';
-import { getCreateKeyError } from 'loot-core/src/shared/errors';
+import { getCreateKeyError } from '@actual-app/loot-core/src/shared/errors';
 
 let textStyle = styles.text;
 

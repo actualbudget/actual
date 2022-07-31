@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { colors } from '../../style';
-import Platform from 'loot-core/src/client/platform';
+import Platform from '@actual-app/loot-core/src/client/platform';
 
 export const ROW_HEIGHT = 50;
 

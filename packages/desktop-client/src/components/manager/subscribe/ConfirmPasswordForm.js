@@ -3,7 +3,7 @@ import {
   View,
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/common';
+} from '@actual-app/loot-design/src/components/common';
 import { Input } from './common';
 
 export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {

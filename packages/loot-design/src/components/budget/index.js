@@ -22,7 +22,7 @@ import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';
 import ArrowThinRight from '../../svg/v1/ArrowThinRight';
 import ExpandArrow from '../../svg/ExpandArrow';
 import CheveronDown from '../../svg/v1/CheveronDown';
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 import { separateGroups, findSortDown, findSortUp } from './util';
 import { MonthsProvider, MonthsContext } from './MonthsContext';
 import NotesButton from '../NotesButton';

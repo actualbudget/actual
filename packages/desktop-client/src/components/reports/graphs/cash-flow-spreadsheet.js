@@ -1,9 +1,9 @@
 import React from 'react';
-import * as monthUtils from 'loot-core/src/shared/months';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 import * as d from 'date-fns';
-import { AlignedText } from 'loot-design/src/components/common';
-import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
-import q from 'loot-core/src/client/query-helpers';
+import { AlignedText } from '@actual-app/loot-design/src/components/common';
+import { integerToCurrency, integerToAmount } from '@actual-app/loot-core/src/shared/util';
+import q from '@actual-app/loot-core/src/client/query-helpers';
 import { fromDateRepr, fromDateReprToDay, runAll, index } from '../util';
 
 export function simpleCashFlow(start, end) {

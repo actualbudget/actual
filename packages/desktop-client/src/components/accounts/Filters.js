@@ -6,9 +6,9 @@ import {
   format as formatDate,
   isValid as isDateValid
 } from 'date-fns';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { getMonthYearFormat } from 'loot-core/src/shared/months';
-import { titleFirst } from 'loot-core/src/shared/util';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { getMonthYearFormat } from '@actual-app/loot-core/src/shared/months';
+import { titleFirst } from '@actual-app/loot-core/src/shared/util';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import {
   InitialFocus,
   Menu,
   CustomSelect
-} from 'loot-design/src/components/common';
+} from '@actual-app/loot-design/src/components/common';
 import {
   mapField,
   friendlyOp,
@@ -28,12 +28,12 @@ import {
   makeValue,
   FIELD_TYPES,
   TYPE_INFO
-} from 'loot-core/src/shared/rules';
-import DeleteIcon from 'loot-design/src/svg/Delete';
-import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
+} from '@actual-app/loot-core/src/shared/rules';
+import DeleteIcon from '@actual-app/loot-design/src/svg/Delete';
+import SettingsSliderAlternate from '@actual-app/loot-design/src/svg/v2/SettingsSliderAlternate';
 import GenericInput from '../util/GenericInput';
 import { Value } from '../modals/ManageRules';
-import { styles, colors } from 'loot-design/src/style';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 
 let filterFields = [
   'date',

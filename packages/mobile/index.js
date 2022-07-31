@@ -6,7 +6,7 @@ import './sentry';
 import { AppRegistry } from 'react-native';
 import AppRoot from './client';
 import VersionNumber from 'react-native-version-number';
-import * as clientFetch from 'loot-core/src/platform/client/fetch';
+import * as clientFetch from '@actual-app/loot-core/src/platform/client/fetch';
 import nodejs from 'nodejs-mobile-react-native';
 import RNFetchBlob from 'rn-fetch-blob';
 

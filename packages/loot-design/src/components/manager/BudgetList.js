@@ -5,10 +5,10 @@ import CloudCheck from '../../svg/v1/CloudCheck';
 import CloudDownload from '../../svg/v1/CloudDownload';
 import CloudUnknown from '../../svg/v2/CloudUnknown';
 import FileDouble from '../../svg/v1/FileDouble';
-import Key from 'loot-design/src/svg/v2/Key';
+import Key from '@actual-app/loot-design/src/svg/v2/Key';
 import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
-import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
+import RefreshArrow from '@actual-app/loot-design/src/svg/v2/RefreshArrow';
+import Loading from '@actual-app/loot-design/src/svg/v1/AnimatedLoading';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {

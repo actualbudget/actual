@@ -1,21 +1,21 @@
 import React, { useEffect, useState, useReducer } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { pushModal } from 'loot-core/src/client/actions/modals';
+import { pushModal } from '@actual-app/loot-core/src/client/actions/modals';
 import { css } from 'glamor';
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
-import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
-import { extractScheduleConds } from 'loot-core/src/shared/schedules';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
+import { send, sendCatch } from '@actual-app/loot-core/src/platform/client/fetch';
+import q, { runQuery, liveQuery } from '@actual-app/loot-core/src/client/query-helpers';
+import { extractScheduleConds } from '@actual-app/loot-core/src/shared/schedules';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import { useCachedPayees } from '@actual-app/loot-core/src/client/data-hooks/payees';
 import {
   FormField,
   FormLabel,
   Checkbox
-} from 'loot-design/src/components/forms';
-import { colors, styles } from 'loot-design/src/style';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
+} from '@actual-app/loot-design/src/components/forms';
+import { colors, styles } from '@actual-app/loot-design/src/style';
+import PayeeAutocomplete from '@actual-app/loot-design/src/components/PayeeAutocomplete';
+import AccountAutocomplete from '@actual-app/loot-design/src/components/AccountAutocomplete';
 import {
   Stack,
   Input,
@@ -24,20 +24,20 @@ import {
   Text,
   Button,
   ModalButtons
-} from 'loot-design/src/components/common';
-import DateSelect from 'loot-design/src/components/DateSelect';
-import { SelectedItemsButton } from 'loot-design/src/components/table';
+} from '@actual-app/loot-design/src/components/common';
+import DateSelect from '@actual-app/loot-design/src/components/DateSelect';
+import { SelectedItemsButton } from '@actual-app/loot-design/src/components/table';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { usePageType } from '../Page';
 import { Page } from '../Page';
 import useSelected, {
   SelectedProvider
-} from 'loot-design/src/components/useSelected';
+} from '@actual-app/loot-design/src/components/useSelected';
 import { OpSelect } from '../modals/EditRule';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
-import { SchedulesProviderRaw } from 'loot-core/src/client/data-hooks/schedules';
+import { SchedulesProviderRaw } from '@actual-app/loot-core/src/client/data-hooks/schedules';
 
-import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
+import RecurringSchedulePicker from '@actual-app/loot-design/src/components/RecurringSchedulePicker';
 
 function mergeFields(defaults, initial) {
   let res = { ...defaults };

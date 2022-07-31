@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Tooltip, Pointer, P } from 'loot-design/src/components/common';
+import { View, Tooltip, Pointer, P } from '@actual-app/loot-design/src/components/common';
 import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { styles, colors } from '@actual-app/loot-design/src/style';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
 import { Standalone, Title } from './common';
 
 function TransactionEnter({ fromYNAB, navigationProps }) {

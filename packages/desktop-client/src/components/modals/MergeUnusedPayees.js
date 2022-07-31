@@ -8,11 +8,11 @@ import {
   Button,
   P,
   Stack
-} from 'loot-design/src/components/common';
-import { Information } from 'loot-design/src/components/alerts';
-import { colors, styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { replaceModal } from 'loot-core/src/client/actions/modals';
+} from '@actual-app/loot-design/src/components/common';
+import { Information } from '@actual-app/loot-design/src/components/alerts';
+import { colors, styles } from '@actual-app/loot-design/src/style';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { replaceModal } from '@actual-app/loot-core/src/client/actions/modals';
 
 let highlightStyle = { color: colors.p5 };
 

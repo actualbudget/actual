@@ -4,9 +4,9 @@ import { connectActionSheet } from '@expo/react-native-action-sheet';
 import { connect } from 'react-redux';
 import { CommonActions } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from 'loot-design/src/components/mobile/common';
-import { colors } from 'loot-design/src/style';
-import Key from 'loot-design/src/svg/v2/Key';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
+import { colors } from '@actual-app/loot-design/src/style';
+import Key from '@actual-app/loot-design/src/svg/v2/Key';
 
 function UserButton({
   navigation,

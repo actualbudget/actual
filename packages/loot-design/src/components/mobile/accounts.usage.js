@@ -1,13 +1,13 @@
 import React from 'react';
 import { MobileSection } from '../../guide/components';
 import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
-import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
+import makeSpreadsheet from '@actual-app/loot-core/src/mocks/spreadsheet';
 import { AccountList } from './accounts';
 import {
   generateAccount,
   generateCategory,
   generateTransaction
-} from 'loot-core/src/mocks';
+} from '@actual-app/loot-core/src/mocks';
 
 export const accounts = [
   generateAccount('Bank of America', false, null, false),

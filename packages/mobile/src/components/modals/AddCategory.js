@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import { Button } from 'loot-design/src/components/mobile/common';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
 import Modal from './Modal';
 import {
   FieldLabel,
   InputField
-} from 'loot-design/src/components/mobile/forms';
+} from '@actual-app/loot-design/src/components/mobile/forms';
 
 class AddCategory extends React.Component {
   state = { name: '' };

@@ -2,19 +2,19 @@ import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import Component from '@reactions/component';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as actions from 'loot-core/src/client/actions';
-import { View } from 'loot-design/src/components/common';
-import BudgetList from 'loot-design/src/components/manager/BudgetList';
-import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
-import Import from 'loot-design/src/components/manager/Import';
-import ImportYNAB4 from 'loot-design/src/components/manager/ImportYNAB4';
-import ImportYNAB5 from 'loot-design/src/components/manager/ImportYNAB5';
-import ImportActual from 'loot-design/src/components/manager/ImportActual';
-import DeleteFile from 'loot-design/src/components/manager/DeleteFile';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { View } from '@actual-app/loot-design/src/components/common';
+import BudgetList from '@actual-app/loot-design/src/components/manager/BudgetList';
+import LoadBackup from '@actual-app/loot-design/src/components/modals/LoadBackup';
+import Import from '@actual-app/loot-design/src/components/manager/Import';
+import ImportYNAB4 from '@actual-app/loot-design/src/components/manager/ImportYNAB4';
+import ImportYNAB5 from '@actual-app/loot-design/src/components/manager/ImportYNAB5';
+import ImportActual from '@actual-app/loot-design/src/components/manager/ImportActual';
+import DeleteFile from '@actual-app/loot-design/src/components/manager/DeleteFile';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
-import { colors } from 'loot-design/src/style';
+import { colors } from '@actual-app/loot-design/src/style';
 
 function Modals({
   modalStack,

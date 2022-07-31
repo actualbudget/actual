@@ -17,7 +17,7 @@ import {
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex
-} from 'loot-core/src/shared/months';
+} from '@actual-app/loot-core/src/shared/months';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import * as undo from 'loot-core/src/platform/client/undo';
-import uuid from 'loot-core/src/platform/uuid';
-import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import { ManagePayees } from 'loot-design/src/components/payees';
-import { applyChanges } from 'loot-core/src/shared/util';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import * as undo from '@actual-app/loot-core/src/platform/client/undo';
+import uuid from '@actual-app/loot-core/src/platform/uuid';
+import { send, listen, unlisten } from '@actual-app/loot-core/src/platform/client/fetch';
+import { ManagePayees } from '@actual-app/loot-design/src/components/payees';
+import { applyChanges } from '@actual-app/loot-core/src/shared/util';
 
 function ManagePayeesWithData({
   history,

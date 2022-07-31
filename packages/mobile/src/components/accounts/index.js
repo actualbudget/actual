@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, RefreshControl } from 'react-native';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import { AccountList } from 'loot-design/src/components/mobile/accounts';
-import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
-import * as queries from 'loot-core/src/client/queries';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { AccountList } from '@actual-app/loot-design/src/components/mobile/accounts';
+import FocusAwareStatusBar from '@actual-app/loot-design/src/components/mobile/FocusAwareStatusBar';
+import * as queries from '@actual-app/loot-core/src/client/queries';
 import SyncRefresh from '../SyncRefresh';
 class Accounts extends React.Component {
   state = { transactions: [] };

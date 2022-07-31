@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { css } from 'glamor';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import q from 'loot-core/src/client/query-helpers';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { useLiveQuery } from '@actual-app/loot-core/src/client/query-hooks';
+import q from '@actual-app/loot-core/src/client/query-helpers';
 import { View, Button, Tooltip, useTooltip } from './common';
 import CustomNotesPaper from '../svg/v2/CustomNotesPaper';
 import { colors } from '../style';

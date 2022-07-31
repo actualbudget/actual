@@ -6,8 +6,8 @@ import {
   P,
   ModalButtons,
   Button
-} from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/common';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 import { Standalone, Title, ExternalLink } from './common';
 
 function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {

@@ -5,16 +5,16 @@ import { connect } from 'react-redux';
 import {
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/mobile/common';
+} from '@actual-app/loot-design/src/components/mobile/common';
 import {
   FieldLabel,
   InputField
-} from 'loot-design/src/components/mobile/forms';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as actions from 'loot-core/src/client/actions';
-import { styles, colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/mobile/forms';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { styles, colors } from '@actual-app/loot-design/src/style';
 import Modal from '../modals/Modal';
-import { getDownloadError, getTestKeyError } from 'loot-core/src/shared/errors';
+import { getDownloadError, getTestKeyError } from '@actual-app/loot-core/src/shared/errors';
 
 function ExternalLink({ href, children }) {
   return (

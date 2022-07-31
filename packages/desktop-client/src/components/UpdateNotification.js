@@ -1,16 +1,16 @@
 import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import {
   View,
   Text,
   Block,
   Link,
   Button
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import Close from 'loot-design/src/svg/v1/Close';
+} from '@actual-app/loot-design/src/components/common';
+import { colors } from '@actual-app/loot-design/src/style';
+import Close from '@actual-app/loot-design/src/svg/v1/Close';
 
 function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session

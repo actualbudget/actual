@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
+import * as actions from '@actual-app/loot-core/src/client/actions';
 import { View, Text, Linking } from 'react-native';
 import {
   Button,
   ButtonWithLoading
-} from 'loot-design/src/components/mobile/common';
-import Stack from 'loot-design/src/components/Stack';
-import Delete from 'loot-design/src/svg/Delete';
-import { mobileStyles as styles, colors } from 'loot-design/src/style';
+} from '@actual-app/loot-design/src/components/mobile/common';
+import Stack from '@actual-app/loot-design/src/components/Stack';
+import Delete from '@actual-app/loot-design/src/svg/Delete';
+import { mobileStyles as styles, colors } from '@actual-app/loot-design/src/style';
 
 function compileMessage(message, actions, color, setLoading, onRemove) {
   return (

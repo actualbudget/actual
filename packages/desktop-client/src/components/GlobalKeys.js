@@ -1,6 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
-import Platform from 'loot-core/src/client/platform';
+import Platform from '@actual-app/loot-core/src/client/platform';
 
 class GlobalKeys extends React.Component {
   componentDidMount() {

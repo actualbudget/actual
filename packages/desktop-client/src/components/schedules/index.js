@@ -6,11 +6,11 @@ import {
   Button,
   Tooltip,
   Menu
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
+} from '@actual-app/loot-design/src/components/common';
+import { colors, styles } from '@actual-app/loot-design/src/style';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 import { Page } from '../Page';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { useSchedules } from '@actual-app/loot-core/src/client/data-hooks/schedules';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {

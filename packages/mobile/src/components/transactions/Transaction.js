@@ -3,14 +3,14 @@ import { connect } from 'react-redux';
 import { View } from 'react-native';
 import { bindActionCreators } from 'redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as actions from 'loot-core/src/client/actions';
-import * as monthUtils from 'loot-core/src/shared/months';
-import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
-import { TransactionEdit } from 'loot-design/src/components/mobile/transaction';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import FocusAwareStatusBar from '@actual-app/loot-design/src/components/mobile/FocusAwareStatusBar';
+import { TransactionEdit } from '@actual-app/loot-design/src/components/mobile/transaction';
 import ChildEdit from './ChildEdit';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { getChangedValues, diffItems } from 'loot-core/src/shared/util';
-import { colors } from 'loot-design/src/style';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { getChangedValues, diffItems } from '@actual-app/loot-core/src/shared/util';
+import { colors } from '@actual-app/loot-design/src/style';
 
 function isTemporary(transaction) {
   return transaction.id.indexOf('temp') === 0;

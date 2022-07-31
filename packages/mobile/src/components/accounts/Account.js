@@ -5,23 +5,23 @@ import { bindActionCreators } from 'redux';
 import debounce from 'debounce';
 import memoizeOne from 'memoize-one';
 import { connectActionSheet } from '@expo/react-native-action-sheet';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import * as actions from 'loot-core/src/client/actions';
-import { AccountDetails } from 'loot-design/src/components/mobile/account';
-import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
-import * as queries from 'loot-core/src/client/queries';
-import { pagedQuery } from 'loot-core/src/client/query-helpers';
+import { send, listen } from '@actual-app/loot-core/src/platform/client/fetch';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import { AccountDetails } from '@actual-app/loot-design/src/components/mobile/account';
+import FocusAwareStatusBar from '@actual-app/loot-design/src/components/mobile/FocusAwareStatusBar';
+import * as queries from '@actual-app/loot-core/src/client/queries';
+import { pagedQuery } from '@actual-app/loot-core/src/client/query-helpers';
 
 import {
   getSplit,
   ungroupTransactions
-} from 'loot-core/src/shared/transactions';
+} from '@actual-app/loot-core/src/shared/transactions';
 import SyncRefresh from '../SyncRefresh';
 import {
   SchedulesProvider,
   useCachedSchedules
-} from 'loot-core/src/client/data-hooks/schedules';
-import { isPreviewId } from 'loot-design/src/components/mobile/transaction';
+} from '@actual-app/loot-core/src/client/data-hooks/schedules';
+import { isPreviewId } from '@actual-app/loot-design/src/components/mobile/transaction';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');

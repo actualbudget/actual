@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import Cell from 'loot-design/src/components/spreadsheet/Cell';
-import { View } from 'loot-design/src/components/common';
+import Cell from '@actual-app/loot-design/src/components/spreadsheet/Cell';
+import { View } from '@actual-app/loot-design/src/components/common';
 
 function SpreadsheetInterface() {
   return (

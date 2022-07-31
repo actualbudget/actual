@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'loot-design/src/components/common';
+import { View } from '@actual-app/loot-design/src/components/common';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 class Container extends React.Component {

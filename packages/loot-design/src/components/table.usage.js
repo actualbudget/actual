@@ -8,7 +8,7 @@ import {
   InputCell,
   useTableNavigator
 } from './table';
-let uuid = require('loot-core/src/platform/uuid');
+let uuid = require('@actual-app/loot-core/src/platform/uuid');
 
 function PersonRow({ person, editing, focusedField, onEdit, onUpdate }) {
   let { id } = person;

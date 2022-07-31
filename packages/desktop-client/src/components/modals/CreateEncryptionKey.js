@@ -12,10 +12,10 @@ import {
   ModalButtons,
   Input,
   InitialFocus
-} from 'loot-design/src/components/common';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { styles, colors } from 'loot-design/src/style';
-import { getCreateKeyError } from 'loot-core/src/shared/errors';
+} from '@actual-app/loot-design/src/components/common';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
+import { styles, colors } from '@actual-app/loot-design/src/style';
+import { getCreateKeyError } from '@actual-app/loot-core/src/shared/errors';
 
 export default function CreateEncryptionKey({
   modalProps,

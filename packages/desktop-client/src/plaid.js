@@ -1,4 +1,4 @@
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 
 function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
   pushModal('plaid-external-msg', {

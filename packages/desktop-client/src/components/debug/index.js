@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send } from '@actual-app/loot-core/src/platform/client/fetch';
 
 const Container = styled.div`
   width: 100%;

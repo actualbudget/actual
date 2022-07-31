@@ -1,7 +1,7 @@
 let path = require('path');
 let rn_bridge = require('rn-bridge');
 let Sentry = require('@sentry/node');
-// const connection = require('loot-core/lib-node/platform/server/connection');
+// const connection = require('@actual-app/loot-core/lib-node/platform/server/connection');
 
 let __rootdir__ = __dirname || process.cwd();
 

@@ -1,8 +1,8 @@
 import React from 'react';
-import { TestProvider } from 'loot-core/src/mocks/redux';
+import { TestProvider } from '@actual-app/loot-core/src/mocks/redux';
 import { Section, TestModal } from '../../guide/components';
 import { ImportTransactions } from './ImportTransactions';
-import { generateTransactions } from 'loot-core/src/mocks';
+import { generateTransactions } from '@actual-app/loot-core/src/mocks';
 
 let transactions = generateTransactions(20, 'acct', 'group');
 // The mocks generate "internal" transactions... but we need the

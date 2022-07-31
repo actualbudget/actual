@@ -4,10 +4,10 @@ import { MobileScreen } from '../../guide/components';
 import { categories, categoryGroups } from './budget.usage';
 import { BudgetTable, BudgetAccessoryView } from './budget';
 import InputAccessoryView from './InputAccessoryView';
-import { debugDOM } from 'loot-core/src/mocks/util';
+import { debugDOM } from '@actual-app/loot-core/src/mocks/util';
 import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
-import * as monthUtils from 'loot-core/src/shared/months';
-import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
+import * as monthUtils from '@actual-app/loot-core/src/shared/months';
+import makeSpreadsheet from '@actual-app/loot-core/src/mocks/spreadsheet';
 
 function makeLoadedSpreadsheet() {
   let spreadsheet = makeSpreadsheet();

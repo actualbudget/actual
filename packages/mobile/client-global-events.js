@@ -1,5 +1,5 @@
-import { listen } from 'loot-core/src/platform/client/fetch';
-import * as sharedListeners from 'loot-core/src/client/shared-listeners';
+import { listen } from '@actual-app/loot-core/src/platform/client/fetch';
+import * as sharedListeners from '@actual-app/loot-core/src/client/shared-listeners';
 import { invalidatePurchaserInfoCache } from './src/util/iap';
 
 export function handleGlobalEvents(actions, store) {

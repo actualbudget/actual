@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { connect } from 'react-redux';
-import * as actions from 'loot-core/src/client/actions';
-import Stack from 'loot-design/src/components/Stack';
-import { Button } from 'loot-design/src/components/mobile/common';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import * as actions from '@actual-app/loot-core/src/client/actions';
+import Stack from '@actual-app/loot-design/src/components/Stack';
+import { Button } from '@actual-app/loot-design/src/components/mobile/common';
+import { colors, mobileStyles as styles } from '@actual-app/loot-design/src/style';
 
 let buttonTextStyle = [
   styles.text,
