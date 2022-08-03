@@ -22,6 +22,7 @@ if [ $NODE_ENV == 'development' ]; then
   # Make sure to do this before starting the build since watch mode
   # will block
   WEBPACK_ARGS="$WEBPACK_ARGS --watch"
+  export MSYS=winsymlinks:nativestrict
   ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
 fi
 
