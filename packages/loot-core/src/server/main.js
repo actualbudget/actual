@@ -1496,6 +1496,24 @@ handlers['subscribe-sign-out'] = async function() {
   return 'ok';
 };
 
+handlers['get-server-version'] = async function() {
+  if (!getServer() || getServer().BASE_SERVER === UNCONFIGURED_SERVER) {
+    return { error: 'no-server' };
+  }
+
+  let version;
+  try {
+    const res = await get(getServer().BASE_SERVER + '/info');
+
+    const info = JSON.parse(res);
+    version = info.build.version;
+  } catch (err) {
+    return { error: 'network-failure' };
+  }
+
+  return { version };
+};
+
 handlers['get-server-url'] = async function() {
   return getServer() && getServer().BASE_SERVER;
 };
@@ -1834,6 +1852,41 @@ handlers['import-budget'] = async function({ filepath, type }) {
         } catch (e) {
           return { error: 'not-ynab5' };
         }
+        break;
+      case 'actual':
+        // We should pull out import/export into its own app so this
+        // can be abstracted out better. Importing Actual files is a
+        // special case because we can directly write down the files,
+        // but because it doesn't go through the API layer we need to
+        // duplicate some of the workflow
+        await handlers['close-budget']();
+
+        let { id } = await cloudStorage.importBuffer(
+          { cloudFileId: null, groupId: null },
+          buffer
+        );
+
+        // We never want to load cached data from imported files, so
+        // delete the cache
+        let sqliteDb = await sqlite.openDatabase(
+          fs.join(fs.getBudgetDir(id), 'db.sqlite')
+        );
+        sqlite.execQuery(
+          sqliteDb,
+          `
+          DELETE FROM kvcache;
+          DELETE FROM kvcache_key;
+        `
+        );
+        sqlite.closeDatabase(sqliteDb);
+
+        // Load the budget, force everything to be computed, and try
+        // to upload it as a cloud file
+        await handlers['load-budget']({ id });
+        await handlers['get-budget-bounds']();
+        await sheet.waitOnSpreadsheet();
+        await cloudStorage.upload().catch(err => {});
+
         break;
       default:
     }

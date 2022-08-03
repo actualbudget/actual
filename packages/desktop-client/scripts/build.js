@@ -22,11 +22,11 @@ const webpack = require('webpack');
 const bfj = require('bfj');
 const configFactory = require('../config/webpack.config');
 const paths = require('../config/paths');
-const checkRequiredFiles = require('jwl-dev-utils/checkRequiredFiles');
-const formatWebpackMessages = require('jwl-dev-utils/formatWebpackMessages');
-const printHostingInstructions = require('jwl-dev-utils/printHostingInstructions');
-const FileSizeReporter = require('jwl-dev-utils/FileSizeReporter');
-const printBuildError = require('jwl-dev-utils/printBuildError');
+const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
+const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
+const printHostingInstructions = require('react-dev-utils/printHostingInstructions');
+const FileSizeReporter = require('react-dev-utils/FileSizeReporter');
+const printBuildError = require('react-dev-utils/printBuildError');
 
 const measureFileSizesBeforeBuild =
   FileSizeReporter.measureFileSizesBeforeBuild;
@@ -53,7 +53,7 @@ const config = configFactory('production');
 
 // We require that you explicitly set browsers and do not fall back to
 // browserslist defaults.
-const { checkBrowsers } = require('jwl-dev-utils/browsersHelper');
+const { checkBrowsers } = require('react-dev-utils/browsersHelper');
 checkBrowsers(paths.appPath, isInteractive)
   .then(() => {
     // First, read the current file sizes in build directory.

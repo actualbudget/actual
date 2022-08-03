@@ -37,6 +37,9 @@ function Import({ modalProps, actions, availableImports }) {
       case 'ynab5':
         actions.pushModal('import-ynab5');
         break;
+      case 'actual':
+        actions.pushModal('import-actual');
+        break;
       default:
     }
   }
@@ -83,14 +86,12 @@ function Import({ modalProps, actions, availableImports }) {
                   <div>The newer web app</div>
                 </View>
               </Button>
-              {false && (
-                <Button style={itemStyle}>
-                  <span style={{ fontWeight: 700 }}>Actual</span>
-                  <View style={{ color: colors.n5 }}>
-                    <div>Import a backup or external file</div>
-                  </View>
-                </Button>
-              )}
+              <Button style={itemStyle} onClick={() => onSelectType('actual')}>
+                <span style={{ fontWeight: 700 }}>Actual</span>
+                <View style={{ color: colors.n5 }}>
+                  <div>Import a file exported from Actual</div>
+                </View>
+              </Button>
             </View>
           </View>
 

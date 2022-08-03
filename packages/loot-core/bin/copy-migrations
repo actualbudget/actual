@@ -10,7 +10,7 @@ $(
   mkdir ./data;
   cp -r ../../loot-core/migrations ./data;
   cp ../../loot-core/default-db.sqlite ./data;
-  cd data && find * -type f > ../data-file-index.txt;
+  cd data && find * -type f | sort > ../data-file-index.txt;
 )
 
 # Copy them to the mobile app

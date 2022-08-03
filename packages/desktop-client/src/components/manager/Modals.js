@@ -10,6 +10,7 @@ import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
 import Import from 'loot-design/src/components/manager/Import';
 import ImportYNAB4 from 'loot-design/src/components/manager/ImportYNAB4';
 import ImportYNAB5 from 'loot-design/src/components/manager/ImportYNAB5';
+import ImportActual from 'loot-design/src/components/manager/ImportActual';
 import DeleteFile from 'loot-design/src/components/manager/DeleteFile';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
@@ -71,6 +72,10 @@ function Modals({
       case 'import-ynab5':
         return (
           <ImportYNAB5 key={name} modalProps={modalProps} actions={actions} />
+        );
+      case 'import-actual':
+        return (
+          <ImportActual key={name} modalProps={modalProps} actions={actions} />
         );
       case 'load-backup': {
         return (

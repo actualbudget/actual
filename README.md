@@ -1,4 +1,3 @@
-
 This is the source code for [Actual](https://actualbudget.com), a local-first personal finance tool. It is 100% free and open-source.
 
 If you are only interested in running the latest version, you don't need this repo. You can get the latest version through npm.
