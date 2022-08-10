@@ -330,7 +330,8 @@ app.get('/download-user-file', async (req, res) => {
 
   let zip = new AdmZip();
   try {
-    zip.addLocalFolder(join(config.userFiles, fileId), '/');
+    zip.addLocalFile(join(config.userFiles, fileId, 'db.sqlite'), '');
+    zip.addLocalFile(join(config.userFiles, fileId, 'metadata.json'), '');
   } catch (e) {
     res.status(500).send('Error reading files');
     return;
