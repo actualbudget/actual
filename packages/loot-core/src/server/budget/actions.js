@@ -419,8 +419,6 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   let got_by = false;
   template_lines = template_lines.filter((template) => {
 
-    debugger;
-
     switch (template.type) {
       case 'by':
       case 'by_annual':
