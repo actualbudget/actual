@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { loggedIn } from 'loot-core/src/client/actions/user';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   AnchorLink,
@@ -23,6 +25,7 @@ export function useBootstrapped() {
   let [checked, setChecked] = useState(false);
   let history = useHistory();
   let location = useLocation();
+  let dispatch = useDispatch();
 
   useEffect(() => {
     async function run() {
@@ -39,9 +42,14 @@ export function useBootstrapped() {
         // A server hasn't been specified yet
         history.push('/config-server');
       } else {
-        let { error, bootstrapped } = await send('subscribe-needs-bootstrap');
+        let { error, bootstrapped, passwordDisabled } = await send('subscribe-needs-bootstrap');
         if (error) {
           history.push('/error', { error });
+        } else if (passwordDisabled) {
+          let { error } = await send('subscribe-sign-in', {});
+          if (!error) {
+            dispatch(loggedIn());
+          }
         } else if (bootstrapped) {
           ensure('/login');
         } else {

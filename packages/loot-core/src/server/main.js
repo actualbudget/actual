@@ -1402,7 +1402,7 @@ handlers['subscribe-needs-bootstrap'] = async function({ url } = {}) {
     return { error: res.reason };
   }
 
-  return { bootstrapped: res.data.bootstrapped };
+  return { bootstrapped: res.data.bootstrapped, passwordDisabled: res.data.passwordDisabled };
 };
 
 handlers['subscribe-bootstrap'] = async function({ password }) {
