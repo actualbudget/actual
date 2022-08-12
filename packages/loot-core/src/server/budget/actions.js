@@ -3,7 +3,7 @@ import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
-import { safeNumber } from './util';
+import { safeNumber } from '../../shared/util';
 
 async function getSheetValue(sheetName, cell) {
   const node = await sheet.getCell(sheetName, cell);
