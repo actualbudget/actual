@@ -6,7 +6,7 @@ let messageQueue = [];
 let replyHandlers = new Map();
 let listeners = new Map();
 
-function init(thread) {
+export function init(thread) {
   serverThread = thread;
 
   serverThread.onmessage = message => {
@@ -57,7 +57,7 @@ function init(thread) {
   };
 }
 
-function send(name, args, { catchErrors = false } = {}) {
+export function send(name, args, { catchErrors = false } = {}) {
   return new Promise((resolve, reject) => {
     const id = uuid.v4Sync();
     replyHandlers.set(id, { resolve, reject });
@@ -70,11 +70,11 @@ function send(name, args, { catchErrors = false } = {}) {
   });
 }
 
-function sendCatch(name, args) {
+export function sendCatch(name, args) {
   return send(name, args, { catchErrors: true });
 }
 
-function listen(name, cb) {
+export function listen(name, cb) {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }
@@ -82,12 +82,13 @@ function listen(name, cb) {
 
   return () => {
     let arr = listeners.get(name);
-    listeners.set(name, arr.filter(cb_ => cb_ !== cb));
+    listeners.set(
+      name,
+      arr.filter(cb_ => cb_ !== cb)
+    );
   };
 }
 
-function unlisten(name) {
+export function unlisten(name) {
   listeners.set(name, []);
 }
-
-export default { init, send, sendCatch, listen, unlisten };

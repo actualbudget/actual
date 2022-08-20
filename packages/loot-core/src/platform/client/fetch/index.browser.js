@@ -129,13 +129,13 @@ function connectWorker(worker, onOpen, onError) {
   }
 }
 
-module.exports.init = async function init(worker) {
+export const init = async function init(worker) {
   return new Promise((resolve, reject) =>
     connectWorker(worker, resolve, reject)
   );
 };
 
-module.exports.send = function send(name, args, { catchErrors = false } = {}) {
+export const send = function send(name, args, { catchErrors = false } = {}) {
   return new Promise((resolve, reject) => {
     uuid.v4().then(id => {
       replyHandlers.set(id, { resolve, reject });
@@ -160,11 +160,11 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
   });
 };
 
-module.exports.sendCatch = function send(name, args) {
-  return module.exports.send(name, args, { catchErrors: true });
+export const sendCatch = function send(name, args) {
+  return send(name, args, { catchErrors: true });
 };
 
-module.exports.listen = function listen(name, cb) {
+export const listen = function listen(name, cb) {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }
@@ -172,10 +172,13 @@ module.exports.listen = function listen(name, cb) {
 
   return () => {
     let arr = listeners.get(name);
-    listeners.set(name, arr.filter(cb_ => cb_ !== cb));
+    listeners.set(
+      name,
+      arr.filter(cb_ => cb_ !== cb)
+    );
   };
 };
 
-module.exports.unlisten = function unlisten(name) {
+export const unlisten = function unlisten(name) {
   listeners.set(name, []);
 };

@@ -12,7 +12,7 @@ import format from '../../spreadsheet/format';
 import CellValue from '../../spreadsheet/CellValue';
 import BalanceWithCarryover from '../BalanceWithCarryover';
 
-export BudgetSummary from './BudgetSummary';
+export { default as BudgetSummary } from './BudgetSummary';
 
 let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
 
