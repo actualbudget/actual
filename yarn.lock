@@ -70,7 +70,6 @@ __metadata:
     "@reactions/component": ^2.0.2
     "@sentry/browser": 6.12.0
     "@svgr/webpack": 2.4.1
-    add: ^2.0.6
     babel-eslint: 9.0.0
     babel-loader: 8.0.4
     babel-preset-jwl-app: 6.1.12
@@ -100,7 +99,6 @@ __metadata:
     html-webpack-plugin: 4.0.0-alpha.2
     identity-obj-proxy: 3.0.0
     load-js: ^3.0.3
-    lodash.memoize: ^4.1.2
     mini-css-extract-plugin: 0.4.3
     mitt: ^1.1.2
     optimize-css-assets-webpack-plugin: 5.0.1
@@ -111,7 +109,6 @@ __metadata:
     postcss-preset-env: 6.3.1
     postcss-safe-parser: 4.0.1
     prop-types: 15.6.0
-    raven-js: ^3.21.0
     react: 16.13.1
     react-addons-shallow-compare: ^15.6.0
     react-app-polyfill: ^0.1.3
@@ -5116,13 +5113,6 @@ __metadata:
     source-map-support: ^0.5.21
   languageName: unknown
   linkType: soft
-
-"add@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "add@npm:2.0.6"
-  checksum: e2d23d40494565dfed4acd65e478570c444db5ac6c053551ed429c39ea0f2c99d83df63e7befec936df601827d2254d06a2fb6f7dcfd2022e810b25eab818b8c
-  languageName: node
-  linkType: hard
 
 "address@npm:^1.0.1":
   version: 1.1.2
@@ -19542,13 +19532,6 @@ jest-snapshot@test:
   version: 1.2.1
   resolution: "range-parser@npm:1.2.1"
   checksum: 0a268d4fea508661cf5743dfe3d5f47ce214fd6b7dec1de0da4d669dd4ef3d2144468ebe4179049eff253d9d27e719c88dae55be64f954e80135a0cada804ec9
-  languageName: node
-  linkType: hard
-
-"raven-js@npm:^3.21.0":
-  version: 3.27.2
-  resolution: "raven-js@npm:3.27.2"
-  checksum: 561291123065f2c68e4e1b13a4e8484bb69240edf92b282f1659cde70ab5da69558778a1f146998a60aabd5b644635d5b5752e4327db54c4b715c6a9c45883f4
   languageName: node
   linkType: hard
 
