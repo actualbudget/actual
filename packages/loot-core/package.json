@@ -45,7 +45,7 @@
   "devDependencies": {
     "@actual-app/api": "*",
     "@actual-app/import-ynab4": "*",
-    "@swc/core": "^1.2.218",
+    "@swc/core": "^1.2.241",
     "@swc/jest": "^0.2.22",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",

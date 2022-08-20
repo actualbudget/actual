@@ -13,7 +13,7 @@
     "@reactions/component": "^2.0.2",
     "@sentry/browser": "6.12.0",
     "@svgr/webpack": "2.4.1",
-    "@swc/core": "^1.2.218",
+    "@swc/core": "^1.2.241",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
     "add": "^2.0.6",
