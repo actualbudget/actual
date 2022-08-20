@@ -52,7 +52,6 @@
     "postcss-loader": "^7.0.1",
     "postcss-normalize": "^10.0.1",
     "postcss-preset-env": "^7.7.2",
-    "postcss-safe-parser": "^6.0.0",
     "prop-types": "15.6.0",
     "raven-js": "^3.21.0",
     "react": "16.13.1",
