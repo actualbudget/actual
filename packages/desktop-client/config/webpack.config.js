@@ -237,15 +237,6 @@ module.exports = function(webpackEnv) {
       runtimeChunk: true
     },
     resolve: {
-      // Some libraries import Node modules but don't use them in the browser.
-      // Tell Webpack to provide empty mocks for them so importing them works.
-      fallback: {
-        dgram: false,
-        fs: false,
-        net: false,
-        tls: false,
-        child_process: false
-      },
       // This allows you to set a fallback for where Webpack should look for modules.
       // We placed these paths second because we want `node_modules` to "win"
       // if there are any conflicts. This matches Node resolution mechanism.
