@@ -1623,7 +1623,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
         e.stopPropagation();
         onAddTemporary();
       } else if (!e.shiftKey) {
-        function getLastTransaction(state) {
+        const getLastTransaction = (state) => {
           let { newTransactions } = state.current;
           return newTransactions[newTransactions.length - 1];
         }

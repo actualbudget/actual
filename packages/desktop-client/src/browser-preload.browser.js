@@ -1,5 +1,5 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-// eslint-disable-next-line import/no-webpack-loader-syntax
+// Rule is unused:  eslint-disable-next-line import/no-webpack-loader-syntax
 import BackendWorker from 'worker-loader!./browser-server';
 
 // This file installs global variables that the app expects.
