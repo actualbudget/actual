@@ -1,10 +1,11 @@
-import Timestamp, {
+import {
   makeClock,
   setClock,
   serializeClock,
   deserializeClock,
-  makeClientId
-} from '../timestamp';
+  makeClientId,
+  Timestamp
+} from '../crdt';
 import { first, runQuery } from './db-actions';
 
 export async function loadClock() {
