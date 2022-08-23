@@ -88,11 +88,7 @@ yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build
 
-
-(
-  cd packages/desktop-electron;
-  yarn update-client
-)
+yarn workspace Actual update-client
 
 if [ -n "$RELEASE" ]; then
   SENTRY_CLI="./packages/desktop-electron/node_modules/.bin/sentry-cli"
