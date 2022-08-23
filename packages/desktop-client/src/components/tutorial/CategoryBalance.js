@@ -5,7 +5,7 @@ import { styles, colors } from 'loot-design/src/style';
 import { Standalone, Title, useMinimized } from './common';
 
 function CategoryBalance({ targetRect, navigationProps }) {
-  let [minimized, toggle] = useMinimized()
+  let [minimized, toggle] = useMinimized();
 
   return (
     <Standalone>

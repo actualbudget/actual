@@ -5,5 +5,5 @@ export function debugCell(sheet, name) {
     type: constants.DEBUG_CELL,
     sheet,
     name
-  }
+  };
 }

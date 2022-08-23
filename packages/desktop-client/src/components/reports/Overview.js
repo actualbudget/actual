@@ -110,7 +110,10 @@ function CashFlowCard() {
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
 
-  const data = useReport('cash_flow_simple', useArgsMemo(simpleCashFlow)(start, end));
+  const data = useReport(
+    'cash_flow_simple',
+    useArgsMemo(simpleCashFlow)(start, end)
+  );
   if (!data) {
     return null;
   }
@@ -218,9 +221,9 @@ function CashFlowCard() {
 function Overview({ accounts }) {
   return (
     <View
-    style={[
-      styles.page,
-      { paddingLeft: 40, paddingRight: 40, minWidth: 700 }
+      style={[
+        styles.page,
+        { paddingLeft: 40, paddingRight: 40, minWidth: 700 }
       ]}
     >
       <View
