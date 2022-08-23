@@ -1,12 +1,12 @@
-const sqlite = require("sqlite3");
-const escodegen = require("escodegen");
-const sqlgen = require("./sqlgen");
+const sqlite = require('sqlite3');
+const escodegen = require('escodegen');
+const sqlgen = require('./sqlgen');
 
 // Example usage:
 
-const Spreadsheet = require("./spreadsheet");
+const Spreadsheet = require('./spreadsheet');
 
-const db = new sqlite.Database(__dirname + "/../../db.sqlite");
+const db = new sqlite.Database(__dirname + '/../../db.sqlite');
 const sheet = new Spreadsheet({
   plugins: {
     runQuery: {
@@ -20,22 +20,24 @@ const sheet = new Spreadsheet({
 
         return {
           data: {
-            type: "query",
+            type: 'query',
             query: query,
             sql: sql
           },
 
           ast: {
-            type: "CallExpression",
+            type: 'CallExpression',
             callee: {
-              type: "Identifier",
-              name: "runQuery"
+              type: 'Identifier',
+              name: 'runQuery'
             },
-            arguments: [{
-              type: "Literal",
-              raw: sql,
-              value: sql
-            }]
+            arguments: [
+              {
+                type: 'Literal',
+                raw: sql,
+                value: sql
+              }
+            ]
           }
         };
       },
@@ -43,7 +45,7 @@ const sheet = new Spreadsheet({
         return new Promise(resolve => {
           const start = Date.now();
           db.all(sql, function(err, rows) {
-            if(err) {
+            if (err) {
               throw new Error(err);
             }
             resolve(rows);
@@ -54,11 +56,12 @@ const sheet = new Spreadsheet({
   }
 });
 
-db.on("preupdate", function(type, dbname, table, old, _new, oldId, newId) {
+db.on('preupdate', function(type, dbname, table, old, _new, oldId, newId) {
   sheet.resolve().then(() => {
     const start = Date.now();
     sheet.startTransaction();
-    sheet.getNodesOfType("query")
+    sheet
+      .getNodesOfType('query')
       .filter(node => node.data.query.table === table)
       .forEach(q => {
         sheet.signal(q.name);

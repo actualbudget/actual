@@ -277,7 +277,4 @@ function FinancesAppWithContext(props) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(FinancesAppWithContext);
+export default connect(null, actions)(FinancesAppWithContext);

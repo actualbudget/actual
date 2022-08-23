@@ -71,7 +71,10 @@ describe('schedule app', () => {
           value: {
             start: '2020-12-20',
             frequency: 'monthly',
-            patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+            patterns: [
+              { type: 'day', value: 15 },
+              { type: 'day', value: 30 }
+            ]
           }
         })
       ).toBe('2021-05-30');
@@ -88,7 +91,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 }
+              ]
             }
           }
         ]
@@ -123,7 +129,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 }
+              ]
             }
           }
         ]
@@ -150,7 +159,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 18 }, { type: 'day', value: 29 }]
+              patterns: [
+                { type: 'day', value: 18 },
+                { type: 'day', value: 29 }
+              ]
             }
           }
         ]
@@ -177,7 +189,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 }
+              ]
             }
           }
         ]
@@ -200,7 +215,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 }
+              ]
             }
           }
         ]
@@ -222,7 +240,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 18 }, { type: 'day', value: 28 }]
+              patterns: [
+                { type: 'day', value: 18 },
+                { type: 'day', value: 28 }
+              ]
             }
           }
         ]

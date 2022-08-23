@@ -24,11 +24,9 @@ function isAnonymous(id) {
   return !id.startsWith('user-');
 }
 
-export async function init() {
-}
+export async function init() {}
 
-export async function login(userId) {
-}
+export async function login(userId) {}
 
 let BUFFERING = false;
 let BUFFER = [];
