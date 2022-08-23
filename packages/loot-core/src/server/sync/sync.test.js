@@ -1,7 +1,7 @@
 import * as prefs from '../prefs';
 import * as db from '../db';
 import * as sheet from '../sheet';
-import Timestamp, { getClock } from '../timestamp';
+import { getClock, Timestamp } from '../crdt';
 import { resolveName } from '../spreadsheet/util';
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
 import * as encoder from './encoder';
