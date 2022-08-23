@@ -1,6 +1,6 @@
 import { send } from '../../platform/client/fetch';
-import { default as constants } from '../constants';
-import { getPayees, getAccounts, filterTransactions } from './queries';
+import constants from '../constants';
+import { getPayees, getAccounts } from './queries';
 import { addNotification } from './notifications';
 
 export function setAccountsSyncing(name) {

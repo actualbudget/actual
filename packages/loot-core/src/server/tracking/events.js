@@ -1,6 +1,4 @@
-import { default as asyncStorage } from '../../platform/server/asyncStorage';
 import { sha256String } from '../encryption-internals';
-let uuid = require('../../platform/uuid');
 
 let currentUniqueId;
 let mixpanel;

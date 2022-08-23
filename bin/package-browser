@@ -56,19 +56,8 @@ if [ $CI != true ]; then
     yarn lint
 fi
 
-(
-  cd packages/loot-design;
-  ../../node_modules/.bin/patch-package
-)
+ACTUAL_RELEASE_TYPE=$RELEASE yarn workspace loot-core build:browser
 
-(
-  cd packages/loot-core;
-  ACTUAL_RELEASE_TYPE=$RELEASE yarn build:browser
-)
-
-(
-  cd packages/desktop-client;
-  REACT_APP_RELEASE_TYPE=$RELEASE yarn build:browser
-)
+REACT_APP_RELEASE_TYPE=$RELEASE yarn workspace @actual-app/web build:browser
 
 echo "packages/desktop-client/build"

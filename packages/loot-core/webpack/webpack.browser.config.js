@@ -63,5 +63,10 @@ module.exports = {
     new webpack.IgnorePlugin({
       resourceRegExp: /worker_threads|original-fs/
     })
-  ]
+  ],
+  node: {
+    dgram: "empty",
+    net: 'empty',
+    tls: 'empty',
+  },
 };

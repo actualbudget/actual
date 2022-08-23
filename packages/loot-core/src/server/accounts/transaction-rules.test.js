@@ -1,5 +1,4 @@
 import * as db from '../db';
-import { Rule } from './rules';
 import {
   getRules,
   loadRules,
@@ -15,7 +14,6 @@ import {
   migrateOldRules
 } from './transaction-rules';
 import { loadMappings } from '../db/mappings';
-import { applyMigration } from '../migrate/migrations';
 import { runQuery } from '../aql/schema/run-query';
 import { default as q } from '../../shared/query';
 

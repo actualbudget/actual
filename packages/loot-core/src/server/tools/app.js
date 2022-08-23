@@ -1,4 +1,3 @@
-import { batchMessages } from '../sync';
 import { runMutator } from '../mutators';
 import { createApp } from '../app';
 import * as db from '../db';

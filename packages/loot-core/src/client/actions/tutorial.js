@@ -1,4 +1,3 @@
-import { default as constants } from '../constants';
 import { send } from '../../platform/client/fetch';
 import { default as Platform } from '../platform';
 import { pushModal } from './modals';

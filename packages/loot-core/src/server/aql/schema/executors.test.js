@@ -1,16 +1,12 @@
 import { default as fc } from 'fast-check';
 import * as db from '../../db';
 import { default as query } from '../../../shared/query';
-import { makeChild } from '../../../shared/transactions';
 import { batchMessages, setSyncingMode } from '../../sync/index';
-import { setClock } from '../../timestamp';
+import { setClock } from '../../crdt';
 import { groupById } from '../../../shared/util';
 import { default as arbs } from '../../../mocks/arbitrary-schema';
-import { isAggregateQuery } from '../compiler';
 import { runQuery } from './run-query';
-import { toGroup, isHappyPathQuery } from './executors';
-
-const uuid = require('../../../platform/uuid');
+import { isHappyPathQuery } from './executors';
 
 beforeEach(global.emptyDatabase());
 

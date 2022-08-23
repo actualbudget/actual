@@ -3,7 +3,7 @@ import * as prefs from './prefs';
 import * as db from './db';
 import * as budget from './budget/base';
 import * as monthUtils from '../shared/months';
-import { getClock, deserializeClock } from './timestamp';
+import { getClock, deserializeClock } from './crdt';
 import {
   runHandler,
   runMutator,
