@@ -27,11 +27,6 @@
     "react-element-query": "^3.0.2",
     "react-native-web": "^0.11.7",
     "react-test-renderer": "^16.3.1",
-    "rollup-plugin-babel": "^4.3.2",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-ignore": "^1.0.5",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-replace": "^2.2.0",
     "velocity-animate": "^1.5.0",
     "wobble": "^1.5.0"
   },
