@@ -1,5 +1,4 @@
 import './polyfills';
-import { differenceInDays } from 'date-fns';
 import asyncStorage from '../platform/server/asyncStorage';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import * as prefs from './prefs';
@@ -31,8 +30,7 @@ import * as bankSync from './accounts/sync';
 import * as link from './accounts/link';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
 import { mutator, runHandler } from './mutators';
-import * as timestamp from './timestamp';
-import * as merkle from './merkle';
+import { getClock, setClock, makeClock, makeClientId, serializeClock, deserializeClock, Timestamp, merkle } from './crdt';
 import {
   initialFullSync,
   fullSync,
@@ -1496,6 +1494,24 @@ handlers['subscribe-sign-out'] = async function() {
   return 'ok';
 };
 
+handlers['get-server-version'] = async function() {
+  if (!getServer() || getServer().BASE_SERVER === UNCONFIGURED_SERVER) {
+    return { error: 'no-server' };
+  }
+
+  let version;
+  try {
+    const res = await get(getServer().BASE_SERVER + '/info');
+
+    const info = JSON.parse(res);
+    version = info.build.version;
+  } catch (err) {
+    return { error: 'network-failure' };
+  }
+
+  return { version };
+};
+
 handlers['get-server-url'] = async function() {
   return getServer() && getServer().BASE_SERVER;
 };
@@ -1951,10 +1967,10 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     //
     // TODO: The client id should be stored elsewhere. It shouldn't
     // work this way, but it's fine for now.
-    timestamp.getClock().timestamp.setNode(timestamp.makeClientId());
+    getClock().timestamp.setNode(makeClientId());
     await db.runQuery(
       'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-      [timestamp.serializeClock(timestamp.getClock())]
+      [serializeClock(getClock())]
     );
 
     await prefs.savePrefs({ resetClock: false });
@@ -2236,7 +2252,9 @@ export const lib = {
 
   // Expose CRDT mechanisms so server can use them
   merkle,
-  timestamp,
+  timestamp: {
+    getClock, setClock, makeClock, makeClientId, serializeClock, deserializeClock, Timestamp
+  },
   SyncProtoBuf: SyncPb
 };
 

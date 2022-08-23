@@ -7,26 +7,24 @@ const resolve = require('resolve');
 const PnpWebpackPlugin = require('pnp-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const InlineChunkHtmlPlugin = require('jwl-dev-utils/InlineChunkHtmlPlugin');
+const InlineChunkHtmlPlugin = require('react-dev-utils/InlineChunkHtmlPlugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const safePostCssParser = require('postcss-safe-parser');
 const ManifestPlugin = require('webpack-manifest-plugin');
-const InterpolateHtmlPlugin = require('jwl-dev-utils/InterpolateHtmlPlugin');
+const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
-const WatchMissingNodeModulesPlugin = require('jwl-dev-utils/WatchMissingNodeModulesPlugin');
-const ModuleScopePlugin = require('jwl-dev-utils/ModuleScopePlugin');
-const getCSSModuleLocalIdent = require('jwl-dev-utils/getCSSModuleLocalIdent');
+const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
+const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
-const ModuleNotFoundPlugin = require('jwl-dev-utils/ModuleNotFoundPlugin');
+const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt');
-const typescriptFormatter = require('jwl-dev-utils/typescriptFormatter');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 const webpackDevClientEntry = require.resolve(
-  'jwl-dev-utils/webpackHotDevClient'
+  'react-dev-utils/webpackHotDevClient'
 );
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
@@ -290,7 +288,7 @@ module.exports = function(webpackEnv) {
           use: [
             {
               options: {
-                formatter: require.resolve('jwl-dev-utils/eslintFormatter'),
+                formatter: require.resolve('react-dev-utils/eslintFormatter'),
                 eslintPath: require.resolve('eslint')
               },
               loader: require.resolve('eslint-loader')
@@ -490,7 +488,7 @@ module.exports = function(webpackEnv) {
             entry: webpackDevClientEntry,
             // The expected exports are slightly different from what the overlay exports,
             // so an interop is included here to enable feedback on module-level errors.
-            module: require.resolve('jwl-dev-utils/refreshOverlayInterop'),
+            module: require.resolve('react-dev-utils/refreshOverlayInterop'),
             // Since we ship a custom dev client and overlay integration,
             // the bundled socket handling logic can be eliminated.
             sockIntegration: false
@@ -500,12 +498,6 @@ module.exports = function(webpackEnv) {
       // a plugin that prints an error when you attempt to do this.
       // See https://github.com/facebook/create-react-app/issues/240
       isEnvDevelopment && new CaseSensitivePathsPlugin(),
-      // If you require a missing module and then `npm install` it, you still have
-      // to restart the development server for Webpack to discover it. This plugin
-      // makes the discovery automatic so you don't have to restart.
-      // See https://github.com/facebook/create-react-app/issues/186
-      isEnvDevelopment &&
-        new WatchMissingNodeModulesPlugin(paths.appNodeModules),
       isEnvProduction &&
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output
@@ -545,6 +537,8 @@ module.exports = function(webpackEnv) {
           ]
         }),
       // TypeScript type checking
+      // This hasn't been tested since migrating away from `jwl-dev-utils` as we
+      // don't currently use TypeScript and we'll likely have to update the dependency anyway.
       useTypeScript &&
         new ForkTsCheckerWebpackPlugin({
           typescript: resolve.sync('typescript', {
@@ -571,7 +565,6 @@ module.exports = function(webpackEnv) {
           ],
           watch: paths.appSrc,
           silent: true,
-          formatter: typescriptFormatter
         })
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
