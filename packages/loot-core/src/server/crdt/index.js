@@ -1,4 +1,12 @@
-import * as merkle from "./merkle";
+import * as merkle from './merkle';
 
 export { merkle };
-export { getClock, setClock, makeClock, makeClientId, serializeClock, deserializeClock, Timestamp } from "./timestamp"
+export {
+  getClock,
+  setClock,
+  makeClock,
+  makeClientId,
+  serializeClock,
+  deserializeClock,
+  Timestamp
+} from './timestamp';

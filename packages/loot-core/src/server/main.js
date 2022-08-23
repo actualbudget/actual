@@ -30,7 +30,16 @@ import * as bankSync from './accounts/sync';
 import * as link from './accounts/link';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
 import { mutator, runHandler } from './mutators';
-import { getClock, setClock, makeClock, makeClientId, serializeClock, deserializeClock, Timestamp, merkle } from './crdt';
+import {
+  getClock,
+  setClock,
+  makeClock,
+  makeClientId,
+  serializeClock,
+  deserializeClock,
+  Timestamp,
+  merkle
+} from './crdt';
 import {
   initialFullSync,
   fullSync,
@@ -414,7 +423,10 @@ handlers['category-group-delete'] = mutator(async function({ id, transferId }) {
 
     return batchMessages(async () => {
       if (transferId) {
-        await budget.doTransfer(groupCategories.map(c => c.id), transferId);
+        await budget.doTransfer(
+          groupCategories.map(c => c.id),
+          transferId
+        );
       }
       await db.deleteCategoryGroup({ id }, transferId);
     });
@@ -759,11 +771,15 @@ handlers['accounts-get'] = async function() {
 };
 
 handlers['account-properties'] = async function({ id }) {
-  const { balance } = await db.first(
+  const {
+    balance
+  } = await db.first(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
     [id]
   );
-  const { count } = await db.first(
+  const {
+    count
+  } = await db.first(
     'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
     [id]
   );
@@ -902,10 +918,9 @@ handlers['account-close'] = mutator(async function({
         true
       );
 
-      let { id: payeeId } = await db.first(
-        'SELECT id FROM payees WHERE transfer_acct = ?',
-        [id]
-      );
+      let {
+        id: payeeId
+      } = await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [id]);
 
       await batchMessages(() => {
         // TODO: what this should really do is send a special message that
@@ -939,10 +954,11 @@ handlers['account-close'] = mutator(async function({
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0) {
-        let { id: payeeId } = await db.first(
-          'SELECT id FROM payees WHERE transfer_acct = ?',
-          [transferAccountId]
-        );
+        let {
+          id: payeeId
+        } = await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [
+          transferAccountId
+        ]);
 
         await handlers['transaction-add']({
           id: uuid.v4Sync(),
@@ -1082,9 +1098,7 @@ handlers['accounts-sync'] = async function({ id }) {
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account "${
-              acct.name
-            }" is not linked properly. Please link it again`
+            message: `Account "${acct.name}" is not linked properly. Please link it again`
           });
         } else {
           errors.push({
@@ -1134,10 +1148,9 @@ handlers['transactions-import'] = mutator(function({
 });
 
 handlers['account-unlink'] = mutator(async function({ id }) {
-  let { bank: bankId } = await db.first(
-    'SELECT bank FROM accounts WHERE id = ?',
-    [id]
-  );
+  let {
+    bank: bankId
+  } = await db.first('SELECT bank FROM accounts WHERE id = ?', [id]);
 
   if (!bankId) {
     return 'ok';
@@ -1152,10 +1165,11 @@ handlers['account-unlink'] = mutator(async function({ id }) {
     balance_limit: null
   });
 
-  let { count } = await db.first(
-    'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
-    [bankId]
-  );
+  let {
+    count
+  } = await db.first('SELECT COUNT(*) as count FROM accounts WHERE bank = ?', [
+    bankId
+  ]);
 
   if (count === 0) {
     // No more accounts are associated with this bank. We can remove
@@ -1545,35 +1559,37 @@ handlers['get-version'] = async function() {
 
 handlers['get-budgets'] = async function() {
   const paths = await fs.listDir(fs.getDocumentDir());
-  const budgets = (await Promise.all(
-    paths.map(async name => {
-      const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
-      if (await fs.exists(prefsPath)) {
-        let prefs;
-        try {
-          prefs = JSON.parse(await fs.readFile(prefsPath));
-        } catch (e) {
-          console.log('Error parsing metadata:', e.stack);
-          return;
+  const budgets = (
+    await Promise.all(
+      paths.map(async name => {
+        const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
+        if (await fs.exists(prefsPath)) {
+          let prefs;
+          try {
+            prefs = JSON.parse(await fs.readFile(prefsPath));
+          } catch (e) {
+            console.log('Error parsing metadata:', e.stack);
+            return;
+          }
+
+          // We treat the directory name as the canonical id so that if
+          // the user moves it around/renames/etc, nothing breaks. The
+          // id is stored in prefs just for convenience (and the prefs
+          // will always update to the latest given id)
+          if (name !== DEMO_BUDGET_ID) {
+            return {
+              id: name,
+              cloudFileId: prefs.cloudFileId,
+              groupId: prefs.groupId,
+              name: prefs.budgetName || '(no name)'
+            };
+          }
         }
 
-        // We treat the directory name as the canonical id so that if
-        // the user moves it around/renames/etc, nothing breaks. The
-        // id is stored in prefs just for convenience (and the prefs
-        // will always update to the latest given id)
-        if (name !== DEMO_BUDGET_ID) {
-          return {
-            id: name,
-            cloudFileId: prefs.cloudFileId,
-            groupId: prefs.groupId,
-            name: prefs.budgetName || '(no name)'
-          };
-        }
-      }
-
-      return null;
-    })
-  )).filter(x => x);
+        return null;
+      })
+    )
+  ).filter(x => x);
 
   return budgets;
 };
@@ -2253,7 +2269,13 @@ export const lib = {
   // Expose CRDT mechanisms so server can use them
   merkle,
   timestamp: {
-    getClock, setClock, makeClock, makeClientId, serializeClock, deserializeClock, Timestamp
+    getClock,
+    setClock,
+    makeClock,
+    makeClientId,
+    serializeClock,
+    deserializeClock,
+    Timestamp
   },
   SyncProtoBuf: SyncPb
 };

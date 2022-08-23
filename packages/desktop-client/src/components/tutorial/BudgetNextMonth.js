@@ -61,7 +61,6 @@ function BudgetNextMonth({ stepTwo, navigationProps }) {
   );
 }
 
-export default connect(
-  null,
-  dispatch => bindActionCreators(actions, dispatch)
-)(BudgetNextMonth);
+export default connect(null, dispatch => bindActionCreators(actions, dispatch))(
+  BudgetNextMonth
+);
