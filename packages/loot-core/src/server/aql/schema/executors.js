@@ -1,6 +1,5 @@
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
-import { groupBy } from '../../../shared/util';
 import { isAggregateQuery } from '../compiler';
 import { convertOutputType } from '../schema-helpers';
 import { execQuery } from '../exec';

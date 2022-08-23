@@ -3,7 +3,6 @@ process.env.LOOT_DATA_DIR = __dirname + '/../../../../data';
 import * as sqlite from '../platform/server/sqlite';
 import * as db from '../server/db';
 import { getMessages } from '../server/sync';
-import Timestamp from '../server/timestamp';
 
 let dbPath = process.argv[2];
 let tables = [

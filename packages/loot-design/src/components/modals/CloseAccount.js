@@ -8,7 +8,6 @@ import {
   P,
   Select,
   FormError,
-  AnchorLink
 } from '../common';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { colors } from '../../style';
