@@ -167,9 +167,9 @@ async function _removeFile(filepath) {
 
 // Load files from the server that should exist by default
 async function populateDefaultFilesystem() {
-  let index = await (await fetch(
-    process.env.PUBLIC_URL + 'data-file-index.txt'
-  )).text();
+  let index = await (
+    await fetch(process.env.PUBLIC_URL + 'data-file-index.txt')
+  ).text();
   let files = index
     .split('\n')
     .map(name => name.trim())
