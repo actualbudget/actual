@@ -1,4 +1,4 @@
-import constants from '../constants';
+import { default as constants } from '../constants';
 import { closeModal } from './modals';
 import { send } from '../../platform/client/fetch';
 

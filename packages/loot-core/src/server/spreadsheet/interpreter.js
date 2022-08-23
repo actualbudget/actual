@@ -22,4 +22,4 @@ function evaluate(ast) {
   }
 }
 
-module.exports = { evaluate };
+export default { evaluate };

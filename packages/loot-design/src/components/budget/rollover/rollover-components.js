@@ -26,7 +26,7 @@ import CategoryAutocomplete from '../../CategorySelect';
 import TransferTooltip from './TransferTooltip';
 import BalanceWithCarryover from '../BalanceWithCarryover';
 
-export BudgetSummary from './BudgetSummary';
+export { default as BudgetSummary } from './BudgetSummary';
 
 function CoverTooltip({
   showToBeBudgeted,

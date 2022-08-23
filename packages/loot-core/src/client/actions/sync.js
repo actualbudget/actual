@@ -1,5 +1,5 @@
 import { send } from '../../platform/client/fetch';
-import constants from '../constants';
+import { default as constants } from '../constants';
 import { loadPrefs } from './prefs';
 import { syncAccounts } from './account';
 import { pushModal } from './modals';

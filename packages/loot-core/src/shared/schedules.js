@@ -1,5 +1,5 @@
 import * as monthUtils from './months';
-import q from './query';
+import { default as q } from './query';
 
 export function getStatus(nextDate, completed, hasTrans) {
   let today = monthUtils.currentDay();

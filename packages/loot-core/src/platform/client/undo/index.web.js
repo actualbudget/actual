@@ -12,28 +12,26 @@ let currentUndoState = {
   selectedItems: null
 };
 
-function setUndoState(name, value) {
+export function setUndoState(name, value) {
   currentUndoState[name] = value;
   currentUndoState.id = uuid.v4Sync();
 }
 
-function getUndoState(name) {
+export function getUndoState(name) {
   return currentUndoState[name];
 }
 
-function getTaggedState(id) {
+export function getTaggedState(id) {
   return UNDO_STATE_MRU.find(state => state.id === id);
 }
 
-function snapshot() {
+export function snapshot() {
   let tagged = { ...currentUndoState, id: uuid.v4Sync() };
   UNDO_STATE_MRU.unshift(tagged);
   UNDO_STATE_MRU = UNDO_STATE_MRU.slice(0, HISTORY_SIZE);
   return tagged.id;
 }
 
-function gc(id) {
+export function gc(id) {
   UNDO_STATE_MRU = UNDO_STATE_MRU.filter(state => state.id !== id);
 }
-
-module.exports = { setUndoState, getUndoState, getTaggedState, snapshot, gc };

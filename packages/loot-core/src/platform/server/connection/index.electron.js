@@ -90,4 +90,4 @@ function send(name, args) {
   }
 }
 
-module.exports = { init, send, getNumClients };
+export default { init, send, getNumClients };

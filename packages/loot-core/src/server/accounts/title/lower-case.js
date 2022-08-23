@@ -86,4 +86,4 @@ const prepositions = [
   'without'
 ];
 
-module.exports = new Set([...conjunctions, ...articles, ...prepositions]);
+export default new Set([...conjunctions, ...articles, ...prepositions]);

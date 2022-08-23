@@ -20,4 +20,4 @@ const intended = [
   'Node.js'
 ];
 
-module.exports = intended;
+export default intended;

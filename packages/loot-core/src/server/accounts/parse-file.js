@@ -1,6 +1,6 @@
-import fs from '../../platform/server/fs';
-import qif2json from './qif2json';
-import csv2json from 'csv-parse/lib/sync';
+import { default as fs } from '../../platform/server/fs';
+import { default as qif2json } from './qif2json';
+import { default as csv2json } from 'csv-parse/lib/sync';
 import { dayFromDate } from '../../shared/months';
 import { looselyParseAmount } from '../../shared/util';
 

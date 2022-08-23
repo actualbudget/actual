@@ -8,7 +8,7 @@ import { runQuery as aqlQuery } from '../server/aql/schema/run-query';
 import { batchMessages, setSyncingMode } from '../server/sync';
 import { runHandler, runMutator } from '../server/mutators';
 import { addTransactions } from '../server/accounts/sync';
-import q from '../shared/query';
+import { default as q } from '../shared/query';
 
 function pickRandom(list) {
   return list[((Math.random() * list.length) | 0) % list.length];

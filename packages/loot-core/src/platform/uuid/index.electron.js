@@ -1,6 +1,6 @@
 const uuid = require('uuid');
 
-module.exports = {
+export default {
   v4: function() {
     return Promise.resolve(uuid.v4());
   },

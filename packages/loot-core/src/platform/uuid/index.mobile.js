@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   v4: function v4() {
     throw new Error('v4 not implemented');
   },

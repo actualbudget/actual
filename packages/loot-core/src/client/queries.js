@@ -7,7 +7,7 @@ import {
   getShortYearRegex,
   getShortYearFormat
 } from '../shared/months';
-import q from '../shared/query';
+import { default as q } from '../shared/query';
 
 function isInteger(num) {
   return (num | 0) === num;

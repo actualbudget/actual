@@ -1,4 +1,4 @@
-import deepEqual from 'deep-equal';
+import { default as deepEqual } from 'deep-equal';
 import * as d from 'date-fns';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -6,7 +6,7 @@ import * as prefs from '../prefs';
 import { toDateRepr } from '../models';
 import { runQuery as aqlQuery } from '../aql/schema/run-query';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
-import q from '../../shared/query';
+import { default as q } from '../../shared/query';
 import {
   insertRule,
   updateRule,

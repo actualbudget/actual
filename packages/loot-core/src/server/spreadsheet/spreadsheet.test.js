@@ -1,4 +1,4 @@
-import Spreadsheet from './spreadsheet';
+import { default as Spreadsheet } from './spreadsheet';
 import * as db from '../db';
 import { generateTransaction } from '../../mocks';
 
