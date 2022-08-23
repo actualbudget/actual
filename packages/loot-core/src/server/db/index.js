@@ -11,13 +11,14 @@ import {
   payeeRuleModel
 } from '../models';
 import { groupById } from '../../shared/util';
-import Timestamp, {
+import {
   makeClock,
   setClock,
   serializeClock,
   deserializeClock,
-  makeClientId
-} from '../timestamp';
+  makeClientId,
+  Timestamp
+} from '../crdt';
 import {
   convertForInsert,
   convertForUpdate,

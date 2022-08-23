@@ -1,11 +1,10 @@
 import fc from 'fast-check';
 import * as db from '../db';
-import { migrateParentIds, listen, unlisten } from './migrate';
-import { addSyncListener, batchMessages, sendMessages } from './index';
+import { listen, unlisten } from './migrate';
+import { addSyncListener, sendMessages } from './index';
 import { execTracer } from '../../shared/test-helpers';
 import { convertInputType, schema, schemaConfig } from '../aql';
 import arbs from '../../mocks/arbitrary-schema';
-import { groupBy } from '../../shared/util';
 
 beforeEach(() => {
   listen();

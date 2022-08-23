@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import RecurringSchedulePicker from './RecurringSchedulePicker';
 import { Section } from '../guide/components';
 import { Button, View } from './common';

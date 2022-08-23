@@ -6,6 +6,7 @@ VERSION=""
 BETA=""
 RELEASE=""
 RELEASE_NOTES=""
+CI=${CI:-false}
 
 cd "$ROOT/.."
 
@@ -64,41 +65,29 @@ if [ -n "$RELEASE" ]; then
 fi
 
 if [ "$OSTYPE" == "msys" ]; then
-    if [ -z "$CIRCLE_TAG" ]; then
+    if [ $CI != true ]; then
         read -s -p "Windows certificate password: " -r CSC_KEY_PASSWORD
         export CSC_KEY_PASSWORD
-    else
+    elif [ -n "$CIRCLE_TAG" ]; then
+        # We only want to run this on CircleCI as Github doesn't have the CSC_KEY_PASSWORD secret set.
         certutil -f -p ${CSC_KEY_PASSWORD} -importPfx ~/windows-shift-reset-llc.p12
     fi
 fi
 
 # We only need to run linting once (and this doesn't seem to work on
 # Windows for some reason)
-if [[ "$OSTYPE" == "darwin"* ]]; then
+if [[ $CI != true && "$OSTYPE" == "darwin"* ]]; then
     yarn lint
 fi
 
-./node_modules/.bin/patch-package
+yarn patch-package
 
-(
-  cd packages/loot-design;
-  ../../node_modules/.bin/patch-package
-)
+yarn workspace mobile patch-package
 
-(
-  cd packages/mobile;
-  ../../node_modules/.bin/patch-package
-)
+yarn workspace loot-core build:node
 
-(
-  cd packages/loot-core;
-  NODE_ENV=production yarn build:node
-)
+yarn workspace @actual-app/web build
 
-(
-  cd packages/desktop-client;
-  yarn build
-)
 
 rm -fr packages/desktop-electron/client-build
 cp -r packages/desktop-client/build packages/desktop-electron/client-build
