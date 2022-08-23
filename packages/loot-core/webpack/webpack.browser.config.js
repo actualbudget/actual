@@ -22,27 +22,31 @@ module.exports = {
           : require.resolve('perf-deets/noop')
     },
     fallback: {
-      assert: require.resolve("assert/"),
-      crypto: require.resolve("crypto-browserify"),
-      path: require.resolve("path-browserify"),
-      process: require.resolve("process/browser"),
-      stream: require.resolve("stream-browserify"),
-      util: require.resolve("util/"),
-      zlib: require.resolve("browserify-zlib"),
-    },
+      assert: require.resolve('assert/'),
+      crypto: require.resolve('crypto-browserify'),
+      dgram: false,
+      net: false,
+      os: false,
+      path: require.resolve('path-browserify'),
+      process: require.resolve('process/browser'),
+      stream: require.resolve('stream-browserify'),
+      tls: false,
+      util: require.resolve('util/'),
+      zlib: require.resolve('browserify-zlib')
+    }
   },
   module: {
     rules: [
       {
         test: /\.m?js$/,
         use: {
-          loader: 'swc-loader',
+          loader: 'swc-loader'
         }
       }
     ]
   },
   optimization: {
-    chunkIds: "named"
+    chunkIds: 'named'
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -63,10 +67,5 @@ module.exports = {
     new webpack.IgnorePlugin({
       resourceRegExp: /worker_threads|original-fs/
     })
-  ],
-  node: {
-    dgram: "empty",
-    net: 'empty',
-    tls: 'empty',
-  },
+  ]
 };
