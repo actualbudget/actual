@@ -70,7 +70,4 @@ function WelcomeScreen({ modalProps, actions }) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(WelcomeScreen);
+export default connect(null, actions)(WelcomeScreen);

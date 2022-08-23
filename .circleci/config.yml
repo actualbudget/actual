@@ -47,7 +47,7 @@ jobs:
           keys:
             - v3-dependencies-{{ checksum "yarn.lock" }}
 
-      - run: yarn install --pure-lockfile
+      - run: yarn install --immutable
 
       - save_cache:
           <<: *cached_files
@@ -74,7 +74,7 @@ jobs:
           shell: bash
 
       - run:
-          command: yarn install --pure-lockfile
+          command: yarn install --immutable
           shell: bash
 
       - run:
@@ -96,7 +96,7 @@ jobs:
           keys:
             - v3-dependencies-{{ checksum "yarn.lock" }}
 
-      - run: yarn install --pure-lockfile
+      - run: yarn install --immutable
 
       - run: sudo npm install -g @sentry/cli --unsafe-perm
 

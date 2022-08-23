@@ -1,7 +1,7 @@
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { batchMessages } from '../sync';
-import { groupBySingle, safeNumber } from '../../shared/util';
+import { safeNumber } from '../../shared/util';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 
