@@ -8,7 +8,7 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/mocks/setup.js'],
   testEnvironment: 'node',
   testPathIgnorePatterns: ['/node_modules/', '/lib/', '.+/index.web.test.js'],
-  transformIgnorePatterns: ['__mocks__'],
+  transformIgnorePatterns: ['/node_modules/', '__mocks__'],
   globals: {
     __TESTING__: true
   }
