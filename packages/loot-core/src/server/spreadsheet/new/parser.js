@@ -363,7 +363,7 @@ function parsePostfix(state, node) {
   while ((tok = nextToken(state))) {
     if (tok.type === types.TOKEN_LEFT_PAREN) {
       pushToken(state, tok);
-      let args = parseArgs(state)
+      let args = parseArgs(state);
       node = new nodes.FunCall(tok.lineno, tok.colno, node, args);
     } else if (tok.type === types.TOKEN_DOT) {
       const val = nextToken(state);

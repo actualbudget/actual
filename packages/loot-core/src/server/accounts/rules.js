@@ -7,7 +7,6 @@ import {
   isAfter,
   addDays,
   subDays,
-  format as formatDate,
   parseDate
 } from '../../shared/months';
 import { fastSetMerge } from '../../shared/util';
