@@ -5,7 +5,7 @@
         "allReconciled": "All reconciled!",
         "clearedBalance": "Your cleared balance {cleared} needs {diff} to match your bank's balance of {balance}",
         "doneReconciling": "Done Reconciling",
-        "needAccountAdvice": "For Actual to be useful, you need to <strong>add an account</strong>. You can link an account to automatically download transactions, or manage it locally yourself."
+        "needAccountMessage": "For Actual to be useful, you need to <strong>add an account</strong>. You can link an account to automatically download transactions, or manage it locally yourself."
     },
     "bootstrap": {
         "title": "Bootstrap this Actual instance",
