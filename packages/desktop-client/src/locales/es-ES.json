@@ -1,4 +1,12 @@
 {
+    "account": {
+        "addAccount": "Agregar cuenta",
+        "addAccountInFutureFromSidebar": "En el futuro puedes agregar cuentas desde la barra lateral.",
+        "allReconciled": "¡Todo conciliado!",
+        "clearedBalance": "Su saldo compensado {cleared} necesita {diff} para coincidir con el saldo del banco de {balance}",
+        "doneReconciling": "Conciliación finalizada",
+        "needAccountAdvice": "Para que Actual sea útil, debe <strong>agregar una cuenta</strong>. Puedes vincular la cuenta para descargar transacciones automáticamente o administrala localmente."
+    },
     "bootstrap": {
         "title": "Bootstrap esta instancia de Actual",
         "setPassword": "Establecer una contraseña para esta instancia de servidor",

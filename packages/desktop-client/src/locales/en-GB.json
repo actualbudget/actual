@@ -1,4 +1,12 @@
 {
+    "account": {
+        "addAccount": "Add account",
+        "addAccountInFutureFromSidebar": "In the future, you can add accounts from the sidebar.",
+        "allReconciled": "All reconciled!",
+        "clearedBalance": "Your cleared balance {cleared} needs {diff} to match your bank's balance of {balance}",
+        "doneReconciling": "Done Reconciling",
+        "needAccountAdvice": "For Actual to be useful, you need to <strong>add an account</strong>. You can link an account to automatically download transactions, or manage it locally yourself."
+    },
     "bootstrap": {
         "title": "Bootstrap this Actual instance",
         "setPassword": "Set a password for this server instance",

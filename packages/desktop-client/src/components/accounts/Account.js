@@ -90,8 +90,11 @@ import {
 } from 'loot-core/src/client/data-hooks/schedules';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 import { useActiveLocation } from '../ActiveLocation';
+import { useTranslation } from 'react-i18next';
 
 function EmptyMessage({ onAdd }) {
+  const { t } = useTranslation();
+
   return (
     <View
       style={{
@@ -111,17 +114,15 @@ function EmptyMessage({ onAdd }) {
         }}
       >
         <Text style={{ textAlign: 'center', lineHeight: '1.4em' }}>
-          For Actual to be useful, you need to <strong>add an account</strong>.
-          You can link an account to automatically download transactions, or
-          manage it locally yourself.
+          {t('account.needAccountMessage')}
         </Text>
 
         <Button primary style={{ marginTop: 20 }} onClick={onAdd}>
-          Add account
+          {t('account.addAccount')}
         </Button>
 
         <View style={{ marginTop: 20, fontSize: 13, color: colors.n5 }}>
-          In the future, you can add accounts from the sidebar.
+          {t('account.addAccountInFutureFromSidebar')}
         </View>
       </View>
     </View>
@@ -129,6 +130,8 @@ function EmptyMessage({ onAdd }) {
 }
 
 function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
+  const { t } = useTranslation();
+
   let cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
     query: balanceQuery.query.filter({ cleared: true })
@@ -167,27 +170,22 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
                 marginRight: 3
               }}
             />
-            All reconciled!
+            {t('account.allReconciled')}
           </View>
         ) : (
           <View style={{ color: colors.n3 }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
-              Your cleared balance{' '}
-              <strong>{format(cleared, 'financial')}</strong> needs{' '}
-              <strong>
-                {(targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial')}
-              </strong>{' '}
-              to match
-              <br /> your bank{"'"}s balance of{' '}
-              <Text style={{ fontWeight: 700 }}>
-                {format(targetBalance, 'financial')}
-              </Text>
+              {t('account.clearedBalance', {
+                'cleared':(<strong>{format(cleared, 'financial')}</strong>),
+                'diff': (<strong>{(targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial')}</strong>),
+                'balance':(<Text style={{ fontWeight: 700 }}>{format(targetBalance, 'financial')}</Text>)
+              })}
             </Text>
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
           <Button primary onClick={onDone}>
-            Done Reconciling
+            {t('account.doneReconciling')}
           </Button>
         </View>
       </View>
