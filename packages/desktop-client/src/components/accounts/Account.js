@@ -90,7 +90,7 @@ import {
 } from 'loot-core/src/client/data-hooks/schedules';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 import { useActiveLocation } from '../ActiveLocation';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 function EmptyMessage({ onAdd }) {
   const { t } = useTranslation();
@@ -114,7 +114,7 @@ function EmptyMessage({ onAdd }) {
         }}
       >
         <Text style={{ textAlign: 'center', lineHeight: '1.4em' }}>
-          {t('account.needAccountMessage')}
+          <Trans>{'account.needAccountMessage'}</Trans>
         </Text>
 
         <Button primary style={{ marginTop: 20 }} onClick={onAdd}>
@@ -175,11 +175,17 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
         ) : (
           <View style={{ color: colors.n3 }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
-              {t('account.clearedBalance', {
-                'cleared':(<strong>{format(cleared, 'financial')}</strong>),
-                'diff': (<strong>{(targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial')}</strong>),
-                'balance':(<Text style={{ fontWeight: 700 }}>{format(targetBalance, 'financial')}</Text>)
-              })}
+              <Trans
+                values={{
+                  cleared: format(cleared, 'financial'),
+                  diff:
+                    (targetDiff > 0 ? '+' : '') +
+                    format(targetDiff, 'financial'),
+                  balance: format(targetBalance, 'financial')
+                }}
+              >
+                {'account.clearedBalance'}
+              </Trans>
             </Text>
           </View>
         )}
