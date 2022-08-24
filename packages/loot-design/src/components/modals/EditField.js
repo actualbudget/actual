@@ -4,7 +4,7 @@ import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 import * as actions from 'loot-core/src/client/actions';
 import { amountToInteger } from 'loot-core/src/shared/util';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
-import { View, Modal, Stack, Button, Input } from '../common';
+import { View, Modal, Input } from '../common';
 import DateSelect from '../DateSelect';
 import CategoryAutocomplete from '../CategorySelect';
 import AccountAutocomplete from '../AccountAutocomplete';

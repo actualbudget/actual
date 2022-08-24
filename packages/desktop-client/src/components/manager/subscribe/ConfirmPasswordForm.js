@@ -47,6 +47,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         type={showPassword ? 'text' : 'password'}
         value={password1}
         onChange={e => setPassword1(e.target.value)}
+        onEnter={onSubmit}
       />
       <Input
         placeholder="Confirm password"
@@ -54,6 +55,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         value={password2}
         onChange={e => setPassword2(e.target.value)}
         style={{ marginTop: 10 }}
+        onEnter={onSubmit}
       />
 
       <View
@@ -69,10 +71,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         </label>
         <View style={{ flex: 1 }} />
         {buttons}
-        <ButtonWithLoading
-          primary
-          loading={loading}
-        >
+        <ButtonWithLoading primary loading={loading}>
           OK
         </ButtonWithLoading>
       </View>

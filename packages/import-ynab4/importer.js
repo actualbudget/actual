@@ -2,8 +2,8 @@ const d = require('date-fns');
 const normalizePathSep = require('slash');
 const uuid = require('uuid');
 const AdmZip = require('adm-zip');
-const actual = require('@actual-app/api/methods');
-const { amountToInteger } = require('@actual-app/api/utils');
+const actual = require('@actual-app/api');
+const amountToInteger = actual.utils.amountToInteger;
 
 // Utils
 

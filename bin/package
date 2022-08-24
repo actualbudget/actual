@@ -80,27 +80,14 @@ if [[ $CI != true && "$OSTYPE" == "darwin"* ]]; then
     yarn lint
 fi
 
-./node_modules/.bin/patch-package
+yarn patch-package
 
-(
-  cd packages/loot-design;
-  ../../node_modules/.bin/patch-package
-)
+yarn workspace mobile patch-package
 
-(
-  cd packages/mobile;
-  ../../node_modules/.bin/patch-package
-)
+yarn workspace loot-core build:node
 
-(
-  cd packages/loot-core;
-  NODE_ENV=production yarn build:node
-)
+yarn workspace @actual-app/web build
 
-(
-  cd packages/desktop-client;
-  yarn build
-)
 
 rm -fr packages/desktop-electron/client-build
 cp -r packages/desktop-client/build packages/desktop-electron/client-build
