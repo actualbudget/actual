@@ -1,0 +1,7 @@
+{
+    "bootstrap": {
+        "title": "Bootstrap esta instancia de Actual",
+        "setPassword": "Establecer una contraseña para esta instancia de servidor",
+        "tryDemo": "Probar Demo"
+    }
+}

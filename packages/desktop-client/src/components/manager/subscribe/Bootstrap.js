@@ -9,8 +9,11 @@ import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 import { useBootstrapped, Title, Input, Link, ExternalLink } from './common';
+import { useTranslation } from 'react-i18next';
 
 export default function Bootstrap() {
+  const { t } = useTranslation();
+
   let dispatch = useDispatch();
   let history = useHistory();
   let [error, setError] = useState(null);
@@ -52,7 +55,7 @@ export default function Bootstrap() {
   return (
     <>
       <View style={{ width: 450, marginTop: -30 }}>
-        <Title text="Bootstrap this Actual instance" />
+        <Title text={t('bootstrap.title')} />
         <Text
           style={{
             fontSize: 16,
@@ -60,7 +63,7 @@ export default function Bootstrap() {
             lineHeight: 1.4
           }}
         >
-          Set a password for this server instance
+          {t('bootstrap.setPassword')}
         </Text>
 
         {error && (
@@ -83,7 +86,7 @@ export default function Bootstrap() {
               style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
               onClick={onDemo}
             >
-              Try Demo
+              {t('bootstrap.tryDemo')}
             </Button>
           }
           onSetPassword={onSetPassword}

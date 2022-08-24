@@ -23,6 +23,7 @@ import * as actions from 'loot-core/src/client/actions';
 import thunk from 'redux-thunk';
 import { handleGlobalEvents } from './global-events';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
+import './locales';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
