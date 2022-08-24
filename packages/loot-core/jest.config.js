@@ -1,6 +1,7 @@
 const isReactNative = process.env.REACT_APP_IS_REACT_NATIVE;
 
 module.exports = {
+  preset: 'ts-jest/presets/js-with-ts-esm',
   moduleFileExtensions: ['testing.js', 'electron.js']
     .concat(isReactNative ? ['ios.js', 'mobile.js'] : [])
     .concat(['mjs', 'js', 'ts', 'json']),
