@@ -8,11 +8,8 @@
     "android": "npx react-native run-android --appId com.shiftreset.actual",
     "android:prod": "rm -f ./android/app/build/generated/assets/react/release/index.android.bundle && npx react-native run-android --appId com.shiftreset.actual --variant=release",
     "ios": "react-native run-ios",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "postinstall": "patch-package"
-  },
-  "jest": {
-    "preset": "react-native"
   },
   "dependencies": {
     "@babel/core": "~7.12.9",
@@ -25,6 +22,7 @@
     "@react-navigation/native-stack": "^6.1.0",
     "@reactions/component": "^2.0.2",
     "@sentry/react-native": "3.0.2",
+    "jest": "^28.1.0",
     "jsc-android": "^241213.1.0",
     "loot-core": "*",
     "memoize-one": "^4.0.0",
