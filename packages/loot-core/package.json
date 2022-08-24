@@ -45,7 +45,6 @@
     "devDependencies": {
         "@actual-app/api": "*",
         "@actual-app/import-ynab4": "*",
-        "@babel/core": "~7.14.3",
         "adm-zip": "cthackers/adm-zip#ff17ae85",
         "buffer": "^5.5.0",
         "cross-env": "^7.0.3",

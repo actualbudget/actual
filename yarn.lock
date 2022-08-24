@@ -15241,7 +15241,6 @@ jest-snapshot@test:
   dependencies:
     "@actual-app/api": "*"
     "@actual-app/import-ynab4": "*"
-    "@babel/core": ~7.14.3
     "@jlongster/mixpanel": ^0.13.4
     "@jlongster/sql.js": ^1.6.7
     "@rschedule/core": ^1.2.0
