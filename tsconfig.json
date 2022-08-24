@@ -9,7 +9,7 @@
     "jsx": "preserve",
     // Check JS files too
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     // Used for temp builds
     "outDir": "build",
     "moduleResolution": "Node",
