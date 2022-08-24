@@ -160,9 +160,9 @@ export const send = function send(name, args, { catchErrors = false } = {}) {
   });
 };
 
-export const sendCatch = function send(name, args) {
+export function sendCatch(name, args) {
   return send(name, args, { catchErrors: true });
-};
+}
 
 export const listen = function listen(name, cb) {
   if (!listeners.get(name)) {
