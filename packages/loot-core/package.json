@@ -38,7 +38,9 @@
         "mitt": "^2.1.0",
         "node-fetch": "^1.6.3",
         "node-libofx": "*",
-        "regenerator-runtime": "^0.13.7"
+        "process": "^0.11.10",
+        "regenerator-runtime": "^0.13.7",
+        "stream-browserify": "^3.0.0"
     },
     "devDependencies": {
         "@actual-app/api": "*",

@@ -16,7 +16,6 @@
         "@swc/core": "^1.2.241",
         "@typescript-eslint/eslint-plugin": "^5.23.0",
         "@typescript-eslint/parser": "^5.23.0",
-        "babel-eslint": "9.0.0",
         "bezier-easing": "^2.0.3",
         "bfj": "6.1.1",
         "case-sensitive-paths-webpack-plugin": "^2.4.0",
