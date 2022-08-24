@@ -3,6 +3,7 @@
     "target": "ES2022",
     "lib": ["ES2021", "DOM"],
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
