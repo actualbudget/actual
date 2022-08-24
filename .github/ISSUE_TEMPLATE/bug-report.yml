@@ -9,14 +9,14 @@ body:
       value: |
         Thanks for taking the time to fill out this bug report! Please ensure you provide as much information as asked to better assist in confirming and identifying a fix for the bug report.
   - type: dropdown
-      id: existing-issue
-      attributes:
-        label: "Verified issue does not already exist?"
-        description: "Please search to see if an issue already exists for the issue you encountered."
-        options:
-          - "I have searched and found no existing issue"
-      validations:
-        required: true
+    id: existing-issue
+    attributes:
+      label: "Verified issue does not already exist?"
+      description: "Please search to see if an issue already exists for the issue you encountered."
+      options:
+        - "I have searched and found no existing issue"
+    validations:
+      required: true
   - type: textarea
     id: what-happened
     attributes:
@@ -31,16 +31,6 @@ body:
     attributes:
       label: "What error did you receive?"
       description: "If you received an error or a message on the screen, please provide that here."
-    validations:
-      required: false
-  - type: dropdown
-    id: version
-    attributes:
-      label: Version
-      description: What version of our software are you running?
-      options:
-        - 1.0.2 (Default)
-        - 1.0.3 (Edge)
     validations:
       required: false
   - type: markdown
