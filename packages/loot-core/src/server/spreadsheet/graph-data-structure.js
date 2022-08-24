@@ -120,4 +120,4 @@ function Graph(serialized) {
   return graph;
 }
 
-export default Graph;
+module.exports = Graph;

@@ -166,4 +166,4 @@ const test = {
   }
 };
 
-export default test
+module.exports = test;

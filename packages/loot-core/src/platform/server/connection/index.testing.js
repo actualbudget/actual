@@ -10,4 +10,4 @@ function resetEvents() {
   events = [];
 }
 
-export default { init, send, resetEvents, getEvents: () => events };
+module.exports = { init, send, resetEvents, getEvents: () => events };

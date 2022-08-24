@@ -184,4 +184,4 @@ function interpret(where, row, table) {
   return ret;
 }
 
-export default interpret;
+module.exports = interpret;

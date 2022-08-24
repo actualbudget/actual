@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   v4: function() {
     return Promise.resolve(global.randomId());
   },

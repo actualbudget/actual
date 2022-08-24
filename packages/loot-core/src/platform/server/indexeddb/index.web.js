@@ -146,7 +146,7 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
-export default {
+module.exports = {
   getDatabase,
   openDatabase,
   closeDatabase,
