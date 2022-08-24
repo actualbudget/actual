@@ -498,7 +498,11 @@ module.exports = function(webpackEnv) {
       // solution that requires the user to opt into importing specific locales.
       // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
       // You can remove this if you don't use Moment.js:
-      new webpack.IgnorePlugin({resourceRegExp:/^\.\/locale$/, contextRegExp: /moment$/}),
+      new webpack.IgnorePlugin({resourceRegExp: /^\.\/locale$/, contextRegExp: /moment$/}),
+      // Pikaday throws a warning if Moment.js is not installed however it doesn't
+      // actually require it to be installed. As we don't use Moment.js ourselves
+      // then we can just silence this warning.
+      new webpack.IgnorePlugin({resourceRegExp: /moment$/, contextRegExp: /pikaday$/}),
       !(isEnvDevelopment || process.env.PERF_BUILD) &&
         new webpack.IgnorePlugin({resourceRegExp: /perf-deets\/frontend/}),
       // Generate a service worker script that will precache, and keep up to date,

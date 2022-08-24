@@ -1,18 +1,18 @@
 const conjunctions = [
-  'for',
+  'for', //
   'and',
   'nor',
   'but',
   'or',
   'yet',
   'so'
-]
+];
 
 const articles = [
-  'a',
+  'a', //
   'an',
   'the'
-]
+];
 
 const prepositions = [
   'aboard',
@@ -84,7 +84,7 @@ const prepositions = [
   'with',
   'within',
   'without'
-]
+];
 
 export default new Set([
   ...conjunctions,

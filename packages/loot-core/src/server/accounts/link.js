@@ -1,6 +1,6 @@
 import { default as asyncStorage } from '../../platform/server/asyncStorage';
 import * as db from '../db';
-import { getServer  } from '../server-config';
+import { getServer } from '../server-config';
 import * as bankSync from './sync';
 import { fromPlaidAccountType } from '../../shared/accounts';
 import { amountToInteger } from '../../shared/util';
