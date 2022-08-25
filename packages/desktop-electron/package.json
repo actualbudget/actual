@@ -56,7 +56,7 @@
     "@sentry/cli": "^1.68.0",
     "@sentry/wizard": "1.2.11",
     "electron": "12.2.1",
-    "electron-builder": "22.10.5",
+    "electron-builder": "22.14.13",
     "electron-download": "4.1.1",
     "electron-notarize": "1.0.0",
     "electron-rebuild": "2.3.5"
