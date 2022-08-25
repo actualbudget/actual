@@ -35,7 +35,7 @@ jobs:
 
   electron:
     # As electron builds take longer, we only run them in master.
-    if: github.event_name != 'pull_request'
+    # if: github.event_name != 'pull_request'
     strategy:
       matrix:
         os:
