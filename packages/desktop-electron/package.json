@@ -7,7 +7,8 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "electron-builder",
-    "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
+    "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
+    "postinstall": "electron-builder install-app-deps"
   },
   "main": "index.js",
   "build": {
@@ -58,7 +59,6 @@
     "electron": "12.2.1",
     "electron-builder": "22.14.13",
     "electron-download": "4.1.1",
-    "electron-notarize": "1.0.0",
-    "electron-rebuild": "2.3.5"
+    "electron-notarize": "1.0.0"
   }
 }
