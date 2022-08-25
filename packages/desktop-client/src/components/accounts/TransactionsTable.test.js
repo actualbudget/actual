@@ -8,8 +8,17 @@ import { initServer } from 'loot-core/src/platform/client/fetch';
 import {
   generateTransaction,
   generateAccount,
-  generateCategoryGroups
+  generateCategoryGroups,
+  TestProvider
 } from 'loot-core/src/mocks';
+import {
+  addSplitTransaction,
+  realizeTempTransactions,
+  splitTransaction,
+  updateTransaction
+} from 'loot-core/src/shared';
+import { SelectedProviderWithItems } from 'loot-design/src/components';
+import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 const uuid = require('loot-core/src/platform/uuid');
 
 const accounts = [generateAccount('Bank of America')];

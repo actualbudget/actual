@@ -90,6 +90,7 @@ __metadata:
     eslint-plugin-flowtype: 2.50.1
     eslint-plugin-import: 2.14.0
     eslint-plugin-jsx-a11y: 6.1.2
+    eslint-plugin-prettier: ^3.1.4
     eslint-plugin-react: 7.11.1
     file-loader: 2.0.0
     focus-visible: ^4.1.1
