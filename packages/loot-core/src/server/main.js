@@ -74,8 +74,8 @@ import schedulesApp from './schedules/app';
 import budgetApp from './budget/app';
 import notesApp from './notes/app';
 import toolsApp from './tools/app';
-import { findOrCreateBank } from "./accounts/link";
-import { normalizeAccount } from "./accounts/sync";
+import { findOrCreateBank } from './accounts/link';
+import { normalizeAccount } from './accounts/sync';
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');
@@ -797,13 +797,15 @@ handlers['accounts-link'] = async function({
   const normalizedAccount = normalizeAccount(account);
 
   if (upgradingId) {
-    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [upgradingId])
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+      upgradingId
+    ]);
     id = accRow.id;
     await db.update('accounts', {
       id,
       account_id: normalizedAccount.account_id,
       bank: bank.id
-    })
+    });
   } else {
     id = uuid.v4Sync();
     await db.insertWithUUID('accounts', {
@@ -939,7 +941,7 @@ handlers['account-close'] = mutator(async function({
         });
 
         db.deleteAccount({ id });
-        if(payeeId) {
+        if (payeeId) {
           db.deleteTransferPayee({ id: payeeId });
         }
       });
@@ -987,7 +989,10 @@ handlers['account-move'] = mutator(async function({ id, targetId }) {
 
 let stopPolling = false;
 
-handlers['poll-web-token'] = async function({ upgradingAccountId, requisitionId }) {
+handlers['poll-web-token'] = async function({
+  upgradingAccountId,
+  requisitionId
+}) {
   let startTime = Date.now();
   stopPolling = false;
 
@@ -1036,8 +1041,16 @@ handlers['poll-web-token-stop'] = async function() {
   return 'ok';
 };
 
-handlers['create-web-token'] = async function ({ upgradingAccountId, institutionId, accessValidForDays}) {
-  return await post(getServer().NORDIGEN_SERVER + '/create-web-token', { upgradingAccountId, institutionId, accessValidForDays });
+handlers['create-web-token'] = async function({
+  upgradingAccountId,
+  institutionId,
+  accessValidForDays
+}) {
+  return await post(getServer().NORDIGEN_SERVER + '/create-web-token', {
+    upgradingAccountId,
+    institutionId,
+    accessValidForDays
+  });
 };
 
 handlers['accounts-sync'] = async function({ id }) {

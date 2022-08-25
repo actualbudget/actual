@@ -99,15 +99,18 @@ async function downloadTransactions(
     requisitionId: bankId,
     accountId: acctId,
     startDate: since,
-    endDate: endDate,
+    endDate: endDate
   });
-  console.log({res});
+  console.log({ res });
 
   if (res.error_code) {
     throw BankSyncError(res.error_type, res.error_code);
   }
 
-  const {transactions: { booked }, balances} = res
+  const {
+    transactions: { booked },
+    balances
+  } = res;
 
   return {
     transactions: booked,
@@ -135,20 +138,17 @@ async function resolvePayee(trans, payeeName, payeesToCreate) {
   return trans.payee;
 }
 
-async function normalizeTransactions(
-  transactions,
-  acctId,
-) {
+async function normalizeTransactions(transactions, acctId) {
   let payeesToCreate = new Map();
 
   let normalized = [];
   for (let trans of transactions) {
-    if(!trans.date) {
-      trans.date = trans.valueDate
+    if (!trans.date) {
+      trans.date = trans.valueDate;
     }
 
-    if(!trans.amount) {
-      trans.amount = trans.transactionAmount.amount
+    if (!trans.amount) {
+      trans.amount = trans.transactionAmount.amount;
     }
 
     // Validate the date because we do some stuff with it. The db
@@ -159,19 +159,37 @@ async function normalizeTransactions(
 
     let payee_name;
     if (trans.amount >= 0) {
-      const nameParts = []
-      nameParts.push(title(trans.debtorName || trans.remittanceInformationUnstructured || ''))
+      const nameParts = [];
+      nameParts.push(
+        title(trans.debtorName || trans.remittanceInformationUnstructured || '')
+      );
       if (trans.debtorAccount && trans.debtorAccount.iban) {
-        nameParts.push('(' + trans.debtorAccount.iban.slice(0, 4) + ' XXX ' + trans.debtorAccount.iban.slice(-4) + ')')
+        nameParts.push(
+          '(' +
+            trans.debtorAccount.iban.slice(0, 4) +
+            ' XXX ' +
+            trans.debtorAccount.iban.slice(-4) +
+            ')'
+        );
       }
-      payee_name = nameParts.join(' ')
+      payee_name = nameParts.join(' ');
     } else {
-      const nameParts = []
-      nameParts.push(title(trans.creditorName || trans.remittanceInformationUnstructured || ''))
+      const nameParts = [];
+      nameParts.push(
+        title(
+          trans.creditorName || trans.remittanceInformationUnstructured || ''
+        )
+      );
       if (trans.creditorAccount && trans.creditorAccount.iban) {
-        nameParts.push('(' + trans.creditorAccount.iban.slice(0, 4) + ' XXX ' + trans.creditorAccount.iban.slice(-4) + ')')
+        nameParts.push(
+          '(' +
+            trans.creditorAccount.iban.slice(0, 4) +
+            ' XXX ' +
+            trans.creditorAccount.iban.slice(-4) +
+            ')'
+        );
       }
-      payee_name = nameParts.join(' ')
+      payee_name = nameParts.join(' ');
     }
 
     trans.imported_payee = trans.imported_payee || payee_name;
@@ -194,7 +212,7 @@ async function normalizeTransactions(
         date: trans.date,
         notes: trans.remittanceInformationUnstructured,
         imported_id: trans.transactionId,
-        imported_payee: trans.imported_payee,
+        imported_payee: trans.imported_payee
       }
     });
   }
@@ -465,9 +483,13 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     });
   } else {
     // Otherwise, download transaction for the past 30 days
-    const startingDay = monthUtils.subDays(monthUtils.currentDay(),30);
+    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 30);
 
-    const { institutionId, transactions, accountBalances } = await downloadTransactions(
+    const {
+      institutionId,
+      transactions,
+      accountBalances
+    } = await downloadTransactions(
       userId,
       userKey,
       acctId,
@@ -479,7 +501,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       return {
         added: [],
         updated: []
-      }
+      };
     }
 
     // We need to add a transaction that represents the starting
@@ -487,9 +509,11 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     // before the first imported transaction, we need to get the
     // current balance from the accounts table and subtract all the
     // imported transactions.
-    const sortedTransactions = sortTransactions(institutionId, transactions)
+    const sortedTransactions = sortTransactions(institutionId, transactions);
     const oldestTransaction = sortedTransactions[sortedTransactions.length - 1];
-    const previousBalance = amountToInteger(countPreviousBalance(institutionId, sortedTransactions, accountBalances));
+    const previousBalance = amountToInteger(
+      countPreviousBalance(institutionId, sortedTransactions, accountBalances)
+    );
 
     const oldestDate =
       transactions.length > 0
@@ -518,80 +542,90 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
   }
 }
 
-export const printIban = (account) => {
-  if(account.iban) {
-    return '(XXX ' + account.iban.slice(-4) + ')'
+export const printIban = account => {
+  if (account.iban) {
+    return '(XXX ' + account.iban.slice(-4) + ')';
   } else {
     return '';
   }
-}
+};
 
 // https://nordigen.com/en/docs/account-information/output/accounts/
 // https://docs.google.com/spreadsheets/d/11tAD5cfrlaOZ4HXI6jPpL5hMf8ZuRYc6TUXTxZE84A8/edit#gid=489769432
 export function normalizeAccount(account) {
   switch (account.institution_id) {
-    case('MBANK_RETAIL_BREXPLPW'):
+    case 'MBANK_RETAIL_BREXPLPW':
       return {
         account_id: account.id,
         name: [account.displayName, printIban(account)].join(' '),
         mask: account.iban.slice(-4),
         official_name: account.product,
-        type: 'checking',
+        type: 'checking'
       };
-    case('SANDBOXFINANCE_SFIN0000'):
+    case 'SANDBOXFINANCE_SFIN0000':
       return {
         account_id: account.id,
         name: [account.name, printIban(account)].join(' '),
         mask: account.iban.slice(-4),
         official_name: account.product,
-        type: 'checking',
+        type: 'checking'
       };
-    case('ING_PL_INGBPLPW'):
-    case('REVOLUT_REVOGB21'):
+    case 'ING_PL_INGBPLPW':
+    case 'REVOLUT_REVOGB21':
     default:
       return {
         account_id: account.id,
         name: [account.product, printIban(account)].join(' '),
         mask: account.iban.slice(-4),
         official_name: account.product,
-        type: 'checking',
+        type: 'checking'
       };
   }
 }
 
-export function sortTransactions(institution_id, transactions=[]) {
+export function sortTransactions(institution_id, transactions = []) {
   switch (institution_id) {
-    case('SANDBOXFINANCE_SFIN0000'):
+    case 'SANDBOXFINANCE_SFIN0000':
       return transactions.sort((a, b) => {
         const [aTime, aSeq] = a.transactionId.split('-');
         const [bTime, bSeq] = b.transactionId.split('-');
 
-        return bTime - aTime || bSeq - aSeq
-      })
-    case('ING_PL_INGBPLPW'):
+        return bTime - aTime || bSeq - aSeq;
+      });
+    case 'ING_PL_INGBPLPW':
       return transactions.sort((a, b) => {
-        return b.transactionId.substr(2)-a.transactionId.substr(2);
-      })
-    case('MBANK_RETAIL_BREXPLPW'):
-    case('REVOLUT_REVOGB21'):
+        return b.transactionId.substr(2) - a.transactionId.substr(2);
+      });
+    case 'MBANK_RETAIL_BREXPLPW':
+    case 'REVOLUT_REVOGB21':
       return transactions.sort((a, b) => b.transactionId - a.transactionId);
     default:
       return transactions;
   }
 }
 
-export function countPreviousBalance(institution_id, transactions = [], accountBalances) {
+export function countPreviousBalance(
+  institution_id,
+  transactions = [],
+  accountBalances
+) {
   const oldestTransaction = transactions[transactions.length - 1];
 
   switch (institution_id) {
-    case('ING_PL_INGBPLPW'):
-      return oldestTransaction.balanceAfterTransaction.balanceAmount.amount - oldestTransaction.transactionAmount.amount;
-    case('MBANK_RETAIL_BREXPLPW'):
-    case('REVOLUT_REVOGB21'):
-    case('SANDBOXFINANCE_SFIN0000'):
+    case 'ING_PL_INGBPLPW':
+      return (
+        oldestTransaction.balanceAfterTransaction.balanceAmount.amount -
+        oldestTransaction.transactionAmount.amount
+      );
+    case 'MBANK_RETAIL_BREXPLPW':
+    case 'REVOLUT_REVOGB21':
+    case 'SANDBOXFINANCE_SFIN0000':
     default:
-      const balance = accountBalances.find((balance) => ['interimBooked', 'interimAvailable'].includes(balance.balanceType)) || accountBalances[0]
-      const accountBalance = balance.balanceAmount.amount
+      const balance =
+        accountBalances.find(balance =>
+          ['interimBooked', 'interimAvailable'].includes(balance.balanceType)
+        ) || accountBalances[0];
+      const accountBalance = balance.balanceAmount.amount;
       return transactions.reduce((total, trans) => {
         return total - trans.transactionAmount.amount;
       }, accountBalance);

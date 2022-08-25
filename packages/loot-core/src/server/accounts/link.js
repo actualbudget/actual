@@ -41,9 +41,12 @@ export async function handoffPublicToken(institution, publicToken) {
 }
 
 export async function findOrCreateBank(institution, requisitionId) {
-  let bank = await db.first('SELECT id, bank_id, name FROM banks WHERE bank_id = ?', [requisitionId]);
+  let bank = await db.first(
+    'SELECT id, bank_id, name FROM banks WHERE bank_id = ?',
+    [requisitionId]
+  );
 
-  if(bank) {
+  if (bank) {
     return bank;
   }
 
