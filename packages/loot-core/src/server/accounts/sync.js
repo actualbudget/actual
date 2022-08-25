@@ -68,7 +68,7 @@ async function updateAccountBalance(id, balance) {
 }
 
 export async function getAccounts(userId, userKey, id) {
-  let res = await post(getServer().PLAID_SERVER + '/accounts', {
+  let res = await post(getServer().NORDIGEN_SERVER + '/accounts', {
     userId,
     key: userKey,
     item_id: id
@@ -101,59 +101,26 @@ async function downloadTransactions(
   since,
   count
 ) {
-  let allTransactions = [];
-  let accountBalance = null;
-  let pageSize = 100;
-  let offset = 0;
-  let numDownloaded = 0;
+  const endDate = monthUtils.currentDay();
+  const res = await post(getServer().NORDIGEN_SERVER + '/transactions', {
+    userId: userId,
+    key: userKey,
+    requisitionId: bankId,
+    accountId: acctId,
+    startDate: since,
+    endDate: endDate,
+  });
+  console.log({res});
 
-  while (1) {
-    const endDate = monthUtils.currentDay();
-
-    const res = await post(getServer().PLAID_SERVER + '/transactions', {
-      userId: userId,
-      key: userKey,
-      item_id: '' + bankId,
-      account_id: acctId,
-      start_date: since,
-      end_date: endDate,
-      count: pageSize,
-      offset
-    });
-
-    if (res.error_code) {
-      throw BankSyncError(res.error_type, res.error_code);
-    }
-
-    if (res.transactions.length === 0) {
-      break;
-    }
-
-    numDownloaded += res.transactions.length;
-
-    // Remove pending transactions for now - we will handle them in
-    // the future.
-    allTransactions = allTransactions.concat(
-      res.transactions.filter(t => !t.pending)
-    );
-    accountBalance = getAccountBalance(res.accounts[0]);
-
-    if (
-      numDownloaded === res.total_transactions ||
-      (count != null && allTransactions.length >= count)
-    ) {
-      break;
-    }
-
-    offset += pageSize;
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
   }
 
-  allTransactions =
-    count != null ? allTransactions.slice(0, count) : allTransactions;
+  const {transactions: { booked }, balances} = res
 
   return {
-    transactions: allTransactions.map(fromPlaid),
-    accountBalance
+    transactions: booked,
+    accountBalances: balances
   };
 }
 
@@ -180,29 +147,40 @@ async function resolvePayee(trans, payeeName, payeesToCreate) {
 async function normalizeTransactions(
   transactions,
   acctId,
-  { rawPayeeName } = {}
 ) {
   let payeesToCreate = new Map();
 
   let normalized = [];
   for (let trans of transactions) {
+    if(!trans.date) {
+      trans.date = trans.valueDate
+    }
+
+    if(!trans.amount) {
+      trans.amount = trans.transactionAmount.amount
+    }
+
     // Validate the date because we do some stuff with it. The db
     // layer does better validation, but this will give nicer errors
     if (trans.date == null) {
       throw new Error('`date` is required when adding a transaction');
     }
 
-    // Strip off the irregular properties
-    let { payee_name, subtransactions, ...rest } = trans;
-    trans = rest;
-
-    if (payee_name) {
-      let trimmed = payee_name.trim();
-      if (trimmed === '') {
-        payee_name = null;
-      } else {
-        payee_name = rawPayeeName ? trimmed : title(trimmed);
+    let payee_name;
+    if (trans.amount >= 0) {
+      const nameParts = []
+      nameParts.push(title(trans.debtorName || trans.remittanceInformationUnstructured || ''))
+      if (trans.debtorAccount && trans.debtorAccount.iban) {
+        nameParts.push('(' + trans.debtorAccount.iban.slice(0, 4) + ' XXX ' + trans.debtorAccount.iban.slice(-4) + ')')
       }
+      payee_name = nameParts.join(' ')
+    } else {
+      const nameParts = []
+      nameParts.push(title(trans.creditorName || trans.remittanceInformationUnstructured || ''))
+      if (trans.creditorAccount && trans.creditorAccount.iban) {
+        nameParts.push('(' + trans.creditorAccount.iban.slice(0, 4) + ' XXX ' + trans.creditorAccount.iban.slice(-4) + ')')
+      }
+      payee_name = nameParts.join(' ')
     }
 
     trans.imported_payee = trans.imported_payee || payee_name;
@@ -218,10 +196,15 @@ async function normalizeTransactions(
 
     normalized.push({
       payee_name,
-      subtransactions: subtransactions
-        ? subtransactions.map(t => ({ ...t, account: acctId }))
-        : null,
-      trans
+      trans: {
+        amount: amountToInteger(trans.amount),
+        payee: trans.payee,
+        account: trans.account,
+        date: trans.date,
+        notes: trans.remittanceInformationUnstructured,
+        imported_id: trans.transactionId,
+        imported_payee: trans.imported_payee,
+      }
     });
   }
 
@@ -446,6 +429,8 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     [id]
   );
 
+  const acctRow = await db.select('accounts', id);
+
   if (latestTransaction) {
     const startingTransaction = await db.first(
       'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
@@ -475,6 +460,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       bankId,
       date
     );
+
     if (transactions.length === 0) {
       return { added: [], updated: [] };
     }
@@ -487,16 +473,10 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       return result;
     });
   } else {
-    const acctRow = await db.select('accounts', id);
+    // Otherwise, download transaction for the past 30 days
+    const startingDay = monthUtils.subDays(monthUtils.currentDay(),30);
 
-    // Otherwise, download transaction for the last few days if it's an
-    // on-budget account, or for the past 30 days if off-budget
-    const startingDay = monthUtils.subDays(
-      monthUtils.currentDay(),
-      acctRow.offbudget === 0 ? 1 : 30
-    );
-
-    const { transactions } = await downloadTransactions(
+    const { institutionId, transactions, accountBalances } = await downloadTransactions(
       userId,
       userKey,
       acctId,
@@ -504,23 +484,28 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd')
     );
 
+    if (!transactions.length) {
+      return {
+        added: [],
+        updated: []
+      }
+    }
+
     // We need to add a transaction that represents the starting
     // balance for everything to balance out. In order to get balance
     // before the first imported transaction, we need to get the
     // current balance from the accounts table and subtract all the
     // imported transactions.
-    let currentBalance = acctRow.balance_current;
-
-    const previousBalance = transactions.reduce((total, trans) => {
-      return total - trans.amount;
-    }, currentBalance);
+    const sortedTransactions = sortTransactions(institutionId, transactions)
+    const oldestTransaction = sortedTransactions[sortedTransactions.length - 1];
+    const previousBalance = amountToInteger(countPreviousBalance(institutionId, sortedTransactions, accountBalances));
 
     const oldestDate =
       transactions.length > 0
-        ? transactions[transactions.length - 1].date
+        ? oldestTransaction.valueDate
         : monthUtils.currentDay();
 
-    let payee = await getStartingBalancePayee();
+    const payee = await getStartingBalancePayee();
 
     return runMutator(async () => {
       let initialId = await db.insertTransaction({
@@ -539,5 +524,85 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
         added: [initialId, ...result.added]
       };
     });
+  }
+}
+
+export const printIban = (account) => {
+  if(account.iban) {
+    return '(XXX ' + account.iban.slice(-4) + ')'
+  } else {
+    return '';
+  }
+}
+
+// https://nordigen.com/en/docs/account-information/output/accounts/
+// https://docs.google.com/spreadsheets/d/11tAD5cfrlaOZ4HXI6jPpL5hMf8ZuRYc6TUXTxZE84A8/edit#gid=489769432
+export function normalizeAccount(account) {
+  switch (account.institution_id) {
+    case('MBANK_RETAIL_BREXPLPW'):
+      return {
+        account_id: account.id,
+        name: [account.displayName, printIban(account)].join(' '),
+        mask: account.iban.slice(-4),
+        official_name: account.product,
+        type: 'checking',
+      };
+    case('SANDBOXFINANCE_SFIN0000'):
+      return {
+        account_id: account.id,
+        name: [account.name, printIban(account)].join(' '),
+        mask: account.iban.slice(-4),
+        official_name: account.product,
+        type: 'checking',
+      };
+    case('ING_PL_INGBPLPW'):
+    case('REVOLUT_REVOGB21'):
+    default:
+      return {
+        account_id: account.id,
+        name: [account.product, printIban(account)].join(' '),
+        mask: account.iban.slice(-4),
+        official_name: account.product,
+        type: 'checking',
+      };
+  }
+}
+
+export function sortTransactions(institution_id, transactions=[]) {
+  switch (institution_id) {
+    case('SANDBOXFINANCE_SFIN0000'):
+      return transactions.sort((a, b) => {
+        const [aTime, aSeq] = a.transactionId.split('-');
+        const [bTime, bSeq] = b.transactionId.split('-');
+
+        return bTime - aTime || bSeq - aSeq
+      })
+    case('ING_PL_INGBPLPW'):
+      return transactions.sort((a, b) => {
+        return b.transactionId.substr(2)-a.transactionId.substr(2);
+      })
+    case('MBANK_RETAIL_BREXPLPW'):
+    case('REVOLUT_REVOGB21'):
+      return transactions.sort((a, b) => b.transactionId - a.transactionId);
+    default:
+      return transactions;
+  }
+}
+
+export function countPreviousBalance(institution_id, transactions = [], accountBalances) {
+  const oldestTransaction = transactions[transactions.length - 1];
+
+  switch (institution_id) {
+    case('ING_PL_INGBPLPW'):
+      return oldestTransaction.balanceAfterTransaction.balanceAmount.amount - oldestTransaction.transactionAmount.amount;
+    case('MBANK_RETAIL_BREXPLPW'):
+    case('REVOLUT_REVOGB21'):
+    case('SANDBOXFINANCE_SFIN0000'):
+    default:
+      const balance = accountBalances.find((balance) => ['interimBooked', 'interimAvailable'].includes(balance.balanceType)) || accountBalances[0]
+      const accountBalance = balance.balanceAmount.amount
+      return transactions.reduce((total, trans) => {
+        return total - trans.transactionAmount.amount;
+      }, accountBalance);
   }
 }

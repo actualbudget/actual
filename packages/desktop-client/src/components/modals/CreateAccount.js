@@ -12,7 +12,7 @@ import {
   P
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import { authorizeBank } from '../../plaid';
+import { authorizeBank } from '../../nordigen';
 
 class CreateAccount extends React.Component {
   onConnect = async () => {

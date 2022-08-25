@@ -40,6 +40,24 @@ export async function handoffPublicToken(institution, publicToken) {
   return id;
 }
 
+export async function findOrCreateBank(institution, requisitionId) {
+  let bank = await db.first('SELECT id, bank_id, name FROM banks WHERE bank_id = ?', [requisitionId]);
+
+  if(bank) {
+    return bank;
+  }
+
+  const bankData = {
+    id: uuid.v4Sync(),
+    bank_id: requisitionId,
+    name: institution.name
+  };
+
+  await db.insertWithUUID('banks', bankData);
+
+  return bankData;
+}
+
 export async function addAccounts(bankId, accountIds, offbudgetIds = []) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',

@@ -67,6 +67,8 @@ import schedulesApp from './schedules/app';
 import budgetApp from './budget/app';
 import notesApp from './notes/app';
 import toolsApp from './tools/app';
+import { findOrCreateBank } from "./accounts/link";
+import { normalizeAccount } from "./accounts/sync";
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');
@@ -74,8 +76,6 @@ const uuid = require('../platform/uuid');
 const connection = require('../platform/server/connection');
 const { resolveName, unresolveName } = require('./spreadsheet/util');
 const SyncPb = require('./sync/proto/sync_pb');
-
-// let indexeddb = require('../platform/server/indexeddb');
 
 let VERSION;
 let DEMO_BUDGET_ID = '_demo-budget';
@@ -774,40 +774,37 @@ handlers['account-properties'] = async function({ id }) {
 };
 
 handlers['accounts-link'] = async function({
-  institution,
-  publicToken,
-  accountId,
+  requisitionId,
+  account,
   upgradingId
 }) {
-  let bankId = await link.handoffPublicToken(institution, publicToken);
+  let id;
+  let bank = await link.findOrCreateBank(account.institution, requisitionId);
+  const normalizedAccount = normalizeAccount(account);
 
-  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key'
-  ]);
-
-  // Get all the available accounts and find the selected one
-  let accounts = await bankSync.getAccounts(userId, userKey, bankId);
-  let account = accounts.find(acct => acct.account_id === accountId);
-
-  await db.update('accounts', {
-    id: upgradingId,
-    account_id: account.account_id,
-    official_name: account.official_name,
-    type: fromPlaidAccountType(account.type),
-    balance_current: amountToInteger(account.balances.current),
-    balance_available: amountToInteger(account.balances.available),
-    balance_limit: amountToInteger(account.balances.limit),
-    mask: account.mask,
-    bank: bankId
-  });
+  if (upgradingId) {
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [upgradingId])
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: normalizedAccount.account_id,
+      bank: bank.id
+    })
+  } else {
+    id = uuid.v4Sync();
+    await db.insertWithUUID('accounts', {
+      ...normalizedAccount,
+      id,
+      bank: bank.id
+    });
+  }
 
   await bankSync.syncAccount(
-    userId,
-    userKey,
-    upgradingId,
-    account.account_id,
-    bankId
+    undefined,
+    undefined,
+    id,
+    account.id,
+    bank.bank_id
   );
 
   connection.send('sync-event', {
@@ -904,7 +901,7 @@ handlers['account-close'] = mutator(async function({
         true
       );
 
-      let { id: payeeId } = await db.first(
+      const payee = await db.first(
         'SELECT id FROM payees WHERE transfer_acct = ?',
         [id]
       );
@@ -929,7 +926,9 @@ handlers['account-close'] = mutator(async function({
         });
 
         db.deleteAccount({ id });
-        db.deleteTransferPayee({ id: payeeId });
+        if(payee) {
+          db.deleteTransferPayee({ id: payee.id });
+        }
       });
     } else {
       if (balance !== 0 && transferAccountId == null) {
@@ -974,12 +973,7 @@ handlers['account-move'] = mutator(async function({ id, targetId }) {
 
 let stopPolling = false;
 
-handlers['poll-web-token'] = async function({ token }) {
-  let [[, userId], [, key]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key'
-  ]);
-
+handlers['poll-web-token'] = async function({ upgradingAccountId, requisitionId }) {
   let startTime = Date.now();
   stopPolling = false;
 
@@ -994,11 +988,10 @@ handlers['poll-web-token'] = async function({ token }) {
     }
 
     let data = await post(
-      getServer().PLAID_SERVER + '/get-web-token-contents',
+      getServer().NORDIGEN_SERVER + '/get-web-token-contents',
       {
-        userId,
-        key,
-        token
+        upgradingAccountId,
+        requisitionId
       }
     );
 
@@ -1029,13 +1022,17 @@ handlers['poll-web-token-stop'] = async function() {
   return 'ok';
 };
 
+handlers['create-web-token'] = async function ({ upgradingAccountId, institutionId, accessValidForDays}) {
+  return await post(getServer().NORDIGEN_SERVER + '/create-web-token', { upgradingAccountId, institutionId, accessValidForDays });
+};
+
 handlers['accounts-sync'] = async function({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
   ]);
   let accounts = await db.runQuery(
-    `SELECT a.*, b.id as bankId FROM accounts a
+    `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
          WHERE a.tombstone = 0 AND a.closed = 0`,
     [],
@@ -1159,19 +1156,11 @@ handlers['account-unlink'] = mutator(async function({ id }) {
     [bankId]
   );
 
+  // No more accounts are associated with this bank. We can remove
+  // it from Nordigen.
   if (count === 0) {
-    // No more accounts are associated with this bank. We can remove
-    // it from Plaid.
-
-    let [[, userId], [, key]] = await asyncStorage.multiGet([
-      'user-id',
-      'user-key'
-    ]);
-
-    await post(getServer().PLAID_SERVER + '/remove-access-token', {
-      userId,
-      key,
-      item_id: bankId
+    await post(getServer().NORDIGEN_SERVER + '/remove-account', {
+      requisition_id: bankId
     });
   }
 

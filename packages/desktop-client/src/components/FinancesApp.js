@@ -28,6 +28,7 @@ import Reports from './reports';
 import Schedules from './schedules';
 import EditSchedule from './schedules/EditSchedule';
 import LinkSchedule from './schedules/LinkSchedule';
+import NordigenLink from './nordigen/NordigenLink';
 import DiscoverSchedules from './schedules/DiscoverSchedules';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import FixSplitsTool from './tools/FixSplitsTool';
@@ -97,6 +98,7 @@ function Routes({ location }) {
         />
 
         <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
+        <Route path="/nordigen/link" exact component={NordigenLink} />
 
         <Route
           path="/accounts/:id"

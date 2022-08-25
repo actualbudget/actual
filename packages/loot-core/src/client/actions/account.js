@@ -41,12 +41,11 @@ export function unlinkAccount(id) {
   };
 }
 
-export function linkAccount(institution, publicToken, accountId, upgradingId) {
+export function linkAccount(requisitionId, account, upgradingId) {
   return async dispatch => {
     await send('accounts-link', {
-      institution,
-      publicToken,
-      accountId,
+      requisitionId,
+      account,
       upgradingId
     });
     await dispatch(getPayees());

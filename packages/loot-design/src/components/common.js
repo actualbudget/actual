@@ -23,7 +23,7 @@ import {
   ListboxButton,
   ListboxPopover,
   ListboxList,
-  ListboxOption
+  ListboxOption,
 } from '@reach/listbox';
 import { styles, colors } from '../style';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -418,7 +418,7 @@ export const Select = React.forwardRef(
   }
 );
 
-export function CustomSelect({ options, value, onChange, style }) {
+export function CustomSelect({ options, value, onChange, style, disabledKeys=[] }) {
   return (
     <ListboxInput
       value={value}
@@ -432,7 +432,7 @@ export function CustomSelect({ options, value, onChange, style }) {
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
         <ListboxList>
           {options.map(([value, label]) => (
-            <ListboxOption key={value} value={value}>
+            <ListboxOption key={value} value={value} disabled={disabledKeys.includes(value)}>
               {label}
             </ListboxOption>
           ))}

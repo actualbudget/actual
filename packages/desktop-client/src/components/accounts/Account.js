@@ -76,7 +76,7 @@ import {
 } from './TransactionsTable';
 import { styles, colors } from 'loot-design/src/style';
 import TransactionList from './TransactionList';
-import { authorizeBank } from '../../plaid';
+import { authorizeBank } from '../../nordigen';
 import {
   SelectedProviderWithItems,
   useSelectedItems
@@ -1324,7 +1324,7 @@ class AccountInternal extends React.PureComponent {
 
     switch (item) {
       case 'link':
-        authorizeBank(this.props.pushModal, { upgradingId: accountId });
+        authorizeBank(this.props.pushModal, { upgradingAccountId: accountId });
         break;
       case 'unlink':
         this.props.unlinkAccount(accountId);

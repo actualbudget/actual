@@ -46,6 +46,94 @@ function Title({ name, style }) {
     </View>
   );
 }
+function Features({ prefs, userData, pushModal, resetSync, savePrefs }) {
+  let [expanded, setExpanded] = useState(true);
+  let [resetting, setResetting] = useState(false);
+  let [resettingCache, setResettingCache] = useState(false);
+
+  const onEnableAccountSync = () => {
+    savePrefs({ 'flags.syncAccount': true});
+  }
+
+  const onDisableAccountSync = () => {
+    savePrefs({ 'flags.syncAccount': false });
+  }
+
+  return (
+    <View style={{ alignItems: 'flex-start', marginTop: 55 }}>
+      <View
+        style={[
+          {
+            fontSize: 15,
+            marginBottom: 20,
+            flexDirection: 'row',
+            alignItems: 'center'
+          },
+          styles.staticText
+        ]}
+        onClick={() => setExpanded(!expanded)}
+      >
+        <ExpandArrow
+          width={8}
+          height={8}
+          style={{
+            marginRight: 5,
+            transition: 'transform .2s',
+            transform: !expanded && 'rotateZ(-90deg)'
+          }}
+        />
+        Features
+      </View>
+
+      {expanded && (
+        <View style={{ marginBottom: 20, alignItems: 'flex-start' }}>
+          <View>
+            <Text style={{ fontWeight: 700, fontSize: 15 }}>
+              Bank sync with Nordigen
+            </Text>
+            <View
+              style={{
+                color: colors.n2,
+                marginTop: 10,
+                maxWidth: 600,
+                lineHeight: '1.4em'
+              }}
+            >
+              {prefs['flags.syncAccount'] ? (
+                <Text>
+                  <Text style={{ color: colors.g4, fontWeight: 600 }}>
+                    Sync is turned on.
+                  </Text>{' '}
+                  <Button
+                    style={{ marginTop: 10 }}
+                    onClick={() => onDisableAccountSync()}
+                  >
+                    Disable integration
+                  </Button>
+                </Text>
+              ) : (
+                <View style={{ alignItems: 'flex-start' }}>
+                  <Text style={{ lineHeight: '1.4em' }}>
+                    The integration give you possibility to sync your accounts with banks.
+                  </Text>
+                  <Button
+                    style={{ marginTop: 10 }}
+                    onClick={() => onEnableAccountSync() }
+                  >
+                    Enable integration
+                  </Button>
+                </View>
+              )}
+            </View>
+          </View>
+
+
+
+        </View>
+      )}
+    </View>
+  );
+}
 
 function Advanced({ prefs, userData, pushModal, resetSync }) {
   let [expanded, setExpanded] = useState(true);
@@ -437,6 +525,14 @@ function FileSettings({
         <Title name="Export" />
         <Button onClick={onExport}>Export data</Button>
       </View>
+
+      <Features
+        prefs={prefs}
+        userData={userData}
+        pushModal={pushModal}
+        resetSync={resetSync}
+        savePrefs={savePrefs}
+      />
 
       <Advanced
         prefs={prefs}
