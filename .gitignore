@@ -21,3 +21,12 @@ export-2020-01-10.csv
 .idea
 
 **/*.log
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

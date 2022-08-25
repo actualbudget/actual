@@ -1,5 +1,5 @@
-import { compile, compileBinding } from './compiler';
-import { MOV, CALL, QUERY, UOP, BOP, REG1, SP, VAR, JUMPF, JUMPT } from './ops';
+import { compile } from './compiler';
+import { MOV, CALL, QUERY, UOP, BOP, JUMPF, JUMPT } from './ops';
 
 export default class VM {
   constructor(db, scopes) {
@@ -74,7 +74,10 @@ export default class VM {
 
   call(callee, args) {
     const func = this.get(callee);
-    this.reg1 = func.apply(null, args.map(arg => this.get(arg)));
+    this.reg1 = func.apply(
+      null,
+      args.map(arg => this.get(arg))
+    );
   }
 
   query(sql, calculated) {

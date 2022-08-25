@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Feature Request?
+    url: https://github.com/actualbudget/actual/discussions/new?category=ideas
+    about: Website is hosted via GitHub Discussions under actualbudget/actual

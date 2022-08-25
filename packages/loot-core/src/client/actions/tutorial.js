@@ -1,4 +1,3 @@
-import constants from '../constants';
 import { send } from '../../platform/client/fetch';
 import Platform from '../platform';
 import { pushModal } from './modals';
