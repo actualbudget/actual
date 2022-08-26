@@ -3,7 +3,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 function _authorize(pushModal, upgradingAccountId, { onSuccess, onClose }) {
   pushModal('nordigen-external-msg', {
     onMoveExternal: async ({institutionId}) => {
-      const accessValidForDays = 1;
+      const accessValidForDays = 30;
       const resp = await send('create-web-token', { upgradingAccountId, institutionId, accessValidForDays });
 
       console.log({resp});
