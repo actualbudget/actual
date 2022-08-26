@@ -4471,13 +4471,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"adm-zip@cthackers/adm-zip#ff17ae85":
-  version: 0.4.12
-  resolution: "adm-zip@https://github.com/cthackers/adm-zip.git#commit=ff17ae85000b62b9d159e2520564902724d26c17"
-  checksum: f6dd7dc3db0acfbf3020ef45017cca0e318a600edcc20390c894561c3ddf06bcd623dc16e03a207eec9d900a42ea84d8e033727adbdb851e6e3c3a2bcd0fcef8
-  languageName: node
-  linkType: hard
-
 "adm-zip@npm:^0.5.9":
   version: 0.5.9
   resolution: "adm-zip@npm:0.5.9"
@@ -14565,7 +14558,7 @@ jest-snapshot@test:
     "@sentry/node": ^6.12.0
     "@types/jest": ^27.5.0
     absurd-sql: 0.0.53
-    adm-zip: "cthackers/adm-zip#ff17ae85"
+    adm-zip: ^0.5.9
     babel-loader: ^8.0.6
     better-sqlite3: 7.4.1
     buffer: ^5.5.0
