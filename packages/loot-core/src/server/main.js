@@ -918,9 +918,7 @@ handlers['account-close'] = mutator(async function({
         true
       );
 
-      let {
-        id: payeeId
-      } = await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [id]);
+      const { id: payeeId} = (await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [id])) || {};
 
       await batchMessages(() => {
         // TODO: what this should really do is send a special message that
