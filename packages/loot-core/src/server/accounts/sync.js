@@ -552,37 +552,6 @@ export const printIban = account => {
 
 // https://nordigen.com/en/docs/account-information/output/accounts/
 // https://docs.google.com/spreadsheets/d/11tAD5cfrlaOZ4HXI6jPpL5hMf8ZuRYc6TUXTxZE84A8/edit#gid=489769432
-export function normalizeAccount(account) {
-  switch (account.institution_id) {
-    case 'MBANK_RETAIL_BREXPLPW':
-      return {
-        account_id: account.id,
-        name: [account.displayName, printIban(account)].join(' '),
-        mask: account.iban.slice(-4),
-        official_name: account.product,
-        type: 'checking'
-      };
-    case 'SANDBOXFINANCE_SFIN0000':
-      return {
-        account_id: account.id,
-        name: [account.name, printIban(account)].join(' '),
-        mask: account.iban.slice(-4),
-        official_name: account.product,
-        type: 'checking'
-      };
-    case 'ING_PL_INGBPLPW':
-    case 'REVOLUT_REVOGB21':
-    default:
-      return {
-        account_id: account.id,
-        name: [account.product, printIban(account)].join(' '),
-        mask: account.iban.slice(-4),
-        official_name: account.product,
-        type: 'checking'
-      };
-  }
-}
-
 export function sortTransactions(institution_id, transactions = []) {
   switch (institution_id) {
     case 'SANDBOXFINANCE_SFIN0000':

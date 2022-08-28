@@ -74,8 +74,6 @@ import schedulesApp from './schedules/app';
 import budgetApp from './budget/app';
 import notesApp from './notes/app';
 import toolsApp from './tools/app';
-import { findOrCreateBank } from './accounts/link';
-import { normalizeAccount } from './accounts/sync';
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');
@@ -794,7 +792,6 @@ handlers['accounts-link'] = async function({
 }) {
   let id;
   let bank = await link.findOrCreateBank(account.institution, requisitionId);
-  const normalizedAccount = normalizeAccount(account);
 
   if (upgradingId) {
     const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
@@ -803,14 +800,18 @@ handlers['accounts-link'] = async function({
     id = accRow.id;
     await db.update('accounts', {
       id,
-      account_id: normalizedAccount.account_id,
+      account_id: account.account_id,
       bank: bank.id
     });
   } else {
-    id = uuid.v4Sync();
+    id = uuid.v4Sync()
     await db.insertWithUUID('accounts', {
-      ...normalizedAccount,
       id,
+      account_id: account.account_id,
+      mask: account.mask,
+      name: account.name,
+      official_name: account.official_name,
+      type: account.type,
       bank: bank.id
     });
   }
@@ -819,7 +820,7 @@ handlers['accounts-link'] = async function({
     undefined,
     undefined,
     id,
-    account.id,
+    account.account_id,
     bank.bank_id
   );
 

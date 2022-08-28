@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { styles, colors } from '../../style';
 import {View, Text, Modal, P, Button, Strong, CustomSelect} from '../common';
-import {normalizeAccount} from "loot-core/src/server/accounts/sync";
 
 let selectedStyle = {
   color: colors.n1
@@ -66,24 +65,16 @@ export default function SelectLinkedAccounts({
   upgradingAccountId,
   modalProps,
   requisitionId,
-  accounts,
+  accounts: importedAccounts,
   actualAccounts,
   actions
 }) {
   let [chosenAccounts, setChosenAccounts] = useState([])
 
-  accounts = accounts.map((acc) => {
-    const normalizedAccount = normalizeAccount(acc);
-    return {
-      ...acc,
-      ...normalizedAccount
-    }
-  })
-
   const addAccountOption = { id: 'new', name: 'Create new account' };
 
   const importedAccountsToSelect =
-    accounts.filter((account) => !chosenAccounts.map((acc) => acc.chosenImportedAccountId).includes(account.id))
+    importedAccounts.filter((account) => !chosenAccounts.map((acc) => acc.chosenImportedAccountId).includes(account.account_id))
 
   const actualAccountsToSelect = [
     addAccountOption,
@@ -91,16 +82,18 @@ export default function SelectLinkedAccounts({
   ]
 
   useEffect(() => {
-    importedAccountsToSelect.forEach( importedAccount =>{
+    importedAccountsToSelect.forEach( importedAccount => {
+      // Try to auto-mach accounts based on account_id or mask
+      // Add matched accounts to list of selected accounts
       const matchedActualAccount = actualAccountsToSelect.find(actualAccount => {
-        return actualAccount.account_id === importedAccount.id || actualAccount.iban === importedAccount.iban
+        return actualAccount.account_id === importedAccount.account_id || actualAccount.mask === importedAccount.mask
       })
 
       if(matchedActualAccount) {
         setChosenAccounts([
           ...chosenAccounts,
           {
-            chosenImportedAccountId: importedAccount.id,
+            chosenImportedAccountId: importedAccount.account_id,
             chosenActualAccountId: matchedActualAccount.id
           }
         ]);
@@ -109,12 +102,12 @@ export default function SelectLinkedAccounts({
     }, []
   );
 
-  let [selectedImportAccountId, setSelectedImportAccountId] = useState(importedAccountsToSelect[0] && importedAccountsToSelect[0].id);
+  let [selectedImportAccountId, setSelectedImportAccountId] = useState(importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id);
   let [selectedAccountId, setSelectedAccountId] = useState(actualAccountsToSelect[0] && actualAccountsToSelect[0].id);
 
   async function onNext() {
     chosenAccounts.forEach((chosenAccount) => {
-      const importedAccount = accounts.find((account) => account.id === chosenAccount.chosenImportedAccountId)
+      const importedAccount = importedAccounts.find((account) => account.account_id === chosenAccount.chosenImportedAccountId)
 
       actions.linkAccount(
         requisitionId,
@@ -135,11 +128,16 @@ export default function SelectLinkedAccounts({
       }
     ]);
 
-    const newSelectedImportAccountId = importedAccountsToSelect[0] && importedAccountsToSelect[0].id;
-    const newSelectedAccountId = actualAccountsToSelect[0] && actualAccountsToSelect[0].id;
-    setSelectedImportAccountId(newSelectedImportAccountId);
-    setSelectedAccountId(newSelectedAccountId);
-  }
+  };
+
+  // Update dropbox with available accounts to select
+  useEffect(() => {
+      const newSelectedImportAccountId = importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id;
+      const newSelectedAccountId = actualAccountsToSelect[0] && actualAccountsToSelect[0].id;
+      setSelectedImportAccountId(newSelectedImportAccountId);
+      setSelectedAccountId(newSelectedAccountId);
+    }, [chosenAccounts]
+  );
 
   const removeChoose = (chosenAccount) => {
     setChosenAccounts([...chosenAccounts.filter((acc) => acc !== chosenAccount)]);
@@ -176,7 +174,7 @@ export default function SelectLinkedAccounts({
             }}
           >
             <View>
-              {accounts.length === 0 ? (
+              {importedAccounts.length === 0 ? (
                 <EmptyMessage />
               ) : (
                 <View>
@@ -192,7 +190,7 @@ export default function SelectLinkedAccounts({
                       <View>
                         <Strong>Imported Account:</Strong>
                         <CustomSelect
-                          options={importedAccountsToSelect.map(account => [account.id, account.name])}
+                          options={importedAccountsToSelect.map(account => [account.account_id, account.name])}
                           onChange={val => {
                             setSelectedImportAccountId(val);
                           }}
@@ -226,7 +224,7 @@ export default function SelectLinkedAccounts({
                   ) : '' }
                   { chosenAccounts.map((chosenAccount) => {
                       const {chosenImportedAccountId, chosenActualAccountId} = chosenAccount
-                      const importedAccount = accounts.find((acc) => acc.id === chosenImportedAccountId )
+                      const importedAccount = importedAccounts.find((acc) => acc.account_id === chosenImportedAccountId )
                       const actualAccount = [
                         addAccountOption,
                         ...actualAccounts,
