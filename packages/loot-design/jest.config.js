@@ -1,10 +1,7 @@
 module.exports = {
-  moduleFileExtensions: ['testing.js', 'web.js', 'mjs', 'js', 'json'],
+  moduleFileExtensions: ['testing.js', 'web.js', 'mjs', 'js', 'ts', 'json'],
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
-  transform: {
-    '.*': '<rootDir>/../../jest-babel-transformer'
-  },
   testPathIgnorePatterns: [
     '/node_modules/',
     '/lib/',

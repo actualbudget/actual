@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
-import { View, P, Button } from 'loot-design/src/components/common';
+import { P, Button } from 'loot-design/src/components/common';
 import { Title, Standalone, useMinimized } from './common';
 import Navigation from './Navigation';
 

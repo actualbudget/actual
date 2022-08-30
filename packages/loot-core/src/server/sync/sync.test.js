@@ -18,7 +18,7 @@ afterEach(() => {
   setSyncingMode('disabled');
 });
 
-describe('Sync', () => {
+describe.skip('Sync', () => {
   it('should send messages to the server', async () => {
     prefs.loadPrefs();
     prefs.savePrefs({ groupId: 'group' });
@@ -171,7 +171,7 @@ function expectCellNotToExist(sheetName, name, voided) {
   expect(value).toBe(voided ? 0 : null);
 }
 
-describe('Sync projections', () => {
+describe.skip('Sync projections', () => {
   test('synced categories should have budgets created', async () => {
     let groupId, fooId, barId;
     await asSecondClient(async () => {
