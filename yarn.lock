@@ -14606,10 +14606,8 @@ jest-snapshot@test:
     memoizee: ^0.4.12
     node-noop: 1.0.0
     npm-run-all: ^4.1.3
-    patch-package: ^6.1.2
     pikaday: 1.8.0
     polished: ^1.8.1
-    postinstall-postinstall: ^2.0.0
     prettier: ^1.14.2
     prop-types: 15.6.0
     react: 16.13.1
@@ -18202,13 +18200,6 @@ jest-snapshot@test:
     picocolors: ^0.2.1
     source-map: ^0.6.1
   checksum: 4ac793f506c23259189064bdc921260d869a115a82b5e713973c5af8e94fbb5721a5cc3e1e26840500d7e1f1fa42a209747c5b1a151918a9bc11f0d7ed9048e3
-  languageName: node
-  linkType: hard
-
-"postinstall-postinstall@npm:^2.0.0":
-  version: 2.1.0
-  resolution: "postinstall-postinstall@npm:2.1.0"
-  checksum: e1d34252cf8d2c5641c7d2db7426ec96e3d7a975f01c174c68f09ef5b8327bc8d5a9aa2001a45e693db2cdbf69577094d3fe6597b564ad2d2202b65fba76134b
   languageName: node
   linkType: hard
 
