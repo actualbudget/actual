@@ -15,4 +15,4 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Check i18n keys
-        run: yarn workspace desktop-client check-i18n --fail-on-update
+        run: yarn workspace @actual-app/web check-i18n --fail-on-update
