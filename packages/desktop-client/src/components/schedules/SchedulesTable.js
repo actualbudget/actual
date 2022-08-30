@@ -240,7 +240,7 @@ export function SchedulesTable({
     <>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
         <Field width="flex">{t('general.payee')}</Field>
-        <Field width="flex">{t('general.account')}</Field>
+        <Field width="flex">{t('general.account_one')}</Field>
         <Field width={110}>{t('schedules.nextDate')}</Field>
         <Field width={120}>{t('general.status')}</Field>
         <Field width={100} style={{ textAlign: 'right' }}>

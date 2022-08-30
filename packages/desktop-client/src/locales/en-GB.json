@@ -13,7 +13,8 @@
     "tryDemo": "Try Demo"
   },
   "general": {
-    "account": "Account",
+    "account_one": "Account",
+    "account_other": "Accounts",
     "add": "Add",
     "amount": "Amount",
     "approximatelyWithAmount": "Approximately {{amount}}",
@@ -27,7 +28,7 @@
     "restart": "Restart",
     "save": "Save",
     "schedule": "Schedule",
-    "schedules": "Schedules",
+    "schedule_other": "Schedules",
     "status": "Status"
   },
   "schedules": {

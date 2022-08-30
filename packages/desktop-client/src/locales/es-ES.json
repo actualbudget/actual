@@ -13,7 +13,8 @@
     "tryDemo": "Probar Demo"
   },
   "general": {
-    "account": "Cuenta",
+    "account_one": "Cuenta",
+    "account_other": "Cuentas",
     "add": "Agregar",
     "amount": "Monto",
     "approximatelyWithAmount": "Aproximadamente {{amount}}",
@@ -27,7 +28,7 @@
     "restart": "Reiniciar",
     "save": "Guardar",
     "schedule": "Agenda",
-    "schedules": "Agendas",
+    "schedule_other": "Agendas",
     "status": "Estado"
   },
   "schedules": {

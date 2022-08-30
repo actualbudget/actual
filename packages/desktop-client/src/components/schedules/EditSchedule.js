@@ -447,7 +447,7 @@ export default function ScheduleDetails() {
         </FormField>
 
         <FormField style={{ flex: 1 }}>
-          <FormLabel title={t('general.account')} />
+          <FormLabel title={t('general.account_one')} />
           <AccountAutocomplete
             value={state.fields.account}
             inputProps={{ placeholder: t('schedules.none') }}
