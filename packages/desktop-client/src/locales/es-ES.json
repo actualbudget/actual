@@ -1,15 +1,15 @@
 {
-    "account": {
-        "addAccount": "Agregar cuenta",
-        "addAccountInFutureFromSidebar": "En el futuro puedes agregar cuentas desde la barra lateral.",
-        "allReconciled": "¡Todo conciliado!",
-        "clearedBalance": "Su saldo compensado <strong>{{cleared}}</strong> necesita <strong>{{diff}}</strong> para coincidir con el saldo del banco de <strong>{{balance}}</strong>",
-        "doneReconciling": "Conciliación finalizada",
-        "needAccountMessage": "Para que Actual sea útil, debe <strong>agregar una cuenta</strong>. Puedes vincular la cuenta para descargar transacciones automáticamente o administrala localmente."
-    },
-    "bootstrap": {
-        "setPassword": "Establecer una contraseña para esta instancia de servidor",
-        "title": "Bootstrap esta instancia de Actual",
-        "tryDemo": "Probar Demo"
-    }
+  "account": {
+    "addAccount": "Agregar cuenta",
+    "addAccountInFutureFromSidebar": "En el futuro puedes agregar cuentas desde la barra lateral.",
+    "allReconciled": "¡Todo conciliado!",
+    "clearedBalance": "Su saldo compensado <strong>{{cleared}}</strong> necesita <strong>{{diff}}</strong> para coincidir con el saldo del banco de <strong>{{balance}}</strong>",
+    "doneReconciling": "Conciliación finalizada",
+    "needAccountMessage": "Para que Actual sea útil, debe <strong>agregar una cuenta</strong>. Puedes vincular la cuenta para descargar transacciones automáticamente o administrala localmente."
+  },
+  "bootstrap": {
+    "setPassword": "Establecer una contraseña para esta instancia de servidor",
+    "title": "Bootstrap esta instancia de Actual",
+    "tryDemo": "Probar Demo"
+  }
 }
