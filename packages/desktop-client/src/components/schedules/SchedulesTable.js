@@ -22,7 +22,7 @@ import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import Check from 'loot-design/src/svg/v2/Check';
 import DisplayId from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 export let ROW_HEIGHT = 43;
 
