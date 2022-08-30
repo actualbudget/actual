@@ -24,7 +24,7 @@ export default function ConfigServer() {
   useEffect(() => {
     async function run() {
       let url = await send('get-server-url');
-      setUrl(url && url.indexOf('not-configured') ? '' : url);
+      setUrl(!url || url.indexOf('not-configured') ? '' : url);
       setCurrentUrl(url);
     }
     run();
