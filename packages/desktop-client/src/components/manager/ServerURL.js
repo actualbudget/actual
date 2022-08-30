@@ -19,7 +19,13 @@ export default function ServerURL() {
       }}
     >
       <Text>
-        Using server: <strong>{url || '(not configured)'}</strong>
+        {url ? (
+          <>
+            Using server: <strong>{url}</strong>
+          </>
+        ) : (
+          <strong>No server configured</strong>
+        )}
       </Text>
       <AnchorLink bare to="/config-server" style={{ marginLeft: 15 }}>
         Change
