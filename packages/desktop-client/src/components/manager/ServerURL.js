@@ -1,17 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, AnchorLink } from 'loot-design/src/components/common';
-import { send } from 'loot-core/src/platform/client/fetch';
+import useServerURL from '../../hooks/useServerURL';
 
 export default function ServerURL() {
-  let [url, setUrl] = useState(null);
-
-  useEffect(() => {
-    async function run() {
-      let url = await send('get-server-url');
-      setUrl(url);
-    }
-    run();
-  }, []);
+  const url = useServerURL();
 
   return (
     <View

@@ -11,24 +11,18 @@ import { colors } from 'loot-design/src/style';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { Title, Input } from './subscribe/common';
+import useServerURL from '../../hooks/useServerURL';
 
 export default function ConfigServer() {
   let dispatch = useDispatch();
   let history = useHistory();
   let [url, setUrl] = useState('');
+  let currentUrl = useServerURL();
+  useEffect(() => {
+    setUrl(currentUrl);
+  }, [currentUrl]);
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState(null);
-
-  let [currentUrl, setCurrentUrl] = useState(null);
-
-  useEffect(() => {
-    async function run() {
-      let url = await send('get-server-url');
-      setUrl(!url || url.indexOf('not-configured') ? '' : url);
-      setCurrentUrl(url);
-    }
-    run();
-  }, []);
 
   function getErrorMessage(error) {
     switch (error) {
