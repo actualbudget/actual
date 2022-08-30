@@ -43,7 +43,7 @@
     "@actual-app/import-ynab4": "*",
     "@babel/core": "~7.14.3",
     "@types/jest": "^27.5.0",
-    "adm-zip": "cthackers/adm-zip#ff17ae85",
+    "adm-zip": "^0.5.9",
     "babel-loader": "^8.0.6",
     "buffer": "^5.5.0",
     "cross-env": "^7.0.3",
