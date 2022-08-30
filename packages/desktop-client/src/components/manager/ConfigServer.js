@@ -121,7 +121,6 @@ export default function ConfigServer() {
             <Button
               bare
               type="button"
-              loading={loading}
               style={{ fontSize: 15, marginLeft: 10 }}
               onClick={() => history.goBack()}
             >
