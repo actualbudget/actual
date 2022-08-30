@@ -1,12 +1,7 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { colors } from 'loot-design/src/style';
-import {
-  View,
-  Text,
-  P,
-  ButtonWithLoading
-} from 'loot-design/src/components/common';
+import { View, P, ButtonWithLoading } from 'loot-design/src/components/common';
 import { Page } from '../Page';
 
 function renderResults(results) {

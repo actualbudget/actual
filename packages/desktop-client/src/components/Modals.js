@@ -6,7 +6,6 @@ import { createLocation } from 'history';
 import Component from '@reactions/component';
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import { getModalRoute } from '../util';
 
 import CreateAccount from './modals/CreateAccount';
 import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';

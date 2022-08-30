@@ -2,15 +2,7 @@ import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  Strong,
-  P
-} from 'loot-design/src/components/common';
+import { View, Text, Modal, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import { authorizeBank } from '../../plaid';
 
