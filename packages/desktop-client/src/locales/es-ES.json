@@ -36,7 +36,6 @@
     "automaticallyAddTransactionAdvice": "Si se selecciona, la agenda creará automáticamente una transacción para la cuenta especificada",
     "editAsRule": "Editar como regla",
     "findMatchingTransactions": "Encontrar transacciones que coincidan",
-    "invalidOpForSelect": "Operación inválida para el selector: {{op}}",
     "isApproximately": "es aproximadamente",
     "isBetween": "está entre",
     "isExactly": "es exactamente",
@@ -52,8 +51,6 @@
     "skipNextDate": "Saltar próxima fecha",
     "theseTransactionsMatchThisSchedule": "Éstas transacciones coinciden con la agenda",
     "thisScheduleHasCustomConditionsAndActions": "Ésta agenda tiene condiciones y acciones personalizadas",
-    "unknownAction": "Acción desconocida: {{action}}",
-    "unknownField": "Campo desconocido {{field}}",
     "unlinkFromSchedule": "Desvincular de la agenda",
     "upcomingDates": "Próximas fechas"
   },

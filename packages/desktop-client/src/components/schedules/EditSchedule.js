@@ -124,9 +124,7 @@ export default function ScheduleDetails() {
         }
         case 'set-field':
           if (!(action.field in state.fields)) {
-            throw new Error(
-              t('schedules.unknownField', { field: action.field })
-            );
+            throw new Error('Unknown field: ' + action.field);
           }
 
           let fields = { [action.field]: action.value };
@@ -192,9 +190,7 @@ export default function ScheduleDetails() {
           return { ...state, transactionsMode: action.mode };
 
         default:
-          throw new Error(
-            t('schedules.unknownAction', { action: action.type })
-          );
+          throw new Error('Unknown action: ' + action.type);
       }
     },
     {
@@ -479,9 +475,7 @@ export default function ScheduleDetails() {
                   case 'isbetween':
                     return t('schedules.isBetween');
                   default:
-                    throw new Error(
-                      t('schedules.invalidOpForSelect', { op: op })
-                    );
+                    throw new Error('Invalid op for select: ' + op);
                 }
               }}
               style={{

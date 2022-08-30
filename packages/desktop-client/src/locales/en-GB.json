@@ -36,7 +36,6 @@
     "automaticallyAddTransactionAdvice": "If checked, the schedule will automatically create transactions for you in the specified account",
     "editAsRule": "Edit as rule",
     "findMatchingTransactions": "Find matching transactions",
-    "invalidOpForSelect": "Invalid op for select: {{op}}",
     "isApproximately": "is approximately",
     "isBetween": "is between",
     "isExactly": "is exactly",
@@ -52,8 +51,6 @@
     "skipNextDate": "Skip next date",
     "theseTransactionsMatchThisSchedule": "These transactions match this schedule:",
     "thisScheduleHasCustomConditionsAndActions": "This schedule has custom conditions and actions",
-    "unknownAction": "Unknown action: {{action}}",
-    "unknownField": "Unknown field: {{field}}",
     "unlinkFromSchedule": "Unlink from schedule",
     "upcomingDates": "Upcoming dates"
   },
