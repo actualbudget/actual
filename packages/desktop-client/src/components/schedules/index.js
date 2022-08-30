@@ -2,8 +2,8 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { View, Button } from 'loot-design/src/components/common';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Page } from '../Page';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { Page } from '../Page';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {

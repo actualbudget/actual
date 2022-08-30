@@ -16,11 +16,11 @@ import {
   P
 } from 'loot-design/src/components/common';
 import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import { MonthCountSelector } from './budget/MonthCountSelector';
 import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
 import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
 import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
+import { MonthCountSelector } from './budget/MonthCountSelector';
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import LoggedInUser from './LoggedInUser';
 import AnimatedRefresh from './AnimatedRefresh';

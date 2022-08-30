@@ -18,16 +18,15 @@ import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete'
 import { Stack, View, Text, Button } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
 import { SelectedItemsButton } from 'loot-design/src/components/table';
-import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
-import { usePageType } from '../Page';
-import { Page } from '../Page';
 import useSelected, {
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
+import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
+import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
+import { usePageType } from '../Page';
+import { Page } from '../Page';
 import { OpSelect } from '../modals/EditRule';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
-
-import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
 
 function mergeFields(defaults, initial) {
   let res = { ...defaults };

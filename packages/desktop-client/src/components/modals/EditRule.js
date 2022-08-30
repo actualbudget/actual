@@ -14,7 +14,6 @@ import {
   CustomSelect,
   Tooltip
 } from 'loot-design/src/components/common';
-import GenericInput from '../util/GenericInput';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { colors } from 'loot-design/src/style';
 import SubtractIcon from 'loot-design/src/svg/Subtract';
@@ -33,9 +32,6 @@ import {
 import useSelected, {
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
-import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
-import { StatusBadge } from '../schedules/StatusBadge';
-import DisplayId from '../util/DisplayId';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   integerToCurrency,
@@ -43,6 +39,10 @@ import {
   amountToInteger
 } from 'loot-core/src/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
+import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
+import { StatusBadge } from '../schedules/StatusBadge';
+import DisplayId from '../util/DisplayId';
+import GenericInput from '../util/GenericInput';
 import { BetweenAmountInput } from '../util/AmountInput';
 
 function updateValue(array, value, update) {

@@ -6,8 +6,8 @@ import {
   init as initConnection,
   send
 } from 'loot-core/src/platform/client/fetch';
-import installPolyfills from '../polyfills';
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
+import installPolyfills from '../polyfills';
 import FatalError from './FatalError';
 import ManagementApp from './manager/ManagementApp';
 import FinancesApp from './FinancesApp';

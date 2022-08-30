@@ -25,8 +25,8 @@ import useSelected, {
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
 import { Page } from '../Page';
-import { ScheduleAmountCell } from './SchedulesTable';
 import DisplayId from '../util/DisplayId';
+import { ScheduleAmountCell } from './SchedulesTable';
 
 let ROW_HEIGHT = 43;
 

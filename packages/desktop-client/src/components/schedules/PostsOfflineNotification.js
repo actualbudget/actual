@@ -2,9 +2,9 @@ import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { Text, P, Button, Stack } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
 import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
-import { colors } from 'loot-design/src/style';
 
 export default function PostsOfflineNotification() {
   let location = useLocation();

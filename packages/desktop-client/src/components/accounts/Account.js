@@ -25,7 +25,6 @@ import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
 import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
-import AnimatedRefresh from '../AnimatedRefresh';
 import Add from 'loot-design/src/svg/v1/Add';
 import format from 'loot-design/src/components/spreadsheet/format';
 import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
@@ -43,25 +42,26 @@ import {
   updateTransaction,
   ungroupTransactions
 } from 'loot-core/src/shared/transactions';
-import {
-  SplitsExpandedProvider,
-  useSplitsExpanded,
-  isPreviewId
-} from './TransactionsTable';
 import { styles, colors } from 'loot-design/src/style';
-import TransactionList from './TransactionList';
-import { authorizeBank } from '../../plaid';
 import {
   SelectedProviderWithItems,
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
 import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
-import { FilterButton, AppliedFilters } from './Filters';
 import {
   SchedulesProvider,
   useCachedSchedules
 } from 'loot-core/src/client/data-hooks/schedules';
+import { authorizeBank } from '../../plaid';
+import AnimatedRefresh from '../AnimatedRefresh';
 import { useActiveLocation } from '../ActiveLocation';
+import { FilterButton, AppliedFilters } from './Filters';
+import TransactionList from './TransactionList';
+import {
+  SplitsExpandedProvider,
+  useSplitsExpanded,
+  isPreviewId
+} from './TransactionsTable';
 
 function EmptyMessage({ onAdd }) {
   return (
