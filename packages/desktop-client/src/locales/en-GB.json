@@ -57,6 +57,15 @@
     "unlinkFromSchedule": "Unlink from schedule",
     "upcomingDates": "Upcoming dates"
   },
+  "status": {
+    "completed": "completed",
+    "due": "due",
+    "missed": "missed",
+    "paid": "paid",
+    "pending": "pending",
+    "scheduled": "scheduled",
+    "upcoming": "upcoming"
+  },
   "support": {
     "anErrorOccuredWhileSaving": "An error occurred while saving. Please contact {{email}} for support."
   }

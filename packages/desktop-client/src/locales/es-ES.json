@@ -57,6 +57,15 @@
     "unlinkFromSchedule": "Desvincular de la agenda",
     "upcomingDates": "Próximas fechas"
   },
+  "status": {
+    "completed": "completo",
+    "due": "adeudado",
+    "missed": "omitido",
+    "paid": "pago",
+    "pending": "pendiente",
+    "scheduled": "agendado",
+    "upcoming": "próximo"
+  },
   "support": {
     "anErrorOccuredWhileSaving": "Ocurrió un error al guardar. Por favor, póngase en contacto con {{email}} para obtener asistencia."
   }
