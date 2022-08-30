@@ -16,7 +16,7 @@
     "account": "Account",
     "add": "Add",
     "amount": "Amount",
-    "approximately": "Approximately",
+    "approximatelyWithAmount": "Approximately {{amount}}",
     "cancel": "Cancel",
     "complete": "Complete",
     "date": "Date",

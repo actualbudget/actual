@@ -104,7 +104,7 @@ export function ScheduleAmountCell({ amount, op }) {
             lineHeight: '1em',
             marginRight: 10
           }}
-          title={`${t('general.approximately')} ` + str}
+          title={t('general.approximatelyWithAmount', { amount: str })}
         >
           ~
         </View>
@@ -117,7 +117,9 @@ export function ScheduleAmountCell({ amount, op }) {
           overflow: 'hidden',
           textOverflow: 'ellipsis'
         }}
-        title={(isApprox ? `${t('general.approximately')} ` : '') + str}
+        title={
+          isApprox ? t('general.approximatelyWithAmount', { amount: str }) : str
+        }
       >
         {num > 0 ? `+${str}` : `${str}`}
       </Text>

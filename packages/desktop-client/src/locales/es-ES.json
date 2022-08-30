@@ -16,7 +16,7 @@
     "account": "Cuenta",
     "add": "Agregar",
     "amount": "Monto",
-    "approximately": "Aproximadamente",
+    "approximatelyWithAmount": "Aproximadamente {{amount}}",
     "cancel": "Cancelar",
     "complete": "Completar",
     "date": "Fecha",
