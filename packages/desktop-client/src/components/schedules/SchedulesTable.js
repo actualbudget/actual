@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { colors, styles } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 import {
   View,
   Text,
@@ -14,8 +14,7 @@ import {
   TableHeader,
   Row,
   Field,
-  Cell,
-  SelectCell
+  Cell
 } from 'loot-design/src/components/table';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
@@ -23,11 +22,14 @@ import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import Check from 'loot-design/src/svg/v2/Check';
 import DisplayId from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
+import { useTranslation } from "react-i18next";
 
 export let ROW_HEIGHT = 43;
 
 function OverflowMenu({ schedule, status, onAction }) {
   let [open, setOpen] = useState(false);
+
+  const { t } = useTranslation();
 
   return (
     <View>
@@ -59,15 +61,15 @@ function OverflowMenu({ schedule, status, onAction }) {
             items={[
               status === 'due' && {
                 name: 'post-transaction',
-                text: 'Post transaction'
+                text: t('schedules.postTransaction')
               },
               ...(schedule.completed
-                ? [{ name: 'restart', text: 'Restart' }]
+                ? [{ name: 'restart', text: t('schedules.restart') }]
                 : [
-                    { name: 'skip', text: 'Skip next date' },
-                    { name: 'complete', text: 'Complete' }
+                    { name: 'skip', text: t('schedules.skipNextDate') },
+                    { name: 'complete', text: t('schedules.complete') }
                   ]),
-              { name: 'delete', text: 'Delete' }
+              { name: 'delete', text: t('schedules.delete') }
             ]}
           />
         </Tooltip>
@@ -80,6 +82,8 @@ export function ScheduleAmountCell({ amount, op }) {
   let num = getScheduledAmount(amount);
   let str = integerToCurrency(Math.abs(num || 0));
   let isApprox = op === 'isapprox' || op === 'isbetween';
+
+  const { t } = useTranslation();
 
   return (
     <Cell
@@ -100,7 +104,7 @@ export function ScheduleAmountCell({ amount, op }) {
             lineHeight: '1em',
             marginRight: 10
           }}
-          title={(isApprox ? 'Approximately ' : '') + str}
+          title={(isApprox ? t('schedules.approximately') : '') + str}
         >
           ~
         </View>
@@ -113,7 +117,7 @@ export function ScheduleAmountCell({ amount, op }) {
           overflow: 'hidden',
           textOverflow: 'ellipsis'
         }}
-        title={(isApprox ? 'Approximately ' : '') + str}
+        title={(isApprox ? t('schedules.approximately') : '') + str}
       >
         {num > 0 ? `+${str}` : `${str}`}
       </Text>
@@ -135,6 +139,8 @@ export function SchedulesTable({
   });
 
   let [showCompleted, setShowCompleted] = useState(false);
+
+  const { t } = useTranslation();
 
   let items = useMemo(() => {
     if (!allowCompleted) {
@@ -220,7 +226,7 @@ export function SchedulesTable({
               color: colors.n6
             }}
           >
-            Show completed schedules
+            {t('schedules.showCompletedSchedules')}
           </Field>
         </Row>
       );
@@ -231,16 +237,16 @@ export function SchedulesTable({
   return (
     <>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
-        <Field width="flex">Payee</Field>
-        <Field width="flex">Account</Field>
-        <Field width={110}>Next date</Field>
-        <Field width={120}>Status</Field>
+        <Field width="flex">{t('schedules.payee')}</Field>
+        <Field width="flex">{t('schedules.account')}</Field>
+        <Field width={110}>{t('schedules.nextDate')}</Field>
+        <Field width={120}>{t('schedules.status')}</Field>
         <Field width={100} style={{ textAlign: 'right' }}>
-          Amount
+          {t('schedules.amount')}
         </Field>
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
-            Recurring
+            {t('schedules.recurring')}
           </Field>
         )}
         {!minimal && <Field width={40}></Field>}
@@ -252,7 +258,7 @@ export function SchedulesTable({
         style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
         items={items}
         renderItem={renderItem}
-        renderEmpty="No schedules"
+        renderEmpty={t('schedules.noSchedules')}
         allowPopupsEscape={items.length < 6}
       />
     </>

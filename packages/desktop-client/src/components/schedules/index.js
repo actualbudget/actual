@@ -1,22 +1,18 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+import { View, Button } from 'loot-design/src/components/common';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { Page } from '../Page';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
+import { useTranslation } from 'react-i18next';
 
 export default function Schedules() {
   let history = useHistory();
 
   let scheduleData = useSchedules();
+
+  const { t } = useTranslation();
 
   if (scheduleData == null) {
     return null;
@@ -57,7 +53,7 @@ export default function Schedules() {
   }
 
   return (
-    <Page title="Schedules">
+    <Page title={t('schedules.schedules')}>
       <View
         style={{
           marginTop: 20,
@@ -77,7 +73,7 @@ export default function Schedules() {
 
       <View style={{ alignItems: 'flex-end', margin: '20px 0', flexShrink: 0 }}>
         <Button primary onClick={onAdd}>
-          Add new schedule
+          {t('schedules.addNewSchedule')}
         </Button>
       </View>
     </Page>

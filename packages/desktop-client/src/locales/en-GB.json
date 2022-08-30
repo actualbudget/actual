@@ -1,15 +1,33 @@
 {
-    "account": {
-        "addAccount": "Add account",
-        "addAccountInFutureFromSidebar": "In the future, you can add accounts from the sidebar.",
-        "allReconciled": "All reconciled!",
-        "clearedBalance": "Your cleared balance <strong>{{cleared}}</strong> needs <strong>{{diff}}</strong> to match your bank's balance of <strong>{{balance}}</strong>",
-        "doneReconciling": "Done Reconciling",
-        "needAccountMessage": "For Actual to be useful, you need to <strong>add an account</strong>. You can link an account to automatically download transactions, or manage it locally yourself."
-    },
-    "bootstrap": {
-        "title": "Bootstrap this Actual instance",
-        "setPassword": "Set a password for this server instance",
-        "tryDemo": "Try Demo"
-    }
+  "account": {
+    "addAccount": "Add account",
+    "addAccountInFutureFromSidebar": "In the future, you can add accounts from the sidebar.",
+    "allReconciled": "All reconciled!",
+    "clearedBalance": "Your cleared balance <strong>{{cleared}}</strong> needs <strong>{{diff}}</strong> to match your bank's balance of <strong>{{balance}}</strong>",
+    "doneReconciling": "Done Reconciling",
+    "needAccountMessage": "For Actual to be useful, you need to <strong>add an account</strong>. You can link an account to automatically download transactions, or manage it locally yourself."
+  },
+  "bootstrap": {
+    "title": "Bootstrap this Actual instance",
+    "setPassword": "Set a password for this server instance",
+    "tryDemo": "Try Demo"
+  },
+  "schedules": {
+    "account": "Account",
+    "addNewSchedule": "Add new schedule",
+    "amount": "Amount",
+    "approximately": "Approximately",
+    "complete": "Complete",
+    "delete": "Delete",
+    "nextDate": "Next date",
+    "noSchedules": "No schedules",
+    "payee": "Payee",
+    "postTransaction": "Post transaction",
+    "recurring": "Recurring",
+    "restart": "Restart",
+    "schedules": "Schedules",
+    "showCompletedSchedules": "Show completed schedules",
+    "skipNextDate": "Skip next date",
+    "status": "Status"
+  }
 }
