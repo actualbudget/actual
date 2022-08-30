@@ -11,5 +11,59 @@
     "setPassword": "Establecer una contraseña para esta instancia de servidor",
     "title": "Bootstrap esta instancia de Actual",
     "tryDemo": "Probar Demo"
+  },
+  "general": {
+    "account": "Cuenta",
+    "add": "Agregar",
+    "amount": "Monto",
+    "approximatelyWithAmount": "Aproximadamente {{amount}}",
+    "cancel": "Cancelar",
+    "complete": "Completar",
+    "date": "Fecha",
+    "delete": "Borrar",
+    "payee": "Beneficiario",
+    "recurring": "Periódico",
+    "repeats": "Repetir",
+    "restart": "Reiniciar",
+    "save": "Guardar",
+    "schedule": "Agenda",
+    "schedules": "Agendas",
+    "status": "Estado"
+  },
+  "schedules": {
+    "addNewSchedule": "Agregar nuevo agenda",
+    "automaticallyAddTransaction": "Agregar transacción automáticamente",
+    "automaticallyAddTransactionAdvice": "Si se selecciona, la agenda creará automáticamente una transacción para la cuenta especificada",
+    "editAsRule": "Editar como regla",
+    "findMatchingTransactions": "Encontrar transacciones que coincidan",
+    "isApproximately": "es aproximadamente",
+    "isBetween": "está entre",
+    "isExactly": "es exactamente",
+    "linkedTransactions": "Transacciones vinculadas",
+    "linkToSchedule": "Vincular a agenda",
+    "nextDate": "Próxima fecha",
+    "none": "(ninguno)",
+    "noSchedules": "Sin agendas",
+    "postTransaction": "Publicar transacción",
+    "scheduleNamed": "Agenda: {{name}}",
+    "selectTransactionsToLinkOnSave": "Seleccionar transacciones para vincular al guardar",
+    "showCompletedSchedules": "Mostrar agendas completadas",
+    "skipNextDate": "Saltar próxima fecha",
+    "theseTransactionsMatchThisSchedule": "Éstas transacciones coinciden con la agenda",
+    "thisScheduleHasCustomConditionsAndActions": "Ésta agenda tiene condiciones y acciones personalizadas",
+    "unlinkFromSchedule": "Desvincular de la agenda",
+    "upcomingDates": "Próximas fechas"
+  },
+  "status": {
+    "completed": "completo",
+    "due": "adeudado",
+    "missed": "omitido",
+    "paid": "pago",
+    "pending": "pendiente",
+    "scheduled": "agendado",
+    "upcoming": "próximo"
+  },
+  "support": {
+    "anErrorOccuredWhileSaving": "Ocurrió un error al guardar. Por favor, póngase en contacto con {{email}} para obtener asistencia."
   }
 }

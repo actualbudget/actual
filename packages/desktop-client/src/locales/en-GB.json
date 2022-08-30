@@ -8,8 +8,62 @@
     "needAccountMessage": "For Actual to be useful, you need to <strong>add an account</strong>. You can link an account to automatically download transactions, or manage it locally yourself."
   },
   "bootstrap": {
-    "title": "Bootstrap this Actual instance",
     "setPassword": "Set a password for this server instance",
+    "title": "Bootstrap this Actual instance",
     "tryDemo": "Try Demo"
+  },
+  "general": {
+    "account": "Account",
+    "add": "Add",
+    "amount": "Amount",
+    "approximatelyWithAmount": "Approximately {{amount}}",
+    "cancel": "Cancel",
+    "complete": "Complete",
+    "date": "Date",
+    "delete": "Delete",
+    "payee": "Payee",
+    "recurring": "Recurring",
+    "repeats": "Repeats",
+    "restart": "Restart",
+    "save": "Save",
+    "schedule": "Schedule",
+    "schedules": "Schedules",
+    "status": "Status"
+  },
+  "schedules": {
+    "addNewSchedule": "Add new schedule",
+    "automaticallyAddTransaction": "Automatically add transaction",
+    "automaticallyAddTransactionAdvice": "If checked, the schedule will automatically create transactions for you in the specified account",
+    "editAsRule": "Edit as rule",
+    "findMatchingTransactions": "Find matching transactions",
+    "isApproximately": "is approximately",
+    "isBetween": "is between",
+    "isExactly": "is exactly",
+    "linkedTransactions": "Linked transactions",
+    "linkToSchedule": "Link to schedule",
+    "nextDate": "Next date",
+    "none": "(none)",
+    "noSchedules": "No schedules",
+    "postTransaction": "Post transaction",
+    "scheduleNamed": "Schedule: {{name}}",
+    "selectTransactionsToLinkOnSave": "Select transactions to link on save",
+    "showCompletedSchedules": "Show completed schedules",
+    "skipNextDate": "Skip next date",
+    "theseTransactionsMatchThisSchedule": "These transactions match this schedule:",
+    "thisScheduleHasCustomConditionsAndActions": "This schedule has custom conditions and actions",
+    "unlinkFromSchedule": "Unlink from schedule",
+    "upcomingDates": "Upcoming dates"
+  },
+  "status": {
+    "completed": "completed",
+    "due": "due",
+    "missed": "missed",
+    "paid": "paid",
+    "pending": "pending",
+    "scheduled": "scheduled",
+    "upcoming": "upcoming"
+  },
+  "support": {
+    "anErrorOccuredWhileSaving": "An error occurred while saving. Please contact {{email}} for support."
   }
 }

@@ -5,11 +5,14 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { Page } from '../Page';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
+import { useTranslation } from 'react-i18next';
 
 export default function Schedules() {
   let history = useHistory();
 
   let scheduleData = useSchedules();
+
+  const { t } = useTranslation();
 
   if (scheduleData == null) {
     return null;
@@ -50,7 +53,7 @@ export default function Schedules() {
   }
 
   return (
-    <Page title="Schedules">
+    <Page title={t('general.schedules')}>
       <View
         style={{
           marginTop: 20,
@@ -70,7 +73,7 @@ export default function Schedules() {
 
       <View style={{ alignItems: 'flex-end', margin: '20px 0', flexShrink: 0 }}>
         <Button primary onClick={onAdd}>
-          Add new schedule
+          {t('schedules.addNewSchedule')}
         </Button>
       </View>
     </Page>
