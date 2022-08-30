@@ -1,22 +1,25 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+
+import { bindActionCreators } from 'redux';
 import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
+
 import * as actions from 'loot-core/src/client/actions';
-import { View, Block, AnchorLink } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { useArgsMemo } from './util';
+import { View, Block, AnchorLink } from 'loot-design/src/components/common';
+import { colors, styles } from 'loot-design/src/style';
+
+import Change from './Change';
 import theme from './chart-theme';
 import Container from './Container';
+import DateRange from './DateRange';
+import { simpleCashFlow } from './graphs/cash-flow-spreadsheet';
+import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
+import NetWorthGraph from './graphs/NetWorthGraph';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
-import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
-import { simpleCashFlow } from './graphs/cash-flow-spreadsheet';
-import NetWorthGraph from './graphs/NetWorthGraph';
-import Change from './Change';
-import DateRange from './DateRange';
+import { useArgsMemo } from './util';
 
 function Card({ flex, to, style, children }) {
   const containerProps = { flex, margin: 15 };
