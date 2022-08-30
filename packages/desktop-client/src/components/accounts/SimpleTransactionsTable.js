@@ -2,7 +2,6 @@ import React, { useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import {
   format as formatDate,
-  parse as parseDate,
   parseISO,
   isValid as isDateValid
 } from 'date-fns';
@@ -17,14 +16,9 @@ import {
   useSelectedItems,
   useSelectedDispatch
 } from 'loot-design/src/components/useSelected';
-import {
-  integerToAmount,
-  amountToInteger,
-  integerToCurrency
-} from 'loot-core/src/shared/util';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   getAccountsById,
-  getPayeesById,
   getCategoriesById
 } from 'loot-core/src/client/reducers/queries';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';

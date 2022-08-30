@@ -1,3 +1,7 @@
+import React from 'react';
+
+/* eslint-disable */
+
 function BudgetSheetHeader({ row }) {
   return (
     <Row style={{ zIndex: 200, backgroundColor: colors.grey1, marginLeft: 20 }}>

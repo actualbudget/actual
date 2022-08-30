@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { select } from 'glamor';
-import lively from '@jlongster/lively';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { styles, colors } from 'loot-design/src/style';
 import {
   Button,
   Input,
   InitialFocus,
-  View,
   Text
 } from 'loot-design/src/components/common';
 import { Sidebar } from 'loot-design/src/components/sidebar';

@@ -1,0 +1,14 @@
+name: Mark new issue for triage
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  needs-triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: needs triage

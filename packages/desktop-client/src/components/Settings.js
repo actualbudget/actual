@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { css } from 'glamor';
 import { Route, Switch, Redirect } from 'react-router-dom';
@@ -8,20 +7,14 @@ import {
   View,
   Text,
   Button,
-  ButtonLink,
   ButtonWithLoading,
-  AnchorLink,
-  Link,
-  Input
+  AnchorLink
 } from 'loot-design/src/components/common';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { numberFormats } from 'loot-core/src/shared/util';
 import { styles, colors } from 'loot-design/src/style';
-import { Information, Warning, Error } from 'loot-design/src/components/alerts';
-import Checkmark from 'loot-design/src/svg/v1/Checkmark';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
+import { Information } from 'loot-design/src/components/alerts';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
-import ExclamationSolid from 'loot-design/src/svg/v1/ExclamationSolid';
 import Platform from 'loot-core/src/client/platform';
 
 import useServerVersion from '../hooks/useServerVersion';
