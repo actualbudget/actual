@@ -15,7 +15,6 @@ import {
   Tooltip,
   Stack,
   Button,
-  InitialFocus,
   Menu,
   CustomSelect
 } from 'loot-design/src/components/common';
@@ -31,9 +30,9 @@ import {
 } from 'loot-core/src/shared/rules';
 import DeleteIcon from 'loot-design/src/svg/Delete';
 import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
+import { colors } from 'loot-design/src/style';
 import GenericInput from '../util/GenericInput';
 import { Value } from '../modals/ManageRules';
-import { styles, colors } from 'loot-design/src/style';
 
 let filterFields = [
   'date',
@@ -149,7 +148,11 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
                       ['amount-outflow', 'Amount (outflow)']
                     ]
                   : field === 'date'
-                  ? [['date', 'Date'], ['month', 'Month'], ['year', 'Year']]
+                  ? [
+                      ['date', 'Date'],
+                      ['month', 'Month'],
+                      ['year', 'Year']
+                    ]
                   : null
               }
               value={subfield}

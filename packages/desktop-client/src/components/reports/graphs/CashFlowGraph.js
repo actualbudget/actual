@@ -8,10 +8,10 @@ import {
   VictoryGroup
 } from 'victory';
 import * as d from 'date-fns';
+import { colors } from 'loot-design/src/style';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 import theme from '../chart-theme';
-import { colors } from 'loot-design/src/style';
 
 function CashFlowGraph({ style, start, end, graphData, isConcise, compact }) {
   return (

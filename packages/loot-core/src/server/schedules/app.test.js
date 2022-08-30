@@ -1,4 +1,3 @@
-import * as db from '../db';
 import { runQuery as aqlQuery } from '../aql/schema/run-query';
 import q from '../../shared/query';
 import { loadRules, updateRule } from '../accounts/transaction-rules';
@@ -6,7 +5,6 @@ import { loadMappings } from '../db/mappings';
 import {
   updateConditions,
   getNextDate,
-  listSchedules,
   createSchedule,
   updateSchedule,
   deleteSchedule,
@@ -73,7 +71,10 @@ describe('schedule app', () => {
           value: {
             start: '2020-12-20',
             frequency: 'monthly',
-            patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+            patterns: [
+              { type: 'day', value: 15 },
+              { type: 'day', value: 30 }
+            ]
           }
         })
       ).toBe('2021-05-30');
@@ -90,7 +91,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 }
+              ]
             }
           }
         ]
@@ -125,7 +129,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 }
+              ]
             }
           }
         ]
@@ -152,7 +159,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 18 }, { type: 'day', value: 29 }]
+              patterns: [
+                { type: 'day', value: 18 },
+                { type: 'day', value: 29 }
+              ]
             }
           }
         ]
@@ -179,7 +189,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 }
+              ]
             }
           }
         ]
@@ -202,7 +215,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 15 }, { type: 'day', value: 30 }]
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 }
+              ]
             }
           }
         ]
@@ -224,7 +240,10 @@ describe('schedule app', () => {
             value: {
               start: '2020-12-20',
               frequency: 'monthly',
-              patterns: [{ type: 'day', value: 18 }, { type: 'day', value: 28 }]
+              patterns: [
+                { type: 'day', value: 18 },
+                { type: 'day', value: 28 }
+              ]
             }
           }
         ]

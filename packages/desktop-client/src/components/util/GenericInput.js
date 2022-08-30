@@ -1,7 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
-import { dayFromDate, getMonthYearFormat } from 'loot-core/src/shared/months';
+import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { View, Input } from 'loot-design/src/components/common';
 import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';

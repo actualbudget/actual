@@ -2,16 +2,13 @@ import * as prefs from '../prefs';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import * as sync from './index';
-import Timestamp, { deserializeClock, getClock } from '../timestamp';
-import * as merkle from '../merkle';
+import { merkle, getClock, Timestamp } from '../crdt';
 import * as encoder from './encoder';
-const Database = require('better-sqlite3');
-const fs = require('fs');
 const jsc = require('jsverify');
-const uuid = require('uuid');
-const uuidGenerator = jsc
-  .integer(97, 122)
-  .smap(x => String.fromCharCode(x), x => x.charCodeAt(x));
+const uuidGenerator = jsc.integer(97, 122).smap(
+  x => String.fromCharCode(x),
+  x => x.charCodeAt(x)
+);
 
 const mockSyncServer = require('../tests/mockSyncServer');
 
@@ -129,7 +126,10 @@ Object.keys(schema).forEach(table => {
       generators.push(
         makeGen({
           table,
-          row: jsc.asciinestring.smap(x => 'sheet!' + x, x => x),
+          row: jsc.asciinestring.smap(
+            x => 'sheet!' + x,
+            x => x
+          ),
           field: 'expr',
           value: jsc.constant(JSON.stringify('fooooo'))
         })
