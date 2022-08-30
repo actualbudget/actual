@@ -129,26 +129,32 @@ export default function ConfigServer() {
           )}
         </form>
 
-        {currentUrl == null && (
-          <View
-            style={{
-              marginTop: 15,
-              flexDirection: 'row',
-              justifyContent: 'center'
-            }}
-          >
-            <Button
-              bare
-              style={{ color: colors.n4, marginRight: 15 }}
-              onClick={onSameDomain}
-            >
-              Use {window.location.origin.replace(/https?:\/\//, '')}
-            </Button>
+        <View
+          style={{
+            marginTop: 15,
+            flexDirection: 'row',
+            justifyContent: 'center'
+          }}
+        >
+          {currentUrl ? (
             <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
-              Don't use a server
+              Stop using a server
             </Button>
-          </View>
-        )}
+          ) : (
+            <>
+              <Button
+                bare
+                style={{ color: colors.n4, marginRight: 15 }}
+                onClick={onSameDomain}
+              >
+                Use {window.location.origin.replace(/https?:\/\//, '')}
+              </Button>
+              <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
+                Don't use a server
+              </Button>
+            </>
+          )}
+        </View>
       </View>
     </>
   );
