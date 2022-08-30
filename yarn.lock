@@ -85,7 +85,7 @@ __metadata:
     dotenv: 6.0.0
     dotenv-expand: 4.2.0
     eslint: ^8.20.0
-    eslint-plugin-prettier: ^3.1.4
+    eslint-plugin-prettier: ^4.2.1
     eslint-plugin-react: 7.11.1
     eslint-webpack-plugin: ^3.2.0
     file-loader: 2.0.0
@@ -10273,21 +10273,6 @@ __metadata:
   peerDependencies:
     eslint: ^2.10.2 || ^3 || ^4
   checksum: adf9dcb7e1c3898df21dc160bbfc8389081c6405580cc9af98ab44282203657b028bd2416d9f67cf4f6aaaac8a5e57908bb7a1bf228264b82f92fd11580ef12a
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-prettier@npm:^3.1.4":
-  version: 3.4.1
-  resolution: "eslint-plugin-prettier@npm:3.4.1"
-  dependencies:
-    prettier-linter-helpers: ^1.0.0
-  peerDependencies:
-    eslint: ">=5.0.0"
-    prettier: ">=1.13.0"
-  peerDependenciesMeta:
-    eslint-config-prettier:
-      optional: true
-  checksum: fa6a89f0d7cba1cc87064352f5a4a68dc3739448dd279bec2bced1bfa3b704467e603d13b69dcec853f8fa30b286b8b715912898e9da776e1b016cf0ee48bd99
   languageName: node
   linkType: hard
 
