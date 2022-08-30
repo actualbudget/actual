@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Tooltip, Pointer, P } from 'loot-design/src/components/common';
+import { P } from 'loot-design/src/components/common';
 import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { Standalone, Title } from './common';
 

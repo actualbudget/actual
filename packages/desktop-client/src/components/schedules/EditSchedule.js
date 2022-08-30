@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { pushModal } from 'loot-core/src/client/actions/modals';
-import { css } from 'glamor';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
@@ -13,18 +12,10 @@ import {
   FormLabel,
   Checkbox
 } from 'loot-design/src/components/forms';
-import { colors, styles } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import {
-  Stack,
-  Input,
-  InputWithContent,
-  View,
-  Text,
-  Button,
-  ModalButtons
-} from 'loot-design/src/components/common';
+import { Stack, View, Text, Button } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
 import { SelectedItemsButton } from 'loot-design/src/components/table';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
@@ -35,7 +26,6 @@ import useSelected, {
 } from 'loot-design/src/components/useSelected';
 import { OpSelect } from '../modals/EditRule';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
-import { SchedulesProviderRaw } from 'loot-core/src/client/data-hooks/schedules';
 
 import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
 

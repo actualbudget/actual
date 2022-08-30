@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Block } from 'loot-design/src/components/common';
 import { css } from 'glamor';
 import Background from './Background';

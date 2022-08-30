@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createBrowserHistory } from 'history';
 import { Switch, Redirect, Router, Route } from 'react-router-dom';
-import { send } from 'loot-core/src/platform/client/fetch';
 import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';

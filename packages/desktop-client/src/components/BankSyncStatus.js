@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 import * as actions from 'loot-core/src/client/actions';

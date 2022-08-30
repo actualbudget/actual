@@ -1,9 +1,5 @@
-import React, { useEffect, useContext, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import { bindActionCreators } from 'redux';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import memoizeOne from 'memoize-one';
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -19,7 +15,7 @@ import { ReportProvider } from 'loot-design/src/components/budget/report/ReportC
 import DynamicBudgetTable from 'loot-design/src/components/budget/DynamicBudgetTable';
 import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
 import { View } from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
+import { styles } from 'loot-design/src/style';
 import {
   addCategory,
   updateCategory,

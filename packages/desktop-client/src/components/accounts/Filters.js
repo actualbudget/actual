@@ -15,7 +15,6 @@ import {
   Tooltip,
   Stack,
   Button,
-  InitialFocus,
   Menu,
   CustomSelect
 } from 'loot-design/src/components/common';
@@ -33,7 +32,7 @@ import DeleteIcon from 'loot-design/src/svg/Delete';
 import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
 import GenericInput from '../util/GenericInput';
 import { Value } from '../modals/ManageRules';
-import { styles, colors } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 
 let filterFields = [
   'date',

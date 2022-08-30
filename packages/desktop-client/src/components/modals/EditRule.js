@@ -1,28 +1,22 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { bindActionCreators } from 'redux';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   initiallyLoadPayees,
   setUndoEnabled
 } from 'loot-core/src/client/actions/queries';
-import * as undo from 'loot-core/src/platform/client/undo';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import {
   View,
   Text,
   Modal,
   Button,
-  Select,
   Stack,
-  Input,
   CustomSelect,
   Tooltip
 } from 'loot-design/src/components/common';
 import GenericInput from '../util/GenericInput';
-import { keys } from 'loot-design/src/util/keys';
-import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import { getStatus } from 'loot-core/src/shared/schedules';
-import { colors, styles } from 'loot-design/src/style';
+import { send } from 'loot-core/src/platform/client/fetch';
+import { colors } from 'loot-design/src/style';
 import SubtractIcon from 'loot-design/src/svg/Subtract';
 import AddIcon from 'loot-design/src/svg/Add';
 import InformationOutline from 'loot-design/src/svg/v1/InformationOutline';

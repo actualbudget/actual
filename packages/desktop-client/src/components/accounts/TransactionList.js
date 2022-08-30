@@ -1,13 +1,6 @@
-import React, {
-  useRef,
-  useEffect,
-  useCallback,
-  useLayoutEffect,
-  useMemo
-} from 'react';
+import React, { useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { TransactionTable } from './TransactionsTable';
-import lively from '@jlongster/lively';
 import {
   splitTransaction,
   updateTransaction,
@@ -16,7 +9,6 @@ import {
   applyTransactionDiff
 } from 'loot-core/src/shared/transactions';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { pushModal } from 'loot-core/src/client/actions/modals';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 const uuid = require('loot-core/src/platform/uuid');
 

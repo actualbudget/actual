@@ -4,20 +4,16 @@ import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
-import { View } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
 import Intro from './tutorial/Intro';
 import BudgetSummary from './tutorial/BudgetSummary';
 import BudgetCategories from './tutorial/BudgetCategories';
 import BudgetInitial from './tutorial/BudgetInitial';
 import TransactionAdd from './tutorial/TransactionAdd';
 import TransactionEnter from './tutorial/TransactionEnter';
-import TransactionFinalize from './tutorial/TransactionFinalize';
 import BudgetNewIncome from './tutorial/BudgetNewIncome';
 import CategoryBalance from './tutorial/CategoryBalance';
 import Overspending from './tutorial/Overspending';
 import BudgetNextMonth from './tutorial/BudgetNextMonth';
-import DeleteTransactions from './tutorial/DeleteTransactions';
 import Final from './tutorial/Final';
 
 function generatePath(innerRect, outerRect) {
