@@ -23,6 +23,8 @@ i18n
 
     // We enforce that a locales have all keys so we treat empty string as missing value.
     returnEmptyString: false,
+    fallbackLng: 'en',
+
     interpolation: {
       escapeValue: false // react already safes from xss
     }
