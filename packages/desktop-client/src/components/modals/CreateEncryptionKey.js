@@ -3,9 +3,7 @@ import { css } from 'glamor';
 import {
   View,
   Text,
-  Stack,
   Modal,
-  Button,
   ButtonWithLoading,
   ExternalLink,
   P,
@@ -14,7 +12,7 @@ import {
   InitialFocus
 } from 'loot-design/src/components/common';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { styles, colors } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
 export default function CreateEncryptionKey({

@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  AnchorLink,
-  Button
-} from 'loot-design/src/components/common';
+import { View, Text, AnchorLink } from 'loot-design/src/components/common';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 export default function ServerURL() {

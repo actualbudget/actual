@@ -6,25 +6,24 @@ import { createLocation } from 'history';
 import Component from '@reactions/component';
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import { getModalRoute } from '../util';
 
-import CreateAccount from './modals/CreateAccount';
 import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
 import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
 import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 import ConfigureLinkedAccounts from 'loot-design/src/components/modals/ConfigureLinkedAccounts';
 import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
+import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
+import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
+import EditField from 'loot-design/src/components/modals/EditField';
+import CreateAccount from './modals/CreateAccount';
 import ManagePayeesWithData from './payees/ManagePayeesWithData';
 import ManageRules from './modals/ManageRules';
 import EditRule from './modals/EditRule';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import WelcomeScreen from './modals/WelcomeScreen';
-import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
 import FixEncryptionKey from './modals/FixEncryptionKey';
-import EditField from 'loot-design/src/components/modals/EditField';
 
 function Modals({
   history,

@@ -2,13 +2,7 @@ import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
-import {
-  View,
-  Text,
-  Block,
-  Link,
-  Button
-} from 'loot-design/src/components/common';
+import { View, Text, Link, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import Close from 'loot-design/src/svg/v1/Close';
 

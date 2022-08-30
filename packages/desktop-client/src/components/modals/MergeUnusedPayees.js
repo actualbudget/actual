@@ -6,11 +6,10 @@ import {
   Modal,
   ModalButtons,
   Button,
-  P,
-  Stack
+  P
 } from 'loot-design/src/components/common';
 import { Information } from 'loot-design/src/components/alerts';
-import { colors, styles } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 

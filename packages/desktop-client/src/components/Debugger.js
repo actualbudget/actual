@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   send,
   init as initConnection
@@ -12,7 +11,7 @@ import {
   Input,
   InlineField
 } from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 
 require('codemirror/lib/codemirror.css');
 require('codemirror/theme/monokai.css');
