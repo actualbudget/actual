@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Tooltip, Pointer, P, Button } from 'loot-design/src/components/common';
+import React from 'react';
+import { P, Button } from 'loot-design/src/components/common';
 import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
 import { Standalone, Title, useMinimized } from './common';
 
 function CategoryBalance({ targetRect, navigationProps }) {

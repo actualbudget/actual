@@ -2,13 +2,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createBrowserHistory } from 'history';
 import { Switch, Redirect, Router, Route } from 'react-router-dom';
-import { send } from 'loot-core/src/platform/client/fetch';
 import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import ServerURL from './ServerURL';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
+import useServerVersion from '../../hooks/useServerVersion';
+import ServerURL from './ServerURL';
 
 import Modals from './Modals';
 import Login from './subscribe/Login';
@@ -16,7 +16,6 @@ import Bootstrap from './subscribe/Bootstrap';
 import Error from './subscribe/Error';
 import ChangePassword from './subscribe/ChangePassword';
 import ConfigServer from './ConfigServer';
-import useServerVersion from '../../hooks/useServerVersion';
 
 function Version() {
   const version = useServerVersion();

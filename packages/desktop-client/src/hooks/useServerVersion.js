@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 function useServerVersion() {

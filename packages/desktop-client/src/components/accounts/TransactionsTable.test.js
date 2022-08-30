@@ -1,7 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, fireEvent } from '@testing-library/react';
-import { debugDOM } from 'loot-core/src/mocks/util';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { initServer } from 'loot-core/src/platform/client/fetch';
