@@ -24,10 +24,12 @@ export default function ConfigServer() {
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState(null);
 
-  function getErrorMessage(error) {
+  function getErrorMessage(error, url) {
     switch (error) {
       case 'network-failure':
         return 'Server is not running at this URL';
+      case 'add-http':
+        return 'Server is not running at this URL. Did you mean to add "http://"?';
       default:
         return 'Server does not look like an Actual server. Is it set up correctly?';
     }
@@ -41,11 +43,30 @@ export default function ConfigServer() {
     setError(null);
     setLoading(true);
     let { error } = await send('set-server-url', { url });
-    setLoading(false);
 
-    if (error) {
+    if (
+      error === 'network-failure' &&
+      !url.startsWith('http://') &&
+      !url.startsWith('https://')
+    ) {
+      let { error } = await send('set-server-url', { url: 'https://' + url });
+      if (error === 'network-failure') {
+        setError('add-http');
+        if (!url.startsWith('http://')) {
+          setUrl('http://' + url);
+        }
+      } else if (error) {
+        setError(error);
+      } else {
+        await dispatch(signOut());
+        history.push('/');
+      }
+      setLoading(false);
+    } else if (error) {
+      setLoading(false);
       setError(error);
     } else {
+      setLoading(false);
       await dispatch(signOut());
       history.push('/');
     }
