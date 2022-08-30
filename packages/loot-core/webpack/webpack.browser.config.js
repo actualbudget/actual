@@ -25,6 +25,8 @@ module.exports = {
       assert: require.resolve('assert/'),
       crypto: require.resolve('crypto-browserify'),
       dgram: false,
+      http: require.resolve('stream-http'),
+      https: require.resolve('https-browserify'),
       net: false,
       os: false,
       path: require.resolve('path-browserify'),
