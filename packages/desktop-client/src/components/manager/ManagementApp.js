@@ -205,7 +205,10 @@ class ManagementApp extends React.Component {
                       zIndex: 4000
                     }}
                   >
-                    <LoggedInUser />
+                    <Switch>
+                      <Route exact path="/config-server" component={null} />
+                      <Route exact path="/" component={LoggedInUser} />
+                    </Switch>
                   </View>
                 </>
               ) : (
@@ -221,7 +224,10 @@ class ManagementApp extends React.Component {
             </View>
           )}
 
-          <ServerURL />
+          <Switch>
+            <Route exact path="/config-server" component={null} />
+            <Route exact path="/" component={ServerURL} />
+          </Switch>
           <Version />
         </View>
       </Router>
