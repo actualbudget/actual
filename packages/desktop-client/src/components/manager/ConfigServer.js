@@ -149,7 +149,7 @@ export default function ConfigServer() {
               style={{ color: colors.n4, marginRight: 15 }}
               onClick={onSameDomain}
             >
-              Use this domain
+              Use {window.location.origin.replace(/https?:\/\//, '')}
             </Button>
             <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
               Don't use a server
