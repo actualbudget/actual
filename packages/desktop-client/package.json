@@ -43,6 +43,7 @@
     "glamor": "^2.20.40",
     "html-webpack-plugin": "4.0.0-alpha.2",
     "i18next": "^21.9.1",
+    "i18next-parser": "^6.5.0",
     "identity-obj-proxy": "3.0.0",
     "load-js": "^3.0.3",
     "mini-css-extract-plugin": "0.4.3",
@@ -89,7 +90,8 @@
     "locales:validate": "node scripts/validate-locales.js",
     "build": "cross-env INLINE_RUNTIME_CHUNK=false node scripts/build.js",
     "build:browser": "./bin/build-browser",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "check-i18n": "i18next"
   },
   "browserslist": [
     "electron 3.0"
