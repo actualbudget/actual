@@ -14,7 +14,6 @@ import ImportActual from 'loot-design/src/components/manager/ImportActual';
 import DeleteFile from 'loot-design/src/components/manager/DeleteFile';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
-import { colors } from 'loot-design/src/style';
 
 function Modals({
   modalStack,

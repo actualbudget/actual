@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
-  AnchorLink,
   Text,
   Button,
-  ButtonLink,
   Input as BaseInput
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';

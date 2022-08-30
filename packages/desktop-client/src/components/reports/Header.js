@@ -1,9 +1,8 @@
 import React from 'react';
-import { colors, styles } from 'loot-design/src/style';
+import { styles } from 'loot-design/src/style';
 import {
   View,
   Select,
-  Link,
   Button,
   ButtonLink
 } from 'loot-design/src/components/common';
