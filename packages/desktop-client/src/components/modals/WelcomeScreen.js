@@ -3,9 +3,7 @@ import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
 import {
   View,
-  Text,
   Modal,
-  Button,
   P,
   ExternalLink
 } from 'loot-design/src/components/common';
@@ -70,7 +68,4 @@ function WelcomeScreen({ modalProps, actions }) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(WelcomeScreen);
+export default connect(null, actions)(WelcomeScreen);

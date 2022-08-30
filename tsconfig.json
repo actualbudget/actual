@@ -3,13 +3,14 @@
     "target": "ES2022",
     "lib": ["ES2021", "DOM"],
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
     "jsx": "preserve",
     // Check JS files too
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     // Used for temp builds
     "outDir": "build",
     "moduleResolution": "Node",

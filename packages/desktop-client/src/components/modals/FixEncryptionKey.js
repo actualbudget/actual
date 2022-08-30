@@ -12,7 +12,7 @@ import {
   ExternalLink
 } from 'loot-design/src/components/common';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { styles, colors } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
 export default function FixEncryptionKey({

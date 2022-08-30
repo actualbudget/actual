@@ -1,6 +1,4 @@
-import asyncStorage from '../../platform/server/asyncStorage';
 import { sha256String } from '../encryption-internals';
-let uuid = require('../../platform/uuid');
 
 let currentUniqueId;
 let mixpanel;
@@ -26,11 +24,9 @@ function isAnonymous(id) {
   return !id.startsWith('user-');
 }
 
-export async function init() {
-}
+export async function init() {}
 
-export async function login(userId) {
-}
+export async function login(userId) {}
 
 let BUFFERING = false;
 let BUFFER = [];

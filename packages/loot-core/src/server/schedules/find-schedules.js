@@ -7,7 +7,7 @@ import { runQuery as aqlQuery } from '../aql/schema/run-query';
 import q from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
-import { dayFromDate, parseDate, subDays } from '../../shared/months';
+import { dayFromDate, parseDate } from '../../shared/months';
 import { conditionsToAQL } from '../accounts/transaction-rules';
 const uuid = require('../../platform/uuid');
 
@@ -219,7 +219,10 @@ async function monthly1stor3rd(startDate, accountId) {
       return {
         start,
         frequency: 'monthly',
-        patterns: [{ type: dayValue, value: 1 }, { type: dayValue, value: 3 }]
+        patterns: [
+          { type: dayValue, value: 1 },
+          { type: dayValue, value: 3 }
+        ]
       };
     },
     accountId
@@ -237,7 +240,10 @@ async function monthly2ndor4th(startDate, accountId) {
       return {
         start,
         frequency: 'monthly',
-        patterns: [{ type: dayValue, value: 2 }, { type: dayValue, value: 4 }]
+        patterns: [
+          { type: dayValue, value: 2 },
+          { type: dayValue, value: 4 }
+        ]
       };
     },
     accountId
