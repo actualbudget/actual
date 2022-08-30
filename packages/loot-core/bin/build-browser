@@ -23,7 +23,7 @@ if [ $NODE_ENV == 'development' ]; then
   # will block
   WEBPACK_ARGS="$WEBPACK_ARGS --watch"
   if [ "$OSTYPE" == "msys" ]; then
-    // Ensure symlinks are created as native Windows symlinks.
+    # Ensure symlinks are created as native Windows symlinks.
     export MSYS=winsymlinks:nativestrict
   fi
   ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
