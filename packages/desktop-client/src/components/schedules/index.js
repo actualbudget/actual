@@ -53,7 +53,7 @@ export default function Schedules() {
   }
 
   return (
-    <Page title={t('schedules.schedules')}>
+    <Page title={t('general.schedules')}>
       <View
         style={{
           marginTop: 20,

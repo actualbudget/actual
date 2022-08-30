@@ -64,12 +64,12 @@ function OverflowMenu({ schedule, status, onAction }) {
                 text: t('schedules.postTransaction')
               },
               ...(schedule.completed
-                ? [{ name: 'restart', text: t('schedules.restart') }]
+                ? [{ name: 'restart', text: t('general.restart') }]
                 : [
                     { name: 'skip', text: t('schedules.skipNextDate') },
-                    { name: 'complete', text: t('schedules.complete') }
+                    { name: 'complete', text: t('general.complete') }
                   ]),
-              { name: 'delete', text: t('schedules.delete') }
+              { name: 'delete', text: t('general.delete') }
             ]}
           />
         </Tooltip>
@@ -104,7 +104,7 @@ export function ScheduleAmountCell({ amount, op }) {
             lineHeight: '1em',
             marginRight: 10
           }}
-          title={(isApprox ? t('schedules.approximately') : '') + str}
+          title={`${t('general.approximately')} ` + str}
         >
           ~
         </View>
@@ -117,7 +117,7 @@ export function ScheduleAmountCell({ amount, op }) {
           overflow: 'hidden',
           textOverflow: 'ellipsis'
         }}
-        title={(isApprox ? t('schedules.approximately') : '') + str}
+        title={(isApprox ? `${t('general.approximately')} ` : '') + str}
       >
         {num > 0 ? `+${str}` : `${str}`}
       </Text>
@@ -237,16 +237,16 @@ export function SchedulesTable({
   return (
     <>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
-        <Field width="flex">{t('schedules.payee')}</Field>
-        <Field width="flex">{t('schedules.account')}</Field>
+        <Field width="flex">{t('general.payee')}</Field>
+        <Field width="flex">{t('general.account')}</Field>
         <Field width={110}>{t('schedules.nextDate')}</Field>
-        <Field width={120}>{t('schedules.status')}</Field>
+        <Field width={120}>{t('general.status')}</Field>
         <Field width={100} style={{ textAlign: 'right' }}>
-          {t('schedules.amount')}
+          {t('general.amount')}
         </Field>
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
-            {t('schedules.recurring')}
+            {t('general.recurring')}
           </Field>
         )}
         {!minimal && <Field width={40}></Field>}
