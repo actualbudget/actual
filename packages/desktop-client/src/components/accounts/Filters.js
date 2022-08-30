@@ -30,9 +30,9 @@ import {
 } from 'loot-core/src/shared/rules';
 import DeleteIcon from 'loot-design/src/svg/Delete';
 import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
+import { colors } from 'loot-design/src/style';
 import GenericInput from '../util/GenericInput';
 import { Value } from '../modals/ManageRules';
-import { colors } from 'loot-design/src/style';
 
 let filterFields = [
   'date',

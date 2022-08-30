@@ -1,7 +1,7 @@
 import React from 'react';
 import { P } from 'loot-design/src/components/common';
-import Navigation from './Navigation';
 import * as monthUtils from 'loot-core/src/shared/months';
+import Navigation from './Navigation';
 import { Standalone, Title } from './common';
 
 function TransactionEnter({ fromYNAB, navigationProps }) {

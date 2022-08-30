@@ -61,9 +61,9 @@ import {
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
 import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
-import { getStatusProps } from '../schedules/StatusBadge';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import { getStatusProps } from '../schedules/StatusBadge';
 
 let TABLE_BACKGROUND_COLOR = colors.n11;
 
