@@ -22,6 +22,10 @@ if [ $NODE_ENV == 'development' ]; then
   # Make sure to do this before starting the build since watch mode
   # will block
   WEBPACK_ARGS="$WEBPACK_ARGS --watch"
+  if [ "$OSTYPE" == "msys" ]; then
+    # Ensure symlinks are created as native Windows symlinks.
+    export MSYS=winsymlinks:nativestrict
+  fi
   ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
 fi
 
