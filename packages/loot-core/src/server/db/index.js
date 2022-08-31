@@ -2,7 +2,7 @@ import LRU from 'lru-cache';
 import * as sqlite from '../../platform/server/sqlite';
 import fs from '../../platform/server/fs';
 import { sendMessages, batchMessages } from '../sync';
-import { schema, schemaConfig } from '../aql/schema';
+import { schema, schemaConfig } from '../aql';
 import {
   accountModel,
   categoryModel,
@@ -23,7 +23,7 @@ import {
   convertForInsert,
   convertForUpdate,
   convertFromSelect
-} from '../aql/schema-helpers';
+} from '../aql';
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';

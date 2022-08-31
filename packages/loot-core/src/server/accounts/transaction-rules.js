@@ -21,7 +21,7 @@ import { requiredFields, toDateRepr } from '../models';
 import { currentDay } from '../../shared/months';
 import { partitionByField, fastSetMerge } from '../../shared/util';
 import { setSyncingMode, batchMessages } from '../sync';
-import { schemaConfig } from '../aql/schema';
+import { schemaConfig } from '../aql';
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead
