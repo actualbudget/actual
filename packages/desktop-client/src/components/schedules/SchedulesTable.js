@@ -239,7 +239,7 @@ export function SchedulesTable({
   return (
     <>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
-        <Field width="flex">{t('general.payee')}</Field>
+        <Field width="flex">{t('general.payee_one')}</Field>
         <Field width="flex">{t('general.account_one')}</Field>
         <Field width={110}>{t('schedules.nextDate')}</Field>
         <Field width={120}>{t('general.status')}</Field>

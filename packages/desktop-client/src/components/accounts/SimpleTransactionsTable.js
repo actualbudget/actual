@@ -211,7 +211,7 @@ export default function SimpleTransactionsTable({
               case 'payee':
                 return (
                   <Field key={i} width="flex">
-                    {t('general.payee')}
+                    {t('general.payee_one')}
                   </Field>
                 );
               case 'category':

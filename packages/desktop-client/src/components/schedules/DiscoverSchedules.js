@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useHistory } from 'react-router-dom';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import Platform from 'loot-core/src/client/platform';
@@ -77,6 +78,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       </Row>
     );
   }
+  const { t } = useTranslation();
 
   return (
     <View style={{ flex: 1 }}>
@@ -87,13 +89,13 @@ function DiscoverSchedulesTable({ schedules, loading }) {
           selected={selectedItems.size > 0}
           onSelect={() => dispatchSelected({ type: 'select-all' })}
         />
-        <Field width="flex">Payee</Field>
-        <Field width="flex">Account</Field>
+        <Field width="flex">{t('general.payee_one')}</Field>
+        <Field width="flex">{t('general.account_one')}</Field>
         <Field width="auto" style={{ flex: 1.5 }}>
-          When
+          {t('general.when')}
         </Field>
         <Field width={100} style={{ textAlign: 'right' }}>
-          Amount
+          {t('general.amount')}
         </Field>
       </TableHeader>
       <Table
@@ -105,7 +107,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
         loading={loading}
         isSelected={id => selectedItems.has(id)}
         renderItem={renderItem}
-        renderEmpty="No schedules found"
+        renderEmpty={t('schedules.noSchedulesFound')}
       />
     </View>
   );
@@ -159,24 +161,19 @@ export default function DiscoverSchedules() {
     setCreating(false);
     history.goBack();
   }
+  const { t } = useTranslation();
 
   return (
-    <Page title="Found schedules" modalSize={{ width: 850, height: 650 }}>
+    <Page
+      title={t('schedules.foundSchedules')}
+      modalSize={{ width: 850, height: 650 }}
+    >
+      <P>{t('schedules.foundSomePossibleSchedulesAdvice')}</P>
+      <P>{t('schedules.expectedSchedulesAdvice')}</P>
       <P>
-        We found some possible schedules in your current transactions. Select
-        the ones you want to create.
-      </P>
-      <P>
-        If you expected a schedule here and don't see it, it might be because
-        the payees of the transactions don't match. Make sure you rename payees
-        on all transactions for a schedule to be the same payee.
-      </P>
-      <P>
-        You can always do this later
         {Platform.isBrowser
-          ? ' from the "Find schedules" item in the sidebar menu'
-          : ' from the "Tools > Find schedules" menu item'}
-        .
+          ? t('schedules.doFromFindSchedules')
+          : t('schedules.doFromToolsFindSchedules')}
       </P>
 
       <SelectedProvider instance={selectedInst}>
@@ -192,14 +189,16 @@ export default function DiscoverSchedules() {
         justify="flex-end"
         style={{ paddingTop: 20 }}
       >
-        <Button onClick={() => history.goBack()}>Do nothing</Button>
+        <Button onClick={() => history.goBack()}>
+          {t('general.doNothing')}
+        </Button>
         <ButtonWithLoading
           primary
           loading={creating}
           disabled={selectedInst.items.size === 0}
           onClick={onCreate}
         >
-          Create schedules
+          {t('schedules.createSchedule', { count: selectedInst.items.size })}
         </ButtonWithLoading>
       </Stack>
     </Page>
