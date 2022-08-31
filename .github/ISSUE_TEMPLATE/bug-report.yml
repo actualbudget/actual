@@ -65,10 +65,11 @@ body:
     id: operating-system
     attributes:
       label: Operating System
-      description: What version of our software are you running?
+      description: What operating system are you using?
       options:
         - Windows 11
         - Windows 10
+        - Mac OSX
         - Linux
         - Mobile Device
         - Other
