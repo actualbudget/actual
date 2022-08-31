@@ -10,6 +10,7 @@ import {
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 import { TransactionTable } from './TransactionsTable';
+import { useHistory } from 'react-router';
 const uuid = require('loot-core/src/platform/uuid');
 
 // When data changes, there are two ways to update the UI:
@@ -75,13 +76,13 @@ export default function TransactionList({
   onRefetch,
   onRefetchUpToRow,
   onCloseAddTransaction,
-  onManagePayees,
   onCreatePayee
 }) {
   let dispatch = useDispatch();
   let table = useRef();
   let transactionsLatest = useRef();
   let scrollTo = useRef();
+  let history = useHistory();
 
   // useEffect(() => {
   //   if (scrollTo.current) {
@@ -156,6 +157,14 @@ export default function TransactionList({
     }
     return newTransaction;
   }, []);
+
+  let onManagePayees = useCallback(
+    id => {
+      debugger;
+      history.push('/payees', { selectedPayee: id });
+    },
+    [history]
+  );
 
   return (
     <TransactionTable

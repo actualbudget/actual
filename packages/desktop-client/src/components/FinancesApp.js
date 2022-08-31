@@ -36,6 +36,7 @@ import Modals from './Modals';
 import Notifications from './Notifications';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
+import { ManagePayeesPage } from './payees/ManagePayeesPage';
 // import Debugger from './Debugger';
 
 function URLBar() {
@@ -98,6 +99,7 @@ function Routes({ location }) {
         />
 
         <Route path="/rules" exact component={ManageRulesPage} />
+        <Route path="/payees" exact component={ManagePayeesPage} />
         <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
 
         <Route

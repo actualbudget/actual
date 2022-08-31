@@ -20,20 +20,6 @@ function getMenu(isDev, createWindow) {
         //   }
         // },
         {
-          label: 'Manage Payees...',
-          enabled: false,
-          click(item, focusedWindow) {
-            if (
-              focusedWindow &&
-              focusedWindow.webContents.getTitle() === 'Actual'
-            ) {
-              focusedWindow.webContents.executeJavaScript(
-                '__actionsForMenu.pushModal("manage-payees")'
-              );
-            }
-          }
-        },
-        {
           label: 'Load Backup...',
           enabled: false,
           click(item, focusedWindow) {

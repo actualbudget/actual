@@ -7,7 +7,6 @@ import { ManagePayees } from 'loot-design/src/components/payees';
 import { applyChanges } from 'loot-core/src/shared/util';
 
 function ManagePayeesWithData({
-  history,
   modalProps,
   initialSelectedIds,
   lastUndoState,
@@ -52,10 +51,7 @@ function ManagePayeesWithData({
       }
     });
 
-    undo.setUndoState('openModal', 'manage-payees');
-
     return () => {
-      undo.setUndoState('openModal', null);
       unlisten();
     };
   }, []);
