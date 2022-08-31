@@ -17,8 +17,7 @@ import { colors } from 'loot-design/src/style';
 import { useTooltip } from 'loot-design/src/components/tooltips';
 import SubtractIcon from 'loot-design/src/svg/Subtract';
 import AddIcon from 'loot-design/src/svg/Add';
-
-const DATE_FORMAT = 'yyyy-MM-dd';
+import { useTranslation } from 'react-i18next';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -376,6 +375,7 @@ export default function RecurringSchedulePicker({
   onChange
 }) {
   let { isOpen, close, getOpenEvents } = useTooltip();
+  let { i18n } = useTranslation();
 
   function onSave(config) {
     onChange(config);
@@ -385,7 +385,7 @@ export default function RecurringSchedulePicker({
   return (
     <View>
       <Button {...getOpenEvents()} style={[{ textAlign: 'left' }, buttonStyle]}>
-        {value ? getRecurringDescription(value) : 'No recurring date'}
+        {value ? getRecurringDescription(value, i18n) : 'No recurring date'}
       </Button>
       {isOpen && (
         <RecurringScheduleTooltip

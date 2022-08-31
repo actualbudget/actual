@@ -40,6 +40,7 @@ import {
   getRecurringDescription
 } from 'loot-core/src/shared/schedules';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+import { useTranslation } from 'react-i18next';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
@@ -50,6 +51,7 @@ export function Value({
   data: dataProp,
   describe = x => x.name
 }) {
+  const { i18n } = useTranslation();
   let { data, dateFormat } = useSelector(state => {
     let data;
     if (dataProp) {
@@ -93,7 +95,7 @@ export function Value({
       } else if (field === 'date') {
         if (value) {
           if (value.frequency) {
-            return getRecurringDescription(value);
+            return getRecurringDescription(value, i18n);
           }
           return formatDate(parseISO(value), dateFormat);
         }

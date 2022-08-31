@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  SectionList,
-  ScrollView,
-  Animated
-} from 'react-native';
+import { View, Text, SectionList, ScrollView, Animated } from 'react-native';
 import memoizeOne from 'memoize-one';
 import {
   format as formatDate,
@@ -772,8 +766,8 @@ export class Transaction extends React.PureComponent {
     let prettyCategory = transferAcct
       ? 'Transfer'
       : is_parent
-        ? 'Split'
-        : categoryName;
+      ? 'Split'
+      : categoryName;
 
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
@@ -787,8 +781,8 @@ export class Transaction extends React.PureComponent {
           notes === 'missed'
             ? colors.r6
             : notes === 'due'
-              ? colors.y4
-              : colors.n5
+            ? colors.y4
+            : colors.n5
       }
     ];
 

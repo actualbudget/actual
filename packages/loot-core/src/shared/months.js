@@ -210,6 +210,10 @@ export function sheetForMonth(month) {
   return 'budget' + month.replace('-', '');
 }
 
+export function format(month, opts, locale) {
+  return Intl.DateTimeFormat(locale, opts).format(_parse(month));
+}
+
 export function nonLocalizedFormat(month, str) {
   return d.format(_parse(month), str);
 }

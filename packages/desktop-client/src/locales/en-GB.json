@@ -29,7 +29,11 @@
     "save": "Save",
     "schedule": "Schedule",
     "schedule_other": "Schedules",
-    "status": "Status"
+    "status": "Status",
+    "ordinal_one": "{{count}}st",
+    "ordinal_two": "{{count}}nd",
+    "ordinal_few": "{{count}}rd",
+    "ordinal_other": "{{count}}th"
   },
   "schedules": {
     "addNewSchedule": "Add new schedule",
@@ -53,7 +57,24 @@
     "theseTransactionsMatchThisSchedule": "These transactions match this schedule:",
     "thisScheduleHasCustomConditionsAndActions": "This schedule has custom conditions and actions",
     "unlinkFromSchedule": "Unlink from schedule",
-    "upcomingDates": "Upcoming dates"
+    "upcomingDates": "Upcoming dates",
+    "recurring": {
+      "weekly_one": "Every week on {{day}}",
+      "weekly_other": "Every {{count}} weeks on {{day}}",
+      "monthly_one": "Every month on the {{day}}",
+      "monthly_other": "Every {{count}} months on the {{day}}",
+      "monthlyPattern_one": "Every month on the {{pattern}}",
+      "monthlyPattern_other": "Every {{count}} months on the {{pattern}}",
+      "yearly_one": "Every year on {{day}}",
+      "yearly_other": "Every {{count}} years on {{day}}",
+      "pattern": {
+        "lastDay": "last day",
+        "weekAndDay": "{{week}} {{dayName}}",
+        "weekAndDay_sameDay": "{{week}}",
+        "lastWeekday": "last {{dayName}}",
+        "lastWeekday_sameDay": "last"
+      }
+    }
   },
   "status": {
     "completed": "completed",
