@@ -68,7 +68,7 @@ function unparseConfig(parsed) {
 
 function createMonthlyRecurrence(startDate) {
   return {
-    value: parseInt(monthUtils.format(startDate, 'd')),
+    value: parseInt(monthUtils.nonLocalizedFormat(startDate, 'd')),
     type: 'day'
   };
 }
@@ -158,8 +158,8 @@ function SchedulePreview({ previewDates }) {
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
           {previewDates.map(d => (
             <View>
-              <Text>{monthUtils.format(d, dateFormat)}</Text>
-              <Text>{monthUtils.format(d, 'EEEE')}</Text>
+              <Text>{monthUtils.nonLocalizedFormat(d, dateFormat)}</Text>
+              <Text>{monthUtils.nonLocalizedFormat(d, 'EEEE')}</Text>
             </View>
           ))}
         </Stack>

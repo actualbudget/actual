@@ -1255,7 +1255,7 @@ export const MonthPicker = scope(lively => {
 
   function getCurrentMonthName(startMonth, currentMonth) {
     return monthUtils.getYear(startMonth) === monthUtils.getYear(currentMonth)
-      ? monthUtils.format(currentMonth, 'MMM')
+      ? monthUtils.nonLocalizedFormat(currentMonth, 'MMM')
       : null;
   }
 
@@ -1263,7 +1263,7 @@ export const MonthPicker = scope(lively => {
     const currentMonth = monthUtils.currentMonth();
     const range = getRangeForYear(currentMonth);
     const monthNames = range.map(month => {
-      return monthUtils.format(month, 'MMM');
+      return monthUtils.nonLocalizedFormat(month, 'MMM');
     });
 
     return {
@@ -1313,7 +1313,7 @@ export const MonthPicker = scope(lively => {
             flex: '0 0 40px'
           }}
         >
-          {monthUtils.format(year, 'yyyy')}
+          {monthUtils.nonLocalizedFormat(year, 'yyyy')}
         </View>
         <ElementQuery
           sizes={[

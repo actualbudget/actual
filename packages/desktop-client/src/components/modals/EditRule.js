@@ -256,7 +256,7 @@ function ScheduleDescription({ id }) {
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          Next: {monthUtils.format(schedule.next_date, dateFormat)}
+          Next: {monthUtils.nonLocalizedFormat(schedule.next_date, dateFormat)}
         </Text>
       </View>
       <StatusBadge status={status} />

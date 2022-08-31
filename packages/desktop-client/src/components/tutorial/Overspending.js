@@ -13,7 +13,7 @@ import { Standalone, Title, useMinimized } from './common';
 function Overspending({ navigationProps, stepTwo }) {
   let currentMonth = monthUtils.currentMonth();
   let sheetName = monthUtils.sheetForMonth(currentMonth);
-  let month = monthUtils.format(currentMonth, 'MMM');
+  let month = monthUtils.nonLocalizedFormat(currentMonth, 'MMM');
   let [minimized, toggle] = useMinimized();
 
   return (

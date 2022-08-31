@@ -28,7 +28,10 @@ import {
 } from 'loot-core/src/shared/categories.js';
 
 function BudgetSummary({ month, onClose }) {
-  const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+  const prevMonthName = monthUtils.nonLocalizedFormat(
+    monthUtils.prevMonth(month),
+    'MMM'
+  );
 
   return (
     <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>

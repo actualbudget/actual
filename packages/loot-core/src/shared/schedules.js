@@ -45,7 +45,7 @@ export function getHasTransactionsQuery(schedules) {
 function makeNumberSuffix(num) {
   // Slight abuse of date-fns to turn a number like "1" into the full
   // form "1st" but formatting a date with that number
-  return monthUtils.format(new Date(2020, 0, num, 12), 'do');
+  return monthUtils.nonLocalizedFormat(new Date(2020, 0, num, 12), 'do');
 }
 
 function prettyDayName(day) {
@@ -68,7 +68,7 @@ export function getRecurringDescription(config) {
     case 'weekly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} weeks` : 'week';
-      desc += ' on ' + monthUtils.format(config.start, 'EEEE');
+      desc += ' on ' + monthUtils.nonLocalizedFormat(config.start, 'EEEE');
       return desc;
     }
     case 'monthly': {
@@ -135,7 +135,7 @@ export function getRecurringDescription(config) {
           desc += ' ' + prettyDayName(patterns[0].type);
         }
       } else {
-        desc += ' on the ' + monthUtils.format(config.start, 'do');
+        desc += ' on the ' + monthUtils.nonLocalizedFormat(config.start, 'do');
       }
 
       return desc;
@@ -143,7 +143,7 @@ export function getRecurringDescription(config) {
     case 'yearly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} years` : 'year';
-      desc += ' on ' + monthUtils.format(config.start, 'LLL do');
+      desc += ' on ' + monthUtils.nonLocalizedFormat(config.start, 'LLL do');
       return desc;
     }
     default:

@@ -696,7 +696,7 @@ export function DateHeader({ date }) {
       }}
     >
       <Text style={[styles.text, { fontSize: 13, color: colors.n4 }]}>
-        {monthUtils.format(date, 'MMMM dd, yyyy')}
+        {monthUtils.nonLocalizedFormat(date, 'MMMM dd, yyyy')}
       </Text>
     </ListItem>
   );

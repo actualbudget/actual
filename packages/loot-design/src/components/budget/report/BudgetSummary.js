@@ -318,7 +318,7 @@ export default React.memo(function BudgetSummary({ month }) {
               currentMonth === month && { textDecoration: 'underline' }
             ])}
           >
-            {monthUtils.format(month, 'MMMM')}
+            {monthUtils.nonLocalizedFormat(month, 'MMMM')}
           </div>
 
           <View

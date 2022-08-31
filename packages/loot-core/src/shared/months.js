@@ -210,11 +210,7 @@ export function sheetForMonth(month) {
   return 'budget' + month.replace('-', '');
 }
 
-export function nameForMonth(month) {
-  return d.format(_parse(month), "MMMM 'yy");
-}
-
-export function format(month, str) {
+export function nonLocalizedFormat(month, str) {
   return d.format(_parse(month), str);
 }
 
