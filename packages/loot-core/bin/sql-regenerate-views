@@ -1,5 +1,5 @@
 #!/usr/bin/env actual-cli-runner.js
-const { schema } = require('../src/server/aql/schema');
+const { schema } = require('../src/server/aql');
 const table = process.argv[3];
 
 if (table == null || table === 'transactions') {
