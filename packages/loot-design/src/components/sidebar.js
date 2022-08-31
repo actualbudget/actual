@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { css } from 'glamor';
@@ -31,6 +31,7 @@ import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CheveronUp from '../svg/v1/CheveronUp';
 import CheveronDown from '../svg/v1/CheveronDown';
 import StoreFrontIcon from '../svg/v1/StoreFront';
+import { useLocation } from 'react-router';
 
 export const SIDEBAR_WIDTH = 240;
 
@@ -434,8 +435,15 @@ const MenuButton = withRouter(function MenuButton({ history }) {
 
 function Tools() {
   let [isOpen, setOpen] = useState(false);
+  let location = useLocation();
   let onToggle = useCallback(() => setOpen(open => !open), []);
   let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
+
+  useEffect(() => {
+    if (['/schedules'].some(route => location.pathname.startsWith(route))) {
+      setOpen(true);
+    }
+  }, [location.pathname]);
   return (
     <>
       <View
