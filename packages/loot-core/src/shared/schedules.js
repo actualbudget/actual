@@ -124,8 +124,6 @@ export function getRecurringDescription(config, i18n) {
               );
             }
           } else {
-            // Add spaces on both sides, then trim any excess afterward,
-            // to allow the day name to be at the beginning, middle, or end
             let dayName = prettyDayName(
               pattern.type,
               i18n.resolvedLanguage,
