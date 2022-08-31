@@ -44,13 +44,13 @@ export function getHasTransactionsQuery(schedules) {
 
 function prettyDayName(day, locale) {
   let days = {
-    SU: new Date('2020-01-06T00:00:00.000Z'),
-    MO: new Date('2020-01-07T00:00:00.000Z'),
-    TU: new Date('2020-01-08T00:00:00.000Z'),
-    WE: new Date('2020-01-09T00:00:00.000Z'),
-    TH: new Date('2020-01-10T00:00:00.000Z'),
-    FR: new Date('2020-01-11T00:00:00.000Z'),
-    SA: new Date('2020-01-12T00:00:00.000Z')
+    SU: new Date('2020-01-06'),
+    MO: new Date('2020-01-07'),
+    TU: new Date('2020-01-08'),
+    WE: new Date('2020-01-09'),
+    TH: new Date('2020-01-10'),
+    FR: new Date('2020-01-11'),
+    SA: new Date('2020-01-12')
   };
   return Intl.DateTimeFormat(locale, { weekday: 'long' }).format(days[day]);
 }
