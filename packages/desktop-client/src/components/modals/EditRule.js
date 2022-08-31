@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   initiallyLoadPayees,
@@ -278,7 +279,6 @@ function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
   return (
     <Editor style={editorStyle} error={error}>
       {/*<OpSelect ops={ops} value={op} onChange={onChange} />*/}
-
       {op === 'set' ? (
         <>
           <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
@@ -323,6 +323,7 @@ function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
 
 function StageInfo() {
   let [open, setOpen] = useState();
+  const { t } = useTranslation();
 
   return (
     <View style={{ position: 'relative', marginLeft: 5 }}>
@@ -344,9 +345,7 @@ function StageInfo() {
             lineHeight: 1.5
           }}
         >
-          The stage of a rule allows you to force a specific order. Pre rules
-          always run first, and post rules always run last. Within each stage
-          rules are automatically ordered from least to most specific.
+          {t('rules.stageOfRuleAdvice')}
         </Tooltip>
       )}
     </View>
@@ -683,9 +682,11 @@ export default function EditRule({
     borderRadius: 4
   };
 
+  const { t } = useTranslation();
+
   return (
     <Modal
-      title="Rule"
+      title={t('general.rule_one')}
       padding={0}
       {...modalProps}
       style={[modalProps.style, { flex: 'inherit', maxWidth: '90%' }]}
@@ -711,7 +712,7 @@ export default function EditRule({
             }}
           >
             <Text style={{ color: colors.n4, marginRight: 15 }}>
-              Stage of rule:
+              {t('rules.stageOfRule')}
             </Text>
 
             <Stack direction="row" align="center" spacing={1}>
@@ -719,19 +720,19 @@ export default function EditRule({
                 selected={stage === 'pre'}
                 onSelect={() => onChangeStage('pre')}
               >
-                Pre
+                {t('rules.stages.pre')}
               </StageButton>
               <StageButton
                 selected={stage === null}
                 onSelect={() => onChangeStage(null)}
               >
-                Default
+                {t('rules.stages.default')}
               </StageButton>
               <StageButton
                 selected={stage === 'post'}
                 onSelect={() => onChangeStage('post')}
               >
-                Post
+                {t('rules.stages.post')}
               </StageButton>
 
               <StageInfo />
@@ -750,7 +751,7 @@ export default function EditRule({
             <View style={{ flexShrink: 0 }}>
               <View style={{ marginBottom: 30 }}>
                 <Text style={{ color: colors.n4, marginBottom: 15 }}>
-                  If all these conditions match:
+                  {t('rules.ifAllTheseConditionsMatch')}
                 </Text>
 
                 <ConditionsList
@@ -762,7 +763,7 @@ export default function EditRule({
               </View>
 
               <Text style={{ color: colors.n4, marginBottom: 15 }}>
-                Then apply these actions:
+                {t('rules.thenApplyTheseActions')}
               </Text>
               <View style={{ flex: 1 }}>
                 {actions.length === 0 ? (
@@ -770,7 +771,7 @@ export default function EditRule({
                     style={{ alignSelf: 'flex-start' }}
                     onClick={addInitialAction}
                   >
-                    Add action
+                    {t('rules.addAction')}
                   </Button>
                 ) : (
                   <Stack spacing={2}>
@@ -805,7 +806,7 @@ export default function EditRule({
                 }}
               >
                 <Text style={{ color: colors.n4, marginBottom: 0 }}>
-                  This rule applies to these transactions:
+                  {t('rules.thisRuleAppliesToTheseTransactions')}
                 </Text>
 
                 <View style={{ flex: 1 }} />
@@ -813,7 +814,7 @@ export default function EditRule({
                   disabled={selectedInst.items.size === 0}
                   onClick={onApply}
                 >
-                  Apply actions ({selectedInst.items.size})
+                  {t('rules.applyAction', { size: selectedInst.items.size })}
                 </Button>
               </View>
 
@@ -828,9 +829,11 @@ export default function EditRule({
                 justify="flex-end"
                 style={{ marginTop: 20 }}
               >
-                <Button onClick={() => modalProps.onClose()}>Cancel</Button>
+                <Button onClick={() => modalProps.onClose()}>
+                  {t('general.cancel')}
+                </Button>
                 <Button primary onClick={() => onSave()}>
-                  Save
+                  {t('general.save')}
                 </Button>
               </Stack>
             </View>

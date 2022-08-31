@@ -10,6 +10,7 @@ import {
 } from 'loot-design/src/components/common';
 import Add from 'loot-design/src/svg/v1/Add';
 import Subtract from 'loot-design/src/svg/v1/Subtract';
+import { useTranslation } from 'react-i18next';
 
 export function AmountInput({ defaultValue, onChange }) {
   let [negative, setNegative] = useState(defaultValue <= 0);
@@ -51,6 +52,8 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
   let [num1, setNum1] = useState(defaultValue.num1);
   let [num2, setNum2] = useState(defaultValue.num2);
 
+  const { t } = useTranslation();
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <AmountInput
@@ -60,7 +63,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
           onChange({ num1: value, num2 });
         }}
       />
-      <View style={{ margin: '0 5px' }}>and</View>
+      <View style={{ margin: '0 5px' }}>{t('general.and')}</View>
       <AmountInput
         defaultValue={num2}
         onChange={value => {

@@ -17,19 +17,38 @@
     "account_other": "Accounts",
     "add": "Add",
     "amount": "Amount",
+    "and": "and",
     "approximatelyWithAmount": "Approximately {{amount}}",
     "cancel": "Cancel",
+    "category_one": "Category",
     "complete": "Complete",
     "date": "Date",
     "delete": "Delete",
+    "importedPayee": "Imported payee",
+    "note_other": "Notes",
     "payee": "Payee",
     "recurring": "Recurring",
     "repeats": "Repeats",
     "restart": "Restart",
+    "rule_one": "Rule",
     "save": "Save",
     "schedule": "Schedule",
     "schedule_other": "Schedules",
     "status": "Status"
+  },
+  "rules": {
+    "addAction": "Add action",
+    "applyAction": "Apply action ({{size}})",
+    "ifAllTheseConditionsMatch": "If all these conditions match:",
+    "stageOfRule": "Stage of rule:",
+    "stageOfRuleAdvice": "The stage of a rule allows you to force a specific order. Pre rules always run first, and post rules always run last. Within each stage rules are automatically ordered from least to most specific.",
+    "stages": {
+      "default": "Default",
+      "post": "Post",
+      "pre": "Pre"
+    },
+    "thenApplyTheseActions": "Then apply these actions:",
+    "thisRuleAppliesToTheseTransactions": "This rule applies to these transactions:"
   },
   "schedules": {
     "addNewSchedule": "Add new schedule",
