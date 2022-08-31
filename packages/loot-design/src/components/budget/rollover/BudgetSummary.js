@@ -113,7 +113,7 @@ function TotalsList({ prevMonthName, collapsed }) {
           binding={rolloverBudget.forNextMonth}
           formatter={value => {
             let n = parseInt(value);
-            n = isNaN(n) ? 0 : -n;
+            n = isNaN(n) || n === 0 ? 0 : -n;
             let v = format(n, 'financial');
 
             return n > 0 ? '+' + v : n === 0 ? '-' + v : v;
