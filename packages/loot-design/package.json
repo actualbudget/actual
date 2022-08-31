@@ -36,9 +36,7 @@
   "dependencies": {
     "@juggle/resize-observer": "^3.1.2",
     "hotkeys-js": "3.8.2",
-    "patch-package": "^6.1.2",
     "pikaday": "1.8.0",
-    "postinstall-postinstall": "^2.0.0",
     "react-dnd": "^10.0.2",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.4.4",
@@ -48,7 +46,6 @@
   "scripts": {
     "start": "react-scripts start",
     "start:mobile": "IS_REACT_NATIVE=1 react-scripts start",
-    "postinstall": "patch-package",
     "test": "npm-run-all -cp 'test:*'",
     "test:web": "jest -c jest.config.js",
     "test:react-native": "jest -c jest.rn.config.js"
