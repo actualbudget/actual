@@ -10,7 +10,7 @@ import {
   Menu
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import useServerURL from '../hooks/useServerURL';
+import { useServerURL } from '../hooks/useServerURL';
 
 function LoggedInUser({
   files,
