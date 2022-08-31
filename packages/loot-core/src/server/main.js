@@ -64,9 +64,8 @@ import * as tracking from './tracking/events';
 import { get, post } from './post';
 import { APIError, TransactionError, PostError, RuleError } from './errors';
 import { createTestBudget } from '../mocks/budget';
-import { runQuery as aqlQuery } from './aql/schema/run-query';
-import { Query } from '../shared/query';
-import q from '../shared/query';
+import { runQuery as aqlQuery } from './aql';
+import q, { Query } from '../shared/query';
 import app from './main-app';
 
 // Apps

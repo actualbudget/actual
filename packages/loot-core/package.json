@@ -35,12 +35,12 @@
     "md5": "^2.3.0",
     "mitt": "^2.1.0",
     "node-fetch": "^1.6.3",
-    "node-libofx": "workspace:*",
+    "node-libofx": "*",
     "regenerator-runtime": "^0.13.7"
   },
   "devDependencies": {
-    "@actual-app/api": "workspace:*",
-    "@actual-app/import-ynab4": "workspace:*",
+    "@actual-app/api": "*",
+    "@actual-app/import-ynab4": "*",
     "@babel/core": "~7.14.3",
     "@types/jest": "^27.5.0",
     "adm-zip": "^0.5.9",
