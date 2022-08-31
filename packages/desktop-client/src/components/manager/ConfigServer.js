@@ -24,7 +24,7 @@ export default function ConfigServer() {
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState(null);
 
-  function getErrorMessage(error, url) {
+  function getErrorMessage(error) {
     switch (error) {
       case 'network-failure':
         return 'Server is not running at this URL';

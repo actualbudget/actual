@@ -5,7 +5,7 @@ function useServerURL() {
   let [url, setUrl] = useState('');
   useEffect(() => {
     async function run() {
-      let url = await send('get-server-url');
+      let url = await send('get-server-url') || '';
       if (url === 'https://not-configured/') {
         url = '';
       }
