@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { css } from 'glamor';
@@ -22,11 +22,15 @@ import { styles, colors } from '../style';
 import Wallet from '../svg/v1/Wallet';
 import Reports from '../svg/v1/Reports';
 import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
+import Wrench from '../svg/v1/Wrench';
 import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
 
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
+import CheveronUp from '../svg/v1/CheveronUp';
+import CheveronDown from '../svg/v1/CheveronDown';
+import StoreFrontIcon from '../svg/v1/StoreFront';
 
 export const SIDEBAR_WIDTH = 240;
 
@@ -214,9 +218,6 @@ export function Accounts({
   accounts,
   failedAccounts,
   updatedAccounts,
-  to,
-  icon,
-  history,
   getAccountPath,
   budgetedAccountPath,
   offBudgetAccountPath,
@@ -267,98 +268,89 @@ export function Accounts({
   };
 
   return (
-    <Item
-      title="Accounts"
-      to={to}
-      icon={icon}
-      exact={true}
-      style={{ marginBottom: 5, flex: 1 }}
-      onButtonPress={onAddAccount}
-    >
-      <View style={{ overflow: 'auto', marginTop: -5 }}>
-        {budgetedAccounts.length > 0 && (
-          <Account
-            name="For budget"
-            to={budgetedAccountPath}
-            query={getOnBudgetBalance()}
-            style={{ marginTop: 15, color: colors.n6 }}
-          />
-        )}
+    <View style={{ overflow: 'auto', flex: 1 }}>
+      {budgetedAccounts.length > 0 && (
+        <Account
+          name="For budget"
+          to={budgetedAccountPath}
+          query={getOnBudgetBalance()}
+          style={{ marginTop: 15, color: colors.n6 }}
+        />
+      )}
 
-        {budgetedAccounts.map((account, i) => (
+      {budgetedAccounts.map((account, i) => (
+        <Account
+          key={account.id}
+          name={account.name}
+          account={account}
+          connected={!!account.bankId}
+          failed={failedAccounts && failedAccounts.has(account.id)}
+          updated={updatedAccounts && updatedAccounts.includes(account.id)}
+          to={getAccountPath(account)}
+          query={getBalanceQuery(account)}
+          onDragChange={onDragChange}
+          onDrop={onReorder}
+          outerStyle={makeDropPadding(i, budgetedAccounts.length)}
+        />
+      ))}
+
+      {offbudgetAccounts.length > 0 && (
+        <Account
+          name="Off budget"
+          to={offBudgetAccountPath}
+          query={getOffBudgetBalance()}
+          style={{ color: colors.n6 }}
+        />
+      )}
+
+      {offbudgetAccounts.map((account, i) => (
+        <Account
+          key={account.id}
+          name={account.name}
+          account={account}
+          connected={!!account.bankId}
+          failed={failedAccounts && failedAccounts.has(account.id)}
+          updated={updatedAccounts && updatedAccounts.includes(account.id)}
+          to={getAccountPath(account)}
+          query={getBalanceQuery(account)}
+          onDragChange={onDragChange}
+          onDrop={onReorder}
+          outerStyle={makeDropPadding(i, offbudgetAccounts.length)}
+        />
+      ))}
+
+      {closedAccounts.length > 0 && (
+        <View
+          style={[
+            accountNameStyle,
+            {
+              marginTop: 15,
+              color: colors.n6,
+              flexDirection: 'row',
+              userSelect: 'none',
+              alignItems: 'center',
+              flexShrink: 0
+            }
+          ]}
+          onClick={onToggleClosedAccounts}
+        >
+          {'Closed Accounts' + (showClosedAccounts ? '' : '...')}
+        </View>
+      )}
+
+      {showClosedAccounts &&
+        closedAccounts.map((account, i) => (
           <Account
             key={account.id}
             name={account.name}
             account={account}
-            connected={!!account.bankId}
-            failed={failedAccounts && failedAccounts.has(account.id)}
-            updated={updatedAccounts && updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={getBalanceQuery(account)}
             onDragChange={onDragChange}
             onDrop={onReorder}
-            outerStyle={makeDropPadding(i, budgetedAccounts.length)}
           />
         ))}
-
-        {offbudgetAccounts.length > 0 && (
-          <Account
-            name="Off budget"
-            to={offBudgetAccountPath}
-            query={getOffBudgetBalance()}
-            style={{ color: colors.n6 }}
-          />
-        )}
-
-        {offbudgetAccounts.map((account, i) => (
-          <Account
-            key={account.id}
-            name={account.name}
-            account={account}
-            connected={!!account.bankId}
-            failed={failedAccounts && failedAccounts.has(account.id)}
-            updated={updatedAccounts && updatedAccounts.includes(account.id)}
-            to={getAccountPath(account)}
-            query={getBalanceQuery(account)}
-            onDragChange={onDragChange}
-            onDrop={onReorder}
-            outerStyle={makeDropPadding(i, offbudgetAccounts.length)}
-          />
-        ))}
-
-        {closedAccounts.length > 0 && (
-          <View
-            style={[
-              accountNameStyle,
-              {
-                marginTop: 15,
-                color: colors.n6,
-                flexDirection: 'row',
-                userSelect: 'none',
-                alignItems: 'center',
-                flexShrink: 0
-              }
-            ]}
-            onClick={onToggleClosedAccounts}
-          >
-            {'Closed Accounts' + (showClosedAccounts ? '' : '...')}
-          </View>
-        )}
-
-        {showClosedAccounts &&
-          closedAccounts.map((account, i) => (
-            <Account
-              key={account.id}
-              name={account.name}
-              account={account}
-              to={getAccountPath(account)}
-              query={getBalanceQuery(account)}
-              onDragChange={onDragChange}
-              onDrop={onReorder}
-            />
-          ))}
-      </View>
-    </Item>
+    </View>
   );
 }
 
@@ -439,6 +431,57 @@ const MenuButton = withRouter(function MenuButton({ history }) {
     </Button>
   );
 });
+
+function Tools() {
+  let [isOpen, setOpen] = useState(false);
+  let onToggle = useCallback(() => setOpen(open => !open), []);
+  let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
+  return (
+    <>
+      <View
+        style={{
+          paddingTop: 4,
+          paddingBottom: 4,
+          paddingRight: 10,
+          paddingLeft: 19,
+          textTransform: 'uppercase',
+          color: colors.n6,
+          flexDirection: 'row',
+          alignItems: 'center'
+        }}
+      >
+        <Wrench
+          width={15}
+          height={15}
+          style={{ color: 'inherit', marginRight: 4 }}
+        />
+        Tools
+        <div style={{ flex: 1 }} />
+        <Button className="hover-visible" bare onClick={onToggle}>
+          <ExpandOrCollapseIcon
+            width={13}
+            height={13}
+            // The margin is to make it the exact same size as the dots button
+            style={{ color: colors.n6, margin: 1 }}
+          />
+        </Button>
+      </View>
+      {isOpen && (
+        <>
+          <Item
+            title="Schedules"
+            icon={
+              <CalendarIcon
+                width={15}
+                height={15}
+                style={{ color: 'inherit' }}
+              />
+            }
+            to="/schedules"
+          />
+    </>
+  );
+}
 
 export function Sidebar({
   style,
@@ -545,15 +588,16 @@ export function Sidebar({
         to="/reports"
       />
       <Item
-        title="Schedules"
-        icon={
-          <CalendarIcon width={15} height={15} style={{ color: 'inherit' }} />
-        }
-        to="/schedules"
-      />
-      <Accounts
+        title="Accounts"
         to="/accounts"
         icon={<PiggyBank width={15} height={15} style={{ color: 'inherit' }} />}
+        exact={true}
+        onButtonPress={onAddAccount}
+      />
+
+      <Tools />
+
+      <Accounts
         accounts={accounts}
         failedAccounts={failedAccounts}
         updatedAccounts={updatedAccounts}
