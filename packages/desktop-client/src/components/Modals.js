@@ -149,21 +149,6 @@ function Modals({
         />
 
         <Route
-          path="/manage-payees"
-          render={() => {
-            return (
-              <ManagePayeesWithData
-                history={history}
-                modalProps={modalProps}
-                initialSelectedIds={
-                  options.selectedPayee ? [options.selectedPayee] : undefined
-                }
-              />
-            );
-          }}
-        />
-
-        <Route
           path="/manage-rules"
           render={() => {
             return (

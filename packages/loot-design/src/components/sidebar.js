@@ -374,9 +374,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
     setMenuOpen(false);
 
     switch (type) {
-      case 'open-payees':
-        dispatch(pushModal('manage-payees'));
-        break;
       case 'find-schedules':
         history.push('/schedule/discover', { locationPtr: history.location });
         break;
@@ -394,7 +391,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
   }
 
   let items = [
-    { name: 'open-payees', text: 'Manage Payees' },
     { name: 'find-schedules', text: 'Find schedules' },
     { name: 'repair-splits', text: 'Repair split transactions' },
     Menu.line,
@@ -438,7 +434,7 @@ function Tools() {
 
   useEffect(() => {
     if (
-      ['/schedules', '/rules'].some(route =>
+      ['/schedules', '/payees', '/rules'].some(route =>
         location.pathname.startsWith(route)
       )
     ) {
@@ -487,6 +483,17 @@ function Tools() {
               />
             }
             to="/schedules"
+          />
+          <Item
+            title="Payees"
+            icon={
+              <StoreFrontIcon
+                width={15}
+                height={15}
+                style={{ color: 'inherit' }}
+              />
+            }
+            to="/payees"
           />
           <Item
             title="Rules"
