@@ -11,7 +11,7 @@ import { colors } from 'loot-design/src/style';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { Title, Input } from './subscribe/common';
-import useServerURL from '../../hooks/useServerURL';
+import { useServerURL } from '../../hooks/useServerURL';
 
 export default function ConfigServer() {
   let dispatch = useDispatch();

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-function useServerURL() {
+export function useServerURL() {
   let [url, setUrl] = useState('');
   useEffect(() => {
     async function run() {
-      let url = await send('get-server-url') || '';
+      let url = (await send('get-server-url')) || '';
       if (url === 'https://not-configured/') {
         url = '';
       }
@@ -15,5 +15,3 @@ function useServerURL() {
   }, []);
   return url;
 }
-
-export default useServerURL;

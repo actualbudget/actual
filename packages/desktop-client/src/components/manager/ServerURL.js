@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, AnchorLink } from 'loot-design/src/components/common';
-import useServerURL from '../../hooks/useServerURL';
+import { useServerURL } from '../../hooks/useServerURL';
 
 export default function ServerURL() {
   const url = useServerURL();
