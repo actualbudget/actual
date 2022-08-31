@@ -220,7 +220,6 @@ function updateMenu(isBudgetOpen) {
       item =>
         item.label === 'Start Tutorial' ||
         item.label === 'Manage Payees...' ||
-        item.label === 'Manage Rules...' ||
         item.label === 'Load Backup...'
     )
 

@@ -34,20 +34,6 @@ function getMenu(isDev, createWindow) {
           }
         },
         {
-          label: 'Manage Rules...',
-          enabled: false,
-          click(item, focusedWindow) {
-            if (
-              focusedWindow &&
-              focusedWindow.webContents.getTitle() === 'Actual'
-            ) {
-              focusedWindow.webContents.executeJavaScript(
-                '__actionsForMenu.pushModal("manage-rules")'
-              );
-            }
-          }
-        },
-        {
           label: 'Load Backup...',
           enabled: false,
           click(item, focusedWindow) {

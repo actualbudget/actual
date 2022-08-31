@@ -35,6 +35,7 @@ import Settings from './Settings';
 import Modals from './Modals';
 import Notifications from './Notifications';
 import GlobalKeys from './GlobalKeys';
+import { ManageRulesPage } from './ManageRulesPage';
 // import Debugger from './Debugger';
 
 function URLBar() {
@@ -96,6 +97,7 @@ function Routes({ location }) {
           component={PostsOfflineNotification}
         />
 
+        <Route path="/rules" exact component={ManageRulesPage} />
         <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
 
         <Route

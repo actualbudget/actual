@@ -31,6 +31,7 @@ import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CheveronUp from '../svg/v1/CheveronUp';
 import CheveronDown from '../svg/v1/CheveronDown';
 import StoreFrontIcon from '../svg/v1/StoreFront';
+import TuningIcon from '../svg/v1/Tuning';
 import { useLocation } from 'react-router';
 
 export const SIDEBAR_WIDTH = 240;
@@ -376,9 +377,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
       case 'open-payees':
         dispatch(pushModal('manage-payees'));
         break;
-      case 'open-rules':
-        dispatch(pushModal('manage-rules'));
-        break;
       case 'find-schedules':
         history.push('/schedule/discover', { locationPtr: history.location });
         break;
@@ -397,7 +395,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
 
   let items = [
     { name: 'open-payees', text: 'Manage Payees' },
-    { name: 'open-rules', text: 'Manage Rules' },
     { name: 'find-schedules', text: 'Find schedules' },
     { name: 'repair-splits', text: 'Repair split transactions' },
     Menu.line,
@@ -440,7 +437,11 @@ function Tools() {
   let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
 
   useEffect(() => {
-    if (['/schedules'].some(route => location.pathname.startsWith(route))) {
+    if (
+      ['/schedules', '/rules'].some(route =>
+        location.pathname.startsWith(route)
+      )
+    ) {
       setOpen(true);
     }
   }, [location.pathname]);
@@ -487,6 +488,15 @@ function Tools() {
             }
             to="/schedules"
           />
+          <Item
+            title="Rules"
+            icon={
+              <TuningIcon width={15} height={15} style={{ color: 'inherit' }} />
+            }
+            to="/rules"
+          />
+        </>
+      )}
     </>
   );
 }
