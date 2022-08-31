@@ -77,7 +77,7 @@ export function Item({
   );
 
   return (
-    <View style={style}>
+    <View style={[{ flexShrink: 0 }, style]}>
       {onClick ? (
         <RectButton onClick={onClick}>
           <View style={linkStyle}>{content}</View>
@@ -272,7 +272,7 @@ export function Accounts({
   };
 
   return (
-    <View style={{ overflow: 'auto', flex: 1 }}>
+    <View>
       {budgetedAccounts.length > 0 && (
         <Account
           name="For budget"
@@ -444,7 +444,12 @@ function Tools() {
     }
   }, [location.pathname]);
   return (
-    <View style={{ borderLeft: isOpen ? '4px solid ' + colors.n9 : '' }}>
+    <View
+      style={{
+        borderLeft: isOpen ? '4px solid ' + colors.n9 : '',
+        flexShrink: 0
+      }}
+    >
       <Item
         title="Tools"
         icon={<Wrench width={15} height={15} style={{ color: 'inherit' }} />}
@@ -524,7 +529,6 @@ export function Sidebar({
         {
           width: SIDEBAR_WIDTH,
           color: colors.n9,
-          overflow: 'auto',
           backgroundColor: colors.n1,
           '& .float': {
             opacity: 0,
@@ -594,52 +598,58 @@ export function Sidebar({
         {!hasWindowButtons && <ToggleButton onFloat={onFloat} />}
         {Platform.isBrowser && <MenuButton />}
       </View>
-      <Item
-        title="Budget"
-        icon={<Wallet width={15} height={15} style={{ color: 'inherit' }} />}
-        to="/budget"
-      />
-      <Item
-        title="Reports"
-        icon={<Reports width={15} height={15} style={{ color: 'inherit' }} />}
-        to="/reports"
-      />
-      <Item
-        title="Accounts"
-        to="/accounts"
-        icon={<PiggyBank width={15} height={15} style={{ color: 'inherit' }} />}
-        exact={true}
-        button={
-          <Button
-            bare
-            onClick={e => {
-              e.stopPropagation();
-              e.preventDefault();
-              onAddAccount();
-            }}
-          >
-            <Add width={12} height={12} style={{ color: colors.n6 }} />
-          </Button>
-        }
-      />
 
-      <Tools />
+      <View style={{ overflow: 'auto' }}>
+        <Item
+          title="Budget"
+          icon={<Wallet width={15} height={15} style={{ color: 'inherit' }} />}
+          to="/budget"
+        />
+        <Item
+          title="Reports"
+          icon={<Reports width={15} height={15} style={{ color: 'inherit' }} />}
+          to="/reports"
+        />
 
-      <Accounts
-        accounts={accounts}
-        failedAccounts={failedAccounts}
-        updatedAccounts={updatedAccounts}
-        getAccountPath={account => `/accounts/${account.id}`}
-        budgetedAccountPath="/accounts/budgeted"
-        offBudgetAccountPath="/accounts/offbudget"
-        getBalanceQuery={getBalanceQuery}
-        getOnBudgetBalance={getOnBudgetBalance}
-        getOffBudgetBalance={getOffBudgetBalance}
-        showClosedAccounts={showClosedAccounts}
-        onAddAccount={onAddAccount}
-        onToggleClosedAccounts={onToggleClosedAccounts}
-        onReorder={onReorder}
-      />
+        <Tools />
+
+        <Item
+          title="Accounts"
+          to="/accounts"
+          icon={
+            <PiggyBank width={15} height={15} style={{ color: 'inherit' }} />
+          }
+          exact={true}
+          button={
+            <Button
+              bare
+              onClick={e => {
+                e.stopPropagation();
+                e.preventDefault();
+                onAddAccount();
+              }}
+            >
+              <Add width={12} height={12} style={{ color: colors.n6 }} />
+            </Button>
+          }
+        />
+
+        <Accounts
+          accounts={accounts}
+          failedAccounts={failedAccounts}
+          updatedAccounts={updatedAccounts}
+          getAccountPath={account => `/accounts/${account.id}`}
+          budgetedAccountPath="/accounts/budgeted"
+          offBudgetAccountPath="/accounts/offbudget"
+          getBalanceQuery={getBalanceQuery}
+          getOnBudgetBalance={getOnBudgetBalance}
+          getOffBudgetBalance={getOffBudgetBalance}
+          showClosedAccounts={showClosedAccounts}
+          onAddAccount={onAddAccount}
+          onToggleClosedAccounts={onToggleClosedAccounts}
+          onReorder={onReorder}
+        />
+      </View>
     </View>
   );
 }
