@@ -33,6 +33,7 @@ import CheveronDown from '../svg/v1/CheveronDown';
 import StoreFrontIcon from '../svg/v1/StoreFront';
 import TuningIcon from '../svg/v1/Tuning';
 import { useLocation } from 'react-router';
+import { RectButton } from 'react-native-gesture-handler';
 
 export const SIDEBAR_WIDTH = 240;
 
@@ -41,59 +42,60 @@ export function Item({
   icon,
   title,
   style,
+  indent = 0,
   to,
   exact,
-  onButtonPress
+  onClick,
+  button
 }) {
-  const showButton = title === 'Accounts';
+  const linkStyle = [
+    {
+      ...styles.mediumText,
+      paddingTop: 9,
+      paddingBottom: 9,
+      paddingLeft: 19 + indent,
+      paddingRight: 10,
+      textDecoration: 'none',
+      color: colors.n9
+    },
+    { ':hover': { backgroundColor: colors.n2 } }
+  ];
+
+  const content = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 20
+      }}
+    >
+      {icon}
+      <Block style={{ marginLeft: 8 }}>{title}</Block>
+      <View style={{ flex: 1 }} />
+      {button}
+    </View>
+  );
 
   return (
     <View style={style}>
-      <AnchorLink
-        style={[
-          {
-            ...styles.mediumText,
-            paddingTop: 9,
-            paddingBottom: 9,
-            paddingLeft: 19,
-            paddingRight: 10,
-            textDecoration: 'none',
-            color: colors.n9
-          },
-          { ':hover': { backgroundColor: colors.n2 } }
-        ]}
-        to={to}
-        exact={exact}
-        activeStyle={{
-          borderLeft: '4px solid ' + colors.p8,
-          paddingLeft: 19 - 4,
-          color: colors.p8
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            height: 20
+      {onClick ? (
+        <RectButton onClick={onClick}>
+          <View style={linkStyle}>{content}</View>
+        </RectButton>
+      ) : (
+        <AnchorLink
+          style={linkStyle}
+          to={to}
+          exact={exact}
+          activeStyle={{
+            borderLeft: '4px solid ' + colors.p8,
+            paddingLeft: 19 + indent - 4,
+            color: colors.p8
           }}
         >
-          {icon}
-          <Block style={{ marginLeft: 8 }}>{title}</Block>
-          <View style={{ flex: 1 }} />
-          {showButton && (
-            <Button
-              bare
-              onClick={e => {
-                e.stopPropagation();
-                e.preventDefault();
-                onButtonPress();
-              }}
-            >
-              <Add width={12} height={12} style={{ color: colors.n6 }} />
-            </Button>
-          )}
-        </View>
-      </AnchorLink>
+          {content}
+        </AnchorLink>
+      )}
 
       {children ? <View style={{ marginTop: 5 }}>{children}</View> : null}
     </View>
@@ -442,35 +444,22 @@ function Tools() {
     }
   }, [location.pathname]);
   return (
-    <>
-      <View
-        style={{
-          paddingTop: 4,
-          paddingBottom: 4,
-          paddingRight: 10,
-          paddingLeft: 19,
-          textTransform: 'uppercase',
-          color: colors.n6,
-          flexDirection: 'row',
-          alignItems: 'center'
-        }}
-      >
-        <Wrench
-          width={15}
-          height={15}
-          style={{ color: 'inherit', marginRight: 4 }}
-        />
-        Tools
-        <div style={{ flex: 1 }} />
-        <Button className="hover-visible" bare onClick={onToggle}>
+    <View style={{ borderLeft: isOpen ? '4px solid ' + colors.n9 : '' }}>
+      <Item
+        title="Tools"
+        icon={<Wrench width={15} height={15} style={{ color: 'inherit' }} />}
+        exact={true}
+        onClick={onToggle}
+        indent={isOpen ? -4 : 0}
+        button={
           <ExpandOrCollapseIcon
-            width={13}
-            height={13}
-            // The margin is to make it the exact same size as the dots button
-            style={{ color: colors.n6, margin: 1 }}
+            width={12}
+            height={12}
+            style={{ color: colors.n6 }}
           />
-        </Button>
-      </View>
+        }
+      />
+
       {isOpen && (
         <>
           <Item
@@ -483,6 +472,7 @@ function Tools() {
               />
             }
             to="/schedules"
+            indent={12}
           />
           <Item
             title="Payees"
@@ -494,6 +484,7 @@ function Tools() {
               />
             }
             to="/payees"
+            indent={12}
           />
           <Item
             title="Rules"
@@ -501,10 +492,11 @@ function Tools() {
               <TuningIcon width={15} height={15} style={{ color: 'inherit' }} />
             }
             to="/rules"
+            indent={12}
           />
         </>
       )}
-    </>
+    </View>
   );
 }
 
@@ -617,7 +609,18 @@ export function Sidebar({
         to="/accounts"
         icon={<PiggyBank width={15} height={15} style={{ color: 'inherit' }} />}
         exact={true}
-        onButtonPress={onAddAccount}
+        button={
+          <Button
+            bare
+            onClick={e => {
+              e.stopPropagation();
+              e.preventDefault();
+              onAddAccount();
+            }}
+          >
+            <Add width={12} height={12} style={{ color: colors.n6 }} />
+          </Button>
+        }
       />
 
       <Tools />
