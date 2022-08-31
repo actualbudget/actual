@@ -29,7 +29,8 @@
     "save": "Guardar",
     "schedule": "Agenda",
     "schedule_other": "Agendas",
-    "status": "Estado"
+    "status": "Estado",
+    "ordinal_other": "{{count}}º"
   },
   "schedules": {
     "addNewSchedule": "Agregar nuevo agenda",
