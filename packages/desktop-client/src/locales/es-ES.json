@@ -58,6 +58,7 @@
     "automaticallyAddTransaction": "Agregar transacción automáticamente",
     "automaticallyAddTransactionAdvice": "Si se selecciona, la agenda creará automáticamente una transacción para la cuenta especificada",
     "createSchedule_one": "Crear agenda",
+    "createSchedule_many": "Crear agendas",
     "createSchedule_other": "Crear agendas",
     "doFromFindSchedules": "Puedes hacerlo después desde el ítem de menú \"Buscar agendas\" en la barra lateral",
     "doFromToolsFindSchedules": "Puedes hacerlo después desde el ítem de menú \"Herramientas > Buscar agendas\"",
