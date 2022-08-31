@@ -27,8 +27,6 @@ export default function ConfigServer() {
   function getErrorMessage(error) {
     switch (error) {
       case 'network-failure':
-        return 'Server is not running at this URL';
-      case 'add-https':
         return 'Server is not running at this URL. Make sure you have HTTPS set up properly.';
       default:
         return 'Server does not look like an Actual server. Is it set up correctly?';
@@ -50,12 +48,8 @@ export default function ConfigServer() {
       !url.startsWith('https://')
     ) {
       let { error } = await send('set-server-url', { url: 'https://' + url });
-      if (error === 'network-failure') {
-        setError('add-https');
-        if (!url.startsWith('https://')) {
-          setUrl('https://' + url);
-        }
-      } else if (error) {
+      if (error) {
+        setUrl('https://' + url);
         setError(error);
       } else {
         await dispatch(signOut());
