@@ -48,7 +48,7 @@
     "electron-is-dev": "2.0.0",
     "electron-log": "4.3.2",
     "electron-updater": "4.3.8",
-    "loot-core": "workspace:*",
+    "loot-core": "*",
     "node-fetch": "^1.6.3",
     "node-ipc": "9.1.4"
   },
