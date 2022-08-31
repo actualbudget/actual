@@ -65,8 +65,8 @@ body:
     id: operating-system
     attributes:
       label: Operating System
-      description: What version of our software are you running?
       options:
+        - macOS
         - Windows 11
         - Windows 10
         - Linux
