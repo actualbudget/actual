@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useState,
-  useCallback,
+  useCallback
 } from 'react';
 import { css } from 'glamor';
 import mergeRefs from 'react-merge-refs';
@@ -820,7 +820,8 @@ export function Modal({
           <View
             style={{
               padding: 20,
-              position: 'relative'
+              position: 'relative',
+              flexShrink: 0
             }}
           >
             {showTitle && (

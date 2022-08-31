@@ -499,7 +499,11 @@ function RulesList({
   );
 }
 
-export default function ManageRules({ payeeId, setLoading = () => {} }) {
+export default function ManageRules({
+  isModal,
+  payeeId,
+  setLoading = () => {}
+}) {
   let [allRules, setAllRules] = useState(null);
   let [rules, setRules] = useState(null);
   let dispatch = useDispatch();
@@ -513,7 +517,9 @@ export default function ManageRules({ payeeId, setLoading = () => {} }) {
 
     let loadedRules = null;
     if (payeeId) {
-      loadedRules = await send('payees-get-rules', { id: payeeId });
+      loadedRules = await send('payees-get-rules', {
+        id: payeeId
+      });
     } else {
       loadedRules = await send('rules-get');
     }
@@ -592,7 +598,14 @@ export default function ManageRules({ payeeId, setLoading = () => {} }) {
         rule: {
           stage: null,
           conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
-          actions: [{ op: 'set', field: 'category', value: null, type: 'id' }]
+          actions: [
+            {
+              op: 'set',
+              field: 'category',
+              value: null,
+              type: 'id'
+            }
+          ]
         },
         onSave: async newRule => {
           let newRules = await loadRules();
@@ -618,10 +631,55 @@ export default function ManageRules({ payeeId, setLoading = () => {} }) {
     return null;
   }
 
+  let actions = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: isModal ? '13px 15px' : '0 0 15px',
+        borderTop: '1px solid ' + colors.border
+      }}
+    >
+      <View
+        style={{
+          color: colors.n4,
+          flexDirection: 'row',
+          alignItems: 'center',
+          width: '50%'
+        }}
+      >
+        <Text>
+          Rules are always run in the order that you see them.{' '}
+          <ExternalLink
+            asAnchor={true}
+            href="https://actualbudget.com/docs/other/rules/"
+            style={{ color: colors.n4 }}
+          >
+            Learn more
+          </ExternalLink>
+        </Text>
+      </View>
+
+      <View style={{ flex: 1 }} />
+
+      <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+        {selectedInst.items.size > 0 && (
+          <Button onClick={onDeleteSelected}>
+            Delete {selectedInst.items.size} rules
+          </Button>
+        )}
+        <Button primary onClick={onCreateRule}>
+          Create new rule
+        </Button>
+      </Stack>
+    </View>
+  );
+
   return (
     <SchedulesQuery.Provider>
       <SelectedProvider instance={selectedInst}>
-        <View style={{ marginTop: 20, overflow: 'hidden' }}>
+        <View style={{ overflow: 'hidden' }}>
+          {!isModal && actions}
           <View style={{ flex: 1 }}>
             <RulesHeader />
             <SimpleTable
@@ -642,53 +700,7 @@ export default function ManageRules({ payeeId, setLoading = () => {} }) {
               />
             </SimpleTable>
           </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              padding: '13px 15px',
-              borderTop: '1px solid ' + colors.border
-            }}
-          >
-            <View
-              style={{
-                color: colors.n4,
-                flexDirection: 'row',
-                alignItems: 'center',
-                width: '50%'
-              }}
-            >
-              <Text>
-                Rules are always run in the order that you see them.{' '}
-                <ExternalLink
-                  asAnchor={true}
-                  href="https://actualbudget.com/docs/other/rules/"
-                  style={{ color: colors.n4 }}
-                >
-                  Learn more
-                </ExternalLink>
-              </Text>
-            </View>
-
-            <View style={{ flex: 1 }} />
-
-            <Stack
-              direction="row"
-              align="center"
-              justify="flex-end"
-              spacing={2}
-            >
-              {selectedInst.items.size > 0 && (
-                <Button onClick={onDeleteSelected}>
-                  Delete {selectedInst.items.size} rules
-                </Button>
-              )}
-              <Button primary onClick={onCreateRule}>
-                Create new rule
-              </Button>
-            </Stack>
-          </View>
+          {isModal && actions}
         </View>
       </SelectedProvider>
     </SchedulesQuery.Provider>
