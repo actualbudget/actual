@@ -17,7 +17,7 @@ import ImportTransactions from 'loot-design/src/components/modals/ImportTransact
 import EditField from 'loot-design/src/components/modals/EditField';
 import CreateAccount from './modals/CreateAccount';
 import ManagePayeesWithData from './payees/ManagePayeesWithData';
-import ManageRules from './modals/ManageRules';
+import ManageRulesModal from './modals/ManageRulesModal';
 import EditRule from './modals/EditRule';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
@@ -167,7 +167,7 @@ function Modals({
           path="/manage-rules"
           render={() => {
             return (
-              <ManageRules
+              <ManageRulesModal
                 history={history}
                 modalProps={modalProps}
                 payeeId={options.payeeId}

@@ -40,6 +40,7 @@ import {
   getRecurringDescription
 } from 'loot-core/src/shared/schedules';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+import { Page } from './Page';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
@@ -446,7 +447,7 @@ function RulesHeader() {
   let dispatchSelected = useSelectedDispatch();
 
   return (
-    <TableHeader>
+    <TableHeader version="v2" style={{}}>
       <SelectCell
         exposed={true}
         focused={false}
@@ -498,14 +499,13 @@ function RulesList({
   );
 }
 
-export default function ManageRules({ history, modalProps, payeeId }) {
+export default function ManageRules({ payeeId, setLoading = () => {} }) {
   let [allRules, setAllRules] = useState(null);
   let [rules, setRules] = useState(null);
   let dispatch = useDispatch();
   let navigator = useTableNavigator(rules, ['select', 'edit']);
   let selectedInst = useSelected('manage-rules', allRules, []);
   let [hoveredRule, setHoveredRule] = useState(null);
-  let [loading, setLoading] = useState(true);
   let tableRef = useRef(null);
 
   async function loadRules() {
@@ -619,88 +619,78 @@ export default function ManageRules({ history, modalProps, payeeId }) {
   }
 
   return (
-    <Modal
-      title="Rules"
-      padding={0}
-      loading={loading}
-      {...modalProps}
-      style={[modalProps.style, { flex: 1, maxWidth: '90%' }]}
-    >
-      {() => (
-        <SchedulesQuery.Provider>
-          <SelectedProvider instance={selectedInst}>
-            <View style={{ height: '70vh' }}>
-              <View style={{ flex: 1 }}>
-                <RulesHeader />
-                <SimpleTable
-                  ref={tableRef}
-                  data={rules}
-                  navigator={navigator}
-                  loadMore={loadMore}
-                  // Hide the last border of the item in the table
-                  style={{ marginBottom: -1 }}
-                >
-                  <RulesList
-                    rules={rules}
-                    selectedItems={selectedInst.items}
-                    navigator={navigator}
-                    hoveredRule={hoveredRule}
-                    onHover={onHover}
-                    onEditRule={onEditRule}
-                  />
-                </SimpleTable>
-              </View>
+    <SchedulesQuery.Provider>
+      <SelectedProvider instance={selectedInst}>
+        <View style={{ marginTop: 20, overflow: 'hidden' }}>
+          <View style={{ flex: 1 }}>
+            <RulesHeader />
+            <SimpleTable
+              ref={tableRef}
+              data={rules}
+              navigator={navigator}
+              loadMore={loadMore}
+              // Hide the last border of the item in the table
+              style={{ marginBottom: -1 }}
+            >
+              <RulesList
+                rules={rules}
+                selectedItems={selectedInst.items}
+                navigator={navigator}
+                hoveredRule={hoveredRule}
+                onHover={onHover}
+                onEditRule={onEditRule}
+              />
+            </SimpleTable>
+          </View>
 
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  padding: '13px 15px',
-                  borderTop: '1px solid ' + colors.border
-                }}
-              >
-                <View
-                  style={{
-                    color: colors.n4,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    width: '50%'
-                  }}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: '13px 15px',
+              borderTop: '1px solid ' + colors.border
+            }}
+          >
+            <View
+              style={{
+                color: colors.n4,
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '50%'
+              }}
+            >
+              <Text>
+                Rules are always run in the order that you see them.{' '}
+                <ExternalLink
+                  asAnchor={true}
+                  href="https://actualbudget.com/docs/other/rules/"
+                  style={{ color: colors.n4 }}
                 >
-                  <Text>
-                    Rules are always run in the order that you see them.{' '}
-                    <ExternalLink
-                      asAnchor={true}
-                      href="https://actualbudget.com/docs/other/rules/"
-                      style={{ color: colors.n4 }}
-                    >
-                      Learn more
-                    </ExternalLink>
-                  </Text>
-                </View>
-
-                <View style={{ flex: 1 }} />
-
-                <Stack
-                  direction="row"
-                  align="center"
-                  justify="flex-end"
-                  spacing={2}
-                >
-                  {selectedInst.items.size > 0 && (
-                    <Button onClick={onDeleteSelected}>
-                      Delete {selectedInst.items.size} rules
-                    </Button>
-                  )}
-                  <Button primary onClick={onCreateRule}>
-                    Create new rule
-                  </Button>
-                </Stack>
-              </View>
+                  Learn more
+                </ExternalLink>
+              </Text>
             </View>
-          </SelectedProvider>
-        </SchedulesQuery.Provider>
-      )}
-    </Modal>
+
+            <View style={{ flex: 1 }} />
+
+            <Stack
+              direction="row"
+              align="center"
+              justify="flex-end"
+              spacing={2}
+            >
+              {selectedInst.items.size > 0 && (
+                <Button onClick={onDeleteSelected}>
+                  Delete {selectedInst.items.size} rules
+                </Button>
+              )}
+              <Button primary onClick={onCreateRule}>
+                Create new rule
+              </Button>
+            </Stack>
+          </View>
+        </View>
+      </SelectedProvider>
+    </SchedulesQuery.Provider>
   );
 }
