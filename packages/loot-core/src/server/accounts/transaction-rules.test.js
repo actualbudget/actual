@@ -14,7 +14,7 @@ import {
   migrateOldRules
 } from './transaction-rules';
 import { loadMappings } from '../db/mappings';
-import { runQuery } from '../aql/schema/run-query';
+import { runQuery } from '../aql';
 import q from '../../shared/query';
 
 // TODO: write tests to make sure payee renaming is "pre" and category
