@@ -19,11 +19,7 @@ import {
   makeClientId,
   Timestamp
 } from '../crdt';
-import {
-  convertForInsert,
-  convertForUpdate,
-  convertFromSelect
-} from '../aql';
+import { convertForInsert, convertForUpdate, convertFromSelect } from '../aql';
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';
