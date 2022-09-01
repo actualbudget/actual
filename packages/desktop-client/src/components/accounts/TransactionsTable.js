@@ -1649,7 +1649,8 @@ export let TransactionTable = React.forwardRef((props, ref) => {
             onAddSplit(lastTransaction.id);
           } else if (
             (newNavigator.focusedField === 'debit' ||
-              newNavigator.focusedField === 'credit') &&
+              newNavigator.focusedField === 'credit' ||
+              newNavigator.focusedField === 'cleared') &&
             newNavigator.editingId === lastTransaction.id &&
             (!isSplit || !lastTransaction.error)
           ) {
