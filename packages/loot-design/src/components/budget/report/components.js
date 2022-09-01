@@ -33,7 +33,7 @@ export const BudgetTotalsMonth = React.memo(function BudgetTotalsMonth() {
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
           style={{ color: colors.n4, fontWeight: 600 }}
-          formatter={(value) => {
+          formatter={value => {
             return format(parseFloat(value || '0'), 'financial');
           }}
         />
@@ -136,7 +136,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
       onClose={tooltip.close}
     >
       <Menu
-        onMenuSelect={(type) => {
+        onMenuSelect={type => {
           onBudgetAction(monthIndex, 'carryover', {
             category: categoryId,
             flag: !carryover
@@ -199,10 +199,10 @@ export const CategoryMonth = React.memo(function CategoryMonth({
           binding: reportBudget.catBudgeted(category.id),
           type: 'financial',
           getValueStyle: makeAmountGrey,
-          formatExpr: (expr) => {
+          formatExpr: expr => {
             return integerToCurrency(expr);
           },
-          unformatExpr: (expr) => {
+          unformatExpr: expr => {
             return amountToInteger(evalArithmetic(expr, 0));
           }
         }}
@@ -211,7 +211,7 @@ export const CategoryMonth = React.memo(function CategoryMonth({
             onEdit(null);
           }
         }}
-        onSave={(amount) => {
+        onSave={amount => {
           onBudgetAction(monthIndex, 'budget-amount', {
             category: category.id,
             amount

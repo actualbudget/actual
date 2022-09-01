@@ -95,7 +95,12 @@ export default () => (
                     onClose: () => setState({ isCurrent: true })
                   }}
                   payees={state.payees}
-                  ruleCounts={new Map([['three', 1], ['tw', 3]])}
+                  ruleCounts={
+                    new Map([
+                      ['three', 1],
+                      ['tw', 3]
+                    ])
+                  }
                   categoryGroups={categoryGroups}
                   onBatchChange={changes => {
                     setState({ payees: applyChanges(changes, state.payees) });
