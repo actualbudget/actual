@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useState,
-  useCallback,
+  useCallback
 } from 'react';
 import { css } from 'glamor';
 import mergeRefs from 'react-merge-refs';

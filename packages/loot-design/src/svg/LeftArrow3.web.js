@@ -1,10 +1,10 @@
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
-import React from "react";
-import { css } from "glamor";
+import React from 'react';
+import { css } from 'glamor';
 
 let x = <div />;
 
-function LeftArrow3({ width, height, style, color = "black", ...props }) {
+function LeftArrow3({ width, height, style, color = 'black', ...props }) {
   return (
     <svg
       width={width}

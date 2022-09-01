@@ -1,5 +1,5 @@
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
-import React from "react";
+import React from 'react';
 
 import {
   Svg,
@@ -18,9 +18,9 @@ import {
   Use,
   Defs,
   Stop
-} from "mobile/node_modules/react-native-svg";
+} from 'mobile/node_modules/react-native-svg';
 
-function Budget({ width, height, style, color = "black", ...props }) {
+function Budget({ width, height, style, color = 'black', ...props }) {
   return (
     <Svg
       width={width}

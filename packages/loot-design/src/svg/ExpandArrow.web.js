@@ -1,8 +1,14 @@
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
-import React from "react";
-import { css } from "glamor";
+import React from 'react';
+import { css } from 'glamor';
 
-function ExpandArrow({ width, height, style, color = "currentColor", ...props }) {
+function ExpandArrow({
+  width,
+  height,
+  style,
+  color = 'currentColor',
+  ...props
+}) {
   return (
     <svg
       width={width}
