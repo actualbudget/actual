@@ -561,8 +561,8 @@ function SelectedTransactionsButton({
               { name: 'date', text: t('general.date') },
               { name: 'account', text: t('general.account_one'), key: 'A' },
               { name: 'payee', text: t('general.payee_one'), key: 'P' },
-              { name: 'category', text: t('general.category_one'), key: 'C' },
               { name: 'notes', text: t('general.note_other'), key: 'N' },
+              { name: 'category', text: t('general.category_one'), key: 'C' },
               { name: 'amount', text: t('general.amount') },
               { name: 'cleared', text: t('account.cleared'), key: 'L' }
             ])
