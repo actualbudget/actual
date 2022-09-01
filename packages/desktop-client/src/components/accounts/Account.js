@@ -181,13 +181,12 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
     onClose();
   }
 
+  const { t } = useTranslation();
+
   return (
     <Tooltip position="bottom-right" width={275} onClose={onClose}>
       <View style={{ padding: '5px 8px' }}>
-        <Text>
-          Enter the current balance of your bank account that you want to
-          reconcile with:
-        </Text>
+        <Text>{t('account.enterCurrentBalanceToReconcileAdvice')}</Text>
         <form onSubmit={onSubmit}>
           {balance != null && (
             <InitialFocus>
@@ -197,7 +196,7 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
               />
             </InitialFocus>
           )}
-          <Button primary>Reconcile</Button>
+          <Button primary>{t('account.reconcile')}</Button>
         </form>
       </View>
     </Tooltip>
@@ -241,6 +240,8 @@ function AccountMenu({
 }) {
   let [tooltip, setTooltip] = useState('default');
 
+  const { t } = useTranslation();
+
   return tooltip === 'reconcile' ? (
     <ReconcileTooltip
       account={account}
@@ -260,19 +261,21 @@ function AccountMenu({
         items={[
           canShowBalances && {
             name: 'toggle-balance',
-            text: (showBalances ? 'Hide' : 'Show') + ' Running Balance'
+            text: showBalances
+              ? t('account.hideRunningBalance')
+              : t('account.showRunningBalance')
           },
-          { name: 'export', text: 'Export' },
-          { name: 'reconcile', text: 'Reconcile' },
+          { name: 'export', text: t('general.export') },
+          { name: 'reconcile', text: t('account.reconcile') },
           syncEnabled &&
             account &&
             !account.closed &&
             (canSync
-              ? { name: 'unlink', text: 'Unlink Account' }
-              : { name: 'link', text: 'Link Account' }),
+              ? { name: 'unlink', text: t('account.unlinkAccount') }
+              : { name: 'link', text: t('account.linkAccount') }),
           account.closed
-            ? { name: 'reopen', text: 'Reopen Account' }
-            : { name: 'close', text: 'Close Account' }
+            ? { name: 'reopen', text: t('account.reopenAccount') }
+            : { name: 'close', text: t('account.closeAccount') }
         ].filter(x => x)}
       />
     </MenuTooltip>
@@ -280,13 +283,15 @@ function AccountMenu({
 }
 
 function CategoryMenu({ onClose, onMenuSelect }) {
+  const { t } = useTranslation();
+
   return (
     <MenuTooltip onClose={onClose}>
       <Menu
         onMenuSelect={item => {
           onMenuSelect(item);
         }}
-        items={[{ name: 'export', text: 'Export' }]}
+        items={[{ name: 'export', text: t('general.export') }]}
       />
     </MenuTooltip>
   );
@@ -303,8 +308,33 @@ function DetailedBalance({ name, balance }) {
         color: colors.n5
       }}
     >
-      {name}{' '}
-      <Text style={{ fontWeight: 600 }}>{format(balance, 'financial')}</Text>
+      {name === 'selected' && (
+        <Trans
+          values={{
+            amount: format(balance, 'financial')
+          }}
+        >
+          {'account.selectedBalance'}
+        </Trans>
+      )}
+      {name === 'cleared' && (
+        <Trans
+          values={{
+            amount: format(balance, 'financial')
+          }}
+        >
+          {'account.clearedTotal'}
+        </Trans>
+      )}
+      {name === 'uncleared' && (
+        <Trans
+          values={{
+            amount: format(balance, 'financial')
+          }}
+        >
+          {'account.unclearedTotal'}
+        </Trans>
+      )}
     </Text>
   );
 }
@@ -339,7 +369,8 @@ function SelectedBalance({ selectedItems }) {
   if (balance == null) {
     return null;
   }
-  return <DetailedBalance name="Selected balance:" balance={balance} />;
+
+  return <DetailedBalance name="selected" balance={balance} />;
 }
 
 function MoreBalances({ balanceQuery }) {
@@ -354,8 +385,8 @@ function MoreBalances({ balanceQuery }) {
 
   return (
     <View style={{ flexDirection: 'row' }}>
-      <DetailedBalance name="Cleared total:" balance={cleared} />
-      <DetailedBalance name="Uncleared total:" balance={uncleared} />
+      <DetailedBalance name="cleared" balance={cleared} />
+      <DetailedBalance name="uncleared" balance={uncleared} />
     </View>
   );
 }
@@ -478,6 +509,8 @@ function SelectedTransactionsButton({
     return [...selectedItems].filter(id => !isPreviewId(id));
   }
 
+  const { t } = useTranslation();
+
   return (
     <SelectedItemsButton
       name="transactions"
@@ -495,37 +528,43 @@ function SelectedTransactionsButton({
       items={[
         ...(!types.trans
           ? [
-              { name: 'view-schedule', text: 'View schedule' },
-              { name: 'post-transaction', text: 'Post transaction' },
-              { name: 'skip', text: 'Skip scheduled date' }
+              { name: 'view-schedule', text: t('schedules.view_one') },
+              {
+                name: 'post-transaction',
+                text: t('schedules.postTransaction')
+              },
+              { name: 'skip', text: t('schedules.skipScheduledDate') }
             ]
           : [
-              { name: 'show', text: 'Show', key: 'F' },
-              { name: 'delete', text: 'Delete', key: 'D' },
+              { name: 'show', text: t('general.show'), key: 'F' },
+              { name: 'delete', text: t('general.delete'), key: 'D' },
               ...(linked
                 ? [
                     {
                       name: 'view-schedule',
-                      text: 'View schedule',
+                      text: t('schedules.view_one'),
                       disabled: selectedItems.size > 1
                     },
-                    { name: 'unlink-schedule', text: 'Unlink schedule' }
+                    {
+                      name: 'unlink-schedule',
+                      text: t('schedules.unlinkSchedule')
+                    }
                   ]
                 : [
                     {
                       name: 'link-schedule',
-                      text: 'Link schedule'
+                      text: t('schedules.linkSchedule')
                     }
                   ]),
               Menu.line,
-              { type: Menu.label, name: 'Edit field' },
-              { name: 'date', text: 'Date' },
-              { name: 'account', text: 'Account', key: 'A' },
-              { name: 'payee', text: 'Payee', key: 'P' },
-              { name: 'notes', text: 'Notes', key: 'N' },
-              { name: 'category', text: 'Category', key: 'C' },
-              { name: 'amount', text: 'Amount' },
-              { name: 'cleared', text: 'Cleared', key: 'L' }
+              { type: Menu.label, name: t('general.editField') },
+              { name: 'date', text: t('general.date') },
+              { name: 'account', text: t('general.account_one'), key: 'A' },
+              { name: 'payee', text: t('general.payee_one'), key: 'P' },
+              { name: 'category', text: t('general.category_one'), key: 'C' },
+              { name: 'notes', text: t('general.note_other'), key: 'N' },
+              { name: 'amount', text: t('general.amount') },
+              { name: 'cleared', text: t('account.cleared'), key: 'L' }
             ])
       ]}
       onSelect={name => {
@@ -637,6 +676,8 @@ const AccountHeader = React.memo(
       }
     }
 
+    const { t } = useTranslation();
+
     return (
       <>
         <KeyHandlers
@@ -729,7 +770,7 @@ const AccountHeader = React.memo(
                       }
                       style={{ color: 'currentColor', marginRight: 4 }}
                     />{' '}
-                    Sync
+                    {t('general.sync')}
                   </>
                 ) : (
                   <>
@@ -738,7 +779,7 @@ const AccountHeader = React.memo(
                       height={13}
                       style={{ color: 'currentColor', marginRight: 4 }}
                     />{' '}
-                    Import
+                    {t('general.import')}
                   </>
                 )}
               </Button>
@@ -750,7 +791,7 @@ const AccountHeader = React.memo(
                   height={10}
                   style={{ color: 'inherit', marginRight: 3 }}
                 />{' '}
-                Add New
+                {t('general.addNew')}
               </Button>
             )}
             <View>
@@ -771,7 +812,7 @@ const AccountHeader = React.memo(
               }
               inputRef={searchInput}
               value={search}
-              placeholder="Search"
+              placeholder={t('general.search')}
               getStyle={focused => [
                 {
                   backgroundColor: 'transparent',
@@ -809,8 +850,8 @@ const AccountHeader = React.memo(
               onClick={onToggleSplits}
               title={
                 splitsExpanded.state.mode === 'collapse'
-                  ? 'Collapse split transactions'
-                  : 'Expand split transactions'
+                  ? t('account.collapseSplitTransaction_other')
+                  : t('account.expandSplitTransaction_other')
               }
             >
               {splitsExpanded.state.mode === 'collapse' ? (
@@ -1188,11 +1229,15 @@ class AccountInternal extends React.PureComponent {
   onImport = async () => {
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
+    const t = this.props.t;
 
     if (account) {
       const res = await window.Actual.openFileDialog({
         filters: [
-          { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] }
+          {
+            name: t('general.financialFile_other'),
+            extensions: ['qif', 'ofx', 'qfx', 'csv']
+          }
         ]
       });
 
@@ -1217,11 +1262,12 @@ class AccountInternal extends React.PureComponent {
     let normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
     let filename = `${normalizedName || 'transactions'}.csv`;
+    const t = this.props.t;
 
     window.Actual.saveFile(
       exportedTransactions,
       filename,
-      'Export Transactions'
+      t('general.exportTransaction_other')
     );
   };
 
@@ -1335,21 +1381,24 @@ class AccountInternal extends React.PureComponent {
     if (filterName) {
       return filterName;
     }
+    const t = this.props.t;
 
     if (!account) {
       if (id === 'budgeted') {
-        return 'Budgeted Accounts';
+        return t('account.budgetedAccount_other');
       } else if (id === 'offbudget') {
-        return 'Off Budget Accounts';
+        return t('account.offBudgetAccount_other');
       } else if (id === 'uncategorized') {
-        return 'Uncategorized';
+        return t('account.uncategorized');
       } else if (!id) {
-        return 'All Accounts';
+        return t('account.allAccounts');
       }
       return null;
     }
 
-    return (account.closed ? 'Closed: ' : '') + account.name;
+    return account.closed
+      ? t('account.closedNamed', { name: account.name })
+      : account.name;
   }
 
   getBalanceQuery(account, id) {
@@ -1388,8 +1437,10 @@ class AccountInternal extends React.PureComponent {
   };
 
   onShowTransactions = async ids => {
+    const t = this.props.t;
+
     this.onApplyFilter({
-      customName: 'Selected transactions',
+      customName: t('account.selectedTransaction_other'),
       filter: { id: { $oneof: ids } }
     });
   };
@@ -1582,7 +1633,8 @@ class AccountInternal extends React.PureComponent {
       transactionsFiltered,
       editingName,
       showBalances,
-      balances
+      balances,
+      t
     } = this.state;
 
     let account = accounts.find(account => account.id === accountId);
@@ -1706,7 +1758,7 @@ class AccountInternal extends React.PureComponent {
                             fontStyle: 'italic'
                           }}
                         >
-                          No transactions
+                          {t('general.noTransaction_other')}
                         </View>
                       ) : null
                     }
@@ -1736,10 +1788,13 @@ class AccountInternal extends React.PureComponent {
 
 function AccountHack(props) {
   let { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  const { t } = useTranslation();
+
   return (
     <AccountInternal
       {...props}
       splitsExpandedDispatch={splitsExpandedDispatch}
+      t={t}
     />
   );
 }
