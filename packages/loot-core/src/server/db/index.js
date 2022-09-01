@@ -3,12 +3,13 @@ import LRU from 'lru-cache';
 import fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import { groupById } from '../../shared/util';
-import { schema, schemaConfig } from '../aql/schema';
 import {
+  schema,
+  schemaConfig,
   convertForInsert,
   convertForUpdate,
   convertFromSelect
-} from '../aql/schema-helpers';
+} from '../aql';
 import {
   makeClock,
   setClock,

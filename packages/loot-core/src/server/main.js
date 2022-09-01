@@ -10,8 +10,7 @@ import logger from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { fromPlaidAccountType } from '../shared/accounts';
 import * as monthUtils from '../shared/months';
-import { Query } from '../shared/query';
-import q from '../shared/query';
+import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
@@ -23,7 +22,7 @@ import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
 import { batchUpdateTransactions } from './accounts/transactions';
 import installAPI from './api';
-import { runQuery as aqlQuery } from './aql/schema/run-query';
+import { runQuery as aqlQuery } from './aql';
 import {
   getAvailableBackups,
   loadBackup,

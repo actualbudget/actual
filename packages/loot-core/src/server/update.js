@@ -1,7 +1,6 @@
 import md5 from 'md5';
 
-import { schema, schemaConfig } from './aql/schema';
-import { makeViews } from './aql/views';
+import { schema, schemaConfig, makeViews } from './aql';
 import * as db from './db';
 import * as migrations from './migrate/migrations';
 

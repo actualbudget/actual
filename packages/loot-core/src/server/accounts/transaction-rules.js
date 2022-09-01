@@ -6,13 +6,12 @@ import {
   getApproxNumberThreshold
 } from '../../shared/rules';
 import { partitionByField, fastSetMerge } from '../../shared/util';
-import { schemaConfig } from '../aql/schema';
+import { schemaConfig } from '../aql';
 import * as db from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
-import { setSyncingMode, batchMessages } from '../sync';
-import { addSyncListener } from '../sync/index';
+import { addSyncListener, setSyncingMode, batchMessages } from '../sync';
 import {
   Condition,
   Action,

@@ -1,5 +1,5 @@
 import { addTransactions } from '../server/accounts/sync';
-import { runQuery as aqlQuery } from '../server/aql/schema/run-query';
+import { runQuery as aqlQuery } from '../server/aql';
 import * as budgetActions from '../server/budget/actions';
 import * as budget from '../server/budget/base';
 import * as db from '../server/db';

@@ -14,7 +14,7 @@ import {
   payeeModel,
   payeeRuleModel
 } from './api-models';
-import { runQuery as aqlQuery } from './aql/schema/run-query';
+import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
 import { getClock } from './crdt';
 import * as db from './db';

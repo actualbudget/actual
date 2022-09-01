@@ -2,8 +2,7 @@ import fc from 'fast-check';
 
 import arbs from '../../mocks/arbitrary-schema';
 import { execTracer } from '../../shared/test-helpers';
-import { schema, schemaConfig } from '../aql/schema';
-import { convertInputType } from '../aql/schema-helpers';
+import { convertInputType, schema, schemaConfig } from '../aql';
 import * as db from '../db';
 import { listen, unlisten } from './migrate';
 

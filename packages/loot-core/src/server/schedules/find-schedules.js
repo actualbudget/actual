@@ -6,7 +6,7 @@ import { getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import { groupBy } from '../../shared/util';
 import { conditionsToAQL } from '../accounts/transaction-rules';
-import { runQuery as aqlQuery } from '../aql/schema/run-query';
+import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
 import { fromDateRepr } from '../models';
 import { Schedule as RSchedule } from '../util/rschedule';

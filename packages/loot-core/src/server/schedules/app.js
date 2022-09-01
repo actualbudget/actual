@@ -20,7 +20,7 @@ import {
   ruleModel
 } from '../accounts/transaction-rules';
 import { createApp } from '../app';
-import { runQuery as aqlQuery } from '../aql/schema/run-query';
+import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
 import { toDateRepr } from '../models';
 import { mutator, runMutator } from '../mutators';
