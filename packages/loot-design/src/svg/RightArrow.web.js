@@ -1,8 +1,8 @@
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
-import React from "react";
-import { css } from "glamor";
+import React from 'react';
+import { css } from 'glamor';
 
-function RightArrow({ width, height, style, color = "black", ...props }) {
+function RightArrow({ width, height, style, color = 'black', ...props }) {
   return (
     <svg
       width={width}
@@ -17,7 +17,6 @@ function RightArrow({ width, height, style, color = "black", ...props }) {
         className="path"
         fill="none"
         stroke={color}
-        className="path"
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"

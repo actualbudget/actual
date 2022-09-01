@@ -183,7 +183,9 @@ export default function PayeeAutocomplete({
   let payees = useCachedPayees();
   let accounts = useCachedAccounts();
 
-  let [focusTransferPayees, setFocusTransferPayees] = useState(defaultFocusTransferPayees);
+  let [focusTransferPayees, setFocusTransferPayees] = useState(
+    defaultFocusTransferPayees
+  );
   let payeeSuggestions = useMemo(
     () => [
       { id: 'new', name: '' },
