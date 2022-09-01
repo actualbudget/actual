@@ -35,7 +35,6 @@ function RightArrow({ width, height, style, color = 'black', ...props }) {
         className="path"
         fill="none"
         stroke={color}
-        className="path"
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
