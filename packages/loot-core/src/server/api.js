@@ -20,7 +20,7 @@ import { setSyncingMode, batchMessages } from './sync';
 import { getClock } from './crdt';
 import { runMutator } from './mutators';
 import { integerToAmount } from '../shared/util';
-import { runQuery as aqlQuery } from './aql/schema/run-query';
+import { runQuery as aqlQuery } from './aql';
 import q from '../shared/query';
 
 const connection = require('../platform/server/connection');

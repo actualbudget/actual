@@ -3,7 +3,7 @@ import * as db from '../db';
 import { Schedule as RSchedule } from '../util/rschedule';
 import { groupBy } from '../../shared/util';
 import { fromDateRepr } from '../models';
-import { runQuery as aqlQuery } from '../aql/schema/run-query';
+import { runQuery as aqlQuery } from '../aql';
 import q from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';

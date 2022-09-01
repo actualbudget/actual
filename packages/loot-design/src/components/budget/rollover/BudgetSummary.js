@@ -112,11 +112,9 @@ function TotalsList({ prevMonthName, collapsed }) {
         <CellValue
           binding={rolloverBudget.forNextMonth}
           formatter={value => {
-            let n = parseInt(value);
-            n = isNaN(n) ? 0 : -n;
-            let v = format(n, 'financial');
-
-            return n > 0 ? '+' + v : n === 0 ? '-' + v : v;
+            let n = parseInt(value) || 0;
+            let v = format(Math.abs(n), 'financial');
+            return n >= 0 ? '-' + v : '+' + v;
           }}
           style={[{ fontWeight: 600 }, styles.tnum]}
         />

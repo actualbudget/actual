@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tooltip, Pointer, P } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
 import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
 import { Title } from './common';
 
 function BudgetInitial({ targetRect, navigationProps }) {

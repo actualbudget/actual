@@ -4,8 +4,7 @@ import {
   Text,
   Block,
   Modal,
-  Button,
-  Select
+  Button
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import { NativeCategorySelect } from 'loot-design/src/components/CategorySelect';

@@ -53,7 +53,7 @@ process.on('unhandledRejection', reason => {
 });
 
 global.afterEach(() => {
-  __resetWorld();
+  global.__resetWorld();
 });
 
 // https://github.com/testing-library/react-testing-library#suppressing-unnecessary-warnings-on-react-dom-168

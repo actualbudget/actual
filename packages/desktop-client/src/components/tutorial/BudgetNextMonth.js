@@ -2,15 +2,8 @@ import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
-import {
-  View,
-  Tooltip,
-  Pointer,
-  P,
-  Button
-} from 'loot-design/src/components/common';
+import { View, P, Button } from 'loot-design/src/components/common';
 import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
 import { Standalone, Title, useMinimized } from './common';
 
 function BudgetNextMonth({ stepTwo, navigationProps }) {
