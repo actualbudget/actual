@@ -1,5 +1,5 @@
-import React from "react";
-import Svg, { Path } from "react-native-svg";
+import React from 'react';
+import Svg, { Path } from 'react-native-svg';
 
 const SvgLogo = props => (
   <Svg
@@ -8,7 +8,7 @@ const SvgLogo = props => (
     height={32}
     fill="none"
     style={{
-      color: "#242134",
+      color: '#242134',
       ...props.style
     }}
   >

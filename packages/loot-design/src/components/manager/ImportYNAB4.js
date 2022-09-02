@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
-import {
-  View,
-  Block,
-  Modal,
-  Button,
-  ButtonWithLoading,
-  P
-} from '../common';
+import { View, Block, Modal, Button, ButtonWithLoading, P } from '../common';
 import { styles, colors } from '../../style';
 
 function getErrorMessage(error) {
@@ -67,10 +60,10 @@ function Import({ modalProps, availableImports }) {
             </P>
             <P>
               When you've located your data,{' '}
-              <strong>compress it into a zip file</strong>. On macOS, right-click
-              the folder and select "Compress". On Windows, right-click and
-              select "Send to > Compressed (zipped) folder". Upload the zipped
-              folder for importing.
+              <strong>compress it into a zip file</strong>. On macOS,
+              right-click the folder and select "Compress". On Windows,
+              right-click and select "Send to > Compressed (zipped) folder".
+              Upload the zipped folder for importing.
             </P>
             <View>
               <ButtonWithLoading loading={importing} primary onClick={onImport}>

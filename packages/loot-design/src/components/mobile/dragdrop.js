@@ -173,7 +173,7 @@ export function DragDrop({ makeHighlight, children, style }) {
             A.set(ax, absoluteX),
             A.set(ay, absoluteY),
 
-           A.call([ax, ay], onDragMove),
+            A.call([ax, ay], onDragMove)
           ])
         ])
     }

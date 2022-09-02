@@ -31,10 +31,7 @@ import SheetValue from './spreadsheet/SheetValue';
 import DateSelect from './DateSelect';
 import format from './spreadsheet/format';
 import { keys } from '../util/keys';
-import {
-  AvoidRefocusScrollProvider,
-  useProperFocus,
-} from './useProperFocus';
+import { AvoidRefocusScrollProvider, useProperFocus } from './useProperFocus';
 import { useSelectedItems } from './useSelected';
 
 export const ROW_HEIGHT = 32;
@@ -250,26 +247,23 @@ export function Row({
   let rowRef = useRef(null);
   let timer = useRef(null);
 
-  useEffect(
-    () => {
-      if (highlighted && !prevHighlighted.current && rowRef.current) {
-        rowRef.current.classList.add('animated');
-        setShouldHighlight(true);
+  useEffect(() => {
+    if (highlighted && !prevHighlighted.current && rowRef.current) {
+      rowRef.current.classList.add('animated');
+      setShouldHighlight(true);
 
-        clearTimeout(timer.current);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        setShouldHighlight(false);
+
         timer.current = setTimeout(() => {
-          setShouldHighlight(false);
-
-          timer.current = setTimeout(() => {
-            if (rowRef.current) {
-              rowRef.current.classList.remove('animated');
-            }
-          }, 500);
+          if (rowRef.current) {
+            rowRef.current.classList.remove('animated');
+          }
         }, 500);
-      }
-    },
-    [highlighted]
-  );
+      }, 500);
+    }
+  }, [highlighted]);
 
   useEffect(() => {
     prevHighlighted.current = highlighted;
@@ -1233,8 +1227,8 @@ export function useTableNavigator(data, fields, opts = {}) {
                     ? 'up'
                     : 'down'
                   : e.shiftKey
-                    ? 'left'
-                    : 'right'
+                  ? 'left'
+                  : 'right'
               );
               break;
             default:
