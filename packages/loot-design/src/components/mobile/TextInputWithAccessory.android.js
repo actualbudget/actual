@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { TextInput } from 'react-native';
+
 import { AccessoryIdContext } from './AndroidKeyboardAvoidingView';
 
 export default React.forwardRef(function TextInputWithAccessory(

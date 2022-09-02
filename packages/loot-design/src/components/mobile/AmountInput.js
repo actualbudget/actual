@@ -1,5 +1,4 @@
 import React from 'react';
-import mitt from 'mitt';
 import {
   View,
   Text,
@@ -9,16 +8,20 @@ import {
   StyleSheet
 } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import { colors } from '../../style';
-import { KeyboardButton } from './common';
-import TextInputWithAccessory from './TextInputWithAccessory';
+
+import mitt from 'mitt';
+
 import {
   toRelaxedNumber,
   amountToCurrency,
   getNumberFormat
 } from 'loot-core/src/shared/util';
-import MathIcon from '../../svg/Math';
 import Platform from 'loot-core/src/client/platform';
+
+import { colors } from '../../style';
+import { KeyboardButton } from './common';
+import TextInputWithAccessory from './TextInputWithAccessory';
+import MathIcon from '../../svg/Math';
 import Add from '../../svg/v1/Add';
 import Subtract from '../../svg/v1/Subtract';
 import Equals from '../../svg/v1/Equals';

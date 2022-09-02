@@ -1,16 +1,14 @@
 import React, { useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
+
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getValidMonthBounds } from 'loot-design/src/components/budget/MonthsContext';
-
 import * as rollover from 'loot-design/src/components/budget/rollover/rollover-components';
 import { RolloverContext } from 'loot-design/src/components/budget/rollover/RolloverContext';
-
 import * as report from 'loot-design/src/components/budget/report/components';
 import { ReportProvider } from 'loot-design/src/components/budget/report/ReportContext';
-
 import DynamicBudgetTable from 'loot-design/src/components/budget/DynamicBudgetTable';
 import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
 import { View } from 'loot-design/src/components/common';
@@ -25,6 +23,7 @@ import {
   updateGroup,
   deleteGroup
 } from 'loot-core/src/shared/categories.js';
+
 import { TitlebarContext } from '../Titlebar';
 
 let _initialBudgetMonth = null;

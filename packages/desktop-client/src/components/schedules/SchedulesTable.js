@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { colors } from 'loot-design/src/style';
 import {
@@ -20,6 +21,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import Check from 'loot-design/src/svg/v2/Check';
+
 import DisplayId from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
 

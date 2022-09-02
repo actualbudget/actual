@@ -3,8 +3,10 @@ import * as db from '../db';
 import * as sheet from '../sheet';
 import { getClock, Timestamp } from '../crdt';
 import { resolveName } from '../spreadsheet/util';
-import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
 import * as encoder from './encoder';
+
+import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
+
 const mockSyncServer = require('../tests/mockSyncServer');
 
 beforeEach(() => {

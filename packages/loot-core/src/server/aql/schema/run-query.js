@@ -1,10 +1,11 @@
-import { schema, schemaConfig } from './index';
 import schemaExecutors from './executors';
 import {
   runQuery as _runQuery,
   runCompiledQuery as _runCompiledQuery
 } from '../exec';
 import { Query } from '../../../shared/query';
+
+import { schema, schemaConfig } from './index';
 
 export function runCompiledQuery(query, sqlPieces, state, params) {
   return _runCompiledQuery(query, sqlPieces, state, {

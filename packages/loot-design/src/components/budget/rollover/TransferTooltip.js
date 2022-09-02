@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
+
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
+
 import { View, Button, Tooltip, InitialFocus, Input } from '../../common';
 import SpreadsheetContext from '../../spreadsheet/SpreadsheetContext';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';

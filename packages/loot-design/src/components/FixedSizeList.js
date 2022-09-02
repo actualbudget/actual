@@ -1,5 +1,7 @@
 import React from 'react';
+
 import memoizeOne from 'memoize-one';
+
 import useResizeObserver from './useResizeObserver';
 import { View } from './common';
 

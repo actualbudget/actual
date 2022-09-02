@@ -1,9 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { connect } from 'react-redux';
+
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+
 import * as actions from 'loot-core/src/client/actions';
+
 import Intro from './tutorial/Intro';
 import BudgetSummary from './tutorial/BudgetSummary';
 import BudgetCategories from './tutorial/BudgetCategories';

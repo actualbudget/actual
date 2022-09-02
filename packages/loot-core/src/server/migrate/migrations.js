@@ -1,10 +1,9 @@
-import fs from '../../platform/server/fs';
-import * as sqlite from '../../platform/server/sqlite';
-
 // We have to bundle in JS migrations manually to avoid having to `eval`
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache.js';
+import fs from '../../platform/server/fs';
+import * as sqlite from '../../platform/server/sqlite';
 
 const uuid = require('../../platform/uuid');
 

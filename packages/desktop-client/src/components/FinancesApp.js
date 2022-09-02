@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
 import { Router, Route, Redirect, Switch, useLocation } from 'react-router-dom';
-import { createBrowserHistory } from 'history';
 import { connect } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
+
+import { createBrowserHistory } from 'history';
 import hotkeys from 'hotkeys-js';
+
 import * as actions from 'loot-core/src/client/actions';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
@@ -14,12 +16,12 @@ import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/Budg
 import * as undo from 'loot-core/src/platform/client/undo';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
+
 import { getLocationState } from '../util/location-state';
 import { makeLocationState } from '../util/location-state';
 import { PageTypeProvider } from './Page';
 import { ActiveLocationProvider } from './ActiveLocation';
 import BankSyncStatus from './BankSyncStatus';
-
 import Titlebar, { TitlebarProvider } from './Titlebar';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import Account from './accounts/Account';

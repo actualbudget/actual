@@ -1,6 +1,10 @@
 import React from 'react';
+
+import { Formik } from 'formik';
+
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 import { determineOffBudget } from 'loot-core/src/shared/accounts';
+
 import {
   View,
   Modal,
@@ -13,7 +17,6 @@ import {
   FormError,
   InitialFocus
 } from '../common';
-import { Formik } from 'formik';
 
 function CreateLocalAccount({ modalProps, actions, history }) {
   return (

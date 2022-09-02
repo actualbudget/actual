@@ -1,5 +1,6 @@
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
 import React from 'react';
+
 import { css } from 'glamor';
 
 function DragIos({ width, height, style, color = 'black', ...props }) {

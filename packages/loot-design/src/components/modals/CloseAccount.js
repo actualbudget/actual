@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+
 import { Formik } from 'formik';
-import { View, Text, Modal, Button, P, Select, FormError } from '../common';
+
 import { integerToCurrency } from 'loot-core/src/shared/util';
+
+import { View, Text, Modal, Button, P, Select, FormError } from '../common';
 import { colors } from '../../style';
 
 function needsCategory(account, currentTransfer, accounts) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
 import {
   initiallyLoadPayees,
   setUndoEnabled
@@ -39,6 +40,7 @@ import {
   amountToInteger
 } from 'loot-core/src/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
+
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { StatusBadge } from '../schedules/StatusBadge';
 import DisplayId from '../util/DisplayId';

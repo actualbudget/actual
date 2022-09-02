@@ -1,12 +1,15 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+
+import { bindActionCreators } from 'redux';
 import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
+
 import * as actions from 'loot-core/src/client/actions';
 import { View, Block, AnchorLink } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+
 import { useArgsMemo } from './util';
 import theme from './chart-theme';
 import Container from './Container';

@@ -1,4 +1,5 @@
 import LRU from 'lru-cache';
+
 import * as sqlite from '../../platform/server/sqlite';
 import fs from '../../platform/server/fs';
 import { sendMessages, batchMessages } from '../sync';

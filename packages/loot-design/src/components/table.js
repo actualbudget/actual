@@ -9,8 +9,10 @@ import React, {
   useMemo
 } from 'react';
 import { useStore } from 'react-redux';
-import { scope } from '@jlongster/lively';
 import AutoSizer from 'react-virtualized-auto-sizer';
+
+import { scope } from '@jlongster/lively';
+
 import { FixedSizeList } from './FixedSizeList';
 import { styles, colors } from '../style';
 import DeleteIcon from '../svg/Delete';

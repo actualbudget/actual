@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
+
 import { prettyAccountType } from 'loot-core/src/shared/accounts';
+
 import { Button, TextOneLine } from './common';
 import { TransactionList } from './transaction';
 import CellValue from '../spreadsheet/CellValue';

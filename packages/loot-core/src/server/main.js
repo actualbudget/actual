@@ -1,4 +1,6 @@
 import './polyfills';
+import injectAPI from '@actual-app/api/injected';
+
 import asyncStorage from '../platform/server/asyncStorage';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import * as prefs from './prefs';
@@ -57,7 +59,6 @@ import { parseFile } from './accounts/parse-file';
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import { getServer, setServer } from './server-config';
 import installAPI from './api';
-import injectAPI from '@actual-app/api/injected';
 import * as cloudStorage from './cloud-storage';
 import encryption from './encryption';
 import * as tracking from './tracking/events';
@@ -67,7 +68,6 @@ import { createTestBudget } from '../mocks/budget';
 import { runQuery as aqlQuery } from './aql';
 import q, { Query } from '../shared/query';
 import app from './main-app';
-
 // Apps
 import schedulesApp from './schedules/app';
 import budgetApp from './budget/app';
@@ -76,6 +76,7 @@ import toolsApp from './tools/app';
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');
+
 const uuid = require('../platform/uuid');
 const connection = require('../platform/server/connection');
 const { resolveName, unresolveName } = require('./spreadsheet/util');

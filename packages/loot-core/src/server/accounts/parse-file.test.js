@@ -1,9 +1,10 @@
+import * as d from 'date-fns';
+
 import { parseFile } from './parse-file';
 import { reconcileTransactions } from './sync';
 import * as prefs from '../prefs';
 import * as db from '../db';
 import { amountToInteger } from '../../shared/util';
-import * as d from 'date-fns';
 
 beforeEach(global.emptyDatabase());
 

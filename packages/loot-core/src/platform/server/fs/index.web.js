@@ -1,5 +1,6 @@
 let { SQLiteFS } = require('absurd-sql');
 let IndexedDBBackend = require('absurd-sql/dist/indexeddb-backend').default;
+
 let connection = require('../connection');
 let { _getModule } = require('../sqlite');
 let idb = require('../indexeddb');

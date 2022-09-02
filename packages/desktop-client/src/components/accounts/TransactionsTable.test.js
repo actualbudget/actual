@@ -1,7 +1,9 @@
 import React from 'react';
+
 import { act } from 'react-dom/test-utils';
 import { render, fireEvent } from '@testing-library/react';
 import { format as formatDate, parse as parseDate } from 'date-fns';
+
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { initServer } from 'loot-core/src/platform/client/fetch';
 import {
@@ -17,7 +19,9 @@ import {
   updateTransaction
 } from 'loot-core/src/shared';
 import { SelectedProviderWithItems } from 'loot-design/src/components';
+
 import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
+
 const uuid = require('loot-core/src/platform/uuid');
 
 const accounts = [generateAccount('Bank of America')];

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+
 import { css } from 'glamor';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 import { reportBudget } from 'loot-core/src/client/queries';
+
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import CellValue from '../../spreadsheet/CellValue';
 import useSheetValue from '../../spreadsheet/useSheetValue';

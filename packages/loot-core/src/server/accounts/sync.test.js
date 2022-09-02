@@ -10,7 +10,9 @@ import {
 import * as monthUtils from '../../shared/months';
 import * as transfer from './transfer';
 import { loadRules, insertRule } from './transaction-rules';
+
 const snapshotDiff = require('snapshot-diff');
+
 const { post } = require('../post');
 const mockSyncServer = require('../tests/mockSyncServer');
 

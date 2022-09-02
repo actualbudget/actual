@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { View, Text, Block, Modal, Button } from '../common';
 import { Row, Cell } from '../table';
 import { colors } from '../../style';
