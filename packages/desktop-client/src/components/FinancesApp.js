@@ -17,8 +17,7 @@ import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/Budg
 import { View } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import { getLocationState } from '../util/location-state';
-import { makeLocationState } from '../util/location-state';
+import { getLocationState, makeLocationState } from '../util/location-state';
 import Account from './accounts/Account';
 import { ActiveLocationProvider } from './ActiveLocation';
 import BankSyncStatus from './BankSyncStatus';

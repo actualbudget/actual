@@ -7,8 +7,7 @@ import CategoryAutocomplete from '../../CategorySelect';
 import { View, Button, Tooltip, InitialFocus, Input } from '../../common';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import SpreadsheetContext from '../../spreadsheet/SpreadsheetContext';
-import { addToBeBudgetedGroup } from '../util';
-import { CategoryGroupsContext } from '../util';
+import { addToBeBudgetedGroup, CategoryGroupsContext } from '../util';
 
 export default function TransferTooltip({
   initialAmount,

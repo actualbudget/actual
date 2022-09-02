@@ -12,8 +12,7 @@ import {
   P,
   AlignedText
 } from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
-import { colors } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';

@@ -2,8 +2,7 @@ import React from 'react';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { Block } from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
-import { colors } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 
 function Change({ amount, style }) {
   return (

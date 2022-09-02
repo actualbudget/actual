@@ -21,8 +21,7 @@ import {
   Button,
   ButtonWithLoading
 } from '../common';
-import { Checkbox } from '../forms';
-import { SectionLabel } from '../forms';
+import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 
 let dateFormats = [

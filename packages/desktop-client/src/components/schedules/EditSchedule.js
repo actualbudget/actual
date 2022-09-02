@@ -26,8 +26,7 @@ import { colors } from 'loot-design/src/style';
 
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { OpSelect } from '../modals/EditRule';
-import { usePageType } from '../Page';
-import { Page } from '../Page';
+import { Page, usePageType } from '../Page';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 
 function mergeFields(defaults, initial) {
