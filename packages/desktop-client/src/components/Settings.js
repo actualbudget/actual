@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
-import { css } from 'glamor';
 import { Route, Switch, Redirect } from 'react-router-dom';
+
+import { css } from 'glamor';
+
 import * as actions from 'loot-core/src/client/actions';
 import {
   View,

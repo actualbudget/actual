@@ -1,9 +1,11 @@
 import * as prefs from '../prefs';
 import * as db from '../db';
 import * as sheet from '../sheet';
-import * as sync from './index';
 import { merkle, getClock, Timestamp } from '../crdt';
 import * as encoder from './encoder';
+
+import * as sync from './index';
+
 const jsc = require('jsverify');
 const uuidGenerator = jsc.integer(97, 122).smap(
   x => String.fromCharCode(x),

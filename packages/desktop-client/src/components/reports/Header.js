@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { styles } from 'loot-design/src/style';
 import {
   View,

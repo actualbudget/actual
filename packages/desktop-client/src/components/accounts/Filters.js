@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
 import { useSelector } from 'react-redux';
+
 import scopeTab from 'react-modal/lib/helpers/scopeTab';
 import {
   parse as parseDate,
   format as formatDate,
   isValid as isDateValid
 } from 'date-fns';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { titleFirst } from 'loot-core/src/shared/util';
@@ -31,6 +33,7 @@ import {
 import DeleteIcon from 'loot-design/src/svg/Delete';
 import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
 import { colors } from 'loot-design/src/style';
+
 import GenericInput from '../util/GenericInput';
 import { Value } from '../modals/ManageRules';
 

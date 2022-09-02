@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+
+import { bindActionCreators } from 'redux';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 import { styles, colors } from 'loot-design/src/style';
 import {

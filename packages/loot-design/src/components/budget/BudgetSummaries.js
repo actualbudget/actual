@@ -5,10 +5,13 @@ import React, {
   useCallback,
   useLayoutEffect
 } from 'react';
+
 import { Spring } from 'wobble';
 import { css } from 'glamor';
-import { MonthsContext } from './MonthsContext';
+
 import * as monthUtils from 'loot-core/src/shared/months';
+
+import { MonthsContext } from './MonthsContext';
 import { View } from '../common';
 import useResizeObserver from '../useResizeObserver';
 

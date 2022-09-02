@@ -2,6 +2,7 @@ import { sendMessages } from './sync';
 import { getIn } from '../shared/util';
 import { Timestamp } from './crdt';
 import { withMutatorContext, getMutatorContext } from './mutators';
+
 const connection = require('../platform/server/connection');
 
 // A marker always sits as the first entry to simplify logic

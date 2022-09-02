@@ -1,4 +1,5 @@
 import Platform from './platform';
+
 const { PostError } = require('./errors');
 const { fetch } = require('../platform/server/fetch');
 

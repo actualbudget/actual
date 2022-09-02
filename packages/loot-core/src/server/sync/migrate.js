@@ -1,5 +1,6 @@
-import { addSyncListener, applyMessages } from './index';
 import { Timestamp } from '../crdt';
+
+import { addSyncListener, applyMessages } from './index';
 
 function migrateParentIds(oldValues, newValues) {
   newValues.forEach((items, table) => {

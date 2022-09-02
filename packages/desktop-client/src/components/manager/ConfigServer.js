@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+
 import {
   View,
   Text,
@@ -10,6 +11,7 @@ import {
 import { colors } from 'loot-design/src/style';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
+
 import { Title, Input } from './subscribe/common';
 
 export default function ConfigServer() {

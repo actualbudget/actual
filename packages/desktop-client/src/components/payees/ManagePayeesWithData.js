@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
+
 import * as actions from 'loot-core/src/client/actions';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { send, listen } from 'loot-core/src/platform/client/fetch';

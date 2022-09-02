@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Block } from 'loot-design/src/components/common';
+
 import { css } from 'glamor';
+
+import { View, Block } from 'loot-design/src/components/common';
 import AnimatedLoading from 'loot-design/src/svg/v1/AnimatedLoading';
 import { colors } from 'loot-design/src/style';
+
 import Background from './Background';
 
 function AppBackground({ initializing, loadingText }) {

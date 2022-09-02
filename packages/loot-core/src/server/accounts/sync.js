@@ -14,8 +14,9 @@ import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 
 const dateFns = require('date-fns');
-const { post } = require('../post');
 const levenshtein = require('damerau-levenshtein');
+
+const { post } = require('../post');
 const uuid = require('../../platform/uuid');
 
 // Plaid article about API options:

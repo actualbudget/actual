@@ -1,6 +1,5 @@
 import { listen, send } from '../platform/client/fetch';
 import { once } from '../shared/async';
-
 import q, { getPrimaryOrderBy } from '../shared/query';
 export default q;
 

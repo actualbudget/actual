@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+
+import { bindActionCreators } from 'redux';
+
 import * as actions from 'loot-core/src/client/actions';
 import {
   View,

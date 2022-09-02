@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { Tooltip, Pointer, P } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
+
 import Navigation from './Navigation';
 import { Title } from './common';
 

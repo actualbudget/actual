@@ -1,7 +1,9 @@
 import React from 'react';
+
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { reportBudget } from 'loot-core/src/client/queries';
+
 import { styles, colors } from '../../../style';
 import { View, Text, Tooltip, Menu, useTooltip } from '../../common';
 import { Field, SheetCell } from '../../table';

@@ -1,10 +1,12 @@
 import React, { useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+
 import {
   format as formatDate,
   parseISO,
   isValid as isDateValid
 } from 'date-fns';
+
 import {
   Table,
   Row,
@@ -23,6 +25,7 @@ import {
 } from 'loot-core/src/client/reducers/queries';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 import { styles } from 'loot-design/src/style';
+
 import DisplayId from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {

@@ -6,6 +6,7 @@ import { fromPlaidAccountType } from '../../shared/accounts';
 import { amountToInteger } from '../../shared/util';
 import { post } from '../post';
 import { runMutator } from '../mutators';
+
 const uuid = require('../../platform/uuid');
 
 export async function handoffPublicToken(institution, publicToken) {

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import View from './View';
 import Text from './Text';
 

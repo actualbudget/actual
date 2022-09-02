@@ -1,10 +1,10 @@
 const sqlite = require('sqlite3');
 const escodegen = require('escodegen');
+
 const sqlgen = require('./sqlgen');
+const Spreadsheet = require('./spreadsheet');
 
 // Example usage:
-
-const Spreadsheet = require('./spreadsheet');
 
 const db = new sqlite.Database(__dirname + '/../../db.sqlite');
 const sheet = new Spreadsheet({

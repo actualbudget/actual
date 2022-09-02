@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
+
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import Platform from 'loot-core/src/client/platform';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -24,6 +25,7 @@ import useSelected, {
   useSelectedItems,
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
+
 import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
 import { ScheduleAmountCell } from './SchedulesTable';

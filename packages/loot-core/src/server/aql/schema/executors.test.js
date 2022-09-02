@@ -1,4 +1,5 @@
 import fc from 'fast-check';
+
 import * as db from '../../db';
 import query from '../../../shared/query';
 import { batchMessages, setSyncingMode } from '../../sync/index';
