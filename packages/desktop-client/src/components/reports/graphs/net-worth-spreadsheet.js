@@ -1,6 +1,8 @@
 import React from 'react';
-import * as monthUtils from 'loot-core/src/shared/months';
+
 import * as d from 'date-fns';
+
+import * as monthUtils from 'loot-core/src/shared/months';
 import { AlignedText } from 'loot-design/src/components/common';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import {
@@ -8,6 +10,7 @@ import {
   integerToAmount,
   amountToInteger
 } from 'loot-core/src/shared/util';
+
 import { index } from '../util';
 
 export default function createSpreadsheet(start, end, accounts) {

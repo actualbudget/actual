@@ -1,12 +1,13 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
+
+import { bindActionCreators } from 'redux';
 import { createLocation } from 'history';
 import Component from '@reactions/component';
+
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-
 import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
 import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
 import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
@@ -15,6 +16,7 @@ import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
 import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
 import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
 import EditField from 'loot-design/src/components/modals/EditField';
+
 import CreateAccount from './modals/CreateAccount';
 import ManagePayeesWithData from './payees/ManagePayeesWithData';
 import ManageRules from './modals/ManageRules';

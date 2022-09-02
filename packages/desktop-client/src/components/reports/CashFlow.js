@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+
 import * as d from 'date-fns';
+
 import {
   View,
   Text,
@@ -12,6 +14,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { colors } from 'loot-design/src/style';
+
 import Header from './Header';
 import Change from './Change';
 import CashFlowGraph from './graphs/CashFlowGraph';

@@ -1,12 +1,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { css } from 'glamor';
+
 import * as actions from 'loot-core/src/client/actions';
 import {
   init as initConnection,
   send
 } from 'loot-core/src/platform/client/fetch';
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
+
 import installPolyfills from '../polyfills';
 import FatalError from './FatalError';
 import ManagementApp from './manager/ManagementApp';

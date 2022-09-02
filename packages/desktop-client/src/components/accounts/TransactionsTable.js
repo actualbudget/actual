@@ -9,11 +9,13 @@ import React, {
   useReducer
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+
 import {
   format as formatDate,
   parseISO,
   isValid as isDateValid
 } from 'date-fns';
+
 import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
 import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
 import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
@@ -63,6 +65,7 @@ import {
 import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+
 import { getStatusProps } from '../schedules/StatusBadge';
 
 let TABLE_BACKGROUND_COLOR = colors.n11;

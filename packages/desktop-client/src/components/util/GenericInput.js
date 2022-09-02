@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { View, Input } from 'loot-design/src/components/common';
 import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';

@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
@@ -22,6 +23,7 @@ import useSelected, {
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
 import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
+
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { usePageType } from '../Page';
 import { Page } from '../Page';

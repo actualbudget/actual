@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { bindActionCreators } from 'redux';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
+
+import { bindActionCreators } from 'redux';
 import { debounce } from 'debounce';
+
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as actions from 'loot-core/src/client/actions';
 import {
@@ -52,6 +54,7 @@ import {
   SchedulesProvider,
   useCachedSchedules
 } from 'loot-core/src/client/data-hooks/schedules';
+
 import { authorizeBank } from '../../plaid';
 import AnimatedRefresh from '../AnimatedRefresh';
 import { useActiveLocation } from '../ActiveLocation';
