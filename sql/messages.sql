@@ -1,10 +1,9 @@
 
 CREATE TABLE messages_binary
-  (timestamp TEXT,
+  (timestamp TEXT PRIMARY KEY,
    is_encrypted BOOLEAN,
-   content bytea,
-   PRIMARY KEY(timestamp, group_id));
+   content bytea);
 
 CREATE TABLE messages_merkles
-  (id TEXT PRIMAREY KEY,
+  (id INTEGER PRIMARY KEY,
    merkle TEXT);

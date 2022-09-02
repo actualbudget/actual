@@ -8,7 +8,7 @@ let errorMiddleware = require('./util/error-middleware');
 let config = require('./load-config');
 let { getAccountDb } = require('./account-db');
 
-let fullSync = require('./sync-full');
+let simpleSync = require('./sync-simple');
 
 let actual = require('@actual-app/api');
 let SyncPb = actual.internal.SyncProtoBuf;
@@ -121,22 +121,12 @@ app.post('/sync', async (req, res) => {
     return false;
   }
 
-  // TODO: We also provide a "simple" sync method which currently isn't
-  // used. This method just stores the messages locally and doesn't
-  // load the whole app at all. If we want to support end-to-end
-  // encryption, this method is required because we can't read the
-  // messages. Using it looks like this:
-  //
-  // let simpleSync = require('./sync-simple');
-  // let {trie, newMessages } = simpleSync.sync(messages, since, file_id);
-
-  let { trie, newMessages } = await fullSync.sync(messages, since, file_id);
+  let { trie, newMessages } = simpleSync.sync(messages, since, group_id);
 
   // encode it back...
   let responsePb = new SyncPb.SyncResponse();
   responsePb.setMerkle(JSON.stringify(trie));
-
-  newMessages.forEach((msg) => responsePb.addMessages(msg));
+  newMessages.forEach(msg => responsePb.addMessages(msg));
 
   res.set('Content-Type', 'application/actual-sync');
   res.send(Buffer.from(responsePb.serializeBinary()));
@@ -306,6 +296,7 @@ app.post('/upload-user-file', async (req, res) => {
       'UPDATE files SET sync_version = ?, encrypt_meta = ?, name = ? WHERE id = ?',
       [syncFormatVersion, encryptMeta, name, fileId]
     );
+
     res.send(JSON.stringify({ status: 'ok', groupId }));
   }
 });
@@ -377,7 +368,7 @@ app.get('/list-user-files', (req, res) => {
   res.send(
     JSON.stringify({
       status: 'ok',
-      data: rows.map((row) => ({
+      data: rows.map(row => ({
         deleted: row.deleted,
         fileId: row.id,
         groupId: row.group_id,
