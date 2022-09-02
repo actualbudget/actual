@@ -38,17 +38,23 @@
     "account_other": "Cuentas",
     "add": "Agregar",
     "addNew": "Agregar nuevo",
+    "addSplit": "Agregar división",
     "amount": "Monto",
     "amountIinflow": "Monto (Entrada)",
+    "amountLeft": "Monto restante: <strong>{{amount}}</strong>",
     "amountOutflow": "Monto (Salida)",
     "and": "y",
     "apply": "Aplicar",
     "approximatelyWithAmount": "Aproximadamente {{amount}}",
+    "balance_one": "Balance",
     "cancel": "Cancelar",
+    "categorize": "Categorizar",
     "category_one": "Categoría",
+    "category_other": "Categorías",
     "complete": "Completar",
     "date": "Fecha",
     "delete": "Borrar",
+    "deposit_one": "Depósito",
     "doNothing": "No hacer nada",
     "editField": "Editar campo",
     "export": "Exportar",
@@ -60,8 +66,10 @@
     "month": "Mes",
     "note_other": "Notas",
     "noTransaction_other": "Sin transacciones",
+    "offBudget": "Fuera de presupuesto",
     "payee_one": "Beneficiario",
     "payee_other": "Beneficiarios",
+    "payment_one": "Pago",
     "recurring": "Periódico",
     "repeats": "Repetir",
     "restart": "Reiniciar",
@@ -71,8 +79,10 @@
     "schedule_other": "Agendas",
     "search": "Buscar",
     "show": "Mostrar",
+    "split": "Dividir",
     "status": "Estado",
     "sync": "Sincronizar",
+    "transfer": "Transferencia",
     "when": "Cuando",
     "year": "Año"
   },
@@ -138,5 +148,8 @@
   },
   "support": {
     "anErrorOccuredWhileSaving": "Ocurrió un error al guardar. Por favor, póngase en contacto con {{email}} para obtener asistencia."
+  },
+  "transaction": {
+    "accountIsRequired": "Cuenta es un campo requerido"
   }
 }

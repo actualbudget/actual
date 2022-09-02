@@ -38,17 +38,23 @@
     "account_other": "Accounts",
     "add": "Add",
     "addNew": "Add new",
+    "addSplit": "Add Split",
     "amount": "Amount",
     "amountIinflow": "Amount (inflow)",
+    "amountLeft": "Amount left: <strong>{{amount}}</strong>",
     "amountOutflow": "Amount (outflow)",
     "and": "and",
     "apply": "Apply",
     "approximatelyWithAmount": "Approximately {{amount}}",
+    "balance_one": "Balance",
     "cancel": "Cancel",
+    "categorize": "Categorize",
     "category_one": "Category",
+    "category_other": "Categories",
     "complete": "Complete",
     "date": "Date",
     "delete": "Delete",
+    "deposit_one": "Deposit",
     "doNothing": "Do nothing",
     "editField": "Edit field",
     "export": "Export",
@@ -60,7 +66,10 @@
     "month": "Month",
     "note_other": "Notes",
     "noTransaction_other": "No transactions",
+    "offBudget": "Off Budget",
     "payee_one": "Payee",
+    "payee_other": "Payees",
+    "payment_one": "Payment",
     "recurring": "Recurring",
     "repeats": "Repeats",
     "restart": "Restart",
@@ -70,8 +79,10 @@
     "schedule_other": "Schedules",
     "search": "Search",
     "show": "Show",
+    "split": "Split",
     "status": "Status",
     "sync": "Sync",
+    "transfer": "Transfer",
     "when": "When",
     "year": "Year"
   },
@@ -136,5 +147,8 @@
   },
   "support": {
     "anErrorOccuredWhileSaving": "An error occurred while saving. Please contact {{email}} for support."
+  },
+  "transaction": {
+    "accountIsRequired": "Account is a required field"
   }
 }
