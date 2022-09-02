@@ -39,7 +39,10 @@
     "add": "Agregar",
     "addNew": "Agregar nuevo",
     "amount": "Monto",
+    "amountIinflow": "Monto (Entrada)",
+    "amountOutflow": "Monto (Salida)",
     "and": "y",
+    "apply": "Aplicar",
     "approximatelyWithAmount": "Aproximadamente {{amount}}",
     "cancel": "Cancelar",
     "category_one": "Categoría",
@@ -53,6 +56,8 @@
     "financialFile_other": "Archivos financieros",
     "import": "Importar",
     "importedPayee": "Beneficiario importado",
+    "invalidDateFormat": "Formato de fecha inválido",
+    "month": "Mes",
     "note_other": "Notas",
     "noTransaction_other": "Sin transacciones",
     "payee_one": "Beneficiario",
@@ -68,7 +73,8 @@
     "show": "Mostrar",
     "status": "Estado",
     "sync": "Sincronizar",
-    "when": "Cuando"
+    "when": "Cuando",
+    "year": "Año"
   },
   "rules": {
     "addAction": "Agregar acción",
