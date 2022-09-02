@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { Section, Component } from '../guide/components';
 import { View, Text } from './common';
 import {
@@ -8,6 +9,7 @@ import {
   InputCell,
   useTableNavigator
 } from './table';
+
 let uuid = require('loot-core/src/platform/uuid');
 
 function PersonRow({ person, editing, focusedField, onEdit, onUpdate }) {

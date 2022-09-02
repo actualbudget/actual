@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from 'react-redux';
+
 import * as d from 'date-fns';
+
 import * as actions from 'loot-core/src/client/actions';
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
@@ -8,6 +10,8 @@ import {
   amountToInteger,
   looselyParseAmount
 } from 'loot-core/src/shared/util';
+
+import { colors, styles } from '../../style';
 import {
   View,
   Text,
@@ -18,9 +22,8 @@ import {
   ButtonWithLoading
 } from '../common';
 import { Checkbox } from '../forms';
-import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 import { SectionLabel } from '../forms';
-import { colors, styles } from '../../style';
+import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 
 let dateFormats = [
   { format: 'yyyy mm dd', label: 'YYYY MM DD' },

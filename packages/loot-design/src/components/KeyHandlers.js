@@ -1,5 +1,6 @@
-import hotkeys from 'hotkeys-js';
 import React, { useEffect, useContext } from 'react';
+
+import hotkeys from 'hotkeys-js';
 
 let KeyScopeContext = React.createContext('app');
 

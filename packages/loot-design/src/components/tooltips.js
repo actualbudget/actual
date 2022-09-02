@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+
 import { css, before } from 'glamor';
+
 import { styles } from '../style';
 
 export const IntersectionBoundary = React.createContext();
