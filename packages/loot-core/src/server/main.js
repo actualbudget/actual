@@ -68,7 +68,6 @@ import { createTestBudget } from '../mocks/budget';
 import { runQuery as aqlQuery } from './aql';
 import q, { Query } from '../shared/query';
 import app from './main-app';
-
 // Apps
 import schedulesApp from './schedules/app';
 import budgetApp from './budget/app';
