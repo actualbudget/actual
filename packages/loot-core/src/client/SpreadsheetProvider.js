@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import LRU from 'lru-cache';
 

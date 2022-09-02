@@ -2,10 +2,10 @@ import React from 'react';
 
 import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 
-import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
 import { MobileSection, WithHeader } from '../../guide/components';
-import { accounts, categories, transactions } from './accounts.usage';
+import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
 import { AccountDetails } from './account';
+import { accounts, categories, transactions } from './accounts.usage';
 
 export default () => (
   <SpreadsheetContext.Provider value={makeSpreadsheet()}>

@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { VictoryTooltip } from 'victory';
 import { css, before } from 'glamor';
+import { VictoryTooltip } from 'victory';
 
 import { colors } from 'loot-design/src/style';
 

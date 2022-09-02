@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { TestProvider } from 'loot-core/src/mocks/redux';
 import { generateTransactions } from 'loot-core/src/mocks';
+import { TestProvider } from 'loot-core/src/mocks/redux';
 
 import { Section, TestModal } from '../../guide/components';
 import { ImportTransactions } from './ImportTransactions';

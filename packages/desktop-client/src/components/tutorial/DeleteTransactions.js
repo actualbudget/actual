@@ -2,8 +2,8 @@ import React from 'react';
 
 import { P } from 'loot-design/src/components/common';
 
-import Navigation from './Navigation';
 import { Standalone, Title } from './common';
+import Navigation from './Navigation';
 
 function DeleteTransactions({ targetRect, navigationProps }) {
   return (

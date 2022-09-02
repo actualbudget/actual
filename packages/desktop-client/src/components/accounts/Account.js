@@ -2,11 +2,27 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
 
-import { bindActionCreators } from 'redux';
 import { debounce } from 'debounce';
+import { bindActionCreators } from 'redux';
 
-import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as actions from 'loot-core/src/client/actions';
+import {
+  SchedulesProvider,
+  useCachedSchedules
+} from 'loot-core/src/client/data-hooks/schedules';
+import * as queries from 'loot-core/src/client/queries';
+import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
+import { send, listen } from 'loot-core/src/platform/client/fetch';
+import {
+  deleteTransaction,
+  updateTransaction,
+  ungroupTransactions
+} from 'loot-core/src/shared/transactions';
+import {
+  currencyToInteger,
+  applyChanges,
+  groupById
+} from 'loot-core/src/shared/util';
 import {
   View,
   Text,
@@ -18,46 +34,30 @@ import {
   Menu,
   Stack
 } from 'loot-design/src/components/common';
-import {
-  currencyToInteger,
-  applyChanges,
-  groupById
-} from 'loot-core/src/shared/util';
-import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
-import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
-import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
-import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
-import Add from 'loot-design/src/svg/v1/Add';
+import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
+import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import format from 'loot-design/src/components/spreadsheet/format';
 import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
-import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
-import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
-import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
-import * as queries from 'loot-core/src/client/queries';
-import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { SelectedItemsButton } from 'loot-design/src/components/table';
-import {
-  deleteTransaction,
-  updateTransaction,
-  ungroupTransactions
-} from 'loot-core/src/shared/transactions';
-import { styles, colors } from 'loot-design/src/style';
 import {
   SelectedProviderWithItems,
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
-import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
-import {
-  SchedulesProvider,
-  useCachedSchedules
-} from 'loot-core/src/client/data-hooks/schedules';
+import { styles, colors } from 'loot-design/src/style';
+import Add from 'loot-design/src/svg/v1/Add';
+import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
+import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
+import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
+import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
+import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
+import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
+import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
+import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
+import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 
 import { authorizeBank } from '../../plaid';
-import AnimatedRefresh from '../AnimatedRefresh';
 import { useActiveLocation } from '../ActiveLocation';
+import AnimatedRefresh from '../AnimatedRefresh';
 import { FilterButton, AppliedFilters } from './Filters';
 import TransactionList from './TransactionList';
 import {

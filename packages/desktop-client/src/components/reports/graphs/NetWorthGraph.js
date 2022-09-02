@@ -1,5 +1,6 @@
 import React from 'react';
 
+import * as d from 'date-fns';
 import {
   VictoryChart,
   VictoryBar,
@@ -8,11 +9,10 @@ import {
   VictoryVoronoiContainer,
   VictoryGroup
 } from 'victory';
-import * as d from 'date-fns';
 
+import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
-import theme from '../chart-theme';
 
 function Area({ start, end, data, style, scale, range }) {
   const zero = scale.y(0);

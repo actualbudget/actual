@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 import * as d from 'date-fns';
 
+import { send } from 'loot-core/src/platform/client/fetch';
+import * as monthUtils from 'loot-core/src/shared/months';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   View,
   Text,
@@ -9,16 +12,12 @@ import {
   P,
   AlignedText
 } from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { colors } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 
-import Header from './Header';
 import Change from './Change';
-import CashFlowGraph from './graphs/CashFlowGraph';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
+import CashFlowGraph from './graphs/CashFlowGraph';
+import Header from './Header';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
 

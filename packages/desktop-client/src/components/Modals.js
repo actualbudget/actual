@@ -2,30 +2,30 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import { bindActionCreators } from 'redux';
-import { createLocation } from 'history';
 import Component from '@reactions/component';
+import { createLocation } from 'history';
+import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
 import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
-import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 import ConfigureLinkedAccounts from 'loot-design/src/components/modals/ConfigureLinkedAccounts';
+import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
+import EditField from 'loot-design/src/components/modals/EditField';
+import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
 import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
 import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
-import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
-import EditField from 'loot-design/src/components/modals/EditField';
+import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 
-import CreateAccount from './modals/CreateAccount';
-import ManagePayeesWithData from './payees/ManagePayeesWithData';
-import ManageRules from './modals/ManageRules';
-import EditRule from './modals/EditRule';
-import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
-import WelcomeScreen from './modals/WelcomeScreen';
+import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
+import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
+import ManageRules from './modals/ManageRules';
+import MergeUnusedPayees from './modals/MergeUnusedPayees';
+import WelcomeScreen from './modals/WelcomeScreen';
+import ManagePayeesWithData from './payees/ManagePayeesWithData';
 
 function Modals({
   history,

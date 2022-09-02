@@ -4,8 +4,8 @@ import { css } from 'glamor';
 
 import { P } from 'loot-design/src/components/common';
 
-import Navigation from './Navigation';
 import { Standalone } from './common';
+import Navigation from './Navigation';
 
 function TransactionFinalize({ navigationProps }) {
   return (

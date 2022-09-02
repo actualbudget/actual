@@ -12,9 +12,9 @@ import {
   Stack,
   ExternalLink
 } from 'loot-design/src/components/common';
+import { styles, colors } from 'loot-design/src/style';
 import Delete from 'loot-design/src/svg/Delete';
 import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
-import { styles, colors } from 'loot-design/src/style';
 
 function compileMessage(message, actions, setLoading, onRemove) {
   return (

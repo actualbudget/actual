@@ -7,17 +7,17 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import Intro from './tutorial/Intro';
-import BudgetSummary from './tutorial/BudgetSummary';
 import BudgetCategories from './tutorial/BudgetCategories';
 import BudgetInitial from './tutorial/BudgetInitial';
+import BudgetNewIncome from './tutorial/BudgetNewIncome';
+import BudgetNextMonth from './tutorial/BudgetNextMonth';
+import BudgetSummary from './tutorial/BudgetSummary';
+import CategoryBalance from './tutorial/CategoryBalance';
+import Final from './tutorial/Final';
+import Intro from './tutorial/Intro';
+import Overspending from './tutorial/Overspending';
 import TransactionAdd from './tutorial/TransactionAdd';
 import TransactionEnter from './tutorial/TransactionEnter';
-import BudgetNewIncome from './tutorial/BudgetNewIncome';
-import CategoryBalance from './tutorial/CategoryBalance';
-import Overspending from './tutorial/Overspending';
-import BudgetNextMonth from './tutorial/BudgetNextMonth';
-import Final from './tutorial/Final';
 
 function generatePath(innerRect, outerRect) {
   const i = innerRect;

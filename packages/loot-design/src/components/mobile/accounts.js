@@ -4,11 +4,11 @@ import { RectButton } from 'react-native-gesture-handler';
 
 import { prettyAccountType } from 'loot-core/src/shared/accounts';
 
+import { colors, mobileStyles as styles } from '../../style';
+import Wallet from '../../svg/v1/Wallet';
+import CellValue from '../spreadsheet/CellValue';
 import { Button, TextOneLine } from './common';
 import { TransactionList } from './transaction';
-import CellValue from '../spreadsheet/CellValue';
-import Wallet from '../../svg/v1/Wallet';
-import { colors, mobileStyles as styles } from '../../style';
 
 export function AccountHeader({ name, amount }) {
   return (

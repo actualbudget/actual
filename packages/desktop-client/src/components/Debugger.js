@@ -2,11 +2,11 @@ import React from 'react';
 
 import CodeMirror from 'codemirror';
 
+import * as spreadsheet from 'loot-core/src/client/sheetql/spreadsheet';
 import {
   send,
   init as initConnection
 } from 'loot-core/src/platform/client/fetch';
-import * as spreadsheet from 'loot-core/src/client/sheetql/spreadsheet';
 import {
   View,
   Button,

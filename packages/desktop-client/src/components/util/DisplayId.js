@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { CachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
+import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
