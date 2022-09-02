@@ -1,5 +1,6 @@
 const sqlite = require('sqlite3');
 const escodegen = require('escodegen');
+
 const sqlgen = require('./sqlgen');
 
 // Example usage:

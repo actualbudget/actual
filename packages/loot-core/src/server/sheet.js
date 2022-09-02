@@ -4,6 +4,7 @@ import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 import Platform from './platform';
+
 const { resolveName } = require('./spreadsheet/util');
 
 let globalSheet, globalOnChange;

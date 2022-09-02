@@ -5,6 +5,7 @@ import { send } from '../../platform/client/fetch';
 import { setAppState } from './app';
 import { startTutorialFirstTime } from './tutorial';
 import { getDownloadError } from '../../shared/errors';
+
 const uuid = require('../../platform/uuid');
 
 export function updateStatusText(text) {

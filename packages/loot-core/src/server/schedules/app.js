@@ -1,5 +1,6 @@
 import deepEqual from 'deep-equal';
 import * as d from 'date-fns';
+
 import { createApp } from '../app';
 import * as db from '../db';
 import * as prefs from '../prefs';

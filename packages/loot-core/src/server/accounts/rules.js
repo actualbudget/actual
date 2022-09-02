@@ -1,5 +1,6 @@
-import { RuleError } from '../errors';
 import * as dateFns from 'date-fns';
+
+import { RuleError } from '../errors';
 import {
   monthFromDate,
   yearFromDate,

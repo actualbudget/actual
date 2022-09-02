@@ -14,8 +14,10 @@ import {
 } from './errors';
 import encryption from './encryption';
 import { post } from './post';
-let uuid = require('../platform/uuid');
+
 let AdmZip = require('adm-zip');
+
+let uuid = require('../platform/uuid');
 
 let UPLOAD_FREQUENCY_IN_DAYS = 7;
 

@@ -3,6 +3,7 @@ import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import * as transfer from './transfer';
 import * as rules from './transaction-rules';
+
 const connection = require('../../platform/server/connection');
 
 async function idsWithChildren(ids) {

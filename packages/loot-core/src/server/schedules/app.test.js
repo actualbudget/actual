@@ -1,3 +1,5 @@
+import MockDate from 'mockdate';
+
 import { runQuery as aqlQuery } from '../aql';
 import q from '../../shared/query';
 import { loadRules, updateRule } from '../accounts/transaction-rules';
@@ -10,7 +12,6 @@ import {
   deleteSchedule,
   setNextDate
 } from './app';
-import MockDate from 'mockdate';
 
 beforeEach(async () => {
   await global.emptyDatabase()();

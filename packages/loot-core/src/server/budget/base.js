@@ -6,7 +6,7 @@ import { resolveName } from '../spreadsheet/util';
 import * as report from './report';
 import * as rollover from './rollover';
 import { sumAmounts } from './util';
-import * as budgetActions from '../budget/actions';
+import * as budgetActions from './actions';
 
 function mergeUpdates(updates) {
   const merged = {};

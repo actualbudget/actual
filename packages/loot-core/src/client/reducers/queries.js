@@ -1,5 +1,6 @@
-import constants from '../constants';
 import memoizeOne from 'memoize-one';
+
+import constants from '../constants';
 import { groupById } from '../../shared/util';
 
 const initialState = {
