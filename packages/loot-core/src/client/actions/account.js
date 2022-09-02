@@ -1,7 +1,7 @@
 import { send } from '../../platform/client/fetch';
 import constants from '../constants';
-import { getPayees, getAccounts } from './queries';
 import { addNotification } from './notifications';
+import { getPayees, getAccounts } from './queries';
 
 export function setAccountsSyncing(name) {
   return {

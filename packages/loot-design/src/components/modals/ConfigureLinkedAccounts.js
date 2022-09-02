@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, Button } from '../common';
-import { styles, colors } from '../../style';
+
 import {
   fromPlaidAccountType,
   determineOffBudget,
   prettyAccountType
 } from 'loot-core/src/shared/accounts';
 import Checkmark from 'loot-design/src/svg/v1/Checkmark';
+
+import { styles, colors } from '../../style';
+import { View, Text, Modal, Button } from '../common';
 
 function EmptyMessage() {
   return null;

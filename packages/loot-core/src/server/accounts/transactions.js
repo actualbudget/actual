@@ -1,8 +1,9 @@
-import { batchMessages } from '../sync';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
-import * as transfer from './transfer';
+import { batchMessages } from '../sync';
 import * as rules from './transaction-rules';
+import * as transfer from './transfer';
+
 const connection = require('../../platform/server/connection');
 
 async function idsWithChildren(ids) {

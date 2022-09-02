@@ -1,4 +1,5 @@
 let path = require('path');
+
 let fs = require('./index.electron.js');
 
 // On mobile, the backend runs from a single bundle mounted at the

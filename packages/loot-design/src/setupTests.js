@@ -1,5 +1,6 @@
 import { fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+
 import { resetStore } from 'loot-core/src/mocks/redux';
 
 const uuid = require('loot-core/src/platform/uuid');
@@ -53,7 +54,7 @@ process.on('unhandledRejection', reason => {
 });
 
 global.afterEach(() => {
-  __resetWorld();
+  global.__resetWorld();
 });
 
 // https://github.com/testing-library/react-testing-library#suppressing-unnecessary-warnings-on-react-dom-168

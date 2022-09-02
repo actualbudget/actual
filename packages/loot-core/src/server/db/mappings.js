@@ -1,5 +1,6 @@
-import * as db from './index';
 import { addSyncListener } from '../sync/index';
+
+import * as db from './index';
 
 // This file keeps all the mappings in memory so we can access it
 // synchronously. This is primarily used in the rules system, but

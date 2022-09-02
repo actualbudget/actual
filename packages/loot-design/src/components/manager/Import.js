@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Block, Modal, Button } from '../common';
+
 import { styles, colors } from '../../style';
+import { View, Block, Modal, Button } from '../common';
 
 function getErrorMessage(error) {
   switch (error) {

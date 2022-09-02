@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+
+import { createBudget } from 'loot-core/src/client/actions/budgets';
+import { loggedIn } from 'loot-core/src/client/actions/user';
+import { send } from 'loot-core/src/platform/client/fetch';
 import { View, Text, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import { loggedIn } from 'loot-core/src/client/actions/user';
-import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { ConfirmPasswordForm } from './ConfirmPasswordForm';
+
 import { useBootstrapped, Title } from './common';
-import { useTranslation } from 'react-i18next';
+import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function Bootstrap() {
   const { t } = useTranslation();

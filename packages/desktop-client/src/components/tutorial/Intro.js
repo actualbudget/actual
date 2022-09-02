@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   View,
   Text,
@@ -6,6 +7,7 @@ import {
   ModalButtons,
   Button
 } from 'loot-design/src/components/common';
+
 import { Standalone, Title, ExternalLink } from './common';
 
 function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {

@@ -1,7 +1,7 @@
-import { runMutator } from '../mutators';
+import { batchUpdateTransactions } from '../accounts/transactions';
 import { createApp } from '../app';
 import * as db from '../db';
-import { batchUpdateTransactions } from '../accounts/transactions';
+import { runMutator } from '../mutators';
 
 let app = createApp();
 

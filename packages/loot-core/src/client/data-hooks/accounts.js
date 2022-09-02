@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
+
 import q, { liveQuery } from 'loot-core/src/client/query-helpers';
 import { getAccountsById } from 'loot-core/src/client/reducers/queries';
 
