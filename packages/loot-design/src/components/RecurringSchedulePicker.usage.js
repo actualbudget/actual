@@ -1,8 +1,9 @@
 import React from 'react';
+
 import RecurringSchedulePicker from './RecurringSchedulePicker';
 import { Section } from '../guide/components';
 import { Button, View } from './common';
-import { useTooltip } from '../components/tooltips';
+import { useTooltip } from './tooltips';
 
 export default () => {
   const { isOpen, close, getOpenEvents } = useTooltip();

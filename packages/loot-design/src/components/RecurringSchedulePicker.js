@@ -1,22 +1,16 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { useSelector } from 'react-redux';
+
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import DateSelect from './DateSelect';
-import {
-  Button,
-  Select,
-  Input,
-  Tooltip,
-  View,
-  Text,
-  Stack
-} from '../components/common';
 import { colors } from 'loot-design/src/style';
 import { useTooltip } from 'loot-design/src/components/tooltips';
 import SubtractIcon from 'loot-design/src/svg/Subtract';
 import AddIcon from 'loot-design/src/svg/Add';
+
+import { Button, Select, Input, Tooltip, View, Text, Stack } from './common';
+import DateSelect from './DateSelect';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
 

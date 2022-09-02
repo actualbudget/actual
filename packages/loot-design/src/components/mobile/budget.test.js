@@ -1,12 +1,15 @@
 import React from 'react';
+
 import { render, fireEvent } from '@testing-library/react';
+
+import * as monthUtils from 'loot-core/src/shared/months';
+import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
+
 import { MobileScreen } from '../../guide/components';
 import { categories, categoryGroups } from './budget.usage';
 import { BudgetTable, BudgetAccessoryView } from './budget';
 import InputAccessoryView from './InputAccessoryView';
 import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
-import * as monthUtils from 'loot-core/src/shared/months';
-import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 
 function makeLoadedSpreadsheet() {
   let spreadsheet = makeSpreadsheet();

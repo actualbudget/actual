@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { View, Text } from './common';
 import { styles, colors } from '../style';
 import InformationOutline from '../svg/v1/InformationOutline';

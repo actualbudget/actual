@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, SectionList, ScrollView, Animated } from 'react-native';
+import { Swipeable, RectButton } from 'react-native-gesture-handler';
+
 import memoizeOne from 'memoize-one';
 import {
   format as formatDate,
@@ -7,7 +9,7 @@ import {
   parseISO,
   isValid as isValidDate
 } from 'date-fns';
-import { Swipeable, RectButton } from 'react-native-gesture-handler';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   splitTransaction,
@@ -23,6 +25,8 @@ import {
   amountToInteger,
   groupById
 } from 'loot-core/src/shared/util';
+import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+
 import KeyboardAvoidingView from './KeyboardAvoidingView';
 import { ListItem } from './table';
 import { Button, TextOneLine } from './common';
@@ -39,11 +43,9 @@ import {
   BooleanField,
   EDITING_PADDING
 } from './forms';
-
 import EditSkull1 from '../../svg/v2/EditSkull1';
 import AlertTriangle from '../../svg/v2/AlertTriangle';
 import CheckCircle1 from '../../svg/v2/CheckCircle1';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));

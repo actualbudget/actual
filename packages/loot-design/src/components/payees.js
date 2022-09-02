@@ -7,6 +7,12 @@ import React, {
   useCallback,
   useImperativeHandle
 } from 'react';
+
+import memoizeOne from 'memoize-one';
+import Component from '@reactions/component';
+
+import { groupById } from 'loot-core/src/shared/util';
+
 import {
   useStableCallback,
   View,
@@ -17,9 +23,6 @@ import {
   Tooltip,
   Menu
 } from './common';
-import memoizeOne from 'memoize-one';
-import Component from '@reactions/component';
-import { groupById } from 'loot-core/src/shared/util';
 import { colors } from '../style';
 import {
   Table,

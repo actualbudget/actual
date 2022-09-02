@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { View, Text, Modal, ButtonWithLoading } from '../common';
 import { colors } from '../../style';
 
