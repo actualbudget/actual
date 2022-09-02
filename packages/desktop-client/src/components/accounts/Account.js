@@ -301,6 +301,15 @@ function CategoryMenu({ onClose, onMenuSelect }) {
 }
 
 function DetailedBalance({ name, balance }) {
+  const balanceType = {
+    // t('account.selectedBalance')
+    selected: 'account.selectedBalance',
+    // t('account.clearedTotal')
+    cleared: 'account.clearedTotal',
+    // t('account.unclearedTotal')
+    uncleared: 'account.unclearedTotal'
+  };
+
   return (
     <Text
       style={{
@@ -311,33 +320,13 @@ function DetailedBalance({ name, balance }) {
         color: colors.n5
       }}
     >
-      {name === 'selected' && (
-        <Trans
-          values={{
-            amount: format(balance, 'financial')
-          }}
-        >
-          {'account.selectedBalance'}
-        </Trans>
-      )}
-      {name === 'cleared' && (
-        <Trans
-          values={{
-            amount: format(balance, 'financial')
-          }}
-        >
-          {'account.clearedTotal'}
-        </Trans>
-      )}
-      {name === 'uncleared' && (
-        <Trans
-          values={{
-            amount: format(balance, 'financial')
-          }}
-        >
-          {'account.unclearedTotal'}
-        </Trans>
-      )}
+      <Trans
+        values={{
+          amount: format(balance, 'financial')
+        }}
+      >
+        {balanceType[name] || name}
+      </Trans>
     </Text>
   );
 }
