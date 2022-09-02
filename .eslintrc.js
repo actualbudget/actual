@@ -11,6 +11,10 @@ module.exports = {
     'import/order': [
       'error',
       {
+        alphabetize: {
+          caseInsensitive: true,
+          order: 'asc'
+        },
         groups: [
           'builtin', // Built-in types are first
           'external',
