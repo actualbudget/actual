@@ -1,4 +1,5 @@
 import React, { useEffect, useReducer } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom';
 
@@ -28,7 +29,6 @@ import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { OpSelect } from '../modals/EditRule';
 import { Page, usePageType } from '../Page';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
-import { useTranslation } from 'react-i18next';
 
 function mergeFields(defaults, initial) {
   let res = { ...defaults };
