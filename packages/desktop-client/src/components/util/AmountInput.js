@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   integerToCurrency,
@@ -11,7 +12,6 @@ import {
 } from 'loot-design/src/components/common';
 import Add from 'loot-design/src/svg/v1/Add';
 import Subtract from 'loot-design/src/svg/v1/Subtract';
-import { useTranslation } from 'react-i18next';
 
 export function AmountInput({ defaultValue, onChange }) {
   let [negative, setNegative] = useState(defaultValue <= 0);
