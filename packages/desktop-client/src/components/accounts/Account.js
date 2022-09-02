@@ -1614,7 +1614,8 @@ class AccountInternal extends React.PureComponent {
       replaceModal,
       showExtraBalances,
       expandSplits,
-      accountId
+      accountId,
+      t
     } = this.props;
     let {
       transactions,
@@ -1625,8 +1626,7 @@ class AccountInternal extends React.PureComponent {
       transactionsFiltered,
       editingName,
       showBalances,
-      balances,
-      t
+      balances
     } = this.state;
 
     let account = accounts.find(account => account.id === accountId);
