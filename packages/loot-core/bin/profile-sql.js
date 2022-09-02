@@ -4,7 +4,7 @@ import os from 'os';
 import * as sqlite from '../src/platform/server/sqlite';
 import * as db from '../src/server/db';
 import { batchMessages, setSyncingMode } from '../src/server/sync';
-import { runQuery } from '../src/server/aql/schema/run-query';
+import { runQuery } from '../src/server/aql';
 import asyncStorage from '../src/platform/server/asyncStorage';
 import { makeChild } from '../src/shared/transactions';
 import q from '../src/shared/query';

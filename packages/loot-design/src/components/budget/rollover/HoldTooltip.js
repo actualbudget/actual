@@ -1,9 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+
 import { View, Button, Tooltip, InitialFocus, Input } from '../../common';
-import SpreadsheetContext from '../../spreadsheet/SpreadsheetContext';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import SpreadsheetContext from '../../spreadsheet/SpreadsheetContext';
 
 export default function HoldTooltip({ onSubmit, onClose }) {
   const spreadsheet = useContext(SpreadsheetContext);

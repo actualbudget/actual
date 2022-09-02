@@ -1,4 +1,5 @@
 let fs = require('fs');
+
 let fetch = require('node-fetch');
 
 async function fetchBinary(url, filepath) {

@@ -1,13 +1,15 @@
 import React from 'react';
-import { Section, MobileSection } from '../../guide/components';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { TransactionList, TransactionEdit } from './transaction';
+
 import {
   generateAccount,
   generateCategory,
   generateTransaction
 } from 'loot-core/src/mocks';
+import * as monthUtils from 'loot-core/src/shared/months';
+
+import { Section, MobileSection } from '../../guide/components';
 import { colors } from '../../style';
+import { TransactionList, TransactionEdit } from './transaction';
 
 export const accounts = [generateAccount('Checking')];
 
@@ -33,8 +35,8 @@ transactions.sort((t1, t2) => {
   return monthUtils.isBefore(t1.date, t2.date)
     ? 1
     : monthUtils.isAfter(t1.date, t2.date)
-      ? -1
-      : 0;
+    ? -1
+    : 0;
 });
 transactions[1].description =
   'A really long one to test to see what happens when there iss too much';

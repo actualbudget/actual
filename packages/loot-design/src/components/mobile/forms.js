@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, Switch } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
+
 import { colors } from '../../style';
 
 export const EDITING_PADDING = 12;

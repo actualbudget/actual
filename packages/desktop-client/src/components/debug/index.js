@@ -1,5 +1,7 @@
 import React from 'react';
+
 import styled from 'styled-components';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 
 const Container = styled.div`

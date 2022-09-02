@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { View, Text, FlatList, TextInput, NativeModules } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import q from 'loot-core/src/client/query-helpers';

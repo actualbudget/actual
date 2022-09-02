@@ -1,16 +1,16 @@
-import * as sqlite from '../platform/server/sqlite';
 import * as fetchClient from '../platform/client/fetch';
-import * as db from '../server/db';
-import * as sheet from '../server/sheet';
+import * as sqlite from '../platform/server/sqlite';
 import * as rules from '../server/accounts/transaction-rules';
-import * as tracking from '../server/tracking/events';
-import { setSyncingMode } from '../server/sync';
-import { updateVersion } from '../server/update';
-import { resetTracer, tracer } from '../shared/test-helpers';
+import * as db from '../server/db';
 import {
   enableGlobalMutations,
   disableGlobalMutations
 } from '../server/mutators';
+import * as sheet from '../server/sheet';
+import { setSyncingMode } from '../server/sync';
+import * as tracking from '../server/tracking/events';
+import { updateVersion } from '../server/update';
+import { resetTracer, tracer } from '../shared/test-helpers';
 
 jest.mock('../server/post');
 

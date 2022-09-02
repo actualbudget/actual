@@ -1,4 +1,23 @@
+import {
+  currentDay,
+  addDays,
+  subDays,
+  parseDate,
+  dayFromDate
+} from '../../shared/months';
+import {
+  FIELD_TYPES,
+  sortNumbers,
+  getApproxNumberThreshold
+} from '../../shared/rules';
+import { partitionByField, fastSetMerge } from '../../shared/util';
+import { schemaConfig } from '../aql';
 import * as db from '../db';
+import { getMappings } from '../db/mappings';
+import { RuleError } from '../errors';
+import { requiredFields, toDateRepr } from '../models';
+import { setSyncingMode, batchMessages } from '../sync';
+import { addSyncListener } from '../sync/index';
 import {
   Condition,
   Action,
@@ -8,20 +27,6 @@ import {
   migrateIds,
   iterateIds
 } from './rules';
-import { getMappings } from '../db/mappings';
-import { addDays, subDays, parseDate, dayFromDate } from '../../shared/months';
-import { addSyncListener } from '../sync/index';
-import { RuleError } from '../errors';
-import {
-  FIELD_TYPES,
-  sortNumbers,
-  getApproxNumberThreshold
-} from '../../shared/rules';
-import { requiredFields, toDateRepr } from '../models';
-import { currentDay } from '../../shared/months';
-import { partitionByField, fastSetMerge } from '../../shared/util';
-import { setSyncingMode, batchMessages } from '../sync';
-import { schemaConfig } from '../aql/schema';
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead
