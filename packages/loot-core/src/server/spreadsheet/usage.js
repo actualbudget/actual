@@ -1,8 +1,8 @@
-const sqlite = require('sqlite3');
 const escodegen = require('escodegen');
+const sqlite = require('sqlite3');
 
-const sqlgen = require('./sqlgen');
 const Spreadsheet = require('./spreadsheet');
+const sqlgen = require('./sqlgen');
 
 // Example usage:
 

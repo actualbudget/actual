@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { send } from 'loot-core/src/platform/client/fetch';
+import { getTestKeyError } from 'loot-core/src/shared/errors';
 import {
   View,
   Text,
@@ -12,9 +14,7 @@ import {
   InitialFocus,
   ExternalLink
 } from 'loot-design/src/components/common';
-import { send } from 'loot-core/src/platform/client/fetch';
 import { colors } from 'loot-design/src/style';
-import { getTestKeyError } from 'loot-core/src/shared/errors';
 
 export default function FixEncryptionKey({
   modalProps,

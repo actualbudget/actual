@@ -5,9 +5,9 @@ import { generateCategoryGroups } from 'loot-core/src/mocks';
 import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 
 import { MobileSection } from '../../guide/components';
+import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
 import { BudgetTable, BudgetAccessoryView } from './budget';
 import InputAccessoryView from './InputAccessoryView';
-import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
 
 export const categoryGroups = generateCategoryGroups([
   {

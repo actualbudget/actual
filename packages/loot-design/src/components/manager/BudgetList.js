@@ -1,16 +1,16 @@
 import React, { useState, useRef } from 'react';
 
+import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
 import Key from 'loot-design/src/svg/v2/Key';
 import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
 
-import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
 import { styles, colors } from '../../style';
 import CloudCheck from '../../svg/v1/CloudCheck';
 import CloudDownload from '../../svg/v1/CloudDownload';
-import CloudUnknown from '../../svg/v2/CloudUnknown';
-import FileDouble from '../../svg/v1/FileDouble';
 import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
+import FileDouble from '../../svg/v1/FileDouble';
+import CloudUnknown from '../../svg/v2/CloudUnknown';
+import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {

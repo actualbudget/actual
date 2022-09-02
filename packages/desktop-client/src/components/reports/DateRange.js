@@ -2,8 +2,8 @@ import React from 'react';
 
 import * as d from 'date-fns';
 
-import { colors } from 'loot-design/src/style';
 import { Block } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
 
 function DateRange({ start, end }) {
   start = d.parseISO(start);

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import Platform from 'loot-core/src/client/platform';
+import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import {
   View,
   Stack,
@@ -18,13 +19,12 @@ import {
   Field,
   SelectCell
 } from 'loot-design/src/components/table';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import { colors } from 'loot-design/src/style';
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
+import { colors } from 'loot-design/src/style';
 
 import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';

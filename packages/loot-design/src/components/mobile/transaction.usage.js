@@ -1,15 +1,15 @@
 import React from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
 import {
   generateAccount,
   generateCategory,
   generateTransaction
 } from 'loot-core/src/mocks';
+import * as monthUtils from 'loot-core/src/shared/months';
 
 import { Section, MobileSection } from '../../guide/components';
-import { TransactionList, TransactionEdit } from './transaction';
 import { colors } from '../../style';
+import { TransactionList, TransactionEdit } from './transaction';
 
 export const accounts = [generateAccount('Checking')];
 

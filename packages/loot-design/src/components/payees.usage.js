@@ -2,8 +2,8 @@ import React from 'react';
 
 import Component from '@reactions/component';
 
-import { applyChanges } from 'loot-core/src/shared/util';
 import { TestProvider } from 'loot-core/src/mocks/redux';
+import { applyChanges } from 'loot-core/src/shared/util';
 
 import { Section, TestModal } from '../guide/components';
 import { ManagePayees } from './payees';

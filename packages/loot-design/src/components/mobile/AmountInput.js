@@ -11,20 +11,20 @@ import { RectButton } from 'react-native-gesture-handler';
 
 import mitt from 'mitt';
 
+import Platform from 'loot-core/src/client/platform';
 import {
   toRelaxedNumber,
   amountToCurrency,
   getNumberFormat
 } from 'loot-core/src/shared/util';
-import Platform from 'loot-core/src/client/platform';
 
 import { colors } from '../../style';
-import { KeyboardButton } from './common';
-import TextInputWithAccessory from './TextInputWithAccessory';
 import MathIcon from '../../svg/Math';
 import Add from '../../svg/v1/Add';
-import Subtract from '../../svg/v1/Subtract';
 import Equals from '../../svg/v1/Equals';
+import Subtract from '../../svg/v1/Subtract';
+import { KeyboardButton } from './common';
+import TextInputWithAccessory from './TextInputWithAccessory';
 
 function getValue(state) {
   const { value, isNegative } = state;

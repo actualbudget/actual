@@ -1,16 +1,16 @@
 import React from 'react';
-import { MemoryRouter as Router } from 'react-router-dom';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
+import { MemoryRouter as Router } from 'react-router-dom';
 
 import lively from '@jlongster/lively';
 
-import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 import { generateAccount } from 'loot-core/src/mocks';
+import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 
-import SpreadsheetContext from './spreadsheet/SpreadsheetContext';
 import { Section } from '../guide/components';
 import { Sidebar } from './sidebar';
+import SpreadsheetContext from './spreadsheet/SpreadsheetContext';
 
 function withState(state, render) {
   const Component = lively(render, { getInitialState: () => state });

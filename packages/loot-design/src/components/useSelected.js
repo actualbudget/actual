@@ -7,8 +7,8 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
-import * as undo from 'loot-core/src/platform/client/undo';
 import { listen } from 'loot-core/src/platform/client/fetch';
+import * as undo from 'loot-core/src/platform/client/undo';
 
 import { hasModifierKey } from '../util/keys';
 

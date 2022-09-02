@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 
 import { css } from 'glamor';
 
-import * as monthUtils from 'loot-core/src/shared/months';
 import { reportBudget } from 'loot-core/src/client/queries';
+import * as monthUtils from 'loot-core/src/shared/months';
 
-import NamespaceContext from '../../spreadsheet/NamespaceContext';
-import CellValue from '../../spreadsheet/CellValue';
-import useSheetValue from '../../spreadsheet/useSheetValue';
-import format from '../../spreadsheet/format';
+import { colors, styles } from '../../../style';
+import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
+import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
+import ArrowButtonUp1 from '../../../svg/v2/ArrowButtonUp1';
 import {
   View,
   Text,
@@ -19,14 +19,14 @@ import {
   HoverTarget,
   AlignedText
 } from '../../common';
+import NotesButton from '../../NotesButton';
+import CellValue from '../../spreadsheet/CellValue';
+import format from '../../spreadsheet/format';
+import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import useSheetValue from '../../spreadsheet/useSheetValue';
 import { MONTH_BOX_SHADOW } from '../constants';
 import { makeAmountFullStyle } from '../util';
-import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
-import ArrowButtonUp1 from '../../../svg/v2/ArrowButtonUp1';
-import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
 import { useReport } from './ReportContext';
-import NotesButton from '../../NotesButton';
-import { colors, styles } from '../../../style';
 
 function PieProgress({ style, progress, color, backgroundColor }) {
   let radius = 4;

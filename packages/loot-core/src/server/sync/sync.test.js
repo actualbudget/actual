@@ -1,7 +1,7 @@
-import * as prefs from '../prefs';
-import * as db from '../db';
-import * as sheet from '../sheet';
 import { getClock, Timestamp } from '../crdt';
+import * as db from '../db';
+import * as prefs from '../prefs';
+import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
 import * as encoder from './encoder';
 

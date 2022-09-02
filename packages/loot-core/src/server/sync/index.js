@@ -1,16 +1,9 @@
-import { sequential, once } from '../../shared/async';
-import * as prefs from '../prefs';
-import app from '../main-app';
-import asyncStorage from '../../platform/server/asyncStorage';
 import { captureException } from '../../platform/exceptions';
+import asyncStorage from '../../platform/server/asyncStorage';
 import logger from '../../platform/server/log';
-import { postBinary } from '../post';
-import * as db from '../db';
-import * as sheet from '../sheet';
-import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
-import * as undo from '../undo';
-import { runMutator } from '../mutators';
+import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
+import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import {
   serializeClock,
   deserializeClock,
@@ -18,12 +11,19 @@ import {
   Timestamp,
   merkle
 } from '../crdt';
-import * as encoder from './encoder';
+import * as db from '../db';
+import app from '../main-app';
+import { runMutator } from '../mutators';
+import { postBinary } from '../post';
+import * as prefs from '../prefs';
 import { getServer } from '../server-config';
+import * as sheet from '../sheet';
+import * as undo from '../undo';
+import * as encoder from './encoder';
 import { rebuildMerkleHash } from './repair';
 
-const { PostError, SyncError } = require('../errors');
 const connection = require('../../platform/server/connection');
+const { PostError, SyncError } = require('../errors');
 
 export { default as makeTestMessage } from './make-test-message';
 export { default as resetSync } from './reset';

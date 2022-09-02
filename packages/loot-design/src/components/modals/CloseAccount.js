@@ -4,8 +4,8 @@ import { Formik } from 'formik';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { View, Text, Modal, Button, P, Select, FormError } from '../common';
 import { colors } from '../../style';
+import { View, Text, Modal, Button, P, Select, FormError } from '../common';
 
 function needsCategory(account, currentTransfer, accounts) {
   const acct = accounts.find(a => a.id === currentTransfer);

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import { send } from 'loot-core/src/platform/client/fetch';
 import {
   Text,
   Button,
   Input as BaseInput
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
 
 // There are two URLs that dance with each other: `/login` and
 // `/bootstrap`. Both of these URLs check the state of the the server

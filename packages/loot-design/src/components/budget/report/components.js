@@ -1,18 +1,18 @@
 import React from 'react';
 
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { reportBudget } from 'loot-core/src/client/queries';
+import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { styles, colors } from '../../../style';
 import { View, Text, Tooltip, Menu, useTooltip } from '../../common';
-import { Field, SheetCell } from '../../table';
-import useSheetValue from '../../spreadsheet/useSheetValue';
-import { makeAmountGrey } from '../util';
-import { MONTH_RIGHT_PADDING } from '../constants';
-import format from '../../spreadsheet/format';
 import CellValue from '../../spreadsheet/CellValue';
+import format from '../../spreadsheet/format';
+import useSheetValue from '../../spreadsheet/useSheetValue';
+import { Field, SheetCell } from '../../table';
 import BalanceWithCarryover from '../BalanceWithCarryover';
+import { MONTH_RIGHT_PADDING } from '../constants';
+import { makeAmountGrey } from '../util';
 
 export BudgetSummary from './BudgetSummary';
 

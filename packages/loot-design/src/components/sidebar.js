@@ -4,11 +4,19 @@ import { withRouter } from 'react-router-dom';
 
 import { css } from 'glamor';
 
-import { pushModal } from 'loot-core/src/client/actions/modals';
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
+import { pushModal } from 'loot-core/src/client/actions/modals';
 import Platform from 'loot-core/src/client/platform';
 import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 
+import { styles, colors } from '../style';
+import Add from '../svg/v1/Add';
+import Cog from '../svg/v1/Cog';
+import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
+import Reports from '../svg/v1/Reports';
+import Wallet from '../svg/v1/Wallet';
+import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
+import CalendarIcon from '../svg/v2/Calendar';
 import {
   View,
   Block,
@@ -19,16 +27,8 @@ import {
   Menu,
   Tooltip
 } from './common';
-import CellValue from './spreadsheet/CellValue';
-import Add from '../svg/v1/Add';
-import CalendarIcon from '../svg/v2/Calendar';
-import { styles, colors } from '../style';
-import Wallet from '../svg/v1/Wallet';
-import Reports from '../svg/v1/Reports';
-import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
-import Cog from '../svg/v1/Cog';
-import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
+import CellValue from './spreadsheet/CellValue';
 
 export const SIDEBAR_WIDTH = 240;
 

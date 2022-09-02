@@ -11,6 +11,7 @@ import {
   looselyParseAmount
 } from 'loot-core/src/shared/util';
 
+import { colors, styles } from '../../style';
 import {
   View,
   Text,
@@ -21,9 +22,8 @@ import {
   ButtonWithLoading
 } from '../common';
 import { Checkbox } from '../forms';
-import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 import { SectionLabel } from '../forms';
-import { colors, styles } from '../../style';
+import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 
 let dateFormats = [
   { format: 'yyyy mm dd', label: 'YYYY MM DD' },

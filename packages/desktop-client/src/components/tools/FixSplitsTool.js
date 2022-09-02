@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
-import { colors } from 'loot-design/src/style';
 import { View, P, ButtonWithLoading } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
 
 import { Page } from '../Page';
 

@@ -11,12 +11,12 @@ import {
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
 
 import installPolyfills from '../polyfills';
-import FatalError from './FatalError';
-import ManagementApp from './manager/ManagementApp';
-import FinancesApp from './FinancesApp';
 import AppBackground from './AppBackground';
-import UpdateNotification from './UpdateNotification';
+import FatalError from './FatalError';
+import FinancesApp from './FinancesApp';
+import ManagementApp from './manager/ManagementApp';
 import MobileWebMessage from './MobileWebMessage';
+import UpdateNotification from './UpdateNotification';
 
 class App extends React.Component {
   state = {

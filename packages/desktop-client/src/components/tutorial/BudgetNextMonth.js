@@ -6,8 +6,8 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 import { View, P, Button } from 'loot-design/src/components/common';
 
-import Navigation from './Navigation';
 import { Standalone, Title, useMinimized } from './common';
+import Navigation from './Navigation';
 
 function BudgetNextMonth({ stepTwo, navigationProps }) {
   let [minimized, toggle] = useMinimized();

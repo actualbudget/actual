@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 
-import { View, Text, Modal, Button, P, ModalButtons } from '../common';
-import { Error } from '../alerts';
 import { colors } from '../../style';
 import AnimatedLoading from '../../svg/v1/AnimatedLoading';
+import { Error } from '../alerts';
+import { View, Text, Modal, Button, P, ModalButtons } from '../common';
 
 function renderError(error) {
   return (
