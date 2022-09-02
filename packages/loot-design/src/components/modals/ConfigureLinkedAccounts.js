@@ -7,8 +7,8 @@ import {
 } from 'loot-core/src/shared/accounts';
 import Checkmark from 'loot-design/src/svg/v1/Checkmark';
 
-import { View, Text, Modal, Button } from '../common';
 import { styles, colors } from '../../style';
+import { View, Text, Modal, Button } from '../common';
 
 function EmptyMessage() {
   return null;

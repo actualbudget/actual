@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { bindActionCreators } from 'redux';
 import * as d from 'date-fns';
+import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { View, P } from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
+import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { View, P } from 'loot-design/src/components/common';
+import { styles } from 'loot-design/src/style';
 
-import Header from './Header';
-import { fromDateRepr } from './util';
-import useReport from './useReport';
+import Change from './Change';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
-import Change from './Change';
-import { useArgsMemo } from './util';
+import Header from './Header';
+import useReport from './useReport';
+import { fromDateRepr, useArgsMemo } from './util';
 
 function NetWorth({ accounts }) {
   const [earliestMonth, setEarliestMonth] = useState(null);

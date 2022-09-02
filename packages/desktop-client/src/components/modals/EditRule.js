@@ -5,21 +5,10 @@ import {
   initiallyLoadPayees,
   setUndoEnabled
 } from 'loot-core/src/client/actions/queries';
+import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  Stack,
-  CustomSelect,
-  Tooltip
-} from 'loot-design/src/components/common';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { colors } from 'loot-design/src/style';
-import SubtractIcon from 'loot-design/src/svg/Subtract';
-import AddIcon from 'loot-design/src/svg/Add';
-import InformationOutline from 'loot-design/src/svg/v1/InformationOutline';
+import * as monthUtils from 'loot-core/src/shared/months';
 import {
   mapField,
   friendlyOp,
@@ -30,22 +19,33 @@ import {
   FIELD_TYPES,
   TYPE_INFO
 } from 'loot-core/src/shared/rules';
-import useSelected, {
-  SelectedProvider
-} from 'loot-design/src/components/useSelected';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger
 } from 'loot-core/src/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
+import {
+  View,
+  Text,
+  Modal,
+  Button,
+  Stack,
+  CustomSelect,
+  Tooltip
+} from 'loot-design/src/components/common';
+import useSelected, {
+  SelectedProvider
+} from 'loot-design/src/components/useSelected';
+import { colors } from 'loot-design/src/style';
+import AddIcon from 'loot-design/src/svg/Add';
+import SubtractIcon from 'loot-design/src/svg/Subtract';
+import InformationOutline from 'loot-design/src/svg/v1/InformationOutline';
 
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { StatusBadge } from '../schedules/StatusBadge';
+import { BetweenAmountInput } from '../util/AmountInput';
 import DisplayId from '../util/DisplayId';
 import GenericInput from '../util/GenericInput';
-import { BetweenAmountInput } from '../util/AmountInput';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));

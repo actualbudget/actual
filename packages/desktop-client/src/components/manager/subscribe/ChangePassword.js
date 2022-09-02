@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
+import { send } from 'loot-core/src/platform/client/fetch';
 import { View, Text, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
 
-import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 import { Title } from './common';
+import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function ChangePassword() {
   let dispatch = useDispatch();

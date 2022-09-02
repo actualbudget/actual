@@ -8,16 +8,16 @@ import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
+import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
-import useServerVersion from '../../hooks/useServerVersion';
-import ServerURL from './ServerURL';
-import Modals from './Modals';
-import Login from './subscribe/Login';
-import Bootstrap from './subscribe/Bootstrap';
-import Error from './subscribe/Error';
-import ChangePassword from './subscribe/ChangePassword';
 import ConfigServer from './ConfigServer';
+import Modals from './Modals';
+import ServerURL from './ServerURL';
+import Bootstrap from './subscribe/Bootstrap';
+import ChangePassword from './subscribe/ChangePassword';
+import Error from './subscribe/Error';
+import Login from './subscribe/Login';
 
 function Version() {
   const version = useServerVersion();

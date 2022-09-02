@@ -1,3 +1,4 @@
+import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { getServer } from '../server-config';
@@ -7,9 +8,8 @@ import {
   addTransactions,
   fromPlaid
 } from './sync';
-import * as monthUtils from '../../shared/months';
-import * as transfer from './transfer';
 import { loadRules, insertRule } from './transaction-rules';
+import * as transfer from './transfer';
 
 const snapshotDiff = require('snapshot-diff');
 

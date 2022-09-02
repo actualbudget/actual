@@ -3,8 +3,8 @@ import React from 'react';
 import { css } from 'glamor';
 
 import { View, Block } from 'loot-design/src/components/common';
-import AnimatedLoading from 'loot-design/src/svg/v1/AnimatedLoading';
 import { colors } from 'loot-design/src/style';
+import AnimatedLoading from 'loot-design/src/svg/v1/AnimatedLoading';
 
 import Background from './Background';
 

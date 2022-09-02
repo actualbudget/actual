@@ -2,8 +2,8 @@ import React from 'react';
 
 import { Formik } from 'formik';
 
-import { toRelaxedNumber } from 'loot-core/src/shared/util';
 import { determineOffBudget } from 'loot-core/src/shared/accounts';
+import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import {
   View,

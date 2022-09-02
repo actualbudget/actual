@@ -2,8 +2,8 @@ import React from 'react';
 
 import Component from '@reactions/component';
 
-import Autocomplete, { MultiAutocomplete } from './Autocomplete';
 import { Section } from '../guide/components';
+import Autocomplete, { MultiAutocomplete } from './Autocomplete';
 
 let items = [
   { id: 'one', name: 'James' },

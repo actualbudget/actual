@@ -13,12 +13,12 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { scope } from '@jlongster/lively';
 
-import { FixedSizeList } from './FixedSizeList';
 import { styles, colors } from '../style';
 import DeleteIcon from '../svg/Delete';
-import Checkmark from '../svg/v1/Checkmark';
 import ExpandArrow from '../svg/ExpandArrow';
 import AnimatedLoading from '../svg/v1/AnimatedLoading';
+import Checkmark from '../svg/v1/Checkmark';
+import { keys } from '../util/keys';
 import {
   View,
   Text,
@@ -28,11 +28,11 @@ import {
   IntersectionBoundary,
   Menu
 } from './common';
-import { KeyHandlers } from './KeyHandlers';
-import SheetValue from './spreadsheet/SheetValue';
 import DateSelect from './DateSelect';
+import { FixedSizeList } from './FixedSizeList';
+import { KeyHandlers } from './KeyHandlers';
 import format from './spreadsheet/format';
-import { keys } from '../util/keys';
+import SheetValue from './spreadsheet/SheetValue';
 import { AvoidRefocusScrollProvider, useProperFocus } from './useProperFocus';
 import { useSelectedItems } from './useSelected';
 

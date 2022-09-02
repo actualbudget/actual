@@ -1,6 +1,5 @@
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
-import { currencyToAmount, amountToInteger } from '../shared/util';
 import {
   dayFromDate,
   getDayMonthRegex,
@@ -9,6 +8,7 @@ import {
   getShortYearFormat
 } from '../shared/months';
 import q from '../shared/query';
+import { currencyToAmount, amountToInteger } from '../shared/util';
 
 function isInteger(num) {
   return (num | 0) === num;

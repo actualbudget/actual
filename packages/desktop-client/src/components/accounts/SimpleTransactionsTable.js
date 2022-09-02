@@ -8,6 +8,11 @@ import {
 } from 'date-fns';
 
 import {
+  getAccountsById,
+  getCategoriesById
+} from 'loot-core/src/client/reducers/queries';
+import { integerToCurrency } from 'loot-core/src/shared/util';
+import {
   Table,
   Row,
   Field,
@@ -18,13 +23,8 @@ import {
   useSelectedItems,
   useSelectedDispatch
 } from 'loot-design/src/components/useSelected';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import {
-  getAccountsById,
-  getCategoriesById
-} from 'loot-core/src/client/reducers/queries';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 import { styles } from 'loot-design/src/style';
+import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 
 import DisplayId from '../util/DisplayId';
 

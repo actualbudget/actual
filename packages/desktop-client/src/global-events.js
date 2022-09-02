@@ -1,6 +1,6 @@
+import * as sharedListeners from 'loot-core/src/client/shared-listeners';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
-import * as sharedListeners from 'loot-core/src/client/shared-listeners';
 
 export function handleGlobalEvents(actions, store) {
   global.Actual.onEventFromMain('update-downloaded', (event, info) => {

@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { replaceModal } from 'loot-core/src/client/actions/modals';
+import { send } from 'loot-core/src/platform/client/fetch';
+import { Information } from 'loot-design/src/components/alerts';
 import {
   View,
   Text,
@@ -9,10 +12,7 @@ import {
   Button,
   P
 } from 'loot-design/src/components/common';
-import { Information } from 'loot-design/src/components/alerts';
 import { colors } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { replaceModal } from 'loot-core/src/client/actions/modals';
 
 let highlightStyle = { color: colors.p5 };
 

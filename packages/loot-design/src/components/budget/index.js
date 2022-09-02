@@ -4,7 +4,11 @@ import { scope } from '@jlongster/lively';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import ElementQuery from '../ElementQuery';
+import { styles, colors } from '../../style';
+import ExpandArrow from '../../svg/ExpandArrow';
+import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';
+import ArrowThinRight from '../../svg/v1/ArrowThinRight';
+import CheveronDown from '../../svg/v1/CheveronDown';
 import {
   View,
   Text,
@@ -13,7 +17,8 @@ import {
   Menu,
   IntersectionBoundary
 } from '../common';
-import { Row, InputCell, ROW_HEIGHT } from '../table';
+import ElementQuery from '../ElementQuery';
+import NotesButton from '../NotesButton';
 import {
   useDraggable,
   useDroppable,
@@ -21,16 +26,11 @@ import {
   DropHighlightPosContext
 } from '../sort.js';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
-import { styles, colors } from '../../style';
-import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';
-import ArrowThinRight from '../../svg/v1/ArrowThinRight';
-import ExpandArrow from '../../svg/ExpandArrow';
-import CheveronDown from '../../svg/v1/CheveronDown';
-import { separateGroups, findSortDown, findSortUp } from './util';
-import { MonthsProvider, MonthsContext } from './MonthsContext';
-import NotesButton from '../NotesButton';
+import { Row, InputCell, ROW_HEIGHT } from '../table';
 import BudgetSummaries from './BudgetSummaries';
 import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
+import { MonthsProvider, MonthsContext } from './MonthsContext';
+import { separateGroups, findSortDown, findSortUp } from './util';
 
 function getScrollbarWidth() {
   return Math.max(styles.scrollbarWidth - 2, 0);

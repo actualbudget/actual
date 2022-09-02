@@ -1,22 +1,27 @@
 import './polyfills';
 import injectAPI from '@actual-app/api/injected';
 
-import asyncStorage from '../platform/server/asyncStorage';
+import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
-import * as prefs from './prefs';
+import asyncStorage from '../platform/server/asyncStorage';
 import fs from '../platform/server/fs';
-import * as sqlite from '../platform/server/sqlite';
 import logger from '../platform/server/log';
-import Platform from './platform';
-import * as db from './db';
-import * as sheet from './sheet';
-import { withUndo, clearUndo, undo, redo } from './undo';
-import { updateVersion } from './update';
-import { Condition, Action, rankRules } from './accounts/rules';
-import * as rules from './accounts/transaction-rules';
-import * as mappings from './db/mappings';
-import { batchUpdateTransactions } from './accounts/transactions';
+import * as sqlite from '../platform/server/sqlite';
+import { fromPlaidAccountType } from '../shared/accounts';
+import * as monthUtils from '../shared/months';
+import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
+import { amountToInteger, stringToInteger } from '../shared/util';
+import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
+import * as link from './accounts/link';
+import { parseFile } from './accounts/parse-file';
+import { getStartingBalancePayee } from './accounts/payees';
+import { Condition, Action, rankRules } from './accounts/rules';
+import * as bankSync from './accounts/sync';
+import * as rules from './accounts/transaction-rules';
+import { batchUpdateTransactions } from './accounts/transactions';
+import installAPI from './api';
+import { runQuery as aqlQuery } from './aql';
 import {
   getAvailableBackups,
   loadBackup,
@@ -24,14 +29,9 @@ import {
   startBackupService,
   stopBackupService
 } from './backups';
-import { amountToInteger, stringToInteger } from '../shared/util';
-import * as monthUtils from '../shared/months';
-import { fromPlaidAccountType } from '../shared/accounts';
+import budgetApp from './budget/app';
 import * as budget from './budget/base';
-import * as bankSync from './accounts/sync';
-import * as link from './accounts/link';
-import { uniqueFileName, idFromFileName } from './util/budget-name';
-import { mutator, runHandler } from './mutators';
+import * as cloudStorage from './cloud-storage';
 import {
   getClock,
   setClock,
@@ -42,6 +42,19 @@ import {
   Timestamp,
   merkle
 } from './crdt';
+import * as db from './db';
+import * as mappings from './db/mappings';
+import encryption from './encryption';
+import { APIError, TransactionError, PostError, RuleError } from './errors';
+import app from './main-app';
+import { mutator, runHandler } from './mutators';
+import notesApp from './notes/app';
+import Platform from './platform';
+import { get, post } from './post';
+import * as prefs from './prefs';
+import schedulesApp from './schedules/app';
+import { getServer, setServer } from './server-config';
+import * as sheet from './sheet';
 import {
   initialFullSync,
   fullSync,
@@ -54,31 +67,17 @@ import {
   repairSync
 } from './sync';
 import * as syncMigrations from './sync/migrate';
-import { getStartingBalancePayee } from './accounts/payees';
-import { parseFile } from './accounts/parse-file';
-import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
-import { getServer, setServer } from './server-config';
-import installAPI from './api';
-import * as cloudStorage from './cloud-storage';
-import encryption from './encryption';
-import * as tracking from './tracking/events';
-import { get, post } from './post';
-import { APIError, TransactionError, PostError, RuleError } from './errors';
-import { createTestBudget } from '../mocks/budget';
-import { runQuery as aqlQuery } from './aql';
-import q, { Query } from '../shared/query';
-import app from './main-app';
-// Apps
-import schedulesApp from './schedules/app';
-import budgetApp from './budget/app';
-import notesApp from './notes/app';
 import toolsApp from './tools/app';
+import * as tracking from './tracking/events';
+import { withUndo, clearUndo, undo, redo } from './undo';
+import { updateVersion } from './update';
+import { uniqueFileName, idFromFileName } from './util/budget-name';
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');
 
-const uuid = require('../platform/uuid');
 const connection = require('../platform/server/connection');
+const uuid = require('../platform/uuid');
 const { resolveName, unresolveName } = require('./spreadsheet/util');
 const SyncPb = require('./sync/proto/sync_pb');
 

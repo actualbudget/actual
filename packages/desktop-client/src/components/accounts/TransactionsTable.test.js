@@ -1,23 +1,23 @@
 import React from 'react';
 
-import { act } from 'react-dom/test-utils';
 import { render, fireEvent } from '@testing-library/react';
 import { format as formatDate, parse as parseDate } from 'date-fns';
+import { act } from 'react-dom/test-utils';
 
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { initServer } from 'loot-core/src/platform/client/fetch';
 import {
   generateTransaction,
   generateAccount,
   generateCategoryGroups,
   TestProvider
 } from 'loot-core/src/mocks';
+import { initServer } from 'loot-core/src/platform/client/fetch';
 import {
   addSplitTransaction,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction
 } from 'loot-core/src/shared';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 import { SelectedProviderWithItems } from 'loot-design/src/components';
 
 import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';

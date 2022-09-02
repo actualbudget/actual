@@ -16,36 +16,31 @@ import {
   isValid as isDateValid
 } from 'date-fns';
 
-import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
-import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import DateSelect from 'loot-design/src/components/DateSelect';
-import RightArrow2 from 'loot-design/src/svg/RightArrow2';
-import LeftArrow2 from 'loot-design/src/svg/LeftArrow2';
-import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
-import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
-import {
-  integerToCurrency,
-  amountToInteger,
-  titleFirst
-} from 'loot-core/src/shared/util';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById
 } from 'loot-core/src/client/reducers/queries';
+import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   splitTransaction,
   updateTransaction,
   deleteTransaction,
   addSplitTransaction
 } from 'loot-core/src/shared/transactions';
-import { styles, colors } from 'loot-design/src/style';
+import {
+  integerToCurrency,
+  amountToInteger,
+  titleFirst
+} from 'loot-core/src/shared/util';
+import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
+import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
+import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
+import DateSelect from 'loot-design/src/components/DateSelect';
+import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import {
   Cell,
   Field,
@@ -58,13 +53,18 @@ import {
   useTableNavigator,
   Table
 } from 'loot-design/src/components/table';
+import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
 import {
   useSelectedDispatch,
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
-import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
-import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import { styles, colors } from 'loot-design/src/style';
+import LeftArrow2 from 'loot-design/src/svg/LeftArrow2';
+import RightArrow2 from 'loot-design/src/svg/RightArrow2';
+import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
+import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
+import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
 
 import { getStatusProps } from '../schedules/StatusBadge';
 

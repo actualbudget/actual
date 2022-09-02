@@ -1,6 +1,6 @@
-import * as db from '../db';
 import query from '../../shared/query';
 import { makeChild } from '../../shared/transactions';
+import * as db from '../db';
 import * as aql from './exec';
 import { schema, schemaConfig } from './schema';
 

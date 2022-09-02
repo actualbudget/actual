@@ -2,9 +2,9 @@ import React from 'react';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
+import { colors } from '../style';
 import Autocomplete from './Autocomplete';
 import { View } from './common';
-import { colors } from '../style';
 
 export function AccountList({
   items,

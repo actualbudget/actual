@@ -1,8 +1,8 @@
 import React from 'react';
 
-import RecurringSchedulePicker from './RecurringSchedulePicker';
 import { Section } from '../guide/components';
 import { Button, View } from './common';
+import RecurringSchedulePicker from './RecurringSchedulePicker';
 import { useTooltip } from './tooltips';
 
 export default () => {

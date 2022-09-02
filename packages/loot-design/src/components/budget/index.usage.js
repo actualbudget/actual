@@ -2,18 +2,18 @@ import React from 'react';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 
-import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 import { generateCategoryGroups } from 'loot-core/src/mocks';
+import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { Section } from '../../guide/components';
+import { colors } from '../../style';
 import { View } from '../common';
 import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
-import DynamicBudgetTable from './DynamicBudgetTable';
 import { BudgetMonthCountContext } from './BudgetMonthCountContext';
+import DynamicBudgetTable from './DynamicBudgetTable';
 import * as rollover from './rollover/rollover-components';
 import { RolloverContext } from './rollover/RolloverContext';
-import { colors } from '../../style';
 
 const categoryGroups = generateCategoryGroups([
   {
