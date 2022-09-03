@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
@@ -14,17 +15,18 @@ export default function ChangePassword() {
   let history = useHistory();
   let [error, setError] = useState(null);
   let [msg, setMessage] = useState(null);
+  const { t } = useTranslation();
 
   function getErrorMessage(error) {
     switch (error) {
       case 'invalid-password':
-        return 'Password cannot be empty';
+        return t('bootstrap.passwordCannotBeEmpty');
       case 'password-match':
-        return 'Passwords do not match';
+        return t('bootstrap.passwordsDoNotMatch');
       case 'network-failure':
-        return 'Unable to contact the server';
+        return t('bootstrap.unableToContactTheServer');
       default:
-        return 'Internal server error';
+        return t('bootstrap.whoopsAnErrorOccurredOnOurSide');
     }
   }
 
@@ -35,7 +37,7 @@ export default function ChangePassword() {
     if (error) {
       setError(error);
     } else {
-      setMessage('Password successfully changed');
+      setMessage(t('bootstrap.passwordSuccessfullyChanged'));
 
       setTimeout(() => {
         history.push('/');
@@ -46,7 +48,7 @@ export default function ChangePassword() {
   return (
     <>
       <View style={{ width: 500, marginTop: -30 }}>
-        <Title text="Change server password" />
+        <Title text={t('bootstrap.changeServerPassword')} />
         <Text
           style={{
             fontSize: 16,
@@ -54,8 +56,7 @@ export default function ChangePassword() {
             lineHeight: 1.4
           }}
         >
-          This will change the password for this server instance. All existing
-          sessions will stay logged in.
+          {t('bootstrap.thisWillChangeThePasswordAdvice')}
         </Text>
 
         {error && (

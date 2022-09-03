@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useBudgetMonthCount } from 'loot-design/src/components/budget/BudgetMonthCountContext';
 import { View } from 'loot-design/src/components/common';
@@ -37,6 +38,8 @@ export function MonthCountSelector({ maxMonths, onChange }) {
     );
   }
 
+  const { t } = useTranslation();
+
   return (
     <View
       style={{
@@ -50,7 +53,7 @@ export function MonthCountSelector({ maxMonths, onChange }) {
           transform: 'scale(1.2)'
         }
       }}
-      title="Choose the number of months shown at a time"
+      title={t('budget.chooseNumberMonths')}
     >
       {calendars}
     </View>

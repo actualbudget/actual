@@ -29,9 +29,19 @@
     "unlinkAccount": "Desvincular cuenta"
   },
   "bootstrap": {
+    "changeServerPassword": "Cambiar contraseña del servidor",
+    "passwordCannotBeEmpty": "La contraseña no puede estar vacía",
+    "passwordsDoNotMatch": "Las contraseñas no coinciden",
+    "passwordSuccessfullyChanged": "La contraseña fue modificada exitosamente",
     "setPassword": "Establecer una contraseña para esta instancia de servidor",
+    "thisWillChangeThePasswordAdvice": "Este proceso modificará la contraseña para el servidor. Todas las sesiones existentes permanecerán conectadas.",
     "title": "Bootstrap esta instancia de Actual",
-    "tryDemo": "Probar Demo"
+    "tryDemo": "Probar Demo",
+    "unableToContactTheServer": "Incapaz de conectarse con el servidor",
+    "whoopsAnErrorOccurredOnOurSide": "¡Vaya, ocurrió un error de nuestro lado! Intentaremos solucionarlo pronto."
+  },
+  "budget": {
+    "chooseNumberMonths": "Seleccióne el numero de meses para mostrar a la vez"
   },
   "general": {
     "account_one": "Cuenta",

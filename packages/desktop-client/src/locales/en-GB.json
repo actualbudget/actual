@@ -29,9 +29,19 @@
     "unlinkAccount": "Unlink Account"
   },
   "bootstrap": {
+    "changeServerPassword": "Change server password",
+    "passwordCannotBeEmpty": "Password cannot be empty",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordSuccessfullyChanged": "Password Successfully changed",
     "setPassword": "Set a password for this server instance",
+    "thisWillChangeThePasswordAdvice": "This will change the password for this server instance. All existing sessions will stay logged in.",
     "title": "Bootstrap this Actual instance",
-    "tryDemo": "Try Demo"
+    "tryDemo": "Try Demo",
+    "unableToContactTheServer": "Unable to contact the server",
+    "whoopsAnErrorOccurredOnOurSide": "Whoops, an error occurred on our side! We'll try to get it fixed soon."
+  },
+  "budget": {
+    "chooseNumberMonths": "Choose the number of months shown at a time"
   },
   "general": {
     "account_one": "Account",
