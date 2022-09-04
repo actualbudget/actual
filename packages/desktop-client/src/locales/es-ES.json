@@ -38,7 +38,7 @@
     "title": "Bootstrap esta instancia de Actual",
     "tryDemo": "Probar Demo",
     "unableToContactTheServer": "Incapaz de conectarse con el servidor",
-    "whoopsAnErrorOccurredOnOurSide": "¡Vaya, ocurrió un error de nuestro lado! Intentaremos solucionarlo pronto."
+    "unknownError": "¡Vaya, ocurrió un error de nuestro lado! Intentaremos solucionarlo pronto."
   },
   "budget": {
     "chooseNumberMonths": "Seleccióne el numero de meses para mostrar a la vez"
