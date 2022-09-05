@@ -38,7 +38,7 @@
     "title": "Bootstrap this Actual instance",
     "tryDemo": "Try Demo",
     "unableToContactTheServer": "Unable to contact the server",
-    "whoopsAnErrorOccurredOnOurSide": "Whoops, an error occurred on our side! We'll try to get it fixed soon."
+    "unknownError": "Whoops, an error occurred on our side! We'll try to get it fixed soon."
   },
   "budget": {
     "chooseNumberMonths": "Choose the number of months shown at a time"

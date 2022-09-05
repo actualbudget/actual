@@ -26,7 +26,7 @@ export default function ChangePassword() {
       case 'network-failure':
         return t('bootstrap.unableToContactTheServer');
       default:
-        return t('bootstrap.whoopsAnErrorOccurredOnOurSide');
+        return t('bootstrap.unknownError');
     }
   }
 

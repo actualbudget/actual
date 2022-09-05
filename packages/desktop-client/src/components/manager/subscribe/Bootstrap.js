@@ -30,7 +30,7 @@ export default function Bootstrap() {
       case 'network-failure':
         return t('bootstrap.unableToContactTheServer');
       default:
-        return t('bootstrap.whoopsAnErrorOccurredOnOurSide');
+        return t('bootstrap.unknownError');
     }
   }
 
