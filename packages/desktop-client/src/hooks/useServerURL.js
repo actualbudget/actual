@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 
 export function useServerURL() {

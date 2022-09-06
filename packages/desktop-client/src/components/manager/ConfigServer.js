@@ -12,8 +12,8 @@ import {
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import { Title, Input } from './subscribe/common';
 import { useServerURL } from '../../hooks/useServerURL';
+import { Title, Input } from './subscribe/common';
 
 export default function ConfigServer() {
   let dispatch = useDispatch();
