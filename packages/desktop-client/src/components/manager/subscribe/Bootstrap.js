@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+
+import { createBudget } from 'loot-core/src/client/actions/budgets';
+import { loggedIn } from 'loot-core/src/client/actions/user';
+import { send } from 'loot-core/src/platform/client/fetch';
 import { View, Text, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import { loggedIn } from 'loot-core/src/client/actions/user';
-import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { ConfirmPasswordForm } from './ConfirmPasswordForm';
+
 import { useBootstrapped, Title } from './common';
+import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function Bootstrap() {
   let dispatch = useDispatch();

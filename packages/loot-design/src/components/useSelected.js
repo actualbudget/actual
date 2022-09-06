@@ -5,10 +5,12 @@ import React, {
   useEffect,
   useRef
 } from 'react';
-import { hasModifierKey } from '../util/keys';
 import { useSelector } from 'react-redux';
-import * as undo from 'loot-core/src/platform/client/undo';
+
 import { listen } from 'loot-core/src/platform/client/fetch';
+import * as undo from 'loot-core/src/platform/client/undo';
+
+import { hasModifierKey } from '../util/keys';
 
 function iterateRange(range, func) {
   let from = Math.min(range.start, range.end);

@@ -1,5 +1,5 @@
-import { toDateRepr, fromDateRepr } from '../models';
 import { dayFromDate } from '../../shared/months';
+import { toDateRepr, fromDateRepr } from '../models';
 
 function isRequired(name, fieldDesc) {
   return fieldDesc.required || name === 'id';

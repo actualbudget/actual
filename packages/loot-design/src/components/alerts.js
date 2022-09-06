@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text } from './common';
+
 import { styles, colors } from '../style';
-import InformationOutline from '../svg/v1/InformationOutline';
 import ExclamationOutline from '../svg/v1/ExclamationOutline';
+import InformationOutline from '../svg/v1/InformationOutline';
+import { View, Text } from './common';
 
 export function Alert({ icon: Icon, color, backgroundColor, style, children }) {
   return (

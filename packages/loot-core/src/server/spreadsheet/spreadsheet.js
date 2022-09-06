@@ -1,4 +1,5 @@
 import mitt from 'mitt';
+
 import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
 
 const Graph = require('./graph-data-structure');

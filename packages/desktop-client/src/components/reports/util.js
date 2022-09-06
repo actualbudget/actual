@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+
 import { runQuery } from 'loot-core/src/client/query-helpers';
 
 export function useArgsMemo(func) {

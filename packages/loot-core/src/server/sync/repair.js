@@ -1,5 +1,5 @@
-import * as db from '../db';
 import { serializeClock, getClock, Timestamp, merkle } from '../crdt';
+import * as db from '../db';
 
 export function rebuildMerkleHash() {
   let rows = db.runQuery('SELECT timestamp FROM messages_crdt', [], true);

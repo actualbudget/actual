@@ -1,5 +1,6 @@
 import { fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+
 import { resetStore } from 'loot-core/src/mocks/redux';
 
 const uuid = require('loot-core/src/platform/uuid');

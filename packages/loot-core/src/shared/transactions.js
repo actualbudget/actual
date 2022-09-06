@@ -1,4 +1,5 @@
 import { last, diffItems, applyChanges } from './util';
+
 const uuid = require('../platform/uuid');
 
 // The amount might be null when adding a new transaction

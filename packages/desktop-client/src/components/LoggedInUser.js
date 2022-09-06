@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
+
 import * as actions from 'loot-core/src/client/actions';
 import {
   View,

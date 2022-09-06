@@ -1,6 +1,7 @@
+import { safeNumber } from '../../shared/util';
 import * as sheet from '../sheet';
 import { number, sumAmounts } from './util';
-import { safeNumber } from '../../shared/util';
+
 const { resolveName } = require('../spreadsheet/util');
 
 export async function createCategory(cat, sheetName, prevSheetName) {

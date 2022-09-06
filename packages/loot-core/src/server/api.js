@@ -1,3 +1,11 @@
+import * as monthUtils from '../shared/months';
+import q from '../shared/query';
+import {
+  ungroupTransactions,
+  updateTransaction,
+  deleteTransaction
+} from '../shared/transactions';
+import { integerToAmount } from '../shared/util';
 import { addTransactions } from './accounts/sync';
 import {
   accountModel,
@@ -6,22 +14,14 @@ import {
   payeeModel,
   payeeRuleModel
 } from './api-models';
-import {
-  ungroupTransactions,
-  updateTransaction,
-  deleteTransaction
-} from '../shared/transactions';
-import * as db from './db';
-import * as sheet from './sheet';
-import * as prefs from './prefs';
-import * as monthUtils from '../shared/months';
-import * as cloudStorage from './cloud-storage';
-import { setSyncingMode, batchMessages } from './sync';
-import { getClock } from './crdt';
-import { runMutator } from './mutators';
-import { integerToAmount } from '../shared/util';
 import { runQuery as aqlQuery } from './aql';
-import q from '../shared/query';
+import * as cloudStorage from './cloud-storage';
+import { getClock } from './crdt';
+import * as db from './db';
+import { runMutator } from './mutators';
+import * as prefs from './prefs';
+import * as sheet from './sheet';
+import { setSyncingMode, batchMessages } from './sync';
 
 const connection = require('../platform/server/connection');
 

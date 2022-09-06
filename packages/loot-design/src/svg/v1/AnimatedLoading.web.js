@@ -1,6 +1,8 @@
 import React from 'react';
-import Loading from './Loading';
+
 import { css } from 'glamor';
+
+import Loading from './Loading';
 
 const rotation = css.keyframes({
   '0%': { transform: 'rotate(-90deg)' },

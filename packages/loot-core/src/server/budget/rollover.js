@@ -1,7 +1,8 @@
-import * as sheet from '../sheet';
 import * as monthUtils from '../../shared/months';
+import * as sheet from '../sheet';
 import { number, sumAmounts, flatten2, unflatten2 } from './util';
 import { safeNumber } from './util';
+
 const { resolveName } = require('../spreadsheet/util');
 
 function getBlankSheet(months) {
