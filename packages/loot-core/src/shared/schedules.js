@@ -72,17 +72,16 @@ function formatMonthAndDay(month, i18n) {
 export function getRecurringDescription(config, i18n) {
   let interval = config.interval || 1;
 
-  const t = (key, options) => i18n.t(key, { ...options, ns: 'core' });
-
   switch (config.frequency) {
     case 'weekly': {
-      return t('schedules.recurring.weekly', {
+      return i18n.t('schedules.recurring.weekly', {
         count: interval,
         day: monthUtils.format(
           config.start,
           { weekday: 'long' },
           i18n.resolvedLanguage
-        )
+        ),
+        ns: 'core'
       });
     }
     case 'monthly': {
@@ -117,12 +116,17 @@ export function getRecurringDescription(config, i18n) {
         for (let pattern of patterns) {
           if (pattern.type === 'day') {
             if (pattern.value === -1) {
-              strs.push(t('schedules.recurring.pattern.lastDay'));
+              strs.push(
+                i18n.t('schedules.recurring.pattern.lastDay', {
+                  ns: 'core'
+                })
+              );
             } else {
               strs.push(
-                t('general.ordinal', {
+                i18n.t('general.ordinal', {
                   count: pattern.value,
-                  ordinal: true
+                  ordinal: true,
+                  ns: 'core'
                 })
               );
             }
@@ -136,50 +140,60 @@ export function getRecurringDescription(config, i18n) {
             if (pattern.value === -1) {
               // Example: last Monday
               strs.push(
-                t('schedules.recurring.pattern.lastWeekday', {
+                i18n.t('schedules.recurring.pattern.lastWeekday', {
                   context,
-                  dayName
+                  dayName,
+                  ns: 'core'
                 })
               );
             } else {
               // Example: 3rd Monday
               strs.push(
-                t('schedules.recurring.pattern.weekAndDay', {
+                i18n.t('schedules.recurring.pattern.weekAndDay', {
                   context,
-                  week: t('general.ordinal', {
+                  week: i18n.t('general.ordinal', {
                     count: pattern.value,
-                    ordinal: true
+                    ordinal: true,
+                    ns: 'core'
                   }),
-                  dayName
+                  dayName,
+                  ns: 'core'
                 })
               );
             }
           }
         }
 
-        return t('schedules.recurring.monthlyPattern', {
+        return i18n.t('schedules.recurring.monthlyPattern', {
           context,
           count: interval,
           day: prettyDayName(patterns[0].type, i18n.resolvedLanguage),
           pattern: new Intl.ListFormat(i18n.resolvedLanguage, {
             style: 'long',
             type: 'conjunction'
-          }).format(strs)
+          }).format(strs),
+          ns: 'core'
         });
       } else {
-        return t('schedules.recurring.monthly', {
+        return i18n.t('schedules.recurring.monthly', {
           count: interval,
-          day: t('general.ordinal', {
+          day: i18n.t('general.ordinal', {
             count: monthUtils.parseDate(config.start).getDate(),
-            ordinal: true
-          })
+            ordinal: true,
+            ns: 'core'
+          }),
+          ns: 'core'
         });
       }
     }
     case 'yearly': {
-      return t(
+      return i18n.t(
         'schedules.recurring.yearly',
-        { count: interval, day: formatMonthAndDay(config.start, i18n) },
+        {
+          count: interval,
+          day: formatMonthAndDay(config.start, i18n),
+          ns: 'core'
+        },
         i18n.resolvedLanguage
       );
     }
