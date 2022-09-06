@@ -1,5 +1,4 @@
 {
-  "{balanceType[name] || name}": "{balanceType[name] || name}",
   "account": {
     "addAccount": "Agregar cuenta",
     "addAccountInFutureFromSidebar": "En el futuro puedes agregar cuentas desde la barra lateral.",

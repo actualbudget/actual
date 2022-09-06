@@ -319,12 +319,11 @@ function DetailedBalance({ name, balance }) {
       }}
     >
       <Trans
+        i18nKey={balanceType[name] || name}
         values={{
           amount: format(balance, 'financial')
         }}
-      >
-        {balanceType[name] || name}
-      </Trans>
+      />
     </Text>
   );
 }
