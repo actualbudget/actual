@@ -1,8 +1,8 @@
 import { initServer, serverPush } from '../platform/client/fetch';
-import q from '../shared/query';
-import { runQuery, liveQuery, pagedQuery } from './query-helpers';
-import { tracer } from '../shared/test-helpers';
 import { subDays } from '../shared/months';
+import q from '../shared/query';
+import { tracer } from '../shared/test-helpers';
+import { runQuery, liveQuery, pagedQuery } from './query-helpers';
 
 function wait(n) {
   return new Promise(resolve => setTimeout(() => resolve(`wait(${n})`), n));

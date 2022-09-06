@@ -1,11 +1,13 @@
 import fs from '../platform/server/fs';
-import * as monthUtils from '../shared/months';
 import * as sqlite from '../platform/server/sqlite';
-import * as prefs from './prefs';
+import * as monthUtils from '../shared/months';
 import * as cloudStorage from './cloud-storage';
+import * as prefs from './prefs';
+
+const dateFns = require('date-fns');
+
 const connection = require('../platform/server/connection');
 const uuid = require('../platform/uuid');
-const dateFns = require('date-fns');
 
 // A special backup that represents the latest version of the db that
 // can be reverted to after loading a backup

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { css } from 'glamor';
+
 import Component from '@reactions/component';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { css } from 'glamor';
+
 import { rolloverBudget } from 'loot-core/src/client/queries';
-import NamespaceContext from '../../spreadsheet/NamespaceContext';
-import format from '../../spreadsheet/format';
-import SheetValue from '../../spreadsheet/SheetValue';
-import CellValue from '../../spreadsheet/CellValue';
+import * as monthUtils from 'loot-core/src/shared/months';
+
+import { colors, styles } from '../../../style';
+import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
+import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
+import ArrowButtonUp1 from '../../../svg/v2/ArrowButtonUp1';
 import {
   View,
   Block,
@@ -16,15 +19,15 @@ import {
   HoverTarget,
   AlignedText
 } from '../../common';
+import NotesButton from '../../NotesButton';
+import CellValue from '../../spreadsheet/CellValue';
+import format from '../../spreadsheet/format';
+import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import SheetValue from '../../spreadsheet/SheetValue';
 import { MONTH_BOX_SHADOW } from '../constants';
-import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
-import ArrowButtonUp1 from '../../../svg/v2/ArrowButtonUp1';
-import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
-import { colors, styles } from '../../../style';
+import HoldTooltip from './HoldTooltip';
 import { useRollover } from './RolloverContext';
 import TransferTooltip from './TransferTooltip';
-import HoldTooltip from './HoldTooltip';
-import NotesButton from '../../NotesButton';
 
 function TotalsList({ prevMonthName, collapsed }) {
   return (

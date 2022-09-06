@@ -5,6 +5,7 @@ import {
   execQuery,
   runQuery
 } from './index.web';
+
 let os = require('os');
 
 beforeAll(() => {

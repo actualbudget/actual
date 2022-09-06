@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { colors } from '../../style';
 
 export let CategoryGroupsContext = React.createContext([]);

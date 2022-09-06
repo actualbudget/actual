@@ -1,7 +1,8 @@
 import React from 'react';
-import ManagePayeesWithData from './ManagePayeesWithData';
-import { Page } from '../Page';
 import { useLocation } from 'react-router';
+
+import { Page } from '../Page';
+import ManagePayeesWithData from './ManagePayeesWithData';
 
 export function ManagePayeesPage() {
   let location = useLocation();

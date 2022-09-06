@@ -1,8 +1,8 @@
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import { isAggregateQuery } from '../compiler';
-import { convertOutputType } from '../schema-helpers';
 import { execQuery } from '../exec';
+import { convertOutputType } from '../schema-helpers';
 
 // Transactions executor
 

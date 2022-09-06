@@ -1,4 +1,5 @@
 import { updateBackups } from './backups';
+
 const dateFns = require('date-fns');
 
 describe('Backups', () => {
