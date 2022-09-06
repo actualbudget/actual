@@ -1,5 +1,7 @@
-import { Modal } from 'loot-design/src/components/common';
 import React, { useState } from 'react';
+
+import { Modal } from 'loot-design/src/components/common';
+
 import ManageRules from '../ManageRules';
 
 export default function ManageRulesModal({ modalProps, payeeId }) {

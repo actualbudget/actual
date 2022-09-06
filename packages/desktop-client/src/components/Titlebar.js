@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { Switch, Route, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { Switch, Route, withRouter } from 'react-router-dom';
+
 import * as actions from 'loot-core/src/client/actions';
+import Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
-import Platform from 'loot-core/src/client/platform';
-import { colors } from 'loot-design/src/style';
 import {
   View,
   Text,
@@ -16,15 +16,17 @@ import {
   P
 } from 'loot-design/src/components/common';
 import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
-import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
+import { colors } from 'loot-design/src/style';
 import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
 import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
-import { MonthCountSelector } from './budget/MonthCountSelector';
+import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
+import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
+
 import AccountSyncCheck from './accounts/AccountSyncCheck';
-import LoggedInUser from './LoggedInUser';
 import AnimatedRefresh from './AnimatedRefresh';
+import { MonthCountSelector } from './budget/MonthCountSelector';
 import { useSidebar } from './FloatableSidebar';
+import LoggedInUser from './LoggedInUser';
 
 export let TitlebarContext = React.createContext();
 

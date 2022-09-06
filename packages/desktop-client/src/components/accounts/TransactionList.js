@@ -1,5 +1,8 @@
 import React, { useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router';
+
+import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,
   updateTransaction,
@@ -7,10 +10,10 @@ import {
   realizeTempTransactions,
   applyTransactionDiff
 } from 'loot-core/src/shared/transactions';
-import { send } from 'loot-core/src/platform/client/fetch';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
+
 import { TransactionTable } from './TransactionsTable';
-import { useHistory } from 'react-router';
+
 const uuid = require('loot-core/src/platform/uuid');
 
 // When data changes, there are two ways to update the UI:

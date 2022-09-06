@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
+
 import { css } from 'glamor';
+
+import { send } from 'loot-core/src/platform/client/fetch';
+import { getCreateKeyError } from 'loot-core/src/shared/errors';
 import {
   View,
   Text,
@@ -11,9 +15,7 @@ import {
   Input,
   InitialFocus
 } from 'loot-design/src/components/common';
-import { send } from 'loot-core/src/platform/client/fetch';
 import { colors } from 'loot-design/src/style';
-import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
 export default function CreateEncryptionKey({
   modalProps,

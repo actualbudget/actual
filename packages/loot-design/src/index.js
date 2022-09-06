@@ -1,5 +1,6 @@
-import renderDocument from './guide/document';
 import { plugins } from 'glamor';
+
+import renderDocument from './guide/document';
 
 plugins.clear();
 

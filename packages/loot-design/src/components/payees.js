@@ -7,6 +7,17 @@ import React, {
   useCallback,
   useImperativeHandle
 } from 'react';
+
+import Component from '@reactions/component';
+import memoizeOne from 'memoize-one';
+
+import { groupById } from 'loot-core/src/shared/util';
+
+import { colors } from '../style';
+import Delete from '../svg/Delete';
+import ExpandArrow from '../svg/ExpandArrow';
+import Merge from '../svg/merge';
+import ArrowThinRight from '../svg/v1/ArrowThinRight';
 import {
   useStableCallback,
   View,
@@ -17,10 +28,6 @@ import {
   Tooltip,
   Menu
 } from './common';
-import memoizeOne from 'memoize-one';
-import Component from '@reactions/component';
-import { groupById } from 'loot-core/src/shared/util';
-import { colors } from '../style';
 import {
   Table,
   TableHeader,
@@ -36,10 +43,6 @@ import useSelected, {
   useSelectedItems,
   useSelectedDispatch
 } from './useSelected';
-import Delete from '../svg/Delete';
-import Merge from '../svg/merge';
-import ExpandArrow from '../svg/ExpandArrow';
-import ArrowThinRight from '../svg/v1/ArrowThinRight';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 

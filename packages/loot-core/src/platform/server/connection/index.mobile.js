@@ -1,6 +1,7 @@
+let rn_bridge = require('rn-bridge');
+
 const { runHandler } = require('../../../server/mutators');
 let { captureException } = require('../../exceptions');
-let rn_bridge = require('rn-bridge');
 
 function coerceError(error) {
   if (error.type && error.type === 'APIError') {

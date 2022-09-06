@@ -1,17 +1,19 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { getActivePayees } from 'loot-core/src/client/reducers/queries';
+
 import { createPayee } from 'loot-core/src/client/actions/queries';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { View } from './common';
+import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
+import { getActivePayees } from 'loot-core/src/client/reducers/queries';
+
+import { colors } from '../style';
 import Add from '../svg/v1/Add';
 import Autocomplete, {
   defaultFilterSuggestion,
   AutocompleteFooter,
   AutocompleteFooterButton
 } from './Autocomplete';
-import { colors } from '../style';
+import { View } from './common';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
@@ -183,7 +185,9 @@ export default function PayeeAutocomplete({
   let payees = useCachedPayees();
   let accounts = useCachedAccounts();
 
-  let [focusTransferPayees, setFocusTransferPayees] = useState(defaultFocusTransferPayees);
+  let [focusTransferPayees, setFocusTransferPayees] = useState(
+    defaultFocusTransferPayees
+  );
   let payeeSuggestions = useMemo(
     () => [
       { id: 'new', name: '' },

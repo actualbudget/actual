@@ -7,6 +7,7 @@ import React, {
   useContext
 } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
+
 import { colors } from '../style';
 import { View } from './common';
 
