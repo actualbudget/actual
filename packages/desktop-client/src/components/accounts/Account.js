@@ -645,6 +645,7 @@ const AccountHeader = React.memo(
     let [menuOpen, setMenuOpen] = useState(false);
     let searchInput = useRef(null);
     let splitsExpanded = useSplitsExpanded();
+    const { t } = useTranslation();
 
     let canSync = syncEnabled && account && account.account_id;
     if (!account) {
@@ -664,8 +665,6 @@ const AccountHeader = React.memo(
         });
       }
     }
-
-    const { t } = useTranslation();
 
     return (
       <>
