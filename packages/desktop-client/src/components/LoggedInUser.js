@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useHistory, withRouter } from 'react-router';
+
 import * as actions from 'loot-core/src/client/actions';
 import {
   View,
@@ -10,6 +11,7 @@ import {
   Menu
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
+
 import { useServerURL } from '../hooks/useServerURL';
 
 function LoggedInUser({

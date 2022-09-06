@@ -1,4 +1,5 @@
 import { createApp } from './app';
+
 const connection = require('../platform/server/connection');
 
 // Main app

@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+
 import lively from '@jlongster/lively';
 import Downshift from 'downshift';
 import { css } from 'glamor';
+
 import { colors } from '../style';
 import Remove from '../svg/v2/Remove';
 import { View, Input, Tooltip, Button } from './common';

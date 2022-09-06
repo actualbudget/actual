@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Text, View, render as renderReactNative } from 'react-native';
+
 import Platform from 'loot-core/src/client/platform';
 import { TestProvider } from 'loot-core/src/mocks/redux';
 

@@ -1,8 +1,11 @@
 import React from 'react';
-import { P } from 'loot-design/src/components/common';
+
 import { css } from 'glamor';
-import Navigation from './Navigation';
+
+import { P } from 'loot-design/src/components/common';
+
 import { Standalone } from './common';
+import Navigation from './Navigation';
 
 function TransactionFinalize({ navigationProps }) {
   return (

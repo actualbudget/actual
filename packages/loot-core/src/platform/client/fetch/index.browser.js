@@ -1,6 +1,6 @@
-const undo = require('../undo');
 const { captureException, captureBreadcrumb } = require('../../exceptions');
 const uuid = require('../../uuid');
+const undo = require('../undo');
 let replyHandlers = new Map();
 let listeners = new Map();
 let messageQueue = [];

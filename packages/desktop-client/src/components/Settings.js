@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
-import { css } from 'glamor';
 import { Route, Switch, Redirect } from 'react-router-dom';
+
+import { css } from 'glamor';
+
 import * as actions from 'loot-core/src/client/actions';
+import Platform from 'loot-core/src/client/platform';
+import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { numberFormats } from 'loot-core/src/shared/util';
+import { Information } from 'loot-design/src/components/alerts';
 import {
   View,
   Text,
@@ -10,12 +16,8 @@ import {
   ButtonWithLoading,
   AnchorLink
 } from 'loot-design/src/components/common';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import { numberFormats } from 'loot-core/src/shared/util';
 import { styles, colors } from 'loot-design/src/style';
-import { Information } from 'loot-design/src/components/alerts';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
-import Platform from 'loot-core/src/client/platform';
 
 import useServerVersion from '../hooks/useServerVersion';
 
