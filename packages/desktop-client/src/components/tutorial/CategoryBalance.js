@@ -1,7 +1,9 @@
 import React from 'react';
+
 import { P, Button } from 'loot-design/src/components/common';
-import Navigation from './Navigation';
+
 import { Standalone, Title, useMinimized } from './common';
+import Navigation from './Navigation';
 
 function CategoryBalance({ targetRect, navigationProps }) {
   let [minimized, toggle] = useMinimized();

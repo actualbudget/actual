@@ -7,22 +7,25 @@ import '@reach/listbox/styles.css';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+
 import {
   createStore,
   combineReducers,
   applyMiddleware,
   bindActionCreators
 } from 'redux';
-import { Provider } from 'react-redux';
-import constants from 'loot-core/src/client/constants';
-import reducers from 'loot-core/src/client/reducers';
-import { send } from 'loot-core/src/platform/client/fetch';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import * as actions from 'loot-core/src/client/actions';
 import thunk from 'redux-thunk';
+
+import * as actions from 'loot-core/src/client/actions';
+import constants from 'loot-core/src/client/constants';
+import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import reducers from 'loot-core/src/client/reducers';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
-import { handleGlobalEvents } from './global-events';
+import { send } from 'loot-core/src/platform/client/fetch';
+
 import App from './components/App';
+import { handleGlobalEvents } from './global-events';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.

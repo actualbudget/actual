@@ -1,9 +1,9 @@
 import { send } from '../../platform/client/fetch';
+import { getUploadError } from '../../shared/errors';
 import constants from '../constants';
-import { loadPrefs } from './prefs';
 import { syncAccounts } from './account';
 import { pushModal } from './modals';
-import { getUploadError } from '../../shared/errors';
+import { loadPrefs } from './prefs';
 
 export function unregister() {
   return async dispatch => {

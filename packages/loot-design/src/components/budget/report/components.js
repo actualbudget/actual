@@ -1,16 +1,18 @@
 import React from 'react';
-import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+
 import { reportBudget } from 'loot-core/src/client/queries';
+import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
+
 import { styles, colors } from '../../../style';
 import { View, Text, Tooltip, Menu, useTooltip } from '../../common';
-import { Field, SheetCell } from '../../table';
-import useSheetValue from '../../spreadsheet/useSheetValue';
-import { makeAmountGrey } from '../util';
-import { MONTH_RIGHT_PADDING } from '../constants';
-import format from '../../spreadsheet/format';
 import CellValue from '../../spreadsheet/CellValue';
+import format from '../../spreadsheet/format';
+import useSheetValue from '../../spreadsheet/useSheetValue';
+import { Field, SheetCell } from '../../table';
 import BalanceWithCarryover from '../BalanceWithCarryover';
+import { MONTH_RIGHT_PADDING } from '../constants';
+import { makeAmountGrey } from '../util';
 
 export BudgetSummary from './BudgetSummary';
 
@@ -33,7 +35,7 @@ export const BudgetTotalsMonth = React.memo(function BudgetTotalsMonth() {
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
           style={{ color: colors.n4, fontWeight: 600 }}
-          formatter={(value) => {
+          formatter={value => {
             return format(parseFloat(value || '0'), 'financial');
           }}
         />
@@ -136,7 +138,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
       onClose={tooltip.close}
     >
       <Menu
-        onMenuSelect={(type) => {
+        onMenuSelect={type => {
           onBudgetAction(monthIndex, 'carryover', {
             category: categoryId,
             flag: !carryover
@@ -199,10 +201,10 @@ export const CategoryMonth = React.memo(function CategoryMonth({
           binding: reportBudget.catBudgeted(category.id),
           type: 'financial',
           getValueStyle: makeAmountGrey,
-          formatExpr: (expr) => {
+          formatExpr: expr => {
             return integerToCurrency(expr);
           },
-          unformatExpr: (expr) => {
+          unformatExpr: expr => {
             return amountToInteger(evalArithmetic(expr, 0));
           }
         }}
@@ -211,7 +213,7 @@ export const CategoryMonth = React.memo(function CategoryMonth({
             onEdit(null);
           }
         }}
-        onSave={(amount) => {
+        onSave={amount => {
           onBudgetAction(monthIndex, 'budget-amount', {
             category: category.id,
             amount

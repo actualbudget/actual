@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+
 import mitt from 'mitt';
+
 import * as actions from 'loot-core/src/client/actions';
 import { View } from 'loot-design/src/components/common';
 import { SIDEBAR_WIDTH } from 'loot-design/src/components/sidebar';

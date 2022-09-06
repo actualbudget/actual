@@ -1,5 +1,5 @@
-const undo = require('../undo');
 const uuid = require('../../uuid');
+const undo = require('../undo');
 let replyHandlers = new Map();
 let listeners = new Map();
 let messageQueue = [];
