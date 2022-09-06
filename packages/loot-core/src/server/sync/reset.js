@@ -1,9 +1,10 @@
+import { captureException } from '../../platform/exceptions';
+import asyncStorage from '../../platform/server/asyncStorage';
 import * as cloudStorage from '../cloud-storage';
 import * as db from '../db';
-import * as prefs from '../prefs';
-import asyncStorage from '../../platform/server/asyncStorage';
-import { captureException } from '../../platform/exceptions';
 import { runMutator } from '../mutators';
+import * as prefs from '../prefs';
+
 const connection = require('../../platform/server/connection');
 
 export default async function resetSync(keyState) {

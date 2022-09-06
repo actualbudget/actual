@@ -1,5 +1,5 @@
-import { RuleError } from '../errors';
 import * as dateFns from 'date-fns';
+
 import {
   monthFromDate,
   yearFromDate,
@@ -9,9 +9,10 @@ import {
   subDays,
   parseDate
 } from '../../shared/months';
-import { fastSetMerge } from '../../shared/util';
 import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
+import { fastSetMerge } from '../../shared/util';
+import { RuleError } from '../errors';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 function safeNumber(n) {

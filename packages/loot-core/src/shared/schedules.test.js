@@ -1,8 +1,9 @@
-import { getRecurringDescription } from './schedules';
 import MockDate from 'mockdate';
 import i18n from '../../../desktop-client/src/locales';
 
 i18n.changeLanguage('en');
+
+import { getRecurringDescription } from './schedules';
 
 describe('recurring date description', () => {
   beforeEach(() => {

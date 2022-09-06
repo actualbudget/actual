@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Button, ModalButtons } from 'loot-design/src/components/common';
 
 function Navigation({

@@ -1,23 +1,17 @@
 import React, { useEffect, useReducer, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import DateSelect from './DateSelect';
-import {
-  Button,
-  Select,
-  Input,
-  Tooltip,
-  View,
-  Text,
-  Stack
-} from '../components/common';
-import { colors } from 'loot-design/src/style';
 import { useTooltip } from 'loot-design/src/components/tooltips';
-import SubtractIcon from 'loot-design/src/svg/Subtract';
+import { colors } from 'loot-design/src/style';
 import AddIcon from 'loot-design/src/svg/Add';
-import { useTranslation } from 'react-i18next';
+import SubtractIcon from 'loot-design/src/svg/Subtract';
+
+import { Button, Select, Input, Tooltip, View, Text, Stack } from './common';
+import DateSelect from './DateSelect';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;

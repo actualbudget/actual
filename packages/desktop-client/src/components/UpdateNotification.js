@@ -1,6 +1,8 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+
+import { bindActionCreators } from 'redux';
+
 import * as actions from 'loot-core/src/client/actions';
 import { View, Text, Link, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';

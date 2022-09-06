@@ -1,7 +1,10 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+
+import * as monthUtils from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { colors } from 'loot-design/src/style';
 import {
   View,
   Text,
@@ -16,13 +19,12 @@ import {
   Field,
   Cell
 } from 'loot-design/src/components/table';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import { colors } from 'loot-design/src/style';
 import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import Check from 'loot-design/src/svg/v2/Check';
+
 import DisplayId from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
-import { useTranslation } from 'react-i18next';
 
 export let ROW_HEIGHT = 43;
 

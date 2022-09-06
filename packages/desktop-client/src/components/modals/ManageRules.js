@@ -1,11 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { css } from 'glamor';
+
 import { format as formatDate, parseISO } from 'date-fns';
-import * as undo from 'loot-core/src/platform/client/undo';
+import { css } from 'glamor';
+
+import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import q from 'loot-core/src/client/query-helpers';
 import { liveQueryContext } from 'loot-core/src/client/query-hooks';
+import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+import { send } from 'loot-core/src/platform/client/fetch';
+import * as undo from 'loot-core/src/platform/client/undo';
+import { getMonthYearFormat } from 'loot-core/src/shared/months';
+import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
+import {
+  extractScheduleConds,
+  getRecurringDescription
+} from 'loot-core/src/shared/schedules';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   View,
   Text,
@@ -28,19 +41,8 @@ import useSelected, {
   useSelectedItems,
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
-import ArrowRight from 'loot-design/src/svg/RightArrow2';
 import { colors } from 'loot-design/src/style';
-import { getMonthYearFormat } from 'loot-core/src/shared/months';
-import {
-  extractScheduleConds,
-  getRecurringDescription
-} from 'loot-core/src/shared/schedules';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
-import { useTranslation } from 'react-i18next';
+import ArrowRight from 'loot-design/src/svg/RightArrow2';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 

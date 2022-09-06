@@ -6,11 +6,11 @@ import React, {
   useImperativeHandle,
   useMemo
 } from 'react';
+
 import * as d from 'date-fns';
 import Pikaday from 'pikaday';
+
 import 'pikaday/css/pikaday.css';
-import { colors } from '../style';
-import { View, Input, Tooltip } from './common';
 import {
   getDayMonthFormat,
   getDayMonthRegex,
@@ -18,6 +18,8 @@ import {
   getShortYearRegex
 } from 'loot-core/src/shared/months';
 
+import { colors } from '../style';
+import { View, Input, Tooltip } from './common';
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
