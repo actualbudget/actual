@@ -437,7 +437,7 @@ export default function ScheduleDetails() {
     >
       <Stack direction="row" style={{ marginTop: 20 }}>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title={t('general.payee')} />
+          <FormLabel title={t('general.payee_one')} />
           <PayeeAutocomplete
             value={state.fields.payee}
             inputProps={{ placeholder: t('schedules.none') }}

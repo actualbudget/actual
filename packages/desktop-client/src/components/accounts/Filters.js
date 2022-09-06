@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import {
@@ -132,6 +133,8 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
     ops = ['is'];
   }
 
+  const { t } = useTranslation();
+
   return (
     <Tooltip
       position="bottom-left"
@@ -146,15 +149,15 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
               options={
                 field === 'amount'
                   ? [
-                      ['amount', 'Amount'],
-                      ['amount-inflow', 'Amount (inflow)'],
-                      ['amount-outflow', 'Amount (outflow)']
+                      ['amount', t('general.amount')],
+                      ['amount-inflow', t('general.amountIinflow')],
+                      ['amount-outflow', t('general.amountOutflow')]
                     ]
                   : field === 'date'
                   ? [
-                      ['date', 'Date'],
-                      ['month', 'Month'],
-                      ['year', 'Year']
+                      ['date', t('general.date')],
+                      ['month', t('general.month')],
+                      ['year', t('general.year')]
                     ]
                   : null
               }
@@ -235,7 +238,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
                 });
               }}
             >
-              Apply
+              {t('general.apply')}
             </Button>
           </View>
         </form>
@@ -250,6 +253,8 @@ export function FilterButton({ onApply }) {
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy'
     };
   });
+
+  const { t } = useTranslation();
 
   let [state, dispatch] = useReducer(
     (state, action) => {
@@ -306,7 +311,7 @@ export function FilterButton({ onApply }) {
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy-MM');
         } else {
-          alert('Invalid date format');
+          alert(t('general.invalidDateFormat'));
           return;
         }
       } else if (cond.options.year) {
@@ -314,7 +319,7 @@ export function FilterButton({ onApply }) {
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy');
         } else {
-          alert('Invalid date format');
+          alert(t('general.invalidDateFormat'));
           return;
         }
       }

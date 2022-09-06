@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import {
@@ -181,6 +182,7 @@ export default function SimpleTransactionsTable({
     },
     [payees, categories, memoFields, selectedItems]
   );
+  const { t } = useTranslation();
 
   return (
     <Table
@@ -200,43 +202,43 @@ export default function SimpleTransactionsTable({
               case 'date':
                 return (
                   <Field key={i} width={100}>
-                    Date
+                    {t('general.date')}
                   </Field>
                 );
               case 'imported_payee':
                 return (
                   <Field key={i} width="flex">
-                    Imported payee
+                    {t('general.importedPayee')}
                   </Field>
                 );
               case 'payee':
                 return (
                   <Field key={i} width="flex">
-                    Payee
+                    {t('general.payee_one')}
                   </Field>
                 );
               case 'category':
                 return (
                   <Field key={i} width="flex">
-                    Category
+                    {t('general.category_one')}
                   </Field>
                 );
               case 'account':
                 return (
                   <Field key={i} width="flex">
-                    Account
+                    {t('general.account_one')}
                   </Field>
                 );
               case 'notes':
                 return (
                   <Field key={i} width="flex">
-                    Notes
+                    {t('general.note_other')}
                   </Field>
                 );
               case 'amount':
                 return (
                   <Field key={i} width={75} style={{ textAlign: 'right' }}>
-                    Amount
+                    {t('general.amount')}
                   </Field>
                 );
               default:
