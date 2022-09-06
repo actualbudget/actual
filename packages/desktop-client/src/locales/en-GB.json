@@ -76,6 +76,8 @@
     "note_other": "Notes",
     "noTransaction_other": "No transactions",
     "offBudget": "Off Budget",
+    "ordinal_one": "{{count}}st",
+    "ordinal_two": "{{count}}nd",
     "ordinal_few": "{{count}}rd",
     "ordinal_other": "{{count}}th",
     "payee_one": "Payee",
