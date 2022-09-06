@@ -24,13 +24,13 @@ export default function Bootstrap() {
   function getErrorMessage(error) {
     switch (error) {
       case 'invalid-password':
-        return 'Password cannot be empty';
+        return t('bootstrap.passwordCannotBeEmpty');
       case 'password-match':
-        return 'Passwords do not match';
+        return t('bootstrap.passwordsDoNotMatch');
       case 'network-failure':
-        return 'Unable to contact the server';
+        return t('bootstrap.unableToContactTheServer');
       default:
-        return "Whoops, an error occurred on our side! We'll try to get it fixed soon.";
+        return t('bootstrap.unknownError');
     }
   }
 
