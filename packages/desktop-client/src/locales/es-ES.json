@@ -87,28 +87,28 @@
     "save": "Guardar",
     "schedule": "Agenda",
     "schedule_other": "Agendas",
-    "search": "",
-    "show": "",
-    "split": "",
+    "search": "Buscar",
+    "show": "Mostrar",
+    "split": "Dividir",
     "status": "Estado",
-    "sync": "",
-    "transfer": "",
-    "when": "",
-    "year": ""
+    "sync": "Sincronizar",
+    "transfer": "Transferencia",
+    "when": "Cuando",
+    "year": "Año"
   },
   "rules": {
-    "addAction": "",
-    "applyAction": "",
-    "ifAllTheseConditionsMatch": "",
-    "stageOfRule": "",
-    "stageOfRuleAdvice": "",
+    "addAction": "Agregar acción",
+    "applyAction": "Aplicar acción ({{size}})",
+    "ifAllTheseConditionsMatch": "Si todas estas condiciones coinciden:",
+    "stageOfRule": "Etapa de la regla:",
+    "stageOfRuleAdvice": "La etapa de una regla le permite forzar un orden específico. Reglas previas siempre se ejecuta primero y las reglas posteriores siempre se ejecutan al final. Dentro de cada etapa las reglas se ordenan automáticamente de menos a más específicas.",
     "stages": {
-      "default": "",
-      "post": "",
-      "pre": ""
+      "default": "Por defecto",
+      "post": "Posterior",
+      "pre": "Previa"
     },
-    "thenApplyTheseActions": "",
-    "thisRuleAppliesToTheseTransactions": ""
+    "thenApplyTheseActions": "Aplíque éstas acciones:",
+    "thisRuleAppliesToTheseTransactions": "Ésta regla aplica a las siguientes transacciones:"
   },
   "schedules": {
     "addNewSchedule": "Agregar nueva agenda",
