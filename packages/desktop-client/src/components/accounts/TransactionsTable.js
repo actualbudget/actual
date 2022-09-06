@@ -1074,14 +1074,13 @@ export function TransactionError({ error, isDeposit, onAddSplit, style }) {
             data-testid="transaction-error"
           >
             <Trans
+              i18nKey={'general.amountLeft'}
               values={{
                 amount: integerToCurrency(
                   isDeposit ? error.difference : -error.difference
                 )
               }}
-            >
-              {'general.amountLeft'}
-            </Trans>
+            />
             <View style={{ flex: 1 }} />
             <Button
               style={{ marginLeft: 15, padding: '4px 10px' }}

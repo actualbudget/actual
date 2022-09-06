@@ -151,6 +151,7 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
           <View style={{ color: colors.n3 }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
               <Trans
+                i18nKey={'account.clearedBalance'}
                 values={{
                   cleared: format(cleared, 'financial'),
                   diff:
@@ -158,9 +159,7 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
                     format(targetDiff, 'financial'),
                   balance: format(targetBalance, 'financial')
                 }}
-              >
-                {'account.clearedBalance'}
-              </Trans>
+              />
             </Text>
           </View>
         )}
