@@ -30,14 +30,13 @@ import { colors } from 'loot-design/src/style';
 import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
 import { ScheduleAmountCell } from './SchedulesTable';
-import { useTranslation } from 'react-i18next';
 
 let ROW_HEIGHT = 43;
 
 function DiscoverSchedulesTable({ schedules, loading }) {
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
-  let { i18n } = useTranslation();
+  let { t, i18n } = useTranslation();
 
   function renderItem({ item }) {
     let selected = selectedItems.has(item.id);
