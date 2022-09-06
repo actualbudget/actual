@@ -116,7 +116,7 @@ function CloseAccount({
                   <View>
                     <P>
                       This account has a balance of{' '}
-                      <strong>${integerToCurrency(balance)}</strong>. To close
+                      <strong>{integerToCurrency(balance)}</strong>. To close
                       this account, select a different account to transfer this
                       balance to:
                     </P>
