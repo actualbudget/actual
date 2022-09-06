@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { send } from 'loot-core/src/platform/client/fetch';
 import { View, Text, AnchorLink } from 'loot-design/src/components/common';
 
 import { useServerURL } from '../../hooks/useServerURL';
