@@ -254,7 +254,6 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
 export const TransactionHeader = React.memo(
   ({ hasSelected, showAccount, showCategory, showBalance }) => {
     let dispatchSelected = useSelectedDispatch();
-
     const { t } = useTranslation();
 
     return (
@@ -535,6 +534,7 @@ export const Transaction = React.memo(function Transaction(props) {
     onCreatePayee,
     onToggleSplit
   } = props;
+  const { t } = useTranslation();
 
   let dispatchSelected = useSelectedDispatch();
 
@@ -628,8 +628,6 @@ export const Transaction = React.memo(function Transaction(props) {
 
   let valueStyle = added ? { fontWeight: 600 } : null;
   let backgroundFocus = hovered || focusedField === 'select';
-
-  const { t } = useTranslation();
 
   return (
     <Row

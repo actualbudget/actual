@@ -17,6 +17,7 @@ function Calendar({ color, onClick }) {
 
 export function MonthCountSelector({ maxMonths, onChange }) {
   let { displayMax } = useBudgetMonthCount();
+  const { t } = useTranslation();
 
   let style = { width: 15, height: 15, color: colors.n8 };
   let activeStyle = { color: colors.n5 };
@@ -37,8 +38,6 @@ export function MonthCountSelector({ maxMonths, onChange }) {
       />
     );
   }
-
-  const { t } = useTranslation();
 
   return (
     <View

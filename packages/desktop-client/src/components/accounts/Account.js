@@ -176,6 +176,7 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
 
 function ReconcileTooltip({ account, onReconcile, onClose }) {
   let balance = useSheetValue(queries.accountBalance(account));
+  const { t } = useTranslation();
 
   function onSubmit(e) {
     let input = e.target.elements[0];
@@ -183,8 +184,6 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
     onReconcile(amount == null ? balance : amount);
     onClose();
   }
-
-  const { t } = useTranslation();
 
   return (
     <Tooltip position="bottom-right" width={275} onClose={onClose}>
@@ -242,7 +241,6 @@ function AccountMenu({
   onMenuSelect
 }) {
   let [tooltip, setTooltip] = useState('default');
-
   const { t } = useTranslation();
 
   return tooltip === 'reconcile' ? (
@@ -478,6 +476,7 @@ function SelectedTransactionsButton({
 }) {
   let selectedItems = useSelectedItems();
   let history = useHistory();
+  const { t } = useTranslation();
 
   let types = useMemo(() => {
     let items = [...selectedItems];
@@ -500,8 +499,6 @@ function SelectedTransactionsButton({
   function getRealTransactions() {
     return [...selectedItems].filter(id => !isPreviewId(id));
   }
-
-  const { t } = useTranslation();
 
   return (
     <SelectedItemsButton

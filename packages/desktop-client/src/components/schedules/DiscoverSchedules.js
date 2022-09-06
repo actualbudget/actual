@@ -36,6 +36,7 @@ let ROW_HEIGHT = 43;
 function DiscoverSchedulesTable({ schedules, loading }) {
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
+  const { t } = useTranslation();
 
   function renderItem({ item }) {
     let selected = selectedItems.has(item.id);
@@ -80,7 +81,6 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       </Row>
     );
   }
-  const { t } = useTranslation();
 
   return (
     <View style={{ flex: 1 }}>

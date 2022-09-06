@@ -553,6 +553,7 @@ export default function EditRule({
   let [transactions, setTransactions] = useState([]);
   let dispatch = useDispatch();
   let scrollableEl = useRef();
+  const { t } = useTranslation();
 
   useEffect(() => {
     dispatch(initiallyLoadPayees());
@@ -683,8 +684,6 @@ export default function EditRule({
     backgroundColor: colors.n10,
     borderRadius: 4
   };
-
-  const { t } = useTranslation();
 
   return (
     <Modal
