@@ -1,0 +1,27 @@
+{
+  "general": {
+    "ordinal_one": "{{count}}st",
+    "ordinal_two": "{{count}}nd",
+    "ordinal_few": "{{count}}rd",
+    "ordinal_other": "{{count}}th"
+  },
+  "schedules": {
+    "recurring": {
+      "monthly_one": "Every month on the {{day}}",
+      "monthly_other": "Every {{count}} months on the {{day}}",
+      "monthlyPattern_one": "Every month on the {{pattern}}",
+      "monthlyPattern_other": "Every {{count}} months on the {{pattern}}",
+      "pattern": {
+        "lastDay": "last day",
+        "lastWeekday": "last {{dayName}}",
+        "lastWeekday_sameDay": "last",
+        "weekAndDay": "{{week}} {{dayName}}",
+        "weekAndDay_sameDay": "{{week}}"
+      },
+      "weekly_one": "Every week on {{day}}",
+      "weekly_other": "Every {{count}} weeks on {{day}}",
+      "yearly_one": "Every year on {{day}}",
+      "yearly_other": "Every {{count}} years on {{day}}"
+    }
+  }
+}

@@ -76,10 +76,6 @@
     "note_other": "Notes",
     "noTransaction_other": "No transactions",
     "offBudget": "Off Budget",
-    "ordinal_one": "{{count}}st",
-    "ordinal_two": "{{count}}nd",
-    "ordinal_few": "{{count}}rd",
-    "ordinal_other": "{{count}}th",
     "payee_one": "Payee",
     "payee_other": "Payees",
     "payment_one": "Payment",
@@ -147,23 +143,6 @@
     "unlinkFromSchedule": "Unlink from schedule",
     "unlinkSchedule": "Unlink Schedule",
     "upcomingDates": "Upcoming dates",
-    "recurring": {
-      "weekly_one": "Every week on {{day}}",
-      "weekly_other": "Every {{count}} weeks on {{day}}",
-      "monthly_one": "Every month on the {{day}}",
-      "monthly_other": "Every {{count}} months on the {{day}}",
-      "monthlyPattern_one": "Every month on the {{pattern}}",
-      "monthlyPattern_other": "Every {{count}} months on the {{pattern}}",
-      "yearly_one": "Every year on {{day}}",
-      "yearly_other": "Every {{count}} years on {{day}}",
-      "pattern": {
-        "lastDay": "last day",
-        "weekAndDay": "{{week}} {{dayName}}",
-        "weekAndDay_sameDay": "{{week}}",
-        "lastWeekday": "last {{dayName}}",
-        "lastWeekday_sameDay": "last"
-      }
-    },
     "view_one": "View schedule"
   },
   "status": {

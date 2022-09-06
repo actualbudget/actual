@@ -1,0 +1,24 @@
+{
+  "general": {
+    "ordinal_other": "{{count}}º"
+  },
+  "schedules": {
+    "recurring": {
+      "monthly_one": "",
+      "monthly_other": "",
+      "monthlyPattern_one": "",
+      "monthlyPattern_other": "",
+      "pattern": {
+        "lastDay": "",
+        "lastWeekday": "",
+        "lastWeekday_sameDay": "",
+        "weekAndDay": "",
+        "weekAndDay_sameDay": ""
+      },
+      "weekly_one": "",
+      "weekly_other": "",
+      "yearly_one": "",
+      "yearly_other": ""
+    }
+  }
+}

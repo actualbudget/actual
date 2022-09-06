@@ -76,7 +76,6 @@
     "note_other": "Notas",
     "noTransaction_other": "Sin transacciones",
     "offBudget": "Fuera de presupuesto",
-    "ordinal_other": "{{count}}º",
     "payee_one": "Beneficiario",
     "payee_other": "Beneficiarios",
     "payment_one": "Pago",

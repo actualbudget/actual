@@ -15153,6 +15153,8 @@ jest-snapshot@test:
     fast-check: 2.13.0
     fast-glob: ^2.2.0
     google-protobuf: ^3.12.0-rc.1
+    i18next: ^21.9.1
+    i18next-parser: ^6.5.0
     jest: ^28.1.0
     jsverify: ^0.8.4
     lru-cache: ^5.1.1

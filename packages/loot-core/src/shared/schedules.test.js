@@ -1,9 +1,17 @@
+import i18n from 'i18next';
 import MockDate from 'mockdate';
 
-import i18n from '../../../desktop-client/src/locales';
+import enUKCore from '../locales/en-GB.json';
 import { getRecurringDescription } from './schedules';
 
-i18n.changeLanguage('en');
+i18n.init({
+  lng: 'en',
+  resources: {
+    en: {
+      core: enUKCore
+    }
+  }
+});
 
 describe('recurring date description', () => {
   beforeEach(() => {

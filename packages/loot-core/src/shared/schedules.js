@@ -63,7 +63,8 @@ function formatMonthAndDay(month, i18n) {
   let dayPart = parts.find(p => p.type === 'day');
   dayPart.value = i18n.t('general.ordinal', {
     count: monthUtils.parseDate(month).getDate(),
-    ordinal: true
+    ordinal: true,
+    ns: 'core'
   });
   return parts.map(part => part.value).join('');
 }
@@ -71,9 +72,11 @@ function formatMonthAndDay(month, i18n) {
 export function getRecurringDescription(config, i18n) {
   let interval = config.interval || 1;
 
+  const t = (key, options) => i18n.t(key, { ...options, ns: 'core' });
+
   switch (config.frequency) {
     case 'weekly': {
-      return i18n.t('schedules.recurring.weekly', {
+      return t('schedules.recurring.weekly', {
         count: interval,
         day: monthUtils.format(
           config.start,
@@ -114,10 +117,10 @@ export function getRecurringDescription(config, i18n) {
         for (let pattern of patterns) {
           if (pattern.type === 'day') {
             if (pattern.value === -1) {
-              strs.push(i18n.t('schedules.recurring.pattern.lastDay'));
+              strs.push(t('schedules.recurring.pattern.lastDay'));
             } else {
               strs.push(
-                i18n.t('general.ordinal', {
+                t('general.ordinal', {
                   count: pattern.value,
                   ordinal: true
                 })
@@ -133,7 +136,7 @@ export function getRecurringDescription(config, i18n) {
             if (pattern.value === -1) {
               // Example: last Monday
               strs.push(
-                i18n.t('schedules.recurring.pattern.lastWeekday', {
+                t('schedules.recurring.pattern.lastWeekday', {
                   context,
                   dayName
                 })
@@ -141,9 +144,9 @@ export function getRecurringDescription(config, i18n) {
             } else {
               // Example: 3rd Monday
               strs.push(
-                i18n.t('schedules.recurring.pattern.weekAndDay', {
+                t('schedules.recurring.pattern.weekAndDay', {
                   context,
-                  week: i18n.t('general.ordinal', {
+                  week: t('general.ordinal', {
                     count: pattern.value,
                     ordinal: true
                   }),
@@ -154,7 +157,7 @@ export function getRecurringDescription(config, i18n) {
           }
         }
 
-        return i18n.t('schedules.recurring.monthlyPattern', {
+        return t('schedules.recurring.monthlyPattern', {
           context,
           count: interval,
           day: prettyDayName(patterns[0].type, i18n.resolvedLanguage),
@@ -164,9 +167,9 @@ export function getRecurringDescription(config, i18n) {
           }).format(strs)
         });
       } else {
-        return i18n.t('schedules.recurring.monthly', {
+        return t('schedules.recurring.monthly', {
           count: interval,
-          day: i18n.t('general.ordinal', {
+          day: t('general.ordinal', {
             count: monthUtils.parseDate(config.start).getDate(),
             ordinal: true
           })
@@ -174,7 +177,7 @@ export function getRecurringDescription(config, i18n) {
       }
     }
     case 'yearly': {
-      return i18n.t(
+      return t(
         'schedules.recurring.yearly',
         { count: interval, day: formatMonthAndDay(config.start, i18n) },
         i18n.resolvedLanguage
