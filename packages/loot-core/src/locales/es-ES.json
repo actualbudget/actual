@@ -4,21 +4,21 @@
   },
   "schedules": {
     "recurring": {
-      "monthly_one": "",
-      "monthly_other": "",
-      "monthlyPattern_one": "",
-      "monthlyPattern_other": "",
+      "monthly_one": "Cada {{day}} día del mes",
+      "monthly_other": "Cada {{count}} meses el {{day}} día",
+      "monthlyPattern_one": "Cada mes {{pattern}}",
+      "monthlyPattern_other": "Cada {{count}} meses {{pattern}}",
       "pattern": {
-        "lastDay": "",
-        "lastWeekday": "",
-        "lastWeekday_sameDay": "",
-        "weekAndDay": "",
-        "weekAndDay_sameDay": ""
+        "lastDay": "el último día",
+        "lastWeekday": "el último {{dayName}}",
+        "lastWeekday_sameDay": "el último",
+        "weekAndDay": "{{week}} {{dayName}}",
+        "weekAndDay_sameDay": "{{week}}"
       },
-      "weekly_one": "",
-      "weekly_other": "",
-      "yearly_one": "",
-      "yearly_other": ""
+      "weekly_one": "Cada semana {{day}}",
+      "weekly_other": "Cada {{count}} semanas el {{day}}",
+      "yearly_one": "Cada año el {{day}}",
+      "yearly_other": "Cada año {{count}} el {{day}}"
     }
   }
 }
