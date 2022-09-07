@@ -139,6 +139,8 @@ export function getRecurringDescription(config, i18n) {
 
             if (pattern.value === -1) {
               // Example: last Monday
+              // t('schedules.recurring.pattern.lastWeekday')
+              // t('schedules.recurring.pattern.lastWeekday_sameDay')
               strs.push(
                 i18n.t('schedules.recurring.pattern.lastWeekday', {
                   context,
@@ -148,6 +150,8 @@ export function getRecurringDescription(config, i18n) {
               );
             } else {
               // Example: 3rd Monday
+              // t('schedules.recurring.pattern.weekAndDay')
+              // t('schedules.recurring.pattern.weekAndDay_sameDay')
               strs.push(
                 i18n.t('schedules.recurring.pattern.weekAndDay', {
                   context,
