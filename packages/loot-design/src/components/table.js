@@ -988,7 +988,14 @@ export const Table = React.forwardRef(
     if (loading) {
       return (
         <View
-          style={[{ flex: 1, justifyContent: 'center', alignItems: 'center' }]}
+          style={[
+            {
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor
+            }
+          ]}
         >
           <AnimatedLoading width={25} color={colors.n1} />
         </View>
