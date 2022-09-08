@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { RectButton } from 'react-native-gesture-handler';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router';
+import { useLocation, useHistory } from 'react-router';
 import { withRouter } from 'react-router-dom';
 
 import { css } from 'glamor';
@@ -13,8 +13,7 @@ import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 
 import { styles, colors } from '../style';
 import Add from '../svg/v1/Add';
-import CheveronDown from '../svg/v1/CheveronDown';
-import CheveronUp from '../svg/v1/CheveronUp';
+import ChevronRight from '../svg/v1/CheveronRight';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
 import Reports from '../svg/v1/Reports';
@@ -48,8 +47,18 @@ export function Item({
   to,
   exact,
   onClick,
-  button
+  button,
+  forceHover = false,
+  forceActive = false
 }) {
+  const hoverStyle = {
+    backgroundColor: colors.n2
+  };
+  const activeStyle = {
+    borderLeft: '4px solid ' + colors.p8,
+    paddingLeft: 19 + indent - 4,
+    color: colors.p8
+  };
   const linkStyle = [
     {
       ...styles.mediumText,
@@ -58,9 +67,11 @@ export function Item({
       paddingLeft: 19 + indent,
       paddingRight: 10,
       textDecoration: 'none',
-      color: colors.n9
+      color: colors.n9,
+      ...(forceHover ? hoverStyle : {}),
+      ...(forceActive ? activeStyle : {})
     },
-    { ':hover': { backgroundColor: colors.n2 } }
+    { ':hover': hoverStyle }
   ];
 
   const content = (
@@ -89,11 +100,7 @@ export function Item({
           style={linkStyle}
           to={to}
           exact={exact}
-          activeStyle={{
-            borderLeft: '4px solid ' + colors.p8,
-            paddingLeft: 19 + indent - 4,
-            color: colors.p8
-          }}
+          activeStyle={activeStyle}
         >
           {content}
         </AnchorLink>
@@ -378,12 +385,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
     setMenuOpen(false);
 
     switch (type) {
-      case 'find-schedules':
-        history.push('/schedule/discover', { locationPtr: history.location });
-        break;
-      case 'repair-splits':
-        history.push('/tools/fix-splits', { locationPtr: history.location });
-        break;
       case 'settings':
         history.push('/settings');
         break;
@@ -395,9 +396,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
   }
 
   let items = [
-    { name: 'find-schedules', text: 'Find schedules' },
-    { name: 'repair-splits', text: 'Repair split transactions' },
-    Menu.line,
     { name: 'settings', text: 'Settings' },
     { name: 'close', text: 'Close File' }
   ];
@@ -433,75 +431,67 @@ const MenuButton = withRouter(function MenuButton({ history }) {
 function Tools() {
   let [isOpen, setOpen] = useState(false);
   let location = useLocation();
+  let history = useHistory();
   let onToggle = useCallback(() => setOpen(open => !open), []);
-  let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
 
-  useEffect(() => {
-    if (
-      ['/schedules', '/payees', '/rules'].some(route =>
-        location.pathname.startsWith(route)
-      )
-    ) {
-      setOpen(true);
-    }
-  }, [location.pathname]);
+  let items = [
+    { name: 'payees', text: 'Payees' },
+    { name: 'rules', text: 'Rules' },
+    { name: 'find-schedules', text: 'Find schedules' },
+    { name: 'repair-splits', text: 'Repair split transactions' }
+  ];
+
+  let onMenuSelect = useCallback(
+    type => {
+      switch (type) {
+        case 'payees':
+          history.push('/payees');
+          break;
+        case 'rules':
+          history.push('/rules');
+          break;
+        case 'find-schedules':
+          history.push('/schedule/discover', { locationPtr: history.location });
+          break;
+        case 'repair-splits':
+          history.push('/tools/fix-splits', { locationPtr: history.location });
+          break;
+        default:
+      }
+      setOpen(false);
+    },
+    [history]
+  );
+
   return (
-    <View
-      style={{
-        borderLeft: isOpen ? '4px solid ' + colors.n9 : '',
-        flexShrink: 0
-      }}
-    >
+    <View style={{ flexShrink: 0 }}>
       <Item
-        title="Tools"
+        title="More Tools"
         icon={<Wrench width={15} height={15} style={{ color: 'inherit' }} />}
         exact={true}
         onClick={onToggle}
-        indent={isOpen ? -4 : 0}
+        style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
+        forceHover={isOpen}
+        forceActive={['/payees', '/rules', '/tools'].some(route =>
+          location.pathname.startsWith(route)
+        )}
         button={
-          <ExpandOrCollapseIcon
+          <ChevronRight
             width={12}
             height={12}
-            style={{ color: colors.n6 }}
+            style={{ color: colors.n6, marginRight: 6 }}
           />
         }
       />
-
       {isOpen && (
-        <>
-          <Item
-            title="Schedules"
-            icon={
-              <CalendarIcon
-                width={15}
-                height={15}
-                style={{ color: 'inherit' }}
-              />
-            }
-            to="/schedules"
-            indent={12}
-          />
-          <Item
-            title="Payees"
-            icon={
-              <StoreFrontIcon
-                width={15}
-                height={15}
-                style={{ color: 'inherit' }}
-              />
-            }
-            to="/payees"
-            indent={12}
-          />
-          <Item
-            title="Rules"
-            icon={
-              <TuningIcon width={15} height={15} style={{ color: 'inherit' }} />
-            }
-            to="/rules"
-            indent={12}
-          />
-        </>
+        <Tooltip
+          position="right"
+          offset={-8}
+          style={{ padding: 0 }}
+          onClose={onToggle}
+        >
+          <Menu onMenuSelect={onMenuSelect} items={items} />
+        </Tooltip>
       )}
     </View>
   );
@@ -611,6 +601,14 @@ export function Sidebar({
           title="Reports"
           icon={<Reports width={15} height={15} style={{ color: 'inherit' }} />}
           to="/reports"
+        />
+
+        <Item
+          title="Schedules"
+          icon={
+            <CalendarIcon width={15} height={15} style={{ color: 'inherit' }} />
+          }
+          to="/schedules"
         />
 
         <Tools />
