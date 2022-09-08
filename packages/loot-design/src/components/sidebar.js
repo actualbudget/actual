@@ -268,7 +268,7 @@ export function Accounts({
     return null;
   };
 
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <Item
