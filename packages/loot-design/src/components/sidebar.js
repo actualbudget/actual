@@ -451,7 +451,7 @@ function Tools() {
           history.push('/rules');
           break;
         case 'find-schedules':
-          history.push('/schedule/discover', { locationPtr: history.location });
+          history.push('/schedule/discover');
           break;
         case 'repair-splits':
           history.push('/tools/fix-splits', { locationPtr: history.location });
@@ -472,9 +472,12 @@ function Tools() {
         onClick={onToggle}
         style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
         forceHover={isOpen}
-        forceActive={['/payees', '/rules', '/tools'].some(route =>
-          location.pathname.startsWith(route)
-        )}
+        forceActive={[
+          '/payees',
+          '/rules',
+          '/tools',
+          '/schedule/discover'
+        ].some(route => location.pathname.startsWith(route))}
         button={
           <ChevronRight
             width={12}
