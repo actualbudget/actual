@@ -271,7 +271,10 @@ export default React.memo(function BudgetSummary({ month }) {
     setMenuOpen(false);
   }
 
-  let prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+  let prevMonthName = monthUtils.nonLocalizedFormat(
+    monthUtils.prevMonth(month),
+    'MMM'
+  );
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
 
@@ -337,7 +340,7 @@ export default React.memo(function BudgetSummary({ month }) {
               currentMonth === month && { textDecoration: 'underline' }
             ])}
           >
-            {monthUtils.format(month, 'MMMM')}
+            {monthUtils.nonLocalizedFormat(month, 'MMMM')}
           </div>
 
           <View

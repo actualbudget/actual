@@ -1,4 +1,5 @@
 import React, { useEffect, useReducer, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
@@ -11,8 +12,6 @@ import SubtractIcon from 'loot-design/src/svg/Subtract';
 
 import { Button, Select, Input, Tooltip, View, Text, Stack } from './common';
 import DateSelect from './DateSelect';
-
-const DATE_FORMAT = 'yyyy-MM-dd';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -62,7 +61,7 @@ function unparseConfig(parsed) {
 
 function createMonthlyRecurrence(startDate) {
   return {
-    value: parseInt(monthUtils.format(startDate, 'd')),
+    value: parseInt(monthUtils.nonLocalizedFormat(startDate, 'd')),
     type: 'day'
   };
 }
@@ -152,8 +151,8 @@ function SchedulePreview({ previewDates }) {
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
           {previewDates.map(d => (
             <View>
-              <Text>{monthUtils.format(d, dateFormat)}</Text>
-              <Text>{monthUtils.format(d, 'EEEE')}</Text>
+              <Text>{monthUtils.nonLocalizedFormat(d, dateFormat)}</Text>
+              <Text>{monthUtils.nonLocalizedFormat(d, 'EEEE')}</Text>
             </View>
           ))}
         </Stack>
@@ -370,6 +369,7 @@ export default function RecurringSchedulePicker({
   onChange
 }) {
   let { isOpen, close, getOpenEvents } = useTooltip();
+  let { i18n } = useTranslation();
 
   function onSave(config) {
     onChange(config);
@@ -379,7 +379,7 @@ export default function RecurringSchedulePicker({
   return (
     <View>
       <Button {...getOpenEvents()} style={[{ textAlign: 'left' }, buttonStyle]}>
-        {value ? getRecurringDescription(value) : 'No recurring date'}
+        {value ? getRecurringDescription(value, i18n) : 'No recurring date'}
       </Button>
       {isOpen && (
         <RecurringScheduleTooltip

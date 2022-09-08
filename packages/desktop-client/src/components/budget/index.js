@@ -327,7 +327,7 @@ class Budget extends React.PureComponent {
       pathname: '/accounts',
       state: {
         goBack: true,
-        filterName: `${categoryName} (${monthUtils.format(
+        filterName: `${categoryName} (${monthUtils.nonLocalizedFormat(
           month,
           'MMMM yyyy'
         )})`,

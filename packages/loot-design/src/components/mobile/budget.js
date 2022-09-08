@@ -1092,7 +1092,7 @@ export function BudgetHeader({
           }
         ]}
       >
-        {monthUtils.format(currentMonth, "MMMM ''yy")}
+        {monthUtils.nonLocalizedFormat(currentMonth, "MMMM ''yy")}
       </Text>
       {editMode ? (
         <Button

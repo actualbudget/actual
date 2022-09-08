@@ -53,7 +53,7 @@ function CashFlow() {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy')
+          pretty: monthUtils.nonLocalizedFormat(month, 'MMMM, yyyy')
         }))
         .reverse();
 

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import * as d from 'date-fns';
 
 import * as actions from 'loot-core/src/client/actions';
-import { format as formatDate_ } from 'loot-core/src/shared/months';
+import { nonLocalizedFormat as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
   amountToInteger,

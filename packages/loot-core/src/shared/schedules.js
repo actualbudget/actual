@@ -42,39 +42,49 @@ export function getHasTransactionsQuery(schedules) {
     .select(['schedule', 'date']);
 }
 
-function makeNumberSuffix(num) {
-  // Slight abuse of date-fns to turn a number like "1" into the full
-  // form "1st" but formatting a date with that number
-  return monthUtils.format(new Date(2020, 0, num, 12), 'do');
-}
-
-function prettyDayName(day) {
+function prettyDayName(day, locale) {
   let days = {
-    SU: 'Sunday',
-    MO: 'Monday',
-    TU: 'Tuesday',
-    WE: 'Wednesday',
-    TH: 'Thursday',
-    FR: 'Friday',
-    SA: 'Saturday'
+    SU: new Date('2020-01-05T12:00:00.000Z'),
+    MO: new Date('2020-01-06T12:00:00.000Z'),
+    TU: new Date('2020-01-07T12:00:00.000Z'),
+    WE: new Date('2020-01-08T12:00:00.000Z'),
+    TH: new Date('2020-01-09T12:00:00.000Z'),
+    FR: new Date('2020-01-10T12:00:00.000Z'),
+    SA: new Date('2020-01-11T12:00:00.000Z')
   };
-  return days[day];
+  return Intl.DateTimeFormat(locale, { weekday: 'long' }).format(days[day]);
 }
 
-export function getRecurringDescription(config) {
+function formatMonthAndDay(month, i18n) {
+  let parts = Intl.DateTimeFormat(i18n.resolvedLanguage, {
+    month: 'short',
+    day: 'numeric'
+  }).formatToParts(monthUtils.parseDate(month));
+  let dayPart = parts.find(p => p.type === 'day');
+  dayPart.value = i18n.t('general.ordinal', {
+    count: monthUtils.parseDate(month).getDate(),
+    ordinal: true,
+    ns: 'core'
+  });
+  return parts.map(part => part.value).join('');
+}
+
+export function getRecurringDescription(config, i18n) {
   let interval = config.interval || 1;
 
   switch (config.frequency) {
     case 'weekly': {
-      let desc = 'Every ';
-      desc += interval !== 1 ? `${interval} weeks` : 'week';
-      desc += ' on ' + monthUtils.format(config.start, 'EEEE');
-      return desc;
+      return i18n.t('schedules.recurring.weekly', {
+        count: interval,
+        day: monthUtils.format(
+          config.start,
+          { weekday: 'long' },
+          i18n.resolvedLanguage
+        ),
+        ns: 'core'
+      });
     }
     case 'monthly': {
-      let desc = 'Every ';
-      desc += interval !== 1 ? `${interval} months` : 'month';
-
       if (config.patterns && config.patterns.length > 0) {
         // Sort the days ascending. We filter out -1 because that
         // represents "last days" and should always be last, but this
@@ -95,56 +105,101 @@ export function getRecurringDescription(config) {
         // Add on all -1 values to the end
         patterns = patterns.concat(config.patterns.filter(p => p.value === -1));
 
-        desc += ' on the ';
-
         let strs = [];
 
         let uniqueDays = new Set(patterns.map(p => p.type));
-        let isSameDay = uniqueDays.length === 1 && !uniqueDays.has('day');
+        let context =
+          uniqueDays.length === 1 && !uniqueDays.has('day')
+            ? 'sameDay'
+            : undefined;
 
         for (let pattern of patterns) {
           if (pattern.type === 'day') {
             if (pattern.value === -1) {
-              strs.push('last day');
+              strs.push(
+                i18n.t('schedules.recurring.pattern.lastDay', {
+                  ns: 'core'
+                })
+              );
             } else {
-              // Example: 15th day
-              strs.push(makeNumberSuffix(pattern.value));
+              strs.push(
+                i18n.t('general.ordinal', {
+                  count: pattern.value,
+                  ordinal: true,
+                  ns: 'core'
+                })
+              );
             }
           } else {
-            let dayName = isSameDay ? '' : ' ' + prettyDayName(pattern.type);
+            let dayName = prettyDayName(
+              pattern.type,
+              i18n.resolvedLanguage,
+              i18n.resolvedLanguage
+            );
 
             if (pattern.value === -1) {
               // Example: last Monday
-              strs.push('last' + dayName);
+              // t('schedules.recurring.pattern.lastWeekday')
+              // t('schedules.recurring.pattern.lastWeekday_sameDay')
+              strs.push(
+                i18n.t('schedules.recurring.pattern.lastWeekday', {
+                  context,
+                  dayName,
+                  ns: 'core'
+                })
+              );
             } else {
               // Example: 3rd Monday
-              strs.push(makeNumberSuffix(pattern.value) + dayName);
+              // t('schedules.recurring.pattern.weekAndDay')
+              // t('schedules.recurring.pattern.weekAndDay_sameDay')
+              strs.push(
+                i18n.t('schedules.recurring.pattern.weekAndDay', {
+                  context,
+                  week: i18n.t('general.ordinal', {
+                    count: pattern.value,
+                    ordinal: true,
+                    ns: 'core'
+                  }),
+                  dayName,
+                  ns: 'core'
+                })
+              );
             }
           }
         }
 
-        if (strs.length > 2) {
-          desc += strs.slice(0, strs.length - 1).join(', ');
-          desc += ', and ';
-          desc += strs[strs.length - 1];
-        } else {
-          desc += strs.join(' and ');
-        }
-
-        if (isSameDay) {
-          desc += ' ' + prettyDayName(patterns[0].type);
-        }
+        return i18n.t('schedules.recurring.monthlyPattern', {
+          context,
+          count: interval,
+          day: prettyDayName(patterns[0].type, i18n.resolvedLanguage),
+          pattern: new Intl.ListFormat(i18n.resolvedLanguage, {
+            style: 'long',
+            type: 'conjunction'
+          }).format(strs),
+          ns: 'core'
+        });
       } else {
-        desc += ' on the ' + monthUtils.format(config.start, 'do');
+        return i18n.t('schedules.recurring.monthly', {
+          count: interval,
+          day: i18n.t('general.ordinal', {
+            count: monthUtils.parseDate(config.start).getDate(),
+            ordinal: true,
+            ns: 'core'
+          }),
+          ns: 'core'
+        });
       }
-
-      return desc;
     }
     case 'yearly': {
-      let desc = 'Every ';
-      desc += interval !== 1 ? `${interval} years` : 'year';
-      desc += ' on ' + monthUtils.format(config.start, 'LLL do');
-      return desc;
+      return i18n.t(
+        'schedules.recurring.yearly',
+        {
+          count: interval,
+          day: formatMonthAndDay(config.start, i18n),
+          ns: 'core'
+        },
+        i18n.resolvedLanguage
+      );
     }
     default:
       return 'Recurring error';

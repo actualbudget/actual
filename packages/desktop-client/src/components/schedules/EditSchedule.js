@@ -549,7 +549,9 @@ export default function ScheduleDetails() {
                 style={{ marginTop: 10, color: colors.n4 }}
               >
                 {state.upcomingDates.map(date => (
-                  <View>{monthUtils.format(date, `${dateFormat} EEEE`)}</View>
+                  <View>
+                    {monthUtils.nonLocalizedFormat(date, `${dateFormat} EEEE`)}
+                  </View>
                 ))}
               </Stack>
             </View>

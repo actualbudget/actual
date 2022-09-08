@@ -36,12 +36,12 @@ let ROW_HEIGHT = 43;
 function DiscoverSchedulesTable({ schedules, loading }) {
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
-  const { t } = useTranslation();
+  let { t, i18n } = useTranslation();
 
   function renderItem({ item }) {
     let selected = selectedItems.has(item.id);
     let amountOp = item._conditions.find(c => c.field === 'amount').op;
-    let recurDescription = getRecurringDescription(item.date);
+    let recurDescription = getRecurringDescription(item.date, i18n);
 
     return (
       <Row
