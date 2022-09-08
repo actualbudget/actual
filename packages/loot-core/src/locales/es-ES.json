@@ -5,10 +5,10 @@
   "schedules": {
     "recurring": {
       "monthly_one": "Cada {{day}} día del mes",
-      "monthly_many": "Cada {{count}} de meses el {{day}} día",
+      "monthly_many": "Cada {{count}} meses el {{day}} día",
       "monthly_other": "Cada {{count}} meses el {{day}} día",
       "monthlyPattern_one": "Cada mes {{pattern}}",
-      "monthlyPattern_many": "Cada {{count}} de meses {{pattern}}",
+      "monthlyPattern_many": "Cada {{count}} meses {{pattern}}",
       "monthlyPattern_other": "Cada {{count}} meses {{pattern}}",
       "pattern": {
         "lastDay": "el último día",
@@ -18,10 +18,10 @@
         "weekAndDay_sameDay": "{{week}}"
       },
       "weekly_one": "Cada semana {{day}}",
-      "weekly_many": "Cada {{count}} de semanas el {{day}}",
+      "weekly_many": "Cada {{count}} semanas el {{day}}",
       "weekly_other": "Cada {{count}} semanas el {{day}}",
       "yearly_one": "Cada año el {{day}}",
-      "yearly_many": "Cada {{count}} de años el {{day}}",
+      "yearly_many": "Cada {{count}} años el {{day}}",
       "yearly_other": "Cada {{count}} años el {{day}}"
     }
   }
