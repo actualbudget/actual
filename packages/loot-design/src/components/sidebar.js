@@ -17,8 +17,6 @@ import ChevronRight from '../svg/v1/CheveronRight';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
 import Reports from '../svg/v1/Reports';
-import StoreFrontIcon from '../svg/v1/StoreFront';
-import TuningIcon from '../svg/v1/Tuning';
 import Wallet from '../svg/v1/Wallet';
 import Wrench from '../svg/v1/Wrench';
 import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
@@ -38,7 +36,7 @@ import CellValue from './spreadsheet/CellValue';
 
 export const SIDEBAR_WIDTH = 240;
 
-export function Item({
+function Item({
   children,
   icon,
   title,
@@ -227,7 +225,7 @@ function Account({
   );
 }
 
-export function Accounts({
+function Accounts({
   accounts,
   failedAccounts,
   updatedAccounts,
