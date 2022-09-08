@@ -1,2 +1,5 @@
 build
 lib
+
+# Ignore auto generated dictionaries with check-i18n
+src/locales/*_old.json

@@ -1,0 +1,32 @@
+{
+  "general": {
+    "account_other": "Accounts",
+    "budget": "Budget",
+    "delete": "Delete",
+    "forBudget": "For budget",
+    "merge": "Merge",
+    "offBudget": "Off budget",
+    "payee_other": "Payees",
+    "report_other": "Reports",
+    "schedule_other": "Schedules"
+  },
+  "payees": {
+    "filterPayees": "Filter payees...",
+    "noPayees": "No payees",
+    "noPayeesSelected": "No payees selected",
+    "payeesSelected_one": "{{count}} payee",
+    "payeesSelected_other": "{{count}} payees",
+    "selectedPayees": "{{names}}",
+    "selectedPayees_other": "{{names}} and more"
+  },
+  "sidebar": {
+    "closeFile": "Close file",
+    "findSchedules": "Find schedules",
+    "hideClosedAccounts": "Closed accounts",
+    "managePayees": "Manage Payees",
+    "manageRules": "Manage rules",
+    "repairSplitTransactions": "Repair split transactions",
+    "settings": "Settings",
+    "showClosedAccounts": "Closed accounts..."
+  }
+}

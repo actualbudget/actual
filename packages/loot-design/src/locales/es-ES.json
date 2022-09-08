@@ -1,0 +1,33 @@
+{
+  "general": {
+    "account_other": "Cuentas",
+    "budget": "Presupuesto",
+    "delete": "Borrar",
+    "forBudget": "Presupuestadas",
+    "merge": "Combinar",
+    "offBudget": "Fuera de presupuesto",
+    "payee_other": "Beneficiarios",
+    "report_other": "Reportes",
+    "schedule_other": "Agendas"
+  },
+  "payees": {
+    "filterPayees": "Filtrar beneficiarios...",
+    "noPayees": "No hay beneficiarios",
+    "noPayeesSelected": "No hay beneficiarios seleccionados",
+    "payeesSelected_one": "{{count}} beneficiario",
+    "payeesSelected_many": "{{count}} beneficiarios",
+    "payeesSelected_other": "{{count}} beneficiarios",
+    "selectedPayees": "{{names}}",
+    "selectedPayees_other": "{{names}} y más"
+  },
+  "sidebar": {
+    "closeFile": "Cerrar archivo",
+    "findSchedules": "Encontrar agendas",
+    "hideClosedAccounts": "Cuentas cerradas",
+    "managePayees": "Gestionar beneficiarios",
+    "manageRules": "Gestionar reglas",
+    "repairSplitTransactions": "Reparar transacciones divididas",
+    "settings": "Configuraciones",
+    "showClosedAccounts": "Cuentas cerradas..."
+  }
+}

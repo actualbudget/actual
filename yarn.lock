@@ -15207,6 +15207,8 @@ jest-snapshot@test:
     formik: ^0.11.10
     glamor: ^2.20.40
     hotkeys-js: 3.8.2
+    i18next: ^21.9.1
+    i18next-parser: ^6.5.0
     jest: ^28.1.0
     jest-environment-jsdom: ^28.1.0
     memoize-one: ^4.0.0

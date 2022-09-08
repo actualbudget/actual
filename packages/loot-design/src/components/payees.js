@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useImperativeHandle
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Component from '@reactions/component';
 import memoizeOne from 'memoize-one';
@@ -277,6 +278,13 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
     id => payeesById[id] == null || payeesById[id].transfer_acct
   );
 
+  const selectedPayeesNames = [...selectedPayees]
+    .slice(0, 4)
+    .map(id => payeesById[id].name)
+    .join(', ');
+
+  const { t } = useTranslation();
+
   return (
     <Tooltip
       position="bottom"
@@ -306,24 +314,29 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
               color: colors.n7
             }}
           >
-            {[...selectedPayees]
-              .slice(0, 4)
-              .map(id => payeesById[id].name)
-              .join(', ') + (selectedPayees.size > 4 ? ', and more' : '')}
+            {selectedPayees.size <= 4
+              ? t('payees.selectedPayees', {
+                  ns: 'design',
+                  names: selectedPayeesNames
+                })
+              : t('payees.selectedPayees_other', {
+                  ns: 'design',
+                  names: selectedPayeesNames
+                })}
           </View>
         }
         items={[
           {
             icon: Delete,
             name: 'delete',
-            text: 'Delete',
+            text: t('general.delete', { ns: 'design' }),
             disabled: isDisabled
           },
           {
             icon: Merge,
             iconSize: 9,
             name: 'merge',
-            text: 'Merge',
+            text: t('general.merge', { ns: 'design' }),
             disabled: isDisabled || selectedPayees.size < 2
           },
           Menu.line
@@ -469,9 +482,11 @@ export const ManagePayees = React.forwardRef(
 
     let payeesById = getPayeesById(payees);
 
+    const { t } = useTranslation();
+
     return (
       <Modal
-        title="Payees"
+        title={t('general.payee_other', { ns: 'design' })}
         padding={0}
         {...modalProps}
         style={[modalProps.style, { flex: 'inherit', maxWidth: '90%' }]}
@@ -500,10 +515,11 @@ export const ManagePayees = React.forwardRef(
                     onClick={() => setState({ menuOpen: true })}
                   >
                     {buttonsDisabled
-                      ? 'No payees selected'
-                      : selected.items.size +
-                        ' ' +
-                        plural(selected.items.size, 'payee', 'payees')}
+                      ? t('payees.noPayeesSelected', { ns: 'design' })
+                      : t('payees.payeesSelected', {
+                          ns: 'design',
+                          count: selected.items.size
+                        })}
                     <ExpandArrow
                       width={8}
                       height={8}
@@ -524,7 +540,7 @@ export const ManagePayees = React.forwardRef(
             </Component>
             <View style={{ flex: 1 }} />
             <Input
-              placeholder="Filter payees..."
+              placeholder={t('payees.filterPayees', { ns: 'design' })}
               value={filter}
               onChange={e => {
                 applyFilter(e.target.value);
@@ -554,7 +570,10 @@ export const ManagePayees = React.forwardRef(
             >
               <PayeeTableHeader />
               {filteredPayees.length === 0 ? (
-                <EmptyMessage text="No payees" style={{ marginTop: 15 }} />
+                <EmptyMessage
+                  text={t('payees.noPayees', { ns: 'design' })}
+                  style={{ marginTop: 15 }}
+                />
               ) : (
                 <PayeeTable
                   ref={table}

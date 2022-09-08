@@ -4,6 +4,8 @@ import i18n from 'i18next';
 
 import enUKCore from 'loot-core/src/locales/en-GB.json';
 import esESCore from 'loot-core/src/locales/es-ES.json';
+import enUKDesign from 'loot-design/src/locales/en-GB.json';
+import esESDesign from 'loot-design/src/locales/es-ES.json';
 
 import enUK from './en-GB.json';
 import esES from './es-ES.json';
@@ -11,10 +13,12 @@ import esES from './es-ES.json';
 const resources = {
   en: {
     web: enUK,
+    design: enUKDesign,
     core: enUKCore
   },
   es: {
     web: esES,
+    design: esESDesign,
     core: esESCore
   }
 };

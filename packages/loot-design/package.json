@@ -17,6 +17,8 @@
     "fast-glob": "^2.2.2",
     "formik": "^0.11.10",
     "glamor": "^2.20.40",
+    "i18next": "^21.9.1",
+    "i18next-parser": "^6.5.0",
     "jest": "^28.1.0",
     "jest-environment-jsdom": "^28.1.0",
     "memoize-one": "^4.0.0",
@@ -51,7 +53,8 @@
     "test": "npm-run-all -cp 'test:*'",
     "test:web": "jest -c jest.config.js",
     "test:react-native": "jest -c jest.rn.config.js",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "check-i18n": "i18next"
   },
   "homepage": "./",
   "manifest": "manifest.json",

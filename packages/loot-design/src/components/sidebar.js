@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
@@ -39,10 +40,9 @@ export function Item({
   style,
   to,
   exact,
-  onButtonPress
+  onButtonPress,
+  showButton = false
 }) {
-  const showButton = title === 'Accounts';
-
   return (
     <View style={style}>
       <AnchorLink
@@ -268,19 +268,22 @@ export function Accounts({
     return null;
   };
 
+  const { t, i18n } = useTranslation();
+
   return (
     <Item
-      title="Accounts"
+      title={t('general.account_other', { ns: 'design' })}
       to={to}
       icon={icon}
       exact={true}
       style={{ marginBottom: 5, flex: 1 }}
       onButtonPress={onAddAccount}
+      showButton={true}
     >
       <View style={{ overflow: 'auto', marginTop: -5 }}>
         {budgetedAccounts.length > 0 && (
           <Account
-            name="For budget"
+            name={t('general.forBudget', { ns: 'design' })}
             to={budgetedAccountPath}
             query={getOnBudgetBalance()}
             style={{ marginTop: 15, color: colors.n6 }}
@@ -305,7 +308,7 @@ export function Accounts({
 
         {offbudgetAccounts.length > 0 && (
           <Account
-            name="Off budget"
+            name={t('general.offBudget', { ns: 'design' })}
             to={offBudgetAccountPath}
             query={getOffBudgetBalance()}
             style={{ color: colors.n6 }}
@@ -343,7 +346,9 @@ export function Accounts({
             ]}
             onClick={onToggleClosedAccounts}
           >
-            {'Closed Accounts' + (showClosedAccounts ? '' : '...')}
+            {showClosedAccounts
+              ? t('sidebar.hideClosedAccounts', { ns: 'design' })
+              : t('sidebar.showClosedAccounts', { ns: 'design' })}
           </View>
         )}
 
@@ -404,14 +409,22 @@ const MenuButton = withRouter(function MenuButton({ history }) {
     }
   }
 
+  const { t } = useTranslation();
+
   let items = [
-    { name: 'open-payees', text: 'Manage Payees' },
-    { name: 'open-rules', text: 'Manage Rules' },
-    { name: 'find-schedules', text: 'Find schedules' },
-    { name: 'repair-splits', text: 'Repair split transactions' },
+    { name: 'open-payees', text: t('sidebar.managePayees', { ns: 'design' }) },
+    { name: 'open-rules', text: t('sidebar.manageRules', { ns: 'design' }) },
+    {
+      name: 'find-schedules',
+      text: t('sidebar.findSchedules', { ns: 'design' })
+    },
+    {
+      name: 'repair-splits',
+      text: t('sidebar.repairSplitTransactions', { ns: 'design' })
+    },
     Menu.line,
-    { name: 'settings', text: 'Settings' },
-    { name: 'close', text: 'Close File' }
+    { name: 'settings', text: t('sidebar.settings', { ns: 'design' }) },
+    { name: 'close', text: t('sidebar.closeFile', { ns: 'design' }) }
   ];
 
   return (
@@ -459,6 +472,8 @@ export function Sidebar({
   onReorder
 }) {
   let hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
+
+  const { t } = useTranslation();
 
   return (
     <View
@@ -537,17 +552,17 @@ export function Sidebar({
         {Platform.isBrowser && <MenuButton />}
       </View>
       <Item
-        title="Budget"
+        title={t('general.budget', { ns: 'design' })}
         icon={<Wallet width={15} height={15} style={{ color: 'inherit' }} />}
         to="/budget"
       />
       <Item
-        title="Reports"
+        title={t('general.report_other', { ns: 'design' })}
         icon={<Reports width={15} height={15} style={{ color: 'inherit' }} />}
         to="/reports"
       />
       <Item
-        title="Schedules"
+        title={t('general.schedule_other', { ns: 'design' })}
         icon={
           <CalendarIcon width={15} height={15} style={{ color: 'inherit' }} />
         }
