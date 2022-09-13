@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Button,
-  ButtonWithLoading
-} from 'loot-design/src/components/common';
+
+import { View, ButtonWithLoading } from 'loot-design/src/components/common';
+
 import { Input } from './common';
 
 export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {

@@ -2,16 +2,23 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 function _authorize(pushModal, upgradingAccountId, { onSuccess, onClose }) {
   pushModal('nordigen-external-msg', {
-    onMoveExternal: async ({institutionId}) => {
+    onMoveExternal: async ({ institutionId }) => {
       const accessValidForDays = 30;
-      const resp = await send('create-web-token', { upgradingAccountId, institutionId, accessValidForDays });
+      const resp = await send('create-web-token', {
+        upgradingAccountId,
+        institutionId,
+        accessValidForDays
+      });
 
-      console.log({resp});
+      console.log({ resp });
 
-      const { link, requisitionId } = resp
+      const { link, requisitionId } = resp;
       window.Actual.openURLInBrowser(link);
 
-      let { error, data } = await send('poll-web-token', { upgradingAccountId, requisitionId });
+      let { error, data } = await send('poll-web-token', {
+        upgradingAccountId,
+        requisitionId
+      });
 
       return { error, data };
     },

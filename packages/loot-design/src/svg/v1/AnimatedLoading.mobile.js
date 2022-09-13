@@ -1,6 +1,7 @@
 import React from 'react';
-import Loading from './Loading';
 import { Animated, Easing } from 'react-native';
+
+import Loading from './Loading';
 
 class AnimatedLoading extends React.Component {
   constructor() {

@@ -1,12 +1,15 @@
 import React from 'react';
+
 import { render, fireEvent } from '@testing-library/react';
-import { MobileScreen } from '../../guide/components';
-import { categories, categoryGroups } from './budget.usage';
-import { BudgetTable, BudgetAccessoryView } from './budget';
-import InputAccessoryView from './InputAccessoryView';
-import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
-import * as monthUtils from 'loot-core/src/shared/months';
+
 import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
+import * as monthUtils from 'loot-core/src/shared/months';
+
+import { MobileScreen } from '../../guide/components';
+import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
+import { BudgetTable, BudgetAccessoryView } from './budget';
+import { categories, categoryGroups } from './budget.usage';
+import InputAccessoryView from './InputAccessoryView';
 
 function makeLoadedSpreadsheet() {
   let spreadsheet = makeSpreadsheet();
@@ -178,7 +181,7 @@ describe('Budget', () => {
     expectToBeEditingRow(container, 1);
 
     // It should never go past the last expense category
-    let lastCat = categories.findIndex((c) => c.is_income) - 1;
+    let lastCat = categories.findIndex(c => c.is_income) - 1;
     editRow(container, lastCat);
     expectToBeEditingRow(container, lastCat);
     fireEvent.press(getButton(container, 'down'));
@@ -247,7 +250,7 @@ describe('Budget', () => {
     fireEvent.press(getButton(container, 'done'));
     expectToNotBeEditing(container);
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
     expect(getField(container, 1, 'budgeted').textContent).toBe('22.00');
   });
 });

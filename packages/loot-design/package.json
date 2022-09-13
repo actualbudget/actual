@@ -12,6 +12,8 @@
     "chroma-js": "^1.3.3",
     "date-fns": "2.0.0-alpha.27",
     "downshift": "1.31.16",
+    "eslint": "5.6.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "fast-glob": "^2.2.2",
     "formik": "^0.11.10",
     "glamor": "^2.20.40",
@@ -36,9 +38,7 @@
   "dependencies": {
     "@juggle/resize-observer": "^3.1.2",
     "hotkeys-js": "3.8.2",
-    "patch-package": "^6.1.2",
     "pikaday": "1.8.0",
-    "postinstall-postinstall": "^2.0.0",
     "react-dnd": "^10.0.2",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.4.4",
@@ -48,10 +48,10 @@
   "scripts": {
     "start": "react-scripts start",
     "start:mobile": "IS_REACT_NATIVE=1 react-scripts start",
-    "postinstall": "patch-package",
     "test": "npm-run-all -cp 'test:*'",
     "test:web": "jest -c jest.config.js",
-    "test:react-native": "jest -c jest.rn.config.js"
+    "test:react-native": "jest -c jest.rn.config.js",
+    "lint": "eslint src"
   },
   "homepage": "./",
   "manifest": "manifest.json",
@@ -64,8 +64,5 @@
   },
   "browserslist": [
     "electron 3.0"
-  ],
-  "eslintConfig": {
-    "extends": "react-app"
-  }
+  ]
 }

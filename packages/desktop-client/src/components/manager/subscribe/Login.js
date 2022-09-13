@@ -1,18 +1,19 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import * as actions from 'loot-core/src/client/actions';
+
+import { createBudget } from 'loot-core/src/client/actions/budgets';
+import { loggedIn } from 'loot-core/src/client/actions/user';
+import { send } from 'loot-core/src/platform/client/fetch';
 import {
   View,
   Text,
   Button,
   ButtonWithLoading
 } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import { loggedIn } from 'loot-core/src/client/actions/user';
-import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { useBootstrapped, Title, Input, Link, ExternalLink } from './common';
+import { colors } from 'loot-design/src/style';
+
+import { useBootstrapped, Title, Input } from './common';
 
 export default function Login() {
   let dispatch = useDispatch();

@@ -1,28 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { css } from 'glamor';
 import { Route, Switch, Redirect } from 'react-router-dom';
+
+import { css } from 'glamor';
+
 import * as actions from 'loot-core/src/client/actions';
+import Platform from 'loot-core/src/client/platform';
+import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { numberFormats } from 'loot-core/src/shared/util';
+import { Information } from 'loot-design/src/components/alerts';
 import {
   View,
   Text,
   Button,
-  ButtonLink,
   ButtonWithLoading,
-  AnchorLink,
-  Link,
-  Input
+  AnchorLink
 } from 'loot-design/src/components/common';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
-import { numberFormats } from 'loot-core/src/shared/util';
 import { styles, colors } from 'loot-design/src/style';
-import { Information, Warning, Error } from 'loot-design/src/components/alerts';
-import Checkmark from 'loot-design/src/svg/v1/Checkmark';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
-import ExclamationSolid from 'loot-design/src/svg/v1/ExclamationSolid';
-import Platform from 'loot-core/src/client/platform';
 
 import useServerVersion from '../hooks/useServerVersion';
 
@@ -52,12 +47,12 @@ function Features({ prefs, userData, pushModal, resetSync, savePrefs }) {
   let [resettingCache, setResettingCache] = useState(false);
 
   const onEnableAccountSync = () => {
-    savePrefs({ 'flags.syncAccount': true});
-  }
+    savePrefs({ 'flags.syncAccount': true });
+  };
 
   const onDisableAccountSync = () => {
     savePrefs({ 'flags.syncAccount': false });
-  }
+  };
 
   return (
     <View style={{ alignItems: 'flex-start', marginTop: 55 }}>
@@ -114,11 +109,12 @@ function Features({ prefs, userData, pushModal, resetSync, savePrefs }) {
               ) : (
                 <View style={{ alignItems: 'flex-start' }}>
                   <Text style={{ lineHeight: '1.4em' }}>
-                    The integration give you possibility to sync your accounts with banks.
+                    The integration give you possibility to sync your accounts
+                    with banks.
                   </Text>
                   <Button
                     style={{ marginTop: 10 }}
-                    onClick={() => onEnableAccountSync() }
+                    onClick={() => onEnableAccountSync()}
                   >
                     Enable integration
                   </Button>
@@ -126,9 +122,6 @@ function Features({ prefs, userData, pushModal, resetSync, savePrefs }) {
               )}
             </View>
           </View>
-
-
-
         </View>
       )}
     </View>

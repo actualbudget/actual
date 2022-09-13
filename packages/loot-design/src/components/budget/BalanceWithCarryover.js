@@ -1,9 +1,10 @@
 import React from 'react';
+
+import ArrowThinRight from '../../svg/v1/ArrowThinRight';
+import { View } from '../common';
+import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { makeAmountStyle } from './util';
-import { View } from '../common';
-import ArrowThinRight from '../../svg/v1/ArrowThinRight';
-import CellValue from '../spreadsheet/CellValue';
 
 export default function BalanceWithCarryover({
   carryover,

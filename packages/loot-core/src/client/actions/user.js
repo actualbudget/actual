@@ -1,7 +1,7 @@
 import { send } from '../../platform/client/fetch';
 import constants from '../constants';
-import { loadGlobalPrefs } from './prefs';
 import { loadAllFiles, closeBudget } from './budgets';
+import { loadGlobalPrefs } from './prefs';
 
 export function getUserData() {
   return async dispatch => {

@@ -1,13 +1,13 @@
 import React from 'react';
+
 import {
   View,
   Text,
-  Block,
   P,
   ModalButtons,
   Button
 } from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
+
 import { Standalone, Title, ExternalLink } from './common';
 
 function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {

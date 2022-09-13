@@ -1,6 +1,7 @@
-const lootFs = require('../fs');
 const fs = require('fs');
 const { join } = require('path');
+
+const lootFs = require('../fs');
 
 let getStorePath = () => join(lootFs.getDataDir(), 'global-store.json');
 let store;

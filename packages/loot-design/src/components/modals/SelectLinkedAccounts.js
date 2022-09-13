@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { styles, colors } from '../../style';
-import {View, Text, Modal, P, Button, Strong, CustomSelect} from '../common';
+import { View, Text, Modal, P, Button, Strong, CustomSelect } from '../common';
 
 let selectedStyle = {
   color: colors.n1
@@ -69,27 +70,41 @@ export default function SelectLinkedAccounts({
   actualAccounts,
   actions
 }) {
-  let [chosenAccounts, setChosenAccounts] = useState([])
+  let [chosenAccounts, setChosenAccounts] = useState([]);
 
   const addAccountOption = { id: 'new', name: 'Create new account' };
 
-  const importedAccountsToSelect =
-    importedAccounts.filter((account) => !chosenAccounts.map((acc) => acc.chosenImportedAccountId).includes(account.account_id))
+  const importedAccountsToSelect = importedAccounts.filter(
+    account =>
+      !chosenAccounts
+        .map(acc => acc.chosenImportedAccountId)
+        .includes(account.account_id)
+  );
 
   const actualAccountsToSelect = [
     addAccountOption,
-    ...actualAccounts.filter((account) => !chosenAccounts.map((acc) => acc.chosenActualAccountId).includes(account.id)),
-  ]
+    ...actualAccounts.filter(
+      account =>
+        !chosenAccounts
+          .map(acc => acc.chosenActualAccountId)
+          .includes(account.id)
+    )
+  ];
 
   useEffect(() => {
-    importedAccountsToSelect.forEach( importedAccount => {
+    importedAccountsToSelect.forEach(importedAccount => {
       // Try to auto-mach accounts based on account_id or mask
       // Add matched accounts to list of selected accounts
-      const matchedActualAccount = actualAccountsToSelect.find(actualAccount => {
-        return actualAccount.account_id === importedAccount.account_id || actualAccount.mask === importedAccount.mask
-      })
+      const matchedActualAccount = actualAccountsToSelect.find(
+        actualAccount => {
+          return (
+            actualAccount.account_id === importedAccount.account_id ||
+            actualAccount.mask === importedAccount.mask
+          );
+        }
+      );
 
-      if(matchedActualAccount) {
+      if (matchedActualAccount) {
         setChosenAccounts([
           ...chosenAccounts,
           {
@@ -98,23 +113,30 @@ export default function SelectLinkedAccounts({
           }
         ]);
       }
-    })
-    }, []
+    });
+  }, []);
+
+  let [selectedImportAccountId, setSelectedImportAccountId] = useState(
+    importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id
+  );
+  let [selectedAccountId, setSelectedAccountId] = useState(
+    actualAccountsToSelect[0] && actualAccountsToSelect[0].id
   );
 
-  let [selectedImportAccountId, setSelectedImportAccountId] = useState(importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id);
-  let [selectedAccountId, setSelectedAccountId] = useState(actualAccountsToSelect[0] && actualAccountsToSelect[0].id);
-
   async function onNext() {
-    chosenAccounts.forEach((chosenAccount) => {
-      const importedAccount = importedAccounts.find((account) => account.account_id === chosenAccount.chosenImportedAccountId)
+    chosenAccounts.forEach(chosenAccount => {
+      const importedAccount = importedAccounts.find(
+        account => account.account_id === chosenAccount.chosenImportedAccountId
+      );
 
       actions.linkAccount(
         requisitionId,
         importedAccount,
-        chosenAccount.chosenActualAccountId !== addAccountOption.id ? chosenAccount.chosenActualAccountId : undefined
+        chosenAccount.chosenActualAccountId !== addAccountOption.id
+          ? chosenAccount.chosenActualAccountId
+          : undefined
       );
-    })
+    });
 
     actions.closeModal();
   }
@@ -127,33 +149,30 @@ export default function SelectLinkedAccounts({
         chosenActualAccountId: selectedAccountId
       }
     ]);
-
-  };
+  }
 
   // Update dropbox with available accounts to select
   useEffect(() => {
-      const newSelectedImportAccountId = importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id;
-      const newSelectedAccountId = actualAccountsToSelect[0] && actualAccountsToSelect[0].id;
-      setSelectedImportAccountId(newSelectedImportAccountId);
-      setSelectedAccountId(newSelectedAccountId);
-    }, [chosenAccounts]
-  );
+    const newSelectedImportAccountId =
+      importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id;
+    const newSelectedAccountId =
+      actualAccountsToSelect[0] && actualAccountsToSelect[0].id;
+    setSelectedImportAccountId(newSelectedImportAccountId);
+    setSelectedAccountId(newSelectedAccountId);
+  }, [chosenAccounts]);
 
-  const removeChoose = (chosenAccount) => {
-    setChosenAccounts([...chosenAccounts.filter((acc) => acc !== chosenAccount)]);
-  }
+  const removeChoose = chosenAccount => {
+    setChosenAccounts([...chosenAccounts.filter(acc => acc !== chosenAccount)]);
+  };
 
   return (
-    <Modal
-      title={'Link Accounts'}
-      {...modalProps}
-    >
+    <Modal title={'Link Accounts'} {...modalProps}>
       {() => (
         <View style={{ maxWidth: 500 }}>
           {upgradingAccountId ? (
             <P>
-              You allowed access to the following accounts.
-              Select the one you want to link with:
+              You allowed access to the following accounts. Select the one you
+              want to link with:
             </P>
           ) : (
             <P>
@@ -178,7 +197,7 @@ export default function SelectLinkedAccounts({
                 <EmptyMessage />
               ) : (
                 <View>
-                  { importedAccountsToSelect.length ? (
+                  {importedAccountsToSelect.length ? (
                     <View
                       style={{
                         flexDirection: 'row',
@@ -190,7 +209,10 @@ export default function SelectLinkedAccounts({
                       <View>
                         <Strong>Imported Account:</Strong>
                         <CustomSelect
-                          options={importedAccountsToSelect.map(account => [account.account_id, account.name])}
+                          options={importedAccountsToSelect.map(account => [
+                            account.account_id,
+                            account.name
+                          ])}
                           onChange={val => {
                             setSelectedImportAccountId(val);
                           }}
@@ -201,7 +223,10 @@ export default function SelectLinkedAccounts({
                       <View>
                         <Strong>Actual Budget Account:</Strong>
                         <CustomSelect
-                          options={actualAccountsToSelect.map(account => [account.id, account.name])}
+                          options={actualAccountsToSelect.map(account => [
+                            account.id,
+                            account.name
+                          ])}
                           onChange={val => {
                             setSelectedAccountId(val);
                           }}
@@ -214,48 +239,53 @@ export default function SelectLinkedAccounts({
                         style={{
                           padding: '10px',
                           fontSize: 15,
-                          margin: 10,
+                          margin: 10
                         }}
                         onClick={addToChosenAccounts}
                       >
                         Link account &rarr;
                       </Button>
                     </View>
-                  ) : '' }
-                  { chosenAccounts.map((chosenAccount) => {
-                      const {chosenImportedAccountId, chosenActualAccountId} = chosenAccount
-                      const importedAccount = importedAccounts.find((acc) => acc.account_id === chosenImportedAccountId )
-                      const actualAccount = [
-                        addAccountOption,
-                        ...actualAccounts,
-                      ].find((acc) => acc.id === chosenActualAccountId )
+                  ) : (
+                    ''
+                  )}
+                  {chosenAccounts.map(chosenAccount => {
+                    const {
+                      chosenImportedAccountId,
+                      chosenActualAccountId
+                    } = chosenAccount;
+                    const importedAccount = importedAccounts.find(
+                      acc => acc.account_id === chosenImportedAccountId
+                    );
+                    const actualAccount = [
+                      addAccountOption,
+                      ...actualAccounts
+                    ].find(acc => acc.id === chosenActualAccountId);
 
-                      return (
-                        <View
-                          key={chosenImportedAccountId}
+                    return (
+                      <View
+                        key={chosenImportedAccountId}
+                        style={{
+                          flexDirection: 'row',
+                          justifyContent: 'flex-center',
+                          marginTop: 30
+                        }}
+                      >
+                        {importedAccount.name} -{'>'} {actualAccount.name}
+                        <Button
+                          primary
                           style={{
-                            flexDirection: 'row',
-                            justifyContent: 'flex-center',
-                            marginTop: 30
+                            padding: '10px',
+                            fontSize: 15,
+                            margin: 10
                           }}
+                          onClick={() => removeChoose(chosenAccount)}
                         >
-                          {importedAccount.name} -> {actualAccount.name}
-
-                          <Button
-                            primary
-                            style={{
-                              padding: '10px',
-                              fontSize: 15,
-                              margin: 10,
-                            }}
-                            onClick={() => removeChoose(chosenAccount)}
-                          >
-                            Remove &rarr;
-                          </Button>
-                        </View>
-                      )
-                    })
-                  }
+                          Remove &rarr;
+                        </Button>
+                      </View>
+                    );
+                  })}
                 </View>
               )}
             </View>

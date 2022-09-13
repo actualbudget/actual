@@ -1,11 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import * as actions from 'loot-core/src/client/actions';
 import {
   View,
-  Text,
   Modal,
-  Button,
   P,
   ExternalLink
 } from 'loot-design/src/components/common';

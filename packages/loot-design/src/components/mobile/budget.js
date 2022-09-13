@@ -14,32 +14,34 @@ import {
   NativeViewGestureHandler
 } from 'react-native-gesture-handler';
 import Animated, { Easing } from 'react-native-reanimated';
-import AndroidKeyboardAvoidingView from './AndroidKeyboardAvoidingView';
-import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
+
 import memoizeOne from 'memoize-one';
+
+import Platform from 'loot-core/src/client/platform';
+import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
+import * as monthUtils from 'loot-core/src/shared/months';
+import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
+
+import { colors, mobileStyles as styles } from '../../style';
+import Add from '../../svg/v1/Add';
+import ArrowThinDown from '../../svg/v1/ArrowThinDown';
+import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';
+import ArrowThinRight from '../../svg/v1/ArrowThinRight';
+import ArrowThinUp from '../../svg/v1/ArrowThinUp';
+import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
 import CellValue from '../spreadsheet/CellValue';
+import format from '../spreadsheet/format';
+import NamespaceContext from '../spreadsheet/NamespaceContext';
 import SheetValue from '../spreadsheet/SheetValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
-import { colors, mobileStyles as styles } from '../../style';
-import format from '../spreadsheet/format';
-import { Button, KeyboardButton, Card, Label } from './common';
-import { ListItem, ROW_HEIGHT } from './table';
-import Platform from 'loot-core/src/client/platform';
-import NamespaceContext from '../spreadsheet/NamespaceContext';
 import AmountInput, {
   MathOperations,
   AmountAccessoryContext
 } from './AmountInput';
+import AndroidKeyboardAvoidingView from './AndroidKeyboardAvoidingView';
+import { Button, KeyboardButton, Card, Label } from './common';
 import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
-import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
-
-import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';
-import ArrowThinRight from '../../svg/v1/ArrowThinRight';
-import ArrowThinUp from '../../svg/v1/ArrowThinUp';
-import ArrowThinDown from '../../svg/v1/ArrowThinDown';
-import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
-import Add from '../../svg/v1/Add';
+import { ListItem, ROW_HEIGHT } from './table';
 
 const ACTScrollViewManager =
   NativeModules && NativeModules.ACTScrollViewManager;
@@ -123,7 +125,7 @@ export class BudgetCell extends React.PureComponent {
 
     return (
       <SheetValue binding={binding}>
-        {(node) => {
+        {node => {
           return (
             <View style={style}>
               <AmountInput
@@ -140,7 +142,7 @@ export class BudgetCell extends React.PureComponent {
                 scrollIntoView={Platform.OS === 'android'}
                 textStyle={[styles.smallText, textStyle]}
                 animationColor="white"
-                onBlur={(value) => {
+                onBlur={value => {
                   onBudgetAction(month, 'budget-amount', {
                     category: categoryId,
                     amount: amountToInteger(value)
@@ -288,7 +290,7 @@ export class BudgetCategory extends React.PureComponent {
 
     let content = (
       <ListItem
-        ref={(el) => (this.container = el)}
+        ref={el => (this.container = el)}
         style={[
           {
             backgroundColor: editing ? colors.p11 : 'transparent',
@@ -323,7 +325,7 @@ export class BudgetCategory extends React.PureComponent {
             name="balance"
             binding={balance}
             style={[styles.smallText, { width: 90, textAlign: 'right' }]}
-            getStyle={(value) => value < 0 && { color: colors.r4 }}
+            getStyle={value => value < 0 && { color: colors.r4 }}
             type="financial"
           />
         </Animated.View>
@@ -487,8 +489,14 @@ export class TotalsRow extends React.PureComponent {
 
 export class IncomeCategory extends React.PureComponent {
   render() {
-    const { name, budget, balance, style, nameTextStyle, amountTextStyle } =
-      this.props;
+    const {
+      name,
+      budget,
+      balance,
+      style,
+      nameTextStyle,
+      amountTextStyle
+    } = this.props;
     return (
       <ListItem
         style={[
@@ -717,10 +725,10 @@ export class IncomeBudgetGroup extends React.Component {
 }
 
 export class BudgetGroups extends React.Component {
-  getGroups = memoizeOne((groups) => {
+  getGroups = memoizeOne(groups => {
     return {
-      incomeGroup: groups.find((group) => group.is_income),
-      expenseGroups: groups.filter((group) => !group.is_income)
+      incomeGroup: groups.find(group => group.is_income),
+      expenseGroups: groups.filter(group => !group.is_income)
     };
   });
 
@@ -742,7 +750,7 @@ export class BudgetGroups extends React.Component {
 
     return (
       <View style={{ marginBottom: 15 }}>
-        {expenseGroups.map((group) => {
+        {expenseGroups.map(group => {
           return (
             <BudgetGroup
               key={group.id}
@@ -800,7 +808,7 @@ export class BudgetTable extends React.Component {
       }
     });
 
-    const keyboardWillHide = (e) => {
+    const keyboardWillHide = e => {
       if (ACTScrollViewManager) {
         ACTScrollViewManager.setFocused(-1);
       }
@@ -831,7 +839,7 @@ export class BudgetTable extends React.Component {
     this.cleanup();
   }
 
-  onEditCategory = (id) => {
+  onEditCategory = id => {
     this.setState({ editingCategory: id });
   };
 
@@ -849,11 +857,9 @@ export class BudgetTable extends React.Component {
   onMoveUp = () => {
     const { categories } = this.props;
     const { editingCategory } = this.state;
-    const expenseCategories = categories.filter((cat) => !cat.is_income);
+    const expenseCategories = categories.filter(cat => !cat.is_income);
 
-    const idx = expenseCategories.findIndex(
-      (cat) => editingCategory === cat.id
-    );
+    const idx = expenseCategories.findIndex(cat => editingCategory === cat.id);
     if (idx - 1 >= 0) {
       this.onEditCategory(expenseCategories[idx - 1].id);
     }
@@ -862,11 +868,9 @@ export class BudgetTable extends React.Component {
   onMoveDown = () => {
     const { categories } = this.props;
     const { editingCategory } = this.state;
-    const expenseCategories = categories.filter((cat) => !cat.is_income);
+    const expenseCategories = categories.filter(cat => !cat.is_income);
 
-    const idx = expenseCategories.findIndex(
-      (cat) => editingCategory === cat.id
-    );
+    const idx = expenseCategories.findIndex(cat => editingCategory === cat.id);
     if (idx + 1 < expenseCategories.length) {
       this.onEditCategory(expenseCategories[idx + 1].id);
     }
@@ -937,7 +941,7 @@ export class BudgetTable extends React.Component {
                   styles.smallText,
                   { color: colors.n1, textAlign: 'right', fontWeight: '500' }
                 ]}
-                formatter={(value) => {
+                formatter={value => {
                   return format(-parseFloat(value || '0'), 'financial');
                 }}
               />
@@ -958,7 +962,7 @@ export class BudgetTable extends React.Component {
           <AndroidKeyboardAvoidingView includeStatusBar={true}>
             {!editMode ? (
               <ScrollView
-                ref={(el) => (this.list = el)}
+                ref={el => (this.list = el)}
                 keyboardShouldPersistTaps="always"
                 refreshControl={refreshControl}
                 style={{ backgroundColor: colors.n10 }}
@@ -993,7 +997,7 @@ export class BudgetTable extends React.Component {
                     ref={this.gestures.scroll}
                   >
                     <Animated.ScrollView
-                      ref={(el) => {
+                      ref={el => {
                         scrollRef.current = el;
                         this.list = el;
                       }}

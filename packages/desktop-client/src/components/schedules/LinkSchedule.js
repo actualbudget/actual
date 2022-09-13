@@ -1,9 +1,11 @@
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
+
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View, Text } from 'loot-design/src/components/common';
+import { Text } from 'loot-design/src/components/common';
+
 import { Page } from '../Page';
 import { SchedulesTable } from './SchedulesTable';
 

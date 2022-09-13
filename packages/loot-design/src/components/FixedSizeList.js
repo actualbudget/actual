@@ -1,7 +1,9 @@
 import React from 'react';
+
 import memoizeOne from 'memoize-one';
-import useResizeObserver from './useResizeObserver';
+
 import { View } from './common';
+import useResizeObserver from './useResizeObserver';
 
 const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 

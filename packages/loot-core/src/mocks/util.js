@@ -1,5 +1,6 @@
-const snapshotDiff = require('snapshot-diff');
 const { join, dirname, basename } = require('path');
+
+const snapshotDiff = require('snapshot-diff');
 
 export function expectSnapshotWithDiffer(initialValue, { onlyUpdates } = {}) {
   let currentValue = initialValue;

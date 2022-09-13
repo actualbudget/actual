@@ -1,18 +1,19 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
+import CodeMirror from 'codemirror';
+
+import * as spreadsheet from 'loot-core/src/client/sheetql/spreadsheet';
 import {
   send,
   init as initConnection
 } from 'loot-core/src/platform/client/fetch';
-import * as spreadsheet from 'loot-core/src/client/sheetql/spreadsheet';
-import CodeMirror from 'codemirror';
 import {
   View,
   Button,
   Input,
   InlineField
 } from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 
 require('codemirror/lib/codemirror.css');
 require('codemirror/theme/monokai.css');
