@@ -486,11 +486,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     // Otherwise, download transaction for the past 30 days
     const startingDay = monthUtils.subDays(monthUtils.currentDay(), 30);
 
-    const {
-      institutionId,
-      transactions,
-      accountBalances
-    } = await downloadTransactions(
+    const { transactions, startingBalance } = await downloadTransactions(
       userId,
       userKey,
       acctId,
@@ -510,11 +506,8 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     // before the first imported transaction, we need to get the
     // current balance from the accounts table and subtract all the
     // imported transactions.
-    const sortedTransactions = sortTransactions(institutionId, transactions);
-    const oldestTransaction = sortedTransactions[sortedTransactions.length - 1];
-    const previousBalance = amountToInteger(
-      countPreviousBalance(institutionId, sortedTransactions, accountBalances)
-    );
+
+    const oldestTransaction = transactions[transactions.length - 1];
 
     const oldestDate =
       transactions.length > 0
@@ -526,7 +519,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     return runMutator(async () => {
       let initialId = await db.insertTransaction({
         account: id,
-        amount: previousBalance,
+        amount: startingBalance,
         category: acctRow.offbudget === 0 ? payee.category : null,
         payee: payee.id,
         date: oldestDate,
@@ -540,64 +533,5 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
         added: [initialId, ...result.added]
       };
     });
-  }
-}
-
-export const printIban = account => {
-  if (account.iban) {
-    return '(XXX ' + account.iban.slice(-4) + ')';
-  } else {
-    return '';
-  }
-};
-
-// https://nordigen.com/en/docs/account-information/output/accounts/
-// https://docs.google.com/spreadsheets/d/11tAD5cfrlaOZ4HXI6jPpL5hMf8ZuRYc6TUXTxZE84A8/edit#gid=489769432
-export function sortTransactions(institution_id, transactions = []) {
-  switch (institution_id) {
-    case 'SANDBOXFINANCE_SFIN0000':
-      return transactions.sort((a, b) => {
-        const [aTime, aSeq] = a.transactionId.split('-');
-        const [bTime, bSeq] = b.transactionId.split('-');
-
-        return bTime - aTime || bSeq - aSeq;
-      });
-    case 'ING_PL_INGBPLPW':
-      return transactions.sort((a, b) => {
-        return b.transactionId.substr(2) - a.transactionId.substr(2);
-      });
-    case 'MBANK_RETAIL_BREXPLPW':
-    case 'REVOLUT_REVOGB21':
-      return transactions.sort((a, b) => b.transactionId - a.transactionId);
-    default:
-      return transactions;
-  }
-}
-
-export function countPreviousBalance(
-  institution_id,
-  transactions = [],
-  accountBalances
-) {
-  const oldestTransaction = transactions[transactions.length - 1];
-
-  switch (institution_id) {
-    case 'ING_PL_INGBPLPW':
-      return (
-        oldestTransaction.balanceAfterTransaction.balanceAmount.amount -
-        oldestTransaction.transactionAmount.amount
-      );
-    case 'MBANK_RETAIL_BREXPLPW':
-    case 'REVOLUT_REVOGB21':
-    case 'SANDBOXFINANCE_SFIN0000':
-    default:
-      const balance =
-        accountBalances.find(balance =>
-          ['interimBooked', 'interimAvailable'].includes(balance.balanceType)
-        ) || accountBalances[0];
-      const accountBalance = balance.balanceAmount.amount;
-      return transactions.reduce((total, trans) => {
-        return total - trans.transactionAmount.amount;
-      }, accountBalance);
   }
 }
