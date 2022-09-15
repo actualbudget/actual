@@ -57,7 +57,7 @@ function addMessages(db, messages) {
   return returnValue;
 }
 
-function getMerkle(db, group_id) {
+function getMerkle(db) {
   let rows = db.all('SELECT * FROM messages_merkles');
 
   if (rows.length > 0) {
@@ -84,7 +84,7 @@ function sync(messages, since, groupId) {
 
   return {
     trie,
-    newMessages: newMessages.map(msg => {
+    newMessages: newMessages.map((msg) => {
       const envelopePb = new SyncPb.MessageEnvelope();
       envelopePb.setTimestamp(msg.timestamp);
       envelopePb.setIsencrypted(msg.is_encrypted);

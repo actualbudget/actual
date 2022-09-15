@@ -126,7 +126,7 @@ app.post('/sync', async (req, res) => {
   // encode it back...
   let responsePb = new SyncPb.SyncResponse();
   responsePb.setMerkle(JSON.stringify(trie));
-  newMessages.forEach(msg => responsePb.addMessages(msg));
+  newMessages.forEach((msg) => responsePb.addMessages(msg));
 
   res.set('Content-Type', 'application/actual-sync');
   res.send(Buffer.from(responsePb.serializeBinary()));
@@ -368,7 +368,7 @@ app.get('/list-user-files', (req, res) => {
   res.send(
     JSON.stringify({
       status: 'ok',
-      data: rows.map(row => ({
+      data: rows.map((row) => ({
         deleted: row.deleted,
         fileId: row.id,
         groupId: row.group_id,
