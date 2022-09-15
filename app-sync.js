@@ -129,6 +129,7 @@ app.post('/sync', async (req, res) => {
   newMessages.forEach((msg) => responsePb.addMessages(msg));
 
   res.set('Content-Type', 'application/actual-sync');
+  res.set('X-ACTUAL-SYNC-METHOD', 'simple');
   res.send(Buffer.from(responsePb.serializeBinary()));
 });
 
