@@ -16,4 +16,7 @@ try {
   };
 }
 
+// The env variable always takes precedence
+config.userFiles = process.env.ACTUAL_USER_FILES || config.userFiles;
+
 module.exports = config;

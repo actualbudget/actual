@@ -1,6 +1,7 @@
 let { existsSync, readFileSync } = require('fs');
 let { join } = require('path');
 let { openDatabase } = require('./db');
+let config = require('./load-config');
 
 let actual = require('@actual-app/api');
 let merkle = actual.internal.merkle;
@@ -8,7 +9,7 @@ let SyncPb = actual.internal.SyncProtoBuf;
 let Timestamp = actual.internal.timestamp.default;
 
 function getGroupDb(groupId) {
-  let path = join(__dirname, `user-files/${groupId}.sqlite`);
+  let path = join(config.userFiles, `${groupId}.sqlite`);
   let needsInit = !existsSync(path);
 
   let db = openDatabase(path);

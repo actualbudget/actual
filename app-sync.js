@@ -16,17 +16,8 @@ let SyncPb = actual.internal.SyncProtoBuf;
 const app = express();
 app.use(errorMiddleware);
 
-async function init() {
-  let fileDir = join(process.env.ACTUAL_USER_FILES || config.userFiles);
-
-  console.log('Initializing Actual with user file dir:', fileDir);
-
-  await actual.init({
-    config: {
-      dataDir: fileDir
-    }
-  });
-}
+// eslint-disable-next-line
+async function init() {}
 
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
