@@ -52,7 +52,7 @@ export default function Bootstrap() {
 
   return (
     <>
-      <View style={{ width: 450, marginTop: -30 }}>
+      <View style={{ maxWidth: 450, marginTop: -30 }}>
         <Title text="Bootstrap this Actual instance" />
         <Text
           style={{

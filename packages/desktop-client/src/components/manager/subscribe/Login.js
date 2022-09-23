@@ -63,7 +63,7 @@ export default function Login() {
 
   return (
     <>
-      <View style={{ width: 450, marginTop: -30 }}>
+      <View style={{ maxWidth: 450, marginTop: -30 }}>
         <Title text="Sign in to this Actual instance" />
         <Text
           style={{

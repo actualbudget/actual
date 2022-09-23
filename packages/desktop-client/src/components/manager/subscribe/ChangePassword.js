@@ -45,7 +45,7 @@ export default function ChangePassword() {
 
   return (
     <>
-      <View style={{ width: 500, marginTop: -30 }}>
+      <View style={{ maxWidth: 500, marginTop: -30 }}>
         <Title text="Change server password" />
         <Text
           style={{

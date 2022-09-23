@@ -8,6 +8,7 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
+import BudgetSummary from 'loot-design/src/components/modals/BudgetSummary';
 import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
 import ConfigureLinkedAccounts from 'loot-design/src/components/modals/ConfigureLinkedAccounts';
 import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
@@ -269,6 +270,15 @@ function Modals({
 
         <Route path="/welcome-screen">
           <WelcomeScreen modalProps={modalProps} actions={actions} />
+        </Route>
+
+        <Route path="/budget-summary">
+          <BudgetSummary
+            key={name}
+            modalProps={modalProps}
+            month={options.month}
+            actions={actions}
+          />
         </Route>
       </Switch>
     );

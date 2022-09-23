@@ -2,9 +2,15 @@ import React, { useState, useEffect } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { View, Text, AnchorLink } from 'loot-design/src/components/common';
+import { useSetThemeColor } from 'loot-design/src/components/hooks';
+import { colors } from 'loot-design/src/style';
+
+import { Version } from '../Settings';
 
 export default function ServerURL() {
   let [url, setUrl] = useState(null);
+
+  useSetThemeColor(colors.p5);
 
   useEffect(() => {
     async function run() {
@@ -21,18 +27,20 @@ export default function ServerURL() {
         bottom: 0,
         left: 0,
         right: 0,
-        justifyContent: 'center',
-        flexDirection: 'row',
+        flexDirection: 'column',
         marginBottom: 15,
         zIndex: 5000
       }}
     >
-      <Text>
-        Using server: <strong>{url || '(not configured)'}</strong>
-      </Text>
-      <AnchorLink bare to="/config-server" style={{ marginLeft: 15 }}>
-        Change
-      </AnchorLink>
+      <Version />
+      <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+        <Text>
+          Using server: <strong>{url || '(not configured)'}</strong>
+        </Text>
+        <AnchorLink bare to="/config-server" style={{ marginLeft: 15 }}>
+          Change
+        </AnchorLink>
+      </View>
     </View>
   );
 }
