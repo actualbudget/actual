@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
 
+import { format as formatDate } from 'date-fns';
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
 
@@ -16,6 +17,7 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   deleteTransaction,
   updateTransaction,
+  realizeTempTransactions,
   ungroupTransactions
 } from 'loot-core/src/shared/transactions';
 import {
@@ -103,7 +105,12 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
+function ReconcilingMessage({
+  balanceQuery,
+  targetBalance,
+  onDone,
+  onCreateTransaction
+}) {
   let cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
     query: balanceQuery.query.filter({ cleared: true })
@@ -165,6 +172,13 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
             Done Reconciling
           </Button>
         </View>
+        {targetDiff !== 0 && (
+          <View style={{ marginLeft: 15 }}>
+            <Button onClick={() => onCreateTransaction(targetDiff)}>
+              Create Reconciliation Transation
+            </Button>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -599,6 +613,7 @@ const AccountHeader = React.memo(
     onAddTransaction,
     onShowTransactions,
     onDoneReconciling,
+    onCreateReconciliationTransaction,
     onToggleExtraBalances,
     onSaveName,
     onExposeName,
@@ -876,6 +891,7 @@ const AccountHeader = React.memo(
             targetBalance={reconcileAmount}
             balanceQuery={balanceQuery}
             onDone={onDoneReconciling}
+            onCreateTransaction={onCreateReconciliationTransaction}
           />
         )}
       </>
@@ -1386,6 +1402,31 @@ class AccountInternal extends React.PureComponent {
     this.setState({ reconcileAmount: null });
   };
 
+  onCreateReconciliationTransaction = async diff => {
+    // Create a new reconciliation transaction
+    const reconciliationTransactions = realizeTempTransactions([
+      {
+        id: 'temp',
+        account: this.props.accountId,
+        cleared: true,
+        amount: diff,
+        date: formatDate(new Date(), 'yyyy-mm-dd'),
+        notes: 'Reconciliation balance adjustment'
+      }
+    ]);
+
+    // Optimistic UI: update the transaction list before sending the data to the database
+    this.setState({
+      transactions: [...this.state.transactions, ...reconciliationTransactions]
+    });
+
+    // sync the reconciliation transaction
+    await send('transactions-batch-update', {
+      added: reconciliationTransactions
+    });
+    await this.refetchTransactions();
+  };
+
   onShowTransactions = async ids => {
     this.onApplyFilter({
       customName: 'Selected transactions',
@@ -1646,6 +1687,9 @@ class AccountInternal extends React.PureComponent {
                   onExposeName={this.onExposeName}
                   onReconcile={this.onReconcile}
                   onDoneReconciling={this.onDoneReconciling}
+                  onCreateReconciliationTransaction={
+                    this.onCreateReconciliationTransaction
+                  }
                   onSync={this.onSync}
                   onImport={this.onImport}
                   onBatchDelete={this.onBatchDelete}
