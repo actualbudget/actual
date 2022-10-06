@@ -1,12 +1,11 @@
+let fs = require('fs/promises');
 let { Buffer } = require('buffer');
-let { join } = require('path');
 let express = require('express');
 let uuid = require('uuid');
-let AdmZip = require('adm-zip');
 let { validateUser } = require('./util/validate-user');
 let errorMiddleware = require('./util/error-middleware');
-let config = require('./load-config');
 let { getAccountDb } = require('./account-db');
+let { getPathForUserFile, getPathForGroupFile } = require('./util/paths');
 
 let simpleSync = require('./sync-simple');
 
@@ -167,7 +166,7 @@ app.post('/user-create-key', (req, res) => {
   res.send(JSON.stringify({ status: 'ok' }));
 });
 
-app.post('/reset-user-file', (req, res) => {
+app.post('/reset-user-file', async (req, res) => {
   let user = validateUser(req, res);
   if (!user) {
     return;
@@ -187,10 +186,11 @@ app.post('/reset-user-file', (req, res) => {
   accountDb.mutate('UPDATE files SET group_id = NULL WHERE id = ?', [fileId]);
 
   if (group_id) {
-    // TODO: Instead of doing this, just delete the db file named
-    // after the group
-    // db.mutate('DELETE FROM messages_binary WHERE group_id = ?', [group_id]);
-    // db.mutate('DELETE FROM messages_merkles WHERE group_id = ?', [group_id]);
+    try {
+      await fs.unlink(getPathForGroupFile(group_id));
+    } catch (e) {
+      console.log(`Unable to delete sync data for group "${group_id}"`);
+    }
   }
 
   res.send(JSON.stringify({ status: 'ok' }));
@@ -247,21 +247,11 @@ app.post('/upload-user-file', async (req, res) => {
     }
   }
 
-  // TODO: If we want to support end-to-end encryption, we'd write the
-  // raw file down because it's an encrypted blob. This isn't
-  // supported yet in the self-hosted version because it's unclear if
-  // it's still needed, given that you own your server
-  //
-  // await fs.writeFile(join(config.userFiles, `${fileId}.blob`), req.body);
-
-  let zip = new AdmZip(req.body);
-
   try {
-    zip.extractAllTo(join(config.userFiles, fileId), true);
+    await fs.writeFile(getPathForUserFile(fileId), req.body);
   } catch (err) {
     console.log('Error writing file', err);
     res.send(JSON.stringify({ status: 'error' }));
-    return;
   }
 
   let rows = accountDb.all('SELECT id FROM files WHERE id = ?', [fileId]);
@@ -311,15 +301,14 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
-  let zip = new AdmZip();
+  let buffer;
   try {
-    zip.addLocalFile(join(config.userFiles, fileId, 'db.sqlite'), '');
-    zip.addLocalFile(join(config.userFiles, fileId, 'metadata.json'), '');
+    buffer = await fs.readFile(getPathForUserFile(fileId));
   } catch (e) {
-    res.status(500).send('Error reading files');
+    console.log(`Error: file does not exist: ${getPathForUserFile(fileId)}`);
+    res.status(500).send('File does not exist on server');
     return;
   }
-  let buffer = zip.toBuffer();
 
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
   res.send(buffer);
