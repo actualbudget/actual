@@ -35,6 +35,7 @@ import {
   Stack
 } from 'loot-design/src/components/common';
 import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
+import NotesButton from 'loot-design/src/components/NotesButton';
 import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import format from 'loot-design/src/components/spreadsheet/format';
 import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
@@ -669,30 +670,46 @@ const AccountHeader = React.memo(
                   />
                 </InitialFocus>
               ) : isNameEditable ? (
-                <Button
-                  bare
+                <View
                   style={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    marginLeft: -5,
-                    marginTop: -5,
-                    backgroundColor: 'transparent',
-                    '& svg': { display: 'none' },
-                    '&:hover svg': { display: 'unset' }
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 3,
+                    '& .hover-visible': {
+                      opacity: 0,
+                      transition: 'opacity .25s'
+                    },
+                    '&:hover .hover-visible': {
+                      opacity: 1
+                    }
                   }}
-                  onClick={() => onExposeName(true)}
                 >
-                  {accountName}
-
-                  <Pencil1
+                  <View
                     style={{
-                      width: 11,
-                      height: 11,
-                      marginLeft: 5,
-                      color: colors.n4
+                      fontSize: 25,
+                      fontWeight: 500,
+                      marginRight: 5,
+                      marginBottom: 5
                     }}
-                  />
-                </Button>
+                  >
+                    {accountName}
+                  </View>
+
+                  <NotesButton id={`account-notes-${account.id}`} />
+                  <Button
+                    bare
+                    className="hover-visible"
+                    onClick={() => onExposeName(true)}
+                  >
+                    <Pencil1
+                      style={{
+                        width: 11,
+                        height: 11,
+                        color: colors.n8
+                      }}
+                    />
+                  </Button>
+                </View>
               ) : (
                 <View
                   style={{ fontSize: 25, fontWeight: 500, marginBottom: 5 }}
