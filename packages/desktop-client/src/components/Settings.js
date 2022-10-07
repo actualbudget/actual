@@ -404,11 +404,10 @@ function FileSettings({
               ) : (
                 <View style={{ alignItems: 'flex-start' }}>
                   <Text style={{ lineHeight: '1.4em' }}>
-                    Encryption is not enabled. Any data on our servers is still
-                    stored safely and securely, but it's not end-to-end
-                    encrypted which means we have the ability to read it (but we
-                    won't). If you want, you can use a password to encrypt your
-                    data on our servers.
+                    Encryption is not enabled. Your data is still stored on your
+                    server, but if you do not fully trust the security of the
+                    server, you can enable encryption to ensure that your data
+                    is encrypted on the server.
                   </Text>
                   <Button
                     style={{ marginTop: 10 }}
