@@ -48,7 +48,6 @@ function Section({ title, children, style, titleProps, ...props }) {
 }
 
 function Advanced({ prefs, resetSync }) {
-  let [expanded, setExpanded] = useState(true);
   let [resetting, setResetting] = useState(false);
   let [resettingCache, setResettingCache] = useState(false);
 
@@ -65,87 +64,55 @@ function Advanced({ prefs, resetSync }) {
   }
 
   return (
-    <View style={{ alignItems: 'flex-start', marginTop: 25 }}>
+    <Section title="Advanced Settings" style={{ marginBottom: 25 }}>
+      <Text>Budget ID: {prefs.id}</Text>
+
       <View
-        style={[
-          {
-            fontSize: 15,
-            marginBottom: 20,
-            flexDirection: 'row',
-            alignItems: 'center'
-          },
-          styles.staticText
-        ]}
-        onClick={() => setExpanded(!expanded)}
+        style={{
+          backgroundColor: colors.n9,
+          alignItems: 'flex-start',
+          padding: 15,
+          borderRadius: 4,
+          border: '1px solid ' + colors.n8
+        }}
       >
-        <ExpandArrow
-          width={8}
-          height={8}
-          style={{
-            marginRight: 5,
-            transition: 'transform .2s',
-            transform: !expanded && 'rotateZ(-90deg)'
-          }}
-        />
-        Advanced
+        <Text style={{ marginBottom: 10, width: 500, lineHeight: 1.5 }}>
+          <strong>Reset budget cache</strong> will clear all cached values for
+          the budget and recalculate the entire budget. All values in the budget
+          are cached for performance reasons, and if there is a bug in the cache
+          you won't see correct values. There is no danger in resetting the
+          cache. Hopefully you never have to do this.
+        </Text>
+        <ButtonWithLoading loading={resettingCache} onClick={onResetCache}>
+          Reset budget cache
+        </ButtonWithLoading>
       </View>
 
-      {expanded && (
-        <View style={{ marginBottom: 20, alignItems: 'flex-start' }}>
-          <Text>
-            <strong>Budget ID</strong>: {prefs.id}
-          </Text>
+      <View
+        style={{
+          backgroundColor: colors.n9,
+          alignItems: 'flex-start',
+          padding: 15,
+          borderRadius: 4,
+          border: '1px solid ' + colors.n8
+        }}
+      >
+        <Text style={{ marginBottom: 10, width: 500, lineHeight: 1.5 }}>
+          <strong>Reset sync</strong> will remove all local data used to track
+          changes for syncing, and create a fresh sync id on our server. This
+          file on other devices will have to be re-downloaded to use the new
+          sync id. Use this if there is a problem with syncing and you want to
+          start fresh.
+        </Text>
 
-          <View
-            style={{
-              backgroundColor: colors.n9,
-              alignItems: 'flex-start',
-              padding: 15,
-              borderRadius: 4,
-              marginTop: 20,
-              border: '1px solid ' + colors.n8
-            }}
-          >
-            <Text style={{ marginBottom: 10, width: 500, lineHeight: 1.5 }}>
-              <strong>Reset budget cache</strong> will clear all cached values
-              for the budget and recalculate the entire budget. All values in
-              the budget are cached for performance reasons, and if there is a
-              bug in the cache you won't see correct values. There is no danger
-              in resetting the cache. Hopefully you never have to do this.
-            </Text>
-            <ButtonWithLoading loading={resettingCache} onClick={onResetCache}>
-              Reset budget cache
-            </ButtonWithLoading>
-          </View>
-
-          <View
-            style={{
-              backgroundColor: colors.n9,
-              alignItems: 'flex-start',
-              padding: 15,
-              borderRadius: 4,
-              marginTop: 20,
-              border: '1px solid ' + colors.n8
-            }}
-          >
-            <Text style={{ marginBottom: 10, width: 500, lineHeight: 1.5 }}>
-              <strong>Reset sync</strong> will remove all local data used to
-              track changes for syncing, and create a fresh sync id on our
-              server. This file on other devices will have to be re-downloaded
-              to use the new sync id. Use this if there is a problem with
-              syncing and you want to start fresh.
-            </Text>
-
-            <ButtonWithLoading loading={resetting} onClick={onResetSync}>
-              Reset sync
-            </ButtonWithLoading>
-            <Text style={{ marginTop: 15, color: colors.n4, fontSize: 12 }}>
-              Sync ID: {prefs.groupId || '(none)'}
-            </Text>
-          </View>
-        </View>
-      )}
-    </View>
+        <ButtonWithLoading loading={resetting} onClick={onResetSync}>
+          Reset sync
+        </ButtonWithLoading>
+        <Text style={{ marginTop: 15, color: colors.n4, fontSize: 12 }}>
+          Sync ID: {prefs.groupId || '(none)'}
+        </Text>
+      </View>
+    </Section>
   );
 }
 
