@@ -144,10 +144,6 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
     }
   }
 
-  function onAutoUpdate(e) {
-    saveGlobalPrefs({ autoUpdate: e.target.checked });
-  }
-
   return (
     <>
       {!Platform.isBrowser && (
@@ -196,37 +192,6 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
               A restart is required for this change to take effect
             </Information>
           )}
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 30,
-              alignItems: 'flex-start'
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={globalPrefs.autoUpdate}
-              style={{ marginRight: 5 }}
-              onChange={onAutoUpdate}
-            />
-
-            <View>
-              <Text style={{ fontSize: 15 }}>
-                Automatically check for updates
-              </Text>
-              <View
-                style={{
-                  color: colors.n2,
-                  marginTop: 10,
-                  lineHeight: '1.4em'
-                }}
-              >
-                By default, Actual will automatically apply new updates as they
-                are available. Disabling this will avoid updating Actual. You
-                will need to go to the About menu to manually check for updates.
-              </View>
-            </View>
-          </View>
         </Section>
       )}
     </>
