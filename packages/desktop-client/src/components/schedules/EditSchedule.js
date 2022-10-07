@@ -9,7 +9,13 @@ import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import { Stack, View, Text, Button } from 'loot-design/src/components/common';
+import {
+  Stack,
+  View,
+  Text,
+  Button,
+  Input
+} from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
 import {
   FormField,
@@ -112,6 +118,7 @@ export default function ScheduleDetails() {
             schedule: action.schedule,
             isCustom,
             fields: {
+              name: schedule.name,
               payee: schedule._payee,
               account: schedule._account,
               amount: schedule._amount || 0,
@@ -198,6 +205,7 @@ export default function ScheduleDetails() {
       error: null,
       fields: mergeFields(
         {
+          name: '',
           payee: null,
           account: null,
           amount: null,
@@ -230,6 +238,7 @@ export default function ScheduleDetails() {
           patterns: []
         };
         let schedule = {
+          name: '',
           posts_transaction: false,
           _date: date,
           _conditions: [{ op: 'isapprox', field: 'date', value: date }],
@@ -358,6 +367,7 @@ export default function ScheduleDetails() {
     let res = await sendCatch(adding ? 'schedule/create' : 'schedule/update', {
       schedule: {
         id: state.schedule.id,
+        name: state.fields.name,
         posts_transaction: state.fields.posts_transaction
       },
       conditions
@@ -424,9 +434,26 @@ export default function ScheduleDetails() {
 
   return (
     <Page
-      title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
+      title={
+        state.fields.name
+          ? `Schedule: ${state.fields.name}`
+          : payee
+          ? `Schedule: ${payee.name}`
+          : 'Schedule'
+      }
       modalSize="medium"
     >
+      <FormField style={{ marginTop: 20, alignItems: 'flex-end' }}>
+        <FormLabel title="Custom Name" />
+        <Input
+          value={state.fields.name}
+          placeholder={payee ? payee.name : ''}
+          onUpdate={name =>
+            dispatch({ type: 'set-field', field: 'name', value: name })
+          }
+        />
+      </FormField>
+
       <Stack direction="row" style={{ marginTop: 20 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Payee" />

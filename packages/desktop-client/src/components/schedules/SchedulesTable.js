@@ -165,8 +165,11 @@ export function SchedulesTable({
         }}
       >
         <Field width="flex">
-          <DisplayId type="payees" id={item._payee} fallback="Any" />
-          {/* )} */}
+          {item.name ? (
+            item.name
+          ) : (
+            <DisplayId type="payees" id={item._payee} fallback="Any" />
+          )}
         </Field>
         <Field width="flex">
           <DisplayId type="accounts" id={item._account} fallback="Any" />
@@ -233,7 +236,7 @@ export function SchedulesTable({
   return (
     <>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
-        <Field width="flex">Payee</Field>
+        <Field width="flex">Name</Field>
         <Field width="flex">Account</Field>
         <Field width={110}>Next date</Field>
         <Field width={120}>Status</Field>
