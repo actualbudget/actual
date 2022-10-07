@@ -20,6 +20,7 @@ import { styles, colors } from 'loot-design/src/style';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 
 import useServerVersion from '../hooks/useServerVersion';
+import { Page } from './Page';
 
 let dateFormats = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
@@ -29,20 +30,24 @@ let dateFormats = [
   { value: 'dd.MM.yyyy', label: 'DD.MM.YYYY' }
 ];
 
-function Title({ name, style }) {
+function Section({ title, children, style, titleProps, ...props }) {
   return (
-    <View
-      style={[
-        { fontSize: 20, fontWeight: 500, marginBottom: 20, flexShrink: 0 },
-        style
-      ]}
-    >
-      {name}
+    <View style={[{ gap: 20, alignItems: 'flex-start' }, style]} {...props}>
+      <View
+        style={[
+          { fontSize: 20, fontWeight: 500, flexShrink: 0 },
+          titleProps && titleProps.style
+        ]}
+        {...titleProps}
+      >
+        {title}
+      </View>
+      {children}
     </View>
   );
 }
 
-function Advanced({ prefs, userData, pushModal, resetSync }) {
+function Advanced({ prefs, resetSync }) {
   let [expanded, setExpanded] = useState(true);
   let [resetting, setResetting] = useState(false);
   let [resettingCache, setResettingCache] = useState(false);
@@ -60,7 +65,7 @@ function Advanced({ prefs, userData, pushModal, resetSync }) {
   }
 
   return (
-    <View style={{ alignItems: 'flex-start', marginTop: 55 }}>
+    <View style={{ alignItems: 'flex-start', marginTop: 25 }}>
       <View
         style={[
           {
@@ -144,13 +149,7 @@ function Advanced({ prefs, userData, pushModal, resetSync }) {
   );
 }
 
-function GlobalSettings({
-  globalPrefs,
-  userData,
-  saveGlobalPrefs,
-  pushModal,
-  closeBudget
-}) {
+function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
   let [documentDirChanged, setDirChanged] = useState(false);
   let dirScrolled = useRef(null);
 
@@ -179,15 +178,12 @@ function GlobalSettings({
   }
 
   return (
-    <View>
-      <View>
-        <Title name="General" />
-
-        {!Platform.isBrowser && (
+    <>
+      {!Platform.isBrowser && (
+        <Section title="General">
           <View
             style={{
               flexDirection: 'row',
-              maxWidth: 550,
               alignItems: 'center',
               overflow: 'hidden'
             }}
@@ -223,55 +219,50 @@ function GlobalSettings({
               Change location
             </Button>
           </View>
-        )}
+          )}
+          {documentDirChanged && (
+            <Information style={{ marginTop: 10 }}>
+              A restart is required for this change to take effect
+            </Information>
+          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              marginTop: 30,
+              alignItems: 'flex-start'
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={globalPrefs.autoUpdate}
+              style={{ marginRight: 5 }}
+              onChange={onAutoUpdate}
+            />
 
-        {documentDirChanged && (
-          <Information style={{ marginTop: 10 }}>
-            A restart is required for this change to take effect
-          </Information>
-        )}
-
-        <View
-          style={{
-            flexDirection: 'row',
-            marginTop: 30,
-            alignItems: 'flex-start'
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={globalPrefs.autoUpdate}
-            style={{ marginRight: 5 }}
-            onChange={onAutoUpdate}
-          />
-
-          <View>
-            <Text style={{ fontSize: 15 }}>
-              Automatically check for updates
-            </Text>
-            <View
-              style={{
-                color: colors.n2,
-                marginTop: 10,
-                maxWidth: 600,
-                lineHeight: '1.4em'
-              }}
-            >
-              By default, Actual will automatically apply new updates as they
-              are available. Disabling this will avoid updating Actual. You will
-              need to go to the About menu to manually check for updates.
+            <View>
+              <Text style={{ fontSize: 15 }}>
+                Automatically check for updates
+              </Text>
+              <View
+                style={{
+                  color: colors.n2,
+                  marginTop: 10,
+                  lineHeight: '1.4em'
+                }}
+              >
+                By default, Actual will automatically apply new updates as they
+                are available. Disabling this will avoid updating Actual. You
+                will need to go to the About menu to manually check for updates.
+              </View>
             </View>
           </View>
-        </View>
-      </View>
+        </Section>
+      )}
 
-      <View style={{ marginTop: 30 }}>
-        <Title name="Privacy" />
-
+      <Section title="Privacy">
         <View
           style={{
             flexDirection: 'row',
-            marginTop: 30,
             alignItems: 'flex-start'
           }}
         >
@@ -280,41 +271,37 @@ function GlobalSettings({
             checked={globalPrefs.trackUsage}
             style={{ marginRight: 5 }}
             onChange={onTrackUsage}
+            id="settings-trackUsage"
           />
 
           <View>
-            <Text style={{ fontSize: 15 }}>
-              Send basic usage statistics back to Actual{"'"}s servers
-            </Text>
+            <label for="settings-trackUsage">
+              <Text style={{ fontSize: 15 }}>
+                Send basic usage statistics back to Actual’s servers
+              </Text>
+            </label>
             <View
               style={{
                 color: colors.n2,
                 marginTop: 10,
-                maxWidth: 600,
                 lineHeight: '1.4em'
               }}
             >
-              We don{"'"}t track anything specific &mdash; only the fact that
-              you{"'"}ve opened Actual. This helps by giving us important
-              feedback about how popular new features are.
+              We don’t track anything specific &mdash; only the fact that you’ve
+              opened Actual. This helps by giving us important feedback about
+              how popular new features are.
             </View>
+            <Text style={{ marginTop: 10, color: colors.n5 }}>
+              This setting applies to all of your files.
+            </Text>
           </View>
         </View>
-      </View>
-    </View>
+      </Section>
+    </>
   );
 }
 
-function FileSettings({
-  savePrefs,
-  prefs,
-  userData,
-  localServerURL,
-  pushModal,
-  resetSync,
-  setAppState,
-  signOut
-}) {
+function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
   function onDateFormat(e) {
     let format = e.target.value;
     savePrefs({ dateFormat: format });
@@ -336,29 +323,21 @@ function FileSettings({
 
   let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
   let numberFormat = prefs.numberFormat || 'comma-dot';
+  let labelStyle = css({
+    textAlign: 'right',
+    display: 'inline-block',
+    width: 100
+  });
 
   return (
-    <View>
-      <View style={{ marginTop: 30 }}>
-        <Title name="Formatting" />
-
+    <>
+      <Section title="Formatting">
         <Text>
-          Date format:{' '}
+          <label for="settings-numberFormat" {...labelStyle}>
+            Number format:{' '}
+          </label>
           <select
-            {...css({ marginLeft: 5, fontSize: 14 })}
-            onChange={onDateFormat}
-          >
-            {dateFormats.map(f => (
-              <option value={f.value} selected={f.value === dateFormat}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-        </Text>
-
-        <Text style={{ marginTop: 20 }}>
-          Number format:{' '}
-          <select
+            id="settings-numberFormat"
             {...css({ marginLeft: 5, fontSize: 14 })}
             onChange={onNumberFormat}
           >
@@ -369,125 +348,93 @@ function FileSettings({
             ))}
           </select>
         </Text>
-      </View>
 
-      <View style={{ marginTop: 30 }}>
-        <Title name="Encryption" />
-        <View style={{ flexDirection: 'row' }}>
-          <View>
-            <Text style={{ fontWeight: 700, fontSize: 15 }}>
-              End-to-end encryption
+        <Text>
+          <label for="settings-dateFormat" {...labelStyle}>
+            Date format:{' '}
+          </label>
+          <select
+            id="settings-dateFormat"
+            {...css({ marginLeft: 5, fontSize: 14 })}
+            onChange={onDateFormat}
+          >
+            {dateFormats.map(f => (
+              <option value={f.value} selected={f.value === dateFormat}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </Text>
+      </Section>
+
+      <Section title="End-to-end Encryption">
+        <View style={{ color: colors.n2, lineHeight: '1.4em' }}>
+          {prefs.encryptKeyId ? (
+            <Text>
+              <Text style={{ color: colors.g4, fontWeight: 600 }}>
+                Encryption is turned on.
+              </Text>{' '}
+              Your data is encrypted with a key that only you have before
+              sending it out to the cloud . Local data remains unencrypted so if
+              you forget your password you can re-encrypt it.
+              <Button style={{ marginTop: 10 }} onClick={() => onChangeKey()}>
+                Generate new key
+              </Button>
             </Text>
-            <View
-              style={{
-                color: colors.n2,
-                marginTop: 10,
-                maxWidth: 600,
-                lineHeight: '1.4em'
-              }}
-            >
-              {prefs.encryptKeyId ? (
-                <Text>
-                  <Text style={{ color: colors.g4, fontWeight: 600 }}>
-                    Encryption is turned on.
-                  </Text>{' '}
-                  Your data is encrypted with a key that only you have before
-                  sending it out to the cloud . Local data remains unencrypted
-                  so if you forget your password you can re-encrypt it.
-                  <Button
-                    style={{ marginTop: 10 }}
-                    onClick={() => onChangeKey()}
-                  >
-                    Generate new key
-                  </Button>
-                </Text>
-              ) : (
-                <View style={{ alignItems: 'flex-start' }}>
-                  <Text style={{ lineHeight: '1.4em' }}>
-                    Encryption is not enabled. Any data on our servers is still
-                    stored safely and securely, but it's not end-to-end
-                    encrypted which means we have the ability to read it (but we
-                    won't). If you want, you can use a password to encrypt your
-                    data on our servers.
-                  </Text>
-                  <Button
-                    style={{ marginTop: 10 }}
-                    onClick={() => {
-                      alert(
-                        'End-to-end encryption is not supported on the self-hosted service yet'
-                      );
-                      // pushModal('create-encryption-key');
-                    }}
-                  >
-                    Enable encryption
-                  </Button>
-                </View>
-              )}
+          ) : (
+            <View style={{ alignItems: 'flex-start' }}>
+              <Text style={{ lineHeight: '1.4em' }}>
+                Encryption is not enabled. Any data on our servers is still
+                stored safely and securely, but it's not end-to-end encrypted
+                which means we have the ability to read it (but we won't). If
+                you want, you can use a password to encrypt your data on our
+                servers.
+              </Text>
+              <Button
+                style={{ marginTop: 10 }}
+                onClick={() => {
+                  alert(
+                    'End-to-end encryption is not supported on the self-hosted service yet'
+                  );
+                  // pushModal('create-encryption-key');
+                }}
+              >
+                Enable encryption
+              </Button>
             </View>
-          </View>
+          )}
         </View>
-      </View>
+      </Section>
 
-      <View style={{ marginTop: 30, alignItems: 'flex-start' }}>
-        <Title name="Export" />
+      <Section title="Export">
+        <Text>
+          Your data will be exported as a zip file containing{' '}
+          <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
+          imported into another Actual instance by clicking the “Import file”
+          button and then choosing “Actual” on the Files page.
+        </Text>
+        {prefs.encryptKeyId ? (
+          <Text>
+            Even though encryption is enabled, the exported zip file will not
+            have any encryption.
+          </Text>
+        ) : null}
         <Button onClick={onExport}>Export data</Button>
-      </View>
+      </Section>
 
-      <Advanced
-        prefs={prefs}
-        userData={userData}
-        pushModal={pushModal}
-        resetSync={resetSync}
-      />
-    </View>
+      <Advanced prefs={prefs} resetSync={resetSync} />
+    </>
   );
 }
 
-function SettingsLink({ to, name, style, first, last }) {
-  return (
-    <AnchorLink
-      to={to}
-      style={[
-        {
-          fontSize: 14,
-          padding: '6px 10px',
-          borderBottom: '2px solid transparent',
-          textDecoration: 'none',
-          borderRadius: first ? '4px 0 0 4px' : last ? '0 4px 4px 0' : 4,
-          border: '1px solid ' + colors.n4,
-          color: colors.n3
-        },
-        style
-      ]}
-      activeStyle={{
-        backgroundColor: colors.p6,
-        borderColor: colors.p6,
-        color: 'white'
-      }}
-    >
-      {name}
-    </AnchorLink>
-  );
-}
-
-function Version() {
+function About() {
   const version = useServerVersion();
 
   return (
-    <Text
-      style={[
-        {
-          alignSelf: 'center',
-          color: colors.n7,
-          ':hover': { color: colors.n2 },
-          padding: '6px 10px'
-        },
-        styles.staticText,
-        styles.smallText
-      ]}
-    >
-      {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
-    </Text>
+    <Section title="About">
+      <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
+      <Text>Server version: {version}</Text>
+    </Section>
   );
 }
 
@@ -509,68 +456,23 @@ class Settings extends React.Component {
     let { prefs, globalPrefs, localServerURL, userData, match } = this.props;
 
     return (
-      <View style={[styles.page, { overflow: 'hidden', fontSize: 14 }]}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignSelf: 'center',
-            margin: '15px 0 5px 0'
-          }}
-        >
-          <SettingsLink to={`${match.path}/file`} name="File" first={true} />
-          <SettingsLink to={`${match.path}/global`} name="Global" last={true} />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignSelf: 'center',
-            margin: '0 0 10px 0'
-          }}
-        >
-          <Version />
-        </View>
+      <Page title="Settings">
+        <View style={{ flexShrink: 0, gap: 30, maxWidth: 600 }}>
+          <About />
 
-        <View
-          style={[
-            styles.pageContent,
-            {
-              alignItems: 'flex-start',
-              flex: 1,
-              overflow: 'auto',
-              paddingBottom: 20
-            }
-          ]}
-        >
-          <View style={{ flexShrink: 0 }}>
-            <Switch>
-              <Route path={`${match.path}/`} exact>
-                <Redirect to={`${match.path}/file`} />
-              </Route>
-              <Route path={`${match.path}/global`}>
-                <GlobalSettings
-                  globalPrefs={globalPrefs}
-                  userData={userData}
-                  saveGlobalPrefs={this.props.saveGlobalPrefs}
-                  pushModal={this.props.pushModal}
-                  closeBudget={this.props.closeBudget}
-                />
-              </Route>
-              <Route path={`${match.path}/file`}>
-                <FileSettings
-                  prefs={prefs}
-                  localServerURL={localServerURL}
-                  userData={userData}
-                  pushModal={this.props.pushModal}
-                  savePrefs={this.props.savePrefs}
-                  setAppState={this.props.setAppState}
-                  signOut={this.props.signOut}
-                  resetSync={this.props.resetSync}
-                />
-              </Route>
-            </Switch>
-          </View>
+          <GlobalSettings
+            globalPrefs={globalPrefs}
+            saveGlobalPrefs={this.props.saveGlobalPrefs}
+          />
+
+          <FileSettings
+            prefs={prefs}
+            userData={userData}
+            pushModal={this.props.pushModal}
+            resetSync={this.props.resetSync}
+          />
         </View>
-      </View>
+      </Page>
     );
   }
 }
