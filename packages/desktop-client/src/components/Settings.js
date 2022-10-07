@@ -148,10 +148,6 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
     saveGlobalPrefs({ autoUpdate: e.target.checked });
   }
 
-  function onTrackUsage(e) {
-    saveGlobalPrefs({ trackUsage: e.target.checked });
-  }
-
   return (
     <>
       {!Platform.isBrowser && (
@@ -233,45 +229,6 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
           </View>
         </Section>
       )}
-
-      <Section title="Privacy">
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'flex-start'
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={globalPrefs.trackUsage}
-            style={{ marginRight: 7 }}
-            onChange={onTrackUsage}
-            id="settings-trackUsage"
-          />
-
-          <View>
-            <label for="settings-trackUsage">
-              <Text style={{ fontSize: 15 }}>
-                Send basic usage statistics back to Actual’s servers
-              </Text>
-            </label>
-            <View
-              style={{
-                color: colors.n2,
-                marginTop: 10,
-                lineHeight: '1.4em'
-              }}
-            >
-              We don’t track anything specific &mdash; only the fact that you’ve
-              opened Actual. This helps by giving us important feedback about
-              how popular new features are.
-            </View>
-            <Text style={{ marginTop: 10, color: colors.n5 }}>
-              This setting applies to all of your files.
-            </Text>
-          </View>
-        </View>
-      </Section>
     </>
   );
 }
