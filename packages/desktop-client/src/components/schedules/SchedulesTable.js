@@ -165,10 +165,11 @@ export function SchedulesTable({
         }}
       >
         <Field width="flex">
-          <DisplayId type="payees" id={item._payee} />
+          <DisplayId type="payees" id={item._payee} fallback="Any" />
+          {/* )} */}
         </Field>
         <Field width="flex">
-          <DisplayId type="accounts" id={item._account} />
+          <DisplayId type="accounts" id={item._account} fallback="Any" />
         </Field>
         <Field width={110}>
           {item.next_date

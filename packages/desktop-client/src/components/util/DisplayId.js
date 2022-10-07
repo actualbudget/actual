@@ -5,7 +5,12 @@ import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-export default function DisplayId({ type, id, noneColor = colors.n8 }) {
+export default function DisplayId({
+  type,
+  id,
+  noneColor = colors.n8,
+  fallback = 'None'
+}) {
   let DataComponent;
 
   switch (type) {
@@ -27,9 +32,9 @@ export default function DisplayId({ type, id, noneColor = colors.n8 }) {
         return (
           <Text
             style={item == null ? { color: noneColor } : null}
-            title={item ? item.name : 'None'}
+            title={item ? item.name : fallback}
           >
-            {item ? item.name : 'None'}
+            {item ? item.name : fallback}
           </Text>
         );
       }}
