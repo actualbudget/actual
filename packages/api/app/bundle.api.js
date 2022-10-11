@@ -52962,7 +52962,6 @@ app.method('budget/set-zero', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mut
 app.method('budget/set-3month-avg', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["set3MonthAvg"])));
 app.method('budget/set-all-future', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["setAllFuture"])));
 app.method('budget/hold-for-next-month', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["holdForNextMonth"])));
-app.method('budget/hold-for-future-months', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["holdForFutureMonths"])));
 app.method('budget/reset-hold', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["resetHold"])));
 app.method('budget/cover-overspending', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["coverOverspending"])));
 app.method('budget/transfer-available', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["transferAvailable"])));
