@@ -231,18 +231,11 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
 
   let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
   let numberFormat = prefs.numberFormat || 'comma-dot';
-  let labelStyle = css({
-    display: 'inline-block',
-    width: 100
-  });
-
   return (
     <>
       <Section title="Formatting">
         <Text>
-          <label for="settings-numberFormat" {...labelStyle}>
-            Number format:{' '}
-          </label>
+          <label for="settings-numberFormat">Number format: </label>
           <select
             id="settings-numberFormat"
             {...css({ marginLeft: 5, fontSize: 14 })}
@@ -257,9 +250,7 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
         </Text>
 
         <Text>
-          <label for="settings-dateFormat" {...labelStyle}>
-            Date format:{' '}
-          </label>
+          <label for="settings-dateFormat">Date format: </label>
           <select
             id="settings-dateFormat"
             {...css({ marginLeft: 5, fontSize: 14 })}
