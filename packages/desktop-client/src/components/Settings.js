@@ -53,6 +53,7 @@ function ButtonSetting({ button, children, onClick }) {
     <View
       style={{
         backgroundColor: colors.n9,
+        alignSelf: 'flex-start',
         alignItems: 'flex-start',
         padding: 15,
         borderRadius: 4,
@@ -265,63 +266,60 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
         </Text>
       </Section>
 
-      <Section title="End-to-end Encryption">
-        {prefs.encryptKeyId ? (
-          <ButtonSetting
-            button={
-              <Button onClick={() => onChangeKey()}>Generate new key</Button>
-            }
-          >
-            <Text>
-              <Text style={{ color: colors.g4, fontWeight: 600 }}>
-                Encryption is turned on.
-              </Text>{' '}
-              Your data is encrypted with a key that only you have before
-              sending it out to the cloud . Local data remains unencrypted so if
-              you forget your password you can re-encrypt it.
-            </Text>
-          </ButtonSetting>
-        ) : (
-          <ButtonSetting
-            button={
-              <Button
-                onClick={() => {
-                  alert(
-                    'End-to-end encryption is not supported on the self-hosted service yet'
-                  );
-                  // pushModal('create-encryption-key');
-                }}
-              >
-                Enable encryption…
-              </Button>
-            }
-          >
-            <Text>
-              Encryption is not enabled. Any data on our servers is still stored
-              safely and securely, but it's not end-to-end encrypted which means
-              we have the ability to read it (but we won't). If you want, you
-              can use a password to encrypt your data on our servers.
-            </Text>
-          </ButtonSetting>
-        )}
-      </Section>
-
-      <Section title="Export">
-        <ButtonSetting button={<Button onClick={onExport}>Export data</Button>}>
+      {prefs.encryptKeyId ? (
+        <ButtonSetting
+          button={
+            <Button onClick={() => onChangeKey()}>Generate new key</Button>
+          }
+        >
           <Text>
-            Your data will be exported as a zip file containing{' '}
-            <code>db.sqlite</code> and <code>metadata.json</code> files. It can
-            be imported into another Actual instance by clicking the “Import
-            file” button and then choosing “Actual” on the Files page.
+            <Text style={{ color: colors.g4, fontWeight: 600 }}>
+              End-to-end Encryption is turned on.
+            </Text>{' '}
+            Your data is encrypted with a key that only you have before sending
+            it out to the cloud . Local data remains unencrypted so if you
+            forget your password you can re-encrypt it.
           </Text>
-          {prefs.encryptKeyId ? (
-            <Text>
-              Even though encryption is enabled, the exported zip file will not
-              have any encryption.
-            </Text>
-          ) : null}
         </ButtonSetting>
-      </Section>
+      ) : (
+        <ButtonSetting
+          button={
+            <Button
+              onClick={() => {
+                alert(
+                  'End-to-end encryption is not supported on the self-hosted service yet'
+                );
+                // pushModal('create-encryption-key');
+              }}
+            >
+              Enable encryption…
+            </Button>
+          }
+        >
+          <Text>
+            <strong>End-to-end encryption</strong> is not enabled. Any data on
+            our servers is still stored safely and securely, but it's not
+            end-to-end encrypted which means we have the ability to read it (but
+            we won't). If you want, you can use a password to encrypt your data
+            on our servers.
+          </Text>
+        </ButtonSetting>
+      )}
+
+      <ButtonSetting button={<Button onClick={onExport}>Export data</Button>}>
+        <Text>
+          <strong>Export</strong> your data as a zip file containing{' '}
+          <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
+          imported into another Actual instance by clicking the “Import file”
+          button and then choosing “Actual” on the Files page.
+        </Text>
+        {prefs.encryptKeyId ? (
+          <Text>
+            Even though encryption is enabled, the exported zip file will not
+            have any encryption.
+          </Text>
+        ) : null}
+      </ButtonSetting>
 
       <Advanced prefs={prefs} resetSync={resetSync} />
     </>
