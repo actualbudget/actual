@@ -1211,6 +1211,10 @@ handlers['save-global-prefs'] = async function(prefs) {
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
+  if ('autoUpdate' in prefs) {
+    await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
+    process.send({ type: 'shouldAutoUpdate', flag: prefs.autoUpdate });
+  }
   if ('documentDir' in prefs) {
     if (await fs.exists(prefs.documentDir)) {
       await asyncStorage.setItem('document-dir', prefs.documentDir);
@@ -1227,12 +1231,14 @@ handlers['load-global-prefs'] = async function() {
     [, floatingSidebar],
     [, seenTutorial],
     [, maxMonths],
+    [, autoUpdate],
     [, documentDir],
     [, encryptKey]
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'seen-tutorial',
     'max-months',
+    'auto-update',
     'document-dir',
     'encrypt-key'
   ]);
@@ -1240,6 +1246,7 @@ handlers['load-global-prefs'] = async function() {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
     seenTutorial: seenTutorial === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
+    autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id
   };
@@ -2152,6 +2159,14 @@ export async function initApp(version, isDev, socketName) {
   }
 
   connection.init(socketName, app.handlers);
+
+  if (!isDev && !Platform.isMobile && !Platform.isWeb) {
+    let autoUpdate = await asyncStorage.getItem('auto-update');
+    process.send({
+      type: 'shouldAutoUpdate',
+      flag: autoUpdate == null || autoUpdate === 'true'
+    });
+  }
 
   if (isDev || process.env.IS_BETA) {
     global.$send = (name, args) => runHandler(app.handlers[name], args);

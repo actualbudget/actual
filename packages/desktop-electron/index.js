@@ -21,6 +21,7 @@ global.fetch = require('node-fetch');
 
 const SentryClient = require('@sentry/electron');
 const findOpenSocket = require('./findOpenSocket');
+const updater = require('./updater');
 const about = require('./about');
 const { SentryMetricIntegration } = require('@jlongster/sentry-metrics-actual');
 
@@ -101,6 +102,13 @@ function createBackgroundProcess(socketName) {
         break;
       case 'captureBreadcrumb':
         SentryClient.addBreadcrumb(msg.breadcrumb);
+        break;
+      case 'shouldAutoUpdate':
+        if (msg.flag) {
+          updater.start();
+        } else {
+          updater.stop();
+        }
         break;
       default:
         console.log('Unknown server message: ' + msg.type);
@@ -360,7 +368,16 @@ ipcMain.on('screenshot', () => {
 });
 
 ipcMain.on('check-for-update', () => {
-  // unimplemented
+  // If the updater is in the middle of an update already, send the
+  // about window the current status
+  if (updater.isChecking()) {
+    // This should always come from the about window so we can
+    // guarantee that it exists. If we ever see an error here
+    // something is wrong
+    about.getWindow().webContents.send(updater.getLastEvent());
+  } else {
+    updater.check();
+  }
 });
 
 ipcMain.on('apply-update', () => {
