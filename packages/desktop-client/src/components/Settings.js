@@ -223,7 +223,6 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
   let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
   let numberFormat = prefs.numberFormat || 'comma-dot';
   let labelStyle = css({
-    textAlign: 'right',
     display: 'inline-block',
     width: 100
   });
