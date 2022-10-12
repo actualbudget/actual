@@ -87,7 +87,9 @@ function Advanced({ prefs, resetSync }) {
   return (
     <Section title="Advanced Settings" style={{ marginBottom: 25 }}>
       <Text>Budget ID: {prefs.id}</Text>
-      <Text>Sync ID: {prefs.groupId || '(none)'}</Text>
+      <Text style={{ color: colors.n6 }}>
+        Sync ID: {prefs.groupId || '(none)'}
+      </Text>
 
       <ButtonSetting
         button={
