@@ -292,7 +292,7 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
                   // pushModal('create-encryption-key');
                 }}
               >
-                Enable encryption
+                Enable encryption…
               </Button>
             }
           >
