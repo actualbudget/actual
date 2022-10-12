@@ -13,6 +13,7 @@ import {
   View,
   Text,
   Button,
+  Link,
   ButtonWithLoading,
   AnchorLink
 } from 'loot-design/src/components/common';
@@ -71,6 +72,7 @@ function ButtonSetting({ button, children, onClick }) {
 function Advanced({ prefs, resetSync }) {
   let [resetting, setResetting] = useState(false);
   let [resettingCache, setResettingCache] = useState(false);
+  let [expanded, setExpanded] = useState(false);
 
   async function onResetSync() {
     setResetting(true);
@@ -84,7 +86,7 @@ function Advanced({ prefs, resetSync }) {
     setResettingCache(false);
   }
 
-  return (
+  return expanded ? (
     <Section title="Advanced Settings" style={{ marginBottom: 25 }}>
       <Text>Budget ID: {prefs.id}</Text>
       <Text style={{ color: colors.n6 }}>
@@ -123,6 +125,13 @@ function Advanced({ prefs, resetSync }) {
         </Text>
       </ButtonSetting>
     </Section>
+  ) : (
+    <Link
+      onClick={() => setExpanded(true)}
+      style={{ flexShrink: 0, alignSelf: 'flex-start', color: colors.p4 }}
+    >
+      Show advanced settings
+    </Link>
   );
 }
 
