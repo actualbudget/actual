@@ -23,7 +23,7 @@ env:
   # - actual-server:1.3.7
   # - actual-server:sha-90dd603
   TAGS: |
-    type=edge
+    type=edge,value=edge
     type=semver,pattern={{version}}
     type=semver,pattern={{major}}.{{minor}}
     type=sha
