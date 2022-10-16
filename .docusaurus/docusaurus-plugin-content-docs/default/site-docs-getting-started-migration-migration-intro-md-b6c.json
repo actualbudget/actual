@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/migration/migration-intro.md",
   "sourceDirName": "Getting-Started/migration",
   "slug": "/Getting-Started/migration/migration-intro",
-  "permalink": "/actual-community-docs/Getting-Started/migration/migration-intro",
+  "permalink": "/docs/Getting-Started/migration/migration-intro",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/migration/migration-intro.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/migration/migration-intro.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Managing Files",
-    "permalink": "/actual-community-docs/Getting-Started/managefiles"
+    "permalink": "/docs/Getting-Started/managefiles"
   },
   "next": {
     "title": "Migrating from YNAB4",
-    "permalink": "/actual-community-docs/Getting-Started/migration/ynab4"
+    "permalink": "/docs/Getting-Started/migration/ynab4"
   }
 }

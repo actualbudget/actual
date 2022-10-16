@@ -6,9 +6,9 @@
   "source": "@site/docs/Accounts/overview.md",
   "sourceDirName": "Accounts",
   "slug": "/Accounts/overview",
-  "permalink": "/actual-community-docs/Accounts/overview",
+  "permalink": "/docs/Accounts/overview",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/overview.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/overview.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Managing Credit Cards",
-    "permalink": "/actual-community-docs/Budgeting/creditcards"
+    "permalink": "/docs/Budgeting/creditcards"
   },
   "next": {
     "title": "Bank accounts",
-    "permalink": "/actual-community-docs/Accounts/addaccount"
+    "permalink": "/docs/Accounts/addaccount"
   }
 }

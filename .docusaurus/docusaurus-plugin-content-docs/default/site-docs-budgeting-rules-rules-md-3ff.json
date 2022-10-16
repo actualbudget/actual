@@ -6,9 +6,9 @@
   "source": "@site/docs/Budgeting/rules/rules.md",
   "sourceDirName": "Budgeting/rules",
   "slug": "/Budgeting/rules/",
-  "permalink": "/actual-community-docs/Budgeting/rules/",
+  "permalink": "/docs/Budgeting/rules/",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/rules/rules.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/rules/rules.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Categories",
-    "permalink": "/actual-community-docs/Budgeting/categories"
+    "permalink": "/docs/Budgeting/categories"
   },
   "next": {
     "title": "Supercharge your Budget",
-    "permalink": "/actual-community-docs/Budgeting/rules/rules-custom"
+    "permalink": "/docs/Budgeting/rules/rules-custom"
   }
 }

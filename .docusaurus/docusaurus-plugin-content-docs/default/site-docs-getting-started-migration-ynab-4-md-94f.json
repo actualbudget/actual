@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/migration/ynab4.md",
   "sourceDirName": "Getting-Started/migration",
   "slug": "/Getting-Started/migration/ynab4",
-  "permalink": "/actual-community-docs/Getting-Started/migration/ynab4",
+  "permalink": "/docs/Getting-Started/migration/ynab4",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/migration/ynab4.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/migration/ynab4.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Migration Overview",
-    "permalink": "/actual-community-docs/Getting-Started/migration/migration-intro"
+    "permalink": "/docs/Getting-Started/migration/migration-intro"
   },
   "next": {
     "title": "How Budgeting Works",
-    "permalink": "/actual-community-docs/Budgeting/howitworks"
+    "permalink": "/docs/Budgeting/howitworks"
   }
 }

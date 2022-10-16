@@ -6,9 +6,9 @@
   "source": "@site/docs/Developers/Building-Windows.md",
   "sourceDirName": "Developers",
   "slug": "/Developers/Building-Windows",
-  "permalink": "/actual-community-docs/Developers/Building-Windows",
+  "permalink": "/docs/Developers/Building-Windows",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/Building-Windows.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Developers/Building-Windows.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "ActualQL",
-    "permalink": "/actual-community-docs/Developers/ActualQL"
+    "permalink": "/docs/Developers/ActualQL"
   },
   "next": {
     "title": "Frequently Asked Questions",
-    "permalink": "/actual-community-docs/FAQ"
+    "permalink": "/docs/FAQ"
   }
 }

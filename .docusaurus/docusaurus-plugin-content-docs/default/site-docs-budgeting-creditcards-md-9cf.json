@@ -6,9 +6,9 @@
   "source": "@site/docs/Budgeting/creditcards.md",
   "sourceDirName": "Budgeting",
   "slug": "/Budgeting/creditcards",
-  "permalink": "/actual-community-docs/Budgeting/creditcards",
+  "permalink": "/docs/Budgeting/creditcards",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/creditcards.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/creditcards.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Returns and Reimbursements",
-    "permalink": "/actual-community-docs/Budgeting/returnsandreimbursements"
+    "permalink": "/docs/Budgeting/returnsandreimbursements"
   },
   "next": {
     "title": "Overview",
-    "permalink": "/actual-community-docs/Accounts/overview"
+    "permalink": "/docs/Accounts/overview"
   }
 }

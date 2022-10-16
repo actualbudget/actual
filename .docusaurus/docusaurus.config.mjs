@@ -7,12 +7,12 @@ export default {
   "title": "Actual Budget Documentation",
   "tagline": "Dinosaurs are cool",
   "url": "https://your-docusaurus-test-site.com",
-  "baseUrl": "/actual-community-docs/",
+  "baseUrl": "/docs/",
   "onBrokenLinks": "throw",
   "onBrokenMarkdownLinks": "warn",
   "favicon": "img/favicon.ico",
-  "organizationName": "rich-howell",
-  "projectName": "actual-community-docs",
+  "organizationName": "actualbudget",
+  "projectName": "docs",
   "i18n": {
     "defaultLocale": "en",
     "locales": [
@@ -27,11 +27,11 @@ export default {
       {
         "docs": {
           "routeBasePath": "/",
-          "sidebarPath": "D:\\workspace\\actualbudget\\actual-community-docs\\sidebars.js",
-          "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/"
+          "sidebarPath": "D:\\workspace\\actualbudget\\docs\\sidebars.js",
+          "editUrl": "https://github.com/actualbudget/docs/tree/main/"
         },
         "theme": {
-          "customCss": "D:\\workspace\\actualbudget\\actual-community-docs\\src\\css\\custom.css"
+          "customCss": "D:\\workspace\\actualbudget\\docs\\src\\css\\custom.css"
         }
       }
     ]
@@ -51,7 +51,7 @@ export default {
           "label": "Home"
         },
         {
-          "href": "https://github.com/rich-howell/actual-community-docs",
+          "href": "https://github.com/actualbudget/docs",
           "label": "GitHub",
           "position": "right"
         }

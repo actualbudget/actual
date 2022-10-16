@@ -1,259 +1,259 @@
 {
-  "/actual-community-docs/__docusaurus/debug-b84": {
+  "/docs/__docusaurus/debug-6ee": {
     "__comp": "__comp---theme-debug-config-23-a-2ff",
     "__context": {
-      "plugin": "plugin---actual-community-docs-docusaurus-debug-654-8b2"
+      "plugin": "plugin---docs-docusaurus-debug-590-d78"
     }
   },
-  "/actual-community-docs/__docusaurus/debug/config-7cc": {
+  "/docs/__docusaurus/debug/config-2cd": {
     "__comp": "__comp---theme-debug-config-23-a-2ff",
     "__context": {
-      "plugin": "plugin---actual-community-docs-docusaurus-debug-654-8b2"
+      "plugin": "plugin---docs-docusaurus-debug-590-d78"
     }
   },
-  "/actual-community-docs/__docusaurus/debug/content-1f0": {
+  "/docs/__docusaurus/debug/content-4a7": {
     "__comp": "__comp---theme-debug-contentba-8-ce7",
     "__context": {
-      "plugin": "plugin---actual-community-docs-docusaurus-debug-654-8b2"
+      "plugin": "plugin---docs-docusaurus-debug-590-d78"
     },
-    "allContent": "allContent---actual-community-docs-docusaurus-debug-content-246-111"
+    "allContent": "allContent---docs-docusaurus-debug-content-246-f36"
   },
-  "/actual-community-docs/__docusaurus/debug/globalData-47c": {
+  "/docs/__docusaurus/debug/globalData-650": {
     "__comp": "__comp---theme-debug-global-dataede-0fa",
     "__context": {
-      "plugin": "plugin---actual-community-docs-docusaurus-debug-654-8b2"
+      "plugin": "plugin---docs-docusaurus-debug-590-d78"
     }
   },
-  "/actual-community-docs/__docusaurus/debug/metadata-359": {
+  "/docs/__docusaurus/debug/metadata-84d": {
     "__comp": "__comp---theme-debug-site-metadata-68-e-3d4",
     "__context": {
-      "plugin": "plugin---actual-community-docs-docusaurus-debug-654-8b2"
+      "plugin": "plugin---docs-docusaurus-debug-590-d78"
     }
   },
-  "/actual-community-docs/__docusaurus/debug/registry-ed6": {
+  "/docs/__docusaurus/debug/registry-d25": {
     "__comp": "__comp---theme-debug-registry-679-501",
     "__context": {
-      "plugin": "plugin---actual-community-docs-docusaurus-debug-654-8b2"
+      "plugin": "plugin---docs-docusaurus-debug-590-d78"
     }
   },
-  "/actual-community-docs/__docusaurus/debug/routes-30e": {
+  "/docs/__docusaurus/debug/routes-017": {
     "__comp": "__comp---theme-debug-routes-946-699",
     "__context": {
-      "plugin": "plugin---actual-community-docs-docusaurus-debug-654-8b2"
+      "plugin": "plugin---docs-docusaurus-debug-590-d78"
     }
   },
-  "/actual-community-docs/markdown-page-9a5": {
+  "/docs/markdown-page-1af": {
     "__comp": "__comp---theme-mdx-page-1-f-3-b90",
     "__context": {
-      "plugin": "plugin---actual-community-docs-markdown-page-816-ab0"
+      "plugin": "plugin---docs-markdown-page-67-f-f29"
     },
-    "content": "content---actual-community-docs-markdown-page-393-352"
+    "content": "content---docs-markdown-page-393-8aa"
   },
-  "/actual-community-docs/-42f": {
+  "/docs/-536": {
     "__comp": "__comp---theme-doc-page-1-be-9be",
     "__context": {
-      "plugin": "plugin---actual-community-docs-891-e03"
+      "plugin": "plugin---docs-b-7-e-8df"
     },
-    "versionMetadata": "versionMetadata---actual-community-docs-935-92d"
+    "versionMetadata": "versionMetadata---docs-935-739"
   },
-  "/actual-community-docs/-e00": {
+  "/docs/-e7a": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-c-37-a09"
+    "content": "content---docs-c-37-4d0"
   },
-  "/actual-community-docs/Accounts/addaccount-438": {
+  "/docs/Accounts/addaccount-f1d": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-accounts-addaccount-4-f-4-d5c"
+    "content": "content---docs-accounts-addaccount-4-f-4-e5e"
   },
-  "/actual-community-docs/Accounts/connecting-your-bank-580": {
+  "/docs/Accounts/connecting-your-bank-ce0": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-accounts-connecting-your-bankfcd-ea5"
+    "content": "content---docs-accounts-connecting-your-bankfcd-33d"
   },
-  "/actual-community-docs/Accounts/importing-trans-17b": {
+  "/docs/Accounts/importing-trans-725": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-accounts-importing-trans-775-0a2"
+    "content": "content---docs-accounts-importing-trans-775-c01"
   },
-  "/actual-community-docs/Accounts/overview-6db": {
+  "/docs/Accounts/overview-c33": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-accounts-overview-26-d-cf5"
+    "content": "content---docs-accounts-overview-26-d-e84"
   },
-  "/actual-community-docs/Accounts/payees-1ad": {
+  "/docs/Accounts/payees-1e7": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-accounts-payeesa-90-ee2"
+    "content": "content---docs-accounts-payeesa-90-94c"
   },
-  "/actual-community-docs/Accounts/transfers-787": {
+  "/docs/Accounts/transfers-132": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-accounts-transfersf-19-0f7"
+    "content": "content---docs-accounts-transfersf-19-25f"
   },
-  "/actual-community-docs/Backup-Restore/Backups-029": {
+  "/docs/Backup-Restore/Backups-eed": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-backup-restore-backups-854-46f"
+    "content": "content---docs-backup-restore-backups-854-e9e"
   },
-  "/actual-community-docs/Backup-Restore/Restore-c93": {
+  "/docs/Backup-Restore/Restore-03c": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-backup-restore-restore-270-7b5"
+    "content": "content---docs-backup-restore-restore-270-a34"
   },
-  "/actual-community-docs/Budgeting/categories-f1c": {
+  "/docs/Budgeting/categories-143": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-budgeting-categoriesafb-b9c"
+    "content": "content---docs-budgeting-categoriesafb-f6f"
   },
-  "/actual-community-docs/Budgeting/creditcards-3ca": {
+  "/docs/Budgeting/creditcards-32c": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-budgeting-creditcards-9-cf-bfd"
+    "content": "content---docs-budgeting-creditcards-9-cf-04c"
   },
-  "/actual-community-docs/Budgeting/howitworks-75f": {
+  "/docs/Budgeting/howitworks-c3c": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-budgeting-howitworks-0-fe-ef3"
+    "content": "content---docs-budgeting-howitworks-0-fe-8a5"
   },
-  "/actual-community-docs/Budgeting/reconcile-b78": {
+  "/docs/Budgeting/reconcile-76b": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-budgeting-reconcileecc-acd"
+    "content": "content---docs-budgeting-reconcileecc-504"
   },
-  "/actual-community-docs/Budgeting/returnsandreimbursements-a70": {
+  "/docs/Budgeting/returnsandreimbursements-32e": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-budgeting-returnsandreimbursements-761-d2b"
+    "content": "content---docs-budgeting-returnsandreimbursements-761-bac"
   },
-  "/actual-community-docs/Budgeting/rules/-917": {
+  "/docs/Budgeting/rules/-00f": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-budgeting-rules-3-ff-57e"
+    "content": "content---docs-budgeting-rules-3-ff-151"
   },
-  "/actual-community-docs/Budgeting/rules/rules-custom-a26": {
+  "/docs/Budgeting/rules/rules-custom-479": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-budgeting-rules-rules-custom-615-e90"
+    "content": "content---docs-budgeting-rules-rules-custom-615-e4a"
   },
-  "/actual-community-docs/Budgeting/schedules-500": {
+  "/docs/Budgeting/schedules-4f1": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-budgeting-schedules-556-fb2"
+    "content": "content---docs-budgeting-schedules-556-d93"
   },
-  "/actual-community-docs/category/backup--restore-5a5": {
+  "/docs/category/backup--restore-4f7": {
     "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
-    "categoryGeneratedIndex": "categoryGeneratedIndex---actual-community-docs-category-backup-restore-279-cb6"
+    "categoryGeneratedIndex": "categoryGeneratedIndex---docs-category-backup-restorea-6-b-b88"
   },
-  "/actual-community-docs/category/developers-ab9": {
+  "/docs/category/developers-cb5": {
     "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
-    "categoryGeneratedIndex": "categoryGeneratedIndex---actual-community-docs-category-developers-55-c-8e8"
+    "categoryGeneratedIndex": "categoryGeneratedIndex---docs-category-developerse-6-e-378"
   },
-  "/actual-community-docs/category/getting-started-625": {
+  "/docs/category/getting-started-066": {
     "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
-    "categoryGeneratedIndex": "categoryGeneratedIndex---actual-community-docs-category-getting-started-14-f-295"
+    "categoryGeneratedIndex": "categoryGeneratedIndex---docs-category-getting-started-52-a-6e6"
   },
-  "/actual-community-docs/category/installing-actual-3c0": {
+  "/docs/category/installing-actual-81d": {
     "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
-    "categoryGeneratedIndex": "categoryGeneratedIndex---actual-community-docs-category-installing-actual-0-a-7-6f2"
+    "categoryGeneratedIndex": "categoryGeneratedIndex---docs-category-installing-actual-973-9b8"
   },
-  "/actual-community-docs/category/troubleshooting-9ca": {
+  "/docs/category/troubleshooting-036": {
     "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
-    "categoryGeneratedIndex": "categoryGeneratedIndex---actual-community-docs-category-troubleshooting-56-f-694"
+    "categoryGeneratedIndex": "categoryGeneratedIndex---docs-category-troubleshootinga-26-90a"
   },
-  "/actual-community-docs/Developers/ActualQL-0b9": {
+  "/docs/Developers/ActualQL-c88": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-developers-actual-q-ldad-dec"
+    "content": "content---docs-developers-actual-q-ldad-367"
   },
-  "/actual-community-docs/Developers/API-dae": {
+  "/docs/Developers/API-750": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-developers-api-253-3f6"
+    "content": "content---docs-developers-api-253-bf5"
   },
-  "/actual-community-docs/Developers/Building-Windows-f29": {
+  "/docs/Developers/Building-Windows-5e3": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-developers-building-windowsea-0-734"
+    "content": "content---docs-developers-building-windowsea-0-195"
   },
-  "/actual-community-docs/Developers/project-layout-f12": {
+  "/docs/Developers/project-layout-c41": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-developers-project-layoutd-86-a88"
+    "content": "content---docs-developers-project-layoutd-86-cd2"
   },
-  "/actual-community-docs/Developers/using-the-API-120": {
+  "/docs/Developers/using-the-API-1fe": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-developers-using-the-ap-ibab-a82"
+    "content": "content---docs-developers-using-the-ap-ibab-7df"
   },
-  "/actual-community-docs/FAQ-078": {
+  "/docs/FAQ-6a7": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-fa-qad-8-1be"
+    "content": "content---docs-fa-qad-8-5a1"
   },
-  "/actual-community-docs/Getting-Started/Installing/Docker-0d3": {
+  "/docs/Getting-Started/Installing/Docker-a26": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-docker-76-d-b7f"
+    "content": "content---docs-getting-started-installing-docker-76-d-2df"
   },
-  "/actual-community-docs/Getting-Started/Installing/fly/Fly-git-3c7": {
+  "/docs/Getting-Started/Installing/fly/Fly-git-464": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-fly-fly-git-643-5e2"
+    "content": "content---docs-getting-started-installing-fly-fly-git-643-280"
   },
-  "/actual-community-docs/Getting-Started/Installing/fly/Fly-image-1c5": {
+  "/docs/Getting-Started/Installing/fly/Fly-image-0fe": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-fly-fly-image-544-869"
+    "content": "content---docs-getting-started-installing-fly-fly-image-544-eaa"
   },
-  "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting-a13": {
+  "/docs/Getting-Started/Installing/fly/Fly-persisting-284": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-fly-fly-persisting-51-e-da8"
+    "content": "content---docs-getting-started-installing-fly-fly-persisting-51-e-868"
   },
-  "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites-5cb": {
+  "/docs/Getting-Started/Installing/fly/Fly-prerequisites-c05": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-fly-fly-prerequisites-384-253"
+    "content": "content---docs-getting-started-installing-fly-fly-prerequisites-384-80d"
   },
-  "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform-b8d": {
+  "/docs/Getting-Started/Installing/fly/Fly-terraform-8a7": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-fly-fly-terraforme-95-c41"
+    "content": "content---docs-getting-started-installing-fly-fly-terraforme-95-3fa"
   },
-  "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating-c87": {
+  "/docs/Getting-Started/Installing/fly/Fly-updating-3ea": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-fly-fly-updatingdef-acd"
+    "content": "content---docs-getting-started-installing-fly-fly-updatingdef-f83"
   },
-  "/actual-community-docs/Getting-Started/Installing/fly/Fly.io-a63": {
+  "/docs/Getting-Started/Installing/fly/Fly.io-1b9": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-fly-fly-io-4-dc-306"
+    "content": "content---docs-getting-started-installing-fly-fly-io-4-dc-917"
   },
-  "/actual-community-docs/Getting-Started/Installing/Pikapods-d5b": {
+  "/docs/Getting-Started/Installing/Pikapods-64f": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-pikapods-536-5cf"
+    "content": "content---docs-getting-started-installing-pikapods-536-30e"
   },
-  "/actual-community-docs/Getting-Started/Installing/synology/-eb0": {
+  "/docs/Getting-Started/Installing/synology/-e23": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-synology-ccc-912"
+    "content": "content---docs-getting-started-installing-synology-ccc-9f2"
   },
-  "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy-bc2": {
+  "/docs/Getting-Started/Installing/synology/synology-reverse-proxy-657": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-synology-synology-reverse-proxy-4-a-8-864"
+    "content": "content---docs-getting-started-installing-synology-synology-reverse-proxy-4-a-8-761"
   },
-  "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower-36c": {
+  "/docs/Getting-Started/Installing/synology/synology-watchtower-7a2": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-synology-synology-watchtower-46-b-6d3"
+    "content": "content---docs-getting-started-installing-synology-synology-watchtower-46-b-8a8"
   },
-  "/actual-community-docs/Getting-Started/Installing/Terraform-bda": {
+  "/docs/Getting-Started/Installing/Terraform-840": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-terraform-5-d-2-412"
+    "content": "content---docs-getting-started-installing-terraform-5-d-2-cdc"
   },
-  "/actual-community-docs/Getting-Started/Installing/Unraid-632": {
+  "/docs/Getting-Started/Installing/Unraid-ee7": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-installing-unraid-092-17c"
+    "content": "content---docs-getting-started-installing-unraid-092-a35"
   },
-  "/actual-community-docs/Getting-Started/managefiles-615": {
+  "/docs/Getting-Started/managefiles-ca4": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-managefiles-07-c-f46"
+    "content": "content---docs-getting-started-managefiles-07-c-9f0"
   },
-  "/actual-community-docs/Getting-Started/migration/migration-intro-81f": {
+  "/docs/Getting-Started/migration/migration-intro-aac": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-migration-migration-introb-6-c-220"
+    "content": "content---docs-getting-started-migration-migration-introb-6-c-060"
   },
-  "/actual-community-docs/Getting-Started/migration/nynab-232": {
+  "/docs/Getting-Started/migration/nynab-3d2": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-migration-nynab-232-7b2"
+    "content": "content---docs-getting-started-migration-nynab-232-05d"
   },
-  "/actual-community-docs/Getting-Started/migration/ynab4-609": {
+  "/docs/Getting-Started/migration/ynab4-954": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-migration-ynab-494-f-a82"
+    "content": "content---docs-getting-started-migration-ynab-494-f-b78"
   },
-  "/actual-community-docs/Getting-Started/sync-905": {
+  "/docs/Getting-Started/sync-5cd": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-sync-6-c-8-352"
+    "content": "content---docs-getting-started-sync-6-c-8-0b5"
   },
-  "/actual-community-docs/Getting-Started/tipstricks-446": {
+  "/docs/Getting-Started/tipstricks-1b8": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-getting-started-tipstricksba-0-62c"
+    "content": "content---docs-getting-started-tipstricksba-0-1dc"
   },
-  "/actual-community-docs/Reports/overview-fa5": {
+  "/docs/Reports/overview-34a": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-reports-overview-7-c-6-372"
+    "content": "content---docs-reports-overview-7-c-6-068"
   },
-  "/actual-community-docs/Troubleshooting/Troubleshooting-Edge-06b": {
+  "/docs/Troubleshooting/Troubleshooting-Edge-85e": {
     "__comp": "__comp---theme-doc-item-178-a40",
-    "content": "content---actual-community-docs-troubleshooting-troubleshooting-edge-713-9c2"
+    "content": "content---docs-troubleshooting-troubleshooting-edge-713-9a8"
   }
 }

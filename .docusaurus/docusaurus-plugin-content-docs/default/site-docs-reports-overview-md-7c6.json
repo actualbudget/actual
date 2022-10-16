@@ -6,9 +6,9 @@
   "source": "@site/docs/Reports/overview.md",
   "sourceDirName": "Reports",
   "slug": "/Reports/overview",
-  "permalink": "/actual-community-docs/Reports/overview",
+  "permalink": "/docs/Reports/overview",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Reports/overview.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Reports/overview.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Transfers",
-    "permalink": "/actual-community-docs/Accounts/transfers"
+    "permalink": "/docs/Accounts/transfers"
   },
   "next": {
     "title": "Backup & Restore",
-    "permalink": "/actual-community-docs/category/backup--restore"
+    "permalink": "/docs/category/backup--restore"
   }
 }

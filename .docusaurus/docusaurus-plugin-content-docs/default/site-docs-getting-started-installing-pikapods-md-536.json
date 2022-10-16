@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/Installing/Pikapods.md",
   "sourceDirName": "Getting-Started/Installing",
   "slug": "/Getting-Started/Installing/Pikapods",
-  "permalink": "/actual-community-docs/Getting-Started/Installing/Pikapods",
+  "permalink": "/docs/Getting-Started/Installing/Pikapods",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/Pikapods.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/Pikapods.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Docker",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/Docker"
+    "permalink": "/docs/Getting-Started/Installing/Docker"
   },
   "next": {
     "title": "Unraid",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/Unraid"
+    "permalink": "/docs/Getting-Started/Installing/Unraid"
   }
 }

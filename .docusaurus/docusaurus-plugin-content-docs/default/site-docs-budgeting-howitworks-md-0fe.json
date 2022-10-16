@@ -6,9 +6,9 @@
   "source": "@site/docs/Budgeting/howitworks.md",
   "sourceDirName": "Budgeting",
   "slug": "/Budgeting/howitworks",
-  "permalink": "/actual-community-docs/Budgeting/howitworks",
+  "permalink": "/docs/Budgeting/howitworks",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/howitworks.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/howitworks.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Migrating from YNAB4",
-    "permalink": "/actual-community-docs/Getting-Started/migration/ynab4"
+    "permalink": "/docs/Getting-Started/migration/ynab4"
   },
   "next": {
     "title": "Categories",
-    "permalink": "/actual-community-docs/Budgeting/categories"
+    "permalink": "/docs/Budgeting/categories"
   }
 }

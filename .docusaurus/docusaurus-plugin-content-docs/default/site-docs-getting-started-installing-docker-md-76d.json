@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/Installing/Docker.md",
   "sourceDirName": "Getting-Started/Installing",
   "slug": "/Getting-Started/Installing/Docker",
-  "permalink": "/actual-community-docs/Getting-Started/Installing/Docker",
+  "permalink": "/docs/Getting-Started/Installing/Docker",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/Docker.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/Docker.md",
   "tags": [],
   "version": "current",
   "sidebarPosition": 2,
@@ -19,10 +19,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Persisting the data in Fly",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting"
+    "permalink": "/docs/Getting-Started/Installing/fly/Fly-persisting"
   },
   "next": {
     "title": "PikaPods",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/Pikapods"
+    "permalink": "/docs/Getting-Started/Installing/Pikapods"
   }
 }

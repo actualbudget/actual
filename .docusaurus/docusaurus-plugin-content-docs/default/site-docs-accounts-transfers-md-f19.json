@@ -6,9 +6,9 @@
   "source": "@site/docs/Accounts/transfers.md",
   "sourceDirName": "Accounts",
   "slug": "/Accounts/transfers",
-  "permalink": "/actual-community-docs/Accounts/transfers",
+  "permalink": "/docs/Accounts/transfers",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/transfers.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/transfers.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Payees",
-    "permalink": "/actual-community-docs/Accounts/payees"
+    "permalink": "/docs/Accounts/payees"
   },
   "next": {
     "title": "Reports In Actual",
-    "permalink": "/actual-community-docs/Reports/overview"
+    "permalink": "/docs/Reports/overview"
   }
 }

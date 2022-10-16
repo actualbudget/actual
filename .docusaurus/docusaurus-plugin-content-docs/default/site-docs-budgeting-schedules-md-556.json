@@ -6,9 +6,9 @@
   "source": "@site/docs/Budgeting/schedules.md",
   "sourceDirName": "Budgeting",
   "slug": "/Budgeting/schedules",
-  "permalink": "/actual-community-docs/Budgeting/schedules",
+  "permalink": "/docs/Budgeting/schedules",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/schedules.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/schedules.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Supercharge your Budget",
-    "permalink": "/actual-community-docs/Budgeting/rules/rules-custom"
+    "permalink": "/docs/Budgeting/rules/rules-custom"
   },
   "next": {
     "title": "Reconciliation",
-    "permalink": "/actual-community-docs/Budgeting/reconcile"
+    "permalink": "/docs/Budgeting/reconcile"
   }
 }

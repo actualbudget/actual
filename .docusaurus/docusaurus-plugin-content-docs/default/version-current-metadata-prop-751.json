@@ -12,7 +12,7 @@
       {
         "type": "link",
         "label": "Introduction",
-        "href": "/actual-community-docs/",
+        "href": "/docs/",
         "docId": "index"
       },
       {
@@ -31,66 +31,66 @@
                   {
                     "type": "link",
                     "label": "Fly Pre-requisites",
-                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites",
+                    "href": "/docs/Getting-Started/Installing/fly/Fly-prerequisites",
                     "docId": "Getting-Started/Installing/fly/Fly-prerequisites"
                   },
                   {
                     "type": "link",
                     "label": "Deploying Actual with Git",
-                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-git",
+                    "href": "/docs/Getting-Started/Installing/fly/Fly-git",
                     "docId": "Getting-Started/Installing/fly/Fly-git"
                   },
                   {
                     "type": "link",
                     "label": "Deploying Actual with a container image",
-                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-image",
+                    "href": "/docs/Getting-Started/Installing/fly/Fly-image",
                     "docId": "Getting-Started/Installing/fly/Fly-image"
                   },
                   {
                     "type": "link",
                     "label": "Deploying Actual with terraform",
-                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform",
+                    "href": "/docs/Getting-Started/Installing/fly/Fly-terraform",
                     "docId": "Getting-Started/Installing/fly/Fly-terraform"
                   },
                   {
                     "type": "link",
                     "label": "Updating Actual",
-                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating",
+                    "href": "/docs/Getting-Started/Installing/fly/Fly-updating",
                     "docId": "Getting-Started/Installing/fly/Fly-updating"
                   },
                   {
                     "type": "link",
                     "label": "Persisting the data in Fly",
-                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting",
+                    "href": "/docs/Getting-Started/Installing/fly/Fly-persisting",
                     "docId": "Getting-Started/Installing/fly/Fly-persisting"
                   }
                 ],
                 "collapsed": true,
                 "collapsible": true,
-                "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly.io"
+                "href": "/docs/Getting-Started/Installing/fly/Fly.io"
               },
               {
                 "type": "link",
                 "label": "Docker",
-                "href": "/actual-community-docs/Getting-Started/Installing/Docker",
+                "href": "/docs/Getting-Started/Installing/Docker",
                 "docId": "Getting-Started/Installing/Docker"
               },
               {
                 "type": "link",
                 "label": "PikaPods",
-                "href": "/actual-community-docs/Getting-Started/Installing/Pikapods",
+                "href": "/docs/Getting-Started/Installing/Pikapods",
                 "docId": "Getting-Started/Installing/Pikapods"
               },
               {
                 "type": "link",
                 "label": "Unraid",
-                "href": "/actual-community-docs/Getting-Started/Installing/Unraid",
+                "href": "/docs/Getting-Started/Installing/Unraid",
                 "docId": "Getting-Started/Installing/Unraid"
               },
               {
                 "type": "link",
                 "label": "Terraform",
-                "href": "/actual-community-docs/Getting-Started/Installing/Terraform",
+                "href": "/docs/Getting-Started/Installing/Terraform",
                 "docId": "Getting-Started/Installing/Terraform"
               },
               {
@@ -100,41 +100,41 @@
                   {
                     "type": "link",
                     "label": "Enabling a Reverse Proxy",
-                    "href": "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy",
+                    "href": "/docs/Getting-Started/Installing/synology/synology-reverse-proxy",
                     "docId": "Getting-Started/Installing/synology/synology-reverse-proxy"
                   },
                   {
                     "type": "link",
                     "label": "Synology Automatic Updates",
-                    "href": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower",
+                    "href": "/docs/Getting-Started/Installing/synology/synology-watchtower",
                     "docId": "Getting-Started/Installing/synology/synology-watchtower"
                   }
                 ],
                 "collapsed": true,
                 "collapsible": true,
-                "href": "/actual-community-docs/Getting-Started/Installing/synology/"
+                "href": "/docs/Getting-Started/Installing/synology/"
               }
             ],
             "collapsed": true,
             "collapsible": true,
-            "href": "/actual-community-docs/category/installing-actual"
+            "href": "/docs/category/installing-actual"
           },
           {
             "type": "link",
             "label": "Tips & Tricks",
-            "href": "/actual-community-docs/Getting-Started/tipstricks",
+            "href": "/docs/Getting-Started/tipstricks",
             "docId": "Getting-Started/tipstricks"
           },
           {
             "type": "link",
             "label": "Syncing Across Devices",
-            "href": "/actual-community-docs/Getting-Started/sync",
+            "href": "/docs/Getting-Started/sync",
             "docId": "Getting-Started/sync"
           },
           {
             "type": "link",
             "label": "Managing Files",
-            "href": "/actual-community-docs/Getting-Started/managefiles",
+            "href": "/docs/Getting-Started/managefiles",
             "docId": "Getting-Started/managefiles"
           },
           {
@@ -144,7 +144,7 @@
               {
                 "type": "link",
                 "label": "Migrating from YNAB4",
-                "href": "/actual-community-docs/Getting-Started/migration/ynab4",
+                "href": "/docs/Getting-Started/migration/ynab4",
                 "docId": "Getting-Started/migration/ynab4"
               },
               {
@@ -156,11 +156,11 @@
             ],
             "collapsed": true,
             "collapsible": true,
-            "href": "/actual-community-docs/Getting-Started/migration/migration-intro"
+            "href": "/docs/Getting-Started/migration/migration-intro"
           }
         ],
         "collapsible": true,
-        "href": "/actual-community-docs/category/getting-started"
+        "href": "/docs/category/getting-started"
       },
       {
         "type": "category",
@@ -170,13 +170,13 @@
           {
             "type": "link",
             "label": "How Budgeting Works",
-            "href": "/actual-community-docs/Budgeting/howitworks",
+            "href": "/docs/Budgeting/howitworks",
             "docId": "Budgeting/howitworks"
           },
           {
             "type": "link",
             "label": "Categories",
-            "href": "/actual-community-docs/Budgeting/categories",
+            "href": "/docs/Budgeting/categories",
             "docId": "Budgeting/categories"
           },
           {
@@ -187,35 +187,35 @@
               {
                 "type": "link",
                 "label": "Supercharge your Budget",
-                "href": "/actual-community-docs/Budgeting/rules/rules-custom",
+                "href": "/docs/Budgeting/rules/rules-custom",
                 "docId": "Budgeting/rules/rules-custom"
               }
             ],
             "collapsible": true,
-            "href": "/actual-community-docs/Budgeting/rules/"
+            "href": "/docs/Budgeting/rules/"
           },
           {
             "type": "link",
             "label": "Schedules",
-            "href": "/actual-community-docs/Budgeting/schedules",
+            "href": "/docs/Budgeting/schedules",
             "docId": "Budgeting/schedules"
           },
           {
             "type": "link",
             "label": "Reconciliation",
-            "href": "/actual-community-docs/Budgeting/reconcile",
+            "href": "/docs/Budgeting/reconcile",
             "docId": "Budgeting/reconcile"
           },
           {
             "type": "link",
             "label": "Returns and Reimbursements",
-            "href": "/actual-community-docs/Budgeting/returnsandreimbursements",
+            "href": "/docs/Budgeting/returnsandreimbursements",
             "docId": "Budgeting/returnsandreimbursements"
           },
           {
             "type": "link",
             "label": "Managing Credit Cards",
-            "href": "/actual-community-docs/Budgeting/creditcards",
+            "href": "/docs/Budgeting/creditcards",
             "docId": "Budgeting/creditcards"
           }
         ],
@@ -229,19 +229,19 @@
           {
             "type": "link",
             "label": "Overview",
-            "href": "/actual-community-docs/Accounts/overview",
+            "href": "/docs/Accounts/overview",
             "docId": "Accounts/overview"
           },
           {
             "type": "link",
             "label": "Bank accounts",
-            "href": "/actual-community-docs/Accounts/addaccount",
+            "href": "/docs/Accounts/addaccount",
             "docId": "Accounts/addaccount"
           },
           {
             "type": "link",
             "label": "Import Transactions",
-            "href": "/actual-community-docs/Accounts/importing-trans",
+            "href": "/docs/Accounts/importing-trans",
             "docId": "Accounts/importing-trans"
           },
           {
@@ -253,13 +253,13 @@
           {
             "type": "link",
             "label": "Payees",
-            "href": "/actual-community-docs/Accounts/payees",
+            "href": "/docs/Accounts/payees",
             "docId": "Accounts/payees"
           },
           {
             "type": "link",
             "label": "Transfers",
-            "href": "/actual-community-docs/Accounts/transfers",
+            "href": "/docs/Accounts/transfers",
             "docId": "Accounts/transfers"
           }
         ],
@@ -273,7 +273,7 @@
           {
             "type": "link",
             "label": "Reports In Actual",
-            "href": "/actual-community-docs/Reports/overview",
+            "href": "/docs/Reports/overview",
             "docId": "Reports/overview"
           },
           {
@@ -293,18 +293,18 @@
           {
             "type": "link",
             "label": "Backing up your Actual budget",
-            "href": "/actual-community-docs/Backup-Restore/Backups",
+            "href": "/docs/Backup-Restore/Backups",
             "docId": "Backup-Restore/Backups"
           },
           {
             "type": "link",
             "label": "Restoring Data Into Actual",
-            "href": "/actual-community-docs/Backup-Restore/Restore",
+            "href": "/docs/Backup-Restore/Restore",
             "docId": "Backup-Restore/Restore"
           }
         ],
         "collapsible": true,
-        "href": "/actual-community-docs/category/backup--restore"
+        "href": "/docs/category/backup--restore"
       },
       {
         "type": "category",
@@ -314,41 +314,41 @@
           {
             "type": "link",
             "label": "The Actual Project Structure",
-            "href": "/actual-community-docs/Developers/project-layout",
+            "href": "/docs/Developers/project-layout",
             "docId": "Developers/project-layout"
           },
           {
             "type": "link",
             "label": "Using the API",
-            "href": "/actual-community-docs/Developers/using-the-API",
+            "href": "/docs/Developers/using-the-API",
             "docId": "Developers/using-the-API"
           },
           {
             "type": "link",
             "label": "API",
-            "href": "/actual-community-docs/Developers/API",
+            "href": "/docs/Developers/API",
             "docId": "Developers/API"
           },
           {
             "type": "link",
             "label": "ActualQL",
-            "href": "/actual-community-docs/Developers/ActualQL",
+            "href": "/docs/Developers/ActualQL",
             "docId": "Developers/ActualQL"
           },
           {
             "type": "link",
             "label": "How to build browser for Windows",
-            "href": "/actual-community-docs/Developers/Building-Windows",
+            "href": "/docs/Developers/Building-Windows",
             "docId": "Developers/Building-Windows"
           }
         ],
         "collapsible": true,
-        "href": "/actual-community-docs/category/developers"
+        "href": "/docs/category/developers"
       },
       {
         "type": "link",
         "label": "Frequently Asked Questions",
-        "href": "/actual-community-docs/FAQ",
+        "href": "/docs/FAQ",
         "docId": "FAQ"
       },
       {
@@ -359,12 +359,12 @@
           {
             "type": "link",
             "label": "Microsoft Edge browser",
-            "href": "/actual-community-docs/Troubleshooting/Troubleshooting-Edge",
+            "href": "/docs/Troubleshooting/Troubleshooting-Edge",
             "docId": "Troubleshooting/Troubleshooting-Edge"
           }
         ],
         "collapsible": true,
-        "href": "/actual-community-docs/category/troubleshooting"
+        "href": "/docs/category/troubleshooting"
       }
     ]
   },

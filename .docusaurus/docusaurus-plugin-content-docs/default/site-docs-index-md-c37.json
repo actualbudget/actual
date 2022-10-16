@@ -6,9 +6,9 @@
   "source": "@site/docs/index.md",
   "sourceDirName": ".",
   "slug": "/",
-  "permalink": "/actual-community-docs/",
+  "permalink": "/docs/",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/index.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/index.md",
   "tags": [],
   "version": "current",
   "sidebarPosition": 1,
@@ -20,6 +20,6 @@
   "sidebar": "docs",
   "next": {
     "title": "Getting Started",
-    "permalink": "/actual-community-docs/category/getting-started"
+    "permalink": "/docs/category/getting-started"
   }
 }

@@ -9,15 +9,15 @@
           "badge": false,
           "noIndex": false,
           "className": "docs-version-current",
-          "path": "/actual-community-docs/",
-          "tagsPath": "/actual-community-docs/tags",
-          "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs",
-          "editUrlLocalized": "https://github.com/rich-howell/actual-community-docs/tree/main/i18n/en/docusaurus-plugin-content-docs/current",
+          "path": "/docs/",
+          "tagsPath": "/docs/tags",
+          "editUrl": "https://github.com/actualbudget/docs/tree/main/docs",
+          "editUrlLocalized": "https://github.com/actualbudget/docs/tree/main/i18n/en/docusaurus-plugin-content-docs/current",
           "isLast": true,
           "routePriority": -1,
-          "sidebarFilePath": "D:\\workspace\\actualbudget\\actual-community-docs\\sidebars.js",
-          "contentPath": "D:\\workspace\\actualbudget\\actual-community-docs\\docs",
-          "contentPathLocalized": "D:\\workspace\\actualbudget\\actual-community-docs\\i18n\\en\\docusaurus-plugin-content-docs\\current",
+          "sidebarFilePath": "D:\\workspace\\actualbudget\\docs\\sidebars.js",
+          "contentPath": "D:\\workspace\\actualbudget\\docs\\docs",
+          "contentPathLocalized": "D:\\workspace\\actualbudget\\docs\\i18n\\en\\docusaurus-plugin-content-docs\\current",
           "docs": [
             {
               "unversionedId": "Accounts/addaccount",
@@ -27,9 +27,9 @@
               "source": "@site/docs/Accounts/addaccount.md",
               "sourceDirName": "Accounts",
               "slug": "/Accounts/addaccount",
-              "permalink": "/actual-community-docs/Accounts/addaccount",
+              "permalink": "/docs/Accounts/addaccount",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/addaccount.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/addaccount.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -38,11 +38,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Overview",
-                "permalink": "/actual-community-docs/Accounts/overview"
+                "permalink": "/docs/Accounts/overview"
               },
               "next": {
                 "title": "Import Transactions",
-                "permalink": "/actual-community-docs/Accounts/importing-trans"
+                "permalink": "/docs/Accounts/importing-trans"
               }
             },
             {
@@ -53,9 +53,9 @@
               "source": "@site/docs/Accounts/connecting-your-bank.md",
               "sourceDirName": "Accounts",
               "slug": "/Accounts/connecting-your-bank",
-              "permalink": "/actual-community-docs/Accounts/connecting-your-bank",
+              "permalink": "/docs/Accounts/connecting-your-bank",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/connecting-your-bank.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/connecting-your-bank.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -70,9 +70,9 @@
               "source": "@site/docs/Accounts/importing-trans.md",
               "sourceDirName": "Accounts",
               "slug": "/Accounts/importing-trans",
-              "permalink": "/actual-community-docs/Accounts/importing-trans",
+              "permalink": "/docs/Accounts/importing-trans",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/importing-trans.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/importing-trans.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -81,11 +81,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Bank accounts",
-                "permalink": "/actual-community-docs/Accounts/addaccount"
+                "permalink": "/docs/Accounts/addaccount"
               },
               "next": {
                 "title": "Payees",
-                "permalink": "/actual-community-docs/Accounts/payees"
+                "permalink": "/docs/Accounts/payees"
               }
             },
             {
@@ -96,9 +96,9 @@
               "source": "@site/docs/Accounts/overview.md",
               "sourceDirName": "Accounts",
               "slug": "/Accounts/overview",
-              "permalink": "/actual-community-docs/Accounts/overview",
+              "permalink": "/docs/Accounts/overview",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/overview.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/overview.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -107,11 +107,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Managing Credit Cards",
-                "permalink": "/actual-community-docs/Budgeting/creditcards"
+                "permalink": "/docs/Budgeting/creditcards"
               },
               "next": {
                 "title": "Bank accounts",
-                "permalink": "/actual-community-docs/Accounts/addaccount"
+                "permalink": "/docs/Accounts/addaccount"
               }
             },
             {
@@ -122,9 +122,9 @@
               "source": "@site/docs/Accounts/payees.md",
               "sourceDirName": "Accounts",
               "slug": "/Accounts/payees",
-              "permalink": "/actual-community-docs/Accounts/payees",
+              "permalink": "/docs/Accounts/payees",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/payees.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/payees.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -133,11 +133,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Import Transactions",
-                "permalink": "/actual-community-docs/Accounts/importing-trans"
+                "permalink": "/docs/Accounts/importing-trans"
               },
               "next": {
                 "title": "Transfers",
-                "permalink": "/actual-community-docs/Accounts/transfers"
+                "permalink": "/docs/Accounts/transfers"
               }
             },
             {
@@ -148,9 +148,9 @@
               "source": "@site/docs/Accounts/transfers.md",
               "sourceDirName": "Accounts",
               "slug": "/Accounts/transfers",
-              "permalink": "/actual-community-docs/Accounts/transfers",
+              "permalink": "/docs/Accounts/transfers",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/transfers.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/transfers.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -159,11 +159,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Payees",
-                "permalink": "/actual-community-docs/Accounts/payees"
+                "permalink": "/docs/Accounts/payees"
               },
               "next": {
                 "title": "Reports In Actual",
-                "permalink": "/actual-community-docs/Reports/overview"
+                "permalink": "/docs/Reports/overview"
               }
             },
             {
@@ -174,9 +174,9 @@
               "source": "@site/docs/Backup-Restore/Backups.md",
               "sourceDirName": "Backup-Restore",
               "slug": "/Backup-Restore/Backups",
-              "permalink": "/actual-community-docs/Backup-Restore/Backups",
+              "permalink": "/docs/Backup-Restore/Backups",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Backup-Restore/Backups.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Backup-Restore/Backups.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -185,11 +185,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Backup & Restore",
-                "permalink": "/actual-community-docs/category/backup--restore"
+                "permalink": "/docs/category/backup--restore"
               },
               "next": {
                 "title": "Restoring Data Into Actual",
-                "permalink": "/actual-community-docs/Backup-Restore/Restore"
+                "permalink": "/docs/Backup-Restore/Restore"
               }
             },
             {
@@ -200,9 +200,9 @@
               "source": "@site/docs/Backup-Restore/Restore.md",
               "sourceDirName": "Backup-Restore",
               "slug": "/Backup-Restore/Restore",
-              "permalink": "/actual-community-docs/Backup-Restore/Restore",
+              "permalink": "/docs/Backup-Restore/Restore",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Backup-Restore/Restore.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Backup-Restore/Restore.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -211,11 +211,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Backing up your Actual budget",
-                "permalink": "/actual-community-docs/Backup-Restore/Backups"
+                "permalink": "/docs/Backup-Restore/Backups"
               },
               "next": {
                 "title": "Developers",
-                "permalink": "/actual-community-docs/category/developers"
+                "permalink": "/docs/category/developers"
               }
             },
             {
@@ -226,9 +226,9 @@
               "source": "@site/docs/Budgeting/categories.md",
               "sourceDirName": "Budgeting",
               "slug": "/Budgeting/categories",
-              "permalink": "/actual-community-docs/Budgeting/categories",
+              "permalink": "/docs/Budgeting/categories",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/categories.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/categories.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -237,11 +237,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "How Budgeting Works",
-                "permalink": "/actual-community-docs/Budgeting/howitworks"
+                "permalink": "/docs/Budgeting/howitworks"
               },
               "next": {
                 "title": "Rules",
-                "permalink": "/actual-community-docs/Budgeting/rules/"
+                "permalink": "/docs/Budgeting/rules/"
               }
             },
             {
@@ -252,9 +252,9 @@
               "source": "@site/docs/Budgeting/creditcards.md",
               "sourceDirName": "Budgeting",
               "slug": "/Budgeting/creditcards",
-              "permalink": "/actual-community-docs/Budgeting/creditcards",
+              "permalink": "/docs/Budgeting/creditcards",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/creditcards.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/creditcards.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -263,11 +263,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Returns and Reimbursements",
-                "permalink": "/actual-community-docs/Budgeting/returnsandreimbursements"
+                "permalink": "/docs/Budgeting/returnsandreimbursements"
               },
               "next": {
                 "title": "Overview",
-                "permalink": "/actual-community-docs/Accounts/overview"
+                "permalink": "/docs/Accounts/overview"
               }
             },
             {
@@ -278,9 +278,9 @@
               "source": "@site/docs/Budgeting/howitworks.md",
               "sourceDirName": "Budgeting",
               "slug": "/Budgeting/howitworks",
-              "permalink": "/actual-community-docs/Budgeting/howitworks",
+              "permalink": "/docs/Budgeting/howitworks",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/howitworks.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/howitworks.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -289,11 +289,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Migrating from YNAB4",
-                "permalink": "/actual-community-docs/Getting-Started/migration/ynab4"
+                "permalink": "/docs/Getting-Started/migration/ynab4"
               },
               "next": {
                 "title": "Categories",
-                "permalink": "/actual-community-docs/Budgeting/categories"
+                "permalink": "/docs/Budgeting/categories"
               }
             },
             {
@@ -304,9 +304,9 @@
               "source": "@site/docs/Budgeting/reconcile.md",
               "sourceDirName": "Budgeting",
               "slug": "/Budgeting/reconcile",
-              "permalink": "/actual-community-docs/Budgeting/reconcile",
+              "permalink": "/docs/Budgeting/reconcile",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/reconcile.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/reconcile.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -315,11 +315,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Schedules",
-                "permalink": "/actual-community-docs/Budgeting/schedules"
+                "permalink": "/docs/Budgeting/schedules"
               },
               "next": {
                 "title": "Returns and Reimbursements",
-                "permalink": "/actual-community-docs/Budgeting/returnsandreimbursements"
+                "permalink": "/docs/Budgeting/returnsandreimbursements"
               }
             },
             {
@@ -330,9 +330,9 @@
               "source": "@site/docs/Budgeting/returnsandreimbursements.md",
               "sourceDirName": "Budgeting",
               "slug": "/Budgeting/returnsandreimbursements",
-              "permalink": "/actual-community-docs/Budgeting/returnsandreimbursements",
+              "permalink": "/docs/Budgeting/returnsandreimbursements",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/returnsandreimbursements.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/returnsandreimbursements.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -341,11 +341,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Reconciliation",
-                "permalink": "/actual-community-docs/Budgeting/reconcile"
+                "permalink": "/docs/Budgeting/reconcile"
               },
               "next": {
                 "title": "Managing Credit Cards",
-                "permalink": "/actual-community-docs/Budgeting/creditcards"
+                "permalink": "/docs/Budgeting/creditcards"
               }
             },
             {
@@ -356,9 +356,9 @@
               "source": "@site/docs/Budgeting/rules/rules.md",
               "sourceDirName": "Budgeting/rules",
               "slug": "/Budgeting/rules/",
-              "permalink": "/actual-community-docs/Budgeting/rules/",
+              "permalink": "/docs/Budgeting/rules/",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/rules/rules.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/rules/rules.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -367,11 +367,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Categories",
-                "permalink": "/actual-community-docs/Budgeting/categories"
+                "permalink": "/docs/Budgeting/categories"
               },
               "next": {
                 "title": "Supercharge your Budget",
-                "permalink": "/actual-community-docs/Budgeting/rules/rules-custom"
+                "permalink": "/docs/Budgeting/rules/rules-custom"
               }
             },
             {
@@ -382,9 +382,9 @@
               "source": "@site/docs/Budgeting/rules/rules-custom.md",
               "sourceDirName": "Budgeting/rules",
               "slug": "/Budgeting/rules/rules-custom",
-              "permalink": "/actual-community-docs/Budgeting/rules/rules-custom",
+              "permalink": "/docs/Budgeting/rules/rules-custom",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/rules/rules-custom.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/rules/rules-custom.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -393,11 +393,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Rules",
-                "permalink": "/actual-community-docs/Budgeting/rules/"
+                "permalink": "/docs/Budgeting/rules/"
               },
               "next": {
                 "title": "Schedules",
-                "permalink": "/actual-community-docs/Budgeting/schedules"
+                "permalink": "/docs/Budgeting/schedules"
               }
             },
             {
@@ -408,9 +408,9 @@
               "source": "@site/docs/Budgeting/schedules.md",
               "sourceDirName": "Budgeting",
               "slug": "/Budgeting/schedules",
-              "permalink": "/actual-community-docs/Budgeting/schedules",
+              "permalink": "/docs/Budgeting/schedules",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/schedules.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Budgeting/schedules.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -419,11 +419,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Supercharge your Budget",
-                "permalink": "/actual-community-docs/Budgeting/rules/rules-custom"
+                "permalink": "/docs/Budgeting/rules/rules-custom"
               },
               "next": {
                 "title": "Reconciliation",
-                "permalink": "/actual-community-docs/Budgeting/reconcile"
+                "permalink": "/docs/Budgeting/reconcile"
               }
             },
             {
@@ -434,9 +434,9 @@
               "source": "@site/docs/Developers/03-ActualQL.md",
               "sourceDirName": "Developers",
               "slug": "/Developers/ActualQL",
-              "permalink": "/actual-community-docs/Developers/ActualQL",
+              "permalink": "/docs/Developers/ActualQL",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/03-ActualQL.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Developers/03-ActualQL.md",
               "tags": [],
               "version": "current",
               "sidebarPosition": 3,
@@ -444,11 +444,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "API",
-                "permalink": "/actual-community-docs/Developers/API"
+                "permalink": "/docs/Developers/API"
               },
               "next": {
                 "title": "How to build browser for Windows",
-                "permalink": "/actual-community-docs/Developers/Building-Windows"
+                "permalink": "/docs/Developers/Building-Windows"
               }
             },
             {
@@ -459,20 +459,20 @@
               "source": "@site/docs/Developers/API.md",
               "sourceDirName": "Developers",
               "slug": "/Developers/API",
-              "permalink": "/actual-community-docs/Developers/API",
+              "permalink": "/docs/Developers/API",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/API.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Developers/API.md",
               "tags": [],
               "version": "current",
               "frontMatter": {},
               "sidebar": "docs",
               "previous": {
                 "title": "Using the API",
-                "permalink": "/actual-community-docs/Developers/using-the-API"
+                "permalink": "/docs/Developers/using-the-API"
               },
               "next": {
                 "title": "ActualQL",
-                "permalink": "/actual-community-docs/Developers/ActualQL"
+                "permalink": "/docs/Developers/ActualQL"
               }
             },
             {
@@ -483,9 +483,9 @@
               "source": "@site/docs/Developers/Building-Windows.md",
               "sourceDirName": "Developers",
               "slug": "/Developers/Building-Windows",
-              "permalink": "/actual-community-docs/Developers/Building-Windows",
+              "permalink": "/docs/Developers/Building-Windows",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/Building-Windows.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Developers/Building-Windows.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -494,11 +494,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "ActualQL",
-                "permalink": "/actual-community-docs/Developers/ActualQL"
+                "permalink": "/docs/Developers/ActualQL"
               },
               "next": {
                 "title": "Frequently Asked Questions",
-                "permalink": "/actual-community-docs/FAQ"
+                "permalink": "/docs/FAQ"
               }
             },
             {
@@ -509,9 +509,9 @@
               "source": "@site/docs/Developers/project-layout.md",
               "sourceDirName": "Developers",
               "slug": "/Developers/project-layout",
-              "permalink": "/actual-community-docs/Developers/project-layout",
+              "permalink": "/docs/Developers/project-layout",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/project-layout.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Developers/project-layout.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -520,11 +520,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Developers",
-                "permalink": "/actual-community-docs/category/developers"
+                "permalink": "/docs/category/developers"
               },
               "next": {
                 "title": "Using the API",
-                "permalink": "/actual-community-docs/Developers/using-the-API"
+                "permalink": "/docs/Developers/using-the-API"
               }
             },
             {
@@ -535,9 +535,9 @@
               "source": "@site/docs/Developers/using-the-API.md",
               "sourceDirName": "Developers",
               "slug": "/Developers/using-the-API",
-              "permalink": "/actual-community-docs/Developers/using-the-API",
+              "permalink": "/docs/Developers/using-the-API",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/using-the-API.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Developers/using-the-API.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -546,11 +546,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "The Actual Project Structure",
-                "permalink": "/actual-community-docs/Developers/project-layout"
+                "permalink": "/docs/Developers/project-layout"
               },
               "next": {
                 "title": "API",
-                "permalink": "/actual-community-docs/Developers/API"
+                "permalink": "/docs/Developers/API"
               }
             },
             {
@@ -561,9 +561,9 @@
               "source": "@site/docs/FAQ.md",
               "sourceDirName": ".",
               "slug": "/FAQ",
-              "permalink": "/actual-community-docs/FAQ",
+              "permalink": "/docs/FAQ",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/FAQ.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/FAQ.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -572,11 +572,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "How to build browser for Windows",
-                "permalink": "/actual-community-docs/Developers/Building-Windows"
+                "permalink": "/docs/Developers/Building-Windows"
               },
               "next": {
                 "title": "Troubleshooting",
-                "permalink": "/actual-community-docs/category/troubleshooting"
+                "permalink": "/docs/category/troubleshooting"
               }
             },
             {
@@ -587,9 +587,9 @@
               "source": "@site/docs/Getting-Started/Installing/Docker.md",
               "sourceDirName": "Getting-Started/Installing",
               "slug": "/Getting-Started/Installing/Docker",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/Docker",
+              "permalink": "/docs/Getting-Started/Installing/Docker",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/Docker.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/Docker.md",
               "tags": [],
               "version": "current",
               "sidebarPosition": 2,
@@ -600,11 +600,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Persisting the data in Fly",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-persisting"
               },
               "next": {
                 "title": "PikaPods",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/Pikapods"
+                "permalink": "/docs/Getting-Started/Installing/Pikapods"
               }
             },
             {
@@ -615,9 +615,9 @@
               "source": "@site/docs/Getting-Started/Installing/fly/Fly-git.md",
               "sourceDirName": "Getting-Started/Installing/fly",
               "slug": "/Getting-Started/Installing/fly/Fly-git",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-git",
+              "permalink": "/docs/Getting-Started/Installing/fly/Fly-git",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-git.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-git.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -626,11 +626,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Fly Pre-requisites",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-prerequisites"
               },
               "next": {
                 "title": "Deploying Actual with a container image",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-image"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-image"
               }
             },
             {
@@ -641,9 +641,9 @@
               "source": "@site/docs/Getting-Started/Installing/fly/Fly-image.md",
               "sourceDirName": "Getting-Started/Installing/fly",
               "slug": "/Getting-Started/Installing/fly/Fly-image",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-image",
+              "permalink": "/docs/Getting-Started/Installing/fly/Fly-image",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-image.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-image.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -652,11 +652,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Deploying Actual with Git",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-git"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-git"
               },
               "next": {
                 "title": "Deploying Actual with terraform",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-terraform"
               }
             },
             {
@@ -667,9 +667,9 @@
               "source": "@site/docs/Getting-Started/Installing/fly/Fly-persisting.md",
               "sourceDirName": "Getting-Started/Installing/fly",
               "slug": "/Getting-Started/Installing/fly/Fly-persisting",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting",
+              "permalink": "/docs/Getting-Started/Installing/fly/Fly-persisting",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-persisting.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-persisting.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -678,11 +678,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Updating Actual",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-updating"
               },
               "next": {
                 "title": "Docker",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/Docker"
+                "permalink": "/docs/Getting-Started/Installing/Docker"
               }
             },
             {
@@ -693,9 +693,9 @@
               "source": "@site/docs/Getting-Started/Installing/fly/Fly-prerequisites.md",
               "sourceDirName": "Getting-Started/Installing/fly",
               "slug": "/Getting-Started/Installing/fly/Fly-prerequisites",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites",
+              "permalink": "/docs/Getting-Started/Installing/fly/Fly-prerequisites",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-prerequisites.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-prerequisites.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -704,11 +704,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Fly.io",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly.io"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly.io"
               },
               "next": {
                 "title": "Deploying Actual with Git",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-git"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-git"
               }
             },
             {
@@ -719,9 +719,9 @@
               "source": "@site/docs/Getting-Started/Installing/fly/Fly-terraform.md",
               "sourceDirName": "Getting-Started/Installing/fly",
               "slug": "/Getting-Started/Installing/fly/Fly-terraform",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform",
+              "permalink": "/docs/Getting-Started/Installing/fly/Fly-terraform",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-terraform.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-terraform.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -730,11 +730,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Deploying Actual with a container image",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-image"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-image"
               },
               "next": {
                 "title": "Updating Actual",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-updating"
               }
             },
             {
@@ -745,9 +745,9 @@
               "source": "@site/docs/Getting-Started/Installing/fly/Fly-updating.md",
               "sourceDirName": "Getting-Started/Installing/fly",
               "slug": "/Getting-Started/Installing/fly/Fly-updating",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating",
+              "permalink": "/docs/Getting-Started/Installing/fly/Fly-updating",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-updating.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-updating.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -756,11 +756,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Deploying Actual with terraform",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-terraform"
               },
               "next": {
                 "title": "Persisting the data in Fly",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-persisting"
               }
             },
             {
@@ -771,20 +771,20 @@
               "source": "@site/docs/Getting-Started/Installing/fly/Fly.io.md",
               "sourceDirName": "Getting-Started/Installing/fly",
               "slug": "/Getting-Started/Installing/fly/Fly.io",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly.io",
+              "permalink": "/docs/Getting-Started/Installing/fly/Fly.io",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly.io.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly.io.md",
               "tags": [],
               "version": "current",
               "frontMatter": {},
               "sidebar": "docs",
               "previous": {
                 "title": "Installing Actual",
-                "permalink": "/actual-community-docs/category/installing-actual"
+                "permalink": "/docs/category/installing-actual"
               },
               "next": {
                 "title": "Fly Pre-requisites",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites"
+                "permalink": "/docs/Getting-Started/Installing/fly/Fly-prerequisites"
               }
             },
             {
@@ -795,9 +795,9 @@
               "source": "@site/docs/Getting-Started/Installing/Pikapods.md",
               "sourceDirName": "Getting-Started/Installing",
               "slug": "/Getting-Started/Installing/Pikapods",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/Pikapods",
+              "permalink": "/docs/Getting-Started/Installing/Pikapods",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/Pikapods.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/Pikapods.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -806,11 +806,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Docker",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/Docker"
+                "permalink": "/docs/Getting-Started/Installing/Docker"
               },
               "next": {
                 "title": "Unraid",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/Unraid"
+                "permalink": "/docs/Getting-Started/Installing/Unraid"
               }
             },
             {
@@ -821,9 +821,9 @@
               "source": "@site/docs/Getting-Started/Installing/synology/synology.md",
               "sourceDirName": "Getting-Started/Installing/synology",
               "slug": "/Getting-Started/Installing/synology/",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/synology/",
+              "permalink": "/docs/Getting-Started/Installing/synology/",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/synology/synology.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/synology/synology.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -832,11 +832,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Terraform",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/Terraform"
+                "permalink": "/docs/Getting-Started/Installing/Terraform"
               },
               "next": {
                 "title": "Enabling a Reverse Proxy",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy"
+                "permalink": "/docs/Getting-Started/Installing/synology/synology-reverse-proxy"
               }
             },
             {
@@ -847,9 +847,9 @@
               "source": "@site/docs/Getting-Started/Installing/synology/synology-reverse-proxy.md",
               "sourceDirName": "Getting-Started/Installing/synology",
               "slug": "/Getting-Started/Installing/synology/synology-reverse-proxy",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy",
+              "permalink": "/docs/Getting-Started/Installing/synology/synology-reverse-proxy",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/synology/synology-reverse-proxy.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/synology/synology-reverse-proxy.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -858,11 +858,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Synology",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/synology/"
+                "permalink": "/docs/Getting-Started/Installing/synology/"
               },
               "next": {
                 "title": "Synology Automatic Updates",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower"
+                "permalink": "/docs/Getting-Started/Installing/synology/synology-watchtower"
               }
             },
             {
@@ -873,9 +873,9 @@
               "source": "@site/docs/Getting-Started/Installing/synology/synology-watchtower.md",
               "sourceDirName": "Getting-Started/Installing/synology",
               "slug": "/Getting-Started/Installing/synology/synology-watchtower",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower",
+              "permalink": "/docs/Getting-Started/Installing/synology/synology-watchtower",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/synology/synology-watchtower.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/synology/synology-watchtower.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -884,11 +884,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Enabling a Reverse Proxy",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy"
+                "permalink": "/docs/Getting-Started/Installing/synology/synology-reverse-proxy"
               },
               "next": {
                 "title": "Tips & Tricks",
-                "permalink": "/actual-community-docs/Getting-Started/tipstricks"
+                "permalink": "/docs/Getting-Started/tipstricks"
               }
             },
             {
@@ -899,9 +899,9 @@
               "source": "@site/docs/Getting-Started/Installing/Terraform.md",
               "sourceDirName": "Getting-Started/Installing",
               "slug": "/Getting-Started/Installing/Terraform",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/Terraform",
+              "permalink": "/docs/Getting-Started/Installing/Terraform",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/Terraform.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/Terraform.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -910,11 +910,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Unraid",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/Unraid"
+                "permalink": "/docs/Getting-Started/Installing/Unraid"
               },
               "next": {
                 "title": "Synology",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/synology/"
+                "permalink": "/docs/Getting-Started/Installing/synology/"
               }
             },
             {
@@ -925,9 +925,9 @@
               "source": "@site/docs/Getting-Started/Installing/Unraid.md",
               "sourceDirName": "Getting-Started/Installing",
               "slug": "/Getting-Started/Installing/Unraid",
-              "permalink": "/actual-community-docs/Getting-Started/Installing/Unraid",
+              "permalink": "/docs/Getting-Started/Installing/Unraid",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/Unraid.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/Unraid.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -936,11 +936,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "PikaPods",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/Pikapods"
+                "permalink": "/docs/Getting-Started/Installing/Pikapods"
               },
               "next": {
                 "title": "Terraform",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/Terraform"
+                "permalink": "/docs/Getting-Started/Installing/Terraform"
               }
             },
             {
@@ -951,9 +951,9 @@
               "source": "@site/docs/Getting-Started/managefiles.md",
               "sourceDirName": "Getting-Started",
               "slug": "/Getting-Started/managefiles",
-              "permalink": "/actual-community-docs/Getting-Started/managefiles",
+              "permalink": "/docs/Getting-Started/managefiles",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/managefiles.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/managefiles.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -962,11 +962,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Syncing Across Devices",
-                "permalink": "/actual-community-docs/Getting-Started/sync"
+                "permalink": "/docs/Getting-Started/sync"
               },
               "next": {
                 "title": "Migration Overview",
-                "permalink": "/actual-community-docs/Getting-Started/migration/migration-intro"
+                "permalink": "/docs/Getting-Started/migration/migration-intro"
               }
             },
             {
@@ -977,9 +977,9 @@
               "source": "@site/docs/Getting-Started/migration/migration-intro.md",
               "sourceDirName": "Getting-Started/migration",
               "slug": "/Getting-Started/migration/migration-intro",
-              "permalink": "/actual-community-docs/Getting-Started/migration/migration-intro",
+              "permalink": "/docs/Getting-Started/migration/migration-intro",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/migration/migration-intro.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/migration/migration-intro.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -988,11 +988,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Managing Files",
-                "permalink": "/actual-community-docs/Getting-Started/managefiles"
+                "permalink": "/docs/Getting-Started/managefiles"
               },
               "next": {
                 "title": "Migrating from YNAB4",
-                "permalink": "/actual-community-docs/Getting-Started/migration/ynab4"
+                "permalink": "/docs/Getting-Started/migration/ynab4"
               }
             },
             {
@@ -1003,9 +1003,9 @@
               "source": "@site/docs/Getting-Started/migration/nynab.md",
               "sourceDirName": "Getting-Started/migration",
               "slug": "/Getting-Started/migration/nynab",
-              "permalink": "/actual-community-docs/Getting-Started/migration/nynab",
+              "permalink": "/docs/Getting-Started/migration/nynab",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/migration/nynab.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/migration/nynab.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -1020,9 +1020,9 @@
               "source": "@site/docs/Getting-Started/migration/ynab4.md",
               "sourceDirName": "Getting-Started/migration",
               "slug": "/Getting-Started/migration/ynab4",
-              "permalink": "/actual-community-docs/Getting-Started/migration/ynab4",
+              "permalink": "/docs/Getting-Started/migration/ynab4",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/migration/ynab4.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/migration/ynab4.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -1031,11 +1031,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Migration Overview",
-                "permalink": "/actual-community-docs/Getting-Started/migration/migration-intro"
+                "permalink": "/docs/Getting-Started/migration/migration-intro"
               },
               "next": {
                 "title": "How Budgeting Works",
-                "permalink": "/actual-community-docs/Budgeting/howitworks"
+                "permalink": "/docs/Budgeting/howitworks"
               }
             },
             {
@@ -1046,9 +1046,9 @@
               "source": "@site/docs/Getting-Started/sync.md",
               "sourceDirName": "Getting-Started",
               "slug": "/Getting-Started/sync",
-              "permalink": "/actual-community-docs/Getting-Started/sync",
+              "permalink": "/docs/Getting-Started/sync",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/sync.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/sync.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -1057,11 +1057,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Tips & Tricks",
-                "permalink": "/actual-community-docs/Getting-Started/tipstricks"
+                "permalink": "/docs/Getting-Started/tipstricks"
               },
               "next": {
                 "title": "Managing Files",
-                "permalink": "/actual-community-docs/Getting-Started/managefiles"
+                "permalink": "/docs/Getting-Started/managefiles"
               }
             },
             {
@@ -1072,9 +1072,9 @@
               "source": "@site/docs/Getting-Started/tipstricks.md",
               "sourceDirName": "Getting-Started",
               "slug": "/Getting-Started/tipstricks",
-              "permalink": "/actual-community-docs/Getting-Started/tipstricks",
+              "permalink": "/docs/Getting-Started/tipstricks",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/tipstricks.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/tipstricks.md",
               "tags": [],
               "version": "current",
               "sidebarPosition": 1,
@@ -1085,11 +1085,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Synology Automatic Updates",
-                "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower"
+                "permalink": "/docs/Getting-Started/Installing/synology/synology-watchtower"
               },
               "next": {
                 "title": "Syncing Across Devices",
-                "permalink": "/actual-community-docs/Getting-Started/sync"
+                "permalink": "/docs/Getting-Started/sync"
               }
             },
             {
@@ -1100,9 +1100,9 @@
               "source": "@site/docs/index.md",
               "sourceDirName": ".",
               "slug": "/",
-              "permalink": "/actual-community-docs/",
+              "permalink": "/docs/",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/index.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/index.md",
               "tags": [],
               "version": "current",
               "sidebarPosition": 1,
@@ -1114,7 +1114,7 @@
               "sidebar": "docs",
               "next": {
                 "title": "Getting Started",
-                "permalink": "/actual-community-docs/category/getting-started"
+                "permalink": "/docs/category/getting-started"
               }
             },
             {
@@ -1125,9 +1125,9 @@
               "source": "@site/docs/Reports/overview.md",
               "sourceDirName": "Reports",
               "slug": "/Reports/overview",
-              "permalink": "/actual-community-docs/Reports/overview",
+              "permalink": "/docs/Reports/overview",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Reports/overview.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Reports/overview.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -1136,11 +1136,11 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Transfers",
-                "permalink": "/actual-community-docs/Accounts/transfers"
+                "permalink": "/docs/Accounts/transfers"
               },
               "next": {
                 "title": "Backup & Restore",
-                "permalink": "/actual-community-docs/category/backup--restore"
+                "permalink": "/docs/category/backup--restore"
               }
             },
             {
@@ -1151,9 +1151,9 @@
               "source": "@site/docs/Troubleshooting/Troubleshooting-Edge.md",
               "sourceDirName": "Troubleshooting",
               "slug": "/Troubleshooting/Troubleshooting-Edge",
-              "permalink": "/actual-community-docs/Troubleshooting/Troubleshooting-Edge",
+              "permalink": "/docs/Troubleshooting/Troubleshooting-Edge",
               "draft": false,
-              "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Troubleshooting/Troubleshooting-Edge.md",
+              "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Troubleshooting/Troubleshooting-Edge.md",
               "tags": [],
               "version": "current",
               "frontMatter": {
@@ -1162,7 +1162,7 @@
               "sidebar": "docs",
               "previous": {
                 "title": "Troubleshooting",
-                "permalink": "/actual-community-docs/category/troubleshooting"
+                "permalink": "/docs/category/troubleshooting"
               }
             }
           ],
@@ -1179,7 +1179,7 @@
                 "link": {
                   "type": "generated-index",
                   "slug": "/category/getting-started",
-                  "permalink": "/actual-community-docs/category/getting-started"
+                  "permalink": "/docs/category/getting-started"
                 },
                 "collapsed": true,
                 "items": [
@@ -1189,7 +1189,7 @@
                     "link": {
                       "type": "generated-index",
                       "slug": "/category/installing-actual",
-                      "permalink": "/actual-community-docs/category/installing-actual"
+                      "permalink": "/docs/category/installing-actual"
                     },
                     "items": [
                       {
@@ -1411,7 +1411,7 @@
                 "link": {
                   "type": "generated-index",
                   "slug": "/category/backup--restore",
-                  "permalink": "/actual-community-docs/category/backup--restore"
+                  "permalink": "/docs/category/backup--restore"
                 },
                 "collapsed": true,
                 "items": [
@@ -1432,7 +1432,7 @@
                 "link": {
                   "type": "generated-index",
                   "slug": "/category/developers",
-                  "permalink": "/actual-community-docs/category/developers"
+                  "permalink": "/docs/category/developers"
                 },
                 "collapsed": true,
                 "items": [
@@ -1469,7 +1469,7 @@
                 "link": {
                   "type": "generated-index",
                   "slug": "/category/troubleshooting",
-                  "permalink": "/actual-community-docs/category/troubleshooting"
+                  "permalink": "/docs/category/troubleshooting"
                 },
                 "collapsed": true,
                 "items": [
@@ -1492,7 +1492,7 @@
       "blogPosts": [],
       "blogListPaginated": [],
       "blogTags": {},
-      "blogTagsListPath": "/actual-community-docs/blog/tags",
+      "blogTagsListPath": "/docs/blog/tags",
       "blogTagsPaginated": []
     }
   },
@@ -1500,7 +1500,7 @@
     "default": [
       {
         "type": "mdx",
-        "permalink": "/actual-community-docs/markdown-page",
+        "permalink": "/docs/markdown-page",
         "source": "@site/src/pages/markdown-page.md",
         "title": "Markdown page example",
         "description": "You don't need React to write simple standalone pages.",

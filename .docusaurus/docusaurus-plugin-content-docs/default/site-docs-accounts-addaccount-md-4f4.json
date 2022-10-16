@@ -6,9 +6,9 @@
   "source": "@site/docs/Accounts/addaccount.md",
   "sourceDirName": "Accounts",
   "slug": "/Accounts/addaccount",
-  "permalink": "/actual-community-docs/Accounts/addaccount",
+  "permalink": "/docs/Accounts/addaccount",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/addaccount.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/addaccount.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Overview",
-    "permalink": "/actual-community-docs/Accounts/overview"
+    "permalink": "/docs/Accounts/overview"
   },
   "next": {
     "title": "Import Transactions",
-    "permalink": "/actual-community-docs/Accounts/importing-trans"
+    "permalink": "/docs/Accounts/importing-trans"
   }
 }

@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/Installing/synology/synology.md",
   "sourceDirName": "Getting-Started/Installing/synology",
   "slug": "/Getting-Started/Installing/synology/",
-  "permalink": "/actual-community-docs/Getting-Started/Installing/synology/",
+  "permalink": "/docs/Getting-Started/Installing/synology/",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/synology/synology.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/synology/synology.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Terraform",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/Terraform"
+    "permalink": "/docs/Getting-Started/Installing/Terraform"
   },
   "next": {
     "title": "Enabling a Reverse Proxy",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy"
+    "permalink": "/docs/Getting-Started/Installing/synology/synology-reverse-proxy"
   }
 }

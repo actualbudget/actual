@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/managefiles.md",
   "sourceDirName": "Getting-Started",
   "slug": "/Getting-Started/managefiles",
-  "permalink": "/actual-community-docs/Getting-Started/managefiles",
+  "permalink": "/docs/Getting-Started/managefiles",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/managefiles.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/managefiles.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Syncing Across Devices",
-    "permalink": "/actual-community-docs/Getting-Started/sync"
+    "permalink": "/docs/Getting-Started/sync"
   },
   "next": {
     "title": "Migration Overview",
-    "permalink": "/actual-community-docs/Getting-Started/migration/migration-intro"
+    "permalink": "/docs/Getting-Started/migration/migration-intro"
   }
 }

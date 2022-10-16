@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/Installing/fly/Fly-terraform.md",
   "sourceDirName": "Getting-Started/Installing/fly",
   "slug": "/Getting-Started/Installing/fly/Fly-terraform",
-  "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform",
+  "permalink": "/docs/Getting-Started/Installing/fly/Fly-terraform",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-terraform.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-terraform.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Deploying Actual with a container image",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-image"
+    "permalink": "/docs/Getting-Started/Installing/fly/Fly-image"
   },
   "next": {
     "title": "Updating Actual",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating"
+    "permalink": "/docs/Getting-Started/Installing/fly/Fly-updating"
   }
 }

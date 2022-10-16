@@ -6,9 +6,9 @@
   "source": "@site/docs/FAQ.md",
   "sourceDirName": ".",
   "slug": "/FAQ",
-  "permalink": "/actual-community-docs/FAQ",
+  "permalink": "/docs/FAQ",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/FAQ.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/FAQ.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "How to build browser for Windows",
-    "permalink": "/actual-community-docs/Developers/Building-Windows"
+    "permalink": "/docs/Developers/Building-Windows"
   },
   "next": {
     "title": "Troubleshooting",
-    "permalink": "/actual-community-docs/category/troubleshooting"
+    "permalink": "/docs/category/troubleshooting"
   }
 }

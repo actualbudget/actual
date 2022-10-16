@@ -3,344 +3,344 @@ import ComponentCreator from '@docusaurus/ComponentCreator';
 
 export default [
   {
-    path: '/actual-community-docs/__docusaurus/debug',
-    component: ComponentCreator('/actual-community-docs/__docusaurus/debug', 'b84'),
+    path: '/docs/__docusaurus/debug',
+    component: ComponentCreator('/docs/__docusaurus/debug', '6ee'),
     exact: true
   },
   {
-    path: '/actual-community-docs/__docusaurus/debug/config',
-    component: ComponentCreator('/actual-community-docs/__docusaurus/debug/config', '7cc'),
+    path: '/docs/__docusaurus/debug/config',
+    component: ComponentCreator('/docs/__docusaurus/debug/config', '2cd'),
     exact: true
   },
   {
-    path: '/actual-community-docs/__docusaurus/debug/content',
-    component: ComponentCreator('/actual-community-docs/__docusaurus/debug/content', '1f0'),
+    path: '/docs/__docusaurus/debug/content',
+    component: ComponentCreator('/docs/__docusaurus/debug/content', '4a7'),
     exact: true
   },
   {
-    path: '/actual-community-docs/__docusaurus/debug/globalData',
-    component: ComponentCreator('/actual-community-docs/__docusaurus/debug/globalData', '47c'),
+    path: '/docs/__docusaurus/debug/globalData',
+    component: ComponentCreator('/docs/__docusaurus/debug/globalData', '650'),
     exact: true
   },
   {
-    path: '/actual-community-docs/__docusaurus/debug/metadata',
-    component: ComponentCreator('/actual-community-docs/__docusaurus/debug/metadata', '359'),
+    path: '/docs/__docusaurus/debug/metadata',
+    component: ComponentCreator('/docs/__docusaurus/debug/metadata', '84d'),
     exact: true
   },
   {
-    path: '/actual-community-docs/__docusaurus/debug/registry',
-    component: ComponentCreator('/actual-community-docs/__docusaurus/debug/registry', 'ed6'),
+    path: '/docs/__docusaurus/debug/registry',
+    component: ComponentCreator('/docs/__docusaurus/debug/registry', 'd25'),
     exact: true
   },
   {
-    path: '/actual-community-docs/__docusaurus/debug/routes',
-    component: ComponentCreator('/actual-community-docs/__docusaurus/debug/routes', '30e'),
+    path: '/docs/__docusaurus/debug/routes',
+    component: ComponentCreator('/docs/__docusaurus/debug/routes', '017'),
     exact: true
   },
   {
-    path: '/actual-community-docs/markdown-page',
-    component: ComponentCreator('/actual-community-docs/markdown-page', '9a5'),
+    path: '/docs/markdown-page',
+    component: ComponentCreator('/docs/markdown-page', '1af'),
     exact: true
   },
   {
-    path: '/actual-community-docs/',
-    component: ComponentCreator('/actual-community-docs/', '42f'),
+    path: '/docs/',
+    component: ComponentCreator('/docs/', '536'),
     routes: [
       {
-        path: '/actual-community-docs/',
-        component: ComponentCreator('/actual-community-docs/', 'e00'),
+        path: '/docs/',
+        component: ComponentCreator('/docs/', 'e7a'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Accounts/addaccount',
-        component: ComponentCreator('/actual-community-docs/Accounts/addaccount', '438'),
+        path: '/docs/Accounts/addaccount',
+        component: ComponentCreator('/docs/Accounts/addaccount', 'f1d'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Accounts/connecting-your-bank',
-        component: ComponentCreator('/actual-community-docs/Accounts/connecting-your-bank', '580'),
+        path: '/docs/Accounts/connecting-your-bank',
+        component: ComponentCreator('/docs/Accounts/connecting-your-bank', 'ce0'),
         exact: true
       },
       {
-        path: '/actual-community-docs/Accounts/importing-trans',
-        component: ComponentCreator('/actual-community-docs/Accounts/importing-trans', '17b'),
+        path: '/docs/Accounts/importing-trans',
+        component: ComponentCreator('/docs/Accounts/importing-trans', '725'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Accounts/overview',
-        component: ComponentCreator('/actual-community-docs/Accounts/overview', '6db'),
+        path: '/docs/Accounts/overview',
+        component: ComponentCreator('/docs/Accounts/overview', 'c33'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Accounts/payees',
-        component: ComponentCreator('/actual-community-docs/Accounts/payees', '1ad'),
+        path: '/docs/Accounts/payees',
+        component: ComponentCreator('/docs/Accounts/payees', '1e7'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Accounts/transfers',
-        component: ComponentCreator('/actual-community-docs/Accounts/transfers', '787'),
+        path: '/docs/Accounts/transfers',
+        component: ComponentCreator('/docs/Accounts/transfers', '132'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Backup-Restore/Backups',
-        component: ComponentCreator('/actual-community-docs/Backup-Restore/Backups', '029'),
+        path: '/docs/Backup-Restore/Backups',
+        component: ComponentCreator('/docs/Backup-Restore/Backups', 'eed'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Backup-Restore/Restore',
-        component: ComponentCreator('/actual-community-docs/Backup-Restore/Restore', 'c93'),
+        path: '/docs/Backup-Restore/Restore',
+        component: ComponentCreator('/docs/Backup-Restore/Restore', '03c'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Budgeting/categories',
-        component: ComponentCreator('/actual-community-docs/Budgeting/categories', 'f1c'),
+        path: '/docs/Budgeting/categories',
+        component: ComponentCreator('/docs/Budgeting/categories', '143'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Budgeting/creditcards',
-        component: ComponentCreator('/actual-community-docs/Budgeting/creditcards', '3ca'),
+        path: '/docs/Budgeting/creditcards',
+        component: ComponentCreator('/docs/Budgeting/creditcards', '32c'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Budgeting/howitworks',
-        component: ComponentCreator('/actual-community-docs/Budgeting/howitworks', '75f'),
+        path: '/docs/Budgeting/howitworks',
+        component: ComponentCreator('/docs/Budgeting/howitworks', 'c3c'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Budgeting/reconcile',
-        component: ComponentCreator('/actual-community-docs/Budgeting/reconcile', 'b78'),
+        path: '/docs/Budgeting/reconcile',
+        component: ComponentCreator('/docs/Budgeting/reconcile', '76b'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Budgeting/returnsandreimbursements',
-        component: ComponentCreator('/actual-community-docs/Budgeting/returnsandreimbursements', 'a70'),
+        path: '/docs/Budgeting/returnsandreimbursements',
+        component: ComponentCreator('/docs/Budgeting/returnsandreimbursements', '32e'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Budgeting/rules/',
-        component: ComponentCreator('/actual-community-docs/Budgeting/rules/', '917'),
+        path: '/docs/Budgeting/rules/',
+        component: ComponentCreator('/docs/Budgeting/rules/', '00f'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Budgeting/rules/rules-custom',
-        component: ComponentCreator('/actual-community-docs/Budgeting/rules/rules-custom', 'a26'),
+        path: '/docs/Budgeting/rules/rules-custom',
+        component: ComponentCreator('/docs/Budgeting/rules/rules-custom', '479'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Budgeting/schedules',
-        component: ComponentCreator('/actual-community-docs/Budgeting/schedules', '500'),
+        path: '/docs/Budgeting/schedules',
+        component: ComponentCreator('/docs/Budgeting/schedules', '4f1'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/category/backup--restore',
-        component: ComponentCreator('/actual-community-docs/category/backup--restore', '5a5'),
+        path: '/docs/category/backup--restore',
+        component: ComponentCreator('/docs/category/backup--restore', '4f7'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/category/developers',
-        component: ComponentCreator('/actual-community-docs/category/developers', 'ab9'),
+        path: '/docs/category/developers',
+        component: ComponentCreator('/docs/category/developers', 'cb5'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/category/getting-started',
-        component: ComponentCreator('/actual-community-docs/category/getting-started', '625'),
+        path: '/docs/category/getting-started',
+        component: ComponentCreator('/docs/category/getting-started', '066'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/category/installing-actual',
-        component: ComponentCreator('/actual-community-docs/category/installing-actual', '3c0'),
+        path: '/docs/category/installing-actual',
+        component: ComponentCreator('/docs/category/installing-actual', '81d'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/category/troubleshooting',
-        component: ComponentCreator('/actual-community-docs/category/troubleshooting', '9ca'),
+        path: '/docs/category/troubleshooting',
+        component: ComponentCreator('/docs/category/troubleshooting', '036'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Developers/ActualQL',
-        component: ComponentCreator('/actual-community-docs/Developers/ActualQL', '0b9'),
+        path: '/docs/Developers/ActualQL',
+        component: ComponentCreator('/docs/Developers/ActualQL', 'c88'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Developers/API',
-        component: ComponentCreator('/actual-community-docs/Developers/API', 'dae'),
+        path: '/docs/Developers/API',
+        component: ComponentCreator('/docs/Developers/API', '750'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Developers/Building-Windows',
-        component: ComponentCreator('/actual-community-docs/Developers/Building-Windows', 'f29'),
+        path: '/docs/Developers/Building-Windows',
+        component: ComponentCreator('/docs/Developers/Building-Windows', '5e3'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Developers/project-layout',
-        component: ComponentCreator('/actual-community-docs/Developers/project-layout', 'f12'),
+        path: '/docs/Developers/project-layout',
+        component: ComponentCreator('/docs/Developers/project-layout', 'c41'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Developers/using-the-API',
-        component: ComponentCreator('/actual-community-docs/Developers/using-the-API', '120'),
+        path: '/docs/Developers/using-the-API',
+        component: ComponentCreator('/docs/Developers/using-the-API', '1fe'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/FAQ',
-        component: ComponentCreator('/actual-community-docs/FAQ', '078'),
+        path: '/docs/FAQ',
+        component: ComponentCreator('/docs/FAQ', '6a7'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/Docker',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/Docker', '0d3'),
+        path: '/docs/Getting-Started/Installing/Docker',
+        component: ComponentCreator('/docs/Getting-Started/Installing/Docker', 'a26'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/fly/Fly-git',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/fly/Fly-git', '3c7'),
+        path: '/docs/Getting-Started/Installing/fly/Fly-git',
+        component: ComponentCreator('/docs/Getting-Started/Installing/fly/Fly-git', '464'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/fly/Fly-image',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/fly/Fly-image', '1c5'),
+        path: '/docs/Getting-Started/Installing/fly/Fly-image',
+        component: ComponentCreator('/docs/Getting-Started/Installing/fly/Fly-image', '0fe'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting', 'a13'),
+        path: '/docs/Getting-Started/Installing/fly/Fly-persisting',
+        component: ComponentCreator('/docs/Getting-Started/Installing/fly/Fly-persisting', '284'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites', '5cb'),
+        path: '/docs/Getting-Started/Installing/fly/Fly-prerequisites',
+        component: ComponentCreator('/docs/Getting-Started/Installing/fly/Fly-prerequisites', 'c05'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform', 'b8d'),
+        path: '/docs/Getting-Started/Installing/fly/Fly-terraform',
+        component: ComponentCreator('/docs/Getting-Started/Installing/fly/Fly-terraform', '8a7'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/fly/Fly-updating',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/fly/Fly-updating', 'c87'),
+        path: '/docs/Getting-Started/Installing/fly/Fly-updating',
+        component: ComponentCreator('/docs/Getting-Started/Installing/fly/Fly-updating', '3ea'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/fly/Fly.io',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/fly/Fly.io', 'a63'),
+        path: '/docs/Getting-Started/Installing/fly/Fly.io',
+        component: ComponentCreator('/docs/Getting-Started/Installing/fly/Fly.io', '1b9'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/Pikapods',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/Pikapods', 'd5b'),
+        path: '/docs/Getting-Started/Installing/Pikapods',
+        component: ComponentCreator('/docs/Getting-Started/Installing/Pikapods', '64f'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/synology/',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/synology/', 'eb0'),
+        path: '/docs/Getting-Started/Installing/synology/',
+        component: ComponentCreator('/docs/Getting-Started/Installing/synology/', 'e23'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy', 'bc2'),
+        path: '/docs/Getting-Started/Installing/synology/synology-reverse-proxy',
+        component: ComponentCreator('/docs/Getting-Started/Installing/synology/synology-reverse-proxy', '657'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower', '36c'),
+        path: '/docs/Getting-Started/Installing/synology/synology-watchtower',
+        component: ComponentCreator('/docs/Getting-Started/Installing/synology/synology-watchtower', '7a2'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/Terraform',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/Terraform', 'bda'),
+        path: '/docs/Getting-Started/Installing/Terraform',
+        component: ComponentCreator('/docs/Getting-Started/Installing/Terraform', '840'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/Installing/Unraid',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/Installing/Unraid', '632'),
+        path: '/docs/Getting-Started/Installing/Unraid',
+        component: ComponentCreator('/docs/Getting-Started/Installing/Unraid', 'ee7'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/managefiles',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/managefiles', '615'),
+        path: '/docs/Getting-Started/managefiles',
+        component: ComponentCreator('/docs/Getting-Started/managefiles', 'ca4'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/migration/migration-intro',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/migration/migration-intro', '81f'),
+        path: '/docs/Getting-Started/migration/migration-intro',
+        component: ComponentCreator('/docs/Getting-Started/migration/migration-intro', 'aac'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/migration/nynab',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/migration/nynab', '232'),
+        path: '/docs/Getting-Started/migration/nynab',
+        component: ComponentCreator('/docs/Getting-Started/migration/nynab', '3d2'),
         exact: true
       },
       {
-        path: '/actual-community-docs/Getting-Started/migration/ynab4',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/migration/ynab4', '609'),
+        path: '/docs/Getting-Started/migration/ynab4',
+        component: ComponentCreator('/docs/Getting-Started/migration/ynab4', '954'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/sync',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/sync', '905'),
+        path: '/docs/Getting-Started/sync',
+        component: ComponentCreator('/docs/Getting-Started/sync', '5cd'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Getting-Started/tipstricks',
-        component: ComponentCreator('/actual-community-docs/Getting-Started/tipstricks', '446'),
+        path: '/docs/Getting-Started/tipstricks',
+        component: ComponentCreator('/docs/Getting-Started/tipstricks', '1b8'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Reports/overview',
-        component: ComponentCreator('/actual-community-docs/Reports/overview', 'fa5'),
+        path: '/docs/Reports/overview',
+        component: ComponentCreator('/docs/Reports/overview', '34a'),
         exact: true,
         sidebar: "docs"
       },
       {
-        path: '/actual-community-docs/Troubleshooting/Troubleshooting-Edge',
-        component: ComponentCreator('/actual-community-docs/Troubleshooting/Troubleshooting-Edge', '06b'),
+        path: '/docs/Troubleshooting/Troubleshooting-Edge',
+        component: ComponentCreator('/docs/Troubleshooting/Troubleshooting-Edge', '85e'),
         exact: true,
         sidebar: "docs"
       }

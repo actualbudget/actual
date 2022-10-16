@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/tipstricks.md",
   "sourceDirName": "Getting-Started",
   "slug": "/Getting-Started/tipstricks",
-  "permalink": "/actual-community-docs/Getting-Started/tipstricks",
+  "permalink": "/docs/Getting-Started/tipstricks",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/tipstricks.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/tipstricks.md",
   "tags": [],
   "version": "current",
   "sidebarPosition": 1,
@@ -19,10 +19,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Synology Automatic Updates",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower"
+    "permalink": "/docs/Getting-Started/Installing/synology/synology-watchtower"
   },
   "next": {
     "title": "Syncing Across Devices",
-    "permalink": "/actual-community-docs/Getting-Started/sync"
+    "permalink": "/docs/Getting-Started/sync"
   }
 }

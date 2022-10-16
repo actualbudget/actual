@@ -6,9 +6,9 @@
   "source": "@site/docs/Accounts/payees.md",
   "sourceDirName": "Accounts",
   "slug": "/Accounts/payees",
-  "permalink": "/actual-community-docs/Accounts/payees",
+  "permalink": "/docs/Accounts/payees",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/payees.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Accounts/payees.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Import Transactions",
-    "permalink": "/actual-community-docs/Accounts/importing-trans"
+    "permalink": "/docs/Accounts/importing-trans"
   },
   "next": {
     "title": "Transfers",
-    "permalink": "/actual-community-docs/Accounts/transfers"
+    "permalink": "/docs/Accounts/transfers"
   }
 }

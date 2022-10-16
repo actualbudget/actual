@@ -6,9 +6,9 @@
   "source": "@site/docs/Developers/project-layout.md",
   "sourceDirName": "Developers",
   "slug": "/Developers/project-layout",
-  "permalink": "/actual-community-docs/Developers/project-layout",
+  "permalink": "/docs/Developers/project-layout",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/project-layout.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Developers/project-layout.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Developers",
-    "permalink": "/actual-community-docs/category/developers"
+    "permalink": "/docs/category/developers"
   },
   "next": {
     "title": "Using the API",
-    "permalink": "/actual-community-docs/Developers/using-the-API"
+    "permalink": "/docs/Developers/using-the-API"
   }
 }

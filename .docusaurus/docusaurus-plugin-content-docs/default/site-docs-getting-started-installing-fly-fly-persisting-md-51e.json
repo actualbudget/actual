@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/Installing/fly/Fly-persisting.md",
   "sourceDirName": "Getting-Started/Installing/fly",
   "slug": "/Getting-Started/Installing/fly/Fly-persisting",
-  "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting",
+  "permalink": "/docs/Getting-Started/Installing/fly/Fly-persisting",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-persisting.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-persisting.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Updating Actual",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating"
+    "permalink": "/docs/Getting-Started/Installing/fly/Fly-updating"
   },
   "next": {
     "title": "Docker",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/Docker"
+    "permalink": "/docs/Getting-Started/Installing/Docker"
   }
 }

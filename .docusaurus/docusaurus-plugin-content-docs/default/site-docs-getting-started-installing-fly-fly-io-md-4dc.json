@@ -6,19 +6,19 @@
   "source": "@site/docs/Getting-Started/Installing/fly/Fly.io.md",
   "sourceDirName": "Getting-Started/Installing/fly",
   "slug": "/Getting-Started/Installing/fly/Fly.io",
-  "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly.io",
+  "permalink": "/docs/Getting-Started/Installing/fly/Fly.io",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly.io.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly.io.md",
   "tags": [],
   "version": "current",
   "frontMatter": {},
   "sidebar": "docs",
   "previous": {
     "title": "Installing Actual",
-    "permalink": "/actual-community-docs/category/installing-actual"
+    "permalink": "/docs/category/installing-actual"
   },
   "next": {
     "title": "Fly Pre-requisites",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites"
+    "permalink": "/docs/Getting-Started/Installing/fly/Fly-prerequisites"
   }
 }

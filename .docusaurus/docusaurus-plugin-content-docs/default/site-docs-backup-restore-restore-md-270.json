@@ -6,9 +6,9 @@
   "source": "@site/docs/Backup-Restore/Restore.md",
   "sourceDirName": "Backup-Restore",
   "slug": "/Backup-Restore/Restore",
-  "permalink": "/actual-community-docs/Backup-Restore/Restore",
+  "permalink": "/docs/Backup-Restore/Restore",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Backup-Restore/Restore.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Backup-Restore/Restore.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Backing up your Actual budget",
-    "permalink": "/actual-community-docs/Backup-Restore/Backups"
+    "permalink": "/docs/Backup-Restore/Backups"
   },
   "next": {
     "title": "Developers",
-    "permalink": "/actual-community-docs/category/developers"
+    "permalink": "/docs/category/developers"
   }
 }

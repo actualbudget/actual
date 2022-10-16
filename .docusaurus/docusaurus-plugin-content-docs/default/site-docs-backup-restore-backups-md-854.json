@@ -6,9 +6,9 @@
   "source": "@site/docs/Backup-Restore/Backups.md",
   "sourceDirName": "Backup-Restore",
   "slug": "/Backup-Restore/Backups",
-  "permalink": "/actual-community-docs/Backup-Restore/Backups",
+  "permalink": "/docs/Backup-Restore/Backups",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Backup-Restore/Backups.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Backup-Restore/Backups.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Backup & Restore",
-    "permalink": "/actual-community-docs/category/backup--restore"
+    "permalink": "/docs/category/backup--restore"
   },
   "next": {
     "title": "Restoring Data Into Actual",
-    "permalink": "/actual-community-docs/Backup-Restore/Restore"
+    "permalink": "/docs/Backup-Restore/Restore"
   }
 }

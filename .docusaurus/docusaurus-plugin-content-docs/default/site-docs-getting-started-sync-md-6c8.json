@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/sync.md",
   "sourceDirName": "Getting-Started",
   "slug": "/Getting-Started/sync",
-  "permalink": "/actual-community-docs/Getting-Started/sync",
+  "permalink": "/docs/Getting-Started/sync",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/sync.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/sync.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Tips & Tricks",
-    "permalink": "/actual-community-docs/Getting-Started/tipstricks"
+    "permalink": "/docs/Getting-Started/tipstricks"
   },
   "next": {
     "title": "Managing Files",
-    "permalink": "/actual-community-docs/Getting-Started/managefiles"
+    "permalink": "/docs/Getting-Started/managefiles"
   }
 }

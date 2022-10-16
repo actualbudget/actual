@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/Installing/synology/synology-watchtower.md",
   "sourceDirName": "Getting-Started/Installing/synology",
   "slug": "/Getting-Started/Installing/synology/synology-watchtower",
-  "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower",
+  "permalink": "/docs/Getting-Started/Installing/synology/synology-watchtower",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/synology/synology-watchtower.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/synology/synology-watchtower.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Enabling a Reverse Proxy",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy"
+    "permalink": "/docs/Getting-Started/Installing/synology/synology-reverse-proxy"
   },
   "next": {
     "title": "Tips & Tricks",
-    "permalink": "/actual-community-docs/Getting-Started/tipstricks"
+    "permalink": "/docs/Getting-Started/tipstricks"
   }
 }

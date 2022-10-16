@@ -6,9 +6,9 @@
   "source": "@site/docs/Getting-Started/Installing/fly/Fly-updating.md",
   "sourceDirName": "Getting-Started/Installing/fly",
   "slug": "/Getting-Started/Installing/fly/Fly-updating",
-  "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating",
+  "permalink": "/docs/Getting-Started/Installing/fly/Fly-updating",
   "draft": false,
-  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-updating.md",
+  "editUrl": "https://github.com/actualbudget/docs/tree/main/docs/Getting-Started/Installing/fly/Fly-updating.md",
   "tags": [],
   "version": "current",
   "frontMatter": {
@@ -17,10 +17,10 @@
   "sidebar": "docs",
   "previous": {
     "title": "Deploying Actual with terraform",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform"
+    "permalink": "/docs/Getting-Started/Installing/fly/Fly-terraform"
   },
   "next": {
     "title": "Persisting the data in Fly",
-    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting"
+    "permalink": "/docs/Getting-Started/Installing/fly/Fly-persisting"
   }
 }
