@@ -1,0 +1,15 @@
+{
+  "title": "Developers",
+  "slug": "/category/developers",
+  "permalink": "/category/developers",
+  "navigation": {
+    "previous": {
+      "title": "Restoring Data Into Actual",
+      "permalink": "/Backup-Restore/Restore"
+    },
+    "next": {
+      "title": "Using the API",
+      "permalink": "/Developers/using-the-API"
+    }
+  }
+}

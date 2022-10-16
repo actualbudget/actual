@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Budgeting/categories",
+  "id": "Budgeting/categories",
+  "title": "Categories",
+  "description": "You can manage your categories in the budget page. Actual supports both expense and income categories.",
+  "source": "@site/docs/Budgeting/categories.md",
+  "sourceDirName": "Budgeting",
+  "slug": "/Budgeting/categories",
+  "permalink": "/actual-community-docs/Budgeting/categories",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/categories.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Categories"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "How Budgeting Works",
+    "permalink": "/actual-community-docs/Budgeting/howitworks"
+  },
+  "next": {
+    "title": "Rules",
+    "permalink": "/actual-community-docs/Budgeting/rules/"
+  }
+}

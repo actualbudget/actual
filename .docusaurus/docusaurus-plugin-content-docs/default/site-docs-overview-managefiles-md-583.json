@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Overview/managefiles",
+  "id": "Overview/managefiles",
+  "title": "Managing Files",
+  "description": "A file is your data that consists of all budgets, transactions, accounts, and everything else. You can create as many files as you want. This lets you create multiple budgets, isolate accounts, and more.",
+  "source": "@site/docs/Overview/managefiles.md",
+  "sourceDirName": "Overview",
+  "slug": "/Overview/managefiles",
+  "permalink": "/actual-community-docs/Overview/managefiles",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Overview/managefiles.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Managing Files"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Syncing Across Devices",
+    "permalink": "/actual-community-docs/Overview/sync"
+  },
+  "next": {
+    "title": "Migration Overview",
+    "permalink": "/actual-community-docs/Overview/migration/migration-intro"
+  }
+}

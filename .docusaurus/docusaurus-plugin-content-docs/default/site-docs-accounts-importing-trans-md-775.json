@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Accounts/importing-trans",
+  "id": "Accounts/importing-trans",
+  "title": "Import Transactions",
+  "description": "There are a couple ways to get transactions into the system. For now, automatic transaction downloading is not available but it will be available very soon.",
+  "source": "@site/docs/Accounts/importing-trans.md",
+  "sourceDirName": "Accounts",
+  "slug": "/Accounts/importing-trans",
+  "permalink": "/actual-community-docs/Accounts/importing-trans",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/importing-trans.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Import Transactions"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Bank accounts",
+    "permalink": "/actual-community-docs/Accounts/addaccount"
+  },
+  "next": {
+    "title": "Payees",
+    "permalink": "/actual-community-docs/Accounts/payees"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "unversionedId": "Accounts/connecting-your-bank",
+  "id": "Accounts/connecting-your-bank",
+  "title": "Connecting Your Bank",
+  "description": "This will be added in a future release of Actual!",
+  "source": "@site/docs/Accounts/connecting-your-bank.md",
+  "sourceDirName": "Accounts",
+  "slug": "/Accounts/connecting-your-bank",
+  "permalink": "/actual-community-docs/Accounts/connecting-your-bank",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/connecting-your-bank.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "Title": "Conn Bank"
+  }
+}

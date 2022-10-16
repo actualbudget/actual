@@ -1,0 +1,28 @@
+{
+  "unversionedId": "Overview/tipstricks",
+  "id": "Overview/tipstricks",
+  "title": "Tips & Tricks",
+  "description": "Undo/redo",
+  "source": "@site/docs/Overview/tipstricks.md",
+  "sourceDirName": "Overview",
+  "slug": "/Overview/tipstricks",
+  "permalink": "/actual-community-docs/Overview/tipstricks",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Overview/tipstricks.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "title": "Tips & Tricks"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Synology Automatic Updates",
+    "permalink": "/actual-community-docs/Installing/synology/synology-watchtower"
+  },
+  "next": {
+    "title": "Syncing Across Devices",
+    "permalink": "/actual-community-docs/Overview/sync"
+  }
+}

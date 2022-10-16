@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Installing/Fly-terraform",
+  "id": "Installing/Fly-terraform",
+  "title": "Deploying Actual with terraform",
+  "description": "Requirements",
+  "source": "@site/docs/Installing/Fly-terraform.md",
+  "sourceDirName": "Installing",
+  "slug": "/Installing/Fly-terraform",
+  "permalink": "/actual-community-docs/Installing/Fly-terraform",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/Fly-terraform.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Deploying Actual with terraform"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Deploying Actual with a container image",
+    "permalink": "/actual-community-docs/Installing/Fly-image"
+  },
+  "next": {
+    "title": "Updating Actual",
+    "permalink": "/actual-community-docs/Installing/Fly-updating"
+  }
+}

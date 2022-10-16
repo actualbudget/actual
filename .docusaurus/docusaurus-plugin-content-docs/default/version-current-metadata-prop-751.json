@@ -1,0 +1,641 @@
+{
+  "pluginId": "default",
+  "version": "current",
+  "label": "Next",
+  "banner": null,
+  "badge": false,
+  "noIndex": false,
+  "className": "docs-version-current",
+  "isLast": true,
+  "docsSidebars": {
+    "docs": [
+      {
+        "type": "link",
+        "label": "Introduction",
+        "href": "/actual-community-docs/",
+        "docId": "index"
+      },
+      {
+        "type": "category",
+        "label": "Getting Started",
+        "collapsed": true,
+        "items": [
+          {
+            "type": "category",
+            "label": "Installing Actual",
+            "items": [
+              {
+                "type": "category",
+                "label": "Fly.io",
+                "items": [
+                  {
+                    "type": "link",
+                    "label": "Fly Pre-requisites",
+                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites",
+                    "docId": "Getting-Started/Installing/fly/Fly-prerequisites"
+                  },
+                  {
+                    "type": "link",
+                    "label": "Deploying Actual with Git",
+                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-git",
+                    "docId": "Getting-Started/Installing/fly/Fly-git"
+                  },
+                  {
+                    "type": "link",
+                    "label": "Deploying Actual with a container image",
+                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-image",
+                    "docId": "Getting-Started/Installing/fly/Fly-image"
+                  },
+                  {
+                    "type": "link",
+                    "label": "Deploying Actual with terraform",
+                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform",
+                    "docId": "Getting-Started/Installing/fly/Fly-terraform"
+                  },
+                  {
+                    "type": "link",
+                    "label": "Updating Actual",
+                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating",
+                    "docId": "Getting-Started/Installing/fly/Fly-updating"
+                  },
+                  {
+                    "type": "link",
+                    "label": "Persisting the data in Fly",
+                    "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting",
+                    "docId": "Getting-Started/Installing/fly/Fly-persisting"
+                  }
+                ],
+                "collapsed": true,
+                "collapsible": true,
+                "href": "/actual-community-docs/Getting-Started/Installing/fly/Fly.io"
+              },
+              {
+                "type": "link",
+                "label": "Docker",
+                "href": "/actual-community-docs/Getting-Started/Installing/Docker",
+                "docId": "Getting-Started/Installing/Docker"
+              },
+              {
+                "type": "link",
+                "label": "PikaPods",
+                "href": "/actual-community-docs/Getting-Started/Installing/Pikapods",
+                "docId": "Getting-Started/Installing/Pikapods"
+              },
+              {
+                "type": "link",
+                "label": "Unraid",
+                "href": "/actual-community-docs/Getting-Started/Installing/Unraid",
+                "docId": "Getting-Started/Installing/Unraid"
+              },
+              {
+                "type": "link",
+                "label": "Terraform",
+                "href": "/actual-community-docs/Getting-Started/Installing/Terraform",
+                "docId": "Getting-Started/Installing/Terraform"
+              },
+              {
+                "type": "category",
+                "label": "Synology",
+                "items": [
+                  {
+                    "type": "link",
+                    "label": "Enabling a Reverse Proxy",
+                    "href": "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy",
+                    "docId": "Getting-Started/Installing/synology/synology-reverse-proxy"
+                  },
+                  {
+                    "type": "link",
+                    "label": "Synology Automatic Updates",
+                    "href": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower",
+                    "docId": "Getting-Started/Installing/synology/synology-watchtower"
+                  }
+                ],
+                "collapsed": true,
+                "collapsible": true,
+                "href": "/actual-community-docs/Getting-Started/Installing/synology/"
+              }
+            ],
+            "collapsed": true,
+            "collapsible": true,
+            "href": "/actual-community-docs/category/installing-actual"
+          },
+          {
+            "type": "link",
+            "label": "Tips & Tricks",
+            "href": "/actual-community-docs/Getting-Started/tipstricks",
+            "docId": "Getting-Started/tipstricks"
+          },
+          {
+            "type": "link",
+            "label": "Syncing Across Devices",
+            "href": "/actual-community-docs/Getting-Started/sync",
+            "docId": "Getting-Started/sync"
+          },
+          {
+            "type": "link",
+            "label": "Managing Files",
+            "href": "/actual-community-docs/Getting-Started/managefiles",
+            "docId": "Getting-Started/managefiles"
+          },
+          {
+            "type": "category",
+            "label": "Migrating From Other Apps",
+            "items": [
+              {
+                "type": "link",
+                "label": "Migrating from YNAB4",
+                "href": "/actual-community-docs/Getting-Started/migration/ynab4",
+                "docId": "Getting-Started/migration/ynab4"
+              },
+              {
+                "type": "html",
+                "value": "nYNAB",
+                "className": "menu__link menu__link--unavailable",
+                "defaultStyle": true
+              }
+            ],
+            "collapsed": true,
+            "collapsible": true,
+            "href": "/actual-community-docs/Getting-Started/migration/migration-intro"
+          }
+        ],
+        "collapsible": true,
+        "href": "/actual-community-docs/category/getting-started"
+      },
+      {
+        "type": "category",
+        "label": "Budgeting",
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "How Budgeting Works",
+            "href": "/actual-community-docs/Budgeting/howitworks",
+            "docId": "Budgeting/howitworks"
+          },
+          {
+            "type": "link",
+            "label": "Categories",
+            "href": "/actual-community-docs/Budgeting/categories",
+            "docId": "Budgeting/categories"
+          },
+          {
+            "type": "category",
+            "label": "Rules",
+            "collapsed": true,
+            "items": [
+              {
+                "type": "link",
+                "label": "Supercharge your Budget",
+                "href": "/actual-community-docs/Budgeting/rules/rules-custom",
+                "docId": "Budgeting/rules/rules-custom"
+              }
+            ],
+            "collapsible": true,
+            "href": "/actual-community-docs/Budgeting/rules/"
+          },
+          {
+            "type": "link",
+            "label": "Schedules",
+            "href": "/actual-community-docs/Budgeting/schedules",
+            "docId": "Budgeting/schedules"
+          },
+          {
+            "type": "link",
+            "label": "Reconciliation",
+            "href": "/actual-community-docs/Budgeting/reconcile",
+            "docId": "Budgeting/reconcile"
+          },
+          {
+            "type": "link",
+            "label": "Returns and Reimbursements",
+            "href": "/actual-community-docs/Budgeting/returnsandreimbursements",
+            "docId": "Budgeting/returnsandreimbursements"
+          },
+          {
+            "type": "link",
+            "label": "Managing Credit Cards",
+            "href": "/actual-community-docs/Budgeting/creditcards",
+            "docId": "Budgeting/creditcards"
+          }
+        ],
+        "collapsible": true
+      },
+      {
+        "type": "category",
+        "label": "Accounts",
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "Overview",
+            "href": "/actual-community-docs/Accounts/overview",
+            "docId": "Accounts/overview"
+          },
+          {
+            "type": "link",
+            "label": "Bank accounts",
+            "href": "/actual-community-docs/Accounts/addaccount",
+            "docId": "Accounts/addaccount"
+          },
+          {
+            "type": "link",
+            "label": "Import Transactions",
+            "href": "/actual-community-docs/Accounts/importing-trans",
+            "docId": "Accounts/importing-trans"
+          },
+          {
+            "type": "html",
+            "value": "Connecting Your Bank",
+            "className": "menu__link menu__link--unavailable",
+            "defaultStyle": true
+          },
+          {
+            "type": "link",
+            "label": "Payees",
+            "href": "/actual-community-docs/Accounts/payees",
+            "docId": "Accounts/payees"
+          },
+          {
+            "type": "link",
+            "label": "Transfers",
+            "href": "/actual-community-docs/Accounts/transfers",
+            "docId": "Accounts/transfers"
+          }
+        ],
+        "collapsible": true
+      },
+      {
+        "type": "category",
+        "label": "Reports",
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "Reports In Actual",
+            "href": "/actual-community-docs/Reports/overview",
+            "docId": "Reports/overview"
+          },
+          {
+            "type": "html",
+            "value": "Custom Reports",
+            "className": "menu__link menu__link--unavailable",
+            "defaultStyle": true
+          }
+        ],
+        "collapsible": true
+      },
+      {
+        "type": "category",
+        "label": "Backup & Restore",
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "Backing up your Actual budget",
+            "href": "/actual-community-docs/Backup-Restore/Backups",
+            "docId": "Backup-Restore/Backups"
+          },
+          {
+            "type": "link",
+            "label": "Restoring Data Into Actual",
+            "href": "/actual-community-docs/Backup-Restore/Restore",
+            "docId": "Backup-Restore/Restore"
+          }
+        ],
+        "collapsible": true,
+        "href": "/actual-community-docs/category/backup--restore"
+      },
+      {
+        "type": "category",
+        "label": "Developers",
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "The Actual Project Structure",
+            "href": "/actual-community-docs/Developers/project-layout",
+            "docId": "Developers/project-layout"
+          },
+          {
+            "type": "link",
+            "label": "Using the API",
+            "href": "/actual-community-docs/Developers/using-the-API",
+            "docId": "Developers/using-the-API"
+          },
+          {
+            "type": "link",
+            "label": "API",
+            "href": "/actual-community-docs/Developers/API",
+            "docId": "Developers/API"
+          },
+          {
+            "type": "link",
+            "label": "ActualQL",
+            "href": "/actual-community-docs/Developers/ActualQL",
+            "docId": "Developers/ActualQL"
+          },
+          {
+            "type": "link",
+            "label": "How to build browser for Windows",
+            "href": "/actual-community-docs/Developers/Building-Windows",
+            "docId": "Developers/Building-Windows"
+          }
+        ],
+        "collapsible": true,
+        "href": "/actual-community-docs/category/developers"
+      },
+      {
+        "type": "link",
+        "label": "Frequently Asked Questions",
+        "href": "/actual-community-docs/FAQ",
+        "docId": "FAQ"
+      },
+      {
+        "type": "category",
+        "label": "Troubleshooting",
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "Microsoft Edge browser",
+            "href": "/actual-community-docs/Troubleshooting/Troubleshooting-Edge",
+            "docId": "Troubleshooting/Troubleshooting-Edge"
+          }
+        ],
+        "collapsible": true,
+        "href": "/actual-community-docs/category/troubleshooting"
+      }
+    ]
+  },
+  "docs": {
+    "Accounts/addaccount": {
+      "id": "Accounts/addaccount",
+      "title": "Bank accounts",
+      "description": "This page explains how to manage Bank Accounts within your Actual instance.",
+      "sidebar": "docs"
+    },
+    "Accounts/connecting-your-bank": {
+      "id": "Accounts/connecting-your-bank",
+      "title": "Connecting Your Bank",
+      "description": "This will be added in a future release of Actual!"
+    },
+    "Accounts/importing-trans": {
+      "id": "Accounts/importing-trans",
+      "title": "Import Transactions",
+      "description": "There are a couple ways to get transactions into the system. For now, automatic transaction downloading is not available but it will be available very soon.",
+      "sidebar": "docs"
+    },
+    "Accounts/overview": {
+      "id": "Accounts/overview",
+      "title": "Overview",
+      "description": "You can add as many accounts as you like. Adding all of your accounts (including things like mortgages) is a nice way to get an overview of all your finances.",
+      "sidebar": "docs"
+    },
+    "Accounts/payees": {
+      "id": "Accounts/payees",
+      "title": "Payees",
+      "description": "A payee is a description of the source of a transaction. Actual provides a powerful way of managing payees.",
+      "sidebar": "docs"
+    },
+    "Accounts/transfers": {
+      "id": "Accounts/transfers",
+      "title": "Transfers",
+      "description": "If you want to transfer money between accounts, you want to do it in a way that doesn't mess up reports. If you only created two transactions, Actual would have no way of knowing they are a single transfer and can be ignored in reports.",
+      "sidebar": "docs"
+    },
+    "Backup-Restore/Backups": {
+      "id": "Backup-Restore/Backups",
+      "title": "Backing up your Actual budget",
+      "description": "This only applies to Actual Web",
+      "sidebar": "docs"
+    },
+    "Backup-Restore/Restore": {
+      "id": "Backup-Restore/Restore",
+      "title": "Restoring Data Into Actual",
+      "description": "If you previously followed the steps to back up your data and have an Actual",
+      "sidebar": "docs"
+    },
+    "Budgeting/categories": {
+      "id": "Budgeting/categories",
+      "title": "Categories",
+      "description": "You can manage your categories in the budget page. Actual supports both expense and income categories.",
+      "sidebar": "docs"
+    },
+    "Budgeting/creditcards": {
+      "id": "Budgeting/creditcards",
+      "title": "Managing Credit Cards",
+      "description": "Using a credit card in any budgeting software can be confusing, and Actual is no different. Of all the questions that are asked about budgeting, credit card usage is near the top of the list so don't feel bad if you're a little confused. We will try to walk through the process of using a credit card, paying a credit card, and carrying a balance on a credit card here.",
+      "sidebar": "docs"
+    },
+    "Budgeting/howitworks": {
+      "id": "Budgeting/howitworks",
+      "title": "How Budgeting Works",
+      "description": "The purpose of a budget is to answer simple questions: how much money did I save last month? Do I have enough money to make this purchase? Answering these is simple in an ideal world, but the complexity of real life sometimes makes it hard to see clearly.",
+      "sidebar": "docs"
+    },
+    "Budgeting/reconcile": {
+      "id": "Budgeting/reconcile",
+      "title": "Reconciliation",
+      "description": "Keeping your Actual account ledgers consistent with your band ledgers is important to maintain a healthy budget and know exactly how much currency is available to spend.  Some choose to reconcile monthly, weekly, or even daily.  Actual provides the Reconciliation tool to help manage this process.",
+      "sidebar": "docs"
+    },
+    "Budgeting/returnsandreimbursements": {
+      "id": "Budgeting/returnsandreimbursements",
+      "title": "Returns and Reimbursements",
+      "description": "[budgeting]: ./howitworks#overspending",
+      "sidebar": "docs"
+    },
+    "Budgeting/rules/rules": {
+      "id": "Budgeting/rules/rules",
+      "title": "Rules",
+      "description": "Introduced in 0.0.124, rules determine how a transaction is processed. When importing or syncing transactions, they are run through a list of rules that can apply actions to the transaction. For example, a rule could process a transaction with the payee AMAZON.COM*5C7QC7MH0 AM 10/26 PURCHASE AMZN.COM/BILL, and because it contains the word \"amazon\", sets the payee to \"Amazon\" and the category to \"my fun stuff\". Rules allow you to automate any workflow you want.",
+      "sidebar": "docs"
+    },
+    "Budgeting/rules/rules-custom": {
+      "id": "Budgeting/rules/rules-custom",
+      "title": "Supercharge your Budget",
+      "description": "This page has examples of custom rules that some of our users have found useful for their own budgets.  If you have any custom rules you're proud of, let the Discord group know or submit an issue or PR to the Actual Documentation GitHub repository.",
+      "sidebar": "docs"
+    },
+    "Budgeting/schedules": {
+      "id": "Budgeting/schedules",
+      "title": "Schedules",
+      "description": "[rules]: ./rules",
+      "sidebar": "docs"
+    },
+    "Developers/ActualQL": {
+      "id": "Developers/ActualQL",
+      "title": "ActualQL",
+      "description": "ActualQL is a new query language introduced in 0.0.129. This allows you to query data any way you like. For example, previously we provided a filterTransactions method that let you search transactions, but its behavior was baked into the backend. You couldn't change how transactions were sorted, search certain fields specifically, or sum the total amount.",
+      "sidebar": "docs"
+    },
+    "Developers/API": {
+      "id": "Developers/API",
+      "title": "API",
+      "description": "",
+      "sidebar": "docs"
+    },
+    "Developers/Building-Windows": {
+      "id": "Developers/Building-Windows",
+      "title": "How to build browser for Windows",
+      "description": "Many of the build scripts are bash scripts and not natively invokable in Windows. To solve this, you can build the project using Git Bash.",
+      "sidebar": "docs"
+    },
+    "Developers/project-layout": {
+      "id": "Developers/project-layout",
+      "title": "The Actual Project Structure",
+      "description": "Actual is made up of lots of different packages in this article we are going to try and explain how each of them fits together to form the project you know as Actual Budget.",
+      "sidebar": "docs"
+    },
+    "Developers/using-the-API": {
+      "id": "Developers/using-the-API",
+      "title": "Using the API",
+      "description": "",
+      "sidebar": "docs"
+    },
+    "FAQ": {
+      "id": "FAQ",
+      "title": "Frequently Asked Questions",
+      "description": "- Q. Can I use the mobile apps with my self hosted version of Actual?",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/Docker": {
+      "id": "Getting-Started/Installing/Docker",
+      "title": "Docker",
+      "description": "Hosting Actual on a home server with Docker",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/fly/Fly-git": {
+      "id": "Getting-Started/Installing/fly/Fly-git",
+      "title": "Deploying Actual with Git",
+      "description": "Installing Git On Your Local Machine",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/fly/Fly-image": {
+      "id": "Getting-Started/Installing/fly/Fly-image",
+      "title": "Deploying Actual with a container image",
+      "description": "Deploying",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/fly/Fly-persisting": {
+      "id": "Getting-Started/Installing/fly/Fly-persisting",
+      "title": "Persisting the data in Fly",
+      "description": "Persisting the data in Fly",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/fly/Fly-prerequisites": {
+      "id": "Getting-Started/Installing/fly/Fly-prerequisites",
+      "title": "Fly Pre-requisites",
+      "description": "Pre-requisites",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/fly/Fly-terraform": {
+      "id": "Getting-Started/Installing/fly/Fly-terraform",
+      "title": "Deploying Actual with terraform",
+      "description": "Requirements",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/fly/Fly-updating": {
+      "id": "Getting-Started/Installing/fly/Fly-updating",
+      "title": "Updating Actual",
+      "description": "Updating Actual",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/fly/Fly.io": {
+      "id": "Getting-Started/Installing/fly/Fly.io",
+      "title": "Fly.io",
+      "description": "[git-guide]: ./Fly-git",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/Pikapods": {
+      "id": "Getting-Started/Installing/Pikapods",
+      "title": "PikaPods",
+      "description": "Deploying Actual on Pikapods",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/synology/synology": {
+      "id": "Getting-Started/Installing/synology/synology",
+      "title": "Synology",
+      "description": "[reverse-proxy]: ./synology-reverse-proxy",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/synology/synology-reverse-proxy": {
+      "id": "Getting-Started/Installing/synology/synology-reverse-proxy",
+      "title": "Enabling a Reverse Proxy",
+      "description": "1. If you don't have a registered hostname, Synology offers a free service that provides one. You can also use your existing provider. This information is found in the Control Panel in the External Access menu.",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/synology/synology-watchtower": {
+      "id": "Getting-Started/Installing/synology/synology-watchtower",
+      "title": "Synology Automatic Updates",
+      "description": "Updating containers on a Synology isn't hard, but it can be tedious if you have to do it too many times. This page will provide instructions for one method to automate the task.",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/Terraform": {
+      "id": "Getting-Started/Installing/Terraform",
+      "title": "Terraform",
+      "description": "Installing Actual using Terraform",
+      "sidebar": "docs"
+    },
+    "Getting-Started/Installing/Unraid": {
+      "id": "Getting-Started/Installing/Unraid",
+      "title": "Unraid",
+      "description": "Hosting Actual with Unraid",
+      "sidebar": "docs"
+    },
+    "Getting-Started/managefiles": {
+      "id": "Getting-Started/managefiles",
+      "title": "Managing Files",
+      "description": "A file is your data that consists of all budgets, transactions, accounts, and everything else. You can create as many files as you want. This lets you create multiple budgets, isolate accounts, and more.",
+      "sidebar": "docs"
+    },
+    "Getting-Started/migration/migration-intro": {
+      "id": "Getting-Started/migration/migration-intro",
+      "title": "Migration Overview",
+      "description": "Keeping your existing transaction history is important. If you already use a different app, you probably want to migrate it over into Actual.",
+      "sidebar": "docs"
+    },
+    "Getting-Started/migration/nynab": {
+      "id": "Getting-Started/migration/nynab",
+      "title": "Migrating from nYNAB",
+      "description": ""
+    },
+    "Getting-Started/migration/ynab4": {
+      "id": "Getting-Started/migration/ynab4",
+      "title": "Migrating from YNAB4",
+      "description": "Go to the Create new file* screen (this is the first screen you see on first launch).",
+      "sidebar": "docs"
+    },
+    "Getting-Started/sync": {
+      "id": "Getting-Started/sync",
+      "title": "Syncing Across Devices",
+      "description": "Actual is a different kind of app. Instead of storing all of your data on the internet by default, it stores all of your data locally. That means it works regardless of your network connection, and you always have direct access to your data.",
+      "sidebar": "docs"
+    },
+    "Getting-Started/tipstricks": {
+      "id": "Getting-Started/tipstricks",
+      "title": "Tips & Tricks",
+      "description": "Undo/redo",
+      "sidebar": "docs"
+    },
+    "index": {
+      "id": "index",
+      "title": "Introduction",
+      "description": "Add a bank account",
+      "sidebar": "docs"
+    },
+    "Reports/overview": {
+      "id": "Reports/overview",
+      "title": "Reports In Actual",
+      "description": "Currently Actual comes with two reports: net worth and cash flow. These are valuable reports, but in the future many more report types will be available.",
+      "sidebar": "docs"
+    },
+    "Troubleshooting/Troubleshooting-Edge": {
+      "id": "Troubleshooting/Troubleshooting-Edge",
+      "title": "Microsoft Edge browser",
+      "description": "Common Problems",
+      "sidebar": "docs"
+    }
+  }
+}

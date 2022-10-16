@@ -1,0 +1,44 @@
+{
+  "name": "postcss-discard-unused",
+  "version": "5.1.0",
+  "description": "Discard unused counter styles, keyframes and fonts.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "LICENSE-MIT",
+    "src",
+    "types"
+  ],
+  "keywords": [
+    "css",
+    "minify",
+    "optimise",
+    "postcss",
+    "postcss-plugin",
+    "unused"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/cssnano/cssnano",
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "cssnano/cssnano",
+  "dependencies": {
+    "postcss-selector-parser": "^6.0.5"
+  },
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "engines": {
+    "node": "^10 || ^12 || >=14.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.2.15"
+  },
+  "peerDependencies": {
+    "postcss": "^8.2.15"
+  },
+  "readme": "# [postcss][postcss]-discard-unused\n\n> Discard unused counter styles, keyframes and fonts.\n\n\n## Install\n\nWith [npm](https://npmjs.org/package/postcss-discard-unused) do:\n\n```\nnpm install postcss-discard-unused --save\n```\n\n\n## Example\n\nThis module will discard unused at rules in your CSS file, if it cannot find\nany selectors that make use of them. It works on `@counter-style`, `@keyframes`\nand `@font-face`.\n\n### Input\n\n```css\n@counter-style custom {\n    system: extends decimal;\n    suffix: \"> \"\n}\n\n@counter-style custom2 {\n    system: extends decimal;\n    suffix: \"| \"\n}\n\na {\n    list-style: custom\n}\n```\n\n### Output\n\n```css\n@counter-style custom {\n    system: extends decimal;\n    suffix: \"> \"\n}\n\na {\n    list-style: custom\n}\n```\n\nNote that this plugin is not responsible for normalising font families, as it\nmakes the assumption that you will write your font names consistently, such that\nit considers these two declarations differently:\n\n```css\nh1 {\n    font-family: \"Helvetica Neue\"\n}\n\nh2 {\n    font-family: Helvetica Neue\n}\n```\n\nHowever, you can mitigate this by including [postcss-minify-font-values][mfv]\n*before* this plugin, which will take care of normalising quotes, and\ndeduplicating. For more examples, see the [tests](src/__tests__/index.js).\n\n\n## Usage\n\nSee the [PostCSS documentation](https://github.com/postcss/postcss#usage) for\nexamples for your environment.\n\n\n## API\n\n### discardUnused([options])\n\n#### options\n\n##### fontFace\n\nType: `boolean`  \nDefault: `true`\n\nPass `false` to disable discarding unused font face rules.\n\n##### counterStyle\n\nType: `boolean`  \nDefault: `true`\n\nPass `false` to disable discarding unused counter style rules.\n\n##### keyframes\n\nType: `boolean`  \nDefault: `true`\n\nPass `false` to disable discarding unused keyframe rules.\n\n##### namespace\n\nType: `boolean`  \nDefault: `true`\n\nPass `false` to disable discarding unused namespace rules.\n\n\n## Usage\n\nSee the [PostCSS documentation](https://github.com/postcss/postcss#usage) for\nexamples for your environment.\n\n## Contributors\n\nSee [CONTRIBUTORS.md](https://github.com/cssnano/cssnano/blob/master/CONTRIBUTORS.md).\n\n## License\n\nMIT © [Ben Briggs](http://beneb.info)\n\n\n[postcss]: https://github.com/postcss/postcss\n[mfv]:     https://github.com/trysound/postcss-minify-font-values\n"
+}

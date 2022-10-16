@@ -1,0 +1,40 @@
+{
+	"name": "to-readable-stream",
+	"version": "1.0.0",
+	"description": "Convert a string/Buffer/Uint8Array to a readable stream",
+	"license": "MIT",
+	"repository": "sindresorhus/to-readable-stream",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "sindresorhus.com"
+	},
+	"engines": {
+		"node": ">=6"
+	},
+	"scripts": {
+		"test": "xo && ava"
+	},
+	"files": [
+		"index.js"
+	],
+	"keywords": [
+		"stream",
+		"readablestream",
+		"string",
+		"buffer",
+		"uint8array",
+		"from",
+		"into",
+		"to",
+		"transform",
+		"convert",
+		"readable",
+		"pull"
+	],
+	"devDependencies": {
+		"ava": "*",
+		"get-stream": "^3.0.0",
+		"xo": "*"
+	}
+}

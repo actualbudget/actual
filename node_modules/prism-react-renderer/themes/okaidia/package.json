@@ -1,0 +1,8 @@
+{
+  "name": "@prism-react-renderer/okaidia",
+  "private": true,
+  "sideEffects": false,
+  "main": "index.cjs.js",
+  "module": "index.js",
+  "license": "MIT"
+}

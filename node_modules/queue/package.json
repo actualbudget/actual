@@ -1,0 +1,43 @@
+{
+  "name": "queue",
+  "version": "6.0.2",
+  "description": "asynchronous function queue with adjustable concurrency",
+  "keywords": [
+    "queue",
+    "async",
+    "asynchronous",
+    "synchronous",
+    "job",
+    "task",
+    "concurrency",
+    "concurrent"
+  ],
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "dependencies": {
+    "inherits": "~2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "browserify": "^16.2.3",
+    "coveralls": "^3.0.3",
+    "istanbul": "^0.4.5",
+    "standard": "^12.0.1",
+    "tape": "^4.10.1",
+    "tsd-check": "*",
+    "typescript": "^3.3.3333"
+  },
+  "scripts": {
+    "test": "standard && node test && tsd-check",
+    "test-browser": "standard && browserify test/index.js > test/bundle.js && echo \"open test/index.html in your browser\"",
+    "travis": "standard && istanbul cover test --report lcovonly && cat coverage/lcov.info | coveralls",
+    "travis-ts": "tsc test/typescript.ts --m System --out /dev/null && echo 'TypeScript compilation passed.'",
+    "example": "node example",
+    "lint": "standard"
+  },
+  "repository": "https://github.com/jessetane/queue.git",
+  "author": "Jesse Tane <jesse.tane@gmail.com>",
+  "license": "MIT"
+}

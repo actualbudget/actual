@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Getting-Started/Installing/fly/Fly-prerequisites",
+  "id": "Getting-Started/Installing/fly/Fly-prerequisites",
+  "title": "Fly Pre-requisites",
+  "description": "Pre-requisites",
+  "source": "@site/docs/Getting-Started/Installing/fly/Fly-prerequisites.md",
+  "sourceDirName": "Getting-Started/Installing/fly",
+  "slug": "/Getting-Started/Installing/fly/Fly-prerequisites",
+  "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-prerequisites.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Fly Pre-requisites"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Fly.io",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly.io"
+  },
+  "next": {
+    "title": "Deploying Actual with Git",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-git"
+  }
+}

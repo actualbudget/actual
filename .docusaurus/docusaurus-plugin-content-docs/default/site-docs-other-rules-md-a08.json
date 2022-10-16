@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Other/rules",
+  "id": "Other/rules",
+  "title": "Rules",
+  "description": "Introduced in 0.0.124, rules determine how a transaction is processed. When importing or syncing transactions, they are run through a list of rules that can apply actions to the transaction. For example, a rule could process a transaction with the payee AMAZON.COM*5C7QC7MH0 AM 10/26 PURCHASE AMZN.COM/BILL, and because it contains the word \"amazon\", sets the payee to \"Amazon\" and the category to \"my fun stuff\". Rules allow you to automate any workflow you want.",
+  "source": "@site/docs/Other/rules.md",
+  "sourceDirName": "Other",
+  "slug": "/Other/rules",
+  "permalink": "/Other/rules",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Other/rules.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Rules"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Other",
+    "permalink": "/category/other"
+  },
+  "next": {
+    "title": "Schedules",
+    "permalink": "/Other/schedules"
+  }
+}

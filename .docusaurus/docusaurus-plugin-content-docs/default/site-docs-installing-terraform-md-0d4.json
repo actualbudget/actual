@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Installing/Terraform",
+  "id": "Installing/Terraform",
+  "title": "Terraform",
+  "description": "Installing Actual using Terraform",
+  "source": "@site/docs/Installing/Terraform.md",
+  "sourceDirName": "Installing",
+  "slug": "/Installing/Terraform",
+  "permalink": "/actual-community-docs/Installing/Terraform",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/Terraform.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Terraform"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Unraid",
+    "permalink": "/actual-community-docs/Installing/Unraid"
+  },
+  "next": {
+    "title": "Synology",
+    "permalink": "/actual-community-docs/Installing/synology/"
+  }
+}

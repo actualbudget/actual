@@ -1,0 +1,94 @@
+{
+    "name": "@types/yargs",
+    "version": "17.0.13",
+    "description": "TypeScript definitions for yargs",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/yargs",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Martin Poelstra",
+            "url": "https://github.com/poelstra",
+            "githubUsername": "poelstra"
+        },
+        {
+            "name": "Mizunashi Mana",
+            "url": "https://github.com/mizunashi-mana",
+            "githubUsername": "mizunashi-mana"
+        },
+        {
+            "name": "Jeffery Grajkowski",
+            "url": "https://github.com/pushplay",
+            "githubUsername": "pushplay"
+        },
+        {
+            "name": "Jimi (Dimitris) Charalampidis",
+            "url": "https://github.com/JimiC",
+            "githubUsername": "JimiC"
+        },
+        {
+            "name": "Steffen Viken Valvåg",
+            "url": "https://github.com/steffenvv",
+            "githubUsername": "steffenvv"
+        },
+        {
+            "name": "Emily Marigold Klassen",
+            "url": "https://github.com/forivall",
+            "githubUsername": "forivall"
+        },
+        {
+            "name": "ExE Boss",
+            "url": "https://github.com/ExE-Boss",
+            "githubUsername": "ExE-Boss"
+        },
+        {
+            "name": "Aankhen",
+            "url": "https://github.com/Aankhen",
+            "githubUsername": "Aankhen"
+        },
+        {
+            "name": "Ben Coe",
+            "url": "https://github.com/bcoe",
+            "githubUsername": "bcoe"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "typesVersions": {
+        "<4.2.0-0": {
+            "*": [
+                "ts4.1/*"
+            ]
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/yargs"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/yargs-parser": "*"
+    },
+    "typesPublisherContentHash": "9016ff10b6e6354147619595a33b71abde9faf7542f46ec8296d7c8d2bd5cc45",
+    "typeScriptVersion": "4.1",
+    "exports": {
+        ".": {
+            "types": {
+                "import": "./index.d.mts",
+                "default": "./index.d.ts"
+            }
+        },
+        "./helpers": {
+            "types": {
+                "import": "./helpers.d.mts",
+                "default": "./helpers.d.ts"
+            }
+        },
+        "./yargs": {
+            "types": {
+                "default": "./yargs.d.ts"
+            }
+        },
+        "./package.json": "./package.json"
+    }
+}

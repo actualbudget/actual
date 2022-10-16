@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Developers/using-the-API",
+  "id": "Developers/using-the-API",
+  "title": "Using the API",
+  "description": "",
+  "source": "@site/docs/Developers/using-the-API.md",
+  "sourceDirName": "Developers",
+  "slug": "/Developers/using-the-API",
+  "permalink": "/actual-community-docs/Developers/using-the-API",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/using-the-API.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Using the API"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "The Actual Project Structure",
+    "permalink": "/actual-community-docs/Developers/project-layout"
+  },
+  "next": {
+    "title": "API",
+    "permalink": "/actual-community-docs/Developers/API"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Accounts/payees",
+  "id": "Accounts/payees",
+  "title": "Payees",
+  "description": "A payee is a description of the source of a transaction. Actual provides a powerful way of managing payees.",
+  "source": "@site/docs/Accounts/payees.md",
+  "sourceDirName": "Accounts",
+  "slug": "/Accounts/payees",
+  "permalink": "/actual-community-docs/Accounts/payees",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/payees.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Payees"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Import Transactions",
+    "permalink": "/actual-community-docs/Accounts/importing-trans"
+  },
+  "next": {
+    "title": "Transfers",
+    "permalink": "/actual-community-docs/Accounts/transfers"
+  }
+}

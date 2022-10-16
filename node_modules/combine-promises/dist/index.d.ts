@@ -1,0 +1,7 @@
+declare type UnwrapPromise<P extends Promise<unknown>> = P extends PromiseLike<infer V> ? V : never;
+declare type Input = Record<string | number | symbol, Promise<unknown>>;
+declare type Result<Obj extends Input> = {
+    [P in keyof Obj]: UnwrapPromise<Obj[P]>;
+};
+export default function combinePromises<Obj extends Input>(obj: Obj): Promise<Result<Obj>>;
+export {};

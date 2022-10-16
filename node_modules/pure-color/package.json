@@ -1,0 +1,28 @@
+{
+  "name": "pure-color",
+  "description": "Pure functions for color conversion and parsing",
+  "main": "index.js",
+  "version": "1.3.0",
+  "author": "Nick Williams",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/WickyNilliams/pure-color.git"
+  },
+  "license": "MIT",
+  "devDependencies": {},
+  "scripts": {
+    "postversion": "git push origin master --tags && npm publish",
+    "test": "node test/convert.js && node test/parse.js"
+  },
+  "keywords": [
+    "color",
+    "colour",
+    "convert",
+    "conversion",
+    "converter",
+    "rgb",
+    "hsl",
+    "hsv",
+    "parse"
+  ]
+}

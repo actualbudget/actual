@@ -1,0 +1,18 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+import type { BrokenMarkdownLink, ContentPaths } from '@docusaurus/utils';
+export declare type BlogContentPaths = ContentPaths;
+export declare type BlogBrokenMarkdownLink = BrokenMarkdownLink<BlogContentPaths>;
+export declare type BlogMarkdownLoaderOptions = {
+    siteDir: string;
+    contentPaths: BlogContentPaths;
+    truncateMarker: RegExp;
+    sourceToPermalink: {
+        [aliasedPath: string]: string;
+    };
+    onBrokenMarkdownLink: (brokenMarkdownLink: BlogBrokenMarkdownLink) => void;
+};

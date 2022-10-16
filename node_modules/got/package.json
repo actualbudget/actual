@@ -1,0 +1,74 @@
+{
+	"name": "got",
+	"version": "9.6.0",
+	"description": "Simplified HTTP requests",
+	"license": "MIT",
+	"repository": "sindresorhus/got",
+	"main": "source",
+	"engines": {
+		"node": ">=8.6"
+	},
+	"scripts": {
+		"test": "xo && nyc ava",
+		"release": "np"
+	},
+	"files": [
+		"source"
+	],
+	"keywords": [
+		"http",
+		"https",
+		"get",
+		"got",
+		"url",
+		"uri",
+		"request",
+		"util",
+		"utility",
+		"simple",
+		"curl",
+		"wget",
+		"fetch",
+		"net",
+		"network",
+		"electron"
+	],
+	"dependencies": {
+		"@sindresorhus/is": "^0.14.0",
+		"@szmarczak/http-timer": "^1.1.2",
+		"cacheable-request": "^6.0.0",
+		"decompress-response": "^3.3.0",
+		"duplexer3": "^0.1.4",
+		"get-stream": "^4.1.0",
+		"lowercase-keys": "^1.0.1",
+		"mimic-response": "^1.0.1",
+		"p-cancelable": "^1.0.0",
+		"to-readable-stream": "^1.0.0",
+		"url-parse-lax": "^3.0.0"
+	},
+	"devDependencies": {
+		"ava": "^1.1.0",
+		"coveralls": "^3.0.0",
+		"delay": "^4.1.0",
+		"form-data": "^2.3.3",
+		"get-port": "^4.0.0",
+		"np": "^3.1.0",
+		"nyc": "^13.1.0",
+		"p-event": "^2.1.0",
+		"pem": "^1.13.2",
+		"proxyquire": "^2.0.1",
+		"sinon": "^7.2.2",
+		"slow-stream": "0.0.4",
+		"tempfile": "^2.0.0",
+		"tempy": "^0.2.1",
+		"tough-cookie": "^3.0.0",
+		"xo": "^0.24.0"
+	},
+	"ava": {
+		"concurrency": 4
+	},
+	"browser": {
+		"decompress-response": false,
+		"electron": false
+	}
+}

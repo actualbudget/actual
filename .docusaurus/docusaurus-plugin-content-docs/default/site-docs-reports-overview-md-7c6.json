@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Reports/overview",
+  "id": "Reports/overview",
+  "title": "Reports In Actual",
+  "description": "Currently Actual comes with two reports: net worth and cash flow. These are valuable reports, but in the future many more report types will be available.",
+  "source": "@site/docs/Reports/overview.md",
+  "sourceDirName": "Reports",
+  "slug": "/Reports/overview",
+  "permalink": "/actual-community-docs/Reports/overview",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Reports/overview.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Reports In Actual"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Transfers",
+    "permalink": "/actual-community-docs/Accounts/transfers"
+  },
+  "next": {
+    "title": "Backup & Restore",
+    "permalink": "/actual-community-docs/category/backup--restore"
+  }
+}

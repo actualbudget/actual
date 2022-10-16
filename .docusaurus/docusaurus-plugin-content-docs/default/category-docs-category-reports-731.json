@@ -1,0 +1,15 @@
+{
+  "title": "Reports",
+  "slug": "/category/reports",
+  "permalink": "/category/reports",
+  "navigation": {
+    "previous": {
+      "title": "Transfers",
+      "permalink": "/Accounts/transfers"
+    },
+    "next": {
+      "title": "Reports In Actual",
+      "permalink": "/Reports/overview"
+    }
+  }
+}

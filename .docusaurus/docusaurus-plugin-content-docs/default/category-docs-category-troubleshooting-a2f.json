@@ -1,0 +1,15 @@
+{
+  "title": "Troubleshooting",
+  "slug": "/category/troubleshooting",
+  "permalink": "/category/troubleshooting",
+  "navigation": {
+    "previous": {
+      "title": "Frequently Asked Questions",
+      "permalink": "/Other/FAQ"
+    },
+    "next": {
+      "title": "Microsoft Edge browser",
+      "permalink": "/Troubleshooting/Troubleshooting-Edge"
+    }
+  }
+}

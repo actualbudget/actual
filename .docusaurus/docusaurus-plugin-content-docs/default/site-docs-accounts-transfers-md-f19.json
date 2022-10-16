@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Accounts/transfers",
+  "id": "Accounts/transfers",
+  "title": "Transfers",
+  "description": "If you want to transfer money between accounts, you want to do it in a way that doesn't mess up reports. If you only created two transactions, Actual would have no way of knowing they are a single transfer and can be ignored in reports.",
+  "source": "@site/docs/Accounts/transfers.md",
+  "sourceDirName": "Accounts",
+  "slug": "/Accounts/transfers",
+  "permalink": "/actual-community-docs/Accounts/transfers",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/transfers.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Transfers"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Payees",
+    "permalink": "/actual-community-docs/Accounts/payees"
+  },
+  "next": {
+    "title": "Reports In Actual",
+    "permalink": "/actual-community-docs/Reports/overview"
+  }
+}

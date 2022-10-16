@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Installing/Fly-image",
+  "id": "Installing/Fly-image",
+  "title": "Deploying Actual with a container image",
+  "description": "Deploying",
+  "source": "@site/docs/Installing/Fly-image.md",
+  "sourceDirName": "Installing",
+  "slug": "/Installing/Fly-image",
+  "permalink": "/actual-community-docs/Installing/Fly-image",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/Fly-image.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Deploying Actual with a container image"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Deploying Actual with Git",
+    "permalink": "/actual-community-docs/Installing/Fly-git"
+  },
+  "next": {
+    "title": "Deploying Actual with terraform",
+    "permalink": "/actual-community-docs/Installing/Fly-terraform"
+  }
+}

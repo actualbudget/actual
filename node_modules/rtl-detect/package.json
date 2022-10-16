@@ -1,0 +1,49 @@
+{
+  "name": "rtl-detect",
+  "version": "1.0.4",
+  "description": "Library will help you to detect if the locale is right-to-left language.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "jest --coverage"
+  },
+  "jest": {
+    "verbose": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadiabuhilal/rtl-detect.git"
+  },
+  "keywords": [
+    "rtl-detect",
+    "rtl-detect",
+    "locale direction",
+    "locale dir",
+    "locale",
+    "intl direction",
+    "intl dir",
+    "intl",
+    "right-to-left",
+    "left-to-right",
+    "rtl",
+    "ltr",
+    "intl-lang"
+  ],
+  "author": "Shadi Abu Hilal <shadiabuhilal@gmail.com> (http://github.com/shadiabuhilal)",
+  "license": "BSD-3-Clause",
+  "homepage": "https://github.com/shadiabuhilal/rtl-detect",
+  "bugs": {
+    "url": "https://github.com/shadiabuhilal/rtl-detect/issues"
+  },
+  "licenses": [
+    {
+      "type": "BSD-3-Clause",
+      "url": "https://github.com/shadiabuhilal/rtl-detect/blob/master/LICENSE.md"
+    }
+  ],
+  "devDependencies": {
+    "eslint": "^7.26.0",
+    "jest": "^26.6.3"
+  }
+}

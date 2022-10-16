@@ -1,0 +1,25 @@
+{
+  "unversionedId": "index",
+  "id": "index",
+  "title": "Introduction",
+  "description": "Add a bank account",
+  "source": "@site/docs/index.md",
+  "sourceDirName": ".",
+  "slug": "/",
+  "permalink": "/actual-community-docs/",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/index.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "slug": "/",
+    "sidebar_position": 1,
+    "title": "Introduction"
+  },
+  "sidebar": "docs",
+  "next": {
+    "title": "Getting Started",
+    "permalink": "/actual-community-docs/category/getting-started"
+  }
+}

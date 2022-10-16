@@ -1,0 +1,7 @@
+## 4.0.0
+
+- Minimum webpack version is >= 4.0.0
+- Supported nodejs version >= 8.9.0
+- Update all dependencies
+- Update tests
+- Performance and memory improvement (Use less stats object when calling stats.toJson())

@@ -1,0 +1,26 @@
+{
+  "unversionedId": "FAQ",
+  "id": "FAQ",
+  "title": "Frequently Asked Questions",
+  "description": "- Q. Can I use the mobile apps with my self hosted version of Actual?",
+  "source": "@site/docs/FAQ.md",
+  "sourceDirName": ".",
+  "slug": "/FAQ",
+  "permalink": "/actual-community-docs/FAQ",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/FAQ.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Frequently Asked Questions"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "How to build browser for Windows",
+    "permalink": "/actual-community-docs/Developers/Building-Windows"
+  },
+  "next": {
+    "title": "Troubleshooting",
+    "permalink": "/actual-community-docs/category/troubleshooting"
+  }
+}

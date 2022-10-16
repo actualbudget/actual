@@ -1,0 +1,32 @@
+{
+    "name": "@types/connect",
+    "version": "3.4.35",
+    "description": "TypeScript definitions for connect",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/connect",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Maxime LUCE",
+            "url": "https://github.com/SomaticIT",
+            "githubUsername": "SomaticIT"
+        },
+        {
+            "name": "Evan Hahn",
+            "url": "https://github.com/EvanHahn",
+            "githubUsername": "EvanHahn"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/connect"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "typesPublisherContentHash": "09c0dcec5f675cb2bdd7487a85447955f769ef4ab174294478c4f055b528fecc",
+    "typeScriptVersion": "3.6"
+}

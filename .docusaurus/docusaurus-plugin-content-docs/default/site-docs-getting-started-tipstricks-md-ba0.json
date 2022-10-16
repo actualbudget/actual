@@ -1,0 +1,28 @@
+{
+  "unversionedId": "Getting-Started/tipstricks",
+  "id": "Getting-Started/tipstricks",
+  "title": "Tips & Tricks",
+  "description": "Undo/redo",
+  "source": "@site/docs/Getting-Started/tipstricks.md",
+  "sourceDirName": "Getting-Started",
+  "slug": "/Getting-Started/tipstricks",
+  "permalink": "/actual-community-docs/Getting-Started/tipstricks",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/tipstricks.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "title": "Tips & Tricks"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Synology Automatic Updates",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower"
+  },
+  "next": {
+    "title": "Syncing Across Devices",
+    "permalink": "/actual-community-docs/Getting-Started/sync"
+  }
+}

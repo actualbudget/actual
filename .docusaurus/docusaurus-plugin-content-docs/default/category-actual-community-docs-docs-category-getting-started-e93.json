@@ -1,0 +1,15 @@
+{
+  "title": "Getting Started",
+  "slug": "/category/getting-started",
+  "permalink": "/actual-community-docs/category/getting-started",
+  "navigation": {
+    "previous": {
+      "title": "Introduction",
+      "permalink": "/actual-community-docs/"
+    },
+    "next": {
+      "title": "Installing Actual",
+      "permalink": "/actual-community-docs/category/installing-actual"
+    }
+  }
+}

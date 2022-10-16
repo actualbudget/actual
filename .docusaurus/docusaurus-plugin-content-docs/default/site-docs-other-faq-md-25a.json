@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Other/FAQ",
+  "id": "Other/FAQ",
+  "title": "Frequently Asked Questions",
+  "description": "- Q. Can I use the mobile apps with my self hosted version of Actual?",
+  "source": "@site/docs/Other/FAQ.md",
+  "sourceDirName": "Other",
+  "slug": "/Other/FAQ",
+  "permalink": "/actual-community-docs/Other/FAQ",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Other/FAQ.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Frequently Asked Questions"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Other",
+    "permalink": "/actual-community-docs/category/other"
+  },
+  "next": {
+    "title": "Troubleshooting",
+    "permalink": "/actual-community-docs/category/troubleshooting"
+  }
+}

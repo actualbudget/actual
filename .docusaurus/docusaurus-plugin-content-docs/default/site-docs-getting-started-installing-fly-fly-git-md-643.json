@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Getting-Started/Installing/fly/Fly-git",
+  "id": "Getting-Started/Installing/fly/Fly-git",
+  "title": "Deploying Actual with Git",
+  "description": "Installing Git On Your Local Machine",
+  "source": "@site/docs/Getting-Started/Installing/fly/Fly-git.md",
+  "sourceDirName": "Getting-Started/Installing/fly",
+  "slug": "/Getting-Started/Installing/fly/Fly-git",
+  "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-git",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/fly/Fly-git.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Deploying Actual with Git"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Fly Pre-requisites",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites"
+  },
+  "next": {
+    "title": "Deploying Actual with a container image",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-image"
+  }
+}
