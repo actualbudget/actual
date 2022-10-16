@@ -1,0 +1,28 @@
+{
+  "unversionedId": "Getting-Started/Installing/Docker",
+  "id": "Getting-Started/Installing/Docker",
+  "title": "Docker",
+  "description": "Hosting Actual on a home server with Docker",
+  "source": "@site/docs/Getting-Started/Installing/Docker.md",
+  "sourceDirName": "Getting-Started/Installing",
+  "slug": "/Getting-Started/Installing/Docker",
+  "permalink": "/actual-community-docs/Getting-Started/Installing/Docker",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/Docker.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "title": "Docker",
+    "sidebar_position": 2
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Persisting the data in Fly",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting"
+  },
+  "next": {
+    "title": "PikaPods",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/Pikapods"
+  }
+}

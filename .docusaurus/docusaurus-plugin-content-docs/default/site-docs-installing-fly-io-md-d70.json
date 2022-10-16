@@ -1,0 +1,24 @@
+{
+  "unversionedId": "Installing/Fly.io",
+  "id": "Installing/Fly.io",
+  "title": "Fly.io",
+  "description": "[git-guide]: ./Fly-git",
+  "source": "@site/docs/Installing/Fly.io.md",
+  "sourceDirName": "Installing",
+  "slug": "/Installing/Fly.io",
+  "permalink": "/actual-community-docs/Installing/Fly.io",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/Fly.io.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Installing Actual",
+    "permalink": "/actual-community-docs/category/installing-actual"
+  },
+  "next": {
+    "title": "Fly Pre-requisites",
+    "permalink": "/actual-community-docs/Installing/Fly-prerequisites"
+  }
+}

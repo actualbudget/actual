@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Accounts/overview",
+  "id": "Accounts/overview",
+  "title": "Overview",
+  "description": "You can add as many accounts as you like. Adding all of your accounts (including things like mortgages) is a nice way to get an overview of all your finances.",
+  "source": "@site/docs/Accounts/overview.md",
+  "sourceDirName": "Accounts",
+  "slug": "/Accounts/overview",
+  "permalink": "/actual-community-docs/Accounts/overview",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Accounts/overview.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Overview"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Managing Credit Cards",
+    "permalink": "/actual-community-docs/Budgeting/creditcards"
+  },
+  "next": {
+    "title": "Bank accounts",
+    "permalink": "/actual-community-docs/Accounts/addaccount"
+  }
+}

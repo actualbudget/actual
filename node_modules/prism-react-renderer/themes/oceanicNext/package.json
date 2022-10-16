@@ -1,0 +1,8 @@
+{
+  "name": "@prism-react-renderer/oceanicNext",
+  "private": true,
+  "sideEffects": false,
+  "main": "index.cjs.js",
+  "module": "index.js",
+  "license": "MIT"
+}

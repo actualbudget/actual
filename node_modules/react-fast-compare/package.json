@@ -1,0 +1,101 @@
+{
+  "name": "react-fast-compare",
+  "version": "3.2.0",
+  "description": "Fastest deep equal comparison for React. Great for React.memo & shouldComponentUpdate. Also really fast general-purpose deep comparison.",
+  "main": "index.js",
+  "typings": "index.d.ts",
+  "scripts": {
+    "preversion": "yarn test",
+    "benchmark": "node benchmark",
+    "eslint": "eslint \"*.js\" benchmark test",
+    "tslint": "eslint test/typescript/*.tsx",
+    "test-browser": "karma start test/browser/karma.conf.js",
+    "test-browser-ie": "karma start test/browser/karma.conf.ie.js",
+    "test-node": "mocha \"test/node/*.spec.js\"",
+    "test-node-cov": "nyc mocha \"test/node/*.spec.js\"",
+    "test-ts-usage": "tsc --esModuleInterop --jsx react --noEmit test/typescript/sample-react-redux-usage.tsx test/typescript/sample-usage.tsx",
+    "test-ts-defs": "tsc --target ES5 index.d.ts",
+    "test": "builder concurrent --buffer eslint tslint test-ts-usage test-ts-defs test-node-cov test-browser",
+    "test-ie": "builder concurrent --buffer eslint tslint test-ts-usage test-ts-defs test-node-cov test-browser-ie",
+    "compress": "terser --compress --mangle=\"toplevel:true\" -- index.js",
+    "size-min-gz": "yarn -s compress | gzip -9 | wc -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FormidableLabs/react-fast-compare.git"
+  },
+  "keywords": [
+    "fast",
+    "equal",
+    "react",
+    "compare",
+    "shouldComponentUpdate",
+    "deep-equal"
+  ],
+  "author": "Chris Bolin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FormidableLabs/react-fast-compare/issues"
+  },
+  "homepage": "https://github.com/FormidableLabs/react-fast-compare",
+  "devDependencies": {
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
+    "@testing-library/dom": "^7.5.1",
+    "@testing-library/preact": "^1.0.2",
+    "@types/node": "^14.0.1",
+    "@types/react": "^16.9.35",
+    "@types/react-dom": "^16.9.8",
+    "@types/react-redux": "^7.1.9",
+    "@typescript-eslint/parser": "^2.34.0",
+    "babel-loader": "^8.0.6",
+    "benchmark": "^2.1.4",
+    "builder": "^5.0.0",
+    "codecov": "^3.6.5",
+    "core-js": "^3.5.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-react": "^7.20.0",
+    "fast-deep-equal": "3.1.1",
+    "fast-deep-equal-git": "epoberezkin/fast-deep-equal#v3.1.1",
+    "jsdom": "^16.2.2",
+    "jsdom-global": "^3.0.2",
+    "karma": "^4.4.1",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-ie-launcher": "^1.0.0",
+    "karma-mocha": "^1.3.0",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-safari-launcher": "^1.0.0",
+    "karma-webpack": "^4.0.2",
+    "lodash": "^4.17.10",
+    "mocha": "^6.2.2",
+    "nano-equal": "^2.0.2",
+    "nyc": "^14.1.1",
+    "preact": "^10.4.1",
+    "react": "^16.3.1",
+    "react-dom": "^16.13.1",
+    "react-redux": "^7.2.0",
+    "react-test-renderer": "^16.13.1",
+    "redux": "^4.0.5",
+    "shallow-equal-fuzzy": "0.0.2",
+    "sinon": "^7.5.0",
+    "terser": "^4.4.3",
+    "typescript": "^3.7.3",
+    "webpack": "^4.5.0"
+  },
+  "nyc": {
+    "exclude": [
+      "**/test/**",
+      "node_modules"
+    ],
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "types": "index.d.ts"
+}

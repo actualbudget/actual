@@ -1,0 +1,43 @@
+{
+  "name": "postcss-merge-idents",
+  "version": "5.1.1",
+  "description": "Merge keyframe and counter style identifiers.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "src",
+    "LICENSE-MIT",
+    "types"
+  ],
+  "keywords": [
+    "css",
+    "merge",
+    "postcss",
+    "postcss-plugin"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/cssnano/cssnano",
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "cssnano/cssnano",
+  "dependencies": {
+    "cssnano-utils": "^3.1.0",
+    "postcss-value-parser": "^4.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "engines": {
+    "node": "^10 || ^12 || >=14.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.2.15"
+  },
+  "peerDependencies": {
+    "postcss": "^8.2.15"
+  },
+  "readme": "# [postcss][postcss]-merge-idents\n\n> Merge keyframe and counter style identifiers.\n\n\n## Install\n\nWith [npm](https://npmjs.org/package/postcss-merge-idents) do:\n\n```\nnpm install postcss-merge-idents --save\n```\n\n\n## Example\n\nThis module will merge identifiers such as `@keyframes` and `@counter-style`,\nif their properties are identical. Then, it will update those declarations that\ndepend on the duplicated property.\n\n### Input\n\n```css\n@keyframes rotate {\n    from { transform: rotate(0) }\n    to { transform: rotate(360deg) }\n}\n\n@keyframes flip {\n    from { transform: rotate(0) }\n    to { transform: rotate(360deg) }\n}\n\n.rotate {\n    animation-name: rotate\n}\n\n.flip {\n    animation-name: flip\n}\n```\n\n### Output\n\n```css\n@keyframes flip {\n    from { transform: rotate(0) }\n    to { transform: rotate(360deg) }\n}\n\n.rotate {\n    animation-name: flip\n}\n\n.flip {\n    animation-name: flip\n}\n```\n\n\n## Usage\n\nSee the [PostCSS documentation](https://github.com/postcss/postcss#usage) for\nexamples for your environment.\n\n\n## Contributors\n\nSee [CONTRIBUTORS.md](https://github.com/cssnano/cssnano/blob/master/CONTRIBUTORS.md).\n\n\n## License\n\nMIT © [Ben Briggs](http://beneb.info)\n\n\n[postcss]: https://github.com/postcss/postcss\n"
+}

@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Installing/synology/synology",
+  "id": "Installing/synology/synology",
+  "title": "Synology",
+  "description": "[reverse-proxy]: ./synology-reverse-proxy",
+  "source": "@site/docs/Installing/synology/synology.md",
+  "sourceDirName": "Installing/synology",
+  "slug": "/Installing/synology/",
+  "permalink": "/actual-community-docs/Installing/synology/",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/synology/synology.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Synology"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Terraform",
+    "permalink": "/actual-community-docs/Installing/Terraform"
+  },
+  "next": {
+    "title": "Enabling a Reverse Proxy",
+    "permalink": "/actual-community-docs/Installing/synology/synology-reverse-proxy"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Other/schedules",
+  "id": "Other/schedules",
+  "title": "Schedules",
+  "description": "[rules]: ./rules",
+  "source": "@site/docs/Other/schedules.md",
+  "sourceDirName": "Other",
+  "slug": "/Other/schedules",
+  "permalink": "/Other/schedules",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Other/schedules.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Schedules"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Rules",
+    "permalink": "/Other/rules"
+  },
+  "next": {
+    "title": "Frequently Asked Questions",
+    "permalink": "/Other/FAQ"
+  }
+}

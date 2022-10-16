@@ -1,0 +1,15 @@
+{
+  "title": "Installing Actual",
+  "slug": "/category/installing-actual",
+  "permalink": "/category/installing-actual",
+  "navigation": {
+    "previous": {
+      "title": "Migrating from other apps",
+      "permalink": "/Overview/migration"
+    },
+    "next": {
+      "title": "Fly.io",
+      "permalink": "/Installing/Fly.io"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Installing/synology/synology-watchtower",
+  "id": "Installing/synology/synology-watchtower",
+  "title": "Synology Automatic Updates",
+  "description": "Updating containers on a Synology isn't hard, but it can be tedious if you have to do it too many times. This page will provide instructions for one method to automate the task.",
+  "source": "@site/docs/Installing/synology/synology-watchtower.md",
+  "sourceDirName": "Installing/synology",
+  "slug": "/Installing/synology/synology-watchtower",
+  "permalink": "/actual-community-docs/Installing/synology/synology-watchtower",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/synology/synology-watchtower.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Synology Automatic Updates"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Enabling a Reverse Proxy",
+    "permalink": "/actual-community-docs/Installing/synology/synology-reverse-proxy"
+  },
+  "next": {
+    "title": "Tips & Tricks",
+    "permalink": "/actual-community-docs/Overview/tipstricks"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Installing/fly/Fly-persisting",
+  "id": "Installing/fly/Fly-persisting",
+  "title": "Persisting the data in Fly",
+  "description": "Persisting the data in Fly",
+  "source": "@site/docs/Installing/fly/Fly-persisting.md",
+  "sourceDirName": "Installing/fly",
+  "slug": "/Installing/fly/Fly-persisting",
+  "permalink": "/actual-community-docs/Installing/fly/Fly-persisting",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/fly/Fly-persisting.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Persisting the data in Fly"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Updating Actual",
+    "permalink": "/actual-community-docs/Installing/fly/Fly-updating"
+  },
+  "next": {
+    "title": "Docker",
+    "permalink": "/actual-community-docs/Installing/Docker"
+  }
+}

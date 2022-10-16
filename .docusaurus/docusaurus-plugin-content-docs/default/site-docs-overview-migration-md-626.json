@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Overview/migration",
+  "id": "Overview/migration",
+  "title": "Migrating from other apps ",
+  "description": "Keeping your existing transaction history is important. If you already usy a different app, you probably want to migrate it over into Actual.",
+  "source": "@site/docs/Overview/migration.md",
+  "sourceDirName": "Overview",
+  "slug": "/Overview/migration",
+  "permalink": "/actual-community-docs/Overview/migration",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Overview/migration.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Migrating from other apps "
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Managing Files",
+    "permalink": "/actual-community-docs/Overview/managefiles"
+  },
+  "next": {
+    "title": "How Budgeting Works",
+    "permalink": "/actual-community-docs/Budgeting/howitworks"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Budgeting/returnsandreimbursements",
+  "id": "Budgeting/returnsandreimbursements",
+  "title": "Returns and Reimbursements",
+  "description": "[budgeting]: ./howitworks#overspending",
+  "source": "@site/docs/Budgeting/returnsandreimbursements.md",
+  "sourceDirName": "Budgeting",
+  "slug": "/Budgeting/returnsandreimbursements",
+  "permalink": "/actual-community-docs/Budgeting/returnsandreimbursements",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/returnsandreimbursements.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Returns and Reimbursements"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Reconciliation",
+    "permalink": "/actual-community-docs/Budgeting/reconcile"
+  },
+  "next": {
+    "title": "Managing Credit Cards",
+    "permalink": "/actual-community-docs/Budgeting/creditcards"
+  }
+}

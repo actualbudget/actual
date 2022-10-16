@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Installing/Fly-updating",
+  "id": "Installing/Fly-updating",
+  "title": "Updating Actual",
+  "description": "Updating Actual",
+  "source": "@site/docs/Installing/Fly-updating.md",
+  "sourceDirName": "Installing",
+  "slug": "/Installing/Fly-updating",
+  "permalink": "/actual-community-docs/Installing/Fly-updating",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/Fly-updating.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Updating Actual"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Deploying Actual with terraform",
+    "permalink": "/actual-community-docs/Installing/Fly-terraform"
+  },
+  "next": {
+    "title": "Persisting the data in Fly",
+    "permalink": "/actual-community-docs/Installing/Fly-persisting"
+  }
+}

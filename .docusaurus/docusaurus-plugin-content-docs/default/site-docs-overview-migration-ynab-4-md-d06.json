@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Overview/migration/ynab4",
+  "id": "Overview/migration/ynab4",
+  "title": "Migrating from YNAB4",
+  "description": "Go to the Create new file* screen (this is the first screen you see on first launch).",
+  "source": "@site/docs/Overview/migration/ynab4.md",
+  "sourceDirName": "Overview/migration",
+  "slug": "/Overview/migration/ynab4",
+  "permalink": "/actual-community-docs/Overview/migration/ynab4",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Overview/migration/ynab4.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Migrating from YNAB4"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Migration Overview",
+    "permalink": "/actual-community-docs/Overview/migration/migration-intro"
+  },
+  "next": {
+    "title": "How Budgeting Works",
+    "permalink": "/actual-community-docs/Budgeting/howitworks"
+  }
+}

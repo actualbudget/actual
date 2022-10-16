@@ -1,0 +1,37 @@
+{
+	"name": "semver-diff",
+	"version": "3.1.1",
+	"description": "Get the diff type of two semver versions: 0.0.1 0.0.2 → patch",
+	"license": "MIT",
+	"repository": "sindresorhus/semver-diff",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "sindresorhus.com"
+	},
+	"engines": {
+		"node": ">=8"
+	},
+	"scripts": {
+		"test": "xo && ava && tsd"
+	},
+	"files": [
+		"index.js",
+		"index.d.ts"
+	],
+	"keywords": [
+		"semver",
+		"version",
+		"semantic",
+		"diff",
+		"difference"
+	],
+	"dependencies": {
+		"semver": "^6.3.0"
+	},
+	"devDependencies": {
+		"ava": "^2.4.0",
+		"tsd": "^0.9.0",
+		"xo": "^0.25.3"
+	}
+}

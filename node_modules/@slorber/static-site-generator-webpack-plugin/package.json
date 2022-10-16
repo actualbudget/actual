@@ -1,0 +1,46 @@
+{
+  "name": "@slorber/static-site-generator-webpack-plugin",
+  "version": "4.0.7",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Minimal, unopinionated static site generator powered by webpack",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest test",
+    "coverage": "jest --coverage",
+    "coveralls": "jest --coverage --coverageReporters=text-lcov | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/slorber/static-site-generator-webpack-plugin"
+  },
+  "author": "Mark Dalgleish",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/slorber/static-site-generator-webpack-plugin/issues"
+  },
+  "homepage": "https://github.com/slorber/static-site-generator-webpack-plugin",
+  "dependencies": {
+    "eval": "^0.1.8",
+    "p-map": "^4.0.0",
+    "webpack-sources": "^3.2.2"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "async": "^2.0.1",
+    "babel-loader": "^8.0.0",
+    "compression-webpack-plugin": "^9.0.1",
+    "ejs": "^2.3.4",
+    "glob": "^7.0.3",
+    "jest": "^24.9.0",
+    "node-dir": "^0.1.17",
+    "rimraf": "^2.4.4",
+    "webpack": "^5.64.2",
+    "webpack-stats-plugin": "^1.0.3"
+  }
+}

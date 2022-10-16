@@ -1,0 +1,24 @@
+{
+  "name": "@docsearch/css",
+  "description": "Styles for DocSearch.",
+  "version": "3.2.1",
+  "license": "MIT",
+  "homepage": "https://docsearch.algolia.com",
+  "repository": "algolia/docsearch",
+  "author": {
+    "name": "Algolia, Inc.",
+    "url": "https://www.algolia.com"
+  },
+  "files": [
+    "dist/"
+  ],
+  "main": "dist/style.css",
+  "unpkg": "dist/style.css",
+  "jsdelivr": "dist/style.css",
+  "scripts": {
+    "build:clean": "rm -rf ./dist",
+    "build:css": "node build-css.js",
+    "build": "yarn build:clean && mkdir dist && yarn build:css",
+    "watch": "watch \"yarn build:css\" --ignoreDirectoryPattern \"/dist/\""
+  }
+}

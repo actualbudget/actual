@@ -1,0 +1,63 @@
+{
+	"name": "@sindresorhus/is",
+	"version": "0.14.0",
+	"description": "Type check values: `is.string('🦄') //=> true`",
+	"license": "MIT",
+	"repository": "sindresorhus/is",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "sindresorhus.com"
+	},
+	"main": "dist/index.js",
+	"engines": {
+		"node": ">=6"
+	},
+	"scripts": {
+		"lint": "tslint --format stylish --project .",
+		"build": "del dist && tsc",
+		"test": "npm run lint && npm run build && ava dist/tests",
+		"prepublish": "npm run build && del dist/tests"
+	},
+	"files": [
+		"dist"
+	],
+	"keywords": [
+		"type",
+		"types",
+		"is",
+		"check",
+		"checking",
+		"validate",
+		"validation",
+		"utility",
+		"util",
+		"typeof",
+		"instanceof",
+		"object",
+		"assert",
+		"assertion",
+		"test",
+		"kind",
+		"primitive",
+		"verify",
+		"compare"
+	],
+	"devDependencies": {
+		"@sindresorhus/tsconfig": "^0.1.0",
+		"@types/jsdom": "^11.12.0",
+		"@types/node": "^10.12.10",
+		"@types/tempy": "^0.2.0",
+		"@types/zen-observable": "^0.8.0",
+		"ava": "^0.25.0",
+		"del-cli": "^1.1.0",
+		"jsdom": "^11.6.2",
+		"rxjs": "^6.3.3",
+		"tempy": "^0.2.1",
+		"tslint": "^5.9.1",
+		"tslint-xo": "^0.10.0",
+		"typescript": "^3.2.1",
+		"zen-observable": "^0.8.8"
+	},
+	"types": "dist/index.d.ts"
+}

@@ -1,0 +1,25 @@
+{
+  "unversionedId": "Developers/ActualQL",
+  "id": "Developers/ActualQL",
+  "title": "ActualQL",
+  "description": "ActualQL is a new query language introduced in 0.0.129. This allows you to query data any way you like. For example, previously we provided a filterTransactions method that let you search transactions, but its behavior was baked into the backend. You couldn't change how transactions were sorted, search certain fields specifically, or sum the total amount.",
+  "source": "@site/docs/Developers/03-ActualQL.md",
+  "sourceDirName": "Developers",
+  "slug": "/Developers/ActualQL",
+  "permalink": "/actual-community-docs/Developers/ActualQL",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/03-ActualQL.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "API",
+    "permalink": "/actual-community-docs/Developers/API"
+  },
+  "next": {
+    "title": "How to build browser for Windows",
+    "permalink": "/actual-community-docs/Developers/Building-Windows"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules
+__snapshots__
+coverage
+build
+.editorconfig
+.DS_Store
+.gitignore
+.travis.yml

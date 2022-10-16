@@ -1,0 +1,276 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/actual-community-docs/",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/actual-community-docs/",
+          "mainDocId": "index",
+          "docs": [
+            {
+              "id": "Accounts/addaccount",
+              "path": "/actual-community-docs/Accounts/addaccount",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Accounts/connecting-your-bank",
+              "path": "/actual-community-docs/Accounts/connecting-your-bank"
+            },
+            {
+              "id": "Accounts/importing-trans",
+              "path": "/actual-community-docs/Accounts/importing-trans",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Accounts/overview",
+              "path": "/actual-community-docs/Accounts/overview",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Accounts/payees",
+              "path": "/actual-community-docs/Accounts/payees",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Accounts/transfers",
+              "path": "/actual-community-docs/Accounts/transfers",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Backup-Restore/Backups",
+              "path": "/actual-community-docs/Backup-Restore/Backups",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Backup-Restore/Restore",
+              "path": "/actual-community-docs/Backup-Restore/Restore",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Budgeting/categories",
+              "path": "/actual-community-docs/Budgeting/categories",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Budgeting/creditcards",
+              "path": "/actual-community-docs/Budgeting/creditcards",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Budgeting/howitworks",
+              "path": "/actual-community-docs/Budgeting/howitworks",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Budgeting/reconcile",
+              "path": "/actual-community-docs/Budgeting/reconcile",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Budgeting/returnsandreimbursements",
+              "path": "/actual-community-docs/Budgeting/returnsandreimbursements",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Budgeting/rules/rules",
+              "path": "/actual-community-docs/Budgeting/rules/",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Budgeting/rules/rules-custom",
+              "path": "/actual-community-docs/Budgeting/rules/rules-custom",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Budgeting/schedules",
+              "path": "/actual-community-docs/Budgeting/schedules",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Developers/ActualQL",
+              "path": "/actual-community-docs/Developers/ActualQL",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Developers/API",
+              "path": "/actual-community-docs/Developers/API",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Developers/Building-Windows",
+              "path": "/actual-community-docs/Developers/Building-Windows",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Developers/project-layout",
+              "path": "/actual-community-docs/Developers/project-layout",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Developers/using-the-API",
+              "path": "/actual-community-docs/Developers/using-the-API",
+              "sidebar": "docs"
+            },
+            {
+              "id": "FAQ",
+              "path": "/actual-community-docs/FAQ",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/Docker",
+              "path": "/actual-community-docs/Getting-Started/Installing/Docker",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/fly/Fly-git",
+              "path": "/actual-community-docs/Getting-Started/Installing/fly/Fly-git",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/fly/Fly-image",
+              "path": "/actual-community-docs/Getting-Started/Installing/fly/Fly-image",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/fly/Fly-persisting",
+              "path": "/actual-community-docs/Getting-Started/Installing/fly/Fly-persisting",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/fly/Fly-prerequisites",
+              "path": "/actual-community-docs/Getting-Started/Installing/fly/Fly-prerequisites",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/fly/Fly-terraform",
+              "path": "/actual-community-docs/Getting-Started/Installing/fly/Fly-terraform",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/fly/Fly-updating",
+              "path": "/actual-community-docs/Getting-Started/Installing/fly/Fly-updating",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/fly/Fly.io",
+              "path": "/actual-community-docs/Getting-Started/Installing/fly/Fly.io",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/Pikapods",
+              "path": "/actual-community-docs/Getting-Started/Installing/Pikapods",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/synology/synology",
+              "path": "/actual-community-docs/Getting-Started/Installing/synology/",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/synology/synology-reverse-proxy",
+              "path": "/actual-community-docs/Getting-Started/Installing/synology/synology-reverse-proxy",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/synology/synology-watchtower",
+              "path": "/actual-community-docs/Getting-Started/Installing/synology/synology-watchtower",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/Terraform",
+              "path": "/actual-community-docs/Getting-Started/Installing/Terraform",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/Installing/Unraid",
+              "path": "/actual-community-docs/Getting-Started/Installing/Unraid",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/managefiles",
+              "path": "/actual-community-docs/Getting-Started/managefiles",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/migration/migration-intro",
+              "path": "/actual-community-docs/Getting-Started/migration/migration-intro",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/migration/nynab",
+              "path": "/actual-community-docs/Getting-Started/migration/nynab"
+            },
+            {
+              "id": "Getting-Started/migration/ynab4",
+              "path": "/actual-community-docs/Getting-Started/migration/ynab4",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/sync",
+              "path": "/actual-community-docs/Getting-Started/sync",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Getting-Started/tipstricks",
+              "path": "/actual-community-docs/Getting-Started/tipstricks",
+              "sidebar": "docs"
+            },
+            {
+              "id": "index",
+              "path": "/actual-community-docs/",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Reports/overview",
+              "path": "/actual-community-docs/Reports/overview",
+              "sidebar": "docs"
+            },
+            {
+              "id": "Troubleshooting/Troubleshooting-Edge",
+              "path": "/actual-community-docs/Troubleshooting/Troubleshooting-Edge",
+              "sidebar": "docs"
+            },
+            {
+              "id": "/category/getting-started",
+              "path": "/actual-community-docs/category/getting-started",
+              "sidebar": "docs"
+            },
+            {
+              "id": "/category/installing-actual",
+              "path": "/actual-community-docs/category/installing-actual",
+              "sidebar": "docs"
+            },
+            {
+              "id": "/category/backup--restore",
+              "path": "/actual-community-docs/category/backup--restore",
+              "sidebar": "docs"
+            },
+            {
+              "id": "/category/developers",
+              "path": "/actual-community-docs/category/developers",
+              "sidebar": "docs"
+            },
+            {
+              "id": "/category/troubleshooting",
+              "path": "/actual-community-docs/category/troubleshooting",
+              "sidebar": "docs"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "docs": {
+              "link": {
+                "path": "/actual-community-docs/",
+                "label": "index"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

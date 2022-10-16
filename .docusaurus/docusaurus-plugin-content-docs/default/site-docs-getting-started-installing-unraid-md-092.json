@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Getting-Started/Installing/Unraid",
+  "id": "Getting-Started/Installing/Unraid",
+  "title": "Unraid",
+  "description": "Hosting Actual with Unraid",
+  "source": "@site/docs/Getting-Started/Installing/Unraid.md",
+  "sourceDirName": "Getting-Started/Installing",
+  "slug": "/Getting-Started/Installing/Unraid",
+  "permalink": "/actual-community-docs/Getting-Started/Installing/Unraid",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Getting-Started/Installing/Unraid.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Unraid"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "PikaPods",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/Pikapods"
+  },
+  "next": {
+    "title": "Terraform",
+    "permalink": "/actual-community-docs/Getting-Started/Installing/Terraform"
+  }
+}

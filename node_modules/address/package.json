@@ -1,0 +1,45 @@
+{
+  "name": "address",
+  "version": "1.2.1",
+  "description": "Get current machine IP, MAC and DNS servers.",
+  "main": "lib/address.js",
+  "types": "lib/address.d.ts",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "egg-bin test",
+    "ci": "egg-bin cov",
+    "contributors": "git-contributor"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^12.7.2",
+    "egg-bin": "^4.19.0",
+    "egg-ci": "^2.1.0",
+    "git-contributor": "^1.1.0",
+    "mm": "*",
+    "runscript": "^1.4.0",
+    "typescript": "^3.5.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/node-modules/address.git"
+  },
+  "keywords": [
+    "address",
+    "ip",
+    "ipv4",
+    "mac"
+  ],
+  "engines": {
+    "node": ">= 10.0.0"
+  },
+  "ci": {
+    "version": "14, 16, 18",
+    "type": "github",
+    "os": "linux, macos"
+  },
+  "author": "fengmk2 <fengmk2@gmail.com>",
+  "license": "MIT"
+}

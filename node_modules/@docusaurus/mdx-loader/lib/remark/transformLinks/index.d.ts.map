@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/remark/transformLinks/index.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAeH,OAAO,KAAK,EAAC,WAAW,EAAC,MAAM,SAAS,CAAC;AAQzC,oBAAY,aAAa,GAAG;IAC1B,UAAU,EAAE,MAAM,EAAE,CAAC;IACrB,OAAO,EAAE,MAAM,CAAC;CACjB,CAAC;AAuHF,MAAM,CAAC,OAAO,UAAU,MAAM,CAAC,OAAO,EAAE,aAAa,GAAG,WAAW,CAalE"}

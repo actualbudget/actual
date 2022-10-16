@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Budgeting/reconcile",
+  "id": "Budgeting/reconcile",
+  "title": "Reconciliation",
+  "description": "Keeping your Actual account ledgers consistent with your band ledgers is important to maintain a healthy budget and know exactly how much currency is available to spend.  Some choose to reconcile monthly, weekly, or even daily.  Actual provides the Reconciliation tool to help manage this process.",
+  "source": "@site/docs/Budgeting/reconcile.md",
+  "sourceDirName": "Budgeting",
+  "slug": "/Budgeting/reconcile",
+  "permalink": "/actual-community-docs/Budgeting/reconcile",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Budgeting/reconcile.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Reconciliation"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Schedules",
+    "permalink": "/actual-community-docs/Budgeting/schedules"
+  },
+  "next": {
+    "title": "Returns and Reimbursements",
+    "permalink": "/actual-community-docs/Budgeting/returnsandreimbursements"
+  }
+}

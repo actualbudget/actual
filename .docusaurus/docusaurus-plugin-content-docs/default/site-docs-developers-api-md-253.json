@@ -1,0 +1,24 @@
+{
+  "unversionedId": "Developers/API",
+  "id": "Developers/API",
+  "title": "API",
+  "description": "",
+  "source": "@site/docs/Developers/API.md",
+  "sourceDirName": "Developers",
+  "slug": "/Developers/API",
+  "permalink": "/actual-community-docs/Developers/API",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Developers/API.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Using the API",
+    "permalink": "/actual-community-docs/Developers/using-the-API"
+  },
+  "next": {
+    "title": "ActualQL",
+    "permalink": "/actual-community-docs/Developers/ActualQL"
+  }
+}

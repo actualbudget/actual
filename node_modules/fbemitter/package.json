@@ -1,0 +1,57 @@
+{
+  "name": "fbemitter",
+  "version": "3.0.0",
+  "keywords": [
+    "clientside"
+  ],
+  "bugs": "https://github.com/facebook/emitter/issues",
+  "license": "BSD-3-Clause",
+  "files": [
+    "LICENSE",
+    "PATENTS",
+    "README.md",
+    "index.js",
+    "lib/"
+  ],
+  "main": "index.js",
+  "repository": "facebook/emitter",
+  "scripts": {
+    "build": "gulp build",
+    "prepublish": "npm run build",
+    "test": "NODE_ENV=test jest"
+  },
+  "dependencies": {
+    "fbjs": "^3.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "del": "^2.2.0",
+    "fbjs-scripts": "^3.0.0",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-flatten": "^0.2.0",
+    "jest-cli": "^26.6.3",
+    "object-assign": "^4.0.1",
+    "run-sequence": "^1.1.5"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "/lib/",
+      "/node_modules/"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "transform": {
+      "\\.js$": "<rootDir>/scripts/jest/preprocessor.js"
+    },
+    "rootDir": "",
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "unmockedModulePathPatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/src/(?!(__forks__/fetch.js$|fetch/))"
+    ]
+  }
+}

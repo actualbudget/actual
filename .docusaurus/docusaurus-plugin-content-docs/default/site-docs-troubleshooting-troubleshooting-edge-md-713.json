@@ -1,0 +1,22 @@
+{
+  "unversionedId": "Troubleshooting/Troubleshooting-Edge",
+  "id": "Troubleshooting/Troubleshooting-Edge",
+  "title": "Microsoft Edge browser",
+  "description": "Common Problems",
+  "source": "@site/docs/Troubleshooting/Troubleshooting-Edge.md",
+  "sourceDirName": "Troubleshooting",
+  "slug": "/Troubleshooting/Troubleshooting-Edge",
+  "permalink": "/actual-community-docs/Troubleshooting/Troubleshooting-Edge",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Troubleshooting/Troubleshooting-Edge.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Microsoft Edge browser"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Troubleshooting",
+    "permalink": "/actual-community-docs/category/troubleshooting"
+  }
+}

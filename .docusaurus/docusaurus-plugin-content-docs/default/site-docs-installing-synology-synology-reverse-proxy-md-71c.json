@@ -1,0 +1,26 @@
+{
+  "unversionedId": "Installing/synology/synology-reverse-proxy",
+  "id": "Installing/synology/synology-reverse-proxy",
+  "title": "Enabling a Reverse Proxy",
+  "description": "1. If you don't have a registered hostname, Synology offers a free service that provides one. You can also use your existing provider. This information is found in the Control Panel in the External Access menu.",
+  "source": "@site/docs/Installing/synology/synology-reverse-proxy.md",
+  "sourceDirName": "Installing/synology",
+  "slug": "/Installing/synology/synology-reverse-proxy",
+  "permalink": "/actual-community-docs/Installing/synology/synology-reverse-proxy",
+  "draft": false,
+  "editUrl": "https://github.com/rich-howell/actual-community-docs/tree/main/docs/Installing/synology/synology-reverse-proxy.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Enabling a Reverse Proxy"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Synology",
+    "permalink": "/actual-community-docs/Installing/synology/"
+  },
+  "next": {
+    "title": "Synology Automatic Updates",
+    "permalink": "/actual-community-docs/Installing/synology/synology-watchtower"
+  }
+}

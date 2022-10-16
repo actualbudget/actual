@@ -1,0 +1,33 @@
+{
+  "name": "reading-time",
+  "version": "1.5.0",
+  "description": "Medium's like reading time estimation.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "lint": "eslint lib test",
+    "spec": "mocha",
+    "test": "npm run lint && npm run spec",
+    "watch": "onchange {lib,test}/*.js -- npm test"
+  },
+  "repository": "ngryman/reading-time",
+  "keywords": [
+    "read",
+    "time",
+    "read time",
+    "reading time",
+    "medium",
+    "words per minute"
+  ],
+  "author": "Nicolas Gryman <ngryman@gmail.com> (http://ngryman.sh)",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.1.0",
+    "curry": "^1.2.0",
+    "eslint": "^3.8.1",
+    "eslint-config-ngryman": "^1.7.0",
+    "mocha": "^9.0.3",
+    "onchange": "^7.1.0"
+  }
+}
