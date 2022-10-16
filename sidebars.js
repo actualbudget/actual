@@ -32,7 +32,7 @@ const sidebars = {
       items: [
         {
           type: 'category',
-          label: 'On Your Own Hardware',
+          label: 'On Your Own Server',
           link: {
             type: 'generated-index',
           },
