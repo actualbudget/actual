@@ -1,1 +1,0 @@
-export declare const createAlgoliaRequester: (requesterParams: import("./createRequester").RequesterParams<any>) => <TTHit>(requestParams: import("./createRequester").RequestParams<TTHit>) => import("./createRequester").RequesterDescription<TTHit>;

@@ -1,7 +1,0 @@
-{
-  "name": "@prism-react-renderer/prism",
-  "private": true,
-  "license": "MIT",
-  "main": "index.cjs.js",
-  "module": "index.js"
-}

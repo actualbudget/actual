@@ -1,1 +1,0 @@
-export var MAX_QUERY_SIZE = 64;

@@ -1,1 +1,0 @@
-module.exports = require('../../es/typed-array/find-last');
