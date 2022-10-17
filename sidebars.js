@@ -25,15 +25,37 @@ const sidebars = {
     'index',
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Installing Actual',
       link: {
         type: 'generated-index',
       },
-      collapsed: true,
       items: [
         {
           type: 'category',
-          label: 'Installing Actual',
+          label: 'On Your Own Server',
+          link: {
+            type: 'generated-index',
+          },
+          items: [
+            'Installing/Docker',
+            'Installing/Unraid',
+            {
+              type: 'category',
+              label: 'Synology',
+              link: {
+                type: 'doc',
+                id: 'Installing/synology/synology',
+              },
+              items: [
+                'Installing/synology/synology-reverse-proxy',
+                'Installing/synology/synology-watchtower',
+              ]
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'In the Cloud',
           link: {
             type: 'generated-index',
           },
@@ -43,35 +65,31 @@ const sidebars = {
               label: 'Fly.io',
               link: {
                 type: 'doc',
-                id: 'Getting-Started/Installing/fly/Fly.io',
+                id: 'Installing/fly/Fly.io',
               },
               items: [
-                'Getting-Started/Installing/fly/Fly-prerequisites',
-                'Getting-Started/Installing/fly/Fly-git',            
-                'Getting-Started/Installing/fly/Fly-image',            
-                'Getting-Started/Installing/fly/Fly-terraform',
-                'Getting-Started/Installing/fly/Fly-updating',
-                'Getting-Started/Installing/fly/Fly-persisting',
+                'Installing/fly/Fly-prerequisites',
+                'Installing/fly/Fly-git',
+                'Installing/fly/Fly-image',
+                'Installing/fly/Fly-terraform',
+                'Installing/fly/Fly-updating',
+                'Installing/fly/Fly-persisting',
               ],
             },
-            'Getting-Started/Installing/Docker',
-            'Getting-Started/Installing/Pikapods', 
-            'Getting-Started/Installing/Unraid',
-            'Getting-Started/Installing/Terraform',
-            {
-              type: 'category',
-              label: 'Synology',
-              link: {
-                type: 'doc',
-                id: 'Getting-Started/Installing/synology/synology',
-              },
-              items: [
-                'Getting-Started/Installing/synology/synology-reverse-proxy',
-                'Getting-Started/Installing/synology/synology-watchtower',
-              ]
-            },
-          ],
+            'Installing/Pikapods',
+            'Installing/Terraform',
+          ]
         },
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Getting Started',
+      link: {
+        type: 'generated-index',
+      },
+      collapsed: true,
+      items: [
         'Getting-Started/tipstricks',
         'Getting-Started/sync',
         'Getting-Started/managefiles',
@@ -87,7 +105,7 @@ const sidebars = {
             unavailable('nYNAB'),
           ]
         },
-             
+
       ],
     },
     {
@@ -103,7 +121,7 @@ const sidebars = {
           collapsed: true,
           link: {
             type: 'doc',
-            id: 'Budgeting/rules/rules', 
+            id: 'Budgeting/rules/rules',
           },
           items: [
             'Budgeting/rules/rules-custom',
