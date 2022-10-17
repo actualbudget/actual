@@ -1,1 +1,0 @@
-{"version":3,"names":["createPlugin","name","development"],"sources":["../src/development.ts"],"sourcesContent":["import createPlugin from \"./create-plugin\";\n\nexport default createPlugin({\n  name: \"transform-react-jsx/development\",\n  development: true,\n});\n"],"mappings":";;;;;;;AAAA;;eAEe,IAAAA,qBAAA,EAAa;EAC1BC,IAAI,EAAE,iCADoB;EAE1BC,WAAW,EAAE;AAFa,CAAb,C"}
