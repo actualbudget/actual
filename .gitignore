@@ -5,7 +5,7 @@ node_modules/
 build/
 
 # Generated files
-.docusaurus
+.docusaurus/
 .cache-loader
 
 # Misc
@@ -18,6 +18,7 @@ build/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+yarn.lock
 
 # User-specific files
 *.rsuser
