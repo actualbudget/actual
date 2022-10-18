@@ -30,6 +30,7 @@ const sidebars = {
         type: 'generated-index',
       },
       items: [
+        'Installing/overview',
         {
           type: 'category',
           label: 'On Your Own Server',
