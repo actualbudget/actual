@@ -66,6 +66,7 @@ export default function GenericInput({
           content = (
             <AccountAutocomplete
               accounts={accounts}
+              includeClosedAccounts
               value={value}
               multi={multi}
               openOnFocus={false}

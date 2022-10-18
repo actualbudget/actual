@@ -762,6 +762,7 @@ export const Transaction = React.memo(function Transaction(props) {
             <AccountAutocomplete
               value={accountId}
               accounts={accounts}
+              includeClosedAccounts
               shouldSaveFromKey={shouldSaveFromKey}
               tableBehavior={true}
               focused={true}
