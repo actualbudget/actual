@@ -16,7 +16,9 @@ Schedules can be used to enter anticipated transactions early.  Some of the avai
 Once a schedule is started, Actual will search the transaction history for entries that match the schedule, select the matches, and the option to link those transactions to the schedule is given.  You can click to the **Find missing transactions** button to have Actual look for matches.
 
 ![](/img/schedules-1.png)
+
 ![](/img/schedules-6.png)
+
 ![](/img/schedules-7.png)
 
 ## Schedule options that are not supported
@@ -28,19 +30,24 @@ Once a schedule is started, Actual will search the transaction history for entri
 
 Many times it's desired to add notes to the scheduled transactions or to assign categories automatically. This is done with the [Rules][rules] tool.
 
-Once you have a schedule in place
+Create a schedule.
+
 ![](/img/schedules-2.png)
 
 You can click on it and a new button has now appeared called **Edit as rule**.
+
 ![](/img/schedules-3.png)
 
 Click on **Edit as Rule** to further customize the automatic entry.
+
 ![](/img/schedules-4.png)
 
-By clicking the **+** arrow on in the **The apply these actions** area, you can define the category this schedule should be assigned against as well as any notes you might want to include.
+By clicking the **+** arrow on in the **Then apply these actions** area, you can define the category this schedule should be assigned against as well as any notes you might want to include.
+
 ![](/img/schedules-5.png)
 
-You can apply this newly made rule to any other of the linked transactions. Select all of the transactions from the rules dialog and press **Apply actions**
+You can apply this newly made rule to any other of the linked transactions. Select all of the transactions from the rules dialog and press **Apply actions**.
+
 ![](/img/schedules-8.png)
 
 Save the rule and any time this scheduled transaction gets entered into the register it can be automatically categorized with a helpful note.
