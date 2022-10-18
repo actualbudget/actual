@@ -72,6 +72,7 @@ function EditField({
         <AccountAutocomplete
           value={null}
           accounts={accounts}
+          includeClosedAccounts
           focused={true}
           embedded={true}
           onSelect={value => {
