@@ -178,6 +178,7 @@ const sidebars = {
       collapsed: true,
       items: [
         'Developers/project-layout',
+        'Developers/releasing',
         'Developers/using-the-API',
         'Developers/API',
         'Developers/ActualQL',
