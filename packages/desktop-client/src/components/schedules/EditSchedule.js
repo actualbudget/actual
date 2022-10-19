@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom';
 
@@ -340,6 +340,10 @@ export default function ScheduleDetails() {
 
   let selectedInst = useSelected('transactions', state.transactions, []);
 
+  // helps emulate the <TransactionsTable> behavior where <PayeeAutocomplete>
+  // remains open as long as we're interacting with it
+  const [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
+
   async function onSave() {
     dispatch({ type: 'form-error', error: null });
 
@@ -430,10 +434,15 @@ export default function ScheduleDetails() {
           <FormLabel title="Payee" />
           <PayeeAutocomplete
             value={state.fields.payee}
-            inputProps={{ placeholder: '(none)' }}
+            inputProps={{
+              onBlur: () => setPayeeFieldFocused(false),
+              onFocus: () => setPayeeFieldFocused(true),
+              placeholder: '(none)'
+            }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
             }
+            focused={payeeFieldFocused}
           />
         </FormField>
 
