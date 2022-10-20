@@ -7,10 +7,10 @@ sidebar_position: 2
 
 Actual is also available as a Docker image ready to be run in your own custom environment.
 
-- [Docker Hub](https://hub.docker.com/r/jlongster)
-[Github Registry](https://ghcr.io/actualbudget/actual-server)
+* [Docker Hub](https://hub.docker.com/r/jlongster)
+* [Github Registry](https://ghcr.io/actualbudget/actual-server)
 
-## Docker Hub Tags
+## Docker Tags
 
 We publish a number of tags to the official repository now so that users who want to get the latest bleeding edge changes can do that without having to wait for the latest image to be updated. Details of the available tags are below. 
 
