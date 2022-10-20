@@ -1,10 +1,32 @@
 name: Build Docker Image
 
-# Docker Images are only built when a new tag is created
+# Docker Images are built for every push to master or when a new tag is created
 on:
   push:
+    branches:
+      - master
     tags:
       - 'v*.*.*'
+    paths-ignore:
+      - README.md
+      - LICENSE.txt
+
+env:
+  IMAGES: |
+    jlongster/actual-server
+    ghcr.io/actualbudget/actual-server
+
+  # Creates the following tags:
+  # - actual-server:latest (see docker/metadata-action flavor inputs, below)
+  # - actual-server:edge (for master)
+  # - actual-server:1.3
+  # - actual-server:1.3.7
+  # - actual-server:sha-90dd603
+  TAGS: |
+    type=edge,value=edge
+    type=semver,pattern={{version}}
+    type=semver,pattern={{major}}.{{minor}}
+    type=sha
 
 jobs:
   build:
@@ -24,35 +46,22 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           # Push to both Docker Hub and Github Container Registry
-          images: |
-            jlongster/actual-server
-            ghcr.io/actualbudget/actual-server
-          # Creates the following tags:
-          # - actual-server:latest
-          # - actual-server:1.3
-          # - actual-server:1.3.7
-          # - actual-server:sha-90dd603
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
+          images: ${{ env.IMAGES }}
+          # Automatically update :latest for our semver tags
+          flavor: |
+            latest=auto
+          tags: ${{ env.TAGS }}
 
       - name: Docker meta for Alpine image
         id: alpine-meta
         uses: docker/metadata-action@v4
         with:
-          images: |
-            jlongster/actual-server
-            ghcr.io/actualbudget/actual-server
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=latest,suffix=-alpine
-            type=semver,pattern={{version}},suffix=-alpine
-            type=semver,pattern={{major}}.{{minor}},suffix=-alpine
-            type=sha,suffix=-alpine
+          images: ${{ env.IMAGES }}
+          # Automatically update :latest for our semver tags and suffix all tags
+          flavor: |
+            latest=auto
+            suffix=-alpine,onlatest=true
+          tags: $${{ env.TAGS }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
