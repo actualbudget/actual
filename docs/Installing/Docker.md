@@ -5,16 +5,32 @@ sidebar_position: 2
 
 ## Hosting Actual on a home server with Docker
 
-:::caution
-
-These instructions are written to use a PR that has not been merged!
-
-:::
-
 Actual is also available as a Docker image ready to be run in your own custom environment.
 
-- Docker Hub: `jlongster/actual-server`
-- Github Registry: `ghcr.io/actualbudget/actual-server`
+- [Docker Hub](https://hub.docker.com/r/jlongster)
+[Github Registry](ghcr.io/actualbudget/actual-server)
+
+## Docker Hub Tags
+
+We publish a number of tags to the official repository now so that users who want to get the latest bleeding edge changes can do that without having to wait for the latest image to be updated. Details of the available tags are below. 
+
+:::note
+[SemVer](https://github.com/semver/semver/blob/master/semver.md) relates to the Semantic Version number
+:::
+
+### Latest Tag
+
+Auto-updated to point to the most recent semver build (see the [workflow docs](https://github.com/marketplace/actions/docker-metadata-action#typeedge)) 👈 this is for people who want the stable build.
+
+* latest
+* latest-alpine - Based on Alpine Linux, which is tiny so great for low powered devices.
+  
+### Edge Tag
+
+This tag reflects the last commit of the active branch on your Git repository.
+
+* edge 
+* edge-alpine - Based on Alpine Linux, which is tiny so great for low powered devices.
 
 ## Launch container
 
@@ -25,6 +41,7 @@ These are you need to deploy Actual in your server with docker and you **only** 
 file](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env).
 
 To create and run the container:
+
 ```bash
 $ docker-compose --env-file actual_server.env up -d
 ```
