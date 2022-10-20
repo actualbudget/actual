@@ -6,10 +6,19 @@ Installing Actual be it on your own personal computer or in the cloud is really 
 
 ### Pre Requisites  
 
-* Windows, OSX or Linux operating system
-* [NodeJS](https://nodejs.org/en/) version 14 or greater
-* Access to the internet
-* [Yarn](https://yarnpkg.com/)
+We support all Operating systems including Windows, OSX or Linux.
+
+Install [NodeJS](https://nodejs.org/en/) version 14 or greater,
+
+You will need access to the internet.
+
+Install [Yarn](https://yarnpkg.com/) using NPM, if you only just installed NodeJS you may need to restart your terminal.
+
+```js
+npm install --global yarn
+```
+
+Once you have the above, pick one of our guides which should help you install Actual in an environment that is suitable for you.
 
 ### Currently Not Supported 
 
