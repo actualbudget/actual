@@ -8,7 +8,7 @@ sidebar_position: 2
 Actual is also available as a Docker image ready to be run in your own custom environment.
 
 - [Docker Hub](https://hub.docker.com/r/jlongster)
-[Github Registry](ghcr.io/actualbudget/actual-server)
+[Github Registry](https://ghcr.io/actualbudget/actual-server)
 
 ## Docker Hub Tags
 
