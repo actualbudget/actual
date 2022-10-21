@@ -8,7 +8,7 @@ Actual Server is the server element of Actual that is used for syncing changes a
 
 ## Getting Started 
 
-As outlined in the [overview](/installing/overview.md) you need to make sure the following is installed on your machine before starting. 
+As outlined in the [overview](/Installing/overview.md) you need to make sure the following is installed on your machine before starting. 
 
 [NodeJS](https://nodejs.org/en/) version 14 or greater, NodeJS has documentation on how to install it on your own machine, [Yarn](https://yarnpkg.com/) you can install this using NPM, however if you only just installed NodeJS you may need to restart your terminal first before running the below command.
 
