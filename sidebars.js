@@ -187,10 +187,19 @@ const sidebars = {
       items: [
         'Developers/project-layout',
         'Developers/releasing',
+        'Developers/Building-Windows',
         'Developers/using-the-API',
         'Developers/API',
-        'Developers/ActualQL',
-        'Developers/Building-Windows',
+        {
+          type: 'category',
+          label: 'ActualQL',
+          collapsed: true,
+          items: [
+            'Developers/ActualQL/Overview',
+            'Developers/ActualQL/Functions',
+            'Developers/ActualQL/Examples',
+          ],
+        },
       ],
     },
     'FAQ',

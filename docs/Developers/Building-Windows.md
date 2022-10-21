@@ -1,5 +1,5 @@
 ---
-title: 'How to build browser for Windows'
+title: 'How To Build Browser For Windows'
 ---
 
 Many of the build scripts are bash scripts and not natively invokable in Windows. To solve this, you can build the project using Git Bash.
