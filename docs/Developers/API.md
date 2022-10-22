@@ -163,7 +163,7 @@ Get all the transactions in `accountId` between the specified dates (inclusive).
 
 #### `filterTransactions`
 
-`filterTransactions` has been removed. Use [ActualQL](/developers/ActualQL/) instead.
+`filterTransactions` has been removed. Use [ActualQL](/developers/ActualQL/ActualQL/) instead.
 
 #### `updateTransaction`
 
