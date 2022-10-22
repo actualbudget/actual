@@ -21,7 +21,7 @@ yarn install
 yarn start
 ```
 
-Navigate to https://localhost:5006 in your browser and you will see Actual.
+Navigate to http://localhost:5006 in your browser and you will see Actual.
 
 You should deploy the server somewhere so you can access your data from anywhere. See instructions on the [actual-server](https://github.com/actualbudget/actual-server) repo.
 
