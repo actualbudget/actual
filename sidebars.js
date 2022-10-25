@@ -136,8 +136,7 @@ const sidebars = {
             'Budgeting/rules/rules-custom',
           ],
         },
-        'Budgeting/schedules',
-        'Budgeting/reconcile',
+        'Budgeting/schedules',        
         'Budgeting/bulk-editing-transactions',
         'Budgeting/returnsandreimbursements',
         'Budgeting/creditcards',
@@ -152,6 +151,7 @@ const sidebars = {
       items: [
         'Accounts/overview',
         'Accounts/addaccount',
+        'Accounts/reconcile',
         'Accounts/importing-trans',
         unavailable('Connecting Your Bank'),
         'Accounts/payees',
