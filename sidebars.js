@@ -137,6 +137,7 @@ const sidebars = {
         },
         'Budgeting/schedules',
         'Budgeting/reconcile',
+        'Budgeting/bulk-editing-transactions',
         'Budgeting/returnsandreimbursements',
         'Budgeting/creditcards',
         'Budgeting/jointaccounts',
