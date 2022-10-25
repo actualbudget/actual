@@ -122,6 +122,7 @@ const sidebars = {
       collapsed: true,
       items: [
         'Budgeting/howitworks',
+        'Budgeting/filters',
         'Budgeting/categories',
         {
           type: 'category',
