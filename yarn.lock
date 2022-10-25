@@ -11,10 +11,10 @@
     node-fetch "^1.6.3"
     uuid "3.3.2"
 
-"@actual-app/web@4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@actual-app/web/-/web-4.1.0.tgz#9a5c5d5fd3c6e5a1a34dcaf087fb1920a27f13eb"
-  integrity sha512-QgxrHBUoDXsUCRzQTD4PmDkTt27UUcPfFJMqXPHtk2lP0ey7iVsZIW7AUeYkEs1+ghmqVVqk+jw3OAD4XQzbRA==
+"@actual-app/web@22.10.25":
+  version "22.10.25"
+  resolved "https://registry.yarnpkg.com/@actual-app/web/-/web-22.10.25.tgz#9bf027bbceff2a5ca3e1dc74025bd17acdac53ea"
+  integrity sha512-PJccTQTRwyjHXSE0cDfNaBqMryAweXau8MWBxOkjbXIqJDrlJKv/0QJGwCba/LmCROrCSSEagdUzRRSe6a4Amg==
 
 "@eslint/eslintrc@^1.2.3":
   version "1.2.3"
