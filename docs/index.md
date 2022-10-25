@@ -16,7 +16,7 @@ Create your first budget by entering amounts into the "budgeted" column of the c
 
 ### Check back throughout the month
 
-That's it! After you've made some more purchases, check back and [import your transactions](/Accounts/importing-trans/). After categorizing them, you can see how your spending has impacted your budget.
+That's it! After you've made some more purchases, check back and [import your transactions](/Accounts/Transactions/importing-trans/). After categorizing them, you can see how your spending has impacted your budget.
 
 Related reading: [importing transactions](/Accounts/Transactions/importing-trans/), [how budgeting works](/Budgeting/howitworks/), [managing categories](/Budgeting/categories/)
 
