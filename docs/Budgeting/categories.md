@@ -4,18 +4,6 @@ title: 'Categories'
 
 You can manage your categories in the budget page. Actual supports both expense and income categories.
 
-## Renaming or delete a category
-
-1. Hover over the category and press the down arrow
-
-![](/img/RenameCategoryDropDown.png)
-
-2. Select **Rename** or **Delete** from the menu
-
-![](/img/RenameCategoryOptions.png)
-
-Categories are organized into groups and same actions can be performanced on groups.
-
 ## Add a category
 
 1. Hover over the category group and press the down arrow
@@ -33,6 +21,18 @@ Scroll to the bottom of the budget sheet and select add group
 ![](/img/AddCategoryGroup.png)
 
 Only one income group can ever exist and it cannot be deleted.
+
+## Renaming or delete a category
+
+1. Hover over the category and press the down arrow
+
+![](/img/RenameCategoryDropDown.png)
+
+2. Select **Rename** or **Delete** from the menu
+
+![](/img/RenameCategoryOptions.png)
+
+Categories are organized into groups and same actions can be performed on groups.
 
 ## Merging categories
 
