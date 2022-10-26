@@ -103,17 +103,23 @@ const sidebars = {
         'Getting-Started/managefiles',
         {
           type: 'category',
-          label: 'Migrating From Other Apps',
+          label: 'Migration',
           link: {
             type: 'doc',
             id: 'Getting-Started/migration/migration-intro',
           },
           items: [
-            'Getting-Started/migration/ynab4',
-            unavailable('nYNAB'),
+            {
+              type: 'category',
+              label: 'Migrating From Other Apps',
+              items: [            
+                'Getting-Started/migration/ynab4',
+                unavailable('nYNAB'),
+              ]
+            },            
+            'Getting-Started/migration/simple-sync',
           ]
         },
-
       ],
     },
     {

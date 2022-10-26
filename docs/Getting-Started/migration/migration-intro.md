@@ -1,6 +1,10 @@
 ---
-title: 'Migration Overview'
+title: "Migration Overview"
 ---
+
+:::note
+[Click here](simple-sync) if you are looking for the steps to migrate from "full sync" to (the more reliable) "simple sync" method.
+:::
 
 Keeping your existing transaction history is important. If you already use a different app, you probably want to migrate it over into Actual.
 
