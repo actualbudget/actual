@@ -10,7 +10,7 @@ module.exports = {
   title: 'Actual Budget Documentation',
   tagline: 'Dinosaurs are cool',
   url: 'https://actualbudget.github.io',
-  baseUrl: '/docs/',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
