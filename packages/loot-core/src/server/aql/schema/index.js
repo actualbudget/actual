@@ -85,7 +85,6 @@ export const schema = {
   },
   schedules: {
     id: f('id'),
-    name: f('string'),
     rule: f('id', { ref: 'rules', required: true }),
     next_date: f('date'),
     completed: f('boolean'),
@@ -94,6 +93,7 @@ export const schema = {
 
     // These are special fields that are actually pulled from the
     // underlying rule
+    _name: f('string'),
     _payee: f('id', { ref: 'payees' }),
     _account: f('id', { ref: 'accounts' }),
     _amount: f('json/fallback'),
@@ -230,6 +230,7 @@ export const schemaConfig = {
               ELSE _nd.base_next_date
             END
           `,
+          _name: `json_extract(_rules.actions, _paths.notes || '.value')`,
           _payee: `pm.targetId`,
           _account: `json_extract(_rules.conditions, _paths.account || '.value')`,
           _amount: `json_extract(_rules.conditions, _paths.amount || '.value')`,

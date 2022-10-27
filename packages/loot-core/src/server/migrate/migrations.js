@@ -37,6 +37,7 @@ export function getUpMigration(id, names) {
 }
 
 export async function getAppliedMigrations(db) {
+  debugger;
   const rows = await sqlite.runQuery(
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
@@ -108,6 +109,7 @@ export async function applyMigration(db, name, migrationsDir) {
 
 function checkDatabaseValidity(appliedIds, available) {
   for (let i = 0; i < appliedIds.length; i++) {
+    debugger;
     if (
       i >= available.length ||
       appliedIds[i] !== getMigrationId(available[i])

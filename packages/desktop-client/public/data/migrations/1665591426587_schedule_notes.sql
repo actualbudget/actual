@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE schedules_json_paths ADD COLUMN notes TEXT;
+
+COMMIT;

@@ -118,7 +118,7 @@ export default function ScheduleDetails() {
             schedule: action.schedule,
             isCustom,
             fields: {
-              name: schedule.name,
+              name: schedule._name,
               payee: schedule._payee,
               account: schedule._account,
               amount: schedule._amount || 0,
@@ -205,7 +205,7 @@ export default function ScheduleDetails() {
       error: null,
       fields: mergeFields(
         {
-          name: '',
+          name: null,
           payee: null,
           account: null,
           amount: null,
@@ -238,7 +238,7 @@ export default function ScheduleDetails() {
           patterns: []
         };
         let schedule = {
-          name: '',
+          _name: null,
           posts_transaction: false,
           _date: date,
           _conditions: [{ op: 'isapprox', field: 'date', value: date }],
@@ -367,7 +367,6 @@ export default function ScheduleDetails() {
     let res = await sendCatch(adding ? 'schedule/create' : 'schedule/update', {
       schedule: {
         id: state.schedule.id,
-        name: state.fields.name,
         posts_transaction: state.fields.posts_transaction
       },
       conditions
