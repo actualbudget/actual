@@ -6,6 +6,16 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
+
+  plugins: [
+    [require.resolve("@easyops-cn/docusaurus-search-local"),
+    { 
+      hashed: true,
+      indexDocs: true
+    }
+    ],
+    ],
+
   title: 'Actual Budget Documentation',
   tagline: 'Dinosaurs are cool',
   url: 'https://your-docusaurus-test-site.com',
