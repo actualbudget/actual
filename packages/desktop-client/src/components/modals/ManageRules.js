@@ -238,9 +238,9 @@ function ScheduleValue({ value }) {
       field="rule"
       data={schedules}
       describe={s => {
-        let { payee } = extractScheduleConds(s._conditions);
-        return payee
-          ? `${byId[payee.value].name} (${s.next_date})`
+        let payeeId = s._payee;
+        return payeeId
+          ? `${byId[payeeId].name} (${s.next_date})`
           : `Next: ${s.next_date}`;
       }}
     />
