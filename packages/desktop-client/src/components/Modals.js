@@ -64,6 +64,7 @@ function Modals({
             modalProps={modalProps}
             actions={actions}
             history={history}
+            accounts={accounts}
           />
         </Route>
 

@@ -56,3 +56,13 @@ export function determineOffBudget(type) {
   }
   return false;
 }
+
+export function accountNameErrorMessage(errorName) {
+  switch (errorName) {
+    case 'already-exists':
+      return 'This account already exists';
+    case 'required':
+    default:
+      return 'Name is required';
+  }
+}

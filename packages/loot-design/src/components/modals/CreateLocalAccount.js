@@ -2,7 +2,10 @@ import React from 'react';
 
 import { Formik } from 'formik';
 
-import { determineOffBudget } from 'loot-core/src/shared/accounts';
+import {
+  determineOffBudget,
+  accountNameErrorMessage
+} from 'loot-core/src/shared/accounts';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import {
@@ -18,7 +21,7 @@ import {
   InitialFocus
 } from '../common';
 
-function CreateLocalAccount({ modalProps, actions, history }) {
+function CreateLocalAccount({ modalProps, actions, history, accounts }) {
   return (
     <Modal title="Create Local Account" {...modalProps} showBack={false}>
       {() => (
@@ -38,6 +41,10 @@ function CreateLocalAccount({ modalProps, actions, history }) {
               }
               if (!values.name) {
                 errors.name = 'required';
+              } else if (
+                accounts.some(account => account.name === values.name)
+              ) {
+                errors.name = 'already-exists';
               }
               if (isNaN(parseFloat(values.balance))) {
                 errors.balance = 'format';
@@ -79,7 +86,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                 </InlineField>
                 {errors.name && (
                   <FormError style={{ marginLeft: 75 }}>
-                    Name is required
+                    {accountNameErrorMessage(errors.name)}
                   </FormError>
                 )}
 
