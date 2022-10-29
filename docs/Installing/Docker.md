@@ -57,28 +57,42 @@ Pre-requisites:  Docker
 Alternatively to using docker compose, you may also launch docker using this command.  This command, as shown, will launch the latest stable build of Actual.
 
 ```bash
-$ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data jlongster/actual-server:latest
+$ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
 ```
 
-`--pull` -- always pulls the latest image
+`--pull=always` -- always pulls the latest image
 
-`--restart` -- sets the restart policy of the container
+`--restart=unless-stopped` -- sets the restart policy of the container
 
 `-d` -- starts the container as background application
 
-`-p` -- sets the port to access Actual.  (HOST PORT:DOCKER PORT)
+`-p 5006:5006` -- sets the port to access Actual.  (HOST PORT:DOCKER PORT)
 
-`-v` -- tells the container where to store your budget data.  This persists the data on your hard disk so it isn't lost if you remove the container.
+`-v YOUR/PATH/TO/DATA:/data` -- tells the container where to store your budget data.  This persists the data on your hard disk so it isn't lost if you remove the container.  Change the current value to a folder on your host computer.
+
+`--name my_actual_budget` -- gives your new docker container a name
 
 `jlongster/actual-server:latest` -- defines which image you want to pull and launch.
 
 To update the container from a new image, use these commands.
 
-`$ docker container ls`  List the current docker images to find the current container id.
+```bash
+$ docker stop my_actual_budget
+```
 
-`$ docker stop CONTAINER_ID`  Fill in the container id to stop the current container.
+```bash
+$ docker container rm my_actual_budget
+```
 
-`$ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data jlongster/actual-server:latest`  
+```bash
+$ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
+```  
+
+You can place all of these in a batch script for a 1 click or single command update.
+
+```bash
+$ docker stop my_actual_budget && docker container rm my_actual_budget && docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
+```
 
 
 ## Test connection within local network
