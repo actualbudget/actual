@@ -1413,7 +1413,15 @@ class AccountInternal extends React.PureComponent {
         value = !!transactions.find(t => !t.cleared);
       }
 
+      let idSet = new Set(ids);
+
       transactions.forEach(trans => {
+        if (!idSet.has(trans.id)) {
+          // Skip transactions which aren't actually selected, since the
+          // query above also retrieves the siblings of any selected splits.
+          return;
+        }
+
         let { diff } = updateTransaction(transactions, {
           ...trans,
           [name]: value
