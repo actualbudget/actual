@@ -6,6 +6,10 @@ title: 'Fly Pre-requisites'
 
 There are some things we need to do before we get started though.
 
+:::note
+If deploying via Terminal on a Mac be sure that you have granted Terminal `Full Disk Access` rights
+:::
+
 ### Fly.io Account
 
 Create an account with [fly.io](https://fly.io/app/sign-up). Although you are required to enter
