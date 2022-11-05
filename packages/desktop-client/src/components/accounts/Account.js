@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
 
-import { format as formatDate } from 'date-fns';
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
 
@@ -14,6 +13,7 @@ import {
 import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { currentDay } from 'loot-core/src/shared/months';
 import {
   deleteTransaction,
   updateTransaction,
@@ -1410,7 +1410,7 @@ class AccountInternal extends React.PureComponent {
         account: this.props.accountId,
         cleared: true,
         amount: diff,
-        date: formatDate(new Date(), 'yyyy-mm-dd'),
+        date: currentDay(),
         notes: 'Reconciliation balance adjustment'
       }
     ]);
