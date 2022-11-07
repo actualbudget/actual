@@ -200,6 +200,11 @@ const sidebars = {
       },
       collapsed: true,
       items: [
+        {
+          type: 'link',
+          label: 'Issue Board',
+          href: 'https://github.com/orgs/actualbudget/projects/1',
+        }, 
         'Developers/project-layout',
         'Developers/releasing',
         'Developers/Building-Windows',
