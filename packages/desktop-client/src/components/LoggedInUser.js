@@ -28,7 +28,7 @@ function LoggedInUser({
 }) {
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
-  const url = useServerURL();
+  const serverUrl = useServerURL();
   const history = useHistory();
 
   useEffect(() => {
@@ -55,7 +55,7 @@ function LoggedInUser({
   }
 
   function onClick() {
-    if (url) {
+    if (serverUrl) {
       setMenuOpen(true);
     } else {
       history.push('/config-server');
@@ -76,7 +76,7 @@ function LoggedInUser({
     return (
       <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
         <Button bare onClick={onClick} style={{ color }}>
-          {url ? 'Server' : 'No server'}
+          {serverUrl ? 'Server' : 'No server'}
         </Button>
 
         {menuOpen && (
