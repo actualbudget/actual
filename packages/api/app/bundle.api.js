@@ -52562,7 +52562,7 @@ function stopBackupService() {
 /*!*********************************************************!*\
   !*** ./packages/loot-core/src/server/budget/actions.js ***!
   \*********************************************************/
-/*! exports provided: getBudget, setBudget, setBuffer, copyPreviousMonth, setZero, set3MonthAvg, setAllFuture, holdForNextMonth, holdForFutureMonths, resetHold, coverOverspending, transferAvailable, transferCategory, setCategoryCarryover */
+/*! exports provided: getBudget, setBudget, setBuffer, copyPreviousMonth, setZero, set3MonthAvg, holdForNextMonth, holdForFutureMonths, resetHold, coverOverspending, transferAvailable, transferCategory, setCategoryCarryover */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -52573,7 +52573,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "copyPreviousMonth", function() { return copyPreviousMonth; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setZero", function() { return setZero; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "set3MonthAvg", function() { return set3MonthAvg; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setAllFuture", function() { return setAllFuture; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "holdForNextMonth", function() { return holdForNextMonth; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "holdForFutureMonths", function() { return holdForFutureMonths; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "resetHold", function() { return resetHold; });
@@ -52789,32 +52788,7 @@ async function set3MonthAvg({
     }
   });
 }
-async function setAllFuture({
-  startMonth
-}) {
-  if (!isReflectBudget()) {
-    throw new Error('setAllFuture only applies to report budget type');
-  }
 
-  let table = getBudgetTable();
-  let budgetData = await getBudgetData(table, dbMonth(startMonth));
-  let months = getAllMonths(_shared_months__WEBPACK_IMPORTED_MODULE_0__["addMonths"](startMonth, 1));
-  Object(_sync__WEBPACK_IMPORTED_MODULE_2__["batchMessages"])(() => {
-    for (let month of months) {
-      budgetData.forEach(budget => {
-        if (budget.is_income === 1 && !isReflectBudget()) {
-          return;
-        }
-
-        setBudget({
-          category: budget.category,
-          month,
-          amount: budget.amount
-        });
-      });
-    }
-  });
-}
 async function holdForNextMonth({
   month,
   amount
@@ -52960,7 +52934,6 @@ app.method('budget/budget-amount', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__
 app.method('budget/copy-previous-month', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["copyPreviousMonth"])));
 app.method('budget/set-zero', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["setZero"])));
 app.method('budget/set-3month-avg', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["set3MonthAvg"])));
-app.method('budget/set-all-future', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["setAllFuture"])));
 app.method('budget/hold-for-next-month', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["holdForNextMonth"])));
 app.method('budget/reset-hold', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["resetHold"])));
 app.method('budget/cover-overspending', Object(_mutators__WEBPACK_IMPORTED_MODULE_1__["mutator"])(Object(_undo__WEBPACK_IMPORTED_MODULE_2__["undoable"])(_actions__WEBPACK_IMPORTED_MODULE_3__["coverOverspending"])));
