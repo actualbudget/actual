@@ -190,26 +190,6 @@ export async function set3MonthAvg({ month }) {
   });
 }
 
-export async function setAllFuture({ startMonth }) {
-  if (!isReflectBudget()) {
-    throw new Error('setAllFuture only applies to report budget type');
-  }
-  let table = getBudgetTable();
-  let budgetData = await getBudgetData(table, dbMonth(startMonth));
-  let months = getAllMonths(monthUtils.addMonths(startMonth, 1));
-
-  batchMessages(() => {
-    for (let month of months) {
-      budgetData.forEach(budget => {
-        if (budget.is_income === 1 && !isReflectBudget()) {
-          return;
-        }
-        setBudget({ category: budget.category, month, amount: budget.amount });
-      });
-    }
-  });
-}
-
 export async function holdForNextMonth({ month, amount }) {
   let row = await db.first(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
