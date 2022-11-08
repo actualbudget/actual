@@ -232,18 +232,6 @@ export async function holdForNextMonth({ month, amount }) {
   return false;
 }
 
-export async function holdForFutureMonths({ startMonth, amount }) {
-  let months = getAllMonths(startMonth);
-
-  await batchMessages(async () => {
-    for (let month of months) {
-      if (!(await holdForNextMonth({ month, amount }))) {
-        break;
-      }
-    }
-  });
-}
-
 export async function resetHold({ month }) {
   await setBuffer(month, 0);
 }
