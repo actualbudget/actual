@@ -17,6 +17,7 @@ function init(socketName, handlers) {
 
   ipc.serve(() => {
     ipc.server.on('message', (data, socket) => {
+      console.log('[msg]', data)
       let msg = data;
       let { id, name, args, undoTag, catchErrors } = msg;
 
