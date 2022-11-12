@@ -398,7 +398,7 @@ const MenuButton = withRouter(function MenuButton({ history }) {
         history.push('/settings');
         break;
       case 'help':
-        window.open("https://actualbudget.github.io/docs","_blank");
+        window.open('https://actualbudget.github.io/docs', '_blank');
         break;
       case 'close':
         dispatch(closeBudget());
@@ -414,7 +414,7 @@ const MenuButton = withRouter(function MenuButton({ history }) {
     { name: 'repair-splits', text: 'Repair split transactions' },
     Menu.line,
     { name: 'settings', text: 'Settings' },
-    { name: 'help', text: 'Help'},
+    { name: 'help', text: 'Help' },
     { name: 'close', text: 'Close File' }
   ];
 
