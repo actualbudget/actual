@@ -21,6 +21,16 @@ Once a schedule is started, Actual will search the transaction history for entri
 
 ![](/img/schedules-7.png)
 
+## How Actual finds schedules
+
+In addition to the requirements you have specified when creating a schedule, a transaction must also meet the date requirements to be matched to a schedule.  Transactions must be dated within 2 days before or after a schedule.
+
+For example:  You have a schedule set up for your power bill for the 15th of every month.  Today is the 10th of the month and you can see an upcoming scheduled transaction of your bill in Actual.  The utility company decided to withdraw the funds on the 10th this month, so you post the transaction to Actual early and change the date of the transaction to match your bank statement.  A problem just occurred because now the posted transaction is outside of the 2 day window to match scheduled transactions.  You'll see your bill posted in the Actual account ledger but you'll also see an upcoming transaction for the power bill on the 15th even though you just entered it.  This is the expected behavior when using schedules.  
+
+You can resolve this issue in one of two ways.
+1. Skip the next schedule by selecting the upcoming scheduled transaction and choosing the "Skip Scheduled Date" from the menu options.
+2. Accept the date doesn't match and leave it as is so the schedule doesn't prompt a second transaction. 
+
 ## Schedule options that are not supported
 
 1. Schedules cannot be made that adjust based on the last non-weekend day (Monday-Friday) of a month.
