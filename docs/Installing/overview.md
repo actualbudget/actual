@@ -26,9 +26,3 @@ Install [Yarn](https://yarnpkg.com/) using NPM, if you only just installed NodeJ
 npm install --global yarn
 ```
 
-### Currently Not Supported 
-
-The following is currently not supported by Actual.
-
-* [Nomad](https://www.nomadproject.io/)
-
