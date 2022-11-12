@@ -112,12 +112,21 @@ const sidebars = {
             {
               type: 'category',
               label: 'Migrating From Other Apps',
-              items: [            
+              items: [
                 'Getting-Started/migration/ynab4',
-                unavailable('nYNAB'),
+                unavailable('nYNAB')
               ]
-            },            
+            },
             'Getting-Started/migration/simple-sync',
+            {
+              type: 'category',
+              label: 'Advanced Migration Actions',
+              items: [
+                'Getting-Started/migration/bulk-migration-updates/modify-transfers'
+              ]
+            },
+
+
           ]
         },
       ],
@@ -142,7 +151,7 @@ const sidebars = {
             'Budgeting/rules/rules-custom',
           ],
         },
-        'Budgeting/schedules',                
+        'Budgeting/schedules',
         'Budgeting/returnsandreimbursements',
         'Budgeting/creditcards',
         'Budgeting/jointaccounts',
@@ -160,12 +169,12 @@ const sidebars = {
         {
           type: 'category',
           label: 'Transactions',
-          collapsed: true,          
+          collapsed: true,
           items: [
             'Accounts/Transactions/importing-trans',
             'Accounts/Transactions/bulk-editing-transactions',
           ],
-        },        
+        },
         unavailable('Connecting Your Bank'),
         'Accounts/payees',
         'Accounts/transfers',
@@ -204,7 +213,7 @@ const sidebars = {
           type: 'link',
           label: 'Issue Board',
           href: 'https://github.com/orgs/actualbudget/projects/1',
-        }, 
+        },
         'Developers/project-layout',
         'Developers/releasing',
         'Developers/Building-Windows',

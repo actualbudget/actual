@@ -10,7 +10,9 @@ When you create a transfer in Actual, those two transactions are linked and upda
 
 In the **Payee** field of a transaction, choose the account in the dropdown you want to transfer to/from. You can press **Make Transfer** if you want to just see a list of accounts and hide other payees.
 
+:::caution
 A transaction in the corresponding account will automatically be created.
+:::
 
 If you are importing files, it is recommended to import into a single account and create the transfer first, and then import the second account. This way the transaction in the second account is automatically reconciled to the transfer transaction. If you imported to both accounts first, creating the transfer would create a duplicate transaction.
 
