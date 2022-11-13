@@ -6,9 +6,9 @@ export function generateAccount(name, isConnected, type, offbudget) {
   return {
     id: uuid.v4Sync(),
     name,
-    balance_current: isConnected ? Math.floor(Math.random() * 100000): null,
-    bank: isConnected ? Math.floor(Math.random() * 10000): null,
-    bankId: isConnected ? Math.floor(Math.random() * 10000): null,
+    balance_current: isConnected ? Math.floor(Math.random() * 100000) : null,
+    bank: isConnected ? Math.floor(Math.random() * 10000) : null,
+    bankId: isConnected ? Math.floor(Math.random() * 10000) : null,
     bankName: isConnected ? 'boa' : null,
     type: type || 'checking',
     offbudget: offbudget ? 1 : 0,
