@@ -307,7 +307,7 @@ setNumberFormat('comma-dot');
 // because we always do that on numbers, the app would potentially
 // display wrong numbers. Instead of `2**53` we use `2**51` which
 // gives division more room to be correct
-const MAX_SAFE_NUMBER = 2**51 - 1;
+const MAX_SAFE_NUMBER = 2 ** 51 - 1;
 const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 
 export function safeNumber(value) {
