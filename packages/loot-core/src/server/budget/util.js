@@ -1,5 +1,5 @@
-import { number } from '../spreadsheet/globals';
 import { safeNumber } from '../../shared/util';
+import { number } from '../spreadsheet/globals';
 
 export { number } from '../spreadsheet/globals';
 
