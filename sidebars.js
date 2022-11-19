@@ -118,15 +118,6 @@ const sidebars = {
               ]
             },
             'Getting-Started/migration/simple-sync',
-            {
-              type: 'category',
-              label: 'Advanced Migration Actions',
-              items: [
-                'Getting-Started/migration/bulk-migration-updates/modify-transfers'
-              ]
-            },
-
-
           ]
         },
       ],
@@ -249,6 +240,25 @@ const sidebars = {
       collapsed: true,
       items: [
         'Release-Notes/22.10.25',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Advanced',
+      collapsed: true,
+      link: {
+        type: 'doc',
+        id: 'Advanced/advanced-intro',
+      },
+      items: [
+        {
+          type: 'category',
+          label: 'Scripts',
+          collapsed: true,
+          items: [
+            'Advanced/Scripts/modify-transfers',
+          ],
+        },
       ],
     },
   ],
