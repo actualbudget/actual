@@ -696,7 +696,7 @@ const AccountHeader = React.memo(
                     {accountName}
                   </View>
 
-                  <NotesButton id={`account-notes-${account.id}`} />
+                  <NotesButton id={`account-${account.id}`} />
                   <Button
                     bare
                     className="hover-visible"
