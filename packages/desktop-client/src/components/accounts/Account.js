@@ -106,6 +106,7 @@ function EmptyMessage({ onAdd }) {
 function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
   let cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
+    value: 0,
     query: balanceQuery.query.filter({ cleared: true })
   });
   let targetDiff = targetBalance - cleared;
