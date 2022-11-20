@@ -41,7 +41,7 @@ export default function useSheetValue(binding, onChange) {
   let spreadsheet = useContext(SpreadsheetContext);
   let [result, setResult] = useState({
     name: sheetName + '!' + binding.name,
-    value: binding.value,
+    value: binding.value === undefined ? null : binding.value,
     query: binding.query
   });
   let latestOnChange = useRef(onChange);
