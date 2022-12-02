@@ -1,9 +1,13 @@
+// This is a special usage of the API because this package is embedded
+// into Actual itself. We only want to pull in the methods in that
+// case and ignore everything else; otherwise we'd be pulling in the
+// entire backend bundle from the API
+const actual = require('@actual-app/api/methods');
+const { amountToInteger } = require('@actual-app/api/utils');
+const AdmZip = require('adm-zip');
 const d = require('date-fns');
 const normalizePathSep = require('slash');
 const uuid = require('uuid');
-const AdmZip = require('adm-zip');
-const actual = require('@actual-app/api');
-const amountToInteger = actual.utils.amountToInteger;
 
 // Utils
 
