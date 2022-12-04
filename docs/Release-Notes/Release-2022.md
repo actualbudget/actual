@@ -1,23 +1,47 @@
 ---
-title: Release 22.10.25
+title: Releases for 2022
 ---
 
+## Release 22.12.xx
+
+The release has notable of improvements of:
+* Large values are supported
+* Fix YNAB 4 and nYnab importers
+* Fixed crashes in certain situations
+
+A full accounting of the changes are listed below.  Thank you to everyone who contributed!
+
+### Actual
+
+* [#262](https://github.com/actualbudget/actual/pull/262) Render a schedule rule with the mapped payee id; fixes crash thanks [jlongster](https://github.com/jlongster)
+* [#266](https://github.com/actualbudget/actual/pull/266) RUpdate data-file-index.txt thanks [j-f1](https://github.com/j-f1)
+* [#272](https://github.com/actualbudget/actual/pull/272) a11y: update cleared state display for clarity thanks [rickdoesdev](https://github.com/rickdoesdev)
+* [#368](https://github.com/actualbudget/actual/pull/368) Update README.md  thanks [rich-howell](https://github.com/rich-howell)
+* [#373](https://github.com/actualbudget/actual/pull/373) Remove documentation  thanks [rich-howell](https://github.com/rich-howell)
+* [#386](https://github.com/actualbudget/actual/pull/386) Always pull in API package from workspace (fixes #378) thanks [jlongster](https://github.com/jlongster)
+* [#387](https://github.com/actualbudget/actual/pull/387) Remove 32bit limit on amounts thanks [jlongster](https://github.com/jlongster)
+* [#389](https://github.com/actualbudget/actual/pull/389) Add a help button to the menu thanks [shall0pass](https://github.com/shall0pass)
+* [#394](https://github.com/actualbudget/actual/pull/389) fix(useSheetValue): default value should be null not undefined thanks [Matissjanis](https://github.com/Matissjanis)
+* [#396](https://github.com/actualbudget/actual/pull/396) Avoid pulling in the bundled app from API in backend thanks [jlongster](https://github.com/jlongster)
+
+### Actual Server
+
+No changes
+
+
+## Release 22.10.25
 
 :::warning
 This release includes a breaking change to the sync component, ensure your budget is [backed up](/Backup-Restore/Backups) before you update to avoid data loss
 :::
 
-Changes that are in this release are listed below.
-
-## Releases 
-
-This version of Actual does not include any of the following 
+This release of Actual does not include any of the following 
 
 * Actual Electron Desktop Application
 * iOS Application
 * Android Application
 
-## Actual
+### Actual
 
 * [#1](https://github.com/actualbudget/actual/pull/1) Add fields to package.json thanks [coliff](https://github.com/coliff)
 * [#3](https://github.com/actualbudget/actual/pull/3) Create .editorconfig thanks [coliff](https://github.com/coliff)
@@ -86,7 +110,7 @@ This version of Actual does not include any of the following
 * [#244](https://github.com/actualbudget/actual/pull/244) Remove dollar sign from close account modal thanks [TomAFrench](https://github.com/TomAFrench)
 * [#262](https://github.com/actualbudget/actual/pull/262) Render a schedule rule with the mapped payee id; fixes crash thanks [jlongster](https://github.com/jlongster)
 
-## Actual Server
+### Actual Server
 
 * [#1](https://github.com/actualbudget/actual-server/pull/1) - Adjust Dockerfile to build successfully thanks [Kovah](https://github.com/Kovah)
 * [#2](https://github.com/actualbudget/actual-server/pull/2) - Instructions for running via Docker thanks [ajtrichards](https://github.com/ajtrichards)
