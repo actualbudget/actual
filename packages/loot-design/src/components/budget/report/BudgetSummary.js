@@ -368,7 +368,7 @@ export default React.memo(function BudgetSummary({ month }) {
                       {
                         name: 'set-3-avg',
                         text: 'Set budgets to 3 month avg'
-                      },
+                      }
                     ]}
                   />
                 </Tooltip>
