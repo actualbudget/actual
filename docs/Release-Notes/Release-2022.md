@@ -32,7 +32,7 @@ No changes
 ## 22.10.25
 
 :::warning
-This release includes a breaking change to the sync component, ensure your budget is [backed up](/Backup-Restore/Backups) before you update to avoid data loss
+This release includes a breaking change to the sync component that requires manual migration ([migration guide](/Getting-Started/migration/simple-sync)). Ensure your budget is [backed up](/Backup-Restore/Backups) before you update to avoid data loss
 :::
 
 This release of Actual does not include any of the following 
