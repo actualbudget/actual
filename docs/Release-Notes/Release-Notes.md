@@ -1,5 +1,5 @@
 ---
-title: Releases for 2022
+title: Releases Notes
 ---
 
 ## 22.12.03
