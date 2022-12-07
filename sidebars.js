@@ -239,7 +239,7 @@ const sidebars = {
       label: 'Release Notes',
       collapsed: true,
       items: [
-        'Release-Notes/22.10.25',
+        'Release-Notes/Release-Notes'
       ],
     },
   ],
