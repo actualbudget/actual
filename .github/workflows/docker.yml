@@ -25,7 +25,6 @@ env:
   TAGS: |
     type=edge,value=edge
     type=semver,pattern={{version}}
-    type=semver,pattern={{major}}.{{minor}}
     type=sha
 
 jobs:
