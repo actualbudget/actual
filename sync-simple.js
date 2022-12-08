@@ -6,7 +6,7 @@ let { getPathForGroupFile } = require('./util/paths');
 let actual = require('@actual-app/api');
 let merkle = actual.internal.merkle;
 let SyncPb = actual.internal.SyncProtoBuf;
-let Timestamp = actual.internal.timestamp.default;
+let Timestamp = actual.internal.timestamp.Timestamp;
 
 function getGroupDb(groupId) {
   let path = getPathForGroupFile(groupId);
