@@ -3,12 +3,22 @@ title: Releases Notes
 ---
 
 ## 22.12.03
+**Docker tag: 22.12.9**
+
+:::warning
+
+ If you are upgrading from a release older than 22.10.25, read that versions release notes for steps regarding a breaking change.
+
+ Using Docker tags 22.12.3 or 22.12.8 have errors.  **Use Docker tag 22.12.9**
+
+:::
 
 The release has notable of improvements of:
 * Large values are supported
 * Fix YNAB 4 and nYnab importers
 * Fixed crashes in certain situations
 * Accounts can now have notes
+* Icon design was changed for more contrast.
 
 A full accounting of the changes are listed below.  Thank you to everyone who contributed!
 
@@ -25,11 +35,13 @@ A full accounting of the changes are listed below.  Thank you to everyone who co
 * [#396](https://github.com/actualbudget/actual/pull/396) Avoid pulling in the bundled app from API in backend -- thanks [jlongster](https://github.com/jlongster)
 
 ### Actual Server
+Version : 22.12.09
 
-No changes
+Builds with Actual 22.12.03 and API 4.1.5.
 
 
 ## 22.10.25
+**Docker tag: 22.10.25**
 
 :::warning
 This release includes a breaking change to the sync component that requires manual migration ([migration guide](/Getting-Started/migration/simple-sync)). Ensure your budget is [backed up](/Backup-Restore/Backups) before you update to avoid data loss
