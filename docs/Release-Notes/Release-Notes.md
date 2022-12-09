@@ -23,6 +23,8 @@ The release has notable of improvements of:
 A full accounting of the changes are listed below.  Thank you to everyone who contributed!
 
 ### Actual
+Version: 22.12.03
+
 * [#218](https://github.com/actualbudget/actual/pull/218) Fix enter to create accounts -- thanks [ezfe](https://github.com/ezfe))
 * [#266](https://github.com/actualbudget/actual/pull/266) RUpdate data-file-index.txt -- thanks [j-f1](https://github.com/j-f1)
 * [#272](https://github.com/actualbudget/actual/pull/272) a11y: update cleared state display for clarity -- thanks [rickdoesdev](https://github.com/rickdoesdev)
@@ -54,6 +56,7 @@ This release of Actual does not include any of the following
 * Android Application
 
 ### Actual
+Version: 22.10.25
 
 * [#1](https://github.com/actualbudget/actual/pull/1) Add fields to package.json -- thanks [coliff](https://github.com/coliff)
 * [#3](https://github.com/actualbudget/actual/pull/3) Create .editorconfig -- thanks [coliff](https://github.com/coliff)
@@ -123,6 +126,7 @@ This release of Actual does not include any of the following
 * [#262](https://github.com/actualbudget/actual/pull/262) Render a schedule rule with the mapped payee id; fixes crash -- thanks [jlongster](https://github.com/jlongster)
 
 ### Actual Server
+Version: 22.10.25
 
 * [#1](https://github.com/actualbudget/actual-server/pull/1) - Adjust Dockerfile to build successfully -- thanks [Kovah](https://github.com/Kovah)
 * [#2](https://github.com/actualbudget/actual-server/pull/2) - Instructions for running via Docker -- thanks [ajtrichards](https://github.com/ajtrichards)
