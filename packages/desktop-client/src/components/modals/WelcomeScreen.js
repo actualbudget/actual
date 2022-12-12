@@ -26,7 +26,7 @@ function WelcomeScreen({ modalProps, actions }) {
             Currently Actual implements budgeting based on a{' '}
             <ExternalLink
               asAnchor
-              href="https://actualbudget.com/how-it-works/"
+              href="https://actualbudget.github.io/docs/Budgeting/howitworks"
             >
               monthly envelope system
             </ExternalLink>
@@ -44,20 +44,20 @@ function WelcomeScreen({ modalProps, actions }) {
             }}
           >
             Read the{' '}
-            <ExternalLink asAnchor href="https://actualbudget.com/docs/">
+            <ExternalLink asAnchor href="https://actualbudget.github.io/docs/">
               documentation
             </ExternalLink>{' '}
             to get started and learn about{' '}
             <ExternalLink
               asAnchor
-              href="https://actualbudget.com/docs/budgeting/how-it-works/"
+              href="https://actualbudget.github.io/docs/Budgeting/howitworks"
             >
               budgeting
             </ExternalLink>
             ,{' '}
             <ExternalLink
               asAnchor
-              href="https://actualbudget.com/docs/accounts/overview/"
+              href="https://actualbudget.github.io/docs/Accounts/overview"
             >
               accounts
             </ExternalLink>{' '}
