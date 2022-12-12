@@ -1,9 +1,18 @@
 {
   "name": "@actual-app/api",
-  "version": "4.0.2",
+  "version": "4.1.5",
   "license": "MIT",
   "description": "An API for Actual",
   "main": "index.js",
+  "files": [
+    "app",
+    "default-db.sqlite",
+    "index.js",
+    "injected.js",
+    "methods.js",
+    "migrations",
+    "utils.js"
+  ],
   "dependencies": {
     "better-sqlite3": "^7.5.0",
     "node-fetch": "^1.6.3",
