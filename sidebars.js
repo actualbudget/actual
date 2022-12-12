@@ -114,7 +114,7 @@ const sidebars = {
               label: 'Migrating From Other Apps',
               items: [            
                 'Getting-Started/migration/ynab4',
-                unavailable('nYNAB'),
+                'Getting-Started/migration/nynab'
               ]
             },            
             'Getting-Started/migration/simple-sync',
