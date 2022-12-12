@@ -33,7 +33,10 @@ function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {
           : A guide on what to do first
         </Text>
         <Text>
-          <ExternalLink asAnchor href="https://actualbudget.github.io/docs/Budgeting/howitworks">
+          <ExternalLink
+            asAnchor
+            href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+          >
             How it Works
           </ExternalLink>
           : An in-depth explanation of the budgeting workflow
