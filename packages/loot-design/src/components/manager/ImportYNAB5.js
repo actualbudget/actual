@@ -70,7 +70,7 @@ function Import({ modalProps, availableImports }) {
             <P>
               <ExternalLink
                 asAnchor={true}
-                href="https://actualbudget.github.io/docs/Getting-Started/migration/ynab5"
+                href="https://actualbudget.github.io/docs/Getting-Started/migration/nynab"
                 target="_blank"
               >
                 Read here
