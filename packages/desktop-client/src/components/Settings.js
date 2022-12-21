@@ -428,9 +428,28 @@ function FileSettings({
         </View>
       </View>
 
-      <View style={{ marginTop: 30, alignItems: 'flex-start' }}>
+      <View style={{ marginTop: 30, maxWidth: 600, alignItems: 'flex-start' }}>
+        <Title name="Import" />
+        <Text style={{ lineHeight: '1.4em' }}>
+          Importing creates a new budget file and must be done after you are
+          signed out from the server. Once signed out, there is an option to
+          import a file.
+        </Text>
+        <Button style={{ marginTop: 10 }} onClick={() => signOut()}>
+          Sign out
+        </Button>
+      </View>
+
+      <View style={{ marginTop: 30, maxWidth: 600, alignItems: 'flex-start' }}>
         <Title name="Export" />
-        <Button onClick={onExport}>Export data</Button>
+        <Text style={{ lineHeight: '1.4em' }}>
+          Exporting your data allows you to save data from Actual to a file on
+          your computer for a variety of uses, including for backup and to use
+          when switching versions of Actual.
+        </Text>
+        <Button style={{ marginTop: 10 }} onClick={onExport}>
+          Export data
+        </Button>
       </View>
 
       <Advanced
