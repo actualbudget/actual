@@ -47,6 +47,7 @@ function parseConfig(config) {
     config || {
       start: monthUtils.currentDay(),
       interval: 1,
+      interval_count: 0,
       frequency: 'monthly',
       patterns: [createMonthlyRecurrence(monthUtils.currentDay())]
     }
@@ -151,7 +152,7 @@ function SchedulePreview({ previewDates }) {
         <Text style={{ fontWeight: 600 }}>Upcoming dates</Text>
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
           {previewDates.map(d => (
-            <View>
+            <View key={d}>
               <Text>{monthUtils.format(d, dateFormat)}</Text>
               <Text>{monthUtils.format(d, 'EEEE')}</Text>
             </View>
@@ -347,6 +348,23 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
         config.patterns.length > 0 && (
           <MonthlyPatterns config={config} dispatch={dispatch} />
         )}
+      <Stack
+        direction="row"
+        align="center"
+        justify="flex-start"
+        style={{ marginTop: 10 }}
+        spacing={2}
+      >
+        <Text style={{ whiteSpace: 'nowrap' }}>Repeat count</Text>
+        <Input
+          id="interval_count"
+          style={{ width: 40 }}
+          type="text"
+          onBlur={e => updateField('interval_count', e.target.value)}
+          onEnter={e => updateField('interval_count', e.target.value)}
+          defaultValue={config.interval_count || 1}
+        ></Input>
+      </Stack>
       <SchedulePreview previewDates={previewDates} />
       <div
         style={{ display: 'flex', marginTop: 15, justifyContent: 'flex-end' }}

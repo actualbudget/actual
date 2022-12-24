@@ -82,6 +82,24 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
+function calculateLastDate(scheduleDate) {
+  const startDate = new Date(scheduleDate.start);
+  const intervalToSum =
+    scheduleDate.interval * scheduleDate.interval_count - scheduleDate.interval;
+  switch (scheduleDate.frequency) {
+    case 'monthly':
+      startDate.setMonth(startDate.getMonth() + intervalToSum);
+      break;
+    case 'weekly':
+      startDate.setDate(startDate.getDate() + intervalToSum * 7);
+      break;
+    case 'yearly':
+      startDate.setFullYear(startDate.getFullYear() + intervalToSum);
+      break;
+  }
+  return startDate;
+}
+
 export default function ScheduleDetails() {
   let { id, initialFields } = useParams();
   let adding = id == null;
@@ -355,6 +373,35 @@ export default function ScheduleDetails() {
       return;
     }
 
+    const scheduleDate = conditions.find(
+      c => c.field === 'date' && c.op === 'isapprox'
+    );
+    const lastDate = calculateLastDate(scheduleDate.value);
+
+    let repeatCountLimit = conditions.find(
+      c => c.field === 'date' && c.op === 'lte'
+    );
+    if (
+      repeatCountLimit === undefined &&
+      scheduleDate.value.interval_count > 0
+    ) {
+      repeatCountLimit = { field: 'date', op: 'lte', type: 'date' };
+      conditions.push(repeatCountLimit);
+    }
+    if (
+      repeatCountLimit !== undefined &&
+      scheduleDate.value.interval_count === 0
+    ) {
+      conditions = conditions.filter(
+        c => c.op !== 'lte' && c.field === 'date' && c.type === 'date'
+      );
+      repeatCountLimit = undefined;
+    }
+
+    if (repeatCountLimit !== undefined) {
+      repeatCountLimit.value = lastDate.toISOString().slice(0, 10);
+    }
+
     let res = await sendCatch(adding ? 'schedule/create' : 'schedule/update', {
       schedule: {
         id: state.schedule.id,
@@ -561,7 +608,7 @@ export default function ScheduleDetails() {
               dispatch({ type: 'set-repeats', repeats: e.target.checked });
             }}
           />
-          <label for="form_repeats" style={{ userSelect: 'none' }}>
+          <label htmlFor="form_repeats" style={{ userSelect: 'none' }}>
             Repeats
           </label>
         </View>
@@ -592,7 +639,10 @@ export default function ScheduleDetails() {
                 });
               }}
             />
-            <label for="form_posts_transaction" style={{ userSelect: 'none' }}>
+            <label
+              htmlFor="form_posts_transaction"
+              style={{ userSelect: 'none' }}
+            >
               Automatically add transaction
             </label>
           </View>
