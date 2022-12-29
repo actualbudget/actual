@@ -435,7 +435,7 @@ function FileSettings({
           signed out from the server. Once signed out, there is an option to
           import a file.
         </Text>
-        <Button style={{ marginTop: 10 }} onClick={() => signOut()}>
+        <Button style={{ marginTop: 10 }} onClick={signOut}>
           Sign out
         </Button>
       </View>
