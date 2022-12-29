@@ -32,12 +32,6 @@ jobs:
         uses: ./.github/actions/setup
       - name: Build Web
         run: ./bin/package-browser
-      - name: Deploy a preview
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ACTUAL_BUDGET }}'
-          projectId: actual-budget
 
   electron:
     # As electron builds take longer, we only run them in master.
