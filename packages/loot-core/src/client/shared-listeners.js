@@ -45,7 +45,7 @@ export function listenForSyncEvent(actions, store) {
     } else if (type === 'error') {
       let notif = null;
       let learnMore =
-        '[Learn more](https://actualbudget.com/docs/overview/syncing-across-devices/#debugging-sync-issues)';
+        '[Learn more](https://actualbudget.github.io/docs/Getting-Started/sync#debugging-sync-issues)';
 
       switch (subtype) {
         case 'out-of-sync':
@@ -95,7 +95,7 @@ export function listenForSyncEvent(actions, store) {
               'This happens rarely (if ever again). The internal syncing format ' +
               'has changed and you need to reset sync. This will upload data from ' +
               'this device and revert all other devices. ' +
-              '[Learn more about what this means](https://actualbudget.com/docs/overview/syncing-across-devices/#what-does-resetting-sync-mean).' +
+              '[Learn more about what this means](https://actualbudget.github.io/docs/Getting-Started/sync#what-does-resetting-sync-mean).' +
               '\n\nOld encryption keys are not migrated. If using ' +
               'encryption, [reset encryption here](#makeKey).',
             messageActions: {
