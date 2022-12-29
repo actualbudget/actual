@@ -146,7 +146,9 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                 )}
 
                 <ModalButtons>
-                  <Button onClick={() => modalProps.onBack()}>Back</Button>
+                  <Button onClick={() => modalProps.onBack()} type="button">
+                    Back
+                  </Button>
                   <Button primary style={{ marginLeft: 10 }}>
                     Create
                   </Button>

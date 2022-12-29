@@ -456,7 +456,7 @@ function compileLiteral(value) {
   } else if (typeof value === 'boolean') {
     return typed(value ? 1 : 0, 'boolean', { literal: true });
   } else if (typeof value === 'number') {
-    return typed(value, (value | 0) === value ? 'integer' : 'float', {
+    return typed(value, Number.isInteger(value) ? 'integer' : 'float', {
       literal: true
     });
   } else if (Array.isArray(value)) {

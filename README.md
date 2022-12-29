@@ -1,72 +1,39 @@
-This is the source code for [Actual](https://actualbudget.com), a local-first personal finance tool. It is 100% free and open-source.
+## Getting Started
 
-If you are only interested in running the latest version, you don't need this repo. You can get the latest version through npm.
+Actual is a local-first personal finance tool. It is 100% free and open-source, written in NodeJS, it has a synchronization element so that all your changes can move between devices without any heavy lifting.
 
-More docs are available in the [docs](https://github.com/actualbudget/actual/tree/master/docs) folder.
+If you are interested in contributing, or want to know how development works, see [CONTRIBUTING.md](https://github.com/actualbudget/actual/blob/master/CONTRIBUTING.md) we would love to have you.
 
-If you are interested in contributing, or want to know how development works, see [CONTRIBUTING.md](https://github.com/actualbudget/actual/blob/master/CONTRIBUTING.md)
+Want to say thanks? Click the ⭐ at the top of the page.
 
-Join the [discord](https://discord.gg/pRYNYr4W5A)!
+## Key Links
+
+* Actual [discord](https://discord.gg/pRYNYr4W5A) community.
+* Actual [Community Documentation](https://actualbudget.github.io/docs)
 
 ## Installation
+
+If you are only interested in running the latest version and not contributing to the source code, you don't need to clone this repo. You can get the latest version through npm.
+
+**Please Note:** While the Actual repository holds source code for the mobile applications that were supported when Actual was closed source, these are no longer supported on the Open Source version of Actual.
 
 ### The easy way: using a server (recommended)
 
 The easiest way to get Actual running is to use the [actual-server](https://github.com/actualbudget/actual-server) project. That is the server for syncing changes across devices, and it comes with the latest version of Actual. The server will provide both the web project and a server for syncing.
 
-```
-git clone https://github.com/actualbudget/actual-server.git
-cd actual-server
-yarn install
-yarn start
-```
+You can get up and running quickly and easily by following our [Running Actual Locally Guide](https://actualbudget.github.io/docs/Installing/Local/your-own-machine)
 
-Navigate to https://localhost:5006 in your browser and you will see Actual.
+## Documentation
 
-You should deploy the server somewhere so you can access your data from anywhere. See instructions on the [actual-server](https://github.com/actualbudget/actual-server) repo.
-
-### Without a server
-
-This will give you a fully local web app without a server. This npm package is the `packages/desktop-client` package in this repo built for production:
-
-```
-yarn add @actual-app/web
-```
-
-Now you need to serve the files in `node_modules/@actual-app/web/build`. One way to do it:
-
-```
-cd node_modules/@actual-app/web/build
-npx http-server .
-```
-
-Navigate to http://localhost:8080 and you should see Actual.
-
-## Building
-
-If you want to build the latest version, see [releasing.md](https://github.com/actualbudget/actual/blob/master/docs/releasing.md). It provides instructions for building this code into the same artifacts that come from npm.
-
-## Run locally
-
-Both the electron and web app can started with a single command. When running in development, it will store data in a `data` directory in the root of the `actual` directory.
-
-First, make sure to run `yarn install` to install all dependencies.
-
-In the root of the project:
-
-```
-yarn start            # Run the electron app
-yarn start:browser    # Run the web app
-```
+We have a wide range of documentation on how to use Actual, this is all available in our [Community Documentation](https://actualbudget.github.io/docs), this includes topics on Budgeting, Account Management, Tips & Tricks and some documentation for developers.
 
 ## Code structure
 
-The app is split up into a few packages:
+The Actual app is split up into a few packages:
 
 * loot-core - The core application that runs on any platform
 * loot-design - The generic design components that make up the UI
 * desktop-client - The desktop UI
 * desktop-electron - The desktop app
-* mobile - The mobile app
 
-More docs are available in the [docs](https://github.com/actualbudget/actual/tree/master/docs) folder.
+More information on the project structure is available in our [community documentation](https://actualbudget.github.io/docs/Developers/project-layout).

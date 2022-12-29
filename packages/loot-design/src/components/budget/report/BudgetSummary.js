@@ -368,10 +368,6 @@ export default React.memo(function BudgetSummary({ month }) {
                       {
                         name: 'set-3-avg',
                         text: 'Set budgets to 3 month avg'
-                      },
-                      {
-                        name: 'set-all-future',
-                        text: 'Apply to all future budgets'
                       }
                     ]}
                   />
