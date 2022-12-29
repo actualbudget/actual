@@ -205,10 +205,6 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                             text: 'Hold for next month'
                           },
                           {
-                            name: 'buffer-future',
-                            text: 'Hold for all future months'
-                          },
-                          {
                             name: 'reset-buffer',
                             text: "Reset next month's buffer"
                           }
@@ -221,14 +217,6 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                       onClose={() => setState({ menuOpen: null })}
                       onSubmit={amount => {
                         onBudgetAction(month, 'hold', { amount });
-                      }}
-                    />
-                  )}
-                  {state.menuOpen === 'buffer-future' && (
-                    <HoldTooltip
-                      onClose={() => setState({ menuOpen: null })}
-                      onSubmit={amount => {
-                        onBudgetAction(month, 'hold-all-future', { amount });
                       }}
                     />
                   )}

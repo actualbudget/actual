@@ -25,7 +25,10 @@ function Final({ targetRect, navigationProps }) {
 
       <P isLast={true}>
         Read{' '}
-        <ExternalLink asAnchor href="https://actualbudget.com/how-it-works/">
+        <ExternalLink
+          asAnchor
+          href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+        >
           How it Works
         </ExternalLink>{' '}
         for an in-depth explanation of the budgeting workflow.

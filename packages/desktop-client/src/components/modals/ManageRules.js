@@ -673,7 +673,7 @@ export default function ManageRules({ history, modalProps, payeeId }) {
                     Rules are always run in the order that you see them.{' '}
                     <ExternalLink
                       asAnchor={true}
-                      href="https://actualbudget.com/docs/other/rules/"
+                      href="https://actualbudget.github.io/docs/Budgeting/rules/"
                       style={{ color: colors.n4 }}
                     >
                       Learn more
