@@ -5,12 +5,12 @@ import Key from 'loot-design/src/svg/v2/Key';
 import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
 
 import { styles, colors } from '../../style';
-import { isPreviewDeployment } from '../../util/preview';
 import CloudCheck from '../../svg/v1/CloudCheck';
 import CloudDownload from '../../svg/v1/CloudDownload';
 import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
 import FileDouble from '../../svg/v1/FileDouble';
 import CloudUnknown from '../../svg/v2/CloudUnknown';
+import { isPreviewDeployment } from '../../util/preview';
 import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
 
 function getFileDescription(file) {
