@@ -5,6 +5,7 @@ import Key from 'loot-design/src/svg/v2/Key';
 import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
 
 import { styles, colors } from '../../style';
+import { isPreviewDeployment } from '../../util/preview';
 import CloudCheck from '../../svg/v1/CloudCheck';
 import CloudDownload from '../../svg/v1/CloudDownload';
 import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
@@ -319,7 +320,8 @@ class BudgetList extends React.Component {
                 Create new file
               </Button>
 
-              {process.env.NODE_ENV === 'development' && (
+              {(process.env.NODE_ENV === 'development' ||
+                isPreviewDeployment()) && (
                 <Button
                   primary
                   onClick={() => this.onCreate({ testMode: true })}
