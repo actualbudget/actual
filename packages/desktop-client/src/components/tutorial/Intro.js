@@ -16,7 +16,7 @@ function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {
       <Title>Let's get started</Title>
       <P>
         Welcome to Actual!{' '}
-        <span role="img" aria-label="Party">
+        <span role="img" aria-label="Party" aria-hidden="true">
           &#127881;
         </span>{' '}
         <strong>Learn the basic workflow with this quick tutorial.</strong> You
