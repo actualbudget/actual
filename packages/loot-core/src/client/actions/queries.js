@@ -24,18 +24,9 @@ export function applyBudgetAction(month, type, args) {
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
         break;
-      case 'set-all-future':
-        await send('budget/set-all-future', { startMonth: month });
-        break;
       case 'hold':
         await send('budget/hold-for-next-month', {
           month,
-          amount: args.amount
-        });
-        break;
-      case 'hold-all-future':
-        await send('budget/hold-for-future-months', {
-          startMonth: month,
           amount: args.amount
         });
         break;

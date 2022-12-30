@@ -26,14 +26,17 @@ function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {
         <Text>
           <ExternalLink
             asAnchor
-            href="https://actualbudget.com/getting-started/"
+            href="https://actualbudget.github.io/docs/category/getting-started"
           >
             Getting Started
           </ExternalLink>
           : A guide on what to do first
         </Text>
         <Text>
-          <ExternalLink asAnchor href="https://actualbudget.com/how-it-works/">
+          <ExternalLink
+            asAnchor
+            href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+          >
             How it Works
           </ExternalLink>
           : An in-depth explanation of the budgeting workflow

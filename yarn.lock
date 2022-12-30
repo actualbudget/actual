@@ -22,21 +22,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/api@npm:^1.0.0":
-  version: 1.1.3
-  resolution: "@actual-app/api@npm:1.1.3"
-  dependencies:
-    node-ipc: 9.1.1
-    uuid: 3.3.2
-  checksum: e7fccff7583d64ac908eb7a7c93226200fd75af92b9fe9718b6e3fe0d004d92d79d87485e212b0d3d86cb685827e6733c939ece799156eea64db886bf1457a94
-  languageName: node
-  linkType: hard
-
 "@actual-app/import-ynab4@*, @actual-app/import-ynab4@workspace:packages/import-ynab4":
   version: 0.0.0-use.local
   resolution: "@actual-app/import-ynab4@workspace:packages/import-ynab4"
   dependencies:
-    "@actual-app/api": ^1.0.0
+    "@actual-app/api": "*"
     adm-zip: ^0.5.9
     date-fns: 2.0.0-alpha.27
     slash: 3.0.0
@@ -50,7 +40,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/import-ynab5@workspace:packages/import-ynab5"
   dependencies:
-    "@actual-app/api": ^1.0.0
+    "@actual-app/api": "*"
     date-fns: 2.0.0-alpha.27
     uuid: 3.3.2
   bin:
@@ -8844,7 +8834,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"easy-stack@npm:^1.0.0, easy-stack@npm:^1.0.1":
+"easy-stack@npm:^1.0.1":
   version: 1.0.1
   resolution: "easy-stack@npm:1.0.1"
   checksum: 161a99e497b3857b0be4ec9e1ebbe90b241ea9d84702f9881b8e5b3f6822065b8c4e33436996935103e191bffba3607de70712a792f4d406a050def48c6bc381
@@ -13813,26 +13803,10 @@ jest-snapshot@test:
   languageName: node
   linkType: hard
 
-"js-message@npm:1.0.5":
-  version: 1.0.5
-  resolution: "js-message@npm:1.0.5"
-  checksum: fd2fc8837a88a115aa2fa859bf5c13d9b335fd7eeba8426c44da6eb006b04c52cfe6675b3c27d6b112ffc51dadb8bc51d58340c3a3aa5c555d7da6bdc72ce9c0
-  languageName: node
-  linkType: hard
-
 "js-message@npm:1.0.7":
   version: 1.0.7
   resolution: "js-message@npm:1.0.7"
   checksum: 18dcc4d80356e8b5be978ca7838d96d4e350a1cb8adc5741c229dec6df09f53bfed7c75c1f360171d2d791a14e2f077d6c2b1013ba899ded7a27d7dfcd4f3784
-  languageName: node
-  linkType: hard
-
-"js-queue@npm:2.0.0":
-  version: 2.0.0
-  resolution: "js-queue@npm:2.0.0"
-  dependencies:
-    easy-stack: ^1.0.0
-  checksum: 8f8e589cc20fd3bc3067db73ecaac77b55411c3ac58fdd6882868924ee19ab4203d19e68d3ec680c5c8f5e8282e30dafa377014dbec05c3f2d33be4596f4fb65
   languageName: node
   linkType: hard
 
@@ -16219,17 +16193,6 @@ jest-snapshot@test:
   version: 0.4.0
   resolution: "node-int64@npm:0.4.0"
   checksum: d0b30b1ee6d961851c60d5eaa745d30b5c95d94bc0e74b81e5292f7c42a49e3af87f1eb9e89f59456f80645d679202537de751b7d72e9e40ceea40c5e449057e
-  languageName: node
-  linkType: hard
-
-"node-ipc@npm:9.1.1":
-  version: 9.1.1
-  resolution: "node-ipc@npm:9.1.1"
-  dependencies:
-    event-pubsub: 4.3.0
-    js-message: 1.0.5
-    js-queue: 2.0.0
-  checksum: 2b66099d1976e4328d34ae7fec853d3969ca337b52b5aefb48ae1d19387c37d6716c2b98d4a4934ec24aa79f0441721961d6c1beb858c294ad6a7a97ddf5460d
   languageName: node
   linkType: hard
 
