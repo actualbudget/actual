@@ -1,0 +1,28 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Setup Playwright
+        run: npx playwright install-deps
+      - name: Install
+        run: yarn install
+      - name: Waiting for 200 from the Netlify Preview
+        uses: jakepartusch/wait-for-netlify-action@v1.2
+        id: waitFor200
+        with:
+          site_name: 'actualbudget'
+      - name: Run E2E Tests on Netlify URL
+        run: E2E_START_URL="${{ steps.waitFor200.outputs.url }}" yarn e2e
