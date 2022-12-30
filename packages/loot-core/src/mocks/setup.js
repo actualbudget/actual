@@ -9,14 +9,10 @@ import {
 import { setServer } from '../server/server-config';
 import * as sheet from '../server/sheet';
 import { setSyncingMode } from '../server/sync';
-import * as tracking from '../server/tracking/events';
 import { updateVersion } from '../server/update';
 import { resetTracer, tracer } from '../shared/test-helpers';
 
 jest.mock('../server/post');
-
-// No need to run any of the tracking code in tests
-tracking.toggle(false);
 
 const nativeFs = require('fs');
 
