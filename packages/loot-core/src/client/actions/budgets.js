@@ -124,6 +124,15 @@ export function closeBudget() {
   };
 }
 
+export function closeBudgetAndImport() {
+  return async dispatch => {
+    // Close existing budget
+    await dispatch(closeBudget());
+    // Open import modal for user
+    await dispatch(pushModal('import'));
+  };
+}
+
 export function closeBudgetUI() {
   return async (dispatch, getState) => {
     let prefs = getState().prefs.local;

@@ -313,7 +313,7 @@ function FileSettings({
   pushModal,
   resetSync,
   setAppState,
-  signOut
+  closeBudgetAndImport
 }) {
   function onDateFormat(e) {
     let format = e.target.value;
@@ -431,12 +431,11 @@ function FileSettings({
       <View style={{ marginTop: 30, maxWidth: 600, alignItems: 'flex-start' }}>
         <Title name="Import" />
         <Text style={{ lineHeight: '1.4em' }}>
-          Importing creates a new budget file and must be done after you are
-          signed out from the server. Once signed out, there is an option to
-          import a file.
+          Importing creates a new budget file and must be done after you close
+          the current one. Once closed, you can import a file to a new budget.
         </Text>
-        <Button style={{ marginTop: 10 }} onClick={signOut}>
-          Sign out
+        <Button style={{ marginTop: 10 }} onClick={closeBudgetAndImport}>
+          Close budget and import data
         </Button>
       </View>
 
@@ -582,7 +581,7 @@ class Settings extends React.Component {
                   pushModal={this.props.pushModal}
                   savePrefs={this.props.savePrefs}
                   setAppState={this.props.setAppState}
-                  signOut={this.props.signOut}
+                  closeBudgetAndImport={this.props.closeBudgetAndImport}
                   resetSync={this.props.resetSync}
                 />
               </Route>
