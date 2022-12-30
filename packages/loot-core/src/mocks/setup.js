@@ -6,6 +6,7 @@ import {
   enableGlobalMutations,
   disableGlobalMutations
 } from '../server/mutators';
+import { setServer } from '../server/server-config';
 import * as sheet from '../server/sheet';
 import { setSyncingMode } from '../server/sync';
 import * as tracking from '../server/tracking/events';
@@ -21,6 +22,9 @@ const nativeFs = require('fs');
 
 // By default, syncing is disabled
 setSyncingMode('disabled');
+
+// Set a mock url for the testing server
+setServer('https://test.env');
 
 process.on('unhandledRejection', reason => {
   console.log('REJECTION', reason);
