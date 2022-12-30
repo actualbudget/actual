@@ -140,6 +140,10 @@ class Tutorial extends React.Component {
         );
       case 'budget-next-month':
         return <div>hi</div>;
+      default:
+        throw new Error(
+          `Encountered an unexpected error rendering the tutorial content for ${stage}`
+        );
     }
   }
 
@@ -213,6 +217,8 @@ class Tutorial extends React.Component {
             navigationProps={navigationProps}
           />
         );
+      default:
+      // Default case defined below (outside the switch statement)
     }
 
     const { node: targetNode, expand } = this.context.getTutorialNode(stage);
@@ -244,7 +250,6 @@ class Tutorial extends React.Component {
                   <path
                     fill="rgba(0, 0, 0, .2)"
                     fill-rule="evenodd"
-                    // prettier-ignore
                     d={generatePath(targetRect, windowRect)}
                     style={{ pointerEvents: 'fill' }}
                   />
