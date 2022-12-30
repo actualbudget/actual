@@ -101,7 +101,7 @@ function ManagePayeesWithData({
       stage: null,
       conditions: [
         {
-          field: 'description',
+          field: 'payee',
           op: 'is',
           value: payee.id,
           type: 'id'
