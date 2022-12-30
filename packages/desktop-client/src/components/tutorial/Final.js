@@ -11,7 +11,7 @@ function Final({ targetRect, navigationProps }) {
       <P>
         With that workflow you can have peace of mind that what you are looking
         at reflects reality.{' '}
-        <span role="img" aria-label="Relieved smile">
+        <span role="img" aria-label="Relieved smile" aria-hidden="true">
           &#128524;
         </span>{' '}
         The amount of money in a category is cash that you can safely spend
