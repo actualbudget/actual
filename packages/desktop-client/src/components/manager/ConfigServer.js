@@ -12,30 +12,24 @@ import {
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
+import { useServerURL } from '../../hooks/useServerURL';
 import { Title, Input } from './subscribe/common';
 
 export default function ConfigServer() {
   let dispatch = useDispatch();
   let history = useHistory();
   let [url, setUrl] = useState('');
+  let currentUrl = useServerURL();
+  useEffect(() => {
+    setUrl(currentUrl);
+  }, [currentUrl]);
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState(null);
-
-  let [currentUrl, setCurrentUrl] = useState(null);
-
-  useEffect(() => {
-    async function run() {
-      let url = await send('get-server-url');
-      setUrl(url && url.indexOf('not-configured') ? '' : url);
-      setCurrentUrl(url);
-    }
-    run();
-  }, []);
 
   function getErrorMessage(error) {
     switch (error) {
       case 'network-failure':
-        return 'Server is not running at this URL';
+        return 'Server is not running at this URL. Make sure you have HTTPS set up properly.';
       default:
         return 'Server does not look like an Actual server. Is it set up correctly?';
     }
@@ -49,11 +43,26 @@ export default function ConfigServer() {
     setError(null);
     setLoading(true);
     let { error } = await send('set-server-url', { url });
-    setLoading(false);
 
-    if (error) {
+    if (
+      error === 'network-failure' &&
+      !url.startsWith('http://') &&
+      !url.startsWith('https://')
+    ) {
+      let { error } = await send('set-server-url', { url: 'https://' + url });
+      if (error) {
+        setUrl('https://' + url);
+        setError(error);
+      } else {
+        await dispatch(signOut());
+        history.push('/');
+      }
+      setLoading(false);
+    } else if (error) {
+      setLoading(false);
       setError(error);
     } else {
+      setLoading(false);
       await dispatch(signOut());
       history.push('/');
     }
@@ -129,7 +138,6 @@ export default function ConfigServer() {
             <Button
               bare
               type="button"
-              loading={loading}
               style={{ fontSize: 15, marginLeft: 10 }}
               onClick={() => history.goBack()}
             >
@@ -138,26 +146,32 @@ export default function ConfigServer() {
           )}
         </form>
 
-        {currentUrl == null && (
-          <View
-            style={{
-              marginTop: 15,
-              flexDirection: 'row',
-              justifyContent: 'center'
-            }}
-          >
-            <Button
-              bare
-              style={{ color: colors.n4, marginRight: 15 }}
-              onClick={onSameDomain}
-            >
-              Use this domain
-            </Button>
+        <View
+          style={{
+            marginTop: 15,
+            flexDirection: 'row',
+            justifyContent: 'center'
+          }}
+        >
+          {currentUrl ? (
             <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
-              Don't use a server
+              Stop using a server
             </Button>
-          </View>
-        )}
+          ) : (
+            <>
+              <Button
+                bare
+                style={{ color: colors.n4, marginRight: 15 }}
+                onClick={onSameDomain}
+              >
+                Use {window.location.origin.replace(/https?:\/\//, '')}
+              </Button>
+              <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
+                Don't use a server
+              </Button>
+            </>
+          )}
+        </View>
       </View>
     </>
   );
