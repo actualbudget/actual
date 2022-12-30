@@ -68,7 +68,7 @@ export function AccountList({
 
 export default function AccountAutocomplete({
   embedded,
-  includeClosedAccounts = false,
+  includeClosedAccounts = true,
   ...props
 }) {
   let accounts = useCachedAccounts() || [];
