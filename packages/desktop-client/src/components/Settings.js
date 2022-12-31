@@ -20,6 +20,7 @@ import {
 import { styles, colors } from 'loot-design/src/style';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 
+import { useServerURL } from '../hooks/useServerURL';
 import useServerVersion from '../hooks/useServerVersion';
 import { Page } from './Page';
 
@@ -211,6 +212,8 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
 }
 
 function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
+  const serverUrl = useServerURL();
+
   function onDateFormat(e) {
     let format = e.target.value;
     savePrefs({ dateFormat: format });
@@ -281,7 +284,7 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
             your password you can re-encrypt it.
           </Text>
         </ButtonSetting>
-      ) : (
+      ) : serverUrl ? (
         <ButtonSetting
           button={
             <Button onClick={() => pushModal('create-encryption-key')}>
@@ -295,6 +298,14 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
             end-to-end encrypted which means the server owners have the ability
             to read it. If you want, you can use an additional password to
             encrypt your data on the server.
+          </Text>
+        </ButtonSetting>
+      ) : (
+        <ButtonSetting button={<Button disabled>Enable encryption…</Button>}>
+          <Text>
+            <strong>End-to-end encryption</strong> is not available when running
+            without a server. Budget files are always kept unencrypted locally,
+            and encryption is only applied when sending data to the server.
           </Text>
         </ButtonSetting>
       )}
