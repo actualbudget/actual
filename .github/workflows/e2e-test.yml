@@ -10,7 +10,15 @@ jobs:
     name: Wait for deployment on Netlify
     runs-on: ubuntu-latest
     steps:
+      - name: Wait for Pages changed to neutral
+        uses: fountainhead/action-wait-for-check@v1.0.0
+        id: wait-for-Netlify
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          checkName: 'Pages changed - actualbudget'
       - name: Waiting for Netlify Preview
+        if: steps.wait-for-Netlify.outputs.conclusion == 'neutral'
         uses: jakepartusch/wait-for-netlify-action@v1.4
         id: waitFor200
         with:
