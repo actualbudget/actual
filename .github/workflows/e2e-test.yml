@@ -1,13 +1,27 @@
 name: E2E Tests
 
-on:
-  deployment_status:
+on: [pull_request]
+
+env:
+  GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
 
 jobs:
-  test:
-    timeout-minutes: 60
+  tests_e2e_netlify_prepare:
+    name: Wait for deployment on Netlify
     runs-on: ubuntu-latest
-    if: github.event.deployment_status.state == 'success'
+    steps:
+      - name: Waiting for Netlify Preview
+        uses: jakepartusch/wait-for-netlify-action@v1.4
+        id: waitFor200
+        with:
+          site_name: 'actual-budget'
+          max_timeout: 180
+
+  test:
+    needs: tests_e2e_netlify_prepare
+    name: Run end-to-end tests on Netlify PR preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -20,7 +34,7 @@ jobs:
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
-          E2E_START_URL: ${{ github.event.deployment_status.target_url }}
+          E2E_START_URL: https://deploy-preview-${{env.GITHUB_PR_NUMBER}}--actualbudget.netlify.app
       - uses: actions/upload-artifact@v3
         if: always()
         with:
