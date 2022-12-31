@@ -426,6 +426,7 @@ export function IncomeCategoryMonth({
         name="received"
         width="flex"
         borderColor={colors.border}
+        textAlign="right"
         style={[
           { paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' },
           isLast && { borderBottomWidth: 0 }
