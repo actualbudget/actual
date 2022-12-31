@@ -96,7 +96,7 @@ describe('Budgets', () => {
   });
 });
 
-describe.skip('Accounts', () => {
+describe('Accounts', () => {
   test('create accounts with correct starting balance', async () => {
     prefs.loadPrefs();
     prefs.savePrefs({ clientId: 'client', groupId: 'group' });
@@ -202,7 +202,7 @@ describe.skip('Accounts', () => {
   });
 });
 
-describe.skip('Budget', () => {
+describe('Budget', () => {
   test('new budgets should be created', async () => {
     const spreadsheet = await sheet.loadSpreadsheet(db);
 
@@ -330,7 +330,7 @@ describe.skip('Budget', () => {
 });
 
 describe('Categories', () => {
-  test.skip('can be deleted', async () => {
+  test('can be deleted', async () => {
     let spreadsheet = await sheet.loadSpreadsheet(db);
 
     await runMutator(async () => {
