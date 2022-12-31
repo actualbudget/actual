@@ -6,10 +6,16 @@ env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
 
 jobs:
-  tests_e2e_netlify_prepare:
-    name: Wait for deployment on Netlify
+  test:
+    needs: tests_e2e_netlify_prepare
+    name: Run end-to-end tests on Netlify PR preview
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      - name: Setup Playwright
+        run: npx playwright install --with-deps
+      - name: Set up environment
+        uses: ./.github/actions/setup
       - name: Wait for Pages changed to neutral
         uses: fountainhead/action-wait-for-check@v1.0.0
         id: wait-for-Netlify
@@ -24,18 +30,6 @@ jobs:
         with:
           site_name: 'actualbudget'
           max_timeout: 240
-
-  test:
-    needs: tests_e2e_netlify_prepare
-    name: Run end-to-end tests on Netlify PR preview
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Playwright
-        run: npx playwright install --with-deps
-      - name: Set up environment
-        uses: ./.github/actions/setup
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
