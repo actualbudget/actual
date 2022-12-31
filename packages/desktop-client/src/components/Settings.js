@@ -206,7 +206,7 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
               Change location
             </Button>
           </View>
-          )}
+
           {documentDirChanged && (
             <Information style={{ marginTop: 10 }}>
               A restart is required for this change to take effect
@@ -218,7 +218,7 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
   );
 }
 
-function FileSettings({ closeBudget, savePrefs, prefs, pushModal, resetSync }) {
+function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
   function onDateFormat(e) {
     let format = e.target.value;
     savePrefs({ dateFormat: format });
@@ -243,19 +243,6 @@ function FileSettings({ closeBudget, savePrefs, prefs, pushModal, resetSync }) {
 
   return (
     <>
-      {/* The only spot to close a budget on mobile */}
-      {isMobile() && (
-        <View style={{ alignItems: 'center', marginBottom: 30 }}>
-          <Text
-            style={[mobileStyles.text, { fontWeight: '600', fontSize: 17 }]}
-          >
-            {prefs.budgetName}
-          </Text>
-          <Button onClick={closeBudget} style={{ marginTop: 10 }}>
-            Close Budget
-          </Button>
-        </View>
-      )}
       <Section title="Formatting">
         <Text>
           <label for="settings-numberFormat">Number format: </label>
@@ -354,7 +341,7 @@ function About() {
   const version = useServerVersion();
 
   return (
-    <Section title="About">
+    <Section title="About" style={{ gap: 5 }}>
       <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
       <Text>Server version: {version}</Text>
     </Section>
@@ -380,6 +367,20 @@ class Settings extends React.Component {
 
     return (
       <Page title="Settings">
+        {/* The only spot to close a budget on mobile */}
+        {isMobile() && (
+          <View style={{ alignItems: 'center', marginBottom: 30 }}>
+            <Text
+              style={[mobileStyles.text, { fontWeight: '600', fontSize: 17 }]}
+            >
+              {prefs.budgetName}
+            </Text>
+            <Button onClick={this.props.closeBudget} style={{ marginTop: 10 }}>
+              Close Budget
+            </Button>
+          </View>
+        )}
+
         <View style={{ flexShrink: 0, gap: 30, maxWidth: 600 }}>
           <About />
 
@@ -389,7 +390,6 @@ class Settings extends React.Component {
           />
 
           <FileSettings
-            closeBudget={this.props.closeBudget}
             prefs={prefs}
             userData={userData}
             pushModal={this.props.pushModal}
