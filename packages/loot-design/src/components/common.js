@@ -939,10 +939,6 @@ export function ModalButtons({
         style
       ]}
     >
-      {/* Add a dummy button first so that when a user
-          presses "enter" they do a normal submit, instead of
-          activating the back button */}
-      <Button data-hidden={true} style={{ display: 'none' }} />
       {leftContent}
       <View style={{ flex: 1 }} />
       {children}

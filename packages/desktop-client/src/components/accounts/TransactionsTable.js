@@ -336,7 +336,7 @@ function StatusCell({
         ? colors.y5
         : selected
         ? colors.b7
-        : colors.n6
+        : colors.n7
   };
 
   function onSelect() {
@@ -362,7 +362,8 @@ function StatusCell({
             ':focus': {
               border: '1px solid ' + props.color,
               boxShadow: `0 1px 2px ${props.color}`
-            }
+            },
+            cursor: isClearedField ? 'pointer' : 'default'
           },
 
           isChild && { visibility: 'hidden' }

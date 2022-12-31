@@ -161,7 +161,7 @@ describe('Spreadsheet', () => {
     expect(spreadsheet.getValue('foo!x')).toBe(1);
   });
 
-  test.skip('async cells work2', done => {
+  test('async cells work2', done => {
     const spreadsheet = new Spreadsheet();
 
     spreadsheet.transaction(() => {

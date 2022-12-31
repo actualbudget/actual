@@ -444,8 +444,8 @@ exports[`Account sync import never matches existing with financial ids 3`] = `
       \\"account\\": \\"one\\",
 -     \\"amount\\": -1462,
 +     \\"amount\\": -2947,
-      \\"category\\": null,
-      \\"cleared\\": 1,
++     \\"category\\": null,
++     \\"cleared\\": 1,
 +     \\"date\\": 20171017,
 +     \\"error\\": null,
 +     \\"id\\": \\"two\\",
@@ -488,8 +488,8 @@ exports[`Account sync import never matches existing with financial ids 3`] = `
 +   Object {
 +     \\"account\\": \\"one\\",
 +     \\"amount\\": 8105,
-+     \\"category\\": null,
-+     \\"cleared\\": 1,
+      \\"category\\": null,
+      \\"cleared\\": 1,
       \\"date\\": 20171015,
       \\"error\\": null,
 -     \\"id\\": \\"id20\\",
@@ -920,12 +920,15 @@ exports[`Account sync import updates transfers when matched 2`] = `
       \\"category\\": null,
       \\"cleared\\": 1,
       \\"date\\": 20171015,
-@@ -65,10 +87,32 @@
+@@ -62,10 +84,32 @@
+      \\"schedule\\": null,
+      \\"sort_order\\": 123456789,
+      \\"starting_balance_flag\\": 0,
       \\"tombstone\\": 0,
       \\"transfer_id\\": null,
-    },
-    Object {
-      \\"account\\": \\"one\\",
++   },
++   Object {
++     \\"account\\": \\"one\\",
 +     \\"amount\\": -2948,
 +     \\"category\\": null,
 +     \\"cleared\\": 0,
@@ -945,14 +948,11 @@ exports[`Account sync import updates transfers when matched 2`] = `
 +     \\"starting_balance_flag\\": 0,
 +     \\"tombstone\\": 0,
 +     \\"transfer_id\\": \\"one\\",
-+   },
-+   Object {
-+     \\"account\\": \\"one\\",
+    },
+    Object {
+      \\"account\\": \\"one\\",
       \\"amount\\": -4207,
-      \\"category\\": null,
-      \\"cleared\\": 1,
-      \\"date\\": 20171015,
-      \\"error\\": null,"
+      \\"category\\": null,"
 `;
 
 exports[`Account sync import updates transfers when matched 3`] = `
