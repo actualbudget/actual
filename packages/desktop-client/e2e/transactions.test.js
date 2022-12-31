@@ -84,6 +84,7 @@ test.describe('Transactions', () => {
     await page.keyboard.press('Tab');
 
     await page.keyboard.type('Krogger');
+    await page.keyboard.press('Enter');
     await page.keyboard.press('Tab');
 
     await page.keyboard.type('Notes');
@@ -91,6 +92,7 @@ test.describe('Transactions', () => {
 
     await page.getByTestId('split-transaction-button').click();
     await page.keyboard.type('General');
+    await page.keyboard.press('Enter');
     await page.keyboard.press('Tab');
 
     await page
