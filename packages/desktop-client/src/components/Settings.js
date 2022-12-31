@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
-import { Route, Switch, Redirect } from 'react-router-dom';
 
 import { css } from 'glamor';
 
@@ -13,19 +12,19 @@ import {
   View,
   Text,
   Button,
-  ButtonWithLoading,
-  AnchorLink
+  Link,
+  ButtonWithLoading
 } from 'loot-design/src/components/common';
 import {
   mobileStyles,
   styles as desktopStyles,
   colors
 } from 'loot-design/src/style';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import useServerVersion from '../hooks/useServerVersion';
 import { isMobile } from '../util';
+import { Page } from './Page';
 
 let dateFormats = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
@@ -35,23 +34,50 @@ let dateFormats = [
   { value: 'dd.MM.yyyy', label: 'DD.MM.YYYY' }
 ];
 
-function Title({ name, style }) {
+function Section({ title, children, style, titleProps, ...props }) {
   return (
-    <View
-      style={[
-        { fontSize: 20, fontWeight: 500, marginBottom: 20, flexShrink: 0 },
-        style
-      ]}
-    >
-      {name}
+    <View style={[{ gap: 20, alignItems: 'flex-start' }, style]} {...props}>
+      <View
+        style={[
+          { fontSize: 20, fontWeight: 500, flexShrink: 0 },
+          titleProps && titleProps.style
+        ]}
+        {...titleProps}
+      >
+        {title}
+      </View>
+      {children}
     </View>
   );
 }
 
-function Advanced({ prefs, userData, pushModal, resetSync }) {
-  let [expanded, setExpanded] = useState(true);
+function ButtonSetting({ button, children, onClick }) {
+  return (
+    <View
+      style={{
+        backgroundColor: colors.n9,
+        alignSelf: 'flex-start',
+        alignItems: 'flex-start',
+        padding: 15,
+        borderRadius: 4,
+        border: '1px solid ' + colors.n8,
+        ...(isMobile() && { width: '100%' })
+      }}
+    >
+      <View
+        style={{ marginBottom: 10, maxWidth: 500, lineHeight: 1.5, gap: 10 }}
+      >
+        {children}
+      </View>
+      {button}
+    </View>
+  );
+}
+
+function Advanced({ prefs, resetSync }) {
   let [resetting, setResetting] = useState(false);
   let [resettingCache, setResettingCache] = useState(false);
+  let [expanded, setExpanded] = useState(false);
   let styles = true ? mobileStyles : desktopStyles;
 
   async function onResetSync() {
@@ -66,103 +92,61 @@ function Advanced({ prefs, userData, pushModal, resetSync }) {
     setResettingCache(false);
   }
 
-  return (
-    <View style={{ alignItems: 'flex-start', marginTop: 55 }}>
-      <View
-        style={[
-          {
-            fontSize: 15,
-            marginBottom: 20,
-            flexDirection: 'row',
-            alignItems: 'center'
-          },
-          styles.staticText
-        ]}
-        onClick={() => setExpanded(!expanded)}
+  return expanded ? (
+    <Section
+      title="Advanced Settings"
+      style={{ marginBottom: 25, ...(isMobile() && { width: '100%' }) }}
+    >
+      <Text>Budget ID: {prefs.id}</Text>
+      <Text style={{ color: colors.n6 }}>
+        Sync ID: {prefs.groupId || '(none)'}
+      </Text>
+
+      <ButtonSetting
+        button={
+          <ButtonWithLoading loading={resettingCache} onClick={onResetCache}>
+            Reset budget cache
+          </ButtonWithLoading>
+        }
       >
-        <ExpandArrow
-          width={8}
-          height={8}
-          style={{
-            marginRight: 5,
-            transition: 'transform .2s',
-            transform: !expanded && 'rotateZ(-90deg)'
-          }}
-        />
-        Advanced
-      </View>
+        <Text>
+          <strong>Reset budget cache</strong> will clear all cached values for
+          the budget and recalculate the entire budget. All values in the budget
+          are cached for performance reasons, and if there is a bug in the cache
+          you won't see correct values. There is no danger in resetting the
+          cache. Hopefully you never have to do this.
+        </Text>
+      </ButtonSetting>
 
-      {expanded && (
-        <View
-          style={{
-            marginBottom: 20,
-            alignItems: 'flex-start',
-            ...(isMobile() && { width: '100%' })
-          }}
-        >
-          <Text>
-            <strong>Budget ID</strong>: {prefs.id}
-          </Text>
-
-          <View
-            style={{
-              backgroundColor: colors.n9,
-              alignItems: 'flex-start',
-              padding: 15,
-              borderRadius: 4,
-              marginTop: 20,
-              border: '1px solid ' + colors.n8,
-              ...(isMobile() && { width: '100%' })
-            }}
-          >
-            <Text style={{ marginBottom: 10, maxWidth: 500, lineHeight: 1.5 }}>
-              <strong>Reset budget cache</strong> will clear all cached values
-              for the budget and recalculate the entire budget. All values in
-              the budget are cached for performance reasons, and if there is a
-              bug in the cache you won't see correct values. There is no danger
-              in resetting the cache. Hopefully you never have to do this.
-            </Text>
-            <ButtonWithLoading loading={resettingCache} onClick={onResetCache}>
-              Reset budget cache
-            </ButtonWithLoading>
-          </View>
-
-          <View
-            style={{
-              backgroundColor: colors.n9,
-              alignItems: 'flex-start',
-              padding: 15,
-              borderRadius: 4,
-              marginTop: 20,
-              border: '1px solid ' + colors.n8
-            }}
-          >
-            <Text style={{ marginBottom: 10, maxWidth: 500, lineHeight: 1.5 }}>
-              <strong>Reset sync</strong> will remove all local data used to
-              track changes for syncing, and create a fresh sync id on our
-              server. This file on other devices will have to be re-downloaded
-              to use the new sync id. Use this if there is a problem with
-              syncing and you want to start fresh.
-            </Text>
-
-            <ButtonWithLoading loading={resetting} onClick={onResetSync}>
-              Reset sync
-            </ButtonWithLoading>
-            <Text style={{ marginTop: 15, color: colors.n4, fontSize: 12 }}>
-              Sync ID: {prefs.groupId || '(none)'}
-            </Text>
-          </View>
-        </View>
-      )}
-    </View>
+      <ButtonSetting
+        button={
+          <ButtonWithLoading loading={resetting} onClick={onResetSync}>
+            Reset sync
+          </ButtonWithLoading>
+        }
+      >
+        <Text>
+          <strong>Reset sync</strong> will remove all local data used to track
+          changes for syncing, and create a fresh sync ID on our server. This
+          file on other devices will have to be re-downloaded to use the new
+          sync ID. Use this if there is a problem with syncing and you want to
+          start fresh.
+        </Text>
+      </ButtonSetting>
+    </Section>
+  ) : (
+    <Link
+      onClick={() => setExpanded(true)}
+      style={{ flexShrink: 0, alignSelf: 'flex-start', color: colors.p4 }}
+    >
+      Show advanced settings
+    </Link>
   );
 }
 
-function GlobalSettings({ globalPrefs, userData, saveGlobalPrefs, pushModal }) {
+function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
   let [documentDirChanged, setDirChanged] = useState(false);
   let dirScrolled = useRef(null);
-
-  // useSetMobileThemeColor(colors.n10, { skip: !isMobile() });
 
   useEffect(() => {
     if (dirScrolled.current) {
@@ -180,24 +164,13 @@ function GlobalSettings({ globalPrefs, userData, saveGlobalPrefs, pushModal }) {
     }
   }
 
-  function onAutoUpdate(e) {
-    saveGlobalPrefs({ autoUpdate: e.target.checked });
-  }
-
-  function onTrackUsage(e) {
-    saveGlobalPrefs({ trackUsage: e.target.checked });
-  }
-
   return (
-    <View>
-      <View>
-        <Title name="General" />
-
-        {!Platform.isBrowser && (
+    <>
+      {!Platform.isBrowser && (
+        <Section title="General">
           <View
             style={{
               flexDirection: 'row',
-              maxWidth: 550,
               alignItems: 'center',
               overflow: 'hidden'
             }}
@@ -233,113 +206,19 @@ function GlobalSettings({ globalPrefs, userData, saveGlobalPrefs, pushModal }) {
               Change location
             </Button>
           </View>
-        )}
-
-        {documentDirChanged && (
-          <Information style={{ marginTop: 10 }}>
-            A restart is required for this change to take effect
-          </Information>
-        )}
-
-        <View
-          style={{
-            flexDirection: 'row',
-            marginTop: 30,
-            alignItems: 'flex-start'
-          }}
-        >
-          <input
-            id="autoUpdate"
-            type="checkbox"
-            checked={globalPrefs.autoUpdate}
-            style={{
-              marginRight: 5,
-              ...(isMobile() && { height: 20, marginTop: 0, width: 32 })
-            }}
-            onChange={onAutoUpdate}
-          />
-
-          <View>
-            <label htmlFor="autoUpdate">
-              <Text style={{ fontSize: 15 }}>
-                Automatically check for updates
-              </Text>
-            </label>
-            <View
-              style={{
-                color: colors.n2,
-                marginTop: 10,
-                maxWidth: 600,
-                lineHeight: '1.4em'
-              }}
-            >
-              By default, Actual will automatically apply new updates as they
-              are available. Disabling this will avoid updating Actual. You will
-              need to go to the About menu to manually check for updates.
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <View style={{ marginTop: 30 }}>
-        <Title name="Privacy" />
-
-        <View
-          style={{
-            flexDirection: 'row',
-            marginTop: 30,
-            alignItems: 'flex-start'
-          }}
-        >
-          <input
-            id="trackUsage"
-            type="checkbox"
-            checked={globalPrefs.trackUsage}
-            style={{
-              marginRight: 5,
-              ...(isMobile() && { height: 20, marginTop: 0, width: 32 })
-            }}
-            onChange={onTrackUsage}
-          />
-
-          <View>
-            <label htmlFor="trackUsage">
-              <Text style={{ fontSize: 15 }}>
-                Send basic usage statistics back to Actual{"'"}s servers
-              </Text>
-            </label>
-            <View
-              style={{
-                color: colors.n2,
-                marginTop: 10,
-                maxWidth: 600,
-                lineHeight: '1.4em'
-              }}
-            >
-              We don{"'"}t track anything specific &mdash; only the fact that
-              you{"'"}ve opened Actual. This helps by giving us important
-              feedback about how popular new features are.
-            </View>
-          </View>
-        </View>
-      </View>
-    </View>
+          )}
+          {documentDirChanged && (
+            <Information style={{ marginTop: 10 }}>
+              A restart is required for this change to take effect
+            </Information>
+          )}
+        </Section>
+      )}
+    </>
   );
 }
 
-function FileSettings({
-  closeBudget,
-  savePrefs,
-  prefs,
-  userData,
-  localServerURL,
-  pushModal,
-  resetSync,
-  setAppState,
-  signOut
-}) {
-  // useSetMobileThemeColor(colors.n10, { skip: !isMobile() });
-
+function FileSettings({ closeBudget, savePrefs, prefs, pushModal, resetSync }) {
   function onDateFormat(e) {
     let format = e.target.value;
     savePrefs({ dateFormat: format });
@@ -363,29 +242,41 @@ function FileSettings({
   let numberFormat = prefs.numberFormat || 'comma-dot';
 
   return (
-    <View>
-      <View style={{ marginTop: isMobile() ? 'auto' : 30 }}>
-        {isMobile() && (
-          <View style={{ alignItems: 'center', marginBottom: 30 }}>
-            <Text
-              style={[mobileStyles.text, { fontWeight: '600', fontSize: 17 }]}
-            >
-              {prefs.budgetName}
-            </Text>
-            <Button
-              onClick={async () => await closeBudget()}
-              style={{ marginTop: 10 }}
-            >
-              Close Budget
-            </Button>
-          </View>
-        )}
-
-        <Title name="Formatting" />
+    <>
+      {/* The only spot to close a budget on mobile */}
+      {isMobile() && (
+        <View style={{ alignItems: 'center', marginBottom: 30 }}>
+          <Text
+            style={[mobileStyles.text, { fontWeight: '600', fontSize: 17 }]}
+          >
+            {prefs.budgetName}
+          </Text>
+          <Button onClick={closeBudget} style={{ marginTop: 10 }}>
+            Close Budget
+          </Button>
+        </View>
+      )}
+      <Section title="Formatting">
+        <Text>
+          <label for="settings-numberFormat">Number format: </label>
+          <select
+            id="settings-numberFormat"
+            {...css({ marginLeft: 5, fontSize: 14 })}
+            defaultValue={numberFormat}
+            onChange={onNumberFormat}
+          >
+            {numberFormats.map(f => (
+              <option value={f.value} key={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </Text>
 
         <Text>
-          Date format:{' '}
+          <label for="settings-dateFormat">Date format: </label>
           <select
+            id="settings-dateFormat"
             {...css({ marginLeft: 5, fontSize: 14 })}
             defaultValue={dateFormat}
             onChange={onDateFormat}
@@ -397,139 +288,76 @@ function FileSettings({
             ))}
           </select>
         </Text>
+      </Section>
 
-        <Text style={{ marginTop: 20 }}>
-          Number format:{' '}
-          <select
-            {...css({ marginLeft: 5, fontSize: 14 })}
-            defaultValue={numberFormat}
-            onChange={onNumberFormat}
-          >
-            {numberFormats.map(f => (
-              <option key={f.value} value={f.value}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-        </Text>
-      </View>
-
-      <View style={{ marginTop: 30 }}>
-        <Title name="Encryption" />
-        <View style={{ flexDirection: 'row' }}>
-          <View>
-            <Text style={{ fontWeight: 700, fontSize: 15 }}>
-              End-to-end encryption
-            </Text>
-            <View
-              style={{
-                color: colors.n2,
-                marginTop: 10,
-                maxWidth: 600,
-                lineHeight: '1.4em'
+      {prefs.encryptKeyId ? (
+        <ButtonSetting
+          button={
+            <Button onClick={() => onChangeKey()}>Generate new key</Button>
+          }
+        >
+          <Text>
+            <Text style={{ color: colors.g4, fontWeight: 600 }}>
+              End-to-end Encryption is turned on.
+            </Text>{' '}
+            Your data is encrypted with a key that only you have before sending
+            it out to the cloud . Local data remains unencrypted so if you
+            forget your password you can re-encrypt it.
+          </Text>
+        </ButtonSetting>
+      ) : (
+        <ButtonSetting
+          button={
+            <Button
+              onClick={() => {
+                alert(
+                  'End-to-end encryption is not supported on the self-hosted service yet'
+                );
+                // pushModal('create-encryption-key');
               }}
             >
-              {prefs.encryptKeyId ? (
-                <Text>
-                  <Text style={{ color: colors.g4, fontWeight: 600 }}>
-                    Encryption is turned on.
-                  </Text>{' '}
-                  Your data is encrypted with a key that only you have before
-                  sending it out to the cloud . Local data remains unencrypted
-                  so if you forget your password you can re-encrypt it.
-                  <Button
-                    style={{ marginTop: 10 }}
-                    onClick={() => onChangeKey()}
-                  >
-                    Generate new key
-                  </Button>
-                </Text>
-              ) : (
-                <View style={{ alignItems: 'flex-start' }}>
-                  <Text style={{ lineHeight: '1.4em' }}>
-                    Encryption is not enabled. Any data on our servers is still
-                    stored safely and securely, but it's not end-to-end
-                    encrypted which means we have the ability to read it (but we
-                    won't). If you want, you can use a password to encrypt your
-                    data on our servers.
-                  </Text>
-                  <Button
-                    style={{ marginTop: 10 }}
-                    onClick={() => {
-                      alert(
-                        'End-to-end encryption is not supported on the self-hosted service yet'
-                      );
-                      // pushModal('create-encryption-key');
-                    }}
-                  >
-                    Enable encryption
-                  </Button>
-                </View>
-              )}
-            </View>
-          </View>
-        </View>
-      </View>
+              Enable encryption…
+            </Button>
+          }
+        >
+          <Text>
+            <strong>End-to-end encryption</strong> is not enabled. Any data on
+            our servers is still stored safely and securely, but it's not
+            end-to-end encrypted which means we have the ability to read it (but
+            we won't). If you want, you can use a password to encrypt your data
+            on our servers.
+          </Text>
+        </ButtonSetting>
+      )}
 
-      <View style={{ marginTop: 30, alignItems: 'flex-start' }}>
-        <Title name="Export" />
-        <Button onClick={onExport}>Export data</Button>
-      </View>
+      <ButtonSetting button={<Button onClick={onExport}>Export data</Button>}>
+        <Text>
+          <strong>Export</strong> your data as a zip file containing{' '}
+          <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
+          imported into another Actual instance by clicking the “Import file”
+          button and then choosing “Actual” on the Files page.
+        </Text>
+        {prefs.encryptKeyId ? (
+          <Text>
+            Even though encryption is enabled, the exported zip file will not
+            have any encryption.
+          </Text>
+        ) : null}
+      </ButtonSetting>
 
-      <Advanced
-        prefs={prefs}
-        userData={userData}
-        pushModal={pushModal}
-        resetSync={resetSync}
-      />
-    </View>
+      <Advanced prefs={prefs} resetSync={resetSync} />
+    </>
   );
 }
 
-function SettingsLink({ to, name, style, first, last }) {
-  return (
-    <AnchorLink
-      to={to}
-      style={[
-        {
-          fontSize: 14,
-          padding: '6px 10px',
-          borderBottom: '2px solid transparent',
-          textDecoration: 'none',
-          borderRadius: first ? '4px 0 0 4px' : last ? '0 4px 4px 0' : 4,
-          border: '1px solid ' + colors.n4,
-          color: colors.n3
-        },
-        style
-      ]}
-      activeStyle={{
-        backgroundColor: colors.p6,
-        borderColor: colors.p6,
-        color: 'white'
-      }}
-    >
-      {name}
-    </AnchorLink>
-  );
-}
-
-export function Version() {
+function About() {
   const version = useServerVersion();
-  let styles = isMobile() ? mobileStyles : desktopStyles;
 
   return (
-    <Text
-      style={[
-        {
-          alignSelf: 'center',
-          color: 'inherit',
-          padding: '6px 10px'
-        },
-        styles.smallText
-      ]}
-    >
-      {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
-    </Text>
+    <Section title="About">
+      <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
+      <Text>Server version: {version}</Text>
+    </Section>
   );
 }
 
@@ -548,75 +376,27 @@ class Settings extends React.Component {
   }
 
   render() {
-    let { prefs, globalPrefs, localServerURL, userData, match } = this.props;
-    let styles = isMobile() ? mobileStyles : desktopStyles;
+    let { prefs, globalPrefs, userData } = this.props;
 
     return (
-      <View style={[styles.page, { overflow: 'hidden', fontSize: 14 }]}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignSelf: 'center',
-            margin: '15px 0 5px 0'
-          }}
-        >
-          <SettingsLink to={`${match.path}/file`} name="File" first={true} />
-          <SettingsLink to={`${match.path}/global`} name="Global" last={true} />
-        </View>
-        <View
-          style={{
-            alignSelf: 'center',
-            color: colors.n2,
-            flexDirection: 'row',
-            margin: '0 0 10px 0'
-          }}
-        >
-          <Version />
-        </View>
+      <Page title="Settings">
+        <View style={{ flexShrink: 0, gap: 30, maxWidth: 600 }}>
+          <About />
 
-        <View
-          style={[
-            styles.pageContent,
-            {
-              alignItems: 'flex-start',
-              flex: 1,
-              overflow: 'auto',
-              paddingBottom: 20,
-              ...(isMobile() && { padding: 20 })
-            },
-            { ...(isMobile() && styles.settingsPageContent) }
-          ]}
-        >
-          <View style={{ flexShrink: 0, width: '100%' }}>
-            <Switch>
-              <Route path={`${match.path}/`} exact>
-                <Redirect to={`${match.path}/file`} />
-              </Route>
-              <Route path={`${match.path}/global`}>
-                <GlobalSettings
-                  globalPrefs={globalPrefs}
-                  userData={userData}
-                  saveGlobalPrefs={this.props.saveGlobalPrefs}
-                  pushModal={this.props.pushModal}
-                />
-              </Route>
-              <Route path={`${match.path}/file`}>
-                <FileSettings
-                  prefs={prefs}
-                  closeBudget={this.props.closeBudget}
-                  localServerURL={localServerURL}
-                  userData={userData}
-                  pushModal={this.props.pushModal}
-                  savePrefs={this.props.savePrefs}
-                  setAppState={this.props.setAppState}
-                  signOut={this.props.signOut}
-                  resetSync={this.props.resetSync}
-                />
-              </Route>
-            </Switch>
-          </View>
+          <GlobalSettings
+            globalPrefs={globalPrefs}
+            saveGlobalPrefs={this.props.saveGlobalPrefs}
+          />
+
+          <FileSettings
+            closeBudget={this.props.closeBudget}
+            prefs={prefs}
+            userData={userData}
+            pushModal={this.props.pushModal}
+            resetSync={this.props.resetSync}
+          />
         </View>
-      </View>
+      </Page>
     );
   }
 }

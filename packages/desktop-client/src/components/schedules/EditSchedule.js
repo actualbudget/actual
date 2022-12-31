@@ -442,6 +442,7 @@ export default function ScheduleDetails() {
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Account" />
           <AccountAutocomplete
+            includeClosedAccounts={false}
             value={state.fields.account}
             inputProps={{ placeholder: '(none)' }}
             onSelect={id =>

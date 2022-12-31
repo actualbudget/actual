@@ -55,7 +55,6 @@ function Login({ navigation, createBudget }) {
             navigation={navigation}
             buttons={['back', 'demo']}
             loadDemoBudget={() => {
-              send('track', { name: 'app:create-demo' });
               createBudget({ demoMode: true });
             }}
           />
@@ -90,7 +89,4 @@ function Login({ navigation, createBudget }) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(Login);
+export default connect(null, actions)(Login);

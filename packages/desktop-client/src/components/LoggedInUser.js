@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
+import { useHistory, withRouter } from 'react-router';
 
 import * as actions from 'loot-core/src/client/actions';
 import {
@@ -12,8 +12,9 @@ import {
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
+import { useServerURL } from '../hooks/useServerURL';
+
 function LoggedInUser({
-  history,
   files,
   budgetId,
   userData,
@@ -27,6 +28,8 @@ function LoggedInUser({
 }) {
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
+  const serverUrl = useServerURL();
+  const history = useHistory();
 
   useEffect(() => {
     getUserData().then(() => setLoading(false));
@@ -34,7 +37,7 @@ function LoggedInUser({
 
   async function onChangePassword() {
     await closeBudget();
-    window.__history.push('/change-password');
+    history.push('/change-password');
   }
 
   function onMenuSelect(type) {
@@ -52,7 +55,11 @@ function LoggedInUser({
   }
 
   function onClick() {
-    setMenuOpen(true);
+    if (serverUrl) {
+      setMenuOpen(true);
+    } else {
+      history.push('/config-server');
+    }
   }
 
   if (loading) {
@@ -69,7 +76,7 @@ function LoggedInUser({
     return (
       <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
         <Button bare onClick={onClick} style={{ color }}>
-          Server
+          {serverUrl ? 'Server' : 'No server'}
         </Button>
 
         {menuOpen && (
@@ -83,7 +90,7 @@ function LoggedInUser({
               items={[
                 { name: 'change-password', text: 'Change password' },
                 { name: 'sign-out', text: 'Sign out' }
-              ].filter(x => x)}
+              ]}
             />
           </Tooltip>
         )}

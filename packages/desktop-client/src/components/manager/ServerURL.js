@@ -1,24 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-import { send } from 'loot-core/src/platform/client/fetch';
 import { View, Text, AnchorLink } from 'loot-design/src/components/common';
-import { useSetThemeColor } from 'loot-design/src/components/hooks';
-import { colors } from 'loot-design/src/style';
 
-import { Version } from '../Settings';
+import { useServerURL } from '../../hooks/useServerURL';
 
 export default function ServerURL() {
-  let [url, setUrl] = useState(null);
-
-  useSetThemeColor(colors.p5);
-
-  useEffect(() => {
-    async function run() {
-      let url = await send('get-server-url');
-      setUrl(url);
-    }
-    run();
-  }, []);
+  const url = useServerURL();
 
   return (
     <View
@@ -27,20 +14,24 @@ export default function ServerURL() {
         bottom: 0,
         left: 0,
         right: 0,
-        flexDirection: 'column',
+        justifyContent: 'center',
+        flexDirection: 'row',
         marginBottom: 15,
         zIndex: 5000
       }}
     >
-      <Version />
-      <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-        <Text>
-          Using server: <strong>{url || '(not configured)'}</strong>
-        </Text>
-        <AnchorLink bare to="/config-server" style={{ marginLeft: 15 }}>
-          Change
-        </AnchorLink>
-      </View>
+      <Text>
+        {url ? (
+          <>
+            Using server: <strong>{url}</strong>
+          </>
+        ) : (
+          <strong>No server configured</strong>
+        )}
+      </Text>
+      <AnchorLink bare to="/config-server" style={{ marginLeft: 15 }}>
+        Change
+      </AnchorLink>
     </View>
   );
 }
