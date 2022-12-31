@@ -7,7 +7,6 @@ env:
 
 jobs:
   test:
-    needs: tests_e2e_netlify_prepare
     name: Run end-to-end tests on Netlify PR preview
     runs-on: ubuntu-latest
     steps:
