@@ -111,14 +111,13 @@ export function AnchorLink({
   );
 }
 
-export const ExternalLink = React.forwardRef((props, ref) => {
+export const ExternalLink = React.forwardRef(({ asAnchor, ...props }, ref) => {
   function onClick(e) {
     e.preventDefault();
     window.Actual.openURLInBrowser(props.href);
   }
 
-  if (props.asAnchor) {
-    // eslint-disable-next-line
+  if (asAnchor) {
     return <a ref={ref} {...props} onClick={onClick} />;
   }
   return <Button ref={ref} bare {...props} onClick={onClick} />;
@@ -874,6 +873,7 @@ export function Modal({
                     bare
                     onClick={e => onClose()}
                     style={{ padding: '10px 10px' }}
+                    aria-label="Close"
                   >
                     <Delete width={10} />
                   </Button>

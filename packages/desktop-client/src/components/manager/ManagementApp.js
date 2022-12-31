@@ -2,12 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Switch, Redirect, Router, Route } from 'react-router-dom';
 
-import { createBrowserHistory } from 'history';
-
 import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
+import history from '../../history';
 import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
@@ -45,8 +44,6 @@ class ManagementApp extends React.Component {
   constructor(props) {
     super(props);
     this.mounted = true;
-    this.history = createBrowserHistory();
-    window.__history = this.history;
   }
 
   async componentDidMount() {
@@ -140,7 +137,7 @@ class ManagementApp extends React.Component {
     let isHidden = loadingText != null;
 
     return (
-      <Router history={this.history}>
+      <Router history={history}>
         <View style={{ height: '100%', minHeight: 500 }}>
           <View
             style={{

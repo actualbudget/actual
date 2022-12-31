@@ -2,6 +2,8 @@ import * as sharedListeners from 'loot-core/src/client/shared-listeners';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import history from './history';
+
 export function handleGlobalEvents(actions, store) {
   global.Actual.onEventFromMain('update-downloaded', (event, info) => {
     actions.setAppState({ updateInfo: info });
@@ -36,13 +38,10 @@ export function handleGlobalEvents(actions, store) {
   });
 
   listen('schedules-offline', ({ payees }) => {
-    let history = window.__history;
-    if (history) {
-      history.push(`/schedule/posts-offline-notification`, {
-        locationPtr: history.location,
-        payees
-      });
-    }
+    history.push(`/schedule/posts-offline-notification`, {
+      locationPtr: history.location,
+      payees
+    });
   });
 
   async function onManage() {
