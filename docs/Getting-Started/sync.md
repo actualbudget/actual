@@ -16,19 +16,13 @@ Once you are logged in, if you have not created a file yet it will automatically
 
 If you have already created files, after logging in Actual will show you all the available files. Select one and it will download it and start syncing seamlessly. That's it.
 
-## Migrating from older versions
-
-Version 0.0.120 changed the internal syncing format, which means all clients need to reset sync. The app guides you naturally through this, but if you are reading this you want to know more about what this means.
-
-When you sync to the server, the app sends many small pieces of data representing changes in the app. These changes are what is synced around. Before version 0.0.120, these changes were represented as stringified JavaScript objects, but as of 0.0.120 onwards they are binary blobs. These two formats are incompatible, so when upgrading you need to "reset sync".
-
-Resetting sync means clearing all sync data both locally and on the server, and starting clean. Once you do this, all new changes from then on will be stored in the new format. Be aware that it's important to choose the right copy of your data when resetting sync. See [What does "resetting sync" mean?](#what-does-resetting-sync-mean)
-
 ## End-to-end encryption
+
+In addition to the requirement to enter your password before the Actual server will allow you to access your budget, you can optionally enable end-to-end encryption. This will mean that you’ll have to enter a second password to access the budget, and that the server will no longer be able to access your budget information. On the one hand, this improves security if you’re worried that someone else will have access to the server’s file or if you don’t trust the server to check the password correctly (that said, we have done our best to make the server secure). On the other hand, you **will not be able to recover your data if you forget your encyrption password**. If you forget the encryption password and you still have a copy of your data locally, you can reset your key which will do a [sync reset](#what-does-resetting-sync-mean) and generate a new key.
 
 End-to-end encryption offers the ability for you to generate a key based on a password and encrypt it so that hosted services can't read the data. Before your data leaves your device, it is encrypted using keys only you have.
 
-This guarantees that only you will ever have access to your data. This is optional and using it requires you to enter a password whenever downloading cloud files (this only needs to be done once per device).
+This guarantees that only you will ever have access to your data. This is optional and using it requires you to enter a password whenever downloading cloud files (this only needs to be done once per device). The password you enter can be different from the main server password.
 
 Data on your local device is still unencrypted. We recommend full disk encryption if you are interested in local encryption.
 
@@ -36,9 +30,12 @@ There are some things to consider with end-to-end encryption:
 
 * **Pro:** Your data is fully secure and nobody except you can read it
 * **Pro:** If you don't want to sync across devices, this still allows you keep a fully encrypted backup of your data
-* **Con:** There is a performance hit because of encoding & decoding your data whenever syncing
+* **Pro:** If you want to share the server with someone else, you can use different passwords to encrypt separate budget files, and you won’t be able to access each other’s budgets.
 * **Con:** If you lose your local data copy and forget your password, you can never recover your data
 * **Con:** It is not possible to turn off encryption.  This is a one way process.  If you would like to move back to an unencrypted file after enabling encryption, you can use the steps in the [Backup](/docs/Backup-Restore/Backups.md) and [Restore](/docs/Backup-Restore/Restore.md) sections.
+* **Con:** There is a minor performance hit because of encoding & decoding your data whenever syncing
+
+Note: even if you don’t have the password, you can still remove an encrypted file from the server.
 
 ### Setting up end-to-end encryption
 
