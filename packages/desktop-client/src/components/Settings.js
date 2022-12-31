@@ -281,7 +281,10 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
             </Text>{' '}
             Your data is encrypted with a key that only you have before sending
             it out to the cloud. Local data remains unencrypted so if you forget
-            your password you can re-encrypt it.
+            your password you can re-encrypt it.{' '}
+            <a href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption">
+              Learn more…
+            </a>
           </Text>
         </ButtonSetting>
       ) : serverUrl ? (
@@ -297,7 +300,10 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
             the server is still protected by the server password, but it's not
             end-to-end encrypted which means the server owners have the ability
             to read it. If you want, you can use an additional password to
-            encrypt your data on the server.
+            encrypt your data on the server.{' '}
+            <a href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption">
+              Learn more…
+            </a>
           </Text>
         </ButtonSetting>
       ) : (
@@ -305,7 +311,10 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
           <Text>
             <strong>End-to-end encryption</strong> is not available when running
             without a server. Budget files are always kept unencrypted locally,
-            and encryption is only applied when sending data to the server.
+            and encryption is only applied when sending data to the server.{' '}
+            <a href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption">
+              Learn more…
+            </a>
           </Text>
         </ButtonSetting>
       )}
