@@ -221,7 +221,7 @@ export function extractScheduleConds(conditions) {
 
 export function getScheduledAmount(amount) {
   if (amount && typeof amount !== 'number') {
-    return ((amount.num1 + amount.num2) / 2) | 0;
+    return Math.round((amount.num1 + amount.num2) / 2);
   }
   return amount;
 }

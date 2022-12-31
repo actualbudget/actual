@@ -33,7 +33,7 @@ async function prepareDatabase() {
   });
 }
 
-describe.skip('Transfer', () => {
+describe('Transfer', () => {
   test('transfers are properly inserted/updated/deleted', async () => {
     await prepareDatabase();
 

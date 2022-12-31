@@ -10,6 +10,10 @@ import CloudDownload from '../../svg/v1/CloudDownload';
 import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
 import FileDouble from '../../svg/v1/FileDouble';
 import CloudUnknown from '../../svg/v2/CloudUnknown';
+import {
+  isDevelopmentEnvironment,
+  isPreviewEnvironment
+} from '../../util/environment';
 import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
 
 function getFileDescription(file) {
@@ -319,7 +323,7 @@ class BudgetList extends React.Component {
                 Create new file
               </Button>
 
-              {process.env.NODE_ENV === 'development' && (
+              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
                 <Button
                   primary
                   onClick={() => this.onCreate({ testMode: true })}

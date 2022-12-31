@@ -1,4 +1,5 @@
 import * as monthUtils from '../../shared/months';
+import { safeNumber } from '../../shared/util';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
@@ -6,7 +7,7 @@ import { batchMessages } from '../sync';
 
 async function getSheetValue(sheetName, cell) {
   const node = await sheet.getCell(sheetName, cell);
-  return typeof node.value === 'number' ? node.value : 0;
+  return safeNumber(typeof node.value === 'number' ? node.value : 0);
 }
 
 // We want to only allow the positive movement of money back and
@@ -71,9 +72,7 @@ export function getBudget({ category, month }) {
 }
 
 export function setBudget({ category, month, amount }) {
-  if (typeof amount !== 'number') {
-    amount = 0;
-  }
+  amount = safeNumber(typeof amount === 'number' ? amount : 0);
   const table = getBudgetTable();
 
   let existing = db.firstSync(
@@ -185,28 +184,8 @@ export async function set3MonthAvg({ month }) {
         'sum-amount-' + cat.id
       );
 
-      const avg = ((spent1 + spent2 + spent3) / 3) | 0;
+      const avg = Math.round((spent1 + spent2 + spent3) / 3);
       setBudget({ category: cat.id, month, amount: -avg });
-    }
-  });
-}
-
-export async function setAllFuture({ startMonth }) {
-  if (!isReflectBudget()) {
-    throw new Error('setAllFuture only applies to report budget type');
-  }
-  let table = getBudgetTable();
-  let budgetData = await getBudgetData(table, dbMonth(startMonth));
-  let months = getAllMonths(monthUtils.addMonths(startMonth, 1));
-
-  batchMessages(() => {
-    for (let month of months) {
-      budgetData.forEach(budget => {
-        if (budget.is_income === 1 && !isReflectBudget()) {
-          return;
-        }
-        setBudget({ category: budget.category, month, amount: budget.amount });
-      });
     }
   });
 }
@@ -231,18 +210,6 @@ export async function holdForNextMonth({ month, amount }) {
     return true;
   }
   return false;
-}
-
-export async function holdForFutureMonths({ startMonth, amount }) {
-  let months = getAllMonths(startMonth);
-
-  await batchMessages(async () => {
-    for (let month of months) {
-      if (!(await holdForNextMonth({ month, amount }))) {
-        break;
-      }
-    }
-  });
 }
 
 export async function resetHold({ month }) {
