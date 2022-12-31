@@ -1,32 +1,29 @@
 import { test, expect } from '@playwright/test';
 
-import { AccountPage } from './page-models/account-page';
+import { ConfigurationPage } from './page-models/configuration-page';
+import { Navigation } from './page-models/navigation';
 
 test.describe('Transactions', () => {
-  let context;
   let page;
+  let navigation;
   let accountPage;
+  let configurationPage;
 
   test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext();
     page = await browser.newPage();
+    navigation = new Navigation(page);
+    configurationPage = new ConfigurationPage(page);
+
+    await page.goto('/');
+    await configurationPage.createTestFile();
   });
 
   test.afterAll(async () => {
     await page.close();
-    await context.close();
-  });
-
-  test.beforeAll(async () => {
-    await page.goto('/');
-
-    await page.getByRole('button', { name: 'Create test file' }).click();
-    await page.getByRole('button', { name: 'Close' }).click();
   });
 
   test.beforeEach(async () => {
-    await page.getByRole('link', { name: /^Ally Savings/ }).click();
-    accountPage = new AccountPage(page);
+    accountPage = await navigation.goToAccountPage('Ally Savings');
   });
 
   test('creates a test transaction', async () => {

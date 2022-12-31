@@ -3,7 +3,6 @@ module.exports = {
   retries: 1,
   use: {
     screenshot: 'on',
-    video: 'on',
     browserName: 'chromium',
     baseURL: process.env.E2E_START_URL ?? 'http://localhost:3001'
   }
