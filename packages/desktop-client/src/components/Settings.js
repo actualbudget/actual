@@ -206,7 +206,6 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
               Change location
             </Button>
           </View>
-
           {documentDirChanged && (
             <Information style={{ marginTop: 10 }}>
               A restart is required for this change to take effect
@@ -240,7 +239,6 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
 
   let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
   let numberFormat = prefs.numberFormat || 'comma-dot';
-
   return (
     <>
       <Section title="Formatting">

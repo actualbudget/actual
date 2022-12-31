@@ -8,6 +8,7 @@ import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
+import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
 import ConfigServer from './ConfigServer';
@@ -17,6 +18,28 @@ import Bootstrap from './subscribe/Bootstrap';
 import ChangePassword from './subscribe/ChangePassword';
 import Error from './subscribe/Error';
 import Login from './subscribe/Login';
+
+function Version() {
+  const version = useServerVersion();
+
+  return (
+    <Text
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        color: colors.n7,
+        margin: 15,
+        marginRight: 17,
+        ':hover': { color: colors.n2 },
+        zIndex: 5001
+      }}
+      href={'https://actualbudget.com/blog/' + window.Actual.ACTUAL_VERSION}
+    >
+      {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
+    </Text>
+  );
+}
 
 class ManagementApp extends React.Component {
   constructor(props) {
@@ -204,7 +227,11 @@ class ManagementApp extends React.Component {
             </View>
           )}
 
-          <ServerURL />
+          <Switch>
+            <Route exact path="/config-server" component={null} />
+            <Route exact path="/" component={ServerURL} />
+          </Switch>
+          <Version />
         </View>
       </Router>
     );
