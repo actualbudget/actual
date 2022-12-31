@@ -14,8 +14,8 @@ jobs:
         uses: jakepartusch/wait-for-netlify-action@v1.4
         id: waitFor200
         with:
-          site_name: 'actual-budget'
-          max_timeout: 180
+          site_name: 'actualbudget'
+          max_timeout: 240
 
   test:
     needs: tests_e2e_netlify_prepare
@@ -24,13 +24,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
       - name: Setup Playwright
         run: npx playwright install --with-deps
-      - name: Install
-        run: yarn install
+      - name: Set up environment
+        uses: ./.github/actions/setup
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
