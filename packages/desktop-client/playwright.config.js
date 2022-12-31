@@ -1,9 +1,9 @@
 module.exports = {
-  timeout: 10000, // 10 seconds
+  timeout: 20000, // 20 seconds
   retries: 1,
   use: {
-    screenshot: 'only-on-failure',
-    video: 'on-first-retry',
+    screenshot: 'on',
+    video: 'on',
     browserName: 'chromium',
     baseURL: process.env.E2E_START_URL ?? 'http://localhost:3001'
   }
