@@ -386,6 +386,9 @@ const MenuButton = withRouter(function MenuButton({ history }) {
       case 'settings':
         history.push('/settings');
         break;
+      case 'help':
+        window.open('https://actualbudget.github.io/docs', '_blank');
+        break;
       case 'close':
         dispatch(closeBudget());
         break;
@@ -395,6 +398,7 @@ const MenuButton = withRouter(function MenuButton({ history }) {
 
   let items = [
     { name: 'settings', text: 'Settings' },
+    { name: 'help', text: 'Help' },
     { name: 'close', text: 'Close File' }
   ];
 

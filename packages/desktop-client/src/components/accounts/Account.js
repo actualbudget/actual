@@ -13,9 +13,11 @@ import {
 import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { currentDay } from 'loot-core/src/shared/months';
 import {
   deleteTransaction,
   updateTransaction,
+  realizeTempTransactions,
   ungroupTransactions
 } from 'loot-core/src/shared/transactions';
 import {
@@ -35,6 +37,7 @@ import {
   Stack
 } from 'loot-design/src/components/common';
 import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
+import NotesButton from 'loot-design/src/components/NotesButton';
 import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import format from 'loot-design/src/components/spreadsheet/format';
 import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
@@ -103,9 +106,15 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
+function ReconcilingMessage({
+  balanceQuery,
+  targetBalance,
+  onDone,
+  onCreateTransaction
+}) {
   let cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
+    value: 0,
     query: balanceQuery.query.filter({ cleared: true })
   });
   let targetDiff = targetBalance - cleared;
@@ -165,6 +174,13 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
             Done Reconciling
           </Button>
         </View>
+        {targetDiff !== 0 && (
+          <View style={{ marginLeft: 15 }}>
+            <Button onClick={() => onCreateTransaction(targetDiff)}>
+              Create Reconciliation Transation
+            </Button>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -599,6 +615,7 @@ const AccountHeader = React.memo(
     onAddTransaction,
     onShowTransactions,
     onDoneReconciling,
+    onCreateReconciliationTransaction,
     onToggleExtraBalances,
     onSaveName,
     onExposeName,
@@ -669,30 +686,46 @@ const AccountHeader = React.memo(
                   />
                 </InitialFocus>
               ) : isNameEditable ? (
-                <Button
-                  bare
+                <View
                   style={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    marginLeft: -5,
-                    marginTop: -5,
-                    backgroundColor: 'transparent',
-                    '& svg': { display: 'none' },
-                    '&:hover svg': { display: 'unset' }
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 3,
+                    '& .hover-visible': {
+                      opacity: 0,
+                      transition: 'opacity .25s'
+                    },
+                    '&:hover .hover-visible': {
+                      opacity: 1
+                    }
                   }}
-                  onClick={() => onExposeName(true)}
                 >
-                  {accountName}
-
-                  <Pencil1
+                  <View
                     style={{
-                      width: 11,
-                      height: 11,
-                      marginLeft: 5,
-                      color: colors.n4
+                      fontSize: 25,
+                      fontWeight: 500,
+                      marginRight: 5,
+                      marginBottom: 5
                     }}
-                  />
-                </Button>
+                  >
+                    {accountName}
+                  </View>
+
+                  <NotesButton id={`account-${account.id}`} />
+                  <Button
+                    bare
+                    className="hover-visible"
+                    onClick={() => onExposeName(true)}
+                  >
+                    <Pencil1
+                      style={{
+                        width: 11,
+                        height: 11,
+                        color: colors.n8
+                      }}
+                    />
+                  </Button>
+                </View>
               ) : (
                 <View
                   style={{ fontSize: 25, fontWeight: 500, marginBottom: 5 }}
@@ -876,6 +909,7 @@ const AccountHeader = React.memo(
             targetBalance={reconcileAmount}
             balanceQuery={balanceQuery}
             onDone={onDoneReconciling}
+            onCreateTransaction={onCreateReconciliationTransaction}
           />
         )}
       </>
@@ -1382,6 +1416,31 @@ class AccountInternal extends React.PureComponent {
     this.setState({ reconcileAmount: null });
   };
 
+  onCreateReconciliationTransaction = async diff => {
+    // Create a new reconciliation transaction
+    const reconciliationTransactions = realizeTempTransactions([
+      {
+        id: 'temp',
+        account: this.props.accountId,
+        cleared: true,
+        amount: diff,
+        date: currentDay(),
+        notes: 'Reconciliation balance adjustment'
+      }
+    ]);
+
+    // Optimistic UI: update the transaction list before sending the data to the database
+    this.setState({
+      transactions: [...this.state.transactions, ...reconciliationTransactions]
+    });
+
+    // sync the reconciliation transaction
+    await send('transactions-batch-update', {
+      added: reconciliationTransactions
+    });
+    await this.refetchTransactions();
+  };
+
   onShowTransactions = async ids => {
     this.onApplyFilter({
       customName: 'Selected transactions',
@@ -1409,7 +1468,15 @@ class AccountInternal extends React.PureComponent {
         value = !!transactions.find(t => !t.cleared);
       }
 
+      const idSet = new Set(ids);
+
       transactions.forEach(trans => {
+        if (!idSet.has(trans.id)) {
+          // Skip transactions which aren't actually selected, since the query
+          // above also retrieves the siblings & parent of any selected splits.
+          return;
+        }
+
         let { diff } = updateTransaction(transactions, {
           ...trans,
           [name]: value
@@ -1642,6 +1709,9 @@ class AccountInternal extends React.PureComponent {
                   onExposeName={this.onExposeName}
                   onReconcile={this.onReconcile}
                   onDoneReconciling={this.onDoneReconciling}
+                  onCreateReconciliationTransaction={
+                    this.onCreateReconciliationTransaction
+                  }
                   onSync={this.onSync}
                   onImport={this.onImport}
                   onBatchDelete={this.onBatchDelete}
