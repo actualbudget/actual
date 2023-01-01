@@ -16,9 +16,8 @@ export function useScrollFlasher() {
   return scrollRef;
 }
 
-export function useSetThemeColor(color, opts) {
+export function useSetThemeColor(color) {
   useEffect(() => {
-    if (opts && opts.skip) return;
     setThemeColor(color);
   });
 }
