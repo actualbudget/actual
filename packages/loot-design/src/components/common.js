@@ -823,7 +823,8 @@ export function Modal({
           <View
             style={{
               padding: 20,
-              position: 'relative'
+              position: 'relative',
+              flexShrink: 0
             }}
           >
             {showTitle && (

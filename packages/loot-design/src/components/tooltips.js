@@ -242,6 +242,8 @@ export class Tooltip extends React.Component {
         return 'top-center';
       case 'top-center':
         return 'bottom-center';
+      case 'right':
+        return 'right';
       default:
     }
   }
@@ -300,6 +302,9 @@ export class Tooltip extends React.Component {
       style.top = anchorRect.top + anchorRect.height + offset + 'px';
       style.left = anchorRect.left + 'px';
       style.width = anchorRect.width + 'px';
+    } else if (position === 'right') {
+      style.top = anchorRect.top + 'px';
+      style.left = anchorRect.left + anchorRect.width + offset + 'px';
     } else {
       throw new Error('Invalid position for Tooltip: ' + position);
     }

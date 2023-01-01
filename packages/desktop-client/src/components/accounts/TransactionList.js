@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
@@ -78,13 +79,13 @@ export default function TransactionList({
   onRefetch,
   onRefetchUpToRow,
   onCloseAddTransaction,
-  onManagePayees,
   onCreatePayee
 }) {
   let dispatch = useDispatch();
   let table = useRef();
   let transactionsLatest = useRef();
   let scrollTo = useRef();
+  let history = useHistory();
 
   // useEffect(() => {
   //   if (scrollTo.current) {
@@ -159,6 +160,13 @@ export default function TransactionList({
     }
     return newTransaction;
   }, []);
+
+  let onManagePayees = useCallback(
+    id => {
+      history.push('/payees', { selectedPayee: id });
+    },
+    [history]
+  );
 
   return (
     <TransactionTable
