@@ -1,14 +1,16 @@
 import * as d from 'date-fns';
-import * as db from '../db';
-import { Schedule as RSchedule } from '../util/rschedule';
-import { groupBy } from '../../shared/util';
-import { fromDateRepr } from '../models';
-import { runQuery as aqlQuery } from '../aql/schema/run-query';
+
+import { dayFromDate, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
-import { dayFromDate, parseDate } from '../../shared/months';
+import { groupBy } from '../../shared/util';
 import { conditionsToAQL } from '../accounts/transaction-rules';
+import { runQuery as aqlQuery } from '../aql';
+import * as db from '../db';
+import { fromDateRepr } from '../models';
+import { Schedule as RSchedule } from '../util/rschedule';
+
 const uuid = require('../../platform/uuid');
 
 function takeDates(config) {
@@ -219,7 +221,10 @@ async function monthly1stor3rd(startDate, accountId) {
       return {
         start,
         frequency: 'monthly',
-        patterns: [{ type: dayValue, value: 1 }, { type: dayValue, value: 3 }]
+        patterns: [
+          { type: dayValue, value: 1 },
+          { type: dayValue, value: 3 }
+        ]
       };
     },
     accountId
@@ -237,7 +242,10 @@ async function monthly2ndor4th(startDate, accountId) {
       return {
         start,
         frequency: 'monthly',
-        patterns: [{ type: dayValue, value: 2 }, { type: dayValue, value: 4 }]
+        patterns: [
+          { type: dayValue, value: 2 },
+          { type: dayValue, value: 4 }
+        ]
       };
     },
     accountId

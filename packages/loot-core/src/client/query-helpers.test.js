@@ -1,8 +1,8 @@
 import { initServer, serverPush } from '../platform/client/fetch';
-import q from '../shared/query';
-import { runQuery, liveQuery, pagedQuery } from './query-helpers';
-import { tracer } from '../shared/test-helpers';
 import { subDays } from '../shared/months';
+import q from '../shared/query';
+import { tracer } from '../shared/test-helpers';
+import { runQuery, liveQuery, pagedQuery } from './query-helpers';
 
 function wait(n) {
   return new Promise(resolve => setTimeout(() => resolve(`wait(${n})`), n));
@@ -93,7 +93,7 @@ function initBasicServer(delay) {
 function initPagingServer(dataLength, { delay, eventType = 'select' } = {}) {
   let data = [];
   for (let i = 0; i < dataLength; i++) {
-    data.push({ id: i, date: subDays('2020-05-01', (i / 5) | 0) });
+    data.push({ id: i, date: subDays('2020-05-01', Math.floor(i / 5)) });
   }
 
   initServer({

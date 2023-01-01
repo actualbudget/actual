@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   View,
   Stack,
@@ -34,7 +35,7 @@ class FatalError extends React.Component {
         <Text>
           There was a problem loading the app in this browser version. If this
           continues to be a problem, you can{' '}
-          <a href="https://actualbudget.com/download">
+          <a href="https://github.com/actualbudget/releases">
             download the desktop app
           </a>
           .
@@ -99,7 +100,9 @@ class FatalError extends React.Component {
               .
             </P>
             <P>
-              <Button onClick={() => window.Actual.relaunch()}>{buttonText}</Button>
+              <Button onClick={() => window.Actual.relaunch()}>
+                {buttonText}
+              </Button>
             </P>
             <P isLast={true} style={{ fontSize: 11 }}>
               <Link

@@ -1,19 +1,12 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
+
 import { send } from 'loot-core/src/platform/client/fetch';
-import {
-  View,
-  Text,
-  P,
-  Button,
-  Stack
-} from 'loot-design/src/components/common';
+import { Text, P, Button, Stack } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
+
 import { Page } from '../Page';
-import { SchedulesTable } from './SchedulesTable';
 import DisplayId from '../util/DisplayId';
-import { colors, styles } from 'loot-design/src/style';
 
 export default function PostsOfflineNotification() {
   let location = useLocation();

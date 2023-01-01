@@ -51,7 +51,7 @@ exports[`Transfer transfers are properly de-categorized 2`] = `
       \\"tombstone\\": 0,
 -     \\"transfer_id\\": null,
 +     \\"transfer_id\\": \\"id7\\",
-    },
++   },
 +   Object {
 +     \\"account\\": \\"three\\",
 +     \\"amount\\": -5000,
@@ -73,7 +73,7 @@ exports[`Transfer transfers are properly de-categorized 2`] = `
 +     \\"starting_balance_flag\\": 0,
 +     \\"tombstone\\": 0,
 +     \\"transfer_id\\": \\"id6\\",
-+   },
+    },
   ]"
 `;
 
@@ -334,7 +334,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 5`] = `
 - First value
 + Second value
 
-@@ -11,41 +11,19 @@
+@@ -11,39 +11,17 @@
       \\"imported_payee\\": null,
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
@@ -349,9 +349,8 @@ exports[`Transfer transfers are properly inserted/updated/deleted 5`] = `
       \\"starting_balance_flag\\": 0,
       \\"tombstone\\": 0,
 -     \\"transfer_id\\": \\"id8\\",
-+     \\"transfer_id\\": null,
-    },
-    Object {
+-   },
+-   Object {
 -     \\"account\\": \\"three\\",
 -     \\"amount\\": -5000,
 -     \\"category\\": null,
@@ -372,13 +371,12 @@ exports[`Transfer transfers are properly inserted/updated/deleted 5`] = `
 -     \\"starting_balance_flag\\": 0,
 -     \\"tombstone\\": 0,
 -     \\"transfer_id\\": \\"id7\\",
--   },
--   Object {
++     \\"transfer_id\\": null,
+    },
+    Object {
       \\"account\\": \\"one\\",
       \\"amount\\": 5000,
-      \\"category\\": null,
-      \\"cleared\\": 1,
-      \\"date\\": 20170101,"
+      \\"category\\": null,"
 `;
 
 exports[`Transfer transfers are properly inserted/updated/deleted 6`] = `
@@ -386,7 +384,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 6`] = `
 - First value
 + Second value
 
-@@ -11,19 +11,41 @@
+@@ -11,17 +11,39 @@
       \\"imported_payee\\": null,
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
@@ -402,8 +400,8 @@ exports[`Transfer transfers are properly inserted/updated/deleted 6`] = `
       \\"tombstone\\": 0,
 -     \\"transfer_id\\": null,
 +     \\"transfer_id\\": \\"id10\\",
-    },
-    Object {
++   },
++   Object {
 +     \\"account\\": \\"two\\",
 +     \\"amount\\": -5000,
 +     \\"category\\": null,
@@ -424,13 +422,11 @@ exports[`Transfer transfers are properly inserted/updated/deleted 6`] = `
 +     \\"starting_balance_flag\\": 0,
 +     \\"tombstone\\": 0,
 +     \\"transfer_id\\": \\"id7\\",
-+   },
-+   Object {
+    },
+    Object {
       \\"account\\": \\"one\\",
       \\"amount\\": 5000,
-      \\"category\\": null,
-      \\"cleared\\": 1,
-      \\"date\\": 20170101,"
+      \\"category\\": null,"
 `;
 
 exports[`Transfer transfers are properly inserted/updated/deleted 7`] = `

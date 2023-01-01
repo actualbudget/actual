@@ -1,5 +1,5 @@
-import { sequential } from '../shared/async';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
+import { sequential } from '../shared/async';
 
 let runningMethods = new Set();
 

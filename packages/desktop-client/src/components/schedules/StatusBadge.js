@@ -1,14 +1,15 @@
 import React from 'react';
-import { colors } from 'loot-design/src/style';
-import { View, Text } from 'loot-design/src/components/common';
-import { titleFirst } from 'loot-core/src/shared/util';
 
-import EditSkull1 from 'loot-design/src/svg/v2/EditSkull1';
+import { titleFirst } from 'loot-core/src/shared/util';
+import { View, Text } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
 import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
 import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
-import ValidationCheck from 'loot-design/src/svg/v2/ValidationCheck';
-import FavoriteStar from 'loot-design/src/svg/v2/FavoriteStar';
 import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
+import CheckCircleHollow from 'loot-design/src/svg/v2/CheckCircleHollow';
+import EditSkull1 from 'loot-design/src/svg/v2/EditSkull1';
+import FavoriteStar from 'loot-design/src/svg/v2/FavoriteStar';
+import ValidationCheck from 'loot-design/src/svg/v2/ValidationCheck';
 
 export function getStatusProps(status) {
   let color, backgroundColor, Icon;
@@ -49,10 +50,15 @@ export function getStatusProps(status) {
       backgroundColor = colors.n11;
       Icon = CalendarIcon;
       break;
+    case 'cleared':
+      color = colors.g5;
+      backgroundColor = colors.n11;
+      Icon = CheckCircle1;
+      break;
     default:
       color = colors.n1;
       backgroundColor = colors.n11;
-      Icon = CheckCircle1;
+      Icon = CheckCircleHollow;
       break;
   }
 

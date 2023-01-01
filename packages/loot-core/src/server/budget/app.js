@@ -3,7 +3,6 @@ import { mutator } from '../mutators';
 import { undoable } from '../undo';
 import * as actions from './actions';
 
-
 let app = createApp();
 
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
@@ -13,14 +12,9 @@ app.method(
 );
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
 app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
-app.method('budget/set-all-future', mutator(undoable(actions.setAllFuture)));
 app.method(
   'budget/hold-for-next-month',
   mutator(undoable(actions.holdForNextMonth))
-);
-app.method(
-  'budget/hold-for-future-months',
-  mutator(undoable(actions.holdForFutureMonths))
 );
 app.method('budget/reset-hold', mutator(undoable(actions.resetHold)));
 app.method(

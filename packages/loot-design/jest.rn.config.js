@@ -5,14 +5,12 @@ module.exports = {
     'mobile.js',
     'mjs',
     'js',
+    'ts',
     'json'
   ],
   moduleDirectories: ['<rootDir>/node_modules', 'node_modules'],
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
-  transform: {
-    '^.+\\.(js|ts|tsx)?$': '<rootDir>/../../jest-babel-transformer',
-  },
   testMatch: ['<rootDir>/src/components/mobile/**/*.test.js'],
   testPathIgnorePatterns: [
     '/node_modules/(?!loot-core).+\\.js$'

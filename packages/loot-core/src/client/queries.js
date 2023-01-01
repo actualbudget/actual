@@ -1,5 +1,5 @@
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
-import { currencyToAmount, amountToInteger } from '../shared/util';
+
 import {
   dayFromDate,
   getDayMonthRegex,
@@ -8,10 +8,7 @@ import {
   getShortYearFormat
 } from '../shared/months';
 import q from '../shared/query';
-
-function isInteger(num) {
-  return (num | 0) === num;
-}
+import { currencyToAmount, amountToInteger } from '../shared/util';
 
 export function getAccountFilter(accountId, field = 'account') {
   if (accountId) {
@@ -81,7 +78,7 @@ export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
           amount: { $transform: '$abs', $eq: amountToInteger(amount) }
         },
         amount != null &&
-          isInteger(amount) && {
+          Number.isInteger(amount) && {
             amount: {
               $transform: { $abs: { $idiv: ['$', 100] } },
               $eq: amount

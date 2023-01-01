@@ -1,5 +1,5 @@
-import constants from '../constants';
 import { setNumberFormat } from '../../shared/util.js';
+import constants from '../constants';
 
 const initialState = {
   local: null,

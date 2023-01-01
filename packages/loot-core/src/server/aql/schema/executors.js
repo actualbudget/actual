@@ -1,8 +1,8 @@
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import { isAggregateQuery } from '../compiler';
-import { convertOutputType } from '../schema-helpers';
 import { execQuery } from '../exec';
+import { convertOutputType } from '../schema-helpers';
 
 // Transactions executor
 
@@ -142,7 +142,10 @@ async function execTransactionsGrouped(
 
     rows = await db.all(rowSql, params);
     matched = new Set(
-      [].concat.apply([], rows.map(row => row.matched.split(',')))
+      [].concat.apply(
+        [],
+        rows.map(row => row.matched.split(','))
+      )
     );
   }
 

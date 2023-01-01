@@ -1,8 +1,9 @@
 let { SQLiteFS } = require('absurd-sql');
 let IndexedDBBackend = require('absurd-sql/dist/indexeddb-backend').default;
+
 let connection = require('../connection');
-let { _getModule } = require('../sqlite');
 let idb = require('../indexeddb');
+let { _getModule } = require('../sqlite');
 let baseAPI = require('./index.electron.js');
 let join = require('./path-join');
 
@@ -167,9 +168,9 @@ async function _removeFile(filepath) {
 
 // Load files from the server that should exist by default
 async function populateDefaultFilesystem() {
-  let index = await (await fetch(
-    process.env.PUBLIC_URL + 'data-file-index.txt'
-  )).text();
+  let index = await (
+    await fetch(process.env.PUBLIC_URL + 'data-file-index.txt')
+  ).text();
   let files = index
     .split('\n')
     .map(name => name.trim())

@@ -1,11 +1,14 @@
+import { safeNumber } from '../../shared/util';
 import { number } from '../spreadsheet/globals';
 
 export { number } from '../spreadsheet/globals';
 
 export function sumAmounts(...amounts) {
-  return amounts.reduce((total, amount) => {
-    return total + number(amount);
-  }, 0);
+  return safeNumber(
+    amounts.reduce((total, amount) => {
+      return total + number(amount);
+    }, 0)
+  );
 }
 
 export function flatten2(arr) {
@@ -19,4 +22,3 @@ export function unflatten2(arr) {
   }
   return res;
 }
-

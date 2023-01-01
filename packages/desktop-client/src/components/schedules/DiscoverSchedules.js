@@ -1,13 +1,12 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+
 import Platform from 'loot-core/src/client/platform';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import {
   View,
-  Text,
   Stack,
   Button,
   ButtonWithLoading,
@@ -18,19 +17,18 @@ import {
   TableHeader,
   Row,
   Field,
-  Cell,
   SelectCell
 } from 'loot-design/src/components/table';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import { colors, styles } from 'loot-design/src/style';
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
+import { colors } from 'loot-design/src/style';
+
 import { Page } from '../Page';
-import { ScheduleAmountCell } from './SchedulesTable';
 import DisplayId from '../util/DisplayId';
+import { ScheduleAmountCell } from './SchedulesTable';
 
 let ROW_HEIGHT = 43;
 

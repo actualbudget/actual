@@ -1,12 +1,13 @@
 import fc from 'fast-check';
-import * as db from '../../db';
-import query from '../../../shared/query';
-import { batchMessages, setSyncingMode } from '../../sync/index';
-import { setClock } from '../../crdt';
-import { groupById } from '../../../shared/util';
+
 import arbs from '../../../mocks/arbitrary-schema';
-import { runQuery } from './run-query';
+import query from '../../../shared/query';
+import { groupById } from '../../../shared/util';
+import { setClock } from '../../crdt';
+import * as db from '../../db';
+import { batchMessages, setSyncingMode } from '../../sync/index';
 import { isHappyPathQuery } from './executors';
+import { runQuery } from './run-query';
 
 beforeEach(global.emptyDatabase());
 
@@ -90,7 +91,7 @@ function expectTransactionOrder(data, fields) {
 }
 
 async function expectPagedData(query, numTransactions, allData) {
-  let pageCount = Math.max((numTransactions / 3) | 0, 3);
+  let pageCount = Math.max(Math.floor(numTransactions / 3), 3);
   let pagedData = [];
   let done = false;
 

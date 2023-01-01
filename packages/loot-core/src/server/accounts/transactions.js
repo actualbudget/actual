@@ -1,8 +1,9 @@
-import { batchMessages } from '../sync';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
-import * as transfer from './transfer';
+import { batchMessages } from '../sync';
 import * as rules from './transaction-rules';
+import * as transfer from './transfer';
+
 const connection = require('../../platform/server/connection');
 
 async function idsWithChildren(ids) {
@@ -116,9 +117,9 @@ export async function batchUpdateTransactions({
     await Promise.all(allAdded.map(t => transfer.onInsert(t)));
 
     // Return any updates from here
-    resultUpdated = (await Promise.all(
-      allUpdated.map(t => transfer.onUpdate(t))
-    )).filter(Boolean);
+    resultUpdated = (
+      await Promise.all(allUpdated.map(t => transfer.onUpdate(t)))
+    ).filter(Boolean);
 
     await Promise.all(allDeleted.map(t => transfer.onDelete(t)));
   });

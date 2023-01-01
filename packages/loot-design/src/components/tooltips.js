@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+
 import { css, before } from 'glamor';
+
 import { styles } from '../style';
 
 export const IntersectionBoundary = React.createContext();
@@ -189,7 +191,8 @@ export class Tooltip extends React.Component {
         // If it doesn't fit below it, switch it above only if it does
         // fit above it
         (this.position.indexOf('bottom') !== -1 &&
-          (testBottom > containerRect.height && testTop > 0))
+          testBottom > containerRect.height &&
+          testTop > 0)
       ) {
         // Invert the position
         this.position = this.getOppositePosition(this.position);

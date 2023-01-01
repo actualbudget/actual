@@ -1,4 +1,5 @@
 import { useContext, useState, useRef, useLayoutEffect } from 'react';
+
 import NamespaceContext from './NamespaceContext.js';
 import SpreadsheetContext from './SpreadsheetContext';
 
@@ -47,24 +48,21 @@ export default function SheetValue({
     latestValue.current = result.value;
   });
 
-  useLayoutEffect(
-    () => {
-      if (binding.query) {
-        spreadsheet.createQuery(sheetName, binding.name, binding.query);
+  useLayoutEffect(() => {
+    if (binding.query) {
+      spreadsheet.createQuery(sheetName, binding.name, binding.query);
+    }
+
+    return spreadsheet.bind(sheetName, binding, null, newResult => {
+      if (latestOnChange.current) {
+        latestOnChange.current(newResult);
       }
 
-      return spreadsheet.bind(sheetName, binding, null, newResult => {
-        if (latestOnChange.current) {
-          latestOnChange.current(newResult);
-        }
-
-        if (newResult.value !== latestValue.current) {
-          setResult(newResult);
-        }
-      });
-    },
-    [sheetName, binding.name]
-  );
+      if (newResult.value !== latestValue.current) {
+        setResult(newResult);
+      }
+    });
+  }, [sheetName, binding.name]);
 
   return result.value != null ? children(result, setCell) : null;
 }

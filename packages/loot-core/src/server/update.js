@@ -1,8 +1,8 @@
 import md5 from 'md5';
-import * as migrations from './migrate/migrations';
+
+import { schema, schemaConfig, makeViews } from './aql';
 import * as db from './db';
-import { schema, schemaConfig } from './aql/schema';
-import { makeViews } from './aql/views';
+import * as migrations from './migrate/migrations';
 
 // Managing the init/update process
 

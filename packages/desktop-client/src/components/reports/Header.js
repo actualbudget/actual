@@ -1,13 +1,13 @@
 import React from 'react';
-import { colors, styles } from 'loot-design/src/style';
+
+import * as monthUtils from 'loot-core/src/shared/months';
 import {
   View,
   Select,
-  Link,
   Button,
   ButtonLink
 } from 'loot-design/src/components/common';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { styles } from 'loot-design/src/style';
 import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
 
 function validateStart(allMonths, start, end) {

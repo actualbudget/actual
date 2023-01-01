@@ -1,17 +1,17 @@
-import * as monthUtils from '../shared/months';
-import * as sheet from '../server/sheet';
+import { addTransactions } from '../server/accounts/sync';
+import { runQuery as aqlQuery } from '../server/aql';
+import * as budgetActions from '../server/budget/actions';
 import * as budget from '../server/budget/base';
 import * as db from '../server/db';
-import * as prefs from '../server/prefs';
-import * as budgetActions from '../server/budget/actions';
-import { runQuery as aqlQuery } from '../server/aql/schema/run-query';
-import { batchMessages, setSyncingMode } from '../server/sync';
 import { runHandler, runMutator } from '../server/mutators';
-import { addTransactions } from '../server/accounts/sync';
+import * as prefs from '../server/prefs';
+import * as sheet from '../server/sheet';
+import { batchMessages, setSyncingMode } from '../server/sync';
+import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 
 function pickRandom(list) {
-  return list[((Math.random() * list.length) | 0) % list.length];
+  return list[Math.floor(Math.random() * list.length) % list.length];
 }
 
 function number(start, end) {
@@ -19,7 +19,7 @@ function number(start, end) {
 }
 
 function integer(start, end) {
-  return number(start, end) | 0;
+  return Math.round(number(start, end));
 }
 
 function findMin(items, field) {
@@ -104,13 +104,13 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       amount,
       payee: payee.id,
       account: account.id,
-      date: monthUtils.subDays(monthUtils.currentDay(), (i / 3) | 0),
+      date: monthUtils.subDays(monthUtils.currentDay(), Math.floor(i / 3)),
       category: category.id
     };
     transactions.push(transaction);
 
     if (Math.random() < 0.2) {
-      let a = (transaction.amount / 3) | 0;
+      let a = Math.round(transaction.amount / 3);
       let pick = () =>
         payee === incomePayee
           ? incomeGroup.categories.find(c => c.name === 'Income').id
@@ -244,7 +244,7 @@ async function fillChecking(handlers, account, payees, groups) {
       amount,
       payee: payee.id,
       account: account.id,
-      date: monthUtils.subDays(monthUtils.currentDay(), (i * 2) | 0),
+      date: monthUtils.subDays(monthUtils.currentDay(), i * 2),
       category: category.id
     });
   }
@@ -334,7 +334,7 @@ async function fillSavings(handlers, account, payees, groups) {
       amount,
       payee: payee.id,
       account: account.id,
-      date: monthUtils.subDays(monthUtils.currentDay(), (i * 5) | 0),
+      date: monthUtils.subDays(monthUtils.currentDay(), i * 5),
       category: category.id
     });
   }
@@ -439,15 +439,19 @@ async function fillOther(handlers, account, payees, groups) {
 
 async function createBudget(accounts, payees, groups) {
   let primaryAccount = accounts.find(a => (a.name = 'Bank of America'));
-  let earliestDate = (await db.first(
-    `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
+  let earliestDate = (
+    await db.first(
+      `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`
-  )).date;
-  let earliestPrimaryDate = (await db.first(
-    `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
+    )
+  ).date;
+  let earliestPrimaryDate = (
+    await db.first(
+      `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.id = ? AND a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
-    [primaryAccount.id]
-  )).date;
+      [primaryAccount.id]
+    )
+  ).date;
 
   let start = monthUtils.monthFromDate(db.fromDateRepr(earliestDate));
   let end = monthUtils.currentMonth();

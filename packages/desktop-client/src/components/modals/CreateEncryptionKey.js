@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+
 import { css } from 'glamor';
+
+import { send } from 'loot-core/src/platform/client/fetch';
+import { getCreateKeyError } from 'loot-core/src/shared/errors';
 import {
   View,
   Text,
-  Stack,
   Modal,
-  Button,
   ButtonWithLoading,
   ExternalLink,
   P,
@@ -13,9 +15,7 @@ import {
   Input,
   InitialFocus
 } from 'loot-design/src/components/common';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { styles, colors } from 'loot-design/src/style';
-import { getCreateKeyError } from 'loot-core/src/shared/errors';
+import { colors } from 'loot-design/src/style';
 
 export default function CreateEncryptionKey({
   modalProps,
@@ -70,7 +70,7 @@ export default function CreateEncryptionKey({
                 other devices will have to revert to this version of your data.{' '}
                 <ExternalLink
                   asAnchor
-                  href="https://actualbudget.com/encrypted-syncing"
+                  href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
                 >
                   Learn more
                 </ExternalLink>
@@ -104,7 +104,7 @@ export default function CreateEncryptionKey({
                 will take you through that process on those devices.{' '}
                 <ExternalLink
                   asAnchor
-                  href="https://actualbudget.com/encrypted-syncing"
+                  href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
                 >
                   Learn more
                 </ExternalLink>

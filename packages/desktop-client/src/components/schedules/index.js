@@ -1,16 +1,11 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { Page } from '../Page';
+
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { send } from 'loot-core/src/platform/client/fetch';
+import { View, Button } from 'loot-design/src/components/common';
+
+import { Page } from '../Page';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {

@@ -1,24 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { connect } from 'react-redux';
+
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+
 import * as actions from 'loot-core/src/client/actions';
-import { View } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import Intro from './tutorial/Intro';
-import BudgetSummary from './tutorial/BudgetSummary';
+
 import BudgetCategories from './tutorial/BudgetCategories';
 import BudgetInitial from './tutorial/BudgetInitial';
+import BudgetNewIncome from './tutorial/BudgetNewIncome';
+import BudgetNextMonth from './tutorial/BudgetNextMonth';
+import BudgetSummary from './tutorial/BudgetSummary';
+import CategoryBalance from './tutorial/CategoryBalance';
+import Final from './tutorial/Final';
+import Intro from './tutorial/Intro';
+import Overspending from './tutorial/Overspending';
 import TransactionAdd from './tutorial/TransactionAdd';
 import TransactionEnter from './tutorial/TransactionEnter';
-import TransactionFinalize from './tutorial/TransactionFinalize';
-import BudgetNewIncome from './tutorial/BudgetNewIncome';
-import CategoryBalance from './tutorial/CategoryBalance';
-import Overspending from './tutorial/Overspending';
-import BudgetNextMonth from './tutorial/BudgetNextMonth';
-import DeleteTransactions from './tutorial/DeleteTransactions';
-import Final from './tutorial/Final';
 
 function generatePath(innerRect, outerRect) {
   const i = innerRect;
@@ -141,6 +140,10 @@ class Tutorial extends React.Component {
         );
       case 'budget-next-month':
         return <div>hi</div>;
+      default:
+        throw new Error(
+          `Encountered an unexpected error rendering the tutorial content for ${stage}`
+        );
     }
   }
 
@@ -214,6 +217,8 @@ class Tutorial extends React.Component {
             navigationProps={navigationProps}
           />
         );
+      default:
+      // Default case defined below (outside the switch statement)
     }
 
     const { node: targetNode, expand } = this.context.getTutorialNode(stage);
@@ -245,7 +250,6 @@ class Tutorial extends React.Component {
                   <path
                     fill="rgba(0, 0, 0, .2)"
                     fill-rule="evenodd"
-                    // prettier-ignore
                     d={generatePath(targetRect, windowRect)}
                     style={{ pointerEvents: 'fill' }}
                   />

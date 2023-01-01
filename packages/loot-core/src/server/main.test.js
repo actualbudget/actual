@@ -1,24 +1,24 @@
 import { expectSnapshotWithDiffer } from '../mocks/util';
-import * as prefs from './prefs';
-import * as db from './db';
-import * as budget from './budget/base';
 import * as monthUtils from '../shared/months';
+import * as budgetActions from './budget/actions';
+import * as budget from './budget/base';
 import { getClock, deserializeClock } from './crdt';
+import * as db from './db';
 import {
   runHandler,
   runMutator,
   disableGlobalMutations,
   enableGlobalMutations
 } from './mutators';
-import * as budgetActions from './budget/actions';
+import * as prefs from './prefs';
 
 jest.mock('./post');
+const connection = require('../platform/server/connection');
+const fs = require('../platform/server/fs');
 const backend = require('./main');
 const { post } = require('./post');
 const handlers = backend.handlers;
 const sheet = require('./sheet');
-const fs = require('../platform/server/fs');
-const connection = require('../platform/server/connection');
 
 beforeEach(async () => {
   await global.emptyDatabase()();
