@@ -163,7 +163,6 @@ export default function TransactionList({
 
   let onManagePayees = useCallback(
     id => {
-      debugger;
       history.push('/payees', { selectedPayee: id });
     },
     [history]
