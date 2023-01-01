@@ -720,7 +720,11 @@ export function TableHeader({ headers, children, version, ...rowProps }) {
   return (
     <View
       style={
-        version === 'v2' && { borderRadius: '6px 6px 0 0', overflow: 'hidden' }
+        version === 'v2' && {
+          borderRadius: '6px 6px 0 0',
+          overflow: 'hidden',
+          flexShrink: 0
+        }
       }
     >
       <Row
@@ -984,7 +988,14 @@ export const Table = React.forwardRef(
     if (loading) {
       return (
         <View
-          style={[{ flex: 1, justifyContent: 'center', alignItems: 'center' }]}
+          style={[
+            {
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor
+            }
+          ]}
         >
           <AnimatedLoading width={25} color={colors.n1} />
         </View>

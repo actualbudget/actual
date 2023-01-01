@@ -1400,10 +1400,6 @@ class AccountInternal extends React.PureComponent {
     return this.props.matchedTransactions.includes(id);
   };
 
-  onManagePayees = id => {
-    this.props.pushModal('manage-payees', { selectedPayee: id });
-  };
-
   onCreatePayee = name => {
     let trimmed = name.trim();
     if (trimmed !== '') {
@@ -1790,7 +1786,6 @@ class AccountInternal extends React.PureComponent {
                     onCloseAddTransaction={() =>
                       this.setState({ isAdding: false })
                     }
-                    onManagePayees={this.onManagePayees}
                     onCreatePayee={this.onCreatePayee}
                   />
                 </View>
