@@ -16,8 +16,6 @@ import { colors, mobileStyles as styles } from 'loot-design/src/style';
 import Wallet from 'loot-design/src/svg/v1/Wallet';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
-import { isMobile } from '../../util';
-
 export function AccountHeader({ name, amount }) {
   return (
     <View
@@ -154,11 +152,9 @@ function EmptyMessage({ onAdd }) {
         primary
         style={{ marginTop: 20, alignSelf: 'center' }}
         onClick={() =>
-          isMobile()
-            ? alert(
-                'Account creation is not supported on mobile on the self-hosted service yet'
-              )
-            : onAdd()
+          alert(
+            'Account creation is not supported on mobile on the self-hosted service yet'
+          )
         }
       >
         Add Account
@@ -307,7 +303,6 @@ function Accounts(props) {
 
   const onSelectTransaction = transaction => {
     navigate(`/transaction/${transaction}`);
-    // props.navigation.navigate('Transaction', { transaction });
   };
 
   let {

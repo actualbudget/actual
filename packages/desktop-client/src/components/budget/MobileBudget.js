@@ -263,36 +263,34 @@ class Budget extends React.Component {
     }
 
     return (
-      <>
-        <SyncRefresh onSync={this.sync}>
-          {({ refreshing, onRefresh }) => (
-            <BudgetTable
-              // This key forces the whole table rerender when the number
-              // format changes
-              key={numberFormat}
-              categories={categories}
-              categoryGroups={categoryGroups}
-              type={budgetType}
-              month={currentMonth}
-              monthBounds={bounds}
-              editMode={editMode}
-              navigation={navigation}
-              //   refreshControl={
-              //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              //   }
-              onEditMode={flag => this.setState({ editMode: flag })}
-              onShowBudgetDetails={this.onShowBudgetDetails}
-              onPrevMonth={this.onPrevMonth}
-              onNextMonth={this.onNextMonth}
-              onAddCategory={this.onAddCategory}
-              onReorderCategory={this.onReorderCategory}
-              onReorderGroup={this.onReorderGroup}
-              onOpenActionSheet={() => {}} //this.onOpenActionSheet}
-              onBudgetAction={applyBudgetAction}
-            />
-          )}
-        </SyncRefresh>
-      </>
+      <SyncRefresh onSync={this.sync}>
+        {({ refreshing, onRefresh }) => (
+          <BudgetTable
+            // This key forces the whole table rerender when the number
+            // format changes
+            key={numberFormat}
+            categories={categories}
+            categoryGroups={categoryGroups}
+            type={budgetType}
+            month={currentMonth}
+            monthBounds={bounds}
+            editMode={editMode}
+            navigation={navigation}
+            //   refreshControl={
+            //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            //   }
+            onEditMode={flag => this.setState({ editMode: flag })}
+            onShowBudgetDetails={this.onShowBudgetDetails}
+            onPrevMonth={this.onPrevMonth}
+            onNextMonth={this.onNextMonth}
+            onAddCategory={this.onAddCategory}
+            onReorderCategory={this.onReorderCategory}
+            onReorderGroup={this.onReorderGroup}
+            onOpenActionSheet={() => {}} //this.onOpenActionSheet}
+            onBudgetAction={applyBudgetAction}
+          />
+        )}
+      </SyncRefresh>
     );
   }
 }

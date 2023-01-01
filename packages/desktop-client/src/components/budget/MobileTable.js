@@ -5,7 +5,7 @@ import { colors } from 'loot-design/src/style';
 
 export const ROW_HEIGHT = 50;
 
-export const ListItem = ({ children, style, ...props }, ref) => {
+export const ListItem = ({ children, style, ...props }) => {
   return (
     <View
       style={[
