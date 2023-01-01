@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "4.0.2",
+  "version": "22.12.03",
   "license": "MIT",
   "files": [
     "build"
@@ -14,7 +14,6 @@
     "@reactions/component": "^2.0.2",
     "@sentry/browser": "6.12.0",
     "@svgr/webpack": "2.4.1",
-    "add": "^2.0.6",
     "babel-eslint": "9.0.0",
     "babel-loader": "8.0.4",
     "babel-preset-jwl-app": "6.1.12",
@@ -33,8 +32,9 @@
     "eslint-config-react-app": "3.0.5",
     "eslint-loader": "2.1.1",
     "eslint-plugin-flowtype": "2.50.1",
-    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "6.1.2",
+    "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "7.11.1",
     "file-loader": "2.0.0",
     "focus-visible": "^4.1.1",
@@ -42,10 +42,8 @@
     "fs-extra": "7.0.0",
     "glamor": "^2.20.40",
     "html-webpack-plugin": "4.0.0-alpha.2",
-    "http-client": "^4.3.1",
     "identity-obj-proxy": "3.0.0",
     "load-js": "^3.0.3",
-    "lodash.memoize": "^4.1.2",
     "mini-css-extract-plugin": "0.4.3",
     "mitt": "^1.1.2",
     "optimize-css-assets-webpack-plugin": "5.0.1",
@@ -56,7 +54,6 @@
     "postcss-preset-env": "6.3.1",
     "postcss-safe-parser": "4.0.1",
     "prop-types": "15.6.0",
-    "raven-js": "^3.21.0",
     "react": "16.13.1",
     "react-addons-shallow-compare": "^15.6.0",
     "react-app-polyfill": "^0.1.3",
@@ -76,7 +73,6 @@
     "sass-loader": "7.1.0",
     "style-loader": "0.23.0",
     "terser-webpack-plugin": "1.1.0",
-    "url-loader": "1.1.1",
     "victory": "^0.26.1",
     "webpack": "4.19.1",
     "webpack-dev-server": "3.11.0",
@@ -86,10 +82,11 @@
   },
   "scripts": {
     "start": "cross-env PORT=3001 node scripts/start.js",
-    "start:browser": "./bin/watch-browser",
+    "start:browser": "cross-env ./bin/watch-browser",
     "watch": "cross-env PORT=3001 node scripts/start.js",
     "build": "cross-env INLINE_RUNTIME_CHUNK=false node scripts/build.js",
-    "build:browser": "./bin/build-browser"
+    "build:browser": "cross-env ./bin/build-browser",
+    "lint": "eslint src"
   },
   "browserslist": [
     "electron 3.0"

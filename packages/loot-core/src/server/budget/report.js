@@ -1,5 +1,7 @@
+import { safeNumber } from '../../shared/util';
 import * as sheet from '../sheet';
 import { number, sumAmounts } from './util';
+
 const { resolveName } = require('../spreadsheet/util');
 
 export async function createCategory(cat, sheetName, prevSheetName) {
@@ -24,17 +26,17 @@ export async function createCategory(cat, sheetName, prevSheetName) {
     ],
     run: (budgeted, sumAmount, prevCarryover, prevLeftover) => {
       if (cat.is_income) {
-        return (
+        return safeNumber(
           number(budgeted) -
-          number(sumAmount) +
-          (prevCarryover ? number(prevLeftover) : 0)
+            number(sumAmount) +
+            (prevCarryover ? number(prevLeftover) : 0)
         );
       }
 
-      return (
+      return safeNumber(
         number(budgeted) +
-        number(sumAmount) +
-        (prevCarryover ? number(prevLeftover) : 0)
+          number(sumAmount) +
+          (prevCarryover ? number(prevLeftover) : 0)
       );
     }
   });
@@ -49,7 +51,7 @@ export async function createCategory(cat, sheetName, prevSheetName) {
     refresh: true,
     run: (budgeted, sumAmount, carryover) => {
       return carryover
-        ? Math.max(0, number(budgeted) + number(sumAmount))
+        ? Math.max(0, safeNumber(number(budgeted) + number(sumAmount)))
         : sumAmount;
     }
   });
@@ -108,7 +110,7 @@ export function createSummary(groups, categories, sheetName) {
     initialValue: 0,
     dependencies: ['total-income', 'total-spent'],
     run: (income, spent) => {
-      return income - -spent;
+      return safeNumber(income - -spent);
     }
   });
 }

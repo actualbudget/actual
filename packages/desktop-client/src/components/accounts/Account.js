@@ -1,29 +1,30 @@
-import React, {
-  useState,
-  useLayoutEffect,
-  useEffect,
-  useRef,
-  useMemo,
-  useReducer,
-  useCallback
-} from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  Redirect,
-  withRouter,
-  useParams,
-  useHistory,
-  useLocation
-} from 'react-router-dom';
-import { css } from 'glamor';
-import Modal from 'react-modal';
-import Component from '@reactions/component';
+import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
+
 import { debounce } from 'debounce';
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { bindActionCreators } from 'redux';
+
 import * as actions from 'loot-core/src/client/actions';
+import {
+  SchedulesProvider,
+  useCachedSchedules
+} from 'loot-core/src/client/data-hooks/schedules';
+import * as queries from 'loot-core/src/client/queries';
+import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
+import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { currentDay } from 'loot-core/src/shared/months';
+import {
+  deleteTransaction,
+  updateTransaction,
+  realizeTempTransactions,
+  ungroupTransactions
+} from 'loot-core/src/shared/transactions';
+import {
+  currencyToInteger,
+  applyChanges,
+  groupById
+} from 'loot-core/src/shared/util';
 import {
   View,
   Text,
@@ -33,63 +34,40 @@ import {
   InitialFocus,
   Tooltip,
   Menu,
-  Block,
   Stack
 } from 'loot-design/src/components/common';
-import {
-  currencyToInteger,
-  applyChanges,
-  groupById
-} from 'loot-core/src/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
-import TutorialPoint from 'loot-design/src/components/TutorialPoint';
-import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
-import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
-import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
-import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
-import AnimatedRefresh from '../AnimatedRefresh';
-import Add from 'loot-design/src/svg/v1/Add';
+import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
+import NotesButton from 'loot-design/src/components/NotesButton';
+import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import format from 'loot-design/src/components/spreadsheet/format';
 import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
-import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
+import { SelectedItemsButton } from 'loot-design/src/components/table';
+import {
+  SelectedProviderWithItems,
+  useSelectedItems
+} from 'loot-design/src/components/useSelected';
+import { styles, colors } from 'loot-design/src/style';
+import Add from 'loot-design/src/svg/v1/Add';
 import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
+import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
+import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
 import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
-import * as queries from 'loot-core/src/client/queries';
-import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
-import { queryContext } from 'loot-core/src/client/query-hooks';
-import { SelectedItemsButton } from 'loot-design/src/components/table';
-import { Query } from 'loot-core/src/shared/query';
-import * as aql from 'loot-core/src/client/query-helpers';
-import {
-  deleteTransaction,
-  updateTransaction,
-  ungroupTransactions
-} from 'loot-core/src/shared/transactions';
+import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
+import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
+import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
+import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
+
+import { authorizeBank } from '../../plaid';
+import { useActiveLocation } from '../ActiveLocation';
+import AnimatedRefresh from '../AnimatedRefresh';
+import { FilterButton, AppliedFilters } from './Filters';
+import TransactionList from './TransactionList';
 import {
   SplitsExpandedProvider,
   useSplitsExpanded,
   isPreviewId
 } from './TransactionsTable';
-import { styles, colors } from 'loot-design/src/style';
-import TransactionList from './TransactionList';
-import { authorizeBank } from '../../plaid';
-import {
-  SelectedProviderWithItems,
-  useSelectedItems
-} from 'loot-design/src/components/useSelected';
-import { keys } from 'loot-design/src/util/keys';
-import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
-import { FilterButton, AppliedFilters } from './Filters';
-import {
-  SchedulesProvider,
-  useCachedSchedules
-} from 'loot-core/src/client/data-hooks/schedules';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
-import { useActiveLocation } from '../ActiveLocation';
 
 function EmptyMessage({ onAdd }) {
   return (
@@ -128,9 +106,15 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
+function ReconcilingMessage({
+  balanceQuery,
+  targetBalance,
+  onDone,
+  onCreateTransaction
+}) {
   let cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
+    value: 0,
     query: balanceQuery.query.filter({ cleared: true })
   });
   let targetDiff = targetBalance - cleared;
@@ -190,6 +174,13 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
             Done Reconciling
           </Button>
         </View>
+        {targetDiff !== 0 && (
+          <View style={{ marginLeft: 15 }}>
+            <Button onClick={() => onCreateTransaction(targetDiff)}>
+              Create Reconciliation Transation
+            </Button>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -624,6 +615,7 @@ const AccountHeader = React.memo(
     onAddTransaction,
     onShowTransactions,
     onDoneReconciling,
+    onCreateReconciliationTransaction,
     onToggleExtraBalances,
     onSaveName,
     onExposeName,
@@ -642,7 +634,7 @@ const AccountHeader = React.memo(
     let searchInput = useRef(null);
     let splitsExpanded = useSplitsExpanded();
 
-    let canSync = syncEnabled && (account && account.account_id);
+    let canSync = syncEnabled && account && account.account_id;
     if (!account) {
       // All accounts - check for any syncable account
       canSync = !!accounts.find(account => !!account.account_id);
@@ -694,30 +686,46 @@ const AccountHeader = React.memo(
                   />
                 </InitialFocus>
               ) : isNameEditable ? (
-                <Button
-                  bare
+                <View
                   style={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    marginLeft: -5,
-                    marginTop: -5,
-                    backgroundColor: 'transparent',
-                    '& svg': { display: 'none' },
-                    '&:hover svg': { display: 'unset' }
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 3,
+                    '& .hover-visible': {
+                      opacity: 0,
+                      transition: 'opacity .25s'
+                    },
+                    '&:hover .hover-visible': {
+                      opacity: 1
+                    }
                   }}
-                  onClick={() => onExposeName(true)}
                 >
-                  {accountName}
-
-                  <Pencil1
+                  <View
                     style={{
-                      width: 11,
-                      height: 11,
-                      marginLeft: 5,
-                      color: colors.n4
+                      fontSize: 25,
+                      fontWeight: 500,
+                      marginRight: 5,
+                      marginBottom: 5
                     }}
-                  />
-                </Button>
+                  >
+                    {accountName}
+                  </View>
+
+                  <NotesButton id={`account-${account.id}`} />
+                  <Button
+                    bare
+                    className="hover-visible"
+                    onClick={() => onExposeName(true)}
+                  >
+                    <Pencil1
+                      style={{
+                        width: 11,
+                        height: 11,
+                        color: colors.n8
+                      }}
+                    />
+                  </Button>
+                </View>
               ) : (
                 <View
                   style={{ fontSize: 25, fontWeight: 500, marginBottom: 5 }}
@@ -901,6 +909,7 @@ const AccountHeader = React.memo(
             targetBalance={reconcileAmount}
             balanceQuery={balanceQuery}
             onDone={onDoneReconciling}
+            onCreateTransaction={onCreateReconciliationTransaction}
           />
         )}
       </>
@@ -1411,6 +1420,31 @@ class AccountInternal extends React.PureComponent {
     this.setState({ reconcileAmount: null });
   };
 
+  onCreateReconciliationTransaction = async diff => {
+    // Create a new reconciliation transaction
+    const reconciliationTransactions = realizeTempTransactions([
+      {
+        id: 'temp',
+        account: this.props.accountId,
+        cleared: true,
+        amount: diff,
+        date: currentDay(),
+        notes: 'Reconciliation balance adjustment'
+      }
+    ]);
+
+    // Optimistic UI: update the transaction list before sending the data to the database
+    this.setState({
+      transactions: [...this.state.transactions, ...reconciliationTransactions]
+    });
+
+    // sync the reconciliation transaction
+    await send('transactions-batch-update', {
+      added: reconciliationTransactions
+    });
+    await this.refetchTransactions();
+  };
+
   onShowTransactions = async ids => {
     this.onApplyFilter({
       customName: 'Selected transactions',
@@ -1438,7 +1472,15 @@ class AccountInternal extends React.PureComponent {
         value = !!transactions.find(t => !t.cleared);
       }
 
+      const idSet = new Set(ids);
+
       transactions.forEach(trans => {
+        if (!idSet.has(trans.id)) {
+          // Skip transactions which aren't actually selected, since the query
+          // above also retrieves the siblings & parent of any selected splits.
+          return;
+        }
+
         let { diff } = updateTransaction(transactions, {
           ...trans,
           [name]: value
@@ -1671,6 +1713,9 @@ class AccountInternal extends React.PureComponent {
                   onExposeName={this.onExposeName}
                   onReconcile={this.onReconcile}
                   onDoneReconciling={this.onDoneReconciling}
+                  onCreateReconciliationTransaction={
+                    this.onCreateReconciliationTransaction
+                  }
                   onSync={this.onSync}
                   onImport={this.onImport}
                   onBatchDelete={this.onBatchDelete}
@@ -1701,9 +1746,9 @@ class AccountInternal extends React.PureComponent {
                     }
                     showAccount={
                       !accountId ||
-                      (accountId === 'offbudget' ||
-                        accountId === 'budgeted' ||
-                        accountId === 'uncategorized')
+                      accountId === 'offbudget' ||
+                      accountId === 'budgeted' ||
+                      accountId === 'uncategorized'
                     }
                     isAdding={this.state.isAdding}
                     isNew={this.isNew}

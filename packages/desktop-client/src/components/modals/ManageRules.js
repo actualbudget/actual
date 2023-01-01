@@ -1,19 +1,23 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  useImperativeHandle
-} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { css } from 'glamor';
+
 import { format as formatDate, parseISO } from 'date-fns';
-import * as undo from 'loot-core/src/platform/client/undo';
-import * as actions from 'loot-core/src/client/actions';
+import { css } from 'glamor';
+
+import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import q from 'loot-core/src/client/query-helpers';
 import { liveQueryContext } from 'loot-core/src/client/query-hooks';
+import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+import { send } from 'loot-core/src/platform/client/fetch';
+import * as undo from 'loot-core/src/platform/client/undo';
+import { getMonthYearFormat } from 'loot-core/src/shared/months';
+import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
+import {
+  extractScheduleConds,
+  getRecurringDescription
+} from 'loot-core/src/shared/schedules';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   View,
   Text,
@@ -36,20 +40,8 @@ import useSelected, {
   useSelectedItems,
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import { pushModal } from 'loot-core/src/client/actions/modals';
-import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
+import { colors } from 'loot-design/src/style';
 import ArrowRight from 'loot-design/src/svg/RightArrow2';
-import InformationOutline from 'loot-design/src/svg/v1/InformationOutline';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
-import { colors, styles } from 'loot-design/src/style';
-import { dayFromDate, getMonthYearFormat } from 'loot-core/src/shared/months';
-import {
-  extractScheduleConds,
-  getRecurringDescription
-} from 'loot-core/src/shared/schedules';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
@@ -246,9 +238,9 @@ function ScheduleValue({ value }) {
       field="rule"
       data={schedules}
       describe={s => {
-        let { payee } = extractScheduleConds(s._conditions);
-        return payee
-          ? `${byId[payee.value].name} (${s.next_date})`
+        let payeeId = s._payee;
+        return payeeId
+          ? `${byId[payeeId].name} (${s.next_date})`
           : `Next: ${s.next_date}`;
       }}
     />
@@ -681,7 +673,7 @@ export default function ManageRules({ history, modalProps, payeeId }) {
                     Rules are always run in the order that you see them.{' '}
                     <ExternalLink
                       asAnchor={true}
-                      href="https://actualbudget.com/docs/other/rules/"
+                      href="https://actualbudget.github.io/docs/Budgeting/rules/"
                       style={{ color: colors.n4 }}
                     >
                       Learn more

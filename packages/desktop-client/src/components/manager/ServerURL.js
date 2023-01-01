@@ -1,22 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  AnchorLink,
-  Button
-} from 'loot-design/src/components/common';
-import { send } from 'loot-core/src/platform/client/fetch';
+import React from 'react';
+
+import { View, Text, AnchorLink } from 'loot-design/src/components/common';
+
+import { useServerURL } from '../../hooks/useServerURL';
 
 export default function ServerURL() {
-  let [url, setUrl] = useState(null);
-
-  useEffect(() => {
-    async function run() {
-      let url = await send('get-server-url');
-      setUrl(url);
-    }
-    run();
-  }, []);
+  const url = useServerURL();
 
   return (
     <View
@@ -32,7 +21,13 @@ export default function ServerURL() {
       }}
     >
       <Text>
-        Using server: <strong>{url || '(not configured)'}</strong>
+        {url ? (
+          <>
+            Using server: <strong>{url}</strong>
+          </>
+        ) : (
+          <strong>No server configured</strong>
+        )}
       </Text>
       <AnchorLink bare to="/config-server" style={{ marginLeft: 15 }}>
         Change

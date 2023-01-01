@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+
+import * as monthUtils from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { colors, styles } from 'loot-design/src/style';
 import {
   View,
   Text,
@@ -14,13 +16,12 @@ import {
   TableHeader,
   Row,
   Field,
-  Cell,
-  SelectCell
+  Cell
 } from 'loot-design/src/components/table';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import { colors } from 'loot-design/src/style';
 import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import Check from 'loot-design/src/svg/v2/Check';
+
 import DisplayId from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
 

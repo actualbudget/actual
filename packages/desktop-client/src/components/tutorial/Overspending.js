@@ -1,23 +1,17 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+
+import { bindActionCreators } from 'redux';
+
 import * as actions from 'loot-core/src/client/actions';
-import * as spreadsheet from 'loot-core/src/client/sheetql/spreadsheet';
-import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
-import {
-  Tooltip,
-  Pointer,
-  P,
-  View,
-  Text,
-  Button
-} from 'loot-design/src/components/common';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import Navigation from './Navigation';
-import { colors } from 'loot-design/src/style';
+import { P, View, Text, Button } from 'loot-design/src/components/common';
+import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
+import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
+
 import { Standalone, Title, useMinimized } from './common';
+import Navigation from './Navigation';
 
 function Overspending({ navigationProps, stepTwo }) {
   let currentMonth = monthUtils.currentMonth();
@@ -96,7 +90,6 @@ function Overspending({ navigationProps, stepTwo }) {
   );
 }
 
-export default connect(
-  null,
-  dispatch => bindActionCreators(actions, dispatch)
-)(Overspending);
+export default connect(null, dispatch => bindActionCreators(actions, dispatch))(
+  Overspending
+);

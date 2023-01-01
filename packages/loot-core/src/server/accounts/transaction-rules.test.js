@@ -1,4 +1,7 @@
+import q from '../../shared/query';
+import { runQuery } from '../aql';
 import * as db from '../db';
+import { loadMappings } from '../db/mappings';
 import {
   getRules,
   loadRules,
@@ -13,9 +16,6 @@ import {
   updateCategoryRules,
   migrateOldRules
 } from './transaction-rules';
-import { loadMappings } from '../db/mappings';
-import { runQuery } from '../aql/schema/run-query';
-import q from '../../shared/query';
 
 // TODO: write tests to make sure payee renaming is "pre" and category
 // setting is "null" stage

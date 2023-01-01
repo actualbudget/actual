@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Tooltip, Pointer, P } from 'loot-design/src/components/common';
-import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
+
 import * as monthUtils from 'loot-core/src/shared/months';
+import { P } from 'loot-design/src/components/common';
+
 import { Standalone, Title } from './common';
+import Navigation from './Navigation';
 
 function TransactionEnter({ fromYNAB, navigationProps }) {
   const currentDay = monthUtils.currentDay();

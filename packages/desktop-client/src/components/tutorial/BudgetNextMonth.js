@@ -1,17 +1,13 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+
+import { bindActionCreators } from 'redux';
+
 import * as actions from 'loot-core/src/client/actions';
-import {
-  View,
-  Tooltip,
-  Pointer,
-  P,
-  Button
-} from 'loot-design/src/components/common';
-import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
+import { View, P, Button } from 'loot-design/src/components/common';
+
 import { Standalone, Title, useMinimized } from './common';
+import Navigation from './Navigation';
 
 function BudgetNextMonth({ stepTwo, navigationProps }) {
   let [minimized, toggle] = useMinimized();
@@ -61,7 +57,6 @@ function BudgetNextMonth({ stepTwo, navigationProps }) {
   );
 }
 
-export default connect(
-  null,
-  dispatch => bindActionCreators(actions, dispatch)
-)(BudgetNextMonth);
+export default connect(null, dispatch => bindActionCreators(actions, dispatch))(
+  BudgetNextMonth
+);

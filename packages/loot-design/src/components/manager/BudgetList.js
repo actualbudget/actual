@@ -1,14 +1,20 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
+
+import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
+import Key from 'loot-design/src/svg/v2/Key';
+import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
+
 import { styles, colors } from '../../style';
 import CloudCheck from '../../svg/v1/CloudCheck';
 import CloudDownload from '../../svg/v1/CloudDownload';
-import CloudUnknown from '../../svg/v2/CloudUnknown';
-import FileDouble from '../../svg/v1/FileDouble';
-import Key from 'loot-design/src/svg/v2/Key';
 import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
-import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
+import FileDouble from '../../svg/v1/FileDouble';
+import CloudUnknown from '../../svg/v2/CloudUnknown';
+import {
+  isDevelopmentEnvironment,
+  isPreviewEnvironment
+} from '../../util/environment';
+import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -317,7 +323,7 @@ class BudgetList extends React.Component {
                 Create new file
               </Button>
 
-              {process.env.NODE_ENV === 'development' && (
+              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
                 <Button
                   primary
                   onClick={() => this.onCreate({ testMode: true })}

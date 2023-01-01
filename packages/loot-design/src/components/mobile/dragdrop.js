@@ -9,6 +9,7 @@ import React, {
 import { View, findNodeHandle } from 'react-native';
 import { State, LongPressGestureHandler } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
+
 import { colors } from '../../style';
 
 export const DragDropContext = React.createContext(null);
@@ -173,7 +174,7 @@ export function DragDrop({ makeHighlight, children, style }) {
             A.set(ax, absoluteX),
             A.set(ay, absoluteY),
 
-           A.call([ax, ay], onDragMove),
+            A.call([ax, ay], onDragMove)
           ])
         ])
     }

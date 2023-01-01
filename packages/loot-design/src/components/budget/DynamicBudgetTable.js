@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
+
 import { View } from '../common';
-import { BudgetPageHeader, BudgetTable } from './index';
-import { CategoryGroupsContext } from './util';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
+import { CategoryGroupsContext } from './util';
+
+import { BudgetPageHeader, BudgetTable } from './index';
 
 function getNumPossibleMonths(width) {
   let estimatedTableWidth = width - 200;

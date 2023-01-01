@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
+
 import { styles, colors } from '../../style';
 import Loading from '../../svg/v1/AnimatedLoading';
 

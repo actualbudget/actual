@@ -1,6 +1,6 @@
-import Spreadsheet from './spreadsheet';
-import * as db from '../db';
 import { generateTransaction } from '../../mocks';
+import * as db from '../db';
+import Spreadsheet from './spreadsheet';
 
 beforeEach(global.emptyDatabase());
 
@@ -161,7 +161,7 @@ describe('Spreadsheet', () => {
     expect(spreadsheet.getValue('foo!x')).toBe(1);
   });
 
-  test.skip('async cells work2', done => {
+  test('async cells work2', done => {
     const spreadsheet = new Spreadsheet();
 
     spreadsheet.transaction(() => {

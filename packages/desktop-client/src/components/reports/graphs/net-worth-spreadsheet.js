@@ -1,15 +1,17 @@
 import React from 'react';
-import { mergeObjects, flattenArray } from 'loot-core/src/shared/util';
-import * as monthUtils from 'loot-core/src/shared/months';
+
 import * as d from 'date-fns';
-import { AlignedText } from 'loot-design/src/components/common';
+
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import * as monthUtils from 'loot-core/src/shared/months';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger
 } from 'loot-core/src/shared/util';
-import { fromDateRepr, runAll, index } from '../util';
+import { AlignedText } from 'loot-design/src/components/common';
+
+import { index } from '../util';
 
 export default function createSpreadsheet(start, end, accounts) {
   return async (spreadsheet, setData) => {

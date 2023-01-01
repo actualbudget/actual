@@ -1,7 +1,7 @@
 import React from 'react';
+
 import { P, ModalButtons, Button } from 'loot-design/src/components/common';
-import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
+
 import { Standalone, Title, ExternalLink } from './common';
 
 function Final({ targetRect, navigationProps }) {
@@ -10,8 +10,12 @@ function Final({ targetRect, navigationProps }) {
       <Title>That's it!</Title>
       <P>
         With that workflow you can have peace of mind that what you are looking
-        at reflects reality. &#128524; The amount of money in a category is cash
-        that you can safely spend right now.
+        at reflects reality.{' '}
+        <span role="img" aria-label="Relieved smile" aria-hidden="true">
+          &#128524;
+        </span>{' '}
+        The amount of money in a category is cash that you can safely spend
+        right now.
       </P>
 
       <P>
@@ -25,7 +29,10 @@ function Final({ targetRect, navigationProps }) {
 
       <P isLast={true}>
         Read{' '}
-        <ExternalLink asAnchor href="https://actualbudget.com/how-it-works/">
+        <ExternalLink
+          asAnchor
+          href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+        >
           How it Works
         </ExternalLink>{' '}
         for an in-depth explanation of the budgeting workflow.

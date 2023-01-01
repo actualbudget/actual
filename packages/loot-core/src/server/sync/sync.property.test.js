@@ -1,14 +1,16 @@
-import * as prefs from '../prefs';
+import { merkle, getClock, Timestamp } from '../crdt';
 import * as db from '../db';
+import * as prefs from '../prefs';
 import * as sheet from '../sheet';
-import * as sync from './index';
-import { getClock, Timestamp } from '../crdt';
-import { merkle } from '../crdt';
 import * as encoder from './encoder';
+
+import * as sync from './index';
+
 const jsc = require('jsverify');
-const uuidGenerator = jsc
-  .integer(97, 122)
-  .smap(x => String.fromCharCode(x), x => x.charCodeAt(x));
+const uuidGenerator = jsc.integer(97, 122).smap(
+  x => String.fromCharCode(x),
+  x => x.charCodeAt(x)
+);
 
 const mockSyncServer = require('../tests/mockSyncServer');
 
@@ -126,7 +128,10 @@ Object.keys(schema).forEach(table => {
       generators.push(
         makeGen({
           table,
-          row: jsc.asciinestring.smap(x => 'sheet!' + x, x => x),
+          row: jsc.asciinestring.smap(
+            x => 'sheet!' + x,
+            x => x
+          ),
           field: 'expr',
           value: jsc.constant(JSON.stringify('fooooo'))
         })
@@ -166,7 +171,7 @@ function shuffle(arr) {
   let shuffled = new Array(src.length);
   let item;
   while ((item = src.pop())) {
-    let idx = (Math.random() * shuffled.length) | 0;
+    let idx = Math.floor(Math.random() * shuffled.length);
     if (shuffled[idx]) {
       src.push(item);
     } else {

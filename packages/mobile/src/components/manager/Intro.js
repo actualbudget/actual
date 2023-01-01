@@ -138,7 +138,7 @@ class Intro extends React.Component {
                         Actual is a privacy-focused app that lets you track your
                         finances without all the fuss. Create your own budgeting
                         workflows quickly and discover your spending habits.{' '}
-                        <ExternalLink href="https://actualbudget.com/">
+                        <ExternalLink href="https://actualbudget.github.io/docs/">
                           Learn more
                         </ExternalLink>
                       </Text>
