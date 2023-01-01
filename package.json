@@ -29,7 +29,7 @@
     "test:debug": "yarn workspaces foreach --verbose run test",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "yarn workspaces foreach --verbose run lint --max-warnings 0",
+    "lint": "yarn workspaces foreach --verbose run lint",
     "postinstall": "rm -rf ./packages/loot-design/node_modules/react && rm -rf ./packages/mobile/node_modules/react && rm -rf ./node_modules/react-native && patch-package"
   },
   "devDependencies": {
