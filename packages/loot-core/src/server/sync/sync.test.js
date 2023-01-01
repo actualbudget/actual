@@ -1,15 +1,12 @@
-import * as prefs from '../prefs';
+import { getClock, Timestamp } from '../crdt';
 import * as db from '../db';
+import * as prefs from '../prefs';
 import * as sheet from '../sheet';
-import Timestamp, { getClock } from '../timestamp';
 import { resolveName } from '../spreadsheet/util';
-import {
-  setSyncingMode,
-  sendMessages,
-  applyMessages,
-  fullSync
-} from './index';
 import * as encoder from './encoder';
+
+import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
+
 const mockSyncServer = require('../tests/mockSyncServer');
 
 beforeEach(() => {

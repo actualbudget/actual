@@ -20,34 +20,6 @@ function getMenu(isDev, createWindow) {
         //   }
         // },
         {
-          label: 'Manage Payees...',
-          enabled: false,
-          click(item, focusedWindow) {
-            if (
-              focusedWindow &&
-              focusedWindow.webContents.getTitle() === 'Actual'
-            ) {
-              focusedWindow.webContents.executeJavaScript(
-                '__actionsForMenu.pushModal("manage-payees")'
-              );
-            }
-          }
-        },
-        {
-          label: 'Manage Rules...',
-          enabled: false,
-          click(item, focusedWindow) {
-            if (
-              focusedWindow &&
-              focusedWindow.webContents.getTitle() === 'Actual'
-            ) {
-              focusedWindow.webContents.executeJavaScript(
-                '__actionsForMenu.pushModal("manage-rules")'
-              );
-            }
-          }
-        },
-        {
           label: 'Load Backup...',
           enabled: false,
           click(item, focusedWindow) {
@@ -202,7 +174,7 @@ function getMenu(isDev, createWindow) {
         {
           label: 'Learn More',
           click() {
-            shell.openExternal('https://actualbudget.com');
+            shell.openExternal('https://actualbudget.github.io/docs/');
           }
         }
       ]

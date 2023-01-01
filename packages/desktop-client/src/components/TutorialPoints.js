@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import PropTypes from 'prop-types';
-import lively from '@jlongster/lively';
 
 class Tutorial extends React.Component {
   static childContextTypes = {

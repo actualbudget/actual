@@ -1,7 +1,10 @@
 import React from 'react';
-import { toRelaxedNumber } from 'loot-core/src/shared/util';
+
+import { Formik } from 'formik';
+
 import { determineOffBudget } from 'loot-core/src/shared/accounts';
-import { styles, colors } from '../../style';
+import { toRelaxedNumber } from 'loot-core/src/shared/util';
+
 import {
   View,
   Modal,
@@ -14,7 +17,6 @@ import {
   FormError,
   InitialFocus
 } from '../common';
-import { Formik } from 'formik';
 
 function CreateLocalAccount({ modalProps, actions, history }) {
   return (
@@ -144,7 +146,9 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                 )}
 
                 <ModalButtons>
-                  <Button onClick={() => modalProps.onBack()}>Back</Button>
+                  <Button onClick={() => modalProps.onBack()} type="button">
+                    Back
+                  </Button>
                   <Button primary style={{ marginLeft: 10 }}>
                     Create
                   </Button>

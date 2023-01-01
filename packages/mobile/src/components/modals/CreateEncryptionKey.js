@@ -71,7 +71,7 @@ function CreateEncryptionKey({ route, navigation, actions }) {
             password whenever you set up a new device.{' '}
             <ExternalLink
               asAnchor
-              href="https://actualbudget.com/encrypted-syncing"
+              href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
             >
               Learn more
             </ExternalLink>
@@ -85,7 +85,7 @@ function CreateEncryptionKey({ route, navigation, actions }) {
               through that process on those devices.{' '}
               <ExternalLink
                 asAnchor
-                href="https://actualbudget.com/encrypted-syncing"
+                href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
               >
                 Learn more
               </ExternalLink>

@@ -4,8 +4,7 @@ import os from 'os';
 import * as sqlite from '../src/platform/server/sqlite';
 import * as db from '../src/server/db';
 import { batchMessages, setSyncingMode } from '../src/server/sync';
-import Timestamp from '../src/server/timestamp';
-import { runQuery } from '../src/server/aql/schema/run-query';
+import { runQuery } from '../src/server/aql';
 import asyncStorage from '../src/platform/server/asyncStorage';
 import { makeChild } from '../src/shared/transactions';
 import q from '../src/shared/query';
@@ -36,31 +35,31 @@ async function init() {
     for (let i = 0; i < 100; i++) {
       if (Math.random() < 0.02) {
         let parent = {
-          date: '2020-01-' + pad((Math.random() * 30) | 0),
-          amount: (Math.random() * 10000) | 0,
+          date: '2020-01-' + pad(Math.floor(Math.random() * 30)),
+          amount: Math.floor(Math.random() * 10000),
           account: accounts[0].id,
           notes: 'foo'
         };
         db.insertTransaction(parent);
         db.insertTransaction(
           makeChild(parent, {
-            amount: (Math.random() * 1000) | 0
+            amount: Math.floor(Math.random() * 1000) 
           })
         );
         db.insertTransaction(
           makeChild(parent, {
-            amount: (Math.random() * 1000) | 0
+            amount: Math.floor(Math.random() * 1000) 
           })
         );
         db.insertTransaction(
           makeChild(parent, {
-            amount: (Math.random() * 1000) | 0
+            amount: Math.floor(Math.random() * 1000) 
           })
         );
       } else {
         db.insertTransaction({
-          date: '2020-01-' + pad((Math.random() * 30) | 0),
-          amount: (Math.random() * 10000) | 0,
+          date: '2020-01-' + pad(Math.floor(Math.random() * 30)),
+          amount: Math.floor(Math.random() * 10000),
           account: accounts[0].id
         });
       }

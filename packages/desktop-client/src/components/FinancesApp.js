@@ -1,40 +1,43 @@
 import React, { useMemo } from 'react';
-import { Router, Route, Redirect, Switch, useLocation } from 'react-router-dom';
-import { createBrowserHistory } from 'history';
-import { connect } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
+import { connect } from 'react-redux';
+import { Router, Route, Redirect, Switch, useLocation } from 'react-router-dom';
+
+import { createBrowserHistory } from 'history';
 import hotkeys from 'hotkeys-js';
+
 import * as actions from 'loot-core/src/client/actions';
+import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
+import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
-import { colors } from 'loot-design/src/style';
-import { View } from 'loot-design/src/components/common';
-import BankSyncStatus from './BankSyncStatus';
-import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/BudgetMonthCountContext';
 import * as undo from 'loot-core/src/platform/client/undo';
-import { PageTypeProvider } from './Page';
-import { getLocationState } from '../util/location-state';
-import { ActiveLocationProvider } from './ActiveLocation';
-import { makeLocationState } from '../util/location-state';
-import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
-import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
+import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/BudgetMonthCountContext';
+import { View } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
 
-import Titlebar, { TitlebarProvider } from './Titlebar';
-import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
+import { getLocationState, makeLocationState } from '../util/location-state';
 import Account from './accounts/Account';
+import { ActiveLocationProvider } from './ActiveLocation';
+import BankSyncStatus from './BankSyncStatus';
 import Budget from './budget';
-import Reports from './reports';
-import Schedules from './schedules';
-import EditSchedule from './schedules/EditSchedule';
-import LinkSchedule from './schedules/LinkSchedule';
-import DiscoverSchedules from './schedules/DiscoverSchedules';
-import PostsOfflineNotification from './schedules/PostsOfflineNotification';
-import FixSplitsTool from './tools/FixSplitsTool';
-import Settings from './Settings';
+import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
+import GlobalKeys from './GlobalKeys';
+import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
 import Notifications from './Notifications';
-import GlobalKeys from './GlobalKeys';
+import { PageTypeProvider } from './Page';
+import { ManagePayeesPage } from './payees/ManagePayeesPage';
+import Reports from './reports';
+import Schedules from './schedules';
+import DiscoverSchedules from './schedules/DiscoverSchedules';
+import EditSchedule from './schedules/EditSchedule';
+import LinkSchedule from './schedules/LinkSchedule';
+import PostsOfflineNotification from './schedules/PostsOfflineNotification';
+import Settings from './Settings';
+import Titlebar, { TitlebarProvider } from './Titlebar';
+import FixSplitsTool from './tools/FixSplitsTool';
 // import Debugger from './Debugger';
 
 function URLBar() {
@@ -96,6 +99,8 @@ function Routes({ location }) {
           component={PostsOfflineNotification}
         />
 
+        <Route path="/rules" exact component={ManageRulesPage} />
+        <Route path="/payees" exact component={ManagePayeesPage} />
         <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
 
         <Route
@@ -277,7 +282,4 @@ function FinancesAppWithContext(props) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(FinancesAppWithContext);
+export default connect(null, actions)(FinancesAppWithContext);

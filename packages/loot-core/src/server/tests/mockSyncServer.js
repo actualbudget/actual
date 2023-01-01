@@ -1,8 +1,9 @@
 import dateFns from 'date-fns';
-import * as merkle from '../merkle';
-import Timestamp, { makeClock } from '../timestamp';
-const defaultMockData = require('./mockData').basic;
+
+import { makeClock, Timestamp, merkle } from '../crdt';
+
 const SyncPb = require('../sync/proto/sync_pb');
+const defaultMockData = require('./mockData').basic;
 
 const handlers = {};
 let currentMockData = defaultMockData;

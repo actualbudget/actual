@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { colors } from '../../style';
 import { View, Text, Block, Modal, Button } from '../common';
-import { Row, Cell, DeleteCell } from '../table';
-import { styles, colors } from '../../style';
+import { Row, Cell } from '../table';
 
 class BackupTable extends React.Component {
   state = { hoveredBackup: null };

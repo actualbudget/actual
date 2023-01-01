@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, TextInput } from 'react-native';
-import CellValue from '../spreadsheet/CellValue';
-import { TransactionList } from './transaction';
-import Search from '../../svg/v1/Search';
-import { Label } from './common';
+
 import { colors } from '../../style';
+import Search from '../../svg/v1/Search';
+import CellValue from '../spreadsheet/CellValue';
+import { Label } from './common';
+import { TransactionList } from './transaction';
 
 class TransactionSearchInput extends React.Component {
   state = { text: '' };
@@ -64,7 +65,7 @@ export function AccountDetails({
     return prependTransactions.concat(transactions);
   }, [prependTransactions, transactions]);
 
-  console.log('rendering')
+  console.log('rendering');
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>

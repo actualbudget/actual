@@ -1,8 +1,23 @@
 import LRU from 'lru-cache';
-import * as sqlite from '../../platform/server/sqlite';
+
 import fs from '../../platform/server/fs';
-import { sendMessages, batchMessages } from '../sync';
-import { schema, schemaConfig } from '../aql/schema';
+import * as sqlite from '../../platform/server/sqlite';
+import { groupById } from '../../shared/util';
+import {
+  schema,
+  schemaConfig,
+  convertForInsert,
+  convertForUpdate,
+  convertFromSelect
+} from '../aql';
+import {
+  makeClock,
+  setClock,
+  serializeClock,
+  deserializeClock,
+  makeClientId,
+  Timestamp
+} from '../crdt';
 import {
   accountModel,
   categoryModel,
@@ -10,19 +25,7 @@ import {
   payeeModel,
   payeeRuleModel
 } from '../models';
-import { groupById } from '../../shared/util';
-import Timestamp, {
-  makeClock,
-  setClock,
-  serializeClock,
-  deserializeClock,
-  makeClientId
-} from '../timestamp';
-import {
-  convertForInsert,
-  convertForUpdate,
-  convertFromSelect
-} from '../aql/schema-helpers';
+import { sendMessages, batchMessages } from '../sync';
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';

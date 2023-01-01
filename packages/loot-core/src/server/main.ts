@@ -1,21 +1,27 @@
 import './polyfills';
-import { differenceInDays } from 'date-fns';
-import asyncStorage from '../platform/server/asyncStorage';
+import injectAPI from '@actual-app/api/injected';
+
+import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
-import * as prefs from './prefs';
+import asyncStorage from '../platform/server/asyncStorage';
 import fs from '../platform/server/fs';
-import * as sqlite from '../platform/server/sqlite';
 import logger from '../platform/server/log';
-import Platform from './platform';
-import * as db from './db';
-import * as sheet from './sheet';
-import { withUndo, clearUndo, undo, redo } from './undo';
-import { updateVersion } from './update';
-import { Condition, Action, rankRules } from './accounts/rules';
-import * as rules from './accounts/transaction-rules';
-import * as mappings from './db/mappings';
-import { batchUpdateTransactions } from './accounts/transactions';
+import * as sqlite from '../platform/server/sqlite';
+import { fromPlaidAccountType } from '../shared/accounts';
+import * as monthUtils from '../shared/months';
+import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
+import { amountToInteger, stringToInteger } from '../shared/util';
+import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
+import * as link from './accounts/link';
+import { parseFile } from './accounts/parse-file';
+import { getStartingBalancePayee } from './accounts/payees';
+import { Condition, Action, rankRules } from './accounts/rules';
+import * as bankSync from './accounts/sync';
+import * as rules from './accounts/transaction-rules';
+import { batchUpdateTransactions } from './accounts/transactions';
+import installAPI from './api';
+import { runQuery as aqlQuery } from './aql';
 import {
   getAvailableBackups,
   loadBackup,
@@ -23,16 +29,32 @@ import {
   startBackupService,
   stopBackupService
 } from './backups';
-import { amountToInteger, stringToInteger } from '../shared/util';
-import * as monthUtils from '../shared/months';
-import { fromPlaidAccountType } from '../shared/accounts';
+import budgetApp from './budget/app';
 import * as budget from './budget/base';
-import * as bankSync from './accounts/sync';
-import * as link from './accounts/link';
-import { uniqueFileName, idFromFileName } from './util/budget-name';
+import * as cloudStorage from './cloud-storage';
+import {
+  getClock,
+  setClock,
+  makeClock,
+  makeClientId,
+  serializeClock,
+  deserializeClock,
+  Timestamp,
+  merkle
+} from './crdt';
+import * as db from './db';
+import * as mappings from './db/mappings';
+import encryption from './encryption';
+import { APIError, TransactionError, PostError, RuleError } from './errors';
+import app from './main-app';
 import { mutator, runHandler } from './mutators';
-import * as timestamp from './timestamp';
-import * as merkle from './merkle';
+import notesApp from './notes/app';
+import Platform from './platform';
+import { get, post } from './post';
+import * as prefs from './prefs';
+import schedulesApp from './schedules/app';
+import { getServer, setServer } from './server-config';
+import * as sheet from './sheet';
 import {
   initialFullSync,
   fullSync,
@@ -45,33 +67,16 @@ import {
   repairSync
 } from './sync';
 import * as syncMigrations from './sync/migrate';
-import { getStartingBalancePayee } from './accounts/payees';
-import { parseFile } from './accounts/parse-file';
-import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
-import { getServer, setServer } from './server-config';
-import installAPI from './api';
-import injectAPI from '@actual-app/api/injected';
-import * as cloudStorage from './cloud-storage';
-import encryption from './encryption';
-import * as tracking from './tracking/events';
-import { get, post } from './post';
-import { APIError, TransactionError, PostError, RuleError } from './errors';
-import { createTestBudget } from '../mocks/budget';
-import { runQuery as aqlQuery } from './aql/schema/run-query';
-import { Query } from '../shared/query';
-import q from '../shared/query';
-import app from './main-app';
-
-// Apps
-import schedulesApp from './schedules/app';
-import budgetApp from './budget/app';
-import notesApp from './notes/app';
 import toolsApp from './tools/app';
+import { withUndo, clearUndo, undo, redo } from './undo';
+import { updateVersion } from './update';
+import { uniqueFileName, idFromFileName } from './util/budget-name';
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');
-const uuid = require('../platform/uuid');
+
 const connection = require('../platform/server/connection');
+const uuid = require('../platform/uuid');
 const { resolveName, unresolveName } = require('./spreadsheet/util');
 const SyncPb = require('./sync/proto/sync_pb');
 
@@ -1209,10 +1214,6 @@ handlers['save-global-prefs'] = async function(prefs) {
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if ('trackUsage' in prefs) {
-    tracking.toggle(prefs.trackUsage);
-    await asyncStorage.setItem('track-usage', '' + prefs.trackUsage);
-  }
   if ('autoUpdate' in prefs) {
     await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
     process.send({ type: 'shouldAutoUpdate', flag: prefs.autoUpdate });
@@ -1233,7 +1234,6 @@ handlers['load-global-prefs'] = async function() {
     [, floatingSidebar],
     [, seenTutorial],
     [, maxMonths],
-    [, trackUsage],
     [, autoUpdate],
     [, documentDir],
     [, encryptKey]
@@ -1241,7 +1241,6 @@ handlers['load-global-prefs'] = async function() {
     'floating-sidebar',
     'seen-tutorial',
     'max-months',
-    'track-usage',
     'auto-update',
     'document-dir',
     'encrypt-key'
@@ -1250,8 +1249,6 @@ handlers['load-global-prefs'] = async function() {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
     seenTutorial: seenTutorial === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
-    // Default to true
-    trackUsage: trackUsage == null || trackUsage === 'true' ? true : false,
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id
@@ -1317,7 +1314,7 @@ handlers['key-make'] = async function({ password }) {
     salt,
     testContent: JSON.stringify({
       ...testContent,
-      value: testContent.value.toString('base64')
+      value: testContent.value.toString()
     })
   });
 };
@@ -1508,6 +1505,24 @@ handlers['subscribe-sign-out'] = async function() {
   return 'ok';
 };
 
+handlers['get-server-version'] = async function() {
+  if (!getServer() || getServer().BASE_SERVER === UNCONFIGURED_SERVER) {
+    return { error: 'no-server' };
+  }
+
+  let version;
+  try {
+    const res = await get(getServer().BASE_SERVER + '/info');
+
+    const info = JSON.parse(res);
+    version = info.build.version;
+  } catch (err) {
+    return { error: 'network-failure' };
+  }
+
+  return { version };
+};
+
 handlers['get-server-url'] = async function() {
   return getServer() && getServer().BASE_SERVER;
 };
@@ -1669,27 +1684,6 @@ handlers['load-budget'] = async function({ id }) {
   }
 
   const res = await loadBudget(id, VERSION, { showUpdate: true });
-
-  async function trackSizes() {
-    const getFileSize = async name => {
-      const dbFile = fs.join(fs.getBudgetDir(id), name);
-      try {
-        return await fs.size(dbFile);
-      } catch (err) {
-        return null;
-      }
-    };
-
-    try {
-      const dbSize = await getFileSize('db.sqlite');
-      const cacheSize = await getFileSize('cache.sqlite');
-      tracking.track('app:load-budget', { size: dbSize, cacheSize });
-    } catch (err) {
-      console.warn(err);
-    }
-  }
-  trackSizes();
-
   return res;
 };
 
@@ -1972,10 +1966,10 @@ async function loadBudget(id, appVersion, { showUpdate = false } = {}) {
     //
     // TODO: The client id should be stored elsewhere. It shouldn't
     // work this way, but it's fine for now.
-    timestamp.getClock().timestamp.setNode(timestamp.makeClientId());
+    getClock().timestamp.setNode(makeClientId());
     await db.runQuery(
       'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-      [timestamp.serializeClock(timestamp.getClock())]
+      [serializeClock(getClock())]
     );
 
     await prefs.savePrefs({ resetClock: false });
@@ -2094,10 +2088,6 @@ handlers['app-focused'] = async function() {
   }
 };
 
-handlers['track'] = async function({ name, props }) {
-  tracking.track(name, props);
-};
-
 handlers = installAPI(handlers);
 
 injectAPI.send = (name, args) => runHandler(app.handlers[name], args);
@@ -2150,7 +2140,6 @@ export async function initApp(version, isDev, socketName) {
 
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
-  await tracking.init();
   await setupDocumentsDir();
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
@@ -2183,10 +2172,6 @@ export async function initApp(version, isDev, socketName) {
   }
 
   connection.init(socketName, app.handlers);
-
-  tracking.track('app:init', {
-    platform: Platform.isMobile ? 'mobile' : Platform.isWeb ? 'web' : 'desktop'
-  });
 
   if (!isDev && !Platform.isMobile && !Platform.isWeb) {
     const autoUpdate = await asyncStorage.getItem('auto-update');
@@ -2257,7 +2242,15 @@ export const lib = {
 
   // Expose CRDT mechanisms so server can use them
   merkle,
-  timestamp,
+  timestamp: {
+    getClock,
+    setClock,
+    makeClock,
+    makeClientId,
+    serializeClock,
+    deserializeClock,
+    Timestamp
+  },
   SyncProtoBuf: SyncPb
 };
 

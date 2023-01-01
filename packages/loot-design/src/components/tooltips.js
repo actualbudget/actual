@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+
 import { css, before } from 'glamor';
+
 import { styles } from '../style';
 
 export const IntersectionBoundary = React.createContext();
@@ -189,7 +191,8 @@ export class Tooltip extends React.Component {
         // If it doesn't fit below it, switch it above only if it does
         // fit above it
         (this.position.indexOf('bottom') !== -1 &&
-          (testBottom > containerRect.height && testTop > 0))
+          testBottom > containerRect.height &&
+          testTop > 0)
       ) {
         // Invert the position
         this.position = this.getOppositePosition(this.position);
@@ -239,6 +242,8 @@ export class Tooltip extends React.Component {
         return 'top-center';
       case 'top-center':
         return 'bottom-center';
+      case 'right':
+        return 'right';
       default:
     }
   }
@@ -297,6 +302,9 @@ export class Tooltip extends React.Component {
       style.top = anchorRect.top + anchorRect.height + offset + 'px';
       style.left = anchorRect.left + 'px';
       style.width = anchorRect.width + 'px';
+    } else if (position === 'right') {
+      style.top = anchorRect.top + 'px';
+      style.left = anchorRect.left + anchorRect.width + offset + 'px';
     } else {
       throw new Error('Invalid position for Tooltip: ' + position);
     }

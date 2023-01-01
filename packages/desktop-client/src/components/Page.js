@@ -1,7 +1,8 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+
 import { Modal, View, Text } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+import { styles } from 'loot-design/src/style';
 
 let PageTypeContext = React.createContext({ type: 'page' });
 

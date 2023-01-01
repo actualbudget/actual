@@ -1,5 +1,3 @@
-let currencyFormatter = require('currency-formatter');
-
 export function cleanUUID(uuid) {
   return uuid.replace(/-/g, '');
 }
@@ -267,7 +265,7 @@ export function setNumberFormat(format) {
 
   switch (format) {
     case 'space-comma':
-      locale = 'za-ZA';
+      locale = 'en-ZA';
       regex = /[^-0-9,]/g;
       separator = ',';
       break;
@@ -286,12 +284,10 @@ export function setNumberFormat(format) {
   numberFormat = {
     value: format,
     separator,
-    // This is the keep in line with the Intl API which we might
-    // switch to when it's available on all mobile platforms
-    formatter: {
-      format: number =>
-        currencyFormatter.format(number, { locale, format: '%v' })
-    },
+    formatter: new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }),
     regex
   };
 }
@@ -300,7 +296,31 @@ export function getNumberFormat() {
   return numberFormat;
 }
 
-setNumberFormat('1,000.33');
+setNumberFormat('comma-dot');
+
+// Number utilities
+
+// We dont use `Number.MAX_SAFE_NUMBER` and such here because those
+// numbers are so large that it's not safe to convert them to floats
+// (i.e. N / 100). For example, `9007199254740987 / 100 ===
+// 90071992547409.88`. While the internal arithemetic would be correct
+// because we always do that on numbers, the app would potentially
+// display wrong numbers. Instead of `2**53` we use `2**51` which
+// gives division more room to be correct
+const MAX_SAFE_NUMBER = 2 ** 51 - 1;
+const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
+
+export function safeNumber(value) {
+  if (!Number.isInteger(value)) {
+    throw new Error('safeNumber: number is not an integer: ' + value);
+  }
+  if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
+    throw new Error(
+      "safeNumber: can't safely perform arithmetic with number: " + value
+    );
+  }
+  return value;
+}
 
 export function toRelaxedNumber(value) {
   return integerToAmount(currencyToInteger(value) || 0);
@@ -311,16 +331,11 @@ export function toRelaxedInteger(value) {
 }
 
 export function integerToCurrency(n) {
-  // Awesome
-  return numberFormat.formatter.format(n / 100);
+  return numberFormat.formatter.format(safeNumber(n) / 100);
 }
 
 export function amountToCurrency(n) {
   return numberFormat.formatter.format(n);
-}
-
-export function amountToPrettyCurrency(n, code) {
-  return currencyFormatter.format(n, { code });
 }
 
 export function currencyToAmount(str) {
@@ -348,7 +363,7 @@ export function amountToInteger(n) {
 }
 
 export function integerToAmount(n) {
-  return parseFloat((n / 100).toFixed(2));
+  return parseFloat((safeNumber(n) / 100).toFixed(2));
 }
 
 // This is used when the input format could be anything (from

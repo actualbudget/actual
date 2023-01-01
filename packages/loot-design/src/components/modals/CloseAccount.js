@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
+
 import { Formik } from 'formik';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  P,
-  Select,
-  FormError,
-  AnchorLink
-} from '../common';
+
 import { integerToCurrency } from 'loot-core/src/shared/util';
+
 import { colors } from '../../style';
+import { View, Text, Modal, Button, P, Select, FormError } from '../common';
 
 function needsCategory(account, currentTransfer, accounts) {
   const acct = accounts.find(a => a.id === currentTransfer);
@@ -122,7 +116,7 @@ function CloseAccount({
                   <View>
                     <P>
                       This account has a balance of{' '}
-                      <strong>${integerToCurrency(balance)}</strong>. To close
+                      <strong>{integerToCurrency(balance)}</strong>. To close
                       this account, select a different account to transfer this
                       balance to:
                     </P>

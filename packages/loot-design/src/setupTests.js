@@ -1,5 +1,6 @@
 import { fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+
 import { resetStore } from 'loot-core/src/mocks/redux';
 
 const uuid = require('loot-core/src/platform/uuid');
@@ -23,11 +24,11 @@ global.Date.now = () => 123456789;
 
 let seqId = 1;
 uuid.v4 = function() {
-  return Promise.resolve('testing-uuid-' + ((Math.random() * 1000000) | 0));
+  return Promise.resolve('testing-uuid-' + Math.floor(Math.random() * 1000000));
 };
 
 uuid.v4Sync = function() {
-  return 'testing-uuid-' + ((Math.random() * 1000000) | 0);
+  return 'testing-uuid-' + Math.floor(Math.random() * 1000000);
 };
 
 global.__resetWorld = () => {
@@ -53,7 +54,7 @@ process.on('unhandledRejection', reason => {
 });
 
 global.afterEach(() => {
-  __resetWorld();
+  global.__resetWorld();
 });
 
 // https://github.com/testing-library/react-testing-library#suppressing-unnecessary-warnings-on-react-dom-168

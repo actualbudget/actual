@@ -3,12 +3,9 @@ import React, {
   useEffect,
   useLayoutEffect,
   useState,
-  useCallback,
-  useMemo
+  useCallback
 } from 'react';
-import { css } from 'glamor';
 import mergeRefs from 'react-merge-refs';
-import hotkeys from 'hotkeys-js';
 import ReactModal from 'react-modal';
 import {
   Route,
@@ -17,27 +14,30 @@ import {
   useHistory,
   useRouteMatch
 } from 'react-router-dom';
+
 import {
-  Listbox,
   ListboxInput,
   ListboxButton,
   ListboxPopover,
   ListboxList,
   ListboxOption
 } from '@reach/listbox';
-import { styles, colors } from '../style';
+import { css } from 'glamor';
+import hotkeys from 'hotkeys-js';
+
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+
+import { styles, colors } from '../style';
 import Delete from '../svg/Delete';
 import Loading from '../svg/v1/AnimatedLoading';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
-import View from './View';
 import Text from './Text';
-import Stack from './Stack';
 import { useProperFocus } from './useProperFocus';
+import View from './View';
 
-export View from './View';
-export Text from './Text';
-export Stack from './Stack';
+export { default as View } from './View';
+export { default as Text } from './Text';
+export { default as Stack } from './Stack';
 
 export const useStableCallback = callback => {
   const callbackRef = useRef();
@@ -823,7 +823,8 @@ export function Modal({
           <View
             style={{
               padding: 20,
-              position: 'relative'
+              position: 'relative',
+              flexShrink: 0
             }}
           >
             {showTitle && (
@@ -938,10 +939,6 @@ export function ModalButtons({
         style
       ]}
     >
-      {/* Add a dummy button first so that when a user
-          presses "enter" they do a normal submit, instead of
-          activating the back button */}
-      <Button data-hidden={true} style={{ display: 'none' }} />
       {leftContent}
       <View style={{ flex: 1 }} />
       {children}

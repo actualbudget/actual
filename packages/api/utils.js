@@ -1,5 +1,5 @@
 function amountToInteger(n) {
-  return Math.round(n * 100) | 0;
+  return Math.round(n * 100);
 }
 
 function integerToAmount(n) {

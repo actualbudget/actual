@@ -1,8 +1,10 @@
 import React from 'react';
+
 import { Tooltip, Pointer, P } from 'loot-design/src/components/common';
-import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
+
 import { Title } from './common';
+import Navigation from './Navigation';
 
 function BudgetSummary({ fromYNAB, targetRect, navigationProps }) {
   return (

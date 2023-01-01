@@ -1,16 +1,13 @@
 import fc from 'fast-check';
-import * as db from '../../db';
-import query from '../../../shared/query';
-import { makeChild } from '../../../shared/transactions';
-import { batchMessages, setSyncingMode } from '../../sync/index';
-import { setClock } from '../../timestamp';
-import { groupById } from '../../../shared/util';
-import arbs from '../../../mocks/arbitrary-schema';
-import { isAggregateQuery } from '../compiler';
-import { runQuery } from './run-query';
-import { toGroup, isHappyPathQuery } from './executors';
 
-const uuid = require('../../../platform/uuid');
+import arbs from '../../../mocks/arbitrary-schema';
+import query from '../../../shared/query';
+import { groupById } from '../../../shared/util';
+import { setClock } from '../../crdt';
+import * as db from '../../db';
+import { batchMessages, setSyncingMode } from '../../sync/index';
+import { isHappyPathQuery } from './executors';
+import { runQuery } from './run-query';
 
 beforeEach(global.emptyDatabase());
 
@@ -94,7 +91,7 @@ function expectTransactionOrder(data, fields) {
 }
 
 async function expectPagedData(query, numTransactions, allData) {
-  let pageCount = Math.max((numTransactions / 3) | 0, 3);
+  let pageCount = Math.max(Math.floor(numTransactions / 3), 3);
   let pagedData = [];
   let done = false;
 

@@ -1,19 +1,22 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { css } from 'glamor';
+
 import * as actions from 'loot-core/src/client/actions';
 import {
   init as initConnection,
   send
 } from 'loot-core/src/platform/client/fetch';
-import installPolyfills from '../polyfills';
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
-import FatalError from './FatalError';
-import ManagementApp from './manager/ManagementApp';
-import FinancesApp from './FinancesApp';
+
+import installPolyfills from '../polyfills';
 import AppBackground from './AppBackground';
-import UpdateNotification from './UpdateNotification';
+import FatalError from './FatalError';
+import FinancesApp from './FinancesApp';
+import ManagementApp from './manager/ManagementApp';
 import MobileWebMessage from './MobileWebMessage';
+import UpdateNotification from './UpdateNotification';
 
 class App extends React.Component {
   state = {
