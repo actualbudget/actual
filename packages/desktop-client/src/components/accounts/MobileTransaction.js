@@ -8,6 +8,7 @@ import { useListState } from '@react-stately/list';
 import memoizeOne from 'memoize-one';
 
 import * as monthUtils from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { titleFirst } from 'loot-core/src/shared/util';
 import { integerToCurrency, groupById } from 'loot-core/src/shared/util';
 import { Text, TextOneLine, View } from 'loot-design/src/components/common';
@@ -113,6 +114,11 @@ export class Transaction extends React.PureComponent {
       notes,
       schedule
     } = transaction;
+
+    if (isPreviewId(id)) {
+      amount = getScheduledAmount(amount);
+    }
+
     let categoryName = category ? lookupName(categories, category) : null;
 
     let payee = payees && payeeId && getPayeesById(payees)[payeeId];
