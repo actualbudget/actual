@@ -407,8 +407,8 @@ function Tools() {
   let items = [
     { name: 'payees', text: 'Payees' },
     { name: 'rules', text: 'Rules' },
-    { name: 'settings', text: 'Settings' },
-    { name: 'help', text: 'Help' }
+    { name: 'settings', text: 'Budget Settings' },
+    { name: 'help', text: 'Actual Help' }
   ];
 
   let onMenuSelect = useCallback(
