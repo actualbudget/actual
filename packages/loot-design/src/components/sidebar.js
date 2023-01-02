@@ -408,7 +408,7 @@ function Tools() {
     { name: 'payees', text: 'Payees' },
     { name: 'rules', text: 'Rules' },
     { name: 'settings', text: 'Budget Settings' },
-    { name: 'help', text: 'Actual Help' }
+    { name: 'docs', text: 'Documentation' }
   ];
 
   let onMenuSelect = useCallback(
@@ -423,7 +423,7 @@ function Tools() {
         case 'settings':
           history.push('/settings');
           break;
-        case 'help':
+        case 'docs':
           window.open('https://actualbudget.github.io/docs', '_blank');
           break;
         default:
