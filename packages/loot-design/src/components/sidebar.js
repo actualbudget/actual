@@ -15,6 +15,7 @@ import Add from '../svg/v1/Add';
 import ArrowLeft from '../svg/v1/ArrowLeft';
 import ChevronRight from '../svg/v1/CheveronRight';
 import Cog from '../svg/v1/Cog';
+import Pin from '../svg/v1/Pin';
 import Reports from '../svg/v1/Reports';
 import Wallet from '../svg/v1/Wallet';
 import Wrench from '../svg/v1/Wrench';
@@ -366,8 +367,18 @@ function Accounts({
 function ToggleButton({ style, onFloat }) {
   return (
     <View className="float" style={[style, { flexShrink: 0 }]}>
-      <Button bare onClick={onFloat}>
-        <ArrowButtonLeft1 style={{ width: 13, height: 13, color: colors.n5 }} />
+      <Button bare title="Enable floating sidebar" onClick={onFloat}>
+        <Pin
+          style={{
+            width: 16,
+            height: 16,
+            color: colors.n5,
+            transform: 'rotate(45deg)',
+            position: 'relative',
+            top: 1,
+            left: -1
+          }}
+        />
       </Button>
     </View>
   );

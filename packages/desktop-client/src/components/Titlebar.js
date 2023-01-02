@@ -18,8 +18,8 @@ import {
 import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
 import { colors } from 'loot-design/src/style';
 import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
+import Pin from 'loot-design/src/svg/v1/Pin';
 import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
-import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
@@ -279,20 +279,22 @@ function Titlebar({
           }}
           onMouseEnter={() => sidebar.show()}
           onMouseLeave={() => sidebar.hide()}
+          title="Pin sidebar open"
           onClick={() => {
             saveGlobalPrefs({ floatingSidebar: !floatingSidebar });
           }}
         >
           <View style={{ width: 15, height: 15 }}>
-            <ArrowButtonRight1
+            <Pin
               className="arrow-right"
               style={{
-                width: 13,
-                height: 13,
+                width: 16,
+                height: 16,
                 color: colors.n5,
                 position: 'absolute',
+                transform: 'rotate(45deg)',
                 top: 1,
-                left: 1
+                left: -1
               }}
             />
             <NavigationMenu
