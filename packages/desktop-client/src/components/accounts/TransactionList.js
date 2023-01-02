@@ -78,16 +78,9 @@ export default function TransactionList({
   onCloseAddTransaction,
   onCreatePayee
 }) {
-  // let table = useRef();
   let transactionsLatest = useRef();
   let scrollTo = useRef();
   let history = useHistory();
-
-  // useEffect(() => {
-  //   if (scrollTo.current) {
-  //     // table.current.scrollTo(scrollTo.current);
-  //   }
-  // }, [transactions]);
 
   useEffect(clearScrollTo);
 
