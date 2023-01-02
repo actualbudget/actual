@@ -442,7 +442,7 @@ function Tools() {
         onClick={onToggle}
         style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
         forceHover={isOpen}
-        forceActive={['/payees', '/rules'].some(route =>
+        forceActive={['/payees', '/rules', '/settings'].some(route =>
           location.pathname.startsWith(route)
         )}
         button={
