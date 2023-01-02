@@ -27,7 +27,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
             {parts.map((part, idx) => {
               let match = part.match(/\[([^\]]*)\]\(([^)]*)\)/);
               if (match) {
-                let [, text, href] = match;
+                let [_, text, href] = match;
 
                 if (href[0] === '#') {
                   let actionName = href.slice(1);

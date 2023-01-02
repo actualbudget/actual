@@ -3,6 +3,13 @@ module.exports = {
   extends: ['react-app'],
   rules: {
     'prettier/prettier': 'error',
+    'no-unused-vars': [
+      'warn',
+      {
+        argsIgnorePattern: '.*', // to keep backwards-compatibility; TODO: consider removing this too
+        varsIgnorePattern: '^_'
+      }
+    ],
     'no-loop-func': 'off',
     'no-restricted-globals': 'off',
 
