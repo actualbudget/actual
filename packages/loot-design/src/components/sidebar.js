@@ -383,12 +383,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
     setMenuOpen(false);
 
     switch (type) {
-      case 'settings':
-        history.push('/settings');
-        break;
-      case 'help':
-        window.open('https://actualbudget.github.io/docs', '_blank');
-        break;
       case 'close':
         dispatch(closeBudget());
         break;
@@ -396,11 +390,7 @@ const MenuButton = withRouter(function MenuButton({ history }) {
     }
   }
 
-  let items = [
-    { name: 'settings', text: 'Settings' },
-    { name: 'help', text: 'Help' },
-    { name: 'close', text: 'Close File' }
-  ];
+  let items = [{ name: 'close', text: 'Close File' }];
 
   return (
     <Button
@@ -438,7 +428,9 @@ function Tools() {
 
   let items = [
     { name: 'payees', text: 'Payees' },
-    { name: 'rules', text: 'Rules' }
+    { name: 'rules', text: 'Rules' },
+    { name: 'settings', text: 'Settings' },
+    { name: 'help', text: 'Help' }
   ];
 
   let onMenuSelect = useCallback(
@@ -449,6 +441,12 @@ function Tools() {
           break;
         case 'rules':
           history.push('/rules');
+          break;
+        case 'settings':
+          history.push('/settings');
+          break;
+        case 'help':
+          window.open('https://actualbudget.github.io/docs', '_blank');
           break;
         default:
       }
