@@ -88,17 +88,8 @@ export function Link({ style, children, ...nativeProps }) {
   );
 }
 
-export function AnchorLink({
-  staticContext,
-  to,
-  exact,
-  style,
-  activeStyle,
-  children
-}) {
-  let history = useHistory();
-  let href = history.createHref(typeof to === 'string' ? { pathname: to } : to);
-  let match = useRouteMatch({ path: to, exact: true });
+export function AnchorLink({ to, exact, style, activeStyle, children }) {
+  let match = useRouteMatch({ path: to, exact });
 
   return (
     <NavLink
@@ -126,7 +117,6 @@ export const ExternalLink = React.forwardRef((props, ref) => {
 
 function ButtonLink_({
   history,
-  staticContext,
   to,
   style,
   activeStyle,
