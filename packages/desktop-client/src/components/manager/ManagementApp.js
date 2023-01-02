@@ -231,6 +231,14 @@ class ManagementApp extends React.Component {
             <Route exact path="/" component={ServerURL} />
           </Switch>
           <Version />
+          <a
+            href="https://actualbudget.github.io/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ position: 'absolute', bottom: 15, left: 15, zIndex: 5001 }}
+          >
+            Help
+          </a>
         </View>
       </Router>
     );
