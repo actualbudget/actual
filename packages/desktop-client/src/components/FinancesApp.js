@@ -101,7 +101,6 @@ function Routes({ location }) {
 
         <Route path="/rules" exact component={ManageRulesPage} />
         <Route path="/payees" exact component={ManagePayeesPage} />
-        <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
 
         <Route
           path="/accounts/:id"

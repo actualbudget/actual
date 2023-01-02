@@ -148,15 +148,6 @@ function getMenu(isDev, createWindow) {
               '__history && __history.push("/schedule/discover", { locationPtr: __history.location })'
             );
           }
-        },
-        {
-          label: 'Repair split transactions',
-          enabled: false,
-          click: function(menuItem, focusedWin) {
-            focusedWin.webContents.executeJavaScript(
-              '__history && __history.push("/tools/fix-splits", { locationPtr: __history.location })'
-            );
-          }
         }
       ]
     },
