@@ -11,7 +11,6 @@ import useServerVersion from '../../hooks/useServerVersion';
 import { Page } from '../Page';
 import EncryptionSettings from './Encryption';
 import Export from './Export';
-import FixSplitsTool from './FixSplits';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
@@ -76,7 +75,6 @@ function Settings({
           <AdvancedAbout prefs={prefs} />
           <ResetCache />
           <ResetSync resetSync={resetSync} />
-          <FixSplitsTool />
         </AdvancedToggle>
       </View>
     </Page>
