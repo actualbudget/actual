@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
-import Platform from 'loot-core/src/client/platform';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import {
   View,
   Stack,
-  Button,
   ButtonWithLoading,
   P
 } from 'loot-design/src/components/common';
@@ -133,7 +131,6 @@ export default function DiscoverSchedules() {
   }, []);
 
   async function onCreate() {
-    let items = selectedInst.items;
     let selected = schedules.filter(s => selectedInst.items.has(s.id));
     setCreating(true);
 

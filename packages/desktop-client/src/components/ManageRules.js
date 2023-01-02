@@ -13,15 +13,11 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
-import {
-  extractScheduleConds,
-  getRecurringDescription
-} from 'loot-core/src/shared/schedules';
+import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   View,
   Text,
-  Modal,
   Button,
   Stack,
   ExternalLink
@@ -42,8 +38,6 @@ import useSelected, {
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
 import ArrowRight from 'loot-design/src/svg/RightArrow2';
-
-import { Page } from './Page';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
@@ -294,7 +288,6 @@ let Rule = React.memo(
     onEdit,
     onEditRule
   }) => {
-    let dispatch = useDispatch();
     let dispatchSelected = useSelectedDispatch();
     let borderColor = selected ? colors.b8 : colors.border;
     let backgroundFocus = hovered || focusedField === 'select';
@@ -580,7 +573,6 @@ export default function ManageRules({
 
           setRules(rules => {
             let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
-            let oldIdx = rules.findIndex(rule => rule.id === newRule.id);
 
             if (newIdx > rules.length) {
               return newRules.slice(0, newIdx + 75);
