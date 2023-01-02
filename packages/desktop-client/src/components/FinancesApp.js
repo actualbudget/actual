@@ -37,7 +37,6 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './Settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
-import FixSplitsTool from './tools/FixSplitsTool';
 // import Debugger from './Debugger';
 
 function URLBar() {
