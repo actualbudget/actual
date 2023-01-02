@@ -49,7 +49,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
         style={{
           color: colors.n9,
           fontSize: 16,
-          fontWeight: 500,
+          fontWeight: 600,
           marginLeft: -5,
           flex: '0 auto'
         }}
