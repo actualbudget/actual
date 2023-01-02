@@ -39,7 +39,7 @@ export function loggedIn() {
 
 export function signOut() {
   return async dispatch => {
-    const data = await send('subscribe-sign-out');
+    await send('subscribe-sign-out');
 
     dispatch(getUserData());
     dispatch(loadGlobalPrefs());

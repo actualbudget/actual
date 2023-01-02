@@ -82,7 +82,7 @@ async function execTransactionsGrouped(
   splitType,
   outputTypes
 ) {
-  let { table: tableName, withDead } = queryState;
+  let { withDead } = queryState;
   let whereDead = withDead ? '' : `AND ${sql.from}.tombstone = 0`;
 
   if (isAggregateQuery(queryState)) {
@@ -160,7 +160,6 @@ async function execTransactionsGrouped(
     ${sql.orderBy}
   `;
 
-  let start = Date.now();
   let allRows = await db.all(finalSql);
 
   // Group the parents and children up

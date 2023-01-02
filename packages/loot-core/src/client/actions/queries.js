@@ -96,7 +96,6 @@ export function deleteCategory(id, transferId) {
     let { error } = await send('category-delete', { id, transferId });
 
     if (error) {
-      let msg;
       switch (error) {
         case 'category-type':
           dispatch(
@@ -164,7 +163,6 @@ export function updateGroup(group) {
 
 export function deleteGroup(id, transferId) {
   return async function(dispatch, getState) {
-    const group = getState().queries.categories.grouped.find(g => g.id === id);
     await send('category-group-delete', { id, transferId });
     await dispatch(getCategories());
     // See `deleteCategory` for why we need this

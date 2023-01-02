@@ -32,7 +32,6 @@ function resolveNamesAsArrays(sheets) {
     const sheet = sheets[sheetName];
 
     sheet.forEach(name => {
-      const expr = sheet[name];
       cells.push(resolveName(sheetName, name));
     });
   });

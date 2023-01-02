@@ -1,5 +1,3 @@
-import dateFns from 'date-fns';
-
 import { makeClock, Timestamp, merkle } from '../crdt';
 
 const SyncPb = require('../sync/proto/sync_pb');
@@ -113,7 +111,7 @@ module.exports.getClock = () => {
 
 module.exports.getMessages = () => {
   return currentMessages.map(msg => {
-    let { timestamp, is_encrypted, content } = msg;
+    let { timestamp, content } = msg;
     let fields = SyncPb.Message.deserializeBinary(content);
 
     return {
