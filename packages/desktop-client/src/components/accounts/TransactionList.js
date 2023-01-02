@@ -74,23 +74,15 @@ export default function TransactionList({
   renderEmpty,
   onChange,
   onRefetch,
-  onRefetchUpToRow,
   onCloseAddTransaction,
   onCreatePayee
 }) {
   let transactionsLatest = useRef();
-  let scrollTo = useRef();
   let history = useHistory();
-
-  useEffect(clearScrollTo);
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
   }, [transactions]);
-
-  function clearScrollTo() {
-    scrollTo.current = null;
-  }
 
   let onAdd = useCallback(async newTransactions => {
     newTransactions = realizeTempTransactions(newTransactions);
@@ -186,7 +178,6 @@ export default function TransactionList({
       onAddSplit={onAddSplit}
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
-      onScroll={clearScrollTo}
       style={{ backgroundColor: 'white' }}
     />
   );
