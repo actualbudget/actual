@@ -577,6 +577,8 @@ describe('Transactions', () => {
   test('dropdown selects an item when clicking', async () => {
     const { container, getTransactions } = renderTransactions();
 
+    editField(container, 'category', 2);
+
     let tooltip = container.querySelector('[data-testid="tooltip"]');
 
     // Make sure none of the items are highlighted
