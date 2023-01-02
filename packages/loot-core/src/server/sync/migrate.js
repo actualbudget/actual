@@ -2,10 +2,9 @@ import { Timestamp } from '../crdt';
 
 import { addSyncListener, applyMessages } from './index';
 
-function migrateParentIds(oldValues, newValues) {
+function migrateParentIds(_oldValues, newValues) {
   newValues.forEach((items, table) => {
     if (table === 'transactions') {
-      let old = oldValues.get(table);
       let toApply = [];
 
       items.forEach(newValue => {

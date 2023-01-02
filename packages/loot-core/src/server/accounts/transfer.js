@@ -7,8 +7,7 @@ async function getPayee(acct) {
 async function getTransferredAccount(transaction) {
   if (transaction.payee) {
     let {
-      transfer_acct,
-      id
+      transfer_acct
     } = await db.first('SELECT id, transfer_acct FROM v_payees WHERE id = ?', [
       transaction.payee
     ]);

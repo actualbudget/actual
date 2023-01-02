@@ -257,7 +257,6 @@ function onApplySync(oldValues, newValues) {
 // Runner
 export function runRules(trans) {
   let finalTrans = { ...trans };
-  let allChanges = {};
 
   let rules = rankRules(
     fastSetMerge(
@@ -346,8 +345,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
               .toArray()
               .map(d => dayFromDate(d.date));
 
-            let compare = d => ({ $eq: d });
-
             return {
               $or: dates.map(d => {
                 if (op === 'isapprox') {
@@ -362,8 +359,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
               })
             };
           } else {
-            let { date } = value;
-
             if (op === 'isapprox') {
               let fullDate = parseDate(value.date);
               let high = addDays(fullDate, 2);
