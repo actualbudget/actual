@@ -439,7 +439,6 @@ function Tools() {
   let items = [
     { name: 'payees', text: 'Payees' },
     { name: 'rules', text: 'Rules' },
-    { name: 'find-schedules', text: 'Find schedules' },
     { name: 'repair-splits', text: 'Repair split transactions' }
   ];
 
@@ -451,9 +450,6 @@ function Tools() {
           break;
         case 'rules':
           history.push('/rules');
-          break;
-        case 'find-schedules':
-          history.push('/schedule/discover');
           break;
         case 'repair-splits':
           history.push('/tools/fix-splits', { locationPtr: history.location });
@@ -474,12 +470,9 @@ function Tools() {
         onClick={onToggle}
         style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
         forceHover={isOpen}
-        forceActive={[
-          '/payees',
-          '/rules',
-          '/tools',
-          '/schedule/discover'
-        ].some(route => location.pathname.startsWith(route))}
+        forceActive={['/payees', '/rules', '/tools'].some(route =>
+          location.pathname.startsWith(route)
+        )}
         button={
           <ChevronRight
             width={12}
