@@ -35,7 +35,7 @@ import DiscoverSchedules from './schedules/DiscoverSchedules';
 import EditSchedule from './schedules/EditSchedule';
 import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
-import Settings from './Settings';
+import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 import FixSplitsTool from './tools/FixSplitsTool';
 // import Debugger from './Debugger';
