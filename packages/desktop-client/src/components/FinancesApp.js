@@ -52,8 +52,6 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
-import FixSplitsTool from './tools/FixSplitsTool';
-
 // import Debugger from './Debugger';
 
 function PageRoute({ path, component: Component }) {
@@ -98,9 +96,10 @@ function Routes({ isMobile, location }) {
           component={PostsOfflineNotification}
         />
 
-        <Route path="/rules" exact component={ManageRulesPage} />
         <Route path="/payees" exact component={ManagePayeesPage} />
-        <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
+        <Route path="/rules" exact component={ManageRulesPage} />
+        <Route path="/settings" component={Settings} />
+
         <Route
           path="/accounts/:id"
           exact
@@ -116,7 +115,6 @@ function Routes({ isMobile, location }) {
           exact
           component={isMobile ? MobileAccounts : Account}
         />
-        <Route path="/settings" component={Settings} />
       </Route>
     </Switch>
   );
