@@ -7,19 +7,17 @@ import { withRouter } from 'react-router-dom';
 import { css } from 'glamor';
 
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
-import { pushModal } from 'loot-core/src/client/actions/modals';
 import Platform from 'loot-core/src/client/platform';
 import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 
 import { styles, colors } from '../style';
 import Add from '../svg/v1/Add';
+import ArrowLeft from '../svg/v1/ArrowLeft';
 import ChevronRight from '../svg/v1/CheveronRight';
 import Cog from '../svg/v1/Cog';
-import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
 import Reports from '../svg/v1/Reports';
 import Wallet from '../svg/v1/Wallet';
 import Wrench from '../svg/v1/Wrench';
-import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
 import CalendarIcon from '../svg/v2/Calendar';
 import {
   View,
@@ -375,50 +373,19 @@ function ToggleButton({ style, onFloat }) {
   );
 }
 
-const MenuButton = withRouter(function MenuButton({ history }) {
+function CloseButton() {
   let dispatch = useDispatch();
-  let [menuOpen, setMenuOpen] = useState(false);
-
-  function onMenuSelect(type) {
-    setMenuOpen(false);
-
-    switch (type) {
-      case 'close':
-        dispatch(closeBudget());
-        break;
-      default:
-    }
-  }
-
-  let items = [{ name: 'close', text: 'Close File' }];
-
   return (
     <Button
       bare
-      style={{
-        color: colors.n5,
-        flexShrink: 0
-      }}
-      activeStyle={{ color: colors.p7 }}
-      onClick={() => setMenuOpen(true)}
+      style={{ flexShrink: 0, marginLeft: -10, marginRight: 3 }}
+      title="Close File"
+      onClick={() => dispatch(closeBudget())}
     >
-      <DotsHorizontalTriple
-        width={15}
-        height={15}
-        style={{ color: 'inherit', transform: 'rotateZ(0deg)' }}
-      />
-      {menuOpen && (
-        <Tooltip
-          position="bottom-right"
-          style={{ padding: 0 }}
-          onClose={() => setMenuOpen(false)}
-        >
-          <Menu onMenuSelect={onMenuSelect} items={items} />
-        </Tooltip>
-      )}
+      <ArrowLeft style={{ width: 15, height: 15, color: colors.n5 }} />
     </Button>
   );
-});
+}
 
 function Tools() {
   let [isOpen, setOpen] = useState(false);
@@ -558,6 +525,7 @@ export function Sidebar({
           }
         ]}
       >
+        {Platform.isBrowser && <CloseButton />}
         {budgetName}
 
         {!Platform.isBrowser && (
@@ -580,7 +548,6 @@ export function Sidebar({
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
         {!hasWindowButtons && <ToggleButton onFloat={onFloat} />}
-        {Platform.isBrowser && <MenuButton />}
       </View>
 
       <View style={{ overflow: 'auto' }}>
