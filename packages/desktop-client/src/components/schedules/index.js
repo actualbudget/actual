@@ -20,15 +20,15 @@ export default function Schedules() {
   let { schedules, statuses } = scheduleData;
 
   function onEdit(id) {
-    history.push(`/schedule/edit/${id}`, { locationPtr: history.location });
+    history.push(`/schedules/edit/${id}`, { locationPtr: history.location });
   }
 
   function onAdd() {
-    history.push(`/schedule/edit`, { locationPtr: history.location });
+    history.push(`/schedules/edit`, { locationPtr: history.location });
   }
 
   function onDiscover() {
-    history.push(`/schedule/discover`, { locationPtr: history.location });
+    history.push(`/schedules/discover`, { locationPtr: history.location });
   }
 
   async function onAction(name, id) {

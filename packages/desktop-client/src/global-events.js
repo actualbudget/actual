@@ -38,7 +38,7 @@ export function handleGlobalEvents(actions, store) {
   listen('schedules-offline', ({ payees }) => {
     let history = window.__history;
     if (history) {
-      history.push(`/schedule/posts-offline-notification`, {
+      history.push(`/schedules/posts-offline-notification`, {
         locationPtr: history.location,
         payees
       });

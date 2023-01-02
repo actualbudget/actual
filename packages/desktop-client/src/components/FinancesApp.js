@@ -90,12 +90,12 @@ function Routes({ location }) {
         <PageRoute path="/budget" component={Budget} />
 
         <Route path="/schedules" exact component={Schedules} />
-        <Route path="/schedule/edit" exact component={EditSchedule} />
-        <Route path="/schedule/edit/:id" component={EditSchedule} />
-        <Route path="/schedule/link" component={LinkSchedule} />
-        <Route path="/schedule/discover" component={DiscoverSchedules} />
+        <Route path="/schedules/edit" exact component={EditSchedule} />
+        <Route path="/schedules/edit/:id" component={EditSchedule} />
+        <Route path="/schedules/link" component={LinkSchedule} />
+        <Route path="/schedules/discover" component={DiscoverSchedules} />
         <Route
-          path="/schedule/posts-offline-notification"
+          path="/schedules/posts-offline-notification"
           component={PostsOfflineNotification}
         />
 
