@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useLayoutEffect } from 'react';
+import React, { useRef, useCallback, useLayoutEffect } from 'react';
 import { useHistory } from 'react-router';
 
 import { send } from 'loot-core/src/platform/client/fetch';
