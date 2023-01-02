@@ -73,6 +73,8 @@ export function getDefaultPrefs(id, budgetName) {
   return {
     id,
     budgetName,
+    // old notification IDs no longer supported by the app
+    // kept to ensure that they aren’t accidentally reused
     'notifications.schedules': true,
     'notifications.repair-splits': true
   };
