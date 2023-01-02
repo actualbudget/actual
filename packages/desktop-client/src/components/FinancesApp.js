@@ -37,7 +37,6 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
-import FixSplitsTool from './tools/FixSplitsTool';
 // import Debugger from './Debugger';
 
 function URLBar() {
@@ -101,7 +100,6 @@ function Routes({ location }) {
 
         <Route path="/rules" exact component={ManageRulesPage} />
         <Route path="/payees" exact component={ManagePayeesPage} />
-        <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
 
         <Route
           path="/accounts/:id"

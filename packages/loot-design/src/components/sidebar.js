@@ -438,8 +438,7 @@ function Tools() {
 
   let items = [
     { name: 'payees', text: 'Payees' },
-    { name: 'rules', text: 'Rules' },
-    { name: 'repair-splits', text: 'Repair split transactions' }
+    { name: 'rules', text: 'Rules' }
   ];
 
   let onMenuSelect = useCallback(
@@ -450,9 +449,6 @@ function Tools() {
           break;
         case 'rules':
           history.push('/rules');
-          break;
-        case 'repair-splits':
-          history.push('/tools/fix-splits', { locationPtr: history.location });
           break;
         default:
       }
@@ -470,7 +466,7 @@ function Tools() {
         onClick={onToggle}
         style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
         forceHover={isOpen}
-        forceActive={['/payees', '/rules', '/tools'].some(route =>
+        forceActive={['/payees', '/rules'].some(route =>
           location.pathname.startsWith(route)
         )}
         button={
