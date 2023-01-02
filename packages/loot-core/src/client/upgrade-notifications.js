@@ -38,7 +38,7 @@ export default function checkForUpgradeNotifications(
         //         // eslint-disable-next-line
         //         __history &&
         //           // eslint-disable-next-line
-        //           __history.push('/schedules/discover', {
+        //           __history.push('/schedule/discover', {
         //             // eslint-disable-next-line
         //             locationPtr: __history.location
         //           });

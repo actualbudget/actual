@@ -567,13 +567,13 @@ function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              history.push(`/schedules/edit/${scheduleId}`, {
+              history.push(`/schedule/edit/${scheduleId}`, {
                 locationPtr: history.location
               });
             }
             break;
           case 'link-schedule':
-            history.push(`/schedules/link`, {
+            history.push(`/schedule/link`, {
               locationPtr: history.location,
               transactionIds: [...selectedItems]
             });
