@@ -112,11 +112,11 @@ const sidebars = {
             {
               type: 'category',
               label: 'Migrating From Other Apps',
-              items: [            
+              items: [
                 'Getting-Started/migration/ynab4',
                 'Getting-Started/migration/nynab'
               ]
-            },            
+            },
             'Getting-Started/migration/simple-sync',
           ]
         },
@@ -142,7 +142,7 @@ const sidebars = {
             'Budgeting/rules/rules-custom',
           ],
         },
-        'Budgeting/schedules',                
+        'Budgeting/schedules',
         'Budgeting/returnsandreimbursements',
         'Budgeting/creditcards',
         'Budgeting/jointaccounts',
@@ -160,12 +160,12 @@ const sidebars = {
         {
           type: 'category',
           label: 'Transactions',
-          collapsed: true,          
+          collapsed: true,
           items: [
             'Accounts/Transactions/importing-trans',
             'Accounts/Transactions/bulk-editing-transactions',
           ],
-        },        
+        },
         unavailable('Connecting Your Bank'),
         'Accounts/payees',
         'Accounts/transfers',
@@ -204,7 +204,7 @@ const sidebars = {
           type: 'link',
           label: 'Issue Board',
           href: 'https://github.com/orgs/actualbudget/projects/1',
-        }, 
+        },
         'Developers/project-layout',
         'Developers/releasing',
         'Developers/Building-Windows',
@@ -240,6 +240,25 @@ const sidebars = {
       collapsed: true,
       items: [
         'Release-Notes/Release-Notes'
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Advanced',
+      collapsed: true,
+      link: {
+        type: 'doc',
+        id: 'Advanced/advanced-intro',
+      },
+      items: [
+        {
+          type: 'category',
+          label: 'Scripts',
+          collapsed: true,
+          items: [
+            'Advanced/Scripts/modify-transfers',
+          ],
+        },
       ],
     },
   ],
