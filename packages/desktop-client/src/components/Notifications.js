@@ -66,7 +66,6 @@ function compileMessage(message, actions, setLoading, onRemove) {
 
 function Notification({ notification, onRemove }) {
   let {
-    id,
     type,
     title,
     message,

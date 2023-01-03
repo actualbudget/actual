@@ -1,5 +1,4 @@
-import React, { useRef, useEffect, useCallback, useLayoutEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useRef, useCallback, useLayoutEffect } from 'react';
 import { useHistory } from 'react-router';
 
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -13,8 +12,6 @@ import {
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
 import { TransactionTable } from './TransactionsTable';
-
-const uuid = require('loot-core/src/platform/uuid');
 
 // When data changes, there are two ways to update the UI:
 //
@@ -77,31 +74,15 @@ export default function TransactionList({
   renderEmpty,
   onChange,
   onRefetch,
-  onRefetchUpToRow,
   onCloseAddTransaction,
   onCreatePayee
 }) {
-  let dispatch = useDispatch();
-  let table = useRef();
   let transactionsLatest = useRef();
-  let scrollTo = useRef();
   let history = useHistory();
-
-  // useEffect(() => {
-  //   if (scrollTo.current) {
-  //     // table.current.scrollTo(scrollTo.current);
-  //   }
-  // }, [transactions]);
-
-  useEffect(clearScrollTo);
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
   }, [transactions]);
-
-  function clearScrollTo() {
-    scrollTo.current = null;
-  }
 
   let onAdd = useCallback(async newTransactions => {
     newTransactions = realizeTempTransactions(newTransactions);
@@ -197,7 +178,6 @@ export default function TransactionList({
       onAddSplit={onAddSplit}
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
-      onScroll={clearScrollTo}
       style={{ backgroundColor: 'white' }}
     />
   );

@@ -1,5 +1,5 @@
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 export function handleGlobalEvents(actions, store) {
@@ -45,12 +45,6 @@ export function handleGlobalEvents(actions, store) {
     }
   });
 
-  async function onManage() {
-    let tempId = await send('make-user-temp-id');
-    let url = 'https://actualbudget.com/account?tempId=' + tempId;
-    window.Actual.openURLInBrowser(url);
-  }
-
   // This is experimental: we sync data locally automatically when
   // data changes from the backend
   listen('sync-event', async ({ type, tables }) => {
@@ -82,7 +76,7 @@ export function handleGlobalEvents(actions, store) {
   sharedListeners.listenForSyncEvent(actions, store);
 
   listen('undo-event', undoState => {
-    let { messages, tables, undoTag } = undoState;
+    let { tables, undoTag } = undoState;
     let promises = [];
 
     if (
