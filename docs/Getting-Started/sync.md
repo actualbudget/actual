@@ -8,7 +8,7 @@ We don't want to throw away the internet though. It's too useful. When your data
 
 That's why we automatically sync all of your data to the cloud in the background. You get the best of both worlds: all data is local by default, but if internet is available, your data is seamlessly backed up and synced to all other devices. This is the opposite of most apps which heavily rely on the internet to be available.
 
-For the super privacy-focused, it even allows for your data to be [end-to-end encrypted](#) since all your server is doing is passing around changes.
+For the super privacy-focused, it even allows for your data to be [end-to-end encrypted](#End-to-end encryption) since all your server is doing is passing around changes.
 
 ## Getting started
 
@@ -24,7 +24,29 @@ When you sync to the server, the app sends many small pieces of data representin
 
 Resetting sync means clearing all sync data both locally and on the server, and starting clean. Once you do this, all new changes from then on will be stored in the new format. Be aware that it's important to choose the right copy of your data when resetting sync. See [What does "resetting sync" mean?](#what-does-resetting-sync-mean)
 
-**Do not lose this password**. We will not be able to recover your data if you forget it because we cannot decrypt it. If you forget it and you still have a copy of your data locally, you can reset your key which will do a [sync reset](#what-does-resetting-sync-mean) and generate a new key.
+## End-to-end encryption
+
+End-to-end encryption offers the ability for you to generate a key based on a password and encrypt it so that hosted services can't read the data. Before your data leaves your device, it is encrypted using keys only you have.
+
+This guarantees that only you will ever have access to your data. This is optional and using it requires you to enter a password whenever downloading cloud files (this only needs to be done once per device).
+
+Data on your local device is still unencrypted. We recommend full disk encryption if you are interested in local encryption.
+
+There are some things to consider with end-to-end encryption:
+
+* **Pro:** Your data is fully secure and nobody except you can read it
+* **Pro:** If you don't want to sync across devices, this still allows you keep a fully encrypted backup of your data
+* **Con:** There is a performance hit because of encoding & decoding your data whenever syncing
+* **Con:** If you lose your local data copy and forget your password, you can never recover your data
+* **Con:** It is not possible to turn off encryption.  This is a one way process.  If you would like to move back to an unencrypted file after enabling encryption, you can use the steps in the [Backup](/docs/Backup-Restore/Backups.md) and [Restore](/docs/Backup-Restore/Restore.md) sections.
+
+### Setting up end-to-end encryption
+
+You can enable end-to-end encryption by opening a file, going into settings, and clicking "enable encryption" in the Encryption section. You will be asked to enter a password, and a key will be generated from it that will encrypted all your data from then on.
+
+When downloading data on other devices, you will need to enter the same password to generate the key to be able to decrypt your data.
+
+**Do not lose this password**. You will not be able to recover your data if you forget it. If you forget it and you still have a copy of your data locally, you can reset your key which will do a [sync reset](#what-does-resetting-sync-mean) and generate a new key.
 
 ## What does "resetting sync" mean?
 
