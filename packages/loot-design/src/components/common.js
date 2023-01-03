@@ -7,13 +7,7 @@ import React, {
 } from 'react';
 import mergeRefs from 'react-merge-refs';
 import ReactModal from 'react-modal';
-import {
-  Route,
-  NavLink,
-  withRouter,
-  useHistory,
-  useRouteMatch
-} from 'react-router-dom';
+import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
 
 import {
   ListboxInput,
@@ -88,16 +82,7 @@ export function Link({ style, children, ...nativeProps }) {
   );
 }
 
-export function AnchorLink({
-  staticContext,
-  to,
-  exact,
-  style,
-  activeStyle,
-  children
-}) {
-  let history = useHistory();
-  let href = history.createHref(typeof to === 'string' ? { pathname: to } : to);
+export function AnchorLink({ to, exact, style, activeStyle, children }) {
   let match = useRouteMatch({ path: to, exact: true });
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { RectButton } from 'react-native-gesture-handler';
 import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router';
@@ -7,7 +7,6 @@ import { withRouter } from 'react-router-dom';
 import { css } from 'glamor';
 
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
-import { pushModal } from 'loot-core/src/client/actions/modals';
 import Platform from 'loot-core/src/client/platform';
 import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 

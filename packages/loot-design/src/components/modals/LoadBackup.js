@@ -15,7 +15,6 @@ class BackupTable extends React.Component {
     const { backups, onSelect } = this.props;
     const { hoveredBackup } = this.state;
 
-    const borderColor = '#f0f0f0';
     return (
       <View
         style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}
