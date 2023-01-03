@@ -39,9 +39,11 @@ import Budget from './budget';
 import { default as MobileBudget } from './budget/MobileBudget';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
+import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
 import Notifications from './Notifications';
 import { PageTypeProvider } from './Page';
+import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import Schedules from './schedules';
 import DiscoverSchedules from './schedules/DiscoverSchedules';
@@ -117,6 +119,8 @@ function Routes({ isMobile, location }) {
           component={PostsOfflineNotification}
         />
 
+        <Route path="/rules" exact component={ManageRulesPage} />
+        <Route path="/payees" exact component={ManagePayeesPage} />
         <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
         <Route
           path="/accounts/:id"

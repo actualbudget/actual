@@ -78,7 +78,7 @@ function Advanced({ prefs, resetSync }) {
   let [resetting, setResetting] = useState(false);
   let [resettingCache, setResettingCache] = useState(false);
   let [expanded, setExpanded] = useState(false);
-  let styles = true ? mobileStyles : desktopStyles;
+  let styles = isMobile() ? mobileStyles : desktopStyles;
 
   async function onResetSync() {
     setResetting(true);
