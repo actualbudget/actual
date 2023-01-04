@@ -35,7 +35,7 @@ export async function authorizeBank(pushModal, { upgradingId } = {}) {
 }
 
 export async function reauthorizeBank(pushModal, bankId, onSuccess) {
-  let { error, linkToken } = await send('make-plaid-public-token', {
+  let { linkToken } = await send('make-plaid-public-token', {
     bankId
   });
 

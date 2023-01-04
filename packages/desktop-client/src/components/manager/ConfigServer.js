@@ -84,8 +84,9 @@ export default function ConfigServer() {
   }
 
   async function onCreateTestFile() {
+    await send('set-server-url', { url: null });
     await dispatch(createBudget({ testMode: true }));
-    await onSkip();
+    window.__history.push('/');
   }
 
   return (

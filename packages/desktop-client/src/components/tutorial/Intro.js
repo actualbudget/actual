@@ -15,7 +15,10 @@ function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {
     <Standalone width={500}>
       <Title>Let's get started</Title>
       <P>
-        Welcome to Actual! &#127881;{' '}
+        Welcome to Actual!{' '}
+        <span role="img" aria-label="Party" aria-hidden="true">
+          &#127881;
+        </span>{' '}
         <strong>Learn the basic workflow with this quick tutorial.</strong> You
         can always restart it from the File menu.
       </P>

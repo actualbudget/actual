@@ -489,10 +489,6 @@ function SelectedTransactionsButton({
     );
   }, [types.preview, selectedItems, getTransaction]);
 
-  function getRealTransactions() {
-    return [...selectedItems].filter(id => !isPreviewId(id));
-  }
-
   return (
     <SelectedItemsButton
       name="transactions"
@@ -582,7 +578,6 @@ function SelectedTransactionsButton({
             onUnlink([...selectedItems]);
             break;
           default:
-            let field = name;
             onEdit(name, [...selectedItems]);
         }
       }}
@@ -1101,7 +1096,6 @@ class AccountInternal extends React.PureComponent {
   };
 
   makeRootQuery = () => {
-    let { transactions } = this.state;
     let locationState = this.props.location.state;
     let accountId = this.props.accountId;
 
@@ -1400,10 +1394,6 @@ class AccountInternal extends React.PureComponent {
     return this.props.matchedTransactions.includes(id);
   };
 
-  onManagePayees = id => {
-    this.props.pushModal('manage-payees', { selectedPayee: id });
-  };
-
   onCreatePayee = name => {
     let trimmed = name.trim();
     if (trimmed !== '') {
@@ -1629,14 +1619,12 @@ class AccountInternal extends React.PureComponent {
       accounts,
       categoryGroups,
       payees,
-      match,
       syncEnabled,
       dateFormat,
       addNotification,
       accountsSyncing,
       replaceModal,
       showExtraBalances,
-      expandSplits,
       accountId
     } = this.props;
     let {
@@ -1644,7 +1632,6 @@ class AccountInternal extends React.PureComponent {
       loading,
       workingHard,
       reconcileAmount,
-      transactionCount,
       transactionsFiltered,
       editingName,
       showBalances,
@@ -1790,7 +1777,6 @@ class AccountInternal extends React.PureComponent {
                     onCloseAddTransaction={() =>
                       this.setState({ isAdding: false })
                     }
-                    onManagePayees={this.onManagePayees}
                     onCreatePayee={this.onCreatePayee}
                   />
                 </View>

@@ -13,15 +13,11 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
-import {
-  extractScheduleConds,
-  getRecurringDescription
-} from 'loot-core/src/shared/schedules';
+import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   View,
   Text,
-  Modal,
   Button,
   Stack,
   ExternalLink
@@ -292,7 +288,6 @@ let Rule = React.memo(
     onEdit,
     onEditRule
   }) => {
-    let dispatch = useDispatch();
     let dispatchSelected = useSelectedDispatch();
     let borderColor = selected ? colors.b8 : colors.border;
     let backgroundFocus = hovered || focusedField === 'select';
@@ -448,7 +443,7 @@ function RulesHeader() {
   let dispatchSelected = useSelectedDispatch();
 
   return (
-    <TableHeader>
+    <TableHeader version="v2" style={{}}>
       <SelectCell
         exposed={true}
         focused={false}
@@ -500,14 +495,17 @@ function RulesList({
   );
 }
 
-export default function ManageRules({ history, modalProps, payeeId }) {
+export default function ManageRules({
+  isModal,
+  payeeId,
+  setLoading = () => {}
+}) {
   let [allRules, setAllRules] = useState(null);
   let [rules, setRules] = useState(null);
   let dispatch = useDispatch();
   let navigator = useTableNavigator(rules, ['select', 'edit']);
   let selectedInst = useSelected('manage-rules', allRules, []);
   let [hoveredRule, setHoveredRule] = useState(null);
-  let [loading, setLoading] = useState(true);
   let tableRef = useRef(null);
 
   async function loadRules() {
@@ -515,7 +513,9 @@ export default function ManageRules({ history, modalProps, payeeId }) {
 
     let loadedRules = null;
     if (payeeId) {
-      loadedRules = await send('payees-get-rules', { id: payeeId });
+      loadedRules = await send('payees-get-rules', {
+        id: payeeId
+      });
     } else {
       loadedRules = await send('rules-get');
     }
@@ -573,7 +573,6 @@ export default function ManageRules({ history, modalProps, payeeId }) {
 
           setRules(rules => {
             let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
-            let oldIdx = rules.findIndex(rule => rule.id === newRule.id);
 
             if (newIdx > rules.length) {
               return newRules.slice(0, newIdx + 75);
@@ -594,7 +593,14 @@ export default function ManageRules({ history, modalProps, payeeId }) {
         rule: {
           stage: null,
           conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
-          actions: [{ op: 'set', field: 'category', value: null, type: 'id' }]
+          actions: [
+            {
+              op: 'set',
+              field: 'category',
+              value: null,
+              type: 'id'
+            }
+          ]
         },
         onSave: async newRule => {
           let newRules = await loadRules();
@@ -620,89 +626,78 @@ export default function ManageRules({ history, modalProps, payeeId }) {
     return null;
   }
 
-  return (
-    <Modal
-      title="Rules"
-      padding={0}
-      loading={loading}
-      {...modalProps}
-      style={[modalProps.style, { flex: 1, maxWidth: '90%' }]}
+  let actions = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: isModal ? '13px 15px' : '0 0 15px',
+        borderTop: '1px solid ' + colors.border
+      }}
     >
-      {() => (
-        <SchedulesQuery.Provider>
-          <SelectedProvider instance={selectedInst}>
-            <View style={{ height: '70vh' }}>
-              <View style={{ flex: 1 }}>
-                <RulesHeader />
-                <SimpleTable
-                  ref={tableRef}
-                  data={rules}
-                  navigator={navigator}
-                  loadMore={loadMore}
-                  // Hide the last border of the item in the table
-                  style={{ marginBottom: -1 }}
-                >
-                  <RulesList
-                    rules={rules}
-                    selectedItems={selectedInst.items}
-                    navigator={navigator}
-                    hoveredRule={hoveredRule}
-                    onHover={onHover}
-                    onEditRule={onEditRule}
-                  />
-                </SimpleTable>
-              </View>
+      <View
+        style={{
+          color: colors.n4,
+          flexDirection: 'row',
+          alignItems: 'center',
+          width: '50%'
+        }}
+      >
+        <Text>
+          Rules are always run in the order that you see them.{' '}
+          <ExternalLink
+            asAnchor={true}
+            href="https://actualbudget.github.io/docs/Budgeting/rules/"
+            style={{ color: colors.n4 }}
+          >
+            Learn more
+          </ExternalLink>
+        </Text>
+      </View>
 
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  padding: '13px 15px',
-                  borderTop: '1px solid ' + colors.border
-                }}
-              >
-                <View
-                  style={{
-                    color: colors.n4,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    width: '50%'
-                  }}
-                >
-                  <Text>
-                    Rules are always run in the order that you see them.{' '}
-                    <ExternalLink
-                      asAnchor={true}
-                      href="https://actualbudget.github.io/docs/Budgeting/rules/"
-                      style={{ color: colors.n4 }}
-                    >
-                      Learn more
-                    </ExternalLink>
-                  </Text>
-                </View>
+      <View style={{ flex: 1 }} />
 
-                <View style={{ flex: 1 }} />
+      <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+        {selectedInst.items.size > 0 && (
+          <Button onClick={onDeleteSelected}>
+            Delete {selectedInst.items.size} rules
+          </Button>
+        )}
+        <Button primary onClick={onCreateRule}>
+          Create new rule
+        </Button>
+      </Stack>
+    </View>
+  );
 
-                <Stack
-                  direction="row"
-                  align="center"
-                  justify="flex-end"
-                  spacing={2}
-                >
-                  {selectedInst.items.size > 0 && (
-                    <Button onClick={onDeleteSelected}>
-                      Delete {selectedInst.items.size} rules
-                    </Button>
-                  )}
-                  <Button primary onClick={onCreateRule}>
-                    Create new rule
-                  </Button>
-                </Stack>
-              </View>
-            </View>
-          </SelectedProvider>
-        </SchedulesQuery.Provider>
-      )}
-    </Modal>
+  return (
+    <SchedulesQuery.Provider>
+      <SelectedProvider instance={selectedInst}>
+        <View style={{ overflow: 'hidden' }}>
+          {!isModal && actions}
+          <View style={{ flex: 1 }}>
+            <RulesHeader />
+            <SimpleTable
+              ref={tableRef}
+              data={rules}
+              navigator={navigator}
+              loadMore={loadMore}
+              // Hide the last border of the item in the table
+              style={{ marginBottom: -1 }}
+            >
+              <RulesList
+                rules={rules}
+                selectedItems={selectedInst.items}
+                navigator={navigator}
+                hoveredRule={hoveredRule}
+                onHover={onHover}
+                onEditRule={onEditRule}
+              />
+            </SimpleTable>
+          </View>
+          {isModal && actions}
+        </View>
+      </SelectedProvider>
+    </SchedulesQuery.Provider>
   );
 }

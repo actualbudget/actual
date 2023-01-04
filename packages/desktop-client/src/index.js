@@ -31,30 +31,6 @@ import { handleGlobalEvents } from './global-events';
 // focus outline appear from keyboard events.
 require('focus-visible');
 
-function lightweightStringify(obj) {
-  return JSON.stringify(obj, function(k, v) {
-    return k ? '' + v : v;
-  });
-}
-
-function log() {
-  return next => action => {
-    if (window.Actual.IS_DEV) {
-      console.log(action);
-    }
-
-    if (window.SentryClient) {
-      window.SentryClient.addBreadcrumb({
-        message: lightweightStringify(action).slice(0, 500),
-        category: 'redux',
-        level: 'info'
-      });
-    }
-
-    return next(action);
-  };
-}
-
 const appReducer = combineReducers(reducers);
 function rootReducer(state, action) {
   if (action.type === constants.CLOSE_BUDGET) {
@@ -77,11 +53,7 @@ function rootReducer(state, action) {
   return appReducer(state, action);
 }
 
-const store = createStore(
-  rootReducer,
-  undefined,
-  applyMiddleware(thunk /*log*/)
-);
+const store = createStore(rootReducer, undefined, applyMiddleware(thunk));
 const boundActions = bindActionCreators(actions, store.dispatch);
 
 // Listen for global events from the server or main process

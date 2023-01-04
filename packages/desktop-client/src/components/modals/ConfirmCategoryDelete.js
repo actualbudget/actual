@@ -22,7 +22,7 @@ class ConfirmCategoryDelete extends React.Component {
 
   onDelete = () => {
     let { transferCategory } = this.state;
-    let { category, group, onDelete } = this.props;
+    let { onDelete } = this.props;
 
     if (!transferCategory) {
       this.setState({ error: 'required-transfer' });
