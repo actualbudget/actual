@@ -4,6 +4,7 @@ import Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import { Router, Route, Redirect, Switch, useLocation } from 'react-router-dom';
 
+import { createBrowserHistory } from 'history';
 import hotkeys from 'hotkeys-js';
 
 import * as actions from 'loot-core/src/client/actions';
@@ -16,7 +17,6 @@ import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/Budg
 import { View } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import history from '../history';
 import { getLocationState, makeLocationState } from '../util/location-state';
 import Account from './accounts/Account';
 import { ActiveLocationProvider } from './ActiveLocation';
@@ -131,23 +131,29 @@ function StackedRoutes() {
 class FinancesApp extends React.Component {
   constructor(props) {
     super(props);
+    this.history = createBrowserHistory();
 
-    let oldPush = history.push;
-    history.push = (to, state) => {
-      return oldPush.call(history, to, makeLocationState(state));
+    let oldPush = this.history.push;
+    this.history.push = (to, state) => {
+      return oldPush.call(this.history, to, makeLocationState(state));
     };
+
+    // I'm not sure if this is the best approach but we need this to
+    // globally. We could instead move various workflows inside global
+    // React components, but that's for another day.
+    window.__history = this.history;
 
     undo.setUndoState('url', window.location.href);
 
-    this.cleanup = history.listen(location => {
+    this.cleanup = this.history.listen(location => {
       undo.setUndoState('url', window.location.href);
     });
   }
 
   componentDidMount() {
     // TODO: quick hack fix for showing the demo
-    if (history.location.pathname === '/subscribe') {
-      history.push('/');
+    if (this.history.location.pathname === '/subscribe') {
+      this.history.push('/');
     }
 
     // Get the accounts and check if any exist. If there are no
@@ -155,7 +161,7 @@ class FinancesApp extends React.Component {
     // screen which will prompt them to add an account
     this.props.getAccounts().then(accounts => {
       if (accounts.length === 0) {
-        history.push('/accounts');
+        this.history.push('/accounts');
       }
     });
 
@@ -173,7 +179,7 @@ class FinancesApp extends React.Component {
       checkForUpgradeNotifications(
         this.props.addNotification,
         this.props.resetSync,
-        history
+        this.history
       );
     }, 100);
   }
@@ -184,7 +190,7 @@ class FinancesApp extends React.Component {
 
   render() {
     return (
-      <Router history={history}>
+      <Router history={this.history}>
         <View style={{ height: '100%', backgroundColor: colors.n10 }}>
           <GlobalKeys />
 
