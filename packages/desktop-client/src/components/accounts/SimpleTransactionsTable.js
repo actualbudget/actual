@@ -54,7 +54,6 @@ const TransactionRow = React.memo(function TransactionRow({
   let a = getAccountsById(accounts)[transaction.account];
 
   let dispatchSelected = useSelectedDispatch();
-  let schedule = transaction.schedule;
 
   return (
     <Row>

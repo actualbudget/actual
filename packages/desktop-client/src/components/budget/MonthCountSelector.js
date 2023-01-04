@@ -17,9 +17,6 @@ function Calendar({ color, onClick }) {
 export function MonthCountSelector({ maxMonths, onChange }) {
   let { displayMax } = useBudgetMonthCount();
 
-  let style = { width: 15, height: 15, color: colors.n8 };
-  let activeStyle = { color: colors.n5 };
-
   // It doesn't make sense to show anything if we can only fit one
   // month
   if (displayMax <= 1) {

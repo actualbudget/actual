@@ -40,26 +40,6 @@ import Titlebar, { TitlebarProvider } from './Titlebar';
 import FixSplitsTool from './tools/FixSplitsTool';
 // import Debugger from './Debugger';
 
-function URLBar() {
-  let location = useLocation();
-
-  return (
-    <View
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        margin: 15,
-        backgroundColor: colors.n9,
-        padding: 8,
-        borderRadius: 6
-      }}
-    >
-      {location.pathname}
-    </View>
-  );
-}
-
 function PageRoute({ path, component: Component }) {
   return (
     <Route
@@ -246,12 +226,8 @@ class FinancesApp extends React.Component {
               >
                 <Notifications />
                 <BankSyncStatus />
-
                 <StackedRoutes />
-
                 {/*window.Actual.IS_DEV && <Debugger />*/}
-                {/*window.Actual.IS_DEV && <URLBar />*/}
-
                 <Modals history={this.history} />
               </div>
             </div>

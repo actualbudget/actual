@@ -176,7 +176,7 @@ export function ConditionEditor({
   onDelete,
   onAdd
 }) {
-  let { field, op, value, type, options, error, inputKey } = condition;
+  let { field, op, value, type, options, error } = condition;
 
   if (field === 'amount' && options) {
     if (options.inflow) {

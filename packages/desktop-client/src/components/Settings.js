@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
-import { Route, Switch, Redirect } from 'react-router-dom';
 
 import { css } from 'glamor';
 
@@ -14,11 +13,9 @@ import {
   Text,
   Button,
   Link,
-  ButtonWithLoading,
-  AnchorLink
+  ButtonWithLoading
 } from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+import { colors } from 'loot-design/src/style';
 
 import useServerVersion from '../hooks/useServerVersion';
 import { Page } from './Page';
@@ -352,7 +349,7 @@ class Settings extends React.Component {
   }
 
   render() {
-    let { prefs, globalPrefs, localServerURL, userData, match } = this.props;
+    let { prefs, globalPrefs, userData } = this.props;
 
     return (
       <Page title="Settings">
@@ -380,7 +377,6 @@ export default connect(
   state => ({
     prefs: state.prefs.local,
     globalPrefs: state.prefs.global,
-    localServerURL: state.account.localServerURL,
     userData: state.user.data
   }),
   actions
