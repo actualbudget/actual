@@ -10,12 +10,14 @@ import {
   Button,
   ButtonWithLoading
 } from 'loot-design/src/components/common';
+import { useSetThemeColor } from 'loot-design/src/components/hooks';
 import { colors } from 'loot-design/src/style';
 
 import { useServerURL } from '../../hooks/useServerURL';
 import { Title, Input } from './subscribe/common';
 
 export default function ConfigServer() {
+  useSetThemeColor(colors.p5);
   let dispatch = useDispatch();
   let history = useHistory();
   let [url, setUrl] = useState('');
@@ -80,7 +82,7 @@ export default function ConfigServer() {
 
   return (
     <>
-      <View style={{ width: 500, marginTop: -30 }}>
+      <View style={{ maxWidth: 500, marginTop: -30 }}>
         <Title text="Where's the server?" />
 
         <Text

@@ -15,9 +15,15 @@ import {
   Link,
   ButtonWithLoading
 } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import {
+  mobileStyles,
+  styles as desktopStyles,
+  colors
+} from 'loot-design/src/style';
+import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import useServerVersion from '../hooks/useServerVersion';
+import { isMobile } from '../util';
 import { Page } from './Page';
 
 let dateFormats = [
@@ -54,7 +60,8 @@ function ButtonSetting({ button, children, onClick }) {
         alignItems: 'flex-start',
         padding: 15,
         borderRadius: 4,
-        border: '1px solid ' + colors.n8
+        border: '1px solid ' + colors.n8,
+        ...(isMobile() && { width: '100%' })
       }}
     >
       <View
@@ -71,6 +78,7 @@ function Advanced({ prefs, resetSync }) {
   let [resetting, setResetting] = useState(false);
   let [resettingCache, setResettingCache] = useState(false);
   let [expanded, setExpanded] = useState(false);
+  let styles = isMobile() ? mobileStyles : desktopStyles;
 
   async function onResetSync() {
     setResetting(true);
@@ -85,7 +93,10 @@ function Advanced({ prefs, resetSync }) {
   }
 
   return expanded ? (
-    <Section title="Advanced Settings" style={{ marginBottom: 25 }}>
+    <Section
+      title="Advanced Settings"
+      style={{ marginBottom: 25, ...(isMobile() && { width: '100%' }) }}
+    >
       <Text>Budget ID: {prefs.id}</Text>
       <Text style={{ color: colors.n6 }}>
         Sync ID: {prefs.groupId || '(none)'}
@@ -195,7 +206,6 @@ function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
               Change location
             </Button>
           </View>
-          )}
           {documentDirChanged && (
             <Information style={{ marginTop: 10 }}>
               A restart is required for this change to take effect
@@ -237,10 +247,11 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
           <select
             id="settings-numberFormat"
             {...css({ marginLeft: 5, fontSize: 14 })}
+            defaultValue={numberFormat}
             onChange={onNumberFormat}
           >
             {numberFormats.map(f => (
-              <option value={f.value} selected={f.value === numberFormat}>
+              <option value={f.value} key={f.value}>
                 {f.label}
               </option>
             ))}
@@ -252,10 +263,11 @@ function FileSettings({ savePrefs, prefs, pushModal, resetSync }) {
           <select
             id="settings-dateFormat"
             {...css({ marginLeft: 5, fontSize: 14 })}
+            defaultValue={dateFormat}
             onChange={onDateFormat}
           >
             {dateFormats.map(f => (
-              <option value={f.value} selected={f.value === dateFormat}>
+              <option value={f.value} key={f.value}>
                 {f.label}
               </option>
             ))}
@@ -327,7 +339,7 @@ function About() {
   const version = useServerVersion();
 
   return (
-    <Section title="About">
+    <Section title="About" style={{ gap: 5 }}>
       <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
       <Text>Server version: {version}</Text>
     </Section>
@@ -353,6 +365,20 @@ class Settings extends React.Component {
 
     return (
       <Page title="Settings">
+        {/* The only spot to close a budget on mobile */}
+        {isMobile() && (
+          <View style={{ alignItems: 'center', marginBottom: 30 }}>
+            <Text
+              style={[mobileStyles.text, { fontWeight: '600', fontSize: 17 }]}
+            >
+              {prefs.budgetName}
+            </Text>
+            <Button onClick={this.props.closeBudget} style={{ marginTop: 10 }}>
+              Close Budget
+            </Button>
+          </View>
+        )}
+
         <View style={{ flexShrink: 0, gap: 30, maxWidth: 600 }}>
           <About />
 
@@ -373,11 +399,14 @@ class Settings extends React.Component {
   }
 }
 
-export default connect(
-  state => ({
-    prefs: state.prefs.local,
-    globalPrefs: state.prefs.global,
-    userData: state.user.data
-  }),
-  actions
-)(Settings);
+export default withThemeColor(colors.n10)(
+  connect(
+    state => ({
+      prefs: state.prefs.local,
+      globalPrefs: state.prefs.global,
+      localServerURL: state.account.localServerURL,
+      userData: state.user.data
+    }),
+    actions
+  )(Settings)
+);
