@@ -37,7 +37,7 @@ function LoggedInUser({
 
   async function onChangePassword() {
     await closeBudget();
-    history.push('/change-password');
+    window.__history.push('/change-password');
   }
 
   function onMenuSelect(type) {
@@ -54,11 +54,12 @@ function LoggedInUser({
     }
   }
 
-  function onClick() {
+  async function onClick() {
     if (serverUrl) {
       setMenuOpen(true);
     } else {
-      history.push('/config-server');
+      await closeBudget();
+      window.__history.push('/config-server');
     }
   }
 
