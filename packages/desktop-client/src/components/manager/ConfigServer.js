@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
+import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
@@ -11,6 +12,10 @@ import {
   ButtonWithLoading
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
+import {
+  isDevelopmentEnvironment,
+  isPreviewEnvironment
+} from 'loot-design/src/util/environment';
 
 import { useServerURL } from '../../hooks/useServerURL';
 import { Title, Input } from './subscribe/common';
@@ -76,6 +81,12 @@ export default function ConfigServer() {
     await send('set-server-url', { url: null });
     await dispatch(loggedIn());
     history.push('/');
+  }
+
+  async function onCreateTestFile() {
+    await send('set-server-url', { url: null });
+    await dispatch(createBudget({ testMode: true }));
+    window.__history.push('/');
   }
 
   return (
@@ -169,6 +180,16 @@ export default function ConfigServer() {
               <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
                 Don't use a server
               </Button>
+
+              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
+                <Button
+                  primary
+                  style={{ marginLeft: 15 }}
+                  onClick={onCreateTestFile}
+                >
+                  Create test file
+                </Button>
+              )}
             </>
           )}
         </View>
