@@ -82,7 +82,7 @@ export default function Schedules() {
           flexShrink: 0
         }}
       >
-        <Button onClick={onDiscover}>Find schedules…</Button>
+        <Button onClick={onDiscover}>Find schedules</Button>
         <Button primary onClick={onAdd}>
           Add new schedule
         </Button>
