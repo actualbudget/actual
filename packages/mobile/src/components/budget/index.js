@@ -15,7 +15,7 @@ import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
 import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import format from 'loot-design/src/components/spreadsheet/format';
 import { BudgetTable } from 'loot-design/src/components/mobile/budget';
-import AnimatedLoading from 'loot-design/src/svg/AnimatedLoading';
+import AnimatedLoading from 'loot-design/src/svg/v1/AnimatedLoading';
 import { Button } from 'loot-design/src/components/mobile/common';
 import SyncRefresh from '../SyncRefresh';
 import Modal from '../modals/Modal';
