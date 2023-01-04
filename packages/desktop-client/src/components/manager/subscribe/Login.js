@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
@@ -17,7 +16,6 @@ import { useBootstrapped, Title, Input } from './common';
 
 export default function Login() {
   let dispatch = useDispatch();
-  let history = useHistory();
   let [password, setPassword] = useState('');
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState(null);

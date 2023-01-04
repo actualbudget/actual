@@ -22,7 +22,6 @@ import useReport from './useReport';
 import { useArgsMemo } from './util';
 
 function CashFlow() {
-  const [earliestMonth, setEarliestMonth] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 30)
@@ -57,7 +56,6 @@ function CashFlow() {
         }))
         .reverse();
 
-      setEarliestMonth(earliestMonth);
       setAllMonths(allMonths);
     }
     run();
@@ -84,7 +82,7 @@ function CashFlow() {
     return null;
   }
 
-  const { graphData, balance, totalChange, totalExpenses, totalIncome } = data;
+  const { graphData, totalExpenses, totalIncome } = data;
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
