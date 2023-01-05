@@ -217,11 +217,7 @@ function updateMenu(isBudgetOpen) {
   const fileItems = file.submenu.items;
   fileItems
     .filter(
-      item =>
-        item.label === 'Start Tutorial' ||
-        item.label === 'Manage Payees...' ||
-        item.label === 'Manage Rules...' ||
-        item.label === 'Load Backup...'
+      item => item.label === 'Start Tutorial' || item.label === 'Load Backup...'
     )
 
     .map(item => (item.enabled = isBudgetOpen));

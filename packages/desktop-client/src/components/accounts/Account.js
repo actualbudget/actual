@@ -13,9 +13,11 @@ import {
 import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { currentDay } from 'loot-core/src/shared/months';
 import {
   deleteTransaction,
   updateTransaction,
+  realizeTempTransactions,
   ungroupTransactions
 } from 'loot-core/src/shared/transactions';
 import {
@@ -104,7 +106,12 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
+function ReconcilingMessage({
+  balanceQuery,
+  targetBalance,
+  onDone,
+  onCreateTransaction
+}) {
   let cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
     value: 0,
@@ -167,6 +174,13 @@ function ReconcilingMessage({ balanceQuery, targetBalance, onDone }) {
             Done Reconciling
           </Button>
         </View>
+        {targetDiff !== 0 && (
+          <View style={{ marginLeft: 15 }}>
+            <Button onClick={() => onCreateTransaction(targetDiff)}>
+              Create Reconciliation Transation
+            </Button>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -475,10 +489,6 @@ function SelectedTransactionsButton({
     );
   }, [types.preview, selectedItems, getTransaction]);
 
-  function getRealTransactions() {
-    return [...selectedItems].filter(id => !isPreviewId(id));
-  }
-
   return (
     <SelectedItemsButton
       name="transactions"
@@ -568,7 +578,6 @@ function SelectedTransactionsButton({
             onUnlink([...selectedItems]);
             break;
           default:
-            let field = name;
             onEdit(name, [...selectedItems]);
         }
       }}
@@ -601,6 +610,7 @@ const AccountHeader = React.memo(
     onAddTransaction,
     onShowTransactions,
     onDoneReconciling,
+    onCreateReconciliationTransaction,
     onToggleExtraBalances,
     onSaveName,
     onExposeName,
@@ -894,6 +904,7 @@ const AccountHeader = React.memo(
             targetBalance={reconcileAmount}
             balanceQuery={balanceQuery}
             onDone={onDoneReconciling}
+            onCreateTransaction={onCreateReconciliationTransaction}
           />
         )}
       </>
@@ -1085,7 +1096,6 @@ class AccountInternal extends React.PureComponent {
   };
 
   makeRootQuery = () => {
-    let { transactions } = this.state;
     let locationState = this.props.location.state;
     let accountId = this.props.accountId;
 
@@ -1384,10 +1394,6 @@ class AccountInternal extends React.PureComponent {
     return this.props.matchedTransactions.includes(id);
   };
 
-  onManagePayees = id => {
-    this.props.pushModal('manage-payees', { selectedPayee: id });
-  };
-
   onCreatePayee = name => {
     let trimmed = name.trim();
     if (trimmed !== '') {
@@ -1402,6 +1408,31 @@ class AccountInternal extends React.PureComponent {
 
   onDoneReconciling = () => {
     this.setState({ reconcileAmount: null });
+  };
+
+  onCreateReconciliationTransaction = async diff => {
+    // Create a new reconciliation transaction
+    const reconciliationTransactions = realizeTempTransactions([
+      {
+        id: 'temp',
+        account: this.props.accountId,
+        cleared: true,
+        amount: diff,
+        date: currentDay(),
+        notes: 'Reconciliation balance adjustment'
+      }
+    ]);
+
+    // Optimistic UI: update the transaction list before sending the data to the database
+    this.setState({
+      transactions: [...this.state.transactions, ...reconciliationTransactions]
+    });
+
+    // sync the reconciliation transaction
+    await send('transactions-batch-update', {
+      added: reconciliationTransactions
+    });
+    await this.refetchTransactions();
   };
 
   onShowTransactions = async ids => {
@@ -1431,7 +1462,15 @@ class AccountInternal extends React.PureComponent {
         value = !!transactions.find(t => !t.cleared);
       }
 
+      const idSet = new Set(ids);
+
       transactions.forEach(trans => {
+        if (!idSet.has(trans.id)) {
+          // Skip transactions which aren't actually selected, since the query
+          // above also retrieves the siblings & parent of any selected splits.
+          return;
+        }
+
         let { diff } = updateTransaction(transactions, {
           ...trans,
           [name]: value
@@ -1580,14 +1619,12 @@ class AccountInternal extends React.PureComponent {
       accounts,
       categoryGroups,
       payees,
-      match,
       syncEnabled,
       dateFormat,
       addNotification,
       accountsSyncing,
       replaceModal,
       showExtraBalances,
-      expandSplits,
       accountId
     } = this.props;
     let {
@@ -1595,7 +1632,6 @@ class AccountInternal extends React.PureComponent {
       loading,
       workingHard,
       reconcileAmount,
-      transactionCount,
       transactionsFiltered,
       editingName,
       showBalances,
@@ -1664,6 +1700,9 @@ class AccountInternal extends React.PureComponent {
                   onExposeName={this.onExposeName}
                   onReconcile={this.onReconcile}
                   onDoneReconciling={this.onDoneReconciling}
+                  onCreateReconciliationTransaction={
+                    this.onCreateReconciliationTransaction
+                  }
                   onSync={this.onSync}
                   onImport={this.onImport}
                   onBatchDelete={this.onBatchDelete}
@@ -1738,7 +1777,6 @@ class AccountInternal extends React.PureComponent {
                     onCloseAddTransaction={() =>
                       this.setState({ isAdding: false })
                     }
-                    onManagePayees={this.onManagePayees}
                     onCreatePayee={this.onCreatePayee}
                   />
                 </View>

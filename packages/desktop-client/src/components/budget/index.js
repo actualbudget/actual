@@ -320,9 +320,6 @@ class Budget extends React.PureComponent {
   };
 
   onShowActivity = (categoryName, categoryId, month) => {
-    const after = `${month}-01`;
-    const before = `${month}-31`;
-
     this.props.history.push({
       pathname: '/accounts',
       state: {

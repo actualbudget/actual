@@ -35,7 +35,7 @@ class FatalError extends React.Component {
         <Text>
           There was a problem loading the app in this browser version. If this
           continues to be a problem, you can{' '}
-          <a href="https://actualbudget.com/download">
+          <a href="https://github.com/actualbudget/releases">
             download the desktop app
           </a>
           .
