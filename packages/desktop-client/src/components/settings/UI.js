@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { View, Link } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import { isMobile } from '../util';
+import { isMobile } from '../../util';
 
 export function Section({ title, children, style, titleProps, ...props }) {
   return (

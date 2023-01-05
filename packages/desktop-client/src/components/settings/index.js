@@ -4,13 +4,14 @@ import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
 import Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
-import { View, Text } from 'loot-design/src/components/common';
+import { View, Text, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
+import { mobileStyles } from 'loot-design/src/style';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import useServerVersion from '../../hooks/useServerVersion';
+import { isMobile } from '../../util';
 import { Page } from '../Page';
-import { isMobile } from '../util';
 import EncryptionSettings from './Encryption';
 import Export from './Export';
 import FormatSettings from './Format';
