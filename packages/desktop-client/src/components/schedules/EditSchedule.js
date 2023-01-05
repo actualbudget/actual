@@ -96,6 +96,7 @@ function calculateLastDate(scheduleDate) {
     case 'yearly':
       startDate.setFullYear(startDate.getFullYear() + intervalToSum);
       break;
+    default:
   }
   return startDate;
 }
