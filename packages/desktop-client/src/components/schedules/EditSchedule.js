@@ -26,7 +26,7 @@ import { colors } from 'loot-design/src/style';
 
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { OpSelect } from '../modals/EditRule';
-import { Page, usePageType } from '../Page';
+import { Page } from '../Page';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 
 function mergeFields(defaults, initial) {
@@ -91,8 +91,6 @@ export default function ScheduleDetails() {
   let dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
-
-  let pageType = usePageType();
 
   let [state, dispatch] = useReducer(
     (state, action) => {
@@ -251,7 +249,6 @@ export default function ScheduleDetails() {
   useEffect(() => {
     async function run() {
       let date = state.fields.date;
-      let dates = null;
 
       if (date == null) {
         dispatch({ type: 'set-upcoming-dates', dates: null });
@@ -297,7 +294,7 @@ export default function ScheduleDetails() {
     let unsubscribe;
 
     if (state.schedule && state.transactionsMode === 'matched') {
-      let { error, conditions } = updateScheduleConditions(
+      let { conditions } = updateScheduleConditions(
         state.schedule,
         state.fields
       );
@@ -442,6 +439,7 @@ export default function ScheduleDetails() {
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Account" />
           <AccountAutocomplete
+            includeClosedAccounts={false}
             value={state.fields.account}
             inputProps={{ placeholder: '(none)' }}
             onSelect={id =>

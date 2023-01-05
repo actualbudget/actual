@@ -2,9 +2,7 @@ const { ipcRenderer } = require('electron');
 
 const root = document.querySelector('#root');
 
-const { version: appVersion } = ipcRenderer.sendSync(
-  'get-bootstrap-data'
-);
+const { version: appVersion } = ipcRenderer.sendSync('get-bootstrap-data');
 
 const iconPath = __dirname + '/../icons/icon.png';
 
@@ -85,9 +83,7 @@ ipcRenderer.on('update-error', (event, msg) => {
     text = 'Error updating the app. Please try again later.';
   }
 
-  // prettier-ignore
-  errorEl.innerHTML =
-  `<div style="text-align:center; color:#F65151">${text}</div>`;
+  errorEl.innerHTML = `<div style="text-align:center; color:#F65151">${text}</div>`;
   errorEl.style.display = 'block';
 });
 

@@ -23,7 +23,6 @@ export default function CreateEncryptionKey({
   budgetId,
   options = {}
 }) {
-  let [enabling, setEnabling] = useState(false);
   let [password, setPassword] = useState('');
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState('');
@@ -70,7 +69,7 @@ export default function CreateEncryptionKey({
                 other devices will have to revert to this version of your data.{' '}
                 <ExternalLink
                   asAnchor
-                  href="https://actualbudget.com/encrypted-syncing"
+                  href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
                 >
                   Learn more
                 </ExternalLink>
@@ -104,7 +103,7 @@ export default function CreateEncryptionKey({
                 will take you through that process on those devices.{' '}
                 <ExternalLink
                   asAnchor
-                  href="https://actualbudget.com/encrypted-syncing"
+                  href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
                 >
                   Learn more
                 </ExternalLink>

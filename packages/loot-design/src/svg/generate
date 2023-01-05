@@ -162,12 +162,12 @@ function transformContents(name, contents, isReactNative) {
     return null;
   }
 
-  // prettier-ignore
   const reactNativeImport = `
     import {${reactNativeTags.join(', ')}} from 'mobile/node_modules/react-native-svg'
   `;
 
   output = `
+/* eslint no-unused-vars: 0 */
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
 import React from 'react';
 ${!isReactNative ? `import { css } from 'glamor';` : ''}
@@ -180,7 +180,7 @@ return ${output}
 export default ${name}
 `;
 
-  return prettier.format(output, { parser: 'babylon' });
+  return prettier.format(output, { parser: 'babel' });
 }
 
 function title(str) {
@@ -188,7 +188,7 @@ function title(str) {
 }
 
 async function run() {
-  const files = await fastglob(['split.svg']);
+  const files = await fastglob(['*.svg']);
 
   for (let file of files) {
     let contents = fs.readFileSync(`./${file}`, 'utf8');

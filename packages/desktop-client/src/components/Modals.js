@@ -22,10 +22,9 @@ import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
 import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
-import ManageRules from './modals/ManageRules';
+import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import WelcomeScreen from './modals/WelcomeScreen';
-import ManagePayeesWithData from './payees/ManagePayeesWithData';
 
 function Modals({
   history,
@@ -151,25 +150,10 @@ function Modals({
         />
 
         <Route
-          path="/manage-payees"
-          render={() => {
-            return (
-              <ManagePayeesWithData
-                history={history}
-                modalProps={modalProps}
-                initialSelectedIds={
-                  options.selectedPayee ? [options.selectedPayee] : undefined
-                }
-              />
-            );
-          }}
-        />
-
-        <Route
           path="/manage-rules"
           render={() => {
             return (
-              <ManageRules
+              <ManageRulesModal
                 history={history}
                 modalProps={modalProps}
                 payeeId={options.payeeId}
