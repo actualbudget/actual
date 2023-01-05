@@ -57,7 +57,12 @@ export function AdvancedToggle({ children }) {
   ) : (
     <Link
       onClick={() => setExpanded(true)}
-      style={{ flexShrink: 0, alignSelf: 'flex-start', color: colors.p4 }}
+      style={{
+        flexShrink: 0,
+        alignSelf: 'flex-start',
+        color: colors.p4,
+        marginBottom: 25
+      }}
     >
       Show advanced settings
     </Link>
