@@ -24,10 +24,12 @@ import BankSyncStatus from './BankSyncStatus';
 import Budget from './budget';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
+import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
 import NordigenLink from './nordigen/NordigenLink';
 import Notifications from './Notifications';
 import { PageTypeProvider } from './Page';
+import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import Schedules from './schedules';
 import DiscoverSchedules from './schedules/DiscoverSchedules';
@@ -38,26 +40,6 @@ import Settings from './Settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 import FixSplitsTool from './tools/FixSplitsTool';
 // import Debugger from './Debugger';
-
-function URLBar() {
-  let location = useLocation();
-
-  return (
-    <View
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        margin: 15,
-        backgroundColor: colors.n9,
-        padding: 8,
-        borderRadius: 6
-      }}
-    >
-      {location.pathname}
-    </View>
-  );
-}
 
 function PageRoute({ path, component: Component }) {
   return (
@@ -98,6 +80,8 @@ function Routes({ location }) {
           component={PostsOfflineNotification}
         />
 
+        <Route path="/rules" exact component={ManageRulesPage} />
+        <Route path="/payees" exact component={ManagePayeesPage} />
         <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
         <Route path="/nordigen/link" exact component={NordigenLink} />
 
@@ -244,12 +228,8 @@ class FinancesApp extends React.Component {
               >
                 <Notifications />
                 <BankSyncStatus />
-
                 <StackedRoutes />
-
                 {/*window.Actual.IS_DEV && <Debugger />*/}
-                {/*window.Actual.IS_DEV && <URLBar />*/}
-
                 <Modals history={this.history} />
               </div>
             </div>

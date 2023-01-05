@@ -34,7 +34,7 @@ import { colors } from 'loot-design/src/style';
 import DeleteIcon from 'loot-design/src/svg/Delete';
 import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
 
-import { Value } from '../modals/ManageRules';
+import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 
 let filterFields = [

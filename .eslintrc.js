@@ -3,7 +3,7 @@ module.exports = {
   extends: ['react-app'],
   rules: {
     'prettier/prettier': 'error',
-    'no-unused-vars': 'off',
+    'no-unused-vars': 'off', // TODO: re-enable once issues are fixed
     'no-loop-func': 'off',
     'no-restricted-globals': 'off',
 

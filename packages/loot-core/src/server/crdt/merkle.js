@@ -22,7 +22,7 @@ export function keyToTimestamp(key) {
 
 export function insert(trie, timestamp) {
   let hash = timestamp.hash();
-  let key = Number((timestamp.millis() / 1000 / 60) | 0).toString(3);
+  let key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
   trie = Object.assign({}, trie, { hash: trie.hash ^ hash });
   return insertKey(trie, key, hash);

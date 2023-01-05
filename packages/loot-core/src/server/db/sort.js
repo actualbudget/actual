@@ -34,7 +34,7 @@ export function shoveSortOrders(items, targetId) {
   } else {
     if (target.sort_order - (before ? before.sort_order : 0) <= 2) {
       let next = to;
-      let order = (items[next].sort_order | 0) + SORT_INCREMENT;
+      let order = Math.floor(items[next].sort_order) + SORT_INCREMENT;
       while (next < items.length) {
         // No need to update it if it's already greater than the current
         // order. This can happen because there may already be large
