@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
 import Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
-import { View, Text, Button } from 'loot-design/src/components/common';
+import { View, Text, Button, Input } from 'loot-design/src/components/common';
+import { FormField, FormLabel } from 'loot-design/src/components/forms';
 import { colors } from 'loot-design/src/style';
 import { mobileStyles } from 'loot-design/src/style';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
@@ -61,21 +62,22 @@ function Settings({
 
   return (
     <Page title="Settings">
-      {/* The only spot to close a budget on mobile */}
-      {isMobile() && (
-        <View style={{ alignItems: 'center', marginBottom: 30 }}>
-          <Text
-            style={[mobileStyles.text, { fontWeight: '600', fontSize: 17 }]}
-          >
-            {prefs.budgetName}
-          </Text>
-          <Button onClick={closeBudget} style={{ marginTop: 10 }}>
-            Close Budget
-          </Button>
-        </View>
-      )}
-
       <View style={{ flexShrink: 0, gap: 30, maxWidth: 600 }}>
+        {/* The only spot to close a budget on mobile */}
+        {isMobile() && (
+          <Section title="Budget">
+            <FormField>
+              <FormLabel title="Name" />
+              <Input
+                value={prefs.budgetName}
+                disabled
+                style={{ color: '#999' }}
+              />
+            </FormField>
+            <Button onClick={closeBudget}>Close Budget</Button>
+          </Section>
+        )}
+
         <About />
 
         {!Platform.isBrowser && (
