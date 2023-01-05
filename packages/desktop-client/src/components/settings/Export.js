@@ -5,7 +5,7 @@ import { Text, Button } from 'loot-design/src/components/common';
 
 import { ButtonSetting } from './UI';
 
-export default function Export({ prefs }) {
+export default function ExportBudget({ prefs }) {
   async function onExport() {
     let data = await send('export-budget');
     window.Actual.saveFile(data, `${prefs.id}.zip`, 'Export budget');

@@ -13,7 +13,7 @@ import useServerVersion from '../../hooks/useServerVersion';
 import { isMobile } from '../../util';
 import { Page } from '../Page';
 import EncryptionSettings from './Encryption';
-import Export from './Export';
+import ExportBudget from './Export';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
@@ -87,7 +87,7 @@ function Settings({
 
         <FormatSettings prefs={prefs} savePrefs={savePrefs} />
         <EncryptionSettings prefs={prefs} pushModal={pushModal} />
-        <Export prefs={prefs} />
+        <ExportBudget prefs={prefs} />
 
         <AdvancedToggle>
           <AdvancedAbout prefs={prefs} />
