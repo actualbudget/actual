@@ -47,7 +47,8 @@ function Settings({
   prefs,
   globalPrefs,
   pushModal,
-  resetSync
+  resetSync,
+  closeBudget
 }) {
   useEffect(() => {
     let unlisten = listen('prefs-updated', () => {
@@ -68,7 +69,7 @@ function Settings({
           >
             {prefs.budgetName}
           </Text>
-          <Button onClick={this.props.closeBudget} style={{ marginTop: 10 }}>
+          <Button onClick={closeBudget} style={{ marginTop: 10 }}>
             Close Budget
           </Button>
         </View>
