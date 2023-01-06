@@ -22,7 +22,6 @@ import {
   useStableCallback,
   View,
   Text,
-  Modal,
   Input,
   Button,
   Tooltip,

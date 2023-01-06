@@ -7,29 +7,6 @@ import { styles } from '../style';
 
 export const IntersectionBoundary = React.createContext();
 
-function visibleBoundingRect(el) {
-  let rect = el.getBoundingClientRect();
-  let parentRect = el.parentNode.getBoundingClientRect();
-
-  let top = Math.max(rect.top, parentRect.top);
-  let left = Math.max(rect.left, parentRect.left);
-  let right = Math.min(
-    rect.left + rect.width,
-    parentRect.left + parentRect.width
-  );
-  let bottom = Math.min(
-    rect.top + rect.height,
-    parentRect.top + parentRect.height
-  );
-
-  return {
-    top,
-    left,
-    width: right - left,
-    height: bottom - top
-  };
-}
-
 export function useTooltip() {
   let [isOpen, setIsOpen] = useState(false);
 
