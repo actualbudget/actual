@@ -223,9 +223,6 @@ export default function DateSelect({
   }, [value]);
 
   function onKeyDown(e) {
-    let ENTER = 13;
-    let UP = 38;
-    let DOWN = 40;
     let ESC = 27;
 
     if (

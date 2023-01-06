@@ -25,10 +25,8 @@ function getErrorMessage(error) {
 //   this.setState({ error: err.message, importing: false });
 // });
 
-function Import({ modalProps, actions, availableImports }) {
-  const [error, setError] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const [type, setType] = useState(null);
+function Import({ modalProps, actions }) {
+  const [error] = useState(false);
 
   function onSelectType(type) {
     switch (type) {
