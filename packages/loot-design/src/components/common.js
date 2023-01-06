@@ -111,18 +111,27 @@ export function AnchorLink({
   );
 }
 
-export const ExternalLink = React.forwardRef((props, ref) => {
-  function onClick(e) {
-    e.preventDefault();
-    window.Actual.openURLInBrowser(props.href);
-  }
+export const ExternalLink = React.forwardRef(
+  ({ asAnchor, children, ...props }, ref) => {
+    function onClick(e) {
+      e.preventDefault();
+      window.Actual.openURLInBrowser(props.href);
+    }
 
-  if (props.asAnchor) {
-    // eslint-disable-next-line
-    return <a ref={ref} {...props} onClick={onClick} />;
+    if (asAnchor) {
+      return (
+        <a ref={ref} {...props} onClick={onClick}>
+          {children}
+        </a>
+      );
+    }
+    return (
+      <Button ref={ref} bare {...props} onClick={onClick}>
+        {children}
+      </Button>
+    );
   }
-  return <Button ref={ref} bare {...props} onClick={onClick} />;
-});
+);
 
 function ButtonLink_({
   history,
