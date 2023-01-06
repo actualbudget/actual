@@ -8,20 +8,6 @@ import * as report from './report';
 import * as rollover from './rollover';
 import { sumAmounts } from './util';
 
-function mergeUpdates(updates) {
-  const merged = {};
-  updates.forEach(update => {
-    Object.keys(update).forEach(sheet => {
-      if (merged[sheet]) {
-        merged[sheet] = { ...merged[sheet], ...update[sheet] };
-      } else {
-        merged[sheet] = update[sheet];
-      }
-    });
-  });
-  return merged;
-}
-
 export function getBudgetType() {
   let meta = sheet.get().meta();
   return meta.budgetType || 'rollover';
