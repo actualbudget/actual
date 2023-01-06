@@ -22,7 +22,6 @@ Math.random = function random() {
 
 global.Date.now = () => 123456789;
 
-let seqId = 1;
 uuid.v4 = function() {
   return Promise.resolve('testing-uuid-' + Math.floor(Math.random() * 1000000));
 };
@@ -33,7 +32,6 @@ uuid.v4Sync = function() {
 
 global.__resetWorld = () => {
   seed = 2;
-  seqId = 1;
   resetStore();
 };
 
