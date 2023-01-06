@@ -254,7 +254,8 @@ class Budget extends React.Component {
             flex: 1,
             backgroundColor: 'white',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            marginBottom: 25
           }}
         >
           <AnimatedLoading width={25} height={25} />

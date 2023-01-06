@@ -61,7 +61,7 @@ export function DateHeader({ date }) {
 }
 
 function Status({ status }) {
-  let color, backgroundColor, Icon;
+  let color, Icon;
 
   switch (status) {
     case 'missed':
@@ -271,10 +271,9 @@ export class TransactionList extends React.Component {
   render() {
     const {
       transactions,
-      style,
       scrollProps = {},
-      onLoadMore,
-      refreshControl
+      onLoadMore
+      // refreshControl
     } = this.props;
 
     const sections = this.makeData(transactions);
@@ -290,6 +289,21 @@ export class TransactionList extends React.Component {
           selectionMode="none"
           style={{ flex: '1 auto', height: '100%', overflowY: 'auto' }}
         >
+          {sections.length === 0 ? (
+            <Section>
+              <Item>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '100%'
+                  }}
+                >
+                  <Text style={{ fontSize: 15 }}>No transactions</Text>
+                </div>
+              </Item>
+            </Section>
+          ) : null}
           {sections.map(section => {
             return (
               <Section

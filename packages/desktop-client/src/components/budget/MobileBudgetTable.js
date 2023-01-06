@@ -760,7 +760,7 @@ export class BudgetGroups extends React.Component {
     return (
       <View
         data-testid="budget-groups"
-        style={{ flex: '1 0 auto', marginBottom: 15, overflowY: 'auto' }}
+        style={{ flex: '1 0 auto', overflowY: 'auto', paddingBottom: 15 }}
       >
         {expenseGroups.map(group => {
           return (

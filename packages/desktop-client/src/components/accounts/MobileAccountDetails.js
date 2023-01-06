@@ -1,13 +1,18 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Label, View, Input, Button } from 'loot-design/src/components/common';
+import {
+  Button,
+  InputWithContent,
+  Label,
+  View
+} from 'loot-design/src/components/common';
 import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import Text from 'loot-design/src/components/Text';
 import { colors, mobileStyles as styles } from 'loot-design/src/style';
 import Add from 'loot-design/src/svg/v1/Add';
 import CheveronLeft from 'loot-design/src/svg/v1/CheveronLeft';
-import Search from 'loot-design/src/svg/v1/Search';
+import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 
 import { TransactionList } from './MobileTransaction';
 
@@ -38,8 +43,19 @@ class TransactionSearchInput extends React.Component {
           width: '100%'
         }}
       >
-        <Search width="20" height="20" style={{ color: colors.n7 }} />
-        <Input
+        <InputWithContent
+          leftContent={
+            <SearchAlternate
+              style={{
+                width: 13,
+                height: 13,
+                flexShrink: 0,
+                color: text ? colors.p7 : 'inherit',
+                margin: 5,
+                marginRight: 0
+              }}
+            />
+          }
           value={text}
           onUpdate={this.onChange}
           placeholder={`Search ${accountName}`}
