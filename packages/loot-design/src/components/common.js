@@ -7,13 +7,7 @@ import React, {
 } from 'react';
 import mergeRefs from 'react-merge-refs';
 import ReactModal from 'react-modal';
-import {
-  Route,
-  NavLink,
-  withRouter,
-  useHistory,
-  useRouteMatch
-} from 'react-router-dom';
+import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
 
 import {
   ListboxInput,
@@ -88,16 +82,7 @@ export function Link({ style, children, ...nativeProps }) {
   );
 }
 
-export function AnchorLink({
-  staticContext,
-  to,
-  exact,
-  style,
-  activeStyle,
-  children
-}) {
-  let history = useHistory();
-  let href = history.createHref(typeof to === 'string' ? { pathname: to } : to);
+export function AnchorLink({ to, exact, style, activeStyle, children }) {
   let match = useRouteMatch({ path: to, exact: true });
 
   return (
@@ -111,18 +96,27 @@ export function AnchorLink({
   );
 }
 
-export const ExternalLink = React.forwardRef((props, ref) => {
-  function onClick(e) {
-    e.preventDefault();
-    window.Actual.openURLInBrowser(props.href);
-  }
+export const ExternalLink = React.forwardRef(
+  ({ asAnchor, children, ...props }, ref) => {
+    function onClick(e) {
+      e.preventDefault();
+      window.Actual.openURLInBrowser(props.href);
+    }
 
-  if (props.asAnchor) {
-    // eslint-disable-next-line
-    return <a ref={ref} {...props} onClick={onClick} />;
+    if (asAnchor) {
+      return (
+        <a ref={ref} {...props} onClick={onClick}>
+          {children}
+        </a>
+      );
+    }
+    return (
+      <Button ref={ref} bare {...props} onClick={onClick}>
+        {children}
+      </Button>
+    );
   }
-  return <Button ref={ref} bare {...props} onClick={onClick} />;
-});
+);
 
 function ButtonLink_({
   history,
@@ -823,7 +817,8 @@ export function Modal({
           <View
             style={{
               padding: 20,
-              position: 'relative'
+              position: 'relative',
+              flexShrink: 0
             }}
           >
             {showTitle && (

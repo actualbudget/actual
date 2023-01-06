@@ -265,7 +265,7 @@ export function DragDrop({ makeHighlight, children, style }) {
     });
 
     if (droppable) {
-      let { layout, getActiveStatus } = droppable;
+      let { getActiveStatus } = droppable;
 
       if (getActiveStatus) {
         let status = getActiveStatus(x, y, droppable, draggable.current || {});

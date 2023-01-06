@@ -68,8 +68,6 @@ import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
 
 import { getStatusProps } from '../schedules/StatusBadge';
 
-let TABLE_BACKGROUND_COLOR = colors.n11;
-
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
 }
@@ -132,7 +130,6 @@ function deserializeTransaction(transaction, originalTransaction, dateFormat) {
 
 function getParentTransaction(transactions, fromIndex) {
   let trans = transactions[fromIndex];
-  let parent;
   let parentIdx = fromIndex;
   while (parentIdx >= 0) {
     if (transactions[parentIdx].id === trans.parent_id) {
@@ -479,7 +476,6 @@ function CellWithScheduleIcon({ scheduleId, children }) {
     marginRight: 3,
     color: 'inherit'
   };
-  let Icon = recurring ? ArrowsSynchronize : CalendarIcon;
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch' }}>
@@ -1514,7 +1510,6 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   let [_, forceRerender] = useState({});
 
   let selectedItems = useSelectedItems();
-  let dispatchSelected = useSelectedDispatch();
 
   useLayoutEffect(() => {
     latestState.current = {

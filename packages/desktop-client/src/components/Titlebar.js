@@ -22,6 +22,7 @@ import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
 import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
 
+import { useServerURL } from '../hooks/useServerURL';
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
@@ -247,6 +248,7 @@ function Titlebar({
   sync
 }) {
   let sidebar = useSidebar();
+  const serverURL = useServerURL();
 
   return (
     <View
@@ -353,11 +355,13 @@ function Titlebar({
       </Switch>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <SyncButton
-        style={{ marginLeft: 10 }}
-        localPrefs={localPrefs}
-        onSync={sync}
-      />
+      {serverURL ? (
+        <SyncButton
+          style={{ marginLeft: 10 }}
+          localPrefs={localPrefs}
+          onSync={sync}
+        />
+      ) : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>
   );
