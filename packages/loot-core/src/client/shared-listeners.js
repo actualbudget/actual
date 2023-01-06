@@ -170,7 +170,7 @@ export function listenForSyncEvent(actions, store) {
           // the server does not match the local one. This can mean a
           // few things depending on the state, and we try to show an
           // appropriate message and call to action to fix it.
-          let { groupId, cloudFileId } = store.getState().prefs.local;
+          let { cloudFileId } = store.getState().prefs.local;
 
           notif = {
             title: 'Syncing has been reset on this cloud file',

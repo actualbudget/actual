@@ -29,11 +29,6 @@ function isReflectBudget() {
   return budgetType === 'report';
 }
 
-function isZeroBudget() {
-  let { budgetType } = prefs.getPrefs();
-  return budgetType === 'rollover';
-}
-
 function dbMonth(month) {
   return parseInt(month.replace('-', ''));
 }
