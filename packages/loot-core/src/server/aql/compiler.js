@@ -560,7 +560,6 @@ const compileFunction = saveStack('function', (state, func) => {
     }
     case '$lower': {
       validateArgLength(args, 1);
-      // eslint-disable-next-line no-unused-vars
       let [arg1] = valArray(state, args, ['string']);
       return typed(`LOWER(${arg1})`, 'string');
     }
@@ -568,19 +567,17 @@ const compileFunction = saveStack('function', (state, func) => {
     // integer/float functions
     case '$neg': {
       validateArgLength(args, 1);
-      // eslint-disable-next-line no-unused-vars
-      let [arg1] = valArray(state, args, ['float']);
+      valArray(state, args, ['float']);
       return typed(`(-${val(state, args[0])})`, args[0].type);
     }
     case '$abs': {
       validateArgLength(args, 1);
-      // eslint-disable-next-line no-unused-vars
-      let [arg1] = valArray(state, args, ['float']);
+      valArray(state, args, ['float']);
       return typed(`ABS(${val(state, args[0])})`, args[0].type);
     }
     case '$idiv': {
       validateArgLength(args, 2);
-      let [arg1, arg2] = valArray(state, args, ['integer', 'integer']);
+      valArray(state, args, ['integer', 'integer']);
       return typed(
         `(${val(state, args[0])} / ${val(state, args[1])})`,
         args[0].type
