@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 export default function useResizeObserver(func) {
   let observer = useRef(null);
@@ -8,12 +8,10 @@ export default function useResizeObserver(func) {
     });
   }
 
-  let elementRef = useCallback(el => {
+  return useCallback(el => {
     observer.current.disconnect();
     if (el) {
       observer.current.observe(el, { box: 'border-box' });
     }
   }, []);
-
-  return elementRef;
 }

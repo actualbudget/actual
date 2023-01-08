@@ -7,6 +7,7 @@ packages/desktop-electron/dist
 packages/desktop-electron/loot-core
 node_modules
 .DS_Store
+**/.idea/*
 lerna-debug.log
 Actual-*
 .#*
