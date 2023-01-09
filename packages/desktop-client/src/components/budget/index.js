@@ -148,7 +148,7 @@ class Budget extends React.PureComponent {
       monthUtils.subMonths(startMonth, 1),
       monthUtils.addMonths(startMonth, numMonths + 1)
     );
-    let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
+    let months = monthUtils.rangeInclusive(bounds.start, bounds.end) || [];
 
     await Promise.all(months.map(month => this.prewarmMonth(month, type)));
 
