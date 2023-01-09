@@ -12,7 +12,7 @@ import {
   View
 } from 'loot-design/src/components/common';
 import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import Wallet from 'loot-design/src/svg/v1/Wallet';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 

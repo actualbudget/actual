@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, Switch } from 'react-native';
 import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import {
   Button,
   ButtonWithLoading
@@ -137,7 +137,4 @@ function ConfigureLinkedAccounts({ route, navigation, connectAccounts }) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(ConfigureLinkedAccounts);
+export default connect(null, actions)(ConfigureLinkedAccounts);

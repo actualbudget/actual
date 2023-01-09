@@ -7,12 +7,10 @@ import format from 'loot-design/src/components/spreadsheet/format';
 import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
 import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
 
-import { isMobile } from '../../../../desktop-client/src/util';
-import { colors, styles as desktopStyles, mobileStyles } from '../../style';
+import { colors, styles } from '../../style';
 import { View, Text, Modal, Button } from '../common';
 
 function BudgetSummary({ month, modalProps }) {
-  const styles = isMobile() ? mobileStyles : desktopStyles;
   const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
 
   return (

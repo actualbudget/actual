@@ -125,7 +125,7 @@ function ReconcilingMessage({
         flexDirection: 'row',
         alignSelf: 'center',
         backgroundColor: 'white',
-        boxShadow: styles.shadow,
+        ...styles.shadow,
         borderRadius: 4,
         marginTop: 5,
         marginBottom: 15,

@@ -22,7 +22,7 @@ import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
 
-import { colors, mobileStyles as styles } from '../../style';
+import { colors, styles } from '../../style';
 import Add from '../../svg/v1/Add';
 import ArrowThinDown from '../../svg/v1/ArrowThinDown';
 import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';

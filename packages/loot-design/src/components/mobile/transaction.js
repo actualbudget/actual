@@ -27,7 +27,7 @@ import {
 } from 'loot-core/src/shared/util';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 
-import { colors, mobileStyles as styles } from '../../style';
+import { colors, styles } from '../../style';
 import Add from '../../svg/v1/Add';
 import Trash from '../../svg/v1/Trash';
 import CheckCircle1 from '../../svg/v2/CheckCircle1';
@@ -798,7 +798,7 @@ export class Transaction extends React.PureComponent {
               )}
               <TextOneLine
                 style={[
-                  styles.text,
+                  { fontSize: styles.text.fontSize, color: styles.textColor },
                   textStyle,
                   { fontSize: 14, fontWeight: added ? '600' : '400' },
                   prettyDescription === '' && {

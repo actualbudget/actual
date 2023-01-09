@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { connect } from 'react-redux';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
+import { css, media } from 'glamor';
+
 import * as actions from 'loot-core/src/client/actions';
 import Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
@@ -21,6 +23,7 @@ import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
 import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
 import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
+import tokens from 'loot-design/src/tokens';
 
 import { useServerURL } from '../hooks/useServerURL';
 import AccountSyncCheck from './accounts/AccountSyncCheck';
@@ -113,10 +116,20 @@ export function SyncButton({ localPrefs, style, onSync }) {
   return (
     <Button
       bare
-      style={[
+      style={css(
         style,
         {
           WebkitAppRegion: 'none',
+          color:
+            syncState === 'error'
+              ? colors.r7
+              : syncState === 'disabled' ||
+                syncState === 'offline' ||
+                syncState === 'local'
+              ? colors.n9
+              : null
+        },
+        media(`(min-width: ${tokens.breakpoint_medium})`, {
           color:
             syncState === 'error'
               ? colors.r4
@@ -125,8 +138,8 @@ export function SyncButton({ localPrefs, style, onSync }) {
                 syncState === 'local'
               ? colors.n6
               : null
-        }
-      ]}
+        })
+      )}
       onClick={onSync}
     >
       {syncState === 'error' ? (

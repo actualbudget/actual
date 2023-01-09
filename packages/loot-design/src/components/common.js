@@ -16,16 +16,16 @@ import {
   ListboxList,
   ListboxOption
 } from '@reach/listbox';
-import { css } from 'glamor';
+import { css, media } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 
-import { isMobile } from '../../../desktop-client/src/util';
 import { styles, colors } from '../style';
 import Delete from '../svg/Delete';
 import Loading from '../svg/v1/AnimatedLoading';
+import tokens from '../tokens';
 import Text from './Text';
 import { useProperFocus } from './useProperFocus';
 import View from './View';
@@ -207,7 +207,7 @@ export const Button = React.forwardRef(
     hoveredStyle = [
       bare
         ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
-        : { boxShadow: styles.shadow },
+        : { ...styles.shadow },
       hoveredStyle
     ];
     activeStyle = [
@@ -334,7 +334,7 @@ export function Input({
   return (
     <input
       ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
-      {...css([
+      {...css(
         defaultInputStyle,
         {
           ':focus': {
@@ -345,7 +345,7 @@ export function Input({
         },
         styles.smallText,
         style
-      ])}
+      )}
       {...nativeProps}
       onKeyDown={e => {
         if (e.keyCode === 13 && onEnter) {
@@ -868,13 +868,16 @@ export function Modal({
         style={[
           {
             willChange: 'opacity, transform',
-            minWidth: isMobile() ? '100%' : 500,
+            minWidth: '100%',
             minHeight: 0,
-            boxShadow: styles.shadowLarge,
             borderRadius: 4,
             backgroundColor: 'white',
-            opacity: isHidden ? 0 : 1
+            opacity: isHidden ? 0 : 1,
+            [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+              minWidth: 500
+            }
           },
+          styles.shadowLarge,
           style,
           styles.lightScrollbar
         ]}

@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
 import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
 import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
 import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import format from 'loot-design/src/components/spreadsheet/format';

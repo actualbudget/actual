@@ -7,7 +7,7 @@ import {
   Button,
   ButtonWithLoading
 } from 'loot-design/src/components/mobile/common';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 
 function DeleteFile({ route, navigation, deleteBudget }) {
   let { file } = route.params;
@@ -128,7 +128,4 @@ function DeleteFile({ route, navigation, deleteBudget }) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(DeleteFile);
+export default connect(null, actions)(DeleteFile);

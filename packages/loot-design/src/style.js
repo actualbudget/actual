@@ -1,6 +1,6 @@
 import Platform from 'loot-core/src/client/platform';
 
-import { isMobile } from '../../desktop-client/src/util';
+import tokens from './tokens';
 
 export const debug = { borderWidth: 1, borderColor: 'red' };
 
@@ -86,67 +86,100 @@ colors.resolve = (name, offset) => {
   throw new Error('Unknown color name: ' + name);
 };
 
-function getStyles(isMobile) {
-  return {
-    veryLargeText: {
-      fontSize: 30,
+export const styles = {
+  veryLargeText: {
+    fontSize: 30,
+    fontWeight: 600
+  },
+  largeText: {
+    fontSize: 20,
+    fontWeight: 700,
+    letterSpacing: 0.5
+  },
+  mediumText: {
+    fontSize: 15,
+    fontWeight: 500
+  },
+  smallText: {
+    fontSize: 13,
+    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+      // lineHeight: 21 // TODO: This seems like trouble, but what's the right value?
+    }
+  },
+  verySmallText: {
+    fontSize: 13
+  },
+  page: {
+    // This is the height of the titlebar
+    paddingTop: 8,
+    minWidth: 360,
+    flex: 1,
+    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+      minWidth: 500,
+      paddingTop: 36
+    }
+  },
+  pageHeader: {
+    fontSize: 25,
+    borderBottomWidth: 5,
+    borderColor: colors.purple2,
+    borderStyle: 'solid',
+    display: 'inline',
+    flex: 0,
+    color: colors.grey4,
+    marginTop: 40,
+    marginBottom: 20,
+    paddingBottom: 5
+  },
+  pageContent: {
+    paddingLeft: 2,
+    paddingRight: 2,
+    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+      paddingLeft: 20,
+      paddingRight: 20
+    }
+  },
+  settingsPageContent: {
+    padding: 20,
+    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+      padding: 'inherit'
+    }
+  },
+  staticText: {
+    cursor: 'default',
+    userSelect: 'none'
+  },
+  shadow: {
+    boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)'
+  },
+  shadowLarge: {
+    boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)'
+  },
+  tnum: {
+    fontFeatureSettings: '"tnum"'
+  },
+  notFixed: { fontFeatureSettings: '' },
+  header: {
+    headerStyle: {
+      backgroundColor: 'white',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.n9,
+      elevation: 0
+    },
+    headerTintColor: colors.n1,
+    headerTitleStyle: {
+      color: colors.n1,
+      fontSize: 15,
       fontWeight: 600
     },
-    largeText: {
-      fontSize: 20,
-      fontWeight: 700,
-      letterSpacing: 0.5
-    },
-    mediumText: {
-      fontSize: 15,
-      fontWeight: 500
-    },
-    smallText: {
-      fontSize: 13
-    },
-    verySmallText: {
-      fontSize: 13
-    },
-    page: {
-      // This is the height of the titlebar
-      paddingTop: isMobile ? 8 : 36,
-      minWidth: isMobile ? 360 : 500,
-      flex: 1
-    },
-    pageHeader: {
-      fontSize: 25,
-      borderBottomWidth: 5,
-      borderColor: colors.purple2,
-      borderStyle: 'solid',
-      display: 'inline',
-      flex: 0,
-      color: colors.grey4,
-      marginTop: 40,
-      marginBottom: 20,
-      paddingBottom: 5
-    },
-    pageContent: {
-      paddingLeft: isMobile ? 2 : 20,
-      paddingRight: isMobile ? 2 : 20
-    },
-    settingsPageContent: {
-      padding: isMobile ? 20 : 'inherit'
-    },
-    staticText: {
-      cursor: 'default',
-      userSelect: 'none'
-    },
-    shadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
-    shadowLarge:
-      '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
-    tnum: {
-      fontFeatureSettings: '"tnum"'
-    },
-    notFixed: { fontFeatureSettings: '' }
-  };
-}
-
-export const styles = getStyles(isMobile());
+    headerBackTitle: null
+  },
+  text: {
+    fontSize: 16
+    // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
+  },
+  textColor: colors.n1
+};
 
 let hiddenScrollbars = false;
 
@@ -203,48 +236,6 @@ if (Platform.env === 'web') {
 }
 
 export const hasHiddenScrollbars = () => hiddenScrollbars;
-
-export const mobileStyles = {
-  header: {
-    headerStyle: {
-      backgroundColor: 'white',
-      borderBottomWidth: 1,
-      borderBottomColor: colors.n9,
-      elevation: 0
-    },
-    headerTintColor: colors.n1,
-    headerTitleStyle: {
-      color: colors.n1,
-      fontSize: 15,
-      fontWeight: 600
-    },
-    headerBackTitle: null
-  },
-  text: {
-    color: colors.n1,
-    fontSize: 16
-    // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
-  },
-  smallText: {
-    color: colors.n1,
-    fontSize: 13
-    // lineHeight: 21 // TODO: This seems like trouble, but what's the right value?
-  },
-  mediumText: {
-    fontSize: 15,
-    fontWeight: 500
-  },
-  shadow: {
-    boxShadow: '0 1px 1px 2px #9594A8'
-  },
-  shadowLarge: {
-    shadowColor: '#9594A8',
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 10,
-    shadowOpacity: 1,
-    elevation: 3
-  }
-};
 
 export function transform(spec) {
   // We've made React Native Web simulate a mobile environment so it

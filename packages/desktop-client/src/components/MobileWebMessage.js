@@ -64,7 +64,7 @@ export default function MobileWebMessage() {
         borderRadius: 6,
         zIndex: 10000,
         fontSize: 15,
-        boxShadow: styles.shadowLarge
+        ...styles.shadowLarge
       }}
     >
       <Text style={{ lineHeight: '1.5em' }}>

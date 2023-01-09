@@ -12,7 +12,7 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { titleFirst } from 'loot-core/src/shared/util';
 import { integerToCurrency, groupById } from 'loot-core/src/shared/util';
 import { Text, TextOneLine, View } from 'loot-design/src/components/common';
-import { mobileStyles as styles, colors } from 'loot-design/src/style';
+import { styles, colors } from 'loot-design/src/style';
 import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';

@@ -181,7 +181,7 @@ function MobileNavTabs() {
         backgroundColor: 'white',
         borderTop: `1px solid ${colors.n10}`,
         bottom: 0,
-        boxShadow: styles.shadow,
+        ...styles.shadow,
         display: 'flex',
         height: '80px',
         justifyContent: 'space-around',

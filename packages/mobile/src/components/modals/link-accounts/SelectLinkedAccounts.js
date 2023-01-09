@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import Modal, { CloseButton } from '../Modal';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import { Button } from 'loot-design/src/components/mobile/common';
 import Checkmark from 'loot-design/src/svg/v1/Checkmark';
 import { useScrollFlasher } from 'loot-design/src/components/mobile/hooks';

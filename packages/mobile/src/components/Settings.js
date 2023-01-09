@@ -1,22 +1,24 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
+import { RectButton } from 'react-native-gesture-handler';
 import { connect } from 'react-redux';
+
 import * as actions from 'loot-core/src/client/actions';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import { numberFormats } from 'loot-core/src/shared/util';
-import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
 import {
   Button,
   ButtonWithLoading
 } from 'loot-design/src/components/mobile/common';
-import { RectButton } from 'react-native-gesture-handler';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
 import {
   FieldLabel,
   TapField,
   EDITING_PADDING
 } from 'loot-design/src/components/mobile/forms';
+import { colors, styles } from 'loot-design/src/style';
+import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+
 import AccountButton from './AccountButton';
 
 let dateFormats = [

@@ -26,7 +26,7 @@ import format from 'loot-design/src/components/spreadsheet/format';
 import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
 import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
 import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import Add from 'loot-design/src/svg/v1/Add';
 import ArrowThinLeft from 'loot-design/src/svg/v1/ArrowThinLeft';
 import ArrowThinRight from 'loot-design/src/svg/v1/ArrowThinRight';
@@ -136,6 +136,7 @@ export class BudgetCell extends React.PureComponent {
                 }}
                 focused={editing}
                 textStyle={[styles.smallText, textStyle]}
+                onChange={() => {}} // temporarily disabled for read-only view
                 onBlur={value => {
                   onBudgetAction(month, 'budget-amount', {
                     category: categoryId,
