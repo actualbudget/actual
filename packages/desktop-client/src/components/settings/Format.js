@@ -32,14 +32,15 @@ export default function FormatSettings({ prefs, savePrefs }) {
   return (
     <Section title="Formatting">
       <Text>
-        <label for="settings-numberFormat">Number format: </label>
+        <label htmlFor="settings-numberFormat">Number format: </label>
         <select
+          defaultValue={numberFormat}
           id="settings-numberFormat"
           {...css({ marginLeft: 5, fontSize: 14 })}
           onChange={onNumberFormat}
         >
           {numberFormats.map(f => (
-            <option value={f.value} selected={f.value === numberFormat}>
+            <option key={f.value} value={f.value}>
               {f.label}
             </option>
           ))}
@@ -47,14 +48,15 @@ export default function FormatSettings({ prefs, savePrefs }) {
       </Text>
 
       <Text>
-        <label for="settings-dateFormat">Date format: </label>
+        <label htmlFor="settings-dateFormat">Date format: </label>
         <select
+          defaultValue={dateFormat}
           id="settings-dateFormat"
           {...css({ marginLeft: 5, fontSize: 14 })}
           onChange={onDateFormat}
         >
           {dateFormats.map(f => (
-            <option value={f.value} selected={f.value === dateFormat}>
+            <option key={f.value} value={f.value}>
               {f.label}
             </option>
           ))}
