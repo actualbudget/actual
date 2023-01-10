@@ -444,7 +444,14 @@ const MenuButton = withRouter(function MenuButton({ history }) {
   );
 });
 
-function ToggleableSection({ title, Icon, children, isOpen, setOpen }) {
+function ToggleableSection({
+  title,
+  Icon,
+  children,
+  isOpen,
+  setOpen,
+  isActive
+}) {
   let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
   let onToggle = useCallback(() => setOpen(open => !open), []);
   return (
@@ -460,6 +467,7 @@ function ToggleableSection({ title, Icon, children, isOpen, setOpen }) {
             style={{ color: colors.n6 }}
           />
         }
+        forceActive={!isOpen && isActive}
       />
       {isOpen && children}
     </View>
@@ -471,12 +479,12 @@ function Tools() {
   let location = useLocation();
   let history = useHistory();
 
+  const isActive = ['/payees', '/rules', '/tools'].some(route =>
+    location.pathname.startsWith(route)
+  );
+
   useEffect(() => {
-    if (
-      ['/payees', '/rules', '/tools'].some(route =>
-        location.pathname.startsWith(route)
-      )
-    ) {
+    if (isActive) {
       setOpen(true);
     }
   }, [location.pathname]);
@@ -487,6 +495,7 @@ function Tools() {
       Icon={Wrench}
       isOpen={isOpen}
       setOpen={setOpen}
+      isActive={isActive}
     >
       <Item title="Payees" Icon={StoreFrontIcon} to="/payees" />
       <Item title="Rules" Icon={TuningIcon} to="/rules" />
@@ -509,6 +518,7 @@ export function AccountsSection({
   onReorder
 }) {
   let [isOpen, setOpen] = useState(true);
+  let location = useLocation();
 
   return (
     <ToggleableSection
@@ -517,6 +527,7 @@ export function AccountsSection({
       isOpen={isOpen}
       setOpen={setOpen}
       style={{ marginTop: 15 }}
+      isActive={location.pathname.startsWith('/accounts')}
     >
       <Accounts
         accounts={accounts}
