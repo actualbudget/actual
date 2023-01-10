@@ -384,6 +384,7 @@ function Accounts({
           accountNameStyle,
           {
             marginTop: 15,
+            marginBottom: 9,
             color: colors.n6,
             flexDirection: 'row',
             userSelect: 'none',
