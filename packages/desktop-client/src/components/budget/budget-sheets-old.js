@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
+
+import * as monthUtils from 'loot-core/src/shared/months';
 
 /* eslint-disable */
 
@@ -79,29 +81,19 @@ function BudgetSheetRow({ row, editing, onEdit }) {
   );
 }
 
-const BudgetSheet = scope(lively => {
-  function getInitialState() {
-    return { editing: null };
-  }
+const BudgetSheet = ({month}) => {
+  const [editing, setEditing] = useState(null);
 
-  function onEdit(bag, name) {
-    return { editing: name };
-  }
-
-  function BudgetSheet({ props: { month }, state: { editing }, updater }) {
-    return (
-      <Namespace name={monthUtils.sheetForMonth(month)} key={month}>
-        <BudgetSheetHeader />
-        <BudgetSheetRow row={1} editing={editing} onEdit={updater(onEdit)} />
-        <BudgetSheetRow row={2} editing={editing} onEdit={updater(onEdit)} />
-        <BudgetSheetRow row={3} editing={editing} onEdit={updater(onEdit)} />
-        <BudgetSheetRow row={4} editing={editing} onEdit={updater(onEdit)} />
-      </Namespace>
-    );
-  }
-
-  return lively(BudgetSheet, { getInitialState });
-});
+  return (
+    <Namespace name={monthUtils.sheetForMonth(month)} key={month}>
+      <BudgetSheetHeader />
+      <BudgetSheetRow row={1} editing={editing} onEdit={setEditing} />
+      <BudgetSheetRow row={2} editing={editing} onEdit={setEditing} />
+      <BudgetSheetRow row={3} editing={editing} onEdit={setEditing} />
+      <BudgetSheetRow row={4} editing={editing} onEdit={setEditing} />
+    </Namespace>
+  );
+}
 
 function BudgetSheets({
   startMonth,
