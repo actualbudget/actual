@@ -206,6 +206,7 @@ const sidebars = {
           href: 'https://github.com/orgs/actualbudget/projects/1',
         },
         'Developers/project-layout',
+        'Developers/preview-builds',
         'Developers/releasing',
         'Developers/Building-Windows',
         'Developers/using-the-API',
