@@ -12,6 +12,11 @@ app.method(
 );
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
 app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
+app.method('budget/apply-template', mutator(undoable(actions.applyTemplate)));
+app.method(
+  'budget/overwrite-template',
+  mutator(undoable(actions.overwriteTemplate))
+);
 app.method(
   'budget/hold-for-next-month',
   mutator(undoable(actions.holdForNextMonth))
