@@ -222,7 +222,7 @@ function Account({
               }
             />
           </AnchorLink>
-        </View>{' '}
+        </View>
       </View>
     </View>
   );
@@ -354,7 +354,8 @@ function Accounts({
               flexDirection: 'row',
               userSelect: 'none',
               alignItems: 'center',
-              flexShrink: 0
+              flexShrink: 0,
+              cursor: 'pointer'
             }
           ]}
           onClick={onToggleClosedAccounts}
@@ -375,6 +376,25 @@ function Accounts({
             onDrop={onReorder}
           />
         ))}
+
+      <View
+        style={[
+          accountNameStyle,
+          {
+            marginTop: 15,
+            color: colors.n6,
+            flexDirection: 'row',
+            userSelect: 'none',
+            alignItems: 'center',
+            flexShrink: 0,
+            cursor: 'pointer'
+          }
+        ]}
+        onClick={onAddAccount}
+      >
+        <Add style={{ width: 13, height: 13, color: colors.n6 }} />
+        <View style={{ marginLeft: 5 }}>Add account</View>
+      </View>
     </View>
   );
 }
