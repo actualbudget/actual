@@ -183,7 +183,7 @@ export default class Spreadsheet {
       this.events.emit('change', { names: this.computeQueue });
 
       // Cache the updated cells
-      if (this.saveCache) {
+      if (typeof this.saveCache === 'function') {
         this.saveCache(this.computeQueue);
       }
       this.markCacheSafe();
