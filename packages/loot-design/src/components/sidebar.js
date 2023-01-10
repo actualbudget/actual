@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { RectButton } from 'react-native-gesture-handler';
 import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router';
@@ -12,10 +12,14 @@ import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 
 import { styles, colors } from '../style';
 import Add from '../svg/v1/Add';
-import ChevronRight from '../svg/v1/CheveronRight';
+import CheveronDown from '../svg/v1/CheveronDown';
+import CheveronUp from '../svg/v1/CheveronUp';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
+import LoadBalancer from '../svg/v1/LoadBalancer';
 import Reports from '../svg/v1/Reports';
+import StoreFrontIcon from '../svg/v1/StoreFront';
+import TuningIcon from '../svg/v1/Tuning';
 import Wallet from '../svg/v1/Wallet';
 import Wrench from '../svg/v1/Wrench';
 import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
@@ -431,64 +435,77 @@ const MenuButton = withRouter(function MenuButton({ history }) {
 
 function Tools() {
   let [isOpen, setOpen] = useState(false);
+  let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
   let location = useLocation();
   let history = useHistory();
   let onToggle = useCallback(() => setOpen(open => !open), []);
 
-  let items = [
-    { name: 'payees', text: 'Payees' },
-    { name: 'rules', text: 'Rules' },
-    { name: 'repair-splits', text: 'Repair split transactions' }
-  ];
-
-  let onMenuSelect = useCallback(
-    type => {
-      switch (type) {
-        case 'payees':
-          history.push('/payees');
-          break;
-        case 'rules':
-          history.push('/rules');
-          break;
-        case 'repair-splits':
-          history.push('/tools/fix-splits', { locationPtr: history.location });
-          break;
-        default:
-      }
-      setOpen(false);
-    },
-    [history]
-  );
+  useEffect(() => {
+    if (
+      ['/payees', '/rules', '/tools'].some(route =>
+        location.pathname.startsWith(route)
+      )
+    ) {
+      setOpen(true);
+    }
+  }, [location.pathname]);
 
   return (
-    <View style={{ flexShrink: 0 }}>
+    <View
+      style={{
+        borderLeft: isOpen ? '4px solid ' + colors.n9 : '',
+        flexShrink: 0
+      }}
+    >
       <Item
-        title="More Tools"
+        title="Tools"
         icon={<Wrench width={15} height={15} style={{ color: 'inherit' }} />}
         exact={true}
         onClick={onToggle}
-        style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
-        forceHover={isOpen}
-        forceActive={['/payees', '/rules', '/tools'].some(route =>
-          location.pathname.startsWith(route)
-        )}
+        indent={isOpen ? -4 : 0}
         button={
-          <ChevronRight
+          <ExpandOrCollapseIcon
             width={12}
             height={12}
-            style={{ color: colors.n6, marginRight: 6 }}
+            style={{ color: colors.n6 }}
           />
         }
       />
       {isOpen && (
-        <Tooltip
-          position="right"
-          offset={-8}
-          style={{ padding: 0 }}
-          onClose={onToggle}
-        >
-          <Menu onMenuSelect={onMenuSelect} items={items} />
-        </Tooltip>
+        <>
+          <Item
+            title="Payees"
+            icon={
+              <StoreFrontIcon
+                width={15}
+                height={15}
+                style={{ color: 'inherit' }}
+              />
+            }
+            to="/payees"
+            indent={12}
+          />
+          <Item
+            title="Rules"
+            icon={
+              <TuningIcon width={15} height={15} style={{ color: 'inherit' }} />
+            }
+            to="/rules"
+            indent={12}
+          />
+          <Item
+            title="Repair splits"
+            icon={
+              <LoadBalancer
+                width={15}
+                height={15}
+                style={{ color: 'inherit' }}
+              />
+            }
+            to="/tools/fix-splits"
+            indent={12}
+          />
+        </>
       )}
     </View>
   );
