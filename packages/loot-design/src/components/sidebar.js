@@ -287,7 +287,7 @@ function Accounts({
     <View>
       {accounts.length > 0 && (
         <Account
-          name="All Accounts"
+          name="All accounts"
           to={allAccountsPath}
           query={getAllAccountBalance()}
           style={{ marginTop: 8, color: colors.n6 }}
@@ -360,7 +360,7 @@ function Accounts({
           ]}
           onClick={onToggleClosedAccounts}
         >
-          {'Closed Accounts' + (showClosedAccounts ? '' : '...')}
+          {'Closed accounts' + (showClosedAccounts ? '' : '...')}
         </View>
       )}
 
