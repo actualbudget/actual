@@ -42,6 +42,8 @@ If you haven't already got an API key, you'll need to:
 The API key is only shown once, so make sure you copy it down somewhere! More information on how to access the YNAB API can be found at https://api.youneedabudget.com/
 :::
 
+While we don't support this tool, you can also use https://json-exporter-for-ynab.netlify.app to export your budget from nYNAB into jSON.
+
 Now open a terminal window / command prompt, and enter:
 
 ```
