@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { View, Text } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+
 import {
   fromPlaidAccountType,
   prettyAccountType
 } from 'loot-core/src/shared/accounts';
+import { colors, styles } from 'loot-design/src/style';
 
 export default function Account({ account, style, rightContent, onPress }) {
   return (
     <View
       style={[
-        styles.shadow,
+        ...styles.shadow,
         {
           backgroundColor: 'white',
           marginBottom: 15,

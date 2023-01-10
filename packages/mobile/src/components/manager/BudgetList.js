@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { connectActionSheet } from '@expo/react-native-action-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import * as actions from 'loot-core/src/client/actions';
 import { RectButton } from 'react-native-gesture-handler';
 import { Button } from 'loot-design/src/components/mobile/common';
