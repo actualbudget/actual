@@ -6,7 +6,7 @@ import * as actions from 'loot-core/src/client/actions';
 import KeyboardAvoidingView from 'loot-design/src/components/mobile/KeyboardAvoidingView';
 import Stack from 'loot-design/src/components/Stack';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import SingleInput from './SingleInput';
 import Header from './Header';
 import TransitionView from './TransitionView';
@@ -36,10 +36,13 @@ function Confirm({ route, navigation, getUserData, loginUser, createBudget }) {
     let { email } = route.params || {};
     setLoading(true);
 
-    let { confirmed, error, userId, key, validSubscription } = await send(
-      'subscribe-confirm',
-      { email, code }
-    );
+    let {
+      confirmed,
+      error,
+      userId,
+      key,
+      validSubscription
+    } = await send('subscribe-confirm', { email, code });
 
     if (error) {
       setLoading(false);
@@ -127,7 +130,4 @@ function Confirm({ route, navigation, getUserData, loginUser, createBudget }) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(Confirm);
+export default connect(null, actions)(Confirm);

@@ -90,5 +90,13 @@
   },
   "browserslist": [
     "electron 3.0"
-  ]
+  ],
+  "dependencies": {
+    "@react-aria/focus": "^3.8.0",
+    "@react-aria/listbox": "^3.6.1",
+    "@react-aria/utils": "^3.13.3",
+    "@react-stately/collections": "^3.4.3",
+    "@react-stately/list": "^3.5.3",
+    "react-router-dom-v5-compat": "^6.4.1"
+  }
 }

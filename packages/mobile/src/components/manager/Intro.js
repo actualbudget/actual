@@ -8,7 +8,7 @@ import {
   Linking,
   Animated
 } from 'react-native';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import { Button } from 'loot-design/src/components/mobile/common';
 import ScalableImage from 'loot-design/src/components/mobile/ScalableImage';
 import { connect } from 'react-redux';
@@ -221,7 +221,6 @@ class Intro extends React.Component {
   }
 }
 
-export default connect(
-  null,
-  dispatch => bindActionCreators(actions, dispatch)
-)(Intro);
+export default connect(null, dispatch => bindActionCreators(actions, dispatch))(
+  Intro
+);

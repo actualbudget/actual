@@ -153,7 +153,7 @@ function File({ file, onSelect, onDelete }) {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          boxShadow: styles.shadow,
+          ...styles.shadow,
           margin: 10,
           padding: '12px 15px',
           backgroundColor: 'white',

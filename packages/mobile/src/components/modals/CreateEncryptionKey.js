@@ -12,7 +12,7 @@ import {
   InputField
 } from 'loot-design/src/components/mobile/forms';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { mobileStyles as styles, colors } from 'loot-design/src/style';
+import { styles, colors } from 'loot-design/src/style';
 import Modal from '../modals/Modal';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
@@ -141,7 +141,6 @@ function CreateEncryptionKey({ route, navigation, actions }) {
   );
 }
 
-export default connect(
-  null,
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) })
-)(CreateEncryptionKey);
+export default connect(null, dispatch => ({
+  actions: bindActionCreators(actions, dispatch)
+}))(CreateEncryptionKey);

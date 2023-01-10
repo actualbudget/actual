@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
 import Stack from 'loot-design/src/components/Stack';
 import { Button } from 'loot-design/src/components/mobile/common';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 
 let buttonTextStyle = [
   styles.text,
@@ -62,7 +62,4 @@ function Header({
   );
 }
 
-export default connect(
-  null,
-  actions
-)(Header);
+export default connect(null, actions)(Header);
