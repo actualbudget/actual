@@ -4,7 +4,7 @@ import { RectButton } from 'react-native-gesture-handler';
 
 import { prettyAccountType } from 'loot-core/src/shared/accounts';
 
-import { colors, mobileStyles as styles } from '../../style';
+import { colors, styles } from '../../style';
 import Wallet from '../../svg/v1/Wallet';
 import CellValue from '../spreadsheet/CellValue';
 import { Button, TextOneLine } from './common';

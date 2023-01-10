@@ -8,7 +8,7 @@ import KeyboardAvoidingView from 'loot-design/src/components/mobile/KeyboardAvoi
 import Stack from 'loot-design/src/components/Stack';
 import Header from './Header';
 import SingleInput from './SingleInput';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import TransitionView from './TransitionView';
 
 function getErrorMessage(error) {

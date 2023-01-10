@@ -297,7 +297,7 @@ export class Tooltip extends React.Component {
 
       padding: 5,
       width,
-      boxShadow: styles.shadowLarge,
+      ...styles.shadowLarge,
       borderRadius: 4,
       backgroundColor: 'white'
       // opacity: 0,

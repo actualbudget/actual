@@ -3,7 +3,7 @@ import { View, Text, Platform } from 'react-native';
 import { connect } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as actions from 'loot-core/src/client/actions';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getSubscribeError } from 'loot-core/src/shared/errors';
 import Stack from 'loot-design/src/components/Stack';
@@ -98,7 +98,4 @@ export function SubscribeEmail({ navigation, createBudget }) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(SubscribeEmail);
+export default connect(null, actions)(SubscribeEmail);
