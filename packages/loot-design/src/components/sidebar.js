@@ -112,6 +112,56 @@ function Item({
   );
 }
 
+function SecondaryItem({ Icon, title, style, to, exact, onClick }) {
+  const hoverStyle = {
+    backgroundColor: colors.n2
+  };
+  const activeStyle = {
+    borderLeft: '4px solid ' + colors.p8,
+    paddingLeft: 14 - 4,
+    color: colors.p8
+  };
+  const linkStyle = [
+    accountNameStyle,
+    { color: colors.n6, paddingLeft: 14 },
+    { ':hover': hoverStyle }
+  ];
+
+  const content = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 20
+      }}
+    >
+      {Icon && <Icon width={12} height={12} style={{ color: 'inherit' }} />}
+      <Block style={{ marginLeft: Icon ? 8 : 0, color: 'inherit' }}>
+        {title}
+      </Block>
+    </View>
+  );
+
+  return (
+    <View style={[{ flexShrink: 0 }, style]}>
+      {onClick ? (
+        <RectButton onClick={onClick}>
+          <View style={linkStyle}>{content}</View>
+        </RectButton>
+      ) : (
+        <AnchorLink
+          style={linkStyle}
+          to={to}
+          exact={exact}
+          activeStyle={activeStyle}
+        >
+          {content}
+        </AnchorLink>
+      )}
+    </View>
+  );
+}
+
 let accountNameStyle = [
   {
     marginTop: -2,
@@ -292,7 +342,7 @@ function Accounts({
           }
           to={allAccountsPath}
           query={getAllAccountBalance()}
-          style={{ marginTop: 8, color: colors.n6 }}
+          style={{ color: colors.n6 }}
         />
       )}
 
@@ -347,23 +397,11 @@ function Accounts({
       ))}
 
       {closedAccounts.length > 0 && (
-        <View
-          style={[
-            accountNameStyle,
-            {
-              marginTop: 15,
-              color: colors.n6,
-              flexDirection: 'row',
-              userSelect: 'none',
-              alignItems: 'center',
-              flexShrink: 0,
-              cursor: 'pointer'
-            }
-          ]}
+        <SecondaryItem
+          style={{ marginTop: 15 }}
+          title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
           onClick={onToggleClosedAccounts}
-        >
-          {'Closed accounts' + (showClosedAccounts ? '' : '...')}
-        </View>
+        />
       )}
 
       {showClosedAccounts &&
@@ -379,25 +417,15 @@ function Accounts({
           />
         ))}
 
-      <View
-        style={[
-          accountNameStyle,
-          {
-            marginTop: 15,
-            marginBottom: 9,
-            color: colors.n6,
-            flexDirection: 'row',
-            userSelect: 'none',
-            alignItems: 'center',
-            flexShrink: 0,
-            cursor: 'pointer'
-          }
-        ]}
+      <SecondaryItem
+        style={{
+          marginTop: 15,
+          marginBottom: 9
+        }}
         onClick={onAddAccount}
-      >
-        <Add style={{ width: 13, height: 13, color: colors.n6 }} />
-        <View style={{ marginLeft: 5 }}>Add account</View>
-      </View>
+        Icon={Add}
+        title="Add account"
+      />
     </View>
   );
 }
@@ -483,6 +511,7 @@ function ToggleableSection({
         title={title}
         Icon={Icon}
         onClick={onToggle}
+        style={{ marginBottom: isOpen ? 8 : 0 }}
         button={
           <ExpandOrCollapseIcon
             width={12}
@@ -520,9 +549,13 @@ function Tools() {
       setOpen={setOpen}
       isActive={isActive}
     >
-      <Item title="Payees" Icon={StoreFrontIcon} to="/payees" />
-      <Item title="Rules" Icon={TuningIcon} to="/rules" />
-      <Item title="Repair splits" Icon={LoadBalancer} to="/tools/fix-splits" />
+      <SecondaryItem title="Payees" Icon={StoreFrontIcon} to="/payees" />
+      <SecondaryItem title="Rules" Icon={TuningIcon} to="/rules" />
+      <SecondaryItem
+        title="Repair splits"
+        Icon={LoadBalancer}
+        to="/tools/fix-splits"
+      />
     </ToggleableSection>
   );
 }
