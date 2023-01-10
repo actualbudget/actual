@@ -202,7 +202,7 @@ export class AccountList extends React.Component {
       <View style={{ overflowY: 'auto' }}>
         <View
           style={{
-            alignItems: 'flex-end',
+            alignItems: 'center',
             backgroundColor: colors.b2,
             color: 'white',
             flexDirection: 'row',
@@ -211,8 +211,7 @@ export class AccountList extends React.Component {
             fontWeight: 500,
             height: 50,
             justifyContent: 'center',
-            overflowY: 'auto',
-            paddingBottom: 10
+            overflowY: 'auto'
           }}
         >
           Accounts
