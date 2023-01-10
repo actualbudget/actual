@@ -41,7 +41,7 @@ export const SIDEBAR_WIDTH = 240;
 
 function Item({
   children,
-  icon,
+  Icon,
   title,
   style,
   indent = 0,
@@ -83,7 +83,7 @@ function Item({
         height: 20
       }}
     >
-      {icon}
+      <Icon width={15} height={15} style={{ color: 'inherit' }} />
       <Block style={{ marginLeft: 8 }}>{title}</Block>
       <View style={{ flex: 1 }} />
       {button}
@@ -233,9 +233,11 @@ function Accounts({
   failedAccounts,
   updatedAccounts,
   getAccountPath,
+  allAccountsPath,
   budgetedAccountPath,
   offBudgetAccountPath,
   getBalanceQuery,
+  getAllAccountBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
   showClosedAccounts,
@@ -283,6 +285,15 @@ function Accounts({
 
   return (
     <View>
+      {accounts.length > 0 && (
+        <Account
+          name="All Accounts"
+          to={allAccountsPath}
+          query={getAllAccountBalance()}
+          style={{ marginTop: 8, color: colors.n6 }}
+        />
+      )}
+
       {budgetedAccounts.length > 0 && (
         <Account
           name="For budget"
@@ -433,12 +444,32 @@ const MenuButton = withRouter(function MenuButton({ history }) {
   );
 });
 
+function ToggleableSection({ title, Icon, children, isOpen, setOpen }) {
+  let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
+  let onToggle = useCallback(() => setOpen(open => !open), []);
+  return (
+    <View style={{ flexShrink: 0, marginTop: 15 }}>
+      <Item
+        title={title}
+        Icon={Icon}
+        onClick={onToggle}
+        button={
+          <ExpandOrCollapseIcon
+            width={12}
+            height={12}
+            style={{ color: colors.n6 }}
+          />
+        }
+      />
+      {isOpen && children}
+    </View>
+  );
+}
+
 function Tools() {
   let [isOpen, setOpen] = useState(false);
-  let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
   let location = useLocation();
   let history = useHistory();
-  let onToggle = useCallback(() => setOpen(open => !open), []);
 
   useEffect(() => {
     if (
@@ -451,63 +482,60 @@ function Tools() {
   }, [location.pathname]);
 
   return (
-    <View
-      style={{
-        borderLeft: isOpen ? '4px solid ' + colors.n9 : '',
-        flexShrink: 0
-      }}
+    <ToggleableSection
+      title="Tools"
+      Icon={Wrench}
+      isOpen={isOpen}
+      setOpen={setOpen}
     >
-      <Item
-        title="Tools"
-        icon={<Wrench width={15} height={15} style={{ color: 'inherit' }} />}
-        exact={true}
-        onClick={onToggle}
-        indent={isOpen ? -4 : 0}
-        button={
-          <ExpandOrCollapseIcon
-            width={12}
-            height={12}
-            style={{ color: colors.n6 }}
-          />
-        }
+      <Item title="Payees" Icon={StoreFrontIcon} to="/payees" />
+      <Item title="Rules" Icon={TuningIcon} to="/rules" />
+      <Item title="Repair splits" Icon={LoadBalancer} to="/tools/fix-splits" />
+    </ToggleableSection>
+  );
+}
+
+export function AccountsSection({
+  accounts,
+  failedAccounts,
+  updatedAccounts,
+  getBalanceQuery,
+  getAllAccountBalance,
+  getOnBudgetBalance,
+  getOffBudgetBalance,
+  showClosedAccounts,
+  onAddAccount,
+  onToggleClosedAccounts,
+  onReorder
+}) {
+  let [isOpen, setOpen] = useState(true);
+
+  return (
+    <ToggleableSection
+      title="Accounts"
+      Icon={PiggyBank}
+      isOpen={isOpen}
+      setOpen={setOpen}
+      style={{ marginTop: 15 }}
+    >
+      <Accounts
+        accounts={accounts}
+        failedAccounts={failedAccounts}
+        updatedAccounts={updatedAccounts}
+        getAccountPath={account => `/accounts/${account.id}`}
+        allAccountsPath="/accounts"
+        budgetedAccountPath="/accounts/budgeted"
+        offBudgetAccountPath="/accounts/offbudget"
+        getBalanceQuery={getBalanceQuery}
+        getAllAccountBalance={getAllAccountBalance}
+        getOnBudgetBalance={getOnBudgetBalance}
+        getOffBudgetBalance={getOffBudgetBalance}
+        showClosedAccounts={showClosedAccounts}
+        onAddAccount={onAddAccount}
+        onToggleClosedAccounts={onToggleClosedAccounts}
+        onReorder={onReorder}
       />
-      {isOpen && (
-        <>
-          <Item
-            title="Payees"
-            icon={
-              <StoreFrontIcon
-                width={15}
-                height={15}
-                style={{ color: 'inherit' }}
-              />
-            }
-            to="/payees"
-            indent={12}
-          />
-          <Item
-            title="Rules"
-            icon={
-              <TuningIcon width={15} height={15} style={{ color: 'inherit' }} />
-            }
-            to="/rules"
-            indent={12}
-          />
-          <Item
-            title="Repair splits"
-            icon={
-              <LoadBalancer
-                width={15}
-                height={15}
-                style={{ color: 'inherit' }}
-              />
-            }
-            to="/tools/fix-splits"
-            indent={12}
-          />
-        </>
-      )}
-    </View>
+    </ToggleableSection>
   );
 }
 
@@ -518,6 +546,7 @@ export function Sidebar({
   failedAccounts,
   updatedAccounts,
   getBalanceQuery,
+  getAllAccountBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
   showClosedAccounts,
@@ -606,56 +635,19 @@ export function Sidebar({
       </View>
 
       <View style={{ overflow: 'auto' }}>
-        <Item
-          title="Budget"
-          icon={<Wallet width={15} height={15} style={{ color: 'inherit' }} />}
-          to="/budget"
-        />
-        <Item
-          title="Reports"
-          icon={<Reports width={15} height={15} style={{ color: 'inherit' }} />}
-          to="/reports"
-        />
+        <Item title="Budget" Icon={Wallet} to="/budget" />
+        <Item title="Reports" Icon={Reports} to="/reports" />
 
-        <Item
-          title="Schedules"
-          icon={
-            <CalendarIcon width={15} height={15} style={{ color: 'inherit' }} />
-          }
-          to="/schedules"
-        />
+        <Item title="Schedules" Icon={CalendarIcon} to="/schedules" />
 
         <Tools />
 
-        <Item
-          title="Accounts"
-          to="/accounts"
-          icon={
-            <PiggyBank width={15} height={15} style={{ color: 'inherit' }} />
-          }
-          exact={true}
-          button={
-            <Button
-              bare
-              onClick={e => {
-                e.stopPropagation();
-                e.preventDefault();
-                onAddAccount();
-              }}
-            >
-              <Add width={12} height={12} style={{ color: colors.n6 }} />
-            </Button>
-          }
-        />
-
-        <Accounts
+        <AccountsSection
           accounts={accounts}
           failedAccounts={failedAccounts}
           updatedAccounts={updatedAccounts}
-          getAccountPath={account => `/accounts/${account.id}`}
-          budgetedAccountPath="/accounts/budgeted"
-          offBudgetAccountPath="/accounts/offbudget"
           getBalanceQuery={getBalanceQuery}
+          getAllAccountBalance={getAllAccountBalance}
           getOnBudgetBalance={getOnBudgetBalance}
           getOffBudgetBalance={getOffBudgetBalance}
           showClosedAccounts={showClosedAccounts}
