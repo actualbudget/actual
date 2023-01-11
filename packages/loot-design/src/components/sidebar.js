@@ -328,10 +328,6 @@ function Accounts({
         paddingTop: isDragging ? 15 : 0,
         marginTop: isDragging ? -15 : 0
       };
-    } else if (i === length - 1) {
-      return {
-        paddingBottom: 15
-      };
     }
     return null;
   };
@@ -379,7 +375,7 @@ function Accounts({
           name="Off budget"
           to={offBudgetAccountPath}
           query={getOffBudgetBalance()}
-          style={{ fontWeight }}
+          style={{ fontWeight, marginTop: 15 }}
         />
       )}
 
@@ -509,7 +505,7 @@ function ToggleableSection({
   let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
   let onToggle = useCallback(() => setOpen(open => !open), []);
   return (
-    <View style={{ flexShrink: 0, marginTop: 15 }}>
+    <View style={{ flexShrink: 0 }}>
       <Item
         title={title}
         Icon={Icon}
@@ -532,7 +528,6 @@ function ToggleableSection({
 function Tools() {
   let [isOpen, setOpen] = useState(false);
   let location = useLocation();
-  let history = useHistory();
 
   const isActive = ['/payees', '/rules', '/tools'].some(route =>
     location.pathname.startsWith(route)
