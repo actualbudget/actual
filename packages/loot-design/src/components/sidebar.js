@@ -1,23 +1,25 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { RectButton } from 'react-native-gesture-handler';
 import { useDispatch } from 'react-redux';
-import { useLocation, useHistory } from 'react-router';
+import { useLocation } from 'react-router';
 import { withRouter } from 'react-router-dom';
 
 import { css } from 'glamor';
 
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import Platform from 'loot-core/src/client/platform';
-import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 
 import { styles, colors } from '../style';
 import Add from '../svg/v1/Add';
-import ChevronRight from '../svg/v1/CheveronRight';
+import CheveronDown from '../svg/v1/CheveronDown';
+import CheveronRight from '../svg/v1/CheveronRight';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
+import LoadBalancer from '../svg/v1/LoadBalancer';
 import Reports from '../svg/v1/Reports';
+import StoreFrontIcon from '../svg/v1/StoreFront';
+import TuningIcon from '../svg/v1/Tuning';
 import Wallet from '../svg/v1/Wallet';
-import Wrench from '../svg/v1/Wrench';
 import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
 import CalendarIcon from '../svg/v2/Calendar';
 import {
@@ -35,9 +37,11 @@ import CellValue from './spreadsheet/CellValue';
 
 export const SIDEBAR_WIDTH = 240;
 
+const fontWeight = 600;
+
 function Item({
   children,
-  icon,
+  Icon,
   title,
   style,
   indent = 0,
@@ -79,7 +83,7 @@ function Item({
         height: 20
       }}
     >
-      {icon}
+      <Icon width={15} height={15} style={{ color: 'inherit' }} />
       <Block style={{ marginLeft: 8 }}>{title}</Block>
       <View style={{ flex: 1 }} />
       {button}
@@ -104,6 +108,70 @@ function Item({
       )}
 
       {children ? <View style={{ marginTop: 5 }}>{children}</View> : null}
+    </View>
+  );
+}
+
+function SecondaryItem({
+  Icon,
+  title,
+  style,
+  to,
+  exact,
+  onClick,
+  bold,
+  indent = 0
+}) {
+  const hoverStyle = {
+    backgroundColor: colors.n2
+  };
+  const activeStyle = {
+    borderLeft: '4px solid ' + colors.p8,
+    paddingLeft: 14 - 4 + indent,
+    color: colors.p8,
+    fontWeight: bold ? fontWeight : null
+  };
+  const linkStyle = [
+    accountNameStyle,
+    {
+      color: colors.n9,
+      paddingLeft: 14 + indent,
+      fontWeight: bold ? fontWeight : null
+    },
+    { ':hover': hoverStyle }
+  ];
+
+  const content = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 16
+      }}
+    >
+      {Icon && <Icon width={12} height={12} style={{ color: 'inherit' }} />}
+      <Block style={{ marginLeft: Icon ? 8 : 0, color: 'inherit' }}>
+        {title}
+      </Block>
+    </View>
+  );
+
+  return (
+    <View style={[{ flexShrink: 0 }, style]}>
+      {onClick ? (
+        <RectButton onClick={onClick}>
+          <View style={linkStyle}>{content}</View>
+        </RectButton>
+      ) : (
+        <AnchorLink
+          style={linkStyle}
+          to={to}
+          exact={exact}
+          activeStyle={activeStyle}
+        >
+          {content}
+        </AnchorLink>
+      )}
     </View>
   );
 }
@@ -179,7 +247,7 @@ function Account({
               // has unread transactions. The system does mark is read and
               // unbolds it, but it still "flashes" bold so this just
               // ignores it if it's active
-              fontWeight: 'normal',
+              fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
                 backgroundColor: colors.p8,
                 transform: 'translateX(-4.5px)'
@@ -218,7 +286,7 @@ function Account({
               }
             />
           </AnchorLink>
-        </View>{' '}
+        </View>
       </View>
     </View>
   );
@@ -229,9 +297,11 @@ function Accounts({
   failedAccounts,
   updatedAccounts,
   getAccountPath,
+  allAccountsPath,
   budgetedAccountPath,
   offBudgetAccountPath,
   getBalanceQuery,
+  getAllAccountBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
   showClosedAccounts,
@@ -269,22 +339,25 @@ function Accounts({
         paddingTop: isDragging ? 15 : 0,
         marginTop: isDragging ? -15 : 0
       };
-    } else if (i === length - 1) {
-      return {
-        paddingBottom: 15
-      };
     }
     return null;
   };
 
   return (
     <View>
+      <Account
+        name="All accounts"
+        to={allAccountsPath}
+        query={getAllAccountBalance()}
+        style={{ fontWeight, marginTop: 15 }}
+      />
+
       {budgetedAccounts.length > 0 && (
         <Account
           name="For budget"
           to={budgetedAccountPath}
           query={getOnBudgetBalance()}
-          style={{ marginTop: 15, color: colors.n6 }}
+          style={{ fontWeight, marginTop: 13 }}
         />
       )}
 
@@ -309,7 +382,7 @@ function Accounts({
           name="Off budget"
           to={offBudgetAccountPath}
           query={getOffBudgetBalance()}
-          style={{ color: colors.n6 }}
+          style={{ fontWeight, marginTop: 13 }}
         />
       )}
 
@@ -330,22 +403,12 @@ function Accounts({
       ))}
 
       {closedAccounts.length > 0 && (
-        <View
-          style={[
-            accountNameStyle,
-            {
-              marginTop: 15,
-              color: colors.n6,
-              flexDirection: 'row',
-              userSelect: 'none',
-              alignItems: 'center',
-              flexShrink: 0
-            }
-          ]}
+        <SecondaryItem
+          style={{ marginTop: 15 }}
+          title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
           onClick={onToggleClosedAccounts}
-        >
-          {'Closed Accounts' + (showClosedAccounts ? '' : '...')}
-        </View>
+          bold
+        />
       )}
 
       {showClosedAccounts &&
@@ -360,6 +423,16 @@ function Accounts({
             onDrop={onReorder}
           />
         ))}
+
+      <SecondaryItem
+        style={{
+          marginTop: 15,
+          marginBottom: 9
+        }}
+        onClick={onAddAccount}
+        Icon={Add}
+        title="Add account"
+      />
     </View>
   );
 }
@@ -431,64 +504,49 @@ const MenuButton = withRouter(function MenuButton({ history }) {
 
 function Tools() {
   let [isOpen, setOpen] = useState(false);
-  let location = useLocation();
-  let history = useHistory();
   let onToggle = useCallback(() => setOpen(open => !open), []);
+  let location = useLocation();
 
-  let items = [
-    { name: 'payees', text: 'Payees' },
-    { name: 'rules', text: 'Rules' },
-    { name: 'repair-splits', text: 'Repair split transactions' }
-  ];
-
-  let onMenuSelect = useCallback(
-    type => {
-      switch (type) {
-        case 'payees':
-          history.push('/payees');
-          break;
-        case 'rules':
-          history.push('/rules');
-          break;
-        case 'repair-splits':
-          history.push('/tools/fix-splits', { locationPtr: history.location });
-          break;
-        default:
-      }
-      setOpen(false);
-    },
-    [history]
+  const isActive = ['/payees', '/rules', '/tools'].some(route =>
+    location.pathname.startsWith(route)
   );
+
+  useEffect(() => {
+    if (isActive) {
+      setOpen(true);
+    }
+  }, [location.pathname]);
 
   return (
     <View style={{ flexShrink: 0 }}>
       <Item
-        title="More Tools"
-        icon={<Wrench width={15} height={15} style={{ color: 'inherit' }} />}
-        exact={true}
+        title="More"
+        Icon={isOpen ? CheveronDown : CheveronRight}
         onClick={onToggle}
-        style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
-        forceHover={isOpen}
-        forceActive={['/payees', '/rules', '/tools'].some(route =>
-          location.pathname.startsWith(route)
-        )}
-        button={
-          <ChevronRight
-            width={12}
-            height={12}
-            style={{ color: colors.n6, marginRight: 6 }}
-          />
-        }
+        style={{ marginBottom: isOpen ? 8 : 0 }}
+        forceActive={!isOpen && isActive}
       />
       {isOpen && (
-        <Tooltip
-          position="right"
-          offset={-8}
-          style={{ padding: 0 }}
-          onClose={onToggle}
-        >
-          <Menu onMenuSelect={onMenuSelect} items={items} />
-        </Tooltip>
+        <>
+          <SecondaryItem
+            title="Payees"
+            Icon={StoreFrontIcon}
+            to="/payees"
+            indent={15}
+          />
+          <SecondaryItem
+            title="Rules"
+            Icon={TuningIcon}
+            to="/rules"
+            indent={15}
+          />
+          <SecondaryItem
+            title="Repair split transactions"
+            Icon={LoadBalancer}
+            to="/tools/fix-splits"
+            indent={15}
+          />
+        </>
       )}
     </View>
   );
@@ -501,6 +559,7 @@ export function Sidebar({
   failedAccounts,
   updatedAccounts,
   getBalanceQuery,
+  getAllAccountBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
   showClosedAccounts,
@@ -589,46 +648,20 @@ export function Sidebar({
       </View>
 
       <View style={{ overflow: 'auto' }}>
-        <Item
-          title="Budget"
-          icon={<Wallet width={15} height={15} style={{ color: 'inherit' }} />}
-          to="/budget"
-        />
-        <Item
-          title="Reports"
-          icon={<Reports width={15} height={15} style={{ color: 'inherit' }} />}
-          to="/reports"
-        />
+        <Item title="Budget" Icon={Wallet} to="/budget" />
+        <Item title="Reports" Icon={Reports} to="/reports" />
 
-        <Item
-          title="Schedules"
-          icon={
-            <CalendarIcon width={15} height={15} style={{ color: 'inherit' }} />
-          }
-          to="/schedules"
-        />
+        <Item title="Schedules" Icon={CalendarIcon} to="/schedules" />
 
         <Tools />
 
-        <Item
-          title="Accounts"
-          to="/accounts"
-          icon={
-            <PiggyBank width={15} height={15} style={{ color: 'inherit' }} />
-          }
-          exact={true}
-          button={
-            <Button
-              bare
-              onClick={e => {
-                e.stopPropagation();
-                e.preventDefault();
-                onAddAccount();
-              }}
-            >
-              <Add width={12} height={12} style={{ color: colors.n6 }} />
-            </Button>
-          }
+        <View
+          style={{
+            height: 1,
+            backgroundColor: colors.n3,
+            marginTop: 15,
+            flexShrink: 0
+          }}
         />
 
         <Accounts
@@ -636,9 +669,11 @@ export function Sidebar({
           failedAccounts={failedAccounts}
           updatedAccounts={updatedAccounts}
           getAccountPath={account => `/accounts/${account.id}`}
+          allAccountsPath="/accounts"
           budgetedAccountPath="/accounts/budgeted"
           offBudgetAccountPath="/accounts/offbudget"
           getBalanceQuery={getBalanceQuery}
+          getAllAccountBalance={getAllAccountBalance}
           getOnBudgetBalance={getOnBudgetBalance}
           getOffBudgetBalance={getOffBudgetBalance}
           showClosedAccounts={showClosedAccounts}
