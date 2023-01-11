@@ -206,9 +206,7 @@ class AmountInput extends React.Component {
     super(props);
     this.backgroundValue = new Animated.Value(0);
 
-    this.id = Math.random()
-      .toString()
-      .slice(0, 5);
+    this.id = Math.random().toString().slice(0, 5);
     this.state = {
       editing: false,
       text: '',

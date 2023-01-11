@@ -8,8 +8,11 @@ const uuid = require('loot-core/src/platform/uuid');
 global.IS_TESTING = true;
 global.Actual = {};
 
-jest.mock('react-virtualized-auto-sizer', () => ({ children }) =>
-  children({ height: 1000, width: 600 })
+jest.mock(
+  'react-virtualized-auto-sizer',
+  () =>
+    ({ children }) =>
+      children({ height: 1000, width: 600 })
 );
 
 // Why 2? There were already tests written assuming a specific
@@ -22,11 +25,11 @@ Math.random = function random() {
 
 global.Date.now = () => 123456789;
 
-uuid.v4 = function() {
+uuid.v4 = function () {
   return Promise.resolve('testing-uuid-' + Math.floor(Math.random() * 1000000));
 };
 
-uuid.v4Sync = function() {
+uuid.v4Sync = function () {
   return 'testing-uuid-' + Math.floor(Math.random() * 1000000);
 };
 

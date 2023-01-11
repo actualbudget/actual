@@ -698,12 +698,8 @@ describe('Transactions', () => {
   });
 
   test('adding a new transaction works', async () => {
-    const {
-      queryByTestId,
-      container,
-      getTransactions,
-      updateProps
-    } = renderTransactions();
+    const { queryByTestId, container, getTransactions, updateProps } =
+      renderTransactions();
 
     expect(getTransactions().length).toBe(5);
     expect(queryByTestId('new-transaction')).toBe(null);

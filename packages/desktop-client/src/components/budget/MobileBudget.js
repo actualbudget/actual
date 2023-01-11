@@ -230,13 +230,8 @@ class Budget extends React.Component {
   };
 
   render() {
-    const {
-      currentMonth,
-      bounds,
-      editMode,
-      initialized,
-      showBudgetDetails
-    } = this.state;
+    const { currentMonth, bounds, editMode, initialized, showBudgetDetails } =
+      this.state;
     const {
       categories,
       categoryGroups,
