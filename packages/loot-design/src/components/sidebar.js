@@ -504,24 +504,9 @@ const MenuButton = withRouter(function MenuButton({ history }) {
   );
 });
 
-function ToggleableSection({ title, children, isOpen, setOpen, isActive }) {
-  let onToggle = useCallback(() => setOpen(open => !open), []);
-  return (
-    <View style={{ flexShrink: 0 }}>
-      <Item
-        title={title}
-        Icon={isOpen ? CheveronDown : CheveronRight}
-        onClick={onToggle}
-        style={{ marginBottom: isOpen ? 8 : 0 }}
-        forceActive={!isOpen && isActive}
-      />
-      {isOpen && children}
-    </View>
-  );
-}
-
 function Tools() {
   let [isOpen, setOpen] = useState(false);
+  let onToggle = useCallback(() => setOpen(open => !open), []);
   let location = useLocation();
 
   const isActive = ['/payees', '/rules', '/tools'].some(route =>
@@ -535,26 +520,37 @@ function Tools() {
   }, [location.pathname]);
 
   return (
-    <ToggleableSection
-      title="More"
-      isOpen={isOpen}
-      setOpen={setOpen}
-      isActive={isActive}
-    >
-      <SecondaryItem
-        title="Payees"
-        Icon={StoreFrontIcon}
-        to="/payees"
-        indent={15}
+    <View style={{ flexShrink: 0 }}>
+      <Item
+        title="More"
+        Icon={isOpen ? CheveronDown : CheveronRight}
+        onClick={onToggle}
+        style={{ marginBottom: isOpen ? 8 : 0 }}
+        forceActive={!isOpen && isActive}
       />
-      <SecondaryItem title="Rules" Icon={TuningIcon} to="/rules" indent={15} />
-      <SecondaryItem
-        title="Repair split transactions"
-        Icon={LoadBalancer}
-        to="/tools/fix-splits"
-        indent={15}
-      />
-    </ToggleableSection>
+      {isOpen && (
+        <>
+          <SecondaryItem
+            title="Payees"
+            Icon={StoreFrontIcon}
+            to="/payees"
+            indent={15}
+          />
+          <SecondaryItem
+            title="Rules"
+            Icon={TuningIcon}
+            to="/rules"
+            indent={15}
+          />
+          <SecondaryItem
+            title="Repair split transactions"
+            Icon={LoadBalancer}
+            to="/tools/fix-splits"
+            indent={15}
+          />
+        </>
+      )}
+    </View>
   );
 }
 
