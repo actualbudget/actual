@@ -359,7 +359,7 @@ function Accounts({
           name="For budget"
           to={budgetedAccountPath}
           query={getOnBudgetBalance()}
-          style={{ fontWeight, marginTop: 10 }}
+          style={{ fontWeight, marginTop: 15 }}
         />
       )}
 
@@ -384,7 +384,7 @@ function Accounts({
           name="Off budget"
           to={offBudgetAccountPath}
           query={getOffBudgetBalance()}
-          style={{ fontWeight, marginTop: 10 }}
+          style={{ fontWeight, marginTop: 15 }}
         />
       )}
 
@@ -406,7 +406,7 @@ function Accounts({
 
       {closedAccounts.length > 0 && (
         <SecondaryItem
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 15 }}
           title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
           onClick={onToggleClosedAccounts}
           bold
@@ -428,7 +428,7 @@ function Accounts({
 
       <SecondaryItem
         style={{
-          marginTop: 10,
+          marginTop: 15,
           marginBottom: 9
         }}
         onClick={onAddAccount}
