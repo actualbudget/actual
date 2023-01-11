@@ -1,20 +1,18 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { RectButton } from 'react-native-gesture-handler';
 import { useDispatch } from 'react-redux';
-import { useLocation, useHistory } from 'react-router';
+import { useLocation } from 'react-router';
 import { withRouter } from 'react-router-dom';
 
 import { css } from 'glamor';
 
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import Platform from 'loot-core/src/client/platform';
-import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 
 import { styles, colors } from '../style';
 import Add from '../svg/v1/Add';
 import CheveronDown from '../svg/v1/CheveronDown';
 import CheveronRight from '../svg/v1/CheveronRight';
-import CheveronUp from '../svg/v1/CheveronUp';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
 import LoadBalancer from '../svg/v1/LoadBalancer';
