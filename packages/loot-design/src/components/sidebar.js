@@ -39,7 +39,7 @@ import CellValue from './spreadsheet/CellValue';
 
 export const SIDEBAR_WIDTH = 240;
 
-const fontWeight = 550;
+const fontWeight = 600;
 
 function Item({
   children,
@@ -114,7 +114,16 @@ function Item({
   );
 }
 
-function SecondaryItem({ Icon, title, style, to, exact, onClick, indent = 0 }) {
+function SecondaryItem({
+  Icon,
+  title,
+  style,
+  to,
+  exact,
+  onClick,
+  bold,
+  indent = 0
+}) {
   const hoverStyle = {
     backgroundColor: colors.n2
   };
@@ -122,11 +131,15 @@ function SecondaryItem({ Icon, title, style, to, exact, onClick, indent = 0 }) {
     borderLeft: '4px solid ' + colors.p8,
     paddingLeft: 14 - 4 + indent,
     color: colors.p8,
-    fontWeight
+    fontWeight: bold ? fontWeight : null
   };
   const linkStyle = [
     accountNameStyle,
-    { color: colors.n9, paddingLeft: 14 + indent, fontWeight },
+    {
+      color: colors.n9,
+      paddingLeft: 14 + indent,
+      fontWeight: bold ? fontWeight : null
+    },
     { ':hover': hoverStyle }
   ];
 
@@ -396,6 +409,7 @@ function Accounts({
           style={{ marginTop: 10 }}
           title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
           onClick={onToggleClosedAccounts}
+          bold
         />
       )}
 
