@@ -12,7 +12,7 @@ import {
   InputField
 } from 'loot-design/src/components/mobile/forms';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { mobileStyles as styles, colors } from 'loot-design/src/style';
+import { styles, colors } from 'loot-design/src/style';
 import Modal from '../modals/Modal';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
@@ -71,7 +71,7 @@ function CreateEncryptionKey({ route, navigation, actions }) {
             password whenever you set up a new device.{' '}
             <ExternalLink
               asAnchor
-              href="https://actualbudget.com/encrypted-syncing"
+              href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
             >
               Learn more
             </ExternalLink>
@@ -85,7 +85,7 @@ function CreateEncryptionKey({ route, navigation, actions }) {
               through that process on those devices.{' '}
               <ExternalLink
                 asAnchor
-                href="https://actualbudget.com/encrypted-syncing"
+                href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
               >
                 Learn more
               </ExternalLink>
@@ -141,7 +141,6 @@ function CreateEncryptionKey({ route, navigation, actions }) {
   );
 }
 
-export default connect(
-  null,
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) })
-)(CreateEncryptionKey);
+export default connect(null, dispatch => ({
+  actions: bindActionCreators(actions, dispatch)
+}))(CreateEncryptionKey);

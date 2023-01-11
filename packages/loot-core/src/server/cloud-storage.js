@@ -1,21 +1,23 @@
-import fs from '../platform/server/fs';
 import asyncStorage from '../platform/server/asyncStorage';
 import { fetch } from '../platform/server/fetch';
-import * as monthUtils from '../shared/months';
+import fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
-import * as prefs from './prefs';
-import { getServer } from './server-config';
-import { runMutator } from './mutators';
+import * as monthUtils from '../shared/months';
+import encryption from './encryption';
 import {
   HTTPError,
   PostError,
   FileDownloadError,
   FileUploadError
 } from './errors';
-import encryption from './encryption';
+import { runMutator } from './mutators';
 import { post } from './post';
-let uuid = require('../platform/uuid');
+import * as prefs from './prefs';
+import { getServer } from './server-config';
+
 let AdmZip = require('adm-zip');
+
+let uuid = require('../platform/uuid');
 
 let UPLOAD_FREQUENCY_IN_DAYS = 7;
 
@@ -271,8 +273,6 @@ export async function upload() {
   } catch (err) {
     console.log('Upload failure', err);
 
-    let reason = err instanceof PostError ? err.reason : 'network';
-
     if (err instanceof PostError) {
       throw new FileUploadError(
         err.reason === 'unauthorized' ? 'unauthorized' : err.reason || 'network'
@@ -297,7 +297,7 @@ export async function upload() {
 }
 
 export async function possiblyUpload() {
-  let { cloudFileId, groupId, lastUploaded, id } = prefs.getPrefs();
+  let { cloudFileId, groupId, lastUploaded } = prefs.getPrefs();
 
   let threshold =
     lastUploaded && monthUtils.addDays(lastUploaded, UPLOAD_FREQUENCY_IN_DAYS);

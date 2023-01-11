@@ -1,8 +1,9 @@
 import throttle from 'throttleit';
+
 import { send } from '../../platform/client/fetch';
 import constants from '../constants';
-import { addNotification, addGenericErrorNotification } from './notifications';
 import { pushModal } from './modals';
+import { addNotification, addGenericErrorNotification } from './notifications';
 
 export function applyBudgetAction(month, type, args) {
   return async function() {
@@ -23,18 +24,9 @@ export function applyBudgetAction(month, type, args) {
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
         break;
-      case 'set-all-future':
-        await send('budget/set-all-future', { startMonth: month });
-        break;
       case 'hold':
         await send('budget/hold-for-next-month', {
           month,
-          amount: args.amount
-        });
-        break;
-      case 'hold-all-future':
-        await send('budget/hold-for-future-months', {
-          startMonth: month,
           amount: args.amount
         });
         break;
@@ -104,7 +96,6 @@ export function deleteCategory(id, transferId) {
     let { error } = await send('category-delete', { id, transferId });
 
     if (error) {
-      let msg;
       switch (error) {
         case 'category-type':
           dispatch(
@@ -172,7 +163,6 @@ export function updateGroup(group) {
 
 export function deleteGroup(id, transferId) {
   return async function(dispatch, getState) {
-    const group = getState().queries.categories.grouped.find(g => g.id === id);
     await send('category-group-delete', { id, transferId });
     await dispatch(getCategories());
     // See `deleteCategory` for why we need this

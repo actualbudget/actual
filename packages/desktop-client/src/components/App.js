@@ -1,19 +1,22 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { css } from 'glamor';
+
 import * as actions from 'loot-core/src/client/actions';
 import {
   init as initConnection,
   send
 } from 'loot-core/src/platform/client/fetch';
-import installPolyfills from '../polyfills';
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
-import FatalError from './FatalError';
-import ManagementApp from './manager/ManagementApp';
-import FinancesApp from './FinancesApp';
+
+import installPolyfills from '../polyfills';
 import AppBackground from './AppBackground';
-import UpdateNotification from './UpdateNotification';
+import FatalError from './FatalError';
+import FinancesApp from './FinancesApp';
+import ManagementApp from './manager/ManagementApp';
 import MobileWebMessage from './MobileWebMessage';
+import UpdateNotification from './UpdateNotification';
 
 class App extends React.Component {
   state = {
@@ -37,7 +40,7 @@ class App extends React.Component {
     }
 
     // Load any global prefs
-    let globalPrefs = await this.props.loadGlobalPrefs();
+    await this.props.loadGlobalPrefs();
 
     // Open the last opened budget, if any
     const budgetId = await send('get-last-opened-backup');
@@ -85,7 +88,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { budgetId, loadingText, showingTutorial } = this.props;
+    const { budgetId, loadingText } = this.props;
     const { fatalError, initializing, hiddenScrollbars } = this.state;
 
     return (
@@ -133,8 +136,7 @@ export default connect(
   state => ({
     budgetId: state.prefs.local && state.prefs.local.id,
     cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
-    loadingText: state.app.loadingText,
-    showingTutorial: state.tutorial.stage !== null
+    loadingText: state.app.loadingText
   }),
   actions
 )(App);

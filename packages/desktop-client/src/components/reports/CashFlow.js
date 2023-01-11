@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
+
 import * as d from 'date-fns';
+
+import { send } from 'loot-core/src/platform/client/fetch';
+import * as monthUtils from 'loot-core/src/shared/months';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   View,
   Text,
@@ -7,21 +12,16 @@ import {
   P,
   AlignedText
 } from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
-import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { fromDateRepr } from './util';
-import Header from './Header';
+import { colors, styles } from 'loot-design/src/style';
+
 import Change from './Change';
-import CashFlowGraph from './graphs/CashFlowGraph';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
+import CashFlowGraph from './graphs/CashFlowGraph';
+import Header from './Header';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
-import { colors } from 'loot-design/src/style';
 
 function CashFlow() {
-  const [earliestMonth, setEarliestMonth] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 30)
@@ -56,7 +56,6 @@ function CashFlow() {
         }))
         .reverse();
 
-      setEarliestMonth(earliestMonth);
       setAllMonths(allMonths);
     }
     run();
@@ -83,7 +82,7 @@ function CashFlow() {
     return null;
   }
 
-  const { graphData, balance, totalChange, totalExpenses, totalIncome } = data;
+  const { graphData, totalExpenses, totalIncome } = data;
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>

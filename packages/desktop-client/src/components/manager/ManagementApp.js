@@ -1,39 +1,48 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { createBrowserHistory } from 'history';
 import { Switch, Redirect, Router, Route } from 'react-router-dom';
-import { send } from 'loot-core/src/platform/client/fetch';
+
+import { createBrowserHistory } from 'history';
+
 import * as actions from 'loot-core/src/client/actions';
-import { View, ExternalLink, Button } from 'loot-design/src/components/common';
+import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import ServerURL from './ServerURL';
+import tokens from 'loot-design/src/tokens';
+
+import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
-
-import Modals from './Modals';
-import Login from './subscribe/Login';
-import Bootstrap from './subscribe/Bootstrap';
-import Error from './subscribe/Error';
-import ChangePassword from './subscribe/ChangePassword';
 import ConfigServer from './ConfigServer';
+import Modals from './Modals';
+import ServerURL from './ServerURL';
+import Bootstrap from './subscribe/Bootstrap';
+import ChangePassword from './subscribe/ChangePassword';
+import Error from './subscribe/Error';
+import Login from './subscribe/Login';
 
 function Version() {
+  const version = useServerVersion();
+
   return (
-    <ExternalLink
+    <Text
       style={{
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
         color: colors.n7,
-        margin: 15,
-        marginRight: 17,
         ':hover': { color: colors.n2 },
-        zIndex: 5001
+        margin: 15,
+        marginLeft: 17,
+        [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          marginLeft: 15,
+          marginRight: 17,
+          zIndex: 5001
+        }
       }}
       href={'https://actualbudget.com/blog/' + window.Actual.ACTUAL_VERSION}
     >
-      {window.Actual.ACTUAL_VERSION}
-    </ExternalLink>
+      {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
+    </Text>
   );
 }
 
@@ -167,13 +176,14 @@ class ManagementApp extends React.Component {
           {!isHidden && (
             <View
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
+                alignItems: 'center',
                 bottom: 0,
                 justifyContent: 'center',
-                alignItems: 'center'
+                left: 0,
+                padding: 20,
+                position: 'absolute',
+                right: 0,
+                top: 0
               }}
             >
               {userData ? (
@@ -203,7 +213,16 @@ class ManagementApp extends React.Component {
                       zIndex: 4000
                     }}
                   >
-                    <LoggedInUser />
+                    <Switch>
+                      <Route exact path="/config-server" component={null} />
+                      <Route
+                        exact
+                        path="/"
+                        render={() => (
+                          <LoggedInUser style={{ padding: '4px 7px' }} />
+                        )}
+                      />
+                    </Switch>
                   </View>
                 </>
               ) : (
@@ -219,7 +238,10 @@ class ManagementApp extends React.Component {
             </View>
           )}
 
-          <ServerURL />
+          <Switch>
+            <Route exact path="/config-server" component={null} />
+            <Route exact path="/" component={ServerURL} />
+          </Switch>
           <Version />
         </View>
       </Router>
@@ -227,17 +249,14 @@ class ManagementApp extends React.Component {
   }
 }
 
-export default connect(
-  state => {
-    let { modalStack } = state.modals;
+export default connect(state => {
+  let { modalStack } = state.modals;
 
-    return {
-      files: state.budgets.allFiles,
-      userData: state.user.data,
-      managerHasInitialized: state.app.managerHasInitialized,
-      loadingText: state.app.loadingText,
-      currentModals: modalStack.map(modal => modal.name)
-    };
-  },
-  actions
-)(ManagementApp);
+  return {
+    files: state.budgets.allFiles,
+    userData: state.user.data,
+    managerHasInitialized: state.app.managerHasInitialized,
+    loadingText: state.app.loadingText,
+    currentModals: modalStack.map(modal => modal.name)
+  };
+}, actions)(ManagementApp);

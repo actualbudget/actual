@@ -1,19 +1,15 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  SectionList,
-  ScrollView,
-  Animated
-} from 'react-native';
-import memoizeOne from 'memoize-one';
+import { View, Text, SectionList, ScrollView, Animated } from 'react-native';
+import { Swipeable, RectButton } from 'react-native-gesture-handler';
+
 import {
   format as formatDate,
   parse as parseDate,
   parseISO,
   isValid as isValidDate
 } from 'date-fns';
-import { Swipeable, RectButton } from 'react-native-gesture-handler';
+import memoizeOne from 'memoize-one';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   splitTransaction,
@@ -22,21 +18,22 @@ import {
   deleteTransaction,
   realizeTempTransactions
 } from 'loot-core/src/shared/transactions';
-import { applyChanges, titleFirst } from 'loot-core/src/shared/util';
+import { titleFirst } from 'loot-core/src/shared/util';
 import {
   integerToCurrency,
   integerToAmount,
   amountToInteger,
   groupById
 } from 'loot-core/src/shared/util';
-import KeyboardAvoidingView from './KeyboardAvoidingView';
-import { ListItem } from './table';
-import { Button, TextOneLine } from './common';
-import { colors, mobileStyles as styles } from '../../style';
+import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+
+import { colors, styles } from '../../style';
 import Add from '../../svg/v1/Add';
 import Trash from '../../svg/v1/Trash';
+import CheckCircle1 from '../../svg/v2/CheckCircle1';
 import PencilWriteAlternate from '../../svg/v2/PencilWriteAlternate';
 import { FocusableAmountInput } from './AmountInput';
+import { Button, TextOneLine } from './common';
 import ExitTransition from './ExitTransition';
 import {
   FieldLabel,
@@ -45,14 +42,8 @@ import {
   BooleanField,
   EDITING_PADDING
 } from './forms';
-
-import EditSkull1 from '../../svg/v2/EditSkull1';
-import AlertTriangle from '../../svg/v2/AlertTriangle';
-import CalendarIcon from '../../svg/v2/Calendar';
-import ValidationCheck from '../../svg/v2/ValidationCheck';
-import FavoriteStar from '../../svg/v2/FavoriteStar';
-import CheckCircle1 from '../../svg/v2/CheckCircle1';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+import KeyboardAvoidingView from './KeyboardAvoidingView';
+import { ListItem } from './table';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));
@@ -182,7 +173,6 @@ export class TransactionEdit extends React.Component {
 
   onEdit = async (transaction, name, value) => {
     let { transactions } = this.state;
-    let { payees } = this.props;
 
     let newTransaction = { ...transaction, [name]: value };
     if (this.props.onEdit) {
@@ -706,20 +696,17 @@ export function DateHeader({ date }) {
 }
 
 function Status({ status }) {
-  let color, backgroundColor, Icon;
+  let color;
 
   switch (status) {
     case 'missed':
       color = colors.r3;
-      Icon = EditSkull1;
       break;
     case 'due':
       color = colors.y3;
-      Icon = AlertTriangle;
       break;
     case 'upcoming':
       color = colors.n4;
-      Icon = ArrowsSynchronize;
       break;
     default:
   }
@@ -775,25 +762,14 @@ export class Transaction extends React.PureComponent {
     let prettyCategory = transferAcct
       ? 'Transfer'
       : is_parent
-        ? 'Split'
-        : categoryName;
+      ? 'Split'
+      : categoryName;
 
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
       color: colors.n5
     };
-    let textStyleWithColor = [
-      textStyle,
-      isPreview && {
-        color:
-          notes === 'missed'
-            ? colors.r6
-            : notes === 'due'
-              ? colors.y4
-              : colors.n5
-      }
-    ];
 
     return (
       <RectButton
@@ -822,7 +798,7 @@ export class Transaction extends React.PureComponent {
               )}
               <TextOneLine
                 style={[
-                  styles.text,
+                  { fontSize: styles.text.fontSize, color: styles.textColor },
                   textStyle,
                   { fontSize: 14, fontWeight: added ? '600' : '400' },
                   prettyDescription === '' && {

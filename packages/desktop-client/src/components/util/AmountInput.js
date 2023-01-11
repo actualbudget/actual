@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   integerToCurrency,
   currencyToInteger
@@ -11,7 +12,7 @@ import {
 import Add from 'loot-design/src/svg/v1/Add';
 import Subtract from 'loot-design/src/svg/v1/Subtract';
 
-export function AmountInput({ defaultValue, onChange }) {
+export function AmountInput({ defaultValue = 0, onChange, style }) {
   let [negative, setNegative] = useState(defaultValue <= 0);
   let [value, setValue] = useState(integerToCurrency(Math.abs(defaultValue)));
 
@@ -39,7 +40,7 @@ export function AmountInput({ defaultValue, onChange }) {
         </Button>
       }
       value={value}
-      style={{ flex: 1, alignItems: 'stretch' }}
+      style={{ flex: 1, alignItems: 'stretch', ...style }}
       inputStyle={{ paddingLeft: 0 }}
       onChange={e => setValue(e.target.value)}
       onBlur={e => fireChange()}

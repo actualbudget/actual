@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from 'react-redux';
+
 import * as d from 'date-fns';
+
 import * as actions from 'loot-core/src/client/actions';
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
@@ -8,6 +10,8 @@ import {
   amountToInteger,
   looselyParseAmount
 } from 'loot-core/src/shared/util';
+
+import { colors, styles } from '../../style';
 import {
   View,
   Text,
@@ -17,10 +21,8 @@ import {
   Button,
   ButtonWithLoading
 } from '../common';
-import { Checkbox } from '../forms';
+import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
-import { SectionLabel, FieldLabel } from '../forms';
-import { colors, styles } from '../../style';
 
 let dateFormats = [
   { format: 'yyyy mm dd', label: 'YYYY MM DD' },
@@ -31,7 +33,7 @@ let dateFormats = [
   { format: 'dd mm yy', label: 'DD MM YY' }
 ];
 
-function parseDate(str, order) {
+export function parseDate(str, order) {
   if (typeof str !== 'string') {
     return null;
   }
@@ -40,37 +42,48 @@ function parseDate(str, order) {
     return v && v.length === 1 ? '0' + v : v;
   }
 
-  let parts = str.replace(/ /g, '').split(/[^0-9]/);
+  const dateGroups = (a, b) => str => {
+    const digits = str.replace(/[^\d]/g, '');
+    return [digits.slice(0, a), digits.slice(a, a + b), digits.slice(a + b)];
+  };
+  const yearFirst = dateGroups(4, 2);
+  const twoDig = dateGroups(2, 2);
 
-  let year, month, day;
+  let parts, year, month, day;
   switch (order) {
     case 'dd mm yyyy':
+      parts = twoDig(str);
       year = parts[2];
       month = parts[1];
       day = parts[0];
       break;
     case 'dd mm yy':
+      parts = twoDig(str);
       year = `20${parts[2]}`;
       month = parts[1];
       day = parts[0];
       break;
     case 'yyyy mm dd':
+      parts = yearFirst(str);
       year = parts[0];
       month = parts[1];
       day = parts[2];
       break;
     case 'yy mm dd':
+      parts = twoDig(str);
       year = `20${parts[0]}`;
       month = parts[1];
       day = parts[2];
       break;
     case 'mm dd yy':
+      parts = twoDig(str);
       year = `20${parts[2]}`;
       month = parts[0];
       day = parts[1];
       break;
     default:
     case 'mm dd yyyy':
+      parts = twoDig(str);
       year = parts[2];
       month = parts[0];
       day = parts[1];
@@ -336,10 +349,7 @@ function DateFormatSelect({
   // try to figure out what delimiter the date is using, and default
   // to space if we can't figure it out.
   let delimiter = '-';
-  if (
-    transactions.length > 0 &&
-    (fieldMappings && fieldMappings.date != null)
-  ) {
+  if (transactions.length > 0 && fieldMappings && fieldMappings.date != null) {
     let date = transactions[0][fieldMappings.date];
     let m = date && date.match(/[/.,-/\\]/);
     delimiter = m ? m[0] : ' ';

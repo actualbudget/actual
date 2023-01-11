@@ -1,11 +1,17 @@
 import React, { useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+
 import {
   format as formatDate,
-  parse as parseDate,
   parseISO,
   isValid as isDateValid
 } from 'date-fns';
+
+import {
+  getAccountsById,
+  getCategoriesById
+} from 'loot-core/src/client/reducers/queries';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   Table,
   Row,
@@ -17,18 +23,9 @@ import {
   useSelectedItems,
   useSelectedDispatch
 } from 'loot-design/src/components/useSelected';
-import {
-  integerToAmount,
-  amountToInteger,
-  integerToCurrency
-} from 'loot-core/src/shared/util';
-import {
-  getAccountsById,
-  getPayeesById,
-  getCategoriesById
-} from 'loot-core/src/client/reducers/queries';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 import { styles } from 'loot-design/src/style';
+import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+
 import DisplayId from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {
@@ -57,7 +54,6 @@ const TransactionRow = React.memo(function TransactionRow({
   let a = getAccountsById(accounts)[transaction.account];
 
   let dispatchSelected = useSelectedDispatch();
-  let schedule = transaction.schedule;
 
   return (
     <Row>

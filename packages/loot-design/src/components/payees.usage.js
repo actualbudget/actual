@@ -1,9 +1,12 @@
 import React from 'react';
+
 import Component from '@reactions/component';
-import { Section, TestModal } from './../guide/components';
-import { ManagePayees } from './payees';
-import { applyChanges } from 'loot-core/src/shared/util';
+
 import { TestProvider } from 'loot-core/src/mocks/redux';
+import { applyChanges } from 'loot-core/src/shared/util';
+
+import { Section, TestModal } from '../guide/components';
+import { ManagePayees } from './payees';
 
 let categoryGroups = [
   {
@@ -95,7 +98,12 @@ export default () => (
                     onClose: () => setState({ isCurrent: true })
                   }}
                   payees={state.payees}
-                  ruleCounts={new Map([['three', 1], ['tw', 3]])}
+                  ruleCounts={
+                    new Map([
+                      ['three', 1],
+                      ['tw', 3]
+                    ])
+                  }
                   categoryGroups={categoryGroups}
                   onBatchChange={changes => {
                     setState({ payees: applyChanges(changes, state.payees) });

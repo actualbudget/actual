@@ -1,8 +1,7 @@
-import dateFns from 'date-fns';
-import * as merkle from '../merkle';
-import Timestamp, { makeClock } from '../timestamp';
-const defaultMockData = require('./mockData').basic;
+import { makeClock, Timestamp, merkle } from '../crdt';
+
 const SyncPb = require('../sync/proto/sync_pb');
+const defaultMockData = require('./mockData').basic;
 
 const handlers = {};
 let currentMockData = defaultMockData;
@@ -112,7 +111,7 @@ module.exports.getClock = () => {
 
 module.exports.getMessages = () => {
   return currentMessages.map(msg => {
-    let { timestamp, is_encrypted, content } = msg;
+    let { timestamp, content } = msg;
     let fields = SyncPb.Message.deserializeBinary(content);
 
     return {

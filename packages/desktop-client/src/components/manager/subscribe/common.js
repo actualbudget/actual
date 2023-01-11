@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+
+import { send } from 'loot-core/src/platform/client/fetch';
 import {
-  AnchorLink,
   Text,
   Button,
-  ButtonLink,
   Input as BaseInput
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
 
 // There are two URLs that dance with each other: `/login` and
 // `/bootstrap`. Both of these URLs check the state of the the server
@@ -87,8 +86,8 @@ export const Input = React.forwardRef((props, ref) => {
           padding: 10,
           fontSize: 15,
           border: 'none',
-          boxShadow: styles.shadow,
-          ':focus': { border: 'none', boxShadow: styles.shadow }
+          ...styles.shadow,
+          ':focus': { border: 'none', ...styles.shadow }
         },
         props.style
       ]}

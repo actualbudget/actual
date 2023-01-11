@@ -1,9 +1,10 @@
 import React, { useCallback } from 'react';
-import { useSelector } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
+
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View, Text } from 'loot-design/src/components/common';
+import { Text } from 'loot-design/src/components/common';
+
 import { Page } from '../Page';
 import { SchedulesTable } from './SchedulesTable';
 
@@ -13,9 +14,6 @@ export default function ScheduleLink() {
   let scheduleData = useSchedules(
     useCallback(query => query.filter({ completed: false }), [])
   );
-  let dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
 
   if (scheduleData == null) {
     return null;

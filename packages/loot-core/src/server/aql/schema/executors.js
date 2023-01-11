@@ -1,9 +1,8 @@
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
-import { groupBy } from '../../../shared/util';
 import { isAggregateQuery } from '../compiler';
-import { convertOutputType } from '../schema-helpers';
 import { execQuery } from '../exec';
+import { convertOutputType } from '../schema-helpers';
 
 // Transactions executor
 
@@ -83,7 +82,7 @@ async function execTransactionsGrouped(
   splitType,
   outputTypes
 ) {
-  let { table: tableName, withDead } = queryState;
+  let { withDead } = queryState;
   let whereDead = withDead ? '' : `AND ${sql.from}.tombstone = 0`;
 
   if (isAggregateQuery(queryState)) {
@@ -143,7 +142,10 @@ async function execTransactionsGrouped(
 
     rows = await db.all(rowSql, params);
     matched = new Set(
-      [].concat.apply([], rows.map(row => row.matched.split(',')))
+      [].concat.apply(
+        [],
+        rows.map(row => row.matched.split(','))
+      )
     );
   }
 
@@ -158,7 +160,6 @@ async function execTransactionsGrouped(
     ${sql.orderBy}
   `;
 
-  let start = Date.now();
   let allRows = await db.all(finalSql);
 
   // Group the parents and children up

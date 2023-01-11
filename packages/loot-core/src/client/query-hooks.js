@@ -1,4 +1,5 @@
 import React, { useState, useContext, useMemo, useEffect } from 'react';
+
 import { runQuery, liveQuery, LiveQuery, PagedQuery } from './query-helpers';
 
 function makeContext(queryState, opts, QueryClass) {
@@ -112,8 +113,4 @@ export function useLiveQuery(query, opts) {
   }, [query]);
 
   return { data };
-}
-
-function usePagedQuery(query) {
-  // TODO
 }

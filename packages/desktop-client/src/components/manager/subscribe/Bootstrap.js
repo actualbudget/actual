@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import * as actions from 'loot-core/src/client/actions';
-import { View, Text, Button } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import { loggedIn } from 'loot-core/src/client/actions/user';
+
 import { createBudget } from 'loot-core/src/client/actions/budgets';
+import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { View, Text, Button } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
+
+import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-import { useBootstrapped, Title, Input, Link, ExternalLink } from './common';
 
 export default function Bootstrap() {
   let dispatch = useDispatch();
-  let history = useHistory();
   let [error, setError] = useState(null);
 
   let { checked } = useBootstrapped();
@@ -51,7 +50,7 @@ export default function Bootstrap() {
 
   return (
     <>
-      <View style={{ width: 450, marginTop: -30 }}>
+      <View style={{ maxWidth: 450, marginTop: -30 }}>
         <Title text="Bootstrap this Actual instance" />
         <Text
           style={{

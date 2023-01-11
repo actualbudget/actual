@@ -4,16 +4,8 @@ require('fake-indexeddb/auto');
 let FDBFactory = require('fake-indexeddb/lib/FDBFactory');
 
 let idb = require('../indexeddb');
-let {
-  init,
-  populateFileHeirarchy,
-  readFile,
-  writeFile,
-  exists,
-  pathToId,
-  listDir,
-  join
-} = require('./index');
+
+let { init, readFile, writeFile, exists, pathToId, join } = require('./index');
 
 beforeAll(() => {
   process.env.PUBLIC_URL =

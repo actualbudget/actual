@@ -1,24 +1,24 @@
 import { expectSnapshotWithDiffer } from '../mocks/util';
-import * as prefs from './prefs';
-import * as db from './db';
-import * as budget from './budget/base';
 import * as monthUtils from '../shared/months';
-import { getClock, deserializeClock } from './timestamp';
+import * as budgetActions from './budget/actions';
+import * as budget from './budget/base';
+import { getClock, deserializeClock } from './crdt';
+import * as db from './db';
 import {
   runHandler,
   runMutator,
   disableGlobalMutations,
   enableGlobalMutations
 } from './mutators';
-import * as budgetActions from './budget/actions';
+import * as prefs from './prefs';
 
 jest.mock('./post');
+const connection = require('../platform/server/connection');
+const fs = require('../platform/server/fs');
 const backend = require('./main');
 const { post } = require('./post');
 const handlers = backend.handlers;
 const sheet = require('./sheet');
-const fs = require('../platform/server/fs');
-const connection = require('../platform/server/connection');
 
 beforeEach(async () => {
   await global.emptyDatabase()();
@@ -80,7 +80,7 @@ describe('Budgets', () => {
     await createTestBudget('default-budget-template');
 
     await db.openDatabase('test-budget');
-    let r = await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
+    await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
 
     const spy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -331,7 +331,7 @@ describe('Budget', () => {
 
 describe('Categories', () => {
   test('can be deleted', async () => {
-    let spreadsheet = await sheet.loadSpreadsheet(db);
+    await sheet.loadSpreadsheet(db);
 
     await runMutator(async () => {
       await db.insertCategoryGroup({ id: 'group1', name: 'group1' });

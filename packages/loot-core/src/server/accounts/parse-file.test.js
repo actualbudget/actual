@@ -1,9 +1,10 @@
+import * as d from 'date-fns';
+
+import { amountToInteger } from '../../shared/util';
+import * as db from '../db';
+import * as prefs from '../prefs';
 import { parseFile } from './parse-file';
 import { reconcileTransactions } from './sync';
-import * as prefs from '../prefs';
-import * as db from '../db';
-import { amountToInteger } from '../../shared/util';
-import * as d from 'date-fns';
 
 beforeEach(global.emptyDatabase());
 
@@ -43,7 +44,7 @@ describe('File import', () => {
   test('qif import works', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
-    let { errors, added } = await importFileWithRealTime(
+    let { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qif',
       'MM/dd/yy'
@@ -56,7 +57,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors, added } = await importFileWithRealTime(
+    let { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.ofx'
     );
@@ -68,7 +69,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors, added } = await importFileWithRealTime(
+    let { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qfx'
     );

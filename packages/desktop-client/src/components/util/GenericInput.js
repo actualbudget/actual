@@ -1,13 +1,13 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
-import { dayFromDate, getMonthYearFormat } from 'loot-core/src/shared/months';
-import { View, Input } from 'loot-design/src/components/common';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
+
+import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
 import Autocomplete from 'loot-design/src/components/Autocomplete';
 import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
+import { View, Input } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
+import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
 
 export default function GenericInput({

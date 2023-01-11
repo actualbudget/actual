@@ -1,0 +1,3 @@
+{
+  "presets": ["jwl-app", "@babel/preset-react"]
+}

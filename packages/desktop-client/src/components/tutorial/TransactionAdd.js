@@ -1,8 +1,10 @@
 import React from 'react';
+
 import { Tooltip, Pointer, P } from 'loot-design/src/components/common';
-import Navigation from './Navigation';
-import { styles, colors } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
+
 import { Title } from './common';
+import Navigation from './Navigation';
 
 function TransactionAdd({ targetRect, navigationProps }) {
   return (
@@ -33,8 +35,8 @@ function TransactionAdd({ targetRect, navigationProps }) {
         </P>
 
         <P isLast={true}>
-          Try <strong>clicking "Add New"</strong> to see how adding
-          transactions affects your budget.
+          Try <strong>clicking "Add New"</strong> to see how adding transactions
+          affects your budget.
         </P>
 
         <Navigation {...navigationProps} showBack={false} />

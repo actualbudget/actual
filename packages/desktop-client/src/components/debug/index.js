@@ -1,5 +1,7 @@
 import React from 'react';
+
 import styled from 'styled-components';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 
 const Container = styled.div`
@@ -54,7 +56,7 @@ class Debug extends React.Component {
   }
 
   async fetchSqlGenResult() {
-    let row = {};
+    let row = {}; // eslint-disable-line
     try {
       row = (0, eval)('(' + this.state.sqlgenRow + ')'); // eslint-disable-line
     } catch (e) {}
@@ -83,11 +85,11 @@ class Debug extends React.Component {
 
   render() {
     const {
-      value,
-      outputType,
-      ast,
-      code,
-      sql,
+      // value,
+      // outputType,
+      // ast,
+      // code,
+      // sql,
       sqlgenValue,
       sqlgenRow,
       sqlgenResult

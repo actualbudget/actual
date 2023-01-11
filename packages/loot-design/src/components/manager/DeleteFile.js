@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, Button, ButtonWithLoading } from '../common';
-import { styles, colors } from '../../style';
+
+import { colors } from '../../style';
+import { View, Text, Modal, ButtonWithLoading } from '../common';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
   let [loadingState, setLoadingState] = useState(null);
-  let { state } = file;
 
   async function onDeleteCloud() {
     setLoadingState('cloud');

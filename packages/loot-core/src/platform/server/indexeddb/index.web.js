@@ -131,7 +131,7 @@ function openDatabase() {
 
 function closeDatabase() {
   if (openedDb) {
-    let promise = openedDb.then(db => {
+    openedDb.then(db => {
       db.close();
     });
     openedDb = null;

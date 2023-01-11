@@ -7,50 +7,29 @@ import '@reach/listbox/styles.css';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './components/App';
+import { Provider } from 'react-redux';
+
 import {
   createStore,
   combineReducers,
   applyMiddleware,
   bindActionCreators
 } from 'redux';
-import { Provider } from 'react-redux';
-import constants from 'loot-core/src/client/constants';
-import reducers from 'loot-core/src/client/reducers';
-import { send } from 'loot-core/src/platform/client/fetch';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import * as actions from 'loot-core/src/client/actions';
 import thunk from 'redux-thunk';
-import { handleGlobalEvents } from './global-events';
+
+import * as actions from 'loot-core/src/client/actions';
+import constants from 'loot-core/src/client/constants';
+import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import reducers from 'loot-core/src/client/reducers';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
+import { send } from 'loot-core/src/platform/client/fetch';
+
+import App from './components/App';
+import { handleGlobalEvents } from './global-events';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 require('focus-visible');
-
-function lightweightStringify(obj) {
-  return JSON.stringify(obj, function(k, v) {
-    return k ? '' + v : v;
-  });
-}
-
-function log() {
-  return next => action => {
-    if (window.Actual.IS_DEV) {
-      console.log(action);
-    }
-
-    if (window.SentryClient) {
-      window.SentryClient.addBreadcrumb({
-        message: lightweightStringify(action).slice(0, 500),
-        category: 'redux',
-        level: 'info'
-      });
-    }
-
-    return next(action);
-  };
-}
 
 const appReducer = combineReducers(reducers);
 function rootReducer(state, action) {
@@ -74,11 +53,7 @@ function rootReducer(state, action) {
   return appReducer(state, action);
 }
 
-const store = createStore(
-  rootReducer,
-  undefined,
-  applyMiddleware(thunk /*log*/)
-);
+const store = createStore(rootReducer, undefined, applyMiddleware(thunk));
 const boundActions = bindActionCreators(actions, store.dispatch);
 
 // Listen for global events from the server or main process

@@ -1,7 +1,10 @@
+// This is a special usage of the API because this package is embedded
+// into Actual itself. We only want to pull in the methods in that
+// case and ignore everything else; otherwise we'd be pulling in the
+// entire backend bundle from the API
+const actual = require('@actual-app/api/methods');
 const d = require('date-fns');
 const uuid = require('uuid');
-const actual = require('@actual-app/api/methods');
-const { amountToInteger } = require('@actual-app/api/utils');
 
 function amountFromYnab(amount) {
   // ynabs multiplies amount by 1000 and actual by 100

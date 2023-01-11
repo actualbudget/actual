@@ -1,16 +1,11 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import { send } from 'loot-core/src/platform/client/fetch';
-import { Page } from '../Page';
+
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
+import { send } from 'loot-core/src/platform/client/fetch';
+import { View, Button } from 'loot-design/src/components/common';
+
+import { Page } from '../Page';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {
@@ -30,6 +25,10 @@ export default function Schedules() {
 
   function onAdd() {
     history.push(`/schedule/edit`, { locationPtr: history.location });
+  }
+
+  function onDiscover() {
+    history.push(`/schedule/discover`, { locationPtr: history.location });
   }
 
   async function onAction(name, id) {
@@ -75,7 +74,15 @@ export default function Schedules() {
         />
       </View>
 
-      <View style={{ alignItems: 'flex-end', margin: '20px 0', flexShrink: 0 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          margin: '20px 0',
+          flexShrink: 0
+        }}
+      >
+        <Button onClick={onDiscover}>Find schedules</Button>
         <Button primary onClick={onAdd}>
           Add new schedule
         </Button>

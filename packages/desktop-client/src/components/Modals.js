@@ -1,30 +1,31 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
-import { createLocation } from 'history';
+
 import Component from '@reactions/component';
+import { createLocation } from 'history';
+import { bindActionCreators } from 'redux';
+
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import { getModalRoute } from '../util';
-
-import CreateAccount from './modals/CreateAccount';
-import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
+import BudgetSummary from 'loot-design/src/components/modals/BudgetSummary';
 import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
-import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 import ConfigureLinkedAccounts from 'loot-design/src/components/modals/ConfigureLinkedAccounts';
-import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
-import ManagePayeesWithData from './payees/ManagePayeesWithData';
-import ManageRules from './modals/ManageRules';
-import EditRule from './modals/EditRule';
-import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
-import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
-import WelcomeScreen from './modals/WelcomeScreen';
-import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
-import CreateEncryptionKey from './modals/CreateEncryptionKey';
-import FixEncryptionKey from './modals/FixEncryptionKey';
+import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
 import EditField from 'loot-design/src/components/modals/EditField';
+import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
+import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
+import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
+import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
+
+import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
+import CreateAccount from './modals/CreateAccount';
+import CreateEncryptionKey from './modals/CreateEncryptionKey';
+import EditRule from './modals/EditRule';
+import FixEncryptionKey from './modals/FixEncryptionKey';
+import ManageRulesModal from './modals/ManageRulesModal';
+import MergeUnusedPayees from './modals/MergeUnusedPayees';
+import WelcomeScreen from './modals/WelcomeScreen';
 
 function Modals({
   history,
@@ -150,25 +151,10 @@ function Modals({
         />
 
         <Route
-          path="/manage-payees"
-          render={() => {
-            return (
-              <ManagePayeesWithData
-                history={history}
-                modalProps={modalProps}
-                initialSelectedIds={
-                  options.selectedPayee ? [options.selectedPayee] : undefined
-                }
-              />
-            );
-          }}
-        />
-
-        <Route
           path="/manage-rules"
           render={() => {
             return (
-              <ManageRules
+              <ManageRulesModal
                 history={history}
                 modalProps={modalProps}
                 payeeId={options.payeeId}
@@ -268,6 +254,15 @@ function Modals({
 
         <Route path="/welcome-screen">
           <WelcomeScreen modalProps={modalProps} actions={actions} />
+        </Route>
+
+        <Route path="/budget-summary">
+          <BudgetSummary
+            key={name}
+            modalProps={modalProps}
+            month={options.month}
+            actions={actions}
+          />
         </Route>
       </Switch>
     );

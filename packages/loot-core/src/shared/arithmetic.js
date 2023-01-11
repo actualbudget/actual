@@ -20,10 +20,6 @@ function next(state) {
   return ch;
 }
 
-function isEnd(state) {
-  return state.index >= state.str.length;
-}
-
 function nextOperator(state, op) {
   if (char(state) === op) {
     next(state);

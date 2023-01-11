@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+
 import { importBudget } from 'loot-core/src/client/actions/budgets';
-import {
-  View,
-  Block,
-  Modal,
-  ButtonWithLoading,
-  Button,
-  Link,
-  P,
-  ExternalLink
-} from '../common';
+
 import { styles, colors } from '../../style';
+import { View, Block, Modal, ButtonWithLoading, Button, P } from '../common';
 
 function getErrorMessage(error) {
   switch (error) {

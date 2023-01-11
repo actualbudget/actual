@@ -1,14 +1,14 @@
 import React from 'react';
+
+import { NativeCategorySelect } from 'loot-design/src/components/CategorySelect';
 import {
   View,
   Text,
   Block,
   Modal,
-  Button,
-  Select
+  Button
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import { NativeCategorySelect } from 'loot-design/src/components/CategorySelect';
 
 class ConfirmCategoryDelete extends React.Component {
   state = { transferCategory: null, error: null };
@@ -22,7 +22,7 @@ class ConfirmCategoryDelete extends React.Component {
 
   onDelete = () => {
     let { transferCategory } = this.state;
-    let { category, group, onDelete } = this.props;
+    let { onDelete } = this.props;
 
     if (!transferCategory) {
       this.setState({ error: 'required-transfer' });

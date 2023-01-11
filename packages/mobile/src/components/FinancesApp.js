@@ -1,42 +1,44 @@
 import React, { useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
+import { RectButton } from 'react-native-gesture-handler';
 import { connect } from 'react-redux';
+
+import { ActionSheetProvider } from '@expo/react-native-action-sheet';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import { RectButton } from 'react-native-gesture-handler';
+
 import * as actions from 'loot-core/src/client/actions';
-import { AppState } from 'react-native';
-import Wallet from 'loot-design/src/svg/v1/Wallet';
-import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
-import Cog from 'loot-design/src/svg/v1/Cog';
-import Add from 'loot-design/src/svg/v1/Add';
-import { colors } from 'loot-design/src/style';
-import { Button } from 'loot-design/src/components/mobile/common';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
-import InputAccessoryView from 'loot-design/src/components/mobile/InputAccessoryView';
-import Notifications from './Notifications';
-import ModalListener from './ModalListener';
-
-import Budget from './budget';
-import Accounts from './accounts';
-import Account from './accounts/Account';
-import Transaction from './transactions/Transaction';
-import CategorySelect from './modals/CategorySelect';
-import PayeeSelect from './modals/PayeeSelect';
-import AccountSelect from './modals/AccountSelect';
-import GenericSelect from './modals/GenericSelect';
-import GenericSearchableSelect from './modals/GenericSearchableSelect';
-import Settings from './Settings';
-import AddCategory from './modals/AddCategory';
-import AddLocalAccount from './modals/AddLocalAccount';
-import AddAccount from './modals/AddAccount';
-import CreateEncryptionKey from './modals/CreateEncryptionKey';
-import SelectLinkedAccounts from './modals/link-accounts/SelectLinkedAccounts';
-import ConfigureLinkedAccounts from './modals/link-accounts/ConfigureLinkedAccounts';
 import { AmountAccessoryView } from 'loot-design/src/components/mobile/AmountInput';
 import { BudgetAccessoryView } from 'loot-design/src/components/mobile/budget';
+import { Button } from 'loot-design/src/components/mobile/common';
+import InputAccessoryView from 'loot-design/src/components/mobile/InputAccessoryView';
+import { colors } from 'loot-design/src/style';
+import Add from 'loot-design/src/svg/v1/Add';
+import Cog from 'loot-design/src/svg/v1/Cog';
+import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
+import Wallet from 'loot-design/src/svg/v1/Wallet';
+
+import Accounts from './accounts';
+import Account from './accounts/Account';
+import Budget from './budget';
+import ModalListener from './ModalListener';
+import AccountSelect from './modals/AccountSelect';
+import AddAccount from './modals/AddAccount';
+import AddCategory from './modals/AddCategory';
+import AddLocalAccount from './modals/AddLocalAccount';
+import CategorySelect from './modals/CategorySelect';
+import CreateEncryptionKey from './modals/CreateEncryptionKey';
+import GenericSearchableSelect from './modals/GenericSearchableSelect';
+import GenericSelect from './modals/GenericSelect';
+import ConfigureLinkedAccounts from './modals/link-accounts/ConfigureLinkedAccounts';
+import SelectLinkedAccounts from './modals/link-accounts/SelectLinkedAccounts';
+import PayeeSelect from './modals/PayeeSelect';
+import Notifications from './Notifications';
+import Settings from './Settings';
+import Transaction from './transactions/Transaction';
 
 function useForegroundSync(sync) {
   let appState = useRef(null);
@@ -281,7 +283,4 @@ function FinancesApp({ getAccounts, sync, addNotification, resetSync }) {
   );
 }
 
-export default connect(
-  null,
-  actions
-)(FinancesApp);
+export default connect(null, actions)(FinancesApp);

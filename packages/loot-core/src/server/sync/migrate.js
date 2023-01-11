@@ -1,10 +1,10 @@
-import { addSyncListener, applyMessages } from './index';
-import Timestamp from '../timestamp';
+import { Timestamp } from '../crdt';
 
-function migrateParentIds(oldValues, newValues) {
+import { addSyncListener, applyMessages } from './index';
+
+function migrateParentIds(_oldValues, newValues) {
   newValues.forEach((items, table) => {
     if (table === 'transactions') {
-      let old = oldValues.get(table);
       let toApply = [];
 
       items.forEach(newValue => {

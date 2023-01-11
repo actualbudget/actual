@@ -1,22 +1,14 @@
-import React, { useState, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import * as actions from 'loot-core/src/client/actions';
-import {
-  View,
-  Text,
-  Button,
-  ButtonWithLoading
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import { loggedIn } from 'loot-core/src/client/actions/user';
-import { createBudget } from 'loot-core/src/client/actions/budgets';
+
 import { send } from 'loot-core/src/platform/client/fetch';
+import { View, Text, Button } from 'loot-design/src/components/common';
+import { colors } from 'loot-design/src/style';
+
+import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-import { useBootstrapped, Title, Input, Link, ExternalLink } from './common';
 
 export default function ChangePassword() {
-  let dispatch = useDispatch();
   let history = useHistory();
   let [error, setError] = useState(null);
   let [msg, setMessage] = useState(null);
@@ -51,7 +43,7 @@ export default function ChangePassword() {
 
   return (
     <>
-      <View style={{ width: 500, marginTop: -30 }}>
+      <View style={{ maxWidth: 500, marginTop: -30 }}>
         <Title text="Change server password" />
         <Text
           style={{
