@@ -35,18 +35,6 @@ global.__resetWorld = () => {
   resetStore();
 };
 
-// This uses the `global` instead of `process.env` because it allows
-// to be specified by the jest configuration for a specific project,
-// allowing us to run all tests with the multi-project runner.
-if (global.IS_REACT_NATIVE) {
-  fireEvent['press'] = (node, init) => {
-    act(() => {
-      fireEvent.mouseDown(node, init);
-      fireEvent.mouseUp(node, init);
-    });
-  };
-}
-
 process.on('unhandledRejection', reason => {
   console.log('REJECTION', reason);
 });

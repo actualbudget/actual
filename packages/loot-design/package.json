@@ -51,10 +51,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "start:mobile": "IS_REACT_NATIVE=1 react-scripts start",
     "test": "npm-run-all -cp 'test:*'",
     "test:web": "jest -c jest.config.js",
-    "test:react-native": "jest -c jest.rn.config.js",
     "lint": "eslint src"
   },
   "homepage": "./",
