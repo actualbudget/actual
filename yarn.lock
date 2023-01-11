@@ -1790,7 +1790,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-object-assign@npm:^7.0.0, @babel/plugin-transform-object-assign@npm:^7.16.7":
+"@babel/plugin-transform-object-assign@npm:^7.0.0":
   version: 7.18.6
   resolution: "@babel/plugin-transform-object-assign@npm:7.18.6"
   dependencies:
@@ -2128,7 +2128,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-typescript@npm:^7.18.6, @babel/plugin-transform-typescript@npm:^7.5.0":
+"@babel/plugin-transform-typescript@npm:^7.5.0":
   version: 7.20.7
   resolution: "@babel/plugin-transform-typescript@npm:7.20.7"
   dependencies:
@@ -2304,19 +2304,6 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: 413c507f853b95c71ecb64f29ea7b0786464a237c54977b03a4410dd837b03bfa55df81d0e337f9792d9abc61f4bf3d616f857d00a36ff4ede79407c143ac865
-  languageName: node
-  linkType: hard
-
-"@babel/preset-typescript@npm:^7.16.7":
-  version: 7.18.6
-  resolution: "@babel/preset-typescript@npm:7.18.6"
-  dependencies:
-    "@babel/helper-plugin-utils": ^7.18.6
-    "@babel/helper-validator-option": ^7.18.6
-    "@babel/plugin-transform-typescript": ^7.18.6
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-  checksum: 7fe0da5103eb72d3cf39cf3e138a794c8cdd19c0b38e3e101507eef519c46a87a0d6d0e8bc9e28a13ea2364001ebe7430b9d75758aab4c3c3a8db9a487b9dc7c
   languageName: node
   linkType: hard
 
@@ -15572,8 +15559,6 @@ __metadata:
     react-modal: 3.4.4
     react-native: 0.65.1
     react-native-gesture-handler: 1.10.3
-    react-native-reanimated: ^2.2.0
-    react-native-status-bar-height: ^2.4.0
     react-native-web: ^0.11.7
     react-spring: ^8.0.27
     react-test-renderer: ^16.3.1
@@ -19868,32 +19853,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^2.2.0":
-  version: 2.14.0
-  resolution: "react-native-reanimated@npm:2.14.0"
-  dependencies:
-    "@babel/plugin-transform-object-assign": ^7.16.7
-    "@babel/preset-typescript": ^7.16.7
-    convert-source-map: ^1.7.0
-    invariant: ^2.2.4
-    lodash.isequal: ^4.5.0
-    setimmediate: ^1.0.5
-    string-hash-64: ^1.0.3
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-    react: "*"
-    react-native: "*"
-  checksum: 8b1ae7d4116f2c3acb907c48085e573d24ac9d92b84a61154bae1589176e512c3145e97b4ed6f4a7c81c00dffb91c6be2f09b2cd06f274f9d320d671f38fd6cc
-  languageName: node
-  linkType: hard
-
-"react-native-status-bar-height@npm:^2.4.0":
-  version: 2.6.0
-  resolution: "react-native-status-bar-height@npm:2.6.0"
-  checksum: ee9e95ce30d346e113ecb68d6db66a5a2653263b03605428558e11956840bcc7498282c450a8bcc1c03ced9372ede6c4a5c51ab133c563492acedf328e8feecb
-  languageName: node
-  linkType: hard
-
 "react-native-web@npm:^0.11.7":
   version: 0.11.7
   resolution: "react-native-web@npm:0.11.7"
@@ -22008,13 +21967,6 @@ __metadata:
   version: 1.0.1
   resolution: "stream-shift@npm:1.0.1"
   checksum: 59b82b44b29ec3699b5519a49b3cedcc6db58c72fb40c04e005525dfdcab1c75c4e0c180b923c380f204bed78211b9bad8faecc7b93dece4d004c3f6ec75737b
-  languageName: node
-  linkType: hard
-
-"string-hash-64@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "string-hash-64@npm:1.0.3"
-  checksum: 79de8431b4fa3e85a2429cd52a34f7948221ff167b7a094e05d6bcfd0173474b232e0c9845c96f74b0d7b6b0c8bbe2c3532a4cacb21635293ef0cf3cc8e77f06
   languageName: node
   linkType: hard
 

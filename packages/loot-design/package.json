@@ -44,8 +44,6 @@
     "react-modal": "3.4.4",
     "react-native": "0.65.1",
     "react-native-gesture-handler": "1.10.3",
-    "react-native-reanimated": "^2.2.0",
-    "react-native-status-bar-height": "^2.4.0",
     "react-spring": "^8.0.27",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
@@ -58,11 +56,8 @@
   "homepage": "./",
   "manifest": "manifest.json",
   "pathAliases": {
-    "react-native-gesture-handler": "./src/guide/mocks/react-native-gesture-handler.js",
-    "react-native-reanimated": "./src/guide/mocks/react-native-reanimated.js",
     "react-art": "../../node_modules/node-noop",
-    "react-native": "./node_modules/react-native-web",
-    "react-native-status-bar-height": "./src/guide/mocks/react-native-status-bar-height.js"
+    "react-native": "./node_modules/react-native-web"
   },
   "browserslist": [
     "electron 3.0"
