@@ -7,6 +7,7 @@ import { createBrowserHistory } from 'history';
 import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
+import tokens from 'loot-design/src/tokens';
 
 import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
@@ -25,14 +26,18 @@ function Version() {
   return (
     <Text
       style={{
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
         color: colors.n7,
-        margin: 15,
-        marginRight: 17,
         ':hover': { color: colors.n2 },
-        zIndex: 5001
+        margin: 15,
+        marginLeft: 17,
+        [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          marginLeft: 15,
+          marginRight: 17,
+          zIndex: 5001
+        }
       }}
       href={'https://actualbudget.com/blog/' + window.Actual.ACTUAL_VERSION}
     >
@@ -210,7 +215,13 @@ class ManagementApp extends React.Component {
                   >
                     <Switch>
                       <Route exact path="/config-server" component={null} />
-                      <Route exact path="/" component={LoggedInUser} />
+                      <Route
+                        exact
+                        path="/"
+                        render={() => (
+                          <LoggedInUser style={{ padding: '4px 7px' }} />
+                        )}
+                      />
                     </Switch>
                   </View>
                 </>

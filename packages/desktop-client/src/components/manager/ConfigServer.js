@@ -161,9 +161,10 @@ export default function ConfigServer() {
 
         <View
           style={{
-            marginTop: 15,
             flexDirection: 'row',
-            justifyContent: 'center'
+            flexFlow: 'row wrap',
+            justifyContent: 'center',
+            marginTop: 15
           }}
         >
           {currentUrl ? (
@@ -174,12 +175,20 @@ export default function ConfigServer() {
             <>
               <Button
                 bare
-                style={{ color: colors.n4, marginRight: 15 }}
+                style={{
+                  color: colors.n4,
+                  margin: 5,
+                  marginRight: 15
+                }}
                 onClick={onSameDomain}
               >
                 Use {window.location.origin.replace(/https?:\/\//, '')}
               </Button>
-              <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
+              <Button
+                bare
+                style={{ color: colors.n4, margin: 5 }}
+                onClick={onSkip}
+              >
                 Don't use a server
               </Button>
 
