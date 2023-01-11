@@ -157,13 +157,13 @@ export function Value({
             </Text>
           );
         })}
-        {
-          // prettier-ignore
-          numHidden > 0 && (
+        {numHidden > 0 && (
           <Text style={{ color: colors.p4 }}>
             &nbsp;&nbsp;
-            {  // eslint-disable-next-line
-            }<a
+            {
+              // eslint-disable-next-line
+            }
+            <a
               href="#"
               onClick={onExpand}
               {...css({
@@ -176,8 +176,7 @@ export function Value({
             </a>
             {!inline && <br />}
           </Text>
-        )
-        }
+        )}
         ]
       </Text>
     );
