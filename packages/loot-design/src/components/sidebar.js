@@ -357,7 +357,7 @@ function Accounts({
           name="For budget"
           to={budgetedAccountPath}
           query={getOnBudgetBalance()}
-          style={{ fontWeight, marginTop: 15 }}
+          style={{ fontWeight, marginTop: 13 }}
         />
       )}
 
@@ -382,7 +382,7 @@ function Accounts({
           name="Off budget"
           to={offBudgetAccountPath}
           query={getOffBudgetBalance()}
-          style={{ fontWeight, marginTop: 15 }}
+          style={{ fontWeight, marginTop: 13 }}
         />
       )}
 
