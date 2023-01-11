@@ -335,7 +335,7 @@ function Accounts({
   return (
     <View>
       <Account
-        name={closedAccounts.length > 0 ? 'All open accounts' : 'All accounts'}
+        name="All accounts"
         to={allAccountsPath}
         query={getAllAccountBalance()}
         style={{ fontWeight, marginTop: 15 }}
