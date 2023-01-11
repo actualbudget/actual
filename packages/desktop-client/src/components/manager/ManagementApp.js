@@ -209,13 +209,19 @@ class ManagementApp extends React.Component {
                       position: 'absolute',
                       top: 0,
                       right: 0,
-                      padding: '15px 17px',
+                      padding: '6px 10px',
                       zIndex: 4000
                     }}
                   >
                     <Switch>
                       <Route exact path="/config-server" component={null} />
-                      <Route exact path="/" component={LoggedInUser} />
+                      <Route
+                        exact
+                        path="/"
+                        render={() => (
+                          <LoggedInUser style={{ padding: '4px 7px' }} />
+                        )}
+                      />
                     </Switch>
                   </View>
                 </>
