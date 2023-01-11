@@ -146,7 +146,6 @@ export class MathOperations extends React.Component {
               data-testid="negative"
             >
               <Subtract
-                /* react-native-svg does not properly rerender, so force it to */
                 key={isNegative ? 'yes' : 'no'}
                 width={10}
                 height={10}

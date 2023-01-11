@@ -42,6 +42,10 @@
     "react-dnd": "^10.0.2",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.4.4",
+    "react-native": "0.65.1",
+    "react-native-gesture-handler": "1.10.3",
+    "react-native-reanimated": "^2.2.0",
+    "react-native-status-bar-height": "^2.4.0",
     "react-spring": "^8.0.27",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
