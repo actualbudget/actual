@@ -112,18 +112,18 @@ function Item({
   );
 }
 
-function SecondaryItem({ Icon, title, style, to, exact, onClick }) {
+function SecondaryItem({ Icon, title, style, to, exact, onClick, indent = 0 }) {
   const hoverStyle = {
     backgroundColor: colors.n2
   };
   const activeStyle = {
     borderLeft: '4px solid ' + colors.p8,
-    paddingLeft: 14 - 4,
+    paddingLeft: 14 - 4 + indent,
     color: colors.p8
   };
   const linkStyle = [
     accountNameStyle,
-    { color: colors.n6, paddingLeft: 14 },
+    { color: colors.n6, paddingLeft: 14 + indent },
     { ':hover': hoverStyle }
   ];
 
@@ -549,12 +549,18 @@ function Tools() {
       setOpen={setOpen}
       isActive={isActive}
     >
-      <SecondaryItem title="Payees" Icon={StoreFrontIcon} to="/payees" />
-      <SecondaryItem title="Rules" Icon={TuningIcon} to="/rules" />
+      <SecondaryItem
+        title="Payees"
+        Icon={StoreFrontIcon}
+        to="/payees"
+        indent={15}
+      />
+      <SecondaryItem title="Rules" Icon={TuningIcon} to="/rules" indent={15} />
       <SecondaryItem
         title="Repair splits"
         Icon={LoadBalancer}
         to="/tools/fix-splits"
+        indent={15}
       />
     </ToggleableSection>
   );
