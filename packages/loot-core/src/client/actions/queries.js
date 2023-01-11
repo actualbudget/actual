@@ -30,12 +30,6 @@ export function applyBudgetAction(month, type, args) {
       case 'overwrite-template':
         await send('budget/overwrite-template', { month });
         break;
-      case 'apply-template':
-        await send('budget/apply-template', { month });
-        break;
-      case 'overwrite-template':
-        await send('budget/overwrite-template', { month });
-        break;
       case 'hold':
         await send('budget/hold-for-next-month', {
           month,
