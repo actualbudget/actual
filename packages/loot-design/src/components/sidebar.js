@@ -146,7 +146,7 @@ function SecondaryItem({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        height: 20
+        height: 16
       }}
     >
       {Icon && <Icon width={12} height={12} style={{ color: 'inherit' }} />}
