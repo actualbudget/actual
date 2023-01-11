@@ -13,6 +13,7 @@ import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 import { styles, colors } from '../style';
 import Add from '../svg/v1/Add';
 import CheveronDown from '../svg/v1/CheveronDown';
+import CheveronRight from '../svg/v1/CheveronRight';
 import CheveronUp from '../svg/v1/CheveronUp';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
@@ -21,7 +22,6 @@ import Reports from '../svg/v1/Reports';
 import StoreFrontIcon from '../svg/v1/StoreFront';
 import TuningIcon from '../svg/v1/Tuning';
 import Wallet from '../svg/v1/Wallet';
-import Wrench from '../svg/v1/Wrench';
 import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
 import CalendarIcon from '../svg/v2/Calendar';
 import {
@@ -490,30 +490,15 @@ const MenuButton = withRouter(function MenuButton({ history }) {
   );
 });
 
-function ToggleableSection({
-  title,
-  Icon,
-  children,
-  isOpen,
-  setOpen,
-  isActive
-}) {
-  let ExpandOrCollapseIcon = isOpen ? CheveronUp : CheveronDown;
+function ToggleableSection({ title, children, isOpen, setOpen, isActive }) {
   let onToggle = useCallback(() => setOpen(open => !open), []);
   return (
     <View style={{ flexShrink: 0 }}>
       <Item
         title={title}
-        Icon={Icon}
+        Icon={isOpen ? CheveronDown : CheveronRight}
         onClick={onToggle}
         style={{ marginBottom: isOpen ? 8 : 0 }}
-        button={
-          <ExpandOrCollapseIcon
-            width={12}
-            height={12}
-            style={{ color: colors.n6 }}
-          />
-        }
         forceActive={!isOpen && isActive}
       />
       {isOpen && children}
@@ -537,8 +522,7 @@ function Tools() {
 
   return (
     <ToggleableSection
-      title="Tools"
-      Icon={Wrench}
+      title="More"
       isOpen={isOpen}
       setOpen={setOpen}
       isActive={isActive}
