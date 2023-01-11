@@ -1,13 +1,3 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Stack,
-  Button,
-  ButtonWithLoading
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-
 export function RepairSyncNotification() {}
 
 // TODO: sync button shouldn't show error status if it's a local file

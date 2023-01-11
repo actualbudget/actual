@@ -1,27 +1,16 @@
-import PropTypes from 'prop-types';
 import React, { useEffect, useReducer, useState } from 'react';
-import * as d from 'date-fns';
 import { useSelector } from 'react-redux';
-import { parse as parseDate } from 'date-fns';
+
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import DateSelect from './DateSelect';
-import {
-  Button,
-  Select,
-  Input,
-  Tooltip,
-  View,
-  Text,
-  Stack
-} from '../components/common';
-import { colors, styles } from 'loot-design/src/style';
 import { useTooltip } from 'loot-design/src/components/tooltips';
-import SubtractIcon from 'loot-design/src/svg/Subtract';
+import { colors } from 'loot-design/src/style';
 import AddIcon from 'loot-design/src/svg/Add';
+import SubtractIcon from 'loot-design/src/svg/Subtract';
 
-const DATE_FORMAT = 'yyyy-MM-dd';
+import { Button, Select, Input, Tooltip, View, Text, Stack } from './common';
+import DateSelect from './DateSelect';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -105,7 +94,6 @@ function reducer(state, action) {
         }
       };
     case 'update-recurrence':
-      const index = state.config.patterns.indexOf(action.recurrence);
       return {
         ...state,
         config: {

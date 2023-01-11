@@ -1,8 +1,23 @@
 import LRU from 'lru-cache';
-import * as sqlite from '../../platform/server/sqlite';
+
 import fs from '../../platform/server/fs';
-import { sendMessages, batchMessages } from '../sync';
-import { schema, schemaConfig } from '../aql/schema';
+import * as sqlite from '../../platform/server/sqlite';
+import { groupById } from '../../shared/util';
+import {
+  schema,
+  schemaConfig,
+  convertForInsert,
+  convertForUpdate,
+  convertFromSelect
+} from '../aql';
+import {
+  makeClock,
+  setClock,
+  serializeClock,
+  deserializeClock,
+  makeClientId,
+  Timestamp
+} from '../crdt';
 import {
   accountModel,
   categoryModel,
@@ -10,19 +25,7 @@ import {
   payeeModel,
   payeeRuleModel
 } from '../models';
-import { groupById } from '../../shared/util';
-import Timestamp, {
-  makeClock,
-  setClock,
-  serializeClock,
-  deserializeClock,
-  makeClientId
-} from '../timestamp';
-import {
-  convertForInsert,
-  convertForUpdate,
-  convertFromSelect
-} from '../aql/schema-helpers';
+import { sendMessages, batchMessages } from '../sync';
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';
@@ -607,38 +610,6 @@ export async function getTransaction(id) {
     [id]
   );
   return rows[0];
-}
-
-function _addFragmentForAccount(accountId, addWhere, options = {}) {
-  let { showClosed = false, showOffbudget = true } = options;
-
-  let fragment = addWhere ? ' WHERE (' : ' AND ';
-  let params = [];
-
-  if (accountId) {
-    if (accountId === 'offbudget') {
-      fragment += 'a.closed = 0 AND a.offbudget = 1 ';
-    } else if (accountId === 'budgeted') {
-      fragment += 'a.closed = 0 AND a.offbudget = 0 ';
-    } else if (accountId === 'uncategorized') {
-      fragment += `
-          t.category IS NULL AND a.offbudget = 0 AND isParent = 0 AND (
-            ta.offbudget IS NULL OR ta.offbudget = 1
-          )
-        `;
-    } else {
-      fragment += 'a.id = ? ';
-      params.push(accountId);
-    }
-  } else {
-    fragment += showClosed ? '1' : 'a.closed = 0';
-
-    if (!showOffbudget) {
-      fragment += ' AND a.offbudget = 0';
-    }
-  }
-
-  return { fragment, params };
 }
 
 export async function getTransactionsByDate(

@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { colors } from '../../style';
 import { View, Text, Block, Modal, Button } from '../common';
-import { Row, Cell, DeleteCell } from '../table';
-import { styles, colors } from '../../style';
+import { Row, Cell } from '../table';
 
 class BackupTable extends React.Component {
   state = { hoveredBackup: null };
@@ -14,7 +15,6 @@ class BackupTable extends React.Component {
     const { backups, onSelect } = this.props;
     const { hoveredBackup } = this.state;
 
-    const borderColor = '#f0f0f0';
     return (
       <View
         style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}

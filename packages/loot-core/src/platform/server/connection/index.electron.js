@@ -1,5 +1,6 @@
-const { runHandler, isMutating } = require('../../../server/mutators');
 const ipc = require('node-ipc');
+
+const { runHandler, isMutating } = require('../../../server/mutators');
 const { captureException } = require('../../exceptions');
 
 function coerceError(error) {

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import InformationSolid from 'loot-design/src/svg/v1/InformationOutline';
+
 import { styles, colors } from 'loot-design/src/style';
+import InformationSolid from 'loot-design/src/svg/v1/InformationOutline';
 
 export function Information({ style, children }) {
   return (
@@ -9,7 +10,7 @@ export function Information({ style, children }) {
       style={[
         {
           fontSize: 13,
-          boxShadow: styles.shadow,
+          ...styles.shadow,
           borderRadius: 4,
           backgroundColor: colors.b10,
           padding: 10,

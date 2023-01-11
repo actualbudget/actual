@@ -1,5 +1,5 @@
-const undo = require('../undo');
 const uuid = require('../../uuid');
+const undo = require('../undo');
 let replyHandlers = new Map();
 let listeners = new Map();
 let messageQueue = [];
@@ -117,7 +117,10 @@ module.exports.listen = function listen(name, cb) {
   return () => {
     let arr = listeners.get(name);
     if (arr) {
-      listeners.set(name, arr.filter(cb_ => cb_ !== cb));
+      listeners.set(
+        name,
+        arr.filter(cb_ => cb_ !== cb)
+      );
     }
   };
 };

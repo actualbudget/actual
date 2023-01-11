@@ -1,5 +1,4 @@
 const uuid = require('../../uuid');
-const { getChangedValues } = require('../../../shared/util');
 
 // List of recently used states. We don't use a true MRU structure
 // because our needs are simple and we also do some custom reordering.

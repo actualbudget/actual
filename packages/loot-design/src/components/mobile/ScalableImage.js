@@ -64,7 +64,7 @@ export default function ScalableImage(props) {
           width: scalableWidth,
           height: scalableHeight,
           flex: -1,
-          overflow: 'hidden',
+          overflow: 'hidden'
         },
         props.style
       ]}

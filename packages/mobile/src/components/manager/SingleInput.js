@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TextInput } from 'react-native';
 import Stack from 'loot-design/src/components/Stack';
 import { ButtonWithLoading } from 'loot-design/src/components/mobile/common';
-import { colors, mobileStyles as styles } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 
 export default function SingleInput({
   title,

@@ -1,21 +1,27 @@
 import './polyfills';
-import { differenceInDays } from 'date-fns';
-import asyncStorage from '../platform/server/asyncStorage';
+import injectAPI from '@actual-app/api/injected';
+
+import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
-import * as prefs from './prefs';
+import asyncStorage from '../platform/server/asyncStorage';
 import fs from '../platform/server/fs';
-import * as sqlite from '../platform/server/sqlite';
 import logger from '../platform/server/log';
-import Platform from './platform';
-import * as db from './db';
-import * as sheet from './sheet';
-import { withUndo, clearUndo, undo, redo } from './undo';
-import { updateVersion } from './update';
-import { Condition, Action, rankRules } from './accounts/rules';
-import * as rules from './accounts/transaction-rules';
-import * as mappings from './db/mappings';
-import { batchUpdateTransactions } from './accounts/transactions';
+import * as sqlite from '../platform/server/sqlite';
+import { fromPlaidAccountType } from '../shared/accounts';
+import * as monthUtils from '../shared/months';
+import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
+import { amountToInteger, stringToInteger } from '../shared/util';
+import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
+import * as link from './accounts/link';
+import { parseFile } from './accounts/parse-file';
+import { getStartingBalancePayee } from './accounts/payees';
+import { Condition, Action, rankRules } from './accounts/rules';
+import * as bankSync from './accounts/sync';
+import * as rules from './accounts/transaction-rules';
+import { batchUpdateTransactions } from './accounts/transactions';
+import installAPI from './api';
+import { runQuery as aqlQuery } from './aql';
 import {
   getAvailableBackups,
   loadBackup,
@@ -23,16 +29,32 @@ import {
   startBackupService,
   stopBackupService
 } from './backups';
-import { amountToInteger, stringToInteger } from '../shared/util';
-import * as monthUtils from '../shared/months';
-import { fromPlaidAccountType } from '../shared/accounts';
+import budgetApp from './budget/app';
 import * as budget from './budget/base';
-import * as bankSync from './accounts/sync';
-import * as link from './accounts/link';
-import { uniqueFileName, idFromFileName } from './util/budget-name';
+import * as cloudStorage from './cloud-storage';
+import {
+  getClock,
+  setClock,
+  makeClock,
+  makeClientId,
+  serializeClock,
+  deserializeClock,
+  Timestamp,
+  merkle
+} from './crdt';
+import * as db from './db';
+import * as mappings from './db/mappings';
+import encryption from './encryption';
+import { APIError, TransactionError, PostError, RuleError } from './errors';
+import app from './main-app';
 import { mutator, runHandler } from './mutators';
-import * as timestamp from './timestamp';
-import * as merkle from './merkle';
+import notesApp from './notes/app';
+import Platform from './platform';
+import { get, post } from './post';
+import * as prefs from './prefs';
+import schedulesApp from './schedules/app';
+import { getServer, setServer } from './server-config';
+import * as sheet from './sheet';
 import {
   initialFullSync,
   fullSync,
@@ -45,33 +67,16 @@ import {
   repairSync
 } from './sync';
 import * as syncMigrations from './sync/migrate';
-import { getStartingBalancePayee } from './accounts/payees';
-import { parseFile } from './accounts/parse-file';
-import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
-import { getServer, setServer } from './server-config';
-import installAPI from './api';
-import injectAPI from '@actual-app/api/injected';
-import * as cloudStorage from './cloud-storage';
-import encryption from './encryption';
-import * as tracking from './tracking/events';
-import { get, post } from './post';
-import { APIError, TransactionError, PostError, RuleError } from './errors';
-import { createTestBudget } from '../mocks/budget';
-import { runQuery as aqlQuery } from './aql/schema/run-query';
-import { Query } from '../shared/query';
-import q from '../shared/query';
-import app from './main-app';
-
-// Apps
-import schedulesApp from './schedules/app';
-import budgetApp from './budget/app';
-import notesApp from './notes/app';
 import toolsApp from './tools/app';
+import { withUndo, clearUndo, undo, redo } from './undo';
+import { updateVersion } from './update';
+import { uniqueFileName, idFromFileName } from './util/budget-name';
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');
-const uuid = require('../platform/uuid');
+
 const connection = require('../platform/server/connection');
+const uuid = require('../platform/uuid');
 const { resolveName, unresolveName } = require('./spreadsheet/util');
 const SyncPb = require('./sync/proto/sync_pb');
 
@@ -416,7 +421,10 @@ handlers['category-group-delete'] = mutator(async function({ id, transferId }) {
 
     return batchMessages(async () => {
       if (transferId) {
-        await budget.doTransfer(groupCategories.map(c => c.id), transferId);
+        await budget.doTransfer(
+          groupCategories.map(c => c.id),
+          transferId
+        );
       }
       await db.deleteCategoryGroup({ id }, transferId);
     });
@@ -460,7 +468,6 @@ handlers['payees-get'] = async function() {
 
 handlers['payees-get-rule-counts'] = async function() {
   let payeeCounts = {};
-  let allRules = rules.getRules();
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
     if (payeeCounts[id] == null) {
@@ -761,11 +768,15 @@ handlers['accounts-get'] = async function() {
 };
 
 handlers['account-properties'] = async function({ id }) {
-  const { balance } = await db.first(
+  const {
+    balance
+  } = await db.first(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
     [id]
   );
-  const { count } = await db.first(
+  const {
+    count
+  } = await db.first(
     'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
     [id]
   );
@@ -904,10 +915,9 @@ handlers['account-close'] = mutator(async function({
         true
       );
 
-      let { id: payeeId } = await db.first(
-        'SELECT id FROM payees WHERE transfer_acct = ?',
-        [id]
-      );
+      let {
+        id: payeeId
+      } = await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [id]);
 
       await batchMessages(() => {
         // TODO: what this should really do is send a special message that
@@ -941,10 +951,11 @@ handlers['account-close'] = mutator(async function({
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0) {
-        let { id: payeeId } = await db.first(
-          'SELECT id FROM payees WHERE transfer_acct = ?',
-          [transferAccountId]
-        );
+        let {
+          id: payeeId
+        } = await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [
+          transferAccountId
+        ]);
 
         await handlers['transaction-add']({
           id: uuid.v4Sync(),
@@ -1051,8 +1062,6 @@ handlers['accounts-sync'] = async function({ id }) {
   let matchedTransactions = [];
   let updatedAccounts = [];
 
-  let { groupId } = prefs.getPrefs();
-
   for (var i = 0; i < accounts.length; i++) {
     const acct = accounts[i];
     if (acct.bankId) {
@@ -1084,9 +1093,7 @@ handlers['accounts-sync'] = async function({ id }) {
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account "${
-              acct.name
-            }" is not linked properly. Please link it again`
+            message: `Account "${acct.name}" is not linked properly. Please link it again`
           });
         } else {
           errors.push({
@@ -1136,10 +1143,9 @@ handlers['transactions-import'] = mutator(function({
 });
 
 handlers['account-unlink'] = mutator(async function({ id }) {
-  let { bank: bankId } = await db.first(
-    'SELECT bank FROM accounts WHERE id = ?',
-    [id]
-  );
+  let {
+    bank: bankId
+  } = await db.first('SELECT bank FROM accounts WHERE id = ?', [id]);
 
   if (!bankId) {
     return 'ok';
@@ -1154,10 +1160,11 @@ handlers['account-unlink'] = mutator(async function({ id }) {
     balance_limit: null
   });
 
-  let { count } = await db.first(
-    'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
-    [bankId]
-  );
+  let {
+    count
+  } = await db.first('SELECT COUNT(*) as count FROM accounts WHERE bank = ?', [
+    bankId
+  ]);
 
   if (count === 0) {
     // No more accounts are associated with this bank. We can remove
@@ -1201,10 +1208,6 @@ handlers['save-global-prefs'] = async function(prefs) {
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if ('trackUsage' in prefs) {
-    tracking.toggle(prefs.trackUsage);
-    await asyncStorage.setItem('track-usage', '' + prefs.trackUsage);
-  }
   if ('autoUpdate' in prefs) {
     await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
     process.send({ type: 'shouldAutoUpdate', flag: prefs.autoUpdate });
@@ -1225,7 +1228,6 @@ handlers['load-global-prefs'] = async function() {
     [, floatingSidebar],
     [, seenTutorial],
     [, maxMonths],
-    [, trackUsage],
     [, autoUpdate],
     [, documentDir],
     [, encryptKey]
@@ -1233,7 +1235,6 @@ handlers['load-global-prefs'] = async function() {
     'floating-sidebar',
     'seen-tutorial',
     'max-months',
-    'track-usage',
     'auto-update',
     'document-dir',
     'encrypt-key'
@@ -1242,8 +1243,6 @@ handlers['load-global-prefs'] = async function() {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
     seenTutorial: seenTutorial === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
-    // Default to true
-    trackUsage: trackUsage == null || trackUsage === 'true' ? true : false,
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id
@@ -1288,8 +1287,6 @@ handlers['key-make'] = async function({ password }) {
   if (!prefs.getPrefs()) {
     throw new Error('user-set-key must be called with file loaded');
   }
-
-  let cloudFileId = prefs.getPrefs().cloudFileId;
 
   let salt = encryption.randomBytes(32).toString('base64');
   let id = uuid.v4Sync();
@@ -1459,9 +1456,8 @@ handlers['subscribe-get-user'] = async function() {
 
 handlers['subscribe-change-password'] = async function({ password }) {
   let userToken = await asyncStorage.getItem('user-token');
-  let res;
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/change-password', {
+    await post(getServer().SIGNUP_SERVER + '/change-password', {
       token: userToken,
       password
     });
@@ -1547,35 +1543,37 @@ handlers['get-version'] = async function() {
 
 handlers['get-budgets'] = async function() {
   const paths = await fs.listDir(fs.getDocumentDir());
-  const budgets = (await Promise.all(
-    paths.map(async name => {
-      const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
-      if (await fs.exists(prefsPath)) {
-        let prefs;
-        try {
-          prefs = JSON.parse(await fs.readFile(prefsPath));
-        } catch (e) {
-          console.log('Error parsing metadata:', e.stack);
-          return;
+  const budgets = (
+    await Promise.all(
+      paths.map(async name => {
+        const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
+        if (await fs.exists(prefsPath)) {
+          let prefs;
+          try {
+            prefs = JSON.parse(await fs.readFile(prefsPath));
+          } catch (e) {
+            console.log('Error parsing metadata:', e.stack);
+            return;
+          }
+
+          // We treat the directory name as the canonical id so that if
+          // the user moves it around/renames/etc, nothing breaks. The
+          // id is stored in prefs just for convenience (and the prefs
+          // will always update to the latest given id)
+          if (name !== DEMO_BUDGET_ID) {
+            return {
+              id: name,
+              cloudFileId: prefs.cloudFileId,
+              groupId: prefs.groupId,
+              name: prefs.budgetName || '(no name)'
+            };
+          }
         }
 
-        // We treat the directory name as the canonical id so that if
-        // the user moves it around/renames/etc, nothing breaks. The
-        // id is stored in prefs just for convenience (and the prefs
-        // will always update to the latest given id)
-        if (name !== DEMO_BUDGET_ID) {
-          return {
-            id: name,
-            cloudFileId: prefs.cloudFileId,
-            groupId: prefs.groupId,
-            name: prefs.budgetName || '(no name)'
-          };
-        }
-      }
-
-      return null;
-    })
-  )).filter(x => x);
+        return null;
+      })
+    )
+  ).filter(x => x);
 
   return budgets;
 };
@@ -1673,26 +1671,6 @@ handlers['load-budget'] = async function({ id }) {
   }
 
   let res = await loadBudget(id, VERSION, { showUpdate: true });
-
-  async function trackSizes() {
-    let getFileSize = async name => {
-      let dbFile = fs.join(fs.getBudgetDir(id), name);
-      try {
-        return await fs.size(dbFile);
-      } catch (err) {
-        return null;
-      }
-    };
-
-    try {
-      let dbSize = await getFileSize('db.sqlite');
-      let cacheSize = await getFileSize('cache.sqlite');
-      tracking.track('app:load-budget', { size: dbSize, cacheSize });
-    } catch (err) {
-      console.warn(err);
-    }
-  }
-  trackSizes();
 
   return res;
 };
@@ -1938,7 +1916,7 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     prefs.savePrefs({ userId });
   }
 
-  let { budgetVersion, budgetId } = prefs.getPrefs();
+  let { budgetVersion } = prefs.getPrefs();
 
   try {
     await updateVersion(budgetVersion, showUpdate);
@@ -1969,10 +1947,10 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     //
     // TODO: The client id should be stored elsewhere. It shouldn't
     // work this way, but it's fine for now.
-    timestamp.getClock().timestamp.setNode(timestamp.makeClientId());
+    getClock().timestamp.setNode(makeClientId());
     await db.runQuery(
       'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-      [timestamp.serializeClock(timestamp.getClock())]
+      [serializeClock(getClock())]
     );
 
     await prefs.savePrefs({ resetClock: false });
@@ -2091,10 +2069,6 @@ handlers['app-focused'] = async function() {
   }
 };
 
-handlers['track'] = async function({ name, props }) {
-  tracking.track(name, props);
-};
-
 handlers = installAPI(handlers);
 
 injectAPI.send = (name, args) => runHandler(app.handlers[name], args);
@@ -2147,7 +2121,6 @@ export async function initApp(version, isDev, socketName) {
 
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
-  await tracking.init();
   await setupDocumentsDir();
 
   let keysStr = await asyncStorage.getItem('encrypt-keys');
@@ -2167,12 +2140,12 @@ export async function initApp(version, isDev, socketName) {
     }
   }
 
-  if (isDev) {
-    const lastBudget = await asyncStorage.getItem('lastBudget');
-    // if (lastBudget) {
-    //   loadBudget(lastBudget, VERSION);
-    // }
-  }
+  // if (isDev) {
+  // const lastBudget = await asyncStorage.getItem('lastBudget');
+  // if (lastBudget) {
+  //   loadBudget(lastBudget, VERSION);
+  // }
+  // }
 
   const url = await asyncStorage.getItem('server-url');
   if (url) {
@@ -2180,10 +2153,6 @@ export async function initApp(version, isDev, socketName) {
   }
 
   connection.init(socketName, app.handlers);
-
-  tracking.track('app:init', {
-    platform: Platform.isMobile ? 'mobile' : Platform.isWeb ? 'web' : 'desktop'
-  });
 
   if (!isDev && !Platform.isMobile && !Platform.isWeb) {
     let autoUpdate = await asyncStorage.getItem('auto-update');
@@ -2254,7 +2223,15 @@ export const lib = {
 
   // Expose CRDT mechanisms so server can use them
   merkle,
-  timestamp,
+  timestamp: {
+    getClock,
+    setClock,
+    makeClock,
+    makeClientId,
+    serializeClock,
+    deserializeClock,
+    Timestamp
+  },
   SyncProtoBuf: SyncPb
 };
 

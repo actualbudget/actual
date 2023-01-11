@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Block, Modal, Button, Link } from '../common';
+
 import { styles, colors } from '../../style';
+import { View, Block, Modal, Button } from '../common';
 
 function getErrorMessage(error) {
   switch (error) {
@@ -24,10 +25,8 @@ function getErrorMessage(error) {
 //   this.setState({ error: err.message, importing: false });
 // });
 
-function Import({ modalProps, actions, availableImports }) {
-  const [error, setError] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const [type, setType] = useState(null);
+function Import({ modalProps, actions }) {
+  const [error] = useState(false);
 
   function onSelectType(type) {
     switch (type) {

@@ -1,6 +1,7 @@
 import Platform from './platform';
-const { PostError, HTTPError } = require('./errors');
+
 const { fetch } = require('../platform/server/fetch');
+const { PostError } = require('./errors');
 
 function throwIfNot200(res, text) {
   if (res.status !== 200) {
@@ -20,8 +21,6 @@ function throwIfNot200(res, text) {
 export async function post(url, data) {
   let text;
   let res;
-
-  let s = new Error().stack;
 
   try {
     res = await fetch(url, {

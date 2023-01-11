@@ -1,5 +1,4 @@
 import * as nodes from './nodes';
-const uuid = require('../../../platform/uuid');
 
 let _uid = 0;
 function resetUid() {
@@ -228,7 +227,6 @@ export default function generate(table, where, groupby, select, deps) {
   let dependencies = [];
   let joins = [];
 
-  let uid = 1;
   allPaths.forEach(path => {
     let currentTable = { name: table, id: table };
     for (var i = 0; i < path.length - 1; i++) {
@@ -239,9 +237,7 @@ export default function generate(table, where, groupby, select, deps) {
         joins.push(meta.sql(lookup.tableId));
       } else {
         joins.push(
-          `LEFT JOIN ${meta.table} ${lookup.tableId} ON ${
-            lookup.tableId
-          }.id = ${currentTable.id}.${lookup.field}`
+          `LEFT JOIN ${meta.table} ${lookup.tableId} ON ${lookup.tableId}.id = ${currentTable.id}.${lookup.field}`
         );
       }
 

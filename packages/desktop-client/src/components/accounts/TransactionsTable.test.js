@@ -1,15 +1,27 @@
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+
 import { render, fireEvent } from '@testing-library/react';
-import { debugDOM } from 'loot-core/src/mocks/util';
 import { format as formatDate, parse as parseDate } from 'date-fns';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-import { initServer } from 'loot-core/src/platform/client/fetch';
+import { act } from 'react-dom/test-utils';
+
 import {
   generateTransaction,
   generateAccount,
-  generateCategoryGroups
+  generateCategoryGroups,
+  TestProvider
 } from 'loot-core/src/mocks';
+import { initServer } from 'loot-core/src/platform/client/fetch';
+import {
+  addSplitTransaction,
+  realizeTempTransactions,
+  splitTransaction,
+  updateTransaction
+} from 'loot-core/src/shared';
+import { integerToCurrency } from 'loot-core/src/shared/util';
+import { SelectedProviderWithItems } from 'loot-design/src/components';
+
+import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
+
 const uuid = require('loot-core/src/platform/uuid');
 
 const accounts = [generateAccount('Bank of America')];
@@ -234,28 +246,6 @@ function prettyDate(date) {
 
 function keyWithShift(key) {
   return { ...key, shiftKey: true };
-}
-
-function verifySortOrder(transactions) {
-  transactions.forEach((transaction, idx) => {
-    let lastTransaction = idx === 0 ? null : transactions[idx];
-
-    if (transaction.sort_order == null) {
-      throw new Error("Transaction doesn't have sort_order");
-    }
-
-    if (
-      lastTransaction &&
-      transaction.sort_order > lastTransaction.sort_order
-    ) {
-      throw new Error(
-        'Transaction sort order must always be decreasing. Found increasing sort order:\n  ' +
-          JSON.stringify(lastTransaction) +
-          '\n  ' +
-          JSON.stringify(transaction)
-      );
-    }
-  });
 }
 
 function renderTransactions(extraProps) {
@@ -587,7 +577,8 @@ describe('Transactions', () => {
   test('dropdown selects an item when clicking', async () => {
     const { container, getTransactions } = renderTransactions();
 
-    let input = editField(container, 'category', 2);
+    editField(container, 'category', 2);
+
     let tooltip = container.querySelector('[data-testid="tooltip"]');
 
     // Make sure none of the items are highlighted
@@ -693,7 +684,7 @@ describe('Transactions', () => {
   });
 
   test('dropdown escape resets the value ', () => {
-    const { container, getTransactions } = renderTransactions();
+    const { container } = renderTransactions();
 
     let input = editField(container, 'category', 2);
     let oldValue = input.value;

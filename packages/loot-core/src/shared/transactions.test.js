@@ -5,7 +5,7 @@ import {
   addSplitTransaction,
   makeChild
 } from './transactions';
-import * as db from '../server/db';
+
 const uuid = require('../platform/uuid');
 
 // const data = {

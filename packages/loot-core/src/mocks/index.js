@@ -1,13 +1,14 @@
 import * as monthUtils from '../shared/months';
+
 const uuid = require('../platform/uuid');
 
 export function generateAccount(name, isConnected, type, offbudget) {
   return {
     id: uuid.v4Sync(),
     name,
-    balance_current: isConnected ? (Math.random() * 100000) | 0 : null,
-    bank: isConnected ? (Math.random() * 10000) | 0 : null,
-    bankId: isConnected ? (Math.random() * 10000) | 0 : null,
+    balance_current: isConnected ? Math.floor(Math.random() * 100000) : null,
+    bank: isConnected ? Math.floor(Math.random() * 10000) : null,
+    bankId: isConnected ? Math.floor(Math.random() * 10000) : null,
     bankName: isConnected ? 'boa' : null,
     type: type || 'checking',
     offbudget: offbudget ? 1 : 0,
@@ -53,7 +54,7 @@ function _generateTransaction(data) {
   const id = data.id || uuid.v4Sync();
   return {
     id: id,
-    amount: data.amount || (Math.random() * 10000 - 7000) | 0,
+    amount: data.amount || Math.floor(Math.random() * 10000 - 7000),
     payee: data.payee || (Math.random() < 0.9 ? 'payed-to' : 'guy'),
     notes:
       Math.random() < 0.1 ? 'A really long note that should overflow' : 'Notes',

@@ -104,7 +104,6 @@ function makePath(state, path) {
 
 function resolvePath(state, path) {
   let paths = path.split('.');
-  let tableId;
 
   paths = paths.reduce(
     (acc, name) => {
@@ -456,7 +455,7 @@ function compileLiteral(value) {
   } else if (typeof value === 'boolean') {
     return typed(value ? 1 : 0, 'boolean', { literal: true });
   } else if (typeof value === 'number') {
-    return typed(value, (value | 0) === value ? 'integer' : 'float', {
+    return typed(value, Number.isInteger(value) ? 'integer' : 'float', {
       literal: true
     });
   } else if (Array.isArray(value)) {
@@ -503,24 +502,6 @@ const compileExpr = saveStack('expr', (state, expr) => {
 
   return compileLiteral(expr);
 });
-
-function assertType(name, data, acceptedTypes) {
-  if (acceptedTypes.indexOf(data.type) === -1) {
-    throw new CompileError(
-      `Invalid type of expression to ${name}, must be one of ${JSON.stringify(
-        acceptedTypes
-      )}: ${JSON.stringify(data.value)}`
-    );
-  }
-}
-
-function assertArgLength(name, args, len) {
-  if (args.length !== len) {
-    throw new CompileError(
-      `Invalid number of args to ${name}: expected ${len} but received ${args.length}`
-    )();
-  }
-}
 
 const compileFunction = saveStack('function', (state, func) => {
   let [name] = Object.keys(func);
@@ -586,17 +567,17 @@ const compileFunction = saveStack('function', (state, func) => {
     // integer/float functions
     case '$neg': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['float']);
+      valArray(state, args, ['float']);
       return typed(`(-${val(state, args[0])})`, args[0].type);
     }
     case '$abs': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['float']);
+      valArray(state, args, ['float']);
       return typed(`ABS(${val(state, args[0])})`, args[0].type);
     }
     case '$idiv': {
       validateArgLength(args, 2);
-      let [arg1, arg2] = valArray(state, args, ['integer', 'integer']);
+      valArray(state, args, ['integer', 'integer']);
       return typed(
         `(${val(state, args[0])} / ${val(state, args[1])})`,
         args[0].type
@@ -965,7 +946,7 @@ export function isAggregateQuery(queryState) {
 
   return queryState.selectExpressions.find(expr => {
     if (typeof expr !== 'string') {
-      let [name, value] = Object.entries(expr)[0];
+      let [_, value] = Object.entries(expr)[0];
       return isAggregateFunction(value);
     }
     return false;
@@ -1015,8 +996,7 @@ export function compileQuery(queryState, schema, schemaConfig = {}) {
     groupExpressions,
     orderExpressions,
     limit,
-    offset,
-    calculation
+    offset
   } = customizeQuery(queryState);
 
   let select = '';
@@ -1024,7 +1004,6 @@ export function compileQuery(queryState, schema, schemaConfig = {}) {
   let joins = '';
   let groupBy = '';
   let orderBy = '';
-  let dependences = [];
   let state = {
     schema,
     implicitTableName: tableName,

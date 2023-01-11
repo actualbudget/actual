@@ -1,8 +1,10 @@
+/* eslint no-unused-vars: 0 */
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
-import React from "react";
-import { css } from "glamor";
+import React from 'react';
 
-function RightArrow2({ width, height, style, color = "black", ...props }) {
+import { css } from 'glamor';
+
+function RightArrow2({ width, height, style, color = 'black', ...props }) {
   return (
     <svg
       width={width}

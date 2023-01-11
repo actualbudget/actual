@@ -217,11 +217,7 @@ function updateMenu(isBudgetOpen) {
   const fileItems = file.submenu.items;
   fileItems
     .filter(
-      item =>
-        item.label === 'Start Tutorial' ||
-        item.label === 'Manage Payees...' ||
-        item.label === 'Manage Rules...' ||
-        item.label === 'Load Backup...'
+      item => item.label === 'Start Tutorial' || item.label === 'Load Backup...'
     )
 
     .map(item => (item.enabled = isBudgetOpen));
@@ -362,8 +358,8 @@ ipcMain.on('screenshot', () => {
     let width = 1100;
 
     // This is for the main screenshot inside the frame
-    clientWin.setSize(width, (width * (427 / 623)) | 0);
-    // clientWin.setSize(width, (width * (495 / 700)) | 0);
+    clientWin.setSize(width, Math.floor(width * (427 / 623)));
+    // clientWin.setSize(width, Math.floor(width * (495 / 700)));
   }
 });
 

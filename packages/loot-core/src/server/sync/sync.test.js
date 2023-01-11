@@ -1,15 +1,11 @@
-import * as prefs from '../prefs';
+import { getClock, Timestamp } from '../crdt';
 import * as db from '../db';
+import * as prefs from '../prefs';
 import * as sheet from '../sheet';
-import Timestamp, { getClock } from '../timestamp';
-import { resolveName } from '../spreadsheet/util';
-import {
-  setSyncingMode,
-  sendMessages,
-  applyMessages,
-  fullSync
-} from './index';
 import * as encoder from './encoder';
+
+import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
+
 const mockSyncServer = require('../tests/mockSyncServer');
 
 beforeEach(() => {
@@ -186,13 +182,13 @@ describe('Sync projections', () => {
       barId = await db.insertCategory({ name: 'bar', cat_group: 'group1' });
     });
 
-    const spreadsheet = await sheet.loadSpreadsheet(db);
+    await sheet.loadSpreadsheet(db);
     registerBudgetMonths(['2017-01', '2017-02']);
     expectCellNotToExist('budget201701', 'sum-amount-' + fooId);
     expectCellNotToExist('budget201701', 'sum-amount-' + barId);
     expectCellNotToExist('budget201701', 'group-sum-amount-' + barId);
 
-    const { messages } = await fullSync();
+    await fullSync();
 
     // Make sure the budget cells have been created
     expectCellToExist('budget201701', 'sum-amount-' + fooId);
@@ -206,26 +202,26 @@ describe('Sync projections', () => {
   test('creating and deleting categories in same sync', async () => {
     // It should work when the client creates a category and deletes
     // it in the same sync (should do nothing)
-    let groupId, fooId;
+    let fooId;
     await asSecondClient(async () => {
       await sheet.loadSpreadsheet(db);
-      groupId = await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+      await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
       fooId = await db.insertCategory({ name: 'foo', cat_group: 'group1' });
       await db.deleteCategory({ id: fooId });
     });
 
-    const spreadsheet = await sheet.loadSpreadsheet(db);
+    await sheet.loadSpreadsheet(db);
     registerBudgetMonths(['2017-01', '2017-02']);
     expectCellNotToExist('budget201701', 'sum-amount-' + fooId);
-    const { messages } = await fullSync();
+    await fullSync();
     expectCellNotToExist('budget201701', 'sum-amount-' + fooId);
   });
 
   test('synced categories should have budgets deleted', async () => {
-    let groupId, fooId;
+    let fooId;
     await asSecondClient(async () => {
       await sheet.loadSpreadsheet(db);
-      groupId = await db.insertCategoryGroup({
+      await db.insertCategoryGroup({
         id: 'group1',
         name: 'group1'
       });
@@ -233,7 +229,7 @@ describe('Sync projections', () => {
       await db.deleteCategory({ id: fooId });
     });
 
-    const spreadsheet = await sheet.loadSpreadsheet(db);
+    await sheet.loadSpreadsheet(db);
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
@@ -264,7 +260,7 @@ describe('Sync projections', () => {
       await db.deleteCategoryGroup({ id: groupId });
     });
 
-    const spreadsheet = await sheet.loadSpreadsheet(db);
+    await sheet.loadSpreadsheet(db);
     registerBudgetMonths(['2017-01', '2017-02']);
     expectCellNotToExist('budget201701', 'group-sum-amount-' + groupId);
     await fullSync();
@@ -287,7 +283,7 @@ describe('Sync projections', () => {
       await db.deleteCategoryGroup({ id: groupId });
     });
 
-    const spreadsheet = await sheet.loadSpreadsheet(db);
+    await sheet.loadSpreadsheet(db);
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
@@ -315,16 +311,16 @@ describe('Sync projections', () => {
   });
 
   test('categories should update the budget when moved', async () => {
-    let groupId, group2Id, fooId;
+    let groupId, fooId;
     await asSecondClient(async () => {
       await sheet.loadSpreadsheet(db);
       groupId = await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
-      group2Id = await db.insertCategoryGroup({ id: 'group2', name: 'group2' });
+      await db.insertCategoryGroup({ id: 'group2', name: 'group2' });
       fooId = await db.insertCategory({ name: 'foo', cat_group: 'group1' });
       await db.moveCategory(fooId, 'group2');
     });
 
-    const spreadsheet = await sheet.loadSpreadsheet(db);
+    await sheet.loadSpreadsheet(db);
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes

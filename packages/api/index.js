@@ -1,8 +1,7 @@
 let bundle = require('./app/bundle.api.js');
+let injected = require('./injected');
 let methods = require('./methods');
 let utils = require('./utils');
-
-let injected = require('./injected');
 let actualApp;
 
 async function init({ budgetId, config } = {}) {

@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Animated } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 

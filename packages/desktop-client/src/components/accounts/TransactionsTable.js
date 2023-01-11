@@ -5,58 +5,42 @@ import React, {
   useCallback,
   useLayoutEffect,
   useEffect,
-  useImperativeHandle,
   useContext,
   useReducer
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+
 import {
   format as formatDate,
-  parse as parseDate,
   parseISO,
   isValid as isDateValid
 } from 'date-fns';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import {
-  View,
-  Text,
-  Stack,
-  Tooltip,
-  Button
-} from 'loot-design/src/components/common';
-import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import DateSelect from 'loot-design/src/components/DateSelect';
-import RightArrow2 from 'loot-design/src/svg/RightArrow2';
-import LeftArrow2 from 'loot-design/src/svg/LeftArrow2';
-import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
-import DeleteIcon from 'loot-design/src/svg/Delete';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
-import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
-import {
-  integerToCurrency,
-  amountToInteger,
-  applyChanges,
-  debugMemoFailure,
-  titleFirst
-} from 'loot-core/src/shared/util';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+
+import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById
 } from 'loot-core/src/client/reducers/queries';
-import { currentDay, dayFromDate, addDays } from 'loot-core/src/shared/months';
+import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { currentDay } from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   splitTransaction,
   updateTransaction,
   deleteTransaction,
-  addSplitTransaction,
-  ungroupTransaction
+  addSplitTransaction
 } from 'loot-core/src/shared/transactions';
-import { styles, colors } from 'loot-design/src/style';
+import {
+  integerToCurrency,
+  amountToInteger,
+  titleFirst
+} from 'loot-core/src/shared/util';
+import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
+import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
+import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
+import DateSelect from 'loot-design/src/components/DateSelect';
+import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import {
   Cell,
   Field,
@@ -67,20 +51,22 @@ import {
   CustomCell,
   CellButton,
   useTableNavigator,
-  Table,
-  ROW_HEIGHT
+  Table
 } from 'loot-design/src/components/table';
+import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
 import {
   useSelectedDispatch,
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
-import { keys } from 'loot-design/src/util/keys';
-import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
-import { getStatusProps } from '../schedules/StatusBadge';
-import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import { styles, colors } from 'loot-design/src/style';
+import LeftArrow2 from 'loot-design/src/svg/LeftArrow2';
+import RightArrow2 from 'loot-design/src/svg/RightArrow2';
+import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
+import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
+import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
+import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
 
-let TABLE_BACKGROUND_COLOR = colors.n11;
+import { getStatusProps } from '../schedules/StatusBadge';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -144,7 +130,6 @@ function deserializeTransaction(transaction, originalTransaction, dateFormat) {
 
 function getParentTransaction(transactions, fromIndex) {
   let trans = transactions[fromIndex];
-  let parent;
   let parentIdx = fromIndex;
   while (parentIdx >= 0) {
     if (transactions[parentIdx].id === trans.parent_id) {
@@ -348,7 +333,7 @@ function StatusCell({
         ? colors.y5
         : selected
         ? colors.b7
-        : colors.n6
+        : colors.n7
   };
 
   function onSelect() {
@@ -374,7 +359,8 @@ function StatusCell({
             ':focus': {
               border: '1px solid ' + props.color,
               boxShadow: `0 1px 2px ${props.color}`
-            }
+            },
+            cursor: isClearedField ? 'pointer' : 'default'
           },
 
           isChild && { visibility: 'hidden' }
@@ -490,7 +476,6 @@ function CellWithScheduleIcon({ scheduleId, children }) {
     marginRight: 3,
     color: 'inherit'
   };
-  let Icon = recurring ? ArrowsSynchronize : CalendarIcon;
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch' }}>
@@ -1525,7 +1510,6 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   let [_, forceRerender] = useState({});
 
   let selectedItems = useSelectedItems();
-  let dispatchSelected = useSelectedDispatch();
 
   useLayoutEffect(() => {
     latestState.current = {
@@ -1649,7 +1633,8 @@ export let TransactionTable = React.forwardRef((props, ref) => {
             onAddSplit(lastTransaction.id);
           } else if (
             (newNavigator.focusedField === 'debit' ||
-              newNavigator.focusedField === 'credit') &&
+              newNavigator.focusedField === 'credit' ||
+              newNavigator.focusedField === 'cleared') &&
             newNavigator.editingId === lastTransaction.id &&
             (!isSplit || !lastTransaction.error)
           ) {

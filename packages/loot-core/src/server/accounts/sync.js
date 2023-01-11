@@ -1,31 +1,22 @@
-import title from './title';
-import * as db from '../db';
-import {
-  mergeObjects,
-  hasFieldsChanged,
-  toRelaxedNumber,
-  amountToInteger,
-  integerToAmount
-} from '../../shared/util';
+import * as monthUtils from '../../shared/months';
 import {
   makeChild as makeChildTransaction,
   recalculateSplit
 } from '../../shared/transactions';
-import * as monthUtils from '../../shared/months';
-import { transactionModel } from '../api-models';
+import { hasFieldsChanged, amountToInteger } from '../../shared/util';
+import * as db from '../db';
+import { runMutator } from '../mutators';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
-import { runMutator } from '../mutators';
 import { getStartingBalancePayee } from './payees';
-import * as transfer from './transfer';
-import { TransactionError } from '../errors';
+import title from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 
 const dateFns = require('date-fns');
-const { post } = require('../post');
-const levenshtein = require('damerau-levenshtein');
+
 const uuid = require('../../platform/uuid');
+const { post } = require('../post');
 
 // Plaid article about API options:
 // https://support.plaid.com/customer/en/portal/articles/2612155-transactions-returned-per-request
@@ -339,7 +330,7 @@ export async function reconcileTransactions(acctId, transactions) {
   });
 
   // Finally, generate & commit the changes
-  for (let { payee_name, trans, subtransactions, match } of transactionsStep3) {
+  for (let { trans, subtransactions, match } of transactionsStep3) {
     if (match) {
       // TODO: change the above sql query to use aql
       let existing = {
@@ -403,7 +394,7 @@ export async function addTransactions(
     { rawPayeeName: true }
   );
 
-  for (let { payee_name, trans, subtransactions } of normalized) {
+  for (let { trans, subtransactions } of normalized) {
     // Run the rules
     trans = runRules(trans);
 

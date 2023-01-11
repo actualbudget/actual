@@ -1,11 +1,10 @@
-import React, { useMemo, useEffect, useState, useContext } from 'react';
-import * as monthUtils from 'loot-core/src/shared/months';
+import React, { useEffect, useState, useContext } from 'react';
+
+import q, { liveQuery } from 'loot-core/src/client/query-helpers';
 import {
   getStatus,
   getHasTransactionsQuery
 } from 'loot-core/src/shared/schedules';
-import q, { liveQuery, runQuery } from 'loot-core/src/client/query-helpers';
-import { send } from 'loot-core/src/platform/client/fetch';
 
 function loadStatuses(schedules, onData) {
   return liveQuery(getHasTransactionsQuery(schedules), onData, {

@@ -1,5 +1,5 @@
-import { RuleError } from '../errors';
 import * as dateFns from 'date-fns';
+
 import {
   monthFromDate,
   yearFromDate,
@@ -7,21 +7,13 @@ import {
   isAfter,
   addDays,
   subDays,
-  format as formatDate,
   parseDate
 } from '../../shared/months';
-import { fastSetMerge } from '../../shared/util';
 import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
+import { fastSetMerge } from '../../shared/util';
+import { RuleError } from '../errors';
 import { Schedule as RSchedule } from '../util/rschedule';
-
-function safeNumber(n) {
-  return isNaN(n) ? null : n;
-}
-
-function safeParseInt(n) {
-  return safeNumber(parseInt(n));
-}
 
 function assert(test, type, msg) {
   if (!test) {
@@ -703,7 +695,6 @@ export function migrateIds(rule, mappings) {
 
 // This finds all the rules that reference the `id`
 export function iterateIds(rules, fieldName, func) {
-  let counts = {};
   let i;
 
   ruleiter: for (i = 0; i < rules.length; i++) {

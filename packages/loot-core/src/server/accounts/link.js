@@ -1,11 +1,12 @@
 import asyncStorage from '../../platform/server/asyncStorage';
-import * as db from '../db';
-import { getServer  } from '../server-config';
-import * as bankSync from './sync';
 import { fromPlaidAccountType } from '../../shared/accounts';
 import { amountToInteger } from '../../shared/util';
-import { post } from '../post';
+import * as db from '../db';
 import { runMutator } from '../mutators';
+import { post } from '../post';
+import { getServer } from '../server-config';
+import * as bankSync from './sync';
+
 const uuid = require('../../platform/uuid');
 
 export async function handoffPublicToken(institution, publicToken) {

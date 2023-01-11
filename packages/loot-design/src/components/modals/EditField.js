@@ -1,16 +1,19 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
+
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
+
 import * as actions from 'loot-core/src/client/actions';
-import { amountToInteger } from 'loot-core/src/shared/util';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
-import { View, Modal, Stack, Button, Input } from '../common';
-import DateSelect from '../DateSelect';
-import CategoryAutocomplete from '../CategorySelect';
-import AccountAutocomplete from '../AccountAutocomplete';
-import PayeeAutocomplete from '../PayeeAutocomplete';
-import { SectionLabel } from '../forms';
+import { amountToInteger } from 'loot-core/src/shared/util';
+
 import { colors } from '../../style';
+import AccountAutocomplete from '../AccountAutocomplete';
+import CategoryAutocomplete from '../CategorySelect';
+import { View, Modal, Input } from '../common';
+import DateSelect from '../DateSelect';
+import { SectionLabel } from '../forms';
+import PayeeAutocomplete from '../PayeeAutocomplete';
 // import { colors } from '../../style';
 
 function EditField({
@@ -24,8 +27,6 @@ function EditField({
   dateFormat,
   createPayee
 }) {
-  let submitRef = useRef();
-
   function onSelect(value) {
     // Process the value if needed
     if (name === 'amount') {

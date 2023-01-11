@@ -1,7 +1,9 @@
 import React from 'react';
+
 import memoizeOne from 'memoize-one';
-import useResizeObserver from './useResizeObserver';
+
 import { View } from './common';
+import useResizeObserver from './useResizeObserver';
 
 const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 
@@ -76,7 +78,7 @@ export class FixedSizeList extends React.PureComponent {
   }
 
   componentDidMount() {
-    const { direction, initialScrollOffset, layout } = this.props;
+    const { initialScrollOffset } = this.props;
 
     if (typeof initialScrollOffset === 'number' && this._outerRef != null) {
       let outerRef = this._outerRef;
@@ -91,7 +93,6 @@ export class FixedSizeList extends React.PureComponent {
     if (this.anchored && this.props.indexForKey && this._outerRef != null) {
       let index = this.props.indexForKey(this.anchored.key);
       let baseOffset = this.getOffsetForIndexAndAlignment(index, 'start');
-      let outerRef = this._outerRef;
       return baseOffset + this.anchored.offset;
     }
     return null;
@@ -145,8 +146,7 @@ export class FixedSizeList extends React.PureComponent {
       outerTagName,
       style,
       useIsScrolling,
-      width,
-      version
+      width
     } = this.props;
     const { isScrolling } = this.state;
 
@@ -471,7 +471,7 @@ export class FixedSizeList extends React.PureComponent {
   }
 
   _onScrollVertical = event => {
-    let { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
+    let { scrollTop } = event.currentTarget;
 
     this.setState(prevState => {
       if (prevState.scrollOffset === scrollTop) {

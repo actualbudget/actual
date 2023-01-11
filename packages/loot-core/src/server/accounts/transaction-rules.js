@@ -1,4 +1,23 @@
+import {
+  currentDay,
+  addDays,
+  subDays,
+  parseDate,
+  dayFromDate
+} from '../../shared/months';
+import {
+  FIELD_TYPES,
+  sortNumbers,
+  getApproxNumberThreshold
+} from '../../shared/rules';
+import { partitionByField, fastSetMerge } from '../../shared/util';
+import { schemaConfig } from '../aql';
 import * as db from '../db';
+import { getMappings } from '../db/mappings';
+import { RuleError } from '../errors';
+import { requiredFields, toDateRepr } from '../models';
+import { setSyncingMode, batchMessages } from '../sync';
+import { addSyncListener } from '../sync/index';
 import {
   Condition,
   Action,
@@ -8,22 +27,6 @@ import {
   migrateIds,
   iterateIds
 } from './rules';
-import { getMappings } from '../db/mappings';
-import { addDays, subDays, parseDate, dayFromDate } from '../../shared/months';
-import { addSyncListener } from '../sync/index';
-import { RuleError } from '../errors';
-import {
-  FIELD_TYPES,
-  sortNumbers,
-  getApproxNumberThreshold
-} from '../../shared/rules';
-import q from '../../shared/query';
-import { requiredFields, toDateRepr } from '../models';
-import { currentDay } from '../../shared/months';
-import { partitionByField, fastSetMerge } from '../../shared/util';
-import { setSyncingMode, batchMessages } from '../sync';
-import { schemaConfig } from '../aql/schema';
-const uuid = require('../../platform/uuid');
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead
@@ -254,7 +257,6 @@ function onApplySync(oldValues, newValues) {
 // Runner
 export function runRules(trans) {
   let finalTrans = { ...trans };
-  let allChanges = {};
 
   let rules = rankRules(
     fastSetMerge(
@@ -343,8 +345,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
               .toArray()
               .map(d => dayFromDate(d.date));
 
-            let compare = d => ({ $eq: d });
-
             return {
               $or: dates.map(d => {
                 if (op === 'isapprox') {
@@ -359,8 +359,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
               })
             };
           } else {
-            let { date } = value;
-
             if (op === 'isapprox') {
               let fullDate = parseDate(value.date);
               let high = addDays(fullDate, 2);

@@ -1,6 +1,5 @@
-import parse from './parser';
+import getSqlFields from './get-sql-fields';
 import * as nodes from './nodes';
-import generateSql from './sqlgen';
 import {
   MOV,
   CALL,
@@ -14,7 +13,8 @@ import {
   JUMPT,
   LABEL
 } from './ops';
-import getSqlFields from './get-sql-fields';
+import parse from './parser';
+import generateSql from './sqlgen';
 
 class Compiler {
   constructor() {
@@ -101,7 +101,7 @@ class Compiler {
       .concat(getSqlFields(node.table, node.groupby))
       .concat(...node.select.map(s => getSqlFields(node.table, s.expr)));
 
-    const { sql, where, dependencies } = generateSql(
+    const { sql, where } = generateSql(
       node.table,
       node.where,
       node.groupby,

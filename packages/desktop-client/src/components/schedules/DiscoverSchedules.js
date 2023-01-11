@@ -1,15 +1,12 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { useLocation, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import Platform from 'loot-core/src/client/platform';
-import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import {
   View,
-  Text,
   Stack,
-  Button,
   ButtonWithLoading,
   P
 } from 'loot-design/src/components/common';
@@ -18,23 +15,23 @@ import {
   TableHeader,
   Row,
   Field,
-  Cell,
   SelectCell
 } from 'loot-design/src/components/table';
-import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import { colors, styles } from 'loot-design/src/style';
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
-import { Page } from '../Page';
-import { ScheduleAmountCell } from './SchedulesTable';
+import { colors } from 'loot-design/src/style';
+
+import { Page, usePageType } from '../Page';
 import DisplayId from '../util/DisplayId';
+import { ScheduleAmountCell } from './SchedulesTable';
 
 let ROW_HEIGHT = 43;
 
 function DiscoverSchedulesTable({ schedules, loading }) {
+  let pageType = usePageType();
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
 
@@ -102,9 +99,12 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
-        backgroundColor="transparent"
         version="v2"
-        style={{ flex: 1, backgroundColor: 'transparent' }}
+        backgroundColor={pageType.type === 'modal' ? 'transparent' : undefined}
+        style={{
+          flex: 1,
+          backgroundColor: pageType.type === 'modal' ? 'transparent' : undefined
+        }}
         items={schedules}
         loading={loading}
         isSelected={id => selectedItems.has(id)}
@@ -116,7 +116,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
 }
 
 export default function DiscoverSchedules() {
-  let location = useLocation();
+  let pageType = usePageType();
   let history = useHistory();
   let [schedules, setSchedules] = useState();
   let [creating, setCreating] = useState(false);
@@ -131,7 +131,6 @@ export default function DiscoverSchedules() {
   }, []);
 
   async function onCreate() {
-    let items = selectedInst.items;
     let selected = schedules.filter(s => selectedInst.items.has(s.id));
     setCreating(true);
 
@@ -176,11 +175,7 @@ export default function DiscoverSchedules() {
         on all transactions for a schedule to be the same payee.
       </P>
       <P>
-        You can always do this later
-        {Platform.isBrowser
-          ? ' from the "Find schedules" item in the sidebar menu'
-          : ' from the "Tools > Find schedules" menu item'}
-        .
+        You can always do this later from “More Tools” &rarr; “Find Schedules.”
       </P>
 
       <SelectedProvider instance={selectedInst}>
@@ -194,9 +189,11 @@ export default function DiscoverSchedules() {
         direction="row"
         align="center"
         justify="flex-end"
-        style={{ paddingTop: 20 }}
+        style={{
+          paddingTop: 20,
+          paddingBottom: pageType.type === 'modal' ? 0 : 20
+        }}
       >
-        <Button onClick={() => history.goBack()}>Do nothing</Button>
         <ButtonWithLoading
           primary
           loading={creating}

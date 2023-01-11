@@ -1,6 +1,5 @@
 import {
   parseDateString,
-  parseRecurDate,
   rankRules,
   iterateIds,
   Condition,
@@ -73,19 +72,19 @@ describe('Condition', () => {
 
   test('date restricts operators for each type', () => {
     expect(() => {
-      let cond = new Condition('isapprox', 'date', '2020-08', null, fieldTypes);
+      new Condition('isapprox', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
     expect(() => {
-      let cond = new Condition('gt', 'date', '2020-08', null, fieldTypes);
+      new Condition('gt', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
     expect(() => {
-      let cond = new Condition('gte', 'date', '2020-08', null, fieldTypes);
+      new Condition('gte', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
     expect(() => {
-      let cond = new Condition('lt', 'date', '2020-08', null, fieldTypes);
+      new Condition('lt', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
     expect(() => {
-      let cond = new Condition('lte', 'date', '2020-08', null, fieldTypes);
+      new Condition('lte', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
   });
 
@@ -225,23 +224,17 @@ describe('Condition', () => {
   });
 
   test('number validates value', () => {
-    let cond = new Condition('isapprox', 'amount', 34, null, fieldTypes);
+    new Condition('isapprox', 'amount', 34, null, fieldTypes);
 
     expect(() => {
-      cond = new Condition('isapprox', 'amount', 'hello', null, fieldTypes);
+      new Condition('isapprox', 'amount', 'hello', null, fieldTypes);
     }).toThrow('Value must be a number or between amount');
 
     expect(() => {
-      cond = new Condition(
-        'is',
-        'amount',
-        { num1: 0, num2: 10 },
-        null,
-        fieldTypes
-      );
+      new Condition('is', 'amount', { num1: 0, num2: 10 }, null, fieldTypes);
     }).toThrow('Invalid number value for');
 
-    cond = new Condition(
+    new Condition(
       'isbetween',
       'amount',
       { num1: 0, num2: 10 },
@@ -250,16 +243,10 @@ describe('Condition', () => {
     );
 
     expect(() => {
-      cond = new Condition('isbetween', 'amount', 34.22, null, fieldTypes);
+      new Condition('isbetween', 'amount', 34.22, null, fieldTypes);
     }).toThrow('Invalid between value for');
     expect(() => {
-      cond = new Condition(
-        'isbetween',
-        'amount',
-        { num1: 0 },
-        null,
-        fieldTypes
-      );
+      new Condition('isbetween', 'amount', { num1: 0 }, null, fieldTypes);
     }).toThrow('Value must be a number or between amount');
   });
 
@@ -327,11 +314,11 @@ describe('Action', () => {
     expect(item.name).toBe('James');
 
     expect(() => {
-      let action = new Action('set', 'foo', 'James', null, new Map());
+      new Action('set', 'foo', 'James', null, new Map());
     }).toThrow(/invalid field/i);
 
     expect(() => {
-      let action = new Action('noop', 'name', 'James', null, fieldTypes);
+      new Action('noop', 'name', 'James', null, fieldTypes);
     }).toThrow(/invalid action operation/i);
   });
 });
