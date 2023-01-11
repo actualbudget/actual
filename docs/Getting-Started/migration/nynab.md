@@ -2,6 +2,26 @@
 title: 'Migrating from nYNAB'
 ---
 
+## Method 1: 3rd Party nYnab exporter
+
+While we don't maintain this tool, you can also use https://json-exporter-for-ynab.netlify.app to export your budget from nYNAB into jSON.
+
+### Import json file
+
+* Open Actual
+* Select the drop down menu and **Close File**
+* Select **Import file**
+
+![](/img/actual-config-10.png)
+
+* Select **nYnab**
+
+![](/img/actual-config-12.png)
+
+* Choose the exported json file
+
+## Method 2: Beta export and import tools
+
 This is a beta importer for YNAB5 (nYNAB) data.
 
 To run:
@@ -19,7 +39,7 @@ npx @actual-app/import-ynab5 <path-to-ynab5-file>
     Maybe something else I'm missing
     Remove ynab transfer payees not used by actual -->
 
-## How to use the importer
+### How to use the importer
 
 To use the importer, you will first need to export your budget, then have the correct software installed, and then run the importer.
 
@@ -27,7 +47,7 @@ To use the importer, you will first need to export your budget, then have the co
 Currently this does not work under WSL in Windows. Run this directly in Windows.
 :::
 
-## Exporting from YNAB
+### Exporting from YNAB
 
 In order to export your budget from YNAB, you will need an API key.
 
@@ -42,7 +62,6 @@ If you haven't already got an API key, you'll need to:
 The API key is only shown once, so make sure you copy it down somewhere! More information on how to access the YNAB API can be found at https://api.youneedabudget.com/
 :::
 
-While we don't support this tool, you can also use https://json-exporter-for-ynab.netlify.app to export your budget from nYNAB into jSON.
 
 Now open a terminal window / command prompt, and enter:
 
@@ -56,7 +75,7 @@ This will get the list of all the budgets you have. You'll need to find the id o
 curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1/budgets/<BUDGET ID> --output budget.json
 ```
 
-## Getting the right tools installed
+### Getting the right tools installed
 
 For the importer to run, you will need nodejs installed. Details on doing that are too long for this README, but you can find details at https://nodejs.org/.
 
@@ -70,7 +89,7 @@ npm i
 
 This will install the required libraries for the importer.
 
-### Running the importer
+#### Running the importer
 
 * Have Actual running locally on your computer
 * Open a terminal / command prompt in the unzipped directory from the previous steps
@@ -93,6 +112,6 @@ Once the import is complete, it may not show all the up-to-date information corr
 * Click Advanced -> Reset budget cache
 * Restart Actual
 
-## Contributions
+### Contributions
 
 If you would like to contribute, check out the documentation for the API, specifically about importers. All of the available methods can be found here.
