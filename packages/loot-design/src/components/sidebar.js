@@ -661,6 +661,15 @@ export function Sidebar({
 
         <Tools />
 
+        <View
+          style={{
+            height: 1,
+            backgroundColor: colors.n3,
+            marginTop: 15,
+            flexShrink: 0
+          }}
+        />
+
         <Accounts
           accounts={accounts}
           failedAccounts={failedAccounts}
