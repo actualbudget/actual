@@ -535,7 +535,7 @@ function Tools() {
       />
       <SecondaryItem title="Rules" Icon={TuningIcon} to="/rules" indent={15} />
       <SecondaryItem
-        title="Repair splits"
+        title="Repair split transactions"
         Icon={LoadBalancer}
         to="/tools/fix-splits"
         indent={15}
