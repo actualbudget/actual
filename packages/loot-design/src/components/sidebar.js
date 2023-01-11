@@ -334,16 +334,12 @@ function Accounts({
 
   return (
     <View>
-      {accounts.length > 0 && (
-        <Account
-          name={
-            closedAccounts.length > 0 ? 'All open accounts' : 'All accounts'
-          }
-          to={allAccountsPath}
-          query={getAllAccountBalance()}
-          style={{ fontWeight }}
-        />
-      )}
+      <Account
+        name={closedAccounts.length > 0 ? 'All open accounts' : 'All accounts'}
+        to={allAccountsPath}
+        query={getAllAccountBalance()}
+        style={{ fontWeight, marginTop: 15 }}
+      />
 
       {budgetedAccounts.length > 0 && (
         <Account
@@ -564,52 +560,6 @@ function Tools() {
   );
 }
 
-export function AccountsSection({
-  accounts,
-  failedAccounts,
-  updatedAccounts,
-  getBalanceQuery,
-  getAllAccountBalance,
-  getOnBudgetBalance,
-  getOffBudgetBalance,
-  showClosedAccounts,
-  onAddAccount,
-  onToggleClosedAccounts,
-  onReorder
-}) {
-  let [isOpen, setOpen] = useState(true);
-  let location = useLocation();
-
-  return (
-    <ToggleableSection
-      title="Accounts"
-      Icon={PiggyBank}
-      isOpen={isOpen}
-      setOpen={setOpen}
-      style={{ marginTop: 15 }}
-      isActive={location.pathname.startsWith('/accounts')}
-    >
-      <Accounts
-        accounts={accounts}
-        failedAccounts={failedAccounts}
-        updatedAccounts={updatedAccounts}
-        getAccountPath={account => `/accounts/${account.id}`}
-        allAccountsPath="/accounts"
-        budgetedAccountPath="/accounts/budgeted"
-        offBudgetAccountPath="/accounts/offbudget"
-        getBalanceQuery={getBalanceQuery}
-        getAllAccountBalance={getAllAccountBalance}
-        getOnBudgetBalance={getOnBudgetBalance}
-        getOffBudgetBalance={getOffBudgetBalance}
-        showClosedAccounts={showClosedAccounts}
-        onAddAccount={onAddAccount}
-        onToggleClosedAccounts={onToggleClosedAccounts}
-        onReorder={onReorder}
-      />
-    </ToggleableSection>
-  );
-}
-
 export function Sidebar({
   style,
   budgetName,
@@ -713,10 +663,14 @@ export function Sidebar({
 
         <Tools />
 
-        <AccountsSection
+        <Accounts
           accounts={accounts}
           failedAccounts={failedAccounts}
           updatedAccounts={updatedAccounts}
+          getAccountPath={account => `/accounts/${account.id}`}
+          allAccountsPath="/accounts"
+          budgetedAccountPath="/accounts/budgeted"
+          offBudgetAccountPath="/accounts/offbudget"
           getBalanceQuery={getBalanceQuery}
           getAllAccountBalance={getAllAccountBalance}
           getOnBudgetBalance={getOnBudgetBalance}
