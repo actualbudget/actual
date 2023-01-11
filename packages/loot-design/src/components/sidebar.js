@@ -39,6 +39,8 @@ import CellValue from './spreadsheet/CellValue';
 
 export const SIDEBAR_WIDTH = 240;
 
+const fontWeight = 550;
+
 function Item({
   children,
   Icon,
@@ -119,11 +121,12 @@ function SecondaryItem({ Icon, title, style, to, exact, onClick, indent = 0 }) {
   const activeStyle = {
     borderLeft: '4px solid ' + colors.p8,
     paddingLeft: 14 - 4 + indent,
-    color: colors.p8
+    color: colors.p8,
+    fontWeight
   };
   const linkStyle = [
     accountNameStyle,
-    { color: colors.n6, paddingLeft: 14 + indent },
+    { color: colors.n9, paddingLeft: 14 + indent, fontWeight },
     { ':hover': hoverStyle }
   ];
 
@@ -233,7 +236,7 @@ function Account({
               // has unread transactions. The system does mark is read and
               // unbolds it, but it still "flashes" bold so this just
               // ignores it if it's active
-              fontWeight: 'normal',
+              fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
                 backgroundColor: colors.p8,
                 transform: 'translateX(-4.5px)'
@@ -342,7 +345,7 @@ function Accounts({
           }
           to={allAccountsPath}
           query={getAllAccountBalance()}
-          style={{ color: colors.n6 }}
+          style={{ fontWeight }}
         />
       )}
 
@@ -351,7 +354,7 @@ function Accounts({
           name="For budget"
           to={budgetedAccountPath}
           query={getOnBudgetBalance()}
-          style={{ marginTop: 15, color: colors.n6 }}
+          style={{ fontWeight, marginTop: 15 }}
         />
       )}
 
@@ -376,7 +379,7 @@ function Accounts({
           name="Off budget"
           to={offBudgetAccountPath}
           query={getOffBudgetBalance()}
-          style={{ color: colors.n6 }}
+          style={{ fontWeight }}
         />
       )}
 
