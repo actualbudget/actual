@@ -273,8 +273,6 @@ export async function upload() {
   } catch (err) {
     console.log('Upload failure', err);
 
-    let reason = err instanceof PostError ? err.reason : 'network';
-
     if (err instanceof PostError) {
       throw new FileUploadError(
         err.reason === 'unauthorized' ? 'unauthorized' : err.reason || 'network'
@@ -299,7 +297,7 @@ export async function upload() {
 }
 
 export async function possiblyUpload() {
-  let { cloudFileId, groupId, lastUploaded, id } = prefs.getPrefs();
+  let { cloudFileId, groupId, lastUploaded } = prefs.getPrefs();
 
   let threshold =
     lastUploaded && monthUtils.addDays(lastUploaded, UPLOAD_FREQUENCY_IN_DAYS);

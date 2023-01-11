@@ -29,7 +29,7 @@ function Account({ account, selected, onSelect }) {
         style={[
           {
             padding: 12,
-            boxShadow: styles.shadow,
+            ...styles.shadow,
             cursor: 'pointer',
             transition: 'transform .20s',
             fontSize: 14,

@@ -80,7 +80,7 @@ describe('Budgets', () => {
     await createTestBudget('default-budget-template');
 
     await db.openDatabase('test-budget');
-    let r = await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
+    await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
 
     const spy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -331,7 +331,7 @@ describe('Budget', () => {
 
 describe('Categories', () => {
   test('can be deleted', async () => {
-    let spreadsheet = await sheet.loadSpreadsheet(db);
+    await sheet.loadSpreadsheet(db);
 
     await runMutator(async () => {
       await db.insertCategoryGroup({ id: 'group1', name: 'group1' });

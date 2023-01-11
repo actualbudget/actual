@@ -1,5 +1,4 @@
 const { runHandler, isMutating } = require('../../../server/mutators');
-const { sequential } = require('../../../shared/async');
 const { captureException } = require('../../exceptions');
 
 function getGlobalObject() {

@@ -117,7 +117,7 @@ function Notification({ notification, onRemove }) {
           borderTop: `3px solid ${
             positive ? colors.g5 : error ? colors.r5 : colors.y4
           }`,
-          boxShadow: styles.shadowLarge,
+          ...styles.shadowLarge,
           maxWidth: 550,
 
           '& a': { color: 'currentColor' }

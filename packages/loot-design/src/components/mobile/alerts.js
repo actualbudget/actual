@@ -10,7 +10,7 @@ export function Information({ style, children }) {
       style={[
         {
           fontSize: 13,
-          boxShadow: styles.shadow,
+          ...styles.shadow,
           borderRadius: 4,
           backgroundColor: colors.b10,
           padding: 10,

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { RectButton } from 'react-native-gesture-handler';
 import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router';
@@ -7,7 +7,6 @@ import { withRouter } from 'react-router-dom';
 import { css } from 'glamor';
 
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
-import { pushModal } from 'loot-core/src/client/actions/modals';
 import Platform from 'loot-core/src/client/platform';
 import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 
@@ -440,7 +439,6 @@ function Tools() {
   let items = [
     { name: 'payees', text: 'Payees' },
     { name: 'rules', text: 'Rules' },
-    { name: 'find-schedules', text: 'Find schedules' },
     { name: 'repair-splits', text: 'Repair split transactions' }
   ];
 
@@ -452,9 +450,6 @@ function Tools() {
           break;
         case 'rules':
           history.push('/rules');
-          break;
-        case 'find-schedules':
-          history.push('/schedule/discover');
           break;
         case 'repair-splits':
           history.push('/tools/fix-splits', { locationPtr: history.location });
@@ -475,12 +470,9 @@ function Tools() {
         onClick={onToggle}
         style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
         forceHover={isOpen}
-        forceActive={[
-          '/payees',
-          '/rules',
-          '/tools',
-          '/schedule/discover'
-        ].some(route => location.pathname.startsWith(route))}
+        forceActive={['/payees', '/rules', '/tools'].some(route =>
+          location.pathname.startsWith(route)
+        )}
         button={
           <ChevronRight
             width={12}

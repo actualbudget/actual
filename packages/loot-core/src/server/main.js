@@ -468,7 +468,6 @@ handlers['payees-get'] = async function() {
 
 handlers['payees-get-rule-counts'] = async function() {
   let payeeCounts = {};
-  let allRules = rules.getRules();
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
     if (payeeCounts[id] == null) {
@@ -1063,8 +1062,6 @@ handlers['accounts-sync'] = async function({ id }) {
   let matchedTransactions = [];
   let updatedAccounts = [];
 
-  let { groupId } = prefs.getPrefs();
-
   for (var i = 0; i < accounts.length; i++) {
     const acct = accounts[i];
     if (acct.bankId) {
@@ -1291,8 +1288,6 @@ handlers['key-make'] = async function({ password }) {
     throw new Error('user-set-key must be called with file loaded');
   }
 
-  let cloudFileId = prefs.getPrefs().cloudFileId;
-
   let salt = encryption.randomBytes(32).toString('base64');
   let id = uuid.v4Sync();
   let key = await encryption.createKey({ id, password, salt });
@@ -1461,9 +1456,8 @@ handlers['subscribe-get-user'] = async function() {
 
 handlers['subscribe-change-password'] = async function({ password }) {
   let userToken = await asyncStorage.getItem('user-token');
-  let res;
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/change-password', {
+    await post(getServer().SIGNUP_SERVER + '/change-password', {
       token: userToken,
       password
     });
@@ -1922,7 +1916,7 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     prefs.savePrefs({ userId });
   }
 
-  let { budgetVersion, budgetId } = prefs.getPrefs();
+  let { budgetVersion } = prefs.getPrefs();
 
   try {
     await updateVersion(budgetVersion, showUpdate);
@@ -2146,12 +2140,12 @@ export async function initApp(version, isDev, socketName) {
     }
   }
 
-  if (isDev) {
-    const lastBudget = await asyncStorage.getItem('lastBudget');
-    // if (lastBudget) {
-    //   loadBudget(lastBudget, VERSION);
-    // }
-  }
+  // if (isDev) {
+  // const lastBudget = await asyncStorage.getItem('lastBudget');
+  // if (lastBudget) {
+  //   loadBudget(lastBudget, VERSION);
+  // }
+  // }
 
   const url = await asyncStorage.getItem('server-url');
   if (url) {

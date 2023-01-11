@@ -27,6 +27,10 @@ export default function Schedules() {
     history.push(`/schedule/edit`, { locationPtr: history.location });
   }
 
+  function onDiscover() {
+    history.push(`/schedule/discover`, { locationPtr: history.location });
+  }
+
   async function onAction(name, id) {
     switch (name) {
       case 'post-transaction':
@@ -70,7 +74,15 @@ export default function Schedules() {
         />
       </View>
 
-      <View style={{ alignItems: 'flex-end', margin: '20px 0', flexShrink: 0 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          margin: '20px 0',
+          flexShrink: 0
+        }}
+      >
+        <Button onClick={onDiscover}>Find schedules</Button>
         <Button primary onClick={onAdd}>
           Add new schedule
         </Button>

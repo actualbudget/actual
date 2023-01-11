@@ -43,7 +43,6 @@ const sheet = new Spreadsheet({
       },
       run: sql => {
         return new Promise(resolve => {
-          const start = Date.now();
           db.all(sql, function(err, rows) {
             if (err) {
               throw new Error(err);
