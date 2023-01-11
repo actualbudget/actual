@@ -204,7 +204,7 @@ export async function createSchedule({ schedule, conditions = [] } = {}) {
   });
 
   let now = Date.now();
-  let nextDateId = await db.insertWithUUID('schedules_next_date', {
+  await db.insertWithUUID('schedules_next_date', {
     schedule_id: scheduleId,
     local_next_date: nextDateRepr,
     local_next_date_ts: now,
@@ -212,7 +212,7 @@ export async function createSchedule({ schedule, conditions = [] } = {}) {
     base_next_date_ts: now
   });
 
-  let id = await db.insertWithSchema('schedules', {
+  await db.insertWithSchema('schedules', {
     ...schedule,
     id: scheduleId,
     rule: ruleId
@@ -380,10 +380,8 @@ function trackJSONPaths() {
 }
 
 function onApplySync(oldValues, newValues) {
-  let found = false;
   newValues.forEach((items, table) => {
     if (table === 'rules') {
-      found = true;
       items.forEach(newValue => {
         onRuleUpdate(newValue);
       });

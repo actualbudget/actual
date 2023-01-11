@@ -44,7 +44,7 @@ describe('File import', () => {
   test('qif import works', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
-    let { errors, added } = await importFileWithRealTime(
+    let { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qif',
       'MM/dd/yy'
@@ -57,7 +57,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors, added } = await importFileWithRealTime(
+    let { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.ofx'
     );
@@ -69,7 +69,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors, added } = await importFileWithRealTime(
+    let { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qfx'
     );

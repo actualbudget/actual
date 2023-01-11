@@ -80,7 +80,7 @@ describe('Budgets', () => {
     await createTestBudget('default-budget-template');
 
     await db.openDatabase('test-budget');
-    let r = await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
+    await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
 
     const spy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -96,7 +96,7 @@ describe('Budgets', () => {
   });
 });
 
-describe.skip('Accounts', () => {
+describe('Accounts', () => {
   test('create accounts with correct starting balance', async () => {
     prefs.loadPrefs();
     prefs.savePrefs({ clientId: 'client', groupId: 'group' });
@@ -202,7 +202,7 @@ describe.skip('Accounts', () => {
   });
 });
 
-describe.skip('Budget', () => {
+describe('Budget', () => {
   test('new budgets should be created', async () => {
     const spreadsheet = await sheet.loadSpreadsheet(db);
 
@@ -330,8 +330,8 @@ describe.skip('Budget', () => {
 });
 
 describe('Categories', () => {
-  test.skip('can be deleted', async () => {
-    let spreadsheet = await sheet.loadSpreadsheet(db);
+  test('can be deleted', async () => {
+    await sheet.loadSpreadsheet(db);
 
     await runMutator(async () => {
       await db.insertCategoryGroup({ id: 'group1', name: 'group1' });

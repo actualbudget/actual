@@ -27,12 +27,10 @@ import {
 } from 'loot-core/src/shared/util';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 
-import { colors, mobileStyles as styles } from '../../style';
+import { colors, styles } from '../../style';
 import Add from '../../svg/v1/Add';
 import Trash from '../../svg/v1/Trash';
-import AlertTriangle from '../../svg/v2/AlertTriangle';
 import CheckCircle1 from '../../svg/v2/CheckCircle1';
-import EditSkull1 from '../../svg/v2/EditSkull1';
 import PencilWriteAlternate from '../../svg/v2/PencilWriteAlternate';
 import { FocusableAmountInput } from './AmountInput';
 import { Button, TextOneLine } from './common';
@@ -175,7 +173,6 @@ export class TransactionEdit extends React.Component {
 
   onEdit = async (transaction, name, value) => {
     let { transactions } = this.state;
-    let { payees } = this.props;
 
     let newTransaction = { ...transaction, [name]: value };
     if (this.props.onEdit) {
@@ -699,20 +696,17 @@ export function DateHeader({ date }) {
 }
 
 function Status({ status }) {
-  let color, backgroundColor, Icon;
+  let color;
 
   switch (status) {
     case 'missed':
       color = colors.r3;
-      Icon = EditSkull1;
       break;
     case 'due':
       color = colors.y3;
-      Icon = AlertTriangle;
       break;
     case 'upcoming':
       color = colors.n4;
-      Icon = ArrowsSynchronize;
       break;
     default:
   }
@@ -776,17 +770,6 @@ export class Transaction extends React.PureComponent {
       fontStyle: 'italic',
       color: colors.n5
     };
-    let textStyleWithColor = [
-      textStyle,
-      isPreview && {
-        color:
-          notes === 'missed'
-            ? colors.r6
-            : notes === 'due'
-            ? colors.y4
-            : colors.n5
-      }
-    ];
 
     return (
       <RectButton
@@ -815,7 +798,7 @@ export class Transaction extends React.PureComponent {
               )}
               <TextOneLine
                 style={[
-                  styles.text,
+                  { fontSize: styles.text.fontSize, color: styles.textColor },
                   textStyle,
                   { fontSize: 14, fontWeight: added ? '600' : '400' },
                   prettyDescription === '' && {

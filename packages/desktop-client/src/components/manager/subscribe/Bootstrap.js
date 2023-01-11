@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
@@ -13,7 +12,6 @@ import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function Bootstrap() {
   let dispatch = useDispatch();
-  let history = useHistory();
   let [error, setError] = useState(null);
 
   let { checked } = useBootstrapped();
@@ -52,7 +50,7 @@ export default function Bootstrap() {
 
   return (
     <>
-      <View style={{ width: 450, marginTop: -30 }}>
+      <View style={{ maxWidth: 450, marginTop: -30 }}>
         <Title text="Bootstrap this Actual instance" />
         <Text
           style={{

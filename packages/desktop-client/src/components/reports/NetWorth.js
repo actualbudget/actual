@@ -19,7 +19,6 @@ import useReport from './useReport';
 import { fromDateRepr, useArgsMemo } from './util';
 
 function NetWorth({ accounts }) {
-  const [earliestMonth, setEarliestMonth] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5)
@@ -55,7 +54,6 @@ function NetWorth({ accounts }) {
         }))
         .reverse();
 
-      setEarliestMonth(earliestMonth);
       setAllMonths(allMonths);
     }
     run();

@@ -7,6 +7,7 @@ import { createBrowserHistory } from 'history';
 import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
+import tokens from 'loot-design/src/tokens';
 
 import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
@@ -25,14 +26,18 @@ function Version() {
   return (
     <Text
       style={{
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
         color: colors.n7,
-        margin: 15,
-        marginRight: 17,
         ':hover': { color: colors.n2 },
-        zIndex: 5001
+        margin: 15,
+        marginLeft: 17,
+        [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          marginLeft: 15,
+          marginRight: 17,
+          zIndex: 5001
+        }
       }}
       href={'https://actualbudget.com/blog/' + window.Actual.ACTUAL_VERSION}
     >
@@ -171,13 +176,14 @@ class ManagementApp extends React.Component {
           {!isHidden && (
             <View
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
+                alignItems: 'center',
                 bottom: 0,
                 justifyContent: 'center',
-                alignItems: 'center'
+                left: 0,
+                padding: 20,
+                position: 'absolute',
+                right: 0,
+                top: 0
               }}
             >
               {userData ? (
@@ -207,7 +213,16 @@ class ManagementApp extends React.Component {
                       zIndex: 4000
                     }}
                   >
-                    <LoggedInUser />
+                    <Switch>
+                      <Route exact path="/config-server" component={null} />
+                      <Route
+                        exact
+                        path="/"
+                        render={() => (
+                          <LoggedInUser style={{ padding: '4px 7px' }} />
+                        )}
+                      />
+                    </Switch>
                   </View>
                 </>
               ) : (
@@ -223,7 +238,10 @@ class ManagementApp extends React.Component {
             </View>
           )}
 
-          <ServerURL />
+          <Switch>
+            <Route exact path="/config-server" component={null} />
+            <Route exact path="/" component={ServerURL} />
+          </Switch>
           <Version />
         </View>
       </Router>

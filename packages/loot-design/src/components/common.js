@@ -7,13 +7,7 @@ import React, {
 } from 'react';
 import mergeRefs from 'react-merge-refs';
 import ReactModal from 'react-modal';
-import {
-  Route,
-  NavLink,
-  withRouter,
-  useHistory,
-  useRouteMatch
-} from 'react-router-dom';
+import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
 
 import {
   ListboxInput,
@@ -22,7 +16,7 @@ import {
   ListboxList,
   ListboxOption
 } from '@reach/listbox';
-import { css } from 'glamor';
+import { css, media } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -31,6 +25,7 @@ import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import { styles, colors } from '../style';
 import Delete from '../svg/Delete';
 import Loading from '../svg/v1/AnimatedLoading';
+import tokens from '../tokens';
 import Text from './Text';
 import { useProperFocus } from './useProperFocus';
 import View from './View';
@@ -38,6 +33,14 @@ import View from './View';
 export { default as View } from './View';
 export { default as Text } from './Text';
 export { default as Stack } from './Stack';
+
+export function TextOneLine({ children, centered, ...props }) {
+  return (
+    <Text numberOfLines={1} {...props}>
+      {children}
+    </Text>
+  );
+}
 
 export const useStableCallback = callback => {
   const callbackRef = useRef();
@@ -62,13 +65,43 @@ export function Block(props) {
   );
 }
 
+export const Card = React.forwardRef(({ children, ...props }, ref) => {
+  return (
+    <View
+      {...props}
+      ref={ref}
+      style={[
+        {
+          marginTop: 15,
+          marginLeft: 5,
+          marginRight: 5,
+          borderRadius: 6,
+          backgroundColor: 'white',
+          borderColor: colors.p3,
+          boxShadow: '0 1px 2px #9594A8'
+        },
+        props.style
+      ]}
+    >
+      <View
+        style={{
+          borderRadius: 6,
+          overflow: 'hidden'
+        }}
+      >
+        {children}
+      </View>
+    </View>
+  );
+});
+
 export function Link({ style, children, ...nativeProps }) {
   return (
-    <button
+    <Button
       {...css(
         {
           textDecoration: 'none',
-          color: styles.text,
+          color: styles.textColor,
           backgroundColor: 'transparent',
           border: 0,
           cursor: 'pointer',
@@ -84,20 +117,11 @@ export function Link({ style, children, ...nativeProps }) {
       {...nativeProps}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
-export function AnchorLink({
-  staticContext,
-  to,
-  exact,
-  style,
-  activeStyle,
-  children
-}) {
-  let history = useHistory();
-  let href = history.createHref(typeof to === 'string' ? { pathname: to } : to);
+export function AnchorLink({ to, exact, style, activeStyle, children }) {
   let match = useRouteMatch({ path: to, exact: true });
 
   return (
@@ -111,18 +135,27 @@ export function AnchorLink({
   );
 }
 
-export const ExternalLink = React.forwardRef((props, ref) => {
-  function onClick(e) {
-    e.preventDefault();
-    window.Actual.openURLInBrowser(props.href);
-  }
+export const ExternalLink = React.forwardRef(
+  ({ asAnchor, children, ...props }, ref) => {
+    function onClick(e) {
+      e.preventDefault();
+      window.Actual.openURLInBrowser(props.href);
+    }
 
-  if (props.asAnchor) {
-    // eslint-disable-next-line
-    return <a ref={ref} {...props} onClick={onClick} />;
+    if (asAnchor) {
+      return (
+        <a ref={ref} {...props} onClick={onClick}>
+          {children}
+        </a>
+      );
+    }
+    return (
+      <Button ref={ref} bare {...props} onClick={onClick}>
+        {children}
+      </Button>
+    );
   }
-  return <Button ref={ref} bare {...props} onClick={onClick} />;
-});
+);
 
 function ButtonLink_({
   history,
@@ -174,7 +207,7 @@ export const Button = React.forwardRef(
     hoveredStyle = [
       bare
         ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
-        : { boxShadow: styles.shadow },
+        : { ...styles.shadow },
       hoveredStyle
     ];
     activeStyle = [
@@ -301,7 +334,7 @@ export function Input({
   return (
     <input
       ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
-      {...css([
+      {...css(
         defaultInputStyle,
         {
           ':focus': {
@@ -312,7 +345,7 @@ export function Input({
         },
         styles.smallText,
         style
-      ])}
+      )}
       {...nativeProps}
       onKeyDown={e => {
         if (e.keyCode === 13 && onEnter) {
@@ -385,6 +418,33 @@ export function InputWithContent({
       />
       {rightContent}
     </View>
+  );
+}
+
+export function KeyboardButton({ highlighted, children, ...props }) {
+  return (
+    <Button
+      {...props}
+      bare
+      style={[
+        {
+          backgroundColor: 'white',
+          shadowColor: colors.n3,
+          shadowOffset: { width: 0, height: 1 },
+          shadowRadius: 1,
+          shadowOpacity: 1,
+          elevation: 4,
+          borderWidth: 0,
+          paddingLeft: 17,
+          paddingRight: 17
+        },
+        highlighted && { backgroundColor: colors.p6 },
+        props.style
+      ]}
+      textStyle={[highlighted && { color: 'white' }]}
+    >
+      {children}
+    </Button>
   );
 }
 
@@ -808,13 +868,16 @@ export function Modal({
         style={[
           {
             willChange: 'opacity, transform',
-            minWidth: 500,
+            minWidth: '100%',
             minHeight: 0,
-            boxShadow: styles.shadowLarge,
             borderRadius: 4,
             backgroundColor: 'white',
-            opacity: isHidden ? 0 : 1
+            opacity: isHidden ? 0 : 1,
+            [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
+              minWidth: tokens.breakpoint_narrow
+            }
           },
+          styles.shadowLarge,
           style,
           styles.lightScrollbar
         ]}
@@ -823,7 +886,8 @@ export function Modal({
           <View
             style={{
               padding: 20,
-              position: 'relative'
+              position: 'relative',
+              flexShrink: 0
             }}
           >
             {showTitle && (
@@ -938,10 +1002,6 @@ export function ModalButtons({
         style
       ]}
     >
-      {/* Add a dummy button first so that when a user
-          presses "enter" they do a normal submit, instead of
-          activating the back button */}
-      <Button data-hidden={true} style={{ display: 'none' }} />
       {leftContent}
       <View style={{ flex: 1 }} />
       {children}
@@ -1062,6 +1122,25 @@ export class TooltipTarget extends React.Component {
       </View>
     );
   }
+}
+
+export function Label({ title, style }) {
+  return (
+    <Text
+      style={[
+        styles.text,
+        {
+          color: colors.n2,
+          textAlign: 'right',
+          fontSize: 12,
+          marginBottom: 2
+        },
+        style
+      ]}
+    >
+      {title}
+    </Text>
+  );
 }
 
 export * from './tooltips';

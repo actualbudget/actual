@@ -210,7 +210,7 @@ function applyMessagesForImport(messages) {
   db.transaction(() => {
     for (let i = 0; i < messages.length; i++) {
       let msg = messages[i];
-      let { dataset, row, column, timestamp, value } = msg;
+      let { dataset } = msg;
 
       if (!msg.old) {
         try {
@@ -662,7 +662,6 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
   }
 
   let diffTime = merkle.diff(res.merkle, getClock().merkle);
-  let result = res.messages;
 
   if (diffTime !== null) {
     // This is a bit wonky, but we loop until we are in sync with the

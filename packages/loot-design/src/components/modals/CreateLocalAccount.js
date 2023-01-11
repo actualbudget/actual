@@ -15,7 +15,6 @@ import {
   Button,
   Input,
   Select,
-  P,
   InlineField,
   FormError,
   InitialFocus
@@ -153,7 +152,9 @@ function CreateLocalAccount({ modalProps, actions, history, accounts }) {
                 )}
 
                 <ModalButtons>
-                  <Button onClick={() => modalProps.onBack()}>Back</Button>
+                  <Button onClick={() => modalProps.onBack()} type="button">
+                    Back
+                  </Button>
                   <Button primary style={{ marginLeft: 10 }}>
                     Create
                   </Button>

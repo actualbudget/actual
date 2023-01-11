@@ -8,7 +8,7 @@ import {
 } from 'loot-design/src/components/mobile/common';
 import Stack from 'loot-design/src/components/Stack';
 import Delete from 'loot-design/src/svg/Delete';
-import { mobileStyles as styles, colors } from 'loot-design/src/style';
+import { styles, colors } from 'loot-design/src/style';
 
 function compileMessage(message, actions, color, setLoading, onRemove) {
   return (
@@ -111,7 +111,7 @@ function Notification({ notification, onRemove }) {
             : colors.y10,
           borderRadius: 6
         },
-        styles.shadowLarge
+        ...styles.shadowLarge
       ]}
     >
       <Stack align="flex-start" style={{ flex: 1 }}>

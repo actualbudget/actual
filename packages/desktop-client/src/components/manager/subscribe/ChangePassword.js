@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -10,7 +9,6 @@ import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function ChangePassword() {
-  let dispatch = useDispatch();
   let history = useHistory();
   let [error, setError] = useState(null);
   let [msg, setMessage] = useState(null);
@@ -45,7 +43,7 @@ export default function ChangePassword() {
 
   return (
     <>
-      <View style={{ width: 500, marginTop: -30 }}>
+      <View style={{ maxWidth: 500, marginTop: -30 }}>
         <Title text="Change server password" />
         <Text
           style={{

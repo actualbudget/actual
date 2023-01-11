@@ -5,7 +5,6 @@ import { View, Text, Modal, ButtonWithLoading } from '../common';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
   let [loadingState, setLoadingState] = useState(null);
-  let { state } = file;
 
   async function onDeleteCloud() {
     setLoadingState('cloud');

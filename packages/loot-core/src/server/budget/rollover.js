@@ -1,4 +1,5 @@
 import * as monthUtils from '../../shared/months';
+import { safeNumber } from '../../shared/util';
 import * as sheet from '../sheet';
 import { number, sumAmounts, flatten2, unflatten2 } from './util';
 
@@ -51,10 +52,10 @@ export function createCategory(cat, sheetName, prevSheetName) {
         `${prevSheetName}!leftover-pos-${cat.id}`
       ],
       run: (budgeted, spent, prevCarryover, prevLeftover, prevLeftoverPos) => {
-        return (
+        return safeNumber(
           number(budgeted) +
-          number(spent) +
-          (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos))
+            number(spent) +
+            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos))
         );
       }
     });
@@ -78,7 +79,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'from-last-month', {
     initialValue: 0,
     dependencies: [`${prevSheetName}!to-budget`, `${prevSheetName}!buffered`],
-    run: (toBudget, buffered) => number(toBudget) + number(buffered)
+    run: (toBudget, buffered) => safeNumber(number(toBudget) + number(buffered))
   });
 
   // Alias the group income total to `total-income`
@@ -91,7 +92,8 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
     dependencies: ['total-income', 'from-last-month'],
-    run: (income, fromLastMonth) => number(income) + number(fromLastMonth)
+    run: (income, fromLastMonth) =>
+      safeNumber(number(income) + number(fromLastMonth))
   });
 
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {
@@ -104,12 +106,14 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     ),
     run: (...data) => {
       data = unflatten2(data);
-      return data.reduce((total, [leftover, carryover]) => {
-        if (carryover) {
-          return total;
-        }
-        return total + Math.min(0, number(leftover));
-      }, 0);
+      return safeNumber(
+        data.reduce((total, [leftover, carryover]) => {
+          if (carryover) {
+            return total;
+          }
+          return total + Math.min(0, number(leftover));
+        }, 0)
+      );
     }
   });
 
@@ -135,11 +139,11 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       'buffered'
     ],
     run: (available, lastOverspent, totalBudgeted, buffered) => {
-      return (
+      return safeNumber(
         number(available) +
-        number(lastOverspent) +
-        number(totalBudgeted) -
-        number(buffered)
+          number(lastOverspent) +
+          number(totalBudgeted) -
+          number(buffered)
       );
     }
   });

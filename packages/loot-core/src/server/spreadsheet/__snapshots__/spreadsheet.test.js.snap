@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Spreadsheet querying deep join works 1`] = `"=from transactions where acct.offbudget = 0 and (description.transfer_acct.offbudget = null or description.transfer_acct.offbudget = 1) select { acct.offbudget, description.transfer_acct.offbudget as foo, amount }"`;
+
+exports[`Spreadsheet querying transactions works 1`] = `"=from transactions select { amount, category }"`;

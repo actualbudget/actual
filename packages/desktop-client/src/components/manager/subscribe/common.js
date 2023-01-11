@@ -86,8 +86,8 @@ export const Input = React.forwardRef((props, ref) => {
           padding: 10,
           fontSize: 15,
           border: 'none',
-          boxShadow: styles.shadow,
-          ':focus': { border: 'none', boxShadow: styles.shadow }
+          ...styles.shadow,
+          ':focus': { border: 'none', ...styles.shadow }
         },
         props.style
       ]}

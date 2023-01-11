@@ -66,7 +66,11 @@ export function AccountList({
   );
 }
 
-export default function AccountAutocomplete({ embedded, ...props }) {
+export default function AccountAutocomplete({
+  embedded,
+  includeClosedAccounts = true,
+  ...props
+}) {
   let accounts = useCachedAccounts() || [];
 
   return (
@@ -74,7 +78,11 @@ export default function AccountAutocomplete({ embedded, ...props }) {
       strict={true}
       highlightFirst={true}
       embedded={embedded}
-      suggestions={accounts}
+      suggestions={
+        includeClosedAccounts
+          ? accounts
+          : accounts.filter(a => a.closed === false)
+      }
       renderItems={(items, getItemProps, highlightedIndex) => (
         <AccountList
           items={items}

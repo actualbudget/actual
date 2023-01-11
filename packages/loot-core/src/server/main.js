@@ -68,7 +68,6 @@ import {
 } from './sync';
 import * as syncMigrations from './sync/migrate';
 import toolsApp from './tools/app';
-import * as tracking from './tracking/events';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
@@ -469,7 +468,6 @@ handlers['payees-get'] = async function() {
 
 handlers['payees-get-rule-counts'] = async function() {
   let payeeCounts = {};
-  let allRules = rules.getRules();
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
     if (payeeCounts[id] == null) {
@@ -1064,8 +1062,6 @@ handlers['accounts-sync'] = async function({ id }) {
   let matchedTransactions = [];
   let updatedAccounts = [];
 
-  let { groupId } = prefs.getPrefs();
-
   for (var i = 0; i < accounts.length; i++) {
     const acct = accounts[i];
     if (acct.bankId) {
@@ -1212,10 +1208,6 @@ handlers['save-global-prefs'] = async function(prefs) {
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if ('trackUsage' in prefs) {
-    tracking.toggle(prefs.trackUsage);
-    await asyncStorage.setItem('track-usage', '' + prefs.trackUsage);
-  }
   if ('autoUpdate' in prefs) {
     await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
     process.send({ type: 'shouldAutoUpdate', flag: prefs.autoUpdate });
@@ -1236,7 +1228,6 @@ handlers['load-global-prefs'] = async function() {
     [, floatingSidebar],
     [, seenTutorial],
     [, maxMonths],
-    [, trackUsage],
     [, autoUpdate],
     [, documentDir],
     [, encryptKey]
@@ -1244,7 +1235,6 @@ handlers['load-global-prefs'] = async function() {
     'floating-sidebar',
     'seen-tutorial',
     'max-months',
-    'track-usage',
     'auto-update',
     'document-dir',
     'encrypt-key'
@@ -1253,8 +1243,6 @@ handlers['load-global-prefs'] = async function() {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
     seenTutorial: seenTutorial === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
-    // Default to true
-    trackUsage: trackUsage == null || trackUsage === 'true' ? true : false,
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id
@@ -1299,8 +1287,6 @@ handlers['key-make'] = async function({ password }) {
   if (!prefs.getPrefs()) {
     throw new Error('user-set-key must be called with file loaded');
   }
-
-  let cloudFileId = prefs.getPrefs().cloudFileId;
 
   let salt = encryption.randomBytes(32).toString('base64');
   let id = uuid.v4Sync();
@@ -1470,9 +1456,8 @@ handlers['subscribe-get-user'] = async function() {
 
 handlers['subscribe-change-password'] = async function({ password }) {
   let userToken = await asyncStorage.getItem('user-token');
-  let res;
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/change-password', {
+    await post(getServer().SIGNUP_SERVER + '/change-password', {
       token: userToken,
       password
     });
@@ -1686,26 +1671,6 @@ handlers['load-budget'] = async function({ id }) {
   }
 
   let res = await loadBudget(id, VERSION, { showUpdate: true });
-
-  async function trackSizes() {
-    let getFileSize = async name => {
-      let dbFile = fs.join(fs.getBudgetDir(id), name);
-      try {
-        return await fs.size(dbFile);
-      } catch (err) {
-        return null;
-      }
-    };
-
-    try {
-      let dbSize = await getFileSize('db.sqlite');
-      let cacheSize = await getFileSize('cache.sqlite');
-      tracking.track('app:load-budget', { size: dbSize, cacheSize });
-    } catch (err) {
-      console.warn(err);
-    }
-  }
-  trackSizes();
 
   return res;
 };
@@ -1951,7 +1916,7 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     prefs.savePrefs({ userId });
   }
 
-  let { budgetVersion, budgetId } = prefs.getPrefs();
+  let { budgetVersion } = prefs.getPrefs();
 
   try {
     await updateVersion(budgetVersion, showUpdate);
@@ -2104,10 +2069,6 @@ handlers['app-focused'] = async function() {
   }
 };
 
-handlers['track'] = async function({ name, props }) {
-  tracking.track(name, props);
-};
-
 handlers = installAPI(handlers);
 
 injectAPI.send = (name, args) => runHandler(app.handlers[name], args);
@@ -2160,7 +2121,6 @@ export async function initApp(version, isDev, socketName) {
 
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
-  await tracking.init();
   await setupDocumentsDir();
 
   let keysStr = await asyncStorage.getItem('encrypt-keys');
@@ -2180,12 +2140,12 @@ export async function initApp(version, isDev, socketName) {
     }
   }
 
-  if (isDev) {
-    const lastBudget = await asyncStorage.getItem('lastBudget');
-    // if (lastBudget) {
-    //   loadBudget(lastBudget, VERSION);
-    // }
-  }
+  // if (isDev) {
+  // const lastBudget = await asyncStorage.getItem('lastBudget');
+  // if (lastBudget) {
+  //   loadBudget(lastBudget, VERSION);
+  // }
+  // }
 
   const url = await asyncStorage.getItem('server-url');
   if (url) {
@@ -2193,10 +2153,6 @@ export async function initApp(version, isDev, socketName) {
   }
 
   connection.init(socketName, app.handlers);
-
-  tracking.track('app:init', {
-    platform: Platform.isMobile ? 'mobile' : Platform.isWeb ? 'web' : 'desktop'
-  });
 
   if (!isDev && !Platform.isMobile && !Platform.isWeb) {
     let autoUpdate = await asyncStorage.getItem('auto-update');
