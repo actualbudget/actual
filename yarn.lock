@@ -5310,7 +5310,7 @@ __metadata:
     husky: ^3.0.4
     npm-run-all: ^4.1.3
     patch-package: ^6.1.2
-    prettier: ^1.18.1
+    prettier: 2.8.2
     pretty-quick: ^1.11.1
     react-refresh: ^0.14.0
     shelljs: ^0.8.2
@@ -15502,7 +15502,6 @@ __metadata:
     node-libofx: "*"
     npm-run-all: ^4.1.3
     perf-deets: ^1.0.15
-    prettier: ^1.19.1
     regenerator-runtime: ^0.13.7
     sanitize-filename: ^1.6.1
     search-query-parser: ^1.3.0
@@ -15548,7 +15547,6 @@ __metadata:
     npm-run-all: ^4.1.3
     pikaday: 1.8.0
     polished: ^1.8.1
-    prettier: ^1.14.2
     prop-types: 15.6.0
     react: 16.13.1
     react-dnd: ^10.0.2
@@ -19124,7 +19122,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^1.14.2, prettier@npm:^1.18.1, prettier@npm:^1.19.1":
+"prettier@npm:2.8.2":
+  version: 2.8.2
+  resolution: "prettier@npm:2.8.2"
+  bin:
+    prettier: bin-prettier.js
+  checksum: 740c56c2128d587d656ea1dde9bc9c3503dfc94db4f3ac387259215eeb2e216680bdad9d18a0c9feecc6b42cfa188d6fa777df4c36c1d00cedd4199074fbfbd2
+  languageName: node
+  linkType: hard
+
+"prettier@npm:^1.14.2":
   version: 1.19.1
   resolution: "prettier@npm:1.19.1"
   bin:

@@ -104,7 +104,7 @@ function Graph(serialized) {
 
   function generateDOT() {
     let edgeStrings = [];
-    edges.forEach(function(adj, edge) {
+    edges.forEach(function (adj, edge) {
       if (adj.length !== 0) {
         edgeStrings.push(`${edge} -> {${adj.join(',')}}`);
       }

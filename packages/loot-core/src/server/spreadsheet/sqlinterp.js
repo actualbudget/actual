@@ -21,10 +21,10 @@ function bind(args, func) {
 }
 
 const builtinFuncs = {
-  concat: function(str1, str2) {
+  concat: function (str1, str2) {
     return str1 + str2;
   },
-  date: function(str) {
+  date: function (str) {
     return dateFns.parseISO(str);
   }
 };

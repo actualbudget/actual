@@ -82,9 +82,10 @@ function Account(props) {
   }));
 
   let dispatch = useDispatch();
-  let actionCreators = useMemo(() => bindActionCreators(actions, dispatch), [
-    dispatch
-  ]);
+  let actionCreators = useMemo(
+    () => bindActionCreators(actions, dispatch),
+    [dispatch]
+  );
 
   const { id: accountId } = props.match.params;
 
