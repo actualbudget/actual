@@ -14,10 +14,10 @@ class ReconstructedError extends Error {
     this.message = message;
 
     Object.defineProperty(this, 'stack', {
-      get: function() {
+      get: function () {
         return 'extended ' + this._stack;
       },
-      set: function(value) {
+      set: function (value) {
         this._stack = value;
       }
     });

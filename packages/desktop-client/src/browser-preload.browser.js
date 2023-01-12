@@ -106,14 +106,14 @@ global.Actual = {
         if (file) {
           var reader = new FileReader();
           reader.readAsArrayBuffer(file);
-          reader.onload = async function(ev) {
+          reader.onload = async function (ev) {
             let filepath = `/uploads/${filename}`;
 
             window.__actionsForMenu
               .uploadFile(filename, ev.target.result)
               .then(() => resolve([filepath]));
           };
-          reader.onerror = function(ev) {
+          reader.onerror = function (ev) {
             alert('Error reading file');
           };
         }

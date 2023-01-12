@@ -56,7 +56,7 @@ global.randomId = () => {
   return 'id' + _id++;
 };
 
-global.getDatabaseDump = async function(tables) {
+global.getDatabaseDump = async function (tables) {
   if (!tables) {
     const rows = await sqlite.runQuery(
       db.getDatabase(),
@@ -106,7 +106,7 @@ global.getDatabaseDump = async function(tables) {
 // where to find the webassembly file
 // process.env.PUBLIC_URL = __dirname + '/../../../../node_modules/sql.js/dist/';
 
-global.emptyDatabase = function(avoidUpdate) {
+global.emptyDatabase = function (avoidUpdate) {
   return async () => {
     let path = ':memory:';
     // let path = `/tmp/foo-${Math.random()}.sqlite`;
