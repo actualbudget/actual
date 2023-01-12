@@ -46,6 +46,6 @@ yarn start
 
 ## Accessing Actual
 
-You should now be able to access [https://localhost:5006](https://localhost:5006) in your browser and you will see Actual.
+You should now be able to access [http://localhost:5006](http://localhost:5006) in your browser and you will see Actual.
 
-When first accessing Actual, you may be prompted to provide a URL for the server. In this case (when installing locally), simply input `https://localhost:5006` or click down the bottom on "use this domain".
+When first accessing Actual, you may be prompted to provide a URL for the server. In this case (when installing locally), you can input `http://localhost:5006` or click the “use this domain” button below the text field (which will do the same thing).
