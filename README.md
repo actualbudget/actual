@@ -15,8 +15,6 @@ Want to say thanks? Click the ⭐ at the top of the page.
 
 If you are only interested in running the latest version and not contributing to the source code, you don't need to clone this repo. You can get the latest version through npm.
 
-**Please Note:** While the Actual repository holds source code for the mobile applications that were supported when Actual was closed source, these are no longer supported on the Open Source version of Actual.
-
 ### The easy way: using a server (recommended)
 
 The easiest way to get Actual running is to use the [actual-server](https://github.com/actualbudget/actual-server) project. That is the server for syncing changes across devices, and it comes with the latest version of Actual. The server will provide both the web project and a server for syncing.
