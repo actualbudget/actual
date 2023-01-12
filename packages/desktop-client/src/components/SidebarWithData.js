@@ -94,6 +94,7 @@ function SidebarWithData({
       failedAccounts={failedAccounts}
       updatedAccounts={updatedAccounts}
       getBalanceQuery={queries.accountBalance}
+      getAllAccountBalance={queries.allAccountBalance}
       getOnBudgetBalance={queries.budgetedAccountBalance}
       getOffBudgetBalance={queries.offbudgetAccountBalance}
       onFloat={() => saveGlobalPrefs({ floatingSidebar: !floatingSidebar })}

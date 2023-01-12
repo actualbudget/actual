@@ -101,7 +101,7 @@ export function Link({ style, children, ...nativeProps }) {
       {...css(
         {
           textDecoration: 'none',
-          color: styles.text,
+          color: styles.textColor,
           backgroundColor: 'transparent',
           border: 0,
           cursor: 'pointer',
@@ -873,8 +873,8 @@ export function Modal({
             borderRadius: 4,
             backgroundColor: 'white',
             opacity: isHidden ? 0 : 1,
-            [`@media (min-width: ${tokens.breakpoint_medium})`]: {
-              minWidth: 500
+            [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
+              minWidth: tokens.breakpoint_narrow
             }
           },
           styles.shadowLarge,
