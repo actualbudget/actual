@@ -2,28 +2,23 @@
 title: Releases Notes
 ---
 
-## 22.12.03
-**Docker tag: 22.12.9**
+## 23.1.xx
+**Docker tag: 23.1.xx**
 
 :::warning
 
  If you are upgrading from a release older than 22.10.25, read that versions release notes for steps regarding a breaking change.
 
- Using Docker tags 22.12.3 or 22.12.8 have errors.  **Use Docker tag 22.12.9**
+ Using Docker tags 22.12.3 or 22.12.8 have errors.  **Use Docker tag 23.1.xx**
 
 :::
 
 The release has notable of improvements of:
-* Large values are supported
-* Fix YNAB 4 and nYnab importers
-* Fixed crashes in certain situations
-* Accounts can now have notes
-* Icon design was changed for more contrast.
-
-A full accounting of the changes are listed below.  Thank you to everyone who contributed!
+* Read-only responsive view, this replaces our mobile apps, it is notable that this is read only only at this stage.
+* Improvements to the sidebar design
 
 ### Actual 
-Version: 23.01.xx
+Version: 23.1.xx
     
 * [#401](https://github.com/actualbudget/actual/pull/401) Update git attributes for better End of Line handling -- thanks [winklevos](https://github.com/winklevos)
 * [#403](https://github.com/actualbudget/actual/pull/403) Replace URLs to point to https://actualbudget.github.io/docs -- thanks [shall0pass](https://github.com/shall0pass)
@@ -46,10 +41,21 @@ Version: 23.01.xx
 * [#439](https://github.com/actualbudget/actual/pull/439) docs: add netlify as sponsors to README -- thanks [MatissJanis](https://github.com/MatissJanis) 
 * [#440](https://github.com/actualbudget/actual/pull/440) Further iteration on the sidebar design -- thanks [j-f1](https://github.com/j-f1) 
 * [#441](https://github.com/actualbudget/actual/pull/441) Fix overlap of version info and server URL -- thanks [trevdor](https://github.com/trevdor)
+* [#443](https://github.com/actualbudget/actual/pull/443) 🔥 removal of react-native mobile apps -- thanks [MatissJanis](https://github.com/MatissJanis)
 
-### Actual Server 23.01.xx
+### Actual Server 
+Version: 23.1.xx
 
 No pull requests were merged in this release.
+
+The release has notable of improvements of:
+* Large values are supported
+* Fix YNAB 4 and nYnab importers
+* Fixed crashes in certain situations
+* Accounts can now have notes
+* Icon design was changed for more contrast.
+
+A full accounting of the changes are listed below.  Thank you to everyone who contributed!
 
 ### Actual
 Version: 22.12.03
