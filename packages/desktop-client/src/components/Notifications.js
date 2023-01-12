@@ -65,15 +65,8 @@ function compileMessage(message, actions, setLoading, onRemove) {
 }
 
 function Notification({ notification, onRemove }) {
-  let {
-    type,
-    title,
-    message,
-    messageActions,
-    sticky,
-    internal,
-    button
-  } = notification;
+  let { type, title, message, messageActions, sticky, internal, button } =
+    notification;
 
   let [loading, setLoading] = useState(false);
   let [overlayLoading, setOverlayLoading] = useState(false);

@@ -94,23 +94,23 @@ export default async function render(rootNode) {
 
 var context = require.context('../components', true, /\.usage.js$/);
 
-context.keys().forEach(function(key) {
+context.keys().forEach(function (key) {
   var module = context(key);
   modules[key] = module;
 });
 
 if (module.hot) {
-  module.hot.accept(context.id, function() {
+  module.hot.accept(context.id, function () {
     var reloadedContext = require.context('../components', true, /\.usage.js$/);
     var changedModules = reloadedContext
       .keys()
-      .map(function(key) {
+      .map(function (key) {
         return [key, reloadedContext(key)];
       })
-      .filter(function(reloadedModule) {
+      .filter(function (reloadedModule) {
         return modules[reloadedModule[0]] !== reloadedModule[1];
       });
-    changedModules.forEach(function(module) {
+    changedModules.forEach(function (module) {
       modules[module[0]] = module[1];
       reloadUsage(module[0], module[1]);
     });

@@ -157,12 +157,11 @@ export function Value({
             </Text>
           );
         })}
-        {// prettier-ignore
-        numHidden > 0 && (
+        {numHidden > 0 && (
           <Text style={{ color: colors.p4 }}>
             &nbsp;&nbsp;
-            {  // eslint-disable-next-line
-            }<a
+            {/* eslint-disable-next-line */}
+            <a
               href="#"
               onClick={onExpand}
               {...css({
@@ -405,7 +404,8 @@ let SimpleTable = React.forwardRef(
 
     useEffect(() => {
       if (contentRef.current) {
-        contentHeight.current = contentRef.current.getBoundingClientRect().height;
+        contentHeight.current =
+          contentRef.current.getBoundingClientRect().height;
       } else {
         contentHeight.current = null;
       }

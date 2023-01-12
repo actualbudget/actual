@@ -130,9 +130,7 @@ function componentWillReceiveProps(bag, nextProps) {
 }
 
 export function defaultFilterSuggestion(suggestion, value) {
-  return getItemName(suggestion)
-    .toLowerCase()
-    .includes(value.toLowerCase());
+  return getItemName(suggestion).toLowerCase().includes(value.toLowerCase());
 }
 
 export function defaultFilterSuggestions(suggestions, value) {

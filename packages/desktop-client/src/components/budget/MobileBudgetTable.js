@@ -500,14 +500,8 @@ export class TotalsRow extends React.PureComponent {
 
 export class IncomeCategory extends React.PureComponent {
   render() {
-    const {
-      name,
-      budget,
-      balance,
-      style,
-      nameTextStyle,
-      amountTextStyle
-    } = this.props;
+    const { name, budget, balance, style, nameTextStyle, amountTextStyle } =
+      this.props;
     return (
       <ListItem
         style={[

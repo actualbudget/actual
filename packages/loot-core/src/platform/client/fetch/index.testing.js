@@ -36,7 +36,11 @@ module.exports.serverPush = (name, args) => {
   });
 };
 
-module.exports.send = async function(name, args, { catchErrors = false } = {}) {
+module.exports.send = async function (
+  name,
+  args,
+  { catchErrors = false } = {}
+) {
   if (serverHandler) {
     return serverHandler({ name, args, catchErrors });
   } else {

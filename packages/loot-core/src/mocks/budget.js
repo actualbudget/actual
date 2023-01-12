@@ -213,12 +213,8 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
 }
 
 async function fillChecking(handlers, account, payees, groups) {
-  let {
-    incomePayee,
-    expensePayees,
-    incomeGroup,
-    expenseCategories
-  } = extractCommonThings(payees, groups);
+  let { incomePayee, expensePayees, incomeGroup, expenseCategories } =
+    extractCommonThings(payees, groups);
   let numTransactions = integer(20, 40);
 
   let transactions = [];
@@ -301,12 +297,8 @@ async function fillInvestment(handlers, account, payees, groups) {
 }
 
 async function fillSavings(handlers, account, payees, groups) {
-  let {
-    incomePayee,
-    expensePayees,
-    incomeGroup,
-    expenseCategories
-  } = extractCommonThings(payees, groups);
+  let { incomePayee, expensePayees, incomeGroup, expenseCategories } =
+    extractCommonThings(payees, groups);
 
   let numTransactions = integer(15, 40);
 
