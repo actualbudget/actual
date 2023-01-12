@@ -1,7 +1,3 @@
-// This file will initialize the app if we are in a real browser
-// environment (not electron)
-import './browser-preload';
-
 // A hack for now: this makes sure it's appended before glamor
 import '@reach/listbox/styles.css';
 
