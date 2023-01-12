@@ -248,28 +248,6 @@ function keyWithShift(key) {
   return { ...key, shiftKey: true };
 }
 
-function verifySortOrder(transactions) {
-  transactions.forEach((transaction, idx) => {
-    let lastTransaction = idx === 0 ? null : transactions[idx];
-
-    if (transaction.sort_order == null) {
-      throw new Error("Transaction doesn't have sort_order");
-    }
-
-    if (
-      lastTransaction &&
-      transaction.sort_order > lastTransaction.sort_order
-    ) {
-      throw new Error(
-        'Transaction sort order must always be decreasing. Found increasing sort order:\n  ' +
-          JSON.stringify(lastTransaction) +
-          '\n  ' +
-          JSON.stringify(transaction)
-      );
-    }
-  });
-}
-
 function renderTransactions(extraProps) {
   let transactions = generateTransactions(5, [6]);
   // Hardcoding the first value makes it easier for tests to do
@@ -599,7 +577,8 @@ describe('Transactions', () => {
   test('dropdown selects an item when clicking', async () => {
     const { container, getTransactions } = renderTransactions();
 
-    let input = editField(container, 'category', 2);
+    editField(container, 'category', 2);
+
     let tooltip = container.querySelector('[data-testid="tooltip"]');
 
     // Make sure none of the items are highlighted
@@ -705,7 +684,7 @@ describe('Transactions', () => {
   });
 
   test('dropdown escape resets the value ', () => {
-    const { container, getTransactions } = renderTransactions();
+    const { container } = renderTransactions();
 
     let input = editField(container, 'category', 2);
     let oldValue = input.value;
@@ -719,12 +698,8 @@ describe('Transactions', () => {
   });
 
   test('adding a new transaction works', async () => {
-    const {
-      queryByTestId,
-      container,
-      getTransactions,
-      updateProps
-    } = renderTransactions();
+    const { queryByTestId, container, getTransactions, updateProps } =
+      renderTransactions();
 
     expect(getTransactions().length).toBe(5);
     expect(queryByTestId('new-transaction')).toBe(null);

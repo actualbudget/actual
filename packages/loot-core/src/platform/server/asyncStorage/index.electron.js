@@ -23,19 +23,21 @@ function init({ persist = true } = {}) {
 
 function _saveStore() {
   if (persisted) {
-    return new Promise(function(resolve, reject) {
-      fs.writeFile(getStorePath(), JSON.stringify(store), 'utf8', function(
-        err,
-        _
-      ) {
-        return err ? reject(err) : resolve();
-      });
+    return new Promise(function (resolve, reject) {
+      fs.writeFile(
+        getStorePath(),
+        JSON.stringify(store),
+        'utf8',
+        function (err, _) {
+          return err ? reject(err) : resolve();
+        }
+      );
     });
   }
 }
 
 function getItem(key) {
-  return new Promise(function(resolve) {
+  return new Promise(function (resolve) {
     return resolve(store[key]);
   });
 }
@@ -51,9 +53,9 @@ function removeItem(key) {
 }
 
 function multiGet(keys) {
-  return new Promise(function(resolve) {
+  return new Promise(function (resolve) {
     return resolve(
-      keys.map(function(key) {
+      keys.map(function (key) {
         return [key, store[key]];
       })
     );
@@ -61,14 +63,14 @@ function multiGet(keys) {
 }
 
 function multiSet(keyValues) {
-  keyValues.forEach(function([key, value]) {
+  keyValues.forEach(function ([key, value]) {
     store[key] = value;
   });
   return _saveStore();
 }
 
 function multiRemove(keys) {
-  keys.forEach(function(key) {
+  keys.forEach(function (key) {
     delete store[key];
   });
   return _saveStore();

@@ -22,7 +22,6 @@ import {
   useStableCallback,
   View,
   Text,
-  Modal,
   Input,
   Button,
   Tooltip,
@@ -30,6 +29,7 @@ import {
 } from './common';
 import {
   Table,
+  TableHeader,
   Row,
   Cell,
   InputCell,
@@ -230,7 +230,7 @@ function PayeeTableHeader() {
 
   return (
     <View>
-      <Row
+      <TableHeader
         borderColor={borderColor}
         style={{
           backgroundColor: 'white',
@@ -239,6 +239,7 @@ function PayeeTableHeader() {
           userSelect: 'none'
         }}
         collapsed={true}
+        version="v2"
       >
         <SelectCell
           exposed={true}
@@ -247,7 +248,7 @@ function PayeeTableHeader() {
           onSelect={() => dispatchSelected({ type: 'select-all' })}
         />
         <Cell value="Name" width="flex" />
-      </Row>
+      </TableHeader>
     </View>
   );
 }
@@ -470,108 +471,90 @@ export const ManagePayees = React.forwardRef(
     let payeesById = getPayeesById(payees);
 
     return (
-      <Modal
-        title="Payees"
-        padding={0}
-        {...modalProps}
-        style={[modalProps.style, { flex: 'inherit', maxWidth: '90%' }]}
-      >
+      <View style={{ height: '100%' }}>
         <View
           style={{
-            maxWidth: '100%',
-            width: 900,
-            height: 550
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0 10px 5px'
           }}
         >
+          <Component initialState={{ menuOpen: false }}>
+            {({ state, setState }) => (
+              <View>
+                <Button
+                  bare
+                  style={{ marginRight: 10 }}
+                  disabled={buttonsDisabled}
+                  onClick={() => setState({ menuOpen: true })}
+                >
+                  {buttonsDisabled
+                    ? 'No payees selected'
+                    : selected.items.size +
+                      ' ' +
+                      plural(selected.items.size, 'payee', 'payees')}
+                  <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
+                </Button>
+                {state.menuOpen && (
+                  <PayeeMenu
+                    payeesById={payeesById}
+                    selectedPayees={selected.items}
+                    onClose={() => setState({ menuOpen: false })}
+                    onDelete={onDelete}
+                    onMerge={onMerge}
+                  />
+                )}
+              </View>
+            )}
+          </Component>
+          <View style={{ flex: 1 }} />
+          <Input
+            placeholder="Filter payees..."
+            value={filter}
+            onChange={e => {
+              applyFilter(e.target.value);
+              tableNavigator.onEdit(null);
+            }}
+            style={{
+              width: 350,
+              borderColor: 'transparent',
+              backgroundColor: colors.n11,
+              ':focus': {
+                backgroundColor: 'white',
+                '::placeholder': { color: colors.n8 }
+              }
+            }}
+          />
+        </View>
+
+        <SelectedProvider instance={selected} fetchAllIds={getSelectableIds}>
           <View
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              padding: '0 10px'
+              flex: 1,
+              border: '1px solid ' + colors.border,
+              borderRadius: 4,
+              overflow: 'hidden'
             }}
           >
-            <Component initialState={{ menuOpen: false }}>
-              {({ state, setState }) => (
-                <View>
-                  <Button
-                    bare
-                    style={{ marginRight: 10 }}
-                    disabled={buttonsDisabled}
-                    onClick={() => setState({ menuOpen: true })}
-                  >
-                    {buttonsDisabled
-                      ? 'No payees selected'
-                      : selected.items.size +
-                        ' ' +
-                        plural(selected.items.size, 'payee', 'payees')}
-                    <ExpandArrow
-                      width={8}
-                      height={8}
-                      style={{ marginLeft: 5 }}
-                    />
-                  </Button>
-                  {state.menuOpen && (
-                    <PayeeMenu
-                      payeesById={payeesById}
-                      selectedPayees={selected.items}
-                      onClose={() => setState({ menuOpen: false })}
-                      onDelete={onDelete}
-                      onMerge={onMerge}
-                    />
-                  )}
-                </View>
-              )}
-            </Component>
-            <View style={{ flex: 1 }} />
-            <Input
-              placeholder="Filter payees..."
-              value={filter}
-              onChange={e => {
-                applyFilter(e.target.value);
-                tableNavigator.onEdit(null);
-              }}
-              style={{
-                width: 350,
-                borderColor: 'transparent',
-                backgroundColor: colors.n11,
-                ':focus': {
-                  backgroundColor: 'white',
-                  '::placeholder': { color: colors.n8 }
-                }
-              }}
-            />
+            <PayeeTableHeader />
+            {filteredPayees.length === 0 ? (
+              <EmptyMessage text="No payees" style={{ marginTop: 15 }} />
+            ) : (
+              <PayeeTable
+                ref={table}
+                payees={filteredPayees}
+                ruleCounts={ruleCounts}
+                categoryGroups={categoryGroups}
+                highlightedRows={highlightedRows}
+                navigator={tableNavigator}
+                onUpdate={onUpdate}
+                onViewRules={onViewRules}
+                onCreateRule={onCreateRule}
+              />
+            )}
           </View>
-
-          <SelectedProvider instance={selected} fetchAllIds={getSelectableIds}>
-            <View
-              style={{
-                flex: 1,
-                border: '1px solid ' + colors.border,
-                borderRadius: 4,
-                overflow: 'hidden',
-                margin: 5
-              }}
-            >
-              <PayeeTableHeader />
-              {filteredPayees.length === 0 ? (
-                <EmptyMessage text="No payees" style={{ marginTop: 15 }} />
-              ) : (
-                <PayeeTable
-                  ref={table}
-                  payees={filteredPayees}
-                  ruleCounts={ruleCounts}
-                  categoryGroups={categoryGroups}
-                  highlightedRows={highlightedRows}
-                  navigator={tableNavigator}
-                  onUpdate={onUpdate}
-                  onViewRules={onViewRules}
-                  onCreateRule={onCreateRule}
-                />
-              )}
-            </View>
-          </SelectedProvider>
-        </View>
-      </Modal>
+        </SelectedProvider>
+      </View>
     );
   }
 );

@@ -82,22 +82,11 @@ fi
 
 yarn patch-package
 
-yarn workspace mobile patch-package
-
 yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build
 
-
-rm -fr packages/desktop-electron/client-build
-cp -r packages/desktop-client/build packages/desktop-electron/client-build
-# Remove the embedded backend for the browser version. Will improve
-# this process
-rm -fr packages/desktop-electron/client-build/data
-rm -fr packages/desktop-electron/client-build/*kcab.*
-rm -fr packages/desktop-electron/client-build/*.wasm
-rm -fr packages/desktop-electron/client-build/*.map
-
+yarn workspace Actual update-client
 
 if [ -n "$RELEASE" ]; then
   SENTRY_CLI="./packages/desktop-electron/node_modules/.bin/sentry-cli"
@@ -133,30 +122,8 @@ fi
         echo "\nCreated release $VERSION with release notes \"$RELEASE_NOTES\""
     elif [ "$RELEASE" == "beta" ]; then
         yarn build --publish never --arm64 --x64
-
-        WINDOWS_FILE="./dist/Actual Setup $VERSION.exe"
-        if [ -f "$WINDOWS_FILE" ]; then
-            scp "$WINDOWS_FILE" "jlongster.com:/sites/static.actualbudget/Actual-Setup-$VERSION.exe"
-            echo "Windows: https://static.actualbudget.com/Actual-Setup-$VERSION.exe"
-        else
-            echo "No Windows file found"
-        fi
-
-        MAC_FILE="./dist/Actual-$VERSION.dmg"
-        if [ -f "$MAC_FILE" ]; then
-            scp "$MAC_FILE" "jlongster.com:/sites/static.actualbudget.com/Actual-$VERSION.dmg"
-            echo "macOS: https://static.actualbudget.com/Actual-$VERSION.dmg"
-        else
-            echo "No macOS file found"
-        fi
-
-        LINUX_FILE="./dist/Actual-$VERSION-x86_64.AppImage"
-        if [ -f "$LINUX_FILE" ]; then
-            scp "$LINUX_FILE" "jlongster.com:/sites/static.actualbudget/Actual-$VERSION-x86_64.AppImage"
-            echo "Linux: https://static.actualbudget.com/Actual-$VERSION-x86_64.AppImage"
-        else
-            echo "No linux file found"
-        fi
+        
+        echo "\nCreated beta release $VERSION"
     else
         SKIP_NOTARIZATION=true yarn build --publish never --x64
     fi

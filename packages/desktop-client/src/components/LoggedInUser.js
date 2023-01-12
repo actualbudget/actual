@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { useHistory, withRouter } from 'react-router';
+import { withRouter } from 'react-router';
 
 import * as actions from 'loot-core/src/client/actions';
 import {
@@ -29,7 +29,6 @@ function LoggedInUser({
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
-  const history = useHistory();
 
   useEffect(() => {
     getUserData().then(() => setLoading(false));
@@ -37,7 +36,7 @@ function LoggedInUser({
 
   async function onChangePassword() {
     await closeBudget();
-    history.push('/change-password');
+    window.__history.push('/change-password');
   }
 
   function onMenuSelect(type) {
@@ -54,11 +53,12 @@ function LoggedInUser({
     }
   }
 
-  function onClick() {
+  async function onClick() {
     if (serverUrl) {
       setMenuOpen(true);
     } else {
-      history.push('/config-server');
+      await closeBudget();
+      window.__history.push('/config-server');
     }
   }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
+import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
@@ -10,12 +11,18 @@ import {
   Button,
   ButtonWithLoading
 } from 'loot-design/src/components/common';
+import { useSetThemeColor } from 'loot-design/src/components/hooks';
 import { colors } from 'loot-design/src/style';
+import {
+  isDevelopmentEnvironment,
+  isPreviewEnvironment
+} from 'loot-design/src/util/environment';
 
 import { useServerURL } from '../../hooks/useServerURL';
 import { Title, Input } from './subscribe/common';
 
 export default function ConfigServer() {
+  useSetThemeColor(colors.p5);
   let dispatch = useDispatch();
   let history = useHistory();
   let [url, setUrl] = useState('');
@@ -78,9 +85,15 @@ export default function ConfigServer() {
     history.push('/');
   }
 
+  async function onCreateTestFile() {
+    await send('set-server-url', { url: null });
+    await dispatch(createBudget({ testMode: true }));
+    window.__history.push('/');
+  }
+
   return (
     <>
-      <View style={{ width: 500, marginTop: -30 }}>
+      <View style={{ maxWidth: 500, marginTop: -30 }}>
         <Title text="Where's the server?" />
 
         <Text
@@ -148,9 +161,10 @@ export default function ConfigServer() {
 
         <View
           style={{
-            marginTop: 15,
             flexDirection: 'row',
-            justifyContent: 'center'
+            flexFlow: 'row wrap',
+            justifyContent: 'center',
+            marginTop: 15
           }}
         >
           {currentUrl ? (
@@ -161,14 +175,32 @@ export default function ConfigServer() {
             <>
               <Button
                 bare
-                style={{ color: colors.n4, marginRight: 15 }}
+                style={{
+                  color: colors.n4,
+                  margin: 5,
+                  marginRight: 15
+                }}
                 onClick={onSameDomain}
               >
                 Use {window.location.origin.replace(/https?:\/\//, '')}
               </Button>
-              <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
+              <Button
+                bare
+                style={{ color: colors.n4, margin: 5 }}
+                onClick={onSkip}
+              >
                 Don't use a server
               </Button>
+
+              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
+                <Button
+                  primary
+                  style={{ marginLeft: 15 }}
+                  onClick={onCreateTestFile}
+                >
+                  Create test file
+                </Button>
+              )}
             </>
           )}
         </View>

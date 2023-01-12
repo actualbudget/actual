@@ -5,7 +5,7 @@ import { View, Button } from './common';
 
 const context = require.context('../svg/v1', false, /\.web.js$/);
 const modules = {};
-context.keys().forEach(function(key) {
+context.keys().forEach(function (key) {
   var module = context(key);
   modules[key] = module;
 });

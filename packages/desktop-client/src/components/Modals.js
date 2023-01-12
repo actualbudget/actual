@@ -8,6 +8,7 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
+import BudgetSummary from 'loot-design/src/components/modals/BudgetSummary';
 import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
 import ConfigureLinkedAccounts from 'loot-design/src/components/modals/ConfigureLinkedAccounts';
 import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
@@ -22,10 +23,9 @@ import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
 import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
-import ManageRules from './modals/ManageRules';
+import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import WelcomeScreen from './modals/WelcomeScreen';
-import ManagePayeesWithData from './payees/ManagePayeesWithData';
 
 function Modals({
   history,
@@ -151,25 +151,10 @@ function Modals({
         />
 
         <Route
-          path="/manage-payees"
-          render={() => {
-            return (
-              <ManagePayeesWithData
-                history={history}
-                modalProps={modalProps}
-                initialSelectedIds={
-                  options.selectedPayee ? [options.selectedPayee] : undefined
-                }
-              />
-            );
-          }}
-        />
-
-        <Route
           path="/manage-rules"
           render={() => {
             return (
-              <ManageRules
+              <ManageRulesModal
                 history={history}
                 modalProps={modalProps}
                 payeeId={options.payeeId}
@@ -269,6 +254,15 @@ function Modals({
 
         <Route path="/welcome-screen">
           <WelcomeScreen modalProps={modalProps} actions={actions} />
+        </Route>
+
+        <Route path="/budget-summary">
+          <BudgetSummary
+            key={name}
+            modalProps={modalProps}
+            month={options.month}
+            actions={actions}
+          />
         </Route>
       </Switch>
     );

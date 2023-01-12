@@ -65,16 +65,8 @@ function compileMessage(message, actions, setLoading, onRemove) {
 }
 
 function Notification({ notification, onRemove }) {
-  let {
-    id,
-    type,
-    title,
-    message,
-    messageActions,
-    sticky,
-    internal,
-    button
-  } = notification;
+  let { type, title, message, messageActions, sticky, internal, button } =
+    notification;
 
   let [loading, setLoading] = useState(false);
   let [overlayLoading, setOverlayLoading] = useState(false);
@@ -118,7 +110,7 @@ function Notification({ notification, onRemove }) {
           borderTop: `3px solid ${
             positive ? colors.g5 : error ? colors.r5 : colors.y4
           }`,
-          boxShadow: styles.shadowLarge,
+          ...styles.shadowLarge,
           maxWidth: 550,
 
           '& a': { color: 'currentColor' }

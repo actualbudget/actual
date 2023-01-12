@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { connect } from 'react-redux';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
+import { css, media } from 'glamor';
+
 import * as actions from 'loot-core/src/client/actions';
 import Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
@@ -16,12 +18,14 @@ import {
   P
 } from 'loot-design/src/components/common';
 import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import { colors } from 'loot-design/src/style';
+import { colors, styles } from 'loot-design/src/style';
 import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
 import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
 import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
+import tokens from 'loot-design/src/tokens';
 
+import { useServerURL } from '../hooks/useServerURL';
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
@@ -72,7 +76,7 @@ export function UncategorizedButton() {
   );
 }
 
-function SyncButton({ localPrefs, style, onSync }) {
+export function SyncButton({ localPrefs, style, onSync }) {
   let [syncing, setSyncing] = useState(false);
   let [syncState, setSyncState] = useState(null);
 
@@ -87,7 +91,7 @@ function SyncButton({ localPrefs, style, onSync }) {
         // instant
         setTimeout(() => {
           setSyncing(false);
-        }, 20);
+        }, 200);
       }
 
       if (type === 'error') {
@@ -112,10 +116,20 @@ function SyncButton({ localPrefs, style, onSync }) {
   return (
     <Button
       bare
-      style={[
+      style={css(
         style,
         {
           WebkitAppRegion: 'none',
+          color:
+            syncState === 'error'
+              ? colors.r7
+              : syncState === 'disabled' ||
+                syncState === 'offline' ||
+                syncState === 'local'
+              ? colors.n9
+              : null
+        },
+        media(`(min-width: ${tokens.breakpoint_medium})`, {
           color:
             syncState === 'error'
               ? colors.r4
@@ -124,8 +138,8 @@ function SyncButton({ localPrefs, style, onSync }) {
                 syncState === 'local'
               ? colors.n6
               : null
-        }
-      ]}
+        })
+      )}
       onClick={onSync}
     >
       {syncState === 'error' ? (
@@ -247,6 +261,7 @@ function Titlebar({
   sync
 }) {
   let sidebar = useSidebar();
+  const serverURL = useServerURL();
 
   return (
     <View
@@ -353,11 +368,13 @@ function Titlebar({
       </Switch>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <SyncButton
-        style={{ marginLeft: 10 }}
-        localPrefs={localPrefs}
-        onSync={sync}
-      />
+      {serverURL ? (
+        <SyncButton
+          style={{ marginLeft: 10 }}
+          localPrefs={localPrefs}
+          onSync={sync}
+        />
+      ) : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>
   );

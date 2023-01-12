@@ -6,28 +6,24 @@ async function getPayee(acct) {
 
 async function getTransferredAccount(transaction) {
   if (transaction.payee) {
-    let {
-      transfer_acct,
-      id
-    } = await db.first('SELECT id, transfer_acct FROM v_payees WHERE id = ?', [
-      transaction.payee
-    ]);
+    let { transfer_acct } = await db.first(
+      'SELECT id, transfer_acct FROM v_payees WHERE id = ?',
+      [transaction.payee]
+    );
     return transfer_acct;
   }
   return null;
 }
 
 async function clearCategory(transaction, transferAcct) {
-  const {
-    offbudget: fromOffBudget
-  } = await db.first('SELECT offbudget FROM accounts WHERE id = ?', [
-    transaction.account
-  ]);
-  const {
-    offbudget: toOffBudget
-  } = await db.first('SELECT offbudget FROM accounts WHERE id = ?', [
-    transferAcct
-  ]);
+  const { offbudget: fromOffBudget } = await db.first(
+    'SELECT offbudget FROM accounts WHERE id = ?',
+    [transaction.account]
+  );
+  const { offbudget: toOffBudget } = await db.first(
+    'SELECT offbudget FROM accounts WHERE id = ?',
+    [transferAcct]
+  );
 
   // We should clear the category to make sure it's not being
   // accounted for in the budget, unless it should be in the case of
@@ -40,11 +36,10 @@ async function clearCategory(transaction, transferAcct) {
 }
 
 export async function addTransfer(transaction, transferredAccount) {
-  let {
-    id: fromPayee
-  } = await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [
-    transaction.account
-  ]);
+  let { id: fromPayee } = await db.first(
+    'SELECT id FROM payees WHERE transfer_acct = ?',
+    [transaction.account]
+  );
 
   // We need to enforce certain constraints with child transaction transfers
   if (transaction.parent_id) {

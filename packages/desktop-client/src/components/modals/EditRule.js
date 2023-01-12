@@ -176,7 +176,7 @@ export function ConditionEditor({
   onDelete,
   onAdd
 }) {
-  let { field, op, value, type, options, error, inputKey } = condition;
+  let { field, op, value, type, options, error } = condition;
 
   if (field === 'amount' && options) {
     if (options.inflow) {
@@ -580,9 +580,7 @@ export default function EditRule({
 
       if (filters.length > 0) {
         let { data: transactions } = await runQuery(
-          q('transactions')
-            .filter({ $and: filters })
-            .select('*')
+          q('transactions').filter({ $and: filters }).select('*')
         );
         setTransactions(transactions);
       } else {

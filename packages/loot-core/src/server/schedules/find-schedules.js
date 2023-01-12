@@ -58,7 +58,6 @@ export function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
   for (let trans of baseOccur.transactions) {
     let threshold = getApproxNumberThreshold(trans.amount);
     let payee = trans.payee;
-    let account = trans.account;
 
     let found = occurs.map(occur => {
       let matched = occur.transactions.find(
@@ -113,7 +112,6 @@ async function schedulesForPattern(
 ) {
   let schedules = [];
 
-  let i = 0;
   for (let i = 0; i < numDays; i++) {
     let start = d.addDays(baseStart, i);
     let config;
@@ -306,9 +304,7 @@ async function findStartDate(schedule) {
     }
 
     let { data } = await aqlQuery(
-      q('transactions')
-        .filter({ $and: filters })
-        .select('*')
+      q('transactions').filter({ $and: filters }).select('*')
     );
 
     if (data.length === 0) {
@@ -342,9 +338,7 @@ export async function findSchedules() {
   // and find the best one...
 
   let { data: accounts } = await aqlQuery(
-    q('accounts')
-      .filter({ closed: false })
-      .select('*')
+    q('accounts').filter({ closed: false }).select('*')
   );
 
   let allSchedules = [];

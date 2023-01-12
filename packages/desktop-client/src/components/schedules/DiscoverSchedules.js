@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
-import Platform from 'loot-core/src/client/platform';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import {
   View,
   Stack,
-  Button,
   ButtonWithLoading,
   P
 } from 'loot-design/src/components/common';
@@ -26,13 +24,14 @@ import useSelected, {
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
 
-import { Page } from '../Page';
+import { Page, usePageType } from '../Page';
 import DisplayId from '../util/DisplayId';
 import { ScheduleAmountCell } from './SchedulesTable';
 
 let ROW_HEIGHT = 43;
 
 function DiscoverSchedulesTable({ schedules, loading }) {
+  let pageType = usePageType();
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
 
@@ -100,9 +99,12 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
-        backgroundColor="transparent"
         version="v2"
-        style={{ flex: 1, backgroundColor: 'transparent' }}
+        backgroundColor={pageType.type === 'modal' ? 'transparent' : undefined}
+        style={{
+          flex: 1,
+          backgroundColor: pageType.type === 'modal' ? 'transparent' : undefined
+        }}
         items={schedules}
         loading={loading}
         isSelected={id => selectedItems.has(id)}
@@ -114,7 +116,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
 }
 
 export default function DiscoverSchedules() {
-  let location = useLocation();
+  let pageType = usePageType();
   let history = useHistory();
   let [schedules, setSchedules] = useState();
   let [creating, setCreating] = useState(false);
@@ -129,7 +131,6 @@ export default function DiscoverSchedules() {
   }, []);
 
   async function onCreate() {
-    let items = selectedInst.items;
     let selected = schedules.filter(s => selectedInst.items.has(s.id));
     setCreating(true);
 
@@ -145,9 +146,7 @@ export default function DiscoverSchedules() {
 
       if (filters.length > 0) {
         let { data: transactions } = await runQuery(
-          q('transactions')
-            .filter({ $and: filters })
-            .select('id')
+          q('transactions').filter({ $and: filters }).select('id')
         );
         await send('transactions-batch-update', {
           updated: transactions.map(t => ({
@@ -174,11 +173,7 @@ export default function DiscoverSchedules() {
         on all transactions for a schedule to be the same payee.
       </P>
       <P>
-        You can always do this later
-        {Platform.isBrowser
-          ? ' from the "Find schedules" item in the sidebar menu'
-          : ' from the "Tools > Find schedules" menu item'}
-        .
+        You can always do this later from “More Tools” &rarr; “Find Schedules.”
       </P>
 
       <SelectedProvider instance={selectedInst}>
@@ -192,9 +187,11 @@ export default function DiscoverSchedules() {
         direction="row"
         align="center"
         justify="flex-end"
-        style={{ paddingTop: 20 }}
+        style={{
+          paddingTop: 20,
+          paddingBottom: pageType.type === 'modal' ? 0 : 20
+        }}
       >
-        <Button onClick={() => history.goBack()}>Do nothing</Button>
         <ButtonWithLoading
           primary
           loading={creating}

@@ -114,7 +114,3 @@ export function useLiveQuery(query, opts) {
 
   return { data };
 }
-
-function usePagedQuery(query) {
-  // TODO
-}

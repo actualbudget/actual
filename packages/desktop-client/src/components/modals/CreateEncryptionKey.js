@@ -23,7 +23,6 @@ export default function CreateEncryptionKey({
   budgetId,
   options = {}
 }) {
-  let [enabling, setEnabling] = useState(false);
   let [password, setPassword] = useState('');
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState('');

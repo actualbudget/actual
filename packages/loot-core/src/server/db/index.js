@@ -612,38 +612,6 @@ export async function getTransaction(id) {
   return rows[0];
 }
 
-function _addFragmentForAccount(accountId, addWhere, options = {}) {
-  let { showClosed = false, showOffbudget = true } = options;
-
-  let fragment = addWhere ? ' WHERE (' : ' AND ';
-  let params = [];
-
-  if (accountId) {
-    if (accountId === 'offbudget') {
-      fragment += 'a.closed = 0 AND a.offbudget = 1 ';
-    } else if (accountId === 'budgeted') {
-      fragment += 'a.closed = 0 AND a.offbudget = 0 ';
-    } else if (accountId === 'uncategorized') {
-      fragment += `
-          t.category IS NULL AND a.offbudget = 0 AND isParent = 0 AND (
-            ta.offbudget IS NULL OR ta.offbudget = 1
-          )
-        `;
-    } else {
-      fragment += 'a.id = ? ';
-      params.push(accountId);
-    }
-  } else {
-    fragment += showClosed ? '1' : 'a.closed = 0';
-
-    if (!showOffbudget) {
-      fragment += ' AND a.offbudget = 0';
-    }
-  }
-
-  return { fragment, params };
-}
-
 export async function getTransactionsByDate(
   accountId,
   startDate,

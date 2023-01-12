@@ -132,6 +132,7 @@ function parseAnd(state) {
 function parseNot(state) {
   let left = parseCompare(state);
   while (skipValue(state, types.TOKEN_OPERATOR, 'not')) {
+    // eslint-disable-next-line no-unused-vars
     const right = parseCompare(state);
     left = new nodes.UnaryOp(left.lineno, left.colno, 'not', parseNot(state));
   }
@@ -221,7 +222,6 @@ function parseUnary(state) {
 function parsePrimary(state) {
   var tok = nextToken(state);
   var val = null;
-  var node = null;
 
   if (!tok) {
     fail(state, 'expected expression, got end of file');

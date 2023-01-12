@@ -6,8 +6,6 @@ import {
   runQuery
 } from './index.web';
 
-let os = require('os');
-
 beforeAll(() => {
   process.env.PUBLIC_URL =
     __dirname + '/../../../../../../node_modules/@jlongster/sql.js/dist/';

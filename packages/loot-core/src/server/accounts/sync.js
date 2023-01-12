@@ -13,7 +13,6 @@ import title from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 
-const levenshtein = require('damerau-levenshtein');
 const dateFns = require('date-fns');
 
 const uuid = require('../../platform/uuid');
@@ -331,7 +330,7 @@ export async function reconcileTransactions(acctId, transactions) {
   });
 
   // Finally, generate & commit the changes
-  for (let { payee_name, trans, subtransactions, match } of transactionsStep3) {
+  for (let { trans, subtransactions, match } of transactionsStep3) {
     if (match) {
       // TODO: change the above sql query to use aql
       let existing = {
@@ -395,7 +394,7 @@ export async function addTransactions(
     { rawPayeeName: true }
   );
 
-  for (let { payee_name, trans, subtransactions } of normalized) {
+  for (let { trans, subtransactions } of normalized) {
     // Run the rules
     trans = runRules(trans);
 
