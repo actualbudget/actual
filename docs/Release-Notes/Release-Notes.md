@@ -2,6 +2,50 @@
 title: Releases Notes
 ---
 
+## 23.1.12
+**Docker tag: 23.1.12**
+
+The release has notable of improvements of:
+* Read-only responsive view, this replaces our mobile apps, it is notable that this is read only only at this stage.
+* Improvements to the sidebar design
+
+### Actual 
+Version: 23.1.12
+    
+#### Features
+* [#403](https://github.com/actualbudget/actual/pull/403) Replace URLs to point to https://actualbudget.github.io/docs -- thanks [shall0pass](https://github.com/shall0pass)
+* [#413](https://github.com/actualbudget/actual/pull/413) feat: allow creating test budget in netlify deployments -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#420](https://github.com/actualbudget/actual/pull/420) feat: creating test budget on the config page -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#426](https://github.com/actualbudget/actual/pull/426) Move “Find schedules” to a button on the Schedules page [j-f1](https://github.com/j-f1)
+* [#435](https://github.com/actualbudget/actual/pull/435) Read-only Responsive view -- thanks [trevdor](https://github.com/trevdor) 
+* [#440](https://github.com/actualbudget/actual/pull/440) Further iteration on the sidebar design -- thanks [j-f1](https://github.com/j-f1) 
+
+#### Bugfix
+* [#423](https://github.com/actualbudget/actual/pull/423) Improve handling of “no server” state -- thanks [j-f1](https://github.com/j-f1) 
+* [#430](https://github.com/actualbudget/actual/pull/430) fix: select date filtering by month #406 🚑 -- thanks [iurynogueira](https://github.com/iurynogueira) 
+* [#441](https://github.com/actualbudget/actual/pull/441) Fix overlap of version info and server URL -- thanks [trevdor](https://github.com/trevdor)
+
+#### Maintenance
+* [#401](https://github.com/actualbudget/actual/pull/401) Update git attributes for better End of Line handling -- thanks [winklevos](https://github.com/winklevos)
+* [#412](https://github.com/actualbudget/actual/pull/412) test: re-enable skipped unit tests -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#415](https://github.com/actualbudget/actual/pull/415) chore: fix eslint issues and make warnings CI blocking -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#418](https://github.com/actualbudget/actual/pull/418) fix: some react warnings -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#421](https://github.com/actualbudget/actual/pull/421) chore: remove unused variables -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#425](https://github.com/actualbudget/actual/pull/425) fix: re-disable no-unused-vars eslint rule -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#428](https://github.com/actualbudget/actual/pull/428) chore: remove more unused variables -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#429](https://github.com/actualbudget/actual/pull/429) prune: remove unused icons -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#431](https://github.com/actualbudget/actual/pull/431) prune: remove unused variables -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#434](https://github.com/actualbudget/actual/pull/434) Split the Settings component into multiple files -- thanks [j-f1](https://github.com/j-f1)
+* [#437](https://github.com/actualbudget/actual/pull/437) chore: remove unsed vars & cleanups -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#439](https://github.com/actualbudget/actual/pull/439) docs: add netlify as sponsors to README -- thanks [MatissJanis](https://github.com/MatissJanis) 
+* [#442](https://github.com/actualbudget/actual/pull/442) 🔥 removal of react-native mobile apps -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#443](https://github.com/actualbudget/actual/pull/443) ⬆️ upgrade prettier and fix new issues -- thanks [MatissJanis](https://github.com/MatissJanis)
+
+### Actual Server 
+Version: 23.1.12
+
+No pull requests were merged in this release.
+
 ## 22.12.03
 **Docker tag: 22.12.9**
 
