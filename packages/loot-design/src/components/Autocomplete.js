@@ -33,6 +33,29 @@ function getItemId(item) {
   return item ? item.id : null;
 }
 
+function _getInitialState({
+  value,
+  suggestions,
+  embedded,
+  isOpen = false,
+  strict,
+  initialFilterSuggestions
+}) {
+  let selectedItem = findItem(strict, suggestions, value);
+  let filteredSuggestions = initialFilterSuggestions
+    ? initialFilterSuggestions(suggestions, value)
+    : null;
+
+  return {
+    selectedItem,
+    value: selectedItem ? getItemName(selectedItem) : '',
+    originalItem: selectedItem,
+    filteredSuggestions,
+    highlightedIndex: null,
+    isOpen: embedded || isOpen,
+    lastChangeType: null
+  };
+}
 function getInitialState({
   props: {
     value,
@@ -214,6 +237,49 @@ function onInputValueChange(
       filteredSuggestions,
       highlightedIndex
     };
+  }
+}
+
+function _onStateChange(
+  changes,
+  tableBehavior,
+  embedded,
+  onUpdate,
+  strict,
+  suggestions,
+  state,
+  setState
+) {
+  if (tableBehavior && changes.type === Downshift.stateChangeTypes.mouseUp) {
+    return;
+  }
+
+  const { isOpen, highlightedIndex, selectedItem } = changes;
+  setState(prevState => ({
+    ...prevState,
+    highlightedIndex: highlightedIndex || prevState.highlightedIndex,
+    isOpen: embedded ? true : isOpen || prevState.isOpen,
+    selectedItem: selectedItem || prevState.selectedItem,
+    lastChangeType: changes.type
+  }));
+
+  // We only ever want to update the value if the user explicitly
+  // highlighted an item via the keyboard. It shouldn't change with
+  // mouseover; otherwise the user could accidentally hover over an
+  // item without realizing it and change the value.
+  const isHighlightedWithKeyboardChange =
+    state.isOpen &&
+    (changes.type === Downshift.stateChangeTypes.keyDownArrowUp ||
+      changes.type === Downshift.stateChangeTypes.keyDownArrowDown);
+
+  if (isHighlightedWithKeyboardChange) {
+    fireUpdate(
+      onUpdate,
+      strict,
+      state.filteredSuggestions || suggestions,
+      state.highlightedIndex,
+      state.value
+    );
   }
 }
 
@@ -459,6 +525,126 @@ function defaultItemToString(item) {
   return item ? getItemName(item) : '';
 }
 
+const _ESingleAutocomplete = ({
+  value,
+  focused,
+  embedded,
+  containerProps,
+  inputProps,
+  children,
+  selectedItem,
+  tableBehavior,
+  suggestions,
+  filteredSuggestions,
+  initialFilterSuggestions,
+  tooltipStyle,
+  onItemClick,
+  isOpen,
+  strict,
+  onUpdate,
+  tooltipProps,
+  renderInput = defaultRenderInput,
+  renderItems = defaultRenderItems,
+  itemToString = defaultItemToString
+}) => {
+  const [state, setState] = useState(() =>
+    _getInitialState({
+      value,
+      suggestions,
+      embedded,
+      isOpen,
+      strict,
+      initialFilterSuggestions
+    })
+  );
+
+  const filtered = filteredSuggestions || filteredSuggestions;
+
+  return (
+    <Downshift
+      onSelect={updater(onSelect)}
+      highlightedIndex={state.highlightedIndex}
+      selectedItem={selectedItem || null}
+      itemToString={itemToString}
+      inputValue={value}
+      isOpen={isOpen}
+      onInputValueChange={updater(onInputValueChange)}
+      onStateChange={changes => {
+        _onStateChange(
+          changes,
+          tableBehavior,
+          embedded,
+          onUpdate,
+          strict,
+          suggestions,
+          state,
+          setState
+        );
+      }}
+    >
+      {({
+        getInputProps,
+        getItemProps,
+        getRootProps,
+        isOpen,
+        inputValue,
+        selectedItem,
+        highlightedIndex
+      }) => (
+        // Super annoying but it works best to return a div so we
+        // can't use a View here, but we can fake it be using the
+        // className
+        <div
+          className={'view ' + css({ display: 'flex' }).toString()}
+          {...containerProps}
+        >
+          {renderInput(
+            getInputProps({
+              focused,
+              ...inputProps,
+              onFocus: updater(onFocus),
+              onBlur: updater(onBlur),
+              onKeyDown: updater(onKeyDown),
+              onChange: updater(onChange)
+            })
+          )}
+          {isOpen &&
+            filtered.length > 0 &&
+            (embedded ? (
+              <View style={{ marginTop: 5 }} data-testid="autocomplete">
+                {renderItems(
+                  filtered,
+                  getItemProps,
+                  highlightedIndex,
+                  inputValue
+                )}
+              </View>
+            ) : (
+              <Tooltip
+                position="bottom-stretch"
+                offset={2}
+                style={{
+                  padding: 0,
+                  backgroundColor: colors.n1,
+                  color: 'white',
+                  ...tooltipStyle
+                }}
+                {...tooltipProps}
+                data-testid="autocomplete"
+              >
+                {renderItems(
+                  filtered,
+                  getItemProps,
+                  highlightedIndex,
+                  inputValue
+                )}
+              </Tooltip>
+            ))}
+        </div>
+      )}
+    </Downshift>
+  );
+};
 function _SingleAutocomplete({
   props: {
     focused,
