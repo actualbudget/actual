@@ -1,5 +1,3 @@
-/* global globalThis */
-
 let hasInitialized = false;
 
 self.addEventListener('message', e => {
