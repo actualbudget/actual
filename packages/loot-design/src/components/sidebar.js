@@ -483,6 +483,7 @@ const MenuButton = withRouter(function MenuButton({ history }) {
       }}
       activeStyle={{ color: colors.p7 }}
       onClick={() => setMenuOpen(true)}
+      aria-label="Menu"
     >
       <DotsHorizontalTriple
         width={15}
