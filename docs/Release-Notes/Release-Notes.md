@@ -41,7 +41,8 @@ Version: 23.1.xx
 * [#439](https://github.com/actualbudget/actual/pull/439) docs: add netlify as sponsors to README -- thanks [MatissJanis](https://github.com/MatissJanis) 
 * [#440](https://github.com/actualbudget/actual/pull/440) Further iteration on the sidebar design -- thanks [j-f1](https://github.com/j-f1) 
 * [#441](https://github.com/actualbudget/actual/pull/441) Fix overlap of version info and server URL -- thanks [trevdor](https://github.com/trevdor)
-* [#443](https://github.com/actualbudget/actual/pull/443) 🔥 removal of react-native mobile apps -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#442](https://github.com/actualbudget/actual/pull/442) 🔥 removal of react-native mobile apps -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#443](https://github.com/actualbudget/actual/pull/443) ⬆️ upgrade prettier and fix new issues -- thanks [MatissJanis](https://github.com/MatissJanis)
 
 ### Actual Server 
 Version: 23.1.xx
