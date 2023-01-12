@@ -55,6 +55,7 @@ __metadata:
     "@babel/core": ~7.14.3
     "@jlongster/lively": 0.0.4
     "@jlongster/sentry-metrics-actual": ^0.0.10
+    "@playwright/test": ^1.29.1
     "@pmmmwh/react-refresh-webpack-plugin": ^0.4.2
     "@reach/listbox": ^0.11.2
     "@react-aria/focus": ^3.8.0
@@ -3213,6 +3214,18 @@ __metadata:
     d3: ^6.7.0
     isoformat: ^0.1.0
   checksum: 02935dc844a488ef291a26ca1b4c14d29941ad5b2225710052699ca5a9c56cf31764e32ca39f4b20208ed4c2ff027e08a36c295bc1e66d054766926f4e069a80
+  languageName: node
+  linkType: hard
+
+"@playwright/test@npm:^1.29.1":
+  version: 1.29.1
+  resolution: "@playwright/test@npm:1.29.1"
+  dependencies:
+    "@types/node": "*"
+    playwright-core: 1.29.1
+  bin:
+    playwright: cli.js
+  checksum: c4424ee09f6589a296a3a78402f8c9eac841f3e5f44d96e3a2ba07aaa00d53ee9c10cc96379b304743a9e70f231df0ded0ad2fc197f412ada67b4cf17ee24b0f
   languageName: node
   linkType: hard
 
@@ -18202,6 +18215,15 @@ __metadata:
   dependencies:
     find-up: ^3.0.0
   checksum: 5bac346b7c7c903613c057ae3ab722f320716199d753f4a7d053d38f2b5955460f3e6ab73b4762c62fd3e947f58e04f1343e92089e7bb6091c90877406fcd8c8
+  languageName: node
+  linkType: hard
+
+"playwright-core@npm:1.29.1":
+  version: 1.29.1
+  resolution: "playwright-core@npm:1.29.1"
+  bin:
+    playwright: cli.js
+  checksum: e1c8423db4d28f44e5365a353f321b04a07709c8bf26d0c908f06d2c2669f715315170f84ca98a532951c2ac6324f5f48f651dca1abe43092c7637bdb4703303
   languageName: node
   linkType: hard
 
