@@ -95,18 +95,14 @@ export async function getRuleForSchedule(id) {
   }
 
   let { data: ruleId } = await aqlQuery(
-    q('schedules')
-      .filter({ id })
-      .calculate('rule')
+    q('schedules').filter({ id }).calculate('rule')
   );
   return getRules().find(rule => rule.id === ruleId);
 }
 
 export async function fixRuleForSchedule(id) {
   let { data: ruleId } = await aqlQuery(
-    q('schedules')
-      .filter({ id })
-      .calculate('rule')
+    q('schedules').filter({ id }).calculate('rule')
   );
 
   if (ruleId) {
@@ -141,9 +137,7 @@ export async function setNextDate({ id, start, conditions, reset }) {
   let { date: dateCond } = extractScheduleConds(conditions);
 
   let { data: nextDate } = await aqlQuery(
-    q('schedules')
-      .filter({ id })
-      .calculate('next_date')
+    q('schedules').filter({ id }).calculate('next_date')
   );
 
   // Only do this if a date condition exists
@@ -293,9 +287,7 @@ export async function updateSchedule({ schedule, conditions, resetNextDate }) {
 
 export async function deleteSchedule({ id }) {
   let { data: ruleId } = await aqlQuery(
-    q('schedules')
-      .filter({ id })
-      .calculate('rule')
+    q('schedules').filter({ id }).calculate('rule')
   );
 
   await batchMessages(async () => {
@@ -393,11 +385,7 @@ function onApplySync(oldValues, newValues) {
 // posts transactions
 
 async function postTransactionForSchedule({ id }) {
-  let { data } = await aqlQuery(
-    q('schedules')
-      .filter({ id })
-      .select('*')
-  );
+  let { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   let schedule = data[0];
   if (schedule == null || schedule._account == null) {
     return;

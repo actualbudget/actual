@@ -92,12 +92,8 @@ export default () => (
         let [items, setItems] = useState(() => {
           return [...people];
         });
-        let {
-          onEdit,
-          editingId,
-          focusedField,
-          getNavigatorProps
-        } = useTableNavigator(items, getFields);
+        let { onEdit, editingId, focusedField, getNavigatorProps } =
+          useTableNavigator(items, getFields);
 
         function onUpdate(id, name, value) {
           let idx = items.findIndex(item => item.id === id);

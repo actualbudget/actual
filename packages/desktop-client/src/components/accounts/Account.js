@@ -1823,9 +1823,10 @@ export default function Account(props) {
   }));
 
   let dispatch = useDispatch();
-  let actionCreators = useMemo(() => bindActionCreators(actions, dispatch), [
-    dispatch
-  ]);
+  let actionCreators = useMemo(
+    () => bindActionCreators(actions, dispatch),
+    [dispatch]
+  );
 
   let params = useParams();
   let location = useLocation();
