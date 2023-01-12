@@ -2,15 +2,15 @@
 title: Releases Notes
 ---
 
-## 23.1.xx
-**Docker tag: 23.1.xx**
+## 23.1.12
+**Docker tag: 23.1.12**
 
 The release has notable of improvements of:
 * Read-only responsive view, this replaces our mobile apps, it is notable that this is read only only at this stage.
 * Improvements to the sidebar design
 
 ### Actual 
-Version: 23.1.xx
+Version: 23.1.12
     
 #### Features
 * [#403](https://github.com/actualbudget/actual/pull/403) Replace URLs to point to https://actualbudget.github.io/docs -- thanks [shall0pass](https://github.com/shall0pass)
@@ -42,7 +42,7 @@ Version: 23.1.xx
 * [#443](https://github.com/actualbudget/actual/pull/443) ⬆️ upgrade prettier and fix new issues -- thanks [MatissJanis](https://github.com/MatissJanis)
 
 ### Actual Server 
-Version: 23.1.xx
+Version: 23.1.12
 
 No pull requests were merged in this release.
 
