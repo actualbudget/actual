@@ -30,7 +30,7 @@
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
     "lint": "yarn workspaces foreach --verbose run lint --max-warnings 0",
-    "postinstall": "rm -rf ./packages/loot-design/node_modules/react && rm -rf ./packages/mobile/node_modules/react && rm -rf ./node_modules/react-native && patch-package"
+    "postinstall": "rm -rf ./packages/loot-design/node_modules/react && rm -rf ./node_modules/react-native && patch-package"
   },
   "devDependencies": {
     "cross-env": "^5.1.5",
@@ -39,6 +39,7 @@
     "patch-package": "^6.1.2",
     "prettier": "^1.18.1",
     "pretty-quick": "^1.11.1",
+    "react-refresh": "^0.14.0",
     "shelljs": "^0.8.2",
     "source-map-support": "^0.5.21"
   },

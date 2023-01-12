@@ -42,25 +42,22 @@
     "react-dnd": "^10.0.2",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.4.4",
+    "react-native": "0.65.1",
+    "react-native-gesture-handler": "1.10.3",
     "react-spring": "^8.0.27",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
-    "start:mobile": "IS_REACT_NATIVE=1 react-scripts start",
     "test": "npm-run-all -cp 'test:*'",
     "test:web": "jest -c jest.config.js",
-    "test:react-native": "jest -c jest.rn.config.js",
     "lint": "eslint src"
   },
   "homepage": "./",
   "manifest": "manifest.json",
   "pathAliases": {
-    "react-native-gesture-handler": "./src/guide/mocks/react-native-gesture-handler.js",
-    "react-native-reanimated": "./src/guide/mocks/react-native-reanimated.js",
     "react-art": "../../node_modules/node-noop",
-    "react-native": "./node_modules/react-native-web",
-    "react-native-status-bar-height": "./src/guide/mocks/react-native-status-bar-height.js"
+    "react-native": "./node_modules/react-native-web"
   },
   "browserslist": [
     "electron 3.0"

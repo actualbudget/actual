@@ -24,7 +24,6 @@ import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import SyncRefresh from '../SyncRefresh';
 import { default as AccountDetails } from './MobileAccountDetails';
-// import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
@@ -236,7 +235,6 @@ function Account(props) {
         <SchedulesProvider
           transform={getSchedulesTransform(accountId, searchText !== '')}
         >
-          {/* <FocusAwareStatusBar barStyle="dark-content" animated={true} /> // TODO: how to do this on web? */}
           <PreviewTransactions accountId={props.accountId}>
             {prependTransactions =>
               prependTransactions == null ? null : (

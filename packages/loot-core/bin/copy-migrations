@@ -12,9 +12,3 @@ $(
   cp ../../loot-core/default-db.sqlite ./data;
   cd data && find * -type f | sort > ../data-file-index.txt;
 )
-
-# Copy them to the mobile app
-rsync -av --delete ../migrations/ ../../mobile/nodejs-assets/nodejs-project/data/migrations
-
-
-
