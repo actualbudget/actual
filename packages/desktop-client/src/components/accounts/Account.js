@@ -281,7 +281,7 @@ function AccountMenu({
         onMenuSelect={onMenuSelect}
         items={[
           { name: 'rename', text: 'Rename Account' },
-          { name: 'export', text: 'Export' },
+          { name: 'export', text: 'Export All Transactions' },
           syncEnabled &&
             account &&
             !account.closed &&
