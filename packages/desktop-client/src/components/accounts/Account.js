@@ -40,6 +40,7 @@ import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
 import NotesButton from 'loot-design/src/components/NotesButton';
 import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import format from 'loot-design/src/components/spreadsheet/format';
+import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
 import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
 import { SelectedItemsButton } from 'loot-design/src/components/table';
 import {
@@ -50,7 +51,6 @@ import { styles, colors } from 'loot-design/src/style';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import Add from 'loot-design/src/svg/v1/Add';
 import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
-import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
 import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
 import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
@@ -227,9 +227,7 @@ function AccountNameWithMenu({
   onCloseMenu,
   onReconcile,
   canSync,
-  syncEnabled,
-  showBalances,
-  canCalculateBalance
+  syncEnabled
 }) {
   return (
     <Button
@@ -245,8 +243,6 @@ function AccountNameWithMenu({
             account={account}
             canSync={canSync}
             syncEnabled={syncEnabled}
-            canShowBalances={canCalculateBalance()}
-            showBalances={showBalances}
             onMenuSelect={onMenuSelect}
             onReconcile={onReconcile}
             onClose={onCloseMenu}
@@ -275,11 +271,41 @@ function AccountMenu({
   account,
   canSync,
   syncEnabled,
-  showBalances,
-  canShowBalances,
   onClose,
   onReconcile,
   onMenuSelect
+}) {
+  return (
+    <MenuTooltip onClose={onClose}>
+      <Menu
+        onMenuSelect={onMenuSelect}
+        items={[
+          { name: 'rename', text: 'Rename Account' },
+          { name: 'export', text: 'Export' },
+          syncEnabled &&
+            account &&
+            !account.closed &&
+            (canSync
+              ? { name: 'unlink', text: 'Unlink Account' }
+              : { name: 'link', text: 'Link Account' }),
+          account.closed
+            ? { name: 'reopen', text: 'Reopen Account' }
+            : { name: 'close', text: 'Close Account' }
+        ].filter(x => x)}
+      />
+    </MenuTooltip>
+  );
+}
+
+function BalanceMenu({
+  account,
+  showRunningBalances,
+  canShowRunningBalances,
+  onClose,
+  onReconcile,
+  onMenuSelect,
+  showExtraBalances,
+  onToggleExtraBalances
 }) {
   let [tooltip, setTooltip] = useState('default');
 
@@ -293,29 +319,31 @@ function AccountMenu({
     <MenuTooltip onClose={onClose}>
       <Menu
         onMenuSelect={item => {
-          if (item === 'reconcile') {
-            setTooltip('reconcile');
-          } else {
-            onMenuSelect(item);
+          switch (item) {
+            case 'reconcile':
+              setTooltip('reconcile');
+              break;
+            case 'toggle-totals':
+              onClose();
+              onToggleExtraBalances();
+              break;
+            default:
+              onClose();
+              onMenuSelect(item);
           }
         }}
         items={[
-          { name: 'rename', text: 'Rename Account' },
-          canShowBalances && {
-            name: 'toggle-balance',
-            text: (showBalances ? 'Hide' : 'Show') + ' Running Balance'
+          {
+            name: 'toggle-totals',
+            text:
+              (showExtraBalances ? 'Hide' : 'Show') +
+              ' Cleared/Uncleared Totals'
           },
-          { name: 'export', text: 'Export' },
-          { name: 'reconcile', text: 'Reconcile' },
-          syncEnabled &&
-            account &&
-            !account.closed &&
-            (canSync
-              ? { name: 'unlink', text: 'Unlink Account' }
-              : { name: 'link', text: 'Link Account' }),
-          account.closed
-            ? { name: 'reopen', text: 'Reopen Account' }
-            : { name: 'close', text: 'Close Account' }
+          canShowRunningBalances && {
+            name: 'toggle-balance',
+            text: (showRunningBalances ? 'Hide' : 'Show') + ' Running Balance'
+          },
+          account && { name: 'reconcile', text: 'Reconcile' }
         ].filter(x => x)}
       />
     </MenuTooltip>
@@ -403,8 +431,22 @@ function MoreBalances({ balanceQuery }) {
   );
 }
 
-function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
+function Balances({
+  account,
+  balanceQuery,
+  showExtraBalances,
+  onToggleExtraBalances,
+  showRunningBalances,
+  canCalculateBalance,
+  onReconcile,
+  onMenuSelect
+}) {
+  let [menuOpen, setMenuOpen] = useState(false);
   let selectedItems = useSelectedItems();
+
+  let colorByValue = value => ({
+    color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8
+  });
 
   return (
     <View
@@ -415,34 +457,39 @@ function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
         marginLeft: -1
       }}
     >
-      <Button
-        bare
-        onClick={onToggleExtraBalances}
-        style={{
-          '& svg': {
-            opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0
-          },
-          '&:hover svg': { opacity: 1 }
-        }}
-      >
+      <Button bare onClick={() => setMenuOpen(true)}>
         <CellValue
           binding={{ ...balanceQuery, value: 0 }}
           type="financial"
           style={{ fontSize: 22, fontWeight: 400 }}
-          getStyle={value => ({
-            color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8
-          })}
+          getStyle={colorByValue}
         />
 
-        <ArrowButtonRight1
-          style={{
-            width: 10,
-            height: 10,
-            marginLeft: 10,
-            color: colors.n5,
-            transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)'
-          }}
-        />
+        <SheetValue binding={{ ...balanceQuery, value: 0 }}>
+          {({ value }) => (
+            <ExpandArrow
+              style={{
+                width: 10,
+                height: 10,
+                marginLeft: 10,
+                ...colorByValue(value)
+              }}
+            />
+          )}
+        </SheetValue>
+
+        {menuOpen && (
+          <BalanceMenu
+            account={account}
+            showRunningBalances={showRunningBalances}
+            canShowRunningBalances={canCalculateBalance()}
+            onClose={() => setMenuOpen(false)}
+            onReconcile={onReconcile}
+            onMenuSelect={onMenuSelect}
+            showExtraBalances={showExtraBalances}
+            onToggleExtraBalances={onToggleExtraBalances}
+          />
+        )}
       </Button>
       {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
 
@@ -676,6 +723,25 @@ const AccountHeader = React.memo(
       }
     }
 
+    let accountNameElement = (
+      <AccountNameWithMenu
+        menuOpen={menuOpen}
+        accountName={accountName}
+        account={account}
+        onMenuSelect={item => {
+          setMenuOpen(false);
+          onMenuSelect(item);
+        }}
+        onOpenMenu={() => setMenuOpen(true)}
+        onCloseMenu={() => setMenuOpen(false)}
+        onReconcile={onReconcile}
+        canSync={canSync}
+        syncEnabled={syncEnabled}
+        showBalances={showBalances}
+        canCalculateBalance={canCalculateBalance}
+      />
+    );
+
     return (
       <>
         <KeyHandlers
@@ -723,50 +789,25 @@ const AccountHeader = React.memo(
                     }
                   }}
                 >
-                  <AccountNameWithMenu
-                    menuOpen={menuOpen}
-                    accountName={accountName}
-                    account={account}
-                    onMenuSelect={item => {
-                      setMenuOpen(false);
-                      onMenuSelect(item);
-                    }}
-                    onOpenMenu={() => setMenuOpen(true)}
-                    onCloseMenu={() => setMenuOpen(false)}
-                    onReconcile={onReconcile}
-                    canSync={canSync}
-                    syncEnabled={syncEnabled}
-                    showBalances={showBalances}
-                    canCalculateBalance={canCalculateBalance}
-                  />
+                  {accountNameElement}
 
                   <NotesButton id={`account-${account.id}`} />
                 </View>
               ) : (
-                <AccountNameWithMenu
-                  menuOpen={menuOpen}
-                  accountName={accountName}
-                  account={account}
-                  onMenuSelect={item => {
-                    setMenuOpen(false);
-                    onMenuSelect(item);
-                  }}
-                  onOpenMenu={() => setMenuOpen(true)}
-                  onCloseMenu={() => setMenuOpen(false)}
-                  onReconcile={onReconcile}
-                  canSync={canSync}
-                  syncEnabled={syncEnabled}
-                  showBalances={showBalances}
-                  canCalculateBalance={canCalculateBalance}
-                />
+                accountNameElement
               )}
             </View>
           </View>
 
           <Balances
+            account={account}
             balanceQuery={balanceQuery}
             showExtraBalances={showExtraBalances}
             onToggleExtraBalances={onToggleExtraBalances}
+            showRunningBalances={showBalances}
+            canCalculateBalance={canCalculateBalance}
+            onReconcile={onReconcile}
+            onMenuSelect={onMenuSelect}
           />
 
           <Stack
