@@ -269,7 +269,7 @@ app.on('ready', async () => {
 
     const pathname = parsedUrl.pathname;
 
-    if (pathname.startsWith('/static') || pathname.startsWith('/Inter')) {
+    if (pathname.startsWith('/static')) {
       callback({
         path: path.normalize(`${__dirname}/client-build${pathname}`)
       });

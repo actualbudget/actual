@@ -234,7 +234,7 @@ function ScheduleValue({ value }) {
       data={schedules}
       describe={s => {
         let payeeId = s._payee;
-        return payeeId
+        return byId[payeeId]
           ? `${byId[payeeId].name} (${s.next_date})`
           : `Next: ${s.next_date}`;
       }}
