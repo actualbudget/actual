@@ -50,13 +50,11 @@ import { styles, colors } from 'loot-design/src/style';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import Add from 'loot-design/src/svg/v1/Add';
 import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
-import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
 import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
 import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
 import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
-import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
 import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 
 import { authorizeBank } from '../../plaid';
@@ -240,7 +238,7 @@ function AccountNameWithMenu({
       style={{ marginRight: 5, marginBottom: 5 }}
     >
       <View style={{ fontSize: 25, fontWeight: 500 }}>{accountName}</View>
-      <ExpandArrow width={11} height={11} style={{ marginInline: 5 }} />
+      <ExpandArrow width={9} height={9} style={{ marginInline: 5 }} />
       {menuOpen &&
         (account ? (
           <AccountMenu
