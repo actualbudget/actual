@@ -225,7 +225,6 @@ function AccountNameWithMenu({
   onMenuSelect,
   onOpenMenu,
   onCloseMenu,
-  onReconcile,
   canSync,
   syncEnabled
 }) {
@@ -237,19 +236,27 @@ function AccountNameWithMenu({
     >
       <View style={{ fontSize: 25, fontWeight: 500 }}>{accountName}</View>
       <ExpandArrow width={9} height={9} style={{ marginInline: 5 }} />
-      {menuOpen &&
-        (account ? (
-          <AccountMenu
-            account={account}
-            canSync={canSync}
-            syncEnabled={syncEnabled}
+      {menuOpen && (
+        <MenuTooltip onClose={onCloseMenu}>
+          <Menu
             onMenuSelect={onMenuSelect}
-            onReconcile={onReconcile}
-            onClose={onCloseMenu}
+            items={[
+              account && { name: 'rename', text: 'Rename Account' },
+              { name: 'export', text: 'Export All Transactions' },
+              syncEnabled &&
+                account &&
+                !account.closed &&
+                (canSync
+                  ? { name: 'unlink', text: 'Unlink Account' }
+                  : { name: 'link', text: 'Link Account' }),
+              account &&
+                (account.closed
+                  ? { name: 'reopen', text: 'Reopen Account' }
+                  : { name: 'close', text: 'Close Account' })
+            ].filter(x => x)}
           />
-        ) : (
-          <CategoryMenu onMenuSelect={onMenuSelect} onClose={onCloseMenu} />
-        ))}
+        </MenuTooltip>
+      )}
     </Button>
   );
 }
@@ -264,36 +271,6 @@ function MenuTooltip({ onClose, children }) {
     >
       {children}
     </Tooltip>
-  );
-}
-
-function AccountMenu({
-  account,
-  canSync,
-  syncEnabled,
-  onClose,
-  onReconcile,
-  onMenuSelect
-}) {
-  return (
-    <MenuTooltip onClose={onClose}>
-      <Menu
-        onMenuSelect={onMenuSelect}
-        items={[
-          { name: 'rename', text: 'Rename Account' },
-          { name: 'export', text: 'Export All Transactions' },
-          syncEnabled &&
-            account &&
-            !account.closed &&
-            (canSync
-              ? { name: 'unlink', text: 'Unlink Account' }
-              : { name: 'link', text: 'Link Account' }),
-          account.closed
-            ? { name: 'reopen', text: 'Reopen Account' }
-            : { name: 'close', text: 'Close Account' }
-        ].filter(x => x)}
-      />
-    </MenuTooltip>
   );
 }
 
@@ -345,19 +322,6 @@ function BalanceMenu({
           },
           account && { name: 'reconcile', text: 'Reconcile' }
         ].filter(x => x)}
-      />
-    </MenuTooltip>
-  );
-}
-
-function CategoryMenu({ onClose, onMenuSelect }) {
-  return (
-    <MenuTooltip onClose={onClose}>
-      <Menu
-        onMenuSelect={item => {
-          onMenuSelect(item);
-        }}
-        items={[{ name: 'export', text: 'Export' }]}
       />
     </MenuTooltip>
   );
@@ -734,7 +698,6 @@ const AccountHeader = React.memo(
         }}
         onOpenMenu={() => setMenuOpen(true)}
         onCloseMenu={() => setMenuOpen(false)}
-        onReconcile={onReconcile}
         canSync={canSync}
         syncEnabled={syncEnabled}
         showBalances={showBalances}
