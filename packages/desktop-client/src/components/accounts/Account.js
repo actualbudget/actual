@@ -47,6 +47,7 @@ import {
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
 import { styles, colors } from 'loot-design/src/style';
+import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import Add from 'loot-design/src/svg/v1/Add';
 import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
 import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
@@ -219,14 +220,42 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
   );
 }
 
-function MenuButton({ onClick }) {
+function AccountNameWithMenu({
+  menuOpen,
+  accountName,
+  account,
+  onMenuSelect,
+  onOpenMenu,
+  onCloseMenu,
+  onReconcile,
+  canSync,
+  syncEnabled,
+  showBalances,
+  canCalculateBalance
+}) {
   return (
-    <Button bare onClick={onClick}>
-      <DotsHorizontalTriple
-        width={15}
-        height={15}
-        style={{ color: 'inherit', transform: 'rotateZ(90deg)' }}
-      />
+    <Button
+      bare
+      onClick={onOpenMenu}
+      style={{ marginRight: 5, marginBottom: 5 }}
+    >
+      <View style={{ fontSize: 25, fontWeight: 500 }}>{accountName}</View>
+      <ExpandArrow width={11} height={11} style={{ marginInline: 5 }} />
+      {menuOpen &&
+        (account ? (
+          <AccountMenu
+            account={account}
+            canSync={canSync}
+            syncEnabled={syncEnabled}
+            canShowBalances={canCalculateBalance()}
+            showBalances={showBalances}
+            onMenuSelect={onMenuSelect}
+            onReconcile={onReconcile}
+            onClose={onCloseMenu}
+          />
+        ) : (
+          <CategoryMenu onMenuSelect={onMenuSelect} onClose={onCloseMenu} />
+        ))}
     </Button>
   );
 }
@@ -273,6 +302,7 @@ function AccountMenu({
           }
         }}
         items={[
+          { name: 'rename', text: 'Rename Account' },
           canShowBalances && {
             name: 'toggle-balance',
             text: (showBalances ? 'Hide' : 'Show') + ' Running Balance'
@@ -695,38 +725,42 @@ const AccountHeader = React.memo(
                     }
                   }}
                 >
-                  <View
-                    style={{
-                      fontSize: 25,
-                      fontWeight: 500,
-                      marginRight: 5,
-                      marginBottom: 5
+                  <AccountNameWithMenu
+                    menuOpen={menuOpen}
+                    accountName={accountName}
+                    account={account}
+                    onMenuSelect={item => {
+                      setMenuOpen(false);
+                      onMenuSelect(item);
                     }}
-                  >
-                    {accountName}
-                  </View>
+                    onOpenMenu={() => setMenuOpen(true)}
+                    onCloseMenu={() => setMenuOpen(false)}
+                    onReconcile={onReconcile}
+                    canSync={canSync}
+                    syncEnabled={syncEnabled}
+                    showBalances={showBalances}
+                    canCalculateBalance={canCalculateBalance}
+                  />
 
                   <NotesButton id={`account-${account.id}`} />
-                  <Button
-                    bare
-                    className="hover-visible"
-                    onClick={() => onExposeName(true)}
-                  >
-                    <Pencil1
-                      style={{
-                        width: 11,
-                        height: 11,
-                        color: colors.n8
-                      }}
-                    />
-                  </Button>
                 </View>
               ) : (
-                <View
-                  style={{ fontSize: 25, fontWeight: 500, marginBottom: 5 }}
-                >
-                  {accountName}
-                </View>
+                <AccountNameWithMenu
+                  menuOpen={menuOpen}
+                  accountName={accountName}
+                  account={account}
+                  onMenuSelect={item => {
+                    setMenuOpen(false);
+                    onMenuSelect(item);
+                  }}
+                  onOpenMenu={() => setMenuOpen(true)}
+                  onCloseMenu={() => setMenuOpen(false)}
+                  onReconcile={onReconcile}
+                  canSync={canSync}
+                  syncEnabled={syncEnabled}
+                  showBalances={showBalances}
+                  canCalculateBalance={canCalculateBalance}
+                />
               )}
             </View>
           </View>
@@ -858,41 +892,6 @@ const AccountHeader = React.memo(
                 />
               )}
             </Button>
-            {account ? (
-              <View>
-                <MenuButton onClick={() => setMenuOpen(true)} />
-
-                {menuOpen && (
-                  <AccountMenu
-                    account={account}
-                    canSync={canSync}
-                    syncEnabled={syncEnabled}
-                    canShowBalances={canCalculateBalance()}
-                    showBalances={showBalances}
-                    onMenuSelect={item => {
-                      setMenuOpen(false);
-                      onMenuSelect(item);
-                    }}
-                    onReconcile={onReconcile}
-                    onClose={() => setMenuOpen(false)}
-                  />
-                )}
-              </View>
-            ) : (
-              <View>
-                <MenuButton onClick={() => setMenuOpen(true)} />
-
-                {menuOpen && (
-                  <CategoryMenu
-                    onMenuSelect={item => {
-                      setMenuOpen(false);
-                      onMenuSelect(item);
-                    }}
-                    onClose={() => setMenuOpen(false)}
-                  />
-                )}
-              </View>
-            )}
           </Stack>
 
           {filters && filters.length > 0 && (
@@ -1326,6 +1325,9 @@ class AccountInternal extends React.PureComponent {
     );
 
     switch (item) {
+      case 'rename':
+        this.setState({ editingName: true });
+        break;
       case 'link':
         authorizeBank(this.props.pushModal, { upgradingId: accountId });
         break;
