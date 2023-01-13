@@ -234,7 +234,7 @@ function ScheduleValue({ value }) {
       data={schedules}
       describe={s => {
         let payeeId = s._payee;
-        return payeeId
+        return byId[payeeId]
           ? `${byId[payeeId].name} (${s.next_date})`
           : `Next: ${s.next_date}`;
       }}
@@ -529,9 +529,9 @@ export default function ManageRules({
       let loadedRules = await loadRules();
       setRules(loadedRules.slice(0, 100));
       setLoading(false);
-    }
 
-    dispatch(initiallyLoadPayees());
+      await dispatch(initiallyLoadPayees());
+    }
 
     undo.setUndoState('openModal', 'manage-rules');
 
