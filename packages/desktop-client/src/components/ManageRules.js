@@ -529,9 +529,9 @@ export default function ManageRules({
       let loadedRules = await loadRules();
       setRules(loadedRules.slice(0, 100));
       setLoading(false);
-
-      await dispatch(initiallyLoadPayees());
     }
+
+    dispatch(initiallyLoadPayees());
 
     undo.setUndoState('openModal', 'manage-rules');
 
