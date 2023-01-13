@@ -694,7 +694,7 @@ const AccountHeader = React.memo(
           style={[styles.pageContent, { paddingBottom: 10, flexShrink: 0 }]}
         >
           <View style={{ marginTop: 2, alignItems: 'flex-start' }}>
-            <View>
+            <View style={{ marginTop: -5, marginBottom: -2, marginLeft: -5 }}>
               {editingName ? (
                 <InitialFocus>
                   <Input
@@ -704,9 +704,9 @@ const AccountHeader = React.memo(
                     style={{
                       fontSize: 25,
                       fontWeight: 500,
-                      marginTop: -5,
-                      marginBottom: -2,
-                      marginLeft: -5
+                      marginTop: 0,
+                      marginBottom: 3,
+                      marginLeft: 0
                     }}
                   />
                 </InitialFocus>
