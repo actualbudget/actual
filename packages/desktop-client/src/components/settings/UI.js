@@ -5,6 +5,8 @@ import { css, media } from 'glamor';
 import { View, Link } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
+import { useLocation } from 'react-router-dom-v5-compat';
+import { useEffect } from 'react';
 
 export function Section({ title, children, style, titleProps, ...props }) {
   return (
@@ -53,8 +55,21 @@ export function ButtonSetting({ button, children }) {
 
 export function AdvancedToggle({ children }) {
   let [expanded, setExpanded] = useState(false);
+  let location = useLocation();
+  useEffect(() => {
+    if (location.hash === '#advanced') {
+      setExpanded(true);
+    }
+  }, [location.hash]);
+
   return expanded ? (
     <Section
+      innerRef={el => {
+        if (el && location.hash === '#advanced') {
+          el.scrollIntoView(true);
+        }
+      }}
+      id="advanced"
       title="Advanced Settings"
       {...css(
         {
@@ -70,6 +85,7 @@ export function AdvancedToggle({ children }) {
     </Section>
   ) : (
     <Link
+      id="advanced"
       onClick={() => setExpanded(true)}
       style={{
         flexShrink: 0,
