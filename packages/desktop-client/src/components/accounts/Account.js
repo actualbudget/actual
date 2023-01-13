@@ -322,7 +322,9 @@ function BalanceMenu({
           },
           canShowRunningBalances && {
             name: 'toggle-balance',
-            text: (showRunningBalances ? 'Hide' : 'Show') + ' Running Balance'
+            text:
+              (showRunningBalances ? 'Hide' : 'Show') +
+              ' Running Balance Column'
           },
           account && { name: 'reconcile', text: 'Reconcile' }
         ].filter(x => x)}
