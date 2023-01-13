@@ -337,7 +337,7 @@ async function getCategoryTemplates() {
   const matches = [
     {
       type: 'simple',
-      re: /^#template \$?(\-?\d+(\.\d{2})?)$/im,
+      re: /^#template \$?(\-?\d+(\.\d{2})?)$/im,//eslint-disable-line
       params: ['monthly']
     },
     {
@@ -352,62 +352,62 @@ async function getCategoryTemplates() {
     },
     {
       type: 'by',
-      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2})$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2})$/im,//eslint-disable-line
       params: ['amount', null, 'month']
     },
     {
       type: 'by',
-      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) months$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
       params: ['amount', null, 'month', 'repeat']
     },
     {
       type: 'week',
-      re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2})$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
       params: ['amount', null, 'starting']
     },
     {
       type: 'week',
-      re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
       params: ['amount', null, 'starting', 'limit']
     },
     {
       type: 'weeks',
-      re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2})$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
       params: ['amount', null, 'weeks', 'starting']
     },
     {
       type: 'weeks',
-      re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
       params: ['amount', null, 'weeks', 'starting', 'limit']
     },
     {
       type: 'by_annual',
-      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every year$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
       params: ['amount', null, 'month']
     },
     {
       type: 'by_annual',
-      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) years$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
       params: ['amount', null, 'month', 'repeat']
     },
     {
       type: 'spend',
-      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2})$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2})$/im,//eslint-disable-line
       params: ['amount', null, 'month', 'from']
     },
     {
       type: 'spend',
-      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) months$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
       params: ['amount', null, 'month', 'from', 'repeat']
     },
     {
       type: 'spend_annual',
-      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every year$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
       params: ['amount', null, 'month', 'from']
     },
     {
       type: 'spend_annual',
-      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) years$/im,
+      re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
       params: ['amount', null, 'month', 'from', 'repeat']
     },
     {
@@ -657,7 +657,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             }`
           );
           return null;
-        } else if (num_months == 0) {
+        } else if (num_months === 0) {
           to_budget = target - already_budgeted;
         } else {
           to_budget = Math.round(
@@ -696,11 +696,12 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   }
 
   if (
-    ((category.budgeted != null && category.budgeted != 0) || to_budget == 0) &&
+    ((category.budgeted != null && category.budgeted !== 0) ||
+      to_budget === 0) &&
     !force
   ) {
     return null;
-  } else if (category.budgeted == to_budget && force) {
+  } else if (category.budgeted === to_budget && force) {
     return null;
   } else {
     let str = category.name + ': ' + integerToAmount(last_month_balance);
