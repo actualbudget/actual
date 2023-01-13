@@ -592,7 +592,9 @@ export default function ManageRules({
       pushModal('edit-rule', {
         rule: {
           stage: null,
-          conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
+          conditions: [
+            { op: 'is', field: 'payee', value: payeeId, type: 'id' }
+          ],
           actions: [
             {
               op: 'set',
