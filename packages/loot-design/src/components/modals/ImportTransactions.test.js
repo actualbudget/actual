@@ -1,8 +1,8 @@
 import { parseDate } from './ImportTransactions';
 
-describe('Import transactions', function() {
-  describe('date parsing', function() {
-    it('should not parse', function() {
+describe('Import transactions', function () {
+  describe('date parsing', function () {
+    it('should not parse', function () {
       const invalidInputs = [
         { str: '', order: 'yyyy mm dd' },
         { str: null, order: 'yyyy mm dd' },
@@ -35,7 +35,7 @@ describe('Import transactions', function() {
       }
     });
 
-    it('should parse', function() {
+    it('should parse', function () {
       const validInputs = [
         {
           order: 'yyyy mm dd',

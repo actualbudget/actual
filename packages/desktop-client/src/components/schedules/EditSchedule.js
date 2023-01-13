@@ -211,11 +211,7 @@ export default function ScheduleDetails() {
   );
 
   async function loadSchedule() {
-    let { data } = await runQuery(
-      q('schedules')
-        .filter({ id })
-        .select('*')
-    );
+    let { data } = await runQuery(q('schedules').filter({ id }).select('*'));
     return data[0];
   }
 

@@ -8,26 +8,7 @@ let traverse = require('@babel/traverse').default;
 let camelcase = require('camelcase');
 let t = require('@babel/types');
 
-let reactNativeTags = [
-  'Svg',
-  'Circle',
-  'Ellipse',
-  'G',
-  'LinearGradient',
-  'RadialGradient',
-  'Line',
-  'Path',
-  'Polygon',
-  'Polyline',
-  'Rect',
-  'Symbol',
-  'Text',
-  'Use',
-  'Defs',
-  'Stop'
-];
-
-function transformContents(name, contents, isReactNative) {
+function transformContents(name, contents) {
   let halted = false;
 
   let output = prettier.format(contents, {
@@ -63,22 +44,13 @@ function transformContents(name, contents, isReactNative) {
                         )
                       );
 
-                      if (isReactNative) {
-                        path.insertAfter(
-                          t.jsxAttribute(
-                            t.jsxIdentifier('style'),
-                            t.jsxExpressionContainer(t.Identifier('style'))
-                          )
-                        );
-                      } else {
-                        path.insertAfter(
-                          t.JSXSpreadAttribute(
-                            t.callExpression(t.identifier('css'), [
-                              t.identifier('style')
-                            ])
-                          )
-                        );
-                      }
+                      path.insertAfter(
+                        t.JSXSpreadAttribute(
+                          t.callExpression(t.identifier('css'), [
+                            t.identifier('style')
+                          ])
+                        )
+                      );
 
                       path.insertAfter(
                         t.JSXSpreadAttribute(t.identifier('props'))
@@ -132,25 +104,6 @@ function transformContents(name, contents, isReactNative) {
             path.scope,
             path
           );
-
-          if (isReactNative) {
-            const name = path.node.name.name;
-            path.node.name.name = name[0].toUpperCase() + name.slice(1);
-          }
-        },
-
-        JSXClosingElement(path) {
-          if (isReactNative) {
-            const name = path.node.name.name;
-            const rnName = name[0].toUpperCase() + name.slice(1);
-
-            if (!reactNativeTags.includes(rnName)) {
-              halted = true;
-              path.stop();
-            } else {
-              path.node.name.name = rnName;
-            }
-          }
         }
       });
 
@@ -162,16 +115,11 @@ function transformContents(name, contents, isReactNative) {
     return null;
   }
 
-  const reactNativeImport = `
-    import {${reactNativeTags.join(', ')}} from 'mobile/node_modules/react-native-svg'
-  `;
-
   output = `
 /* eslint no-unused-vars: 0 */
 /* This file is auto-generated, do not touch! Please edit the SVG file instead. */
 import React from 'react';
-${!isReactNative ? `import { css } from 'glamor';` : ''}
-${isReactNative ? reactNativeImport : ''}
+import { css } from 'glamor';
 
 function ${name}({ width, height, style, color = "black", ...props }) {
 return ${output}
@@ -196,11 +144,8 @@ async function run() {
     let filepath = file.replace(/\.[^.]+$/, '');
     let name = camelcase(basename(filepath));
 
-    const webOutput = transformContents(title(name), contents, false);
+    const webOutput = transformContents(title(name), contents);
     fs.writeFileSync(`./${filepath}.web.js`, webOutput, 'utf8');
-
-    const rnOutput = transformContents(title(name), contents, true);
-    fs.writeFileSync(`./${filepath}.mobile.js`, rnOutput, 'utf8');
   }
 }
 

@@ -6,7 +6,7 @@ import { pushModal } from './modals';
 import { addNotification, addGenericErrorNotification } from './notifications';
 
 export function applyBudgetAction(month, type, args) {
-  return async function() {
+  return async function () {
     switch (type) {
       case 'budget-amount':
         await send('budget/budget-amount', {
@@ -69,7 +69,7 @@ export function applyBudgetAction(month, type, args) {
 }
 
 export function getCategories() {
-  return async function(dispatch) {
+  return async function (dispatch) {
     const categories = await send('get-categories');
     dispatch({
       type: constants.LOAD_CATEGORIES,
@@ -80,7 +80,7 @@ export function getCategories() {
 }
 
 export function createCategory(name, groupId, isIncome) {
-  return async function(dispatch) {
+  return async function (dispatch) {
     let id = await send('category-create', {
       name,
       groupId,
@@ -92,11 +92,10 @@ export function createCategory(name, groupId, isIncome) {
 }
 
 export function deleteCategory(id, transferId) {
-  return async function(dispatch, getState) {
+  return async function (dispatch, getState) {
     let { error } = await send('category-delete', { id, transferId });
 
     if (error) {
-      let msg;
       switch (error) {
         case 'category-type':
           dispatch(
@@ -163,8 +162,7 @@ export function updateGroup(group) {
 }
 
 export function deleteGroup(id, transferId) {
-  return async function(dispatch, getState) {
-    const group = getState().queries.categories.grouped.find(g => g.id === id);
+  return async function (dispatch, getState) {
     await send('category-group-delete', { id, transferId });
     await dispatch(getCategories());
     // See `deleteCategory` for why we need this
@@ -173,7 +171,7 @@ export function deleteGroup(id, transferId) {
 }
 
 export function getPayees() {
-  return async function(dispatch) {
+  return async function (dispatch) {
     let payees = await send('payees-get');
     dispatch({
       type: constants.LOAD_PAYEES,
@@ -184,7 +182,7 @@ export function getPayees() {
 }
 
 export function initiallyLoadPayees() {
-  return async function(dispatch, getState) {
+  return async function (dispatch, getState) {
     if (getState().queries.payees.length === 0) {
       return dispatch(getPayees());
     }
@@ -198,7 +196,7 @@ export function createPayee(name) {
 }
 
 export function getAccounts() {
-  return async function(dispatch) {
+  return async function (dispatch) {
     const accounts = await send('accounts-get');
     dispatch({ type: constants.LOAD_ACCOUNTS, accounts });
     return accounts;
@@ -206,14 +204,14 @@ export function getAccounts() {
 }
 
 export function updateAccount(account) {
-  return async function(dispatch) {
+  return async function (dispatch) {
     dispatch({ type: constants.UPDATE_ACCOUNT, account });
     await send('account-update', account);
   };
 }
 
 export function createAccount(name, type, balance, offBudget) {
-  return async function(dispatch) {
+  return async function (dispatch) {
     let id = await send('account-create', { name, type, balance, offBudget });
     await dispatch(getAccounts());
     await dispatch(getPayees());
@@ -222,7 +220,7 @@ export function createAccount(name, type, balance, offBudget) {
 }
 
 export function openAccountCloseModal(accountId) {
-  return async function(dispatch, getState) {
+  return async function (dispatch, getState) {
     const { balance, numTransactions } = await send('account-properties', {
       id: accountId
     });
@@ -241,7 +239,7 @@ export function openAccountCloseModal(accountId) {
 }
 
 export function closeAccount(accountId, transferAccountId, categoryId, forced) {
-  return async function(dispatch) {
+  return async function (dispatch) {
     await send('account-close', {
       id: accountId,
       transferAccountId,
@@ -253,7 +251,7 @@ export function closeAccount(accountId, transferAccountId, categoryId, forced) {
 }
 
 export function reopenAccount(accountId) {
-  return async function(dispatch) {
+  return async function (dispatch) {
     await send('account-reopen', { id: accountId });
     dispatch(getAccounts());
   };

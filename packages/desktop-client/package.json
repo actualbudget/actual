@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "22.12.03",
+  "version": "23.1.12",
   "license": "MIT",
   "files": [
     "build"
@@ -9,6 +9,7 @@
     "@babel/core": "~7.14.3",
     "@jlongster/lively": "0.0.4",
     "@jlongster/sentry-metrics-actual": "^0.0.10",
+    "@playwright/test": "^1.29.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.2",
     "@reach/listbox": "^0.11.2",
     "@reactions/component": "^2.0.2",
@@ -86,9 +87,18 @@
     "watch": "cross-env PORT=3001 node scripts/start.js",
     "build": "cross-env INLINE_RUNTIME_CHUNK=false node scripts/build.js",
     "build:browser": "cross-env ./bin/build-browser",
+    "e2e": "npx playwright test e2e --browser=chromium",
     "lint": "eslint src"
   },
   "browserslist": [
     "electron 3.0"
-  ]
+  ],
+  "dependencies": {
+    "@react-aria/focus": "^3.8.0",
+    "@react-aria/listbox": "^3.6.1",
+    "@react-aria/utils": "^3.13.3",
+    "@react-stately/collections": "^3.4.3",
+    "@react-stately/list": "^3.5.3",
+    "react-router-dom-v5-compat": "^6.4.1"
+  }
 }

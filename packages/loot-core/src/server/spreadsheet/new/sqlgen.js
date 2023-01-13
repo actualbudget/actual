@@ -227,7 +227,6 @@ export default function generate(table, where, groupby, select, deps) {
   let dependencies = [];
   let joins = [];
 
-  let uid = 1;
   allPaths.forEach(path => {
     let currentTable = { name: table, id: table };
     for (var i = 0; i < path.length - 1; i++) {

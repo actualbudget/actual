@@ -1,5 +1,7 @@
 import Platform from 'loot-core/src/client/platform';
 
+import tokens from './tokens';
+
 export const debug = { borderWidth: 1, borderColor: 'red' };
 
 export const colors = {
@@ -99,16 +101,23 @@ export const styles = {
     fontWeight: 500
   },
   smallText: {
-    fontSize: 13
+    fontSize: 13,
+    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+      // lineHeight: 21 // TODO: This seems like trouble, but what's the right value?
+    }
   },
   verySmallText: {
     fontSize: 13
   },
   page: {
     // This is the height of the titlebar
-    paddingTop: 36,
-    minWidth: 500,
-    flex: 1
+    paddingTop: 8,
+    minWidth: 360,
+    flex: 1,
+    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+      minWidth: 500,
+      paddingTop: 36
+    }
   },
   pageHeader: {
     fontSize: 25,
@@ -123,22 +132,53 @@ export const styles = {
     paddingBottom: 5
   },
   pageContent: {
-    paddingLeft: 20,
-    paddingRight: 20
+    paddingLeft: 2,
+    paddingRight: 2,
+    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+      paddingLeft: 20,
+      paddingRight: 20
+    }
+  },
+  settingsPageContent: {
+    padding: 20,
+    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+      padding: 'inherit'
+    }
   },
   staticText: {
     cursor: 'default',
     userSelect: 'none'
   },
-  shadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
-  shadowLarge: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
-  tnum:
-    Platform.env === 'web'
-      ? {
-          fontFeatureSettings: '"tnum"'
-        }
-      : null,
-  notFixed: { fontFeatureSettings: '' }
+  shadow: {
+    boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)'
+  },
+  shadowLarge: {
+    boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)'
+  },
+  tnum: {
+    fontFeatureSettings: '"tnum"'
+  },
+  notFixed: { fontFeatureSettings: '' },
+  header: {
+    headerStyle: {
+      backgroundColor: 'white',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.n9,
+      elevation: 0
+    },
+    headerTintColor: colors.n1,
+    headerTitleStyle: {
+      color: colors.n1,
+      fontSize: 15,
+      fontWeight: 600
+    },
+    headerBackTitle: null
+  },
+  text: {
+    fontSize: 16
+    // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
+  },
+  textColor: colors.n1
 };
 
 let hiddenScrollbars = false;
@@ -196,48 +236,6 @@ if (Platform.env === 'web') {
 }
 
 export const hasHiddenScrollbars = () => hiddenScrollbars;
-
-export const mobileStyles = {
-  header: {
-    headerStyle: {
-      backgroundColor: 'white',
-      borderBottomWidth: 1,
-      borderBottomColor: colors.n9,
-      elevation: 0
-    },
-    headerTintColor: colors.n1,
-    headerTitleStyle: {
-      color: colors.n1,
-      fontSize: 15,
-      fontWeight: '600'
-    },
-    headerBackTitle: null
-  },
-  text: {
-    color: colors.n1,
-    fontSize: 16,
-    lineHeight: 22.4
-  },
-  smallText: {
-    color: colors.n1,
-    fontSize: 15,
-    lineHeight: 21
-  },
-  shadow: {
-    shadowColor: '#9594A8',
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 1,
-    shadowOpacity: 1,
-    elevation: 2
-  },
-  shadowLarge: {
-    shadowColor: '#9594A8',
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 10,
-    shadowOpacity: 1,
-    elevation: 3
-  }
-};
 
 export function transform(spec) {
   // We've made React Native Web simulate a mobile environment so it

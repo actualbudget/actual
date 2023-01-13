@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
@@ -27,8 +27,6 @@ function EditField({
   dateFormat,
   createPayee
 }) {
-  let submitRef = useRef();
-
   function onSelect(value) {
     // Process the value if needed
     if (name === 'amount') {

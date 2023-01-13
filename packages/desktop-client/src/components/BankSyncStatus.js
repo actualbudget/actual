@@ -46,7 +46,7 @@ function BankSyncStatus({ accountsSyncing }) {
                   padding: '5px 13px',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  boxShadow: styles.shadow
+                  ...styles.shadow
                 }}
               >
                 <AnimatedRefresh

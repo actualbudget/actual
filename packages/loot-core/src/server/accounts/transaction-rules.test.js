@@ -29,9 +29,7 @@ beforeEach(async () => {
 async function getMatchingTransactions(conds) {
   let { filters } = conditionsToAQL(conds);
   let { data } = await runQuery(
-    q('transactions')
-      .filter({ $and: filters })
-      .select('*')
+    q('transactions').filter({ $and: filters }).select('*')
   );
   return data;
 }

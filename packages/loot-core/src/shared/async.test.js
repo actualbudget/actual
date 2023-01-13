@@ -6,7 +6,6 @@ function timeout(n) {
 
 function makeFunction(data) {
   return async function fn(n, { throwError } = {}) {
-    const x = Math.random();
     data.push(n);
     await timeout(10);
 
