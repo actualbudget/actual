@@ -264,8 +264,8 @@ function AccountNameWithMenu({
 function MenuTooltip({ onClose, children }) {
   return (
     <Tooltip
-      position="bottom-right"
-      width={200}
+      position="bottom-left"
+      width={220}
       style={{ padding: 0 }}
       onClose={onClose}
     >
