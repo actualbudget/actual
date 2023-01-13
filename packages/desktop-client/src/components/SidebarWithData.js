@@ -19,7 +19,7 @@ import {
 } from 'loot-design/src/components/common';
 import { Sidebar } from 'loot-design/src/components/sidebar';
 import { styles, colors } from 'loot-design/src/style';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
+import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
@@ -92,10 +92,10 @@ function EditableBudgetName({ prefs, savePrefs }) {
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           {prefs.budgetName || 'A budget has no name'}
         </Text>
-        <CheveronDown
-          width={18}
-          height={18}
-          style={{ color: 'inherit', paddingLeft: 3 }}
+        <ExpandArrow
+          width={7}
+          height={7}
+          style={{ color: 'inherit', marginLeft: 5 }}
         />
         {menuOpen && (
           <Tooltip
