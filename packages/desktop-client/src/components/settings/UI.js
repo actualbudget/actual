@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
 
 import { View, Link } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
-import { useLocation } from 'react-router-dom-v5-compat';
-import { useEffect } from 'react';
 
 export function Section({ title, children, style, titleProps, ...props }) {
   return (
