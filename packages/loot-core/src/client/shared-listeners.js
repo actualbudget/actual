@@ -236,8 +236,7 @@ export function listenForSyncEvent(actions, store) {
         case 'apply-failure':
           notif = {
             message:
-              "We couldn't apply that change to the database. This is a bug, " +
-              'and it has been reported.'
+              "We couldn't apply that change to the database. Please report this as a bug via Github issues."
           };
           break;
         case 'beta-version':
@@ -247,8 +246,7 @@ export function listenForSyncEvent(actions, store) {
         default:
           notif = {
             message:
-              'We had problems syncing your changes. This is a bug, ' +
-              'and it has been reported.'
+              'We had problems syncing your changes. Please report this as a bug via Github issues.'
           };
       }
 
