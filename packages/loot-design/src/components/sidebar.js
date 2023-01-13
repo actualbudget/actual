@@ -455,9 +455,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
     setMenuOpen(false);
 
     switch (type) {
-      case 'settings':
-        history.push('/settings');
-        break;
       case 'help':
         window.open('https://actualbudget.github.io/docs', '_blank');
         break;
@@ -469,7 +466,6 @@ const MenuButton = withRouter(function MenuButton({ history }) {
   }
 
   let items = [
-    { name: 'settings', text: 'Settings' },
     { name: 'help', text: 'Help' },
     { name: 'close', text: 'Close File' }
   ];
@@ -508,7 +504,7 @@ function Tools() {
   let onToggle = useCallback(() => setOpen(open => !open), []);
   let location = useLocation();
 
-  const isActive = ['/payees', '/rules', '/tools'].some(route =>
+  const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
     location.pathname.startsWith(route)
   );
 
@@ -539,6 +535,12 @@ function Tools() {
             title="Rules"
             Icon={TuningIcon}
             to="/rules"
+            indent={15}
+          />
+          <SecondaryItem
+            title="Settings"
+            Icon={Cog}
+            to="/settings"
             indent={15}
           />
           <SecondaryItem
