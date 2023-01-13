@@ -414,7 +414,7 @@ function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: -5,
-        marginLeft: -5
+        marginLeft: -1
       }}
     >
       <Button
@@ -694,7 +694,7 @@ const AccountHeader = React.memo(
           style={[styles.pageContent, { paddingBottom: 10, flexShrink: 0 }]}
         >
           <View style={{ marginTop: 2, alignItems: 'flex-start' }}>
-            <View style={{ marginTop: -5, marginBottom: -2, marginLeft: -5 }}>
+            <View style={{ marginTop: -5, marginBottom: -2, marginLeft: -1 }}>
               {editingName ? (
                 <InitialFocus>
                   <Input
