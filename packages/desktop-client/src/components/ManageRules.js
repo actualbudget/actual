@@ -595,7 +595,7 @@ export default function ManageRules({
         {
           field: 'payee',
           op: 'is',
-          value: null,
+          value: payeeId || null,
           type: 'id'
         }
       ],
