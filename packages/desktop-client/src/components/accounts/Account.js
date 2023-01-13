@@ -196,7 +196,7 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
   }
 
   return (
-    <Tooltip position="bottom-right" width={275} onClose={onClose}>
+    <Tooltip position="bottom-left" width={275} onClose={onClose}>
       <View style={{ padding: '5px 8px' }}>
         <Text>
           Enter the current balance of your bank account that you want to
