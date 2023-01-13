@@ -235,7 +235,11 @@ function AccountNameWithMenu({
       style={{ marginRight: 5, marginBottom: 5 }}
     >
       <View style={{ fontSize: 25, fontWeight: 500 }}>{accountName}</View>
-      <ExpandArrow width={9} height={9} style={{ marginInline: 5 }} />
+      <ExpandArrow
+        width={9}
+        height={9}
+        style={{ marginLeft: 10, marginRight: 3 }}
+      />
       {menuOpen && (
         <MenuTooltip onClose={onCloseMenu}>
           <Menu
