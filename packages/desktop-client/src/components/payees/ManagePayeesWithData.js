@@ -91,7 +91,6 @@ function ManagePayeesWithData({
 
   function onCreateRule(id) {
     let rule = {
-      id: null,
       stage: null,
       conditions: [
         {

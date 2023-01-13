@@ -589,7 +589,6 @@ export default function ManageRules({
 
   function onCreateRule() {
     let rule = {
-      id: null,
       stage: null,
       conditions: [
         {
@@ -603,15 +602,11 @@ export default function ManageRules({
         {
           op: 'set',
           field: 'category',
-          value: null,
+          value: payeeId || null,
           type: 'id'
         }
       ]
     };
-
-    if (payeeId) {
-      rule.conditions[0].value = payeeId;
-    }
 
     dispatch(
       pushModal('edit-rule', {
