@@ -595,7 +595,7 @@ export default function ManageRules({
         {
           field: 'payee',
           op: 'is',
-          value: payeeId,
+          value: null,
           type: 'id'
         }
       ],
@@ -608,6 +608,10 @@ export default function ManageRules({
         }
       ]
     };
+
+    if (payeeId) {
+      rule.conditions[0].value = payeeId;
+    }
 
     dispatch(
       pushModal('edit-rule', {
