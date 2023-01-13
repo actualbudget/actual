@@ -99,6 +99,7 @@
     "@react-aria/utils": "^3.13.3",
     "@react-stately/collections": "^3.4.3",
     "@react-stately/list": "^3.5.3",
+    "inter-ui": "^3.19.3",
     "react-router-dom-v5-compat": "^6.4.1"
   }
 }
