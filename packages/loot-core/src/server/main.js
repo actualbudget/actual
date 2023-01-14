@@ -1659,7 +1659,7 @@ handlers['sync-budget'] = async function ({ id }) {
   await initialFullSync();
 
   await handlers['close-budget']();
-  return {}
+  return {};
 };
 
 handlers['load-budget'] = async function ({ id }) {

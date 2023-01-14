@@ -165,7 +165,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   let id;
   if (localBudget) {
     id = localBudget.id;
-    result = await handlers['sync-budget']({ id });
+    let result = await handlers['sync-budget']({ id });
     if (result.error) {
       throw new Error(getSyncError(result.error, id));
     }
