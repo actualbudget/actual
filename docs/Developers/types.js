@@ -303,8 +303,8 @@ function Argument({ arg }) {
   if (arg.properties) {
     return (
       <span>
-        {arg.name}
-        {': { '}
+        {arg.name ? arg.name + ': ' : ''}
+        {'{ '}
         {arg.properties
           .map((prop) => <Argument arg={prop} />)
           .map(insertCommas)}

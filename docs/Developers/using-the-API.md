@@ -34,13 +34,13 @@ If you’re able to run the `@actual-app/api` package on the same computer that 
 let api = require('@actual-app/api');
 
 await api.init({
-  // This is the UUID from Settings → Show advanced settings → Budget ID
-  budgetId: 'abcdef',
-  config: {
-    // This is the path to the `user-files` folder created by actual-server
-    dataDir: '/path/to/user-files',
-  },
+  // This is the path to the `user-files` folder created by actual-server
+  // (including the `user-files` part)
+  dataDir: '/path/to/user-files',
 });
+
+// This is the ID from Settings → Show advanced settings → Budget ID
+await api.loadBudget('abcdef');
 
 let budget = await api.getBudgetMonth('2019-10');
 console.log(budget);
@@ -94,7 +94,7 @@ These are the public methods that you can use. The API also exports low-level fu
 
 #### `init`
 
-<Method name="init" argsObject={true} args={[{ name: 'options', properties: [{ name: 'budgetId', type: 'string'}, { name: 'config', properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }]}] }]} returns="Promise<void>" />
+<Method name="init" argsObject={true} args={[{ properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }]}]} returns="Promise<void>" />
 
 Call this before attempting to use any of the API methods. This will connect to the server and load the budget data.
 
