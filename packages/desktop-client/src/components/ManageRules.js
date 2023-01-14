@@ -602,7 +602,7 @@ export default function ManageRules({
         {
           op: 'set',
           field: 'category',
-          value: payeeId || null,
+          value: null,
           type: 'id'
         }
       ]
