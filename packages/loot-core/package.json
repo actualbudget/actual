@@ -26,7 +26,7 @@
     "@rschedule/standard-date-adapter": "^1.2.0",
     "@sentry/node": "^6.12.0",
     "absurd-sql": "0.0.53",
-    "better-sqlite3": "7.4.1",
+    "better-sqlite3": "^7.6.2",
     "core-js": "^3.8.3",
     "csv-parse": "^4.10.1",
     "csv-stringify": "^5.3.6",

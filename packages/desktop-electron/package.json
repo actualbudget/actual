@@ -3,7 +3,7 @@
   "productName": "Actual",
   "author": "Shift Reset LLC",
   "description": "A simple and powerful personal finance system",
-  "version": "22.12.03",
+  "version": "22.12.3",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -56,7 +56,7 @@
   "devDependencies": {
     "@sentry/cli": "^1.68.0",
     "@sentry/wizard": "1.2.11",
-    "electron": "22.0.2",
+    "electron": "20.3.9",
     "electron-builder": "^23.6.0",
     "electron-download": "^4.1.1",
     "electron-notarize": "^1.2.2"
