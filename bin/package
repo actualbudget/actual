@@ -88,25 +88,6 @@ yarn workspace @actual-app/web build
 
 yarn workspace Actual update-client
 
-if [ -n "$RELEASE" ]; then
-  SENTRY_CLI="./packages/desktop-electron/node_modules/.bin/sentry-cli"
-  "$SENTRY_CLI" releases -o shift-reset-llc -p actual set-commits "$VERSION" --auto
-
-  echo "Uploading frontend sourcemaps to sentry for version $VERSION..."
-  "$SENTRY_CLI" releases -o shift-reset-llc -p actual files "$VERSION" \
-      upload-sourcemaps --url-prefix app://actual/static/js/ --rewrite ./packages/desktop-client/build/static/js
-
-  echo "Uploading backend sourcemaps to sentry for version $VERSION..."
-  "$SENTRY_CLI" releases -o shift-reset-llc -p actual files "$VERSION" \
-      delete app:///node_modules/loot-core/lib-dist/bundle.desktop.js
-
-  "$SENTRY_CLI" releases -o shift-reset-llc -p actual files "$VERSION" \
-      delete app:///node_modules/loot-core/lib-dist/bundle.desktop.js.map
-
-  "$SENTRY_CLI" releases -o shift-reset-llc -p actual files "$VERSION" \
-      upload-sourcemaps --url-prefix 'app:///node_modules/loot-core/lib-dist/' ./packages/loot-core/lib-dist/bundle.desktop*
-fi
-
 (
     cd packages/desktop-electron;
     yarn clean;

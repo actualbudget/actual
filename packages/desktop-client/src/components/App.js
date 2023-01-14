@@ -74,10 +74,7 @@ class App extends React.Component {
     this.cleanup = () => window.removeEventListener('focus', checkScrollbars);
   }
 
-  componentDidCatch(error, errorInfo) {
-    if (process.env.NODE_ENV !== 'development') {
-      window.SentryClient.captureException(error, { extra: errorInfo });
-    }
+  componentDidCatch(error) {
     this.setState({ fatalError: error });
   }
 
