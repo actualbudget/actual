@@ -22,7 +22,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build API
-        run: cd packages/loot-core && yarn build:api
+        run: cd packages/api && yarn build
 
   web:
     runs-on: ubuntu-latest

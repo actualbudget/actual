@@ -13,6 +13,9 @@
     "migrations",
     "utils.js"
   ],
+  "scripts": {
+    "build": "yarn workspace loot-core build:api"
+  },
   "dependencies": {
     "better-sqlite3": "^7.5.0",
     "node-fetch": "^1.6.3",
