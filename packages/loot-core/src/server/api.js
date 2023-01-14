@@ -162,12 +162,10 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   let localBudget = (await handlers['get-budgets']()).find(
     b => b.groupId === syncId
   );
-  let id;
   if (localBudget) {
-    id = localBudget.id;
-    let result = await handlers['sync-budget']({ id });
+    let result = await handlers['sync-budget']({ id: localBudget.id });
     if (result.error) {
-      throw new Error(getSyncError(result.error, id));
+      throw new Error(getSyncError(result.error, localBudget.id));
     }
   } else {
     let files = await handlers['get-remote-files']();
@@ -194,12 +192,10 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 
     let result = await handlers['download-budget']({ fileId: file.fileId });
     if (result.error) {
-      throw new Error(getDownloadError(result.error, id));
+      throw new Error(getDownloadError(result.error, result.id));
     }
-    id = result.id;
+    await handlers['load-budget']({ id: result.id });
   }
-
-  await handlers['load-budget']({ id });
 };
 
 handlers['api/start-import'] = async function ({ budgetName }) {

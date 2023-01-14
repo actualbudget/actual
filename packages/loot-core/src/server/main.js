@@ -1642,12 +1642,14 @@ handlers['download-budget'] = async function ({ fileId, replace }) {
 
   let id = result.id;
   result = await handlers['sync-budget']({ id });
+  await handlers['close-budget']();
   if (result.error) {
     return result;
   }
   return { id };
 };
 
+// open and sync, but don’t close
 handlers['sync-budget'] = async function ({ id }) {
   // Load the budget and do a full sync
   let result = await loadBudget(id, VERSION, { showUpdate: true });
@@ -1658,7 +1660,6 @@ handlers['sync-budget'] = async function ({ id }) {
   setSyncingMode('enabled');
   await initialFullSync();
 
-  await handlers['close-budget']();
   return {};
 };
 
