@@ -22,7 +22,7 @@ function createBackendWorker() {
     type: 'init',
     version: ACTUAL_VERSION,
     isDev: IS_DEV,
-    hash: process.env.REACT_APP_BACKEND_WORKER_HASH || 'dev'
+    hash: process.env.REACT_APP_BACKEND_WORKER_HASH
   });
 
   if (IS_DEV || IS_PERF_BUILD) {

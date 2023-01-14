@@ -52,7 +52,7 @@
     "node-ipc": "9.1.4"
   },
   "devDependencies": {
-    "electron": "20.3.9",
+    "electron": "22.0.2",
     "electron-builder": "^23.6.0",
     "electron-download": "^4.1.1",
     "electron-notarize": "^1.2.2"
