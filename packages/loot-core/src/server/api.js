@@ -160,7 +160,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   }
 
   let localBudget = (await handlers['get-budgets']()).find(
-    b => b.cloudFileId === syncId
+    b => b.groupId === syncId
   );
   let id;
   if (localBudget) {
