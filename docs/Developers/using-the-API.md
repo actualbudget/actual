@@ -94,7 +94,7 @@ These are the public methods that you can use. The API also exports low-level fu
 
 #### `init`
 
-<Method name="init" argsObject={true} args={{ properties: [{ name: 'budgetId', type: 'string'}, { name: 'config', properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }]}] }} returns="Promise<void>" />
+<Method name="init" argsObject={true} args={[{ name: 'options', properties: [{ name: 'budgetId', type: 'string'}, { name: 'config', properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }]}] }]} returns="Promise<void>" />
 
 After connecting to the budget `budgetId`, run the function. This function can assume all API methods are ready to use.
 
