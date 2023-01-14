@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useDispatch } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { withRouter, useHistory } from 'react-router';
 
 import { bindActionCreators } from 'redux';
 
@@ -23,6 +23,7 @@ import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
+  let history = useHistory();
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
