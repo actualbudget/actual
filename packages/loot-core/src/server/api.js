@@ -6,6 +6,7 @@ import {
   deleteTransaction
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
+import { getTestKeyError } from '../shared/errors';
 import { addTransactions } from './accounts/sync';
 import {
   accountModel,
@@ -158,6 +159,35 @@ handlers['api/load-budget'] = async function ({ id }) {
       }
     }
   }
+};
+
+handlers['api/download-budget'] = async function ({ syncId, password }) {
+  let { id: currentId } = prefs.getPrefs() || {};
+  if (currentId) {
+    await handlers['close-budget']();
+  }
+
+  let files = await handlers['get-remote-files']();
+  let file = files.find(f => f.groupId === syncId);
+  if (!file) {
+    throw new Error(
+      `Budget "${syncId}" not found. Check the sync id of your budget in the "Advanced" section of the settings page.`
+    );
+  }
+  if (file.encryptKeyId && !password) {
+    throw new Error(
+      `File ${file.name} is encrypted. Please provide a password.`
+    );
+  }
+  if (password) {
+    let result = await handlers['key-test']({ fileId: file.fileId, password });
+    if (result.error) {
+      throw new Error(getTestKeyError(result.error));
+    }
+  }
+
+  let { id } = await handlers['download-budget']({ fileId: file.fileId });
+  await handlers['load-budget']({ id });
 };
 
 handlers['api/start-import'] = async function ({ budgetName }) {
