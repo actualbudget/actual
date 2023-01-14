@@ -42,7 +42,12 @@ export function Setting({ primaryAction, children }) {
       )}
     >
       <View
-        style={{ marginBottom: 10, maxWidth: 500, lineHeight: 1.5, gap: 10 }}
+        style={{
+          marginBottom: primaryAction ? 10 : 0,
+          maxWidth: 500,
+          lineHeight: 1.5,
+          gap: 10
+        }}
       >
         {children}
       </View>
