@@ -41,9 +41,11 @@ await api.init({
 });
 
 // This is the ID from Settings → Show advanced settings → Sync ID
-await api.downloadBudget('abcdef');
+await api.downloadBudget('1cfdbb80-6274-49bf-b0c2-737235a4c81f');
 // or, if you have end-to-end encryption enabled:
-await api.downloadBudget('abcdef', { password: 'password1' });
+await api.downloadBudget('1cfdbb80-6274-49bf-b0c2-737235a4c81f', {
+  password: 'password1',
+});
 
 let budget = await api.getBudgetMonth('2019-10');
 console.log(budget);
