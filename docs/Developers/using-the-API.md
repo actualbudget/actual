@@ -6,15 +6,13 @@ import { Method, MethodBox } from './types';
 
 The API gives you full programmatic access to your data. If you are a developer, you can use this to import transactions from a custom source, export data to another app like Excel, or write anything you want on top of Actual.
 
-One thing to keep in mind: Actual is not like most other apps. All of your data already exists locally, so using the API does not mean you'll be contacting our servers. You'll simply be accessing your local data.
-
-Currently, **the API requires Actual to be running locally** because of this. In the future, the client will contain all the code necessary to query your data and will work by itself. Right now the primary use case is custom importers and exporters, so running Actual first is natural.
+One thing to keep in mind: Actual is not like most other apps. While your data is stored on a server, the server does not have the functionality for analyzing details of or modifying your budget. As a result, the API client contains all the code necessary to query your data and will work on a local copy. Right now, the primary use case is custom importers and exporters.
 
 ## Getting started
 
 We provide an official node.js client in the `@actual-app/api` package. Other languages are not supported at this point.
 
-The client is [full open-source on Github](https://github.com/actualbudget/node-api) if you want to see the code.
+The client is [open-source on GitHub](https://github.com/actualbudget/actual/tree/master/packages/api) along with the rest of Actual if you want to see the code.
 
 Install it with either `npm` or `yarn`:
 
@@ -26,22 +24,29 @@ npm install --save @actual-app/api
 yarn add @actual-app/api
 ```
 
-The simplest way to get started is with `runWithBudget`. This will do all the connection setup and teardown for you. It takes the `id` of the budget to use and a function to run.
+Next, you’ll need to point the API at your budget data. There are two ways to do this.
 
-This is all the code to get the budget values for the current month:
+### Connecting to the server files directly
+
+If you’re able to run the `@actual-app/api` package on the same computer that has the Actual server running, you can connect directly to the server files. This is the easiest way to get started.
 
 ```js
 let api = require('@actual-app/api');
 
-async function run() {
-  let budget = await api.getBudgetMonth('2019-10');
-  console.log(budget);
-}
+await api.init({
+  // This is the UUID from Settings → Show advanced settings → Budget ID
+  budgetId: 'abcdef',
+  config: {
+    // This is the path to the `user-files` folder created by actual-server
+    dataDir: '/path/to/user-files',
+  },
+});
 
-api.runWithBudget('My-Budget', run);
+let budget = await api.getBudgetMonth('2019-10');
+console.log(budget);
 ```
 
-Remember, **before running scripts you must start Actual**. This code will connect to Actual, select the budget `My-Budget` and print out the result of [`getBudgetMonth`](/developers/API/#getbudgetmonth). Read the [reference docs](/developers/API/) to see all the methods available.
+This code will load the budget file and print out the result of [`getBudgetMonth`](API.md#getbudgetmonth). Read the [reference docs](API.md) to see all the methods available.
 
 You can find your budget id in the "Advanced" section of the settings page.
 
@@ -67,7 +72,7 @@ async function run() {
     await api.addTransactions(
       acctId,
       data.transactions
-        .filter(t => t.acctId === acctId)
+        .filter((t) => t.acctId === acctId)
         .map(convertTransaction)
     );
   }
