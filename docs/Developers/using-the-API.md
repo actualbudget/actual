@@ -24,38 +24,9 @@ npm install --save @actual-app/api
 yarn add @actual-app/api
 ```
 
-Next, you’ll need to point the API at your budget data. There are two ways to do this.
-
-### Connecting to the server files directly
-
-If you’re able to run the `@actual-app/api` package on the same computer that has the Actual server running, you can connect directly to the server files. This is the easiest way to get started.
-
-```js
-let api = require('@actual-app/api');
-
-await api.init({
-  // This is the path to the `user-files` folder created by actual-server
-  // (including the `user-files` part)
-  dataDir: '/path/to/user-files',
-});
-
-// This is the ID from Settings → Show advanced settings → Budget ID
-await api.loadBudget('abcdef');
-
-let budget = await api.getBudgetMonth('2019-10');
-console.log(budget);
-await api.shutdown();
-```
-
-This code will load the budget file and print out the result of [`getBudgetMonth`](API.md#getbudgetmonth). Read the [reference docs](API.md) to see all the methods available.
-
-You can find your budget id in the "Advanced" section of the settings page.
-
-If you want, you can use some low-level methods (see below) to manage the connection yourself, but this is not recommended.
-
 ### Connecting to a remote server
 
-If you can’t run the API on the same computer as the server, you can connect to your running server over the network. This is a bit more complicated, but it can be more convenient if you can’t easily access the server files.
+Next, you’ll need connect to your running server version of Actual to access your budget files.
 
 ```js
 let api = require('@actual-app/api');
