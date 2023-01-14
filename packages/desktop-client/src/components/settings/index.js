@@ -13,6 +13,7 @@ import tokens from 'loot-design/src/tokens';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import useServerVersion from '../../hooks/useServerVersion';
+import { isMobile } from '../../util';
 import { Page } from '../Page';
 import EncryptionSettings from './Encryption';
 import ExportBudget from './Export';
@@ -62,48 +63,54 @@ function Settings({
   }, [loadPrefs]);
 
   return (
-    <Page title="Settings">
-      <View style={{ flexShrink: 0, gap: 30, maxWidth: 600 }}>
-        {/* The only spot to close a budget on mobile */}
-        <Section
-          title="Budget"
-          style={css(
-            media(`(min-width: ${tokens.breakpoint_medium})`, {
-              display: 'none'
-            })
-          )}
-        >
-          <FormField>
-            <FormLabel title="Name" />
-            <Input
-              value={prefs.budgetName}
-              disabled
-              style={{ color: '#999' }}
+    <View
+      style={{
+        marginInline: globalPrefs.floatingSidebar && !isMobile() ? 'auto' : 0
+      }}
+    >
+      <Page title="Settings">
+        <View style={{ flexShrink: 0, gap: 30 }}>
+          {/* The only spot to close a budget on mobile */}
+          <Section
+            title="Budget"
+            style={css(
+              media(`(min-width: ${tokens.breakpoint_medium})`, {
+                display: 'none'
+              })
+            )}
+          >
+            <FormField>
+              <FormLabel title="Name" />
+              <Input
+                value={prefs.budgetName}
+                disabled
+                style={{ color: '#999' }}
+              />
+            </FormField>
+            <Button onClick={closeBudget}>Close Budget</Button>
+          </Section>
+
+          <About />
+
+          {!Platform.isBrowser && (
+            <GlobalSettings
+              globalPrefs={globalPrefs}
+              saveGlobalPrefs={this.props.saveGlobalPrefs}
             />
-          </FormField>
-          <Button onClick={closeBudget}>Close Budget</Button>
-        </Section>
+          )}
 
-        <About />
+          <FormatSettings prefs={prefs} savePrefs={savePrefs} />
+          <EncryptionSettings prefs={prefs} pushModal={pushModal} />
+          <ExportBudget prefs={prefs} />
 
-        {!Platform.isBrowser && (
-          <GlobalSettings
-            globalPrefs={globalPrefs}
-            saveGlobalPrefs={this.props.saveGlobalPrefs}
-          />
-        )}
-
-        <FormatSettings prefs={prefs} savePrefs={savePrefs} />
-        <EncryptionSettings prefs={prefs} pushModal={pushModal} />
-        <ExportBudget prefs={prefs} />
-
-        <AdvancedToggle>
-          <AdvancedAbout prefs={prefs} />
-          <ResetCache />
-          <ResetSync resetSync={resetSync} />
-        </AdvancedToggle>
-      </View>
-    </Page>
+          <AdvancedToggle>
+            <AdvancedAbout prefs={prefs} />
+            <ResetCache />
+            <ResetSync resetSync={resetSync} />
+          </AdvancedToggle>
+        </View>
+      </Page>
+    </View>
   );
 }
 

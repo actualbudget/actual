@@ -234,7 +234,7 @@ function ScheduleValue({ value }) {
       data={schedules}
       describe={s => {
         let payeeId = s._payee;
-        return payeeId
+        return byId[payeeId]
           ? `${byId[payeeId].name} (${s.next_date})`
           : `Next: ${s.next_date}`;
       }}
@@ -588,20 +588,29 @@ export default function ManageRules({
   }, []);
 
   function onCreateRule() {
+    let rule = {
+      stage: null,
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: payeeId || null,
+          type: 'id'
+        }
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: null,
+          type: 'id'
+        }
+      ]
+    };
+
     dispatch(
       pushModal('edit-rule', {
-        rule: {
-          stage: null,
-          conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
-          actions: [
-            {
-              op: 'set',
-              field: 'category',
-              value: null,
-              type: 'id'
-            }
-          ]
-        },
+        rule,
         onSave: async newRule => {
           let newRules = await loadRules();
 
