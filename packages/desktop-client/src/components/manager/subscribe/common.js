@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { loggedIn } from 'loot-core/src/client/actions/user';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   Text,
@@ -41,7 +41,9 @@ export function useBootstrapped() {
         // A server hasn't been specified yet
         history.push('/config-server');
       } else {
-        let { error, bootstrapped, passwordDisabled } = await send('subscribe-needs-bootstrap');
+        let { error, bootstrapped, passwordDisabled } = await send(
+          'subscribe-needs-bootstrap'
+        );
         if (error) {
           history.push('/error', { error });
         } else if (passwordDisabled) {

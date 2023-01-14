@@ -22,7 +22,7 @@ export default function ChangePassword() {
       case 'network-failure':
         return 'Unable to contact the server';
       case 'password-disabled':
-        return 'Passwords are disabled on this instance. To change this, remove the environment variable DANGEROUS_DISABLE_PASSWORD.'
+        return 'Passwords are disabled on this instance. To change this, remove the environment variable DANGEROUS_DISABLE_PASSWORD.';
       default:
         return 'Internal server error';
     }
