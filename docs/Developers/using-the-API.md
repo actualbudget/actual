@@ -44,6 +44,7 @@ await api.init({
 
 let budget = await api.getBudgetMonth('2019-10');
 console.log(budget);
+await api.shutdown();
 ```
 
 This code will load the budget file and print out the result of [`getBudgetMonth`](API.md#getbudgetmonth). Read the [reference docs](API.md) to see all the methods available.
@@ -83,17 +84,17 @@ api.runImport('My-Budget', run);
 
 This is very simple, but it takes some data in `my-data.json` and creates all the accounts and transactions from it. Functions to convert the items (like `convertAccount`) are not included here. Use the [reference docs](/developers/API/) to learn the shape of objects that Actual expects.
 
-**Note:** it's important that [`addTransactions`](/developers/API/#addtransactions) is used here. You want to use it instead of [`importTransactions`](/developers/API/#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which dedupes transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data your importing.
+**Note:** it's important that [`addTransactions`](/developers/API/#addtransactions) is used here. You want to use it instead of [`importTransactions`](/developers/API/#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which dedupes transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data you’re importing.
 
-If you want to see an example of a real importer, our YNAB4 importer is [completely open-source](https://github.com/actualbudget/import-ynab4/blob/master/importer.js). It's built on exactly the same API that you are using.
+Check out the [YNAB4](https://github.com/actualbudget/actual/blob/master/packages/import-ynab4/importer.js) and [YNAB5](https://github.com/actualbudget/actual/blob/master/packages/import-ynab5/importer.js) importers to see how a real importer works.
 
 ## Methods
 
-These are the two public methods that you can use. The API also exports low-level functions like `init`, `send`, `disconnect`, and `loadBudget` if you want to manually manage the connection. You can [read the source](https://github.com/actualbudget/node-api/blob/master/connection.js) to learn about those methods.
+These are the public methods that you can use. The API also exports low-level functions like `init`, `send`, `disconnect`, and `loadBudget` if you want to manually manage the connection. You can [read the source](https://github.com/actualbudget/actual/blob/master/packages/loot-core/src/server/main.js) to learn about those methods (search for `export const lib`).
 
-#### `runWithBudget`
+#### `init`
 
-<Method name="runWithBudget" args={[{ name: 'budgetId', type: 'string'}, { name: 'func', type: 'function' }]} returns="Promise<null>" />
+<Method name="init" argsObject={true} args={{ properties: [{ name: 'budgetId', type: 'string'}, { name: 'config', properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }]}] }} returns="Promise<void>" />
 
 After connecting to the budget `budgetId`, run the function. This function can assume all API methods are ready to use.
 

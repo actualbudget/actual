@@ -299,6 +299,27 @@ export function StructType({ name, fields }) {
   );
 }
 
+function Argument({ arg }) {
+  return (
+    <span>
+      <span
+        className="text-gray-500"
+        style={{ position: 'absolute', bottom: -15, fontSize: 12 }}
+      >
+        {arg.type}
+      </span>
+      {arg.name}
+    </span>
+  );
+}
+
+function insertCommas(element, i, arr) {
+  if (i === arr.length - 1) {
+    return element;
+  }
+  return [element, ', '];
+}
+
 export function Method({ name, args, returns = 'Promise<null>', children }) {
   return (
     <p className="method">
@@ -306,21 +327,23 @@ export function Method({ name, args, returns = 'Promise<null>', children }) {
         <code className="text-blue-800">
           {name}(
           {args.map((arg, idx) => {
-            return (
-              <>
-                <span style={{ position: 'relative' }}>
-                  <span
-                    className="text-gray-500"
-                    style={{ position: 'absolute', bottom: -15, fontSize: 12 }}
-                  >
-                    {arg.type}
-                  </span>
-                  {arg.name}
-                  {idx !== args.length - 1 ? ', ' : ''}
-                </span>
-              </>
-            );
-          })}
+            if (arg.properties) {
+              return arg.properties.map(prop => {
+                if (prop.properties) {
+                  return [
+                    prop.name,
+                    ': { ',
+                    prop.properties.map(p => {
+                      return <Argument arg={p} />;
+                    }),
+                    ' }'
+                  ];
+                }
+                return <Argument arg={prop} />;
+              }).map(insertCommas)
+            }
+            return <Argument arg={arg} />;
+          }).map(insertCommas)}
           ) <span className="text-gray-500">&rarr; {returns}</span>
         </code>
       </div>
