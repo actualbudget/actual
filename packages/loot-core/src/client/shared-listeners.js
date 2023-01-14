@@ -46,6 +46,8 @@ export function listenForSyncEvent(actions, store) {
       let notif = null;
       let learnMore =
         '[Learn more](https://actualbudget.github.io/docs/Getting-Started/sync#debugging-sync-issues)';
+      const githubIssueLink =
+        'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug%2Cneeds+triage&template=bug-report.yml&title=%5BBug%5D%3A+';
 
       switch (subtype) {
         case 'out-of-sync':
@@ -235,8 +237,7 @@ export function listenForSyncEvent(actions, store) {
           break;
         case 'apply-failure':
           notif = {
-            message:
-              "We couldn't apply that change to the database. Please report this as a bug via Github issues."
+            message: `We couldn't apply that change to the database. Please report this as a bug by [opening a Github issue](${githubIssueLink}).`
           };
           break;
         case 'beta-version':
@@ -245,8 +246,7 @@ export function listenForSyncEvent(actions, store) {
           break;
         default:
           notif = {
-            message:
-              'We had problems syncing your changes. Please report this as a bug via Github issues.'
+            message: `We had problems syncing your changes. Please report this as a bug by [opening a Github issue](${githubIssueLink}).`
           };
       }
 
