@@ -159,25 +159,6 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     await handlers['close-budget']();
   }
 
-  let files = await handlers['get-remote-files']();
-  let file = files.find(f => f.groupId === syncId);
-  if (!file) {
-    throw new Error(
-      `Budget "${syncId}" not found. Check the sync id of your budget in the "Advanced" section of the settings page.`
-    );
-  }
-  if (file.encryptKeyId && !password) {
-    throw new Error(
-      `File ${file.name} is encrypted. Please provide a password.`
-    );
-  }
-  if (password) {
-    let result = await handlers['key-test']({ fileId: file.fileId, password });
-    if (result.error) {
-      throw new Error(getTestKeyError(result.error));
-    }
-  }
-
   let localBudget = (await handlers['get-budgets']()).find(
     b => b.cloudFileId === syncId
   );
@@ -189,6 +170,28 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
       throw new Error(getSyncError(result.error, id));
     }
   } else {
+    let files = await handlers['get-remote-files']();
+    let file = files.find(f => f.groupId === syncId);
+    if (!file) {
+      throw new Error(
+        `Budget "${syncId}" not found. Check the sync id of your budget in the "Advanced" section of the settings page.`
+      );
+    }
+    if (file.encryptKeyId && !password) {
+      throw new Error(
+        `File ${file.name} is encrypted. Please provide a password.`
+      );
+    }
+    if (password) {
+      let result = await handlers['key-test']({
+        fileId: file.fileId,
+        password
+      });
+      if (result.error) {
+        throw new Error(getTestKeyError(result.error));
+      }
+    }
+
     let result = await handlers['download-budget']({ fileId: file.fileId });
     if (result.error) {
       throw new Error(getDownloadError(result.error, id));
