@@ -18,13 +18,11 @@
   "license": "ISC",
   "dependencies": {
     "@babel/register": "^7.12.10",
-    "@jlongster/mixpanel": "^0.13.4",
     "@jlongster/sql.js": "^1.6.7",
     "@rschedule/core": "^1.2.0",
     "@rschedule/ical-tools": "^1.2.0",
     "@rschedule/json-tools": "^1.2.0",
     "@rschedule/standard-date-adapter": "^1.2.0",
-    "@sentry/node": "^6.12.0",
     "absurd-sql": "0.0.53",
     "better-sqlite3": "7.4.1",
     "core-js": "^3.8.3",

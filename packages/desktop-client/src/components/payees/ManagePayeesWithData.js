@@ -90,19 +90,24 @@ function ManagePayeesWithData({
   }
 
   function onCreateRule(id) {
-    let payee = payees.find(p => p.id === id);
     let rule = {
-      id: null,
       stage: null,
       conditions: [
         {
-          field: 'description',
+          field: 'payee',
           op: 'is',
-          value: payee.id,
+          value: id,
           type: 'id'
         }
       ],
-      actions: []
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: null,
+          type: 'id'
+        }
+      ]
     };
     pushModal('edit-rule', { rule });
   }
