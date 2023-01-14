@@ -4461,7 +4461,7 @@ __metadata:
     "@sentry/cli": ^1.68.0
     "@sentry/electron": 2.5.3
     "@sentry/wizard": 1.2.11
-    electron: ^22.0.2
+    electron: 22.0.2
     electron-builder: ^23.6.0
     electron-download: ^4.1.1
     electron-is-dev: 2.0.0
@@ -9059,7 +9059,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:^22.0.2":
+"electron@npm:22.0.2":
   version: 22.0.2
   resolution: "electron@npm:22.0.2"
   dependencies:

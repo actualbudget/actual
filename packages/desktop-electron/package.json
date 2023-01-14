@@ -8,8 +8,7 @@
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "electron-builder",
-    "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
-    "postinstall": "electron-builder install-app-deps"
+    "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
   "main": "index.js",
   "build": {
@@ -57,7 +56,7 @@
   "devDependencies": {
     "@sentry/cli": "^1.68.0",
     "@sentry/wizard": "1.2.11",
-    "electron": "^22.0.2",
+    "electron": "22.0.2",
     "electron-builder": "^23.6.0",
     "electron-download": "^4.1.1",
     "electron-notarize": "^1.2.2"
