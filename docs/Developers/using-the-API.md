@@ -32,6 +32,8 @@ Next, you’ll need connect to your running server version of Actual to access y
 let api = require('@actual-app/api');
 
 await api.init({
+  // Budget data will be cached locally here, in subdirectories for each file.
+  dataDir: '/some/path',
   // This is the URL of your running server
   serverUrl: 'http://localhost:5006',
   // This is the password you use to log into the server
@@ -91,11 +93,13 @@ These are the public methods that you can use. The API also exports low-level fu
 
 #### `init`
 
-<Method name="init" argsObject={true} args={[{ properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }]}]} returns="Promise<void>" />
+<Method name="init" argsObject={true} args={[{ properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }, { name: 'password', type: 'string' }]}]} returns="Promise<void>" />
 
-Call this before attempting to use any of the API methods. This will connect to the server and load the budget data.
+Call this before attempting to use any of the API methods. This will connect to the server using the provided password and load the budget data.
 
-`dataDir` defaults to the current working directory. If no `serverURL` is provided, no network connections will be made. If you provide a `serverURL`, the API will attempt to connect to the server and load the budget data from there.
+`dataDir` defaults to the current working directory.
+
+If no `serverURL` is provided, no network connections will be made, and you’ll only be able to access budget files already downloaded locally.
 
 You can find your budget id in the "Advanced" section of the settings page.
 
