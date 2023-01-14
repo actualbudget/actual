@@ -2192,7 +2192,9 @@ export async function init(config) {
     setServer(serverURL);
 
     if (config.password) {
-      await runHandler(handlers['subscribe-sign-in'], { password: config.password });
+      await runHandler(handlers['subscribe-sign-in'], {
+        password: config.password
+      });
     }
   } else {
     // This turns off all server URLs. In this mode we don't want any

@@ -1,3 +1,4 @@
+import { getTestKeyError } from '../shared/errors';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import {
@@ -6,7 +7,6 @@ import {
   deleteTransaction
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
-import { getTestKeyError } from '../shared/errors';
 import { addTransactions } from './accounts/sync';
 import {
   accountModel,
