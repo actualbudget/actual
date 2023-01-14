@@ -3,7 +3,7 @@
   "productName": "Actual",
   "author": "Shift Reset LLC",
   "description": "A simple and powerful personal finance system",
-  "version": "22.12.03",
+  "version": "22.12.3",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
