@@ -96,12 +96,26 @@ These are the public methods that you can use. The API also exports low-level fu
 
 <Method name="init" argsObject={true} args={[{ name: 'options', properties: [{ name: 'budgetId', type: 'string'}, { name: 'config', properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }]}] }]} returns="Promise<void>" />
 
-After connecting to the budget `budgetId`, run the function. This function can assume all API methods are ready to use.
+Call this before attempting to use any of the API methods. This will connect to the server and load the budget data.
+
+`dataDir` defaults to the current working directory. If no `serverURL` is provided, no network connections will be made. If you provide a `serverURL`, the API will attempt to connect to the server and load the budget data from there.
 
 You can find your budget id in the "Advanced" section of the settings page.
 
-#### `runImport`
+#### `shutdown`
 
-<Method name="runImport" args={[{ name: 'budgetName', type: 'string'}, { name: 'func', type: 'function' }]} returns="Promise<null>" />
+<Method name="shutdown" args={[]} returns="Promise<void>" />
 
-Create the budget `budgetName`, connect to it, and run the function. This puts the API in a special "import mode" that does some maintenance work to create a new budget, and bulk importing data runs much faster.
+Close the current budget file, and stop any other ongoing processes. It’s recommended to call this before exiting your script.
+
+#### `utils.amountToInteger`
+
+<Method name="utils.amountToInteger" args={[{ name: 'amount', type: 'number' }]} returns="number" />
+
+Convert a currency amount (such as `123.45`) represented as a floating point number to the integer format Actual uses internally (i.e. `12345`).
+
+#### `utils.integerToAmount`
+
+<Method name="utils.integerToAmount" args={[{ name: 'amount', type: 'number' }]} returns="number" />
+
+Convert an integer amount as used internally by Actual (such as `12345`) to the traditional floating point (i.e. `123.45`).
