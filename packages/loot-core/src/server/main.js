@@ -2190,6 +2190,10 @@ export async function init(config) {
 
   if (serverURL) {
     setServer(serverURL);
+
+    if (config.password) {
+      await runHandler(handlers['subscribe-sign-in'], { password: config.password });
+    }
   } else {
     // This turns off all server URLs. In this mode we don't want any
     // access to the server, we are doing things locally
