@@ -1,4 +1,8 @@
-import { getSyncError, getTestKeyError } from '../shared/errors';
+import {
+  getDownloadError,
+  getSyncError,
+  getTestKeyError
+} from '../shared/errors';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import {
@@ -174,7 +178,24 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     }
   }
 
-  let { id } = await handlers['download-budget']({ fileId: file.fileId });
+  let localBudget = (await handlers['get-budgets']()).find(
+    b => b.cloudFileId === syncId
+  );
+  let id;
+  if (localBudget) {
+    id = localBudget.id;
+    result = await handlers['sync-budget']({ id });
+    if (result.error) {
+      throw new Error(getSyncError(result.error, id));
+    }
+  } else {
+    let result = await handlers['download-budget']({ fileId: file.fileId });
+    if (result.error) {
+      throw new Error(getDownloadError(result.error, id));
+    }
+    id = result.id;
+  }
+
   await handlers['load-budget']({ id });
 };
 

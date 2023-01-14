@@ -1641,9 +1641,16 @@ handlers['download-budget'] = async function ({ fileId, replace }) {
   }
 
   let id = result.id;
+  result = await handlers['sync-budget']({ id });
+  if (result.error) {
+    return result;
+  }
+  return { id };
+};
 
+handlers['sync-budget'] = async function ({ id }) {
   // Load the budget and do a full sync
-  result = await loadBudget(result.id, VERSION, { showUpdate: true });
+  let result = await loadBudget(id, VERSION, { showUpdate: true });
   if (result.error) {
     return { error: { reason: result.error } };
   }
@@ -1652,8 +1659,7 @@ handlers['download-budget'] = async function ({ fileId, replace }) {
   await initialFullSync();
 
   await handlers['close-budget']();
-
-  return { id };
+  return {}
 };
 
 handlers['load-budget'] = async function ({ id }) {
