@@ -163,6 +163,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     b => b.groupId === syncId
   );
   if (localBudget) {
+    await handlers['load-budget']({ id: localBudget.id });
     let result = await handlers['sync-budget']({ id: localBudget.id });
     if (result.error) {
       throw new Error(getSyncError(result.error, localBudget.id));
