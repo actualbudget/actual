@@ -2170,7 +2170,7 @@ export async function initApp(version, isDev, socketName) {
   }
 }
 
-export async function init({ budgetId, config }) {
+export async function init(config) {
   // Get from build
   // eslint-disable-next-line
   VERSION = ACTUAL_APP_VERSION;
@@ -2198,10 +2198,6 @@ export async function init({ budgetId, config }) {
     app.events.on('load-budget', () => {
       setSyncingMode('offline');
     });
-  }
-
-  if (budgetId) {
-    await runHandler(handlers['load-budget'], { id: budgetId });
   }
 
   return lib;
