@@ -23,7 +23,7 @@ export function Section({ title, children, style, titleProps, ...props }) {
   );
 }
 
-export function ButtonSetting({ button, children }) {
+export function Setting({ primaryAction, children }) {
   return (
     <View
       {...css(
@@ -46,7 +46,7 @@ export function ButtonSetting({ button, children }) {
       >
         {children}
       </View>
-      {button}
+      {primaryAction || null}
     </View>
   );
 }

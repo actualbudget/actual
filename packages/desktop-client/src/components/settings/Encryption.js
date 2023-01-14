@@ -3,7 +3,7 @@ import React from 'react';
 import { Text, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import { ButtonSetting } from './UI';
+import { Setting } from './UI';
 
 export default function EncryptionSettings({ prefs, pushModal }) {
   function onChangeKey() {
@@ -11,8 +11,8 @@ export default function EncryptionSettings({ prefs, pushModal }) {
   }
 
   return prefs.encryptKeyId ? (
-    <ButtonSetting
-      button={<Button onClick={onChangeKey}>Generate new key</Button>}
+    <Setting
+      primaryAction={<Button onClick={onChangeKey}>Generate new key</Button>}
     >
       <Text>
         <Text style={{ color: colors.g4, fontWeight: 600 }}>
@@ -22,10 +22,10 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         out to the cloud . Local data remains unencrypted so if you forget your
         password you can re-encrypt it.
       </Text>
-    </ButtonSetting>
+    </Setting>
   ) : (
-    <ButtonSetting
-      button={
+    <Setting
+      primaryAction={
         <Button
           onClick={() => {
             alert(
@@ -44,6 +44,6 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         encrypted which means we have the ability to read it (but we won't). If
         you want, you can use a password to encrypt your data on our servers.
       </Text>
-    </ButtonSetting>
+    </Setting>
   );
 }
