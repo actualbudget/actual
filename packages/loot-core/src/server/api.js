@@ -1,4 +1,4 @@
-import { getTestKeyError } from '../shared/errors';
+import { getSyncError, getTestKeyError } from '../shared/errors';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import {
@@ -144,19 +144,7 @@ handlers['api/load-budget'] = async function ({ id }) {
     } else {
       connection.send('show-budgets');
 
-      if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
-        throw new Error(
-          'This budget cannot be loaded with this version of the app.'
-        );
-      } else if (error === 'budget-not-found') {
-        throw new Error(
-          'Budget "' +
-            id +
-            '" not found. Check the id of your budget in the "Advanced" section of the settings page.'
-        );
-      } else {
-        throw new Error('We had an unknown problem opening "' + id + '".');
-      }
+      throw new Error(getSyncError(error, id));
     }
   }
 };
