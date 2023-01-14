@@ -38,9 +38,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             </View>
           </label>
 
-          <label
-            style={{ display: 'flex', color: disabled ? colors.n5 : 'inherit' }}
-          >
+          <label style={{ display: 'flex' }}>
             <Checkbox
               id="report-budget-flag"
               checked={flags.syncAccount}
