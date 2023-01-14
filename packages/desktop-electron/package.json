@@ -44,8 +44,6 @@
     }
   },
   "dependencies": {
-    "@jlongster/sentry-metrics-actual": "^0.0.10",
-    "@sentry/electron": "2.5.3",
     "electron-is-dev": "2.0.0",
     "electron-log": "4.3.2",
     "electron-updater": "4.3.8",
@@ -54,8 +52,6 @@
     "node-ipc": "9.1.4"
   },
   "devDependencies": {
-    "@sentry/cli": "^1.68.0",
-    "@sentry/wizard": "1.2.11",
     "electron": "20.3.9",
     "electron-builder": "^23.6.0",
     "electron-download": "^4.1.1",
