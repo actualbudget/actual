@@ -53,6 +53,32 @@ You can find your budget id in the "Advanced" section of the settings page.
 
 If you want, you can use some low-level methods (see below) to manage the connection yourself, but this is not recommended.
 
+### Connecting to a remote server
+
+If you can’t run the API on the same computer as the server, you can connect to your running server over the network. This is a bit more complicated, but it can be more convenient if you can’t easily access the server files.
+
+```js
+let api = require('@actual-app/api');
+
+await api.init({
+  // This is the URL of your running server
+  serverUrl: 'http://localhost:5006',
+  // This is the password you use to log into the server
+  password: 'hunter2',
+});
+
+// This is the ID from Settings → Show advanced settings → Sync ID
+await api.downloadBudget('abcdef');
+// or, if you have end-to-end encryption enabled:
+await api.downloadBudget('abcdef', { password: 'password1' });
+
+let budget = await api.getBudgetMonth('2019-10');
+console.log(budget);
+await api.shutdown();
+```
+
+Heads up! You probably don’t want to hard-code the passwords like that, especially if you’ll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
+
 ## Writing data importers
 
 If you are using another app, like YNAB or Mint, you might want to migrate your data. Right now only officially support [importing YNAB4 data](/Getting-Started/migration/ynab4) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.
