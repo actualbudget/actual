@@ -238,7 +238,7 @@ function AccountNameWithMenu({
       <ExpandArrow
         width={9}
         height={9}
-        style={{ marginLeft: 10, marginRight: 3 }}
+        style={{ marginLeft: 7, marginRight: 3 }}
       />
       {menuOpen && (
         <MenuTooltip onClose={onCloseMenu}>
@@ -441,7 +441,7 @@ function Balances({
               style={{
                 width: 10,
                 height: 10,
-                marginLeft: 10,
+                marginLeft: 7,
                 ...colorByValue(value)
               }}
             />
