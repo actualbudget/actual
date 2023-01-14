@@ -82,8 +82,6 @@ fi
 
 yarn patch-package
 
-yarn workspace mobile patch-package
-
 yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build

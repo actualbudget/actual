@@ -153,7 +153,7 @@ export const schemaConfig = {
   },
 
   customizeQuery(queryState) {
-    let { table: tableName, tableOptions = {} } = queryState;
+    let { table: tableName } = queryState;
 
     function orderBy(orders) {
       // If order was specified, always add id as the last sort to make

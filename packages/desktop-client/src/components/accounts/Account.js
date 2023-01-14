@@ -125,7 +125,7 @@ function ReconcilingMessage({
         flexDirection: 'row',
         alignSelf: 'center',
         backgroundColor: 'white',
-        boxShadow: styles.shadow,
+        ...styles.shadow,
         borderRadius: 4,
         marginTop: 5,
         marginBottom: 15,
@@ -790,7 +790,7 @@ const AccountHeader = React.memo(
                     width: 13,
                     height: 13,
                     flexShrink: 0,
-                    color: 'inherit',
+                    color: search ? colors.p7 : 'inherit',
                     margin: 5,
                     marginRight: 0
                   }}
@@ -1823,9 +1823,10 @@ export default function Account(props) {
   }));
 
   let dispatch = useDispatch();
-  let actionCreators = useMemo(() => bindActionCreators(actions, dispatch), [
-    dispatch
-  ]);
+  let actionCreators = useMemo(
+    () => bindActionCreators(actions, dispatch),
+    [dispatch]
+  );
 
   let params = useParams();
   let location = useLocation();

@@ -38,15 +38,11 @@ function getServedPath(appPackageJson) {
   return ensureSlash(servedUrl, true);
 }
 
-const isReactNative = process.env.IS_REACT_NATIVE;
-const isGenericBrowser = process.env.IS_GENERIC_BROWSER;
-
 // JWL: Resolve to mobile suffixes before resolving to .js. This
 // makes it load real React Native components, but when needed
 // .web.js can be used to force a web version.
-const moduleFileExtensions = (isGenericBrowser ? ['browser.js'] : [])
+const moduleFileExtensions = ['browser.js']
   .concat(['web.mjs', 'web.js'])
-  .concat(isReactNative ? ['ios.js', 'mobile.js'] : [])
   .concat(['mjs', 'js', 'json', 'web.jsx', 'jsx']);
 
 // Resolve file paths in the same order as webpack
@@ -90,7 +86,5 @@ module.exports = {
   servedPath: getServedPath(resolveApp('package.json')),
   aliases: getAliases(resolveApp('package.json'))
 };
-
-
 
 module.exports.moduleFileExtensions = moduleFileExtensions;

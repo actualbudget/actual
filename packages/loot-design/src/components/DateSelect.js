@@ -325,7 +325,9 @@ export default function DateSelect({
               setValue(selectedValue || '');
 
               let date = d.parse(selectedValue, dateFormat, new Date());
-              onSelect(d.format(date, 'yyyy-MM-dd'));
+              if (date instanceof Date && !isNaN(date)) {
+                onSelect(d.format(date, 'yyyy-MM-dd'));
+              }
             }
           }
         }}

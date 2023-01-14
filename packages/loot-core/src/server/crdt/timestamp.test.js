@@ -1,9 +1,9 @@
 import { Timestamp } from './timestamp';
 
-describe('Timestamp', function() {
+describe('Timestamp', function () {
   let now = 0;
 
-  beforeEach(function() {
+  beforeEach(function () {
     Date.prevNow = Date.now;
     Date.now = () => now;
     Timestamp.init({ node: '1' });
@@ -13,8 +13,8 @@ describe('Timestamp', function() {
     Date.now = Date.prevNow;
   });
 
-  describe('comparison', function() {
-    it('should be in order', function() {
+  describe('comparison', function () {
+    it('should be in order', function () {
       expect(Timestamp.zero()).toBe(Timestamp.zero());
       expect(Timestamp.max() > Timestamp.zero()).toBeTruthy();
       expect(Timestamp.send() > Timestamp.zero()).toBeTruthy();
@@ -22,8 +22,8 @@ describe('Timestamp', function() {
     });
   });
 
-  describe('parsing', function() {
-    it('should not parse', function() {
+  describe('parsing', function () {
+    it('should not parse', function () {
       var invalidInputs = [
         null,
         undefined,
@@ -45,7 +45,7 @@ describe('Timestamp', function() {
       }
     });
 
-    it('should parse', function() {
+    it('should parse', function () {
       var validInputs = [
         '1970-01-01T00:00:00.000Z-0000-0000000000000000',
         '2015-04-24T22:23:42.123Z-1000-0123456789ABCDEF',
@@ -64,8 +64,8 @@ describe('Timestamp', function() {
     });
   });
 
-  describe('send', function() {
-    it('should send monotonically with a monotonic clock', function() {
+  describe('send', function () {
+    it('should send monotonically with a monotonic clock', function () {
       now = 10;
       expect(Timestamp.send()).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.010Z-0000-0000000000000001')
@@ -80,7 +80,7 @@ describe('Timestamp', function() {
       );
     });
 
-    it('should send monotonically with a stuttering clock', function() {
+    it('should send monotonically with a stuttering clock', function () {
       now = 20;
       expect(Timestamp.send()).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.020Z-0000-0000000000000001')
@@ -97,7 +97,7 @@ describe('Timestamp', function() {
       );
     });
 
-    it('should send monotonically with a regressing clock', function() {
+    it('should send monotonically with a regressing clock', function () {
       now = 30;
       expect(Timestamp.send()).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.030Z-0000-0000000000000001')
@@ -115,20 +115,20 @@ describe('Timestamp', function() {
       );
     });
 
-    it('should fail with counter overflow', function() {
+    it('should fail with counter overflow', function () {
       now = 40;
       for (var i = 0; i < 65536; i++) Timestamp.send();
       expect(Timestamp.send).toThrow(Timestamp.OverflowError);
     });
 
-    it('should fail with clock drift', function() {
+    it('should fail with clock drift', function () {
       now = -(5 * 60 * 1000 + 1);
       expect(Timestamp.send).toThrow(Timestamp.ClockDriftError);
     });
   });
 
-  describe('recv', function() {
-    it('should receive monotonically with a global monotonic clock', function() {
+  describe('recv', function () {
+    it('should receive monotonically with a global monotonic clock', function () {
       now = 52;
       expect(
         Timestamp.recv(
@@ -155,7 +155,7 @@ describe('Timestamp', function() {
       );
     });
 
-    it('should receive monotonically with a global stuttering clock', function() {
+    it('should receive monotonically with a global stuttering clock', function () {
       now = 61;
       expect(
         Timestamp.recv(
@@ -190,7 +190,7 @@ describe('Timestamp', function() {
       );
     });
 
-    it('should receive monotonically with a local stuttering clock', function() {
+    it('should receive monotonically with a local stuttering clock', function () {
       now = 73;
       expect(
         Timestamp.recv(
@@ -217,7 +217,7 @@ describe('Timestamp', function() {
       );
     });
 
-    it('should receive monotonically with a remote stuttering clock', function() {
+    it('should receive monotonically with a remote stuttering clock', function () {
       now = 81;
       expect(
         Timestamp.recv(
@@ -251,7 +251,7 @@ describe('Timestamp', function() {
         Timestamp.parse('1970-01-01T00:00:00.084Z-0000-0000000000000001')
       );
     });
-    it('should receive monotonically with a local regressing clock', function() {
+    it('should receive monotonically with a local regressing clock', function () {
       now = 93;
       expect(
         Timestamp.recv(
@@ -277,7 +277,7 @@ describe('Timestamp', function() {
         Timestamp.parse('1970-01-01T00:00:00.093Z-0002-0000000000000001')
       );
     });
-    it('should receive monotonically with a remote regressing clock', function() {
+    it('should receive monotonically with a remote regressing clock', function () {
       now = 101;
       expect(
         Timestamp.recv(
@@ -312,8 +312,8 @@ describe('Timestamp', function() {
     //   }).toThrow(Timestamp.DuplicateNodeError);
     // });
 
-    it('should fail with clock drift', function() {
-      expect(function() {
+    it('should fail with clock drift', function () {
+      expect(function () {
         Timestamp.recv(
           Timestamp.parse('1980-01-01T00:00:00.101Z-0000-0000000000000002')
         );

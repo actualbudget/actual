@@ -6,7 +6,7 @@ function _openDatabase() {
     let dbVersion = 9;
     let openRequest = indexedDB.open('actual', dbVersion);
 
-    openRequest.onupgradeneeded = function(e) {
+    openRequest.onupgradeneeded = function (e) {
       let db = e.target.result;
 
       // Remove old stores
@@ -33,7 +33,7 @@ function _openDatabase() {
       reject(new Error('indexeddb-failure: Could not open IndexedDB'));
     };
 
-    openRequest.onsuccess = function(e) {
+    openRequest.onsuccess = function (e) {
       let db = e.target.result;
 
       db.onversionchange = () => {
@@ -41,7 +41,7 @@ function _openDatabase() {
         db.close();
       };
 
-      db.onerror = function(event) {
+      db.onerror = function (event) {
         console.log('Database error: ' + (event.target && event.target.error));
 
         if (event.target && event.target.error) {
@@ -131,7 +131,7 @@ function openDatabase() {
 
 function closeDatabase() {
   if (openedDb) {
-    let promise = openedDb.then(db => {
+    openedDb.then(db => {
       db.close();
     });
     openedDb = null;

@@ -6,7 +6,7 @@ let messageQueue = [];
 let socketClient = null;
 
 function connectSocket(name, onOpen) {
-  global.Actual.ipcConnect(name, function(client) {
+  global.Actual.ipcConnect(name, function (client) {
     client.on('message', data => {
       const msg = data;
 

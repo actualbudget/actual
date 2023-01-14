@@ -153,7 +153,7 @@ function File({ file, onSelect, onDelete }) {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          boxShadow: styles.shadow,
+          ...styles.shadow,
           margin: 10,
           padding: '12px 15px',
           backgroundColor: 'white',
@@ -172,7 +172,9 @@ function File({ file, onSelect, onDelete }) {
         <FileState file={file} />
       </View>
 
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View
+        style={{ flex: '0 0 auto', flexDirection: 'row', alignItems: 'center' }}
+      >
         {file.encryptKeyId && (
           <Key
             style={{
