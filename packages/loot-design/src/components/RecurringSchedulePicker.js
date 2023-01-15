@@ -12,8 +12,6 @@ import SubtractIcon from 'loot-design/src/svg/Subtract';
 import { Button, Select, Input, Tooltip, View, Text, Stack } from './common';
 import DateSelect from './DateSelect';
 
-const DATE_FORMAT = 'yyyy-MM-dd';
-
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
 
@@ -96,7 +94,6 @@ function reducer(state, action) {
         }
       };
     case 'update-recurrence':
-      const index = state.config.patterns.indexOf(action.recurrence);
       return {
         ...state,
         config: {

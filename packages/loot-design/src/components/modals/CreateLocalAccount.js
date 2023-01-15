@@ -12,7 +12,6 @@ import {
   Button,
   Input,
   Select,
-  P,
   InlineField,
   FormError,
   InitialFocus

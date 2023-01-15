@@ -16,7 +16,7 @@ test('sql interpretation works', async () => {
     category: 1
   };
 
-  const { ops, dependencies, sqlDependencies } = compile(`
+  const { sqlDependencies } = compile(`
     =from transactions
        where date >= 20170101 and date <= 20170131 and
          category = 1

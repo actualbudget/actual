@@ -118,21 +118,21 @@ module.exports = {
     });
   },
   writeFile: (filepath, contents) => {
-    return new Promise(function(resolve, reject) {
-      fs.writeFile(filepath, contents, 'utf8', function(err, _) {
+    return new Promise(function (resolve, reject) {
+      fs.writeFile(filepath, contents, 'utf8', function (err, _) {
         return err ? reject(err) : resolve();
       });
     });
   },
   removeFile: filepath => {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       fs.unlink(filepath, err => {
         return err ? reject(err) : resolve();
       });
     });
   },
   removeDir: dirpath => {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       fs.rmdir(dirpath, err => {
         return err ? reject(err) : resolve();
       });
@@ -154,7 +154,7 @@ module.exports = {
     }
   },
   getModifiedTime: filepath => {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       fs.stat(filepath, (err, stats) => {
         if (err) {
           reject(err);

@@ -32,7 +32,7 @@ async function setItem(key, value) {
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
   let objectStore = transaction.objectStore('asyncStorage');
 
-  let promise = new Promise((resolve, reject) => {
+  new Promise((resolve, reject) => {
     let req = objectStore.put(value, key);
     req.onerror = e => reject(e);
     req.onsuccess = e => resolve();

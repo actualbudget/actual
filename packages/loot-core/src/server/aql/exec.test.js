@@ -75,9 +75,7 @@ describe('runQuery', () => {
 
     // date
     let { data } = await runQuery(
-      query('transactions')
-        .select('date')
-        .serialize()
+      query('transactions').select('date').serialize()
     );
     expect(data[0].date).toBe('2020-01-04');
 
