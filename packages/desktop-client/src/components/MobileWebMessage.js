@@ -8,13 +8,6 @@ import { colors, styles } from 'loot-design/src/style';
 
 import { isMobile } from '../util';
 
-function isOSX() {
-  var ua = window.navigator.userAgent;
-  var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
-  var webkit = !!ua.match(/WebKit/i);
-  return iOS && webkit && !ua.match(/CriOS/i);
-}
-
 let buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
 export default function MobileWebMessage() {
