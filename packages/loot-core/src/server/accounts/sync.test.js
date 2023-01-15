@@ -101,8 +101,7 @@ async function getAllPayees() {
 describe('Account sync', () => {
   test('reconcile creates payees correctly', async () => {
     monthUtils.currentDay = () => '2017-10-15';
-    let mockTransactions = prepMockTransactions();
-    let { id, account_id } = await prepareDatabase();
+    let { id } = await prepareDatabase();
 
     let payees = await getAllPayees();
     expect(payees.length).toBe(0);
@@ -134,7 +133,6 @@ describe('Account sync', () => {
 
     // The payee can be anything, all that matters is the amount is the same
     let mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
-    let payeeName = mockTransaction.name;
     mockTransaction.amount = 29.47;
 
     let payeeId = await db.insertPayee({ name: 'macy' });
@@ -359,7 +357,7 @@ describe('Account sync', () => {
   test('reconcile handles transactions with undefined fields', async () => {
     const { id: acctId } = await prepareDatabase();
 
-    const transactionId = await db.insertTransaction({
+    await db.insertTransaction({
       id: 'one',
       account: acctId,
       amount: 2948,
@@ -523,7 +521,7 @@ describe('Account sync', () => {
         payee: null
       });
 
-      let { added, updated } = await reconcileTransactions(acctId, [
+      let { updated } = await reconcileTransactions(acctId, [
         {
           date: '2017-10-17',
           payee_name: 'bakkerij',

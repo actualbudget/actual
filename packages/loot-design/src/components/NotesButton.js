@@ -49,13 +49,7 @@ export default function NotesButton({
 }) {
   let tooltip = useTooltip();
   let { data } = useLiveQuery(
-    useMemo(
-      () =>
-        q('notes')
-          .filter({ id })
-          .select('*'),
-      [id]
-    )
+    useMemo(() => q('notes').filter({ id }).select('*'), [id])
   );
   let note = data && data.length > 0 ? data[0].note : null;
   let hasNotes = note && note !== '';

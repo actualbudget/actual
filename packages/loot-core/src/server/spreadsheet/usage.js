@@ -43,8 +43,7 @@ const sheet = new Spreadsheet({
       },
       run: sql => {
         return new Promise(resolve => {
-          const start = Date.now();
-          db.all(sql, function(err, rows) {
+          db.all(sql, function (err, rows) {
             if (err) {
               throw new Error(err);
             }
@@ -56,7 +55,7 @@ const sheet = new Spreadsheet({
   }
 });
 
-db.on('preupdate', function(type, dbname, table, old, _new, oldId, newId) {
+db.on('preupdate', function (type, dbname, table, old, _new, oldId, newId) {
   sheet.resolve().then(() => {
     const start = Date.now();
     sheet.startTransaction();
@@ -78,7 +77,7 @@ function insertRow() {
   db.run(
     'INSERT INTO transactions (acct, category, amount, description, date)' +
       '  VALUES (3, 2, 944, "shirt", 1456808400000);',
-    function() {
+    function () {
       console.log('[insertRow] fired', Date.now() - start);
       const t = Math.random() * 100;
       console.log('[insertRow] waiting', t);

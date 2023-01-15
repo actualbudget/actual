@@ -223,9 +223,6 @@ export default function DateSelect({
   }, [value]);
 
   function onKeyDown(e) {
-    let ENTER = 13;
-    let UP = 38;
-    let DOWN = 40;
     let ESC = 27;
 
     if (
@@ -328,7 +325,9 @@ export default function DateSelect({
               setValue(selectedValue || '');
 
               let date = d.parse(selectedValue, dateFormat, new Date());
-              onSelect(d.format(date, 'yyyy-MM-dd'));
+              if (date instanceof Date && !isNaN(date)) {
+                onSelect(d.format(date, 'yyyy-MM-dd'));
+              }
             }
           }
         }}

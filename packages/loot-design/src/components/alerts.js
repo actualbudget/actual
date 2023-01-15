@@ -12,7 +12,7 @@ export function Alert({ icon: Icon, color, backgroundColor, style, children }) {
         {
           color,
           fontSize: 13,
-          boxShadow: styles.shadow,
+          ...styles.shadow,
           borderRadius: 4,
           backgroundColor,
           padding: 10,

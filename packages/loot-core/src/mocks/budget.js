@@ -213,12 +213,8 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
 }
 
 async function fillChecking(handlers, account, payees, groups) {
-  let {
-    incomePayee,
-    expensePayees,
-    incomeGroup,
-    expenseCategories
-  } = extractCommonThings(payees, groups);
+  let { incomePayee, expensePayees, incomeGroup, expenseCategories } =
+    extractCommonThings(payees, groups);
   let numTransactions = integer(20, 40);
 
   let transactions = [];
@@ -265,12 +261,7 @@ async function fillChecking(handlers, account, payees, groups) {
 }
 
 async function fillInvestment(handlers, account, payees, groups) {
-  let {
-    incomePayee,
-    expensePayees,
-    incomeGroup,
-    expenseCategories
-  } = extractCommonThings(payees, groups);
+  let { incomePayee, incomeGroup } = extractCommonThings(payees, groups);
 
   let numTransactions = integer(10, 30);
 
@@ -306,12 +297,8 @@ async function fillInvestment(handlers, account, payees, groups) {
 }
 
 async function fillSavings(handlers, account, payees, groups) {
-  let {
-    incomePayee,
-    expensePayees,
-    incomeGroup,
-    expenseCategories
-  } = extractCommonThings(payees, groups);
+  let { incomePayee, expensePayees, incomeGroup, expenseCategories } =
+    extractCommonThings(payees, groups);
 
   let numTransactions = integer(15, 40);
 
@@ -355,12 +342,7 @@ async function fillSavings(handlers, account, payees, groups) {
 }
 
 async function fillMortgage(handlers, account, payees, groups) {
-  let {
-    incomePayee,
-    expensePayees,
-    incomeGroup,
-    expenseCategories
-  } = extractCommonThings(payees, groups);
+  let { incomePayee, incomeGroup } = extractCommonThings(payees, groups);
 
   let numTransactions = integer(7, 10);
   let amount = integer(100000, 200000);
@@ -397,12 +379,7 @@ async function fillMortgage(handlers, account, payees, groups) {
 }
 
 async function fillOther(handlers, account, payees, groups) {
-  let {
-    incomePayee,
-    expensePayees,
-    incomeGroup,
-    expenseCategories
-  } = extractCommonThings(payees, groups);
+  let { incomePayee, incomeGroup } = extractCommonThings(payees, groups);
 
   let numTransactions = integer(3, 6);
   let category = incomeGroup.categories.find(c => c.name === 'Income');

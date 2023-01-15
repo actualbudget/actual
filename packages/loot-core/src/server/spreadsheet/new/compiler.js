@@ -101,7 +101,7 @@ class Compiler {
       .concat(getSqlFields(node.table, node.groupby))
       .concat(...node.select.map(s => getSqlFields(node.table, s.expr)));
 
-    const { sql, where, dependencies } = generateSql(
+    const { sql, where } = generateSql(
       node.table,
       node.where,
       node.groupby,

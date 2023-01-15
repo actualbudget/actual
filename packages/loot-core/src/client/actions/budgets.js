@@ -6,8 +6,6 @@ import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
 import { startTutorialFirstTime } from './tutorial';
 
-const uuid = require('../../platform/uuid');
-
 export function updateStatusText(text) {
   return (dispatch, getState) => {
     const { loadingText } = getState().app;

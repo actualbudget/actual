@@ -1,28 +1,6 @@
 import * as merkle from './merkle';
 import { Timestamp } from './timestamp';
 
-function pretty(n) {
-  if (n < 60) {
-    console.log(`${n} (${n} min)`);
-  } else if (n < 24 * 60) {
-    console.log(`${n} (${n / 60} hours)`);
-  } else {
-    console.log(`${n} (${n / (24 * 60)} days)`);
-  }
-}
-
-function printBase3Buckets() {
-  for (let i = 0; i < 14; i++) {
-    let left = '0000000000000'.slice(0, i);
-    let rightLow = '0000000000000'.slice(0, 13 - i);
-    let rightHigh = '2222222222222'.slice(0, 13 - i);
-    const min = left + '2' + rightLow;
-    const max = left + '2' + rightHigh;
-
-    pretty(parseInt(max, 3) - parseInt(min, 3));
-  }
-}
-
 function message(timestamp, hash) {
   timestamp = Timestamp.parse(timestamp);
   timestamp.hash = () => hash;
@@ -95,13 +73,6 @@ describe('merkle trie', () => {
 
     expect(merkle.diff(trie1, trie2)).toBe(0);
   });
-
-  function debug(k, trie) {
-    return {
-      name: `[${k}] Hash: ${trie.hash}`,
-      children: merkle.getKeys(trie).map(k => debug(k, trie[k]))
-    };
-  }
 
   test('pruning works and keeps correct hashes', () => {
     let messages = [

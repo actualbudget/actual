@@ -337,7 +337,7 @@ describe('query helpers', () => {
     tracer.start();
 
     let query = q('transactions').select('id');
-    let paged = pagedQuery(query, data => tracer.event('data', data), {
+    pagedQuery(query, data => tracer.event('data', data), {
       pageCount: 10
     });
 
@@ -349,7 +349,7 @@ describe('query helpers', () => {
   });
 
   it('pagedQuery only runs `fetchNext` once at a time', async () => {
-    let data = initPagingServer(1000, { delay: 200 });
+    initPagingServer(1000, { delay: 200 });
     tracer.start();
 
     let query = q('transactions').select('id');
