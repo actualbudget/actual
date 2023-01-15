@@ -20,7 +20,6 @@ import { colors } from 'loot-design/src/style';
 export default function CreateEncryptionKey({
   modalProps,
   actions,
-  budgetId,
   options = {}
 }) {
   let [password, setPassword] = useState('');
@@ -92,7 +91,9 @@ export default function CreateEncryptionKey({
                     through this process.
                   </li>
                   <li>
-                    It is recommended for the encryption password to be different than the log-in password in order to better protect your data.
+                    It is recommended for the encryption password to be
+                    different than the log-in password in order to better
+                    protect your data.
                   </li>
                 </ul>
               </P>
