@@ -10,17 +10,17 @@ export let types = {
           UUID
         </a>
       </span>
-    )
+    ),
   },
   month: {
     name: 'month',
     type: 'string',
-    description: <code>YYYY-MM</code>
+    description: <code>YYYY-MM</code>,
   },
   date: {
     name: 'date',
     type: 'string',
-    description: <code>YYYY-MM-DD</code>
+    description: <code>YYYY-MM-DD</code>,
   },
   amount: {
     name: 'amount',
@@ -32,15 +32,15 @@ export let types = {
         depends on your currency. For example, a USD amount of{' '}
         <code>$120.30</code> would be <code>12030</code>.
       </span>
-    )
-  }
+    ),
+  },
 };
 
 export let objects = {
   transaction: [
     {
       name: 'id',
-      type: types.id
+      type: types.id,
     },
     { name: 'account', type: types.id, required: true },
     { name: 'date', type: 'date', required: true },
@@ -53,7 +53,7 @@ export let objects = {
           In a <a href="#types-of-methods">create</a> request, this overrides{' '}
           <code>payee_name</code>.
         </span>
-      )
+      ),
     },
     {
       name: 'payee_name',
@@ -66,13 +66,13 @@ export let objects = {
           </div>
           * Only available in a <a href="#types-of-methods">create</a> request
         </div>
-      )
+      ),
     },
     {
       name: 'imported_payee',
       type: 'string',
       description:
-        'This can be anything. Meant to represent the raw description when importing, allowing the user to see the original value.'
+        'This can be anything. Meant to represent the raw description when importing, allowing the user to see the original value.',
     },
     { name: 'category', type: types.id },
     { name: 'notes', type: 'string' },
@@ -80,7 +80,7 @@ export let objects = {
       name: 'imported_id',
       type: 'string',
       description:
-        'A unique id usually given by the bank, if importing. Use this is avoid duplicate transactions.'
+        'A unique id usually given by the bank, if importing. Use this is avoid duplicate transactions.',
     },
     {
       name: 'transfer_id',
@@ -90,14 +90,14 @@ export let objects = {
           If a transfer, the <code>id</code> of the transaction in the other
           account for the transfer. See <a href="#transfers">transfers</a>.
         </span>
-      )
+      ),
     },
     {
       name: 'cleared',
       type: 'boolean',
       description: (
         <span>A flag indicating if the transaction has cleared or not.</span>
-      )
+      ),
     },
     {
       name: 'subtransactions',
@@ -111,8 +111,8 @@ export let objects = {
           * Only available in a <a href="#types-of-methods">get</a> or{' '}
           <a href="#types-of-methods">create</a> request
         </div>
-      )
-    }
+      ),
+    },
   ],
 
   account: [
@@ -122,7 +122,7 @@ export let objects = {
       name: 'type',
       type: 'string',
       required: true,
-      description: 'Must be a valid type. See notes below.'
+      description: 'Must be a valid type. See notes below.',
     },
     {
       name: 'offbudget',
@@ -131,7 +131,7 @@ export let objects = {
         <span>
           Defaults to <code>false</code>
         </span>
-      )
+      ),
     },
     {
       name: 'closed',
@@ -140,8 +140,8 @@ export let objects = {
         <span>
           Defaults to <code>false</code>
         </span>
-      )
-    }
+      ),
+    },
   ],
 
   category: [
@@ -155,8 +155,8 @@ export let objects = {
         <span>
           Defaults to <code>false</code>
         </span>
-      )
-    }
+      ),
+    },
   ],
 
   categoryGroup: [
@@ -169,7 +169,7 @@ export let objects = {
         <span>
           Defaults to <code>false</code>
         </span>
-      )
+      ),
     },
     {
       name: 'categories',
@@ -182,8 +182,8 @@ export let objects = {
           </div>
           Only available in a <code>get</code>.
         </div>
-      )
-    }
+      ),
+    },
   ],
 
   payee: [
@@ -198,8 +198,8 @@ export let objects = {
           The <code>id</code> of the account this payee transfers to/from, if
           this is a transfer payee.
         </span>
-      )
-    }
+      ),
+    },
   ],
 
   payeeRule: [
@@ -213,14 +213,14 @@ export let objects = {
         <span>
           Must be one of <code>equals</code> or <code>contains</code>
         </span>
-      )
+      ),
     },
     {
       name: 'value',
       type: 'string',
-      description: 'Value to match imported payee names on'
-    }
-  ]
+      description: 'Value to match imported payee names on',
+    },
+  ],
 };
 
 function Table({ style, headers, className, children }) {
@@ -228,7 +228,7 @@ function Table({ style, headers, className, children }) {
     <table className={`text-sm ${className}`} style={style}>
       <thead>
         <tr>
-          {headers.map(header => (
+          {headers.map((header) => (
             <th className="text-gray-900 font-thin">{header}</th>
           ))}
         </tr>
@@ -241,7 +241,7 @@ function Table({ style, headers, className, children }) {
 export function PrimitiveTypeList() {
   return (
     <Table headers={['Name', 'Type', 'Notes']} style={{ maxWidth: 700 }}>
-      {Object.keys(types).map(name => {
+      {Object.keys(types).map((name) => {
         return (
           <PrimitiveType
             name={types[name].name}
@@ -276,7 +276,7 @@ export function StructType({ name, fields }) {
         showBorder={true}
         headers={['Field', 'Type', 'Required?', 'Notes']}
       >
-        {fields.map(field => {
+        {fields.map((field) => {
           return (
             <tr>
               <td valign="top">
@@ -299,29 +299,46 @@ export function StructType({ name, fields }) {
   );
 }
 
+function Argument({ arg }) {
+  if (arg.properties) {
+    return (
+      <span>
+        {arg.name ? arg.name + ': ' : ''}
+        {'{ '}
+        {arg.properties
+          .map((prop) => <Argument arg={prop} />)
+          .map(insertCommas)}
+        {' }'}
+      </span>
+    );
+  }
+  return (
+    <span style={{ position: 'relative' }}>
+      <span
+        className="text-gray-500"
+        style={{ position: 'absolute', bottom: -20, fontSize: 12 }}
+      >
+        {arg.type}
+      </span>
+      {arg.name}
+    </span>
+  );
+}
+
+function insertCommas(element, i, arr) {
+  if (i === arr.length - 1) {
+    return element;
+  }
+  return [element, ', '];
+}
+
 export function Method({ name, args, returns = 'Promise<null>', children }) {
   return (
     <p className="method">
       <div className="p-4 pb-6 rounded border-b bg-gray-100 overflow-auto">
         <code className="text-blue-800">
-          {name}(
-          {args.map((arg, idx) => {
-            return (
-              <>
-                <span style={{ position: 'relative' }}>
-                  <span
-                    className="text-gray-500"
-                    style={{ position: 'absolute', bottom: -15, fontSize: 12 }}
-                  >
-                    {arg.type}
-                  </span>
-                  {arg.name}
-                  {idx !== args.length - 1 ? ', ' : ''}
-                </span>
-              </>
-            );
-          })}
-          ) <span className="text-gray-500">&rarr; {returns}</span>
+          {name}({args.map((arg) => <Argument arg={arg} />).map(insertCommas)}){' '}
+          <span className="text-gray-500">&rarr; {returns}</span>
         </code>
       </div>
       {children && React.cloneElement(children, {})}

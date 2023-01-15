@@ -6,15 +6,13 @@ import { Method, MethodBox } from './types';
 
 The API gives you full programmatic access to your data. If you are a developer, you can use this to import transactions from a custom source, export data to another app like Excel, or write anything you want on top of Actual.
 
-One thing to keep in mind: Actual is not like most other apps. All of your data already exists locally, so using the API does not mean you'll be contacting our servers. You'll simply be accessing your local data.
-
-Currently, **the API requires Actual to be running locally** because of this. In the future, the client will contain all the code necessary to query your data and will work by itself. Right now the primary use case is custom importers and exporters, so running Actual first is natural.
+One thing to keep in mind: Actual is not like most other apps. While your data is stored on a server, the server does not have the functionality for analyzing details of or modifying your budget. As a result, the API client contains all the code necessary to query your data and will work on a local copy. Right now, the primary use case is custom importers and exporters.
 
 ## Getting started
 
 We provide an official node.js client in the `@actual-app/api` package. Other languages are not supported at this point.
 
-The client is [full open-source on Github](https://github.com/actualbudget/node-api) if you want to see the code.
+The client is [open-source on GitHub](https://github.com/actualbudget/actual/tree/master/packages/api) along with the rest of Actual if you want to see the code.
 
 Install it with either `npm` or `yarn`:
 
@@ -26,26 +24,35 @@ npm install --save @actual-app/api
 yarn add @actual-app/api
 ```
 
-The simplest way to get started is with `runWithBudget`. This will do all the connection setup and teardown for you. It takes the `id` of the budget to use and a function to run.
+### Connecting to a remote server
 
-This is all the code to get the budget values for the current month:
+Next, you’ll need connect to your running server version of Actual to access your budget files.
 
 ```js
 let api = require('@actual-app/api');
 
-async function run() {
-  let budget = await api.getBudgetMonth('2019-10');
-  console.log(budget);
-}
+await api.init({
+  // Budget data will be cached locally here, in subdirectories for each file.
+  dataDir: '/some/path',
+  // This is the URL of your running server
+  serverUrl: 'http://localhost:5006',
+  // This is the password you use to log into the server
+  password: 'hunter2',
+});
 
-api.runWithBudget('My-Budget', run);
+// This is the ID from Settings → Show advanced settings → Sync ID
+await api.downloadBudget('1cfdbb80-6274-49bf-b0c2-737235a4c81f');
+// or, if you have end-to-end encryption enabled:
+await api.downloadBudget('1cfdbb80-6274-49bf-b0c2-737235a4c81f', {
+  password: 'password1',
+});
+
+let budget = await api.getBudgetMonth('2019-10');
+console.log(budget);
+await api.shutdown();
 ```
 
-Remember, **before running scripts you must start Actual**. This code will connect to Actual, select the budget `My-Budget` and print out the result of [`getBudgetMonth`](/developers/API/#getbudgetmonth). Read the [reference docs](/developers/API/) to see all the methods available.
-
-You can find your budget id in the "Advanced" section of the settings page.
-
-If you want, you can use some low-level methods (see below) to manage the connection yourself, but this is not recommended.
+Heads up! You probably don’t want to hard-code the passwords like that, especially if you’ll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
 
 ## Writing data importers
 
@@ -67,7 +74,7 @@ async function run() {
     await api.addTransactions(
       acctId,
       data.transactions
-        .filter(t => t.acctId === acctId)
+        .filter((t) => t.acctId === acctId)
         .map(convertTransaction)
     );
   }
@@ -78,24 +85,40 @@ api.runImport('My-Budget', run);
 
 This is very simple, but it takes some data in `my-data.json` and creates all the accounts and transactions from it. Functions to convert the items (like `convertAccount`) are not included here. Use the [reference docs](/developers/API/) to learn the shape of objects that Actual expects.
 
-**Note:** it's important that [`addTransactions`](/developers/API/#addtransactions) is used here. You want to use it instead of [`importTransactions`](/developers/API/#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which dedupes transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data your importing.
+**Note:** it's important that [`addTransactions`](/developers/API/#addtransactions) is used here. You want to use it instead of [`importTransactions`](/developers/API/#importtransactions) when dumping raw data into Actual. The former will not run the reconciliation process (which dedupes transactions), and won't create the other side of transfer transactions, and more. If you use `importTransactions` it may adjust your data in ways that don't match the data you’re importing.
 
-If you want to see an example of a real importer, our YNAB4 importer is [completely open-source](https://github.com/actualbudget/import-ynab4/blob/master/importer.js). It's built on exactly the same API that you are using.
+Check out the [YNAB4](https://github.com/actualbudget/actual/blob/master/packages/import-ynab4/importer.js) and [YNAB5](https://github.com/actualbudget/actual/blob/master/packages/import-ynab5/importer.js) importers to see how a real importer works.
 
 ## Methods
 
-These are the two public methods that you can use. The API also exports low-level functions like `init`, `send`, `disconnect`, and `loadBudget` if you want to manually manage the connection. You can [read the source](https://github.com/actualbudget/node-api/blob/master/connection.js) to learn about those methods.
+These are the public methods that you can use. The API also exports low-level functions like `init`, `send`, `disconnect`, and `loadBudget` if you want to manually manage the connection. You can [read the source](https://github.com/actualbudget/actual/blob/master/packages/loot-core/src/server/main.js) to learn about those methods (search for `export const lib`).
 
-#### `runWithBudget`
+#### `init`
 
-<Method name="runWithBudget" args={[{ name: 'budgetId', type: 'string'}, { name: 'func', type: 'function' }]} returns="Promise<null>" />
+<Method name="init" argsObject={true} args={[{ properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }, { name: 'password', type: 'string' }]}]} returns="Promise<void>" />
 
-After connecting to the budget `budgetId`, run the function. This function can assume all API methods are ready to use.
+Call this before attempting to use any of the API methods. This will connect to the server using the provided password and load the budget data.
+
+`dataDir` defaults to the current working directory.
+
+If no `serverURL` is provided, no network connections will be made, and you’ll only be able to access budget files already downloaded locally.
 
 You can find your budget id in the "Advanced" section of the settings page.
 
-#### `runImport`
+#### `shutdown`
 
-<Method name="runImport" args={[{ name: 'budgetName', type: 'string'}, { name: 'func', type: 'function' }]} returns="Promise<null>" />
+<Method name="shutdown" args={[]} returns="Promise<void>" />
 
-Create the budget `budgetName`, connect to it, and run the function. This puts the API in a special "import mode" that does some maintenance work to create a new budget, and bulk importing data runs much faster.
+Close the current budget file, and stop any other ongoing processes. It’s recommended to call this before exiting your script.
+
+#### `utils.amountToInteger`
+
+<Method name="utils.amountToInteger" args={[{ name: 'amount', type: 'number' }]} returns="number" />
+
+Convert a currency amount (such as `123.45`) represented as a floating point number to the integer format Actual uses internally (i.e. `12345`).
+
+#### `utils.integerToAmount`
+
+<Method name="utils.integerToAmount" args={[{ name: 'amount', type: 'number' }]} returns="number" />
+
+Convert an integer amount as used internally by Actual (such as `12345`) to the traditional floating point (i.e. `123.45`).
