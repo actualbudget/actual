@@ -415,7 +415,7 @@ class Settings extends React.Component {
   }
 
   render() {
-    let { prefs, globalPrefs, userData } = this.props;
+    let { prefs, savePrefs, globalPrefs, userData } = this.props;
 
     return (
       <Page title="Settings">
@@ -429,6 +429,7 @@ class Settings extends React.Component {
 
           <FileSettings
             prefs={prefs}
+            savePrefs={savePrefs}
             userData={userData}
             pushModal={this.props.pushModal}
             resetSync={this.props.resetSync}
