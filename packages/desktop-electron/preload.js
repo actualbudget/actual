@@ -1,4 +1,6 @@
 const { ipcRenderer, contextBridge } = require('electron');
+// TODO: remove node module usage from this file
+// see: https://www.electronjs.org/docs/latest/tutorial/sandbox
 const ipc = require('node-ipc');
 const fs = require('fs');
 

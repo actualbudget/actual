@@ -51,7 +51,8 @@ function Settings({
   globalPrefs,
   pushModal,
   resetSync,
-  closeBudget
+  closeBudget,
+  saveGlobalPrefs
 }) {
   useEffect(() => {
     let unlisten = listen('prefs-updated', () => {
@@ -95,7 +96,7 @@ function Settings({
           {!Platform.isBrowser && (
             <GlobalSettings
               globalPrefs={globalPrefs}
-              saveGlobalPrefs={this.props.saveGlobalPrefs}
+              saveGlobalPrefs={saveGlobalPrefs}
             />
           )}
 

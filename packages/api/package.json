@@ -14,7 +14,7 @@
     "utils.js"
   ],
   "dependencies": {
-    "better-sqlite3": "^7.6.2",
+    "better-sqlite3": "^8.0.1",
     "node-fetch": "^1.6.3",
     "uuid": "3.3.2"
   }

@@ -123,7 +123,7 @@ async function createWindow() {
     title: 'Actual',
     titleBarStyle: 'hiddenInset',
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,
       contextIsolation: true,
       preload: __dirname + '/preload.js'
     }
