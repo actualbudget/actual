@@ -92,9 +92,7 @@ export default function CreateEncryptionKey({
                     through this process.
                   </li>
                   <li>
-                    If you reuse the password you log in to the server here,
-                    anybody else who has the server password will be able to
-                    decrypt your data.
+                    It is recommended for the encryption password to be different than the log-in password in order to better protect your data.
                   </li>
                 </ul>
               </P>
