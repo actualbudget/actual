@@ -1177,7 +1177,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   // it from Nordigen.
   if (count === 0) {
     await post(getServer().NORDIGEN_SERVER + '/remove-account', {
-      requisition_id: bankId
+      requisitionId: bankId
     });
   }
 
