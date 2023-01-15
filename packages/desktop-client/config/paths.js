@@ -38,10 +38,12 @@ function getServedPath(appPackageJson) {
   return ensureSlash(servedUrl, true);
 }
 
+const isGenericBrowser = process.env.IS_GENERIC_BROWSER;
+
 // JWL: Resolve to mobile suffixes before resolving to .js. This
 // makes it load real React Native components, but when needed
 // .web.js can be used to force a web version.
-const moduleFileExtensions = ['browser.js']
+const moduleFileExtensions = (isGenericBrowser ? ['browser.js'] : [])
   .concat(['web.mjs', 'web.js'])
   .concat(['mjs', 'js', 'json', 'web.jsx', 'jsx']);
 

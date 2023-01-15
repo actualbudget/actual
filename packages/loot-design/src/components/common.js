@@ -938,6 +938,7 @@ export function Modal({
                     bare
                     onClick={e => onClose()}
                     style={{ padding: '10px 10px' }}
+                    aria-label="Close"
                   >
                     <Delete width={10} />
                   </Button>

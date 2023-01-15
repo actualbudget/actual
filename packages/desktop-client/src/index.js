@@ -5,6 +5,8 @@ import './browser-preload';
 // A hack for now: this makes sure it's appended before glamor
 import '@reach/listbox/styles.css';
 
+import 'inter-ui/inter.css';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
