@@ -54,13 +54,8 @@ export function ButtonSetting({ button, children }) {
 }
 
 export function AdvancedToggle({ children }) {
-  let [expanded, setExpanded] = useState(false);
   let location = useLocation();
-  useEffect(() => {
-    if (location.hash === '#advanced') {
-      setExpanded(true);
-    }
-  }, [location.hash]);
+  let [expanded, setExpanded] = useState(location.hash === '#advanced');
 
   return expanded ? (
     <Section
