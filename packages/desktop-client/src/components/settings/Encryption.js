@@ -24,7 +24,11 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         Your data is encrypted with a key that only you have before sending it
         it out to the cloud. Local data remains unencrypted so if you forget
         your password you can re-encrypt it.{' '}
-        <a href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption" target="_blank">
+        <a
+          href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Learn more…
         </a>
       </Text>
@@ -43,7 +47,11 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         end-to-end encrypted which means the server owners have the ability to
         read it. If you want, you can use an additional password to encrypt your
         data on the server.{' '}
-        <a href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption" target="_blank">
+        <a
+          href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Learn more…
         </a>
       </Text>
@@ -54,7 +62,11 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and
         encryption is only applied when sending data to a server.{' '}
-        <a href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption" target="_blank">
+        <a
+          href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Learn more…
         </a>
       </Text>
