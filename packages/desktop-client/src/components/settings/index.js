@@ -17,6 +17,7 @@ import { isMobile } from '../../util';
 import { Page } from '../Page';
 import EncryptionSettings from './Encryption';
 import ExportBudget from './Export';
+import FixSplitsTool from './FixSplits';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
@@ -107,6 +108,7 @@ function Settings({
             <AdvancedAbout prefs={prefs} />
             <ResetCache />
             <ResetSync resetSync={resetSync} />
+            <FixSplitsTool />
           </AdvancedToggle>
         </View>
       </Page>
