@@ -334,17 +334,6 @@ export class BudgetCategory extends React.PureComponent {
       </ListItem>
     );
 
-    if (!editMode) {
-      return (
-        // <TouchableOpacity
-        //   onClick={() => onEdit(category.id)}
-        //   activeOpacity={0.7}
-        // >
-        <div onClick={() => onEdit(category.id)}>{content}</div>
-        // </TouchableOpacity>
-      );
-    }
-
     return <div>{() => content}</div>;
     // <Draggable
     //   id={category.id}
@@ -500,8 +489,14 @@ export class TotalsRow extends React.PureComponent {
 
 export class IncomeCategory extends React.PureComponent {
   render() {
-    const { name, budget, balance, style, nameTextStyle, amountTextStyle } =
-      this.props;
+    const {
+      name,
+      budget,
+      balance,
+      style,
+      nameTextStyle,
+      amountTextStyle
+    } = this.props;
     return (
       <ListItem
         style={[
