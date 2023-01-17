@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { format as formatDate, parseISO } from 'date-fns';
@@ -20,7 +26,8 @@ import {
   Text,
   Button,
   Stack,
-  ExternalLink
+  ExternalLink,
+  Input
 } from 'loot-design/src/components/common';
 import {
   SelectCell,
@@ -502,8 +509,41 @@ export default function ManageRules({
 }) {
   let [allRules, setAllRules] = useState(null);
   let [rules, setRules] = useState(null);
+  let [filter, setFilter] = useState('');
   let dispatch = useDispatch();
   let navigator = useTableNavigator(rules, ['select', 'edit']);
+  let filteredRules = useMemo(
+    () =>
+      filter === '' || !rules
+        ? rules
+        : rules.filter(rule => {
+            let conditions = rule.conditions.flatMap(cond => [
+              mapField(cond.field),
+              friendlyOp(cond.op),
+              cond.value
+            ]);
+            let actions = rule.actions.flatMap(action =>
+              action.op === 'set'
+                ? [
+                    friendlyOp(action.op),
+                    mapField(action.field),
+                    'to',
+                    action.value
+                  ]
+                : action.op === 'link-schedule'
+                ? [friendlyOp(action.op), action.value]
+                : []
+            );
+            let text =
+              (rule.stage || '') +
+              ' ' +
+              conditions.join(' ') +
+              ' ' +
+              actions.join(' ');
+            return text.toLowerCase().includes(filter.toLowerCase());
+          }),
+    [rules, filter]
+  );
   let selectedInst = useSelected('manage-rules', allRules, []);
   let [hoveredRule, setHoveredRule] = useState(null);
   let tableRef = useRef(null);
@@ -667,19 +707,36 @@ export default function ManageRules({
               </Text>
             </View>
             <View style={{ flex: 1 }} />
+            <Input
+              placeholder="Filter rules..."
+              value={filter}
+              onChange={e => {
+                setFilter(e.target.value);
+                navigator.onEdit(null);
+              }}
+              style={{
+                width: 350,
+                borderColor: 'transparent',
+                backgroundColor: colors.n11,
+                ':focus': {
+                  backgroundColor: 'white',
+                  '::placeholder': { color: colors.n8 }
+                }
+              }}
+            />
           </View>
           <View style={{ flex: 1 }}>
             <RulesHeader />
             <SimpleTable
               ref={tableRef}
-              data={rules}
+              data={filteredRules}
               navigator={navigator}
               loadMore={loadMore}
               // Hide the last border of the item in the table
               style={{ marginBottom: -1 }}
             >
               <RulesList
-                rules={rules}
+                rules={filteredRules}
                 selectedItems={selectedInst.items}
                 navigator={navigator}
                 hoveredRule={hoveredRule}
