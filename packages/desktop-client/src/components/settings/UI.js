@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
 
@@ -57,9 +59,17 @@ export function Setting({ primaryAction, children }) {
 }
 
 export function AdvancedToggle({ children }) {
-  let [expanded, setExpanded] = useState(false);
+  let location = useLocation();
+  let [expanded, setExpanded] = useState(location.hash === '#advanced');
+
   return expanded ? (
     <Section
+      innerRef={el => {
+        if (el && location.hash === '#advanced') {
+          el.scrollIntoView(true);
+        }
+      }}
+      id="advanced"
       title="Advanced Settings"
       {...css(
         {
@@ -75,6 +85,7 @@ export function AdvancedToggle({ children }) {
     </Section>
   ) : (
     <Link
+      id="advanced"
       onClick={() => setExpanded(true)}
       style={{
         flexShrink: 0,

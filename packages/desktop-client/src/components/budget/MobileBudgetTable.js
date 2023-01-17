@@ -334,17 +334,6 @@ export class BudgetCategory extends React.PureComponent {
       </ListItem>
     );
 
-    if (!editMode) {
-      return (
-        // <TouchableOpacity
-        //   onClick={() => onEdit(category.id)}
-        //   activeOpacity={0.7}
-        // >
-        <div onClick={() => onEdit(category.id)}>{content}</div>
-        // </TouchableOpacity>
-      );
-    }
-
     return <div>{() => content}</div>;
     // <Draggable
     //   id={category.id}
