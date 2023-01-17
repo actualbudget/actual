@@ -148,6 +148,7 @@ export default function CategoryAutocomplete({
         return 0;
       }}
       filterSuggestions={(suggestions, value) => {
+        console.log("ESHAFFER FOR THE WIN")
         return suggestions.filter(suggestion => {
           return (
             suggestion.id === 'split' ||

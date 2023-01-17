@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef } from 'react';
 
 import lively from '@jlongster/lively';
 import Downshift from 'downshift';
@@ -7,6 +7,7 @@ import { css } from 'glamor';
 import { colors } from '../style';
 import Remove from '../svg/v2/Remove';
 import { View, Input, Tooltip, Button } from './common';
+import { shouldSaveFromKey } from './table';
 
 function findItem(strict, suggestions, value) {
   if (strict) {
@@ -20,8 +21,6 @@ function findItem(strict, suggestions, value) {
 function getItemName(item) {
   if (item == null) {
     return '';
-  } else if (typeof item === 'string') {
-    return item;
   }
   return item.name || '';
 }
@@ -41,9 +40,9 @@ function _getInitialState({
   strict,
   initialFilterSuggestions
 }) {
-  let selectedItem = findItem(strict, suggestions, value);
+  let selectedItem = value ? findItem(strict, suggestions, value) : '';
   let filteredSuggestions = initialFilterSuggestions
-    ? initialFilterSuggestions(suggestions, value)
+    ? initialFilterSuggestions(suggestions, selectedItem)
     : null;
 
   return {
@@ -56,6 +55,7 @@ function _getInitialState({
     lastChangeType: null
   };
 }
+
 function getInitialState({
   props: {
     value,
@@ -164,6 +164,71 @@ function fireUpdate(onUpdate, strict, suggestions, index, value) {
   }
 
   onUpdate && onUpdate(selected);
+}
+function _onInputValueChange(
+  suggestions,
+  onUpdate,
+  highlightFirst,
+  strict,
+  filterSuggestions = defaultFilterSuggestions,
+  getHighlightedIndex,
+  isOpen,
+  value,
+  changes = {},
+  setState
+) {
+  // Do nothing if it's simply updating the selected item
+  console.log('Value at top of onInputValueChange: ', value);
+  console.log(changes);
+  if (
+    changes.type ===
+    Downshift.stateChangeTypes.controlledPropUpdatedSelectedItem
+  )
+    return;
+
+  // Otherwise, filter the items and always the first item if desired
+  const filteredSuggestions = filterSuggestions(suggestions, value);
+  console.log(filteredSuggestions);
+  let newHighlightedIndex = null;
+  if (value === '') {
+    // A blank value shouldn't highlight any item so that the field
+    // can be left blank if desired
+    if (changes.type !== Downshift.stateChangeTypes.clickItem) {
+      fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
+    }
+
+    console.log('value is blank in onInputValueChange');
+    setState(prevState => ({
+      ...prevState,
+      value,
+      filteredSuggestions,
+      highlightedIndex: null
+    }));
+  } else {
+    let defaultGetHighlightedIndex = filteredSuggestions => {
+      return highlightFirst && filteredSuggestions.length ? 0 : null;
+    };
+    newHighlightedIndex = (getHighlightedIndex || defaultGetHighlightedIndex)(
+      filteredSuggestions
+    );
+
+    if (changes.type !== Downshift.stateChangeTypes.clickItem) {
+      console.log('not clicked ', value);
+      fireUpdate(
+        onUpdate,
+        strict,
+        filteredSuggestions,
+        newHighlightedIndex,
+        value
+      );
+    }
+    setState(prevState => ({
+      ...prevState,
+      filteredSuggestions,
+      highlightedIndex: null,
+      value
+    }));
+  }
 }
 
 function onInputValueChange(
@@ -351,6 +416,24 @@ function onSelect(
   return onSelectAfter(suggestions, clearAfterSelect, inst);
 }
 
+function _onSelect(clearAfterSelect, suggestions, ref, setState) {
+  if (clearAfterSelect) {
+    setState({
+      value: '',
+      selectedItem: null,
+      filteredSuggestions: suggestions,
+      highlightedIndex: null
+    });
+  } else {
+    console.log('why is my ref null');
+    console.log(ref);
+    if (!ref) {
+      return;
+    }
+    ref.current.setSelectionRange(0, 10000);
+  }
+}
+
 function onSelectAfter(suggestions, clearAfterSelect, inst) {
   if (clearAfterSelect) {
     return {
@@ -367,6 +450,95 @@ function onSelectAfter(suggestions, clearAfterSelect, inst) {
 function onChange({ props: { inputProps } }, e) {
   const { onChange } = inputProps || {};
   onChange && onChange(e.target.value);
+}
+
+function _onChange(inputProps, e) {
+  console.log('[INFO] _onChange called')
+  const { __onChange } = inputProps || {};
+  __onChange && __onChange(e.target.value);
+}
+
+function _onKeyDown(
+  e,
+  suggestions,
+  clearAfterSelect,
+  initialFilterSuggestions,
+  embedded,
+  onUpdate,
+  onSelect,
+  inputProps,
+  shouldSaveFromKey = defaultShouldSaveFromKey,
+  strict,
+  selectedItem,
+  filteredSuggestions,
+  highlightedIndex,
+  originalItem,
+  isNulled,
+  isOpen,
+  value,
+  inputRef,
+  state,
+  setState
+) {
+  let ENTER = 13;
+  let ESC = 27;
+  let { onKeyDown } = inputProps || {};
+
+  // If the dropdown is open, an item is highlighted, and the user
+  // pressed enter, always capture that and handle it ourselves
+  if (isOpen) {
+    if (e.keyCode === ENTER) {
+      if (highlightedIndex != null) {
+        if (
+          state.lastChangeType === Downshift.stateChangeTypes.itemMouseEnter
+        ) {
+          // If the last thing the user did was hover an item, intentionally
+          // ignore the default behavior of selecting the item. It's too
+          // common to accidentally hover an item and then save it
+          e.preventDefault();
+        } else {
+          // Otherwise, stop propagation so that the table navigator
+          // doesn't handle it
+          e.stopPropagation();
+        }
+      } else if (!strict) {
+        // Handle it ourselves
+        e.stopPropagation();
+        console.log('ENTER KEYDOWN, NO HIGHLIGHTED INDEX, NOT STRICT');
+        return _onSelect(clearAfterSelect, suggestions, inputRef, setState);
+      } else {
+        // No highlighted item, still allow the table to save the item
+        // as `null`, even though we're allowing the table to move
+        e.preventDefault();
+        onKeyDown && onKeyDown(e);
+      }
+    } else if (shouldSaveFromKey(e)) {
+      e.preventDefault();
+      onKeyDown && onKeyDown(e);
+    }
+  }
+
+  // Handle escape ourselves
+  if (e.keyCode === ESC) {
+    e.preventDefault();
+
+    if (!embedded) {
+      e.stopPropagation();
+    }
+
+    let filteredSuggestions = initialFilterSuggestions
+      ? initialFilterSuggestions(suggestions, getItemName(originalItem))
+      : null;
+    fireUpdate(onUpdate, strict, suggestions, null, getItemId(originalItem));
+    setState(prevState => ({
+      ...prevState,
+      value: getItemName(originalItem),
+      selectedItem: findItem(strict, suggestions, originalItem),
+      filteredSuggestions,
+      highlightedIndex: null,
+      isOpen: !!embedded
+    }));
+  }
 }
 
 function onKeyDown(
@@ -454,7 +626,7 @@ function onKeyDown(
 }
 
 function defaultRenderInput(props) {
-  return <Input {...props} />;
+  return <Input {...props} ref={props.ref} />;
 }
 
 function defaultRenderItems(items, getItemProps, highlightedIndex) {
@@ -493,6 +665,17 @@ function onFocus({ inst, props: { inputProps = {}, openOnFocus = true } }, e) {
   }
 }
 
+function _onFocus(e, openOnFocus = true, inputProps, setState) {
+  inputProps.onFocus && inputProps.onFocus(e);
+
+  if (openOnFocus) {
+    setState(prevState => ({
+      ...prevState,
+      isOpen: true
+    }));
+  }
+}
+
 function onBlur({ inst, props, state: { selectedItem } }, e) {
   let { inputProps = {}, onSelect } = props;
 
@@ -521,6 +704,47 @@ function onBlur({ inst, props, state: { selectedItem } }, e) {
   }
 }
 
+function _onBlur(
+  e,
+  inputProps,
+  tableBehavior,
+  onSelect,
+  selectedItem,
+  setState
+) {
+  e.preventDownshiftDefault = true;
+  inputProps.onBlur && inputProps.onBlur(e);
+
+  if (!tableBehavior) {
+    if (e.target.value === '') {
+      console.log('onBlur');
+      onSelect && onSelect(null);
+      setState(prevState => ({
+        ...prevState,
+        selectedItem: null,
+        originalValue: null,
+        isOpen: false
+      }));
+      return;
+    }
+
+    // If not using table behavior, reset the input on blur. Tables
+    // handle saving the value on blur.
+    let value = selectedItem ? getItemId(selectedItem) : null;
+
+    setState(prevState => ({
+      ...prevState,
+      value,
+      originalValue: value
+    }));
+  } else {
+    setState(prevState => ({
+      ...prevState,
+      isOpen: false
+    }));
+  }
+}
+
 function defaultItemToString(item) {
   return item ? getItemName(item) : '';
 }
@@ -529,15 +753,17 @@ const _ESingleAutocomplete = ({
   value,
   focused,
   embedded,
+  clearAfterSelect,
   containerProps,
   inputProps,
   children,
   selectedItem,
+  openOnFocus,
   tableBehavior,
   suggestions,
-  filteredSuggestions,
   initialFilterSuggestions,
   tooltipStyle,
+  isNulled,
   onItemClick,
   isOpen,
   strict,
@@ -547,28 +773,49 @@ const _ESingleAutocomplete = ({
   renderItems = defaultRenderItems,
   itemToString = defaultItemToString
 }) => {
-  const [state, setState] = useState(() =>
-    _getInitialState({
-      value,
-      suggestions,
-      embedded,
-      isOpen,
-      strict,
-      initialFilterSuggestions
-    })
-  );
+  const inputRef = useRef(null);
+  const selectItem = findItem(strict, suggestions, value);
+  const initialValue = selectItem ? getItemName(selectItem) : '';
+  const filteredSuggestions = initialFilterSuggestions
+    ? initialFilterSuggestions(suggestions, initialValue)
+    : defaultFilterSuggestions(suggestions, initialValue);
 
-  const filtered = filteredSuggestions || filteredSuggestions;
+  const [state, setState] = useState({
+    value: initialValue,
+    selectedItem: selectItem,
+    originalItem: selectItem,
+    filteredSuggestions,
+    highlightedIndex: null,
+    isOpen: embedded || isOpen,
+    lastChangeType: null
+  });
+
+  const filtered = state.filteredSuggestions || suggestions;
 
   return (
     <Downshift
-      onSelect={updater(onSelect)}
+      onSelect={() =>
+        _onSelect(clearAfterSelect, suggestions, inputRef, setState)
+      }
       highlightedIndex={state.highlightedIndex}
       selectedItem={selectedItem || null}
       itemToString={itemToString}
       inputValue={value}
       isOpen={isOpen}
-      onInputValueChange={updater(onInputValueChange)}
+      onInputValueChange={(value, changes) =>
+        _onInputValueChange(
+          suggestions,
+          onUpdate,
+          null,
+          strict,
+          defaultFilterSuggestions,
+          null,
+          state.isOpen,
+          value,
+          changes,
+          setState
+        )
+      }
       onStateChange={changes => {
         _onStateChange(
           changes,
@@ -602,10 +849,48 @@ const _ESingleAutocomplete = ({
             getInputProps({
               focused,
               ...inputProps,
-              onFocus: updater(onFocus),
-              onBlur: updater(onBlur),
-              onKeyDown: updater(onKeyDown),
-              onChange: updater(onChange)
+              value: state.value,
+              ref: inputRef,
+              onFocus: e => {
+                _onFocus(e, openOnFocus, inputProps, setState);
+              },
+              onBlur: e => {
+                _onBlur(
+                  e,
+                  inputProps,
+                  tableBehavior,
+                  _onSelect,
+                  state.selectedItem,
+                  setState
+                );
+              },
+              onKeyDown: e => {
+                _onKeyDown(
+                  e,
+                  suggestions,
+                  clearAfterSelect,
+                  initialFilterSuggestions,
+                  embedded,
+                  onUpdate,
+                  _onSelect,
+                  inputProps,
+                  shouldSaveFromKey,
+                  strict,
+                  state.selectedItem,
+                  state.filteredSuggestions,
+                  highlightedIndex,
+                  state.originalItem,
+                  isNulled,
+                  state.isOpen,
+                  state.value,
+                  inputRef,
+                  state,
+                  setState
+                );
+              },
+              onChange: e => {
+                _onChange(inputProps, e);
+              }
             })
           )}
           {isOpen &&
@@ -645,6 +930,7 @@ const _ESingleAutocomplete = ({
     </Downshift>
   );
 };
+
 function _SingleAutocomplete({
   props: {
     focused,
@@ -920,6 +1206,7 @@ export default function Autocomplete({ multi, ...props }) {
   if (multi) {
     return <MultiAutocomplete {...props} />;
   } else {
-    return <SingleAutocomplete {...props} />;
+    // return <SingleAutocomplete {...props} />;
+    return <_ESingleAutocomplete {...props} />;
   }
 }

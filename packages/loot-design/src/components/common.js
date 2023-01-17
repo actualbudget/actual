@@ -3,8 +3,8 @@ import React, {
   useEffect,
   useLayoutEffect,
   useState,
-  useCallback
-} from 'react';
+  useCallback, forwardRef
+} from "react";
 import mergeRefs from 'react-merge-refs';
 import ReactModal from 'react-modal';
 import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
@@ -281,20 +281,15 @@ const defaultInputStyle = {
   border: '1px solid #d0d0d0'
 };
 
-export function Input({
-  style,
-  inputRef,
-  onEnter,
-  onUpdate,
-  focused,
-  ...nativeProps
-}) {
-  let ref = useRef();
-  useProperFocus(ref, focused);
+export const Input = forwardRef((props, ref) => {
+  let { style, onEnter, onUpdate, focused, ...nativeProps } = props;
+
+  let ownRef = useRef();
+  useProperFocus(ownRef, focused);
 
   return (
     <input
-      ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
+      ref={ref ? mergeRefs([ref, ownRef]) : ownRef}
       {...css([
         defaultInputStyle,
         {
@@ -323,7 +318,7 @@ export function Input({
       }}
     />
   );
-}
+});
 
 export function InputWithContent({
   leftContent,
