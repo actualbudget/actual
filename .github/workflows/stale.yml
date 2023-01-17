@@ -16,7 +16,7 @@ jobs:
           days-before-issue-close: -1
           stale-issue-label: "stale"
           stale-pr-label: "stale"
-          stale-pr-message: "🚧🚨 This Pull Request is being marked as stale due to 90 days of inactivity. 🚧🚨"
+          stale-pr-message: "🚧🚨 This Pull Request is being marked as stale due to 30 days of inactivity. 🚧🚨"
           stale-issue-message: "🚧🚨 This issue is being marked as stale due to 90 days of inactivity. 🚧🚨"
           days-before-pr-stale: 30
           days-before-pr-close: -1
