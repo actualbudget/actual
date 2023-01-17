@@ -11,4 +11,4 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions-ecosystem/action-add-labels@v1
         with:
-          labels: awaiting-review
+          labels: waiting-review
