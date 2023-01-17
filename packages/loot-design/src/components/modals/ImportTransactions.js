@@ -652,8 +652,9 @@ export function ImportTransactions({
           ? trans.date
           : parseDate(trans.date, parseDateFormat);
       if (date == null) {
-        errorMessage = `Unable to parse date ${trans.date ||
-          '(empty)'} with given date format`;
+        errorMessage = `Unable to parse date ${
+          trans.date || '(empty)'
+        } with given date format`;
         break;
       }
 

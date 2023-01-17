@@ -86,12 +86,8 @@ export function syncAccounts(id) {
       dispatch(setAccountsSyncing('__all'));
     }
 
-    const {
-      errors,
-      newTransactions,
-      matchedTransactions,
-      updatedAccounts
-    } = await send('accounts-sync', { id });
+    const { errors, newTransactions, matchedTransactions, updatedAccounts } =
+      await send('accounts-sync', { id });
     dispatch(setAccountsSyncing(null));
 
     if (id) {
@@ -169,7 +165,11 @@ export function parseTransactions(filepath, options) {
 
 export function importTransactions(id, transactions) {
   return async dispatch => {
-    let { errors = [], added, updated } = await send('transactions-import', {
+    let {
+      errors = [],
+      added,
+      updated
+    } = await send('transactions-import', {
       accountId: id,
       transactions
     });

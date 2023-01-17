@@ -15,7 +15,6 @@ import CheveronDown from '../svg/v1/CheveronDown';
 import CheveronRight from '../svg/v1/CheveronRight';
 import Cog from '../svg/v1/Cog';
 import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
-import LoadBalancer from '../svg/v1/LoadBalancer';
 import Reports from '../svg/v1/Reports';
 import StoreFrontIcon from '../svg/v1/StoreFront';
 import TuningIcon from '../svg/v1/Tuning';
@@ -483,6 +482,7 @@ const MenuButton = withRouter(function MenuButton({ history }) {
       }}
       activeStyle={{ color: colors.p7 }}
       onClick={() => setMenuOpen(true)}
+      aria-label="Menu"
     >
       <DotsHorizontalTriple
         width={15}
@@ -538,12 +538,6 @@ function Tools() {
             title="Rules"
             Icon={TuningIcon}
             to="/rules"
-            indent={15}
-          />
-          <SecondaryItem
-            title="Repair split transactions"
-            Icon={LoadBalancer}
-            to="/tools/fix-splits"
             indent={15}
           />
         </>

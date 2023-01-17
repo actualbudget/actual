@@ -125,12 +125,8 @@ export class LiveBudgetPage extends React.Component {
 
   render() {
     let { maxMonths } = this.props;
-    let {
-      startMonth,
-      categoryGroups,
-      collapsed,
-      newCategoryForGroup
-    } = this.state;
+    let { startMonth, categoryGroups, collapsed, newCategoryForGroup } =
+      this.state;
 
     let rolloverComponents = {
       SummaryComponent: rollover.BudgetSummary,

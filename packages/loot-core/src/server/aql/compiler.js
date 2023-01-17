@@ -765,13 +765,8 @@ const compileWhere = saveStack('filter', (state, conds) => {
 function compileJoins(state, tableRef, internalTableFilters) {
   let joins = [];
   state.paths.forEach((desc, path) => {
-    let {
-      tableName,
-      tableId,
-      joinField,
-      joinTable,
-      noMapping
-    } = state.paths.get(path);
+    let { tableName, tableId, joinField, joinTable, noMapping } =
+      state.paths.get(path);
 
     let on = `${tableId}.id = ${tableRef(joinTable)}.${quoteAlias(joinField)}`;
 

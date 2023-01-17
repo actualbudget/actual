@@ -1,0 +1,41 @@
+name: E2E Tests
+
+on: [pull_request]
+
+env:
+  GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
+
+jobs:
+  test:
+    name: Run end-to-end tests on Netlify PR preview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Setup Playwright
+        run: npx playwright install chromium --with-deps
+      - name: Wait for Pages changed to neutral
+        uses: fountainhead/action-wait-for-check@v1.0.0
+        id: wait-for-Netlify
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          checkName: 'Pages changed - actualbudget'
+      - name: Waiting for Netlify Preview
+        if: steps.wait-for-Netlify.outputs.conclusion == 'neutral'
+        uses: jakepartusch/wait-for-netlify-action@v1.4
+        id: waitFor200
+        with:
+          site_name: 'actualbudget'
+          max_timeout: 240
+      - name: Run E2E Tests on Netlify URL
+        run: yarn e2e
+        env:
+          E2E_START_URL: https://deploy-preview-${{env.GITHUB_PR_NUMBER}}--actualbudget.netlify.app
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: desktop-client-test-results
+          path: packages/desktop-client/test-results/
+          retention-days: 30

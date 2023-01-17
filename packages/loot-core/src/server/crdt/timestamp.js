@@ -65,10 +65,7 @@ export function deserializeClock(clock) {
 }
 
 export function makeClientId() {
-  return uuid
-    .v4Sync()
-    .replace(/-/g, '')
-    .slice(-16);
+  return uuid.v4Sync().replace(/-/g, '').slice(-16);
 }
 
 var config = {
@@ -98,12 +95,7 @@ export class Timestamp {
   toString() {
     return [
       new Date(this.millis()).toISOString(),
-      (
-        '0000' +
-        this.counter()
-          .toString(16)
-          .toUpperCase()
-      ).slice(-4),
+      ('0000' + this.counter().toString(16).toUpperCase()).slice(-4),
       ('0000000000000000' + this.node()).slice(-16)
     ].join('-');
   }
@@ -150,7 +142,7 @@ MutableTimestamp.from = timestamp => {
 // Timestamp generator initialization
 // * sets the node ID to an arbitrary value
 // * useful for mocking/unit testing
-Timestamp.init = function(options = {}) {
+Timestamp.init = function (options = {}) {
   if (options.maxDrift) {
     config.maxDrift = options.maxDrift;
   }
@@ -173,7 +165,7 @@ Timestamp.init = function(options = {}) {
  * Timestamp send. Generates a unique, monotonic timestamp suitable
  * for transmission to another system in string format
  */
-Timestamp.send = function() {
+Timestamp.send = function () {
   if (!clock) {
     return null;
   }
@@ -213,7 +205,7 @@ Timestamp.send = function() {
 // Timestamp receive. Parses and merges a timestamp from a remote
 // system with the local timeglobal uniqueness and monotonicity are
 // preserved
-Timestamp.recv = function(msg) {
+Timestamp.recv = function (msg) {
   if (!clock) {
     return null;
   }
@@ -276,7 +268,7 @@ Timestamp.recv = function(msg) {
  * timestamp parsing
  * converts a fixed-length string timestamp to the structured value
  */
-Timestamp.parse = function(timestamp) {
+Timestamp.parse = function (timestamp) {
   if (typeof timestamp === 'string') {
     var parts = timestamp.split('-');
     if (parts && parts.length === 5) {
@@ -302,7 +294,7 @@ Timestamp.parse = function(timestamp) {
  * zero/minimum timestamp
  */
 var zero = Timestamp.parse('1970-01-01T00:00:00.000Z-0000-0000000000000000');
-Timestamp.zero = function() {
+Timestamp.zero = function () {
   return zero;
 };
 
@@ -310,7 +302,7 @@ Timestamp.zero = function() {
  * maximum timestamp
  */
 var max = Timestamp.parse('9999-12-31T23:59:59.999Z-FFFF-FFFFFFFFFFFFFFFF');
-Timestamp.max = function() {
+Timestamp.max = function () {
   return max;
 };
 
