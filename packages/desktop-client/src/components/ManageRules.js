@@ -635,55 +635,39 @@ export default function ManageRules({
     return null;
   }
 
-  let actions = (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: isModal ? '13px 15px' : '0 0 15px',
-        borderTop: '1px solid ' + colors.border
-      }}
-    >
-      <View
-        style={{
-          color: colors.n4,
-          flexDirection: 'row',
-          alignItems: 'center',
-          width: '50%'
-        }}
-      >
-        <Text>
-          Rules are always run in the order that you see them.{' '}
-          <ExternalLink
-            asAnchor={true}
-            href="https://actualbudget.github.io/docs/Budgeting/rules/"
-            style={{ color: colors.n4 }}
-          >
-            Learn more
-          </ExternalLink>
-        </Text>
-      </View>
-
-      <View style={{ flex: 1 }} />
-
-      <Stack direction="row" align="center" justify="flex-end" spacing={2}>
-        {selectedInst.items.size > 0 && (
-          <Button onClick={onDeleteSelected}>
-            Delete {selectedInst.items.size} rules
-          </Button>
-        )}
-        <Button primary onClick={onCreateRule}>
-          Create new rule
-        </Button>
-      </Stack>
-    </View>
-  );
-
   return (
     <SchedulesQuery.Provider>
       <SelectedProvider instance={selectedInst}>
         <View style={{ overflow: 'hidden' }}>
-          {!isModal && actions}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: isModal ? '0 13px 15px' : '0 0 15px',
+              flexShrink: 0
+            }}
+          >
+            <View
+              style={{
+                color: colors.n4,
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '50%'
+              }}
+            >
+              <Text>
+                Rules are always run in the order that you see them.{' '}
+                <ExternalLink
+                  asAnchor={true}
+                  href="https://actualbudget.github.io/docs/Budgeting/rules/"
+                  style={{ color: colors.n4 }}
+                >
+                  Learn more
+                </ExternalLink>
+              </Text>
+            </View>
+            <View style={{ flex: 1 }} />
+          </View>
           <View style={{ flex: 1 }}>
             <RulesHeader />
             <SimpleTable
@@ -704,7 +688,30 @@ export default function ManageRules({
               />
             </SimpleTable>
           </View>
-          {isModal && actions}
+          <View
+            style={{
+              paddingBlock: 15,
+              paddingInline: isModal ? 13 : 0,
+              borderTop: isModal && '1px solid ' + colors.border,
+              flexShrink: 0
+            }}
+          >
+            <Stack
+              direction="row"
+              align="center"
+              justify="flex-end"
+              spacing={2}
+            >
+              {selectedInst.items.size > 0 && (
+                <Button onClick={onDeleteSelected}>
+                  Delete {selectedInst.items.size} rules
+                </Button>
+              )}
+              <Button primary onClick={onCreateRule}>
+                Create new rule
+              </Button>
+            </Stack>
+          </View>
         </View>
       </SelectedProvider>
     </SchedulesQuery.Provider>
