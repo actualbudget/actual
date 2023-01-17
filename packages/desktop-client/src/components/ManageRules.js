@@ -716,12 +716,14 @@ export default function ManageRules({
               }}
               style={{
                 width: 350,
-                borderColor: 'transparent',
-                backgroundColor: colors.n11,
-                ':focus': {
-                  backgroundColor: 'white',
-                  '::placeholder': { color: colors.n8 }
-                }
+                borderColor: isModal ? null : 'transparent',
+                backgroundColor: isModal ? null : colors.n11,
+                ':focus': isModal
+                  ? null
+                  : {
+                      backgroundColor: 'white',
+                      '::placeholder': { color: colors.n8 }
+                    }
               }}
             />
           </View>
