@@ -7,6 +7,7 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
+import Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
@@ -50,7 +51,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
   let items = [
     { name: 'rename', text: 'Rename Budget' },
     { name: 'settings', text: 'Settings' },
-    { name: 'help', text: 'Help' },
+    ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
     { name: 'close', text: 'Close File' }
   ];
 
