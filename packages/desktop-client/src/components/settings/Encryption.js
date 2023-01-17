@@ -55,9 +55,9 @@ export default function EncryptionSettings({ prefs, pushModal }) {
           Learn more…
         </a>
       </Text>
-    </ButtonSetting>
+    </Setting>
   ) : (
-    <ButtonSetting button={<Button disabled>Enable encryption…</Button>}>
+    <Setting button={<Button disabled>Enable encryption…</Button>}>
       <Text>
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and
