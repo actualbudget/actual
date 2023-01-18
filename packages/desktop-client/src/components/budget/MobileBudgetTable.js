@@ -274,10 +274,10 @@ export class BudgetCategory extends React.PureComponent {
       editing,
       index,
       // gestures,
-      editMode,
+      // editMode,
       style,
       month,
-      onEdit,
+      // onEdit,
       onBudgetAction
     } = this.props;
 
