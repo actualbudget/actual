@@ -22,7 +22,7 @@ function CashFlowGraph({ style, start, end, graphData, isConcise, compact }) {
       {(width, height, portalHost) =>
         graphData && (
           <VictoryChart
-            scale={{ x: 'time' }}
+            scale={{ x: 'time', y: 'linear' }}
             theme={theme}
             domainPadding={10}
             width={width}
