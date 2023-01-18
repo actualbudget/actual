@@ -20,7 +20,6 @@ import { colors } from 'loot-design/src/style';
 export default function CreateEncryptionKey({
   modalProps,
   actions,
-  budgetId,
   options = {}
 }) {
   let [password, setPassword] = useState('');
@@ -79,8 +78,8 @@ export default function CreateEncryptionKey({
                   <li>
                     <strong>Important:</strong> if you forget this password{' '}
                     <em>and</em> you don't have any local copies of your data,
-                    you will lose access to all your data. We cannot decrypt
-                    your data.
+                    you will lose access to all your data. The data cannot be
+                    decrypted without the password.
                   </li>
                   <li>
                     This key only applies to this file. You will need to
@@ -90,6 +89,11 @@ export default function CreateEncryptionKey({
                     If you've already downloaded your data on other devices, you
                     will need to reset them. Actual will automatically take you
                     through this process.
+                  </li>
+                  <li>
+                    It is recommended for the encryption password to be
+                    different than the log-in password in order to better
+                    protect your data.
                   </li>
                 </ul>
               </P>

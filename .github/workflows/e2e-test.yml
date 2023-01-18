@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Playwright
-        run: npx playwright install --with-deps
       - name: Set up environment
         uses: ./.github/actions/setup
+      - name: Setup Playwright
+        run: npx playwright install chromium --with-deps
       - name: Wait for Pages changed to neutral
         uses: fountainhead/action-wait-for-check@v1.0.0
         id: wait-for-Netlify

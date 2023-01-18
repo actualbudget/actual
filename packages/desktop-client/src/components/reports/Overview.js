@@ -179,11 +179,11 @@ function CashFlowCard() {
               }}
             >
               <VictoryBar
+                barWidth={13}
                 data={[
                   {
                     x: 30,
                     y: Math.max(income, 5),
-                    width: 20,
                     premadeLabel: (
                       <div style={{ textAlign: 'right' }}>
                         <div>Income</div>
@@ -196,11 +196,11 @@ function CashFlowCard() {
                 labels={d => d.premadeLabel}
               />
               <VictoryBar
+                barWidth={13}
                 data={[
                   {
                     x: 60,
                     y: Math.max(expense, 5),
-                    width: 20,
                     premadeLabel: (
                       <div>
                         <div>Expenses</div>
