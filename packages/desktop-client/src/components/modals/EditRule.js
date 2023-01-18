@@ -272,7 +272,8 @@ let actionFields = [
   'date',
   'amount',
   'category',
-  'account'
+  'account',
+  'cleared'
 ].map(field => [field, mapField(field)]);
 function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
   let { field, op, value, type, error, inputKey = 'initial' } = action;
