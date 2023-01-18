@@ -33,19 +33,20 @@ jobs:
       - name: Build Web
         run: ./bin/package-browser
 
-  electron:
-    # As electron builds take longer, we only run them in master.
-    if: github.event_name != 'pull_request'
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up environment
-        uses: ./.github/actions/setup
-      - name: Build Electron
-        run: ./bin/package
+  # TODO: re-enable after solving https://github.com/actualbudget/actual/issues/468
+  # electron:
+  #   # As electron builds take longer, we only run them in master.
+  #   if: github.event_name != 'pull_request'
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - ubuntu-latest
+  #         - windows-latest
+  #         - macos-latest
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Set up environment
+  #       uses: ./.github/actions/setup
+  #     - name: Build Electron
+  #       run: ./bin/package
