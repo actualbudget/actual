@@ -3,7 +3,7 @@ import React from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { Text, Button } from 'loot-design/src/components/common';
 
-import { ButtonSetting } from './UI';
+import { Setting } from './UI';
 
 export default function ExportBudget({ prefs }) {
   async function onExport() {
@@ -12,7 +12,7 @@ export default function ExportBudget({ prefs }) {
   }
 
   return (
-    <ButtonSetting button={<Button onClick={onExport}>Export data</Button>}>
+    <Setting primaryAction={<Button onClick={onExport}>Export data</Button>}>
       <Text>
         <strong>Export</strong> your data as a zip file containing{' '}
         <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
@@ -25,6 +25,6 @@ export default function ExportBudget({ prefs }) {
           any encryption.
         </Text>
       ) : null}
-    </ButtonSetting>
+    </Setting>
   );
 }
