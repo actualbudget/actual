@@ -13,10 +13,8 @@ import { titleFirst } from 'loot-core/src/shared/util';
 import { integerToCurrency, groupById } from 'loot-core/src/shared/util';
 import { Text, TextOneLine, View } from 'loot-design/src/components/common';
 import { styles, colors } from 'loot-design/src/style';
-import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
-import EditSkull1 from 'loot-design/src/svg/v2/EditSkull1';
 
 const zIndices = { SECTION_HEADING: 10 };
 
@@ -61,20 +59,17 @@ export function DateHeader({ date }) {
 }
 
 function Status({ status }) {
-  let color, Icon;
+  let color;
 
   switch (status) {
     case 'missed':
       color = colors.r3;
-      Icon = EditSkull1;
       break;
     case 'due':
       color = colors.y3;
-      Icon = AlertTriangle;
       break;
     case 'upcoming':
       color = colors.n4;
-      Icon = ArrowsSynchronize;
       break;
     default:
   }
@@ -101,7 +96,7 @@ export class Transaction extends React.PureComponent {
       payees,
       showCategory,
       added,
-      onSelect,
+      // onSelect,
       style
     } = this.props;
     let {
@@ -327,7 +322,7 @@ export class TransactionList extends React.Component {
                         payees={this.props.payees}
                         showCategory={this.props.showCategory}
                         added={this.props.isNew(transaction.id)}
-                        onSelect={() => {}} //this.props.onSelect(transaction)}
+                        onSelect={() => {}} // onSelect(transaction)}
                       />
                     </Item>
                   );
@@ -446,11 +441,7 @@ function ListBoxSection({ section, state }) {
 function Option({ isLast, item, state }) {
   // Get props for the option element
   let ref = React.useRef();
-  let { optionProps, isSelected, isDisabled } = useOption(
-    { key: item.key },
-    state,
-    ref
-  );
+  let { optionProps, isSelected } = useOption({ key: item.key }, state, ref);
 
   // Determine whether we should show a keyboard
   // focus ring for accessibility

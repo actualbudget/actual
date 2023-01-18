@@ -16,7 +16,7 @@ import {
   ListboxList,
   ListboxOption
 } from '@reach/listbox';
-import { css, media } from 'glamor';
+import { css } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
