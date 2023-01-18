@@ -1,10 +1,6 @@
 import React from 'react';
 
-import {
-  Link,
-  Text,
-  View
-} from 'loot-design/src/components/common';
+import { Link, Text, View } from 'loot-design/src/components/common';
 import { Checkbox } from 'loot-design/src/components/forms';
 import { colors } from 'loot-design/src/style';
 
