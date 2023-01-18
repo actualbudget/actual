@@ -41,7 +41,7 @@ function Area({ start, end, data, style, scale, range }) {
             x={startX}
             y={zero + 1}
             width={endX - startX}
-            height={range.y[0] - zero - 1}
+            height={Math.max(range.y[0] - zero - 1, 0)}
             fill="#ffffff"
           />
         </clipPath>

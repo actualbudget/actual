@@ -230,7 +230,6 @@ function Account({
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
           <AnchorLink
-            ref={dragRef}
             to={to}
             style={[
               accountNameStyle,

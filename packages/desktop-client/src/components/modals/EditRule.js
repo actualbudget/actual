@@ -220,6 +220,18 @@ export function ConditionEditor({
   );
 }
 
+function formatAmount(amount) {
+  if (!amount) {
+    return integerToCurrency(0);
+  } else if (typeof amount === 'number') {
+    return integerToCurrency(amount);
+  } else {
+    return `${integerToCurrency(amount.num1)} to ${integerToCurrency(
+      amount.num2
+    )}`;
+  }
+}
+
 function ScheduleDescription({ id }) {
   let dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
@@ -254,7 +266,7 @@ function ScheduleDescription({ id }) {
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          Amount: {integerToCurrency(schedule._amount || 0)}
+          Amount: {formatAmount(schedule._amount)}
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
@@ -504,9 +516,8 @@ export function ConditionsList({
         }
 
         return (
-          <View>
+          <View key={i}>
             <ConditionEditor
-              key={i}
               conditionFields={conditionFields}
               editorStyle={editorStyle}
               ops={ops}
@@ -775,9 +786,8 @@ export default function EditRule({
                 ) : (
                   <Stack spacing={2}>
                     {actions.map((action, i) => (
-                      <View>
+                      <View key={i}>
                         <ActionEditor
-                          key={i}
                           ops={['set', 'link-schedule']}
                           action={action}
                           editorStyle={editorStyle}

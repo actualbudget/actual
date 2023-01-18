@@ -312,7 +312,9 @@ const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 
 export function safeNumber(value) {
   if (!Number.isInteger(value)) {
-    throw new Error('safeNumber: number is not an integer: ' + value);
+    throw new Error(
+      'safeNumber: number is not an integer: ' + JSON.stringify(value)
+    );
   }
   if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
     throw new Error(
