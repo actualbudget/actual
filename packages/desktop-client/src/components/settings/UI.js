@@ -24,7 +24,7 @@ export function Section({ title, children, style, titleProps, ...props }) {
   );
 }
 
-export function ButtonSetting({ button, children }) {
+export function Setting({ primaryAction, children }) {
   return (
     <View
       {...css(
@@ -43,11 +43,16 @@ export function ButtonSetting({ button, children }) {
       )}
     >
       <View
-        style={{ marginBottom: 10, maxWidth: 500, lineHeight: 1.5, gap: 10 }}
+        style={{
+          marginBottom: primaryAction ? 10 : 0,
+          maxWidth: 500,
+          lineHeight: 1.5,
+          gap: 10
+        }}
       >
         {children}
       </View>
-      {button}
+      {primaryAction || null}
     </View>
   );
 }

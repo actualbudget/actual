@@ -9,7 +9,7 @@ import {
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import { ButtonSetting } from './UI';
+import { Setting } from './UI';
 
 function renderResults(results) {
   let { numBlankPayees, numCleared, numDeleted } = results;
@@ -61,7 +61,7 @@ export default function FixSplitsTool() {
   }
 
   return (
-    <ButtonSetting
+    <Setting
       button={
         <View
           style={{
@@ -104,6 +104,6 @@ export default function FixSplitsTool() {
           </ul>
         </P>
       </View>
-    </ButtonSetting>
+    </Setting>
   );
 }
