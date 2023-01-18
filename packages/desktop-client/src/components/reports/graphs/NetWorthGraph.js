@@ -7,8 +7,7 @@ import {
   VictoryArea,
   VictoryAxis,
   VictoryVoronoiContainer,
-  VictoryGroup,
-  VictoryContainer
+  VictoryGroup
 } from 'victory';
 
 import theme from '../chart-theme';
