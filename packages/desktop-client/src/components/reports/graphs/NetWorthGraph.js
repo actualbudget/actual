@@ -7,7 +7,8 @@ import {
   VictoryArea,
   VictoryAxis,
   VictoryVoronoiContainer,
-  VictoryGroup
+  VictoryGroup,
+  VictoryContainer
 } from 'victory';
 
 import theme from '../chart-theme';
@@ -80,7 +81,7 @@ function NetWorthGraph({ style, start, end, graphData, compact }) {
       {(width, height, portalHost) =>
         graphData && (
           <Chart
-            scale={{ x: 'time' }}
+            scale={{ x: 'time', y: 'linear' }}
             theme={theme}
             domainPadding={{ x: 0, y: 10 }}
             width={width}
@@ -132,8 +133,16 @@ function NetWorthGraph({ style, start, end, graphData, compact }) {
                 }}
               />
             )}
+            {/* Somehow the path `d` attributes are stripped from second
+             `<VictoryArea />` above if this is removed. I’m just as
+              confused as you are! */}
+            <VictoryArea
+              data={graphData.data}
+              style={{ data: { fill: 'none', stroke: 'none' } }}
+            />
             {!compact && (
               <VictoryAxis
+                style={{ ticks: { stroke: 'red' } }}
                 tickFormat={x => d.format(x, "MMM ''yy")}
                 tickValues={graphData.data.map(item => item.x)}
                 tickCount={Math.min(5, graphData.data.length)}
