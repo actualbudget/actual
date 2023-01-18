@@ -1,12 +1,9 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { RectButton } from 'react-native-gesture-handler';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router';
-import { withRouter } from 'react-router-dom';
 
 import { css } from 'glamor';
 
-import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import Platform from 'loot-core/src/client/platform';
 
 import { styles, colors } from '../style';
@@ -14,7 +11,6 @@ import Add from '../svg/v1/Add';
 import CheveronDown from '../svg/v1/CheveronDown';
 import CheveronRight from '../svg/v1/CheveronRight';
 import Cog from '../svg/v1/Cog';
-import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
 import Reports from '../svg/v1/Reports';
 import StoreFrontIcon from '../svg/v1/StoreFront';
 import TuningIcon from '../svg/v1/Tuning';
@@ -27,9 +23,7 @@ import {
   AlignedText,
   AnchorLink,
   ButtonLink,
-  Button,
-  Menu,
-  Tooltip
+  Button
 } from './common';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CellValue from './spreadsheet/CellValue';
