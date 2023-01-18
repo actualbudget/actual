@@ -532,7 +532,9 @@ export default function ScheduleDetails() {
                 style={{ marginTop: 10, color: colors.n4 }}
               >
                 {state.upcomingDates.map(date => (
-                  <View>{monthUtils.format(date, `${dateFormat} EEEE`)}</View>
+                  <View key={date}>
+                    {monthUtils.format(date, `${dateFormat} EEEE`)}
+                  </View>
                 ))}
               </Stack>
             </View>
@@ -555,7 +557,7 @@ export default function ScheduleDetails() {
               dispatch({ type: 'set-repeats', repeats: e.target.checked });
             }}
           />
-          <label for="form_repeats" style={{ userSelect: 'none' }}>
+          <label htmlFor="form_repeats" style={{ userSelect: 'none' }}>
             Repeats
           </label>
         </View>
@@ -586,7 +588,10 @@ export default function ScheduleDetails() {
                 });
               }}
             />
-            <label for="form_posts_transaction" style={{ userSelect: 'none' }}>
+            <label
+              htmlFor="form_posts_transaction"
+              style={{ userSelect: 'none' }}
+            >
               Automatically add transaction
             </label>
           </View>

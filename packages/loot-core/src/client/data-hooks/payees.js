@@ -4,7 +4,7 @@ import q, { liveQuery } from 'loot-core/src/client/query-helpers';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 
 export function usePayees() {
-  let [data, setData] = useState(null);
+  let [data, setData] = useState([]);
 
   useEffect(() => {
     let query = liveQuery(q('payees').select('*'), async payees => {

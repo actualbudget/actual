@@ -186,7 +186,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
       />
       {reportBudgetEnabled && (
         <View style={{ marginLeft: -5 }}>
-          <Button
+          <ButtonWithLoading
             bare
             loading={loading}
             style={{
@@ -197,7 +197,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
             onClick={() => setShowTooltip(true)}
           >
             {budgetType === 'report' ? 'Report budget' : 'Rollover budget'}
-          </Button>
+          </ButtonWithLoading>
           {showTooltip && (
             <Tooltip
               position="bottom-left"

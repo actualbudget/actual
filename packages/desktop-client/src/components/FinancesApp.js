@@ -207,7 +207,12 @@ class FinancesApp extends React.Component {
 
     let oldPush = this.history.push;
     this.history.push = (to, state) => {
-      return oldPush.call(this.history, to, makeLocationState(state));
+      let newState = makeLocationState(to.state || state);
+      if (typeof to === 'object') {
+        return oldPush.call(this.history, { ...to, state: newState });
+      } else {
+        return oldPush.call(this.history, to, newState);
+      }
     };
 
     // I'm not sure if this is the best approach but we need this to
