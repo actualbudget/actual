@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-  ButtonLink,
   Link,
   Text,
   View
