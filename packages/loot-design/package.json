@@ -6,6 +6,7 @@
     "@babel/traverse": "^7.0.0-rc.1",
     "@babel/types": "^7.0.0-rc.1",
     "@jlongster/lively": "0.0.4",
+    "@svgr/cli": "^6.5.1",
     "@testing-library/react": "^9.1.4",
     "animejs": "^2.2.0",
     "camelcase": "^5.0.0",

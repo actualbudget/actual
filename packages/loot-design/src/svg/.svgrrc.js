@@ -1,6 +1,11 @@
 module.exports = {
   svgoConfig: {
-    plugins: [{ removeUnknownsAndDefaults: false }]
+    plugins: [
+      {
+        name: 'preset-default',
+        params: { overrides: { removeUnknownsAndDefaults: false } }
+      }
+    ]
   },
   jsx: {
     babelConfig: {

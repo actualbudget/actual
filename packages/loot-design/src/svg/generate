@@ -145,7 +145,7 @@ async function run() {
     let name = camelcase(basename(filepath));
 
     const webOutput = transformContents(title(name), contents);
-    fs.writeFileSync(`./${filepath}.web.js`, webOutput, 'utf8');
+    fs.writeFileSync(`./${filepath}.js`, webOutput, 'utf8');
   }
 }
 
