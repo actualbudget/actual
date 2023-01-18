@@ -504,9 +504,8 @@ export function ConditionsList({
         }
 
         return (
-          <View>
+          <View key={i}>
             <ConditionEditor
-              key={i}
               conditionFields={conditionFields}
               editorStyle={editorStyle}
               ops={ops}
@@ -775,9 +774,8 @@ export default function EditRule({
                 ) : (
                   <Stack spacing={2}>
                     {actions.map((action, i) => (
-                      <View>
+                      <View key={i}>
                         <ActionEditor
-                          key={i}
                           ops={['set', 'link-schedule']}
                           action={action}
                           editorStyle={editorStyle}
