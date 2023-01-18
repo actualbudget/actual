@@ -182,6 +182,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
           {type === 'boolean'
             ? [
                 <OpButton
+                  key="true"
                   op="true"
                   selected={value === true}
                   onClick={() => {
@@ -190,6 +191,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
                   }}
                 />,
                 <OpButton
+                  key="false"
                   op="false"
                   selected={value === false}
                   onClick={() => {
@@ -200,6 +202,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
               ]
             : ops.map(currOp => (
                 <OpButton
+                  key={currOp}
                   op={currOp}
                   selected={currOp === op}
                   onClick={() => dispatch({ type: 'set-op', op: currOp })}
