@@ -56,6 +56,7 @@ export function getChangedValues(obj1, obj2) {
     let key = keys[i];
 
     if (obj1[key] !== obj2[key]) {
+      if (obj2[key] === 'true' && key === 'cleared') obj2[key] = true;
       diff[key] = obj2[key];
       hasChanged = true;
     }
