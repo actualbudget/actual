@@ -1,18 +1,15 @@
-name: Add Label
+name: Mark new pull request waiting review
+
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened]
 
 jobs:
-  add-label:
-    name: Add Label
+  pr-waiting-review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: christianvuerings/add-labels@v1
+      - uses: actions/checkout@v3
+      
+      - uses: actions-ecosystem/action-add-labels@v1
         with:
-          labels: |
-            waiting-review            
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          labels: waiting-review
