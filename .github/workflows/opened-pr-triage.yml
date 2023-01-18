@@ -1,14 +1,18 @@
-name: Mark new issue for triage
-
+name: Add Label
 on:
   pull_request:
-    types: [opened]
+    types:
+      - opened
 
 jobs:
-  pr-waiting-review:
+  add-label:
+    name: Add Label
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-add-labels@v1
+      - uses: actions/checkout@v2
+      - uses: christianvuerings/add-labels@v1
         with:
-          labels: waiting-review
+          labels: |
+            waiting-review            
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
