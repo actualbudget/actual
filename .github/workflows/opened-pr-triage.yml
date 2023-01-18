@@ -1,14 +1,14 @@
-name: Mark new pull request as waiting review
+name: Mark new issue for triage
 
 on:
   pull_request:
     types: [opened]
 
 jobs:
-  needs-triage:
+  pr-waiting-review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: waiting-review
