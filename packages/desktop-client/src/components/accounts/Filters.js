@@ -448,6 +448,7 @@ export function AppliedFilters({ filters, editingFilter, onDelete }) {
     >
       {filters.map((filter, i) => (
         <FilterExpression
+          key={i}
           customName={filter.customName}
           field={filter.field}
           op={filter.op}
