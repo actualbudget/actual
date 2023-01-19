@@ -156,6 +156,10 @@ export function parse(item) {
       let parsed = item.value == null ? '' : item.value;
       return { ...item, value: parsed };
     }
+    case 'boolean': {
+      let parsed = item.value;
+      return { ...item, value: parsed};
+    }
     default:
   }
 
@@ -174,6 +178,10 @@ export function unparse({ error, inputKey, ...item }) {
     }
     case 'string': {
       let unparsed = item.value == null ? '' : item.value;
+      return { ...item, value: unparsed };
+    }
+    case 'boolean': {
+      let unparsed = item.value == null ? false : item.value;
       return { ...item, value: unparsed };
     }
     default:
