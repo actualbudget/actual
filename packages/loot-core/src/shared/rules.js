@@ -158,7 +158,7 @@ export function parse(item) {
     }
     case 'boolean': {
       let parsed = item.value;
-      return { ...item, value: parsed};
+      return { ...item, value: parsed };
     }
     default:
   }
