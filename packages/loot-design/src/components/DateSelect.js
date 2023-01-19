@@ -166,11 +166,11 @@ export default function DateSelect({
         return d.format(date, dateFormat);
       }
     }
-    return null;
+    return '';
   }, [defaultValue, dateFormat]);
 
   let picker = useRef(null);
-  let [value, setValue] = useState(parsedDefaultValue || '');
+  let [value, setValue] = useState(parsedDefaultValue);
   let [open, setOpen] = useState(embedded || isOpen || false);
   let inputRef = useRef(null);
 
