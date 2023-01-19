@@ -16,7 +16,7 @@ import { scope } from '@jlongster/lively';
 import { styles, colors } from '../style';
 import DeleteIcon from '../svg/v0/Delete';
 import ExpandArrow from '../svg/v0/ExpandArrow';
-import AnimatedLoading from '../svg/v1/AnimatedLoading';
+import AnimatedLoading from '../svg/AnimatedLoading';
 import Checkmark from '../svg/v1/Checkmark';
 import { keys } from '../util/keys';
 import {

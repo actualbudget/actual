@@ -24,7 +24,7 @@ import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 
 import { styles, colors } from '../style';
 import Delete from '../svg/v0/Delete';
-import Loading from '../svg/v1/AnimatedLoading';
+import Loading from '../svg/AnimatedLoading';
 import tokens from '../tokens';
 import Text from './Text';
 import { useProperFocus } from './useProperFocus';
