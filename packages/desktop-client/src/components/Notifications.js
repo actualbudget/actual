@@ -13,7 +13,7 @@ import {
   ExternalLink
 } from 'loot-design/src/components/common';
 import { styles, colors } from 'loot-design/src/style';
-import Delete from 'loot-design/src/svg/Delete';
+import Delete from 'loot-design/src/svg/v0/Delete';
 import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
 
 function compileMessage(message, actions, setLoading, onRemove) {

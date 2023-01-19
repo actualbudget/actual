@@ -20,10 +20,10 @@ import { css, media } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 
 import { styles, colors } from '../style';
-import Delete from '../svg/Delete';
+import Delete from '../svg/v0/Delete';
 import Loading from '../svg/v1/AnimatedLoading';
 import tokens from '../tokens';
 import Text from './Text';

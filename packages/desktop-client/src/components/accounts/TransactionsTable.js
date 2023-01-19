@@ -59,8 +59,8 @@ import {
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
 import { styles, colors } from 'loot-design/src/style';
-import LeftArrow2 from 'loot-design/src/svg/LeftArrow2';
-import RightArrow2 from 'loot-design/src/svg/RightArrow2';
+import LeftArrow2 from 'loot-design/src/svg/v0/LeftArrow2';
+import RightArrow2 from 'loot-design/src/svg/v0/RightArrow2';
 import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
 import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 import CalendarIcon from 'loot-design/src/svg/v2/Calendar';

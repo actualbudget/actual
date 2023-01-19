@@ -31,7 +31,7 @@ import {
   CustomSelect
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import DeleteIcon from 'loot-design/src/svg/Delete';
+import DeleteIcon from 'loot-design/src/svg/v0/Delete';
 import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
 
 import { Value } from '../ManageRules';
