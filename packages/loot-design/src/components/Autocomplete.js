@@ -173,7 +173,8 @@ function _onInputValueChange(
   isOpen,
   value,
   changes = {},
-  setState
+  setState,
+  state // for testing remove
 ) {
   // Do nothing if it's simply updating the selected item
   console.log('Value at top of onInputValueChange: ', value);
@@ -186,7 +187,6 @@ function _onInputValueChange(
 
   // Otherwise, filter the items and always the first item if desired
   const filteredSuggestions = filterSuggestions(suggestions, value);
-  console.log(filteredSuggestions);
   let newHighlightedIndex = null;
   if (value === '') {
     // A blank value shouldn't highlight any item so that the field
@@ -203,11 +203,17 @@ function _onInputValueChange(
       highlightedIndex: null
     }));
   } else {
+    console.log('[OnInputValueChange] Should get getting highlighted index');
     let defaultGetHighlightedIndex = filteredSuggestions => {
       return highlightFirst && filteredSuggestions.length ? 0 : null;
     };
     newHighlightedIndex = (getHighlightedIndex || defaultGetHighlightedIndex)(
       filteredSuggestions
+    );
+
+    console.log(
+      '[OnInputValueChange] Got highlighted index: ',
+      newHighlightedIndex
     );
 
     if (changes.type !== Downshift.stateChangeTypes.clickItem) {
@@ -220,12 +226,14 @@ function _onInputValueChange(
         value
       );
     }
+    console.log('[OnInputValueChange] state before set State: ', state);
     setState(prevState => ({
       ...prevState,
       filteredSuggestions,
-      highlightedIndex: null,
+      highlightedIndex: newHighlightedIndex,
       value
     }));
+    console.log('[OnInputValueChange] state after set State: ', state);
   }
 }
 
@@ -318,13 +326,17 @@ function _onStateChange(
   }
 
   const { isOpen, highlightedIndex, selectedItem } = changes;
+  console.log('[OnStateChange] Changes: ', changes);
+  console.log('[OnStateChange] ', setState);
   setState(prevState => ({
     ...prevState,
     highlightedIndex: highlightedIndex || prevState.highlightedIndex,
     isOpen: embedded ? true : isOpen || prevState.isOpen,
-    selectedItem: selectedItem || prevState.selectedItem,
+    selectedItem: selectedItem ? selectedItem : prevState.selectedItem,
     lastChangeType: changes.type
   }));
+
+  console.log('State after setState: ', state);
 
   // We only ever want to update the value if the user explicitly
   // highlighted an item via the keyboard. It shouldn't change with
@@ -414,7 +426,12 @@ function onSelect(
   return onSelectAfter(suggestions, clearAfterSelect, inst);
 }
 
-function _onSelect(clearAfterSelect, suggestions, ref, setState) {
+function _onSelect(onSelect, clearAfterSelect, suggestions, ref, setState) {
+  console.log('[OnSelect] Item: ', ref.current);
+  console.log(onSelect);
+  if (onSelect) {
+    onSelect(getItemId(ref.current.selectedItem));
+  }
   if (clearAfterSelect) {
     setState({
       value: '',
@@ -423,11 +440,11 @@ function _onSelect(clearAfterSelect, suggestions, ref, setState) {
       highlightedIndex: null
     });
   } else {
-    console.log('why is my ref null');
-    console.log(ref);
-    if (!ref) {
-      return;
-    }
+    // console.log('why is my ref null');
+    // console.log(ref);
+    // if (!ref) {
+    //   return;
+    // }
     ref.current.setSelectionRange(0, 10000);
   }
 }
@@ -451,7 +468,7 @@ function onChange({ props: { inputProps } }, e) {
 }
 
 function _onChange(inputProps, e) {
-  console.log('[INFO] _onChange called')
+  console.log('[INFO] _onChange called');
   const { __onChange } = inputProps || {};
   __onChange && __onChange(e.target.value);
 }
@@ -761,8 +778,10 @@ const _ESingleAutocomplete = ({
   suggestions,
   initialFilterSuggestions,
   tooltipStyle,
+  onSelect,
   isNulled,
   onItemClick,
+  getHighlightedIndex,
   isOpen,
   strict,
   onUpdate,
@@ -792,9 +811,9 @@ const _ESingleAutocomplete = ({
 
   return (
     <Downshift
-      onSelect={() =>
-        _onSelect(clearAfterSelect, suggestions, inputRef, setState)
-      }
+      onSelect={() => {
+        _onSelect(onSelect, clearAfterSelect, suggestions, inputRef, setState);
+      }}
       highlightedIndex={state.highlightedIndex}
       selectedItem={selectedItem || null}
       itemToString={itemToString}
@@ -804,14 +823,15 @@ const _ESingleAutocomplete = ({
         _onInputValueChange(
           suggestions,
           onUpdate,
-          null,
+          true,
           strict,
           defaultFilterSuggestions,
-          null,
+          getHighlightedIndex,
           state.isOpen,
           value,
           changes,
-          setState
+          setState,
+          state
         )
       }
       onStateChange={changes => {
@@ -857,7 +877,7 @@ const _ESingleAutocomplete = ({
                   e,
                   inputProps,
                   tableBehavior,
-                  _onSelect,
+                  onSelect,
                   state.selectedItem,
                   setState
                 );
@@ -870,7 +890,7 @@ const _ESingleAutocomplete = ({
                   initialFilterSuggestions,
                   embedded,
                   onUpdate,
-                  _onSelect,
+                  onSelect,
                   inputProps,
                   shouldSaveFromKey,
                   strict,

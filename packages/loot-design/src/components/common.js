@@ -1059,7 +1059,7 @@ export function InitialFocus({ children }) {
   if (typeof children === 'function') {
     return children(node);
   }
-  return React.cloneElement(children, { inputRef: node });
+  return React.cloneElement(children, { ref: node });
 }
 
 export class HoverTarget extends React.Component {
