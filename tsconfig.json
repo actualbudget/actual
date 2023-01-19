@@ -16,5 +16,5 @@
     "moduleResolution": "Node",
     "module": "ESNext"
   },
-  "exclude": ["node_modules", "build"]
+  "exclude": ["**/node_modules/*", "**/build/*", "**/lib-dist/*"]
 }
