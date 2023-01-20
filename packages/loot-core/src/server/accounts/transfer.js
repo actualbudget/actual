@@ -75,7 +75,7 @@ export async function addTransfer(transaction, transferredAccount) {
     date: transaction.date,
     transfer_id: transaction.id,
     notes: transaction.notes || null,
-    cleared: false
+    cleared: null
   });
 
   await db.updateTransaction({ id: transaction.id, transfer_id: id });
