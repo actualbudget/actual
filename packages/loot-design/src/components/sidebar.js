@@ -444,7 +444,7 @@ function Tools() {
   let onToggle = useCallback(() => setOpen(open => !open), []);
   let location = useLocation();
 
-  const isActive = ['/payees', '/rules', '/tools'].some(route =>
+  const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
     location.pathname.startsWith(route)
   );
 
@@ -475,6 +475,12 @@ function Tools() {
             title="Rules"
             Icon={TuningIcon}
             to="/rules"
+            indent={15}
+          />
+          <SecondaryItem
+            title="Settings"
+            Icon={Cog}
+            to="/settings"
             indent={15}
           />
         </>
