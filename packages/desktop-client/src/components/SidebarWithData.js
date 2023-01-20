@@ -20,7 +20,7 @@ import {
 } from 'loot-design/src/components/common';
 import { Sidebar } from 'loot-design/src/components/sidebar';
 import { styles, colors } from 'loot-design/src/style';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();

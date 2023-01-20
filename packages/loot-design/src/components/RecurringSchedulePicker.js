@@ -6,8 +6,8 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { useTooltip } from 'loot-design/src/components/tooltips';
 import { colors } from 'loot-design/src/style';
-import AddIcon from 'loot-design/src/svg/Add';
-import SubtractIcon from 'loot-design/src/svg/Subtract';
+import AddIcon from 'loot-design/src/svg/v0/Add';
+import SubtractIcon from 'loot-design/src/svg/v0/Subtract';
 
 import { Button, Select, Input, Tooltip, View, Text, Stack } from './common';
 import DateSelect from './DateSelect';
