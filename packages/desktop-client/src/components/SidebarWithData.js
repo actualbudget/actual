@@ -50,7 +50,6 @@ function EditableBudgetName({ prefs, savePrefs }) {
 
   let items = [
     { name: 'rename', text: 'Rename Budget' },
-    { name: 'settings', text: 'Settings' },
     ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
     { name: 'close', text: 'Close File' }
   ];
