@@ -3,10 +3,9 @@ import * as React from 'react';
 const SvgSplit = props => (
   <svg
     {...props}
-    width={32}
-    height={32}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 32 32"
     style={{
       color: '#242134',
       ...props.style

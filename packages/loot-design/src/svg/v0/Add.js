@@ -3,9 +3,8 @@ import * as React from 'react';
 const SvgAdd = props => (
   <svg
     {...props}
-    width={24}
-    height={24}
     xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
     style={{
       color: '#242134',
       ...props.style

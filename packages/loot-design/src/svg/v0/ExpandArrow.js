@@ -3,9 +3,8 @@ import * as React from 'react';
 const SvgExpandArrow = props => (
   <svg
     {...props}
-    width={25}
-    height={15}
     xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 25 15"
     style={{
       color: '#242134',
       ...props.style

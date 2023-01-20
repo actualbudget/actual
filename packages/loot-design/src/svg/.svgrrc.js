@@ -3,8 +3,11 @@ module.exports = {
     plugins: [
       {
         name: 'preset-default',
-        params: { overrides: { removeUnknownsAndDefaults: false } }
-      }
+        params: {
+          overrides: { removeUnknownsAndDefaults: false }
+        }
+      },
+      'removeDimensions'
     ]
   },
   jsx: {
