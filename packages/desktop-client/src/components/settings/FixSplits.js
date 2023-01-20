@@ -62,7 +62,7 @@ export default function FixSplitsTool() {
 
   return (
     <Setting
-      button={
+      primaryAction={
         <View
           style={{
             flexDirection: 'row',
