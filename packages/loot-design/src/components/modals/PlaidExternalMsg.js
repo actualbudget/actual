@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 import { colors } from '../../style';
-import AnimatedLoading from '../../svg/v1/AnimatedLoading';
+import AnimatedLoading from '../../svg/AnimatedLoading';
 import { Error } from '../alerts';
 import { View, Text, Modal, Button, P, ModalButtons } from '../common';
 
