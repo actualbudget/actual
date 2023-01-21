@@ -1,23 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { withRouter, useHistory } from 'react-router';
 
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import { closeBudget } from 'loot-core/src/client/actions/budgets';
+import Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   Button,
   Input,
   InitialFocus,
-  Text
+  Text,
+  Tooltip,
+  Menu
 } from 'loot-design/src/components/common';
 import { Sidebar } from 'loot-design/src/components/sidebar';
 import { styles, colors } from 'loot-design/src/style';
+import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 
 function EditableBudgetName({ prefs, savePrefs }) {
+  let dispatch = useDispatch();
+  let history = useHistory();
   const [editing, setEditing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  function onMenuSelect(type) {
+    setMenuOpen(false);
+
+    switch (type) {
+      case 'rename':
+        setEditing(true);
+        break;
+      case 'settings':
+        history.push('/settings');
+        break;
+      case 'help':
+        window.open('https://actualbudget.github.io/docs', '_blank');
+        break;
+      case 'close':
+        dispatch(closeBudget());
+        break;
+      default:
+    }
+  }
+
+  let items = [
+    { name: 'rename', text: 'Rename Budget' },
+    ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
+    { name: 'close', text: 'Close File' }
+  ];
 
   if (editing) {
     return (
@@ -53,11 +88,25 @@ function EditableBudgetName({ prefs, savePrefs }) {
           marginLeft: -5,
           flex: '0 auto'
         }}
-        onClick={() => setEditing(true)}
+        onClick={() => setMenuOpen(true)}
       >
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           {prefs.budgetName || 'A budget has no name'}
         </Text>
+        <ExpandArrow
+          width={7}
+          height={7}
+          style={{ color: 'inherit', marginLeft: 5 }}
+        />
+        {menuOpen && (
+          <Tooltip
+            position="bottom-left"
+            style={{ padding: 0 }}
+            onClose={() => setMenuOpen(false)}
+          >
+            <Menu onMenuSelect={onMenuSelect} items={items} />
+          </Tooltip>
+        )}
       </Button>
     );
   }
