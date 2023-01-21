@@ -151,19 +151,13 @@ export default function GenericInput({
       break;
 
     case 'boolean':
-      switch (field) {
-        case 'cleared':
-          content = (
-            <Checkbox
-              checked={value}
-              value={value}
-              onChange={e => onChange(!value)}
-            />
-          );
-          break;
-
-        default:
-      }
+      content = (
+        <Checkbox
+          checked={value}
+          value={value}
+          onChange={e => onChange(!value)}
+        />
+      );
       break;
 
     default:
