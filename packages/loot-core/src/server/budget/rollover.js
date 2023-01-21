@@ -1,7 +1,8 @@
-import { number, sumAmounts, flatten2, unflatten2 } from './util';
 import * as monthUtils from '../../shared/months';
 import { safeNumber } from '../../shared/util';
 import * as sheet from '../sheet';
+
+import { number, sumAmounts, flatten2, unflatten2 } from './util';
 
 const { resolveName } = require('../spreadsheet/util');
 

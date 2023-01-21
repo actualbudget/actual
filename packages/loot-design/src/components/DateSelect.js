@@ -18,10 +18,11 @@ import {
   getShortYearRegex
 } from 'loot-core/src/shared/months';
 
+import { colors } from '../style';
+
 import { View, Input, Tooltip } from './common';
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
-import { colors } from '../style';
 
 let pickerStyles = {
   '& .pika-single.actual-date-picker': {

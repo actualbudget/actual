@@ -6,9 +6,6 @@ import { css } from 'glamor';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import HoldTooltip from './HoldTooltip';
-import { useRollover } from './RolloverContext';
-import TransferTooltip from './TransferTooltip';
 import { colors, styles } from '../../../style';
 import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
@@ -28,6 +25,10 @@ import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import SheetValue from '../../spreadsheet/SheetValue';
 import { MONTH_BOX_SHADOW } from '../constants';
+
+import HoldTooltip from './HoldTooltip';
+import { useRollover } from './RolloverContext';
+import TransferTooltip from './TransferTooltip';
 
 function TotalsList({ prevMonthName, collapsed }) {
   return (

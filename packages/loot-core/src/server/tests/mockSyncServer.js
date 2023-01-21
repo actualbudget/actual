@@ -1,7 +1,8 @@
 import { makeClock, Timestamp, merkle } from '../crdt';
 
-const defaultMockData = require('./mockData').basic;
 const SyncPb = require('../sync/proto/sync_pb');
+
+const defaultMockData = require('./mockData').basic;
 
 const handlers = {};
 let currentMockData = defaultMockData;

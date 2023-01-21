@@ -1,5 +1,6 @@
-import { makeViews } from './views';
 import * as db from '../db';
+
+import { makeViews } from './views';
 
 beforeEach(global.emptyDatabase());
 

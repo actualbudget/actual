@@ -1,3 +1,5 @@
+import * as db from '../db';
+
 import {
   migrate,
   withMigrationsDir,
@@ -5,7 +7,6 @@ import {
   getMigrationList,
   getPending
 } from './migrations';
-import * as db from '../db';
 
 beforeEach(global.emptyDatabase(true));
 

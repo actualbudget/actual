@@ -6,9 +6,10 @@ import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { View, Button, Tooltip, useTooltip } from './common';
 import { colors } from '../style';
 import CustomNotesPaper from '../svg/v2/CustomNotesPaper';
+
+import { View, Button, Tooltip, useTooltip } from './common';
 
 export function NotesTooltip({
   defaultNotes,

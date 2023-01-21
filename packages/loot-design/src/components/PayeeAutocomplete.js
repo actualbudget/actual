@@ -6,14 +6,15 @@ import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
+import { colors } from '../style';
+import Add from '../svg/v1/Add';
+
 import Autocomplete, {
   defaultFilterSuggestion,
   AutocompleteFooter,
   AutocompleteFooterButton
 } from './Autocomplete';
 import { View } from './common';
-import { colors } from '../style';
-import Add from '../svg/v1/Add';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;

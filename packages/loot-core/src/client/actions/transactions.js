@@ -1,5 +1,6 @@
-import { filterTransactions } from './queries';
 import { send } from '../../platform/client/fetch';
+
+import { filterTransactions } from './queries';
 
 export function categorize(accountId) {
   return async dispatch => {

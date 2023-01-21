@@ -4,7 +4,6 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import TransferTooltip from './TransferTooltip';
 import { styles, colors } from '../../../style';
 import CategoryAutocomplete from '../../CategorySelect';
 import {
@@ -27,6 +26,8 @@ import {
   addToBeBudgetedGroup,
   CategoryGroupsContext
 } from '../util';
+
+import TransferTooltip from './TransferTooltip';
 
 export BudgetSummary from './BudgetSummary';
 

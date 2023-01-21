@@ -1,8 +1,9 @@
 import React from 'react';
 
-import BudgetList from './BudgetList';
 import { Section, TestModal } from '../../guide/components';
 import { colors } from '../../style';
+
+import BudgetList from './BudgetList';
 
 const files = [
   { name: 'Finances 2', id: '1', state: 'local' },

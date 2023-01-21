@@ -4,10 +4,6 @@ import { scope } from '@jlongster/lively';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import BudgetSummaries from './BudgetSummaries';
-import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
-import { MonthsProvider, MonthsContext } from './MonthsContext';
-import { separateGroups, findSortDown, findSortUp } from './util';
 import { styles, colors } from '../../style';
 import ExpandArrow from '../../svg/v0/ExpandArrow';
 import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';
@@ -31,6 +27,11 @@ import {
 } from '../sort.js';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import { Row, InputCell, ROW_HEIGHT } from '../table';
+
+import BudgetSummaries from './BudgetSummaries';
+import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
+import { MonthsProvider, MonthsContext } from './MonthsContext';
+import { separateGroups, findSortDown, findSortUp } from './util';
 
 function getScrollbarWidth() {
   return Math.max(styles.scrollbarWidth - 2, 0);

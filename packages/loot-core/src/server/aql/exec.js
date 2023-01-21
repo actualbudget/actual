@@ -1,6 +1,7 @@
+import * as db from '../db';
+
 import { compileQuery, defaultConstructQuery } from './compiler';
 import { convertInputType, convertOutputType } from './schema-helpers';
-import * as db from '../db';
 
 // TODO (compiler):
 // * Properly safeguard all inputs against SQL injection

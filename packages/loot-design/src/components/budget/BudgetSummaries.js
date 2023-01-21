@@ -11,9 +11,10 @@ import { Spring } from 'wobble';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { MonthsContext } from './MonthsContext';
 import { View } from '../common';
 import useResizeObserver from '../useResizeObserver';
+
+import { MonthsContext } from './MonthsContext';
 
 export default function BudgetSummaries({ SummaryComponent }) {
   let { months } = useContext(MonthsContext);

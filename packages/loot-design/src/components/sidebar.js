@@ -6,16 +6,6 @@ import { css } from 'glamor';
 
 import Platform from 'loot-core/src/client/platform';
 
-import {
-  View,
-  Block,
-  AlignedText,
-  AnchorLink,
-  ButtonLink,
-  Button
-} from './common';
-import { useDraggable, useDroppable, DropHighlight } from './sort.js';
-import CellValue from './spreadsheet/CellValue';
 import { styles, colors } from '../style';
 import Add from '../svg/v1/Add';
 import CheveronDown from '../svg/v1/CheveronDown';
@@ -27,6 +17,17 @@ import TuningIcon from '../svg/v1/Tuning';
 import Wallet from '../svg/v1/Wallet';
 import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
 import CalendarIcon from '../svg/v2/Calendar';
+
+import {
+  View,
+  Block,
+  AlignedText,
+  AnchorLink,
+  ButtonLink,
+  Button
+} from './common';
+import { useDraggable, useDroppable, DropHighlight } from './sort.js';
+import CellValue from './spreadsheet/CellValue';
 
 export const SIDEBAR_WIDTH = 240;
 

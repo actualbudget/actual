@@ -1,7 +1,8 @@
 import React from 'react';
 
-import SelectLinkedAccounts from './SelectLinkedAccounts';
 import { Section, TestModal } from '../../guide/components';
+
+import SelectLinkedAccounts from './SelectLinkedAccounts';
 
 export default () => (
   <Section>

@@ -1,5 +1,3 @@
-import * as encoder from './encoder';
-import { rebuildMerkleHash } from './repair';
 import { captureException } from '../../platform/exceptions';
 import asyncStorage from '../../platform/server/asyncStorage';
 import logger from '../../platform/server/log';
@@ -21,6 +19,9 @@ import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
 import * as undo from '../undo';
+
+import * as encoder from './encoder';
+import { rebuildMerkleHash } from './repair';
 
 const connection = require('../../platform/server/connection');
 const { PostError, SyncError } = require('../errors');

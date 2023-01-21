@@ -10,13 +10,14 @@ import {
 } from 'loot-core/src/platform/client/fetch';
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
 
+import installPolyfills from '../polyfills';
+
 import AppBackground from './AppBackground';
 import FatalError from './FatalError';
 import FinancesApp from './FinancesApp';
 import ManagementApp from './manager/ManagementApp';
 import MobileWebMessage from './MobileWebMessage';
 import UpdateNotification from './UpdateNotification';
-import installPolyfills from '../polyfills';
 
 class App extends React.Component {
   state = {

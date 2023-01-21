@@ -6,14 +6,15 @@ import { generateCategoryGroups } from 'loot-core/src/mocks';
 import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { BudgetMonthCountContext } from './BudgetMonthCountContext';
-import DynamicBudgetTable from './DynamicBudgetTable';
-import * as rollover from './rollover/rollover-components';
-import { RolloverContext } from './rollover/RolloverContext';
 import { Section } from '../../guide/components';
 import { colors } from '../../style';
 import { View } from '../common';
 import SpreadsheetContext from '../spreadsheet/SpreadsheetContext';
+
+import { BudgetMonthCountContext } from './BudgetMonthCountContext';
+import DynamicBudgetTable from './DynamicBudgetTable';
+import * as rollover from './rollover/rollover-components';
+import { RolloverContext } from './rollover/RolloverContext';
 
 const categoryGroups = generateCategoryGroups([
   {

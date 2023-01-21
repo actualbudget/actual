@@ -1,9 +1,10 @@
 import React from 'react';
 
-import format from './format';
-import SheetValue from './SheetValue';
 import { styles } from '../../style';
 import Text from '../Text';
+
+import format from './format';
+import SheetValue from './SheetValue';
 
 function CellValue({ binding, type, formatter, style, getStyle, debug }) {
   return (

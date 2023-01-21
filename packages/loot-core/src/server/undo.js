@@ -1,7 +1,8 @@
+import { getIn } from '../shared/util';
+
 import { Timestamp } from './crdt';
 import { withMutatorContext, getMutatorContext } from './mutators';
 import { sendMessages } from './sync';
-import { getIn } from '../shared/util';
 
 const connection = require('../platform/server/connection');
 

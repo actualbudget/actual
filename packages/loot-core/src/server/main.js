@@ -1,6 +1,18 @@
 import './polyfills';
 import injectAPI from '@actual-app/api/injected';
 
+import { createTestBudget } from '../mocks/budget';
+import { captureException, captureBreadcrumb } from '../platform/exceptions';
+import asyncStorage from '../platform/server/asyncStorage';
+import fs from '../platform/server/fs';
+import logger from '../platform/server/log';
+import * as sqlite from '../platform/server/sqlite';
+import { fromPlaidAccountType } from '../shared/accounts';
+import * as monthUtils from '../shared/months';
+import q, { Query } from '../shared/query';
+import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
+import { amountToInteger, stringToInteger } from '../shared/util';
+
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
 import { parseFile } from './accounts/parse-file';
@@ -60,25 +72,15 @@ import toolsApp from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
-import { createTestBudget } from '../mocks/budget';
-import { captureException, captureBreadcrumb } from '../platform/exceptions';
-import asyncStorage from '../platform/server/asyncStorage';
-import fs from '../platform/server/fs';
-import logger from '../platform/server/log';
-import * as sqlite from '../platform/server/sqlite';
-import { fromPlaidAccountType } from '../shared/accounts';
-import * as monthUtils from '../shared/months';
-import q, { Query } from '../shared/query';
-import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
-import { amountToInteger, stringToInteger } from '../shared/util';
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');
 
-const { resolveName, unresolveName } = require('./spreadsheet/util');
-const SyncPb = require('./sync/proto/sync_pb');
 const connection = require('../platform/server/connection');
 const uuid = require('../platform/uuid');
+
+const { resolveName, unresolveName } = require('./spreadsheet/util');
+const SyncPb = require('./sync/proto/sync_pb');
 
 // let indexeddb = require('../platform/server/indexeddb');
 

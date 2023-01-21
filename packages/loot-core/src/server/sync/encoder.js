@@ -1,8 +1,9 @@
 import encryption from '../encryption';
 import * as prefs from '../prefs';
 
-let SyncPb = require('./proto/sync_pb');
 let { SyncError } = require('../errors');
+
+let SyncPb = require('./proto/sync_pb');
 
 function coerceBuffer(value) {
   // The web encryption APIs give us back raw Uint8Array... but our

@@ -1,5 +1,6 @@
-import { closeBudget, loadBudget } from './budgets';
 import { send } from '../../platform/client/fetch';
+
+import { closeBudget, loadBudget } from './budgets';
 
 // Take in the budget id so that backups can be loaded when a budget
 // isn't opened

@@ -13,6 +13,13 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { scope } from '@jlongster/lively';
 
+import { styles, colors } from '../style';
+import AnimatedLoading from '../svg/AnimatedLoading';
+import DeleteIcon from '../svg/v0/Delete';
+import ExpandArrow from '../svg/v0/ExpandArrow';
+import Checkmark from '../svg/v1/Checkmark';
+import { keys } from '../util/keys';
+
 import {
   View,
   Text,
@@ -29,12 +36,6 @@ import format from './spreadsheet/format';
 import SheetValue from './spreadsheet/SheetValue';
 import { AvoidRefocusScrollProvider, useProperFocus } from './useProperFocus';
 import { useSelectedItems } from './useSelected';
-import { styles, colors } from '../style';
-import AnimatedLoading from '../svg/AnimatedLoading';
-import DeleteIcon from '../svg/v0/Delete';
-import ExpandArrow from '../svg/v0/ExpandArrow';
-import Checkmark from '../svg/v1/Checkmark';
-import { keys } from '../util/keys';
 
 export const ROW_HEIGHT = 32;
 export const TABLE_BACKGROUND_COLOR = colors.n11;

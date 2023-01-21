@@ -1,13 +1,14 @@
 import fc from 'fast-check';
 
-import { isHappyPathQuery } from './executors';
-import { runQuery } from './run-query';
 import arbs from '../../../mocks/arbitrary-schema';
 import query from '../../../shared/query';
 import { groupById } from '../../../shared/util';
 import { setClock } from '../../crdt';
 import * as db from '../../db';
 import { batchMessages, setSyncingMode } from '../../sync/index';
+
+import { isHappyPathQuery } from './executors';
+import { runQuery } from './run-query';
 
 beforeEach(global.emptyDatabase());
 

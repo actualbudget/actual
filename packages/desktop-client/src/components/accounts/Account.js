@@ -58,6 +58,10 @@ import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
 import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
 import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 
+import { authorizeBank } from '../../plaid';
+import { useActiveLocation } from '../ActiveLocation';
+import AnimatedRefresh from '../AnimatedRefresh';
+
 import { FilterButton, AppliedFilters } from './Filters';
 import TransactionList from './TransactionList';
 import {
@@ -65,9 +69,6 @@ import {
   useSplitsExpanded,
   isPreviewId
 } from './TransactionsTable';
-import { authorizeBank } from '../../plaid';
-import { useActiveLocation } from '../ActiveLocation';
-import AnimatedRefresh from '../AnimatedRefresh';
 
 function EmptyMessage({ onAdd }) {
   return (
