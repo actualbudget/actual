@@ -3,8 +3,8 @@ import { MemoryRouter as Router } from 'react-router-dom';
 
 import { generateAccount, generateCategoryGroups } from 'loot-core/src/mocks';
 
-import { Section, TestModal } from '../../guide/components';
 import CloseAccount from './CloseAccount';
+import { Section, TestModal } from '../../guide/components';
 
 const accounts = [
   generateAccount('Bank of America', null, null, false),

@@ -1,7 +1,7 @@
+import * as actions from './actions';
 import { createApp } from '../app';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
-import * as actions from './actions';
 
 let app = createApp();
 

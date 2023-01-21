@@ -5,8 +5,8 @@ import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { Text } from 'loot-design/src/components/common';
 
-import { Page } from '../Page';
 import { SchedulesTable } from './SchedulesTable';
+import { Page } from '../Page';
 
 export default function ScheduleLink() {
   let location = useLocation();

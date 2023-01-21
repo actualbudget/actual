@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Section } from '../guide/components';
 import DateSelect from './DateSelect';
+import { Section } from '../guide/components';
 
 export default () => (
   <Section>

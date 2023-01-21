@@ -22,8 +22,8 @@ import {
 import { colors } from 'loot-design/src/style';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
-import SyncRefresh from '../SyncRefresh';
 import { default as AccountDetails } from './MobileAccountDetails';
+import SyncRefresh from '../SyncRefresh';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');

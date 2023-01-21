@@ -1,10 +1,10 @@
-import { send } from '../../platform/client/fetch';
-import { getDownloadError } from '../../shared/errors';
-import constants from '../constants';
 import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
 import { startTutorialFirstTime } from './tutorial';
+import { send } from '../../platform/client/fetch';
+import { getDownloadError } from '../../shared/errors';
+import constants from '../constants';
 
 export function updateStatusText(text) {
   return (dispatch, getState) => {

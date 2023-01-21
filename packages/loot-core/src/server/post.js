@@ -1,7 +1,7 @@
 import Platform from './platform';
 
-const { fetch } = require('../platform/server/fetch');
 const { PostError } = require('./errors');
+const { fetch } = require('../platform/server/fetch');
 
 function throwIfNot200(res, text) {
   if (res.status !== 200) {

@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Section, TestModal } from '../../guide/components';
 import PlaidExternalMsg from './PlaidExternalMsg';
+import { Section, TestModal } from '../../guide/components';
 
 export default () => (
   <Section>

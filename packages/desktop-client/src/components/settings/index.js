@@ -12,9 +12,6 @@ import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
-import useServerVersion from '../../hooks/useServerVersion';
-import { isMobile } from '../../util';
-import { Page } from '../Page';
 import EncryptionSettings from './Encryption';
 import ExperimentalFeatures from './Experimental';
 import ExportBudget from './Export';
@@ -23,6 +20,9 @@ import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { Section, AdvancedToggle } from './UI';
+import useServerVersion from '../../hooks/useServerVersion';
+import { isMobile } from '../../util';
+import { Page } from '../Page';
 
 function About() {
   const version = useServerVersion();

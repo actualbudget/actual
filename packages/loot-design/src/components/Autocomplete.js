@@ -4,9 +4,9 @@ import lively from '@jlongster/lively';
 import Downshift from 'downshift';
 import { css } from 'glamor';
 
+import { View, Input, Tooltip, Button } from './common';
 import { colors } from '../style';
 import Remove from '../svg/v2/Remove';
-import { View, Input, Tooltip, Button } from './common';
 
 function findItem(strict, suggestions, value) {
   if (strict) {

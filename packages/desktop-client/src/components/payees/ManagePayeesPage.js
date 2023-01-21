@@ -1,8 +1,8 @@
 import React from 'react';
 import { useLocation } from 'react-router';
 
-import { Page } from '../Page';
 import ManagePayeesWithData from './ManagePayeesWithData';
+import { Page } from '../Page';
 
 export function ManagePayeesPage() {
   let location = useLocation();

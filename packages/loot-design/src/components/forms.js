@@ -2,8 +2,8 @@ import React from 'react';
 
 import { css } from 'glamor';
 
-import { colors } from '../style';
 import { View, Text } from './common';
+import { colors } from '../style';
 
 export function SectionLabel({ title, style }) {
   return (

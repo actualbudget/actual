@@ -1,5 +1,5 @@
-import query from '../../shared/query';
 import { generateSQLWithState } from './compiler';
+import query from '../../shared/query';
 
 function sqlLines(str) {
   return str

@@ -1,6 +1,6 @@
+import * as transfer from './transfer';
 import { expectSnapshotWithDiffer } from '../../mocks/util';
 import * as db from '../db';
-import * as transfer from './transfer';
 
 beforeEach(global.emptyDatabase());
 

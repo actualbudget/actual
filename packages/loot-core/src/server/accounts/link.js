@@ -1,3 +1,4 @@
+import * as bankSync from './sync';
 import asyncStorage from '../../platform/server/asyncStorage';
 import { fromPlaidAccountType } from '../../shared/accounts';
 import { amountToInteger } from '../../shared/util';
@@ -5,7 +6,6 @@ import * as db from '../db';
 import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
-import * as bankSync from './sync';
 
 const uuid = require('../../platform/uuid');
 

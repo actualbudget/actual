@@ -1,6 +1,6 @@
+import { closeModal } from './modals';
 import { send } from '../../platform/client/fetch';
 import constants from '../constants';
-import { closeModal } from './modals';
 
 export function loadPrefs() {
   return async (dispatch, getState) => {

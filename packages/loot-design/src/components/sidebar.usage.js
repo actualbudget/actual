@@ -8,9 +8,9 @@ import lively from '@jlongster/lively';
 import { generateAccount } from 'loot-core/src/mocks';
 import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 
-import { Section } from '../guide/components';
 import { Sidebar } from './sidebar';
 import SpreadsheetContext from './spreadsheet/SpreadsheetContext';
+import { Section } from '../guide/components';
 
 function withState(state, render) {
   const Component = lively(render, { getInitialState: () => state });

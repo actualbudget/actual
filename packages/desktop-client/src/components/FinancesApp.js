@@ -28,8 +28,6 @@ import Cog from 'loot-design/src/svg/v1/Cog';
 import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 import Wallet from 'loot-design/src/svg/v1/Wallet';
 
-import { isMobile } from '../util';
-import { getLocationState, makeLocationState } from '../util/location-state';
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
 import { default as MobileAccounts } from './accounts/MobileAccounts';
@@ -52,6 +50,8 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
+import { isMobile } from '../util';
+import { getLocationState, makeLocationState } from '../util/location-state';
 // import Debugger from './Debugger';
 
 function PageRoute({ path, component: Component }) {

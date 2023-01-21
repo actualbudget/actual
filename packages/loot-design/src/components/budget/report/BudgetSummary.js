@@ -5,6 +5,7 @@ import { css } from 'glamor';
 import { reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useReport } from './ReportContext';
 import { colors, styles } from '../../../style';
 import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
@@ -26,7 +27,6 @@ import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { MONTH_BOX_SHADOW } from '../constants';
 import { makeAmountFullStyle } from '../util';
-import { useReport } from './ReportContext';
 
 function PieProgress({ style, progress, color, backgroundColor }) {
   let radius = 4;

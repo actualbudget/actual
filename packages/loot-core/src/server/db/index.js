@@ -1,5 +1,6 @@
 import LRU from 'lru-cache';
 
+import { shoveSortOrders, SORT_INCREMENT } from './sort';
 import fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import { groupById } from '../../shared/util';
@@ -26,7 +27,6 @@ import {
   payeeRuleModel
 } from '../models';
 import { sendMessages, batchMessages } from '../sync';
-import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';
 

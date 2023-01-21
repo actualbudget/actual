@@ -1,6 +1,7 @@
 import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 
+import { findSchedules } from './find-schedules';
 import { captureBreadcrumb } from '../../platform/exceptions';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
 import q from '../../shared/query';
@@ -28,7 +29,6 @@ import * as prefs from '../prefs';
 import { addSyncListener, batchMessages } from '../sync';
 import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
-import { findSchedules } from './find-schedules';
 
 const connection = require('../../platform/server/connection');
 const uuid = require('../../platform/uuid');

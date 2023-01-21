@@ -22,13 +22,13 @@ import hotkeys from 'hotkeys-js';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 
+import Text from './Text';
+import { useProperFocus } from './useProperFocus';
+import View from './View';
 import { styles, colors } from '../style';
 import Loading from '../svg/AnimatedLoading';
 import Delete from '../svg/v0/Delete';
 import tokens from '../tokens';
-import Text from './Text';
-import { useProperFocus } from './useProperFocus';
-import View from './View';
 
 export { default as View } from './View';
 export { default as Text } from './Text';

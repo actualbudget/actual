@@ -22,8 +22,8 @@ import { colors } from 'loot-design/src/style';
 import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import Check from 'loot-design/src/svg/v2/Check';
 
-import DisplayId from '../util/DisplayId';
 import { StatusBadge } from './StatusBadge';
+import DisplayId from '../util/DisplayId';
 
 export let ROW_HEIGHT = 43;
 

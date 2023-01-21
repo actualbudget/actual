@@ -1,5 +1,4 @@
 #!/usr/bin/env node --trace-warnings
-import * as sqlite from '../../platform/server/sqlite';
 import {
   getMigrationsDir,
   withMigrationsDir,
@@ -9,6 +8,7 @@ import {
   getPending,
   migrate
 } from './migrations';
+import * as sqlite from '../../platform/server/sqlite';
 
 const fs = require('fs');
 const path = require('path');

@@ -1,3 +1,7 @@
+import { getStartingBalancePayee } from './payees';
+import title from './title';
+import { runRules } from './transaction-rules';
+import { batchUpdateTransactions } from './transactions';
 import * as monthUtils from '../../shared/months';
 import {
   makeChild as makeChildTransaction,
@@ -8,10 +12,6 @@ import * as db from '../db';
 import { runMutator } from '../mutators';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
-import { getStartingBalancePayee } from './payees';
-import title from './title';
-import { runRules } from './transaction-rules';
-import { batchUpdateTransactions } from './transactions';
 
 const dateFns = require('date-fns');
 

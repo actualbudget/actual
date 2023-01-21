@@ -1,11 +1,3 @@
-import * as monthUtils from '../shared/months';
-import q from '../shared/query';
-import {
-  ungroupTransactions,
-  updateTransaction,
-  deleteTransaction
-} from '../shared/transactions';
-import { integerToAmount } from '../shared/util';
 import { addTransactions } from './accounts/sync';
 import {
   accountModel,
@@ -22,6 +14,14 @@ import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
+import * as monthUtils from '../shared/months';
+import q from '../shared/query';
+import {
+  ungroupTransactions,
+  updateTransaction,
+  deleteTransaction
+} from '../shared/transactions';
+import { integerToAmount } from '../shared/util';
 
 const connection = require('../platform/server/connection');
 

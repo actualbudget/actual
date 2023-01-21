@@ -1,8 +1,8 @@
 import React from 'react';
 
+import Import from './Import';
 import { Section, TestModal } from '../../guide/components';
 import { colors } from '../../style';
-import Import from './Import';
 
 export default () => (
   <Section>

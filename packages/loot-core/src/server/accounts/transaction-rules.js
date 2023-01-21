@@ -1,4 +1,13 @@
 import {
+  Condition,
+  Action,
+  Rule,
+  RuleIndexer,
+  rankRules,
+  migrateIds,
+  iterateIds
+} from './rules';
+import {
   currentDay,
   addDays,
   subDays,
@@ -18,15 +27,6 @@ import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
 import { setSyncingMode, batchMessages } from '../sync';
 import { addSyncListener } from '../sync/index';
-import {
-  Condition,
-  Action,
-  Rule,
-  RuleIndexer,
-  rankRules,
-  migrateIds,
-  iterateIds
-} from './rules';
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead

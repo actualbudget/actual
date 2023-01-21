@@ -1,8 +1,8 @@
 import React from 'react';
 
+import LoadBackup from './LoadBackup';
 import { Section, TestModal } from '../../guide/components';
 import { colors } from '../../style';
-import LoadBackup from './LoadBackup';
 
 const backups = [
   { date: 'December 23, 2017 4:08 PM', id: 'sdflkj23' },

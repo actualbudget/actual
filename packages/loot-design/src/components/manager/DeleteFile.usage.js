@@ -1,8 +1,8 @@
 import React from 'react';
 
+import DeleteFile from './DeleteFile';
 import { Section, TestModal } from '../../guide/components';
 import { colors } from '../../style';
-import DeleteFile from './DeleteFile';
 
 export default () => (
   <Section>

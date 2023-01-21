@@ -15,8 +15,8 @@ import { colors } from 'loot-design/src/style';
 import AnimatedLoading from 'loot-design/src/svg/AnimatedLoading';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
-import SyncRefresh from '../SyncRefresh';
 import { BudgetTable } from './MobileBudgetTable';
+import SyncRefresh from '../SyncRefresh';
 
 class Budget extends React.Component {
   constructor(props) {
