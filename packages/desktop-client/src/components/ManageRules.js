@@ -37,7 +37,7 @@ import useSelected, {
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
-import ArrowRight from 'loot-design/src/svg/RightArrow2';
+import ArrowRight from 'loot-design/src/svg/v0/RightArrow2';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
@@ -157,12 +157,11 @@ export function Value({
             </Text>
           );
         })}
-        {// prettier-ignore
-        numHidden > 0 && (
+        {numHidden > 0 && (
           <Text style={{ color: colors.p4 }}>
             &nbsp;&nbsp;
-            {  // eslint-disable-next-line
-            }<a
+            {/* eslint-disable-next-line */}
+            <a
               href="#"
               onClick={onExpand}
               {...css({
@@ -235,7 +234,7 @@ function ScheduleValue({ value }) {
       data={schedules}
       describe={s => {
         let payeeId = s._payee;
-        return payeeId
+        return byId[payeeId]
           ? `${byId[payeeId].name} (${s.next_date})`
           : `Next: ${s.next_date}`;
       }}
@@ -405,7 +404,8 @@ let SimpleTable = React.forwardRef(
 
     useEffect(() => {
       if (contentRef.current) {
-        contentHeight.current = contentRef.current.getBoundingClientRect().height;
+        contentHeight.current =
+          contentRef.current.getBoundingClientRect().height;
       } else {
         contentHeight.current = null;
       }
@@ -588,20 +588,29 @@ export default function ManageRules({
   }, []);
 
   function onCreateRule() {
+    let rule = {
+      stage: null,
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: payeeId || null,
+          type: 'id'
+        }
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: null,
+          type: 'id'
+        }
+      ]
+    };
+
     dispatch(
       pushModal('edit-rule', {
-        rule: {
-          stage: null,
-          conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
-          actions: [
-            {
-              op: 'set',
-              field: 'category',
-              value: null,
-              type: 'id'
-            }
-          ]
-        },
+        rule,
         onSave: async newRule => {
           let newRules = await loadRules();
 

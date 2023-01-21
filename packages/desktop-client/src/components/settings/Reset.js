@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { Text, ButtonWithLoading } from 'loot-design/src/components/common';
 
-import { ButtonSetting } from './UI';
+import { Setting } from './UI';
 
 export function ResetCache() {
   let [resetting, setResetting] = useState(false);
@@ -15,8 +15,8 @@ export function ResetCache() {
   }
 
   return (
-    <ButtonSetting
-      button={
+    <Setting
+      primaryAction={
         <ButtonWithLoading loading={resetting} onClick={onResetCache}>
           Reset budget cache
         </ButtonWithLoading>
@@ -29,7 +29,7 @@ export function ResetCache() {
         won't see correct values. There is no danger in resetting the cache.
         Hopefully you never have to do this.
       </Text>
-    </ButtonSetting>
+    </Setting>
   );
 }
 
@@ -43,8 +43,8 @@ export function ResetSync({ resetSync }) {
   }
 
   return (
-    <ButtonSetting
-      button={
+    <Setting
+      primaryAction={
         <ButtonWithLoading loading={resetting} onClick={onResetSync}>
           Reset sync
         </ButtonWithLoading>
@@ -56,6 +56,6 @@ export function ResetSync({ resetSync }) {
         on other devices will have to be re-downloaded to use the new sync ID.
         Use this if there is a problem with syncing and you want to start fresh.
       </Text>
-    </ButtonSetting>
+    </Setting>
   );
 }

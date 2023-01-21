@@ -47,8 +47,8 @@ import {
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
 import { styles, colors } from 'loot-design/src/style';
+import Loading from 'loot-design/src/svg/AnimatedLoading';
 import Add from 'loot-design/src/svg/v1/Add';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
 import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
 import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
@@ -1823,9 +1823,10 @@ export default function Account(props) {
   }));
 
   let dispatch = useDispatch();
-  let actionCreators = useMemo(() => bindActionCreators(actions, dispatch), [
-    dispatch
-  ]);
+  let actionCreators = useMemo(
+    () => bindActionCreators(actions, dispatch),
+    [dispatch]
+  );
 
   let params = useParams();
   let location = useLocation();

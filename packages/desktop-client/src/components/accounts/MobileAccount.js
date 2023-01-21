@@ -24,7 +24,6 @@ import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import SyncRefresh from '../SyncRefresh';
 import { default as AccountDetails } from './MobileAccountDetails';
-// import FocusAwareStatusBar from 'loot-design/src/components/mobile/FocusAwareStatusBar';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
@@ -83,9 +82,10 @@ function Account(props) {
   }));
 
   let dispatch = useDispatch();
-  let actionCreators = useMemo(() => bindActionCreators(actions, dispatch), [
-    dispatch
-  ]);
+  let actionCreators = useMemo(
+    () => bindActionCreators(actions, dispatch),
+    [dispatch]
+  );
 
   const { id: accountId } = props.match.params;
 
@@ -181,6 +181,7 @@ function Account(props) {
     setSearchText(text);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const onSelectTransaction = transaction => {
     if (isPreviewId(transaction.id)) {
       let parts = transaction.id.split('/');
@@ -236,7 +237,6 @@ function Account(props) {
         <SchedulesProvider
           transform={getSchedulesTransform(accountId, searchText !== '')}
         >
-          {/* <FocusAwareStatusBar barStyle="dark-content" animated={true} /> // TODO: how to do this on web? */}
           <PreviewTransactions accountId={props.accountId}>
             {prependTransactions =>
               prependTransactions == null ? null : (

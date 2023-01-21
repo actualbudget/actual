@@ -528,7 +528,7 @@ export async function initialFullSync() {
   }
 }
 
-export const fullSync = once(async function() {
+export const fullSync = once(async function () {
   app.events.emit('sync', { type: 'start' });
   let messages;
 

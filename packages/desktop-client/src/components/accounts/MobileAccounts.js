@@ -176,15 +176,15 @@ export class AccountList extends React.Component {
     const {
       accounts,
       updatedAccounts,
-      transactions,
-      categories,
+      // transactions,
+      // categories,
       getBalanceQuery,
       getOnBudgetBalance,
       getOffBudgetBalance,
       onAddAccount,
-      onSelectAccount,
-      onSelectTransaction,
-      refreshControl
+      onSelectAccount
+      // onSelectTransaction,
+      // refreshControl
     } = this.props;
     const budgetedAccounts = accounts.filter(
       account => account.offbudget === 0
@@ -304,15 +304,7 @@ function Accounts(props) {
     navigate(`/transaction/${transaction}`);
   };
 
-  let {
-    navigation,
-    accounts,
-    categories,
-    payees,
-    newTransactions,
-    updatedAccounts,
-    prefs
-  } = props;
+  let { accounts, categories, newTransactions, updatedAccounts, prefs } = props;
   let numberFormat = prefs.numberFormat || 'comma-dot';
 
   return (
@@ -329,7 +321,7 @@ function Accounts(props) {
         getBalanceQuery={queries.accountBalance}
         getOnBudgetBalance={queries.budgetedAccountBalance}
         getOffBudgetBalance={queries.offbudgetAccountBalance}
-        onAddAccount={() => {}} //navigation.navigate('AddAccountModal')}
+        onAddAccount={() => {}} // () => navigate('AddAccountModal')
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
         // refreshControl={

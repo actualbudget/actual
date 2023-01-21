@@ -392,11 +392,8 @@ export class FixedSizeList extends React.PureComponent {
     }
 
     if (typeof this.props.onScroll === 'function') {
-      const {
-        scrollDirection,
-        scrollOffset,
-        scrollUpdateWasRequested
-      } = this.state;
+      const { scrollDirection, scrollOffset, scrollUpdateWasRequested } =
+        this.state;
       this._callOnScroll(
         scrollDirection,
         scrollOffset,

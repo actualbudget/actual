@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
+import Loading from 'loot-design/src/svg/AnimatedLoading';
 import Key from 'loot-design/src/svg/v2/Key';
 import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
 

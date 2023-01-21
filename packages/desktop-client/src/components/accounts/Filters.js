@@ -31,7 +31,7 @@ import {
   CustomSelect
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import DeleteIcon from 'loot-design/src/svg/Delete';
+import DeleteIcon from 'loot-design/src/svg/v0/Delete';
 import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
 
 import { Value } from '../ManageRules';
@@ -182,6 +182,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
           {type === 'boolean'
             ? [
                 <OpButton
+                  key="true"
                   op="true"
                   selected={value === true}
                   onClick={() => {
@@ -190,6 +191,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
                   }}
                 />,
                 <OpButton
+                  key="false"
                   op="false"
                   selected={value === false}
                   onClick={() => {
@@ -200,6 +202,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
               ]
             : ops.map(currOp => (
                 <OpButton
+                  key={currOp}
                   op={currOp}
                   selected={currOp === op}
                   onClick={() => dispatch({ type: 'set-op', op: currOp })}
@@ -445,6 +448,7 @@ export function AppliedFilters({ filters, editingFilter, onDelete }) {
     >
       {filters.map((filter, i) => (
         <FilterExpression
+          key={i}
           customName={filter.customName}
           field={filter.field}
           op={filter.op}
