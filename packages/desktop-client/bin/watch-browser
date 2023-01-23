@@ -3,7 +3,7 @@
 ROOT=`dirname $0`
 cd "$ROOT/.."
 
-VERSION=`cat "$ROOT/../../desktop-electron/package.json" | grep version | head -n1 | awk -F "\"" '{print $4}' | tr -d '\r\n'`
+VERSION=`cat "$ROOT/../../desktop-client/package.json" | grep version | head -n1 | awk -F "\"" '{print $4}' | tr -d '\r\n'`
 
 export IS_GENERIC_BROWSER=1
 export PORT=3001

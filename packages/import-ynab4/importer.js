@@ -41,7 +41,7 @@ function sortByKey(arr, key) {
 }
 
 function groupBy(arr, keyName) {
-  return arr.reduce(function(obj, item) {
+  return arr.reduce(function (obj, item) {
     var key = item[keyName];
     if (!obj.hasOwnProperty(key)) {
       obj[key] = [];
@@ -80,8 +80,10 @@ function getCurrentMonth() {
 // Importer
 
 async function importAccounts(data, entityIdMap) {
+  const accounts = sortByKey(data.accounts, 'sortableIndex');
+
   return Promise.all(
-    data.accounts.map(async account => {
+    accounts.map(async account => {
       if (!account.isTombstone) {
         const id = await actual.createAccount({
           type: mapAccountType(account.accountType),
@@ -182,6 +184,12 @@ async function importTransactions(data, entityIdMap) {
   // reliably resolve transfers
   for (let transaction of data.transactions) {
     entityIdMap.set(transaction.entityId, uuid.v4());
+
+    if (transaction.subTransactions) {
+      for (let subTransaction of transaction.subTransactions) {
+        entityIdMap.set(subTransaction.entityId, uuid.v4());
+      }
+    }
   }
 
   let sortOrder = 1;
@@ -198,17 +206,20 @@ async function importTransactions(data, entityIdMap) {
           }
 
           let id = entityIdMap.get(transaction.entityId);
-          let transferId =
-            entityIdMap.get(transaction.transferTransactionId) || null;
 
-          let payee = null;
-          if (transferId) {
-            payee = payees.find(
-              p =>
-                p.transfer_acct === entityIdMap.get(transaction.targetAccountId)
-            ).id;
-          } else {
-            payee = entityIdMap.get(transaction.payeeId);
+          function transferProperties(t) {
+            let transferId = entityIdMap.get(t.transferTransactionId) || null;
+
+            let payee = null;
+            if (transferId) {
+              payee = payees.find(
+                p => p.transfer_acct === entityIdMap.get(t.targetAccountId)
+              ).id;
+            } else {
+              payee = entityIdMap.get(t.payeeId);
+            }
+
+            return { transfer_id: transferId, payee };
           }
 
           let newTransaction = {
@@ -219,8 +230,8 @@ async function importTransactions(data, entityIdMap) {
               : getCategory(transaction.categoryId),
             date: transaction.date,
             notes: transaction.memo || null,
-            payee,
-            transfer_id: transferId
+            cleared: transaction.cleared === 'Cleared',
+            ...transferProperties(transaction)
           };
 
           newTransaction.subtransactions =
@@ -228,7 +239,9 @@ async function importTransactions(data, entityIdMap) {
             transaction.subTransactions.map((t, i) => {
               return {
                 amount: amountToInteger(t.amount),
-                category: getCategory(t.categoryId)
+                category: getCategory(t.categoryId),
+                notes: t.memo || null,
+                ...transferProperties(t)
               };
             });
 
@@ -266,12 +279,8 @@ function fillInBudgets(data, categoryBudgets) {
 
 async function importBudgets(data, entityIdMap) {
   let budgets = sortByKey(data.monthlyBudgets, 'month');
-  let earliestMonth = monthFromDate(budgets[0].month);
-  let currentMonth = getCurrentMonth();
 
   await actual.batchBudgetUpdates(async () => {
-    const carryoverFlags = {};
-
     for (let budget of budgets) {
       let filled = fillInBudgets(
         data,
@@ -290,17 +299,8 @@ async function importBudgets(data, entityIdMap) {
           await actual.setBudgetAmount(month, catId, amount);
 
           if (catBudget.overspendingHandling === 'AffectsBuffer') {
-            // Turn off the carryover flag so it doesn't propagate
-            // to future months
-            carryoverFlags[catId] = false;
-          } else if (
-            catBudget.overspendingHandling === 'Confined' ||
-            carryoverFlags[catId]
-          ) {
-            // Overspending has switched to carryover, set the
-            // flag so it propagates to future months
-            carryoverFlags[catId] = true;
-
+            await actual.setBudgetCarryover(month, catId, false);
+          } else if (catBudget.overspendingHandling === 'Confined') {
             await actual.setBudgetCarryover(month, catId, true);
           }
         })

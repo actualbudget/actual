@@ -37,7 +37,7 @@ import useSelected, {
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
-import ArrowRight from 'loot-design/src/svg/RightArrow2';
+import ArrowRight from 'loot-design/src/svg/v0/RightArrow2';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
@@ -588,20 +588,29 @@ export default function ManageRules({
   }, []);
 
   function onCreateRule() {
+    let rule = {
+      stage: null,
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: payeeId || null,
+          type: 'id'
+        }
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: null,
+          type: 'id'
+        }
+      ]
+    };
+
     dispatch(
       pushModal('edit-rule', {
-        rule: {
-          stage: null,
-          conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
-          actions: [
-            {
-              op: 'set',
-              field: 'category',
-              value: null,
-              type: 'id'
-            }
-          ]
-        },
+        rule,
         onSave: async newRule => {
           let newRules = await loadRules();
 

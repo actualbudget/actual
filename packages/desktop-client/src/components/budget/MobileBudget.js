@@ -12,7 +12,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { View } from 'loot-design/src/components/common';
 import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
 import { colors } from 'loot-design/src/style';
-import AnimatedLoading from 'loot-design/src/svg/v1/AnimatedLoading';
+import AnimatedLoading from 'loot-design/src/svg/AnimatedLoading';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import SyncRefresh from '../SyncRefresh';
@@ -230,8 +230,7 @@ class Budget extends React.Component {
   };
 
   render() {
-    const { currentMonth, bounds, editMode, initialized, showBudgetDetails } =
-      this.state;
+    const { currentMonth, bounds, editMode, initialized } = this.state;
     const {
       categories,
       categoryGroups,

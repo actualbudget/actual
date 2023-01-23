@@ -1,12 +1,9 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { RectButton } from 'react-native-gesture-handler';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router';
-import { withRouter } from 'react-router-dom';
 
 import { css } from 'glamor';
 
-import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import Platform from 'loot-core/src/client/platform';
 
 import { styles, colors } from '../style';
@@ -14,8 +11,6 @@ import Add from '../svg/v1/Add';
 import CheveronDown from '../svg/v1/CheveronDown';
 import CheveronRight from '../svg/v1/CheveronRight';
 import Cog from '../svg/v1/Cog';
-import DotsHorizontalTriple from '../svg/v1/DotsHorizontalTriple';
-import LoadBalancer from '../svg/v1/LoadBalancer';
 import Reports from '../svg/v1/Reports';
 import StoreFrontIcon from '../svg/v1/StoreFront';
 import TuningIcon from '../svg/v1/Tuning';
@@ -28,9 +23,7 @@ import {
   AlignedText,
   AnchorLink,
   ButtonLink,
-  Button,
-  Menu,
-  Tooltip
+  Button
 } from './common';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CellValue from './spreadsheet/CellValue';
@@ -231,7 +224,6 @@ function Account({
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
           <AnchorLink
-            ref={dragRef}
             to={to}
             style={[
               accountNameStyle,
@@ -447,68 +439,12 @@ function ToggleButton({ style, onFloat }) {
   );
 }
 
-const MenuButton = withRouter(function MenuButton({ history }) {
-  let dispatch = useDispatch();
-  let [menuOpen, setMenuOpen] = useState(false);
-
-  function onMenuSelect(type) {
-    setMenuOpen(false);
-
-    switch (type) {
-      case 'settings':
-        history.push('/settings');
-        break;
-      case 'help':
-        window.open('https://actualbudget.github.io/docs', '_blank');
-        break;
-      case 'close':
-        dispatch(closeBudget());
-        break;
-      default:
-    }
-  }
-
-  let items = [
-    { name: 'settings', text: 'Settings' },
-    { name: 'help', text: 'Help' },
-    { name: 'close', text: 'Close File' }
-  ];
-
-  return (
-    <Button
-      bare
-      style={{
-        color: colors.n5,
-        flexShrink: 0
-      }}
-      activeStyle={{ color: colors.p7 }}
-      onClick={() => setMenuOpen(true)}
-      aria-label="Menu"
-    >
-      <DotsHorizontalTriple
-        width={15}
-        height={15}
-        style={{ color: 'inherit', transform: 'rotateZ(0deg)' }}
-      />
-      {menuOpen && (
-        <Tooltip
-          position="bottom-right"
-          style={{ padding: 0 }}
-          onClose={() => setMenuOpen(false)}
-        >
-          <Menu onMenuSelect={onMenuSelect} items={items} />
-        </Tooltip>
-      )}
-    </Button>
-  );
-});
-
 function Tools() {
   let [isOpen, setOpen] = useState(false);
   let onToggle = useCallback(() => setOpen(open => !open), []);
   let location = useLocation();
 
-  const isActive = ['/payees', '/rules', '/tools'].some(route =>
+  const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
     location.pathname.startsWith(route)
   );
 
@@ -542,9 +478,9 @@ function Tools() {
             indent={15}
           />
           <SecondaryItem
-            title="Repair split transactions"
-            Icon={LoadBalancer}
-            to="/tools/fix-splits"
+            title="Settings"
+            Icon={Cog}
+            to="/settings"
             indent={15}
           />
         </>
@@ -645,7 +581,6 @@ export function Sidebar({
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
         {!hasWindowButtons && <ToggleButton onFloat={onFloat} />}
-        {Platform.isBrowser && <MenuButton />}
       </View>
 
       <View style={{ overflow: 'auto' }}>

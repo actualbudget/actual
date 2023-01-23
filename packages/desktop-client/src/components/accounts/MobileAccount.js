@@ -181,6 +181,7 @@ function Account(props) {
     setSearchText(text);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const onSelectTransaction = transaction => {
     if (isPreviewId(transaction.id)) {
       let parts = transaction.id.split('/');

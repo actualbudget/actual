@@ -5,7 +5,7 @@ import { scope } from '@jlongster/lively';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { styles, colors } from '../../style';
-import ExpandArrow from '../../svg/ExpandArrow';
+import ExpandArrow from '../../svg/v0/ExpandArrow';
 import ArrowThinLeft from '../../svg/v1/ArrowThinLeft';
 import ArrowThinRight from '../../svg/v1/ArrowThinRight';
 import CheveronDown from '../../svg/v1/CheveronDown';
