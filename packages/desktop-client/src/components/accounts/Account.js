@@ -177,7 +177,7 @@ function ReconcilingMessage({
         {targetDiff !== 0 && (
           <View style={{ marginLeft: 15 }}>
             <Button onClick={() => onCreateTransaction(targetDiff)}>
-              Create Reconciliation Transation
+              Create Reconciliation Transaction
             </Button>
           </View>
         )}
