@@ -92,6 +92,7 @@ export default function SelectLinkedAccounts({
   ];
 
   useEffect(() => {
+    const chosenAccountsToAdd = [];
     importedAccountsToSelect.forEach(importedAccount => {
       // Try to auto-mach accounts based on account_id or mask
       // Add matched accounts to list of selected accounts
@@ -105,15 +106,18 @@ export default function SelectLinkedAccounts({
       );
 
       if (matchedActualAccount) {
-        setChosenAccounts([
-          ...chosenAccounts,
+        chosenAccountsToAdd.push(
           {
             chosenImportedAccountId: importedAccount.account_id,
             chosenActualAccountId: matchedActualAccount.id
-          }
-        ]);
+          })
       }
     });
+
+    setChosenAccounts([
+      ...chosenAccounts,
+      ...chosenAccountsToAdd,
+    ]);
   }, []);
 
   let [selectedImportAccountId, setSelectedImportAccountId] = useState(
