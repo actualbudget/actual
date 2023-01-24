@@ -1176,8 +1176,10 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   // No more accounts are associated with this bank. We can remove
   // it from Nordigen.
   if (count === 0) {
+    let { bank_id: requisitionId } = await db.first('SELECT bank_id FROM banks WHERE id = ?',
+      [bankId])
     await post(getServer().NORDIGEN_SERVER + '/remove-account', {
-      requisitionId: bankId
+      requisitionId: requisitionId
     });
   }
 
