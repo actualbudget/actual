@@ -51,7 +51,7 @@ export default function GenericInput({
                 accounts={accounts}
                 multi={multi}
                 showMakeTransfer={false}
-                openOnFocus={false}
+                openOnFocus={true}
                 value={value}
                 onSelect={onChange}
                 inputProps={{
@@ -69,7 +69,7 @@ export default function GenericInput({
               accounts={accounts}
               value={value}
               multi={multi}
-              openOnFocus={false}
+              openOnFocus={true}
               onSelect={onChange}
               inputProps={{
                 inputRef,
@@ -85,7 +85,7 @@ export default function GenericInput({
               categoryGroups={categoryGroups}
               value={value}
               multi={multi}
-              openOnFocus={false}
+              openOnFocus={true}
               onSelect={onChange}
               inputProps={{
                 inputRef,
