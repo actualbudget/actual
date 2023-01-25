@@ -7,10 +7,7 @@ import {
 
 import * as monthUtils from '../../shared/months';
 import { safeNumber } from '../../shared/util';
-import {
-  amountToInteger,
-  integerToAmount
-} from '../../shared/util';
+import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
