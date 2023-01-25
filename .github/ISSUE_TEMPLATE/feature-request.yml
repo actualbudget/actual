@@ -9,6 +9,12 @@ body:
       value: |
         Thanks for taking the time to fill out this feature request! Please ensure you provide as much information as possible so we can better understand what you want us to add and so we can come up with the best solution for everyone.
   - type: checkboxes
+    attributes:
+      label: '💻'
+      description: (Optional) Please check this box if you’re willing to open a PR to implement this feature. We’ll help you get started and answer any questions you have along the way :)
+      options:
+        - label: Would you like to implement this feature?
+  - type: checkboxes
     id: existing-issue
     attributes:
       label: 'Verified feature request does not already exist?'
