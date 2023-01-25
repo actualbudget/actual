@@ -38,3 +38,10 @@ body:
       description: Feel free to give multiple different ideas for how the problem could be solved — we’d love to have a discussion to find the best way to solve your problem and related problems others may face! (Or leave this blank if you don’t have a solution in mind yet.)
     validations:
       required: false
+  - type: textarea
+    id: learning
+    attributes:
+      label: Teaching and learning
+      description: How can we make sure future users find and enjoy this feature? (i.e. how do we make it discoverable? what kind of documentation should we write? are there aspects of the feature that could trip up users?)
+    validations:
+      required: false
