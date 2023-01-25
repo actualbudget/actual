@@ -7,14 +7,15 @@ body:
     id: intro-md
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report! Please ensure you provide as much information as asked to better assist in confirming and identifying a fix for the bug report.
-  - type: dropdown
+        Thanks for taking the time to fill out this bug report! Please ensure you provide as much information as possible to better assist in confirming and identifying a fix for the bug.
+  - type: checkboxes
     id: existing-issue
     attributes:
       label: 'Verified issue does not already exist?'
       description: 'Please search to see if an issue already exists for the issue you encountered.'
       options:
-        - 'I have searched and found no existing issue'
+        - label: 'I have searched and found no existing issue'
+          required: true
     validations:
       required: true
   - type: textarea
