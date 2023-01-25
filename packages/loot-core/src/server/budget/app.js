@@ -2,6 +2,7 @@ import { createApp } from '../app';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
 import * as actions from './actions';
+import * as goalActions from './goaltemplates';
 
 let app = createApp();
 
@@ -12,10 +13,13 @@ app.method(
 );
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
 app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
-app.method('budget/apply-template', mutator(undoable(actions.applyTemplate)));
 app.method(
-  'budget/overwrite-template',
-  mutator(undoable(actions.overwriteTemplate))
+  'budget/apply-goal-template',
+  mutator(undoable(goalActions.applyTemplate))
+);
+app.method(
+  'budget/overwrite-goal-template',
+  mutator(undoable(goalActions.overwriteTemplate))
 );
 app.method(
   'budget/hold-for-next-month',

@@ -242,11 +242,6 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
   );
 }
 
-let goalTemplatesEnabled = false;
-export function experimentGoalsRollover(value) {
-  goalTemplatesEnabled = value;
-}
-
 export default React.memo(function BudgetSummary({ month }) {
   let {
     currentMonth,
@@ -267,6 +262,9 @@ export default React.memo(function BudgetSummary({ month }) {
   let prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
+
+  let goalTemplatesEnabled = true;
+  //let goalTemplatesEnabled = prefs['flags.goalTemplatesEnabled'];
 
   return (
     <View
@@ -379,12 +377,12 @@ export default React.memo(function BudgetSummary({ month }) {
                         text: 'Set budgets to 3 month avg'
                       },
                       goalTemplatesEnabled && {
-                        name: 'apply-template',
+                        name: 'apply-goal-template',
                         text: 'Apply budget template'
                       },
                       goalTemplatesEnabled && {
-                        name: 'overwrite-template',
-                        text: 'Overwrite with template'
+                        name: 'overwrite-goal-template',
+                        text: 'Overwrite with budget template'
                       }
                     ]}
                   />

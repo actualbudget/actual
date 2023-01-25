@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { experimentGoalsRollover } from 'loot-design/src/components/budget/rollover/BudgetSummary';
 import { Link, Text, View } from 'loot-design/src/components/common';
 import { Checkbox } from 'loot-design/src/components/forms';
 import { colors } from 'loot-design/src/style';
@@ -58,12 +57,11 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             <label style={{ display: 'flex' }}>
               <Checkbox
                 id="goal-templates-flag"
-                checked={!flags.goalTemplatesEnabled}
+                checked={flags.goalTemplatesEnabled}
                 onChange={() => {
                   savePrefs({
                     'flags.goalTemplatesEnabled': !flags.goalTemplatesEnabled
                   });
-                  experimentGoalsRollover(flags.goalTemplatesEnabled);
                 }}
               />{' '}
               <View>Enable Goal Templates</View>

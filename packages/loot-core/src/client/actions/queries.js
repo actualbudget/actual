@@ -24,11 +24,11 @@ export function applyBudgetAction(month, type, args) {
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
         break;
-      case 'apply-template':
-        await send('budget/apply-template', { month });
+      case 'apply-goal-template':
+        await send('budget/apply-goal-template', { month });
         break;
-      case 'overwrite-template':
-        await send('budget/overwrite-template', { month });
+      case 'overwrite-goal-template':
+        await send('budget/overwrite-goal-template', { month });
         break;
       case 'hold':
         await send('budget/hold-for-next-month', {
