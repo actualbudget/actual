@@ -51,6 +51,7 @@ Actions can set the following fields:
 * amount
 * category
 * account
+* cleared
 
 ## Automatic rules
 
