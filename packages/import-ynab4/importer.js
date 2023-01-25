@@ -41,7 +41,7 @@ function sortByKey(arr, key) {
 }
 
 function groupBy(arr, keyName) {
-  return arr.reduce(function(obj, item) {
+  return arr.reduce(function (obj, item) {
     var key = item[keyName];
     if (!obj.hasOwnProperty(key)) {
       obj[key] = [];
@@ -208,20 +208,18 @@ async function importTransactions(data, entityIdMap) {
           let id = entityIdMap.get(transaction.entityId);
 
           function transferProperties(t) {
-            let transferId =
-             entityIdMap.get(t.transferTransactionId) || null;
+            let transferId = entityIdMap.get(t.transferTransactionId) || null;
 
             let payee = null;
             if (transferId) {
               payee = payees.find(
-                p =>
-                  p.transfer_acct === entityIdMap.get(t.targetAccountId)
+                p => p.transfer_acct === entityIdMap.get(t.targetAccountId)
               ).id;
             } else {
               payee = entityIdMap.get(t.payeeId);
             }
 
-            return { transfer_id: transferId, payee }
+            return { transfer_id: transferId, payee };
           }
 
           let newTransaction = {
@@ -232,7 +230,8 @@ async function importTransactions(data, entityIdMap) {
               : getCategory(transaction.categoryId),
             date: transaction.date,
             notes: transaction.memo || null,
-            ...transferProperties(transaction),
+            cleared: transaction.cleared === 'Cleared',
+            ...transferProperties(transaction)
           };
 
           newTransaction.subtransactions =
@@ -242,8 +241,8 @@ async function importTransactions(data, entityIdMap) {
                 amount: amountToInteger(t.amount),
                 category: getCategory(t.categoryId),
                 notes: t.memo || null,
-                ...transferProperties(t),
-          };
+                ...transferProperties(t)
+              };
             });
 
           return newTransaction;
