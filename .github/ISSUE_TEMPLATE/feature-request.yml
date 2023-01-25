@@ -1,0 +1,34 @@
+name: Feature request
+description: Request a missing feature
+title: '[Feature] '
+labels: ['feature', 'needs triage']
+body:
+  - type: markdown
+    id: intro-md
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request! Please ensure you provide as much information as possible so we can better understand what you want us to add and so we can come up with the best solution for everyone.
+  - type: checkboxes
+    id: existing-issue
+    attributes:
+      label: 'Verified feature request does not already exist?'
+      description: 'Please search to see if an issue already exists for the feature you have requested.'
+      options:
+        - label: 'I have searched and found no existing issue'
+          required: true
+    validations:
+      required: true
+  - type: textarea
+    id: pitch
+    attributes:
+      label: 'Pitch: what problem are you trying to solve?'
+      description: Please concisely describe the problem that motivated your feature request.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you’d like.
+      description: Feel free to give multiple different ideas for how the problem could be solved — we’d love to have a discussion to find the best way to solve your problem and related problems others may face! (Or leave this blank if you don’t have a solution in mind yet.)
+    validations:
+      required: false
