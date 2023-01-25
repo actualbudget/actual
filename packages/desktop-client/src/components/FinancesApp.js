@@ -30,6 +30,7 @@ import Wallet from 'loot-design/src/svg/v1/Wallet';
 
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
+
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
 import { default as MobileAccounts } from './accounts/MobileAccounts';

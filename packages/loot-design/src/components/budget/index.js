@@ -27,6 +27,7 @@ import {
 } from '../sort.js';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import { Row, InputCell, ROW_HEIGHT } from '../table';
+
 import BudgetSummaries from './BudgetSummaries';
 import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
 import { MonthsProvider, MonthsContext } from './MonthsContext';

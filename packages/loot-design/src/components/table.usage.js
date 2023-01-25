@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Section, Component } from '../guide/components';
+
 import { View, Text } from './common';
 import {
   TableWithNavigator as Table,

@@ -26,6 +26,7 @@ import {
   addToBeBudgetedGroup,
   CategoryGroupsContext
 } from '../util';
+
 import TransferTooltip from './TransferTooltip';
 
 export BudgetSummary from './BudgetSummary';
