@@ -8,7 +8,6 @@ import {
 import * as monthUtils from '../../shared/months';
 import { safeNumber } from '../../shared/util';
 import {
-  groupBySingle,
   amountToInteger,
   integerToAmount
 } from '../../shared/util';

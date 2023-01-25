@@ -47,7 +47,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
 
             <label style={{ display: 'flex' }}>
               <Checkbox
-                id="report-budget-flag"
+                id="sync-account-flag"
                 checked={flags.syncAccount}
                 onChange={() => {
                   savePrefs({ 'flags.syncAccount': !flags.syncAccount });
@@ -57,7 +57,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             </label>
             <label style={{ display: 'flex' }}>
               <Checkbox
-                id="report-budget-flag"
+                id="goal-templates-flag"
                 checked={!flags.goalTemplatesEnabled}
                 onChange={() => {
                   savePrefs({
