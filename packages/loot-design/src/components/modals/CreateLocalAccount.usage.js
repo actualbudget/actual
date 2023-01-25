@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Section, TestModal } from '../../guide/components';
+
 import CreateLocalAccount from './CreateLocalAccount';
 
 export default () => (

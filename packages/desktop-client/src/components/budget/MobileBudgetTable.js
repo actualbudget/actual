@@ -39,6 +39,7 @@ import ArrowThinRight from 'loot-design/src/svg/v1/ArrowThinRight';
 
 import { SyncButton } from '../Titlebar';
 import { AmountInput } from '../util/AmountInput';
+
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 export function ToBudget({ toBudget, onClick }) {

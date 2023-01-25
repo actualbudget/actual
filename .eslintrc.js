@@ -25,7 +25,8 @@ module.exports = {
         groups: [
           'builtin', // Built-in types are first
           'external',
-          ['sibling', 'parent'], // Then sibling and parent types. They can be mingled together
+          'parent',
+          'sibling',
           'index' // Then the index file
         ],
         'newlines-between': 'always',

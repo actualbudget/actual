@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Section } from '../guide/components';
+
 import { Button, View } from './common';
 import RecurringSchedulePicker from './RecurringSchedulePicker';
 import { useTooltip } from './tooltips';

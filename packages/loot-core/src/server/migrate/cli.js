@@ -1,5 +1,6 @@
 #!/usr/bin/env node --trace-warnings
 import * as sqlite from '../../platform/server/sqlite';
+
 import {
   getMigrationsDir,
   withMigrationsDir,

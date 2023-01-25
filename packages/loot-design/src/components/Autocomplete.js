@@ -6,6 +6,7 @@ import { css } from 'glamor';
 
 import { colors } from '../style';
 import Remove from '../svg/v2/Remove';
+
 import { View, Input, Tooltip, Button } from './common';
 
 function findItem(strict, suggestions, value) {

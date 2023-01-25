@@ -8,6 +8,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../style';
 import CustomNotesPaper from '../svg/v2/CustomNotesPaper';
+
 import { View, Button, Tooltip, useTooltip } from './common';
 
 export function NotesTooltip({
