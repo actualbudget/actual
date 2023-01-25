@@ -337,7 +337,7 @@ export class BudgetCategory extends React.PureComponent {
       </ListItem>
     );
 
-    return <div>{() => content}</div>;
+    return <div>{content}</div>;
     // <Draggable
     //   id={category.id}
     //   type="category"
