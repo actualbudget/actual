@@ -48,9 +48,9 @@ import {
   useSelectedItems
 } from 'loot-design/src/components/useSelected';
 import { styles, colors } from 'loot-design/src/style';
+import Loading from 'loot-design/src/svg/AnimatedLoading';
 import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
 import Add from 'loot-design/src/svg/v1/Add';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
 import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
 import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
 import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
