@@ -49,7 +49,7 @@ import {
 } from 'loot-design/src/components/useSelected';
 import { styles, colors } from 'loot-design/src/style';
 import Loading from 'loot-design/src/svg/AnimatedLoading';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 import Add from 'loot-design/src/svg/v1/Add';
 import ArrowsExpand3 from 'loot-design/src/svg/v2/ArrowsExpand3';
 import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
