@@ -19,6 +19,7 @@ import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
 import * as undo from '../undo';
+
 import * as encoder from './encoder';
 import { rebuildMerkleHash } from './repair';
 

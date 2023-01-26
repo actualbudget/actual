@@ -13,6 +13,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { View } from '../common';
 import useResizeObserver from '../useResizeObserver';
+
 import { MonthsContext } from './MonthsContext';
 
 export default function BudgetSummaries({ SummaryComponent }) {

@@ -4,7 +4,7 @@ import { css } from 'glamor';
 
 import { View, Block } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
-import AnimatedLoading from 'loot-design/src/svg/v1/AnimatedLoading';
+import AnimatedLoading from 'loot-design/src/svg/AnimatedLoading';
 
 import Background from './Background';
 

@@ -60,6 +60,7 @@ import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 import { authorizeBank } from '../../plaid';
 import { useActiveLocation } from '../ActiveLocation';
 import AnimatedRefresh from '../AnimatedRefresh';
+
 import { FilterButton, AppliedFilters } from './Filters';
 import TransactionList from './TransactionList';
 import {
@@ -176,7 +177,7 @@ function ReconcilingMessage({
         {targetDiff !== 0 && (
           <View style={{ marginLeft: 15 }}>
             <Button onClick={() => onCreateTransaction(targetDiff)}>
-              Create Reconciliation Transation
+              Create Reconciliation Transaction
             </Button>
           </View>
         )}

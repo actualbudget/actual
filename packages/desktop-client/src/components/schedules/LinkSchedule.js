@@ -6,6 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { Text } from 'loot-design/src/components/common';
 
 import { Page } from '../Page';
+
 import { SchedulesTable } from './SchedulesTable';
 
 export default function ScheduleLink() {

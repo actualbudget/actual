@@ -6,6 +6,7 @@ import { groupById } from '../../../shared/util';
 import { setClock } from '../../crdt';
 import * as db from '../../db';
 import { batchMessages, setSyncingMode } from '../../sync/index';
+
 import { isHappyPathQuery } from './executors';
 import { runQuery } from './run-query';
 

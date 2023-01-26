@@ -79,7 +79,7 @@ export default function TransferTooltip({
       <CategoryAutocomplete
         categoryGroups={categoryGroups}
         value={null}
-        openOnFocus={false}
+        openOnFocus={true}
         onUpdate={id => {}}
         onSelect={id => setCategory(id)}
         inputProps={{

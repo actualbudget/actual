@@ -1,5 +1,3 @@
-/* global globalThis */
-
 export function captureException(exc) {
   console.log('[Exception]', exc);
 }

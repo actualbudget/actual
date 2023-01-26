@@ -37,7 +37,7 @@ import useSelected, {
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
-import ArrowRight from 'loot-design/src/svg/RightArrow2';
+import ArrowRight from 'loot-design/src/svg/v0/RightArrow2';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
