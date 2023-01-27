@@ -33,7 +33,7 @@ export function NotesTooltip({
           ref={inputRef}
           {...css({
             border: '1px solid ' + colors.border,
-            padding: 8,
+            padding: 7,
             minWidth: 300,
             minHeight: 120,
             outline: 'none'
