@@ -9,3 +9,12 @@ user-files
 server-files
 fly.toml
 build/
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
