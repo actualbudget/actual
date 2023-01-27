@@ -90,17 +90,24 @@ export async function addTransfer(transaction, transferredAccount) {
 
 export async function removeTransfer(transaction) {
   let transferTrans = await db.getTransaction(transaction.transfer_id);
-  if (transferTrans.is_child) {
-    // If it's a child transaction, we don't delete it because that
-    // would invalidate the whole split transaction. Instead of turn
-    // it into a normal transaction
-    await db.updateTransaction({
-      id: transaction.transfer_id,
-      transfer_id: null,
-      payee: null
-    });
-  } else {
-    await db.deleteTransaction({ id: transaction.transfer_id });
+
+  // Perform operations on the transfer transaction only
+  // if it is found. For example: when users delete both
+  // (in & out) transfer transactions at the same time -
+  // transfer transaction will not be found.
+  if (transferTrans) {
+    if (transferTrans.is_child) {
+      // If it's a child transaction, we don't delete it because that
+      // would invalidate the whole split transaction. Instead of turn
+      // it into a normal transaction
+      await db.updateTransaction({
+        id: transaction.transfer_id,
+        transfer_id: null,
+        payee: null
+      });
+    } else {
+      await db.deleteTransaction({ id: transaction.transfer_id });
+    }
   }
   await db.updateTransaction({ id: transaction.id, transfer_id: null });
   return { id: transaction.id, transfer_id: null };

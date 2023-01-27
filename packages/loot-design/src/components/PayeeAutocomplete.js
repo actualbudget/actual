@@ -8,6 +8,7 @@ import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import { colors } from '../style';
 import Add from '../svg/v1/Add';
+
 import Autocomplete, {
   defaultFilterSuggestion,
   AutocompleteFooter,

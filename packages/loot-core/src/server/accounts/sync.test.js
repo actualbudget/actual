@@ -2,6 +2,7 @@ import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { getServer } from '../server-config';
+
 import {
   syncAccount,
   reconcileTransactions,

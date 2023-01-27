@@ -4,6 +4,7 @@ let IndexedDBBackend = require('absurd-sql/dist/indexeddb-backend').default;
 let connection = require('../connection');
 let idb = require('../indexeddb');
 let { _getModule } = require('../sqlite');
+
 let baseAPI = require('./index.electron.js');
 let join = require('./path-join');
 

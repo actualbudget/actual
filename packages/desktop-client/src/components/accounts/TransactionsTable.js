@@ -296,7 +296,14 @@ function getPayeePretty(transaction, payee, transferAcct) {
         }}
       >
         <Icon width={10} height={8} style={{ marginRight: 5, flexShrink: 0 }} />
-        <div>{transferAcct.name}</div>
+        <div
+          style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {transferAcct.name}
+        </div>
       </View>
     );
   } else if (payee && !payee.transfer_acct) {
@@ -409,7 +416,6 @@ function PayeeCell({
       valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
       formatter={value => getPayeePretty(transaction, payee, transferAcct)}
       exposed={focused}
-      title={importedPayee || payeeId}
       onExpose={!isPreview && (name => onEdit(id, name))}
       onUpdate={async value => {
         onUpdate('payee', value);

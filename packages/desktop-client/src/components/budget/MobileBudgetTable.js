@@ -39,6 +39,7 @@ import ArrowThinRight from 'loot-design/src/svg/v1/ArrowThinRight';
 
 import { SyncButton } from '../Titlebar';
 import { AmountInput } from '../util/AmountInput';
+
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 export function ToBudget({ toBudget, onClick }) {
@@ -336,7 +337,7 @@ export class BudgetCategory extends React.PureComponent {
       </ListItem>
     );
 
-    return <div>{() => content}</div>;
+    return <div>{content}</div>;
     // <Draggable
     //   id={category.id}
     //   type="category"

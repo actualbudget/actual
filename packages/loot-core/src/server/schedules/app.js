@@ -28,6 +28,7 @@ import * as prefs from '../prefs';
 import { addSyncListener, batchMessages } from '../sync';
 import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
+
 import { findSchedules } from './find-schedules';
 
 const connection = require('../../platform/server/connection');

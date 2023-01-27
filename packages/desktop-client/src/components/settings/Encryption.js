@@ -4,6 +4,7 @@ import { Text, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
 import { useServerURL } from '../../hooks/useServerURL';
+
 import { Setting } from './UI';
 
 export default function EncryptionSettings({ prefs, pushModal }) {

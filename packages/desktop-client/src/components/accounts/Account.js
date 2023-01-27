@@ -61,6 +61,7 @@ import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 import { authorizeBank } from '../../plaid';
 import { useActiveLocation } from '../ActiveLocation';
 import AnimatedRefresh from '../AnimatedRefresh';
+
 import { FilterButton, AppliedFilters } from './Filters';
 import TransactionList from './TransactionList';
 import {

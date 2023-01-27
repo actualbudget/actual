@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Section, TestModal } from '../../guide/components';
+
 import ConfigureLinkedAccounts from './ConfigureLinkedAccounts';
 
 export default () => (

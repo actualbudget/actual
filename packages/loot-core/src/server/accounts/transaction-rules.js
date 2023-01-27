@@ -18,6 +18,7 @@ import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
 import { setSyncingMode, batchMessages } from '../sync';
 import { addSyncListener } from '../sync/index';
+
 import {
   Condition,
   Action,

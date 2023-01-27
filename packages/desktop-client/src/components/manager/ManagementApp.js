@@ -12,6 +12,7 @@ import tokens from 'loot-design/src/tokens';
 import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
+
 import ConfigServer from './ConfigServer';
 import Modals from './Modals';
 import ServerURL from './ServerURL';

@@ -19,6 +19,7 @@ import DeleteIcon from '../svg/v0/Delete';
 import ExpandArrow from '../svg/v0/ExpandArrow';
 import Checkmark from '../svg/v1/Checkmark';
 import { keys } from '../util/keys';
+
 import {
   View,
   Text,

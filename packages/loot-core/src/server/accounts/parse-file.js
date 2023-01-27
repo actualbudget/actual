@@ -3,6 +3,7 @@ import csv2json from 'csv-parse/lib/sync';
 import fs from '../../platform/server/fs';
 import { dayFromDate } from '../../shared/months';
 import { looselyParseAmount } from '../../shared/util';
+
 import qif2json from './qif2json';
 
 export function parseFile(filepath, options) {

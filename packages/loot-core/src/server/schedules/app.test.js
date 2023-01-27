@@ -4,6 +4,7 @@ import q from '../../shared/query';
 import { loadRules, updateRule } from '../accounts/transaction-rules';
 import { runQuery as aqlQuery } from '../aql';
 import { loadMappings } from '../db/mappings';
+
 import {
   updateConditions,
   getNextDate,

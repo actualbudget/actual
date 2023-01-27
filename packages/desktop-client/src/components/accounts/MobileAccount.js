@@ -23,6 +23,7 @@ import { colors } from 'loot-design/src/style';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import SyncRefresh from '../SyncRefresh';
+
 import { default as AccountDetails } from './MobileAccountDetails';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
