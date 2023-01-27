@@ -1,11 +1,12 @@
 let path = require('path');
+
 let webpack = require('webpack');
 
+let browser = require('./webpack.browser.config');
+
 module.exports = {
-  mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
+  ...browser,
   target: 'node',
-  entry: path.join(__dirname, '../src/server/main.js'),
-  context: path.resolve(__dirname, '../../..'),
   devtool: 'source-map',
   output: {
     path: path.resolve(path.join(__dirname, '/../lib-dist')),
@@ -26,19 +27,6 @@ module.exports = {
     'node-fetch',
     'node-libofx'
   ],
-  module: {
-    rules: [
-      {
-        test: /\.m?js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['babel-preset-jwl-app']
-          }
-        }
-      }
-    ]
-  },
   plugins: [
     new webpack.IgnorePlugin({
       resourceRegExp: /original-fs/

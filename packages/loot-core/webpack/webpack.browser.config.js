@@ -1,4 +1,5 @@
 let path = require('path');
+
 let webpack = require('webpack');
 
 module.exports = {
@@ -60,8 +61,8 @@ module.exports = {
     })
   ],
   node: {
-    dgram: "empty",
+    dgram: 'empty',
     net: 'empty',
-    tls: 'empty',
-  },
+    tls: 'empty'
+  }
 };
