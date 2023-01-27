@@ -10,7 +10,11 @@ import { Setting } from './UI';
 export default function ExportBudget({ prefs }) {
   async function onExport() {
     let data = await send('export-budget');
-    window.Actual.saveFile(data, `${format(new Date(), 'MM-dd-yyyy')}-${prefs.id}.zip`, 'Export budget');
+    window.Actual.saveFile(
+      data,
+      `${format(new Date(), 'MM-dd-yyyy')}-${prefs.id}.zip`,
+      'Export budget'
+    );
   }
 
   return (
