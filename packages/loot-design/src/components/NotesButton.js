@@ -47,7 +47,8 @@ export function NotesTooltip({
             display: 'block',
             maxWidth: 225,
             padding: 8,
-            whiteSpace: 'pre-wrap'
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all'
           })}
         >
           {notes}
