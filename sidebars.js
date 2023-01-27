@@ -46,6 +46,7 @@ const sidebars = {
           },
           items: [
             'Installing/Docker',
+            'Installing/DockerWithNginx',
             'Installing/Unraid',
             {
               type: 'category',
