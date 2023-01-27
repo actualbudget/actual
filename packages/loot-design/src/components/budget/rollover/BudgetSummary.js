@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
 import Component from '@reactions/component';
 import { css } from 'glamor';
@@ -6,6 +8,7 @@ import { css } from 'glamor';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import * as actions from '../../../../../loot-core/src/client/actions';
 import { colors, styles } from '../../../style';
 import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
@@ -242,7 +245,7 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
   );
 }
 
-export default React.memo(function BudgetSummary({ month }) {
+function BudgetSummary({ month, localPrefs }) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -263,8 +266,7 @@ export default React.memo(function BudgetSummary({ month }) {
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
 
-  let goalTemplatesEnabled = true;
-  //let goalTemplatesEnabled = prefs['flags.goalTemplatesEnabled'];
+  let goalTemplatesEnabled = localPrefs['flags.goalTemplatesEnabled'];
 
   return (
     <View
@@ -420,4 +422,8 @@ export default React.memo(function BudgetSummary({ month }) {
       </NamespaceContext.Provider>
     </View>
   );
-});
+}
+
+export default withRouter(
+  connect(state => ({ localPrefs: state.prefs.local }), actions)(BudgetSummary)
+);
