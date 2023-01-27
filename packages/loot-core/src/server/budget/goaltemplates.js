@@ -8,6 +8,7 @@ import {
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
+
 import { setBudget, getSheetValue } from './actions';
 
 export async function applyTemplate({ month }) {
