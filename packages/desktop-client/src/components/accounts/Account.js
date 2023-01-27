@@ -18,6 +18,7 @@ import {
   deleteTransaction,
   updateTransaction,
   realizeTempTransactions,
+  ungroupTransaction,
   ungroupTransactions
 } from 'loot-core/src/shared/transactions';
 import {
@@ -69,6 +70,7 @@ import {
   useSplitsExpanded,
   isPreviewId
 } from './TransactionsTable';
+import { v4Sync } from 'loot-core/src/platform/uuid/index.web';
 
 function EmptyMessage({ onAdd }) {
   return (
@@ -464,6 +466,7 @@ function SelectedTransactionsButton({
   style,
   getTransaction,
   onShow,
+  onDuplicate,
   onDelete,
   onEdit,
   onUnlink,
@@ -478,6 +481,14 @@ function SelectedTransactionsButton({
       preview: !!items.find(id => isPreviewId(id)),
       trans: !!items.find(id => !isPreviewId(id))
     };
+  }, [selectedItems]);
+
+  let ambiguousDuplication = useMemo(() => {
+    let transactions = [...selectedItems].map(id => getTransaction(id));
+
+    return (
+      transactions.some(t => t.is_parent) && transactions.some(t => t.is_child)
+    );
   }, [selectedItems]);
 
   let linked = useMemo(() => {
@@ -513,6 +524,11 @@ function SelectedTransactionsButton({
             ]
           : [
               { name: 'show', text: 'Show', key: 'F' },
+              {
+                name: 'duplicate',
+                text: 'Duplicate',
+                disabled: ambiguousDuplication
+              },
               { name: 'delete', text: 'Delete', key: 'D' },
               ...(linked
                 ? [
@@ -544,6 +560,9 @@ function SelectedTransactionsButton({
         switch (name) {
           case 'show':
             onShow([...selectedItems]);
+            break;
+          case 'duplicate':
+            onDuplicate([...selectedItems]);
             break;
           case 'delete':
             onDelete([...selectedItems]);
@@ -620,6 +639,7 @@ const AccountHeader = React.memo(
     onMenuSelect,
     onReconcile,
     onBatchDelete,
+    onBatchDuplicate,
     onBatchEdit,
     onBatchUnlink,
     onApplyFilter,
@@ -824,6 +844,7 @@ const AccountHeader = React.memo(
               <SelectedTransactionsButton
                 getTransaction={id => transactions.find(t => t.id === id)}
                 onShow={onShowTransactions}
+                onDuplicate={onBatchDuplicate}
                 onDelete={onBatchDelete}
                 onEdit={onBatchEdit}
                 onUnlink={onBatchUnlink}
@@ -1511,6 +1532,80 @@ class AccountInternal extends React.PureComponent {
     }
   };
 
+  onBatchDuplicate = async ids => {
+    this.setState({ workingHard: true });
+
+    let { data } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'grouped' })
+    );
+
+    let changes = {
+      updated: [],
+      added: []
+    };
+
+    const transactions = data
+      .reduce((newTransactions, trans) => {
+        if (trans.is_parent && !ids.includes(trans.id)) {
+          // If the transaction is a parent, and not included in the selected IDs,
+          // this means that the children are being duplicated, not the parent.
+
+          const duplicatedSubTransactions = trans.subtransactions
+            .filter(subtrans => ids.includes(subtrans.id))
+            .map(({ sort_order, ...subtrans }) => {
+              subtrans.id = v4Sync();
+
+              return subtrans;
+            });
+
+          const duplicatedSubTransactionsTotal =
+            duplicatedSubTransactions.reduce(
+              (sum, { amount }) => sum + amount,
+              0
+            );
+
+          const subtransactions = [
+            ...duplicatedSubTransactions,
+            ...trans.subtransactions
+          ];
+
+          const newTemporaryTransaction = {
+            ...trans,
+            subtransactions
+          };
+
+          let { diff } = updateTransaction(
+            ungroupTransaction(newTemporaryTransaction),
+            {
+              ...trans,
+              amount: trans.amount + duplicatedSubTransactionsTotal
+            }
+          );
+
+          changes.updated = diff.updated;
+
+          return newTransactions.concat(duplicatedSubTransactions);
+        }
+
+        // Otherwise, ungroup transactions, add new IDs
+        return newTransactions.concat(
+          realizeTempTransactions(ungroupTransaction(trans))
+        );
+      }, [])
+      .map(({ sort_order, ...trans }) => ({ ...trans }));
+
+    changes.added = transactions;
+
+    await send('transactions-batch-update', {
+      ...changes
+    });
+
+    await this.refetchTransactions();
+  };
+
   onBatchDelete = async ids => {
     this.setState({ workingHard: true });
 
@@ -1707,6 +1802,7 @@ class AccountInternal extends React.PureComponent {
                   onSync={this.onSync}
                   onImport={this.onImport}
                   onBatchDelete={this.onBatchDelete}
+                  onBatchDuplicate={this.onBatchDuplicate}
                   onBatchEdit={this.onBatchEdit}
                   onBatchUnlink={this.onBatchUnlink}
                   onDeleteFilter={this.onDeleteFilter}
