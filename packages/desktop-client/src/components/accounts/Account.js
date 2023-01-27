@@ -13,6 +13,7 @@ import {
 import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { v4Sync } from 'loot-core/src/platform/uuid/index.web';
 import { currentDay } from 'loot-core/src/shared/months';
 import {
   deleteTransaction,
@@ -70,7 +71,6 @@ import {
   useSplitsExpanded,
   isPreviewId
 } from './TransactionsTable';
-import { v4Sync } from 'loot-core/src/platform/uuid/index.web';
 
 function EmptyMessage({ onAdd }) {
   return (
