@@ -9,9 +9,10 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { colors } from '../style';
 import CustomNotesPaper from '../svg/v2/CustomNotesPaper';
 
-import { View, Button, Tooltip, useTooltip } from './common';
+import { View, Button, Tooltip, useTooltip, Text } from './common';
 
 export function NotesTooltip({
+  editable,
   defaultNotes,
   position = 'bottom-left',
   onClose
@@ -20,22 +21,39 @@ export function NotesTooltip({
   let inputRef = React.createRef();
 
   useEffect(() => {
-    inputRef.current.focus();
-  }, []);
+    if (editable) {
+      inputRef.current.focus();
+    }
+  }, [inputRef, editable]);
 
   return (
     <Tooltip position={position} onClose={() => onClose(notes)}>
-      <textarea
-        ref={inputRef}
-        {...css({
-          border: '1px solid ' + colors.border,
-          minWidth: 300,
-          minHeight: 120,
-          outline: 'none'
-        })}
-        value={notes || ''}
-        onChange={e => setNotes(e.target.value)}
-      ></textarea>
+      {editable ? (
+        <textarea
+          ref={inputRef}
+          {...css({
+            border: '1px solid ' + colors.border,
+            padding: 7,
+            minWidth: 300,
+            minHeight: 120,
+            outline: 'none'
+          })}
+          value={notes || ''}
+          onChange={e => setNotes(e.target.value)}
+        ></textarea>
+      ) : (
+        <Text
+          {...css({
+            display: 'block',
+            maxWidth: 225,
+            padding: 8,
+            whiteSpace: 'pre-wrap',
+            overflowWrap: 'break-word'
+          })}
+        >
+          {notes}
+        </Text>
+      )}
     </Tooltip>
   );
 }
@@ -48,6 +66,7 @@ export default function NotesButton({
   tooltipPosition,
   style
 }) {
+  let [hover, setHover] = useState(false);
   let tooltip = useTooltip();
   let { data } = useLiveQuery(
     useMemo(() => q('notes').filter({ id }).select('*'), [id])
@@ -60,11 +79,14 @@ export default function NotesButton({
     tooltip.close();
   }
 
+  // This account for both the tooltip hover, and editing tooltip
+  const tooltipOpen = tooltip.isOpen || (hasNotes && hover);
+
   return (
     <View
       style={[
         { flexShrink: 0 },
-        tooltip.isOpen && {
+        tooltipOpen && {
           '& button, & .hover-visible': {
             display: 'flex',
             opacity: 1,
@@ -75,6 +97,8 @@ export default function NotesButton({
           '& button, & .hover-visible': { display: 'flex', opacity: 1 }
         }
       ]}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
       <Button
         bare
@@ -84,8 +108,9 @@ export default function NotesButton({
       >
         <CustomNotesPaper style={{ width, height, color: 'currentColor' }} />
       </Button>
-      {tooltip.isOpen && (
+      {tooltipOpen && (
         <NotesTooltip
+          editable={tooltip.isOpen}
           defaultNotes={note}
           position={tooltipPosition}
           onClose={onClose}
