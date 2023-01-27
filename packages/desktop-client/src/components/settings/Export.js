@@ -12,7 +12,7 @@ export default function ExportBudget({ prefs }) {
     let data = await send('export-budget');
     window.Actual.saveFile(
       data,
-      `${format(new Date(), 'MM-dd-yyyy')}-${prefs.id}.zip`,
+      `${format(new Date(), 'yyyyMMdd')}-${prefs.id}.zip`,
       'Export budget'
     );
   }
