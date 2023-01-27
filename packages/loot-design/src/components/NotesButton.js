@@ -28,18 +28,7 @@ export function NotesTooltip({
 
   return (
     <Tooltip position={position} onClose={() => onClose(notes)}>
-      {!editable && (
-        <Text
-          {...css({
-            display: 'block',
-            maxWidth: 225,
-            padding: 8
-          })}
-        >
-          {notes}
-        </Text>
-      )}
-      {editable && (
+      {editable ? (
         <textarea
           ref={inputRef}
           {...css({
@@ -51,6 +40,16 @@ export function NotesTooltip({
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}
         ></textarea>
+      ) : (
+        <Text
+          {...css({
+            display: 'block',
+            maxWidth: 225,
+            padding: 8
+          })}
+        >
+          {notes}
+        </Text>
       )}
     </Tooltip>
   );
