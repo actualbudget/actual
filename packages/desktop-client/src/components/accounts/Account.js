@@ -486,7 +486,7 @@ function SelectedTransactionsButton({
     let transactions = selectedItems.map(id => getTransaction(id));
 
     return (
-      transactions.some(t => t.is_parent) && transactions.some(t => t.is_child)
+      transactions.some(t => t.is_child)
     );
   }, [selectedItems]);
 
