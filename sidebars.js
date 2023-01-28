@@ -99,6 +99,19 @@ const sidebars = {
       },
       collapsed: true,
       items: [
+        {
+          type: 'category',
+          label: 'Using Actual',
+          items: [
+            'Getting-Started/using-actual/files',
+            'Getting-Started/using-actual/overview',
+            'Getting-Started/using-actual/sidebar',
+            'Getting-Started/using-actual/accounts',
+            'Getting-Started/using-actual/budget',
+            'Getting-Started/using-actual/schedules',
+            'Getting-Started/using-actual/settings',
+          ]
+        },
         'Getting-Started/tipstricks',
         'Getting-Started/sync',
         'Getting-Started/managefiles',
