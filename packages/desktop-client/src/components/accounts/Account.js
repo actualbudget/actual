@@ -483,11 +483,9 @@ function SelectedTransactionsButton({
   }, [selectedItems]);
 
   let ambiguousDuplication = useMemo(() => {
-    let transactions = selectedItems.map(id => getTransaction(id));
+    let transactions = [...selectedItems].map(id => getTransaction(id));
 
-    return (
-      transactions.some(t => t.is_child)
-    );
+    return transactions.some(t => t.is_child);
   }, [selectedItems]);
 
   let linked = useMemo(() => {
