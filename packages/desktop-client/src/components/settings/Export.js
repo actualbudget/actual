@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { format } from 'date-fns';
+
 import { send } from 'loot-core/src/platform/client/fetch';
 import { Text, Button } from 'loot-design/src/components/common';
 
@@ -8,7 +10,11 @@ import { Setting } from './UI';
 export default function ExportBudget({ prefs }) {
   async function onExport() {
     let data = await send('export-budget');
-    window.Actual.saveFile(data, `${prefs.id}.zip`, 'Export budget');
+    window.Actual.saveFile(
+      data,
+      `${format(new Date(), 'yyyy-MM-dd')}-${prefs.id}.zip`,
+      'Export budget'
+    );
   }
 
   return (
