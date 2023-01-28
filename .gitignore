@@ -7,6 +7,8 @@ supervise
 bin/large-sync-data.txt
 user-files
 server-files
+test-user-files
+test-server-files
 fly.toml
 build/
 

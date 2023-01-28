@@ -3,7 +3,8 @@ module.exports = {
   env: {
     browser: true,
     amd: true,
-    node: true
+    node: true,
+    jest: true
   },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'prettier'],
