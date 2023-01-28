@@ -25,6 +25,12 @@ export function applyBudgetAction(month, type, args) {
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
         break;
+      case 'apply-goal-template':
+        await send('budget/apply-goal-template', { month });
+        break;
+      case 'overwrite-goal-template':
+        await send('budget/overwrite-goal-template', { month });
+        break;
       case 'hold':
         await send('budget/hold-for-next-month', {
           month,
