@@ -13,7 +13,6 @@ import {
 import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
-import { v4Sync } from 'loot-core/src/platform/uuid/index.web';
 import { currentDay } from 'loot-core/src/shared/months';
 import {
   deleteTransaction,
@@ -1543,61 +1542,14 @@ class AccountInternal extends React.PureComponent {
     );
 
     let changes = {
-      updated: [],
-      added: []
-    };
-
-    const transactions = data
-      .reduce((newTransactions, trans) => {
-        if (trans.is_parent && !ids.includes(trans.id)) {
-          // If the transaction is a parent, and not included in the selected IDs,
-          // this means that the children are being duplicated, not the parent.
-
-          const duplicatedSubTransactions = trans.subtransactions
-            .filter(subtrans => ids.includes(subtrans.id))
-            .map(({ sort_order, ...subtrans }) => {
-              subtrans.id = v4Sync();
-
-              return subtrans;
-            });
-
-          const duplicatedSubTransactionsTotal =
-            duplicatedSubTransactions.reduce(
-              (sum, { amount }) => sum + amount,
-              0
-            );
-
-          const subtransactions = [
-            ...duplicatedSubTransactions,
-            ...trans.subtransactions
-          ];
-
-          const newTemporaryTransaction = {
-            ...trans,
-            subtransactions
-          };
-
-          let { diff } = updateTransaction(
-            ungroupTransaction(newTemporaryTransaction),
-            {
-              ...trans,
-              amount: trans.amount + duplicatedSubTransactionsTotal
-            }
+      added: data
+        .reduce((newTransactions, trans) => {
+          return newTransactions.concat(
+            realizeTempTransactions(ungroupTransaction(trans))
           );
-
-          changes.updated = diff.updated;
-
-          return newTransactions.concat(duplicatedSubTransactions);
-        }
-
-        // Otherwise, ungroup transactions, add new IDs
-        return newTransactions.concat(
-          realizeTempTransactions(ungroupTransaction(trans))
-        );
-      }, [])
-      .map(({ sort_order, ...trans }) => ({ ...trans }));
-
-    changes.added = transactions;
+        }, [])
+        .map(({ sort_order, ...trans }) => ({ ...trans }))
+    };
 
     await send('transactions-batch-update', {
       ...changes
