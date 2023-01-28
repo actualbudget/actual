@@ -425,6 +425,4 @@ function BudgetSummary({ month, localPrefs }) {
   );
 }
 
-export default withRouter(
-  connect(state => ({ localPrefs: state.prefs.local }), actions)(BudgetSummary)
-);
+export default connect(state => ({ localPrefs: state.prefs.local }), actions)(BudgetSummary);
