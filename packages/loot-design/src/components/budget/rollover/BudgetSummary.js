@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 
 import Component from '@reactions/component';
 import { css } from 'glamor';
@@ -6,6 +7,7 @@ import { css } from 'glamor';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import * as actions from '../../../../../loot-core/src/client/actions';
 import { colors, styles } from '../../../style';
 import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
@@ -243,7 +245,7 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
   );
 }
 
-export default React.memo(function BudgetSummary({ month }) {
+function BudgetSummary({ month, localPrefs }) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -263,6 +265,8 @@ export default React.memo(function BudgetSummary({ month }) {
   let prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
+
+  let goalTemplatesEnabled = localPrefs['flags.goalTemplatesEnabled'];
 
   return (
     <View
@@ -373,6 +377,14 @@ export default React.memo(function BudgetSummary({ month }) {
                       {
                         name: 'set-3-avg',
                         text: 'Set budgets to 3 month avg'
+                      },
+                      goalTemplatesEnabled && {
+                        name: 'apply-goal-template',
+                        text: 'Apply budget template'
+                      },
+                      goalTemplatesEnabled && {
+                        name: 'overwrite-goal-template',
+                        text: 'Overwrite with budget template'
                       }
                     ]}
                   />
@@ -410,4 +422,9 @@ export default React.memo(function BudgetSummary({ month }) {
       </NamespaceContext.Provider>
     </View>
   );
-});
+}
+
+export default connect(
+  state => ({ localPrefs: state.prefs.local }),
+  actions
+)(BudgetSummary);

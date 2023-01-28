@@ -14,6 +14,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
       .map(([key, value]) => [key.replace('flags.', ''), value])
   );
   let disabled = prefs.budgetType === 'report' && flags.reportBudget;
+
   return (
     <Setting
       primaryAction={
@@ -45,13 +46,25 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
 
             <label style={{ display: 'flex' }}>
               <Checkbox
-                id="report-budget-flag"
+                id="sync-account-flag"
                 checked={flags.syncAccount}
                 onChange={() => {
                   savePrefs({ 'flags.syncAccount': !flags.syncAccount });
                 }}
               />{' '}
               <View>Enable account syncing</View>
+            </label>
+            <label style={{ display: 'flex' }}>
+              <Checkbox
+                id="goal-templates-flag"
+                checked={flags.goalTemplatesEnabled}
+                onChange={() => {
+                  savePrefs({
+                    'flags.goalTemplatesEnabled': !flags.goalTemplatesEnabled
+                  });
+                }}
+              />{' '}
+              <View>Enable Goal Templates</View>
             </label>
           </View>
         ) : (
