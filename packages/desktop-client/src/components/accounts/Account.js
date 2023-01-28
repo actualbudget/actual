@@ -18,6 +18,7 @@ import {
   deleteTransaction,
   updateTransaction,
   realizeTempTransactions,
+  ungroupTransaction,
   ungroupTransactions
 } from 'loot-core/src/shared/transactions';
 import {
@@ -464,6 +465,7 @@ function SelectedTransactionsButton({
   style,
   getTransaction,
   onShow,
+  onDuplicate,
   onDelete,
   onEdit,
   onUnlink,
@@ -478,6 +480,12 @@ function SelectedTransactionsButton({
       preview: !!items.find(id => isPreviewId(id)),
       trans: !!items.find(id => !isPreviewId(id))
     };
+  }, [selectedItems]);
+
+  let ambiguousDuplication = useMemo(() => {
+    let transactions = [...selectedItems].map(id => getTransaction(id));
+
+    return transactions.some(t => t.is_child);
   }, [selectedItems]);
 
   let linked = useMemo(() => {
@@ -513,6 +521,11 @@ function SelectedTransactionsButton({
             ]
           : [
               { name: 'show', text: 'Show', key: 'F' },
+              {
+                name: 'duplicate',
+                text: 'Duplicate',
+                disabled: ambiguousDuplication
+              },
               { name: 'delete', text: 'Delete', key: 'D' },
               ...(linked
                 ? [
@@ -544,6 +557,9 @@ function SelectedTransactionsButton({
         switch (name) {
           case 'show':
             onShow([...selectedItems]);
+            break;
+          case 'duplicate':
+            onDuplicate([...selectedItems]);
             break;
           case 'delete':
             onDelete([...selectedItems]);
@@ -620,6 +636,7 @@ const AccountHeader = React.memo(
     onMenuSelect,
     onReconcile,
     onBatchDelete,
+    onBatchDuplicate,
     onBatchEdit,
     onBatchUnlink,
     onApplyFilter,
@@ -824,6 +841,7 @@ const AccountHeader = React.memo(
               <SelectedTransactionsButton
                 getTransaction={id => transactions.find(t => t.id === id)}
                 onShow={onShowTransactions}
+                onDuplicate={onBatchDuplicate}
                 onDelete={onBatchDelete}
                 onEdit={onBatchEdit}
                 onUnlink={onBatchUnlink}
@@ -1511,6 +1529,31 @@ class AccountInternal extends React.PureComponent {
     }
   };
 
+  onBatchDuplicate = async ids => {
+    this.setState({ workingHard: true });
+
+    let { data } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'grouped' })
+    );
+
+    let changes = {
+      added: data
+        .reduce((newTransactions, trans) => {
+          return newTransactions.concat(
+            realizeTempTransactions(ungroupTransaction(trans))
+          );
+        }, [])
+        .map(({ sort_order, ...trans }) => ({ ...trans }))
+    };
+
+    await send('transactions-batch-update', changes);
+
+    await this.refetchTransactions();
+  };
+
   onBatchDelete = async ids => {
     this.setState({ workingHard: true });
 
@@ -1707,6 +1750,7 @@ class AccountInternal extends React.PureComponent {
                   onSync={this.onSync}
                   onImport={this.onImport}
                   onBatchDelete={this.onBatchDelete}
+                  onBatchDuplicate={this.onBatchDuplicate}
                   onBatchEdit={this.onBatchEdit}
                   onBatchUnlink={this.onBatchUnlink}
                   onDeleteFilter={this.onDeleteFilter}
