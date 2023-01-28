@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 
 import Component from '@reactions/component';
 import { css } from 'glamor';
@@ -425,4 +424,7 @@ function BudgetSummary({ month, localPrefs }) {
   );
 }
 
-export default connect(state => ({ localPrefs: state.prefs.local }), actions)(BudgetSummary);
+export default connect(
+  state => ({ localPrefs: state.prefs.local }),
+  actions
+)(BudgetSummary);
