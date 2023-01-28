@@ -1551,9 +1551,7 @@ class AccountInternal extends React.PureComponent {
         .map(({ sort_order, ...trans }) => ({ ...trans }))
     };
 
-    await send('transactions-batch-update', {
-      ...changes
-    });
+    await send('transactions-batch-update', changes);
 
     await this.refetchTransactions();
   };
