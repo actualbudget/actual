@@ -99,20 +99,18 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
 
     switch (template.type) {
       case 'by':
-      case 'by_annual':
       case 'spend':
-      case 'spend_annual':
         let target_month = new Date(`${template.month}-01`);
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month
         );
-        let repeat = template.type.includes('annual')
+        let repeat = template.annual
           ? (template.repeat || 1) * 12
           : template.repeat;
 
         let spend_from;
-        if (template.type.includes('spend')) {
+        if (template.type === 'spend') {
           spend_from = new Date(`${template.from}-01`);
         }
         while (num_months < 0 && repeat) {
@@ -143,10 +141,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   if (template_lines.length > 1) {
     template_lines = template_lines
       .sort((a, b) => {
-        if (
-          a.type.slice(0, 2) === b.type.slice(0, 2) &&
-          a.type.slice(0, 2) === 'by'
-        ) {
+        if (a.type === 'by' && !a.annual) {
           return differenceInCalendarMonths(
             new Date(`${a.month}-01`),
             new Date(`${b.month}-01`)
@@ -156,7 +151,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
       })
       .filter(el => {
-        if (el.type.slice(0, 2) === 'by') {
+        if (el.type === 'by') {
           if (!got_by) {
             got_by = true;
             return el;
@@ -201,8 +196,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
         break;
       }
-      case 'by':
-      case 'by_annual': {
+      case 'by': {
         // by has 'amount' and 'month' params
         let target_month = new Date(`${template.month}-01`);
         let target = amountToInteger(template.amount);
@@ -224,10 +218,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
         break;
       }
-      case 'week':
-      case 'weeks': {
-        // weeks has 'amount', 'starting' and optional 'limit' params
-        // weeks has 'amount', 'starting', 'weeks' and optional 'limit' params
+      case 'week': {
+        // week has 'amount', 'starting', 'weeks' and optional 'limit' params
         let amount = amountToInteger(template.amount);
         let weeks = template.weeks != null ? Math.round(template.weeks) : 1;
         if (template.limit != null) {
@@ -254,8 +246,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
         break;
       }
-      case 'spend':
-      case 'spend_annual': {
+      case 'spend': {
         // spend has 'amount' and 'from' and 'month' params
         let from_month = new Date(`${template.from}-01`);
         let to_month = new Date(`${template.month}-01`);

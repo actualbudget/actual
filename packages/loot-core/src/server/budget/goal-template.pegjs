@@ -7,10 +7,10 @@ expr
     { return { type: 'week', amount, weeks, starting, limit } }
   / amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ @repeat)?
     { return {
-      type: (from ? 'spend' : 'by') + (repeat ? repeat.type : ''),
+      type: from ? 'spend' : 'by',
       amount,
       month,
-      repeat: repeat && repeat.repeat,
+      ...(repeat || {}),
       from
     } }
   / monthly: amount limit: limit?
@@ -19,10 +19,10 @@ expr
     { return { type: 'simple', limit } }
 
 repeat 'repeat interval'
-  = 'month' { return { type: '' } }
-  / months: d _ 'months' { return { type: '', repeat: +months } }
-  / 'year' { return { type: '_annual' } }
-  / years: d _ 'years' { return { type: '_annual', repeat: +years } }
+  = 'month' { return { annual: false } }
+  / months: d _ 'months' { return { annual: false, repeat: +months } }
+  / 'year' { return { annual: true } }
+  / years: d _ 'years' { return { annual: true, repeat: +years } }
 
 limit = _ upTo? _ @amount
 
