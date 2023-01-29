@@ -12,16 +12,17 @@ import * as db from '../db';
 import { setBudget, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
 
-export async function applyTemplate({ month }) {
-  await processTemplate(month, false);
+export function applyTemplate({ month }) {
+  return processTemplate(month, false);
 }
 
-export async function overwriteTemplate({ month }) {
-  await processTemplate(month, true);
+export function overwriteTemplate({ month }) {
+  return processTemplate(month, true);
 }
 
 async function processTemplate(month, force) {
   let category_templates = await getCategoryTemplates();
+  let errors = [];
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0'
@@ -40,6 +41,26 @@ async function processTemplate(month, force) {
       let template = category_templates[category.id];
 
       if (template) {
+        errors = errors.concat(
+          template
+            .filter(t => t.type === 'error')
+            .map(({ line, error }) => {
+              error.location.start.column += TEMPLATE_PREFIX.length;
+              error.location.end.column += TEMPLATE_PREFIX.length;
+              // e.g.
+              // 0:Error: Expected month but "i" found.
+              // 1: --> Laundry:1:8
+              // 2:  |
+              // 3:1 | #template $20 by invalid
+              // 4:  |        ^
+              let lines = error.format([{ text: line }]).split('\n');
+              return [
+                category.name + ': ' + lines[0].replace('Error: ', ''),
+                lines[3].slice(4),
+                lines[4].slice(4)
+              ].join('\n');
+            })
+        );
         let to_budget = await applyCategoryTemplate(
           category,
           template,
@@ -54,13 +75,36 @@ async function processTemplate(month, force) {
     }
   }
   if (num_applied === 0) {
-    console.log('All categories were up to date.');
+    if (errors.length) {
+      return {
+        type: 'error',
+        sticky: true,
+        message: `There were errors interpreting some templates:`,
+        pre: errors.join('\n\n')
+      };
+    } else {
+      return { type: 'message', message: 'All categories were up to date.' };
+    }
   } else {
-    console.log(`${num_applied} categories updated.`);
+    let applied = `Applied templates to ${num_applied} ${
+      num_applied === 1 ? 'category' : 'categories'
+    }.`;
+    if (errors.length) {
+      return {
+        sticky: true,
+        message: `${applied} There were errors interpreting some templates:`,
+        pre: errors.join('\n\n')
+      };
+    } else {
+      return {
+        type: 'message',
+        message: applied
+      };
+    }
   }
 }
 
-const TEMPLATE_PREFIX = '#template';
+const TEMPLATE_PREFIX = '#template ';
 
 async function getCategoryTemplates() {
   let templates = {};
@@ -75,11 +119,12 @@ async function getCategoryTemplates() {
     for (let l = 0; l < lines.length; l++) {
       let line = lines[l].trim();
       if (!line.startsWith(TEMPLATE_PREFIX)) continue;
+      let expression = line.slice(TEMPLATE_PREFIX.length);
       try {
-        let parsed = parse(line.slice(TEMPLATE_PREFIX.length).trim());
+        let parsed = parse(expression);
         template_lines.push(parsed);
       } catch (e) {
-        template_lines.push({ type: 'error', line, error: e.message });
+        template_lines.push({ type: 'error', line, error: e });
       }
     }
     if (template_lines.length) {
@@ -313,7 +358,6 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       }
       case 'error':
-        console.log(`${category.name}: Failed to match: ${template.line}`);
         return null;
       default:
     }
