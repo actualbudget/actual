@@ -3,6 +3,7 @@ import React from 'react';
 import { styles, colors } from '../style';
 import ExclamationOutline from '../svg/v1/ExclamationOutline';
 import InformationOutline from '../svg/v1/InformationOutline';
+
 import { View, Text } from './common';
 
 export function Alert({ icon: Icon, color, backgroundColor, style, children }) {

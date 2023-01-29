@@ -30,6 +30,7 @@ import Wallet from 'loot-design/src/svg/v1/Wallet';
 
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
+
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
 import { default as MobileAccounts } from './accounts/MobileAccounts';
@@ -207,7 +208,12 @@ class FinancesApp extends React.Component {
 
     let oldPush = this.history.push;
     this.history.push = (to, state) => {
-      return oldPush.call(this.history, to, makeLocationState(state));
+      let newState = makeLocationState(to.state || state);
+      if (typeof to === 'object') {
+        return oldPush.call(this.history, { ...to, state: newState });
+      } else {
+        return oldPush.call(this.history, to, newState);
+      }
     };
 
     // I'm not sure if this is the best approach but we need this to

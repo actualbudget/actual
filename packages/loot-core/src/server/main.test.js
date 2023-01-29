@@ -1,5 +1,6 @@
 import { expectSnapshotWithDiffer } from '../mocks/util';
 import * as monthUtils from '../shared/months';
+
 import * as budgetActions from './budget/actions';
 import * as budget from './budget/base';
 import { getClock, deserializeClock } from './crdt';
@@ -15,6 +16,7 @@ import * as prefs from './prefs';
 jest.mock('./post');
 const connection = require('../platform/server/connection');
 const fs = require('../platform/server/fs');
+
 const backend = require('./main');
 const { post } = require('./post');
 const handlers = backend.handlers;

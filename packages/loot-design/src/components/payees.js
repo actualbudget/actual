@@ -14,10 +14,11 @@ import memoizeOne from 'memoize-one';
 import { groupById } from 'loot-core/src/shared/util';
 
 import { colors } from '../style';
-import Delete from '../svg/Delete';
-import ExpandArrow from '../svg/ExpandArrow';
-import Merge from '../svg/merge';
+import Delete from '../svg/v0/Delete';
+import ExpandArrow from '../svg/v0/ExpandArrow';
+import Merge from '../svg/v0/Merge';
 import ArrowThinRight from '../svg/v1/ArrowThinRight';
+
 import {
   useStableCallback,
   View,

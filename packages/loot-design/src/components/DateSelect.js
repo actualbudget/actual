@@ -19,6 +19,7 @@ import {
 } from 'loot-core/src/shared/months';
 
 import { colors } from '../style';
+
 import { View, Input, Tooltip } from './common';
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
@@ -166,11 +167,11 @@ export default function DateSelect({
         return d.format(date, dateFormat);
       }
     }
-    return null;
+    return '';
   }, [defaultValue, dateFormat]);
 
   let picker = useRef(null);
-  let [value, setValue] = useState(parsedDefaultValue || '');
+  let [value, setValue] = useState(parsedDefaultValue);
   let [open, setOpen] = useState(embedded || isOpen || false);
   let inputRef = useRef(null);
 

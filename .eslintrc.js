@@ -3,7 +3,14 @@ module.exports = {
   extends: ['react-app'],
   rules: {
     'prettier/prettier': 'error',
-    'no-unused-vars': 'off', // TODO: re-enable once issues are fixed
+    'no-unused-vars': [
+      'error',
+      {
+        args: 'none',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true
+      }
+    ],
     'no-loop-func': 'off',
     'no-restricted-globals': 'off',
 
@@ -18,7 +25,8 @@ module.exports = {
         groups: [
           'builtin', // Built-in types are first
           'external',
-          ['sibling', 'parent'], // Then sibling and parent types. They can be mingled together
+          'parent',
+          'sibling',
           'index' // Then the index file
         ],
         'newlines-between': 'always',

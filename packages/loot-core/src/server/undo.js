@@ -1,4 +1,5 @@
 import { getIn } from '../shared/util';
+
 import { Timestamp } from './crdt';
 import { withMutatorContext, getMutatorContext } from './mutators';
 import { sendMessages } from './sync';

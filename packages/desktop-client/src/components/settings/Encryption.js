@@ -4,7 +4,8 @@ import { Text, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
 import { useServerURL } from '../../hooks/useServerURL';
-import { ButtonSetting } from './UI';
+
+import { Setting } from './UI';
 
 export default function EncryptionSettings({ prefs, pushModal }) {
   const serverURL = useServerURL();
@@ -14,8 +15,8 @@ export default function EncryptionSettings({ prefs, pushModal }) {
   }
 
   return prefs.encryptKeyId ? (
-    <ButtonSetting
-      button={<Button onClick={onChangeKey}>Generate new key</Button>}
+    <Setting
+      primaryAction={<Button onClick={onChangeKey}>Generate new key</Button>}
     >
       <Text>
         <Text style={{ color: colors.g4, fontWeight: 600 }}>
@@ -32,9 +33,9 @@ export default function EncryptionSettings({ prefs, pushModal }) {
           Learn more…
         </a>
       </Text>
-    </ButtonSetting>
+    </Setting>
   ) : serverURL ? (
-    <ButtonSetting
+    <Setting
       button={
         <Button onClick={() => pushModal('create-encryption-key')}>
           Enable encryption…
@@ -55,9 +56,9 @@ export default function EncryptionSettings({ prefs, pushModal }) {
           Learn more…
         </a>
       </Text>
-    </ButtonSetting>
+    </Setting>
   ) : (
-    <ButtonSetting button={<Button disabled>Enable encryption…</Button>}>
+    <Setting button={<Button disabled>Enable encryption…</Button>}>
       <Text>
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and
@@ -70,6 +71,6 @@ export default function EncryptionSettings({ prefs, pushModal }) {
           Learn more…
         </a>
       </Text>
-    </ButtonSetting>
+    </Setting>
   );
 }

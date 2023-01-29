@@ -11,6 +11,7 @@ import {
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
 
 import installPolyfills from '../polyfills';
+
 import AppBackground from './AppBackground';
 import FatalError from './FatalError';
 import FinancesApp from './FinancesApp';

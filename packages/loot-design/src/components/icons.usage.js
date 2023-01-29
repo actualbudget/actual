@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
 import { Section } from '../guide/components';
+
 import { View, Button } from './common';
 
-const context = require.context('../svg/v1', false, /\.web.js$/);
+const context = require.context('../svg/v1', false, /\.js$/);
 const modules = {};
 context.keys().forEach(function (key) {
   var module = context(key);
@@ -11,7 +12,7 @@ context.keys().forEach(function (key) {
 });
 
 function pathToName(path) {
-  const name = path.match(/^\.\/(.*)\.web.js$/)[1];
+  const name = path.match(/^\.\/(.*)\.js$/)[1];
   return name[0].toUpperCase() + name.slice(1);
 }
 

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { View } from '../common';
+
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { CategoryGroupsContext } from './util';
 

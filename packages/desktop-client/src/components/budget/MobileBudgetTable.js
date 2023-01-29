@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useContext, useState } from 'react';
+import React from 'react';
 // import {
 //   RectButton,
 //   PanGestureHandler,
@@ -39,6 +39,7 @@ import ArrowThinRight from 'loot-design/src/svg/v1/ArrowThinRight';
 
 import { SyncButton } from '../Titlebar';
 import { AmountInput } from '../util/AmountInput';
+
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 export function ToBudget({ toBudget, onClick }) {
@@ -164,6 +165,7 @@ export class BudgetCell extends React.PureComponent {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function BudgetGroupPreview({ group, pending, style }) {
   //   let opacity = useMemo(() => new Animated.Value(0), []);
 
@@ -209,6 +211,7 @@ function BudgetGroupPreview({ group, pending, style }) {
   );
 }
 
+// eslint-disable-next-line no-unused-vars
 function BudgetCategoryPreview({ name, pending, style }) {
   return (
     // <Animated.View
@@ -271,11 +274,11 @@ export class BudgetCategory extends React.PureComponent {
       category,
       editing,
       index,
-      gestures,
-      editMode,
+      // gestures,
+      // editMode,
       style,
       month,
-      onEdit,
+      // onEdit,
       onBudgetAction
     } = this.props;
 
@@ -334,7 +337,7 @@ export class BudgetCategory extends React.PureComponent {
       </ListItem>
     );
 
-    return <div>{() => content}</div>;
+    return <div>{content}</div>;
     // <Draggable
     //   id={category.id}
     //   type="category"
@@ -576,13 +579,13 @@ export class BudgetGroup extends React.PureComponent {
   render() {
     const {
       group,
-      editingId,
+      // editingId,
       editMode,
       gestures,
       month,
       onEditCategory,
       onReorderCategory,
-      onReorderGroup,
+      // onReorderGroup,
       onAddCategory,
       onBudgetAction
     } = this.props;
@@ -730,7 +733,7 @@ export class BudgetGroups extends React.Component {
       type,
       categoryGroups,
       editingId,
-      editMode,
+      // editMode,
       gestures,
       month,
       onEditCategory,
