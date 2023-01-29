@@ -229,6 +229,14 @@ export function ConditionExpression({
   );
 }
 
+function describeSchedule(s, payee) {
+  if (payee) {
+    return `${payee.name} (${s.next_date})`;
+  } else {
+    return `Next: ${s.next_date}`;
+  }
+}
+
 function ScheduleValue({ value }) {
   let payees = useSelector(state => state.queries.payees);
   let byId = getPayeesById(payees);
@@ -239,12 +247,7 @@ function ScheduleValue({ value }) {
       value={value}
       field="rule"
       data={schedules}
-      describe={s => {
-        let payeeId = s._payee;
-        return byId[payeeId]
-          ? `${byId[payeeId].name} (${s.next_date})`
-          : `Next: ${s.next_date}`;
-      }}
+      describe={s => describeSchedule(s, byId[s._payee])}
     />
   );
 }
@@ -502,47 +505,81 @@ function RulesList({
   );
 }
 
-export default function ManageRules({
-  isModal,
-  payeeId,
-  setLoading = () => {}
-}) {
+function mapValue(field, value, { payees, categories, accounts }) {
+  if (!value) return '';
+
+  if (field === 'payee') {
+    return payees.find(p => p.id === value).name;
+  } else if (field === 'category') {
+    return categories.find(c => c.id === value).name;
+  } else if (field === 'account') {
+    return accounts.find(a => a.id === value).name;
+  } else {
+    return value;
+  }
+}
+
+function ruleToString(rule, data) {
+  let conditions = rule.conditions.flatMap(cond => [
+    mapField(cond.field),
+    friendlyOp(cond.op),
+    cond.op === 'oneOf'
+      ? cond.value.map(v => mapValue(cond.field, v, data)).join(', ')
+      : mapValue(cond.field, cond.value, data)
+  ]);
+  let actions = rule.actions.flatMap(action => {
+    if (action.op === 'set') {
+      return [
+        friendlyOp(action.op),
+        mapField(action.field),
+        'to',
+        mapValue(action.field, action.value, data)
+      ];
+    } else if (action.op === 'link-schedule') {
+      let schedule = data.schedules.find(s => s.id === action.value);
+      return [
+        friendlyOp(action.op),
+        describeSchedule(
+          schedule,
+          data.payees.find(p => p.id === schedule._payee)
+        )
+      ];
+    } else {
+      return [];
+    }
+  });
+  return (
+    (rule.stage || '') + ' ' + conditions.join(' ') + ' ' + actions.join(' ')
+  );
+}
+
+function ManageRulesContent({ isModal, payeeId, setLoading }) {
   let [allRules, setAllRules] = useState(null);
   let [rules, setRules] = useState(null);
   let [filter, setFilter] = useState('');
   let dispatch = useDispatch();
   let navigator = useTableNavigator(rules, ['select', 'edit']);
+
+  let { data: schedules } = SchedulesQuery.useQuery();
+  let filterData = useSelector(state => ({
+    payees: state.queries.payees,
+    categories: state.queries.categories.list,
+    accounts: state.queries.accounts,
+    schedules
+  }));
+
+  console.log('fil', filterData);
+
   let filteredRules = useMemo(
     () =>
       filter === '' || !rules
         ? rules
-        : rules.filter(rule => {
-            let conditions = rule.conditions.flatMap(cond => [
-              mapField(cond.field),
-              friendlyOp(cond.op),
-              cond.value
-            ]);
-            let actions = rule.actions.flatMap(action =>
-              action.op === 'set'
-                ? [
-                    friendlyOp(action.op),
-                    mapField(action.field),
-                    'to',
-                    action.value
-                  ]
-                : action.op === 'link-schedule'
-                ? [friendlyOp(action.op), action.value]
-                : []
-            );
-            let text =
-              (rule.stage || '') +
-              ' ' +
-              conditions.join(' ') +
-              ' ' +
-              actions.join(' ');
-            return text.toLowerCase().includes(filter.toLowerCase());
-          }),
-    [rules, filter]
+        : rules.filter(rule =>
+            ruleToString(rule, filterData)
+              .toLowerCase()
+              .includes(filter.toLowerCase())
+          ),
+    [rules, filter, filterData]
   );
   let selectedInst = useSelected('manage-rules', allRules, []);
   let [hoveredRule, setHoveredRule] = useState(null);
@@ -676,103 +713,112 @@ export default function ManageRules({
   }
 
   return (
-    <SchedulesQuery.Provider>
-      <SelectedProvider instance={selectedInst}>
-        <View style={{ overflow: 'hidden' }}>
+    <SelectedProvider instance={selectedInst}>
+      <View style={{ overflow: 'hidden' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: isModal ? '0 13px 15px' : '0 0 15px',
+            flexShrink: 0
+          }}
+        >
           <View
             style={{
+              color: colors.n4,
               flexDirection: 'row',
               alignItems: 'center',
-              padding: isModal ? '0 13px 15px' : '0 0 15px',
-              flexShrink: 0
+              width: '50%'
             }}
           >
-            <View
-              style={{
-                color: colors.n4,
-                flexDirection: 'row',
-                alignItems: 'center',
-                width: '50%'
-              }}
-            >
-              <Text>
-                Rules are always run in the order that you see them.{' '}
-                <ExternalLink
-                  asAnchor={true}
-                  href="https://actualbudget.github.io/docs/Budgeting/rules/"
-                  style={{ color: colors.n4 }}
-                >
-                  Learn more
-                </ExternalLink>
-              </Text>
-            </View>
-            <View style={{ flex: 1 }} />
-            <Input
-              placeholder="Filter rules..."
-              value={filter}
-              onChange={e => {
-                setFilter(e.target.value);
-                navigator.onEdit(null);
-              }}
-              style={{
-                width: 350,
-                borderColor: isModal ? null : 'transparent',
-                backgroundColor: isModal ? null : colors.n11,
-                ':focus': isModal
-                  ? null
-                  : {
-                      backgroundColor: 'white',
-                      '::placeholder': { color: colors.n8 }
-                    }
-              }}
-            />
+            <Text>
+              Rules are always run in the order that you see them.{' '}
+              <ExternalLink
+                asAnchor={true}
+                href="https://actualbudget.github.io/docs/Budgeting/rules/"
+                style={{ color: colors.n4 }}
+              >
+                Learn more
+              </ExternalLink>
+            </Text>
           </View>
-          <View style={{ flex: 1 }}>
-            <RulesHeader />
-            <SimpleTable
-              ref={tableRef}
-              data={filteredRules}
-              navigator={navigator}
-              loadMore={loadMore}
-              // Hide the last border of the item in the table
-              style={{ marginBottom: -1 }}
-            >
-              <RulesList
-                rules={filteredRules}
-                selectedItems={selectedInst.items}
-                navigator={navigator}
-                hoveredRule={hoveredRule}
-                onHover={onHover}
-                onEditRule={onEditRule}
-              />
-            </SimpleTable>
-          </View>
-          <View
+          <View style={{ flex: 1 }} />
+          <Input
+            placeholder="Filter rules..."
+            value={filter}
+            onChange={e => {
+              setFilter(e.target.value);
+              navigator.onEdit(null);
+            }}
             style={{
-              paddingBlock: 15,
-              paddingInline: isModal ? 13 : 0,
-              borderTop: isModal && '1px solid ' + colors.border,
-              flexShrink: 0
+              width: 350,
+              borderColor: isModal ? null : 'transparent',
+              backgroundColor: isModal ? null : colors.n11,
+              ':focus': isModal
+                ? null
+                : {
+                    backgroundColor: 'white',
+                    '::placeholder': { color: colors.n8 }
+                  }
             }}
-          >
-            <Stack
-              direction="row"
-              align="center"
-              justify="flex-end"
-              spacing={2}
-            >
-              {selectedInst.items.size > 0 && (
-                <Button onClick={onDeleteSelected}>
-                  Delete {selectedInst.items.size} rules
-                </Button>
-              )}
-              <Button primary onClick={onCreateRule}>
-                Create new rule
-              </Button>
-            </Stack>
-          </View>
+          />
         </View>
-      </SelectedProvider>
+        <View style={{ flex: 1 }}>
+          <RulesHeader />
+          <SimpleTable
+            ref={tableRef}
+            data={filteredRules}
+            navigator={navigator}
+            loadMore={loadMore}
+            // Hide the last border of the item in the table
+            style={{ marginBottom: -1 }}
+          >
+            <RulesList
+              rules={filteredRules}
+              selectedItems={selectedInst.items}
+              navigator={navigator}
+              hoveredRule={hoveredRule}
+              onHover={onHover}
+              onEditRule={onEditRule}
+            />
+          </SimpleTable>
+        </View>
+        <View
+          style={{
+            paddingBlock: 15,
+            paddingInline: isModal ? 13 : 0,
+            borderTop: isModal && '1px solid ' + colors.border,
+            flexShrink: 0
+          }}
+        >
+          <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+            {selectedInst.items.size > 0 && (
+              <Button onClick={onDeleteSelected}>
+                Delete {selectedInst.items.size} rules
+              </Button>
+            )}
+            <Button primary onClick={onCreateRule}>
+              Create new rule
+            </Button>
+          </Stack>
+        </View>
+      </View>
+    </SelectedProvider>
+  );
+}
+
+export default function ManageRules({
+  isModal,
+  payeeId,
+  setLoading = () => {}
+}) {
+  return (
+    <SchedulesQuery.Provider>
+      <ManageRulesContent
+        isModal={isModal}
+        payeeId={payeeId}
+        setLoading={setLoading}
+      />
     </SchedulesQuery.Provider>
   );
 }
