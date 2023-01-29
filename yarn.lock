@@ -10652,11 +10652,9 @@ __metadata:
   linkType: hard
 
 "eventsource@npm:^1.0.7":
-  version: 1.1.0
-  resolution: "eventsource@npm:1.1.0"
-  dependencies:
-    original: ^1.0.0
-  checksum: 78338b7e75ec471cb793efb3319e0c4d2bf00fb638a2e3f888ad6d98cd1e3d4492a29f554c0921c7b2ac5130c3a732a1a0056739f6e2f548d714aec685e5da7e
+  version: 1.1.2
+  resolution: "eventsource@npm:1.1.2"
+  checksum: fe8f2ac3c70b1b63ee3cef5c0a28680cb00b5747bfda1d9835695fab3ed602be41c5c799b1fc997b34b02633573fead25b12b036bdf5212f23a6aa9f59212e9b
   languageName: node
   linkType: hard
 
@@ -17718,15 +17716,6 @@ __metadata:
     strip-ansi: ^6.0.0
     wcwidth: ^1.0.1
   checksum: 28d476ee6c1049d68368c0dc922e7225e3b5600c3ede88fade8052837f9ed342625fdaa84a6209302587c8ddd9b664f71f0759833cbdb3a4cf81344057e63c63
-  languageName: node
-  linkType: hard
-
-"original@npm:^1.0.0":
-  version: 1.0.2
-  resolution: "original@npm:1.0.2"
-  dependencies:
-    url-parse: ^1.4.3
-  checksum: 8dca9311dab50c8953366127cb86b7c07bf547d6aa6dc6873a75964b7563825351440557e5724d9c652c5e99043b8295624f106af077f84bccf19592e421beb9
   languageName: node
   linkType: hard
 
