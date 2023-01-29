@@ -3804,18 +3804,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rocket.chat/peggy-loader@npm:^0.31.22":
-  version: 0.31.22
-  resolution: "@rocket.chat/peggy-loader@npm:0.31.22"
-  dependencies:
-    tslib: ^2.3.1
-  peerDependencies:
-    peggy: "*"
-    webpack: "*"
-  checksum: c1331c4f34bd5a2db095c2a257bd89a5218e4cef29a921ee72058ced68a24516d30a6b6d95682e9682087b88161e091dd1d34bb392eff4742342f3ae8a3f8feb
-  languageName: node
-  linkType: hard
-
 "@rschedule/core@npm:^1.2.0":
   version: 1.2.3
   resolution: "@rschedule/core@npm:1.2.3"
@@ -6650,6 +6638,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"big.js@npm:^3.1.3":
+  version: 3.2.0
+  resolution: "big.js@npm:3.2.0"
+  checksum: 299449e40555625a308f01d74378677036b2ec98b30aaa89794b3afbd4eaa104b7456a989affadfd7f630dc14b3f1df250de9bddc4a6fc664e60727887bb33e7
+  languageName: node
+  linkType: hard
+
 "big.js@npm:^5.2.2":
   version: 5.2.2
   resolution: "big.js@npm:5.2.2"
@@ -7985,7 +7980,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^9.3.0, commander@npm:^9.4.1":
+"commander@npm:^9.4.1":
   version: 9.5.0
   resolution: "commander@npm:9.5.0"
   checksum: c7a3e27aa59e913b54a1bafd366b88650bc41d6651f0cbe258d4ff09d43d6a7394232a4dadd0bf518b3e696fdf595db1028a0d82c785b88bd61f8a440cecfade
@@ -10185,6 +10180,13 @@ __metadata:
   version: 8.0.0
   resolution: "emoji-regex@npm:8.0.0"
   checksum: d4c5c39d5a9868b5fa152f00cada8a936868fd3367f33f71be515ecee4c803132d11b31a6222b2571b1e5f7e13890156a94880345594d0ce7e3c9895f560f192
+  languageName: node
+  linkType: hard
+
+"emojis-list@npm:^2.0.0":
+  version: 2.1.0
+  resolution: "emojis-list@npm:2.1.0"
+  checksum: fb61fa6356dfcc9fbe6db8e334c29da365a34d3d82a915cb59621883d3023d804fd5edad5acd42b8eec016936e81d3b38e2faf921b32e073758374253afe1272
   languageName: node
   linkType: hard
 
@@ -15307,6 +15309,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json5@npm:^0.5.0":
+  version: 0.5.1
+  resolution: "json5@npm:0.5.1"
+  bin:
+    json5: lib/cli.js
+  checksum: 9b85bf06955b23eaa4b7328aa8892e3887e81ca731dd27af04a5f5f1458fbc5e1de57a24442e3272f8a888dd1abe1cb68eb693324035f6b3aeba4fcab7667d62
+  languageName: node
+  linkType: hard
+
 "json5@npm:^1.0.1":
   version: 1.0.1
   resolution: "json5@npm:1.0.1"
@@ -15634,6 +15645,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"loader-utils@npm:^0.2.5":
+  version: 0.2.17
+  resolution: "loader-utils@npm:0.2.17"
+  dependencies:
+    big.js: ^3.1.3
+    emojis-list: ^2.0.0
+    json5: ^0.5.0
+    object-assign: ^4.0.1
+  checksum: 3045c83ef8b19d66d4c25e3245120c579883f473fe0d0559552f55502be913725c4d558a7c866191a74b19ef2af20b094afe3b144ae1e717ea4c245d52f60a09
+  languageName: node
+  linkType: hard
+
 "loader-utils@npm:^1.0.1, loader-utils@npm:^1.0.2, loader-utils@npm:^1.1.0, loader-utils@npm:^1.2.3, loader-utils@npm:^1.4.0":
   version: 1.4.0
   resolution: "loader-utils@npm:1.4.0"
@@ -15884,7 +15907,6 @@ __metadata:
     "@babel/core": ~7.14.3
     "@babel/register": ^7.12.10
     "@jlongster/sql.js": ^1.6.7
-    "@rocket.chat/peggy-loader": ^0.31.22
     "@rschedule/core": ^1.2.0
     "@rschedule/ical-tools": ^1.2.0
     "@rschedule/json-tools": ^1.2.0
@@ -15924,7 +15946,9 @@ __metadata:
     node-libofx: "*"
     npm-run-all: ^4.1.3
     patch-package: ^6.5.1
-    peggy: ^2.0.1
+    pegjs: ^0.10.0
+    pegjs-jest-transformer: ^1.2.3
+    pegjs-loader: ^0.5.6
     perf-deets: ^1.0.15
     regenerator-runtime: ^0.13.7
     sanitize-filename: ^1.6.1
@@ -18494,15 +18518,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"peggy@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "peggy@npm:2.0.1"
+"pegjs-jest-transformer@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "pegjs-jest-transformer@npm:1.2.3"
   dependencies:
-    commander: ^9.3.0
-    source-map-generator: 0.8.0
+    typescript: ">=4.5 <5.0"
+  peerDependencies:
+    jest: ^29.0.0
+    pegjs: ^0.10.0
+  checksum: 2af4d48e6162fda8a0ed98b8c02780727e0528dee5af5c6dd1261945d155943f55cd7e58791419991b88759bb9d89e57e0fec5ec96177cef0e24bd508b6b0eae
+  languageName: node
+  linkType: hard
+
+"pegjs-loader@npm:^0.5.6":
+  version: 0.5.6
+  resolution: "pegjs-loader@npm:0.5.6"
+  dependencies:
+    loader-utils: ^0.2.5
+  peerDependencies:
+    pegjs: ^0.10.0
+    webpack: ">=1"
+  checksum: 26f7a1a49c05cc61bb619e0158da18416e3574729be4fda4af366000f0a264743b692f87273415f73651c9bf20b9306e43822b7a7053103a1fdeca27cead003d
+  languageName: node
+  linkType: hard
+
+"pegjs@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "pegjs@npm:0.10.0"
   bin:
-    peggy: bin/peggy.js
-  checksum: 0ce0ee8f9f872bc96183bfcb7ce9ccabcad6d1df1e4ff9b1b7ebaf57f3996dcb1016b7610013f6a8a1bd8b135a8b3b15ccff914bdd88ab2264bdcbca5b36f2f1
+    pegjs: bin/pegjs
+  checksum: 65d184ca0e1823ec0a3e7f384d7fd771bcbbc7abf460c82c9704022c1fa325425dc9007c92982b951879c3c9d4c39bf5cd6d99690e0540ff5016c04ca1ecd17e
   languageName: node
   linkType: hard
 
@@ -22086,13 +22131,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-generator@npm:0.8.0":
-  version: 0.8.0
-  resolution: "source-map-generator@npm:0.8.0"
-  checksum: 15e7854c04a4b1bc8a477664a65c58316d792fb24a7b427219ac597eed7f57a3905637c783126b123cf05f9d4fdc45a8fadb8bc2fbf010a82d92e35c193aba51
-  languageName: node
-  linkType: hard
-
 "source-map-resolve@npm:^0.5.0":
   version: 0.5.3
   resolution: "source-map-resolve@npm:0.5.3"
@@ -23381,13 +23419,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.3.1":
-  version: 2.5.0
-  resolution: "tslib@npm:2.5.0"
-  checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
-  languageName: node
-  linkType: hard
-
 "tty-browserify@npm:0.0.0":
   version: 0.0.0
   resolution: "tty-browserify@npm:0.0.0"
@@ -23520,6 +23551,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:>=4.5 <5.0":
+  version: 4.9.4
+  resolution: "typescript@npm:4.9.4"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: e782fb9e0031cb258a80000f6c13530288c6d63f1177ed43f770533fdc15740d271554cdae86701c1dd2c83b082cea808b07e97fd68b38a172a83dbf9e0d0ef9
+  languageName: node
+  linkType: hard
+
 "typescript@npm:^4.6.4":
   version: 4.7.4
   resolution: "typescript@npm:4.7.4"
@@ -23527,6 +23568,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 5750181b1cd7e6482c4195825547e70f944114fb47e58e4aa7553e62f11b3f3173766aef9c281783edfd881f7b8299cf35e3ca8caebe73d8464528c907a164df
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@>=4.5 <5.0#~builtin<compat/typescript>":
+  version: 4.9.4
+  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=bda367"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 37f6e2c3c5e2aa5934b85b0fddbf32eeac8b1bacf3a5b51d01946936d03f5377fe86255d4e5a4ae628fd0cd553386355ad362c57f13b4635064400f3e8e05b9d
   languageName: node
   linkType: hard
 

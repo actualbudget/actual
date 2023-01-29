@@ -27,7 +27,7 @@ module.exports = {
   },
   resolveLoader: {
     alias: {
-      'peggy-loader': require.resolve('@rocket.chat/peggy-loader')
+      'pegjs-loader': require.resolve('pegjs-loader')
     }
   },
   module: {
@@ -43,13 +43,7 @@ module.exports = {
       },
       {
         test: /\.pegjs$/,
-        use: {
-          loader: 'peggy-loader',
-          options: {
-            // "[avoids] exponential parsing time in pathological cases but [makes] the parser slower"
-            cache: true
-          }
-        }
+        use: { loader: 'pegjs-loader' }
       }
     ]
   },

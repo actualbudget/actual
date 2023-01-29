@@ -10,5 +10,8 @@ module.exports = {
   ],
   globals: {
     __TESTING__: true
+  },
+  transform: {
+    '\\.pegjs$': 'pegjs-jest-transformer'
   }
 };
