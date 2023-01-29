@@ -2,6 +2,7 @@ let path = require('path');
 
 let webpack = require('webpack');
 
+/** @type {webpack.Configuration} */
 module.exports = {
   mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
   entry: path.join(__dirname, '../src/server/main.js'),
@@ -24,6 +25,11 @@ module.exports = {
           : require.resolve('perf-deets/noop')
     }
   },
+  resolveLoader: {
+    alias: {
+      'peggy-loader': require.resolve('@rocket.chat/peggy-loader')
+    }
+  },
   module: {
     rules: [
       {
@@ -32,6 +38,16 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['babel-preset-jwl-app']
+          }
+        }
+      },
+      {
+        test: /\.pegjs$/,
+        use: {
+          loader: 'peggy-loader',
+          options: {
+            // "[avoids] exponential parsing time in pathological cases but [makes] the parser slower"
+            cache: true
           }
         }
       }

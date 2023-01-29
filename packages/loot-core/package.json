@@ -12,7 +12,8 @@
     "lint": "eslint src",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "jest -c jest.config.js",
-    "test:web": "jest -c jest.web.config.js"
+    "test:web": "jest -c jest.web.config.js",
+    "postinstall": "patch-package"
   },
   "author": "",
   "license": "ISC",
@@ -40,7 +41,9 @@
     "@actual-app/api": "*",
     "@actual-app/import-ynab4": "*",
     "@babel/core": "~7.14.3",
+    "@rocket.chat/peggy-loader": "^0.31.22",
     "@types/jest": "^27.5.0",
+    "@types/webpack": "^5.28.0",
     "adm-zip": "^0.5.9",
     "babel-loader": "^8.0.6",
     "buffer": "^5.5.0",
@@ -62,6 +65,8 @@
     "mockdate": "^3.0.5",
     "murmurhash": "^0.0.2",
     "npm-run-all": "^4.1.3",
+    "patch-package": "^6.5.1",
+    "peggy": "^2.0.1",
     "perf-deets": "^1.0.15",
     "sanitize-filename": "^1.6.1",
     "search-query-parser": "^1.3.0",

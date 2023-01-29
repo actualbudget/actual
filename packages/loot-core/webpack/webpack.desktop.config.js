@@ -4,6 +4,7 @@ let webpack = require('webpack');
 
 let browser = require('./webpack.browser.config');
 
+/** @type {webpack.Configuration} */
 module.exports = {
   ...browser,
   target: 'node',

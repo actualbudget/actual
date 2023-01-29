@@ -10,6 +10,7 @@ import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 
 import { setBudget, getSheetValue } from './actions';
+import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
   await processTemplate(month, false);
@@ -59,114 +60,26 @@ async function processTemplate(month, force) {
   }
 }
 
-async function getCategoryTemplates() {
-  const matches = [
-    {
-      type: 'simple',
-        re: /^#template \$?(\-?\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['monthly']
-    },
-    {
-      type: 'simple',
-      re: /^#template up to \$?(\d+(\.\d{2})?)$/im,
-      params: ['limit']
-    },
-    {
-      type: 'simple',
-      re: /^#template \$?(\d+(\.\d{2})?) up to \$?(\d+(\.\d{2})?)$/im,
-      params: ['monthly', null, 'limit']
-    },
-    {
-      type: 'by',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'month']
-    },
-    {
-      type: 'by',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'repeat']
-    },
-    {
-      type: 'week',
-        re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'starting']
-    },
-    {
-      type: 'week',
-        re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['amount', null, 'starting', 'limit']
-    },
-    {
-      type: 'weeks',
-        re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'weeks', 'starting']
-    },
-    {
-      type: 'weeks',
-        re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['amount', null, 'weeks', 'starting', 'limit']
-    },
-    {
-      type: 'by_annual',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
-      params: ['amount', null, 'month']
-    },
-    {
-      type: 'by_annual',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'repeat']
-    },
-    {
-      type: 'spend',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from']
-    },
-    {
-      type: 'spend',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from', 'repeat']
-    },
-    {
-      type: 'spend_annual',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from']
-    },
-    {
-      type: 'spend_annual',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from', 'repeat']
-    },
-    {
-      type: 'percentage',
-      re: /^#template (\d+(\.\d+)?)% of (.*)$/im,
-      params: ['percent', null, 'category']
-    },
-    { type: 'error', re: /^#template .*$/im, params: [] }
-  ];
+const TEMPLATE_PREFIX = '#template';
 
+async function getCategoryTemplates() {
   let templates = {};
 
-  let notes = await db.all(`SELECT * FROM notes WHERE note like '%#template%'`);
+  let notes = await db.all(
+    `SELECT * FROM notes WHERE note like '%${TEMPLATE_PREFIX}%'`
+  );
 
   for (let n = 0; n < notes.length; n++) {
     let lines = notes[n].note.split('\n');
     let template_lines = [];
     for (let l = 0; l < lines.length; l++) {
-      for (let m = 0; m < matches.length; m++) {
-        let arr = matches[m].re.exec(lines[l]);
-        if (arr) {
-          let matched = {};
-          matched.line = arr[0];
-          matched.type = matches[m].type;
-          for (let p = 0; p < matches[m].params.length; p++) {
-            let param_name = matches[m].params[p];
-            if (param_name) {
-              matched[param_name] = arr[p + 1];
-            }
-          }
-          template_lines.push(matched);
-          break;
-        }
+      let line = lines[l].trim();
+      if (!line.startsWith(TEMPLATE_PREFIX)) continue;
+      try {
+        let parsed = parse(line.slice(TEMPLATE_PREFIX.length).trim());
+        template_lines.push(parsed);
+      } catch (e) {
+        console.info(e);
       }
     }
     if (template_lines.length) {
