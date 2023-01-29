@@ -79,7 +79,7 @@ async function getCategoryTemplates() {
         let parsed = parse(line.slice(TEMPLATE_PREFIX.length).trim());
         template_lines.push(parsed);
       } catch (e) {
-        console.info(e);
+        template_lines.push({ type: 'error', line, error: e.message });
       }
     }
     if (template_lines.length) {
@@ -322,7 +322,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       }
       case 'error':
-        console.log(`${category.name}: ${`Failed to match:`} ${template.line}`);
+        console.log(`${category.name}: Failed to match: ${template.line}`);
         return null;
       default:
     }
