@@ -66,7 +66,7 @@ function CoverTooltip({
           <CategoryAutocomplete
             categoryGroups={categoryGroups}
             value={null}
-            openOnFocus={false}
+            openOnFocus={true}
             onUpdate={id => {}}
             onSelect={id => setCategory(id)}
             inputProps={{
