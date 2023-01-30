@@ -8,9 +8,9 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
+import { useViewport } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import tokens from '../../tokens';
-import { isMobile } from '../../util';
 import { withThemeColor } from '../../util/withThemeColor';
 import { View, Text, Button, Input } from '../common';
 import { FormField, FormLabel } from '../forms';
@@ -122,25 +122,27 @@ function Settings({
     return () => unlisten();
   }, [loadPrefs]);
 
+  const { atLeastMediumWidth, isWideWidth } = useViewport();
+
   return (
     <View
       style={{
-        marginInline: globalPrefs.floatingSidebar && !isMobile() ? 'auto' : 0,
+        marginInline: globalPrefs.floatingSidebar && isWideWidth ? 'auto' : 0,
       }}
     >
       <Page
         title="Settings"
         titleStyle={
-          isMobile()
-            ? {
+          atLeastMediumWidth
+            ? undefined
+            : {
                 backgroundColor: colors.n11,
                 color: colors.n1,
               }
-            : undefined
         }
       >
         <View style={{ flexShrink: 0, gap: 30 }}>
-          {isMobile() && (
+          {atLeastMediumWidth ? null : (
             <View
               style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
             >

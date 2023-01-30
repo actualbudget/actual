@@ -110,15 +110,10 @@ export const styles = {
     fontSize: 13,
   },
   page: {
-    // This is the height of the titlebar
-    paddingTop: 8,
     flex: 1,
-    [`@media (min-width: ${tokens.breakpoint_xs})`]: {
-      minWidth: 360,
-      paddingTop: 36,
-    },
+    paddingTop: 8, // height of the titlebar
     [`@media (min-width: ${tokens.breakpoint_medium})`]: {
-      minWidth: 500,
+      paddingTop: 36,
     },
   },
   pageHeader: {

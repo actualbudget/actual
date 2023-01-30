@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { savePrefs } from 'loot-core/src/client/actions';
 
+import { useViewport } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
-import { isMobile } from '../util';
 
 import { View, Text, Button } from './common';
 import { Checkbox } from './forms';
@@ -16,8 +16,10 @@ export default function MobileWebMessage() {
     return (state.prefs.local && state.prefs.local.hideMobileMessage) || true;
   });
 
+  const { isWideWidth } = useViewport();
+
   let [show, setShow] = useState(
-    isMobile() &&
+    !isWideWidth &&
       !hideMobileMessagePref &&
       !document.cookie.match(/hideMobileMessage=true/),
   );

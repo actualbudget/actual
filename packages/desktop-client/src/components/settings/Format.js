@@ -33,10 +33,12 @@ function Column({ title, children }) {
     <View
       style={{
         alignItems: 'flex-start',
-        gap: '0.5em',
         flexGrow: 1,
-        [`@media (max-width: ${tokens.breakpoint_xs})`]: {
-          width: '100%',
+        gap: '0.5em',
+        width: '100%',
+        [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+          maxWidth: '30%',
+          width: 'auto',
         },
       }}
     >
@@ -73,11 +75,11 @@ export default function FormatSettings({ prefs, savePrefs }) {
       primaryAction={
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: 'column',
             gap: '1em',
             width: '100%',
-            [`@media (max-width: ${tokens.breakpoint_xs})`]: {
-              flexDirection: 'column',
+            [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+              flexDirection: 'row',
             },
           }}
         >

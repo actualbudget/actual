@@ -2,9 +2,9 @@ import React, { useState, useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
-import { useViewportSize } from '@react-aria/utils';
-
 import * as actions from 'loot-core/src/client/actions';
+
+import { useViewport } from '../ResponsiveProvider';
 
 import { View } from './common';
 import { SIDEBAR_WIDTH } from './sidebar';
@@ -22,9 +22,8 @@ export function SidebarProvider({ children }) {
 }
 
 export function useSidebar() {
-  useViewportSize(); // Force re-render on window resize
-  let windowWidth = document.documentElement.clientWidth;
-  let alwaysFloats = windowWidth < 668;
+  let { width } = useViewport();
+  let alwaysFloats = width < 668;
 
   let [hidden, setHidden] = useContext(SidebarContext);
   return useMemo(
