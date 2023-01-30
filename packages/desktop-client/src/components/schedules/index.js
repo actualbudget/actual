@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
-import { integerToCurrency } from 'loot-core/src/shared/util';
 import { View, Button, Input } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -20,8 +16,6 @@ export default function Schedules() {
   let [filter, setFilter] = useState('');
 
   let scheduleData = useSchedules();
-  let payees = useCachedPayees();
-  let accounts = useCachedAccounts();
 
   if (scheduleData == null) {
     return null;
@@ -65,12 +59,6 @@ export default function Schedules() {
     }
   }
 
-  const filterIncludes = str =>
-    str
-      ? str.toLowerCase().includes(filter.toLowerCase()) ||
-        str.toLowerCase().includes(filter.toLowerCase())
-      : true;
-
   return (
     <Page title="Schedules">
       <View style={{ alignItems: 'flex-end' }}>
@@ -98,29 +86,8 @@ export default function Schedules() {
         }}
       >
         <SchedulesTable
-          schedules={
-            filter
-              ? schedules.filter(s => {
-                  let payee = payees.find(p => s._payee === p.id);
-                  let account = accounts.find(a => s._account === a.id);
-                  let amount = getScheduledAmount(s._amount);
-                  let amountStr =
-                    (s._amountOp === 'isapprox' || s._amountOp === 'isbetween'
-                      ? '~'
-                      : '') +
-                    (amount > 0 ? '+' : '') +
-                    integerToCurrency(Math.abs(amount || 0));
-
-                  return (
-                    filterIncludes(payee && payee.name) ||
-                    filterIncludes(account && account.name) ||
-                    filterIncludes(amountStr) ||
-                    filterIncludes(statuses.get(s.id))
-                  );
-                })
-              : schedules
-          }
-          filtered={filter !== ''}
+          schedules={schedules}
+          filter={filter}
           statuses={statuses}
           allowCompleted={true}
           onSelect={onEdit}

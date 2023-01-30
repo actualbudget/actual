@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
+import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
+import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -126,8 +128,8 @@ export function ScheduleAmountCell({ amount, op }) {
 export function SchedulesTable({
   schedules,
   statuses,
+  filter,
   minimal,
-  filtered,
   allowCompleted,
   style,
   onSelect,
@@ -139,19 +141,50 @@ export function SchedulesTable({
 
   let [showCompleted, setShowCompleted] = useState(false);
 
-  let items = useMemo(() => {
-    if (!allowCompleted) {
-      return schedules.filter(s => !s.completed);
-    }
-    if (showCompleted) {
+  let payees = useCachedPayees();
+  let accounts = useCachedAccounts();
+
+  let filteredSchedules = useMemo(() => {
+    if (!filter) {
       return schedules;
     }
-    let arr = schedules.filter(s => !s.completed);
-    if (schedules.find(s => s.completed)) {
+    const filterIncludes = str =>
+      str
+        ? str.toLowerCase().includes(filter.toLowerCase()) ||
+          str.toLowerCase().includes(filter.toLowerCase())
+        : true;
+
+    return schedules.filter(s => {
+      let payee = payees.find(p => s._payee === p.id);
+      let account = accounts.find(a => s._account === a.id);
+      let amount = getScheduledAmount(s._amount);
+      let amountStr =
+        (s._amountOp === 'isapprox' || s._amountOp === 'isbetween' ? '~' : '') +
+        (amount > 0 ? '+' : '') +
+        integerToCurrency(Math.abs(amount || 0));
+
+      return (
+        filterIncludes(payee && payee.name) ||
+        filterIncludes(account && account.name) ||
+        filterIncludes(amountStr) ||
+        filterIncludes(statuses.get(s.id))
+      );
+    });
+  }, [schedules, filter, statuses]);
+
+  let items = useMemo(() => {
+    if (!allowCompleted) {
+      return filteredSchedules.filter(s => !s.completed);
+    }
+    if (showCompleted) {
+      return filteredSchedules;
+    }
+    let arr = filteredSchedules.filter(s => !s.completed);
+    if (filteredSchedules.find(s => s.completed)) {
       arr.push({ type: 'show-completed' });
     }
     return arr;
-  }, [schedules, showCompleted, allowCompleted]);
+  }, [filteredSchedules, showCompleted, allowCompleted]);
 
   function renderSchedule({ item }) {
     return (
@@ -255,7 +288,7 @@ export function SchedulesTable({
         style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
         items={items}
         renderItem={renderItem}
-        renderEmpty={filtered ? 'No matching schedules' : 'No schedules'}
+        renderEmpty={filter ? 'No matching schedules' : 'No schedules'}
         allowPopupsEscape={items.length < 6}
       />
     </>
