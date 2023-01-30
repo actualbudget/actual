@@ -99,4 +99,17 @@ describe('File import', () => {
     expect(res.errors.length).toBe(1);
     expect(res.errors[0].message).toBe('Invalid file type');
   }, 45000);
+
+  test('handles non-ASCII characters', async () => {
+    prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    let { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../mocks/files/8859-1.qfx',
+      'yyyy-MM-dd'
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
 });
