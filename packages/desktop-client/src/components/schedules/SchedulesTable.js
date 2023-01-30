@@ -163,12 +163,16 @@ export function SchedulesTable({
         (s._amountOp === 'isapprox' || s._amountOp === 'isbetween' ? '~' : '') +
         (amount > 0 ? '+' : '') +
         integerToCurrency(Math.abs(amount || 0));
+      let dateStr = s.next_date
+        ? monthUtils.format(s.next_date, dateFormat)
+        : null;
 
       return (
         filterIncludes(payee && payee.name) ||
         filterIncludes(account && account.name) ||
         filterIncludes(amountStr) ||
-        filterIncludes(statuses.get(s.id))
+        filterIncludes(statuses.get(s.id)) ||
+        filterIncludes(dateStr)
       );
     });
   }, [schedules, filter, statuses]);
