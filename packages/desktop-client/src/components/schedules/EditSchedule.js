@@ -290,12 +290,17 @@ export default function ScheduleDetails() {
     let unsubscribe;
 
     if (state.schedule && state.transactionsMode === 'matched') {
-      let { conditions } = updateScheduleConditions(
+      let { error, conditions } = updateScheduleConditions(
         state.schedule,
         state.fields
       );
 
       dispatch({ type: 'set-transactions', transactions: [] });
+
+      if (error) {
+        dispatch({ type: 'form-error', error });
+        return;
+      }
 
       // *Extremely* gross hack because the rules are not mapped to
       // public names automatically. We really should be doing that
