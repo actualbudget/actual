@@ -9,6 +9,17 @@ import { reconcileTransactions } from './sync';
 
 beforeEach(global.emptyDatabase());
 
+// libofx spits out errors that contain the entire
+// source code of the file in the stack which makes
+// it hard to test.
+let old = console.warn;
+beforeAll(() => {
+  console.warn = () => {};
+});
+afterAll(() => {
+  console.warn = old;
+});
+
 async function getTransactions(accountId) {
   return db.runQuery(
     'SELECT * FROM transactions WHERE acct = ?',
