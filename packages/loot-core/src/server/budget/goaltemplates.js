@@ -103,7 +103,7 @@ async function getCategoryTemplates() {
   let templates = {};
 
   let notes = await db.all(
-    `SELECT * FROM notes WHERE note like '%${TEMPLATE_PREFIX}%'`
+    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`
   );
 
   for (let n = 0; n < notes.length; n++) {
@@ -111,7 +111,7 @@ async function getCategoryTemplates() {
     let template_lines = [];
     for (let l = 0; l < lines.length; l++) {
       let line = lines[l].trim();
-      if (!line.startsWith(TEMPLATE_PREFIX)) continue;
+      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
       let expression = line.slice(TEMPLATE_PREFIX.length);
       try {
         let parsed = parse(expression);
