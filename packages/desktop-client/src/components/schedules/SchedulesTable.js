@@ -127,6 +127,7 @@ export function SchedulesTable({
   schedules,
   statuses,
   minimal,
+  filtered,
   allowCompleted,
   style,
   onSelect,
@@ -254,7 +255,7 @@ export function SchedulesTable({
         style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
         items={items}
         renderItem={renderItem}
-        renderEmpty="No schedules"
+        renderEmpty={filtered ? 'No matching schedules' : 'No schedules'}
         allowPopupsEscape={items.length < 6}
       />
     </>
