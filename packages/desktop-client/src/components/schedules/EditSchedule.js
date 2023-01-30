@@ -700,6 +700,22 @@ export default function ScheduleDetails() {
           )}
 
           <SimpleTransactionsTable
+            renderEmpty={
+              state.transactionsMode === 'matched' &&
+              (() => (
+                <View
+                  style={{ padding: 20, color: colors.n4, textAlign: 'center' }}
+                >
+                  {state.error ? (
+                    <Text style={{ color: colors.r4 }}>
+                      Could not search: {state.error}
+                    </Text>
+                  ) : (
+                    'No transactions found'
+                  )}
+                </View>
+              ))
+            }
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
             style={{
