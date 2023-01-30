@@ -241,7 +241,7 @@ class ManagementApp extends React.Component {
 
           <Switch>
             <Route exact path="/config-server" component={null} />
-            <Route exact path="/" component={ServerURL} />
+            <Route path="/" component={ServerURL} />
           </Switch>
           <Version />
         </View>
