@@ -48,5 +48,5 @@ percent 'percentage' = percent: $(d+) _? '%' { return +percent }
 year 'year' = $(d d d d)
 month 'month' = $(year '-' d d)
 day 'day' = $(d d)
-date = $(year '-' month '-' day)
+date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
