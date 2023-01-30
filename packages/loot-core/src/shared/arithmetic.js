@@ -36,8 +36,7 @@ function parsePrimary(state) {
     next(state);
   }
 
-  // TODO: Support currency symbols better
-  if (char(state) === '$') {
+  if (/\p{Sc}/u.test(char(state))) {
     next(state);
   }
 
