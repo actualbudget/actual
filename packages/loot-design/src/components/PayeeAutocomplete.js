@@ -287,7 +287,10 @@ export default function PayeeAutocomplete({
         filtered.filtered = isf;
 
         if (filtered.length >= 2 && filtered[0].id === 'new') {
-          if (filtered[1].name.toLowerCase() === value.toLowerCase()) {
+          if (
+            filtered[1].name.toLowerCase() === value.toLowerCase() &&
+            !filtered[1].transfer_acct
+          ) {
             return filtered.slice(1);
           }
         }
