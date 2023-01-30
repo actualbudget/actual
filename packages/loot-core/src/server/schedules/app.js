@@ -268,8 +268,8 @@ export async function updateSchedule({ schedule, conditions, resetNextDate }) {
           oldConditions.find(c => c.field === 'account')
         ) ||
         !deepEqual(
-          stripType(oldConditions.find(c => c.field === 'date')),
-          stripType(newConditions.find(c => c.field === 'date'))
+          stripType(oldConditions.find(c => c.field === 'date') || {}),
+          stripType(newConditions.find(c => c.field === 'date') || {})
         )
       ) {
         await setNextDate({
