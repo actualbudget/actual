@@ -44,6 +44,7 @@ export default function ScheduleLink() {
         statuses={statuses}
         minimal={true}
         onSelect={onSelect}
+        tableStyle={{ marginInline: -20 }}
       />
     </Page>
   );

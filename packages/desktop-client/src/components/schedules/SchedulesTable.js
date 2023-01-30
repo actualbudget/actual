@@ -133,7 +133,8 @@ export function SchedulesTable({
   allowCompleted,
   style,
   onSelect,
-  onAction
+  onAction,
+  tableStyle
 }) {
   let dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
@@ -265,7 +266,7 @@ export function SchedulesTable({
   }
 
   return (
-    <>
+    <View style={[{ flex: 1 }, tableStyle]}>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
@@ -291,6 +292,6 @@ export function SchedulesTable({
         renderEmpty={filter ? 'No matching schedules' : 'No schedules'}
         allowPopupsEscape={items.length < 6}
       />
-    </>
+    </View>
   );
 }
