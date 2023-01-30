@@ -155,23 +155,25 @@ export function SchedulesTable({
           str.toLowerCase().includes(filter.toLowerCase())
         : true;
 
-    return schedules.filter(s => {
-      let payee = payees.find(p => s._payee === p.id);
-      let account = accounts.find(a => s._account === a.id);
-      let amount = getScheduledAmount(s._amount);
+    return schedules.filter(schedule => {
+      let payee = payees.find(p => schedule._payee === p.id);
+      let account = accounts.find(a => schedule._account === a.id);
+      let amount = getScheduledAmount(schedule._amount);
       let amountStr =
-        (s._amountOp === 'isapprox' || s._amountOp === 'isbetween' ? '~' : '') +
+        (schedule._amountOp === 'isapprox' || schedule._amountOp === 'isbetween'
+          ? '~'
+          : '') +
         (amount > 0 ? '+' : '') +
         integerToCurrency(Math.abs(amount || 0));
-      let dateStr = s.next_date
-        ? monthUtils.format(s.next_date, dateFormat)
+      let dateStr = schedule.next_date
+        ? monthUtils.format(schedule.next_date, dateFormat)
         : null;
 
       return (
         filterIncludes(payee && payee.name) ||
         filterIncludes(account && account.name) ||
         filterIncludes(amountStr) ||
-        filterIncludes(statuses.get(s.id)) ||
+        filterIncludes(statuses.get(schedule.id)) ||
         filterIncludes(dateStr)
       );
     });
