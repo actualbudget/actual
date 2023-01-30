@@ -3,8 +3,7 @@ import { useHistory } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View, Button, Input } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { View, Button, Search } from 'loot-design/src/components/common';
 
 import { Page } from '../Page';
 
@@ -62,19 +61,10 @@ export default function Schedules() {
   return (
     <Page title="Schedules">
       <View style={{ alignItems: 'flex-end' }}>
-        <Input
-          placeholder="Filter schedules..."
+        <Search
+          placeholder="Filter schedules…"
           value={filter}
-          onChange={e => setFilter(e.target.value)}
-          style={{
-            width: 350,
-            borderColor: 'transparent',
-            backgroundColor: colors.n11,
-            ':focus': {
-              backgroundColor: 'white',
-              '::placeholder': { color: colors.n8 }
-            }
-          }}
+          onChange={setFilter}
         />
       </View>
 
