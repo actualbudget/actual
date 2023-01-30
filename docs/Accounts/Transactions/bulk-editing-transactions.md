@@ -1,21 +1,22 @@
 ---
-title: 'Bulk Editing Transactions in Actual' 
+title: 'Bulk Actions' 
 ---
 
-It can be extremely useful to be able to bulk edit a number of transactions at once.
+It can be extremely useful to be able to bulk edit or duplicate a number of transactions at once.
 
 :::danger
 This guidance is not compatible with split transactions, bulk editing produces some unexpected behaviours when bulk editing split transactions.
 :::
 
-### Possible use cases include:
+### Use Cases
 
 1. Adding categories to imported transactions
 2. Changing the category for a number of transactions You may for example wish to reorganise your category structure and naming.
 3. Add a note to certain transactions in order to provide more granular detail for analysis, without having to add still more categories.
 4. To change the Account for a number of transactions - perhaps due to a manual entry or import error.
+5. Duplicating multiple transactions that may not be appropriate for scheduling
 
-### The Bulk Edit options
+### Editing transaction properties
 
 There are various components of a transaction that can be changed through bulk edit. These can be seen here.
 
@@ -46,3 +47,8 @@ Press “Enter” and all the selected transactions are changed.
 Here is another example. This time to bulk change a Category.
 
 ![](/img/bulk-edit/8.png)
+
+### Duplicating transactions
+To duplicate transactions (one or more), simply navigate to the Accounts page as described above, and select the tick box in the left hand column. Once selected, go to the drop down menu on the top right of the page, above the table header. Open the menu and select “Duplicate”. Your newly duplicated transactions will appear in the transactions table!
+
+![](/img/duplicate-transactions.png)
