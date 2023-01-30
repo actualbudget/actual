@@ -44,22 +44,15 @@ async function processTemplate(month, force) {
         errors = errors.concat(
           template
             .filter(t => t.type === 'error')
-            .map(({ line, error }) => {
-              error.location.start.column += TEMPLATE_PREFIX.length;
-              error.location.end.column += TEMPLATE_PREFIX.length;
-              // e.g.
-              // 0:Error: Expected month but "i" found.
-              // 1: --> Laundry:1:8
-              // 2:  |
-              // 3:1 | #template $20 by invalid
-              // 4:  |        ^
-              let lines = error.format([{ text: line }]).split('\n');
-              return [
-                category.name + ': ' + lines[0].replace('Error: ', ''),
-                lines[3].slice(4),
-                lines[4].slice(4)
-              ].join('\n');
-            })
+            .map(({ line, error }) =>
+              [
+                category.name + ': ' + error.message,
+                line,
+                ' '.repeat(
+                  TEMPLATE_PREFIX.length + error.location.start.offset
+                ) + '^'
+              ].join('\n')
+            )
         );
         let to_budget = await applyCategoryTemplate(
           category,
