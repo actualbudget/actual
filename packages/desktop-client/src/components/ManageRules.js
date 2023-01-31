@@ -568,8 +568,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
     schedules
   }));
 
-  console.log('fil', filterData);
-
   let filteredRules = useMemo(
     () =>
       filter === '' || !rules
