@@ -229,11 +229,11 @@ export function ConditionExpression({
   );
 }
 
-function describeSchedule(s, payee) {
+function describeSchedule(schedule, payee) {
   if (payee) {
-    return `${payee.name} (${s.next_date})`;
+    return `${payee.name} (${schedule.next_date})`;
   } else {
-    return `Next: ${s.next_date}`;
+    return `Next: ${schedule.next_date}`;
   }
 }
 
@@ -247,7 +247,7 @@ function ScheduleValue({ value }) {
       value={value}
       field="rule"
       data={schedules}
-      describe={s => describeSchedule(s, byId[s._payee])}
+      describe={schedule => describeSchedule(schedule, byId[schedule._payee])}
     />
   );
 }
