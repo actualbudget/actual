@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === 'test') {
   config = {
     mode: 'test',
     port: 5006,
-    hostname: '0.0.0.0',
+    hostname: '::',
     serverFiles: join(__dirname, 'test-server-files'),
     userFiles: join(__dirname, 'test-user-files')
   };
@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === 'test') {
   config = {
     mode: 'development',
     port: 5006,
-    hostname: '0.0.0.0',
+    hostname: '::',
     serverFiles: join(root, 'server-files'),
     userFiles: join(root, 'user-files'),
     ...config
