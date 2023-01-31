@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
 
@@ -327,31 +327,27 @@ function DetailedBalance({ name, balance }) {
 }
 
 function SelectedBalance({ selectedItems }) {
-  let [balance, setBalance] = useState(null);
+  let name = `selected-balance-${[...selectedItems].join('-')}`;
 
-  useEffect(() => {
-    async function run() {
-      let { data: rows } = await runQuery(
-        q('transactions')
-          .filter({
-            id: { $oneof: [...selectedItems] },
-            parent_id: { $oneof: [...selectedItems] }
-          })
-          .select('id')
-      );
-      let ids = new Set(rows.map(r => r.id));
+  let rows = useSheetValue({
+    name,
+    query: q('transactions')
+      .filter({
+        id: { $oneof: [...selectedItems] },
+        parent_id: { $oneof: [...selectedItems] }
+      })
+      .select('id')
+  });
+  let ids = new Set((rows || []).map(r => r.id));
 
-      let finalIds = [...selectedItems].filter(id => !ids.has(id));
-      let { data: balance } = await runQuery(
-        q('transactions')
-          .filter({ id: { $oneof: finalIds } })
-          .options({ splits: 'all' })
-          .calculate({ $sum: '$amount' })
-      );
-      setBalance(balance);
-    }
-    run();
-  }, [selectedItems]);
+  let finalIds = [...selectedItems].filter(id => !ids.has(id));
+  let balance = useSheetValue({
+    name: name + '-sum',
+    query: q('transactions')
+      .filter({ id: { $oneof: finalIds } })
+      .options({ splits: 'all' })
+      .calculate({ $sum: '$amount' })
+  });
 
   if (balance == null) {
     return null;
@@ -724,7 +720,7 @@ const AccountHeader = React.memo(
                     {accountName}
                   </View>
 
-                  <NotesButton id={`account-${account.id}`} />
+                  {account && <NotesButton id={`account-${account.id}`} />}
                   <Button
                     bare
                     className="hover-visible"
