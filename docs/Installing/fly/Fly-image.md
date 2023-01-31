@@ -2,6 +2,8 @@
 title: 'Deploying Actual with a container image'
 ---
 
+[discord]: https://discord.gg/8JfAXSgfRf
+
 # Deploying Actual on fly.io with a container image
 
 ## Deploying

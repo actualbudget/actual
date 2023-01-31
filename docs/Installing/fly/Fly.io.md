@@ -2,7 +2,7 @@
 [image-guide]: ./Fly-image
 [terraform-guide]: ./Fly-terraform
 [ci-build]: https://github.com/actualbudget/actual-server/blob/master/.github/workflows/build.yml
-[discord]: https://discord.gg/pFFRdFYX
+[discord]: https://discord.gg/8JfAXSgfRf
 
 
 # Hosting Actual with [fly.io](https://fly.io)
