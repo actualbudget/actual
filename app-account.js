@@ -94,10 +94,11 @@ app.post('/change-password', (req, res) => {
   }
 
   let hashed = hashPassword(password);
-
+  let token = uuid.v4();
   // Note that this doesn't have a WHERE. This table only ever has 1
   // row (maybe that will change in the future? if this this will not work)
   accountDb.mutate('UPDATE auth SET password = ?', [hashed]);
+  accountDb.mutate('UPDATE sessions SET token = ?', [token]);
 
   res.send({ status: 'ok', data: {} });
 });
