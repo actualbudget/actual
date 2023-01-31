@@ -8,6 +8,7 @@ import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import { colors } from '../style';
 import Add from '../svg/v1/Add';
+
 import Autocomplete, {
   defaultFilterSuggestion,
   AutocompleteFooter,
@@ -286,7 +287,10 @@ export default function PayeeAutocomplete({
         filtered.filtered = isf;
 
         if (filtered.length >= 2 && filtered[0].id === 'new') {
-          if (filtered[1].name.toLowerCase() === value.toLowerCase()) {
+          if (
+            filtered[1].name.toLowerCase() === value.toLowerCase() &&
+            !filtered[1].transfer_acct
+          ) {
             return filtered.slice(1);
           }
         }

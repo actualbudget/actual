@@ -9,7 +9,7 @@ let colorFades = {
 
 // Typography
 const sansSerif =
-  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif';
+  '"Inter var", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif';
 const letterSpacing = 'normal';
 const fontSize = 13;
 
@@ -22,6 +22,25 @@ const baseLabelStyles = {
   stroke: 'transparent'
 };
 
+const axisBaseStyles = {
+  axis: {
+    fill: 'transparent',
+    stroke: 'none'
+  },
+  grid: {
+    fill: 'none',
+    stroke: 'none',
+    pointerEvents: 'none'
+  },
+  ticks: {
+    fill: 'transparent',
+    size: 1,
+    stroke: 'none'
+  },
+  axisLabel: baseLabelStyles,
+  tickLabels: baseLabelStyles
+};
+
 export default {
   colors: {
     ...colorFades,
@@ -30,6 +49,7 @@ export default {
   },
   area: {
     style: {
+      labels: baseLabelStyles,
       data: {
         stroke: colors.b6,
         strokeWidth: 2,
@@ -39,43 +59,35 @@ export default {
     }
   },
   axis: {
-    style: {
-      axis: {
-        fill: 'transparent',
-        stroke: 'none'
-      },
-      grid: {
-        fill: 'none',
-        stroke: 'none',
-        pointerEvents: 'none'
-      },
-      ticks: {
-        fill: 'transparent',
-        size: 1,
-        stroke: 'none'
-      },
-      tickLabels: baseLabelStyles
-    }
+    style: axisBaseStyles
   },
   dependentAxis: {
     style: {
-      grid: { stroke: 'rgba(0,0,0,.2)', strokeDasharray: '1,1' },
-      tickLabels: { padding: 5 }
+      ...axisBaseStyles,
+      grid: {
+        ...axisBaseStyles.grid,
+        stroke: 'rgba(0,0,0,.2)',
+        strokeDasharray: '1,1'
+      },
+      tickLabels: { ...baseLabelStyles, padding: 5 }
     }
   },
   independentAxis: {
     style: {
-      axis: { stroke: 'rgba(0,0,0,.2)' },
-      tickLabels: { padding: 10 }
+      ...axisBaseStyles,
+      axis: { ...axisBaseStyles.axis, stroke: 'rgba(0,0,0,.2)' },
+      tickLabels: { ...baseLabelStyles, padding: 10 }
     }
   },
   bar: {
     style: {
+      labels: baseLabelStyles,
       data: { fill: colors.b6, stroke: 'none' }
     }
   },
   line: {
     style: {
+      labels: baseLabelStyles,
       data: {
         fill: 'none',
         stroke: colors.b6,
@@ -83,6 +95,11 @@ export default {
         strokeLinejoin: 'round',
         strokeLinecap: 'round'
       }
+    }
+  },
+  voronoi: {
+    style: {
+      labels: baseLabelStyles
     }
   },
   chart: {

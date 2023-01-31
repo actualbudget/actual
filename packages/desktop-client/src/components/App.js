@@ -11,6 +11,7 @@ import {
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
 
 import installPolyfills from '../polyfills';
+
 import AppBackground from './AppBackground';
 import FatalError from './FatalError';
 import FinancesApp from './FinancesApp';
@@ -74,10 +75,7 @@ class App extends React.Component {
     this.cleanup = () => window.removeEventListener('focus', checkScrollbars);
   }
 
-  componentDidCatch(error, errorInfo) {
-    if (process.env.NODE_ENV !== 'development') {
-      window.SentryClient.captureException(error, { extra: errorInfo });
-    }
+  componentDidCatch(error) {
     this.setState({ fatalError: error });
   }
 

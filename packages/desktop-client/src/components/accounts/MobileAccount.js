@@ -23,6 +23,7 @@ import { colors } from 'loot-design/src/style';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import SyncRefresh from '../SyncRefresh';
+
 import { default as AccountDetails } from './MobileAccountDetails';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
@@ -181,6 +182,7 @@ function Account(props) {
     setSearchText(text);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const onSelectTransaction = transaction => {
     if (isPreviewId(transaction.id)) {
       let parts = transaction.id.split('/');

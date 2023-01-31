@@ -5,7 +5,7 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
-async function getSheetValue(sheetName, cell) {
+export async function getSheetValue(sheetName, cell) {
   const node = await sheet.getCell(sheetName, cell);
   return safeNumber(typeof node.value === 'number' ? node.value : 0);
 }

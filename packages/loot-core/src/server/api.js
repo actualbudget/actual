@@ -11,6 +11,7 @@ import {
   deleteTransaction
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
+
 import { addTransactions } from './accounts/sync';
 import {
   accountModel,

@@ -15,8 +15,11 @@ import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 import useServerVersion from '../../hooks/useServerVersion';
 import { isMobile } from '../../util';
 import { Page } from '../Page';
+
 import EncryptionSettings from './Encryption';
+import ExperimentalFeatures from './Experimental';
 import ExportBudget from './Export';
+import FixSplitsTool from './FixSplits';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
@@ -107,6 +110,8 @@ function Settings({
             <AdvancedAbout prefs={prefs} />
             <ResetCache />
             <ResetSync resetSync={resetSync} />
+            <FixSplitsTool />
+            <ExperimentalFeatures prefs={prefs} savePrefs={savePrefs} />
           </AdvancedToggle>
         </View>
       </Page>
