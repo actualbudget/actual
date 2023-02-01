@@ -203,7 +203,7 @@ function MobileNavTabs() {
 class FinancesApp extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isMobile: isMobile(window.innerWidth) };
+    this.state = { isMobile: isMobile() };
     this.history = createBrowserHistory();
 
     let oldPush = this.history.push;
@@ -232,7 +232,7 @@ class FinancesApp extends React.Component {
 
   handleWindowResize() {
     this.setState({
-      isMobile: isMobile(window.innerWidth),
+      isMobile: isMobile(),
       windowWidth: window.innerWidth
     });
   }
