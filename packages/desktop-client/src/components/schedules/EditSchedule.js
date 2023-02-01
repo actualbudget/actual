@@ -290,12 +290,17 @@ export default function ScheduleDetails() {
     let unsubscribe;
 
     if (state.schedule && state.transactionsMode === 'matched') {
-      let { conditions } = updateScheduleConditions(
+      let { error, conditions } = updateScheduleConditions(
         state.schedule,
         state.fields
       );
 
       dispatch({ type: 'set-transactions', transactions: [] });
+
+      if (error) {
+        dispatch({ type: 'form-error', error });
+        return;
+      }
 
       // *Extremely* gross hack because the rules are not mapped to
       // public names automatically. We really should be doing that
@@ -695,6 +700,22 @@ export default function ScheduleDetails() {
           )}
 
           <SimpleTransactionsTable
+            renderEmpty={
+              state.transactionsMode === 'matched' &&
+              (() => (
+                <View
+                  style={{ padding: 20, color: colors.n4, textAlign: 'center' }}
+                >
+                  {state.error ? (
+                    <Text style={{ color: colors.r4 }}>
+                      Could not search: {state.error}
+                    </Text>
+                  ) : (
+                    'No transactions found'
+                  )}
+                </View>
+              ))
+            }
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
             style={{
