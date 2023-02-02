@@ -69,18 +69,6 @@ window.$send = send;
 window.$query = runQuery;
 window.$q = q;
 
-if (!window.SharedArrayBuffer) {
-  alert(
-    'Server misconfiguration alert! Actual requires access to' +
-      ' SharedArrayBuffer in order to function properly. If' +
-      ' you’re seeing this warning, either your browser does not' +
-      ' support SharedArrayBuffer, or your server is not' +
-      ' sending the appropriate headers. See ' +
-      'https://github.com/actualbudget/actual/issues/511 for more' +
-      ' information.'
-  );
-}
-
 ReactDOM.render(
   <Provider store={store}>
     <App />
