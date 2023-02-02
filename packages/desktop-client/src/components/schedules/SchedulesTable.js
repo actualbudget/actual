@@ -153,7 +153,7 @@ export function SchedulesTable({
       str
         ? str.toLowerCase().includes(filter.toLowerCase()) ||
           str.toLowerCase().includes(filter.toLowerCase())
-        : true;
+        : false;
 
     return schedules.filter(schedule => {
       let payee = payees.find(p => schedule._payee === p.id);
