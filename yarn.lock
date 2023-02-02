@@ -5,14 +5,14 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@actual-app/api@npm:4.1.5":
-  version: 4.1.5
-  resolution: "@actual-app/api@npm:4.1.5"
+"@actual-app/api@npm:4.1.6":
+  version: 4.1.6
+  resolution: "@actual-app/api@npm:4.1.6"
   dependencies:
     better-sqlite3: ^7.5.0
-    node-fetch: ^1.6.3
+    node-fetch: ^2.6.9
     uuid: 3.3.2
-  checksum: 38ea20542bb762995340ae7877585fdb1627ecc3a7bbd74a6fe3418079cad7ea7b3509f11ef9b546b1a3ba7aedcf1d411e2955d4e5a409856233432ef091f8d9
+  checksum: e78500562a05bd445be3395cd68d79c24ea8618515db1699409a00cd19e12e4561877b355bbffbe87595be2cd6e86060a45e22fc4ddf26177d7599e94690b3c9
   languageName: node
   linkType: hard
 
@@ -1514,7 +1514,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual-sync@workspace:."
   dependencies:
-    "@actual-app/api": 4.1.5
+    "@actual-app/api": 4.1.6
     "@actual-app/web": 23.1.12
     "@types/better-sqlite3": ^7.5.0
     "@types/jest": ^29.2.3
@@ -2531,7 +2531,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"encoding@npm:^0.1.11, encoding@npm:^0.1.13":
+"encoding@npm:^0.1.13":
   version: 0.1.13
   resolution: "encoding@npm:0.1.13"
   dependencies:
@@ -3728,13 +3728,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-stream@npm:^1.0.1":
-  version: 1.1.0
-  resolution: "is-stream@npm:1.1.0"
-  checksum: 063c6bec9d5647aa6d42108d4c59723d2bd4ae42135a2d4db6eadbd49b7ea05b750fd69d279e5c7c45cf9da753ad2c00d8978be354d65aa9f6bb434969c6a2ae
-  languageName: node
-  linkType: hard
-
 "is-stream@npm:^2.0.0":
   version: 2.0.1
   resolution: "is-stream@npm:2.0.1"
@@ -4739,16 +4732,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^1.6.3":
-  version: 1.7.3
-  resolution: "node-fetch@npm:1.7.3"
-  dependencies:
-    encoding: ^0.1.11
-    is-stream: ^1.0.1
-  checksum: 3bb0528c05d541316ebe52770d71ee25a6dce334df4231fd55df41a644143e07f068637488c18a5b0c43f05041dbd3346752f9e19b50df50569a802484544d5b
-  languageName: node
-  linkType: hard
-
 "node-fetch@npm:^2.6.5":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7"
@@ -4760,6 +4743,20 @@ __metadata:
     encoding:
       optional: true
   checksum: 8d816ffd1ee22cab8301c7756ef04f3437f18dace86a1dae22cf81db8ef29c0bf6655f3215cb0cdb22b420b6fe141e64b26905e7f33f9377a7fa59135ea3e10b
+  languageName: node
+  linkType: hard
+
+"node-fetch@npm:^2.6.9":
+  version: 2.6.9
+  resolution: "node-fetch@npm:2.6.9"
+  dependencies:
+    whatwg-url: ^5.0.0
+  peerDependencies:
+    encoding: ^0.1.0
+  peerDependenciesMeta:
+    encoding:
+      optional: true
+  checksum: acb04f9ce7224965b2b59e71b33c639794d8991efd73855b0b250921382b38331ffc9d61bce502571f6cc6e11a8905ca9b1b6d4aeb586ab093e2756a1fd190d0
   languageName: node
   linkType: hard
 

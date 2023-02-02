@@ -13,7 +13,7 @@
     "verify": "yarn -s lint && yarn types"
   },
   "dependencies": {
-    "@actual-app/api": "4.1.5",
+    "@actual-app/api": "4.1.6",
     "@actual-app/web": "23.1.12",
     "bcrypt": "^5.0.1",
     "better-sqlite3": "^7.5.0",
