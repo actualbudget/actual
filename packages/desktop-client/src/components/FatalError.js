@@ -31,11 +31,10 @@ class FatalError extends React.Component {
       // SharedArrayBuffer isn't available
       msg = (
         <Text>
-          Server misconfiguration alert! Actual requires access to{' '}
-          <code>SharedArrayBuffer</code> in order to function properly. If
-          you’re seeing this error, either your browser does not support{' '}
-          <code>SharedArrayBuffer</code>, or your server is not sending the
-          appropriate headers, or you are not using HTTPS. See{' '}
+          Actual requires access to <code>SharedArrayBuffer</code> in order to
+          function properly. If you’re seeing this error, either your browser
+          does not support <code>SharedArrayBuffer</code>, or your server is not
+          sending the appropriate headers, or you are not using HTTPS. See{' '}
           <a href="https://actualbudget.github.io/docs/Troubleshooting/SharedArrayBuffer">
             our troubleshooting documentation
           </a>{' '}
