@@ -268,7 +268,10 @@ const sidebars = {
           type: 'category',
           label: 'Troubleshooting',
           collapsed: true,
-          items: ['Troubleshooting/Troubleshooting-Edge'],
+          items: [
+            'Troubleshooting/SharedArrayBuffer',
+            'Troubleshooting/Troubleshooting-Edge',
+          ],
         },
       ],
     },
