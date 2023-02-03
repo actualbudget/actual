@@ -1,3 +1,7 @@
+---
+title: API Reference
+---
+
 import { types, objects, PrimitiveTypeList, PrimitiveType, StructType, Method, MethodBox } from './types';
 import APIList from './APIList';
 

@@ -2,15 +2,17 @@
 title: 'Local Installation'
 ---
 
-The easiest way to get Actual running is to use the [actual-server](https://github.com/actualbudget/actual-server) project. 
+The easiest way to get Actual running locally is to use the [actual-server](https://github.com/actualbudget/actual-server) project.
 
 Actual Server is the server element of Actual that is used for syncing changes across devices, and it comes with the latest version of Actual Web.
 
-## Getting Started 
+## Pre-requisites
 
-As outlined in the [overview](/Installing/overview.md) you need to make sure the following is installed on your machine before starting. 
+Actual Server currently requires Node.js v16. If you don’t have Node.js installed, you can download the latest version of Node.js 16 from the [Node.js website](https://nodejs.org/en/download/releases/) (search for “16” to find the right version). If you already have Node.js installed, consider using a tool like [`nvm`](https://github.com/nvm-sh/nvm) or [`asdf`](https://asdf-vm.com) to install and manage multiple versions of Node.js.
 
-[NodeJS](https://nodejs.org/en/) version 14 or greater, NodeJS has documentation on how to install it on your own machine, [Yarn](https://yarnpkg.com/) you can install this using NPM, however if you only just installed NodeJS you may need to restart your terminal first before running the below command.
+You’ll also need to have Git installed. The Git website has [instructions for all supported operating systems](https://git-scm.com/download).
+
+Next, you’ll need to install `yarn`, which is the package manager that Actual uses. You can install it using the following command:
 
 ```js
 npm install --global yarn
@@ -38,14 +40,16 @@ yarn install
 
 ## Running Actual
 
-Now that Actual is *installed* we can start it by issuing the following command
+Now that Actual is installed, start the server by running the following command:
 
 ```bash
 yarn start
 ```
 
+Note that if you restart your computer, you’ll have to run this command again to start the server.
+
 ## Accessing Actual
 
-You should now be able to access [http://localhost:5006](http://localhost:5006) in your browser and you will see Actual.
+You should now be able to visit Actual by going to [http://localhost:5006](http://localhost:5006) in your browser.
 
-When first accessing Actual, you may be prompted to provide a URL for the server. In this case (when installing locally), you can input `http://localhost:5006` or click the “use this domain” button below the text field (which will do the same thing).
+When first accessing Actual, you may be prompted to provide a URL for the server. For a local installation like this, you can click the “Use localhost:5006” button to use the same URL as the one you’re accessing Actual from.

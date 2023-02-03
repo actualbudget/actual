@@ -1,5 +1,5 @@
 ---
-title: Releases Notes
+title: Release Notes
 ---
 
 ## 23.1.12

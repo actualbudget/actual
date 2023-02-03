@@ -2,7 +2,6 @@
 [image-guide]: ./Fly-image
 [terraform-guide]: ./Fly-terraform
 [ci-build]: https://github.com/actualbudget/actual-server/blob/master/.github/workflows/build.yml
-[discord]: https://discord.gg/8JfAXSgfRf
 
 
 # Hosting Actual with [fly.io](https://fly.io)
@@ -11,7 +10,7 @@ You should deploy your server so it's always running. [Fly.io](https://fly.io) p
 option with a free plan.
 
 See the next section for a brief comparison of fly.io deployment options. If you're stuck or find a
-step unclear, the [community in Discord][discord] may be able to assist you.
+step unclear, [contact us](/Contact) for support.
 
 ## Deployment methods
 
@@ -52,5 +51,4 @@ timing, you'll need a new image.
 
   **A.** While we wouldn’t know for certain without seeing your configuration, it is likely that during
   deployment you created a Postgres database. Actual doesn’t need this so you can just delete it and
-  charges should then stop. If you're unsure, the [community in Discord][discord]
-  may be able to assist you.
+  charges should then stop. If you're unsure, please [reach out to us](/Contact).

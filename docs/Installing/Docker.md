@@ -7,30 +7,26 @@ sidebar_position: 2
 
 Actual is also available as a Docker image ready to be run in your own custom environment.
 
-* [Docker Hub](https://hub.docker.com/r/jlongster)
-* [Github Registry](https://ghcr.io/actualbudget/actual-server)
+* [Docker Hub](https://hub.docker.com/r/jlongster/actual-server)
+* [GitHub Registry](https://ghcr.io/actualbudget/actual-server)
 
 ## Docker Tags
 
 We publish a number of tags to the official repository now so that users who want to get the latest bleeding edge changes can do that without having to wait for the latest image to be updated. Details of the available tags are below. 
 
-:::note
-[SemVer](https://github.com/semver/semver/blob/master/semver.md) relates to the Semantic Version number
-:::
+### `latest` Tag
 
-### Latest Tag
+The `latest` tag points to the most recent official release of Actual. This is the recommended tag to use for most users.
 
-Auto-updated to point to the most recent semver build (see the [workflow docs](https://github.com/marketplace/actions/docker-metadata-action#typeedge)) 👈 this is for people who want the stable build.
-
-* latest
-* latest-alpine - Based on Alpine Linux, which is tiny so great for low powered devices.
+* `latest`
+* `latest-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
   
-### Edge Tag
+### `edge` Tag
 
-This tag reflects the last commit of the active branch on your Git repository.
+The `edge` tag is updated every time a commit is pushed to the `master` branch. This is the recommended tag to use for users who want to get the latest changes. Note that `actual-server` will still use the latest official release of the web UI even when deploying from `edge`
 
-* edge 
-* edge-alpine - Based on Alpine Linux, which is tiny so great for low powered devices.
+* `edge` 
+* `edge-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
 
 ## Launch container using Docker Compose
 
@@ -68,7 +64,7 @@ $ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH
 
 `-p 5006:5006` -- sets the port to access Actual.  (HOST PORT:DOCKER PORT)
 
-`-v YOUR/PATH/TO/DATA:/data` -- tells the container where to store your budget data.  This persists the data on your hard disk so it isn't lost if you remove the container.  Change the current value to a folder on your host computer.
+`-v YOUR/PATH/TO/DATA:/data` -- tells the container where to store your budget data.  This persists the data on your hard disk so it isn't lost if you remove the container.  Change the current value to a folder on your host computer. The server will create `server-files` and `user-files` subfolders at this location.
 
 `--name my_actual_budget` -- gives your new docker container a name
 

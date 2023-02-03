@@ -34,3 +34,27 @@
   pointer-events: none;
   opacity: 0.5;
 }
+
+.menu__list-item-collapsible > .menu__link:not([aria-expanded]) {
+  pointer-events: none;
+  user-select: none;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  padding-top: 16px;
+  padding-bottom: 3px;
+}
+.theme-doc-sidebar-item-category-level-1
+  > .menu__list-item-collapsible
+  .menu__link:not([aria-expanded]) {
+  padding-top: 22px;
+  padding-bottom: 3px;
+}
+
+.menu__list-item-collapsible:has(> .menu__link:not([aria-expanded]))
+  + .menu__list {
+  padding-left: 0;
+}
+
+.menu__list-item-collapsible:has(.menu__link:not([aria-expanded])) {
+  pointer-events: none;
+}

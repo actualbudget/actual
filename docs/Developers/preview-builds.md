@@ -11,5 +11,5 @@ Once you have the number of the pr navigate to the following URL https://deploy-
 This will load directly on Netlify where you will be able to preview the changes in that pull request without the need to clone the specific branch.  
 
 :::info
-There is no sync server on preview builds so when asked "Where's the server" select "Don't use a server"
+There is no sync server on preview builds so when asked "Where's the server" select "Don't use a server." Alternatively, you can use your own self-hosted server. You should exercise caution when doing using a server with preview builds because they are much more likely to have bugs that could damage your budget. Consider running a separate local server for preview builds.
 :::

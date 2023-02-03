@@ -2,9 +2,9 @@
 title: 'The Actual Project Structure'
 ---
 
-Actual is made up of lots of different *packages* in this article we are going to try and explain how each of them fits together to form the project you know as Actual Budget.
+Actual is made up of lots of different *packages*. This article covers how they all fit together to form the project you know as Actual Budget.
 
-All of the actual repositories can be found in the [Actual Budget](https://github.com/actualbudget) organization on GitHub, within that organization you will then find the following repositories
+All of the repositories can be found in the [Actual Budget](https://github.com/actualbudget) organization on GitHub, within that organization you will then find the following repositories
 
 * [Actual](https://github.com/actualbudget/actual)
 * [Actual Server](https://github.com/actualbudget/actual-server)
@@ -14,7 +14,7 @@ All of the actual repositories can be found in the [Actual Budget](https://githu
 
 ## Actual
 
-This repository hold all of the front end code for the Actual Budget application, it also holds all the packages for other parts of the application too such as the desktop application and importers.
+This repository holds all of the front end code for the Actual Budget application, along with the syncing engine and the importers for YNAB4 and YNAB5.
 
 ```
 ├── actual
@@ -26,7 +26,6 @@ This repository hold all of the front end code for the Actual Budget application
         └── import-ynab5
         └── loot-core
         └── loot-design
-        └── mobile
         └── node-libofx
         ...
 │
@@ -52,15 +51,6 @@ The development version of the importer for nYNAB into Actual.
 
 
 ### Loot Design
-
-
-### Mobile
-
-This packages holds the source code for the Android & iOS applications.
-
-:::note
-These applications are no longer supported and are being replaced with a responsive first version of Actual Web
-:::
 
 ### Node Libofx
 

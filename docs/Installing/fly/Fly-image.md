@@ -2,8 +2,6 @@
 title: 'Deploying Actual with a container image'
 ---
 
-[discord]: https://discord.gg/8JfAXSgfRf
-
 # Deploying Actual on fly.io with a container image
 
 ## Deploying
@@ -124,8 +122,7 @@ variable.*
 
   **A.** While we wouldn’t know for certain without seeing your configuration, it is likely that during
   deployment you created a Postgres database. Actual doesn’t need this so you can just delete it and
-  charges should then stop. If you're unsure, the [community in Discord][discord]
-  may be able to assist you.
+  charges should then stop. If you're unsure, please [reach out to us](/Contact).
 
 ## Official Images
 

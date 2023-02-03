@@ -2,9 +2,8 @@
 title: 'Supercharge your Budget'
 ---
 
-[discord]: https://discord.gg/8JfAXSgfRf
 
-This page has examples of custom rules that some of our users have found useful for their own budgets.  If you have any custom rules you're proud of, let the [Discord][discord] group know or submit an issue or PR to the Actual Documentation GitHub repository.
+This page has examples of custom rules that some of our users have found useful for their own budgets.  If you have any custom rules you're proud of, click the “Edit this page” button below to propose adding them to this page [tell us about them](/Contact.md)!
 
 **Q:  How do I set a default account when I add transactions?**
 
