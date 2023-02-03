@@ -110,14 +110,16 @@ export function Value({
       } else if (field === 'year') {
         return value ? formatDate(parseISO(value), 'yyyy') : null;
       } else {
-        let name = value;
-        if (data) {
+        if (data && data.length) {
           let item = data.find(item => item.id === value);
           if (item) {
-            name = describe(item);
+            return describe(item);
+          } else {
+            return '(deleted)';
           }
+        } else {
+          return '…';
         }
-        return name;
       }
     }
   }
@@ -508,15 +510,20 @@ function RulesList({
 function mapValue(field, value, { payees, categories, accounts }) {
   if (!value) return '';
 
+  let object = null;
   if (field === 'payee') {
-    return payees.find(p => p.id === value).name;
+    object = payees.find(p => p.id === value);
   } else if (field === 'category') {
-    return categories.find(c => c.id === value).name;
+    object = categories.find(c => c.id === value);
   } else if (field === 'account') {
-    return accounts.find(a => a.id === value).name;
+    object = accounts.find(a => a.id === value);
   } else {
     return value;
   }
+  if (object) {
+    return object.name;
+  }
+  return '(deleted)';
 }
 
 function ruleToString(rule, data) {
