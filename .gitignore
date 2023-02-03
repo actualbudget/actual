@@ -11,6 +11,9 @@ test-user-files
 test-server-files
 fly.toml
 build/
+*.crt
+*.pem
+*.key
 
 # Yarn
 .pnp.*

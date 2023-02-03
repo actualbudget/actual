@@ -56,7 +56,17 @@ async function run() {
   await syncApp.init();
 
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
-  app.listen(config.port, config.hostname);
+  if (config.https) {
+    const https = require('https');
+    const httpsOptions = {
+      ...config.https,
+      key: fs.readFileSync(config.https.key),
+      cert: fs.readFileSync(config.https.cert)
+    };
+    https.createServer(httpsOptions, app).listen(config.port, config.hostname);
+  } else {
+    app.listen(config.port, config.hostname);
+  }
 }
 
 run().catch((err) => {
