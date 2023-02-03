@@ -115,6 +115,8 @@ export function Value({
           let item = data.find(item => item.id === value);
           if (item) {
             name = describe(item);
+          } else {
+            name = '(deleted)';
           }
         }
         return name;
