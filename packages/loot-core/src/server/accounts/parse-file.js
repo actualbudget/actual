@@ -91,7 +91,7 @@ async function parseOFX(filepath) {
   await initModule();
 
   let errors = [];
-  let contents = await fs.readFile(filepath);
+  let contents = await fs.readFile(filepath, 'binary');
 
   let data;
   try {
