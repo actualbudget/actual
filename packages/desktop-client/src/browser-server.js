@@ -10,6 +10,14 @@ self.addEventListener('message', e => {
       let version = msg.version;
       let hash = msg.hash;
 
+      if (!self.SharedArrayBuffer) {
+        self.postMessage({
+          type: 'app-init-failure',
+          SharedArrayBufferMissing: true
+        });
+        return;
+      }
+
       // eslint-disable-next-line
       importScripts(`${process.env.PUBLIC_URL}/kcab/kcab.worker.${hash}.js`);
 
