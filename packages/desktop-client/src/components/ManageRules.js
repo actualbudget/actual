@@ -510,15 +510,20 @@ function RulesList({
 function mapValue(field, value, { payees, categories, accounts }) {
   if (!value) return '';
 
+  let object = null;
   if (field === 'payee') {
-    return payees.find(p => p.id === value).name;
+    object = payees.find(p => p.id === value);
   } else if (field === 'category') {
-    return categories.find(c => c.id === value).name;
+    object = categories.find(c => c.id === value);
   } else if (field === 'account') {
-    return accounts.find(a => a.id === value).name;
+    object = accounts.find(a => a.id === value);
   } else {
     return value;
   }
+  if (object) {
+    return object.name;
+  }
+  return '(deleted)';
 }
 
 function ruleToString(rule, data) {
