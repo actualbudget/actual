@@ -278,7 +278,7 @@ export default function ScheduleDetails() {
         q('transactions')
           .filter({ schedule: state.schedule.id })
           .select('*')
-          .options({ splits: 'none' }),
+          .options({ splits: 'inline' }),
         data => dispatch({ type: 'set-transactions', transactions: data })
       );
       return live.unsubscribe;
