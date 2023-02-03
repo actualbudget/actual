@@ -110,16 +110,16 @@ export function Value({
       } else if (field === 'year') {
         return value ? formatDate(parseISO(value), 'yyyy') : null;
       } else {
-        let name = value;
-        if (data) {
+        if (data && data.length) {
           let item = data.find(item => item.id === value);
           if (item) {
-            name = describe(item);
+            return describe(item);
           } else {
-            name = '(deleted)';
+            return '(deleted)';
           }
+        } else {
+          return '…';
         }
-        return name;
       }
     }
   }
