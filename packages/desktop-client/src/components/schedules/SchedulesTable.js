@@ -152,7 +152,7 @@ export function SchedulesTable({
     const filterIncludes = str =>
       str
         ? str.toLowerCase().includes(filter.toLowerCase()) ||
-          str.toLowerCase().includes(filter.toLowerCase())
+          filter.toLowerCase().includes(str.toLowerCase())
         : false;
 
     return schedules.filter(schedule => {
