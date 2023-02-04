@@ -26,6 +26,7 @@ import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
 import tokens from 'loot-design/src/tokens';
 
 import { useServerURL } from '../hooks/useServerURL';
+import useServerVersion from '../hooks/useServerVersion';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
@@ -155,6 +156,51 @@ export function SyncButton({ localPrefs, style, onSync }) {
           ? 'Offline'
           : 'Sync'}
       </Text>
+    </Button>
+  );
+}
+
+export function OutdatedButton() {
+  async function fetchJSON(...args) {
+    let res = await fetch(...args);
+    res = await checkHTTPStatus(res);
+    return res.json();
+  }
+
+  function cmpSemanticVersion(a, b) {
+    let x = a.replace('v', '').split('.').map(n => parseInt(n));
+    let y = b.replace('v', '').split('.').map(n => parseInt(n));
+    return x[0] - y[0] || x[1] - y[1] || x[2] - y[2];
+  }
+
+  let [latestVersion, setLatestVersion] = useState("");
+  useEffect(() => {
+    (async () => {
+      let v = (await fetchJSON('https://api.github.com/repos/actualbudget/actual/tags')).map(t => t.name).concat([
+        clientVersion, serverVersion
+      ]).sort(cmpSemanticVersion).first();
+      setLatestVersion(v);
+    })();
+  }, []);
+
+  let serverVersion = useServerVersion();
+  let clientVersion = `v${window.Actual.ACTUAL_VERSION}`
+
+  return (
+    <Button
+      bare
+      onClick={_ => {
+        window.open('https://actualbudget.github.io/docs', '_blank');
+      }}
+      visible={serverVersion !== clientVersion || serverVersion !== latestVersion}
+      style={{ color: colors.r5 }}
+    >
+      <Tooltip>
+        <P>
+          Your version of Actual ({clientVersion | serverVersion}) is out of date. Please update to the latest version ({latestVersion}).
+        </P>
+      </Tooltip>
+      Outdated Actual version
     </Button>
   );
 }
@@ -376,6 +422,7 @@ function Titlebar({
           onSync={sync}
         />
       ) : null}
+      <OutdatedButton />
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>
   );
