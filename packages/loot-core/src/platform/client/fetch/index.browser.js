@@ -1,5 +1,3 @@
-import React from 'react';
-
 const { captureException, captureBreadcrumb } = require('../../exceptions');
 const uuid = require('../../uuid');
 const undo = require('../undo');
@@ -111,10 +109,7 @@ function connectWorker(worker, onOpen, onError) {
 
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
         alert(
-          'We hit a limit on the local storage available. ' +
-            'Edits may not be saved. Please open an ' +
-            <a href="https://github.com/actualbudget/actual/issues">issue</a> +
-            ' to help debug this.'
+          'We hit a limit on the local storage available. Edits may not be saved. Please get intouch https://actualbudget.github.io/docs/Contact/ so we can help debug this.'
         );
       }
     } else if (msg.type === 'capture-breadcrumb') {

@@ -1102,10 +1102,10 @@ handlers['accounts-sync'] = async function ({ id }) {
           errors.push({
             accountId: acct.id,
             message:
-              'There was an internal error. Please open an ' +
+              'There was an internal error. Please get ' +
               (
-                <a href="https://github.com/actualbudget/actual/issues">
-                  issue
+                <a href="https://actualbudget.github.io/docs/Contact/">
+                  intouch
                 </a>
               ) +
               ' for support.',

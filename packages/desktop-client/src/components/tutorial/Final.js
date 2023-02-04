@@ -20,8 +20,8 @@ function Final({ targetRect, navigationProps }) {
 
       <P>
         You probably want to delete the transactions you added and clean up your
-        budget. If you have any questions or feedback, open an{' '}
-        <a href="https://github.com/actualbudget/actual/issues">issue</a>.
+        budget. If you have any questions or feedback, please get{' '}
+        <a href="https://actualbudget.github.io/docs/Contact/">in touch</a>.
       </P>
 
       <P isLast={true}>

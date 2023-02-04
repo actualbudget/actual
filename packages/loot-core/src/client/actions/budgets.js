@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { send } from '../../platform/client/fetch';
 import { getDownloadError } from '../../shared/errors';
 import constants from '../constants';
@@ -92,9 +90,7 @@ export function loadBudget(id, loadingText = '', options = {}) {
         );
       } else {
         alert(
-          'Error loading budget. Please open a ' +
-            <a href="https://github.com/actualbudget/actual/issues">issue</a> +
-            ' for support.'
+          'Error loading budget. Please open a issue on GitHub for support.'
         );
       }
 
