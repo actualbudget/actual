@@ -225,7 +225,7 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                   )}
                   {state.menuOpen === 'transfer' && (
                     <TransferTooltip
-                      initialAmountName="leftover"
+                      initialAmount={availableValue}
                       onClose={() => setState({ menuOpen: null })}
                       onSubmit={(amount, category) => {
                         onBudgetAction(month, 'transfer-available', {
