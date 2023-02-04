@@ -1000,13 +1000,10 @@ handlers['poll-web-token'] = async function({
       return;
     }
 
-    let data = await post(
-      getServer().NORDIGEN_SERVER + '/get-web-token-contents',
-      {
-        upgradingAccountId,
-        requisitionId
-      }
-    );
+    let data = await post(getServer().NORDIGEN_SERVER + '/get-accounts', {
+      upgradingAccountId,
+      requisitionId
+    });
 
     if (data) {
       if (data.error) {
