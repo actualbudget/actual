@@ -1,3 +1,5 @@
+import React from 'react';
+
 const { captureException, captureBreadcrumb } = require('../../exceptions');
 const uuid = require('../../uuid');
 const undo = require('../undo');

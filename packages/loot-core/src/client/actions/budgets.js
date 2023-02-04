@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { send } from '../../platform/client/fetch';
 import { getDownloadError } from '../../shared/errors';
 import constants from '../constants';
