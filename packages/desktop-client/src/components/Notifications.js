@@ -13,8 +13,8 @@ import {
   ExternalLink
 } from 'loot-design/src/components/common';
 import { styles, colors } from 'loot-design/src/style';
-import Delete from 'loot-design/src/svg/Delete';
-import Loading from 'loot-design/src/svg/v1/AnimatedLoading';
+import Loading from 'loot-design/src/svg/AnimatedLoading';
+import Delete from 'loot-design/src/svg/v0/Delete';
 
 function compileMessage(message, actions, setLoading, onRemove) {
   return (
@@ -65,15 +65,8 @@ function compileMessage(message, actions, setLoading, onRemove) {
 }
 
 function Notification({ notification, onRemove }) {
-  let {
-    type,
-    title,
-    message,
-    messageActions,
-    sticky,
-    internal,
-    button
-  } = notification;
+  let { type, title, message, messageActions, sticky, internal, button } =
+    notification;
 
   let [loading, setLoading] = useState(false);
   let [overlayLoading, setOverlayLoading] = useState(false);

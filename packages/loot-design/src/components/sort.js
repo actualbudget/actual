@@ -9,6 +9,7 @@ import React, {
 import { useDrag, useDrop } from 'react-dnd';
 
 import { colors } from '../style';
+
 import { View } from './common';
 
 export function useMergedRefs(ref1, ref2) {

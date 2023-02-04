@@ -18,7 +18,7 @@ import {
   P
 } from 'loot-design/src/components/common';
 import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import { colors, styles } from 'loot-design/src/style';
+import { colors } from 'loot-design/src/style';
 import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
 import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
 import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
@@ -26,6 +26,7 @@ import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
 import tokens from 'loot-design/src/tokens';
 
 import { useServerURL } from '../hooks/useServerURL';
+
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
@@ -186,7 +187,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
       />
       {reportBudgetEnabled && (
         <View style={{ marginLeft: -5 }}>
-          <Button
+          <ButtonWithLoading
             bare
             loading={loading}
             style={{
@@ -197,7 +198,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
             onClick={() => setShowTooltip(true)}
           >
             {budgetType === 'report' ? 'Report budget' : 'Rollover budget'}
-          </Button>
+          </ButtonWithLoading>
           {showTooltip && (
             <Tooltip
               position="bottom-left"

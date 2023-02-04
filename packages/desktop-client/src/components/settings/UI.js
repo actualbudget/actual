@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
 
@@ -23,7 +24,7 @@ export function Section({ title, children, style, titleProps, ...props }) {
   );
 }
 
-export function ButtonSetting({ button, children }) {
+export function Setting({ primaryAction, children }) {
   return (
     <View
       {...css(
@@ -42,19 +43,32 @@ export function ButtonSetting({ button, children }) {
       )}
     >
       <View
-        style={{ marginBottom: 10, maxWidth: 500, lineHeight: 1.5, gap: 10 }}
+        style={{
+          marginBottom: primaryAction ? 10 : 0,
+          maxWidth: 500,
+          lineHeight: 1.5,
+          gap: 10
+        }}
       >
         {children}
       </View>
-      {button}
+      {primaryAction || null}
     </View>
   );
 }
 
 export function AdvancedToggle({ children }) {
-  let [expanded, setExpanded] = useState(false);
+  let location = useLocation();
+  let [expanded, setExpanded] = useState(location.hash === '#advanced');
+
   return expanded ? (
     <Section
+      innerRef={el => {
+        if (el && location.hash === '#advanced') {
+          el.scrollIntoView(true);
+        }
+      }}
+      id="advanced"
       title="Advanced Settings"
       {...css(
         {
@@ -70,6 +84,7 @@ export function AdvancedToggle({ children }) {
     </Section>
   ) : (
     <Link
+      id="advanced"
       onClick={() => setExpanded(true)}
       style={{
         flexShrink: 0,

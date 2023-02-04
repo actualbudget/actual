@@ -16,16 +16,17 @@ import {
   ListboxList,
   ListboxOption
 } from '@reach/listbox';
-import { css, media } from 'glamor';
+import { css } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import ExpandArrow from 'loot-design/src/svg/ExpandArrow';
+import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 
 import { styles, colors } from '../style';
-import Delete from '../svg/Delete';
-import Loading from '../svg/v1/AnimatedLoading';
+import Loading from '../svg/AnimatedLoading';
+import Delete from '../svg/v0/Delete';
 import tokens from '../tokens';
+
 import Text from './Text';
 import { useProperFocus } from './useProperFocus';
 import View from './View';
@@ -418,6 +419,35 @@ export function InputWithContent({
       />
       {rightContent}
     </View>
+  );
+}
+
+export function Search({
+  inputRef,
+  value,
+  onChange,
+  placeholder,
+  isInModal,
+  width = 350
+}) {
+  return (
+    <Input
+      inputRef={inputRef}
+      placeholder={placeholder}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      style={{
+        width,
+        borderColor: isInModal ? null : 'transparent',
+        backgroundColor: isInModal ? null : colors.n11,
+        ':focus': isInModal
+          ? null
+          : {
+              backgroundColor: 'white',
+              '::placeholder': { color: colors.n8 }
+            }
+      }}
+    />
   );
 }
 
@@ -938,6 +968,7 @@ export function Modal({
                     bare
                     onClick={e => onClose()}
                     style={{ padding: '10px 10px' }}
+                    aria-label="Close"
                   >
                     <Delete width={10} />
                   </Button>

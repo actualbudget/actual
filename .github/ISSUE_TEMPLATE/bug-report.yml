@@ -7,21 +7,22 @@ body:
     id: intro-md
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report! Please ensure you provide as much information as asked to better assist in confirming and identifying a fix for the bug report.
-  - type: dropdown
+        Thanks for taking the time to fill out this bug report! Please ensure you provide as much information as possible to better assist in confirming and identifying a fix for the bug.
+  - type: checkboxes
     id: existing-issue
     attributes:
       label: 'Verified issue does not already exist?'
       description: 'Please search to see if an issue already exists for the issue you encountered.'
       options:
-        - 'I have searched and found no existing issue'
+        - label: 'I have searched and found no existing issue'
+          required: true
     validations:
       required: true
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us, what did you expect to happen?
+      description: Also tell us, what did you expect to happen? If you’re reporting an issue with imports, please attach a (redacted) version of the file you’re having trouble importing. You may need to zip it before uploading.
       placeholder: Tell us what you see!
       value: 'A bug happened!'
     validations:

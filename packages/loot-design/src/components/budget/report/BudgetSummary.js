@@ -26,6 +26,7 @@ import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { MONTH_BOX_SHADOW } from '../constants';
 import { makeAmountFullStyle } from '../util';
+
 import { useReport } from './ReportContext';
 
 function PieProgress({ style, progress, color, backgroundColor }) {

@@ -1,6 +1,7 @@
 import query from '../../shared/query';
 import { makeChild } from '../../shared/transactions';
 import * as db from '../db';
+
 import * as aql from './exec';
 import { schema, schemaConfig } from './schema';
 
@@ -75,9 +76,7 @@ describe('runQuery', () => {
 
     // date
     let { data } = await runQuery(
-      query('transactions')
-        .select('date')
-        .serialize()
+      query('transactions').select('date').serialize()
     );
     expect(data[0].date).toBe('2020-01-04');
 

@@ -41,7 +41,7 @@ function makeSpreadsheet() {
     }
 
     listen() {
-      return listen('cells-changed', function(nodes) {
+      return listen('cells-changed', function (nodes) {
         if (!observersDisabled) {
           // TODO: batch react so only renders once
           nodes.forEach(node => {

@@ -304,9 +304,7 @@ async function findStartDate(schedule) {
     }
 
     let { data } = await aqlQuery(
-      q('transactions')
-        .filter({ $and: filters })
-        .select('*')
+      q('transactions').filter({ $and: filters }).select('*')
     );
 
     if (data.length === 0) {
@@ -340,9 +338,7 @@ export async function findSchedules() {
   // and find the best one...
 
   let { data: accounts } = await aqlQuery(
-    q('accounts')
-      .filter({ closed: false })
-      .select('*')
+    q('accounts').filter({ closed: false }).select('*')
   );
 
   let allSchedules = [];

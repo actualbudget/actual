@@ -1,4 +1,5 @@
 import query from '../../shared/query';
+
 import { generateSQLWithState } from './compiler';
 
 function sqlLines(str) {
@@ -108,9 +109,7 @@ describe('sheet language', () => {
 
     // By default, it should do id ref validation
     result = generateSQLWithState(
-      query('accounts')
-        .select(['trans1', 'trans2'])
-        .serialize(),
+      query('accounts').select(['trans1', 'trans2']).serialize(),
       schemaWithRefs
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -137,9 +136,7 @@ describe('sheet language', () => {
 
   it('`select` allows selecting all fields with *', () => {
     let result = generateSQLWithState(
-      query('accounts')
-        .select(['*'])
-        .serialize(),
+      query('accounts').select(['*']).serialize(),
       schemaWithRefs
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -154,9 +151,7 @@ describe('sheet language', () => {
 
     // Test selecting from joined tables
     result = generateSQLWithState(
-      query('accounts')
-        .select(['*', 'trans1.*'])
-        .serialize(),
+      query('accounts').select(['*', 'trans1.*']).serialize(),
       schemaWithRefs
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -175,19 +170,14 @@ describe('sheet language', () => {
     // The tombstone flag is not added if not necessary (the table
     // doesn't have it )
     let result = generateSQLWithState(
-      query('accounts')
-        .select(['trans'])
-        .withoutValidatedRefs()
-        .serialize(),
+      query('accounts').select(['trans']).withoutValidatedRefs().serialize(),
       schemaWithTombstone
     );
     expect(result.sql).not.toMatch('tombstone');
 
     // By default, the tombstone flag should be added if necessary
     result = generateSQLWithState(
-      query('transactions')
-        .select(['amount'])
-        .serialize(),
+      query('transactions').select(['amount']).serialize(),
       schemaWithTombstone
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -199,10 +189,7 @@ describe('sheet language', () => {
 
     // `withDead` should not add the tombstone flag
     result = generateSQLWithState(
-      query('transactions')
-        .select(['amount'])
-        .withDead()
-        .serialize(),
+      query('transactions').select(['amount']).withDead().serialize(),
       schemaWithTombstone
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -234,17 +221,13 @@ describe('sheet language', () => {
 
   it('`select` always includes the id', () => {
     let result = generateSQLWithState(
-      query('payees')
-        .select('name')
-        .serialize(),
+      query('payees').select('name').serialize(),
       schemaWithRefs
     );
     expect(result.sql).toMatch('payees.id AS id');
 
     result = generateSQLWithState(
-      query('payees')
-        .select(['name', 'id'])
-        .serialize(),
+      query('payees').select(['name', 'id']).serialize(),
       schemaWithRefs
     );
     // id is only included once, we manually selected it
@@ -253,10 +236,7 @@ describe('sheet language', () => {
     );
 
     result = generateSQLWithState(
-      query('payees')
-        .select('name')
-        .groupBy('account')
-        .serialize(),
+      query('payees').select('name').groupBy('account').serialize(),
       schemaWithRefs
     );
     // id should not automatically by selected if using `groupBy`
@@ -361,10 +341,7 @@ describe('sheet language', () => {
 
   it('groupBy should work', () => {
     let result = generateSQLWithState(
-      query('transactions')
-        .groupBy('payee.name')
-        .select('id')
-        .serialize(),
+      query('transactions').groupBy('payee.name').select('id').serialize(),
       schemaWithRefs
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -389,10 +366,7 @@ describe('sheet language', () => {
 
   it('orderBy should work', () => {
     let result = generateSQLWithState(
-      query('transactions')
-        .orderBy('payee.name')
-        .select('id')
-        .serialize(),
+      query('transactions').orderBy('payee.name').select('id').serialize(),
       schemaWithRefs
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -612,29 +586,19 @@ describe('sheet language', () => {
 
   it('allows limit and offset', () => {
     let result = generateSQLWithState(
-      query('transactions')
-        .select(['id'])
-        .limit(10)
-        .serialize(),
+      query('transactions').select(['id']).limit(10).serialize(),
       schemaWithRefs
     );
     expect(result.sql).toMatch(/\s+LIMIT 10\s*$/);
 
     result = generateSQLWithState(
-      query('transactions')
-        .select(['id'])
-        .offset(11)
-        .serialize(),
+      query('transactions').select(['id']).offset(11).serialize(),
       schemaWithRefs
     );
     expect(result.sql).toMatch(/\s+OFFSET 11\s*$/);
 
     result = generateSQLWithState(
-      query('transactions')
-        .select(['id'])
-        .limit(10)
-        .offset(11)
-        .serialize(),
+      query('transactions').select(['id']).limit(10).offset(11).serialize(),
       schemaWithRefs
     );
     expect(result.sql).toMatch(/\s+LIMIT 10\s*\n\s*OFFSET 11\s*$/);
@@ -675,9 +639,7 @@ describe('sheet language', () => {
 
   it('allows customizing generated SQL', () => {
     let result = generateSQLWithState(
-      query('transactions')
-        .select(['amount'])
-        .serialize(),
+      query('transactions').select(['amount']).serialize(),
       schemaWithRefs,
       {
         tableViews: { transactions: 'v_transactions' },
@@ -694,9 +656,7 @@ describe('sheet language', () => {
 
     // Make sure the same customizations are applied when joining
     result = generateSQLWithState(
-      query('accounts')
-        .select(['trans1.amount'])
-        .serialize(),
+      query('accounts').select(['trans1.amount']).serialize(),
       schemaWithRefs,
       {
         tableViews: { transactions: 'v_transactions' },
@@ -721,9 +681,7 @@ describe('sheet language', () => {
     // Internal table filters can't use paths
     expect(() =>
       generateSQLWithState(
-        query('accounts')
-          .select(['trans1.amount'])
-          .serialize(),
+        query('accounts').select(['trans1.amount']).serialize(),
         schemaWithRefs,
         {
           tableViews: { transactions: 'v_transactions' },
@@ -736,10 +694,7 @@ describe('sheet language', () => {
 
   it('raw mode avoids any internal filters', () => {
     let result = generateSQLWithState(
-      query('transactions')
-        .select(['amount'])
-        .raw()
-        .serialize(),
+      query('transactions').select(['amount']).raw().serialize(),
       schemaWithRefs,
       {
         tableViews: { transactions: 'v_transactions' },
@@ -914,10 +869,7 @@ describe('Type conversions', () => {
   it('allows conversions from string to id', () => {
     expect(() => {
       generateSQLWithState(
-        query('transactions')
-          .filter({ id: 'foo' })
-          .select(['id'])
-          .serialize(),
+        query('transactions').filter({ id: 'foo' }).select(['id']).serialize(),
         schemaWithRefs
       );
     }).not.toThrow();
@@ -935,10 +887,7 @@ describe('Type conversions', () => {
     // Numbers cannot be converted to ids
     expect(() => {
       generateSQLWithState(
-        query('transactions')
-          .filter({ id: 5 })
-          .select(['id'])
-          .serialize(),
+        query('transactions').filter({ id: 5 }).select(['id']).serialize(),
         schemaWithRefs
       );
     }).toThrow(/Can't convert/);
@@ -970,10 +919,7 @@ describe('Type conversions', () => {
   it('allows fields to be nullable', () => {
     // With validated refs
     let result = generateSQLWithState(
-      query('transactions')
-        .filter({ payee: null })
-        .select()
-        .serialize(),
+      query('transactions').filter({ payee: null }).select().serialize(),
       schemaWithRefs
     );
     expect(result.sql).toMatch('WHERE (payees1.id IS NULL)');

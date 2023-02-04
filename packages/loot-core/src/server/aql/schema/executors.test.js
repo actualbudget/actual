@@ -6,6 +6,7 @@ import { groupById } from '../../../shared/util';
 import { setClock } from '../../crdt';
 import * as db from '../../db';
 import { batchMessages, setSyncingMode } from '../../sync/index';
+
 import { isHappyPathQuery } from './executors';
 import { runQuery } from './run-query';
 
@@ -103,10 +104,7 @@ async function expectPagedData(query, numTransactions, allData) {
 
     // Pull in all the data via pages
     let { data } = await runQuery(
-      query
-        .limit(pageCount)
-        .offset(pagedData.length)
-        .serialize()
+      query.limit(pageCount).offset(pagedData.length).serialize()
     );
 
     expect(data.length).toBeLessThanOrEqual(pageCount);

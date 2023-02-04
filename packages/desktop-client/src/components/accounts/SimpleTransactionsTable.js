@@ -146,6 +146,7 @@ const TransactionRow = React.memo(function TransactionRow({
 export default function SimpleTransactionsTable({
   transactions,
   schedules,
+  renderEmpty,
   fields = ['date', 'payee', 'amount'],
   style
 }) {
@@ -185,6 +186,7 @@ export default function SimpleTransactionsTable({
     <Table
       style={style}
       items={serializedTransactions}
+      renderEmpty={renderEmpty}
       headers={
         <>
           <SelectCell

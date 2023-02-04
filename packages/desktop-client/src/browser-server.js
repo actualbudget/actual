@@ -1,17 +1,4 @@
-/* global globalThis */
-
-import * as Sentry from '@sentry/browser';
-
 let hasInitialized = false;
-
-function installSentry(version) {
-  Sentry.init({
-    dsn: 'https://9e6094adfc9f43b5b5b9994cee44d7c2@sentry.io/5169928',
-    release: version
-  });
-
-  globalThis.SentryClient = Sentry;
-}
 
 self.addEventListener('message', e => {
   if (!hasInitialized) {
@@ -23,8 +10,12 @@ self.addEventListener('message', e => {
       let version = msg.version;
       let hash = msg.hash;
 
-      if (!isDev) {
-        installSentry(version);
+      if (!self.SharedArrayBuffer) {
+        self.postMessage({
+          type: 'app-init-failure',
+          SharedArrayBufferMissing: true
+        });
+        return;
       }
 
       // eslint-disable-next-line

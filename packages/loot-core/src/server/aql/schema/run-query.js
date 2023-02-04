@@ -3,6 +3,7 @@ import {
   runQuery as _runQuery,
   runCompiledQuery as _runCompiledQuery
 } from '../exec';
+
 import schemaExecutors from './executors';
 
 import { schema, schemaConfig } from './index';

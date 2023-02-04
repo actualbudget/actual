@@ -19,6 +19,7 @@ import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
 import * as undo from '../undo';
+
 import * as encoder from './encoder';
 import { rebuildMerkleHash } from './repair';
 
@@ -528,7 +529,7 @@ export async function initialFullSync() {
   }
 }
 
-export const fullSync = once(async function() {
+export const fullSync = once(async function () {
   app.events.emit('sync', { type: 'start' });
   let messages;
 

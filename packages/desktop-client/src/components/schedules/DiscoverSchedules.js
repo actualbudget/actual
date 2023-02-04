@@ -26,6 +26,7 @@ import { colors } from 'loot-design/src/style';
 
 import { Page, usePageType } from '../Page';
 import DisplayId from '../util/DisplayId';
+
 import { ScheduleAmountCell } from './SchedulesTable';
 
 let ROW_HEIGHT = 43;
@@ -146,9 +147,7 @@ export default function DiscoverSchedules() {
 
       if (filters.length > 0) {
         let { data: transactions } = await runQuery(
-          q('transactions')
-            .filter({ $and: filters })
-            .select('id')
+          q('transactions').filter({ $and: filters }).select('id')
         );
         await send('transactions-batch-update', {
           updated: transactions.map(t => ({

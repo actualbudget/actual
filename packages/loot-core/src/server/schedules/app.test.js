@@ -4,6 +4,7 @@ import q from '../../shared/query';
 import { loadRules, updateRule } from '../accounts/transaction-rules';
 import { runQuery as aqlQuery } from '../aql';
 import { loadMappings } from '../db/mappings';
+
 import {
   updateConditions,
   getNextDate,
@@ -103,11 +104,7 @@ describe('schedule app', () => {
 
       let {
         data: [row]
-      } = await aqlQuery(
-        q('schedules')
-          .filter({ id })
-          .select('*')
-      );
+      } = await aqlQuery(q('schedules').filter({ id }).select('*'));
 
       expect(row).toBeTruthy();
       expect(row.rule).toBeTruthy();
@@ -140,9 +137,7 @@ describe('schedule app', () => {
       });
 
       let res = await aqlQuery(
-        q('schedules')
-          .filter({ id })
-          .select(['next_date', 'posts_transaction'])
+        q('schedules').filter({ id }).select(['next_date', 'posts_transaction'])
       );
       let row = res.data[0];
 
@@ -170,9 +165,7 @@ describe('schedule app', () => {
       });
 
       res = await aqlQuery(
-        q('schedules')
-          .filter({ id })
-          .select(['next_date', 'posts_transaction'])
+        q('schedules').filter({ id }).select(['next_date', 'posts_transaction'])
       );
       row = res.data[0];
 
@@ -226,9 +219,7 @@ describe('schedule app', () => {
       });
 
       let { data: ruleId } = await aqlQuery(
-        q('schedules')
-          .filter({ id })
-          .calculate('rule')
+        q('schedules').filter({ id }).calculate('rule')
       );
 
       // Manually update the rule
@@ -251,9 +242,7 @@ describe('schedule app', () => {
       });
 
       let res = await aqlQuery(
-        q('schedules')
-          .filter({ id })
-          .select(['next_date'])
+        q('schedules').filter({ id }).select(['next_date'])
       );
       let row = res.data[0];
 
@@ -262,11 +251,7 @@ describe('schedule app', () => {
       MockDate.set(new Date(2021, 4, 17));
       await setNextDate({ id });
 
-      res = await aqlQuery(
-        q('schedules')
-          .filter({ id })
-          .select(['next_date'])
-      );
+      res = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
       row = res.data[0];
 
       expect(row.next_date).toBe('2021-05-18');

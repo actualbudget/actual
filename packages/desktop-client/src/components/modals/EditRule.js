@@ -37,8 +37,8 @@ import useSelected, {
   SelectedProvider
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
-import AddIcon from 'loot-design/src/svg/Add';
-import SubtractIcon from 'loot-design/src/svg/Subtract';
+import AddIcon from 'loot-design/src/svg/v0/Add';
+import SubtractIcon from 'loot-design/src/svg/v0/Subtract';
 import InformationOutline from 'loot-design/src/svg/v1/InformationOutline';
 
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
@@ -172,6 +172,7 @@ export function ConditionEditor({
   ops,
   condition,
   editorStyle,
+  isSchedule,
   onChange,
   onDelete,
   onAdd
@@ -214,10 +215,25 @@ export function ConditionEditor({
       <View style={{ flex: 1 }}>{valueEditor}</View>
 
       <Stack direction="row">
-        <EditorButtons onAdd={onAdd} onDelete={onDelete} />
+        <EditorButtons
+          onAdd={onAdd}
+          onDelete={isSchedule && field === 'date' ? null : onDelete}
+        />
       </Stack>
     </Editor>
   );
+}
+
+function formatAmount(amount) {
+  if (!amount) {
+    return integerToCurrency(0);
+  } else if (typeof amount === 'number') {
+    return integerToCurrency(amount);
+  } else {
+    return `${integerToCurrency(amount.num1)} to ${integerToCurrency(
+      amount.num2
+    )}`;
+  }
 }
 
 function ScheduleDescription({ id }) {
@@ -254,7 +270,7 @@ function ScheduleDescription({ id }) {
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          Amount: {integerToCurrency(schedule._amount || 0)}
+          Amount: {formatAmount(schedule._amount)}
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
@@ -272,7 +288,8 @@ let actionFields = [
   'date',
   'amount',
   'category',
-  'account'
+  'account',
+  'cleared'
 ].map(field => [field, mapField(field)]);
 function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
   let { field, op, value, type, error, inputKey = 'initial' } = action;
@@ -382,6 +399,7 @@ export function ConditionsList({
   conditions,
   conditionFields,
   editorStyle,
+  isSchedule,
   onChangeConditions
 }) {
   function addCondition(index) {
@@ -504,13 +522,13 @@ export function ConditionsList({
         }
 
         return (
-          <View>
+          <View key={i}>
             <ConditionEditor
-              key={i}
               conditionFields={conditionFields}
               editorStyle={editorStyle}
               ops={ops}
               condition={cond}
+              isSchedule={isSchedule}
               onChange={(name, value) => {
                 updateCondition(cond, name, value);
               }}
@@ -555,6 +573,8 @@ export default function EditRule({
   let dispatch = useDispatch();
   let scrollableEl = useRef();
 
+  let isSchedule = actions.some(action => action.op === 'link-schedule');
+
   useEffect(() => {
     dispatch(initiallyLoadPayees());
 
@@ -580,9 +600,7 @@ export default function EditRule({
 
       if (filters.length > 0) {
         let { data: transactions } = await runQuery(
-          q('transactions')
-            .filter({ $and: filters })
-            .select('*')
+          q('transactions').filter({ $and: filters }).select('*')
         );
         setTransactions(transactions);
       } else {
@@ -759,6 +777,7 @@ export default function EditRule({
                   conditions={conditions}
                   conditionFields={conditionFields}
                   editorStyle={editorStyle}
+                  isSchedule={isSchedule}
                   onChangeConditions={conds => setConditions(conds)}
                 />
               </View>
@@ -777,9 +796,8 @@ export default function EditRule({
                 ) : (
                   <Stack spacing={2}>
                     {actions.map((action, i) => (
-                      <View>
+                      <View key={i}>
                         <ActionEditor
-                          key={i}
                           ops={['set', 'link-schedule']}
                           action={action}
                           editorStyle={editorStyle}

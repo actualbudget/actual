@@ -6,6 +6,7 @@ import { css } from 'glamor';
 
 import { colors } from '../style';
 import Remove from '../svg/v2/Remove';
+
 import { View, Input, Tooltip, Button } from './common';
 
 function findItem(strict, suggestions, value) {
@@ -107,9 +108,7 @@ function componentWillReceiveProps(bag, nextProps) {
 }
 
 export function defaultFilterSuggestion(suggestion, value) {
-  return getItemName(suggestion)
-    .toLowerCase()
-    .includes(value.toLowerCase());
+  return getItemName(suggestion).toLowerCase().includes(value.toLowerCase());
 }
 
 export function defaultFilterSuggestions(suggestions, value) {

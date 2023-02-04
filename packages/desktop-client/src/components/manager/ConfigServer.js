@@ -19,6 +19,7 @@ import {
 } from 'loot-design/src/util/environment';
 
 import { useServerURL } from '../../hooks/useServerURL';
+
 import { Title, Input } from './subscribe/common';
 
 export default function ConfigServer() {

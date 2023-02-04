@@ -9,6 +9,7 @@ import { generateAccount } from 'loot-core/src/mocks';
 import makeSpreadsheet from 'loot-core/src/mocks/spreadsheet';
 
 import { Section } from '../guide/components';
+
 import { Sidebar } from './sidebar';
 import SpreadsheetContext from './spreadsheet/SpreadsheetContext';
 
