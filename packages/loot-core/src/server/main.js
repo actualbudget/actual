@@ -861,7 +861,7 @@ handlers['account-create'] = mutator(async function ({
       transfer_acct: id
     });
 
-    if (balance != null) {
+    if (balance != null && balance !== 0) {
       let payee = await getStartingBalancePayee();
 
       await db.insertTransaction({
