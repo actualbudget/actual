@@ -44,9 +44,9 @@ function getErrorMessage(type, code) {
 
   return (
     <>
-      'An internal error occurred. Try to login again, or get
-      <a href="https://actualbudget.github.io/docs/Contact/">intouch</a>
-      for support.''
+      An internal error occurred. Try to login again, or get{' '}
+      <a href="https://actualbudget.github.io/docs/Contact/">in touch</a>{' '}
+      for support.
     </>
   );
 }
