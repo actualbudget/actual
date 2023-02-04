@@ -77,8 +77,8 @@ class FatalError extends React.Component {
         >
           <Text>{msg}</Text>
           <Text>
-            Open an{' '}
-            <a href="https://github.com/actualbudget/actual/issues">issue</a>{' '}
+            Please get{' '}
+            <a href="https://actualbudget.github.io/docs/Contact">in touch</a>{' '}
             for support
           </Text>
         </Stack>
