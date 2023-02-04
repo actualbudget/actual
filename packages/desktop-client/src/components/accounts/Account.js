@@ -717,7 +717,9 @@ const AccountHeader = React.memo(
                       marginBottom: 5
                     }}
                   >
-                    {accountName}
+                    {account && account.closed
+                      ? 'Closed: ' + accountName
+                      : accountName}
                   </View>
 
                   {account && <NotesButton id={`account-${account.id}`} />}
@@ -739,7 +741,9 @@ const AccountHeader = React.memo(
                 <View
                   style={{ fontSize: 25, fontWeight: 500, marginBottom: 5 }}
                 >
-                  {accountName}
+                  {account && account.closed
+                    ? 'Closed: ' + accountName
+                    : accountName}
                 </View>
               )}
             </View>
@@ -1319,12 +1323,14 @@ class AccountInternal extends React.PureComponent {
   };
 
   onSaveName = name => {
-    const accountId = this.props.accountId;
-    const account = this.props.accounts.find(
-      account => account.id === accountId
-    );
-    this.props.updateAccount({ ...account, name });
-    this.setState({ editingName: false });
+    if (name.trim().length) {
+      const accountId = this.props.accountId;
+      const account = this.props.accounts.find(
+        account => account.id === accountId
+      );
+      this.props.updateAccount({ ...account, name });
+      this.setState({ editingName: false });
+    }
   };
 
   onToggleExtraBalances = () => {
@@ -1391,7 +1397,7 @@ class AccountInternal extends React.PureComponent {
       return null;
     }
 
-    return (account.closed ? 'Closed: ' : '') + account.name;
+    return account.name;
   }
 
   getBalanceQuery(account, id) {
