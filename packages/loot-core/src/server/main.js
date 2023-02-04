@@ -1,5 +1,3 @@
-import React from 'react';
-
 import './polyfills';
 import injectAPI from '@actual-app/api/injected';
 
