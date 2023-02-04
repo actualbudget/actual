@@ -40,10 +40,6 @@ function CreateLocalAccount({ modalProps, actions, history, accounts }) {
               }
               if (!values.name) {
                 errors.name = 'required';
-              } else if (
-                accounts.some(account => account.name === values.name)
-              ) {
-                errors.name = 'already-exists';
               }
               if (isNaN(parseFloat(values.balance))) {
                 errors.balance = 'format';

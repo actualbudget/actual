@@ -27,3 +27,12 @@ export function removeNotification(id) {
     id
   };
 }
+
+function addWrongAccountNameNotification(name) {
+  return addNotification({
+    type: 'error',
+    message:
+      `The account name '${name}' is already in use by an existing` +
+      ` account. Please try again with a unique name.`
+  });
+}

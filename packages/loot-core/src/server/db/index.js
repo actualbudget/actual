@@ -565,6 +565,10 @@ export async function insertAccount(account) {
     [account.offbudget != null ? account.offbudget : 0]
   );
 
+  if (accounts.some(existingAccount => existingAccount.name === account.name)) {
+    return 'Account name already exists';
+  }
+
   // Don't pass a target in, it will default to appending at the end
   let { sort_order } = shoveSortOrders(accounts);
 
@@ -572,7 +576,20 @@ export async function insertAccount(account) {
   return insertWithUUID('accounts', account);
 }
 
-export function updateAccount(account) {
+export async function updateAccount(account) {
+  const accounts = await getAccounts();
+
+  if (
+    accounts.some(
+      existingAccount =>
+        existingAccount.name === account.name &&
+        // If it's the current account name, then there's no issue.
+        existingAccount.id !== account.id
+    )
+  ) {
+    return 'Account name already exists';
+  }
+
   account = accountModel.validate(account, { update: true });
   return update('accounts', account);
 }
