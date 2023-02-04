@@ -28,7 +28,7 @@ export function removeNotification(id) {
   };
 }
 
-function addWrongAccountNameNotification(name) {
+export function addWrongAccountNameNotification(name) {
   return addNotification({
     type: 'error',
     message:
