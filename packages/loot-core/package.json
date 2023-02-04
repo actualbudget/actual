@@ -32,7 +32,7 @@
     "google-protobuf": "^3.12.0-rc.1",
     "md5": "^2.3.0",
     "mitt": "^2.1.0",
-    "node-fetch": "^1.6.3",
+    "node-fetch": "^2.6.9",
     "node-libofx": "*",
     "regenerator-runtime": "^0.13.7"
   },
@@ -47,7 +47,7 @@
     "cross-env": "^7.0.3",
     "date-fns": "2.0.0-alpha.27",
     "eslint": "5.6.0",
-    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^3.1.4",
     "esm": "^3.0.82",
     "fake-indexeddb": "^3.1.3",

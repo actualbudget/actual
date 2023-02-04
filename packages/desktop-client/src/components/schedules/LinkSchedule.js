@@ -1,11 +1,12 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Text } from 'loot-design/src/components/common';
+import { Search, Text, View } from 'loot-design/src/components/common';
 
 import { Page } from '../Page';
+
 import { SchedulesTable } from './SchedulesTable';
 
 export default function ScheduleLink() {
@@ -14,6 +15,8 @@ export default function ScheduleLink() {
   let scheduleData = useSchedules(
     useCallback(query => query.filter({ completed: false }), [])
   );
+
+  let [filter, setFilter] = useState('');
 
   if (scheduleData == null) {
     return null;
@@ -34,15 +37,27 @@ export default function ScheduleLink() {
 
   return (
     <Page title="Link Schedule" modalSize="medium">
-      <Text style={{ marginBottom: 20 }}>
-        Choose a schedule to link these transactions to:
-      </Text>
+      <View
+        style={{ flexDirection: 'row', marginBottom: 20, alignItems: 'center' }}
+      >
+        <Text>Choose a schedule to link these transactions to:</Text>
+        <View style={{ flex: 1 }} />
+        <Search
+          isInModal
+          width={300}
+          placeholder="Filter schedules…"
+          value={filter}
+          onChange={setFilter}
+        />
+      </View>
 
       <SchedulesTable
         schedules={schedules}
+        filter={filter}
         statuses={statuses}
         minimal={true}
         onSelect={onSelect}
+        tableStyle={{ marginInline: -20 }}
       />
     </Page>
   );

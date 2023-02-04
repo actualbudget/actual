@@ -2,6 +2,7 @@ import { getClock, Timestamp } from '../crdt';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
+
 import * as encoder from './encoder';
 
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';

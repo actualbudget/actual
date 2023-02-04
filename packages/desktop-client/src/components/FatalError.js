@@ -27,6 +27,20 @@ class FatalError extends React.Component {
           private browsing.
         </Text>
       );
+    } else if (error.SharedArrayBufferMissing) {
+      // SharedArrayBuffer isn't available
+      msg = (
+        <Text>
+          Actual requires access to <code>SharedArrayBuffer</code> in order to
+          function properly. If you’re seeing this error, either your browser
+          does not support <code>SharedArrayBuffer</code>, or your server is not
+          sending the appropriate headers, or you are not using HTTPS. See{' '}
+          <a href="https://actualbudget.github.io/docs/Troubleshooting/SharedArrayBuffer">
+            our troubleshooting documentation
+          </a>{' '}
+          for more information.
+        </Text>
+      );
     } else {
       // This indicates the backend failed to initialize. Show the
       // user something at least so they aren't looking at a blank

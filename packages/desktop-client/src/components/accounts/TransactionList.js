@@ -133,7 +133,8 @@ export default function TransactionList({
         if (
           newTransaction[field] == null ||
           newTransaction[field] === '' ||
-          newTransaction[field] === 0
+          newTransaction[field] === 0 ||
+          newTransaction[field] === false
         ) {
           newTransaction[field] = diff[field];
         }

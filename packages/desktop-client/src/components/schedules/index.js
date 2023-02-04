@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View, Button } from 'loot-design/src/components/common';
+import { View, Button, Search } from 'loot-design/src/components/common';
 
 import { Page } from '../Page';
+
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {
   let history = useHistory();
+
+  let [filter, setFilter] = useState('');
 
   let scheduleData = useSchedules();
 
@@ -57,6 +60,14 @@ export default function Schedules() {
 
   return (
     <Page title="Schedules">
+      <View style={{ alignItems: 'flex-end' }}>
+        <Search
+          placeholder="Filter schedules…"
+          value={filter}
+          onChange={setFilter}
+        />
+      </View>
+
       <View
         style={{
           marginTop: 20,
@@ -66,6 +77,7 @@ export default function Schedules() {
       >
         <SchedulesTable
           schedules={schedules}
+          filter={filter}
           statuses={statuses}
           allowCompleted={true}
           onSelect={onEdit}

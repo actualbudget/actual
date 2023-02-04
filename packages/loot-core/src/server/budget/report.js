@@ -1,5 +1,6 @@
 import { safeNumber } from '../../shared/util';
 import * as sheet from '../sheet';
+
 import { number, sumAmounts } from './util';
 
 const { resolveName } = require('../spreadsheet/util');

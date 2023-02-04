@@ -30,6 +30,7 @@ import Wallet from 'loot-design/src/svg/v1/Wallet';
 
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
+
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
 import { default as MobileAccounts } from './accounts/MobileAccounts';
@@ -53,8 +54,6 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
-import FixSplitsTool from './tools/FixSplitsTool';
-
 // import Debugger from './Debugger';
 
 function PageRoute({ path, component: Component }) {
@@ -99,9 +98,9 @@ function Routes({ isMobile, location }) {
           component={PostsOfflineNotification}
         />
 
-        <Route path="/rules" exact component={ManageRulesPage} />
         <Route path="/payees" exact component={ManagePayeesPage} />
-        <Route path="/tools/fix-splits" exact component={FixSplitsTool} />
+        <Route path="/rules" exact component={ManageRulesPage} />
+        <Route path="/settings" component={Settings} />
         <Route path="/nordigen/link" exact component={NordigenLink} />
 
         <Route
@@ -119,7 +118,6 @@ function Routes({ isMobile, location }) {
           exact
           component={isMobile ? MobileAccounts : Account}
         />
-        <Route path="/settings" component={Settings} />
       </Route>
     </Switch>
   );
@@ -207,12 +205,17 @@ function MobileNavTabs() {
 class FinancesApp extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isMobile: isMobile(window.innerWidth) };
+    this.state = { isMobile: isMobile() };
     this.history = createBrowserHistory();
 
     let oldPush = this.history.push;
     this.history.push = (to, state) => {
-      return oldPush.call(this.history, to, makeLocationState(state));
+      let newState = makeLocationState(to.state || state);
+      if (typeof to === 'object') {
+        return oldPush.call(this.history, { ...to, state: newState });
+      } else {
+        return oldPush.call(this.history, to, newState);
+      }
     };
 
     // I'm not sure if this is the best approach but we need this to
@@ -231,7 +234,7 @@ class FinancesApp extends React.Component {
 
   handleWindowResize() {
     this.setState({
-      isMobile: isMobile(window.innerWidth),
+      isMobile: isMobile(),
       windowWidth: window.innerWidth
     });
   }
