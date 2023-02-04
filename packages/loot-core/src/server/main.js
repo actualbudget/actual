@@ -1105,7 +1105,7 @@ handlers['accounts-sync'] = async function ({ id }) {
               'There was an internal error. Please get ' +
               (
                 <a href="https://actualbudget.github.io/docs/Contact/">
-                  intouch
+                  in touch
                 </a>
               ) +
               ' for support.',

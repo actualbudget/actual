@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 
 // For now, this info is duplicated from the backend. Figure out how
@@ -134,13 +132,7 @@ export function getFieldError(type) {
     case 'invalid-field':
       return 'Please choose a valid field for this type of rule';
     default:
-      return (
-        <>
-          'Internal error, sorry! Please get
-          <a href="https://actualbudget.github.io/docs/Contact/">in touch</a>
-          for support'
-        </>
-      );
+      return 'Internal error, sorry! Please get in touch https://actualbudget.github.io/docs/Contact/ for support';
   }
 }
 
