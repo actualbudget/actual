@@ -100,12 +100,12 @@ class FatalError extends React.Component {
           <View style={{ maxWidth: 500 }}>
             <P>There was an unrecoverable error in the UI. Sorry!</P>
             <P>
-              If this error persists, please open an{' '}
+              If this error persists, please get{' '}
               <a
-                href="https://github.com/actualbudget/actual/issues"
+                href="https://actualbudget.github.io/docs/Contact"
                 style={{ color: colors.p4 }}
               >
-                issue
+                in touch
               </a>
               so it can be investigated.
             </P>
