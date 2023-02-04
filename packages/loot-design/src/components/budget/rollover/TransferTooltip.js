@@ -82,9 +82,7 @@ export default function TransferTooltip({
         openOnFocus={true}
         onUpdate={id => {}}
         onSelect={id => setCategory(id)}
-        inputProps={{
-          onEnter: () => submit()
-        }}
+        inputProps={{ onEnter: () => submit() }}
       />
 
       <View
