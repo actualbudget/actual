@@ -90,9 +90,9 @@ export function loadBudget(id, loadingText = '', options = {}) {
         );
       } else {
         alert(
-          'Error loading budget. Please open a '
-          + <a href='https://github.com/actualbudget/actual/issues'>issue</a>
-          + ' for support.'
+          'Error loading budget. Please open a ' +
+            <a href="https://github.com/actualbudget/actual/issues">issue</a> +
+            ' for support.'
         );
       }
 

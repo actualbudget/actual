@@ -19,9 +19,11 @@ export function getUploadError({ reason, meta }) {
     case 'beta-version':
       return 'You cannot perform this action in the beta version (resetting sync, deleting a file, etc).';
     default:
-      return `An internal error occurred, sorry! Open a `
-      + <a href='https://github.com/actualbudget/actual/issues'>issue</a>
-      + `for support. (ref: ${reason})`;
+      return (
+        `An internal error occurred, sorry! Open a ` +
+        <a href="https://github.com/actualbudget/actual/issues">issue</a> +
+        `for support. (ref: ${reason})`
+      );
   }
 }
 
@@ -32,9 +34,11 @@ export function getDownloadError({ reason, meta, fileName }) {
       return 'Downloading the file failed. Check your network connection.';
     case 'invalid-zip-file':
     case 'invalid-meta-file':
-      return 'Downloaded file is invalid, sorry! Open a '
-      + <a href='https://github.com/actualbudget/actual/issues'>issue</a>
-      + ' for support.';
+      return (
+        'Downloaded file is invalid, sorry! Open a ' +
+        <a href="https://github.com/actualbudget/actual/issues">issue</a> +
+        ' for support.'
+      );
     case 'decrypt-failure':
       return (
         'Unable to decrypt file ' +
@@ -52,8 +56,8 @@ export function getDownloadError({ reason, meta, fileName }) {
     default:
       let info = meta && meta.fileId ? `(fileId: ${meta.fileId})` : '';
       return (
-        'Something went wrong trying to download that file, sorry! Open a '
-        + <a href='https://github.com/actualbudget/actual/issues'>issue</a> +
+        'Something went wrong trying to download that file, sorry! Open a ' +
+        <a href="https://github.com/actualbudget/actual/issues">issue</a> +
         'for support. ' +
         info
       );
@@ -77,9 +81,11 @@ export function getTestKeyError({ reason }) {
     case 'decrypt-failure':
       return 'Unable to decrypt file with this password. Please try again.';
     default:
-      return 'Something went wrong trying to create a key, sorry! Open a '
-      + <a href='https://github.com/actualbudget/actual/issues'>issue</a>
-      + ' for support.';
+      return (
+        'Something went wrong trying to create a key, sorry! Open a ' +
+        <a href="https://github.com/actualbudget/actual/issues">issue</a> +
+        ' for support.'
+      );
   }
 }
 

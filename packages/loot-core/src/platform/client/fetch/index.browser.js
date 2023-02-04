@@ -110,8 +110,9 @@ function connectWorker(worker, onOpen, onError) {
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
         alert(
           'We hit a limit on the local storage available. ' +
-          'Edits may not be saved. Please open an ' + <a href='https://github.com/actualbudget/actual/issues'>issue</a>
-          + ' to help debug this.'
+            'Edits may not be saved. Please open an ' +
+            <a href="https://github.com/actualbudget/actual/issues">issue</a> +
+            ' to help debug this.'
         );
       }
     } else if (msg.type === 'capture-breadcrumb') {
