@@ -1324,12 +1324,12 @@ class AccountInternal extends React.PureComponent {
 
   onSaveName = name => {
     if (name.trim().length) {
-    const accountId = this.props.accountId;
-    const account = this.props.accounts.find(
-      account => account.id === accountId
-    );
-    this.props.updateAccount({ ...account, name });
-    this.setState({ editingName: false });
+      const accountId = this.props.accountId;
+      const account = this.props.accounts.find(
+        account => account.id === accountId
+      );
+      this.props.updateAccount({ ...account, name });
+      this.setState({ editingName: false });
     }
   };
 
