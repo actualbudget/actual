@@ -58,7 +58,7 @@ function UpdateNotification({
                 style={{ color: 'white', textDecoration: 'underline' }}
                 onClick={() =>
                   window.Actual.openURLInBrowser(
-                    'https://actualbudget.com/blog/' + updateInfo.version
+                    'https://actualbudget.github.io/docs/Release-Notes/'
                   )
                 }
               >
