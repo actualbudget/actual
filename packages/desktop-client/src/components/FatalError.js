@@ -77,9 +77,9 @@ class FatalError extends React.Component {
         >
           <Text>{msg}</Text>
           <Text>
-            Contact{' '}
-            <a href="mailto:help@actualbudget.com">help@actualbudget.com</a> for
-            support
+            Please get{' '}
+            <a href="https://actualbudget.github.io/docs/Contact">in touch</a>{' '}
+            for support
           </Text>
         </Stack>
       </View>
@@ -98,20 +98,16 @@ class FatalError extends React.Component {
       <Modal isCurrent={true} showClose={false} title="Fatal Error">
         {() => (
           <View style={{ maxWidth: 500 }}>
+            <P>There was an unrecoverable error in the UI. Sorry!</P>
             <P>
-              There was an unrecoverable error in the UI. Sorry! This error has
-              been reported and hopefully will be fixed soon.
-            </P>
-            <P>
-              If you want to talk about what happened or give any feedback, send
-              an email to{' '}
+              If this error persists, please get{' '}
               <a
-                href="mailto:help@actualbudget.com"
+                href="https://actualbudget.github.io/docs/Contact"
                 style={{ color: colors.p4 }}
               >
-                help@actualbudget.com
+                in touch
               </a>
-              .
+              so it can be investigated.
             </P>
             <P>
               <Button onClick={() => window.Actual.relaunch()}>
