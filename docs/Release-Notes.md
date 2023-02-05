@@ -2,6 +2,91 @@
 title: Release Notes
 ---
 
+## 23.2.5
+**Docker tag: 23.2.5**
+
+The release has notable security improvements. Highlights:
+
+* e2e encryption
+* login invalidation when changing password
+* dependency upgrades to remove potential actual-server security vulnerabilities (although we don’t believe there were any severe issues)
+
+### Actual 
+Version: 23.2.5
+
+#### Features
+
+* [#355](https://github.com/actualbudget/actual/pull/355) Schedule Editor: Keep payee list open while toggling transfer payees focus -- thanks [trevdor](https://github.com/trevdor)
+* [#467](https://github.com/actualbudget/actual/pull/467) Add an “Experimental Features” section in the settings -- thanks [j-f1](https://github.com/j-f1)
+* [#475](https://github.com/actualbudget/actual/pull/475) Add support for filtering the rules list -- thanks [j-f1](https://github.com/j-f1)
+* [#482](https://github.com/actualbudget/actual/pull/482) Add option to control the "cleared state" in Rules -- thanks [shall0pass](https://github.com/shall0pass)
+* [#569](https://github.com/actualbudget/actual/pull/569) List of categories in transfer money dialog -- thanks [shall0pass](https://github.com/shall0pass)
+* [#570](https://github.com/actualbudget/actual/pull/570) Use navigitor.userAgent to determine isMobile -- thanks [shall0pass](https://github.com/shall0pass)
+* [#573](https://github.com/actualbudget/actual/pull/573) Goal templates -- thanks [shall0pass](https://github.com/shall0pass)
+* [#579](https://github.com/actualbudget/actual/pull/579) Add 'View on Hover' to Category Notes for #563 -- thanks [gsumpster](https://github.com/gsumpster)
+* [#580](https://github.com/actualbudget/actual/pull/580) Added date to export file name -- thanks [rich-howell](https://github.com/MatissJanis)
+* [#584](https://github.com/actualbudget/actual/pull/585) Cover Overspending dropdown menu, open on click -- thanks [shall0pass](https://github.com/shall0pass)
+* [#590](https://github.com/actualbudget/actual/pull/590) Add support for filtering the schedules table -- thanks [j-f1](https://github.com/j-f1)
+* [#593](https://github.com/actualbudget/actual/pull/593) Allow creating a payee with a name matching an existing account -- thanks [j-f1](https://github.com/j-f1)
+* [#598](https://github.com/actualbudget/actual/pull/595) Allow configuring the server from any page on the management app -- thanks [j-f1](https://github.com/j-f1)
+* [#600](https://github.com/actualbudget/actual/pull/600) Add a warning when SharedArrayBuffer is not available -- thanks [j-f1](https://github.com/j-f1)
+* [#601](https://github.com/actualbudget/actual/pull/601) Improve handling of schedules that are missing a date -- thanks [j-f1](https://github.com/j-f1)
+* [#602](https://github.com/actualbudget/actual/pull/602) Support arbitrary currency symbols in expressions -- thanks [j-f1](https://github.com/j-f1)
+* [#617](https://github.com/actualbudget/actual/pull/617) Improve behavior of deleted payees/categories/accounts in rules -- thanks [j-f1](https://github.com/j-f1)
+
+#### Bugfix
+
+* [#88](https://github.com/actualbudget/actual/pull/88) Fix some YNAB4 importer bugs -- thanks [rianmcguire](https://github.com/MatissJanis)
+* [#486](https://github.com/actualbudget/actual/pull/486) Fix TypeScript warning about too many files -- thanks [j-f1](https://github.com/MatissJanis)
+* [#489](https://github.com/actualbudget/actual/pull/489) Fix “Repair split transactions” button being missing -- thanks [j-f1](https://github.com/j-f1)
+* [#490](https://github.com/actualbudget/actual/pull/490) 🐛 (ynab4) transaction cleared state in imports -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#574](https://github.com/actualbudget/actual/pull/574) Fix #488 -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#572](https://github.com/actualbudget/actual/pull/572) fix: typo in reconcilation transaction creation -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#591](https://github.com/actualbudget/actual/pull/591) Allow libofx to handle decoding imported files -- thanks [j-f1](https://github.com/j-f1)
+* [#592](https://github.com/actualbudget/actual/pull/592) Update SelectedBalance to use useSheetValue -- thanks [j-f1](https://github.com/j-f1)
+* [#599](https://github.com/actualbudget/actual/pull/599) Don’t crash when loading an invalid account ID -- thanks [j-f1](https://github.com/j-f1)
+* [#605](https://github.com/actualbudget/actual/pull/605) Add a suggestion to upload the imported file if reporting an import bug -- thanks [j-f1](https://github.com/j-f1)
+* [#620](https://github.com/actualbudget/actual/pull/620) Fixes editing closed account names issue #616 -- thanks [n1thun](https://github.com/n1thun)
+* [#629](https://github.com/actualbudget/actual/pull/629) Fix form submission on TransferTooltip when pressing enter -- thanks [gsumpster](https://github.com/gsumpster)
+* [#630](https://github.com/actualbudget/actual/pull/630) Skip the “Starting Balance” transaction if the balance is 0 -- thanks [j-f1](https://github.com/j-f1)
+* [#632](https://github.com/actualbudget/actual/pull/632) Fix default value of “Move to a category” -- thanks [j-f1](https://github.com/j-f1)
+
+#### Maintenance
+
+* [#469](https://github.com/actualbudget/actual/pull/469) 🚨 enabling no-unused-vars eslint rule -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#472](https://github.com/actualbudget/actual/pull/372) 👷 disable failing electron builds -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#485](https://github.com/actualbudget/actual/pull/485) Regenerate icons without the .web.js extension -- thanks [j-f1](https://github.com/j-f1)
+* [#575](https://github.com/actualbudget/actual/pull/575) Add an issue template for feature requests -- thanks [j-f1](https://github.com/j-f1)
+* [#586](https://github.com/actualbudget/actual/pull/586) ⬆️ upgrade caniuse-lite -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#609](https://github.com/actualbudget/actual/pull/609) ⬆️ upgrade node-fetch to ^2.6.9 -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#610](https://github.com/actualbudget/actual/pull/610) 🔖 (api) 4.1.6: node-fetch upgrade -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#624](https://github.com/actualbudget/actual/pull/624) Fatal error dialog update to reflect open source -- thanks [rich-howell](https://github.com/rich-howell)
+* [#627](https://github.com/actualbudget/actual/pull/627) Remove all references to help@actualbudget.com -- thanks [rich-howell](https://github.com/rich-howell)
+* [#633](https://github.com/actualbudget/actual/pull/633) Removed reference to blog -- thanks [rich-howell](https://github.com/rich-howell)
+* [#635](https://github.com/actualbudget/actual/pull/635) Removing dead links [rich-howell](https://github.com/rich-howell)
+
+
+### Actual Server 
+Version: 23.2.5
+
+#### Features
+
+* [#115](https://github.com/actualbudget/actual/pull/115) Add support for HTTPS -- thanks [j-f1](https://github.com/j-f1)
+
+#### Bugfix
+
+* [#109](https://github.com/actualbudget/actual/pull/109) fix: listen also listen on ipv6 addresses -- thanks [heilerich](https://github.com/heilerich)
+
+#### Maintenance
+
+* [#116](https://github.com/actualbudget/actual/pull/116) 🔥 remove unused code (plaid, sync-full) -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#110](https://github.com/actualbudget/actual/pull/110) build(deps): bump node-fetch from 2.2.0 to 2.6.7
+* [#111](https://github.com/actualbudget/actual/pull/111) build(deps): bump minimatch from 3.0.4 to 3.1.2
+* [#112](https://github.com/actualbudget/actual/pull/112) build(deps): bump moment from 2.29.3 to 2.29.4
+* [#117](https://github.com/actualbudget/actual/pull/117) build(deps): bump http-cache-semantics from 4.1.0 to 4.1.1 
+* [#118](https://github.com/actualbudget/actual/pull/118) ⬆️ upgrade @actual-app/api to 4.1.6: node-fetch v2 support -- thanks [MatissJanis](https://github.com/MatissJanis)
+* [#119](https://github.com/actualbudget/actual/pull/119) ⬆️ upgrade express*, bcrypt and body-parser -- thanks [MatissJanis](https://github.com/MatissJanis)
+
 ## 23.1.12
 **Docker tag: 23.1.12**
 
@@ -141,7 +226,7 @@ Version: 22.10.25
 * [#130](https://github.com/actualbudget/actual/pull/130) Enforce prettier rules -- thanks [TomAFrench](https://github.com/TomAFrench)
 * [#131](https://github.com/actualbudget/actual/pull/131) Silence warning for missing moment.js install -- thanks [TomAFrench](https://github.com/TomAFrench)
 * [#132](https://github.com/actualbudget/actual/pull/132) Replace jwl-dev-utils with react-dev-utils -- thanks [TomAFrench](https://github.com/TomAFrench)
-* [#135](https://github.com/actualbudget/actual/pull/135) Remove unused dependencies -- thanks [TomAFrench](https://github.com/TomAFrench)
+* [#135](https://github.com/actualbudget/actual/pull/135) Remove unused dependencies  -- thanks [TomAFrench](https://github.com/TomAFrench)
 * [#137](https://github.com/actualbudget/actual/pull/137) Skip failing test suites -- thanks [TomAFrench](https://github.com/TomAFrench)
 * [#139](https://github.com/actualbudget/actual/pull/139) Remove unused rollup config and dependencies -- thanks [TomAFrench](https://github.com/TomAFrench)
 * [#163](https://github.com/actualbudget/actual/pull/163) Force react-error-overlay to 6.0.9 to fix error -- thanks [jlongster](https://github.com/jlongster)
