@@ -1,4 +1,8 @@
 import React, { useState, useRef } from 'react';
+
+import { colors } from '../../style';
+import AnimatedLoading from '../../svg/AnimatedLoading';
+import { Error } from '../alerts';
 import {
   CustomSelect,
   View,
@@ -9,9 +13,6 @@ import {
   ModalButtons,
   Strong
 } from '../common';
-import { Error } from '../alerts';
-import { colors } from '../../style';
-import AnimatedLoading from '../../svg/v1/AnimatedLoading';
 
 function renderError(error) {
   return (
@@ -39,7 +40,7 @@ export default function NordigenExternalMsg({
     setError(null);
     setWaiting('browser');
 
-    let res = await onMoveExternal({institutionId});
+    let res = await onMoveExternal({ institutionId });
     if (res.error) {
       setError(res.error);
       setWaiting(null);
@@ -94,7 +95,7 @@ export default function NordigenExternalMsg({
         </Button>
       </View>
     );
-  }
+  };
 
   return (
     <Modal
@@ -142,7 +143,9 @@ export default function NordigenExternalMsg({
             >
               Success! Click to continue &rarr;
             </Button>
-          ) : (renderLinkButton())}
+          ) : (
+            renderLinkButton()
+          )}
           <div style={{ marginTop: waiting ? 30 : 35 }}>
             <Text style={{ color: colors.n5, fontWeight: 600 }}>
               Why not link it in the app?
