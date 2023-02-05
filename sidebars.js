@@ -274,6 +274,16 @@ const sidebars = {
             'Troubleshooting/Troubleshooting-Edge',
           ],
         },
+        {
+          type: 'category',
+          label: 'Experimental features',
+          collapsed: true,
+          items: [
+            'Advanced/Experimental-Features/goal-templates',
+            unavailable('Report Budget'),
+            unavailable('Account syncing')
+          ],
+        },
       ],
     },
   ],
