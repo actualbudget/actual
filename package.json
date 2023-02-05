@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "23.1.12",
+  "version": "23.2.5",
   "license": "MIT",
   "description": "actual syncing server",
   "main": "index.js",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@actual-app/api": "4.1.6",
-    "@actual-app/web": "23.1.12",
+    "@actual-app/web": "23.2.5",
     "bcrypt": "^5.1.0",
     "better-sqlite3": "^7.5.0",
     "body-parser": "^1.20.1",
