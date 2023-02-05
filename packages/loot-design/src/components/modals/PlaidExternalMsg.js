@@ -130,7 +130,7 @@ export default function PlaidExternalMsg({
             Typing your bank{"'"}s username and password is one of the most
             security-sensitive things you can do, and the browser is the most
             secure app in the world. Why not use it to make sure your
-            information is safe?
+            information is safe? [TODO: Link to docs article]
           </Text>
 
           <ModalButtons style={{ marginTop: 10 }}>
