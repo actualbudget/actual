@@ -109,8 +109,7 @@ function connectWorker(worker, onOpen, onError) {
 
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
         alert(
-          'We hit a limit on the local storage available. ' +
-            'Edits may not be saved. Please contact help@actualbudget.com to help debug this.'
+          'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.github.io/docs/Contact/ so we can help debug this.'
         );
       }
     } else if (msg.type === 'capture-breadcrumb') {
