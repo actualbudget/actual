@@ -855,6 +855,9 @@ handlers['account-create'] = mutator(async function ({
       closed: closed ? 1 : 0
     });
 
+    // Propogate errors
+    if (id === 'Account name already exists') return id;
+
     await db.insertPayee({
       name: '',
       transfer_acct: id
