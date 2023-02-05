@@ -13,4 +13,6 @@ While running a server can be a complicated endeavor, we’ve tried to make it f
   - If you want to use Docker, we have instructions for [running Actual directly](Docker.md) inside Docker or [behind an nginx proxy that offers HTTPS support](DockerWithNginx.md).
 - If you have a home server or a NAS running [Unraid](Unraid.md) or [Synology](synology/synology.md), we have instructions for installing Actual on those platforms.
 
+Once you’ve set up your server, you can [configure it](Configuration.md) to change a few of the ways it works.
+
 If you have any other ways Actual can be hosted, please consider opening a pull request to add them to the documentation so that others can benefit from your experience.

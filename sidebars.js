@@ -108,6 +108,7 @@ const sidebars = {
             },
           ],
         },
+        'Installing/Configuration',
         {
           type: 'category',
           label: 'A Tour of Actual',

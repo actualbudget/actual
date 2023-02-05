@@ -14,6 +14,8 @@ If you’re running a local server and accessing it through a domain name, you�
 2. Connect your server to a domain you control and make it public to the Internet. You could use a tool like [certbot](https://certbot.eff.org) to generate a valid certificate once you have the domain set up.
 3. Use a service like [Tailscale](https://tailscale.com/kb/1153/enabling-https/) that allows you to create a valid HTTPS certificate without having to expose your server to the wider internet.
 
+Once you have the certificate, [pass it to Actual using the config file](/Installing/Configuration/#https).
+
 ## HTTP Headers
 
 In addition to the HTTPS requirement, the `Cross-Origin-Embedder-Policy` and `Cross-Origin-Opener-Policy` headers must be set to `require-corp` and `same-origin` respectively. If you’re using the default `actual-server` package as your server, you don’t have to worry about this (the headers will always be enabled). If you’re using a different server, you’ll need to make sure these headers are set.
