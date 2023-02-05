@@ -42,7 +42,19 @@ function getErrorMessage(type, code) {
     default:
   }
 
-  return 'An internal error occurred. Try to login again, or contact help@actualbudget.com for support.';
+  return (
+    <>
+      An internal error occurred. Try to login again, or get{' '}
+      <a
+        href="https://actualbudget.github.io/docs/Contact/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        in touch
+      </a>{' '}
+      for support.
+    </>
+  );
 }
 
 function AccountSyncCheck({

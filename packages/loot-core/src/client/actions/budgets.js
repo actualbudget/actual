@@ -90,7 +90,7 @@ export function loadBudget(id, loadingText = '', options = {}) {
         );
       } else {
         alert(
-          'Error loading budget. Please contact help@actualbudget.com for support.'
+          'Error loading budget. Please open a issue on GitHub for support.'
         );
       }
 
