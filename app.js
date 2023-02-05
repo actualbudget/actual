@@ -34,14 +34,10 @@ app.use((req, res, next) => {
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
-app.use(
-  express.static(__dirname + '/node_modules/@actual-app/web/build', {
-    index: false
-  })
-);
-app.get('/*', (req, res) => {
-  res.sendFile(__dirname + '/node_modules/@actual-app/web/build/index.html');
-});
+app.use(express.static(config.webRoot, { index: false }));
+
+let indexHTML = fs.readFileSync(config.webRoot + '/index.html');
+app.get('/*', (req, res) => res.send(indexHTML));
 
 async function run() {
   if (!fs.existsSync(config.serverFiles)) {
@@ -55,18 +51,22 @@ async function run() {
   await accountApp.init();
   await syncApp.init();
 
-  console.log('Listening on ' + config.hostname + ':' + config.port + '...');
   if (config.https) {
     const https = require('https');
     const httpsOptions = {
       ...config.https,
-      key: fs.readFileSync(config.https.key),
-      cert: fs.readFileSync(config.https.cert)
+      key: config.https.key.startsWith('-----BEGIN')
+        ? config.https.key
+        : fs.readFileSync(config.https.key),
+      cert: config.https.cert.startsWith('-----BEGIN')
+        ? config.https.cert
+        : fs.readFileSync(config.https.cert)
     };
     https.createServer(httpsOptions, app).listen(config.port, config.hostname);
   } else {
     app.listen(config.port, config.hostname);
   }
+  console.log('Listening on ' + config.hostname + ':' + config.port + '...');
 }
 
 run().catch((err) => {
