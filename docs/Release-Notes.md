@@ -5,6 +5,12 @@ title: Release Notes
 ## 23.2.5
 **Docker tag: 23.2.5**
 
+:::warning
+
+This release introduces a breaking change, there is now a requirement for Actual to be served over HTTPS when not running on localhost. If you don't have a reverse proxy or certificate Actual will not load your budget. 
+
+:::
+
 The release has notable security improvements. Highlights:
 
 * e2e encryption
