@@ -72,14 +72,16 @@ Now we need to tell Actual to use this volume. Add this in `fly.toml`:
 
 That's it! Actual will automatically check if the `/data` directory exists and use it automatically.
 
-_You can also configure the data dir with the `ACTUAL_USER_FILES` environment variable._
-
 
 ### One-click hosting solutions
 
 These are non-official methods of one-click solutions for running Actual. If you provide a service like this, feel free to open a PR and add it to this list. These run Actual via a Docker image.
 
 * PikaPods: [Run on PikaPods](https://www.pikapods.com/pods?run=actual)
+
+## Configuring the server
+
+The server accepts several configuration options, including for HTTPS certificates and various file paths. The documentation website has [a page dedicated to configuration options](https://actualbudget.github.io/docs/Installing/Configuration)
 
 ## Configuring the server URL
 

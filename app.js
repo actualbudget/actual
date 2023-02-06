@@ -38,6 +38,13 @@ app.use(express.static(config.webRoot, { index: false }));
 
 app.get('/*', (req, res) => res.sendFile(config.webRoot + '/index.html'));
 
+function parseHTTPSConfig(value) {
+  if (value.startsWith('-----BEGIN')) {
+    return value;
+  }
+  return fs.readFileSync(value);
+}
+
 async function run() {
   if (!fs.existsSync(config.serverFiles)) {
     fs.mkdirSync(config.serverFiles);
@@ -54,12 +61,8 @@ async function run() {
     const https = require('https');
     const httpsOptions = {
       ...config.https,
-      key: config.https.key.startsWith('-----BEGIN')
-        ? config.https.key
-        : fs.readFileSync(config.https.key),
-      cert: config.https.cert.startsWith('-----BEGIN')
-        ? config.https.cert
-        : fs.readFileSync(config.https.cert)
+      key: parseHTTPSConfig(config.https.key),
+      cert: parseHTTPSConfig(config.https.cert)
     };
     https.createServer(httpsOptions, app).listen(config.port, config.hostname);
   } else {

@@ -50,8 +50,8 @@ module.exports = {
   https:
     process.env.ACTUAL_HTTPS_KEY && process.env.ACTUAL_HTTPS_CERT
       ? {
-          key: process.env.ACTUAL_HTTPS_KEY,
-          cert: process.env.ACTUAL_HTTPS_CERT,
+          key: process.env.ACTUAL_HTTPS_KEY.replace(/\\n/g, '\n'),
+          cert: process.env.ACTUAL_HTTPS_CERT.replace(/\\n/g, '\n'),
           ...(config.https || {})
         }
       : config.https
