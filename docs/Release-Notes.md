@@ -43,6 +43,8 @@ Version: 23.2.5
 #### Bugfix
 
 * [#88](https://github.com/actualbudget/actual/pull/88) Fix some YNAB4 importer bugs -- thanks [rianmcguire]
+* [#414](https://github.com/actualbudget/actual/pull/414) Fix condition mapping for payee rule creation from payee modal -- thanks [winklevos]
+* [#450](https://github.com/actualbudget/actual/pull/450) Rules page throws fatal exception TypeError: n[t] is undefined -- thanks  [winklevos]
 * [#486](https://github.com/actualbudget/actual/pull/486) Fix TypeScript warning about too many files -- thanks [j-f1]
 * [#489](https://github.com/actualbudget/actual/pull/489) Fix “Repair split transactions” button being missing -- thanks [j-f1]
 * [#490](https://github.com/actualbudget/actual/pull/490) 🐛 (ynab4) transaction cleared state in imports -- thanks [MatissJanis]
