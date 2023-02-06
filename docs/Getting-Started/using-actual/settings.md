@@ -23,7 +23,7 @@ End to End Encryption is not actually available in Actual version 20.10.25, this
 
 ### Export
 
-Actual is local first, with this, it is possible to export your data from Actual, when you do this you will be given a zip file to download which will contain the SQLLite database along with your budget. 
+Actual is local first, with this, it is possible to export your data from Actual, when you do this you will be given a zip file to download which will contain the SQLite database along with your budget. 
 
 ![](/img/using-actual/settings-1.png)
 
