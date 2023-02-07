@@ -1,7 +1,7 @@
 let userConfig;
 let fs = require('fs');
-let { join } = require('path');
-let root = fs.existsSync('/data') ? '/data' : __dirname;
+let { join, dirname } = require('path');
+let root = fs.existsSync('/data') ? '/data' : dirname(__dirname);
 
 if (process.env.ACTUAL_CONFIG_PATH) {
   userConfig = require(process.env.ACTUAL_CONFIG_PATH);
@@ -18,7 +18,13 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 let defaultConfig = {
   port: 5006,
   hostname: '::',
-  webRoot: join(__dirname, 'node_modules', '@actual-app', 'web', 'build')
+  webRoot: join(
+    dirname(__dirname),
+    'node_modules',
+    '@actual-app',
+    'web',
+    'build'
+  )
 };
 
 /** @type {import('./config-types').Config} */
@@ -26,8 +32,8 @@ let config;
 if (process.env.NODE_ENV === 'test') {
   config = {
     mode: 'test',
-    serverFiles: join(__dirname, 'test-server-files'),
-    userFiles: join(__dirname, 'test-user-files'),
+    serverFiles: join(dirname(__dirname), 'test-server-files'),
+    userFiles: join(dirname(__dirname), 'test-user-files'),
     ...defaultConfig
   };
 } else {

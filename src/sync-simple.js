@@ -15,7 +15,7 @@ function getGroupDb(groupId) {
   let db = openDatabase(path);
 
   if (needsInit) {
-    let sql = readFileSync(join(__dirname, 'sql/messages.sql'), 'utf8');
+    let sql = readFileSync(join(__dirname, '../sql/messages.sql'), 'utf8');
     db.exec(sql);
   }
 

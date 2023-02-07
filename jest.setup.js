@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { join } = require('path');
-const { getAccountDb } = require('./account-db');
-const config = require('./load-config');
+const { getAccountDb } = require('./src/account-db');
+const config = require('./src/load-config');
 
 // Delete previous test database (force creation of a new one)
 const dbPath = join(config.serverFiles, 'account.sqlite');
