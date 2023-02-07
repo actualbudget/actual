@@ -13,11 +13,11 @@ const SvgSplit = props => (
   >
     <path
       d="m30 9-4-4M30 9l-4 4M6 5 2 9M2 9l4 4M10 9H3M22 9h7M16 15l6-6M16 15l-6-6M16 28V15"
-      stroke="#000"
+      fill="none"
+      stroke="currentColor"
       strokeWidth={3.5}
       strokeMiterlimit={10}
       strokeLinecap="round"
-      fill="currentColor"
     />
   </svg>
 );
