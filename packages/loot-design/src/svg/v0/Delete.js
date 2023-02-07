@@ -12,7 +12,7 @@ const SvgDelete = props => (
   >
     <path
       fill="none"
-      stroke="#000"
+      stroke="currentColor"
       strokeWidth={4}
       strokeLinecap="round"
       strokeMiterlimit={10}
