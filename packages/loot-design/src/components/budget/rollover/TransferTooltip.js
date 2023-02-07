@@ -82,13 +82,7 @@ export default function TransferTooltip({
         openOnFocus={true}
         onUpdate={id => {}}
         onSelect={id => setCategory(id)}
-        inputProps={{
-          onKeyDown: e => {
-            if (e.keyCode === 13) {
-              submit();
-            }
-          }
-        }}
+        inputProps={{ onEnter: submit }}
       />
 
       <View

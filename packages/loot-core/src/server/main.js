@@ -861,7 +861,7 @@ handlers['account-create'] = mutator(async function ({
       transfer_acct: id
     });
 
-    if (balance != null) {
+    if (balance != null && balance !== 0) {
       let payee = await getStartingBalancePayee();
 
       await db.insertTransaction({
@@ -1100,7 +1100,7 @@ handlers['accounts-sync'] = async function ({ id }) {
           errors.push({
             accountId: acct.id,
             message:
-              'There was an internal error. Please email help@actualbudget.com for support.',
+              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
             internal: err.stack
           });
 

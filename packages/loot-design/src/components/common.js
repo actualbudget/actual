@@ -422,6 +422,35 @@ export function InputWithContent({
   );
 }
 
+export function Search({
+  inputRef,
+  value,
+  onChange,
+  placeholder,
+  isInModal,
+  width = 350
+}) {
+  return (
+    <Input
+      inputRef={inputRef}
+      placeholder={placeholder}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      style={{
+        width,
+        borderColor: isInModal ? null : 'transparent',
+        backgroundColor: isInModal ? null : colors.n11,
+        ':focus': isInModal
+          ? null
+          : {
+              backgroundColor: 'white',
+              '::placeholder': { color: colors.n8 }
+            }
+      }}
+    />
+  );
+}
+
 export function KeyboardButton({ highlighted, children, ...props }) {
   return (
     <Button

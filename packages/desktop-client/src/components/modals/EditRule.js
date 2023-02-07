@@ -172,6 +172,7 @@ export function ConditionEditor({
   ops,
   condition,
   editorStyle,
+  isSchedule,
   onChange,
   onDelete,
   onAdd
@@ -214,7 +215,10 @@ export function ConditionEditor({
       <View style={{ flex: 1 }}>{valueEditor}</View>
 
       <Stack direction="row">
-        <EditorButtons onAdd={onAdd} onDelete={onDelete} />
+        <EditorButtons
+          onAdd={onAdd}
+          onDelete={isSchedule && field === 'date' ? null : onDelete}
+        />
       </Stack>
     </Editor>
   );
@@ -395,6 +399,7 @@ export function ConditionsList({
   conditions,
   conditionFields,
   editorStyle,
+  isSchedule,
   onChangeConditions
 }) {
   function addCondition(index) {
@@ -523,6 +528,7 @@ export function ConditionsList({
               editorStyle={editorStyle}
               ops={ops}
               condition={cond}
+              isSchedule={isSchedule}
               onChange={(name, value) => {
                 updateCondition(cond, name, value);
               }}
@@ -566,6 +572,8 @@ export default function EditRule({
   let [transactions, setTransactions] = useState([]);
   let dispatch = useDispatch();
   let scrollableEl = useRef();
+
+  let isSchedule = actions.some(action => action.op === 'link-schedule');
 
   useEffect(() => {
     dispatch(initiallyLoadPayees());
@@ -769,6 +777,7 @@ export default function EditRule({
                   conditions={conditions}
                   conditionFields={conditionFields}
                   editorStyle={editorStyle}
+                  isSchedule={isSchedule}
                   onChangeConditions={conds => setConditions(conds)}
                 />
               </View>

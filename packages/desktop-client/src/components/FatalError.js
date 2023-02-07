@@ -27,6 +27,20 @@ class FatalError extends React.Component {
           private browsing.
         </Text>
       );
+    } else if (error.SharedArrayBufferMissing) {
+      // SharedArrayBuffer isn't available
+      msg = (
+        <Text>
+          Actual requires access to <code>SharedArrayBuffer</code> in order to
+          function properly. If you’re seeing this error, either your browser
+          does not support <code>SharedArrayBuffer</code>, or your server is not
+          sending the appropriate headers, or you are not using HTTPS. See{' '}
+          <a href="https://actualbudget.github.io/docs/Troubleshooting/SharedArrayBuffer">
+            our troubleshooting documentation
+          </a>{' '}
+          for more information.
+        </Text>
+      );
     } else {
       // This indicates the backend failed to initialize. Show the
       // user something at least so they aren't looking at a blank
@@ -63,9 +77,9 @@ class FatalError extends React.Component {
         >
           <Text>{msg}</Text>
           <Text>
-            Contact{' '}
-            <a href="mailto:help@actualbudget.com">help@actualbudget.com</a> for
-            support
+            Please get{' '}
+            <a href="https://actualbudget.github.io/docs/Contact">in touch</a>{' '}
+            for support
           </Text>
         </Stack>
       </View>
@@ -84,20 +98,16 @@ class FatalError extends React.Component {
       <Modal isCurrent={true} showClose={false} title="Fatal Error">
         {() => (
           <View style={{ maxWidth: 500 }}>
+            <P>There was an unrecoverable error in the UI. Sorry!</P>
             <P>
-              There was an unrecoverable error in the UI. Sorry! This error has
-              been reported and hopefully will be fixed soon.
-            </P>
-            <P>
-              If you want to talk about what happened or give any feedback, send
-              an email to{' '}
+              If this error persists, please get{' '}
               <a
-                href="mailto:help@actualbudget.com"
+                href="https://actualbudget.github.io/docs/Contact"
                 style={{ color: colors.p4 }}
               >
-                help@actualbudget.com
+                in touch
               </a>
-              .
+              so it can be investigated.
             </P>
             <P>
               <Button onClick={() => window.Actual.relaunch()}>

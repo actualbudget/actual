@@ -217,6 +217,8 @@ export default function PayeeAutocomplete({
     }
   }
 
+  const [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
+
   return (
     <Autocomplete
       key={focusTransferPayees ? 'transfers' : 'all'}
@@ -233,8 +235,11 @@ export default function PayeeAutocomplete({
         }
         return item.name;
       }}
+      focused={payeeFieldFocused}
       inputProps={{
         ...inputProps,
+        onBlur: () => setPayeeFieldFocused(false),
+        onFocus: () => setPayeeFieldFocused(true),
         onChange: text => (rawPayee.current = text)
       }}
       onUpdate={value => onUpdate && onUpdate(makeNew(value, rawPayee))}

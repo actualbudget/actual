@@ -40,7 +40,7 @@ function Version() {
           zIndex: 5001
         }
       }}
-      href={'https://actualbudget.com/blog/' + window.Actual.ACTUAL_VERSION}
+      href={'https://actualbudget.github.io/docs/Release-Notes/'}
     >
       {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
     </Text>

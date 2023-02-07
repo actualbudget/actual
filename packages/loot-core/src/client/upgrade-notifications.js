@@ -55,7 +55,7 @@ export default function checkForUpgradeNotifications(
               type: 'message',
               title: 'Split transactions now support transfers & payees',
               message:
-                'The payee field is now available on split transactions, allowing you to perform transfers on individual split transactions.\n\nAll existing split transactions have a blank payee and we recommend using the tool below to set the payee from the parent. [View a video walkthrough](https://actualbudget.com/blog/split-transactions-transfer)',
+                'The payee field is now available on split transactions, allowing you to perform transfers on individual split transactions.\n\nAll existing split transactions have a blank payee and we recommend using the tool below to set the payee from the parent. [View a video walkthrough](https://www.youtube.com/watch?v=5kTtAsB0Oqk)',
               sticky: true,
               id: 'repair-splits',
               button: {

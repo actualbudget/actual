@@ -3,7 +3,7 @@ function create(libofx) {
     init: libofx.cwrap('init', null, ['number']),
     debug: libofx.cwrap('debug', null, []),
     get_new_context: libofx.cwrap('get_new_context', 'number', []),
-    parse_data: libofx.cwrap('parse_data', null, ['number', 'string']),
+    parse_data: libofx.cwrap('parse_data', null, ['number', 'array']),
 
     ofx_set_transaction_cb: libofx.cwrap('ofx_set_transaction_cb', null, [
       'number',

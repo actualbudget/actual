@@ -132,7 +132,7 @@ export function getFieldError(type) {
     case 'invalid-field':
       return 'Please choose a valid field for this type of rule';
     default:
-      return 'Internal error, sorry! Contact help@actualbudget.com';
+      return 'Internal error, sorry! Please get in touch https://actualbudget.github.io/docs/Contact/ for support';
   }
 }
 
