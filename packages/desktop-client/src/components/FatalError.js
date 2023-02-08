@@ -143,7 +143,7 @@ class FatalError extends React.Component {
 export default FatalError;
 
 function SharedArrayBufferOverride() {
-  let [expanded, setExpanded] = useState(true);
+  let [expanded, setExpanded] = useState(false);
   let [understand, setUnderstand] = useState(false);
 
   return expanded ? (
