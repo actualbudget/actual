@@ -119,6 +119,9 @@ export function closeBudget() {
       dispatch(setAppState({ loadingText: 'Closing...' }));
       await send('close-budget');
       dispatch(setAppState({ loadingText: null }));
+      if (localStorage.getItem('SharedArrayBufferOverride')) {
+        location.reload();
+      }
     }
   };
 }
