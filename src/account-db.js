@@ -1,10 +1,10 @@
-let fs = require('fs');
-let { join } = require('path');
-let { openDatabase } = require('./db');
-let config = require('./load-config');
+import fs from 'node:fs';
+import { join } from 'node:path';
+import openDatabase from './db.js';
+import config, { projectRoot } from './load-config.js';
 let accountDb = null;
 
-function getAccountDb() {
+export default function getAccountDb() {
   if (accountDb == null) {
     if (!fs.existsSync(config.serverFiles)) {
       console.log('MAKING SERVER DIR');
@@ -18,7 +18,7 @@ function getAccountDb() {
 
     if (needsInit) {
       let initSql = fs.readFileSync(
-        join(__dirname, '../sql/account.sql'),
+        join(projectRoot, 'sql/account.sql'),
         'utf8'
       );
       accountDb.exec(initSql);
@@ -27,5 +27,3 @@ function getAccountDb() {
 
   return accountDb;
 }
-
-module.exports = { getAccountDb };

@@ -1,14 +1,16 @@
-let express = require('express');
-let bcrypt = require('bcrypt');
-let uuid = require('uuid');
-let errorMiddleware = require('./util/error-middleware');
-let { validateUser } = require('./util/validate-user');
-let { getAccountDb } = require('./account-db');
+import express from 'express';
+import * as bcrypt from 'bcrypt';
+import * as uuid from 'uuid';
+import errorMiddleware from './util/error-middleware.js';
+import validateUser from './util/validate-user.js';
+import getAccountDb from './account-db.js';
 
 let app = express();
 app.use(errorMiddleware);
 
-function init() {
+export { app as handlers };
+
+export function init() {
   // eslint-disable-previous-line @typescript-eslint/no-empty-function
 }
 
@@ -111,6 +113,3 @@ app.get('/validate', (req, res) => {
 });
 
 app.use(errorMiddleware);
-
-module.exports.handlers = app;
-module.exports.init = init;

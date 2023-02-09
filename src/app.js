@@ -1,12 +1,12 @@
-const fs = require('fs');
-const express = require('express');
-const actuator = require('express-actuator');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const config = require('./load-config');
+import fs from 'node:fs';
+import express from 'express';
+import actuator from 'express-actuator';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import config from './load-config.js';
 
-const accountApp = require('./app-account');
-const syncApp = require('./app-sync');
+import * as accountApp from './app-account.js';
+import * as syncApp from './app-sync.js';
 
 const app = express();
 
@@ -45,7 +45,7 @@ function parseHTTPSConfig(value) {
   return fs.readFileSync(value);
 }
 
-module.exports = async function run() {
+export default async function run() {
   if (!fs.existsSync(config.serverFiles)) {
     fs.mkdirSync(config.serverFiles);
   }
@@ -69,4 +69,4 @@ module.exports = async function run() {
     app.listen(config.port, config.hostname);
   }
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
-};
+}

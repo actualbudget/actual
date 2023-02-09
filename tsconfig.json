@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     // DOM for URL global in Node 16+
-    "lib": ["ES2021", "DOM"],
+    "lib": ["ES2021"],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -12,8 +12,8 @@
     // Check JS files too
     "allowJs": true,
     "checkJs": true,
-    "moduleResolution": "node",
-    "module": "commonjs",
+    "moduleResolution": "node16",
+    "module": "node16",
     "outDir": "build"
   },
   "exclude": ["node_modules", "build", "./app-plaid.js"]

@@ -1,52 +1,54 @@
-let userConfig;
-let fs = require('fs');
-let { join, dirname } = require('path');
-let root = fs.existsSync('/data') ? '/data' : dirname(__dirname);
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
+export const projectRoot = path.dirname(
+  path.dirname(fileURLToPath(import.meta.url))
+);
+let defaultDataDir = fs.existsSync('/data') ? '/data' : projectRoot;
+
+function parseJSON(path) {
+  return JSON.parse(fs.readFileSync(path, 'utf8'));
+}
+
+let userConfig;
 if (process.env.ACTUAL_CONFIG_PATH) {
-  userConfig = require(process.env.ACTUAL_CONFIG_PATH);
+  userConfig = parseJSON(process.env.ACTUAL_CONFIG_PATH);
 } else {
   try {
-    // @ts-expect-error TS2307: we expect this file may not exist
-    userConfig = require('./config');
+    userConfig = parseJSON(path.join(defaultDataDir, 'config.json'));
   } catch (e) {
     // do nothing
   }
 }
 
-/** @type {Omit<import('./config-types').Config, 'mode' | 'serverFiles' | 'userFiles'>} */
+/** @type {Omit<import('./config-types.js').Config, 'mode' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
   port: 5006,
   hostname: '::',
-  webRoot: join(
-    dirname(__dirname),
-    'node_modules',
-    '@actual-app',
-    'web',
-    'build'
-  )
+  webRoot: path.join(projectRoot, 'node_modules', '@actual-app', 'web', 'build')
 };
 
-/** @type {import('./config-types').Config} */
+/** @type {import('./config-types.js').Config} */
 let config;
 if (process.env.NODE_ENV === 'test') {
   config = {
     mode: 'test',
-    serverFiles: join(dirname(__dirname), 'test-server-files'),
-    userFiles: join(dirname(__dirname), 'test-user-files'),
+    serverFiles: path.join(projectRoot, 'test-server-files'),
+    userFiles: path.join(projectRoot, 'test-user-files'),
     ...defaultConfig
   };
 } else {
   config = {
     mode: 'development',
     ...defaultConfig,
-    serverFiles: join(root, 'server-files'),
-    userFiles: join(root, 'user-files'),
+    serverFiles: path.join(defaultDataDir, 'server-files'),
+    userFiles: path.join(defaultDataDir, 'user-files'),
     ...(userConfig || {})
   };
 }
 
-module.exports = {
+export default {
   ...config,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
