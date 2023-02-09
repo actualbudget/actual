@@ -27,7 +27,9 @@ function createBackendWorker() {
     version: ACTUAL_VERSION,
     isDev: IS_DEV,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
-    allowBuggyFallback: localStorage.getItem('SharedArrayBufferOverride')
+    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
+      'SharedArrayBufferOverride'
+    )
   });
 
   if (IS_DEV || IS_PERF_BUILD) {
