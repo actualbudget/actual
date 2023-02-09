@@ -10,7 +10,7 @@ self.addEventListener('message', e => {
       let version = msg.version;
       let hash = msg.hash;
 
-      if (!self.SharedArrayBuffer) {
+      if (!self.SharedArrayBuffer && !msg.isSharedArrayBufferOverrideEnabled) {
         self.postMessage({
           type: 'app-init-failure',
           SharedArrayBufferMissing: true
