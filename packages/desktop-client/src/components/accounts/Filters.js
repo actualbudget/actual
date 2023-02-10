@@ -409,27 +409,37 @@ function FilterExpression({
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
-          padding: 5,
-          paddingLeft: 10,
           marginBottom: 10,
           marginRight: 10
         },
         style
       ]}
     >
-      <div>
-        {customName ? (
-          <Text style={{ color: colors.p4 }}>{customName}</Text>
-        ) : (
-          <>
-            <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
-            <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
-            <Value value={value} field={field} inline={true} />
-          </>
-        )}
-      </div>
-      <Button bare style={{ marginLeft: 3 }} onClick={onDelete}>
-        <DeleteIcon style={{ width: 8, height: 8, color: colors.n4 }} />
+      <Button bare style={{ marginRight: -7 }}>
+        <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
+          {customName ? (
+            <Text style={{ color: colors.p4 }}>{customName}</Text>
+          ) : (
+            <>
+              <Text style={{ color: colors.p4 }}>
+                {mapField(field, options)}
+              </Text>{' '}
+              <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+              <Value value={value} field={field} inline={true} />
+            </>
+          )}
+        </div>
+      </Button>
+      <Button bare onClick={onDelete}>
+        <DeleteIcon
+          style={{
+            width: 8,
+            height: 8,
+            color: colors.n4,
+            margin: 5,
+            marginLeft: 3
+          }}
+        />
       </Button>
     </View>
   );
