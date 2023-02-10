@@ -64,21 +64,7 @@ const sidebars = {
               label: 'On Your Own Server',
               collapsible: false,
               items: [
-                'Installing/Docker',
-                'Installing/DockerWithNginx',
-                'Installing/Unraid',
-                {
-                  type: 'category',
-                  label: 'Synology',
-                  link: {
-                    type: 'doc',
-                    id: 'Installing/synology/synology',
-                  },
-                  items: [
-                    'Installing/synology/synology-reverse-proxy',
-                    'Installing/synology/synology-watchtower',
-                  ],
-                },
+                'Installing/Docker',               
               ],
             },
             {
@@ -102,8 +88,7 @@ const sidebars = {
                     'Installing/fly/Fly-persisting',
                   ],
                 },
-                'Installing/PikaPods',
-                'Installing/Terraform',
+                'Installing/PikaPods',               
               ],
             },
           ],
