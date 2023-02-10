@@ -47,6 +47,23 @@ let filterFields = [
   'cleared'
 ].map(field => [field, mapField(field)]);
 
+function subfieldFromFilter({ field, options, value }) {
+  if (field === 'date') {
+    if (value.length === 7) {
+      return 'month';
+    } else if (value.length === 4) {
+      return 'year';
+    }
+  } else if (field === 'amount') {
+    if (options && options.inflow) {
+      return 'amount-inflow';
+    } else if (options && options.outflow) {
+      return 'amount-outflow';
+    }
+  }
+  return field;
+}
+
 function subfieldToOptions(field, subfield) {
   switch (field) {
     case 'amount':
@@ -111,8 +128,38 @@ function OpButton({ op, selected, style, onClick }) {
   );
 }
 
-function ConfigureField({ field, op, value, dispatch, onApply }) {
-  let [subfield, setSubfield] = useState(field);
+function updateFilterReducer(state, action) {
+  switch (action.type) {
+    case 'set-op': {
+      let type = FIELD_TYPES.get(state.field);
+      let value = state.value;
+      if (type === 'id' && action.op === 'contains') {
+        // Clear out the value if switching between contains for
+        // the id type
+        value = null;
+      }
+      return { ...state, op: action.op, value };
+    }
+    case 'set-value': {
+      let { value } = makeValue(action.value, {
+        type: FIELD_TYPES.get(state.field)
+      });
+      return { ...state, value: value };
+    }
+    default:
+      throw new Error(`Unhandled action type: ${action.type}`);
+  }
+}
+
+function ConfigureField({
+  field,
+  initialSubfield = field,
+  op,
+  value,
+  dispatch,
+  onApply
+}) {
+  let [subfield, setSubfield] = useState(initialSubfield);
   let inputRef = useRef();
   let prevOp = useRef(null);
 
@@ -272,25 +319,10 @@ export function FilterButton({ onApply }) {
             value: type === 'boolean' ? true : null
           };
         }
-        case 'set-op': {
-          let type = FIELD_TYPES.get(state.field);
-          let value = state.value;
-          if (type === 'id' && action.op === 'contains') {
-            // Clear out the value if switching between contains for
-            // the id type
-            value = null;
-          }
-          return { ...state, op: action.op, value };
-        }
-        case 'set-value':
-          let { value } = makeValue(action.value, {
-            type: FIELD_TYPES.get(state.field)
-          });
-          return { ...state, value: value };
         case 'close':
           return { fieldsOpen: false, condOpen: false, value: null };
         default:
-          throw new Error('Unknown action: ' + action.type);
+          return updateFilterReducer(state, action);
       }
     },
     { fieldsOpen: false, condOpen: false, field: null, value: null }
@@ -380,6 +412,36 @@ export function FilterButton({ onApply }) {
   );
 }
 
+function FilterEditor({ field, op, value, options, onSave, onClose }) {
+  let [state, dispatch] = useReducer(
+    (state, action) => {
+      switch (action.type) {
+        case 'close':
+          onClose();
+          return state;
+        default:
+          return updateFilterReducer(state, action);
+      }
+    },
+    { field, op, value, options }
+  );
+
+  return (
+    <ConfigureField
+      field={state.field}
+      initialSubfield={subfieldFromFilter({ field, options, value })}
+      op={state.op}
+      value={state.value}
+      options={state.options}
+      dispatch={dispatch}
+      onApply={cond => {
+        onSave(cond);
+        onClose();
+      }}
+    />
+  );
+}
+
 function FilterExpression({
   field: originalField,
   customName,
@@ -388,18 +450,12 @@ function FilterExpression({
   options,
   stage,
   style,
+  onChange,
   onDelete
 }) {
-  let type = FIELD_TYPES.get(originalField);
+  let [editing, setEditing] = useState(false);
 
-  let field = originalField;
-  if (type === 'date') {
-    if (value.length === 7) {
-      field = 'month';
-    } else if (value.length === 4) {
-      field = 'year';
-    }
-  }
+  let field = subfieldFromFilter({ field: originalField, value });
 
   return (
     <View
@@ -415,7 +471,12 @@ function FilterExpression({
         style
       ]}
     >
-      <Button bare style={{ marginRight: -7 }}>
+      <Button
+        bare
+        disabled={customName != null}
+        onClick={() => setEditing(true)}
+        style={{ marginRight: -7 }}
+      >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
             <Text style={{ color: colors.p4 }}>{customName}</Text>
@@ -441,11 +502,23 @@ function FilterExpression({
           }}
         />
       </Button>
+      {editing && (
+        <FilterEditor
+          field={originalField}
+          customName={customName}
+          op={op}
+          value={value}
+          options={options}
+          stage={stage}
+          onSave={onChange}
+          onClose={() => setEditing(false)}
+        />
+      )}
     </View>
   );
 }
 
-export function AppliedFilters({ filters, editingFilter, onDelete }) {
+export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
   return (
     <View
       style={{
@@ -465,6 +538,7 @@ export function AppliedFilters({ filters, editingFilter, onDelete }) {
           value={filter.value}
           options={filter.options}
           editing={editingFilter === filter}
+          onChange={newFilter => onUpdate(filter, newFilter)}
           onDelete={() => onDelete(filter)}
         />
       ))}
