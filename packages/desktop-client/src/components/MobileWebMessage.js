@@ -18,7 +18,7 @@ export default function MobileWebMessage() {
   let [show, setShow] = useState(
     isMobile() &&
       !hideMobileMessagePref &&
-      !document.cookie.match(/hideMobileMessage=true/)
+      !document.cookie.match(/hideMobileMessage=true/),
   );
   let [requestDontRemindMe, setRequestDontRemindMe] = useState(false);
 

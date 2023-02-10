@@ -162,7 +162,7 @@ let Payee = React.memo(
         />
       </Row>
     );
-  }
+  },
 );
 
 const PayeeTable = React.forwardRef(
@@ -178,7 +178,7 @@ const PayeeTable = React.forwardRef(
       onViewRules,
       onCreateRule,
     },
-    ref
+    ref,
   ) => {
     let [hovered, setHovered] = useState(null);
     let selectedItems = useSelectedItems();
@@ -221,7 +221,7 @@ const PayeeTable = React.forwardRef(
         />
       </View>
     );
-  }
+  },
 );
 
 function PayeeTableHeader() {
@@ -276,7 +276,7 @@ function EmptyMessage({ text, style }) {
 function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
   // Transfer accounts are never editable
   let isDisabled = [...selectedPayees].some(
-    id => payeesById[id] == null || payeesById[id].transfer_acct
+    id => payeesById[id] == null || payeesById[id].transfer_acct,
   );
 
   return (
@@ -350,7 +350,7 @@ export const ManagePayees = React.forwardRef(
       onCreateRule,
       ...props
     },
-    ref
+    ref,
   ) => {
     let [highlightedRows, setHighlightedRows] = useState(null);
     let [filter, setFilter] = useState('');
@@ -363,9 +363,9 @@ export const ManagePayees = React.forwardRef(
         filter === ''
           ? payees
           : payees.filter(p =>
-              p.name.toLowerCase().includes(filter.toLowerCase())
+              p.name.toLowerCase().includes(filter.toLowerCase()),
             ),
-      [payees, filter]
+      [payees, filter],
     );
 
     let selected = useSelected('payees', filteredPayees, initialSelectedIds);
@@ -466,7 +466,7 @@ export const ManagePayees = React.forwardRef(
               return true;
           }
         }),
-      tableNavigatorOpts
+      tableNavigatorOpts,
     );
 
     let payeesById = getPayeesById(payees);
@@ -557,5 +557,5 @@ export const ManagePayees = React.forwardRef(
         </SelectedProvider>
       </View>
     );
-  }
+  },
 );

@@ -21,7 +21,7 @@ export function generateTransaction(
   amount,
   name,
   date,
-  pending = false
+  pending = false,
 ) {
   return {
     account_id: acctId,

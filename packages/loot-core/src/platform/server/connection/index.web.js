@@ -81,7 +81,7 @@ function init(serverChannel, handlers) {
               // Notify the frontend that something bad happend
               send('server-error');
             }
-          }
+          },
         );
       } else {
         console.warn('Unknown method: ' + name);
@@ -93,7 +93,7 @@ function init(serverChannel, handlers) {
         });
       }
     },
-    false
+    false,
   );
 
   serverChannel.postMessage({ type: 'connect' });

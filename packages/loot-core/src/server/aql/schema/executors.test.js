@@ -104,7 +104,7 @@ async function expectPagedData(query, numTransactions, allData) {
 
     // Pull in all the data via pages
     let { data } = await runQuery(
-      query.limit(pageCount).offset(pagedData.length).serialize()
+      query.limit(pageCount).offset(pagedData.length).serialize(),
     );
 
     expect(data.length).toBeLessThanOrEqual(pageCount);
@@ -140,7 +140,7 @@ describe('transaction executors', () => {
               .filter({ amount: { $lt: 0 } })
               .select('*')
               .options({ splits: 'inline' })
-              .serialize()
+              .serialize(),
           );
 
           expect(data.filter(t => t.is_parent).length).toBe(0);
@@ -150,14 +150,14 @@ describe('transaction executors', () => {
             query('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
-              .serialize()
+              .serialize(),
           );
 
           // inline should be the default
           expect(defaultData).toEqual(data);
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -177,13 +177,13 @@ describe('transaction executors', () => {
               .filter({ amount: { $lt: 0 } })
               .select('*')
               .options({ splits: 'none' })
-              .serialize()
+              .serialize(),
           );
 
           expect(data.filter(t => t.is_child).length).toBe(0);
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -217,7 +217,7 @@ describe('transaction executors', () => {
             }, 0);
 
             expect(data).toBe(sum);
-          }
+          },
         )
         .beforeEach(() => {
           setClock(null);
@@ -227,7 +227,7 @@ describe('transaction executors', () => {
             DELETE FROM payees;
             DELETE FROM payee_mapping;
           `);
-        })
+        }),
     );
   });
 
@@ -282,7 +282,7 @@ describe('transaction executors', () => {
           expect(trans.category).toBe(null);
 
           expect(trans.subtransactions.length).toBe(
-            allTransactions.filter(t => t.parent_id === trans.id).length
+            allTransactions.filter(t => t.parent_id === trans.id).length,
           );
 
           // Subtransactions should be ordered as well
@@ -318,7 +318,7 @@ describe('transaction executors', () => {
             payeeIds,
             maxLength: 100,
           }),
-          check
+          check,
         )
         .beforeEach(() => {
           setClock(null);
@@ -329,14 +329,14 @@ describe('transaction executors', () => {
             DELETE FROM payee_mapping;
           `);
         }),
-      { numRuns: 300 }
+      { numRuns: 300 },
     );
   }
 
   it('queries the correct transactions without filters', async () => {
     return runTest(arr => {
       let expectedIds = new Set(
-        arr.filter(t => !t.tombstone && !t.is_child).map(t => t.id)
+        arr.filter(t => !t.tombstone && !t.is_child).map(t => t.id),
       );
 
       // Even though we're applying some filters, these are always

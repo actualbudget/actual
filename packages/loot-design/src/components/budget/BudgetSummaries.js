@@ -25,7 +25,7 @@ export default function BudgetSummaries({ SummaryComponent }) {
   let containerRef = useResizeObserver(
     useCallback(rect => {
       setWidthState(rect.width);
-    }, [])
+    }, []),
   );
   let scrollerRef = useRef();
 

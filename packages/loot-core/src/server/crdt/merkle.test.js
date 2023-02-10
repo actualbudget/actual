@@ -18,11 +18,11 @@ describe('merkle trie', () => {
   test('adding an item works', () => {
     let trie = merkle.insert(
       {},
-      Timestamp.parse('2018-11-12T13:21:40.122Z-0000-0123456789ABCDEF')
+      Timestamp.parse('2018-11-12T13:21:40.122Z-0000-0123456789ABCDEF'),
     );
     trie = merkle.insert(
       trie,
-      Timestamp.parse('2018-11-13T13:21:40.122Z-0000-0123456789ABCDEF')
+      Timestamp.parse('2018-11-13T13:21:40.122Z-0000-0123456789ABCDEF'),
     );
     expect(trie).toMatchSnapshot();
   });
@@ -52,7 +52,7 @@ describe('merkle trie', () => {
     expect(trie2.hash).toBe(108);
 
     expect(new Date(merkle.diff(trie1, trie2)).toISOString()).toBe(
-      '2018-11-02T17:15:00.000Z'
+      '2018-11-02T17:15:00.000Z',
     );
 
     trie1 = merkle.insert(trie1, messages[3].timestamp);
@@ -68,7 +68,7 @@ describe('merkle trie', () => {
     let trie1 = {};
     let trie2 = merkle.insert(
       {},
-      Timestamp.parse('2009-01-02T10:17:37.789Z-0000-0000testinguuid1')
+      Timestamp.parse('2009-01-02T10:17:37.789Z-0000-0000testinguuid1'),
     );
 
     expect(merkle.diff(trie1, trie2)).toBe(0);
@@ -123,10 +123,10 @@ describe('merkle trie', () => {
     // Case 0: It always returns a base time when comparing with an
     // empty trie
     expect(new Date(merkle.diff({}, trie)).toISOString()).toBe(
-      '1970-01-01T00:00:00.000Z'
+      '1970-01-01T00:00:00.000Z',
     );
     expect(new Date(merkle.diff(trie, {})).toISOString()).toBe(
-      '1970-01-01T00:00:00.000Z'
+      '1970-01-01T00:00:00.000Z',
     );
 
     // Case 1: Add an older message that modifies the trie in such a
@@ -138,17 +138,17 @@ describe('merkle trie', () => {
 
     // Normal comparision works
     expect(new Date(merkle.diff(trie1, trie)).toISOString()).toBe(
-      '2018-11-01T00:54:00.000Z'
+      '2018-11-01T00:54:00.000Z',
     );
 
     // Comparing the pruned new trie is lossy, so it returns an even older time
     expect(new Date(merkle.diff(merkle.prune(trie1), trie)).toISOString()).toBe(
-      '2018-11-01T00:45:00.000Z'
+      '2018-11-01T00:45:00.000Z',
     );
 
     // Comparing the pruned original trie is just as lossy
     expect(new Date(merkle.diff(trie1, merkle.prune(trie))).toISOString()).toBe(
-      '2018-11-01T00:45:00.000Z'
+      '2018-11-01T00:45:00.000Z',
     );
 
     // Pruning both tries is just as lossy as well, since the changed
@@ -156,8 +156,8 @@ describe('merkle trie', () => {
     // key so it bails at the point
     expect(
       new Date(
-        merkle.diff(merkle.prune(trie1), merkle.prune(trie))
-      ).toISOString()
+        merkle.diff(merkle.prune(trie1), merkle.prune(trie)),
+      ).toISOString(),
     ).toBe('2018-11-01T00:45:00.000Z');
 
     // Case 2: Add two messages similar to the above case, but the
@@ -170,17 +170,17 @@ describe('merkle trie', () => {
 
     // Normal comparision works
     expect(new Date(merkle.diff(trie2, trie)).toISOString()).toBe(
-      '2018-11-01T00:54:00.000Z'
+      '2018-11-01T00:54:00.000Z',
     );
 
     // Same as case 1
     expect(new Date(merkle.diff(merkle.prune(trie2), trie)).toISOString()).toBe(
-      '2018-11-01T00:45:00.000Z'
+      '2018-11-01T00:45:00.000Z',
     );
 
     // Same as case 1
     expect(new Date(merkle.diff(trie2, merkle.prune(trie))).toISOString()).toBe(
-      '2018-11-01T00:45:00.000Z'
+      '2018-11-01T00:45:00.000Z',
     );
 
     // Pruning both tries is very lossy and this ends up returning a
@@ -190,8 +190,8 @@ describe('merkle trie', () => {
     // ignores the first message.
     expect(
       new Date(
-        merkle.diff(merkle.prune(trie2), merkle.prune(trie))
-      ).toISOString()
+        merkle.diff(merkle.prune(trie2), merkle.prune(trie)),
+      ).toISOString(),
     ).toBe('2018-11-01T01:12:00.000Z');
   });
 });

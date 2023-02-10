@@ -150,7 +150,7 @@ function SidebarWithData({
       onReorder={onReorder}
       onAddAccount={() =>
         replaceModal(
-          prefs['flags.syncAccount'] ? 'add-account' : 'add-local-account'
+          prefs['flags.syncAccount'] ? 'add-account' : 'add-local-account',
         )
       }
       showClosedAccounts={prefs['ui.showClosedAccounts']}
@@ -173,6 +173,6 @@ export default withRouter(
       prefs: state.prefs.local,
       floatingSidebar: state.prefs.global.floatingSidebar,
     }),
-    dispatch => bindActionCreators(actions, dispatch)
-  )(SidebarWithData)
+    dispatch => bindActionCreators(actions, dispatch),
+  )(SidebarWithData),
 );

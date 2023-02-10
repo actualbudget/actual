@@ -117,7 +117,7 @@ function NetWorthGraph({ style, start, end, graphData, compact }) {
                           fill: 'url(#positive-gradient)',
                         },
                 },
-              }
+              },
             )}
             {graphData.data.length > 1 && (
               <VictoryArea

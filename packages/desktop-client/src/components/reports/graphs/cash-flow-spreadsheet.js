@@ -38,7 +38,7 @@ export function simpleCashFlow(start, end) {
             expense: data[1],
           },
         });
-      }
+      },
     );
   };
 }
@@ -87,7 +87,7 @@ export function cashFlowByDate(start, end, isConcise) {
       ],
       data => {
         setData(recalculate(data, start, end, isConcise));
-      }
+      },
     );
   };
 }
@@ -97,18 +97,18 @@ function recalculate(data, start, end, isConcise) {
   const dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),
-        monthUtils.getMonth(end)
+        monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
   const incomes = index(
     income,
     'date',
-    isConcise ? fromDateRepr : fromDateReprToDay
+    isConcise ? fromDateRepr : fromDateReprToDay,
   );
   const expenses = index(
     expense,
     'date',
-    isConcise ? fromDateRepr : fromDateReprToDay
+    isConcise ? fromDateRepr : fromDateReprToDay,
   );
 
   let balance = startingBalance;
@@ -160,7 +160,7 @@ function recalculate(data, start, end, isConcise) {
       });
       return res;
     },
-    { expenses: [], income: [], balances: [] }
+    { expenses: [], income: [], balances: [] },
   );
 
   const { balances } = graphData;

@@ -48,7 +48,7 @@ async function saveDiffAndApply(diff, changes, onChange) {
   let remoteDiff = await saveDiff(diff);
   onChange(
     applyTransactionDiff(changes.newTransaction, remoteDiff),
-    applyChanges(remoteDiff, changes.data)
+    applyChanges(remoteDiff, changes.data),
   );
 }
 
@@ -147,7 +147,7 @@ export default function TransactionList({
     id => {
       history.push('/payees', { selectedPayee: id });
     },
-    [history]
+    [history],
   );
 
   return (

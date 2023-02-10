@@ -179,7 +179,7 @@ export default function SimpleTransactionsTable({
         />
       );
     },
-    [payees, categories, memoFields, selectedItems]
+    [payees, categories, memoFields, selectedItems],
   );
 
   return (

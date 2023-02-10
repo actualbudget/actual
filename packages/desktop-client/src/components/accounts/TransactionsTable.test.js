@@ -66,8 +66,8 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
           sort_order: i,
         },
         isSplit ? 30 : undefined,
-        showError
-      )
+        showError,
+      ),
     );
   }
 
@@ -122,7 +122,7 @@ class LiveTransactionTable extends React.Component {
     newTransactions = realizeTempTransactions(newTransactions);
     this.setState(
       { transactions: [...newTransactions, ...state.transactions] },
-      this.notifyChange
+      this.notifyChange,
     );
   };
 
@@ -199,7 +199,7 @@ function waitForAutocomplete() {
 
 const categories = categoryGroups.reduce(
   (all, group) => all.concat(group.categories),
-  []
+  [],
 );
 
 const keys = {
@@ -269,7 +269,7 @@ function renderTransactions(extraProps) {
   };
 
   let result = render(
-    <LiveTransactionTable {...defaultProps} {...extraProps} />
+    <LiveTransactionTable {...defaultProps} {...extraProps} />,
   );
   return {
     ...result,
@@ -277,14 +277,14 @@ function renderTransactions(extraProps) {
     updateProps: props =>
       render(
         <LiveTransactionTable {...defaultProps} {...extraProps} {...props} />,
-        { container: result.container }
+        { container: result.container },
       ),
   };
 }
 
 function queryNewField(container, name, subSelector = '', idx = 0) {
   const field = container.querySelectorAll(
-    `[data-testid="new-transaction"] [data-testid="${name}"]`
+    `[data-testid="new-transaction"] [data-testid="${name}"]`,
   )[idx];
   if (subSelector !== '') {
     return field.querySelector(subSelector);
@@ -294,7 +294,7 @@ function queryNewField(container, name, subSelector = '', idx = 0) {
 
 function queryField(container, name, subSelector = '', idx) {
   const field = container.querySelectorAll(
-    `[data-testid="transaction-table"] [data-testid="${name}"]`
+    `[data-testid="transaction-table"] [data-testid="${name}"]`,
   )[idx];
   if (subSelector !== '') {
     return field.querySelector(subSelector);
@@ -357,34 +357,34 @@ describe('Transactions', () => {
 
     getTransactions().forEach((transaction, idx) => {
       expect(queryField(container, 'date', 'div', idx).textContent).toBe(
-        prettyDate(transaction.date)
+        prettyDate(transaction.date),
       );
       expect(queryField(container, 'account', 'div', idx).textContent).toBe(
-        accounts.find(acct => acct.id === transaction.account).name
+        accounts.find(acct => acct.id === transaction.account).name,
       );
       expect(queryField(container, 'payee', 'div', idx).textContent).toBe(
-        payees.find(p => p.id === transaction.payee).name
+        payees.find(p => p.id === transaction.payee).name,
       );
       expect(queryField(container, 'notes', 'div', idx).textContent).toBe(
-        transaction.notes
+        transaction.notes,
       );
       expect(queryField(container, 'category', 'div', idx).textContent).toBe(
         transaction.category
           ? categories.find(category => category.id === transaction.category)
               .name
-          : 'Categorize'
+          : 'Categorize',
       );
       if (transaction.amount <= 0) {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe(
-          integerToCurrency(-transaction.amount)
+          integerToCurrency(-transaction.amount),
         );
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
-          ''
+          '',
         );
       } else {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe('');
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
-          integerToCurrency(transaction.amount)
+          integerToCurrency(transaction.amount),
         );
       }
     });
@@ -482,7 +482,7 @@ describe('Transactions', () => {
       // Now it should be saved!
       expect(getTransactions()[2].notes).toBe('a happy little note' + idx);
       expect(queryField(container, 'notes', 'div', 2).textContent).toBe(
-        'a happy little note' + idx
+        'a happy little note' + idx,
       );
     });
 
@@ -503,7 +503,7 @@ describe('Transactions', () => {
     let tooltip = container.querySelector('[data-testid="tooltip"]');
     expect(tooltip).toBeTruthy();
     expect(
-      [...tooltip.querySelectorAll('[data-testid*="category-item"]')].length
+      [...tooltip.querySelectorAll('[data-testid*="category-item"]')].length,
     ).toBe(9);
 
     fireEvent.change(input, { target: { value: 'Gener' } });
@@ -536,7 +536,7 @@ describe('Transactions', () => {
 
     // No item should be highlighted
     let highlighted = tooltip.querySelector(
-      '[data-testid="category-item-highlighted"]'
+      '[data-testid="category-item-highlighted"]',
     );
     expect(highlighted).toBe(null);
 
@@ -547,13 +547,13 @@ describe('Transactions', () => {
 
     // The right item should be highlighted
     highlighted = tooltip.querySelector(
-      '[data-testid="category-item-highlighted"]'
+      '[data-testid="category-item-highlighted"]',
     );
     expect(highlighted).toBeTruthy();
     expect(highlighted.textContent).toBe('General');
 
     expect(getTransactions()[2].category).toBe(
-      categories.find(category => category.name === 'Food').id
+      categories.find(category => category.name === 'Food').id,
     );
 
     fireEvent.keyDown(input, keys.ENTER);
@@ -561,7 +561,7 @@ describe('Transactions', () => {
 
     // The transactions data should be updated with the right category
     expect(getTransactions()[2].category).toBe(
-      categories.find(category => category.name === 'General').id
+      categories.find(category => category.name === 'General').id,
     );
 
     // The category field should still be editing
@@ -584,7 +584,7 @@ describe('Transactions', () => {
     // Make sure none of the items are highlighted
     let items = tooltip.querySelectorAll('[data-testid="category-item"]');
     let highlighted = tooltip.querySelector(
-      '[data-testid="category-item-highlighted"]'
+      '[data-testid="category-item-highlighted"]',
     );
     expect(highlighted).toBe(null);
 
@@ -593,19 +593,19 @@ describe('Transactions', () => {
 
     // Make sure the expected category is highlighted
     highlighted = tooltip.querySelector(
-      '[data-testid="category-item-highlighted"]'
+      '[data-testid="category-item-highlighted"]',
     );
     expect(highlighted).toBeTruthy();
     expect(highlighted.textContent).toBe('General');
 
     // Click the item and check the before/after values
     expect(getTransactions()[2].category).toBe(
-      categories.find(c => c.name === 'Food').id
+      categories.find(c => c.name === 'Food').id,
     );
     fireEvent.click(items[2]);
     await waitForAutocomplete();
     expect(getTransactions()[2].category).toBe(
-      categories.find(c => c.name === 'General').id
+      categories.find(c => c.name === 'General').id,
     );
 
     // It should still be editing the category
@@ -629,7 +629,7 @@ describe('Transactions', () => {
 
     // Make sure one of them is highlighted
     let highlighted = tooltip.querySelector(
-      '[data-testid="category-item-highlighted"]'
+      '[data-testid="category-item-highlighted"]',
     );
     expect(highlighted).toBeTruthy();
 
@@ -641,7 +641,7 @@ describe('Transactions', () => {
     let currentCategory = getTransactions()[2].category;
     expect(currentCategory).toBe(oldCategory);
     expect(highlighted.textContent).not.toBe(
-      categories.find(c => c.id === currentCategory).name
+      categories.find(c => c.id === currentCategory).name,
     );
   });
 
@@ -655,7 +655,7 @@ describe('Transactions', () => {
     // For this first test case, make sure the tooltip is gone. We
     // don't need to check this in all the other cases
     let tooltipItems = container.querySelectorAll(
-      '[data-testid="category-item-group"]'
+      '[data-testid="category-item-group"]',
     );
     expect(tooltipItems.length).toBe(0);
 
@@ -730,7 +730,7 @@ describe('Transactions', () => {
 
     // The date field should be re-focused to enter a new transaction
     expect(container.ownerDocument.activeElement).toBe(
-      queryNewField(container, 'date', 'input')
+      queryNewField(container, 'date', 'input'),
     );
     expect(queryNewField(container, 'debit').textContent).toBe('0.00');
   });
@@ -745,7 +745,7 @@ describe('Transactions', () => {
 
     editNewField(container, 'category');
     let splitButton = document.body.querySelector(
-      '[data-testid="tooltip"] [data-testid="split-transaction-button"]'
+      '[data-testid="tooltip"] [data-testid="split-transaction-button"]',
     );
     fireEvent.click(splitButton);
     await waitForAutocomplete();
@@ -753,21 +753,21 @@ describe('Transactions', () => {
     await waitForAutocomplete();
 
     fireEvent.click(
-      container.querySelector('[data-testid="transaction-error"] button')
+      container.querySelector('[data-testid="transaction-error"] button'),
     );
 
     input = editNewField(container, 'debit', 1);
     fireEvent.change(input, { target: { value: '45.00' } });
     fireEvent.blur(input);
     expect(
-      container.querySelector('[data-testid="transaction-error"]')
+      container.querySelector('[data-testid="transaction-error"]'),
     ).toBeTruthy();
 
     input = editNewField(container, 'debit', 2);
     fireEvent.change(input, { target: { value: '10.00' } });
     fireEvent.blur(input);
     expect(container.querySelector('[data-testid="transaction-error"]')).toBe(
-      null
+      null,
     );
 
     let addButton = container.querySelector('[data-testid="add-button"]');
@@ -800,7 +800,7 @@ describe('Transactions', () => {
     // The first escape closes the dropdown
     fireEvent.keyDown(input, keys.ESC);
     expect(
-      container.querySelector('[data-testid="new-transaction"]')
+      container.querySelector('[data-testid="new-transaction"]'),
     ).toBeTruthy();
 
     // TOOD: Fix this
@@ -813,11 +813,11 @@ describe('Transactions', () => {
     // The cancel button should also close the new transaction form
     updateProps({ isAdding: true });
     let cancelButton = container.querySelectorAll(
-      '[data-testid="new-transaction"] [data-testid="cancel-button"]'
+      '[data-testid="new-transaction"] [data-testid="cancel-button"]',
     )[0];
     fireEvent.click(cancelButton);
     expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
-      null
+      null,
     );
   });
 
@@ -829,13 +829,13 @@ describe('Transactions', () => {
       container,
       'select',
       '[data-testid=cell-button]',
-      2
+      2,
     );
 
     fireEvent.click(selectCell);
     // The header is is selected as well as the single transaction
     expect(container.querySelectorAll('[data-testid=select] svg').length).toBe(
-      2
+      2,
     );
   });
 
@@ -868,7 +868,7 @@ describe('Transactions', () => {
     let input = editField(container, 'category', 0);
     let tooltip = container.querySelector('[data-testid="tooltip"]');
     let splitButton = tooltip.querySelector(
-      '[data-testid="split-transaction-button"]'
+      '[data-testid="split-transaction-button"]',
     );
 
     // Make it clear that we are expected a negative transaction
@@ -886,7 +886,7 @@ describe('Transactions', () => {
     expectErrorToExist(getTransactions().slice(0, 2));
 
     let toolbars = container.querySelectorAll(
-      '[data-testid="transaction-error"]'
+      '[data-testid="transaction-error"]',
     );
     // Make sure the toolbar has appeared
     expect(toolbars.length).toBe(1);
@@ -912,7 +912,7 @@ describe('Transactions', () => {
     fireEvent.change(input, { target: { value: '17.77' } });
     fireEvent.keyDown(input, keys.TAB);
     expect(
-      container.querySelectorAll('[data-testid="transaction-error"]').length
+      container.querySelectorAll('[data-testid="transaction-error"]').length,
     ).toBe(0);
     expectErrorToNotExist(getTransactions().slice(0, 3));
 
@@ -944,7 +944,7 @@ describe('Transactions', () => {
     let input = editField(container, 'category', 0);
     let tooltip = container.querySelector('[data-testid="tooltip"]');
     let splitButton = tooltip.querySelector(
-      '[data-testid="split-transaction-button"'
+      '[data-testid="split-transaction-button"',
     );
 
     // The first transaction should always be a negative amount
@@ -955,7 +955,7 @@ describe('Transactions', () => {
     fireEvent.click(splitButton);
     await waitForAutocomplete();
     fireEvent.click(
-      container.querySelector('[data-testid="transaction-error"] button')
+      container.querySelector('[data-testid="transaction-error"] button'),
     );
     expect(getTransactions().length).toBe(7);
 

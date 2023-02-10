@@ -23,7 +23,7 @@ async function insertTransactions(payeeId = null) {
       category: 'cat1',
       date: '2017-01-08',
       description: payeeId,
-    })[0]
+    })[0],
   );
   await db.insertTransaction(
     generateTransaction({
@@ -32,7 +32,7 @@ async function insertTransactions(payeeId = null) {
       category: 'cat2',
       date: '2017-01-10',
       description: payeeId,
-    })[0]
+    })[0],
   );
   await db.insertTransaction(
     generateTransaction({
@@ -41,7 +41,7 @@ async function insertTransactions(payeeId = null) {
       category: 'cat2',
       date: '2017-01-15',
       description: payeeId,
-    })[0]
+    })[0],
   );
 }
 
@@ -132,7 +132,7 @@ describe('Spreadsheet', () => {
 
     spreadsheet.set(
       'g!foo',
-      '=from transactions where acct.offbudget = 0 and (description.transfer_acct.offbudget = null or description.transfer_acct.offbudget = 1) select { acct.offbudget, description.transfer_acct.offbudget as foo, amount }'
+      '=from transactions where acct.offbudget = 0 and (description.transfer_acct.offbudget = null or description.transfer_acct.offbudget = 1) select { acct.offbudget, description.transfer_acct.offbudget as foo, amount }',
     );
 
     return new Promise(resolve => {

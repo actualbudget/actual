@@ -30,7 +30,7 @@ function getAllTransactions() {
        FROM v_transactions_internal t
        LEFT JOIN payees p ON p.id = t.payee
        ORDER BY date DESC, amount DESC, id
-     `
+     `,
   );
 }
 
@@ -118,10 +118,10 @@ describe('Account sync', () => {
     let transactions = await getAllTransactions();
     expect(transactions.length).toBe(2);
     expect(transactions.find(t => t.amount === 4133).payee).toBe(
-      payees.find(p => p.name === 'Bakkerij').id
+      payees.find(p => p.name === 'Bakkerij').id,
     );
     expect(transactions.find(t => t.amount === 5000).payee).toBe(
-      payees.find(p => p.name === 'Kroger').id
+      payees.find(p => p.name === 'Kroger').id,
     );
   });
 
@@ -147,7 +147,7 @@ describe('Account sync', () => {
 
     let { added, updated } = await reconcileTransactions(
       id,
-      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid)
+      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
     );
 
     expect(added.length).toBe(3);
@@ -210,7 +210,7 @@ describe('Account sync', () => {
 
     let { added, updated } = await reconcileTransactions(
       id,
-      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid)
+      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
     );
 
     let transactions = await getAllTransactions();
@@ -218,13 +218,13 @@ describe('Account sync', () => {
     expect(added.length).toBe(1);
 
     expect(transactions.find(t => t.id === 'one').imported_id).toBe(
-      mocked[1].transaction_id
+      mocked[1].transaction_id,
     );
     expect(transactions.find(t => t.id === 'two').imported_id).toBe(
-      mocked[0].transaction_id
+      mocked[0].transaction_id,
     );
     expect(transactions.find(t => t.id === 'three').imported_id).toBe(
-      mocked[2].transaction_id
+      mocked[2].transaction_id,
     );
   });
 
@@ -262,7 +262,7 @@ describe('Account sync', () => {
 
     let { added, updated } = await reconcileTransactions(
       id,
-      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid)
+      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
     );
 
     let transactions = await getAllTransactions();
@@ -272,7 +272,7 @@ describe('Account sync', () => {
     // Make sure lowes, which has the imported_id, is the one that
     // got matched with the same imported_id
     expect(transactions.find(t => t.id === 'one').imported_payee).toBe(
-      "Lowe's Store"
+      "Lowe's Store",
     );
   });
 
@@ -380,7 +380,7 @@ describe('Account sync', () => {
 
     // Make _at least_ the date is required
     await expect(reconcileTransactions(acctId, [{}])).rejects.toThrow(
-      /`date` is required/
+      /`date` is required/,
     );
   });
 
@@ -541,7 +541,7 @@ describe('Account sync', () => {
       let transactions = await getAllTransactions();
       expect(transactions.length).toBe(2);
       expect(transactions.find(t => t.id === 'one').imported_id).toBe(
-        'imported1'
+        'imported1',
       );
     });
   };

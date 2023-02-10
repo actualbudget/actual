@@ -11,7 +11,7 @@ function getAllTransactions() {
        FROM v_transactions t
        LEFT JOIN payees p ON p.id = t.payee
        ORDER BY date DESC, amount DESC, id
-     `
+     `,
   );
 }
 
@@ -50,10 +50,10 @@ describe('Transfer', () => {
     let differ = expectSnapshotWithDiffer(await getAllTransactions());
 
     let transferTwo = await db.first(
-      "SELECT * FROM payees WHERE transfer_acct = 'two'"
+      "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
     let transferThree = await db.first(
-      "SELECT * FROM payees WHERE transfer_acct = 'three'"
+      "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
     transaction = {
@@ -120,10 +120,10 @@ describe('Transfer', () => {
     await prepareDatabase();
 
     let transferTwo = await db.first(
-      "SELECT * FROM payees WHERE transfer_acct = 'two'"
+      "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
     let transferThree = await db.first(
-      "SELECT * FROM payees WHERE transfer_acct = 'three'"
+      "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
     let transaction = {

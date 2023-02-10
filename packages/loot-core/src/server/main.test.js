@@ -41,11 +41,11 @@ async function createTestBudget(name) {
   await fs.mkdir(budgetPath);
   await fs.copyFile(
     fs.join(templatePath, 'metadata.json'),
-    fs.join(budgetPath, 'metadata.json')
+    fs.join(budgetPath, 'metadata.json'),
   );
   await fs.copyFile(
     fs.join(templatePath, 'db.sqlite'),
-    fs.join(budgetPath, 'db.sqlite')
+    fs.join(budgetPath, 'db.sqlite'),
   );
 }
 
@@ -138,11 +138,11 @@ describe('Accounts', () => {
     for (let account of res) {
       const sum = await db.first(
         'SELECT sum(amount) as sum FROM transactions WHERE acct = ? AND starting_balance_flag = 0',
-        [account.id]
+        [account.id],
       );
       const starting = await db.first(
         'SELECT * FROM transactions WHERE acct = ? AND starting_balance_flag = 1',
-        [account.id]
+        [account.id],
       );
       expect(account.balance_current - sum.sum).toBe(starting.amount);
 
@@ -150,7 +150,7 @@ describe('Accounts', () => {
       // possible
       const earliestTrans = await db.first(
         'SELECT p.name as payee_name FROM transactions t LEFT JOIN payees p ON p.id = t.description WHERE acct = ? ORDER BY date LIMIT 1',
-        [account.id]
+        [account.id],
       );
       expect(earliestTrans.payee_name).toBe('Starting Balance');
     }
@@ -187,7 +187,7 @@ describe('Accounts', () => {
       date: '2017-01-01',
     });
     let differ = expectSnapshotWithDiffer(
-      await db.all('SELECT * FROM transactions')
+      await db.all('SELECT * FROM transactions'),
     );
 
     let transaction = await db.getTransaction(id);
@@ -280,7 +280,7 @@ describe('Budget', () => {
     let categories;
     await captureChangedCells(async () => {
       await runMutator(() =>
-        db.insertCategoryGroup({ id: 'group1', name: 'group1' })
+        db.insertCategoryGroup({ id: 'group1', name: 'group1' }),
       );
       categories = [
         await runHandler(handlers['category-create'], {
@@ -312,7 +312,7 @@ describe('Budget', () => {
     };
     // Test insertions
     let changed = await captureChangedCells(() =>
-      runHandler(handlers['transaction-add'], trans)
+      runHandler(handlers['transaction-add'], trans),
     );
     expect(changed.sort()).toMatchSnapshot();
     // Test updates

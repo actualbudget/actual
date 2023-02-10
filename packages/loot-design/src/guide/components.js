@@ -31,7 +31,7 @@ export function Section({
           display: 'flex',
           flexDirection: direction === 'horizontal' ? 'row' : 'column',
         },
-        style
+        style,
       )}
       data-section="true"
     >

@@ -325,7 +325,7 @@ export function FilterButton({ onApply }) {
           return updateFilterReducer(state, action);
       }
     },
-    { fieldsOpen: false, condOpen: false, field: null, value: null }
+    { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
 
   async function onValidateAndApply(cond) {
@@ -336,7 +336,7 @@ export function FilterButton({ onApply }) {
         let date = parseDate(
           cond.value,
           getMonthYearFormat(dateFormat),
-          new Date()
+          new Date(),
         );
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy-MM');
@@ -423,7 +423,7 @@ function FilterEditor({ field, op, value, options, onSave, onClose }) {
           return updateFilterReducer(state, action);
       }
     },
-    { field, op, value, options }
+    { field, op, value, options },
   );
 
   return (

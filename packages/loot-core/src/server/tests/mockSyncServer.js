@@ -46,7 +46,7 @@ handlers['/sync/sync'] = async data => {
 
       currentClock.merkle = merkle.insert(
         currentClock.merkle,
-        Timestamp.parse(msg.getTimestamp())
+        Timestamp.parse(msg.getTimestamp()),
       );
     }
   });
@@ -85,7 +85,7 @@ handlers['/plaid/transactions'] = ({
 }) => {
   const accounts = currentMockData.accounts;
   const transactions = currentMockData.transactions[account_id].filter(
-    t => t.date >= start_date && t.date <= end_date
+    t => t.date >= start_date && t.date <= end_date,
   );
 
   return {

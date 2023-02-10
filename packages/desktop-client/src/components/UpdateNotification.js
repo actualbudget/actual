@@ -58,7 +58,7 @@ function UpdateNotification({
                 style={{ color: 'white', textDecoration: 'underline' }}
                 onClick={() =>
                   window.Actual.openURLInBrowser(
-                    'https://actualbudget.github.io/docs/Release-Notes/'
+                    'https://actualbudget.github.io/docs/Release-Notes/',
                   )
                 }
               >
@@ -90,5 +90,5 @@ export default connect(
     updateInfo: state.app.updateInfo,
     showUpdateNotification: state.app.showUpdateNotification,
   }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(UpdateNotification);

@@ -36,7 +36,7 @@ export async function handoffPublicToken(institution, publicToken) {
       id,
       bank_id: institution.institution_id,
       name: institution.name,
-    })
+    }),
   );
 
   return id;
@@ -81,6 +81,6 @@ export async function addAccounts(bankId, accountIds, offbudgetIds = []) {
       await bankSync.syncAccount(userId, userKey, id, acct.account_id, bankId);
 
       return id;
-    })
+    }),
   );
 }

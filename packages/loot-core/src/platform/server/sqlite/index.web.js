@@ -16,7 +16,7 @@ export async function init() {
       },
       err => {
         reject(err);
-      }
+      },
     );
   });
 }
@@ -156,7 +156,7 @@ export async function openDatabase(pathOrBuffer) {
 
       let db = new SQL.Database(
         path.includes('/blocked') ? path : SQL.FS.readlink(path),
-        { filename: true }
+        { filename: true },
       );
       db.exec(`
       PRAGMA journal_mode=MEMORY;

@@ -183,10 +183,10 @@ async function compareMessages(messages) {
 
     let res = db.runQuery(
       db.cache(
-        'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?'
+        'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?',
       ),
       [dataset, row, column, timestampStr],
-      true
+      true,
     );
 
     // Returned message is any one that is "later" than this message,
@@ -328,7 +328,7 @@ export const applyMessages = sequential(async messages => {
         db.runQuery(
           db.cache(`INSERT INTO messages_crdt (timestamp, dataset, row, column, value)
            VALUES (?, ?, ?, ?, ?)`),
-          [timestamp.toString(), dataset, row, column, serializeValue(value)]
+          [timestamp.toString(), dataset, row, column, serializeValue(value)],
         );
 
         currentMerkle = merkle.insert(currentMerkle, msg.timestamp);
@@ -342,9 +342,9 @@ export const applyMessages = sequential(async messages => {
       // exceptions)
       db.runQuery(
         db.cache(
-          'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)'
+          'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
         ),
-        [serializeClock({ ...clock, merkle: currentMerkle })]
+        [serializeClock({ ...clock, merkle: currentMerkle })],
       );
     }
   });
@@ -464,7 +464,7 @@ export function getMessagesSince(since) {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
     [since],
-    true
+    true,
   );
 }
 
@@ -475,7 +475,7 @@ export async function syncAndReceiveMessages(messages, since) {
       ...msg,
       value: deserializeValue(msg.value),
       timestamp: Timestamp.parse(msg.timestamp),
-    }))
+    })),
   );
   return localMessages;
 }
@@ -625,7 +625,7 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
     'Syncing since',
     since,
     messages.length,
-    '(attempt: ' + count + ')'
+    '(attempt: ' + count + ')',
   );
 
   let buffer = await encoder.encode(groupId, cloudFileId, since, messages);
@@ -658,7 +658,7 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
         ...msg,
         value: deserializeValue(msg.value),
         timestamp: Timestamp.parse(msg.timestamp),
-      }))
+      })),
     );
   }
 
@@ -711,7 +711,7 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
         'server hash:',
         res.merkle.hash,
         'localTimeChanged:',
-        localTimeChanged
+        localTimeChanged,
       );
 
       if (rebuiltMerkle.trie.hash === res.merkle.hash) {
@@ -736,8 +736,8 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
         // but it was because the user kept changing stuff in the
         // middle of syncing.
         localTimeChanged ? 0 : count + 1,
-        diffTime
-      )
+        diffTime,
+      ),
     );
   } else {
     // All synced up, store the current time as a simple optimization

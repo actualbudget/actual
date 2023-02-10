@@ -183,7 +183,7 @@ export class Tooltip extends React.Component {
       box,
       anchorRect,
       this.getContainer().getBoundingClientRect(),
-      offset
+      offset,
     );
 
     contentEl.style.top = style.top;
@@ -332,7 +332,7 @@ export class Tooltip extends React.Component {
           >
             {children}
           </div>,
-          this.getContainer()
+          this.getContainer(),
         )}
       </div>
     );
@@ -406,7 +406,7 @@ export function Pointer({
               : {}),
             ...pointerStyle,
           }),
-          innerStyle
+          innerStyle,
         )}
       >
         {children}

@@ -79,7 +79,7 @@ function Settings({
             style={css(
               media(`(min-width: ${tokens.breakpoint_medium})`, {
                 display: 'none',
-              })
+              }),
             )}
           >
             <FormField>
@@ -125,6 +125,6 @@ export default withThemeColor(colors.n10)(
       prefs: state.prefs.local,
       globalPrefs: state.prefs.global,
     }),
-    actions
-  )(Settings)
+    actions,
+  )(Settings),
 );

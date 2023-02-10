@@ -39,7 +39,7 @@ function getStartingBalanceCat(categories) {
 function extractCommonThings(payees, groups) {
   let incomePayee = payees.find(p => p.name === 'Deposit');
   let expensePayees = payees.filter(
-    p => p.name !== 'Deposit' && p.name !== 'Starting Balance'
+    p => p.name !== 'Deposit' && p.name !== 'Starting Balance',
   );
   let expenseGroup = groups.find(g => g.is_income === 0);
   let incomeGroup = groups.find(g => g.is_income === 1);
@@ -53,7 +53,7 @@ function extractCommonThings(payees, groups) {
         'General',
         'Gift',
         'Medical',
-      ].indexOf(c.name) !== -1
+      ].indexOf(c.name) !== -1,
   );
 
   return {
@@ -127,11 +127,11 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
   }
 
   let earliestMonth = monthUtils.monthFromDate(
-    transactions[transactions.length - 1].date
+    transactions[transactions.length - 1].date,
   );
   let months = monthUtils.rangeInclusive(
     earliestMonth,
-    monthUtils.currentMonth()
+    monthUtils.currentMonth(),
   );
   let currentDay = monthUtils.currentDay();
   for (let month of months) {
@@ -419,14 +419,14 @@ async function createBudget(accounts, payees, groups) {
   let earliestDate = (
     await db.first(
       `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
-       WHERE a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`
+       WHERE a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
     )
   ).date;
   let earliestPrimaryDate = (
     await db.first(
       `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.id = ? AND a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
-      [primaryAccount.id]
+      [primaryAccount.id],
     )
   ).date;
 
@@ -450,7 +450,7 @@ async function createBudget(accounts, payees, groups) {
   function setBudgetIfSpent(month, cat) {
     let spent = sheet.getCellValue(
       monthUtils.sheetForMonth(month),
-      `sum-amount-${cat.id}`
+      `sum-amount-${cat.id}`,
     );
 
     if (spent < 0) {
@@ -494,7 +494,7 @@ async function createBudget(accounts, payees, groups) {
           setBudgetIfSpent(month, category('Power'));
         }
       }
-    })
+    }),
   );
 
   await sheet.waitOnSpreadsheet();
@@ -522,7 +522,7 @@ async function createBudget(accounts, payees, groups) {
           }
         }
       }
-    })
+    }),
   );
 
   await sheet.waitOnSpreadsheet();
@@ -572,7 +572,7 @@ export async function createTestBudget(handlers) {
       for (let account of accounts) {
         account.id = await handlers['account-create'](account);
       }
-    })
+    }),
   );
 
   let payees = [
@@ -595,7 +595,7 @@ export async function createTestBudget(handlers) {
       for (let payee of payees) {
         payee.id = await handlers['payee-create']({ name: payee.name });
       }
-    })
+    }),
   );
 
   let categoryGroups = [
@@ -684,7 +684,7 @@ export async function createTestBudget(handlers) {
           default:
         }
       }
-    })
+    }),
   );
 
   setSyncingMode('import');
@@ -698,7 +698,7 @@ export async function createTestBudget(handlers) {
     q('transactions')
       .filter({ account: primaryAccount.id })
       .calculate({ $sum: '$amount' })
-      .serialize()
+      .serialize(),
   );
   if (primaryBalance < 0) {
     let { data: results } = await aqlQuery(
@@ -706,7 +706,7 @@ export async function createTestBudget(handlers) {
         .filter({ account: primaryAccount.id, amount: { $gt: 0 } })
         .limit(1)
         .select(['id', 'amount'])
-        .serialize()
+        .serialize(),
     );
     let lastDeposit = results[0];
 

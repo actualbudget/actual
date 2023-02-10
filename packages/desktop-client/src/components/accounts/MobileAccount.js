@@ -50,7 +50,7 @@ function PreviewTransactions({ accountId, children }) {
   let schedules = scheduleData.schedules.filter(
     s =>
       !s.completed &&
-      ['due', 'upcoming', 'missed'].includes(scheduleData.statuses.get(s.id))
+      ['due', 'upcoming', 'missed'].includes(scheduleData.statuses.get(s.id)),
   );
 
   return children(
@@ -62,7 +62,7 @@ function PreviewTransactions({ accountId, children }) {
       date: schedule.next_date,
       notes: scheduleData.statuses.get(schedule.id),
       schedule: schedule.id,
-    }))
+    })),
   );
 }
 
@@ -85,7 +85,7 @@ function Account(props) {
   let dispatch = useDispatch();
   let actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
-    [dispatch]
+    [dispatch],
   );
 
   const { id: accountId } = props.match.params;
@@ -103,7 +103,7 @@ function Account(props) {
     paged = pagedQuery(
       query.options({ splits: 'grouped' }).select('*'),
       data => setTransactions(data),
-      { pageCount: 150, mapper: ungroupTransactions }
+      { pageCount: 150, mapper: ungroupTransactions },
     );
   };
 
@@ -159,8 +159,8 @@ function Account(props) {
         queries.makeTransactionSearchQuery(
           currentQuery,
           searchText,
-          state.dateFormat
-        )
+          state.dateFormat,
+        ),
       );
     }
   }, 150);
@@ -208,13 +208,13 @@ function Account(props) {
               break;
             default:
           }
-        }
+        },
       );
     } else {
       let trans = [transaction];
       if (transaction.parent_id || transaction.is_parent) {
         let index = transactions.findIndex(
-          t => t.id === (transaction.parent_id || transaction.id)
+          t => t.id === (transaction.parent_id || transaction.id),
         );
         trans = getSplit(transactions, index);
       }
@@ -284,5 +284,5 @@ export default connect(
     categories: state.queries.categories.list,
     prefs: state.prefs.local,
   }),
-  actions
+  actions,
 )(withThemeColor(colors.n11)(Account));

@@ -27,7 +27,7 @@ const Stack = React.forwardRef(
       debug,
       style,
     },
-    ref
+    ref,
   ) => {
     const isReversed = direction.endsWith('reverse');
     const isHorizontal = direction.startsWith('row');
@@ -64,12 +64,12 @@ const Stack = React.forwardRef(
                 isLastChild ? null : { [marginProp]: spacing * 5 },
                 child.props ? child.props.style : null,
               ],
-            }
+            },
           );
         })}
       </View>
     );
-  }
+  },
 );
 
 export default Stack;

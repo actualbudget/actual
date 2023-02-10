@@ -38,7 +38,7 @@ self.addEventListener('message', e => {
           self.postMessage(msg);
 
           throw err;
-        }
+        },
       );
     }
   }

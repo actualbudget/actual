@@ -5,7 +5,7 @@ beforeEach(global.emptyDatabase());
 async function insertTransactions(transactions) {
   await db.insertAccount({ id: 'foo', name: 'bar' });
   return Promise.all(
-    transactions.map(transaction => db.insertTransaction(transaction))
+    transactions.map(transaction => db.insertTransaction(transaction)),
   );
 }
 

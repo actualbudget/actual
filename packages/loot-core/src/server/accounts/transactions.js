@@ -10,7 +10,7 @@ const connection = require('../../platform/server/connection');
 async function idsWithChildren(ids) {
   let whereIds = whereIn(ids, 'parent_id');
   let rows = await db.all(
-    `SELECT id FROM v_transactions_internal WHERE ${whereIds}`
+    `SELECT id FROM v_transactions_internal WHERE ${whereIds}`,
   );
   let set = new Set(ids);
   for (let row of rows) {
@@ -27,7 +27,7 @@ async function getTransactionsByIds(ids) {
     (query, params) => db.selectWithSchema('transactions', query, params),
     ids,
     id => `id = '${id}'`,
-    where => `SELECT * FROM v_transactions_internal WHERE ${where}`
+    where => `SELECT * FROM v_transactions_internal WHERE ${where}`,
   );
 }
 
@@ -65,7 +65,7 @@ export async function batchUpdateTransactions({
   await batchMessages(async () => {
     if (added) {
       addedIds = await Promise.all(
-        added.map(async t => db.insertTransaction(t))
+        added.map(async t => db.insertTransaction(t)),
       );
     }
 
@@ -77,7 +77,7 @@ export async function batchUpdateTransactions({
         // be fixed (it should only take an id)
         deletedIds.map(async id => {
           await db.deleteTransaction({ id });
-        })
+        }),
       );
     }
 
@@ -94,7 +94,7 @@ export async function batchUpdateTransactions({
           }
 
           await db.updateTransaction(t);
-        })
+        }),
       );
     }
   });
@@ -135,7 +135,7 @@ export async function batchUpdateTransactions({
         : []),
     ]);
     await rules.updateCategoryRules(
-      allAdded.concat(allUpdated).filter(trans => ids.has(trans.id))
+      allAdded.concat(allUpdated).filter(trans => ids.has(trans.id)),
     );
   }
 

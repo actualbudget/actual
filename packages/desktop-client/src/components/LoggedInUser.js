@@ -107,5 +107,5 @@ export default connect(
     files: state.budgets.allFiles,
     budgetId: state.prefs.local && state.prefs.local.id,
   }),
-  actions
+  actions,
 )(withRouter(LoggedInUser));

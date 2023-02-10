@@ -188,5 +188,5 @@ export default connect(
     accounts: state.queries.accounts,
     payees: state.queries.payees,
   }),
-  actions
+  actions,
 )(EditField);

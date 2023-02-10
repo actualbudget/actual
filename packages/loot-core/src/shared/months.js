@@ -223,7 +223,7 @@ export const getDateFormatRegex = memoizeOne(format => {
     format
       .replace(/d+/g, '\\d{1,2}')
       .replace(/M+/g, '\\d{1,2}')
-      .replace(/y+/g, '\\d{4}')
+      .replace(/y+/g, '\\d{4}'),
   );
 });
 

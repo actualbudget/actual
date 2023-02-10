@@ -142,7 +142,7 @@ class Tutorial extends React.Component {
         return <div>hi</div>;
       default:
         throw new Error(
-          `Encountered an unexpected error rendering the tutorial content for ${stage}`
+          `Encountered an unexpected error rendering the tutorial content for ${stage}`,
         );
     }
   }
@@ -227,7 +227,7 @@ class Tutorial extends React.Component {
       <MeasureNodes nodes={[targetNode.parentNode, document.body]}>
         {(targetRect, windowRect) => {
           targetRect = withinWindow(
-            expandRect(expandRect(targetRect, 5), expand)
+            expandRect(expandRect(targetRect, 5), expand),
           );
 
           return (
@@ -254,7 +254,7 @@ class Tutorial extends React.Component {
                     style={{ pointerEvents: 'fill' }}
                   />
                 </svg>,
-                document.body
+                document.body,
               )}
               {this.getContent(stage, targetRect, navigationProps)}
             </div>
@@ -270,5 +270,5 @@ export default connect(
     stage: state.tutorial.stage,
     fromYNAB: state.tutorial.fromYNAB,
   }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(Tutorial);

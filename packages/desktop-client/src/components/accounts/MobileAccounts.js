@@ -153,7 +153,7 @@ function EmptyMessage({ onAdd }) {
         style={{ marginTop: 20, alignSelf: 'center' }}
         onClick={() =>
           alert(
-            'Account creation is not supported on mobile on the self-hosted service yet'
+            'Account creation is not supported on mobile on the self-hosted service yet',
           )
         }
       >
@@ -187,10 +187,10 @@ export class AccountList extends React.Component {
       // refreshControl
     } = this.props;
     const budgetedAccounts = accounts.filter(
-      account => account.offbudget === 0
+      account => account.offbudget === 0,
     );
     const offbudgetAccounts = accounts.filter(
-      account => account.offbudget === 1
+      account => account.offbudget === 1,
     );
 
     // If there are no accounts, show a helpful message
@@ -340,5 +340,5 @@ export default connect(
     categories: state.queries.categories.list,
     prefs: state.prefs.local,
   }),
-  actions
+  actions,
 )(withThemeColor(colors.b2)(Accounts));

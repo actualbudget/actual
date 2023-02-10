@@ -6,7 +6,7 @@ export default function checkForUpgradeNotifications(
   addNotification,
   resetSync,
   // Note: history is only available on desktop
-  history
+  history,
 ) {
   // TODO: Probably should only show one of these at at time?
   send('get-upgrade-notifications').then(types => {

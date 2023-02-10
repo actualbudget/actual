@@ -22,7 +22,7 @@ export const NativeCategorySelect = React.forwardRef(
         ))}
       </Select>
     );
-  }
+  },
 );
 
 export function CategoryList({
@@ -132,11 +132,11 @@ export default function CategoryAutocomplete({
             group.categories.map(category => ({
               ...category,
               groupName: group.name,
-            }))
+            })),
           ),
-        showSplitOption ? [{ id: 'split', name: '' }] : []
+        showSplitOption ? [{ id: 'split', name: '' }] : [],
       ),
-    [categoryGroups]
+    [categoryGroups],
   );
 
   return (

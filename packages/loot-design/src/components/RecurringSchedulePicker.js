@@ -101,7 +101,7 @@ function reducer(state, action) {
           patterns: state.config.patterns.map(p =>
             p === action.recurrence
               ? { ...action.recurrence, ...boundedRecurrence(action) }
-              : p
+              : p,
           ),
         },
       };
@@ -135,7 +135,7 @@ function SchedulePreview({ previewDates }) {
   }
 
   let dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy'
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
   dateFormat = dateFormat.replace('MM', 'M').replace('dd', 'd');
 
@@ -197,7 +197,7 @@ function MonthlyPatterns({ config, dispatch }) {
               updateRecurrence(
                 recurrence,
                 'value',
-                parsePatternValue(e.target.value)
+                parsePatternValue(e.target.value),
               )
             }
           >
@@ -255,7 +255,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   });
 
   let dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy'
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
 
   useEffect(() => {

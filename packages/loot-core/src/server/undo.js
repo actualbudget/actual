@@ -65,7 +65,7 @@ export function withUndo(func, meta) {
 
   return withMutatorContext(
     { undoListening: true, undoTag: context.undoTag },
-    func
+    func,
   );
 }
 
@@ -80,7 +80,7 @@ export function undoable(func) {
 async function applyUndoAction(messages, meta, undoTag) {
   await withMutatorContext({ undoListening: false }, () => {
     return sendMessages(
-      messages.map(msg => ({ ...msg, timestamp: Timestamp.send() }))
+      messages.map(msg => ({ ...msg, timestamp: Timestamp.send() })),
     );
   });
 
@@ -111,7 +111,7 @@ export async function undo() {
   let meta = MESSAGE_HISTORY[CURSOR].meta;
   let start = Math.max(CURSOR, 0);
   let entries = MESSAGE_HISTORY.slice(start, end + 1).filter(
-    entry => entry.type === 'messages'
+    entry => entry.type === 'messages',
   );
 
   if (entries.length > 0) {
@@ -120,7 +120,7 @@ export async function undo() {
         return acc.concat(
           entry.messages
             .map(message => undoMessage(message, entry.oldData))
-            .filter(x => x)
+            .filter(x => x),
         );
       }, [])
       .reverse();
@@ -193,7 +193,7 @@ export async function redo() {
 
   let end = CURSOR;
   let entries = MESSAGE_HISTORY.slice(start + 1, end + 1).filter(
-    entry => entry.type === 'messages'
+    entry => entry.type === 'messages',
   );
 
   if (entries.length > 0) {

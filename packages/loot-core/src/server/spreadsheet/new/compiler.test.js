@@ -3,7 +3,7 @@ import { compile } from './compiler';
 describe('Compiler', () => {
   test('get-query', () => {
     compile(
-      '=from transactions where acct.offbudget = 0 and category = null and (description.transfer_acct.offbudget = 1 or description.transfer_acct = null) calculate { count(date) }'
+      '=from transactions where acct.offbudget = 0 and category = null and (description.transfer_acct.offbudget = 1 or description.transfer_acct = null) calculate { count(date) }',
     );
   });
 
@@ -87,7 +87,7 @@ describe('Compiler', () => {
 
   test('field dependencies', () => {
     let sqlDependencies = compile(
-      '=from transactions where acct.offbudget = 0 and category = null and (description.transfer_acct.offbudget = 1 or description.transfer_acct = null) calculate { count(date) }'
+      '=from transactions where acct.offbudget = 0 and category = null and (description.transfer_acct.offbudget = 1 or description.transfer_acct = null) calculate { count(date) }',
     ).sqlDependencies;
 
     expect(sqlDependencies[0].fields).toMatchSnapshot();

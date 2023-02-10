@@ -47,7 +47,7 @@ export const useStableCallback = callback => {
   const callbackRef = useRef();
   const memoCallback = useCallback(
     (...args) => callbackRef.current(...args),
-    []
+    [],
   );
   useLayoutEffect(() => {
     callbackRef.current = callback;
@@ -113,7 +113,7 @@ export function Link({ style, children, ...nativeProps }) {
           },
         },
         styles.smallText,
-        style
+        style,
       )}
       {...nativeProps}
     >
@@ -155,7 +155,7 @@ export const ExternalLink = React.forwardRef(
         {children}
       </Button>
     );
-  }
+  },
 );
 
 function ButtonLink_({
@@ -203,7 +203,7 @@ export const Button = React.forwardRef(
       as = 'button',
       ...nativeProps
     },
-    ref
+    ref,
   ) => {
     hoveredStyle = [
       bare
@@ -271,7 +271,7 @@ export const Button = React.forwardRef(
         {children}
       </Component>
     );
-  }
+  },
 );
 
 export const ButtonWithLoading = React.forwardRef((props, ref) => {
@@ -345,7 +345,7 @@ export function Input({
           '::placeholder': { color: colors.n7 },
         },
         styles.smallText,
-        style
+        style,
       )}
       {...nativeProps}
       onKeyDown={e => {
@@ -498,14 +498,14 @@ export const Select = React.forwardRef(
               outline: 'none',
             },
           },
-          style
+          style,
         )}
         {...nativeProps}
       >
         {children}
       </select>
     );
-  }
+  },
 );
 
 export function CustomSelect({ options, value, onChange, style }) {
@@ -550,7 +550,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
       const ENTER = 13;
 
       let filteredItems = items.filter(
-        item => item && item !== Menu.line && item.type !== Menu.label
+        item => item && item !== Menu.line && item.type !== Menu.label,
       );
       let currentIndex = filteredItems.indexOf(items[hoveredIndex]);
 
@@ -562,7 +562,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
           setHoveredIndex(
             hoveredIndex === null
               ? 0
-              : transformIndex(Math.max(currentIndex - 1, 0))
+              : transformIndex(Math.max(currentIndex - 1, 0)),
           );
           break;
         case DOWN:
@@ -571,8 +571,8 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
             hoveredIndex === null
               ? 0
               : transformIndex(
-                  Math.min(currentIndex + 1, filteredItems.length - 1)
-                )
+                  Math.min(currentIndex + 1, filteredItems.length - 1),
+                ),
           );
           break;
         case ENTER:
@@ -1013,7 +1013,7 @@ export function ModalButtons({
   useEffect(() => {
     if (focusButton && containerRef.current) {
       let button = containerRef.current.querySelector(
-        'button:not([data-hidden])'
+        'button:not([data-hidden])',
       );
 
       if (button) {
@@ -1051,7 +1051,7 @@ export function InlineField({ label, labelWidth, children, width, style }) {
           margin: '7px 0',
           width,
         },
-        style
+        style,
       )}
     >
       <div

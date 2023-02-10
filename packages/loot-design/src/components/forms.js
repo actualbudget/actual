@@ -88,7 +88,7 @@ export function Checkbox(props) {
             },
           },
         ],
-        props.style
+        props.style,
       )}
     />
   );

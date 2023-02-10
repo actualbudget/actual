@@ -81,9 +81,9 @@ export function reconcileFiles(localFiles, remoteFiles) {
               hasKey: f.hasKey,
               state: 'remote',
             };
-          })
+          }),
       )
-      .filter(f => !f.deleted)
+      .filter(f => !f.deleted),
   );
 
   // One last pass to list all the broken (unauthorized) files at the

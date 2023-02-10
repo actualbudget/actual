@@ -27,7 +27,7 @@ export class Query {
     return new Query({
       ...this.state,
       filterExpressions: this.state.filterExpressions.filter(
-        expr => !exprSet.has(Object.keys(expr)[0])
+        expr => !exprSet.has(Object.keys(expr)[0]),
       ),
     });
   }

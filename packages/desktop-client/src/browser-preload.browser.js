@@ -28,7 +28,7 @@ function createBackendWorker() {
     isDev: IS_DEV,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
     isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride'
+      'SharedArrayBufferOverride',
     ),
   });
 
@@ -103,7 +103,7 @@ global.Actual = {
           view: window,
           bubbles: true,
           cancelable: true,
-        })
+        }),
       );
 
       input.addEventListener('change', e => {

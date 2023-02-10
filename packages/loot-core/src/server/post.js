@@ -52,7 +52,7 @@ export async function post(url, data) {
         '\nData: ' +
         JSON.stringify(data, null, 2) +
         '\nResponse: ' +
-        JSON.stringify(res, null, 2)
+        JSON.stringify(res, null, 2),
     );
 
     throw new PostError(res.description || res.reason || 'unknown');

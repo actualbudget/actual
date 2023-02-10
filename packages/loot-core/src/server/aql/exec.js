@@ -29,7 +29,7 @@ export async function execQuery(
   state,
   sqlPieces,
   params,
-  outputTypes
+  outputTypes,
 ) {
   let sql = defaultConstructQuery(queryState, state, sqlPieces);
   let data = await db.all(sql, params);
@@ -41,7 +41,7 @@ export async function runCompiledQuery(
   query,
   pieces,
   state,
-  { params = {}, executors = {} } = {}
+  { params = {}, executors = {} } = {},
 ) {
   let paramArray = state.namedParameters.map(param => {
     let name = param.paramName;
@@ -58,7 +58,7 @@ export async function runCompiledQuery(
       query,
       pieces,
       paramArray,
-      state.outputTypes
+      state.outputTypes,
     );
   } else {
     data = await execQuery(query, state, pieces, paramArray, state.outputTypes);

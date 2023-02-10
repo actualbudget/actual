@@ -119,8 +119,8 @@ describe('Sync', () => {
             value: 'N:4200',
             timestamp: '1970-01-02T10:17:36.999Z-0000-0000testinguuid2',
           },
-        ]
-      )
+        ],
+      ),
     );
 
     await applyMessages([

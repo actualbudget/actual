@@ -173,5 +173,5 @@ export default connect(
     accounts: state.queries.accounts,
     failedAccounts: state.account.failedAccounts,
   }),
-  actions
+  actions,
 )(AccountSyncCheck);

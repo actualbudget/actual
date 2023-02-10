@@ -39,7 +39,7 @@ export function Setting({ primaryAction, children }) {
         },
         media(`(min-width: ${tokens.breakpoint_medium})`, {
           width: 'auto',
-        })
+        }),
       )}
     >
       <View
@@ -77,7 +77,7 @@ export function AdvancedToggle({ children }) {
         },
         media(`(min-width: ${tokens.breakpoint_medium})`, {
           width: 'auto',
-        })
+        }),
       )}
     >
       {children}

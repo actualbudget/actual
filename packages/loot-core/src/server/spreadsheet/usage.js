@@ -82,7 +82,7 @@ function insertRow() {
       const t = Math.random() * 100;
       console.log('[insertRow] waiting', t);
       setTimeout(insertRow, t);
-    }
+    },
   );
 }
 

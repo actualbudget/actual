@@ -203,11 +203,11 @@ export default function ScheduleDetails() {
           date: null,
           posts_transaction: false,
         },
-        initialFields
+        initialFields,
       ),
       transactions: [],
       transactionsMode: adding ? 'matched' : 'linked',
-    }
+    },
   );
 
   async function loadSchedule() {
@@ -279,7 +279,7 @@ export default function ScheduleDetails() {
           .filter({ schedule: state.schedule.id })
           .select('*')
           .options({ splits: 'none' }),
-        data => dispatch({ type: 'set-transactions', transactions: data })
+        data => dispatch({ type: 'set-transactions', transactions: data }),
       );
       return live.unsubscribe;
     }
@@ -292,7 +292,7 @@ export default function ScheduleDetails() {
     if (state.schedule && state.transactionsMode === 'matched') {
       let { error, conditions } = updateScheduleConditions(
         state.schedule,
-        state.fields
+        state.fields,
       );
 
       dispatch({ type: 'set-transactions', transactions: [] });
@@ -323,7 +323,7 @@ export default function ScheduleDetails() {
               .filter({ $and: filters })
               .select('*')
               .options({ splits: 'none' }),
-            data => dispatch({ type: 'set-transactions', transactions: data })
+            data => dispatch({ type: 'set-transactions', transactions: data }),
           );
           unsubscribe = live.unsubscribe;
         }
@@ -345,7 +345,7 @@ export default function ScheduleDetails() {
 
     let { error, conditions } = updateScheduleConditions(
       state.schedule,
-      state.fields
+      state.fields,
     );
 
     if (error) {
@@ -385,7 +385,7 @@ export default function ScheduleDetails() {
           let schedule = await loadSchedule();
           dispatch({ type: 'set-schedule', schedule });
         },
-      })
+      }),
     );
   }
 

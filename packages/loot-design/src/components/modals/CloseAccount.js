@@ -94,7 +94,7 @@ function CloseAccount({
                   .closeAccount(
                     account.id,
                     values.transfer || null,
-                    values.category || null
+                    values.category || null,
                   )
                   .then(() => {
                     modalProps.onClose();

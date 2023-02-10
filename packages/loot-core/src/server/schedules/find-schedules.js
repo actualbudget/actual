@@ -35,7 +35,7 @@ async function getTransactions(date, account) {
         ],
       })
       .select('*')
-      .options({ splits: 'none' })
+      .options({ splits: 'none' }),
   );
   return data;
 }
@@ -63,7 +63,7 @@ export function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
       let matched = occur.transactions.find(
         t =>
           t.amount >= trans.amount - threshold &&
-          t.amount <= trans.amount + threshold
+          t.amount <= trans.amount + threshold,
       );
       matched = matched && matched.payee === payee ? matched : null;
 
@@ -79,12 +79,12 @@ export function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
 
     let rank = found.reduce(
       (total, match) => total + match.rank,
-      getRank(baseOccur.date, trans.date)
+      getRank(baseOccur.date, trans.date),
     );
 
     let exactAmount = found.reduce(
       (exact, match) => exact && match.trans.amount === trans.amount,
-      true
+      true,
     );
 
     schedules.push({
@@ -108,7 +108,7 @@ async function schedulesForPattern(
   numDays,
   baseConfig,
   accountId,
-  partialMatchRank
+  partialMatchRank,
 ) {
   let schedules = [];
 
@@ -139,7 +139,7 @@ async function schedulesForPattern(
     }
 
     schedules = schedules.concat(
-      matchSchedules(data, config, partialMatchRank)
+      matchSchedules(data, config, partialMatchRank),
     );
   }
   return schedules;
@@ -150,7 +150,7 @@ async function weekly(startDate, accountId) {
     d.subWeeks(parseDate(startDate), 4),
     7 * 2,
     { frequency: 'weekly' },
-    accountId
+    accountId,
   );
 }
 
@@ -161,7 +161,7 @@ async function every2weeks(startDate, accountId) {
     d.subWeeks(parseDate(startDate), 7),
     7 * 2,
     { frequency: 'weekly', interval: 2 },
-    accountId
+    accountId,
   );
 }
 
@@ -180,7 +180,7 @@ async function monthly(startDate, accountId) {
       }
       return { start, frequency: 'monthly' };
     },
-    accountId
+    accountId,
   );
 }
 
@@ -194,7 +194,7 @@ async function monthlyLastDay(startDate, accountId) {
     accountId,
     // Last day patterns should win over day-specific ones that just
     // happen to match
-    0.75
+    0.75,
   );
 
   let s2 = await schedulesForPattern(
@@ -202,7 +202,7 @@ async function monthlyLastDay(startDate, accountId) {
     1,
     { frequency: 'monthly', patterns: [{ type: 'day', value: -1 }] },
     accountId,
-    0.75
+    0.75,
   );
 
   return s1.concat(s2);
@@ -225,7 +225,7 @@ async function monthly1stor3rd(startDate, accountId) {
         ],
       };
     },
-    accountId
+    accountId,
   );
 }
 
@@ -246,7 +246,7 @@ async function monthly2ndor4th(startDate, accountId) {
         ],
       };
     },
-    accountId
+    accountId,
   );
 }
 
@@ -264,8 +264,8 @@ async function findStartDate(schedule) {
         currentConfig.start = dayFromDate(
           d.subWeeks(
             parseDate(currentConfig.start),
-            currentConfig.interval || 1
-          )
+            currentConfig.interval || 1,
+          ),
         );
 
         break;
@@ -273,16 +273,16 @@ async function findStartDate(schedule) {
         currentConfig.start = dayFromDate(
           d.subMonths(
             parseDate(currentConfig.start),
-            currentConfig.interval || 1
-          )
+            currentConfig.interval || 1,
+          ),
         );
         break;
       case 'yearly':
         currentConfig.start = dayFromDate(
           d.subYears(
             parseDate(currentConfig.start),
-            currentConfig.interval || 1
-          )
+            currentConfig.interval || 1,
+          ),
         );
         break;
       default:
@@ -290,7 +290,7 @@ async function findStartDate(schedule) {
     }
 
     let newConditions = conditions.map(c =>
-      c.field === 'date' ? { ...c, value: currentConfig } : c
+      c.field === 'date' ? { ...c, value: currentConfig } : c,
     );
 
     let { filters, errors } = conditionsToAQL(newConditions, {
@@ -304,7 +304,7 @@ async function findStartDate(schedule) {
     }
 
     let { data } = await aqlQuery(
-      q('transactions').filter({ $and: filters }).select('*')
+      q('transactions').filter({ $and: filters }).select('*'),
     );
 
     if (data.length === 0) {
@@ -319,7 +319,7 @@ async function findStartDate(schedule) {
       ...schedule,
       date: currentConfig,
       _conditions: conditions.map(c =>
-        c.field === 'date' ? { ...c, value: currentConfig } : c
+        c.field === 'date' ? { ...c, value: currentConfig } : c,
       ),
     };
   }
@@ -338,7 +338,7 @@ export async function findSchedules() {
   // and find the best one...
 
   let { data: accounts } = await aqlQuery(
-    q('accounts').filter({ closed: false }).select('*')
+    q('accounts').filter({ closed: false }).select('*'),
   );
 
   let allSchedules = [];
@@ -347,7 +347,7 @@ export async function findSchedules() {
     // Find latest transaction-ish to start with
     let latestTrans = await db.first(
       'SELECT * FROM v_transactions WHERE account = ? AND parent_id IS NULL ORDER BY date DESC LIMIT 1',
-      [account.id]
+      [account.id],
     );
 
     if (latestTrans) {
@@ -358,7 +358,7 @@ export async function findSchedules() {
         await monthly(latestDate, account.id),
         await monthlyLastDay(latestDate, account.id),
         await monthly1stor3rd(latestDate, account.id),
-        await monthly2ndor4th(latestDate, account.id)
+        await monthly2ndor4th(latestDate, account.id),
       );
     }
   }
@@ -390,7 +390,7 @@ export async function findSchedules() {
           },
         ],
       };
-    }
+    },
   );
 
   let finalized = [];

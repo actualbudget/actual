@@ -49,7 +49,7 @@ function getFieldDescription(schema, tableName, field) {
   let fieldDesc = schema[tableName][field];
   if (fieldDesc == null) {
     throw new CompileError(
-      `Field "${field}" does not exist in table "${tableName}"`
+      `Field "${field}" does not exist in table "${tableName}"`,
     );
   }
   return fieldDesc;
@@ -74,7 +74,7 @@ function makePath(state, path) {
 
     if (!table[field] || table[field].ref == null) {
       throw new CompileError(
-        `Field not joinable on table ${tableName}: "${field}"`
+        `Field not joinable on table ${tableName}: "${field}"`,
       );
     }
 
@@ -113,7 +113,7 @@ function resolvePath(state, path) {
         path: [...acc.path, fullName],
       };
     },
-    { context: state.implicitTableName, path: [] }
+    { context: state.implicitTableName, path: [] },
   ).path;
 
   paths.forEach(path => {
@@ -218,7 +218,7 @@ function inferParam(param, type) {
       (!casts[type] || !casts[type].includes(existingType))
     ) {
       throw new Error(
-        `Parameter "${name}" can't convert to ${type} (already inferred as ${existingType})`
+        `Parameter "${name}" can't convert to ${type} (already inferred as ${existingType})`,
       );
     }
   } else {
@@ -250,7 +250,7 @@ function castInput(state, expr, type) {
         return parseDate(expr.value) || badDateFormat(expr.value, 'date');
       } else {
         throw new CompileError(
-          'Casting string fields to dates is not supported'
+          'Casting string fields to dates is not supported',
         );
       }
     }
@@ -273,12 +273,12 @@ function castInput(state, expr, type) {
       return typed(
         dateToInt(expr2.value.toString().slice(0, 6)),
         'date-month',
-        { literal: true }
+        { literal: true },
       );
     } else {
       return typed(
         `CAST(SUBSTR(${expr2.value}, 1, 6) AS integer)`,
-        'date-month'
+        'date-month',
       );
     }
   } else if (type === 'date-year') {
@@ -302,7 +302,7 @@ function castInput(state, expr, type) {
     } else {
       return typed(
         `CAST(SUBSTR(${expr2.value}, 1, 4) AS integer)`,
-        'date-year'
+        'date-year',
       );
     }
   } else if (type === 'id') {
@@ -368,7 +368,7 @@ function saveStack(type, func) {
     if (state == null || state.compileStack == null) {
       throw new CompileError(
         'This function cannot track error data. ' +
-          'It needs to accept the compiler state as the first argument.'
+          'It needs to accept the compiler state as the first argument.',
       );
     }
 
@@ -423,7 +423,7 @@ function getCompileError(error, stack) {
   const rootMethod = stack[0].type;
   const methodArgs = stack[0].args[0];
   stackStr += `\n  ${rootMethod}(${prettyValue(
-    methodArgs.length === 1 ? methodArgs[0] : methodArgs
+    methodArgs.length === 1 ? methodArgs[0] : methodArgs,
   )})`;
 
   // In production, hide internal stack traces
@@ -462,7 +462,7 @@ function compileLiteral(value) {
     return typed(value, 'array', { literal: true });
   } else {
     throw new CompileError(
-      'Unsupported type of expression: ' + JSON.stringify(value)
+      'Unsupported type of expression: ' + JSON.stringify(value),
     );
   }
 }
@@ -512,7 +512,7 @@ const compileFunction = saveStack('function', (state, func) => {
 
   if (name[0] !== '$') {
     throw new CompileError(
-      `Unknown property "${name}". Did you mean to call a function? Try prefixing it with $`
+      `Unknown property "${name}". Did you mean to call a function? Try prefixing it with $`,
     );
   }
 
@@ -538,7 +538,7 @@ const compileFunction = saveStack('function', (state, func) => {
 
       return typed(
         `(SUM(${arg1}) OVER (${order} ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING))`,
-        args[0].type
+        args[0].type,
       );
     }
 
@@ -580,7 +580,7 @@ const compileFunction = saveStack('function', (state, func) => {
       valArray(state, args, ['integer', 'integer']);
       return typed(
         `(${val(state, args[0])} / ${val(state, args[1])})`,
-        args[0].type
+        args[0].type,
       );
     }
 
@@ -627,7 +627,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
   if ($transform) {
     lhs = compileFunction(
       { ...state, implicitField: fieldRef },
-      typeof $transform === 'string' ? { [$transform]: '$' } : $transform
+      typeof $transform === 'string' ? { [$transform]: '$' } : $transform,
     );
   } else {
     lhs = compileExpr(state, '$' + fieldRef);
@@ -776,14 +776,14 @@ function compileJoins(state, tableRef, internalTableFilters) {
         ' AND ' +
         compileAnd(
           { ...state, implicitTableName: tableName, implicitTableId: tableId },
-          filters
+          filters,
         );
     }
 
     joins.push(
       `LEFT JOIN ${
         noMapping ? tableName : tableRef(tableName, true)
-      } ${tableId} ON ${addTombstone(state.schema, tableName, tableId, on)}`
+      } ${tableId} ON ${addTombstone(state.schema, tableName, tableId, on)}`,
     );
 
     if (state.dependencies.indexOf(tableName) === -1) {
@@ -846,7 +846,7 @@ const compileSelect = saveStack(
       if (name[0] === '$') {
         state.compileStack.push({ type: 'value', value: expr });
         throw new CompileError(
-          `Invalid field "${name}", are you trying to select a function? You need to name the expression`
+          `Invalid field "${name}", are you trying to select a function? You need to name the expression`,
         );
       }
 
@@ -862,7 +862,7 @@ const compileSelect = saveStack(
     });
 
     return select.join(', ');
-  }
+  },
 );
 
 const compileGroupBy = saveStack('groupBy', (state, exprs) => {
@@ -963,12 +963,12 @@ export function compileQuery(queryState, schema, schemaConfig = {}) {
     for (let filter of filters) {
       if (Array.isArray(filter)) {
         throw new CompileError(
-          'Invalid internal table filter: only object filters are supported'
+          'Invalid internal table filter: only object filters are supported',
         );
       }
       if (Object.keys(filter)[0].indexOf('.') !== -1) {
         throw new CompileError(
-          'Invalid internal table filter: field names cannot contain paths'
+          'Invalid internal table filter: field names cannot contain paths',
         );
       }
     }
@@ -1018,7 +1018,7 @@ export function compileQuery(queryState, schema, schemaConfig = {}) {
       state,
       selectExpressions,
       isAggregateQuery(queryState),
-      orderExpressions
+      orderExpressions,
     );
 
     if (filterExpressions.length > 0) {
@@ -1083,7 +1083,7 @@ export function defaultConstructQuery(queryState, state, sqlPieces) {
         state.schema,
         state.implicitTableName,
         state.implicitTableId,
-        s.where
+        s.where,
       );
 
   return `

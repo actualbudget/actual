@@ -32,7 +32,7 @@ export async function getBackups(id) {
         id: path,
         date: new Date(mtime),
       };
-    })
+    }),
   );
 
   backups.sort((b1, b2) => {
@@ -141,12 +141,12 @@ export async function loadBackup(id, backupId) {
     // current version so the user can easily revert back to it
     await fs.copyFile(
       fs.join(budgetDir, 'db.sqlite'),
-      fs.join(budgetDir, LATEST_BACKUP_FILENAME)
+      fs.join(budgetDir, LATEST_BACKUP_FILENAME),
     );
 
     await fs.copyFile(
       fs.join(budgetDir, 'metadata.json'),
-      fs.join(budgetDir, 'metadata.latest.json')
+      fs.join(budgetDir, 'metadata.latest.json'),
     );
 
     // Restart the backup service to make sure the user has the full
@@ -164,11 +164,11 @@ export async function loadBackup(id, backupId) {
     // backup
     await fs.copyFile(
       fs.join(budgetDir, LATEST_BACKUP_FILENAME),
-      fs.join(budgetDir, 'db.sqlite')
+      fs.join(budgetDir, 'db.sqlite'),
     );
     await fs.copyFile(
       fs.join(budgetDir, 'metadata.latest.json'),
-      fs.join(budgetDir, 'metadata.json')
+      fs.join(budgetDir, 'metadata.json'),
     );
     await fs.removeFile(fs.join(budgetDir, LATEST_BACKUP_FILENAME));
     await fs.removeFile(fs.join(budgetDir, 'metadata.latest.json'));
@@ -201,7 +201,7 @@ export async function loadBackup(id, backupId) {
 
     await fs.copyFile(
       fs.join(budgetDir, 'backups', backupId),
-      fs.join(budgetDir, 'db.sqlite')
+      fs.join(budgetDir, 'db.sqlite'),
     );
   }
 }

@@ -59,7 +59,7 @@ export function connectAccounts(
   institution,
   publicToken,
   accountIds,
-  offbudgetIds
+  offbudgetIds,
 ) {
   return async dispatch => {
     let ids = await send('accounts-connect', {
@@ -112,8 +112,8 @@ export function syncAccounts(id) {
               id: error.accountId,
               type: error.category,
               code: error.code,
-            }))
-        )
+            })),
+        ),
       );
     }
 
@@ -123,7 +123,7 @@ export function syncAccounts(id) {
           addNotification({
             type: 'error',
             message: error.message,
-          })
+          }),
         );
       } else {
         dispatch(
@@ -131,7 +131,7 @@ export function syncAccounts(id) {
             type: 'error',
             message: error.message,
             internal: error.internal,
-          })
+          }),
         );
       }
     });
@@ -181,7 +181,7 @@ export function importTransactions(id, transactions) {
           type: 'error',
           message: error.message,
           internal: error.internal,
-        })
+        }),
       );
     });
 

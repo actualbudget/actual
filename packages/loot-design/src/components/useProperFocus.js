@@ -40,7 +40,7 @@ export function AvoidRefocusScrollProvider({ children }) {
         keyRef.current = key;
       },
     }),
-    [keyRef]
+    [keyRef],
   );
 
   return (

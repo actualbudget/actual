@@ -17,7 +17,7 @@ let fieldTypes = new Map(
     description: 'id',
     description2: 'id',
     amount: 'number',
-  })
+  }),
 );
 
 describe('Condition', () => {
@@ -122,7 +122,7 @@ describe('Condition', () => {
         patterns: [{ type: 'day', value: 15 }],
       },
       null,
-      fieldTypes
+      fieldTypes,
     );
     expect(cond.eval({ date: '2018-03-15' })).toBe(false);
     expect(cond.eval({ date: '2019-03-15' })).toBe(true);
@@ -139,7 +139,7 @@ describe('Condition', () => {
         interval: 3,
       },
       null,
-      fieldTypes
+      fieldTypes,
     );
     expect(cond.eval({ date: '2019-01-12' })).toBe(true);
     expect(cond.eval({ date: '2019-04-12' })).toBe(true);
@@ -156,7 +156,7 @@ describe('Condition', () => {
         patterns: [{ type: 'day', value: 15 }],
       },
       null,
-      fieldTypes
+      fieldTypes,
     );
     expect(cond.eval({ date: '2019-03-12' })).toBe(false);
     expect(cond.eval({ date: '2019-03-13' })).toBe(true);
@@ -239,7 +239,7 @@ describe('Condition', () => {
       'amount',
       { num1: 0, num2: 10 },
       null,
-      fieldTypes
+      fieldTypes,
     );
 
     expect(() => {
@@ -266,7 +266,7 @@ describe('Condition', () => {
       'amount',
       { num1: 32, num2: 86 },
       null,
-      fieldTypes
+      fieldTypes,
     );
     expect(cond.eval({ amount: 30 })).toBe(false);
     expect(cond.eval({ amount: 32 })).toBe(true);
@@ -279,7 +279,7 @@ describe('Condition', () => {
       'amount',
       { num1: -16, num2: -20 },
       null,
-      fieldTypes
+      fieldTypes,
     );
     expect(cond.eval({ amount: -18 })).toBe(true);
     expect(cond.eval({ amount: -12 })).toBe(false);
@@ -425,7 +425,7 @@ describe('Rule', () => {
       rule(
         'first',
         [{ op: 'is', field: 'description', value: 'id1' }],
-        [{ op: 'set', field: 'name', value: 'sar' }]
+        [{ op: 'set', field: 'name', value: 'sar' }],
       ),
       rule('second', [
         { op: 'oneOf', field: 'description', value: ['id2', 'id3'] },
@@ -433,7 +433,7 @@ describe('Rule', () => {
       rule(
         'third',
         [{ op: 'is', field: 'name', value: 'James' }],
-        [{ op: 'set', field: 'description', value: 'id3' }]
+        [{ op: 'set', field: 'description', value: 'id3' }],
       ),
       rule('fourth', [
         { op: 'is', field: 'name', value: 'James' },
@@ -475,13 +475,13 @@ describe('RuleIndexer', () => {
     // rule2 always gets returned because it's not indexed and always
     // needs to be run
     expect(indexer.getApplicableRules({ name: 'James' })).toEqual(
-      new Set([rule, rule2])
+      new Set([rule, rule2]),
     );
     expect(indexer.getApplicableRules({ name: 'James2' })).toEqual(
-      new Set([rule2])
+      new Set([rule2]),
     );
     expect(indexer.getApplicableRules({ amount: 15 })).toEqual(
-      new Set([rule2])
+      new Set([rule2]),
     );
   });
 
@@ -518,19 +518,19 @@ describe('RuleIndexer', () => {
     expect(indexer.rules.get('*').size).toBe(1);
 
     expect(
-      indexer.getApplicableRules({ name: 'James', category: 'food' })
+      indexer.getApplicableRules({ name: 'James', category: 'food' }),
     ).toEqual(new Set([rule, rule3]));
     expect(
-      indexer.getApplicableRules({ name: 'James', category: 'f' })
+      indexer.getApplicableRules({ name: 'James', category: 'f' }),
     ).toEqual(new Set([rule, rule3]));
     expect(
-      indexer.getApplicableRules({ name: 'James', category: 'foo' })
+      indexer.getApplicableRules({ name: 'James', category: 'foo' }),
     ).toEqual(new Set([rule, rule3]));
     expect(
-      indexer.getApplicableRules({ name: 'James', category: 'bars' })
+      indexer.getApplicableRules({ name: 'James', category: 'bars' }),
     ).toEqual(new Set([rule2, rule3]));
     expect(indexer.getApplicableRules({ name: 'James' })).toEqual(
-      new Set([rule3])
+      new Set([rule3]),
     );
   });
 
@@ -589,16 +589,16 @@ describe('RuleIndexer', () => {
     indexer.index(rule2);
 
     expect(indexer.getApplicableRules({ name: 'James' })).toEqual(
-      new Set([rule])
+      new Set([rule]),
     );
     expect(indexer.getApplicableRules({ name: 'Evy' })).toEqual(
-      new Set([rule])
+      new Set([rule]),
     );
     expect(indexer.getApplicableRules({ name: 'Charlotte' })).toEqual(
-      new Set([])
+      new Set([]),
     );
     expect(indexer.getApplicableRules({ name: 'Georgia' })).toEqual(
-      new Set([rule2])
+      new Set([rule2]),
     );
   });
 });

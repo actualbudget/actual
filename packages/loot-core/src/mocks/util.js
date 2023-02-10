@@ -19,7 +19,7 @@ export function getFixtures(filename) {
   join(
     dirname(filename),
     '__fixtures__',
-    basename(filename).replace(/\.[^.]+.js/, '.fixtures.js')
+    basename(filename).replace(/\.[^.]+.js/, '.fixtures.js'),
   );
 }
 

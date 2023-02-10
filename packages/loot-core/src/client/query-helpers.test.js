@@ -20,7 +20,7 @@ function isCountQuery(query) {
 
 function select(row, selectExpressions) {
   return Object.fromEntries(
-    selectExpressions.map(fieldName => [fieldName, row[fieldName]])
+    selectExpressions.map(fieldName => [fieldName, row[fieldName]]),
   );
 }
 
@@ -63,14 +63,14 @@ function runPagedQuery(query, data) {
           })
           .map(row => select(row, query.selectExpressions)),
         query.limit,
-        query.offset
+        query.offset,
       );
     }
   } else if (query.offset != null || query.limit != null) {
     return limitOffset(
       data.map(row => select(row, query.selectExpressions)),
       query.limit,
-      query.offset
+      query.offset,
     );
   }
 
@@ -101,7 +101,7 @@ function initPagingServer(dataLength, { delay, eventType = 'select' } = {}) {
     query: async query => {
       tracer.event(
         'server-query',
-        eventType === 'select' ? query.selectExpressions : query
+        eventType === 'select' ? query.selectExpressions : query,
       );
       if (delay) {
         await wait(delay);
@@ -471,28 +471,28 @@ describe('query helpers', () => {
       'server-query',
       expect.objectContaining({
         selectExpressions: [{ result: { $count: '*' } }],
-      })
+      }),
     );
     await tracer.expect(
       'server-query',
-      expect.objectContaining({ filterExpressions: [{ id: 300 }] })
+      expect.objectContaining({ filterExpressions: [{ id: 300 }] }),
     );
     await tracer.expect(
       'server-query',
       expect.objectContaining({
         filterExpressions: [{ date: { $gte: item.date } }],
-      })
+      }),
     );
     await tracer.expect(
       'server-query',
       expect.objectContaining({
         filterExpressions: [{ date: { $lt: item.date } }],
         limit: 20,
-      })
+      }),
     );
     await tracer.expect(
       'data',
-      data.slice(0, data.findIndex(row => row.date < item.date) + 20)
+      data.slice(0, data.findIndex(row => row.date < item.date) + 20),
     );
 
     await wait(1000);

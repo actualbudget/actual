@@ -192,8 +192,8 @@ export class PagedQuery extends LiveQuery {
         this.query.limit(
           this.data == null
             ? this.pageCount
-            : Math.max(this.data.length, this.pageCount)
-        )
+            : Math.max(this.data.length, this.pageCount),
+        ),
       );
     });
 
@@ -228,7 +228,7 @@ export class PagedQuery extends LiveQuery {
           [field]: {
             [order === 'asc' ? '$lte' : '$gte']: fullRow[field],
           },
-        })
+        }),
       );
       let data = result.data;
 
@@ -241,7 +241,7 @@ export class PagedQuery extends LiveQuery {
               [order === 'asc' ? '$gt' : '$lt']: fullRow[field],
             },
           })
-          .limit(this.pageCount)
+          .limit(this.pageCount),
       );
 
       return {
@@ -264,7 +264,7 @@ export class PagedQuery extends LiveQuery {
 
     if (!this.done) {
       let { data } = await runQuery(
-        this.query.limit(this.pageCount).offset(previousData.length)
+        this.query.limit(this.pageCount).offset(previousData.length),
       );
 
       // If either there is an existing request in flight or the data

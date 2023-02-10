@@ -73,12 +73,12 @@ class Tooltip extends React.Component {
               top: 'calc(50% - 7px)',
               content: '" "',
             }),
-          style
+          style,
         )}
       >
         {datum.premadeLabel}
       </div>,
-      portalHost
+      portalHost,
     );
   }
 }

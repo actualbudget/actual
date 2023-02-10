@@ -47,7 +47,7 @@ export function recalculateSplit(trans) {
   // that it equals the parent amount
   const total = trans.subtransactions.reduce(
     (acc, t) => acc + num(t.amount),
-    0
+    0,
   );
   return {
     ...trans,
@@ -169,7 +169,7 @@ export function addSplitTransaction(transactions, id) {
       makeChild(trans, {
         amount: 0,
         sort_order: num(prevSub && prevSub.sort_order) - 1,
-      })
+      }),
     );
     return trans;
   });

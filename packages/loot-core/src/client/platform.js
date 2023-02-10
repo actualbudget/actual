@@ -5,7 +5,7 @@ const isMac =
   navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
 const isProbablySafari = /^((?!chrome|android).)*safari/i.test(
-  navigator.userAgent
+  navigator.userAgent,
 );
 
 export default {

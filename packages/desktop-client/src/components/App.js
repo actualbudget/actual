@@ -136,5 +136,5 @@ export default connect(
     cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
     loadingText: state.app.loadingText,
   }),
-  actions
+  actions,
 )(App);

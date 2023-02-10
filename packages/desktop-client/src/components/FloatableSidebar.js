@@ -124,6 +124,6 @@ function Sidebar({ floatingSidebar }) {
 export default withRouter(
   connect(
     state => ({ floatingSidebar: state.prefs.global.floatingSidebar }),
-    actions
-  )(Sidebar)
+    actions,
+  )(Sidebar),
 );

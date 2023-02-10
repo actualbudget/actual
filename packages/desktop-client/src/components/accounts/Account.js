@@ -933,7 +933,7 @@ const AccountHeader = React.memo(
         )}
       </>
     );
-  }
+  },
 );
 
 function AllTransactions({ transactions, filtered, children }) {
@@ -946,11 +946,11 @@ function AllTransactions({ transactions, filtered, children }) {
             s =>
               !s.completed &&
               ['due', 'upcoming', 'missed'].includes(
-                scheduleData.statuses.get(s.id)
-              )
+                scheduleData.statuses.get(s.id),
+              ),
           )
         : [],
-    [scheduleData]
+    [scheduleData],
   );
 
   let prependTransactions = useMemo(() => {
@@ -1026,7 +1026,8 @@ class AccountInternal extends React.PureComponent {
         !messages.find(msg => msg.column === 'tombstone')
       ) {
         let focusableMsgs = messages.filter(
-          msg => msg.dataset === 'transactions' && !(msg.column === 'tombstone')
+          msg =>
+            msg.dataset === 'transactions' && !(msg.column === 'tombstone'),
         );
 
         focusId = focusableMsgs.length === 1 ? focusableMsgs[0].row : null;
@@ -1181,14 +1182,14 @@ class AccountInternal extends React.PureComponent {
             setTimeout(() => {
               this.table.current && this.table.current.setRowAnimation(true);
             }, 0);
-          }
+          },
         );
       },
       {
         pageCount: 150,
         onlySync: true,
         mapper: ungroupTransactions,
-      }
+      },
     );
   }
 
@@ -1204,7 +1205,7 @@ class AccountInternal extends React.PureComponent {
         },
         () => {
           this.fetchTransactions();
-        }
+        },
       );
     }
   }
@@ -1222,9 +1223,9 @@ class AccountInternal extends React.PureComponent {
         queries.makeTransactionSearchQuery(
           this.currentQuery,
           this.state.search,
-          this.props.dateFormat
+          this.props.dateFormat,
         ),
-        true
+        true,
       );
     }
   }, 150);
@@ -1272,7 +1273,7 @@ class AccountInternal extends React.PureComponent {
     window.Actual.saveFile(
       exportedTransactions,
       filename,
-      'Export Transactions'
+      'Export Transactions',
     );
   };
 
@@ -1290,7 +1291,7 @@ class AccountInternal extends React.PureComponent {
       },
       mappedData => {
         return data;
-      }
+      },
     );
 
     this.props.updateNewTransactions(newTransaction.id);
@@ -1313,7 +1314,7 @@ class AccountInternal extends React.PureComponent {
       this.paged
         .getQuery()
         .options({ splits: 'none' })
-        .select([{ balance: { $sumOver: '$amount' } }])
+        .select([{ balance: { $sumOver: '$amount' } }]),
     );
 
     this.setState({ balances: groupById(data) });
@@ -1331,7 +1332,7 @@ class AccountInternal extends React.PureComponent {
     if (name.trim().length) {
       const accountId = this.props.accountId;
       const account = this.props.accounts.find(
-        account => account.id === accountId
+        account => account.id === accountId,
       );
       this.props.updateAccount({ ...account, name });
       this.setState({ editingName: false });
@@ -1348,7 +1349,7 @@ class AccountInternal extends React.PureComponent {
   onMenuSelect = async item => {
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(
-      account => account.id === accountId
+      account => account.id === accountId,
     );
 
     switch (item) {
@@ -1476,7 +1477,7 @@ class AccountInternal extends React.PureComponent {
         q('transactions')
           .filter({ id: { $oneof: ids } })
           .select('*')
-          .options({ splits: 'grouped' })
+          .options({ splits: 'grouped' }),
       );
       let transactions = ungroupTransactions(data);
 
@@ -1543,14 +1544,14 @@ class AccountInternal extends React.PureComponent {
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
-        .options({ splits: 'grouped' })
+        .options({ splits: 'grouped' }),
     );
 
     let changes = {
       added: data
         .reduce((newTransactions, trans) => {
           return newTransactions.concat(
-            realizeTempTransactions(ungroupTransaction(trans))
+            realizeTempTransactions(ungroupTransaction(trans)),
           );
         }, [])
         .map(({ sort_order, ...trans }) => ({ ...trans })),
@@ -1568,7 +1569,7 @@ class AccountInternal extends React.PureComponent {
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
-        .options({ splits: 'grouped' })
+        .options({ splits: 'grouped' }),
     );
     let transactions = ungroupTransactions(data);
 
@@ -1615,7 +1616,7 @@ class AccountInternal extends React.PureComponent {
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
     this.applyFilters(
-      this.state.filters.map(f => (f === oldFilter ? updatedFilter : f))
+      this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
   };
 
@@ -1809,7 +1810,7 @@ class AccountInternal extends React.PureComponent {
                         <EmptyMessage
                           onAdd={() =>
                             replaceModal(
-                              syncEnabled ? 'add-account' : 'add-local-account'
+                              syncEnabled ? 'add-account' : 'add-local-account',
                             )
                           }
                         />
@@ -1884,7 +1885,7 @@ export default function Account(props) {
   let dispatch = useDispatch();
   let actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
-    [dispatch]
+    [dispatch],
   );
 
   let params = useParams();

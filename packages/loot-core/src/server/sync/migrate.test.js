@@ -49,7 +49,7 @@ let messageArb = fc
         fc.integer(0, 5).map(i => `id${i}`),
         fc.integer(0, 5).chain(i => {
           return fc.integer(0, 5).map(j => `id${i}/child${j}`);
-        })
+        }),
       ),
       value: value,
     });
@@ -92,7 +92,7 @@ describe('sync migrations', () => {
               ts &&
               [...ts.values()].find(
                 t =>
-                  t.isChild === 1 && t.parent_id == null && t.id.includes('/')
+                  t.isChild === 1 && t.parent_id == null && t.id.includes('/'),
               )
             ) {
             } else {
@@ -106,7 +106,7 @@ describe('sync migrations', () => {
           let transactions = await db.all(
             'SELECT * FROM transactions',
             [],
-            true
+            true,
           );
           for (let trans of transactions) {
             let transMsgs = msgs
@@ -148,7 +148,7 @@ describe('sync migrations', () => {
         })
         .beforeEach(() => {
           return db.execQuery(`DELETE FROM transactions`);
-        })
+        }),
     );
   });
 });

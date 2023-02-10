@@ -141,5 +141,5 @@ export default connect(
     allFiles: state.budgets.allFiles,
     isLoggedIn: !!state.user.data,
   }),
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) })
+  dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
 )(Modals);

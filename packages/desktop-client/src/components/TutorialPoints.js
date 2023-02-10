@@ -37,5 +37,5 @@ class Tutorial extends React.Component {
 }
 
 export default connect(state => ({ deactivated: state.tutorial.deactivated }))(
-  Tutorial
+  Tutorial,
 );

@@ -83,5 +83,5 @@ export default connect(
   state => ({
     currentModal: state.modals.currentModal,
   }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(CreateAccount);

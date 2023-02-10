@@ -158,7 +158,7 @@ handlers['transactions-filter'] = async function ({
     accountId,
     latestDate,
     notPaged ? null : count == null ? undefined : count,
-    options
+    options,
   );
 };
 
@@ -192,7 +192,7 @@ handlers['get-earliest-transaction'] = async function () {
       .options({ splits: 'none' })
       .orderBy({ date: 'asc' })
       .select('*')
-      .limit(1)
+      .limit(1),
   );
   return data[0] || null;
 };
@@ -354,7 +354,7 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
     await batchMessages(async () => {
       let row = await db.first(
         'SELECT is_income FROM categories WHERE id = ?',
-        [id]
+        [id],
       );
       if (!row) {
         result = { error: 'no-categories' };
@@ -424,14 +424,14 @@ handlers['category-group-delete'] = mutator(async function ({
   return withUndo(async () => {
     const groupCategories = await db.all(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
-      [id]
+      [id],
     );
 
     return batchMessages(async () => {
       if (transferId) {
         await budget.doTransfer(
           groupCategories.map(c => c.id),
-          transferId
+          transferId,
         );
       }
       await db.deleteCategoryGroup({ id }, transferId);
@@ -445,7 +445,7 @@ handlers['must-category-transfer'] = async function ({ id }) {
        LEFT JOIN category_mapping cm ON cm.id = t.category
        WHERE cm.transferId = ? AND t.tombstone = 0`,
     [id],
-    true
+    true,
   );
 
   // If there are transactions with this category, return early since
@@ -492,7 +492,7 @@ handlers['payees-merge'] = mutator(async function ({ targetId, mergeIds }) {
     async () => {
       return db.mergePayees(targetId, mergeIds);
     },
-    { targetId, mergeIds }
+    { targetId, mergeIds },
   );
 });
 
@@ -532,7 +532,7 @@ handlers['payees-delete-rule'] = mutator(async function ({ id, payee_id }) {
     async () => {
       return await db.deletePayeeRule({ id });
     },
-    { payeeId: payee_id }
+    { payeeId: payee_id },
   );
 });
 
@@ -541,7 +541,7 @@ handlers['payees-update-rule'] = mutator(async function (rule) {
     async () => {
       return await db.updatePayeeRule(rule);
     },
-    { payeeId: rule.payee_id }
+    { payeeId: rule.payee_id },
   );
 });
 
@@ -551,7 +551,7 @@ handlers['payees-add-rule'] = mutator(async function (rule) {
       let id = await db.insertPayeeRule(rule);
       return { ...rule, id };
     },
-    { payeeId: rule.payee_id }
+    { payeeId: rule.payee_id },
   );
 });
 
@@ -583,8 +583,8 @@ function validateRule(rule) {
         cond.field,
         cond.value,
         cond.options,
-        ruleFieldTypes
-      )
+        ruleFieldTypes,
+      ),
   );
 
   let actionErrors = runValidation(
@@ -595,8 +595,8 @@ function validateRule(rule) {
         action.field,
         action.value,
         action.options,
-        ruleFieldTypes
-      )
+        ruleFieldTypes,
+      ),
   );
 
   if (conditionErrors || actionErrors) {
@@ -746,7 +746,7 @@ handlers['bank-delete'] = async function ({ id }) {
   const accts = await db.runQuery(
     'SELECT * FROM accounts WHERE bank = ?',
     [id],
-    true
+    true,
   );
 
   await db.delete_('banks', id);
@@ -756,7 +756,7 @@ handlers['bank-delete'] = async function ({ id }) {
       // the "recorded" functions
       await db.runQuery('DELETE FROM transactions WHERE acct = ?', [acct.id]);
       await db.delete_('accounts', acct.id);
-    })
+    }),
   );
   return 'ok';
 };
@@ -775,11 +775,11 @@ handlers['accounts-get'] = async function () {
 handlers['account-properties'] = async function ({ id }) {
   const { balance } = await db.first(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
-    [id]
+    [id],
   );
   const { count } = await db.first(
     'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
-    [id]
+    [id],
   );
 
   return { balance: balance || 0, numTransactions: count };
@@ -819,7 +819,7 @@ handlers['accounts-link'] = async function ({
     userKey,
     upgradingId,
     account.account_id,
-    bankId
+    bankId,
   );
 
   connection.send('sync-event', {
@@ -893,7 +893,7 @@ handlers['account-close'] = mutator(async function ({
   return withUndo(async () => {
     let account = await db.first(
       'SELECT * FROM accounts WHERE id = ? AND tombstone = 0',
-      [id]
+      [id],
     );
 
     // Do nothing if the account doesn't exist or it's already been
@@ -913,12 +913,12 @@ handlers['account-close'] = mutator(async function ({
       let rows = await db.runQuery(
         'SELECT id, transfer_id FROM v_transactions WHERE account = ?',
         [id],
-        true
+        true,
       );
 
       let { id: payeeId } = await db.first(
         'SELECT id FROM payees WHERE transfer_acct = ?',
-        [id]
+        [id],
       );
 
       await batchMessages(() => {
@@ -955,7 +955,7 @@ handlers['account-close'] = mutator(async function ({
       if (balance !== 0) {
         let { id: payeeId } = await db.first(
           'SELECT id FROM payees WHERE transfer_acct = ?',
-          [transferAccountId]
+          [transferAccountId],
         );
 
         await handlers['transaction-add']({
@@ -1011,7 +1011,7 @@ handlers['poll-web-token'] = async function ({ token }) {
         userId,
         key,
         token,
-      }
+      },
     );
 
     if (data) {
@@ -1051,7 +1051,7 @@ handlers['accounts-sync'] = async function ({ id }) {
          LEFT JOIN banks b ON a.bank = b.id
          WHERE a.tombstone = 0 AND a.closed = 0`,
     [],
-    true
+    true,
   );
 
   if (id) {
@@ -1072,7 +1072,7 @@ handlers['accounts-sync'] = async function ({ id }) {
           userKey,
           acct.id,
           acct.account_id,
-          acct.bankId
+          acct.bankId,
         );
         let { added, updated } = res;
 
@@ -1146,7 +1146,7 @@ handlers['transactions-import'] = mutator(function ({
 handlers['account-unlink'] = mutator(async function ({ id }) {
   let { bank: bankId } = await db.first(
     'SELECT bank FROM accounts WHERE id = ?',
-    [id]
+    [id],
   );
 
   if (!bankId) {
@@ -1164,7 +1164,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 
   let { count } = await db.first(
     'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
-    [bankId]
+    [bankId],
   );
 
   if (count === 0) {
@@ -1572,7 +1572,7 @@ handlers['get-budgets'] = async function () {
         }
 
         return null;
-      })
+      }),
     )
   ).filter(x => x);
 
@@ -1765,7 +1765,7 @@ handlers['create-budget'] = async function ({
   // Create the initial prefs file
   await fs.writeFile(
     fs.join(budgetDir, 'metadata.json'),
-    JSON.stringify(prefs.getDefaultPrefs(id, budgetName))
+    JSON.stringify(prefs.getDefaultPrefs(id, budgetName)),
   );
 
   // Load it in
@@ -1842,20 +1842,20 @@ handlers['import-budget'] = async function ({ filepath, type }) {
 
         let { id } = await cloudStorage.importBuffer(
           { cloudFileId: null, groupId: null },
-          buffer
+          buffer,
         );
 
         // We never want to load cached data from imported files, so
         // delete the cache
         let sqliteDb = await sqlite.openDatabase(
-          fs.join(fs.getBudgetDir(id), 'db.sqlite')
+          fs.join(fs.getBudgetDir(id), 'db.sqlite'),
         );
         sqlite.execQuery(
           sqliteDb,
           `
           DELETE FROM kvcache;
           DELETE FROM kvcache_key;
-        `
+        `,
         );
         sqlite.closeDatabase(sqliteDb);
 
@@ -1888,7 +1888,7 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     dir = fs.getBudgetDir(id);
   } catch (e) {
     captureException(
-      new Error('`getBudgetDir` failed in `loadBudget`: ' + e.message)
+      new Error('`getBudgetDir` failed in `loadBudget`: ' + e.message),
     );
     return { error: 'budget-not-found' };
   }
@@ -1951,7 +1951,7 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     getClock().timestamp.setNode(makeClientId());
     await db.runQuery(
       'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-      [serializeClock(getClock())]
+      [serializeClock(getClock())],
     );
 
     await prefs.savePrefs({ resetClock: false });
@@ -2133,7 +2133,7 @@ export async function initApp(version, isDev, socketName) {
       await Promise.all(
         Object.keys(keys).map(fileId => {
           return encryption.loadKey(keys[fileId]);
-        })
+        }),
       );
     } catch (e) {
       console.log('Error loading key', e);

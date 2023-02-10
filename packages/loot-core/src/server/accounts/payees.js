@@ -5,7 +5,7 @@ export async function createPayee(description) {
   // name
   let row = await db.first(
     `SELECT id FROM payees WHERE LOWER(name) = ? AND tombstone = 0`,
-    [description.toLowerCase()]
+    [description.toLowerCase()],
   );
 
   if (row) {
@@ -24,7 +24,7 @@ export async function getStartingBalancePayee() {
   `);
   if (category === null) {
     category = await db.first(
-      'SELECT * FROM categories WHERE is_income = 1 AND tombstone = 0'
+      'SELECT * FROM categories WHERE is_income = 1 AND tombstone = 0',
     );
   }
 

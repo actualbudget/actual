@@ -395,13 +395,13 @@ let Rule = React.memo(
         </Cell>
       </Row>
     );
-  }
+  },
 );
 
 let SimpleTable = React.forwardRef(
   (
     { data, navigator, loadMore, style, onHoverLeave, children, ...props },
-    ref
+    ref,
   ) => {
     let contentRef = useRef();
     let contentHeight = useRef();
@@ -449,7 +449,7 @@ let SimpleTable = React.forwardRef(
         </View>
       </View>
     );
-  }
+  },
 );
 
 function RulesHeader() {
@@ -550,7 +550,7 @@ function ruleToString(rule, data) {
         friendlyOp(action.op),
         describeSchedule(
           schedule,
-          data.payees.find(p => p.id === schedule._payee)
+          data.payees.find(p => p.id === schedule._payee),
         ),
       ];
     } else {
@@ -584,9 +584,9 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         : rules.filter(rule =>
             ruleToString(rule, filterData)
               .toLowerCase()
-              .includes(filter.toLowerCase())
+              .includes(filter.toLowerCase()),
           ),
-    [rules, filter, filterData]
+    [rules, filter, filterData],
   );
   let selectedInst = useSelected('manage-rules', allRules, []);
   let [hoveredRule, setHoveredRule] = useState(null);
@@ -667,7 +667,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
           setLoading(false);
         },
-      })
+      }),
     );
   }, []);
 
@@ -707,7 +707,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
           setLoading(false);
         },
-      })
+      }),
     );
   }
 

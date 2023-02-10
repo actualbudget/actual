@@ -37,7 +37,7 @@ export const FIELD_TYPES = new Map(
     category: 'id',
     account: 'id',
     cleared: 'boolean',
-  })
+  }),
 );
 
 export function mapField(field, opts) {

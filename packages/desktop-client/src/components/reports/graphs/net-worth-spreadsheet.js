@@ -25,7 +25,7 @@ export default function createSpreadsheet(start, end, accounts) {
           runQuery(
             q('transactions')
               .filter({ account: acct.id, date: { $lt: start + '-01' } })
-              .calculate({ $sum: '$amount' })
+              .calculate({ $sum: '$amount' }),
           ).then(({ data }) => data),
 
           runQuery(
@@ -41,7 +41,7 @@ export default function createSpreadsheet(start, end, accounts) {
               .select([
                 { date: { $month: '$date' } },
                 { amount: { $sum: '$amount' } },
-              ])
+              ]),
           ).then(({ data }) => data),
         ]);
 
@@ -50,7 +50,7 @@ export default function createSpreadsheet(start, end, accounts) {
           balances: index(balances, 'date'),
           starting,
         };
-      })
+      }),
     );
 
     setData(recalculate(data, start, end));

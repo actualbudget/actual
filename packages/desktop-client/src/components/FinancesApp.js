@@ -266,7 +266,7 @@ class FinancesApp extends React.Component {
       checkForUpgradeNotifications(
         this.props.addNotification,
         this.props.resetSync,
-        this.history
+        this.history,
       );
     }, 100);
 

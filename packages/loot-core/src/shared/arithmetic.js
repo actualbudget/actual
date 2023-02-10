@@ -2,7 +2,7 @@ import { getNumberFormat } from './util';
 
 function fail(state, msg) {
   throw new Error(
-    msg + ': ' + JSON.stringify(state.str.slice(state.index, 10))
+    msg + ': ' + JSON.stringify(state.str.slice(state.index, 10)),
   );
 }
 

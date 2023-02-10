@@ -135,7 +135,7 @@ MutableTimestamp.from = timestamp => {
   return new MutableTimestamp(
     timestamp.millis(),
     timestamp.counter(),
-    timestamp.node()
+    timestamp.node(),
   );
 };
 
@@ -154,10 +154,10 @@ Timestamp.init = function (options = {}) {
         0,
         options.node
           ? ('0000000000000000' + options.node).toString().slice(-16)
-          : ''
-      )
+          : '',
+      ),
     ),
-    null
+    null,
   );
 };
 
@@ -198,7 +198,7 @@ Timestamp.send = function () {
   return new Timestamp(
     clock.timestamp.millis(),
     clock.timestamp.counter(),
-    clock.timestamp.node()
+    clock.timestamp.node(),
   );
 };
 
@@ -260,7 +260,7 @@ Timestamp.recv = function (msg) {
   return new Timestamp(
     clock.timestamp.millis(),
     clock.timestamp.counter(),
-    clock.timestamp.node()
+    clock.timestamp.node(),
   );
 };
 

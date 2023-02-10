@@ -60,7 +60,7 @@ export default () => {
                           Pop modal
                         </Button>
                       </View>
-                    </Modal>
+                    </Modal>,
                   );
                 }
 

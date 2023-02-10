@@ -129,7 +129,7 @@ class Budget extends React.Component {
       let { id: catId, position } = aroundCategory;
 
       let group = categoryGroups.find(group =>
-        group.categories.find(cat => cat.id === catId)
+        group.categories.find(cat => cat.id === catId),
       );
 
       if (position === 'bottom') {
@@ -226,7 +226,7 @@ class Budget extends React.Component {
             break;
           default:
         }
-      }
+      },
     );
   };
 
@@ -304,5 +304,5 @@ export default connect(
     prefs: state.prefs.local,
     initialBudgetMonth: state.app.budgetMonth,
   }),
-  actions
+  actions,
 )(withThemeColor(colors.p5)(BudgetWrapper));

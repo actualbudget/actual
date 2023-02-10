@@ -279,5 +279,5 @@ export default connect(
     payees: state.queries.payees,
     budgetId: state.prefs.local && state.prefs.local.id,
   }),
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) })
+  dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
 )(Modals);

@@ -652,7 +652,7 @@ export class BudgetGroup extends React.PureComponent {
             />
           );
         })}
-      </Card>
+      </Card>,
     );
   }
 }
@@ -1186,5 +1186,5 @@ const BudgetHeader = connect(
   state => ({
     localPrefs: state.prefs.local,
   }),
-  actions
+  actions,
 )(UnconnectedBudgetHeader);

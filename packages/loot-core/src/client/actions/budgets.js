@@ -72,7 +72,7 @@ export function loadBudget(id, loadingText = '', options = {}) {
           // eslint-disable-next-line
           let showBackups = confirm(
             'This budget cannot be loaded with this version of the app. ' +
-              'Make sure the app is up-to-date. Do you want to load a backup?'
+              'Make sure the app is up-to-date. Do you want to load a backup?',
           );
 
           if (showBackups) {
@@ -81,16 +81,16 @@ export function loadBudget(id, loadingText = '', options = {}) {
         } else {
           alert(
             'This budget cannot be loaded with this version of the app. ' +
-              'Make sure the app is up-to-date.'
+              'Make sure the app is up-to-date.',
           );
         }
       } else if (error === 'budget-not-found') {
         alert(
-          'Budget file could not be found. If you changed something manually, please restart the app.'
+          'Budget file could not be found. If you changed something manually, please restart the app.',
         );
       } else {
         alert(
-          'Error loading budget. Please open a issue on GitHub for support.'
+          'Error loading budget. Please open a issue on GitHub for support.',
         );
       }
 
@@ -145,7 +145,9 @@ export function deleteBudget(id, cloudFileId) {
 export function createBudget({ testMode, demoMode } = {}) {
   return async (dispatch, getState) => {
     dispatch(
-      setAppState({ loadingText: testMode || demoMode ? 'Making demo...' : '' })
+      setAppState({
+        loadingText: testMode || demoMode ? 'Making demo...' : '',
+      }),
     );
 
     if (demoMode) {
@@ -229,7 +231,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
         alert(
           `A file with id "${error.meta.id}" already exists with the name "${error.meta.name}". ` +
             'This file will be replaced. This probably happened because files were manually ' +
-            'moved around outside of Actual.'
+            'moved around outside of Actual.',
         );
 
         return dispatch(downloadBudget(cloudFileId, { replace: true }));

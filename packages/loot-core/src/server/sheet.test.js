@@ -17,7 +17,7 @@ async function insertTransactions() {
       account: '1',
       category: 'cat1',
       date: '2017-01-08',
-    })[0]
+    })[0],
   );
   await db.insertTransaction(
     generateTransaction({
@@ -26,7 +26,7 @@ async function insertTransactions() {
       account: '1',
       category: 'cat2',
       date: '2017-01-10',
-    })[0]
+    })[0],
   );
   await db.insertTransaction(
     generateTransaction({
@@ -35,7 +35,7 @@ async function insertTransactions() {
       account: '1',
       category: 'cat2',
       date: '2017-01-15',
-    })[0]
+    })[0],
   );
 }
 
@@ -47,7 +47,7 @@ describe('Spreadsheet', () => {
     spreadsheet.startTransaction();
     spreadsheet.set(
       'g!foo',
-      `=from transactions where category = "cat2" calculate { sum(amount) }`
+      `=from transactions where category = "cat2" calculate { sum(amount) }`,
     );
     spreadsheet.endTransaction();
 
@@ -77,7 +77,7 @@ describe('Spreadsheet', () => {
     spreadsheet.startTransaction();
     spreadsheet.set(
       'g!foo',
-      `=from transactions where category = "cat2" calculate { sum(amount) }`
+      `=from transactions where category = "cat2" calculate { sum(amount) }`,
     );
     spreadsheet.endTransaction();
 

@@ -37,7 +37,7 @@ function makeSpreadsheet() {
       // it's a noop.
       return () => {
         this.observers[resolvedName] = this.observers[resolvedName].filter(
-          x => x !== cb
+          x => x !== cb,
         );
       };
     },

@@ -137,7 +137,7 @@ describe('schema-helpers', () => {
         },
       },
       'transactions',
-      { amount: 100, cleared: false, date: '2020-01-01' }
+      { amount: 100, cleared: false, date: '2020-01-01' },
     );
     expect(obj.amount2).toBe(100);
     expect(obj.cleared2).toBe(0);

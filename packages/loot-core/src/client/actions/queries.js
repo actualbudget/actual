@@ -110,7 +110,7 @@ export function deleteCategory(id, transferId) {
               type: 'error',
               message:
                 'A category must be transferred to another of the same type (expense or income)',
-            })
+            }),
           );
           break;
         default:
@@ -232,7 +232,7 @@ export function openAccountCloseModal(accountId) {
       id: accountId,
     });
     const account = getState().queries.accounts.find(
-      acct => acct.id === accountId
+      acct => acct.id === accountId,
     );
 
     dispatch(
@@ -240,7 +240,7 @@ export function openAccountCloseModal(accountId) {
         account,
         balance,
         canDelete: numTransactions === 0,
-      })
+      }),
     );
   };
 }

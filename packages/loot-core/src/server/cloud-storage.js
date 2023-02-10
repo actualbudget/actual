@@ -126,7 +126,7 @@ export async function exportBuffer() {
   await runMutator(async () => {
     let rawDbContent = await fs.readFile(
       fs.join(budgetDir, 'db.sqlite'),
-      'binary'
+      'binary',
     );
 
     // Do some post-processing of the database. We NEVER upload the cache with
@@ -138,7 +138,7 @@ export async function exportBuffer() {
       `
         DELETE FROM kvcache;
         DELETE FROM kvcache_key;
-      `
+      `,
     );
 
     let dbContent = sqlite.exportDatabase(memDb);
@@ -147,7 +147,7 @@ export async function exportBuffer() {
     // mark it as a file that needs a new clock so when a new client
     // downloads it, it'll get set to a unique node
     let meta = JSON.parse(
-      await fs.readFile(fs.join(budgetDir, 'metadata.json'))
+      await fs.readFile(fs.join(budgetDir, 'metadata.json')),
     );
 
     meta.resetClock = true;
@@ -276,7 +276,9 @@ export async function upload() {
 
     if (err instanceof PostError) {
       throw new FileUploadError(
-        err.reason === 'unauthorized' ? 'unauthorized' : err.reason || 'network'
+        err.reason === 'unauthorized'
+          ? 'unauthorized'
+          : err.reason || 'network',
       );
     }
 

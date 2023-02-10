@@ -46,7 +46,7 @@ function withMutation(handler) {
 
         let rows = await db.all(
           'SELECT DISTINCT dataset FROM messages_crdt WHERE timestamp > ?',
-          [latestTimestamp]
+          [latestTimestamp],
         );
 
         // Only send the sync event if anybody else is connected
@@ -59,7 +59,7 @@ function withMutation(handler) {
 
         return result;
       },
-      { undoDisabled: true }
+      { undoDisabled: true },
     );
   };
 }
@@ -146,13 +146,13 @@ handlers['api/load-budget'] = async function ({ id }) {
 
       if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
         throw new Error(
-          'This budget cannot be loaded with this version of the app.'
+          'This budget cannot be loaded with this version of the app.',
         );
       } else if (error === 'budget-not-found') {
         throw new Error(
           'Budget "' +
             id +
-            '" not found. Check the id of your budget in the "Advanced" section of the settings page.'
+            '" not found. Check the id of your budget in the "Advanced" section of the settings page.',
         );
       } else {
         throw new Error('We had an unknown problem opening "' + id + '".');
@@ -344,7 +344,7 @@ handlers['api/transactions-get'] = async function ({
         ].filter(Boolean),
       })
       .select('*')
-      .options({ splits: 'grouped' })
+      .options({ splits: 'grouped' }),
   );
   return data;
 };
@@ -358,7 +358,7 @@ handlers['api/transaction-update'] = withMutation(async function ({
   fields,
 }) {
   let { data } = await aqlQuery(
-    q('transactions').filter({ id }).select('*').options({ splits: 'grouped' })
+    q('transactions').filter({ id }).select('*').options({ splits: 'grouped' }),
   );
   let transactions = ungroupTransactions(data);
 
@@ -372,7 +372,7 @@ handlers['api/transaction-update'] = withMutation(async function ({
 
 handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
   let { data } = await aqlQuery(
-    q('transactions').filter({ id }).select('*').options({ splits: 'grouped' })
+    q('transactions').filter({ id }).select('*').options({ splits: 'grouped' }),
   );
   let transactions = ungroupTransactions(data);
 

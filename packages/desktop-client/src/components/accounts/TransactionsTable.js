@@ -165,7 +165,7 @@ export function useSplitsExpanded() {
           ? !data.state.ids.has(id)
           : data.state.ids.has(id),
     }),
-    [data]
+    [data],
   );
 }
 
@@ -280,7 +280,7 @@ export const TransactionHeader = React.memo(
         <Cell value="" width={15 + styles.scrollbarWidth} />
       </Row>
     );
-  }
+  },
 );
 
 function getPayeePretty(transaction, payee, transferAcct) {
@@ -537,7 +537,7 @@ export const Transaction = React.memo(function Transaction(props) {
   let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
   let [transaction, setTransaction] = useState(
-    serializeTransaction(originalTransaction, showZeroInDeposit, dateFormat)
+    serializeTransaction(originalTransaction, showZeroInDeposit, dateFormat),
   );
   let isPreview = isPreviewId(transaction.id);
 
@@ -546,7 +546,7 @@ export const Transaction = React.memo(function Transaction(props) {
     showZeroInDeposit !== prevShowZero
   ) {
     setTransaction(
-      serializeTransaction(originalTransaction, showZeroInDeposit, dateFormat)
+      serializeTransaction(originalTransaction, showZeroInDeposit, dateFormat),
     );
     setPrevTransaction(originalTransaction);
     setPrevShowZero(showZeroInDeposit);
@@ -582,12 +582,12 @@ export const Transaction = React.memo(function Transaction(props) {
         let deserialized = deserializeTransaction(
           newTransaction,
           originalTransaction,
-          dateFormat
+          dateFormat,
         );
         // Run the transaction through the formatting so that we know
         // it's always showing the formatted result
         setTransaction(
-          serializeTransaction(deserialized, showZeroInDeposit, dateFormat)
+          serializeTransaction(deserialized, showZeroInDeposit, dateFormat),
         );
         onSave(deserialized);
       }
@@ -936,7 +936,7 @@ export const Transaction = React.memo(function Transaction(props) {
             value
               ? getDisplayValue(
                   getCategoriesById(categoryGroups)[value],
-                  'name'
+                  'name',
                 )
               : transaction.id
               ? 'Categorize'
@@ -1071,7 +1071,7 @@ export function TransactionError({ error, isDeposit, onAddSplit, style }) {
               Amount left:{' '}
               <Text style={{ fontWeight: 500 }}>
                 {integerToCurrency(
-                  isDeposit ? error.difference : -error.difference
+                  isDeposit ? error.difference : -error.difference,
                 )}
               </Text>
             </Text>
@@ -1449,7 +1449,7 @@ class TransactionTable_ extends React.Component {
 export let TransactionTable = React.forwardRef((props, ref) => {
   let [newTransactions, setNewTransactions] = useState(null);
   let [hoveredTransaction, setHoveredTransaction] = useState(
-    props.hoveredTransaction
+    props.hoveredTransaction,
   );
   let [prevIsAdding, setPrevIsAdding] = useState(false);
   let splitsExpanded = useSplitsExpanded();
@@ -1462,7 +1462,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
     let result;
     if (splitsExpanded.state.transitionId != null) {
       let index = props.transactions.findIndex(
-        t => t.id === splitsExpanded.state.transitionId
+        t => t.id === splitsExpanded.state.transitionId,
       );
       result = props.transactions.filter((t, idx) => {
         if (t.parent_id) {
@@ -1546,7 +1546,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
         let transactions = latestState.current.newTransactions;
         let lastDate = transactions.length > 0 ? transactions[0].date : null;
         setNewTransactions(
-          makeTemporaryTransactions(props.currentAccountId, lastDate)
+          makeTemporaryTransactions(props.currentAccountId, lastDate),
         );
         newNavigator.onEdit('temp', 'date');
         props.onAdd(transactions);
@@ -1582,7 +1582,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
       : fields.filter(
           f =>
             (props.showAccount || f !== 'account') &&
-            (props.showCategory || f !== 'category')
+            (props.showCategory || f !== 'category'),
         );
 
     if (isPreviewId(item.id)) {
@@ -1698,7 +1698,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
         props.onSave(transaction);
       }
     },
-    [props.onSave]
+    [props.onSave],
   );
 
   let onHover = useCallback(id => {
@@ -1734,7 +1734,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
         // } else {
         newNavigator.onEdit(
           diff.added[0].id,
-          latestState.current.newNavigator.focusedField
+          latestState.current.newNavigator.focusedField,
         );
         // }
       } else {
@@ -1761,17 +1761,17 @@ export let TransactionTable = React.forwardRef((props, ref) => {
         setNewTransactions(data);
         newNavigator.onEdit(
           diff.added[0].id,
-          latestState.current.newNavigator.focusedField
+          latestState.current.newNavigator.focusedField,
         );
       } else {
         let newId = props.onAddSplit(id);
         tableNavigator.onEdit(
           newId,
-          latestState.current.tableNavigator.focusedField
+          latestState.current.tableNavigator.focusedField,
         );
       }
     },
-    [props.onAddSplit]
+    [props.onAddSplit],
   );
 
   function onCloseAddTransaction() {
@@ -1781,7 +1781,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
 
   let onToggleSplit = useCallback(
     id => splitsExpanded.dispatch({ type: 'toggle-split', id }),
-    [splitsExpanded.dispatch]
+    [splitsExpanded.dispatch],
   );
 
   return (

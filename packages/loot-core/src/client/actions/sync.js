@@ -33,7 +33,7 @@ export function resetSync() {
               // TODO: There won't be a loading indicator for this
               dispatch(resetSync());
             },
-          })
+          }),
         );
       } else if (error.reason === 'encrypt-failure') {
         dispatch(pushModal('create-encryption-key', { recreate: true }));

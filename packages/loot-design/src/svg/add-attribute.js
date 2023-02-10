@@ -31,7 +31,7 @@ const addJSXAttribute = ({ types: t, template }, opts) => {
 
     return t.jsxAttribute(
       t.jsxIdentifier(name),
-      getAttributeValue({ value, literal })
+      getAttributeValue({ value, literal }),
     );
   }
 
@@ -77,7 +77,7 @@ const addJSXAttribute = ({ types: t, template }, opts) => {
             if (!replaced) {
               path[method]('attributes', newAttribute);
             }
-          }
+          },
         );
       },
     },

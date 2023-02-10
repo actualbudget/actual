@@ -56,7 +56,7 @@ function invert(obj) {
   return Object.fromEntries(
     Object.entries(obj).map(entry => {
       return [entry[1], entry[0]];
-    })
+    }),
   );
 }
 
@@ -262,8 +262,8 @@ export function runRules(trans) {
   let rules = rankRules(
     fastSetMerge(
       firstcharIndexer.getApplicableRules(trans),
-      payeeIndexer.getApplicableRules(trans)
-    )
+      payeeIndexer.getApplicableRules(trans),
+    ),
   );
 
   for (let i = 0; i < rules.length; i++) {
@@ -289,7 +289,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           cond.field,
           cond.value,
           cond.options,
-          FIELD_TYPES
+          FIELD_TYPES,
         );
       } catch (e) {
         errors.push(e.type || 'internal');
@@ -420,7 +420,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return apply(
           type === 'id' ? field + '.name' : field,
           '$like',
-          '%' + value + '%'
+          '%' + value + '%',
         );
       case 'oneOf':
         let values = value;
@@ -462,7 +462,7 @@ export function applyActions(transactionIds, actions, handlers) {
           action.field,
           action.value,
           action.options,
-          FIELD_TYPES
+          FIELD_TYPES,
         );
       } catch (e) {
         console.log('Action error', e);
@@ -502,7 +502,7 @@ function* getIsSetterRules(
   stage,
   condField,
   actionField,
-  { condValue, actionValue }
+  { condValue, actionValue },
 ) {
   let rules = getRules();
   for (let i = 0; i < rules.length; i++) {
@@ -530,7 +530,7 @@ function* getOneOfSetterRules(
   stage,
   condField,
   actionField,
-  { condValue, actionValue }
+  { condValue, actionValue },
 ) {
   let rules = getRules();
   for (let i = 0; i < rules.length; i++) {
@@ -570,7 +570,7 @@ export async function updatePayeeRenameRule(fromNames, to) {
     let newValue = [
       ...fastSetMerge(
         new Set(condition.value),
-        new Set(fromNames.filter(name => name !== ''))
+        new Set(fromNames.filter(name => name !== '')),
       ),
     ];
     let rule = {
@@ -639,7 +639,7 @@ export async function updateCategoryRules(transactions) {
     `SELECT t.* FROM v_transactions t
      LEFT JOIN accounts a ON a.id = t.account
      WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0`,
-    [toDateRepr(oldestDate), toDateRepr(addDays(currentDay(), 180))]
+    [toDateRepr(oldestDate), toDateRepr(addDays(currentDay(), 180))],
   );
 
   let allTransactions = partitionByField(register, 'payee');
@@ -705,12 +705,12 @@ export async function migrateOldRules() {
     `SELECT p.*, c.id as category FROM payees p
     LEFT JOIN category_mapping cm ON cm.id = p.category
     LEFT JOIN categories c ON (c.id = cm.transferId AND c.tombstone = 0)
-    WHERE p.tombstone = 0 AND transfer_acct IS NULL`
+    WHERE p.tombstone = 0 AND transfer_acct IS NULL`,
   );
   let allRules = await db.all(
     `SELECT pr.*, pm.targetId as payee_id FROM payee_rules pr
       LEFT JOIN payee_mapping pm ON pm.id = pr.payee_id
-      WHERE pr.tombstone = 0`
+      WHERE pr.tombstone = 0`,
   );
 
   let payeesById = new Map();
@@ -767,7 +767,7 @@ export async function migrateOldRules() {
             },
           ],
           actions,
-        }))
+        })),
       );
     }
   }

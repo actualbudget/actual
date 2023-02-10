@@ -81,7 +81,7 @@ export async function decode(data) {
 
     if (encrypted) {
       let binary = SyncPb.EncryptedData.deserializeBinary(
-        envelopePb.getContent()
+        envelopePb.getContent(),
       );
 
       let decrypted;

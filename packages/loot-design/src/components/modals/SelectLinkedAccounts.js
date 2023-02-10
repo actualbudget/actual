@@ -56,7 +56,7 @@ function Account({ account, selected, onSelect }) {
             }}
           >
             {prettyAccountType(
-              fromPlaidAccountType(account.type, account.subtype)
+              fromPlaidAccountType(account.type, account.subtype),
             )}
             <Text style={{ marginLeft: 4 }}>
               ...
@@ -98,7 +98,7 @@ export default function SelectLinkedAccounts({
           institution,
           publicToken,
           selectedAccounts[0],
-          upgradingId
+          upgradingId,
         );
         actions.closeModal();
       } else {
@@ -106,7 +106,7 @@ export default function SelectLinkedAccounts({
           institution,
           publicToken,
           accounts: selectedAccounts.map(id =>
-            accounts.find(acct => acct.id === id)
+            accounts.find(acct => acct.id === id),
           ),
         });
       }

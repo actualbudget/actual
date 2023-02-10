@@ -125,7 +125,7 @@ export class Transaction extends React.PureComponent {
     let prettyDescription = getDescriptionPretty(
       transaction,
       payee,
-      transferAcct
+      transferAcct,
     );
     let prettyCategory = transferAcct
       ? 'Transfer'
@@ -347,7 +347,7 @@ function ListBox(props) {
         Math.abs(
           listBoxRef.current.scrollHeight -
             listBoxRef.current.clientHeight -
-            listBoxRef.current.scrollTop
+            listBoxRef.current.scrollTop,
         ) < listBoxRef.current.clientHeight // load more when we're one screen height from the end
       ) {
         props.loadMore();
@@ -485,5 +485,5 @@ export const ListItem = React.forwardRef(
         {children}
       </View>
     );
-  }
+  },
 );

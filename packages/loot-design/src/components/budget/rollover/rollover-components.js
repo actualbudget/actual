@@ -40,7 +40,7 @@ function CoverTooltip({
 }) {
   let categoryGroups = useContext(CategoryGroupsContext);
   categoryGroups = addToBeBudgetedGroup(
-    categoryGroups.filter(g => !g.is_income)
+    categoryGroups.filter(g => !g.is_income),
   );
   let [category, setCategory] = useState(null);
 

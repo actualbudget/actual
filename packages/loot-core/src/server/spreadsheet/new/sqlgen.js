@@ -136,14 +136,14 @@ function transformLookups(node, implicitTable) {
 
         if (!SCHEMA_PATHS[table]) {
           const err = new Error(
-            `Table "${table}" not joinable for field "${lookup}"`
+            `Table "${table}" not joinable for field "${lookup}"`,
           );
           err.node = node;
           throw err;
         }
         if (!SCHEMA_PATHS[table][lookup.field]) {
           const err = new Error(
-            `Unknown field "${lookup}" on table "${table}"`
+            `Unknown field "${lookup}" on table "${table}"`,
           );
           err.node = node;
           throw err;
@@ -161,7 +161,7 @@ function transformLookups(node, implicitTable) {
         node.lineno,
         node.colno,
         new nodes.Symbol(node.lineno, node.colno, tableId),
-        new nodes.Symbol(node.lineno, node.colno, field)
+        new nodes.Symbol(node.lineno, node.colno, field),
       );
     }
   });
@@ -237,7 +237,7 @@ export default function generate(table, where, groupby, select, deps) {
         joins.push(meta.sql(lookup.tableId));
       } else {
         joins.push(
-          `LEFT JOIN ${meta.table} ${lookup.tableId} ON ${lookup.tableId}.id = ${currentTable.id}.${lookup.field}`
+          `LEFT JOIN ${meta.table} ${lookup.tableId} ON ${lookup.tableId}.id = ${currentTable.id}.${lookup.field}`,
         );
       }
 

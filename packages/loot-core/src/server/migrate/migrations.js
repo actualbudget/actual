@@ -41,7 +41,7 @@ export async function getAppliedMigrations(db) {
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
     [],
-    true
+    true,
   );
   return rows.map(row => row.id);
 }

@@ -42,8 +42,8 @@ describe('Base budget', () => {
     expect(
       sheet.getCellValue(
         monthUtils.sheetForMonth('2016-12'),
-        `sum-amount-${catId}`
-      )
+        `sum-amount-${catId}`,
+      ),
     ).toBe(0);
 
     // Create the referenced account
@@ -59,8 +59,8 @@ describe('Base budget', () => {
     expect(
       sheet.getCellValue(
         monthUtils.sheetForMonth('2016-12'),
-        `sum-amount-${catId}`
-      )
+        `sum-amount-${catId}`,
+      ),
     ).toBe(-5000);
   });
 });

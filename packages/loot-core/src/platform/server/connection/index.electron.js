@@ -63,7 +63,7 @@ function init(socketName, handlers) {
               // Notify the frontend that something bad happend
               send('server-error');
             }
-          }
+          },
         );
       } else {
         console.warn('Unknown method: ' + name);

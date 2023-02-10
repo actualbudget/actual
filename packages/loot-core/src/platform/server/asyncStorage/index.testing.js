@@ -21,7 +21,7 @@ function multiGet(keys) {
     return resolve(
       keys.map(function (key) {
         return [key, store[key]];
-      })
+      }),
     );
   });
 }

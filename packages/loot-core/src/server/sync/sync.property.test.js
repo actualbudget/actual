@@ -10,7 +10,7 @@ import * as sync from './index';
 const jsc = require('jsverify');
 const uuidGenerator = jsc.integer(97, 122).smap(
   x => String.fromCharCode(x),
-  x => x.charCodeAt(x)
+  x => x.charCodeAt(x),
 );
 
 const mockSyncServer = require('../tests/mockSyncServer');
@@ -117,7 +117,7 @@ function makeGen({ table, row, field, value }) {
         }
         return new Timestamp(baseTime + x, 0, clientId);
       },
-      x => x.millis - baseTime
+      x => x.millis - baseTime,
     ),
   });
 }
@@ -131,11 +131,11 @@ Object.keys(schema).forEach(table => {
           table,
           row: jsc.asciinestring.smap(
             x => 'sheet!' + x,
-            x => x
+            x => x,
           ),
           field: 'expr',
           value: jsc.constant(JSON.stringify('fooooo')),
-        })
+        }),
       );
       return obj;
     }
@@ -151,7 +151,7 @@ Object.keys(schema).forEach(table => {
           generators.push(makeGen({ table, field, value: jsc.uint8 }));
         } else {
           generators.push(
-            makeGen({ table, field, value: jsc.elements([0, 1]) })
+            makeGen({ table, field, value: jsc.elements([0, 1]) }),
           );
         }
         break;
@@ -214,7 +214,7 @@ async function run(msgs) {
 
       return acc;
     },
-    { firstMessages: [], secondMessages: [] }
+    { firstMessages: [], secondMessages: [] },
   );
 
   prefs.loadPrefs();
@@ -223,7 +223,7 @@ async function run(msgs) {
     lastSyncedTimestamp: new Timestamp(
       Date.now(),
       0,
-      '0000000000000000'
+      '0000000000000000',
     ).toString(),
   });
 
@@ -238,7 +238,7 @@ async function run(msgs) {
   let chunks = divide(res.firstMessages);
 
   let client1Sync = Promise.all(
-    chunks.slice(0, -1).map(slice => sync.receiveMessages(slice))
+    chunks.slice(0, -1).map(slice => sync.receiveMessages(slice)),
   );
   await client1Sync;
 
@@ -251,8 +251,8 @@ async function run(msgs) {
         ...x,
         value: sync.serializeValue(x.value),
         timestamp: x.timestamp.toString(),
-      }))
-    )
+      })),
+    ),
   );
 
   let syncPromise = sync.fullSync();
@@ -270,8 +270,8 @@ async function run(msgs) {
         ...x,
         value: sync.serializeValue(x.value),
         timestamp: x.timestamp.toString(),
-      }))
-    )
+      })),
+    ),
   );
 
   let { error } = await syncPromise;
@@ -331,9 +331,9 @@ describe('sync property test', () => {
           }
 
           return true;
-        }
+        },
       ),
-      { tests: 100, quiet: true }
+      { tests: 100, quiet: true },
     );
 
     if (test.counterexample) {
@@ -342,7 +342,7 @@ describe('sync property test', () => {
         test.counterexample[0].map(x => ({
           ...x,
           timestamp: x.timestamp.toString(),
-        }))
+        })),
       );
 
       throw new Error('property test failed');

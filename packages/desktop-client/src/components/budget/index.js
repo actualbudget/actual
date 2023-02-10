@@ -146,7 +146,7 @@ class Budget extends React.PureComponent {
     bounds = getValidMonthBounds(
       bounds,
       monthUtils.subMonths(startMonth, 1),
-      monthUtils.addMonths(startMonth, numMonths + 1)
+      monthUtils.addMonths(startMonth, numMonths + 1),
     );
     let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
@@ -215,7 +215,7 @@ class Budget extends React.PureComponent {
       let id = await this.props.createCategory(
         category.name,
         category.cat_group,
-        category.is_income
+        category.is_income,
       );
 
       this.setState({
@@ -326,7 +326,7 @@ class Budget extends React.PureComponent {
         goBack: true,
         filterName: `${categoryName} (${monthUtils.format(
           month,
-          'MMMM yyyy'
+          'MMMM yyyy',
         )})`,
         filter: {
           category: categoryId,
@@ -345,7 +345,7 @@ class Budget extends React.PureComponent {
         categoryGroups,
         sortInfo.id,
         sortInfo.groupId,
-        sortInfo.targetId
+        sortInfo.targetId,
       ),
     });
   };
@@ -358,7 +358,7 @@ class Budget extends React.PureComponent {
       categoryGroups: moveCategoryGroup(
         categoryGroups,
         sortInfo.id,
-        sortInfo.targetId
+        sortInfo.targetId,
       ),
     });
   };
@@ -509,7 +509,7 @@ function BudgetWrapper(props) {
       BudgetTotalsComponent: report.BudgetTotalsMonth,
       IncomeHeaderComponent: report.IncomeHeaderMonth,
     }),
-    [report]
+    [report],
   );
 
   let rolloverComponents = useMemo(
@@ -522,7 +522,7 @@ function BudgetWrapper(props) {
       BudgetTotalsComponent: rollover.BudgetTotalsMonth,
       IncomeHeaderComponent: rollover.IncomeHeaderMonth,
     }),
-    [rollover]
+    [rollover],
   );
 
   // In a previous iteration, the wrapper needs `overflow: hidden` for
@@ -555,5 +555,5 @@ export default connect(
     maxMonths: state.prefs.global.maxMonths,
     categoryGroups: state.queries.categories.grouped,
   }),
-  actions
+  actions,
 )(BudgetWrapper);

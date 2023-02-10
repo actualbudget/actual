@@ -57,7 +57,7 @@ function makeLoadedSpreadsheet() {
   let spreadsheet = makeSpreadsheet();
   let months = monthUtils.rangeInclusive(
     monthUtils.subMonths('2017-01', 3),
-    '2017-10'
+    '2017-10',
   );
 
   // Something random
@@ -69,7 +69,7 @@ function makeLoadedSpreadsheet() {
       spreadsheet.set(
         monthUtils.sheetForMonth(month),
         name,
-        v || currentNumber++
+        v || currentNumber++,
       );
     }
 
@@ -204,7 +204,7 @@ export class LiveBudgetPage extends React.Component {
                         return {
                           ...group,
                           categories: group.categories.map(c =>
-                            c.id === cat.id ? cat : c
+                            c.id === cat.id ? cat : c,
                           ),
                         };
                       }
@@ -216,7 +216,7 @@ export class LiveBudgetPage extends React.Component {
               onSaveGroup={group => {
                 this.setState({
                   categoryGroups: categoryGroups.map(g =>
-                    g.id === group.id ? group : g
+                    g.id === group.id ? group : g,
                   ),
                 });
               }}

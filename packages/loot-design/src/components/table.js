@@ -63,7 +63,7 @@ function CellProvider({ backgroundColor, borderColor, children }) {
       backgroundColor,
       borderColor,
     }),
-    [backgroundColor, borderColor]
+    [backgroundColor, borderColor],
   );
 
   return <CellContext.Provider value={value}>{children}</CellContext.Provider>;
@@ -80,7 +80,7 @@ export const Field = React.forwardRef(function Field(
     contentStyle,
     ...props
   },
-  ref
+  ref,
 ) {
   let { backgroundColor, borderColor } = useContext(CellContext);
 
@@ -552,7 +552,7 @@ export const CellButton = React.forwardRef(
         {children}
       </View>
     );
-  }
+  },
 );
 
 export function SelectCell({
@@ -806,7 +806,7 @@ export const TableWithNavigator = React.forwardRef(
   ({ fields, ...props }, ref) => {
     let navigator = useTableNavigator(props.items, fields);
     return <Table {...props} navigator={navigator} />;
-  }
+  },
 );
 
 export const Table = React.forwardRef(
@@ -833,7 +833,7 @@ export const Table = React.forwardRef(
       isSelected,
       ...props
     },
-    ref
+    ref,
   ) => {
     if (!navigator) {
       navigator = {
@@ -1077,7 +1077,7 @@ export const Table = React.forwardRef(
         </View>
       </View>
     );
-  }
+  },
 );
 
 export function useTableNavigator(data, fields, opts = {}) {
@@ -1242,7 +1242,7 @@ export function useTableNavigator(data, fields, opts = {}) {
                     : 'down'
                   : e.shiftKey
                   ? 'left'
-                  : 'right'
+                  : 'right',
               );
               break;
             default:

@@ -50,7 +50,7 @@ export function updateConditions(conditions, newConditions) {
 
   let replacements = zip(
     Object.values(scheduleConds),
-    Object.values(newScheduleConds)
+    Object.values(newScheduleConds),
   );
 
   let updated = conditions.map(cond => {
@@ -73,7 +73,7 @@ export function getNextDate(dateCond, start = new Date()) {
     'date',
     dateCond.value,
     null,
-    new Map(Object.entries({ date: 'date' }))
+    new Map(Object.entries({ date: 'date' })),
   );
   let value = cond.getValue();
 
@@ -96,14 +96,14 @@ export async function getRuleForSchedule(id) {
   }
 
   let { data: ruleId } = await aqlQuery(
-    q('schedules').filter({ id }).calculate('rule')
+    q('schedules').filter({ id }).calculate('rule'),
   );
   return getRules().find(rule => rule.id === ruleId);
 }
 
 export async function fixRuleForSchedule(id) {
   let { data: ruleId } = await aqlQuery(
-    q('schedules').filter({ id }).calculate('rule')
+    q('schedules').filter({ id }).calculate('rule'),
   );
 
   if (ruleId) {
@@ -138,14 +138,14 @@ export async function setNextDate({ id, start, conditions, reset }) {
   let { date: dateCond } = extractScheduleConds(conditions);
 
   let { data: nextDate } = await aqlQuery(
-    q('schedules').filter({ id }).calculate('next_date')
+    q('schedules').filter({ id }).calculate('next_date'),
   );
 
   // Only do this if a date condition exists
   if (dateCond) {
     let newNextDate = getNextDate(
       dateCond,
-      start ? start(nextDate) : new Date()
+      start ? start(nextDate) : new Date(),
     );
 
     if (newNextDate !== nextDate) {
@@ -153,7 +153,7 @@ export async function setNextDate({ id, start, conditions, reset }) {
       // have it, so we need to query it
       let nd = await db.first(
         'SELECT id, base_next_date_ts FROM schedules_next_date WHERE schedule_id = ?',
-        [id]
+        [id],
       );
 
       await db.update(
@@ -168,7 +168,7 @@ export async function setNextDate({ id, start, conditions, reset }) {
               id: nd.id,
               local_next_date: toDateRepr(newNextDate),
               local_next_date_ts: nd.base_next_date_ts,
-            }
+            },
       );
     }
   }
@@ -265,11 +265,11 @@ export async function updateSchedule({ schedule, conditions, resetNextDate }) {
         resetNextDate ||
         !deepEqual(
           oldConditions.find(c => c.field === 'account'),
-          oldConditions.find(c => c.field === 'account')
+          oldConditions.find(c => c.field === 'account'),
         ) ||
         !deepEqual(
           stripType(oldConditions.find(c => c.field === 'date') || {}),
-          stripType(newConditions.find(c => c.field === 'date') || {})
+          stripType(newConditions.find(c => c.field === 'date') || {}),
         )
       ) {
         await setNextDate({
@@ -288,7 +288,7 @@ export async function updateSchedule({ schedule, conditions, resetNextDate }) {
 
 export async function deleteSchedule({ id }) {
   let { data: ruleId } = await aqlQuery(
-    q('schedules').filter({ id }).calculate('rule')
+    q('schedules').filter({ id }).calculate('rule'),
   );
 
   await batchMessages(async () => {
@@ -355,7 +355,7 @@ function onRuleUpdate(rule) {
           accountIdx === -1 ? null : `$[${accountIdx}]`,
           amountIdx === -1 ? null : `$[${amountIdx}]`,
           dateIdx === -1 ? null : `$[${dateIdx}]`,
-        ]
+        ],
       );
     }
   }
@@ -413,10 +413,10 @@ export async function advanceSchedulesService(syncSuccess) {
   let { data: schedules } = await aqlQuery(
     q('schedules')
       .filter({ completed: false, '_account.closed': false })
-      .select('*')
+      .select('*'),
   );
   let { data: hasTransData } = await aqlQuery(
-    getHasTransactionsQuery(schedules)
+    getHasTransactionsQuery(schedules),
   );
   let hasTrans = new Set(hasTransData.filter(Boolean).map(row => row.schedule));
 
@@ -427,7 +427,7 @@ export async function advanceSchedulesService(syncSuccess) {
     let status = getStatus(
       schedule.next_date,
       schedule.completed,
-      hasTrans.has(schedule.id)
+      hasTrans.has(schedule.id),
     );
 
     if (status === 'paid') {
@@ -489,11 +489,11 @@ app.method('schedule/delete', mutator(undoable(deleteSchedule)));
 app.method('schedule/skip-next-date', mutator(undoable(skipNextDate)));
 app.method(
   'schedule/post-transaction',
-  mutator(undoable(postTransactionForSchedule))
+  mutator(undoable(postTransactionForSchedule)),
 );
 app.method(
   'schedule/force-run-service',
-  mutator(() => advanceSchedulesService(true))
+  mutator(() => advanceSchedulesService(true)),
 );
 app.method('schedule/get-possible-transactions', getPossibleTransactions);
 app.method('schedule/discover', discoverSchedules);

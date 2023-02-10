@@ -113,7 +113,7 @@ export function defaultFilterSuggestion(suggestion, value) {
 
 export function defaultFilterSuggestions(suggestions, value) {
   return suggestions.filter(suggestion =>
-    defaultFilterSuggestion(suggestion, value)
+    defaultFilterSuggestion(suggestion, value),
   );
 }
 
@@ -156,7 +156,7 @@ function onInputValueChange(
     state: { isOpen },
   },
   value,
-  changes
+  changes,
 ) {
   // OMG this is the dumbest thing ever. I need to remove Downshift
   // and build my own component. For some reason this is fired on blur
@@ -195,7 +195,7 @@ function onInputValueChange(
       return highlightFirst && filteredSuggestions.length ? 0 : null;
     };
     let highlightedIndex = (getHighlightedIndex || defaultGetHighlightedIndex)(
-      filteredSuggestions
+      filteredSuggestions,
     );
 
     if (changes.type !== Downshift.stateChangeTypes.clickItem) {
@@ -204,7 +204,7 @@ function onInputValueChange(
         strict,
         filteredSuggestions,
         highlightedIndex,
-        value
+        value,
       );
     }
 
@@ -251,7 +251,7 @@ function onStateChange({ props, state, inst }, changes, stateAndHelpers) {
       newState.highlightedIndex != null
         ? newState.highlightedIndex
         : state.highlightedIndex,
-      state.value
+      state.value,
     );
   }
 
@@ -261,7 +261,7 @@ function onStateChange({ props, state, inst }, changes, stateAndHelpers) {
 
 function onSelect(
   { props: { onSelect, clearAfterSelect, suggestions }, inst },
-  item
+  item,
 ) {
   if (onSelect) {
     // I AM NOT PROUD OF THIS OK??
@@ -326,7 +326,7 @@ function onKeyDown(
     },
     inst,
   },
-  e
+  e,
 ) {
   let ENTER = 13;
   let ESC = 27;
@@ -515,7 +515,7 @@ function _SingleAutocomplete({
               onBlur: updater(onBlur),
               onKeyDown: updater(onKeyDown),
               onChange: updater(onChange),
-            })
+            }),
           )}
           {isOpen &&
             filtered.length > 0 &&
@@ -525,7 +525,7 @@ function _SingleAutocomplete({
                   filtered,
                   getItemProps,
                   highlightedIndex,
-                  inputValue
+                  inputValue,
                 )}
               </View>
             ) : (
@@ -545,7 +545,7 @@ function _SingleAutocomplete({
                   filtered,
                   getItemProps,
                   highlightedIndex,
-                  inputValue
+                  inputValue,
                 )}
               </Tooltip>
             ))}
@@ -619,7 +619,7 @@ export function MultiAutocomplete({
       {...props}
       value={null}
       suggestions={suggestions.filter(
-        item => !selectedItems.includes(getItemId(item))
+        item => !selectedItems.includes(getItemId(item)),
       )}
       onSelect={onAddItem}
       clearAfterSelect

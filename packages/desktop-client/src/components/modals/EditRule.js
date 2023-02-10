@@ -231,7 +231,7 @@ function formatAmount(amount) {
     return integerToCurrency(amount);
   } else {
     return `${integerToCurrency(amount.num1)} to ${integerToCurrency(
-      amount.num2
+      amount.num2,
     )}`;
   }
 }
@@ -463,14 +463,14 @@ export function ConditionsList({
               makeValue(cond.value != null ? [cond.value] : [], {
                 ...cond,
                 op: value,
-              })
+              }),
             );
           } else if (cond.op === 'oneOf' && op !== 'oneOf') {
             return newInput(
               makeValue(cond.value.length > 0 ? cond.value[0] : null, {
                 ...cond,
                 op: value,
-              })
+              }),
             );
           } else if (cond.op !== 'isbetween' && op === 'isbetween') {
             // TODO: I don't think we need `makeValue` anymore. It
@@ -482,7 +482,7 @@ export function ConditionsList({
                 num1: amountToInteger(cond.value),
                 num2: amountToInteger(cond.value),
               },
-              { ...cond, op: value }
+              { ...cond, op: value },
             );
           } else if (cond.op === 'isbetween' && op !== 'isbetween') {
             return makeValue(integerToAmount(cond.value.num1 || 0), {
@@ -497,7 +497,7 @@ export function ConditionsList({
         }
 
         return cond;
-      })
+      }),
     );
   }
 
@@ -600,7 +600,7 @@ export default function EditRule({
 
       if (filters.length > 0) {
         let { data: transactions } = await runQuery(
-          q('transactions').filter({ $and: filters }).select('*')
+          q('transactions').filter({ $and: filters }).select('*'),
         );
         setTransactions(transactions);
       } else {
@@ -646,7 +646,7 @@ export default function EditRule({
         }
 
         return a;
-      })
+      }),
     );
   }
 

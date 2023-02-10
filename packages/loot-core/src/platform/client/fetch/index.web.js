@@ -119,7 +119,7 @@ module.exports.listen = function listen(name, cb) {
     if (arr) {
       listeners.set(
         name,
-        arr.filter(cb_ => cb_ !== cb)
+        arr.filter(cb_ => cb_ !== cb),
       );
     }
   };

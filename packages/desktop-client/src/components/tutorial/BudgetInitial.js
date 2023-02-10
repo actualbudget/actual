@@ -44,5 +44,5 @@ export default connect(
   state => ({
     accounts: state.queries.accounts,
   }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(BudgetInitial);

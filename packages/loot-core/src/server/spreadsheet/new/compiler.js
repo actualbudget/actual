@@ -32,7 +32,7 @@ class Compiler {
     }
 
     throw new Error(
-      `[${lineno + 1}, ${colno + 1}] ${msg}:\n${lines[lineno]}\n${space}^`
+      `[${lineno + 1}, ${colno + 1}] ${msg}:\n${lines[lineno]}\n${space}^`,
     );
   }
 
@@ -105,7 +105,7 @@ class Compiler {
       node.table,
       node.where,
       node.groupby,
-      node.select
+      node.select,
     );
 
     // TODO: This is a hack, but I'm pretty sure we can get rid of all
@@ -147,7 +147,7 @@ class Compiler {
       this.fail(
         'Unknown node type: ' + node.getTypeName(),
         node.lineno,
-        node.colno
+        node.colno,
       );
     }
     return method.call(this, node, si);

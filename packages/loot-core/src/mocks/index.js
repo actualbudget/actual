@@ -44,7 +44,7 @@ export function generateCategoryGroups(definition) {
     return {
       ...g,
       categories: group.categories.map(cat =>
-        generateCategory(cat.name, g.id, cat.is_income)
+        generateCategory(cat.name, g.id, cat.is_income),
       ),
     };
   });
@@ -95,7 +95,7 @@ export function generateTransaction(data, splitAmount, showError = false) {
         notes: null,
         category: null,
         isChild: true,
-      }
+      },
     );
 
     if (showError) {
@@ -117,7 +117,7 @@ export function generateTransactions(
   accountId,
   groupId,
   splitAtIndexes = [],
-  showError = false
+  showError = false,
 ) {
   const transactions = [];
 
@@ -134,8 +134,8 @@ export function generateTransactions(
           sort_order: i,
         },
         isSplit ? 30 : undefined,
-        showError
-      )
+        showError,
+      ),
     );
   }
 

@@ -86,7 +86,7 @@ function Notification({ notification, onRemove }) {
 
   let processedMessage = useMemo(
     () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
-    [message, messageActions]
+    [message, messageActions],
   );
 
   return (
@@ -216,5 +216,5 @@ function Notifications({ notifications, removeNotification, style }) {
 
 export default connect(
   state => ({ notifications: state.notifications.notifications }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(Notifications);

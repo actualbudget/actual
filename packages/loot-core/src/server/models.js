@@ -60,7 +60,7 @@ export const accountModel = {
       'account',
       account,
       update ? ['name', 'type', 'offbudget', 'closed'] : ['name', 'type'],
-      update
+      update,
     );
 
     return account;
@@ -73,7 +73,7 @@ export const categoryModel = {
       'category',
       category,
       update ? ['name', 'is_income', 'cat_group'] : ['name', 'cat_group'],
-      update
+      update,
     );
 
     let { sort_order, ...rest } = category;
@@ -87,7 +87,7 @@ export const categoryGroupModel = {
       'categoryGroup',
       categoryGroup,
       update ? ['name', 'is_income'] : ['name'],
-      update
+      update,
     );
 
     let { sort_order, ...rest } = categoryGroup;
@@ -146,7 +146,7 @@ export const transactionModel = {
     if (!('location' in row)) {
       throw new Error(
         'A full transaction is required to be passed to `toJS`. Instead got: ' +
-          JSON.stringify(row)
+          JSON.stringify(row),
       );
     }
 

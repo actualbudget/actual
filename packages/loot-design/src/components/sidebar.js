@@ -306,20 +306,20 @@ function Accounts({
   let offbudgetAccounts = useMemo(
     () =>
       accounts.filter(
-        account => account.closed === 0 && account.offbudget === 1
+        account => account.closed === 0 && account.offbudget === 1,
       ),
-    [accounts]
+    [accounts],
   );
   let budgetedAccounts = useMemo(
     () =>
       accounts.filter(
-        account => account.closed === 0 && account.offbudget === 0
+        account => account.closed === 0 && account.offbudget === 0,
       ),
-    [accounts]
+    [accounts],
   );
   let closedAccounts = useMemo(
     () => accounts.filter(account => account.closed === 1),
-    [accounts]
+    [accounts],
   );
 
   function onDragChange(drag) {
@@ -446,7 +446,7 @@ function Tools() {
   let location = useLocation();
 
   const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
-    location.pathname.startsWith(route)
+    location.pathname.startsWith(route),
   );
 
   useEffect(() => {

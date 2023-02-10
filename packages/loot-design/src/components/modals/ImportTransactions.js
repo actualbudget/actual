@@ -116,7 +116,7 @@ function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
     date &&
     formatDate(
       parseDateFormat ? parseDate(date, parseDateFormat) : date,
-      dateFormat
+      dateFormat,
     );
   return (
     <Text>
@@ -162,23 +162,23 @@ function getInitialMappings(transactions) {
 
   let dateField = key(
     fields.find(([name, value]) => name.toLowerCase().includes('date')) ||
-      fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/))
+      fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
   );
 
   let amountField = key(
     fields.find(([name, value]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([name, value]) => value.match(/^-?[.,\d]+$/))
+      fields.find(([name, value]) => value.match(/^-?[.,\d]+$/)),
   );
 
   let payeeField = key(
-    fields.find(([name, value]) => name !== dateField && name !== amountField)
+    fields.find(([name, value]) => name !== dateField && name !== amountField),
   );
 
   let notesField = key(
     fields.find(
       ([name, value]) =>
-        name !== dateField && name !== amountField && name !== payeeField
-    )
+        name !== dateField && name !== amountField && name !== payeeField,
+    ),
   );
 
   return {
@@ -245,13 +245,13 @@ function Transaction({
       fieldMappings
         ? applyFieldMappings(rawTransaction, fieldMappings)
         : rawTransaction,
-    [rawTransaction, fieldMappings]
+    [rawTransaction, fieldMappings],
   );
 
   let { amount, outflow, inflow } = parseAmountFields(
     transaction,
     splitMode,
-    flipAmount
+    flipAmount,
   );
   amount = amountToCurrency(amount);
   outflow = amountToCurrency(outflow);
@@ -526,7 +526,7 @@ export function ImportTransactions({
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
   let [csvDelimiter, setCsvDelimiter] = useState(
-    prefs[`csv-delimiter-${accountId}`] || ','
+    prefs[`csv-delimiter-${accountId}`] || ',',
   );
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
@@ -567,12 +567,12 @@ export function ImportTransactions({
 
         setParseDateFormat(
           prefs[`parse-date-${accountId}-${filetype}`] ||
-            getInitialDateFormat(transactions, mappings)
+            getInitialDateFormat(transactions, mappings),
         );
       } else if (filetype === 'qif') {
         setParseDateFormat(
           prefs[`parse-date-${accountId}-${filetype}`] ||
-            getInitialDateFormat(transactions, { date: 'date' })
+            getInitialDateFormat(transactions, { date: 'date' }),
         );
       } else {
         setFieldMappings(null);
@@ -591,7 +591,7 @@ export function ImportTransactions({
       options.filename,
       getFileType(options.filename) === 'csv'
         ? { delimiter: csvDelimiter }
-        : null
+        : null,
     );
   }, [parseTransactions, options.filename]);
 
@@ -630,7 +630,7 @@ export function ImportTransactions({
 
     parse(
       res[0],
-      getFileType(res[0]) === 'csv' ? { delimiter: csvDelimiter } : null
+      getFileType(res[0]) === 'csv' ? { delimiter: csvDelimiter } : null,
     );
   }
 
@@ -882,5 +882,5 @@ export default connect(
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     prefs: state.prefs.local,
   }),
-  actions
+  actions,
 )(ImportTransactions);

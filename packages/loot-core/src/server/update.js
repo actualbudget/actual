@@ -24,7 +24,7 @@ export async function updateViews() {
     await db.execQuery(views);
     await db.runQuery(
       'INSERT OR REPLACE INTO __meta__ (key, value) VALUES (?, ?)',
-      [hashKey, currentHash]
+      [hashKey, currentHash],
     );
   }
 }

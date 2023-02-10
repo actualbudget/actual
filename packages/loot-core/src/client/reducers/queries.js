@@ -30,10 +30,10 @@ export default function update(state = initialState, action) {
       return {
         ...state,
         newTransactions: state.newTransactions.filter(
-          id => id !== action.changedId
+          id => id !== action.changedId,
         ),
         matchedTransactions: state.matchedTransactions.filter(
-          id => id !== action.changedId
+          id => id !== action.changedId,
         ),
       };
     case constants.SET_LAST_TRANSACTION:
@@ -45,7 +45,7 @@ export default function update(state = initialState, action) {
       return {
         ...state,
         updatedAccounts: state.updatedAccounts.filter(
-          id => id !== action.accountId
+          id => id !== action.accountId,
         ),
       };
     case constants.LOAD_ACCOUNTS:

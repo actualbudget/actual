@@ -26,7 +26,7 @@ export default function format(value, type = 'string') {
 
       if (typeof value !== 'number') {
         throw new Error(
-          'Value is not a number (' + typeof value + '): ' + value
+          'Value is not a number (' + typeof value + '): ' + value,
         );
       }
 

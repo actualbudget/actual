@@ -13,7 +13,7 @@ export default function ScheduleLink() {
   let location = useLocation();
   let history = useHistory();
   let scheduleData = useSchedules(
-    useCallback(query => query.filter({ completed: false }), [])
+    useCallback(query => query.filter({ completed: false }), []),
   );
 
   let [filter, setFilter] = useState('');

@@ -32,7 +32,7 @@ export async function encrypt(masterKey, value) {
       tagLength: 128,
     },
     masterKey.getValue().raw,
-    value
+    value,
   );
 
   encrypted = Buffer.from(encrypted);
@@ -62,7 +62,7 @@ export async function decrypt(masterKey, encrypted, meta) {
       tagLength: 128,
     },
     masterKey.getValue().raw,
-    Buffer.concat([encrypted, Buffer.from(authTag, 'base64')])
+    Buffer.concat([encrypted, Buffer.from(authTag, 'base64')]),
   );
 
   return Buffer.from(decrypted);
@@ -77,7 +77,7 @@ export async function createKey({ secret, salt }) {
     passwordBuffer,
     { name: 'PBKDF2' },
     false,
-    ['deriveBits', 'deriveKey']
+    ['deriveBits', 'deriveKey'],
   );
 
   let derivedKey = await crypto.subtle.deriveKey(
@@ -90,7 +90,7 @@ export async function createKey({ secret, salt }) {
     passwordKey,
     { name: 'AES-GCM', length: 256 },
     true,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   );
 
   let exported = await crypto.subtle.exportKey('raw', derivedKey);
@@ -107,7 +107,7 @@ export async function importKey(str) {
     Buffer.from(str, 'base64'),
     { name: 'AES-GCM' },
     false,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   );
 
   return {

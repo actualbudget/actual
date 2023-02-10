@@ -30,7 +30,7 @@ beforeEach(async () => {
 async function getMatchingTransactions(conds) {
   let { filters } = conditionsToAQL(conds);
   let { data } = await runQuery(
-    q('transactions').filter({ $and: filters }).select('*')
+    q('transactions').filter({ $and: filters }).select('*'),
   );
   return data;
 }
@@ -57,7 +57,7 @@ describe('Transaction rules', () => {
           { op: 'set', field: 'name', value: 'Sarah' },
           { op: 'set', field: 'category', value: 'Sarah' },
         ]),
-      })
+      }),
     ).toBe(null);
 
     // setting an invalid field
@@ -70,7 +70,7 @@ describe('Transaction rules', () => {
           { op: 'set', field: 'notes', value: 'Sarah' },
           { op: 'set', field: 'invalid', value: 'Sarah' },
         ]),
-      })
+      }),
     ).toBe(null);
 
     // condition has valid operator & setting valid fields
@@ -83,7 +83,7 @@ describe('Transaction rules', () => {
           { op: 'set', field: 'notes', value: 'Sarah' },
           { op: 'set', field: 'category', value: 'Sarah' },
         ]),
-      })
+      }),
     ).not.toBe(null);
 
     spy.mockRestore();
@@ -342,7 +342,7 @@ describe('Transaction rules', () => {
         imported_payee: '123 kroger',
         date: '2020-08-11',
         amount: 50,
-      })
+      }),
     ).toEqual({
       date: '2020-08-11',
       imported_payee: '123 kroger',
@@ -402,7 +402,7 @@ describe('Transaction rules', () => {
         payee: null,
         imported_payee: 'blah blah kroger bla',
         category: null,
-      })
+      }),
     ).toEqual({
       imported_payee: 'blah blah kroger bla',
       payee: krogerId,
@@ -530,7 +530,7 @@ describe('Learning categories', () => {
     transaction,
     expectedCategory,
     expectedRuleCount = 1,
-    expectedPayee = 'foo'
+    expectedPayee = 'foo',
   ) {
     await db.insertTransaction(transaction);
     await updateCategoryRules([transaction]);
@@ -540,7 +540,7 @@ describe('Learning categories', () => {
       expectCategoryRule(
         getRules()[expectedRuleCount - 1],
         expectedCategory,
-        expectedPayee
+        expectedPayee,
       );
     }
   }
@@ -599,7 +599,7 @@ describe('Learning categories', () => {
         category: 'food',
       },
       null,
-      0
+      0,
     );
 
     await insertTransaction(
@@ -611,7 +611,7 @@ describe('Learning categories', () => {
         category: 'food',
       },
       null,
-      0
+      0,
     );
 
     await insertTransaction(
@@ -622,7 +622,7 @@ describe('Learning categories', () => {
         payee: 'foo',
         category: 'food',
       },
-      'food'
+      'food',
     );
   });
 
@@ -638,7 +638,7 @@ describe('Learning categories', () => {
         category: 'food',
       },
       null,
-      0
+      0,
     );
 
     await insertTransaction(
@@ -650,7 +650,7 @@ describe('Learning categories', () => {
         category: 'beer',
       },
       null,
-      0
+      0,
     );
 
     await insertTransaction(
@@ -662,7 +662,7 @@ describe('Learning categories', () => {
         category: 'beer',
       },
       null,
-      0
+      0,
     );
 
     await insertRule({
@@ -682,7 +682,7 @@ describe('Learning categories', () => {
         category: 'bills',
       },
       'fun',
-      1
+      1,
     );
   });
 
@@ -704,7 +704,7 @@ describe('Learning categories', () => {
         category: 'food',
       },
       'beer',
-      1
+      1,
     );
     await insertTransaction(
       {
@@ -715,7 +715,7 @@ describe('Learning categories', () => {
         category: 'food',
       },
       'beer',
-      1
+      1,
     );
     await insertTransaction(
       {
@@ -726,7 +726,7 @@ describe('Learning categories', () => {
         category: 'food',
       },
       'food',
-      1
+      1,
     );
   });
 
@@ -749,7 +749,7 @@ describe('Learning categories', () => {
         category: 'fun',
       },
       'beer',
-      1
+      1,
     );
     await insertTransaction(
       {
@@ -760,7 +760,7 @@ describe('Learning categories', () => {
         category: 'fun',
       },
       'beer',
-      1
+      1,
     );
     await insertTransaction(
       {
@@ -772,7 +772,7 @@ describe('Learning categories', () => {
       },
       'fun',
       2,
-      'bar'
+      'bar',
     );
   });
 

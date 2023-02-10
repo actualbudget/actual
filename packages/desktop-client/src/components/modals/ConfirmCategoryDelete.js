@@ -95,14 +95,14 @@ class ConfirmCategoryDelete extends React.Component {
                   categoryGroups={
                     group
                       ? categoryGroups.filter(
-                          g => g.id !== group.id && !!g.is_income === isIncome
+                          g => g.id !== group.id && !!g.is_income === isIncome,
                         )
                       : categoryGroups
                           .filter(g => !!g.is_income === isIncome)
                           .map(g => ({
                             ...g,
                             categories: g.categories.filter(
-                              c => c.id !== category.id
+                              c => c.id !== category.id,
                             ),
                           }))
                   }

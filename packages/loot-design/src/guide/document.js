@@ -79,12 +79,12 @@ export default async function render(rootNode) {
           </Text>
           {modules[key].default()}
         </View>,
-        mount
+        mount,
       );
     } else {
       ReactDOM.render(
         <Usage name={name} render={modules[key].default} />,
-        mount
+        mount,
       );
     }
   });
@@ -124,7 +124,7 @@ function reloadUsage(path, module) {
     ReactDOM.unmountComponentAtNode(mount);
     ReactDOM.render(
       <Usage name={pathToName(path)} render={module.default} updated={true} />,
-      mount
+      mount,
     );
     document.documentElement.scrollTop = scrollTop;
   } catch (e) {

@@ -45,7 +45,7 @@ class Node {
   copy() {
     const inst = Object.assign(
       Object.create(Object.getPrototypeOf(this)),
-      this
+      this,
     );
 
     for (var i = 0; i < inst.fieldNames.length; i++) {
@@ -147,7 +147,7 @@ export class Query extends Node {
       select,
       where,
       groupby,
-      calculated
+      calculated,
     );
   }
   getTypeName() {

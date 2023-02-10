@@ -24,7 +24,7 @@ export function sequential(fn) {
       err => {
         pump();
         reject(err);
-      }
+      },
     );
   }
 

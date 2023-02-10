@@ -56,7 +56,7 @@ function BankSyncStatus({ accountsSyncing }) {
                 <Text>Syncing {item}</Text>
               </View>
             </animated.div>
-          )
+          ),
       )}
     </View>
   );
@@ -66,5 +66,5 @@ export default connect(
   state => ({
     accountsSyncing: state.account.accountsSyncing,
   }),
-  actions
+  actions,
 )(BankSyncStatus);

@@ -30,7 +30,7 @@ export function MonthCountSelector({ maxMonths, onChange }) {
         key={i}
         color={maxMonths >= i ? colors.n5 : colors.n8}
         onClick={() => onChange(i)}
-      />
+      />,
     );
   }
 

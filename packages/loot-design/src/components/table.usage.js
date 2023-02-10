@@ -130,7 +130,7 @@ export default () => (
           let lots = [];
           for (let i = 0; i < 100; i++) {
             lots = lots.concat(
-              people.map(person => ({ ...person, id: uuid.v4Sync() }))
+              people.map(person => ({ ...person, id: uuid.v4Sync() })),
             );
           }
           return lots;

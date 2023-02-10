@@ -49,7 +49,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                   values.name,
                   values.type,
                   toRelaxedNumber(values.balance),
-                  values.offbudget
+                  values.offbudget,
                 );
                 history.push('/accounts/' + id);
               }
@@ -89,7 +89,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                     onChange={e => {
                       setFieldValue(
                         'offbudget',
-                        determineOffBudget(e.target.value)
+                        determineOffBudget(e.target.value),
                       );
                       handleChange(e);
                     }}

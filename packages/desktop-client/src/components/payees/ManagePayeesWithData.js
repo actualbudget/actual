@@ -133,7 +133,7 @@ function ManagePayeesWithData({
           let count = ruleCounts.value.get(id) || 0;
           ruleCounts.value.set(
             targetId,
-            (ruleCounts.value.get(targetId) || 0) + count
+            (ruleCounts.value.get(targetId) || 0) + count,
           );
         });
 
@@ -152,5 +152,5 @@ export default connect(
     lastUndoState: state.app.lastUndoState,
     categoryGroups: state.queries.categories.grouped,
   }),
-  actions
+  actions,
 )(ManagePayeesWithData);

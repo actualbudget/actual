@@ -24,21 +24,21 @@ import { useArgsMemo } from './util';
 function CashFlow() {
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 30)
+    monthUtils.subMonths(monthUtils.currentMonth(), 30),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
-      d.parseISO(start)
+      d.parseISO(start),
     );
     return numDays > 31 * 3;
   });
 
   const data = useReport(
     'cash_flow',
-    useArgsMemo(cashFlowByDate)(start, end, isConcise)
+    useArgsMemo(cashFlowByDate)(start, end, isConcise),
   );
 
   useEffect(() => {
@@ -64,7 +64,7 @@ function CashFlow() {
   function onChangeDates(start, end) {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
-      d.parseISO(start)
+      d.parseISO(start),
     );
     const isConcise = numDays > 31 * 3;
 

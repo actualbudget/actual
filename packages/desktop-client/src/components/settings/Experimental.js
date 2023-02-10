@@ -11,7 +11,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
   let flags = Object.fromEntries(
     Object.entries(prefs)
       .filter(([key]) => key.startsWith('flags.'))
-      .map(([key, value]) => [key.replace('flags.', ''), value])
+      .map(([key, value]) => [key.replace('flags.', ''), value]),
   );
   let disabled = prefs.budgetType === 'report' && flags.reportBudget;
 

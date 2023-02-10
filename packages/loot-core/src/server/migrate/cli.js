@@ -66,7 +66,7 @@ withMigrationsDir(argv.migrationsDir || getMigrationsDir(), async () => {
       fs.unlinkSync(argv.db);
       const initSql = fs.readFileSync(
         path.join(__dirname, '../../../src/server/sql/init.sql'),
-        'utf8'
+        'utf8',
       );
       getDatabase().exec(initSql);
       break;

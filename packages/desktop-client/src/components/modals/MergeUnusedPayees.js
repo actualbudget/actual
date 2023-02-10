@@ -48,7 +48,7 @@ export default function MergeUnusedPayees({
   // TODO: I think a custom `useSelector` hook that doesn't bind would
   // be nice
   let [payees] = useState(() =>
-    payeeIds.map(id => allPayees.find(p => p.id === id))
+    payeeIds.map(id => allPayees.find(p => p.id === id)),
   );
   let targetPayee = allPayees.find(p => p.id === targetPayeeId);
 

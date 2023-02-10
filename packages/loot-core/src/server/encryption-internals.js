@@ -75,6 +75,6 @@ function createKeyBuffer({ numBytes, secret, salt }) {
     salt || crypto.randomBytes(32).toString('base64'),
     10000,
     numBytes || 32,
-    'sha512'
+    'sha512',
   );
 }

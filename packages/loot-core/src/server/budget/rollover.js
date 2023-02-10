@@ -56,7 +56,7 @@ export function createCategory(cat, sheetName, prevSheetName) {
         return safeNumber(
           number(budgeted) +
             number(spent) +
-            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos))
+            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos)),
         );
       },
     });
@@ -104,7 +104,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       expenseCategories.map(cat => [
         `${prevSheetName}!leftover-${cat.id}`,
         `${prevSheetName}!carryover-${cat.id}`,
-      ])
+      ]),
     ),
     run: (...data) => {
       data = unflatten2(data);
@@ -114,7 +114,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
             return total;
           }
           return total + Math.min(0, number(leftover));
-        }, 0)
+        }, 0),
       );
     },
   });
@@ -145,7 +145,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
         number(available) +
           number(lastOverspent) +
           number(totalBudgeted) -
-          number(buffered)
+          number(buffered),
       );
     },
   });

@@ -426,5 +426,5 @@ function BudgetSummary({ month, localPrefs }) {
 
 export default connect(
   state => ({ localPrefs: state.prefs.local }),
-  actions
+  actions,
 )(BudgetSummary);

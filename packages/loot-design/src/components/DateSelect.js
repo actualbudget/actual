@@ -100,7 +100,7 @@ export let DatePicker = React.forwardRef(
           }
         },
       }),
-      []
+      [],
     );
 
     useLayoutEffect(() => {
@@ -136,7 +136,7 @@ export let DatePicker = React.forwardRef(
     return (
       <View style={[pickerStyles, { flex: 1 }]} innerRef={mountPoint}></View>
     );
-  }
+  },
 );
 
 function defaultShouldSaveFromKey(e) {
@@ -348,7 +348,7 @@ export default function DateSelect({
               onSelect(d.format(date, 'yyyy-MM-dd'));
               setOpen(false);
             }}
-          />
+          />,
         )}
     </View>
   );

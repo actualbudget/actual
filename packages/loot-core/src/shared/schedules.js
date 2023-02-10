@@ -196,7 +196,7 @@ export function extractScheduleConds(conditions) {
     payee:
       conditions.find(cond => cond.op === 'is' && cond.field === 'payee') ||
       conditions.find(
-        cond => cond.op === 'is' && cond.field === 'description'
+        cond => cond.op === 'is' && cond.field === 'description',
       ) ||
       null,
     account:
@@ -209,12 +209,12 @@ export function extractScheduleConds(conditions) {
           (cond.op === 'is' ||
             cond.op === 'isapprox' ||
             cond.op === 'isbetween') &&
-          cond.field === 'amount'
+          cond.field === 'amount',
       ) || null,
     date:
       conditions.find(
         cond =>
-          (cond.op === 'is' || cond.op === 'isapprox') && cond.field === 'date'
+          (cond.op === 'is' || cond.op === 'isapprox') && cond.field === 'date',
       ) || null,
   };
 }

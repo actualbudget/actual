@@ -65,7 +65,7 @@ function NetWorthCard({ accounts }) {
 
   const data = useReport(
     'net_worth',
-    useArgsMemo(netWorthSpreadsheet)(start, end, accounts)
+    useArgsMemo(netWorthSpreadsheet)(start, end, accounts),
   );
 
   if (!data) {
@@ -115,7 +115,7 @@ function CashFlowCard() {
 
   const data = useReport(
     'cash_flow_simple',
-    useArgsMemo(simpleCashFlow)(start, end)
+    useArgsMemo(simpleCashFlow)(start, end),
   );
   if (!data) {
     return null;
@@ -266,5 +266,5 @@ function Overview({ accounts }) {
 
 export default connect(
   state => ({ accounts: state.queries.accounts }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(Overview);

@@ -30,14 +30,14 @@ export async function createCategory(cat, sheetName, prevSheetName) {
         return safeNumber(
           number(budgeted) -
             number(sumAmount) +
-            (prevCarryover ? number(prevLeftover) : 0)
+            (prevCarryover ? number(prevLeftover) : 0),
         );
       }
 
       return safeNumber(
         number(budgeted) +
           number(sumAmount) +
-          (prevCarryover ? number(prevLeftover) : 0)
+          (prevCarryover ? number(prevLeftover) : 0),
       );
     },
   });
@@ -76,7 +76,7 @@ export function createSummary(groups, categories, sheetName) {
     initialValue: 0,
     refresh: true,
     dependencies: expenseCategories.map(
-      cat => `${sheetName}!spent-with-carryover-${cat.id}`
+      cat => `${sheetName}!spent-with-carryover-${cat.id}`,
     ),
     run: sumAmounts,
   });

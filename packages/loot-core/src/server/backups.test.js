@@ -24,8 +24,8 @@ describe('Backups', () => {
           { id: 'backup2', date: dateFns.parseISO('2017-01-01') },
           { id: 'backup3', date: dateFns.parseISO('2017-01-01') },
           { id: 'backup4', date: dateFns.parseISO('2017-01-01') },
-        ])
-      )
+        ]),
+      ),
     ).toMatchSnapshot();
 
     // Should not delete any since up to 3 are allowed on the current
@@ -37,8 +37,8 @@ describe('Backups', () => {
           { id: 'backup2', date: dateFns.parseISO('2017-01-01') },
           { id: 'backup3', date: dateFns.parseISO('2016-12-30') },
           { id: 'backup4', date: dateFns.parseISO('2016-12-29') },
-        ])
-      )
+        ]),
+      ),
     ).toMatchSnapshot();
 
     // Should delete any additional backups on other days (keep the
@@ -51,8 +51,8 @@ describe('Backups', () => {
           { id: 'backup3', date: dateFns.parseISO('2016-12-29') },
           { id: 'backup4', date: dateFns.parseISO('2016-12-29') },
           { id: 'backup5', date: dateFns.parseISO('2016-12-29') },
-        ])
-      )
+        ]),
+      ),
     ).toMatchSnapshot();
 
     // Should only keep up to 10 backups
@@ -71,8 +71,8 @@ describe('Backups', () => {
           { id: 'backup10', date: dateFns.parseISO('2016-12-22') },
           { id: 'backup11', date: dateFns.parseISO('2016-12-21') },
           { id: 'backup12', date: dateFns.parseISO('2016-12-20') },
-        ])
-      )
+        ]),
+      ),
     ).toMatchSnapshot();
   });
 });

@@ -116,7 +116,7 @@ export default function useSelected(name, items, initialSelectedIds) {
         initialSelectedIds && initialSelectedIds.length === 1
           ? { start: initialSelectedIds[0], end: null }
           : null,
-    })
+    }),
   );
 
   let prevItems = useRef(items);
@@ -171,7 +171,7 @@ export default function useSelected(name, items, initialSelectedIds) {
       let deletedIds = new Set(
         messages
           .filter(msg => msg.column === 'tombstone' && msg.value === 1)
-          .map(msg => msg.row)
+          .map(msg => msg.row),
       );
 
       if (
@@ -183,7 +183,7 @@ export default function useSelected(name, items, initialSelectedIds) {
           type: 'select-all',
           // Coerce the Set into an array
           ids: [...tagged.selectedItems.items].filter(
-            id => !deletedIds.has(id)
+            id => !deletedIds.has(id),
           ),
         });
       }
@@ -238,7 +238,7 @@ export function SelectedProvider({ instance, fetchAllIds, children }) {
       }
       return instance.dispatch(action);
     },
-    [instance.dispatch, fetchAllIds]
+    [instance.dispatch, fetchAllIds],
   );
 
   return (

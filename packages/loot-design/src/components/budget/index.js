@@ -952,10 +952,10 @@ const BudgetCategories = React.memo(
               cat => ({
                 type: 'expense-category',
                 value: cat,
-              })
+              }),
             ),
           ];
-        })
+        }),
       );
 
       if (isAddingGroup) {
@@ -975,7 +975,7 @@ const BudgetCategories = React.memo(
               type: 'income-category',
               value: cat,
             })),
-          ].filter(x => x)
+          ].filter(x => x),
         );
       }
 
@@ -1188,7 +1188,7 @@ const BudgetCategories = React.memo(
         })}
       </View>
     );
-  }
+  },
 );
 
 function IncomeHeader({ MonthComponent, onShowNewGroup }) {
@@ -1240,14 +1240,14 @@ export const BudgetPageHeader = React.memo(
         </View>
       </View>
     );
-  }
+  },
 );
 
 export const MonthPicker = scope(lively => {
   function getRangeForYear(year) {
     return monthUtils.rangeInclusive(
       monthUtils.getYearStart(year),
-      monthUtils.getYearEnd(year)
+      monthUtils.getYearEnd(year),
     );
   }
 
@@ -1282,7 +1282,7 @@ export const MonthPicker = scope(lively => {
       return {
         currentMonthName: getCurrentMonthName(
           nextProps.startMonth,
-          monthUtils.currentMonth()
+          monthUtils.currentMonth(),
         ),
       };
     }

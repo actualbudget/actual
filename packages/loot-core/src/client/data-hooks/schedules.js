@@ -15,7 +15,7 @@ function loadStatuses(schedules, onData) {
         schedules.map(s => [
           s.id,
           getStatus(s.next_date, s.completed, hasTrans.has(s.id)),
-        ])
+        ]),
       );
     },
   });
@@ -37,10 +37,10 @@ export function useSchedules({ transform } = {}) {
           }
 
           statusQuery = loadStatuses(schedules, statuses =>
-            setData({ schedules, statuses })
+            setData({ schedules, statuses }),
           );
         }
-      }
+      },
     );
 
     return () => {

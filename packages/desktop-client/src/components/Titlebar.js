@@ -139,7 +139,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
                 syncState === 'local'
               ? colors.n6
               : null,
-        })
+        }),
       )}
       onClick={onSync}
     >
@@ -389,6 +389,6 @@ export default withRouter(
       userData: state.user.data,
       floatingSidebar: state.prefs.global.floatingSidebar,
     }),
-    actions
-  )(Titlebar)
+    actions,
+  )(Titlebar),
 );

@@ -48,7 +48,7 @@ function Account({ account, offbudget, onSelect }) {
             }}
           >
             {prettyAccountType(
-              fromPlaidAccountType(account.type, account.subtype)
+              fromPlaidAccountType(account.type, account.subtype),
             )}
             <Text style={{ marginLeft: 4 }}>
               ...
@@ -81,7 +81,7 @@ export default function ConfigureLinkedAccounts({
   let [offbudgetAccounts, setOffbudgetAccounts] = useState(() =>
     accounts
       .filter(acct => determineOffBudget(fromPlaidAccountType(acct.type)))
-      .map(acct => acct.id)
+      .map(acct => acct.id),
   );
 
   function toggleAccount(id) {
@@ -97,7 +97,7 @@ export default function ConfigureLinkedAccounts({
       institution,
       publicToken,
       accounts.map(acct => acct.id),
-      offbudgetAccounts
+      offbudgetAccounts,
     );
 
     actions.closeModal();

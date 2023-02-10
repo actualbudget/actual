@@ -71,7 +71,7 @@ describe('web filesystem', () => {
 
     expect(await readFile('/documents/db.sqlite')).toBe('some junk');
     expect(await readFile('/blocked/' + pathToId('/documents/db.sqlite'))).toBe(
-      'some junk'
+      'some junk',
     );
   });
 
@@ -98,7 +98,7 @@ describe('web filesystem', () => {
     let FS = sqlite._getModule().FS;
     let { node } = FS.lookupPath('/documents/deep/nested/db.sqlite');
     expect(node.link).toBe(
-      '/blocked/' + pathToId('/documents/deep/nested/db.sqlite')
+      '/blocked/' + pathToId('/documents/deep/nested/db.sqlite'),
     );
   });
 });
