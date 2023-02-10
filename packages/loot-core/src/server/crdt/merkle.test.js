@@ -39,7 +39,7 @@ describe('merkle trie', () => {
 
       // Second client messages
       message('2018-11-20T13:19:40.122Z-0000-0123456789ABCDEF', 1300),
-      message('2018-11-25T13:19:40.122Z-0000-0123456789ABCDEF', 1400)
+      message('2018-11-25T13:19:40.122Z-0000-0123456789ABCDEF', 1400),
     ];
 
     trie1 = merkle.insert(trie1, messages[0].timestamp);
@@ -87,7 +87,7 @@ describe('merkle trie', () => {
       message('2018-11-01T02:10:00.000Z-0000-0123456789ABCDEF', 1800),
       message('2018-11-01T02:19:00.000Z-0000-0123456789ABCDEF', 1900),
       message('2018-11-01T02:28:00.000Z-0000-0123456789ABCDEF', 2000),
-      message('2018-11-01T02:37:00.000Z-0000-0123456789ABCDEF', 2100)
+      message('2018-11-01T02:37:00.000Z-0000-0123456789ABCDEF', 2100),
     ];
 
     let trie = {};
@@ -115,7 +115,7 @@ describe('merkle trie', () => {
       message('2018-11-01T02:10:00.000Z-0000-0123456789ABCDEF', 1800),
       message('2018-11-01T02:19:00.000Z-0000-0123456789ABCDEF', 1900),
       message('2018-11-01T02:28:00.000Z-0000-0123456789ABCDEF', 2000),
-      message('2018-11-01T02:37:00.000Z-0000-0123456789ABCDEF', 2100)
+      message('2018-11-01T02:37:00.000Z-0000-0123456789ABCDEF', 2100),
     ];
 
     let trie = insertMessages({}, messages);
@@ -133,7 +133,7 @@ describe('merkle trie', () => {
     // way that it modifies the 1st out of 3 branches (so it will be
     // pruned away)
     let trie1 = insertMessages(trie, [
-      message('2018-11-01T00:59:00.000Z-0000-0123456789ABCDEF', 900)
+      message('2018-11-01T00:59:00.000Z-0000-0123456789ABCDEF', 900),
     ]);
 
     // Normal comparision works
@@ -165,7 +165,7 @@ describe('merkle trie', () => {
     // first message modifiying the 1st key
     let trie2 = insertMessages(trie, [
       message('2018-11-01T00:59:00.000Z-0000-0123456789ABCDEF', 900),
-      message('2018-11-01T01:15:00.000Z-0000-0123456789ABCDEF', 1422)
+      message('2018-11-01T01:15:00.000Z-0000-0123456789ABCDEF', 1422),
     ]);
 
     // Normal comparision works

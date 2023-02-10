@@ -3,7 +3,7 @@ import React, {
   useReducer,
   useCallback,
   useEffect,
-  useRef
+  useRef,
 } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -74,8 +74,8 @@ export default function useSelected(name, items, initialSelectedIds) {
               selectedItems,
               selectedRange: {
                 start: items[range.start].id,
-                end: items[range.end].id
-              }
+                end: items[range.end].id,
+              },
             };
           } else {
             let range = null;
@@ -87,7 +87,7 @@ export default function useSelected(name, items, initialSelectedIds) {
             return {
               ...state,
               selectedItems,
-              selectedRange: range
+              selectedRange: range,
             };
           }
         }
@@ -102,7 +102,7 @@ export default function useSelected(name, items, initialSelectedIds) {
             selectedRange:
               action.ids && action.ids.length === 1
                 ? { start: action.ids[0], end: null }
-                : null
+                : null,
           };
 
         default:
@@ -115,7 +115,7 @@ export default function useSelected(name, items, initialSelectedIds) {
       selectedRange:
         initialSelectedIds && initialSelectedIds.length === 1
           ? { start: initialSelectedIds[0], end: null }
-          : null
+          : null,
     })
   );
 
@@ -182,7 +182,9 @@ export default function useSelected(name, items, initialSelectedIds) {
         dispatch({
           type: 'select-all',
           // Coerce the Set into an array
-          ids: [...tagged.selectedItems.items].filter(id => !deletedIds.has(id))
+          ids: [...tagged.selectedItems.items].filter(
+            id => !deletedIds.has(id)
+          ),
         });
       }
     }
@@ -197,7 +199,7 @@ export default function useSelected(name, items, initialSelectedIds) {
   return {
     items: state.selectedItems,
     setItems: state.setSelectedItems,
-    dispatch
+    dispatch,
   };
 }
 
@@ -228,7 +230,7 @@ export function SelectedProvider({ instance, fetchAllIds, children }) {
           if (fetchAllIds) {
             return instance.dispatch({
               type: 'select-all',
-              ids: await fetchAllIds()
+              ids: await fetchAllIds(),
             });
           }
           return instance.dispatch({ type: 'select-all' });
@@ -256,7 +258,7 @@ export function SelectedProviderWithItems({
   initialSelectedIds,
   fetchAllIds,
   registerDispatch,
-  children
+  children,
 }) {
   let selected = useSelected(name, items, initialSelectedIds);
 

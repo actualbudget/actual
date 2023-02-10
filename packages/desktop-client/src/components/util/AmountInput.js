@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 
 import {
   integerToCurrency,
-  currencyToInteger
+  currencyToInteger,
 } from 'loot-core/src/shared/util';
 import {
   View,
   Button,
-  InputWithContent
+  InputWithContent,
 } from 'loot-design/src/components/common';
 import Add from 'loot-design/src/svg/v1/Add';
 import Subtract from 'loot-design/src/svg/v1/Subtract';

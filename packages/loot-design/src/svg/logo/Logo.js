@@ -8,7 +8,7 @@ const SvgLogo = props => (
     viewBox="0 0 30 32"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path

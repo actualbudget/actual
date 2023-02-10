@@ -122,5 +122,5 @@ module.exports = {
   removeItem,
   multiGet,
   multiSet,
-  multiRemove
+  multiRemove,
 };

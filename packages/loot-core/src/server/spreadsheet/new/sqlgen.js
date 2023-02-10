@@ -123,7 +123,7 @@ function transformLookups(node, implicitTable) {
       lookups = lookups.map((lookup, idx) => {
         return {
           field: lookup.field,
-          tableId: uid()
+          tableId: uid(),
         };
       });
 
@@ -255,7 +255,7 @@ export default function generate(table, where, groupby, select, deps) {
   return {
     sql,
     where: whereTransformed,
-    dependencies
+    dependencies,
   };
 }
 
@@ -264,17 +264,17 @@ export const SCHEMA_PATHS = {
     category: {
       table: 'categories',
       sql: id => `LEFT JOIN categories ${id} ON __cm.transferId = ${id}.id`,
-      field: '__cm.transferId'
+      field: '__cm.transferId',
     },
     acct: { table: 'accounts' },
-    description: { table: 'payees' }
+    description: { table: 'payees' },
   },
   payees: {
-    transfer_acct: { table: 'accounts' }
+    transfer_acct: { table: 'accounts' },
   },
   accounts: {
-    bank: { table: 'banks' }
-  }
+    bank: { table: 'banks' },
+  },
 };
 
 const tables = {
@@ -290,5 +290,5 @@ const tables = {
       ${join}
       ${whereStr}
     `;
-  }
+  },
 };

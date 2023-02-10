@@ -2,7 +2,7 @@ import {
   differenceInCalendarMonths,
   addMonths,
   addWeeks,
-  format
+  format,
 } from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
@@ -64,84 +64,84 @@ async function getCategoryTemplates() {
     {
       type: 'simple',
         re: /^#template \$?(\-?\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['monthly']
+      params: ['monthly'],
     },
     {
       type: 'simple',
       re: /^#template up to \$?(\d+(\.\d{2})?)$/im,
-      params: ['limit']
+      params: ['limit'],
     },
     {
       type: 'simple',
       re: /^#template \$?(\d+(\.\d{2})?) up to \$?(\d+(\.\d{2})?)$/im,
-      params: ['monthly', null, 'limit']
+      params: ['monthly', null, 'limit'],
     },
     {
       type: 'by',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'month']
+      params: ['amount', null, 'month'],
     },
     {
       type: 'by',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'repeat']
+      params: ['amount', null, 'month', 'repeat'],
     },
     {
       type: 'week',
         re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'starting']
+      params: ['amount', null, 'starting'],
     },
     {
       type: 'week',
         re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['amount', null, 'starting', 'limit']
+      params: ['amount', null, 'starting', 'limit'],
     },
     {
       type: 'weeks',
         re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'weeks', 'starting']
+      params: ['amount', null, 'weeks', 'starting'],
     },
     {
       type: 'weeks',
         re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['amount', null, 'weeks', 'starting', 'limit']
+      params: ['amount', null, 'weeks', 'starting', 'limit'],
     },
     {
       type: 'by_annual',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
-      params: ['amount', null, 'month']
+      params: ['amount', null, 'month'],
     },
     {
       type: 'by_annual',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'repeat']
+      params: ['amount', null, 'month', 'repeat'],
     },
     {
       type: 'spend',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from']
+      params: ['amount', null, 'month', 'from'],
     },
     {
       type: 'spend',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from', 'repeat']
+      params: ['amount', null, 'month', 'from', 'repeat'],
     },
     {
       type: 'spend_annual',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from']
+      params: ['amount', null, 'month', 'from'],
     },
     {
       type: 'spend_annual',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from', 'repeat']
+      params: ['amount', null, 'month', 'from', 'repeat'],
     },
     {
       type: 'percentage',
       re: /^#template (\d+(\.\d+)?)% of (.*)$/im,
-      params: ['percent', null, 'category']
+      params: ['percent', null, 'category'],
     },
-    { type: 'error', re: /^#template .*$/im, params: [] }
+    { type: 'error', re: /^#template .*$/im, params: [] },
   ];
 
   let templates = {};

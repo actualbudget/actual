@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Modal } from 'loot-design/src/components/common';
 import {
   isDevelopmentEnvironment,
-  isPreviewEnvironment
+  isPreviewEnvironment,
 } from 'loot-design/src/util/environment';
 
 import ManageRules from '../ManageRules';

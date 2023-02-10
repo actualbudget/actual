@@ -437,7 +437,7 @@ export default function parse(src) {
   let state = {
     src: src,
     tokens: lex(src),
-    peeked: null
+    peeked: null,
   };
 
   if (state.tokens.is_finished()) {

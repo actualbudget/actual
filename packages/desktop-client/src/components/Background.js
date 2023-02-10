@@ -14,7 +14,7 @@ function Background({ selected }) {
         left: 0,
         right: 0,
         background: `url(${BG}) no-repeat center center fixed`,
-        backgroundSize: '100% 100%'
+        backgroundSize: '100% 100%',
       })}
     ></div>
   );

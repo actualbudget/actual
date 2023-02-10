@@ -29,7 +29,7 @@ export default function ScheduleLink() {
     let ids = state.transactionIds;
     if (ids && ids.length > 0) {
       await send('transactions-batch-update', {
-        updated: ids.map(id => ({ id, schedule: scheduleId }))
+        updated: ids.map(id => ({ id, schedule: scheduleId })),
       });
     }
     history.goBack();

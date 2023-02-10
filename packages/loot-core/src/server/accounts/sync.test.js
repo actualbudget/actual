@@ -7,7 +7,7 @@ import {
   syncAccount,
   reconcileTransactions,
   addTransactions,
-  fromPlaid
+  fromPlaid,
 } from './sync';
 import { loadRules, insertRule } from './transaction-rules';
 import * as transfer from './transfer';
@@ -41,7 +41,7 @@ function expectSnapshotWithDiffer(initialValue) {
     expectToMatchDiff: value => {
       expect(snapshotDiff(currentValue, value)).toMatchSnapshot();
       currentValue = value;
-    }
+    },
   };
 }
 
@@ -54,12 +54,12 @@ function prepMockTransactions() {
     mockTransactions = [
       ...transactions.filter(t => t.date <= '2017-10-15'),
       ...transactions.filter(t => t.date === '2017-10-16').slice(0, 1),
-      ...transactions.filter(t => t.date === '2017-10-17').slice(0, 3)
+      ...transactions.filter(t => t.date === '2017-10-17').slice(0, 3),
     ];
 
     return {
       accounts: data.accounts,
-      transactions: { [account_id]: mockTransactions }
+      transactions: { [account_id]: mockTransactions },
     };
   });
   return mockTransactions;
@@ -70,13 +70,13 @@ async function prepareDatabase() {
   await db.insertCategory({
     name: 'income',
     cat_group: 'group1',
-    is_income: 1
+    is_income: 1,
   });
 
   const { accounts } = await post(getServer().PLAID_SERVER + '/accounts', {
     client_id: '',
     group_id: '',
-    item_id: '1'
+    item_id: '1',
   });
   const acct = accounts[0];
 
@@ -84,12 +84,12 @@ async function prepareDatabase() {
     id: 'one',
     account_id: acct.account_id,
     name: acct.official_name,
-    balance_current: acct.balances.current
+    balance_current: acct.balances.current,
   });
   await db.insertPayee({
     id: 'transfer-' + id,
     name: '',
-    transfer_acct: id
+    transfer_acct: id,
   });
 
   return { id, account_id: acct.account_id };
@@ -109,7 +109,7 @@ describe('Account sync', () => {
 
     await reconcileTransactions(id, [
       { date: '2020-01-02', payee_name: 'bakkerij', amount: 4133 },
-      { date: '2020-01-03', payee_name: 'kroger', amount: 5000 }
+      { date: '2020-01-03', payee_name: 'kroger', amount: 5000 },
     ]);
 
     payees = await getAllPayees();
@@ -142,7 +142,7 @@ describe('Account sync', () => {
       account: id,
       amount: -2947,
       date: '2017-10-15',
-      payee: payeeId
+      payee: payeeId,
     });
 
     let { added, updated } = await reconcileTransactions(
@@ -191,21 +191,21 @@ describe('Account sync', () => {
       account: id,
       amount: -2947,
       date: '2017-10-15',
-      payee: await db.insertPayee({ name: 'papa johns' })
+      payee: await db.insertPayee({ name: 'papa johns' }),
     });
     await db.insertTransaction({
       id: 'two',
       account: id,
       amount: -2947,
       date: '2017-10-17',
-      payee: await db.insertPayee({ name: 'lowes' })
+      payee: await db.insertPayee({ name: 'lowes' }),
     });
     await db.insertTransaction({
       id: 'three',
       account: id,
       amount: -2947,
       date: '2017-10-17',
-      payee: await db.insertPayee({ name: 'macy' })
+      payee: await db.insertPayee({ name: 'macy' }),
     });
 
     let { added, updated } = await reconcileTransactions(
@@ -250,14 +250,14 @@ describe('Account sync', () => {
       amount: -3000,
       date: '2017-10-15',
       imported_id: 'imported1',
-      payee: await db.insertPayee({ name: 'papa johns' })
+      payee: await db.insertPayee({ name: 'papa johns' }),
     });
     await db.insertTransaction({
       id: 'two',
       account: id,
       amount: -2947,
       date: '2017-10-17',
-      payee: await db.insertPayee({ name: 'lowes' })
+      payee: await db.insertPayee({ name: 'lowes' }),
     });
 
     let { added, updated } = await reconcileTransactions(
@@ -298,7 +298,7 @@ describe('Account sync', () => {
       amount: -2947,
       date: '2017-10-15',
       payee: await db.insertPayee({ name: 'foo' }),
-      imported_id: 'trans1'
+      imported_id: 'trans1',
     });
 
     await db.insertTransaction({
@@ -307,7 +307,7 @@ describe('Account sync', () => {
       amount: -2947,
       date: '2017-10-15',
       payee: await db.insertPayee({ name: 'bar' }),
-      imported_id: 'trans2'
+      imported_id: 'trans2',
     });
 
     differ.expectToMatchDiff(await getAllTransactions());
@@ -326,7 +326,7 @@ describe('Account sync', () => {
     await db.insertPayee({
       id: 'transfer-two',
       name: '',
-      transfer_acct: 'two'
+      transfer_acct: 'two',
     });
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
@@ -341,7 +341,7 @@ describe('Account sync', () => {
       account: 'two',
       amount: 2948,
       date: '2017-10-15',
-      payee: 'transfer-' + id
+      payee: 'transfer-' + id,
     });
     await transfer.onInsert(await db.getTransaction(transactionId));
 
@@ -362,12 +362,12 @@ describe('Account sync', () => {
       id: 'one',
       account: acctId,
       amount: 2948,
-      date: '2020-01-01'
+      date: '2020-01-01',
     });
 
     await reconcileTransactions(acctId, [
       { date: '2020-01-02' },
-      { date: '2020-01-01', amount: 2948 }
+      { date: '2020-01-01', amount: 2948 },
     ]);
 
     let transactions = await getAllTransactions();
@@ -388,11 +388,11 @@ describe('Account sync', () => {
     const { id: acctId } = await prepareDatabase();
     await db.insertCategoryGroup({
       id: 'group2',
-      name: 'group2'
+      name: 'group2',
     });
     let catId = await db.insertCategory({
       name: 'Food',
-      cat_group: 'group2'
+      cat_group: 'group2',
     });
 
     let payeeId = await db.insertPayee({ name: 'bakkerij' });
@@ -400,11 +400,11 @@ describe('Account sync', () => {
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: payeeId }],
-      actions: [{ op: 'set', field: 'category', value: catId }]
+      actions: [{ op: 'set', field: 'category', value: catId }],
     });
 
     await reconcileTransactions(acctId, [
-      { date: '2020-01-02', payee_name: 'Bakkerij', amount: 4133 }
+      { date: '2020-01-02', payee_name: 'Bakkerij', amount: 4133 },
     ]);
 
     let transactions = await getAllTransactions();
@@ -425,7 +425,7 @@ describe('Account sync', () => {
     const { id: acctId } = await prepareDatabase();
 
     await reconcileTransactions(acctId, [
-      { date: '2020-01-02', payee_name: '     ', amount: 4133 }
+      { date: '2020-01-02', payee_name: '     ', amount: 4133 },
     ]);
 
     let transactions = await getAllTransactions();
@@ -450,11 +450,11 @@ describe('Account sync', () => {
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
-      actions: [{ op: 'set', field: 'payee', value: payeeId }]
+      actions: [{ op: 'set', field: 'payee', value: payeeId }],
     });
 
     await reconcileTransactions(acctId, [
-      { date: '2020-01-02', payee_name: 'bakkerij', amount: 4133 }
+      { date: '2020-01-02', payee_name: 'bakkerij', amount: 4133 },
     ]);
 
     let payees = await getAllPayees();
@@ -496,7 +496,7 @@ describe('Account sync', () => {
       await insertRule({
         stage: null,
         conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
-        actions: [{ op: 'set', field: 'payee', value: payeeId2 }]
+        actions: [{ op: 'set', field: 'payee', value: payeeId2 }],
       });
 
       if (version === 'v1') {
@@ -510,7 +510,7 @@ describe('Account sync', () => {
         account: acctId,
         amount: -2947,
         date: '2017-10-15',
-        payee: payeeId1
+        payee: payeeId1,
       });
       // It will try to match to this one first, make sure it matches
       // the above transaction though
@@ -519,7 +519,7 @@ describe('Account sync', () => {
         account: acctId,
         amount: -2947,
         date: '2017-10-17',
-        payee: null
+        payee: null,
       });
 
       let { updated } = await reconcileTransactions(acctId, [
@@ -527,8 +527,8 @@ describe('Account sync', () => {
           date: '2017-10-17',
           payee_name: 'bakkerij',
           amount: -2947,
-          imported_id: 'imported1'
-        }
+          imported_id: 'imported1',
+        },
       ]);
 
       let payees = await getAllPayees();
@@ -558,30 +558,30 @@ describe('Account sync', () => {
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
-      actions: [{ op: 'set', field: 'payee', value: payeeId }]
+      actions: [{ op: 'set', field: 'payee', value: payeeId }],
     });
 
     let transactions = [
       {
         date: '2017-10-17',
         payee_name: 'BAKKerij',
-        amount: -2947
+        amount: -2947,
       },
       {
         date: '2017-10-18',
         payee_name: 'bakkERIj2',
-        amount: -2947
+        amount: -2947,
       },
       {
         date: '2017-10-19',
         payee_name: 'bakkerij3',
-        amount: -2947
+        amount: -2947,
       },
       {
         date: '2017-10-20',
         payee_name: 'BakkeriJ3',
-        amount: -2947
-      }
+        amount: -2947,
+      },
     ];
 
     let added = await addTransactions(acctId, transactions);
@@ -598,7 +598,7 @@ describe('Account sync', () => {
       'bakkerij3',
       'bakkerij3',
       'bakkERIj2',
-      'bakkerij-renamed'
+      'bakkerij-renamed',
     ]);
   });
 

@@ -5,7 +5,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 export function getValidMonthBounds(bounds, startMonth, endMonth) {
   return {
     start: startMonth < bounds.start ? bounds.start : startMonth,
-    end: endMonth > bounds.end ? bounds.end : endMonth
+    end: endMonth > bounds.end ? bounds.end : endMonth,
   };
 }
 
@@ -16,7 +16,7 @@ export function MonthsProvider({
   numMonths,
   monthBounds,
   type,
-  children
+  children,
 }) {
   let endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
   let bounds = getValidMonthBounds(monthBounds, startMonth, endMonth);

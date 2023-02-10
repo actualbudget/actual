@@ -7,7 +7,7 @@ import {
   isAfter,
   addDays,
   subDays,
-  parseDate
+  parseDate,
 } from '../../shared/months';
 import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
@@ -27,7 +27,7 @@ export function parseRecurDate(desc) {
 
     return {
       type: 'recur',
-      schedule: new RSchedule({ rrules: rules })
+      schedule: new RSchedule({ rrules: rules }),
     };
   } catch (e) {
     throw new RuleError('parse-recur-date', e.message);
@@ -106,7 +106,7 @@ let CONDITION_TYPES = {
       }
 
       return parsed;
-    }
+    },
   },
   id: {
     ops: ['is', 'contains', 'oneOf'],
@@ -121,7 +121,7 @@ let CONDITION_TYPES = {
         return value;
       }
       return value;
-    }
+    },
   },
   string: {
     ops: ['is', 'contains', 'oneOf'],
@@ -147,7 +147,7 @@ let CONDITION_TYPES = {
       }
 
       return value.toLowerCase();
-    }
+    },
   },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
@@ -181,7 +181,7 @@ let CONDITION_TYPES = {
       }
 
       return parsed;
-    }
+    },
   },
   boolean: {
     ops: ['is'],
@@ -194,8 +194,8 @@ let CONDITION_TYPES = {
       );
 
       return value;
-    }
-  }
+    },
+  },
 };
 
 export class Condition {
@@ -385,7 +385,7 @@ export class Condition {
       field: this.field,
       value: this.unparsedValue,
       type: this.type,
-      ...(this.options ? { options: this.options } : null)
+      ...(this.options ? { options: this.options } : null),
     };
   }
 }
@@ -434,7 +434,7 @@ export class Action {
       field: this.field,
       value: this.value,
       type: this.type,
-      ...(this.options ? { options: this.options } : null)
+      ...(this.options ? { options: this.options } : null),
     };
   }
 }
@@ -489,7 +489,7 @@ export class Rule {
       id: this.id,
       stage: this.stage,
       conditions: this.conditions.map(c => c.serialize()),
-      actions: this.actions.map(a => a.serialize())
+      actions: this.actions.map(a => a.serialize()),
     };
   }
 }
@@ -578,7 +578,7 @@ const OP_SCORES = {
   gte: 1,
   lt: 1,
   lte: 1,
-  contains: 0
+  contains: 0,
 };
 
 function computeScore(rule) {

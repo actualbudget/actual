@@ -35,14 +35,14 @@ function expandRect({ top, left, width, height }, padding) {
       top: top - padding,
       left: left - padding,
       width: width + padding * 2,
-      height: height + padding * 2
+      height: height + padding * 2,
     };
   } else if (padding) {
     return {
       top: top - (padding.top || 0),
       left: left - (padding.left || 0),
       width: width + (padding.right || 0) + (padding.left || 0),
-      height: height + (padding.bottom || 0) + (padding.top || 0)
+      height: height + (padding.bottom || 0) + (padding.top || 0),
     };
   }
 
@@ -54,7 +54,7 @@ function withinWindow(rect) {
     top: rect.top,
     left: rect.left,
     width: Math.min(rect.left + rect.width, window.innerWidth) - rect.left,
-    height: Math.min(rect.top + rect.height, window.innerHeight) - rect.top
+    height: Math.min(rect.top + rect.height, window.innerHeight) - rect.top,
   };
 }
 
@@ -76,7 +76,7 @@ class MeasureNodes extends React.Component {
 
   updateMeasurements() {
     this.setState({
-      measurements: this.props.nodes.map(node => node.getBoundingClientRect())
+      measurements: this.props.nodes.map(node => node.getBoundingClientRect()),
     });
   }
 
@@ -92,7 +92,7 @@ class Tutorial extends React.Component {
 
   static contextTypes = {
     getTutorialNode: PropTypes.func,
-    endTutorial: PropTypes.func
+    endTutorial: PropTypes.func,
   };
 
   onClose = didQuitEarly => {
@@ -157,7 +157,7 @@ class Tutorial extends React.Component {
       nextTutorialStage: this.props.nextTutorialStage,
       previousTutorialStage: this.props.previousTutorialStage,
       closeTutorial: () => this.onClose(true),
-      endTutorial: () => this.onClose(false)
+      endTutorial: () => this.onClose(false),
     };
 
     switch (stage) {
@@ -244,7 +244,7 @@ class Tutorial extends React.Component {
                     top: 0,
                     left: 0,
                     zIndex: 1000,
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
                   }}
                 >
                   <path
@@ -268,7 +268,7 @@ class Tutorial extends React.Component {
 export default connect(
   state => ({
     stage: state.tutorial.stage,
-    fromYNAB: state.tutorial.fromYNAB
+    fromYNAB: state.tutorial.fromYNAB,
   }),
   dispatch => bindActionCreators(actions, dispatch)
 )(Tutorial);

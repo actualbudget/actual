@@ -6,7 +6,7 @@ import {
   Text,
   Block,
   Modal,
-  Button
+  Button,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -84,7 +84,7 @@ class ConfirmCategoryDelete extends React.Component {
                 marginTop: 20,
                 flexDirection: 'row',
                 justifyContent: 'flex-start',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <Text>Transfer to:</Text>
@@ -103,7 +103,7 @@ class ConfirmCategoryDelete extends React.Component {
                             ...g,
                             categories: g.categories.filter(
                               c => c.id !== category.id
-                            )
+                            ),
                           }))
                   }
                   name="category"

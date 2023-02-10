@@ -50,7 +50,7 @@ function NetWorth({ accounts }) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy')
+          pretty: monthUtils.format(month, 'MMMM, yyyy'),
         }))
         .reverse();
 
@@ -81,7 +81,7 @@ function NetWorth({ accounts }) {
         style={{
           backgroundColor: 'white',
           padding: '30px',
-          overflow: 'auto'
+          overflow: 'auto',
         }}
       >
         <View style={{ textAlign: 'right', paddingRight: 20, flexShrink: 0 }}>

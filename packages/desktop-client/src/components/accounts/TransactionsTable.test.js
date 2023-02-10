@@ -8,14 +8,14 @@ import {
   generateTransaction,
   generateAccount,
   generateCategoryGroups,
-  TestProvider
+  TestProvider,
 } from 'loot-core/src/mocks';
 import { initServer } from 'loot-core/src/platform/client/fetch';
 import {
   addSplitTransaction,
   realizeTempTransactions,
   splitTransaction,
-  updateTransaction
+  updateTransaction,
 } from 'loot-core/src/shared';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { SelectedProviderWithItems } from 'loot-design/src/components';
@@ -27,21 +27,21 @@ const uuid = require('loot-core/src/platform/uuid');
 const accounts = [generateAccount('Bank of America')];
 const payees = [
   { id: 'payed-to', name: 'Payed To' },
-  { id: 'guy', name: 'This guy on the side of the road' }
+  { id: 'guy', name: 'This guy on the side of the road' },
 ];
 const categoryGroups = generateCategoryGroups([
   {
     name: 'Investments and Savings',
-    categories: [{ name: 'Savings' }]
+    categories: [{ name: 'Savings' }],
   },
   {
     name: 'Usual Expenses',
-    categories: [{ name: 'Food' }, { name: 'General' }, { name: 'Home' }]
+    categories: [{ name: 'Food' }, { name: 'General' }, { name: 'Home' }],
   },
   {
     name: 'Projects',
-    categories: [{ name: 'Big Projects' }, { name: 'Shed' }]
-  }
+    categories: [{ name: 'Big Projects' }, { name: 'Shed' }],
+  },
 ]);
 const usualGroup = categoryGroups[1];
 
@@ -63,7 +63,7 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
               ? usualGroup.categories[1].id
               : usualGroup.categories[0].id,
           amount: isSplit ? 50 : undefined,
-          sort_order: i
+          sort_order: i,
         },
         isSplit ? 30 : undefined,
         showError
@@ -180,7 +180,7 @@ function initBasicServer() {
         default:
           throw new Error(`queried unknown table: ${query.table}`);
       }
-    }
+    },
   });
 }
 
@@ -206,38 +206,38 @@ const keys = {
   ESC: {
     key: 'Esc',
     keyCode: 27,
-    which: 27
+    which: 27,
   },
   ENTER: {
     key: 'Enter',
     keyCode: 13,
-    which: 13
+    which: 13,
   },
   TAB: {
     key: 'Tab',
     keyCode: 9,
-    which: 9
+    which: 9,
   },
   DOWN: {
     key: 'Down',
     keyCode: 40,
-    which: 40
+    which: 40,
   },
   UP: {
     key: 'Up',
     keyCode: 38,
-    which: 38
+    which: 38,
   },
   LEFT: {
     key: 'Left',
     keyCode: 37,
-    which: 37
+    which: 37,
   },
   RIGHT: {
     key: 'Right',
     keyCode: 39,
-    which: 39
-  }
+    which: 39,
+  },
 };
 
 function prettyDate(date) {
@@ -265,7 +265,7 @@ function renderTransactions(extraProps) {
     isAdding: false,
     onTransactionsChange: t => {
       transactions = t;
-    }
+    },
   };
 
   let result = render(
@@ -278,7 +278,7 @@ function renderTransactions(extraProps) {
       render(
         <LiveTransactionTable {...defaultProps} {...extraProps} {...props} />,
         { container: result.container }
-      )
+      ),
   };
 }
 
@@ -464,7 +464,7 @@ describe('Transactions', () => {
         keys.TAB,
         keys.ENTER,
         keyWithShift(keys.TAB),
-        keyWithShift(keys.ENTER)
+        keyWithShift(keys.ENTER),
       ];
 
       ks.forEach((k, i) => func(k, i));
@@ -474,7 +474,7 @@ describe('Transactions', () => {
       let input = editField(container, 'notes', 2);
       let oldValue = input.value;
       fireEvent.change(input, {
-        target: { value: 'a happy little note' + idx }
+        target: { value: 'a happy little note' + idx },
       });
       // It's not saved yet
       expect(getTransactions()[2].notes).toBe(oldValue);
@@ -788,7 +788,7 @@ describe('Transactions', () => {
     const { container, updateProps } = renderTransactions({
       onCloseAddTransaction: () => {
         updateProps({ isAdding: false });
-      }
+      },
     });
     updateProps({ isAdding: true });
 

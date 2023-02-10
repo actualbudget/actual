@@ -35,7 +35,7 @@ let messageArb = fc
     let timestamp = fc
       .date({
         min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2020-05-01T00:00:00.000Z')
+        max: new Date('2020-05-01T00:00:00.000Z'),
       })
       .noBias()
       .noShrink()
@@ -51,7 +51,7 @@ let messageArb = fc
           return fc.integer(0, 5).map(j => `id${i}/child${j}`);
         })
       ),
-      value: value
+      value: value,
     });
   });
 
@@ -67,7 +67,7 @@ describe('sync migrations', () => {
     await db.insert('transactions', {
       id: 'trans1/child1',
       isChild: 1,
-      amount: 4500
+      amount: 4500,
     });
     tracer.expectNow('applied', ['trans1/child1']);
     await tracer.expectWait('applied', ['trans1/child1']);

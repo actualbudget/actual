@@ -16,7 +16,7 @@ describe('recurring date description', () => {
       getRecurringDescription({
         start: '2021-05-17',
         frequency: 'weekly',
-        interval: 2
+        interval: 2,
       })
     ).toBe('Every 2 weeks on Monday');
   });
@@ -30,7 +30,7 @@ describe('recurring date description', () => {
       getRecurringDescription({
         start: '2021-04-25',
         frequency: 'monthly',
-        interval: 2
+        interval: 2,
       })
     ).toBe('Every 2 months on the 25th');
 
@@ -38,7 +38,7 @@ describe('recurring date description', () => {
       getRecurringDescription({
         start: '2021-04-25',
         frequency: 'monthly',
-        patterns: [{ type: 'day', value: 25 }]
+        patterns: [{ type: 'day', value: 25 }],
       })
     ).toBe('Every month on the 25th');
 
@@ -47,7 +47,7 @@ describe('recurring date description', () => {
         start: '2021-04-25',
         frequency: 'monthly',
         interval: 2,
-        patterns: [{ type: 'day', value: 25 }]
+        patterns: [{ type: 'day', value: 25 }],
       })
     ).toBe('Every 2 months on the 25th');
 
@@ -56,7 +56,7 @@ describe('recurring date description', () => {
       getRecurringDescription({
         start: '2021-04-25',
         frequency: 'monthly',
-        patterns: [{ type: 'day', value: 31 }]
+        patterns: [{ type: 'day', value: 31 }],
       })
     ).toBe('Every month on the 31st');
 
@@ -65,7 +65,7 @@ describe('recurring date description', () => {
       getRecurringDescription({
         start: '2021-04-25',
         frequency: 'monthly',
-        patterns: [{ type: 'day', value: -1 }]
+        patterns: [{ type: 'day', value: -1 }],
       })
     ).toBe('Every month on the last day');
 
@@ -74,7 +74,7 @@ describe('recurring date description', () => {
       getRecurringDescription({
         start: '2021-04-25',
         frequency: 'monthly',
-        patterns: [{ type: 'FR', value: 2 }]
+        patterns: [{ type: 'FR', value: 2 }],
       })
     ).toBe('Every month on the 2nd Friday');
 
@@ -82,7 +82,7 @@ describe('recurring date description', () => {
       getRecurringDescription({
         start: '2021-04-25',
         frequency: 'monthly',
-        patterns: [{ type: 'FR', value: -1 }]
+        patterns: [{ type: 'FR', value: -1 }],
       })
     ).toBe('Every month on the last Friday');
   });
@@ -96,8 +96,8 @@ describe('recurring date description', () => {
         patterns: [
           { type: 'day', value: 15 },
           { type: 'day', value: 3 },
-          { type: 'day', value: 20 }
-        ]
+          { type: 'day', value: 20 },
+        ],
       })
     ).toBe('Every month on the 3rd, 15th, and 20th');
 
@@ -108,8 +108,8 @@ describe('recurring date description', () => {
         patterns: [
           { type: 'day', value: 3 },
           { type: 'day', value: -1 },
-          { type: 'day', value: 20 }
-        ]
+          { type: 'day', value: 20 },
+        ],
       })
     ).toBe('Every month on the 3rd, 20th, and last day');
 
@@ -121,8 +121,8 @@ describe('recurring date description', () => {
         patterns: [
           { type: 'day', value: 3 },
           { type: 'day', value: -1 },
-          { type: 'FR', value: 2 }
-        ]
+          { type: 'FR', value: 2 },
+        ],
       })
     ).toBe('Every month on the 2nd Friday, 3rd, and last day');
 
@@ -135,8 +135,8 @@ describe('recurring date description', () => {
           { type: 'SA', value: 1 },
           { type: 'day', value: 2 },
           { type: 'FR', value: 3 },
-          { type: 'day', value: 10 }
-        ]
+          { type: 'day', value: 10 },
+        ],
       })
     ).toBe('Every month on the 1st Saturday, 3rd Friday, 2nd, and 10th');
   });
@@ -150,7 +150,7 @@ describe('recurring date description', () => {
       getRecurringDescription({
         start: '2021-05-17',
         frequency: 'yearly',
-        interval: 2
+        interval: 2,
       })
     ).toBe('Every 2 years on May 17th');
   });

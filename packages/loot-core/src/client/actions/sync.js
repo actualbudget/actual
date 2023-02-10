@@ -11,7 +11,7 @@ export function unregister() {
     const profile = await send('unregister');
     dispatch({
       type: constants.SET_PROFILE,
-      profile
+      profile,
     });
   };
 }
@@ -32,7 +32,7 @@ export function resetSync() {
             onSuccess: () => {
               // TODO: There won't be a loading indicator for this
               dispatch(resetSync());
-            }
+            },
           })
         );
       } else if (error.reason === 'encrypt-failure') {

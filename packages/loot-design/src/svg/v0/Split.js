@@ -8,7 +8,7 @@ const SvgSplit = props => (
     viewBox="0 0 32 32"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path

@@ -31,6 +31,6 @@ export async function getStartingBalancePayee() {
   let id = await createPayee('Starting Balance');
   return {
     id,
-    category: category ? category.id : null
+    category: category ? category.id : null,
   };
 }

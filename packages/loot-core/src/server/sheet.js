@@ -122,7 +122,7 @@ export async function loadSpreadsheet(db, onSheetChange) {
 
   captureBreadcrumb({
     message: 'loading spreaadsheet',
-    category: 'server'
+    category: 'server',
   });
 
   globalSheet = sheet;
@@ -152,7 +152,7 @@ export async function loadSpreadsheet(db, onSheetChange) {
 
   captureBreadcrumb({
     message: 'loaded spreaadsheet',
-    category: 'server'
+    category: 'server',
   });
 
   return sheet;

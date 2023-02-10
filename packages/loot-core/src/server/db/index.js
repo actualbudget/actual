@@ -8,7 +8,7 @@ import {
   schemaConfig,
   convertForInsert,
   convertForUpdate,
-  convertFromSelect
+  convertFromSelect,
 } from '../aql';
 import {
   makeClock,
@@ -16,14 +16,14 @@ import {
   serializeClock,
   deserializeClock,
   makeClientId,
-  Timestamp
+  Timestamp,
 } from '../crdt';
 import {
   accountModel,
   categoryModel,
   categoryGroupModel,
   payeeModel,
-  payeeRuleModel
+  payeeRuleModel,
 } from '../models';
 import { sendMessages, batchMessages } from '../sync';
 
@@ -88,7 +88,7 @@ export async function loadClock() {
 
     await runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
       1,
-      serializeClock(clock)
+      serializeClock(clock),
     ]);
   }
 }
@@ -181,7 +181,7 @@ export async function update(table, params) {
         row: params.id,
         column: k,
         value: params[k],
-        timestamp: Timestamp.send()
+        timestamp: Timestamp.send(),
       };
     })
   );
@@ -214,7 +214,7 @@ export async function insert(table, row) {
         row: row.id,
         column: k,
         value: row[k],
-        timestamp: Timestamp.send()
+        timestamp: Timestamp.send(),
       };
     })
   );
@@ -227,8 +227,8 @@ export async function delete_(table, id) {
       row: id,
       column: 'tombstone',
       value: 1,
-      timestamp: Timestamp.send()
-    }
+      timestamp: Timestamp.send(),
+    },
   ]);
 }
 
@@ -285,7 +285,7 @@ export async function getCategoriesGrouped() {
   return groups.map(group => {
     return {
       ...group,
-      categories: rows.filter(row => row.cat_group === group.id)
+      categories: rows.filter(row => row.cat_group === group.id),
     };
   });
 }
@@ -298,7 +298,7 @@ export async function insertCategoryGroup(group) {
 
   group = {
     ...categoryGroupModel.validate(group),
-    sort_order: sort_order
+    sort_order: sort_order,
   };
   return insertWithUUID('category_groups', group);
 }
@@ -322,7 +322,7 @@ export async function moveCategoryGroup(id, targetId) {
 
 export async function deleteCategoryGroup(group, transferId) {
   const categories = await all('SELECT * FROM categories WHERE cat_group = ?', [
-    group.id
+    group.id,
   ]);
 
   // Delete all the categories within a group
@@ -360,7 +360,7 @@ export async function insertCategory(category, { atEnd } = {}) {
 
     category = {
       ...categoryModel.validate(category),
-      sort_order: sort_order
+      sort_order: sort_order,
     };
 
     const id = await insertWithUUID('categories', category);
@@ -429,7 +429,7 @@ export async function insertPayee(payee) {
 
 export async function deletePayee(payee) {
   let { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
-    payee.id
+    payee.id,
   ]);
   if (transfer_acct) {
     // You should never be able to delete transfer payees
@@ -444,7 +444,7 @@ export async function deletePayee(payee) {
   // );
 
   let rules = await all('SELECT * FROM payee_rules WHERE payee_id = ?', [
-    payee.id
+    payee.id,
   ]);
   await Promise.all(rules.map(rule => deletePayeeRule({ id: rule.id })));
   return delete_('payees', payee.id);
@@ -489,7 +489,7 @@ export async function mergePayees(target, ids) {
       ids.map(id =>
         Promise.all([
           update('payee_mapping', { id, targetId: target }),
-          delete_('payees', id)
+          delete_('payees', id),
         ])
       )
     );
@@ -517,7 +517,7 @@ export async function getOrphanedPayees() {
 
 export async function getPayeeByName(name) {
   return first(`SELECT * FROM payees WHERE LOWER(name) = ? AND tombstone = 0`, [
-    name.toLowerCase()
+    name.toLowerCase(),
   ]);
 }
 

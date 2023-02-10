@@ -12,7 +12,7 @@ describe('Backups', () => {
     function cleanDates(backups) {
       return backups.map(backup => ({
         id: backup.id,
-        date: dateFns.format(backup.date, 'yyyy-MM-dd')
+        date: dateFns.format(backup.date, 'yyyy-MM-dd'),
       }));
     }
 
@@ -23,7 +23,7 @@ describe('Backups', () => {
           { id: 'backup1', date: dateFns.parseISO('2017-01-01') },
           { id: 'backup2', date: dateFns.parseISO('2017-01-01') },
           { id: 'backup3', date: dateFns.parseISO('2017-01-01') },
-          { id: 'backup4', date: dateFns.parseISO('2017-01-01') }
+          { id: 'backup4', date: dateFns.parseISO('2017-01-01') },
         ])
       )
     ).toMatchSnapshot();
@@ -36,7 +36,7 @@ describe('Backups', () => {
           { id: 'backup1', date: dateFns.parseISO('2017-01-01') },
           { id: 'backup2', date: dateFns.parseISO('2017-01-01') },
           { id: 'backup3', date: dateFns.parseISO('2016-12-30') },
-          { id: 'backup4', date: dateFns.parseISO('2016-12-29') }
+          { id: 'backup4', date: dateFns.parseISO('2016-12-29') },
         ])
       )
     ).toMatchSnapshot();
@@ -50,7 +50,7 @@ describe('Backups', () => {
           { id: 'backup2', date: dateFns.parseISO('2017-01-01') },
           { id: 'backup3', date: dateFns.parseISO('2016-12-29') },
           { id: 'backup4', date: dateFns.parseISO('2016-12-29') },
-          { id: 'backup5', date: dateFns.parseISO('2016-12-29') }
+          { id: 'backup5', date: dateFns.parseISO('2016-12-29') },
         ])
       )
     ).toMatchSnapshot();
@@ -70,7 +70,7 @@ describe('Backups', () => {
           { id: 'backup9', date: dateFns.parseISO('2016-12-23') },
           { id: 'backup10', date: dateFns.parseISO('2016-12-22') },
           { id: 'backup11', date: dateFns.parseISO('2016-12-21') },
-          { id: 'backup12', date: dateFns.parseISO('2016-12-20') }
+          { id: 'backup12', date: dateFns.parseISO('2016-12-20') },
         ])
       )
     ).toMatchSnapshot();

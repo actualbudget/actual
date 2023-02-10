@@ -52,7 +52,7 @@ function makeContext(queryState, opts, QueryClass) {
 
   return {
     Provider,
-    useQuery
+    useQuery,
   };
 }
 
@@ -80,7 +80,7 @@ export function queryContext(queryState, opts) {
 
   return {
     Provider,
-    useQuery
+    useQuery,
   };
 }
 

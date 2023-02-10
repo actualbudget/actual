@@ -89,7 +89,7 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
           name,
           args,
           undoTag: undo.snapshot(),
-          catchErrors: !!catchErrors
+          catchErrors: !!catchErrors,
         });
       } else {
         messageQueue.push({
@@ -97,7 +97,7 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
           name,
           args,
           undoTag: undo.snapshot(),
-          catchErrors
+          catchErrors,
         });
       }
     });

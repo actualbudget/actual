@@ -226,8 +226,8 @@ export class PagedQuery extends LiveQuery {
       result = await runQuery(
         this.query.filter({
           [field]: {
-            [order === 'asc' ? '$lte' : '$gte']: fullRow[field]
-          }
+            [order === 'asc' ? '$lte' : '$gte']: fullRow[field],
+          },
         })
       );
       let data = result.data;
@@ -238,15 +238,15 @@ export class PagedQuery extends LiveQuery {
         this.query
           .filter({
             [field]: {
-              [order === 'asc' ? '$gt' : '$lt']: fullRow[field]
-            }
+              [order === 'asc' ? '$gt' : '$lt']: fullRow[field],
+            },
           })
           .limit(this.pageCount)
       );
 
       return {
         data: data.concat(result.data),
-        dependencies: result.dependencies
+        dependencies: result.dependencies,
       };
     });
 

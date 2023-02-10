@@ -29,7 +29,7 @@ export async function encrypt(masterKey, value) {
     {
       name: browserAlgorithmName(ENCRYPTION_ALGORITHM),
       iv,
-      tagLength: 128
+      tagLength: 128,
     },
     masterKey.getValue().raw,
     value
@@ -47,8 +47,8 @@ export async function encrypt(masterKey, value) {
       keyId: masterKey.getId(),
       algorithm: ENCRYPTION_ALGORITHM,
       iv: Buffer.from(iv).toString('base64'),
-      authTag: authTag.toString('base64')
-    }
+      authTag: authTag.toString('base64'),
+    },
   };
 }
 
@@ -59,7 +59,7 @@ export async function decrypt(masterKey, encrypted, meta) {
     {
       name: browserAlgorithmName(algorithm),
       iv: Buffer.from(iv, 'base64'),
-      tagLength: 128
+      tagLength: 128,
     },
     masterKey.getValue().raw,
     Buffer.concat([encrypted, Buffer.from(authTag, 'base64')])
@@ -85,7 +85,7 @@ export async function createKey({ secret, salt }) {
       name: 'PBKDF2',
       hash: 'SHA-512',
       salt: saltBuffer,
-      iterations: 10000
+      iterations: 10000,
     },
     passwordKey,
     { name: 'AES-GCM', length: 256 },
@@ -97,7 +97,7 @@ export async function createKey({ secret, salt }) {
 
   return {
     raw: derivedKey,
-    base64: Buffer.from(exported).toString('base64')
+    base64: Buffer.from(exported).toString('base64'),
   };
 }
 
@@ -112,6 +112,6 @@ export async function importKey(str) {
 
   return {
     raw: key,
-    base64: str
+    base64: str,
   };
 }

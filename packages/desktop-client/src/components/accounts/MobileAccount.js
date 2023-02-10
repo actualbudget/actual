@@ -9,7 +9,7 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 import {
   SchedulesProvider,
-  useCachedSchedules
+  useCachedSchedules,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
@@ -17,7 +17,7 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   getSplit,
   isPreviewId,
-  ungroupTransactions
+  ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 import { colors } from 'loot-design/src/style';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
@@ -61,7 +61,7 @@ function PreviewTransactions({ accountId, children }) {
       amount: schedule._amount,
       date: schedule.next_date,
       notes: scheduleData.statuses.get(schedule.id),
-      schedule: schedule.id
+      schedule: schedule.id,
     }))
   );
 }
@@ -79,7 +79,7 @@ function Account(props) {
     newTransactions: state.queries.newTransactions,
     categories: state.queries.categories.list,
     prefs: state.prefs.local,
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy'
+    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
   }));
 
   let dispatch = useDispatch();
@@ -194,7 +194,7 @@ function Account(props) {
       props.showActionSheetWithOptions(
         {
           options,
-          cancelButtonIndex
+          cancelButtonIndex,
         },
         buttonIndex => {
           switch (buttonIndex) {
@@ -220,7 +220,7 @@ function Account(props) {
       }
 
       navigate('Transaction', {
-        transactions: trans
+        transactions: trans,
       });
     }
   };
@@ -282,7 +282,7 @@ export default connect(
     newTransactions: state.queries.newTransactions,
     updatedAccounts: state.queries.updatedAccounts,
     categories: state.queries.categories.list,
-    prefs: state.prefs.local
+    prefs: state.prefs.local,
   }),
   actions
 )(withThemeColor(colors.n11)(Account));

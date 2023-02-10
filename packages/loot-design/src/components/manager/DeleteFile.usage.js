@@ -16,7 +16,7 @@ export default () => (
             name: 'Finances 2',
             id: 'msdfmsdf',
             cloudFileId: 'vxsfeqw',
-            state: 'synced'
+            state: 'synced',
           }}
           actions={{}}
         />

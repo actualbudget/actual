@@ -16,7 +16,7 @@ export default class Spreadsheet {
     this.computeQueue = [];
     this.events = mitt();
     this._meta = {
-      createdMonths: new Set()
+      createdMonths: new Set(),
     };
   }
 
@@ -38,7 +38,7 @@ export default class Spreadsheet {
         name,
         expr: null,
         value: null,
-        sheet: sheet
+        sheet: sheet,
       });
     }
     return this.nodes.get(name);
@@ -63,7 +63,7 @@ export default class Spreadsheet {
   serialize() {
     return {
       graph: this.graph.getEdges(),
-      nodes: [...this.nodes.entries()]
+      nodes: [...this.nodes.entries()],
     };
   }
 

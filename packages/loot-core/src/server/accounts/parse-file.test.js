@@ -40,7 +40,7 @@ async function importFileWithRealTime(accountId, filepath, dateFormat) {
       amount: amountToInteger(trans.amount),
       date: dateFormat
         ? d.format(d.parse(trans.date, dateFormat, new Date()), 'yyyy-MM-dd')
-        : trans.date
+        : trans.date,
     }));
   }
 

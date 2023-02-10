@@ -35,7 +35,7 @@ export function appendMessages(messages, oldData) {
       type: 'messages',
       messages,
       oldData,
-      undoTag
+      undoTag,
     });
     CURSOR++;
   }
@@ -95,7 +95,7 @@ async function applyUndoAction(messages, meta, undoTag) {
     messages,
     tables,
     meta,
-    undoTag
+    undoTag,
   });
 }
 
@@ -222,7 +222,7 @@ function redoResurrections(messages, oldData) {
         'reflect_budgets',
         'notes',
         'category_mapping',
-        'payee_mapping'
+        'payee_mapping',
       ].includes(message.dataset)
     ) {
       resurrect.add(message.dataset + '.' + message.row);
@@ -236,7 +236,7 @@ function redoResurrections(messages, oldData) {
       row,
       column: 'tombstone',
       value: 0,
-      timestamp: Timestamp.send()
+      timestamp: Timestamp.send(),
     };
   });
 }

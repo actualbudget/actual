@@ -8,7 +8,7 @@ import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
   amountToInteger,
-  looselyParseAmount
+  looselyParseAmount,
 } from 'loot-core/src/shared/util';
 
 import { colors, styles } from '../../style';
@@ -19,7 +19,7 @@ import {
   Modal,
   Select,
   Button,
-  ButtonWithLoading
+  ButtonWithLoading,
 } from '../common';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
@@ -30,7 +30,7 @@ let dateFormats = [
   { format: 'mm dd yyyy', label: 'MM DD YYYY' },
   { format: 'mm dd yy', label: 'MM DD YY' },
   { format: 'dd mm yyyy', label: 'DD MM YYYY' },
-  { format: 'dd mm yy', label: 'DD MM YY' }
+  { format: 'dd mm yy', label: 'DD MM YY' },
 ];
 
 export function parseDate(str, order) {
@@ -185,7 +185,7 @@ function getInitialMappings(transactions) {
     date: dateField,
     amount: amountField,
     payee: payeeField,
-    notes: notesField
+    notes: notesField,
   };
 }
 
@@ -221,13 +221,13 @@ function parseAmountFields(trans, splitMode, flipAmount) {
     return {
       amount: outflow || inflow,
       outflow,
-      inflow
+      inflow,
     };
   }
   return {
     amount: parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)),
     outflow: null,
-    inflow: null
+    inflow: null,
   };
 }
 
@@ -238,7 +238,7 @@ function Transaction({
   parseDateFormat,
   dateFormat,
   splitMode,
-  flipAmount
+  flipAmount,
 }) {
   let transaction = useMemo(
     () =>
@@ -342,7 +342,7 @@ function DateFormatSelect({
   transactions,
   fieldMappings,
   parseDateFormat,
-  onChange
+  onChange,
 }) {
   // We don't actually care about the delimiter, but we try to render
   // it based on the data we have so far. Look in a transaction and
@@ -379,7 +379,7 @@ function FlipAmountOption({ value, disabled, onChange }) {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        userSelect: 'none'
+        userSelect: 'none',
       }}
     >
       <Checkbox
@@ -405,7 +405,7 @@ function SplitOption({ value, onChange }) {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        userSelect: 'none'
+        userSelect: 'none',
       }}
     >
       <Checkbox id="form_split" checked={value} onChange={onChange} />
@@ -508,7 +508,7 @@ export function ImportTransactions({
   parseTransactions,
   importTransactions,
   getPayees,
-  savePrefs
+  savePrefs,
 }) {
   let [loadingState, setLoadingState] = useState('parsing');
   let [error, setError] = useState(null);
@@ -542,7 +542,7 @@ export function ImportTransactions({
     if (errors.length > 0) {
       setError({
         parsed: true,
-        message: errors[0].message || 'Internal error'
+        message: errors[0].message || 'Internal error',
       });
     } else {
       let filetype = getFileType(filename);
@@ -611,12 +611,12 @@ export function ImportTransactions({
       ? {
           amount: null,
           outflow: mappings.amount,
-          inflow: null
+          inflow: null,
         }
       : {
           amount: mappings.amount,
           outflow: null,
-          inflow: null
+          inflow: null,
         };
     setFieldMappings({ ...fieldMappings, ...newFieldMappings });
   }
@@ -624,8 +624,8 @@ export function ImportTransactions({
   function onNewFile() {
     const res = window.Actual.openFileDialog({
       filters: [
-        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] }
-      ]
+        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+      ],
     });
 
     parse(
@@ -668,7 +668,7 @@ export function ImportTransactions({
       finalTransactions.push({
         ...finalTransaction,
         date,
-        amount: amountToInteger(amount)
+        amount: amountToInteger(amount),
       });
     }
 
@@ -685,7 +685,7 @@ export function ImportTransactions({
 
     if (filetype === 'csv') {
       savePrefs({
-        [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings)
+        [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
       savePrefs({ [`csv-delimiter-${accountId}`]: csvDelimiter });
     }
@@ -709,7 +709,7 @@ export function ImportTransactions({
   let headers = [
     { name: 'Date', width: 200 },
     { name: 'Payee', width: 'flex' },
-    { name: 'Notes', width: 'flex' }
+    { name: 'Notes', width: 'flex' },
   ];
 
   if (splitMode) {
@@ -740,7 +740,7 @@ export function ImportTransactions({
           style={{
             flex: 'unset',
             height: 300,
-            border: '1px solid ' + colors.border
+            border: '1px solid ' + colors.border,
           }}
         >
           <TableHeader headers={headers} />
@@ -757,7 +757,7 @@ export function ImportTransactions({
                     textAlign: 'center',
                     marginTop: 25,
                     color: colors.n4,
-                    fontStyle: 'italic'
+                    fontStyle: 'italic',
                   }}
                 >
                   No transactions found
@@ -785,7 +785,7 @@ export function ImportTransactions({
           style={{
             color: colors.r4,
             alignItems: 'center',
-            marginTop: 10
+            marginTop: 10,
           }}
         >
           <Text style={{ maxWidth: 450, marginBottom: 15 }}>
@@ -860,7 +860,7 @@ export function ImportTransactions({
           style={{
             alignSelf: 'flex-end',
             flexDirection: 'row',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
         >
           <ButtonWithLoading
@@ -880,7 +880,7 @@ export function ImportTransactions({
 export default connect(
   state => ({
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    prefs: state.prefs.local
+    prefs: state.prefs.local,
   }),
   actions
 )(ImportTransactions);

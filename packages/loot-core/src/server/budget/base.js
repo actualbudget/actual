@@ -51,7 +51,7 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
       let row = rows[0];
       let amount = row ? row.amount : 0;
       return amount || 0;
-    }
+    },
   });
 
   if (getBudgetType() === 'rollover') {
@@ -65,20 +65,20 @@ function createCategoryGroup(group, sheetName) {
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
     dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
-    run: sumAmounts
+    run: sumAmounts,
   });
 
   if (!group.is_income || getBudgetType() !== 'rollover') {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
       dependencies: group.categories.map(cat => `budget-${cat.id}`),
-      run: sumAmounts
+      run: sumAmounts,
     });
 
     sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
       initialValue: 0,
       dependencies: group.categories.map(cat => `leftover-${cat.id}`),
-      run: sumAmounts
+      run: sumAmounts,
     });
   }
 }
@@ -145,17 +145,17 @@ function handleCategoryChange(months, oldValue, newValue) {
     sheet
       .get()
       .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`
+        `sum-amount-${catId}`,
       ]);
     sheet
       .get()
       .addDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`
+        `budget-${catId}`,
       ]);
     sheet
       .get()
       .addDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`
+        `leftover-${catId}`,
       ]);
   }
 
@@ -163,17 +163,17 @@ function handleCategoryChange(months, oldValue, newValue) {
     sheet
       .get()
       .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`
+        `sum-amount-${catId}`,
       ]);
     sheet
       .get()
       .removeDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`
+        `budget-${catId}`,
       ]);
     sheet
       .get()
       .removeDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`
+        `leftover-${catId}`,
       ]);
   }
 
@@ -211,7 +211,7 @@ function handleCategoryChange(months, oldValue, newValue) {
           .get()
           .addDependencies(sheetName, 'last-month-overspent', [
             `${prevSheetName}!leftover-${id}`,
-            `${prevSheetName}!carryover-${id}`
+            `${prevSheetName}!carryover-${id}`,
           ]);
       }
 
@@ -236,17 +236,17 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
     sheet
       .get()
       .addDependencies(sheetName, 'total-budgeted', [
-        `group-budget-${groupId}`
+        `group-budget-${groupId}`,
       ]);
     sheet
       .get()
       .addDependencies(sheetName, 'total-spent', [
-        `group-sum-amount-${groupId}`
+        `group-sum-amount-${groupId}`,
       ]);
     sheet
       .get()
       .addDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`
+        `group-leftover-${groupId}`,
       ]);
   }
 
@@ -254,17 +254,17 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
     sheet
       .get()
       .removeDependencies(sheetName, 'total-budgeted', [
-        `group-budget-${groupId}`
+        `group-budget-${groupId}`,
       ]);
     sheet
       .get()
       .removeDependencies(sheetName, 'total-spent', [
-        `group-sum-amount-${groupId}`
+        `group-sum-amount-${groupId}`,
       ]);
     sheet
       .get()
       .removeDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`
+        `group-leftover-${groupId}`,
       ]);
   }
 
@@ -373,13 +373,13 @@ export async function doTransfer(categoryIds, transferId) {
 
     let transferValue = budgetActions.getBudget({
       month,
-      category: transferId
+      category: transferId,
     });
 
     budgetActions.setBudget({
       month,
       category: transferId,
-      amount: totalValue + transferValue
+      amount: totalValue + transferValue,
     });
   });
 }

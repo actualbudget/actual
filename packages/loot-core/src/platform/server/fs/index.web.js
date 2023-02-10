@@ -341,5 +341,5 @@ module.exports = {
   removeFile,
   removeDir,
   removeDirRecursively,
-  getModifiedTime
+  getModifiedTime,
 };

@@ -41,11 +41,11 @@ export function MonthCountSelector({ maxMonths, onChange }) {
         marginRight: 20,
         marginTop: -1,
         '& svg': {
-          transition: 'transform .15s'
+          transition: 'transform .15s',
         },
         '& svg:hover': {
-          transform: 'scale(1.2)'
-        }
+          transform: 'scale(1.2)',
+        },
       }}
       title="Choose the number of months shown at a time"
     >

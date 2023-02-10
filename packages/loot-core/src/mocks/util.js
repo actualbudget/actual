@@ -11,7 +11,7 @@ export function expectSnapshotWithDiffer(initialValue, { onlyUpdates } = {}) {
     expectToMatchDiff: value => {
       expect(snapshotDiff(currentValue, value)).toMatchSnapshot();
       currentValue = value;
-    }
+    },
   };
 }
 

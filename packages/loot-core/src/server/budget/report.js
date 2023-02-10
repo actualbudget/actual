@@ -23,7 +23,7 @@ export async function createCategory(cat, sheetName, prevSheetName) {
       `budget-${cat.id}`,
       `sum-amount-${cat.id}`,
       `${prevSheetName}!carryover-${cat.id}`,
-      `${prevSheetName}!leftover-${cat.id}`
+      `${prevSheetName}!leftover-${cat.id}`,
     ],
     run: (budgeted, sumAmount, prevCarryover, prevLeftover) => {
       if (cat.is_income) {
@@ -39,14 +39,14 @@ export async function createCategory(cat, sheetName, prevSheetName) {
           number(sumAmount) +
           (prevCarryover ? number(prevLeftover) : 0)
       );
-    }
+    },
   });
   sheet.get().createDynamic(sheetName, `spent-with-carryover-${cat.id}`, {
     initialValue: 0,
     dependencies: [
       `budget-${cat.id}`,
       `sum-amount-${cat.id}`,
-      `carryover-${cat.id}`
+      `carryover-${cat.id}`,
     ],
     // TODO: Why refresh??
     refresh: true,
@@ -54,7 +54,7 @@ export async function createCategory(cat, sheetName, prevSheetName) {
       return carryover
         ? Math.max(0, safeNumber(number(budgeted) + number(sumAmount)))
         : sumAmount;
-    }
+    },
   });
 
   sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
@@ -69,7 +69,7 @@ export function createSummary(groups, categories, sheetName) {
     dependencies: groups
       .filter(group => !group.is_income)
       .map(group => `group-budget-${group.id}`),
-    run: sumAmounts
+    run: sumAmounts,
   });
 
   sheet.get().createDynamic(sheetName, 'total-spent', {
@@ -78,25 +78,25 @@ export function createSummary(groups, categories, sheetName) {
     dependencies: expenseCategories.map(
       cat => `${sheetName}!spent-with-carryover-${cat.id}`
     ),
-    run: sumAmounts
+    run: sumAmounts,
   });
 
   sheet.get().createDynamic(sheetName, 'total-income', {
     initialValue: 0,
     dependencies: [`group-sum-amount-${incomeGroup.id}`],
-    run: amount => amount
+    run: amount => amount,
   });
 
   sheet.get().createDynamic(sheetName, 'total-leftover', {
     initialValue: 0,
     dependencies: ['total-budgeted', 'total-spent'],
-    run: sumAmounts
+    run: sumAmounts,
   });
 
   sheet.get().createDynamic(sheetName, 'total-budget-income', {
     initialValue: 0,
     dependencies: [`group-budget-${incomeGroup.id}`],
-    run: amount => amount
+    run: amount => amount,
   });
 
   sheet.get().createDynamic(sheetName, 'total-saved', {
@@ -104,7 +104,7 @@ export function createSummary(groups, categories, sheetName) {
     dependencies: ['total-budget-income', 'total-budgeted'],
     run: (income, budgeted) => {
       return income - budgeted;
-    }
+    },
   });
 
   sheet.get().createDynamic(sheetName, 'real-saved', {
@@ -112,6 +112,6 @@ export function createSummary(groups, categories, sheetName) {
     dependencies: ['total-income', 'total-spent'],
     run: (income, spent) => {
       return safeNumber(income - -spent);
-    }
+    },
   });
 }

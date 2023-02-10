@@ -37,7 +37,7 @@ export async function exportToCSV(
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
-      Amount: amount == null ? 0 : integerToAmount(amount)
+      Amount: amount == null ? 0 : integerToAmount(amount),
     })
   );
 
@@ -56,7 +56,7 @@ export async function exportQueryToCSV(query) {
         { IsParent: 'is_parent' },
         { Notes: 'notes' },
         { Category: 'category.name' },
-        { Amount: 'amount' }
+        { Amount: 'amount' },
       ])
       .options({ splits: 'all' })
   );
@@ -79,7 +79,7 @@ export async function exportQueryToCSV(query) {
       Payee: trans.ParentId ? parentsPayees.get(trans.ParentId) : trans.Payee,
       Notes: trans.Notes,
       Category: trans.Category,
-      Amount: trans.Amount == null ? 0 : integerToAmount(trans.Amount)
+      Amount: trans.Amount == null ? 0 : integerToAmount(trans.Amount),
     };
   });
 

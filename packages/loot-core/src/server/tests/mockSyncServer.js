@@ -41,7 +41,7 @@ handlers['/sync/sync'] = async data => {
       currentMessages.push({
         timestamp: msg.getTimestamp(),
         is_encrypted: msg.getIsencrypted(),
-        content: msg.getContent()
+        content: msg.getContent(),
       });
 
       currentClock.merkle = merkle.insert(
@@ -81,7 +81,7 @@ handlers['/plaid/transactions'] = ({
   start_date,
   end_date,
   count,
-  offset
+  offset,
 }) => {
   const accounts = currentMockData.accounts;
   const transactions = currentMockData.transactions[account_id].filter(
@@ -91,7 +91,7 @@ handlers['/plaid/transactions'] = ({
   return {
     accounts: accounts.filter(acct => acct.account_id === account_id),
     transactions: transactions.slice(offset, offset + count),
-    total_transactions: transactions.length
+    total_transactions: transactions.length,
   };
 };
 
@@ -120,7 +120,7 @@ module.exports.getMessages = () => {
       dataset: fields.getDataset(),
       row: fields.getRow(),
       column: fields.getColumn(),
-      value: deserializeValue(fields.getValue())
+      value: deserializeValue(fields.getValue()),
     };
   });
 };

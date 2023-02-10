@@ -28,7 +28,7 @@ afterEach(() => {
 
 let schema = {
   spreadsheet_cells: {
-    expr: 'text'
+    expr: 'text',
   },
   accounts: {
     account_id: 'text',
@@ -43,7 +43,7 @@ let schema = {
     bank: 'text',
     offbudget: 'integer',
     closed: 'integer',
-    tombstone: 'integer'
+    tombstone: 'integer',
   },
   transactions: {
     isParent: 'integer',
@@ -62,35 +62,35 @@ let schema = {
     starting_balance_flag: 'integer',
     transferred_id: 'text',
     sort_order: 'real',
-    tombstone: 'integer'
+    tombstone: 'integer',
   },
   categories: {
     name: 'text',
     is_income: 'integer',
     cat_group: 'text',
     sort_order: 'real',
-    tombstone: 'integer'
+    tombstone: 'integer',
   },
   category_groups: {
     name: 'text',
     is_income: 'integer',
     sort_order: 'real',
-    tombstone: 'integer'
+    tombstone: 'integer',
   },
   category_mapping: { transferId: 'text' },
   payees: {
     name: 'text',
     transfer_acct: 'text',
     category: 'text',
-    tombstone: 'integer'
+    tombstone: 'integer',
   },
   payee_rules: {
     payee_id: 'text',
     type: 'text',
     value: 'text',
-    tombstone: 'integer'
+    tombstone: 'integer',
   },
-  payee_mapping: { targetId: 'text' }
+  payee_mapping: { targetId: 'text' },
 };
 
 // The base time is 2019-08-09T18:14:31.903Z
@@ -118,7 +118,7 @@ function makeGen({ table, row, field, value }) {
         return new Timestamp(baseTime + x, 0, clientId);
       },
       x => x.millis - baseTime
-    )
+    ),
   });
 }
 
@@ -134,7 +134,7 @@ Object.keys(schema).forEach(table => {
             x => x
           ),
           field: 'expr',
-          value: jsc.constant(JSON.stringify('fooooo'))
+          value: jsc.constant(JSON.stringify('fooooo')),
         })
       );
       return obj;
@@ -224,7 +224,7 @@ async function run(msgs) {
       Date.now(),
       0,
       '0000000000000000'
-    ).toString()
+    ).toString(),
   });
 
   await global.emptyDatabase()();
@@ -250,7 +250,7 @@ async function run(msgs) {
       res.secondMessages.map(x => ({
         ...x,
         value: sync.serializeValue(x.value),
-        timestamp: x.timestamp.toString()
+        timestamp: x.timestamp.toString(),
       }))
     )
   );
@@ -269,7 +269,7 @@ async function run(msgs) {
       res.secondMessages.map(x => ({
         ...x,
         value: sync.serializeValue(x.value),
-        timestamp: x.timestamp.toString()
+        timestamp: x.timestamp.toString(),
       }))
     )
   );
@@ -341,7 +341,7 @@ describe('sync property test', () => {
       console.log(
         test.counterexample[0].map(x => ({
           ...x,
-          timestamp: x.timestamp.toString()
+          timestamp: x.timestamp.toString(),
         }))
       );
 
@@ -353,7 +353,7 @@ describe('sync property test', () => {
     function convert(data) {
       return data.map(x => ({
         ...x,
-        timestamp: Timestamp.parse(x.timestamp)
+        timestamp: Timestamp.parse(x.timestamp),
       }));
     }
 
@@ -366,8 +366,8 @@ describe('sync property test', () => {
         row: 't',
         column: 'balance_limit',
         value: 0,
-        timestamp: '2019-08-09T18:14:34.545Z-0000-90xU1sd5124329ac'
-      }
+        timestamp: '2019-08-09T18:14:34.545Z-0000-90xU1sd5124329ac',
+      },
       // ...
     ]);
 

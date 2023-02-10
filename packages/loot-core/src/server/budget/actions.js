@@ -81,7 +81,7 @@ export function setBudget({ category, month, amount }) {
     id: `${dbMonth(month)}-${category}`,
     month: dbMonth(month),
     category,
-    amount
+    amount,
   });
 }
 
@@ -93,7 +93,7 @@ export function setBuffer(month, amount) {
   if (existing) {
     return db.update('zero_budget_months', {
       id: existing.id,
-      buffered: amount
+      buffered: amount,
     });
   }
   return db.insert('zero_budget_months', { id: month, buffered: amount });
@@ -111,7 +111,7 @@ function setCarryover(table, category, month, flag) {
     id: `${month}-${category}`,
     month,
     category,
-    carryover: flag ? 1 : 0
+    carryover: flag ? 1 : 0,
   });
 }
 
@@ -130,7 +130,7 @@ export async function copyPreviousMonth({ month }) {
       setBudget({
         category: prevBudget.category,
         month,
-        amount: prevBudget.amount
+        amount: prevBudget.amount,
       });
     });
   });
@@ -232,7 +232,7 @@ export async function coverOverspending({ month, to, from }) {
     await setBudget({
       category: from,
       month,
-      amount: fromBudgeted - amountCovered
+      amount: fromBudgeted - amountCovered,
     });
   }
 

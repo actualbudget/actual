@@ -43,7 +43,7 @@ async function insertTransactions(transactions, payeeIds) {
       for (let i = 0; i < payeeIds.length; i++) {
         await db.insertPayee({
           id: payeeIds[i],
-          name: 'payee' + (i + 1)
+          name: 'payee' + (i + 1),
         });
       }
     }
@@ -55,7 +55,7 @@ function expectTransactionOrder(data, fields) {
     { date: 'desc' },
     'starting_balance_flag',
     { sort_order: 'desc' },
-    'id'
+    'id',
   ];
 
   let sorted = [...data].sort((i1, i2) => {
@@ -130,7 +130,7 @@ describe('transaction executors', () => {
         arbs.makeTransactionArray({
           splitFreq: 2,
           minLength: 2,
-          maxLength: 20
+          maxLength: 20,
         }),
         async arr => {
           await insertTransactions(arr);
@@ -167,7 +167,7 @@ describe('transaction executors', () => {
         arbs.makeTransactionArray({
           splitFreq: 2,
           minLength: 2,
-          maxLength: 8
+          maxLength: 8,
         }),
         async arr => {
           await insertTransactions(arr);
@@ -200,7 +200,7 @@ describe('transaction executors', () => {
             let aggQuery = query('transactions')
               .filter({
                 $or: [{ amount: { $lt: -5 } }, { amount: { $gt: -2 } }],
-                'payee.name': { $gt: '' }
+                'payee.name': { $gt: '' },
               })
               .options({ splits: 'grouped' })
               .calculate({ $sum: '$amount' });
@@ -316,7 +316,7 @@ describe('transaction executors', () => {
           arbs.makeTransactionArray({
             splitFreq: 0.1,
             payeeIds,
-            maxLength: 100
+            maxLength: 100,
           }),
           check
         )
@@ -344,7 +344,7 @@ describe('transaction executors', () => {
       // should take the optimized path
       let happyQuery = query('transactions')
         .filter({
-          date: { $gt: '2017-01-01' }
+          date: { $gt: '2017-01-01' },
         })
         .options({ splits: 'grouped' })
         .select(['*', 'payee.name']);
@@ -354,7 +354,7 @@ describe('transaction executors', () => {
 
       return {
         expectedIds,
-        query: happyQuery
+        query: happyQuery,
       };
     });
   });
@@ -395,7 +395,7 @@ describe('transaction executors', () => {
         .filter({
           id: [{ $oneof: ids }],
           payee: { $gt: '' },
-          $or: [{ amount: { $lt: -2 } }, { amount: { $gt: -1 } }]
+          $or: [{ amount: { $lt: -2 } }, { amount: { $gt: -1 } }],
         })
         .options({ splits: 'grouped' })
         .select(['*', 'payee.name'])
@@ -408,7 +408,7 @@ describe('transaction executors', () => {
       return {
         expectedIds,
         expectedMatchedIds: matched,
-        query: unhappyQuery
+        query: unhappyQuery,
       };
     });
   });

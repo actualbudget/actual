@@ -23,7 +23,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             <label
               style={{
                 display: 'flex',
-                color: disabled ? colors.n5 : 'inherit'
+                color: disabled ? colors.n5 : 'inherit',
               }}
             >
               <Checkbox
@@ -60,7 +60,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                 checked={flags.goalTemplatesEnabled}
                 onChange={() => {
                   savePrefs({
-                    'flags.goalTemplatesEnabled': !flags.goalTemplatesEnabled
+                    'flags.goalTemplatesEnabled': !flags.goalTemplatesEnabled,
                   });
                 }}
               />{' '}
@@ -73,7 +73,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             style={{
               flexShrink: 0,
               alignSelf: 'flex-start',
-              color: colors.p4
+              color: colors.p4,
             }}
           >
             I understand the risks, show experimental features

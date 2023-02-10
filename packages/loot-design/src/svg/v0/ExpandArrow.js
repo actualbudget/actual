@@ -7,7 +7,7 @@ const SvgExpandArrow = props => (
     viewBox="0 0 25 15"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path

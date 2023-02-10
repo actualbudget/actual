@@ -52,7 +52,7 @@ function init(serverChannel, handlers) {
               id,
               result,
               mutated: isMutating(handlers[name]),
-              undoTag
+              undoTag,
             });
           },
           nativeError => {
@@ -66,7 +66,7 @@ function init(serverChannel, handlers) {
               serverChannel.postMessage({
                 type: 'reply',
                 id,
-                result: { error, data: null }
+                result: { error, data: null },
               });
             } else {
               serverChannel.postMessage({ type: 'error', id });
@@ -89,7 +89,7 @@ function init(serverChannel, handlers) {
           type: 'reply',
           id,
           result: null,
-          error: { type: 'APIError', message: 'Unknown method: ' + name }
+          error: { type: 'APIError', message: 'Unknown method: ' + name },
         });
       }
     },
@@ -104,7 +104,7 @@ function send(name, args) {
     getGlobalObject().__globalServerChannel.postMessage({
       type: 'push',
       name,
-      args
+      args,
     });
   }
 }

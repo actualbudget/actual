@@ -14,7 +14,7 @@ let items = [
   { id: 'five', name: 'Charlotte' },
   { id: 'six', name: 'Fannie' },
   { id: 'seven', name: 'Lily' },
-  { id: 'eight', name: 'Gray' }
+  { id: 'eight', name: 'Gray' },
 ];
 
 export default () => (

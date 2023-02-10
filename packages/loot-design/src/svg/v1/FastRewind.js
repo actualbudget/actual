@@ -7,7 +7,7 @@ const SvgFastRewind = props => (
     viewBox="0 0 20 20"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path d="M19 5v10l-9-5 9-5zm-9 0v10l-9-5 9-5z" fill="currentColor" />

@@ -10,7 +10,7 @@ import {
   Text,
   Block,
   P,
-  AlignedText
+  AlignedText,
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 
@@ -52,7 +52,7 @@ function CashFlow() {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy')
+          pretty: monthUtils.format(month, 'MMMM, yyyy'),
         }))
         .reverse();
 
@@ -99,7 +99,7 @@ function CashFlow() {
           backgroundColor: 'white',
           paddingLeft: 30,
           paddingRight: 30,
-          overflow: 'auto'
+          overflow: 'auto',
         }}
       >
         <View
@@ -108,7 +108,7 @@ function CashFlow() {
             paddingRight: 20,
             flexShrink: 0,
             alignItems: 'flex-end',
-            color: colors.n3
+            color: colors.n3,
           }}
         >
           <AlignedText

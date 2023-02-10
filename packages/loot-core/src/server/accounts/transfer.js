@@ -75,7 +75,7 @@ export async function addTransfer(transaction, transferredAccount) {
     date: transaction.date,
     transfer_id: transaction.id,
     notes: transaction.notes || null,
-    cleared: false
+    cleared: false,
   });
 
   await db.updateTransaction({ id: transaction.id, transfer_id: id });
@@ -84,7 +84,7 @@ export async function addTransfer(transaction, transferredAccount) {
   return {
     id: transaction.id,
     transfer_id: id,
-    ...(categoryCleared ? { category: null } : {})
+    ...(categoryCleared ? { category: null } : {}),
   };
 }
 
@@ -103,7 +103,7 @@ export async function removeTransfer(transaction) {
       await db.updateTransaction({
         id: transaction.transfer_id,
         transfer_id: null,
-        payee: null
+        payee: null,
       });
     } else {
       await db.deleteTransaction({ id: transaction.transfer_id });
@@ -124,7 +124,7 @@ export async function updateTransfer(transaction, transferredAccount) {
     payee: payee.id,
     date: transaction.date,
     notes: transaction.notes,
-    amount: -transaction.amount
+    amount: -transaction.amount,
   });
 
   const categoryCleared = await clearCategory(transaction, transferredAccount);

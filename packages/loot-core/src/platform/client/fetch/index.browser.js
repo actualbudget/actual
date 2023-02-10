@@ -19,7 +19,7 @@ class ReconstructedError extends Error {
       },
       set: function (value) {
         this._stack = value;
-      }
+      },
     });
 
     this.stack = stack;
@@ -144,7 +144,7 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
           name,
           args,
           undoTag: undo.snapshot(),
-          catchErrors
+          catchErrors,
         });
       } else {
         messageQueue.push({
@@ -152,7 +152,7 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
           name,
           args,
           undoTag: undo.snapshot(),
-          catchErrors
+          catchErrors,
         });
       }
     });

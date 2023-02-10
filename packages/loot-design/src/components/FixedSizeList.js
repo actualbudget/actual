@@ -24,7 +24,7 @@ export class FixedSizeList extends React.PureComponent {
     layout: 'vertical',
     overscanCount: 2,
     useIsScrolling: false,
-    headerHeight: 0
+    headerHeight: 0,
   };
 
   constructor(props) {
@@ -44,7 +44,7 @@ export class FixedSizeList extends React.PureComponent {
         typeof this.props.initialScrollOffset === 'number'
           ? this.props.initialScrollOffset
           : 0,
-      scrollUpdateWasRequested: false
+      scrollUpdateWasRequested: false,
     };
   }
 
@@ -61,7 +61,7 @@ export class FixedSizeList extends React.PureComponent {
         scrollDirection:
           prevState.scrollOffset < scrollOffset ? 'forward' : 'backward',
         scrollOffset: scrollOffset,
-        scrollUpdateWasRequested: true
+        scrollUpdateWasRequested: true,
       };
     }, this._resetIsScrollingDebounced);
   }
@@ -146,7 +146,7 @@ export class FixedSizeList extends React.PureComponent {
       outerTagName,
       style,
       useIsScrolling,
-      width
+      width,
     } = this.props;
     const { isScrolling } = this.state;
 
@@ -180,7 +180,7 @@ export class FixedSizeList extends React.PureComponent {
             key,
             style,
             isScrolling: useIsScrolling ? isScrolling : undefined,
-            isAnimating: animating
+            isAnimating: animating,
           })
         );
       }
@@ -206,7 +206,7 @@ export class FixedSizeList extends React.PureComponent {
               height,
               width,
               overflow: 'auto',
-              ...style
+              ...style,
             }}
           >
             <View innerRef={headerRef}>{header}</View>
@@ -216,7 +216,7 @@ export class FixedSizeList extends React.PureComponent {
                 position: 'relative',
                 height: estimatedTotalSize,
                 width: '100%',
-                pointerEvents: isScrolling ? 'none' : undefined
+                pointerEvents: isScrolling ? 'none' : undefined,
               }}
             >
               {items}
@@ -254,7 +254,7 @@ export class FixedSizeList extends React.PureComponent {
 
     this.anchored = {
       key,
-      offset: scrollOffset - this.getItemOffset(index)
+      offset: scrollOffset - this.getItemOffset(index),
     };
   }
 
@@ -359,7 +359,7 @@ export class FixedSizeList extends React.PureComponent {
         overscanStartIndex,
         overscanStopIndex,
         visibleStartIndex,
-        visibleStopIndex
+        visibleStopIndex,
       })
   );
 
@@ -368,7 +368,7 @@ export class FixedSizeList extends React.PureComponent {
       this.props.onScroll({
         scrollDirection,
         scrollOffset,
-        scrollUpdateWasRequested
+        scrollUpdateWasRequested,
       })
   );
 
@@ -380,7 +380,7 @@ export class FixedSizeList extends React.PureComponent {
           overscanStartIndex,
           overscanStopIndex,
           visibleStartIndex,
-          visibleStopIndex
+          visibleStopIndex,
         ] = this._getRangeToRender();
         this._callOnItemsRendered(
           overscanStartIndex,
@@ -423,7 +423,7 @@ export class FixedSizeList extends React.PureComponent {
         left: 0,
         top: offset,
         height: size,
-        width: '100%'
+        width: '100%',
       };
     }
 
@@ -463,7 +463,7 @@ export class FixedSizeList extends React.PureComponent {
       Math.max(0, startIndex - overscanBackward),
       Math.max(0, Math.min(itemCount - 1, stopIndex + overscanForward)),
       startIndex,
-      stopIndex
+      stopIndex,
     ];
   }
 
@@ -485,7 +485,7 @@ export class FixedSizeList extends React.PureComponent {
         scrollDirection:
           prevState.scrollOffset < scrollOffset ? 'forward' : 'backward',
         scrollOffset,
-        scrollUpdateWasRequested: false
+        scrollUpdateWasRequested: false,
       };
     }, this._resetIsScrollingDebounced);
   };

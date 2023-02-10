@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useRef,
   useCallback,
-  useMemo
+  useMemo,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -27,7 +27,7 @@ import {
   Button,
   Stack,
   ExternalLink,
-  Input
+  Input,
 } from 'loot-design/src/components/common';
 import {
   SelectCell,
@@ -36,12 +36,12 @@ import {
   Cell,
   CellButton,
   TableHeader,
-  useTableNavigator
+  useTableNavigator,
 } from 'loot-design/src/components/table';
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
-  SelectedProvider
+  SelectedProvider,
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
 import ArrowRight from 'loot-design/src/svg/v0/RightArrow2';
@@ -53,7 +53,7 @@ export function Value({
   field,
   inline = false,
   data: dataProp,
-  describe = x => x.name
+  describe = x => x.name,
 }) {
   let { data, dateFormat } = useSelector(state => {
     let data;
@@ -77,7 +77,7 @@ export function Value({
 
     return {
       data,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy'
+      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
   let [expanded, setExpanded] = useState(false);
@@ -178,7 +178,7 @@ export function Value({
               {...css({
                 color: colors.p4,
                 textDecoration: 'none',
-                ':hover': { textDecoration: 'underline' }
+                ':hover': { textDecoration: 'underline' },
               })}
             >
               {numHidden} more items...
@@ -208,7 +208,7 @@ export function ConditionExpression({
   value,
   options,
   stage,
-  style
+  style,
 }) {
   return (
     <View
@@ -221,9 +221,9 @@ export function ConditionExpression({
           padding: '3px 5px',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
-          textOverflow: 'ellipsis'
+          textOverflow: 'ellipsis',
         },
-        style
+        style,
       ]}
     >
       <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
@@ -268,9 +268,9 @@ export function ActionExpression({ field, op, value, options, style }) {
           padding: '3px 5px',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
-          textOverflow: 'ellipsis'
+          textOverflow: 'ellipsis',
         },
-        style
+        style,
       ]}
     >
       {op === 'set' ? (
@@ -299,7 +299,7 @@ let Rule = React.memo(
     focusedField,
     onHover,
     onEdit,
-    onEditRule
+    onEditRule,
   }) => {
     let dispatchSelected = useSelectedDispatch();
     let borderColor = selected ? colors.b8 : colors.border;
@@ -336,7 +336,7 @@ let Rule = React.memo(
                 backgroundColor: colors.b10,
                 color: colors.b1,
                 borderRadius: 4,
-                padding: '3px 5px'
+                padding: '3px 5px',
               }}
             >
               {rule.stage}
@@ -431,9 +431,9 @@ let SimpleTable = React.forwardRef(
           {
             flex: 1,
             outline: 'none',
-            '& .animated .animated-row': { transition: '.25s transform' }
+            '& .animated .animated-row': { transition: '.25s transform' },
           },
-          style
+          style,
         ]}
         tabIndex="1"
         {...getNavigatorProps(props)}
@@ -478,7 +478,7 @@ function RulesList({
   collapsed: borderCollapsed,
   onHover,
   onCollapse,
-  onEditRule
+  onEditRule,
 }) {
   if (rules.length === 0) {
     return null;
@@ -534,7 +534,7 @@ function ruleToString(rule, data) {
     friendlyOp(cond.op),
     cond.op === 'oneOf'
       ? cond.value.map(v => mapValue(cond.field, v, data)).join(', ')
-      : mapValue(cond.field, cond.value, data)
+      : mapValue(cond.field, cond.value, data),
   ]);
   let actions = rule.actions.flatMap(action => {
     if (action.op === 'set') {
@@ -542,7 +542,7 @@ function ruleToString(rule, data) {
         friendlyOp(action.op),
         mapField(action.field),
         'to',
-        mapValue(action.field, action.value, data)
+        mapValue(action.field, action.value, data),
       ];
     } else if (action.op === 'link-schedule') {
       let schedule = data.schedules.find(s => s.id === action.value);
@@ -551,7 +551,7 @@ function ruleToString(rule, data) {
         describeSchedule(
           schedule,
           data.payees.find(p => p.id === schedule._payee)
-        )
+        ),
       ];
     } else {
       return [];
@@ -574,7 +574,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
     payees: state.queries.payees,
     categories: state.queries.categories.list,
     accounts: state.queries.accounts,
-    schedules
+    schedules,
   }));
 
   let filteredRules = useMemo(
@@ -598,7 +598,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
     let loadedRules = null;
     if (payeeId) {
       loadedRules = await send('payees-get-rules', {
-        id: payeeId
+        id: payeeId,
       });
     } else {
       loadedRules = await send('rules-get');
@@ -633,7 +633,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
   async function onDeleteSelected() {
     setLoading(true);
     let { someDeletionsFailed } = await send('rule-delete-all', [
-      ...selectedInst.items
+      ...selectedInst.items,
     ]);
 
     if (someDeletionsFailed) {
@@ -666,7 +666,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           });
 
           setLoading(false);
-        }
+        },
       })
     );
   }, []);
@@ -679,17 +679,17 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           field: 'payee',
           op: 'is',
           value: payeeId || null,
-          type: 'id'
-        }
+          type: 'id',
+        },
       ],
       actions: [
         {
           op: 'set',
           field: 'category',
           value: null,
-          type: 'id'
-        }
-      ]
+          type: 'id',
+        },
+      ],
     };
 
     dispatch(
@@ -706,7 +706,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           });
 
           setLoading(false);
-        }
+        },
       })
     );
   }
@@ -727,7 +727,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             flexDirection: 'row',
             alignItems: 'center',
             padding: isModal ? '0 13px 15px' : '0 0 15px',
-            flexShrink: 0
+            flexShrink: 0,
           }}
         >
           <View
@@ -735,7 +735,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
               color: colors.n4,
               flexDirection: 'row',
               alignItems: 'center',
-              width: '50%'
+              width: '50%',
             }}
           >
             <Text>
@@ -765,8 +765,8 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
                 ? null
                 : {
                     backgroundColor: 'white',
-                    '::placeholder': { color: colors.n8 }
-                  }
+                    '::placeholder': { color: colors.n8 },
+                  },
             }}
           />
         </View>
@@ -795,7 +795,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             paddingBlock: 15,
             paddingInline: isModal ? 13 : 0,
             borderTop: isModal && '1px solid ' + colors.border,
-            flexShrink: 0
+            flexShrink: 0,
           }}
         >
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
@@ -817,7 +817,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 export default function ManageRules({
   isModal,
   payeeId,
-  setLoading = () => {}
+  setLoading = () => {},
 }) {
   return (
     <SchedulesQuery.Provider>

@@ -28,8 +28,8 @@ export async function post(url, data) {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
     text = await res.text();
   } catch (err) {
@@ -70,8 +70,8 @@ export async function postBinary(url, data, headers) {
       headers: {
         'Content-Length': data.length,
         'Content-Type': 'application/actual-sync',
-        ...headers
-      }
+        ...headers,
+      },
     });
   } catch (err) {
     throw new PostError('network-failure');

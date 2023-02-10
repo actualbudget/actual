@@ -28,7 +28,7 @@ import {
   loadBackup,
   makeBackup,
   startBackupService,
-  stopBackupService
+  stopBackupService,
 } from './backups';
 import budgetApp from './budget/app';
 import * as budget from './budget/base';
@@ -41,7 +41,7 @@ import {
   serializeClock,
   deserializeClock,
   Timestamp,
-  merkle
+  merkle,
 } from './crdt';
 import * as db from './db';
 import * as mappings from './db/mappings';
@@ -65,7 +65,7 @@ import {
   clearFullSyncTimeout,
   syncAndReceiveMessages,
   resetSync,
-  repairSync
+  repairSync,
 } from './sync';
 import * as syncMigrations from './sync/migrate';
 import toolsApp from './tools/app';
@@ -115,14 +115,14 @@ handlers['transactions-batch-update'] = mutator(async function ({
   added,
   deleted,
   updated,
-  learnCategories
+  learnCategories,
 }) {
   return withUndo(async () => {
     let result = await batchUpdateTransactions({
       added,
       updated,
       deleted,
-      learnCategories
+      learnCategories,
     });
 
     // Return all data updates to the frontend
@@ -151,7 +151,7 @@ handlers['transactions-filter'] = async function ({
   latestDate,
   count,
   notPaged,
-  options = {}
+  options = {},
 }) {
   return db.getTransactions(
     term,
@@ -170,7 +170,7 @@ handlers['transactions-export'] = async function ({
   transactions,
   accounts,
   categoryGroups,
-  payees
+  payees,
 }) {
   return exportToCSV(transactions, accounts, categoryGroups, payees);
 };
@@ -182,7 +182,7 @@ handlers['transactions-export-query'] = async function ({ query: queryState }) {
 handlers['get-categories'] = async function () {
   return {
     grouped: await db.getCategoriesGrouped(),
-    list: await db.getCategories()
+    list: await db.getCategories(),
   };
 };
 
@@ -220,7 +220,7 @@ handlers['rollover-budget-month'] = async function ({ month }) {
     value('from-last-month'),
     value('total-income'),
     value('total-spent'),
-    value('total-leftover')
+    value('total-leftover'),
   ];
 
   for (let group of groups) {
@@ -234,7 +234,7 @@ handlers['rollover-budget-month'] = async function ({ month }) {
       values = values.concat([
         value(`group-budget-${group.id}`),
         value(`group-sum-amount-${group.id}`),
-        value(`group-leftover-${group.id}`)
+        value(`group-leftover-${group.id}`),
       ]);
 
       for (let cat of group.categories) {
@@ -242,7 +242,7 @@ handlers['rollover-budget-month'] = async function ({ month }) {
           value(`budget-${cat.id}`),
           value(`sum-amount-${cat.id}`),
           value(`leftover-${cat.id}`),
-          value(`carryover-${cat.id}`)
+          value(`carryover-${cat.id}`),
         ]);
       }
     }
@@ -267,21 +267,21 @@ handlers['report-budget-month'] = async function ({ month }) {
     value('total-income'),
     value('total-spent'),
     value('real-saved'),
-    value('total-leftover')
+    value('total-leftover'),
   ];
 
   for (let group of groups) {
     values = values.concat([
       value(`group-budget-${group.id}`),
       value(`group-sum-amount-${group.id}`),
-      value(`group-leftover-${group.id}`)
+      value(`group-leftover-${group.id}`),
     ]);
 
     for (let cat of group.categories) {
       values = values.concat([
         value(`budget-${cat.id}`),
         value(`sum-amount-${cat.id}`),
-        value(`leftover-${cat.id}`)
+        value(`leftover-${cat.id}`),
       ]);
 
       if (!group.is_income) {
@@ -310,7 +310,7 @@ handlers['budget-set-type'] = async function ({ type }) {
 handlers['category-create'] = mutator(async function ({
   name,
   groupId,
-  isIncome
+  isIncome,
 }) {
   return withUndo(async () => {
     if (!groupId) {
@@ -320,7 +320,7 @@ handlers['category-create'] = mutator(async function ({
     return db.insertCategory({
       name,
       cat_group: groupId,
-      is_income: isIncome ? 1 : 0
+      is_income: isIncome ? 1 : 0,
     });
   });
 });
@@ -364,7 +364,7 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
       let transfer =
         transferId &&
         (await db.first('SELECT is_income FROM categories WHERE id = ?', [
-          transferId
+          transferId,
         ]));
 
       if (!row || (transferId && !transfer)) {
@@ -392,12 +392,12 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
 
 handlers['category-group-create'] = mutator(async function ({
   name,
-  isIncome
+  isIncome,
 }) {
   return withUndo(async () => {
     return db.insertCategoryGroup({
       name,
-      is_income: isIncome ? 1 : 0
+      is_income: isIncome ? 1 : 0,
     });
   });
 });
@@ -419,7 +419,7 @@ handlers['category-group-move'] = mutator(async function ({ id, targetId }) {
 
 handlers['category-group-delete'] = mutator(async function ({
   id,
-  transferId
+  transferId,
 }) {
   return withUndo(async () => {
     const groupCategories = await db.all(
@@ -499,7 +499,7 @@ handlers['payees-merge'] = mutator(async function ({ targetId, mergeIds }) {
 handlers['payees-batch-change'] = mutator(async function ({
   added,
   deleted,
-  updated
+  updated,
 }) {
   return withUndo(async () => {
     return batchMessages(async () => {
@@ -602,7 +602,7 @@ function validateRule(rule) {
   if (conditionErrors || actionErrors) {
     return {
       conditionErrors,
-      actionErrors
+      actionErrors,
     };
   }
 
@@ -655,7 +655,7 @@ handlers['rule-delete-all'] = mutator(async function (ids) {
 
 handlers['rule-apply-actions'] = mutator(async function ({
   transactionIds,
-  actions
+  actions,
 }) {
   return rules.applyActions(transactionIds, actions, handlers);
 });
@@ -723,7 +723,7 @@ handlers['debugCell'] = async function ({ sheetName, name }) {
   let node = sheet.get().getNode(resolveName(sheetName, name));
   return {
     ...node,
-    _run: node._run && node._run.toString()
+    _run: node._run && node._run.toString(),
   };
 };
 
@@ -789,13 +789,13 @@ handlers['accounts-link'] = async function ({
   institution,
   publicToken,
   accountId,
-  upgradingId
+  upgradingId,
 }) {
   let bankId = await link.handoffPublicToken(institution, publicToken);
 
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
-    'user-key'
+    'user-key',
   ]);
 
   // Get all the available accounts and find the selected one
@@ -811,7 +811,7 @@ handlers['accounts-link'] = async function ({
     balance_available: amountToInteger(account.balances.available),
     balance_limit: amountToInteger(account.balances.limit),
     mask: account.mask,
-    bank: bankId
+    bank: bankId,
   });
 
   await bankSync.syncAccount(
@@ -824,7 +824,7 @@ handlers['accounts-link'] = async function ({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions']
+    tables: ['transactions'],
   });
 
   return 'ok';
@@ -834,7 +834,7 @@ handlers['accounts-connect'] = async function ({
   institution,
   publicToken,
   accountIds,
-  offbudgetIds
+  offbudgetIds,
 }) {
   let bankId = await link.handoffPublicToken(institution, publicToken);
   let ids = await link.addAccounts(bankId, accountIds, offbudgetIds);
@@ -846,19 +846,19 @@ handlers['account-create'] = mutator(async function ({
   type,
   balance,
   offBudget,
-  closed
+  closed,
 }) {
   return withUndo(async () => {
     const id = await db.insertAccount({
       name,
       type,
       offbudget: offBudget ? 1 : 0,
-      closed: closed ? 1 : 0
+      closed: closed ? 1 : 0,
     });
 
     await db.insertPayee({
       name: '',
-      transfer_acct: id
+      transfer_acct: id,
     });
 
     if (balance != null && balance !== 0) {
@@ -871,7 +871,7 @@ handlers['account-create'] = mutator(async function ({
         payee: payee.id,
         date: monthUtils.currentDay(),
         cleared: true,
-        starting_balance_flag: true
+        starting_balance_flag: true,
       });
     }
 
@@ -883,7 +883,7 @@ handlers['account-close'] = mutator(async function ({
   id,
   transferAccountId,
   categoryId,
-  forced
+  forced,
 }) {
   // Unlink the account if it's linked. This makes sure to remove it
   // from Plaid. (This should not be undo-able, as it mutates the
@@ -903,7 +903,7 @@ handlers['account-close'] = mutator(async function ({
     }
 
     const { balance, numTransactions } = await handlers['account-properties']({
-      id
+      id,
     });
 
     // If there are no transactions, we can simply delete the account
@@ -933,7 +933,7 @@ handlers['account-close'] = mutator(async function ({
             db.updateTransaction({
               id: row.transfer_id,
               payee: null,
-              transfer_id: null
+              transfer_id: null,
             });
           }
 
@@ -965,7 +965,7 @@ handlers['account-close'] = mutator(async function ({
           account: id,
           date: monthUtils.currentDay(),
           notes: 'Closing account',
-          category: categoryId || null
+          category: categoryId || null,
         });
       }
     }
@@ -989,7 +989,7 @@ let stopPolling = false;
 handlers['poll-web-token'] = async function ({ token }) {
   let [[, userId], [, key]] = await asyncStorage.multiGet([
     'user-id',
-    'user-key'
+    'user-key',
   ]);
 
   let startTime = Date.now();
@@ -1010,7 +1010,7 @@ handlers['poll-web-token'] = async function ({ token }) {
       {
         userId,
         key,
-        token
+        token,
       }
     );
 
@@ -1044,7 +1044,7 @@ handlers['poll-web-token-stop'] = async function () {
 handlers['accounts-sync'] = async function ({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
-    'user-key'
+    'user-key',
   ]);
   let accounts = await db.runQuery(
     `SELECT a.*, b.id as bankId FROM accounts a
@@ -1089,19 +1089,19 @@ handlers['accounts-sync'] = async function ({ id }) {
             accountId: acct.id,
             message: 'Failed syncing account "' + acct.name + '".',
             category: err.category,
-            code: err.code
+            code: err.code,
           });
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account "${acct.name}" is not linked properly. Please link it again`
+            message: `Account "${acct.name}" is not linked properly. Please link it again`,
           });
         } else {
           errors.push({
             accountId: acct.id,
             message:
               'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
-            internal: err.stack
+            internal: err.stack,
           });
 
           err.message = 'Failed syncing account: ' + err.message;
@@ -1115,7 +1115,7 @@ handlers['accounts-sync'] = async function ({ id }) {
   if (updatedAccounts.length > 0) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions']
+      tables: ['transactions'],
     });
   }
 
@@ -1124,7 +1124,7 @@ handlers['accounts-sync'] = async function ({ id }) {
 
 handlers['transactions-import'] = mutator(function ({
   accountId,
-  transactions
+  transactions,
 }) {
   return withUndo(async () => {
     if (typeof accountId !== 'string') {
@@ -1159,7 +1159,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     bank: null,
     balance_current: null,
     balance_available: null,
-    balance_limit: null
+    balance_limit: null,
   });
 
   let { count } = await db.first(
@@ -1173,13 +1173,13 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 
     let [[, userId], [, key]] = await asyncStorage.multiGet([
       'user-id',
-      'user-key'
+      'user-key',
     ]);
 
     await post(getServer().PLAID_SERVER + '/remove-access-token', {
       userId,
       key,
-      item_id: bankId
+      item_id: bankId,
     });
   }
 
@@ -1189,13 +1189,13 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 handlers['make-plaid-public-token'] = async function ({ bankId }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
-    'user-key'
+    'user-key',
   ]);
 
   let data = await post(getServer().PLAID_SERVER + '/make-public-token', {
     userId: userId,
     key: userKey,
-    item_id: '' + bankId
+    item_id: '' + bankId,
   });
 
   if (data.error_code) {
@@ -1231,14 +1231,14 @@ handlers['load-global-prefs'] = async function () {
     [, maxMonths],
     [, autoUpdate],
     [, documentDir],
-    [, encryptKey]
+    [, encryptKey],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'seen-tutorial',
     'max-months',
     'auto-update',
     'document-dir',
-    'encrypt-key'
+    'encrypt-key',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1246,7 +1246,7 @@ handlers['load-global-prefs'] = async function () {
     maxMonths: stringToInteger(maxMonths || ''),
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
-    keyId: encryptKey && JSON.parse(encryptKey).id
+    keyId: encryptKey && JSON.parse(encryptKey).id,
   };
 };
 
@@ -1260,7 +1260,7 @@ handlers['save-prefs'] = async function (prefsToSet) {
     await post(getServer().SYNC_SERVER + '/update-user-filename', {
       token: userToken,
       fileId: cloudFileId,
-      name: prefsToSet.budgetName
+      name: prefsToSet.budgetName,
     });
   }
 
@@ -1307,8 +1307,8 @@ handlers['key-make'] = async function ({ password }) {
     salt,
     testContent: JSON.stringify({
       ...testContent,
-      value: testContent.value.toString('base64')
-    })
+      value: testContent.value.toString('base64'),
+    }),
   });
 };
 
@@ -1325,7 +1325,7 @@ handlers['key-test'] = async function ({ fileId, password }) {
   try {
     res = await post(getServer().SYNC_SERVER + '/user-get-key', {
       token: userToken,
-      fileId
+      fileId,
     });
   } catch (e) {
     console.log(e);
@@ -1433,8 +1433,8 @@ handlers['subscribe-get-user'] = async function () {
     try {
       let res = await get(getServer().SIGNUP_SERVER + '/validate', {
         headers: {
-          'X-ACTUAL-TOKEN': userToken
-        }
+          'X-ACTUAL-TOKEN': userToken,
+        },
       });
       res = JSON.parse(res);
 
@@ -1460,7 +1460,7 @@ handlers['subscribe-change-password'] = async function ({ password }) {
   try {
     await post(getServer().SIGNUP_SERVER + '/change-password', {
       token: userToken,
-      password
+      password,
     });
   } catch (err) {
     return { error: err.reason || 'network-failure' };
@@ -1471,7 +1471,7 @@ handlers['subscribe-change-password'] = async function ({ password }) {
 
 handlers['subscribe-sign-in'] = async function ({ password }) {
   let res = await post(getServer().SIGNUP_SERVER + '/login', {
-    password
+    password,
   });
 
   if (res.token) {
@@ -1488,7 +1488,7 @@ handlers['subscribe-sign-out'] = async function () {
     'user-token',
     'encrypt-keys',
     'lastBudget',
-    'readOnly'
+    'readOnly',
   ]);
   return 'ok';
 };
@@ -1519,7 +1519,7 @@ handlers['set-server-url'] = async function ({ url }) {
   if (url != null) {
     // Validate the server is running
     let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
-      url
+      url,
     });
     if (error) {
       return { error };
@@ -1566,7 +1566,7 @@ handlers['get-budgets'] = async function () {
               id: name,
               cloudFileId: prefs.cloudFileId,
               groupId: prefs.groupId,
-              name: prefs.budgetName || '(no name)'
+              name: prefs.budgetName || '(no name)',
             };
           }
         }
@@ -1685,7 +1685,7 @@ handlers['create-demo-budget'] = async function () {
   return handlers['create-budget']({
     budgetName: 'Demo Budget',
     testMode: true,
-    testBudgetId: DEMO_BUDGET_ID
+    testBudgetId: DEMO_BUDGET_ID,
   });
 };
 
@@ -1734,7 +1734,7 @@ handlers['create-budget'] = async function ({
   budgetName,
   avoidUpload,
   testMode,
-  testBudgetId
+  testBudgetId,
 } = {}) {
   let id;
   if (testMode) {
@@ -2159,7 +2159,7 @@ export async function initApp(version, isDev, socketName) {
     let autoUpdate = await asyncStorage.getItem('auto-update');
     process.send({
       type: 'shouldAutoUpdate',
-      flag: autoUpdate == null || autoUpdate === 'true'
+      flag: autoUpdate == null || autoUpdate === 'true',
     });
   }
 
@@ -2231,9 +2231,9 @@ export const lib = {
     makeClientId,
     serializeClock,
     deserializeClock,
-    Timestamp
+    Timestamp,
   },
-  SyncProtoBuf: SyncPb
+  SyncProtoBuf: SyncPb,
 };
 
 if (process.env.NODE_ENV === 'development' && Platform.isWeb) {

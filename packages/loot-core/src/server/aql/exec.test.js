@@ -29,12 +29,12 @@ async function insertTransactions(repeatTimes = 1) {
     let cat1 = await db.insertCategory({
       id: 'cat' + i + 'a',
       name: 'cat' + i + 'a',
-      cat_group: group
+      cat_group: group,
     });
     let cat2 = await db.insertCategory({
       id: 'cat' + i + 'b',
       name: 'cat' + i + 'b',
-      cat_group: group
+      cat_group: group,
     });
 
     let parent = {
@@ -42,14 +42,14 @@ async function insertTransactions(repeatTimes = 1) {
       account: 'acct',
       date: '2020-01-04',
       amount: -100,
-      is_parent: true
+      is_parent: true,
     };
     let parent2 = {
       id: uuid.v4Sync(),
       account: 'acct',
       date: '2020-01-01',
       amount: -89,
-      is_parent: true
+      is_parent: true,
     };
 
     transactions = transactions.concat([
@@ -61,7 +61,7 @@ async function insertTransactions(repeatTimes = 1) {
       parent2,
       makeChild(parent2, { amount: -9, category: cat2 }),
       makeChild(parent2, { amount: -80, category: cat1 }),
-      { account: 'acct', date: '2020-01-03', amount: -53, category: cat1 }
+      { account: 'acct', date: '2020-01-03', amount: -53, category: cat1 },
     ]);
   }
 
@@ -122,7 +122,7 @@ describe('runQuery', () => {
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
-      cleared: true
+      cleared: true,
     });
 
     let { data } = await runQuery(
@@ -175,13 +175,13 @@ describe('runQuery', () => {
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
-      category: null
+      category: null,
     });
     let transCat = await db.insertTransaction({
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
-      category: 'cat'
+      category: 'cat',
     });
 
     let queryState = query('transactions')
@@ -202,14 +202,14 @@ describe('runQuery', () => {
       id: transId,
       account: 'acct',
       date: '2020-01-01',
-      amount: -5001
+      amount: -5001,
     });
 
     let { data } = await runQuery(
       query('transactions')
         .filter({
           amount: { $lt: { $neg: ':amount' } },
-          date: [{ $lte: ':date' }, { $gte: ':date' }]
+          date: [{ $lte: ':date' }, { $gte: ':date' }],
         })
         .select()
         .serialize(),

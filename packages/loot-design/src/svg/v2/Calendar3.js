@@ -7,7 +7,7 @@ const SvgCalendar3 = props => (
     viewBox="0 0 24 24"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path

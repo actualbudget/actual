@@ -90,7 +90,7 @@ export function applyChanges(changes, items) {
       const idx = items.findIndex(t => t.id === id);
       items[idx] = {
         ...items[idx],
-        ...fields
+        ...fields,
       };
     });
   }
@@ -251,13 +251,13 @@ export function titleFirst(str) {
 export let numberFormats = [
   { value: 'comma-dot', label: '1,000.33' },
   { value: 'dot-comma', label: '1.000,33' },
-  { value: 'space-comma', label: '1 000,33' }
+  { value: 'space-comma', label: '1 000,33' },
 ];
 
 let numberFormat = {
   value: null,
   formatter: null,
-  regex: null
+  regex: null,
 };
 
 export function setNumberFormat(format) {
@@ -286,9 +286,9 @@ export function setNumberFormat(format) {
     separator,
     formatter: new Intl.NumberFormat(locale, {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }),
-    regex
+    regex,
   };
 }
 

@@ -11,7 +11,7 @@ export function AccountList({
   items,
   getItemProps,
   highlightedIndex,
-  embedded
+  embedded,
 }) {
   let lastItem = null;
 
@@ -20,7 +20,7 @@ export function AccountList({
       <View
         style={[
           { overflow: 'auto', padding: '5px 0' },
-          !embedded && { maxHeight: 175 }
+          !embedded && { maxHeight: 175 },
         ]}
       >
         {items.map((item, idx) => {
@@ -36,7 +36,7 @@ export function AccountList({
                 key={group}
                 style={{
                   color: colors.y9,
-                  padding: '4px 9px'
+                  padding: '4px 9px',
                 }}
                 data-testid="account-item-group"
               >
@@ -51,7 +51,7 @@ export function AccountList({
                   highlightedIndex === idx ? colors.n4 : 'transparent',
                 padding: 4,
                 paddingLeft: 20,
-                borderRadius: embedded ? 4 : 0
+                borderRadius: embedded ? 4 : 0,
               }}
               data-testid={
                 'account-item' +
@@ -59,7 +59,7 @@ export function AccountList({
               }
             >
               {item.name}
-            </div>
+            </div>,
           ];
         })}
       </View>

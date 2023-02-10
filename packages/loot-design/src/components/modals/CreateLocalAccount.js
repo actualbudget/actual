@@ -14,7 +14,7 @@ import {
   Select,
   InlineField,
   FormError,
-  InitialFocus
+  InitialFocus,
 } from '../common';
 
 function CreateLocalAccount({ modalProps, actions, history }) {
@@ -27,7 +27,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
             initialValues={{
               name: '',
               type: 'checking',
-              balance: '0'
+              balance: '0',
             }}
             validate={() => ({})}
             onSubmit={async (values, { setErrors }) => {
@@ -62,7 +62,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
               handleBlur,
               handleSubmit,
               isSubmitting,
-              setFieldValue
+              setFieldValue,
             }) => (
               <form onSubmit={handleSubmit}>
                 <InlineField label="Name" width="75%">
@@ -114,7 +114,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                   style={{
                     width: '75%',
                     flexDirection: 'row',
-                    justifyContent: 'flex-end'
+                    justifyContent: 'flex-end',
                   }}
                 >
                   <label style={{ userSelect: 'none' }}>

@@ -98,7 +98,7 @@ function makePath(state, path) {
     tableName: tableName,
     tableId: uid(tableName),
     joinField: parts[parts.length - 1],
-    joinTable
+    joinTable,
   };
 }
 
@@ -110,7 +110,7 @@ function resolvePath(state, path) {
       let fullName = acc.context + '.' + name;
       return {
         context: fullName,
-        path: [...acc.path, fullName]
+        path: [...acc.path, fullName],
       };
     },
     { context: state.implicitTableName, path: [] }
@@ -137,7 +137,7 @@ function transformField(state, name) {
   if (path === '') {
     pathInfo = {
       tableName: state.implicitTableName,
-      tableId: state.implicitTableId
+      tableId: state.implicitTableId,
     };
   } else {
     pathInfo = resolvePath(state, path);
@@ -210,7 +210,7 @@ function inferParam(param, type) {
       'date-month': ['date'],
       'date-year': ['date', 'date-month'],
       id: ['string'],
-      float: ['integer']
+      float: ['integer'],
     };
 
     if (
@@ -297,7 +297,7 @@ function castInput(state, expr, type) {
 
     if (expr2.literal) {
       return typed(dateToInt(expr2.value.toString().slice(0, 4)), 'date-year', {
-        literal: true
+        literal: true,
       });
     } else {
       return typed(
@@ -456,7 +456,7 @@ function compileLiteral(value) {
     return typed(value ? 1 : 0, 'boolean', { literal: true });
   } else if (typeof value === 'number') {
     return typed(value, Number.isInteger(value) ? 'integer' : 'float', {
-      literal: true
+      literal: true,
     });
   } else if (Array.isArray(value)) {
     return typed(value, 'array', { literal: true });
@@ -554,7 +554,7 @@ const compileFunction = saveStack('function', (state, func) => {
       let [arg1, arg2, arg3] = valArray(state, args, [
         'string',
         'integer',
-        'integer'
+        'integer',
       ]);
       return typed(`SUBSTR(${arg1}, ${arg2}, ${arg3})`, 'string');
     }
@@ -799,7 +799,7 @@ function expandStar(state, expr) {
   if (expr === '*') {
     pathInfo = {
       tableName: state.implicitTableName,
-      tableId: state.implicitTableId
+      tableId: state.implicitTableId,
     };
   } else if (expr.match(/\.\*$/)) {
     let result = popPath(expr);
@@ -954,7 +954,7 @@ export function compileQuery(queryState, schema, schemaConfig = {}) {
   let {
     tableViews = {},
     tableFilters = name => [],
-    customizeQuery = queryState => queryState
+    customizeQuery = queryState => queryState,
   } = schemaConfig;
 
   let internalTableFilters = name => {
@@ -991,7 +991,7 @@ export function compileQuery(queryState, schema, schemaConfig = {}) {
     groupExpressions,
     orderExpressions,
     limit,
-    offset
+    offset,
   } = customizeQuery(queryState);
 
   let select = '';
@@ -1008,7 +1008,7 @@ export function compileQuery(queryState, schema, schemaConfig = {}) {
     compileStack: [],
     outputTypes: new Map(),
     validateRefs,
-    namedParameters: []
+    namedParameters: [],
   };
 
   resetUid();
@@ -1065,12 +1065,12 @@ export function compileQuery(queryState, schema, schemaConfig = {}) {
     groupBy,
     orderBy,
     limit,
-    offset
+    offset,
   };
 
   return {
     sqlPieces,
-    state
+    state,
   };
 }
 

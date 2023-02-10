@@ -16,7 +16,7 @@ async function insertTransactions() {
       amount: -3200,
       account: '1',
       category: 'cat1',
-      date: '2017-01-08'
+      date: '2017-01-08',
     })[0]
   );
   await db.insertTransaction(
@@ -25,7 +25,7 @@ async function insertTransactions() {
       amount: -2800,
       account: '1',
       category: 'cat2',
-      date: '2017-01-10'
+      date: '2017-01-10',
     })[0]
   );
   await db.insertTransaction(
@@ -34,7 +34,7 @@ async function insertTransactions() {
       amount: -9832,
       account: '1',
       category: 'cat2',
-      date: '2017-01-15'
+      date: '2017-01-15',
     })[0]
   );
 }

@@ -11,7 +11,7 @@ import {
   VAR,
   JUMPF,
   JUMPT,
-  LABEL
+  LABEL,
 } from './ops';
 import parse from './parser';
 import generateSql from './sqlgen';
@@ -171,7 +171,7 @@ class Compiler {
     return {
       ops: this.ops,
       dependencies: this.dependencies,
-      sqlDependencies: this.sqlDependencies
+      sqlDependencies: this.sqlDependencies,
     };
   }
 }

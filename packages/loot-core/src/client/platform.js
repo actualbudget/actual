@@ -13,5 +13,5 @@ export default {
   env: 'web',
   isBrowser: !!window.Actual.IS_FAKE_WEB,
   isReactNativeWeb: false,
-  isProbablySafari
+  isProbablySafari,
 };

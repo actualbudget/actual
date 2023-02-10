@@ -5,7 +5,7 @@ import {
   withMigrationsDir,
   getAppliedMigrations,
   getMigrationList,
-  getPending
+  getPending,
 } from './migrations';
 
 beforeEach(global.emptyDatabase(true));

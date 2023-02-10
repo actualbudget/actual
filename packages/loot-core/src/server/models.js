@@ -64,7 +64,7 @@ export const accountModel = {
     );
 
     return account;
-  }
+  },
 };
 
 export const categoryModel = {
@@ -78,7 +78,7 @@ export const categoryModel = {
 
     let { sort_order, ...rest } = category;
     return rest;
-  }
+  },
 };
 
 export const categoryGroupModel = {
@@ -92,14 +92,14 @@ export const categoryGroupModel = {
 
     let { sort_order, ...rest } = categoryGroup;
     return rest;
-  }
+  },
 };
 
 export const payeeModel = {
   validate(payee, { update } = {}) {
     requiredFields('payee', payee, ['name'], update);
     return payee;
-  }
+  },
 };
 
 export const payeeRuleModel = {
@@ -117,7 +117,7 @@ export const payeeRuleModel = {
 
     requiredFields('payee_rules', rule, ['payee_id', 'type'], update);
     return rule;
-  }
+  },
 };
 
 export const transactionModel = {
@@ -187,5 +187,5 @@ export const transactionModel = {
     }
 
     return row;
-  }
+  },
 };

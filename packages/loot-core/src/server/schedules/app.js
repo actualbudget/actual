@@ -9,7 +9,7 @@ import {
   recurConfigToRSchedule,
   getHasTransactionsQuery,
   getStatus,
-  getScheduledAmount
+  getScheduledAmount,
 } from '../../shared/schedules';
 import { Rule, Condition } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
@@ -17,7 +17,7 @@ import {
   insertRule,
   updateRule,
   getRules,
-  ruleModel
+  ruleModel,
 } from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
@@ -116,9 +116,9 @@ export async function fixRuleForSchedule(id) {
     stage: null,
     conditions: [
       { op: 'isapprox', field: 'date', value: currentDay() },
-      { op: 'isapprox', field: 'amount', value: 0 }
+      { op: 'isapprox', field: 'amount', value: 0 },
     ],
-    actions: [{ op: 'link-schedule', value: id }]
+    actions: [{ op: 'link-schedule', value: id }],
   });
 
   await db.updateWithSchema('schedules', { id, rule: newId });
@@ -162,12 +162,12 @@ export async function setNextDate({ id, start, conditions, reset }) {
           ? {
               id: nd.id,
               base_next_date: toDateRepr(newNextDate),
-              base_next_date_ts: Date.now()
+              base_next_date_ts: Date.now(),
             }
           : {
               id: nd.id,
               local_next_date: toDateRepr(newNextDate),
-              local_next_date_ts: nd.base_next_date_ts
+              local_next_date_ts: nd.base_next_date_ts,
             }
       );
     }
@@ -195,7 +195,7 @@ export async function createSchedule({ schedule, conditions = [] } = {}) {
   ruleId = await insertRule({
     stage: null,
     conditions,
-    actions: [{ op: 'link-schedule', value: scheduleId }]
+    actions: [{ op: 'link-schedule', value: scheduleId }],
   });
 
   let now = Date.now();
@@ -204,13 +204,13 @@ export async function createSchedule({ schedule, conditions = [] } = {}) {
     local_next_date: nextDateRepr,
     local_next_date_ts: now,
     base_next_date: nextDateRepr,
-    base_next_date_ts: now
+    base_next_date_ts: now,
   });
 
   await db.insertWithSchema('schedules', {
     ...schedule,
     id: scheduleId,
-    rule: ruleId
+    rule: ruleId,
   });
 
   return scheduleId;
@@ -275,7 +275,7 @@ export async function updateSchedule({ schedule, conditions, resetNextDate }) {
         await setNextDate({
           id: schedule.id,
           conditions: newConditions,
-          reset: true
+          reset: true,
         });
       }
     } else if (resetNextDate) {
@@ -302,7 +302,7 @@ export async function skipNextDate({ id }) {
     id,
     start: nextDate => {
       return d.addDays(parseDate(nextDate), 1);
-    }
+    },
   });
 }
 
@@ -354,7 +354,7 @@ function onRuleUpdate(rule) {
           payeeIdx === -1 ? null : `$[${payeeIdx}]`,
           accountIdx === -1 ? null : `$[${accountIdx}]`,
           amountIdx === -1 ? null : `$[${amountIdx}]`,
-          dateIdx === -1 ? null : `$[${dateIdx}]`
+          dateIdx === -1 ? null : `$[${dateIdx}]`,
         ]
       );
     }
@@ -398,7 +398,7 @@ async function postTransactionForSchedule({ id }) {
     amount: getScheduledAmount(schedule._amount),
     date: schedule.next_date,
     schedule: schedule.id,
-    cleared: false
+    cleared: false,
   };
 
   if (transaction.account) {
@@ -444,7 +444,7 @@ export async function advanceSchedulesService(syncSuccess) {
           if (schedule._date < currentDay()) {
             // Complete any single schedules
             await updateSchedule({
-              schedule: { id: schedule.id, completed: true }
+              schedule: { id: schedule.id, completed: true },
             });
           }
         }
@@ -475,7 +475,7 @@ export async function advanceSchedulesService(syncSuccess) {
     connection.send('sync-event', {
       type: 'success',
       tables: ['transactions'],
-      syncDisabled: 'false'
+      syncDisabled: 'false',
     });
   }
 }

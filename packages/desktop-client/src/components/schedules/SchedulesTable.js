@@ -11,14 +11,14 @@ import {
   Text,
   Button,
   Tooltip,
-  Menu
+  Menu,
 } from 'loot-design/src/components/common';
 import {
   Table,
   TableHeader,
   Row,
   Field,
-  Cell
+  Cell,
 } from 'loot-design/src/components/table';
 import { colors } from 'loot-design/src/style';
 import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
@@ -63,15 +63,15 @@ function OverflowMenu({ schedule, status, onAction }) {
             items={[
               status === 'due' && {
                 name: 'post-transaction',
-                text: 'Post transaction'
+                text: 'Post transaction',
               },
               ...(schedule.completed
                 ? [{ name: 'restart', text: 'Restart' }]
                 : [
                     { name: 'skip', text: 'Skip next date' },
-                    { name: 'complete', text: 'Complete' }
+                    { name: 'complete', text: 'Complete' },
                   ]),
-              { name: 'delete', text: 'Delete' }
+              { name: 'delete', text: 'Delete' },
             ]}
           />
         </Tooltip>
@@ -93,7 +93,7 @@ export function ScheduleAmountCell({ amount, op }) {
         textAlign: 'right',
         flexDirection: 'row',
         alignItems: 'center',
-        padding: '0 5px'
+        padding: '0 5px',
       }}
     >
       {isApprox && (
@@ -102,7 +102,7 @@ export function ScheduleAmountCell({ amount, op }) {
             textAlign: 'left',
             color: colors.n7,
             lineHeight: '1em',
-            marginRight: 10
+            marginRight: 10,
           }}
           title={(isApprox ? 'Approximately ' : '') + str}
         >
@@ -115,7 +115,7 @@ export function ScheduleAmountCell({ amount, op }) {
           color: num > 0 ? colors.g5 : null,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
-          textOverflow: 'ellipsis'
+          textOverflow: 'ellipsis',
         }}
         title={(isApprox ? 'Approximately ' : '') + str}
       >
@@ -134,7 +134,7 @@ export function SchedulesTable({
   style,
   onSelect,
   onAction,
-  tableStyle
+  tableStyle,
 }) {
   let dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
@@ -203,7 +203,7 @@ export function SchedulesTable({
         style={{
           cursor: 'pointer',
           backgroundColor: 'white',
-          ':hover': { backgroundColor: colors.hover }
+          ':hover': { backgroundColor: colors.hover },
         }}
       >
         <Field width="flex">
@@ -251,7 +251,7 @@ export function SchedulesTable({
           style={{
             cursor: 'pointer',
             backgroundColor: 'white',
-            ':hover': { backgroundColor: colors.hover }
+            ':hover': { backgroundColor: colors.hover },
           }}
           onClick={() => setShowCompleted(true)}
         >
@@ -260,7 +260,7 @@ export function SchedulesTable({
             style={{
               fontStyle: 'italic',
               textAlign: 'center',
-              color: colors.n6
+              color: colors.n6,
             }}
           >
             Show completed schedules

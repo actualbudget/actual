@@ -8,7 +8,7 @@ export async function init() {
   // we're returning a real one for correct semantics
   return new Promise((resolve, reject) => {
     initSqlJS({
-      locateFile: file => process.env.PUBLIC_URL + file
+      locateFile: file => process.env.PUBLIC_URL + file,
     }).then(
       sql => {
         SQL = sql;

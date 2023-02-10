@@ -10,7 +10,7 @@ function timeout(promise, n) {
       clearTimeout(timer);
       return res;
     }),
-    timeoutPromise
+    timeoutPromise,
   ]);
 }
 
@@ -141,6 +141,6 @@ export function execTracer() {
         );
       }
       ended = true;
-    }
+    },
   };
 }

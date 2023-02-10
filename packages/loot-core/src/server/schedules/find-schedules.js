@@ -31,8 +31,8 @@ async function getTransactions(date, account) {
         'payee.transfer_acct': null,
         $and: [
           { date: { $gte: d.subDays(date, 2) } },
-          { date: { $lte: d.addDays(date, 2) } }
-        ]
+          { date: { $lte: d.addDays(date, 2) } },
+        ],
       })
       .select('*')
       .options({ splits: 'none' })
@@ -96,7 +96,7 @@ export function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
       // Exact dates rank as 1, so all of them matches exactly it
       // would equal the number of `allOccurs`
       exactDate: rank === allOccurs.length,
-      exactAmount
+      exactAmount,
     });
   }
 
@@ -134,7 +134,7 @@ async function schedulesForPattern(
     for (let date of dates) {
       data.push({
         date: dayFromDate(date),
-        transactions: await getTransactions(date, accountId)
+        transactions: await getTransactions(date, accountId),
       });
     }
 
@@ -221,8 +221,8 @@ async function monthly1stor3rd(startDate, accountId) {
         frequency: 'monthly',
         patterns: [
           { type: dayValue, value: 1 },
-          { type: dayValue, value: 3 }
-        ]
+          { type: dayValue, value: 3 },
+        ],
       };
     },
     accountId
@@ -242,8 +242,8 @@ async function monthly2ndor4th(startDate, accountId) {
         frequency: 'monthly',
         patterns: [
           { type: dayValue, value: 2 },
-          { type: dayValue, value: 4 }
-        ]
+          { type: dayValue, value: 4 },
+        ],
       };
     },
     accountId
@@ -294,7 +294,7 @@ async function findStartDate(schedule) {
     );
 
     let { filters, errors } = conditionsToAQL(newConditions, {
-      recurDateBounds: 1
+      recurDateBounds: 1,
     });
     if (errors.length > 0) {
       // Somehow we generated an invalid config. Abort the whole
@@ -320,7 +320,7 @@ async function findStartDate(schedule) {
       date: currentConfig,
       _conditions: conditions.map(c =>
         c.field === 'date' ? { ...c, value: currentConfig } : c
-      )
+      ),
     };
   }
   return schedule;
@@ -381,14 +381,14 @@ export async function findSchedules() {
           {
             op: winner.exactDate ? 'is' : 'isapprox',
             field: 'date',
-            value: winner.date
+            value: winner.date,
           },
           {
             op: winner.exactAmount ? 'is' : 'isapprox',
             field: 'amount',
-            value: winner.amount
-          }
-        ]
+            value: winner.amount,
+          },
+        ],
       };
     }
   );

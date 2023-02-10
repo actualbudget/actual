@@ -22,7 +22,7 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat1',
       date: '2017-01-08',
-      description: payeeId
+      description: payeeId,
     })[0]
   );
   await db.insertTransaction(
@@ -31,7 +31,7 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat2',
       date: '2017-01-10',
-      description: payeeId
+      description: payeeId,
     })[0]
   );
   await db.insertTransaction(
@@ -40,7 +40,7 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat2',
       date: '2017-01-15',
-      description: payeeId
+      description: payeeId,
     })[0]
   );
 }
@@ -151,7 +151,7 @@ describe('Spreadsheet', () => {
       run: async () => {
         await wait(100);
         return 5;
-      }
+      },
     });
 
     spreadsheet.onFinish(() => {
@@ -171,7 +171,7 @@ describe('Spreadsheet', () => {
         run: async () => {
           await wait(100);
           return 5;
-        }
+        },
       });
 
       spreadsheet.createDynamic('foo', 'y', {
@@ -179,7 +179,7 @@ describe('Spreadsheet', () => {
         dependencies: ['x'],
         run: x => {
           return x * 3;
-        }
+        },
       });
     });
 

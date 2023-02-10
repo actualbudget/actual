@@ -16,8 +16,8 @@ let basicSchema = {
     amount: { type: 'integer' },
     amount2: { type: 'integer' },
     amount3: { type: 'float' },
-    is_parent: { type: 'boolean' }
-  }
+    is_parent: { type: 'boolean' },
+  },
 };
 
 let schemaWithRefs = {
@@ -25,19 +25,19 @@ let schemaWithRefs = {
     id: { type: 'id' },
     payee: { type: 'id', ref: 'payees' },
     date: { type: 'date' },
-    amount: { type: 'integer' }
+    amount: { type: 'integer' },
   },
   payees: {
     name: { type: 'string' },
     id: { type: 'id' },
-    account: { type: 'id', ref: 'accounts' }
+    account: { type: 'id', ref: 'accounts' },
   },
   accounts: {
     id: { type: 'id' },
     trans1: { type: 'id', ref: 'transactions' },
     trans2: { type: 'id', ref: 'transactions' },
-    trans3: { type: 'id', ref: 'transactions' }
-  }
+    trans3: { type: 'id', ref: 'transactions' },
+  },
 };
 
 let schemaWithTombstone = {
@@ -45,17 +45,17 @@ let schemaWithTombstone = {
     id: { type: 'id' },
     payee: { type: 'id', ref: 'payees' },
     amount: { type: 'integer' },
-    tombstone: { type: 'boolean' }
+    tombstone: { type: 'boolean' },
   },
   payees: {
     name: { type: 'string' },
     id: { type: 'id' },
-    tombstone: { type: 'boolean' }
+    tombstone: { type: 'boolean' },
   },
   accounts: {
     id: { type: 'id' },
-    trans: { type: 'id', ref: 'transactions' }
-  }
+    trans: { type: 'id', ref: 'transactions' },
+  },
 };
 
 describe('sheet language', () => {
@@ -288,7 +288,7 @@ describe('sheet language', () => {
     expect([...result.state.paths.keys()]).toEqual([
       'transactions.payee',
       'transactions.payee.account',
-      'transactions.payee.account.trans1'
+      'transactions.payee.account.trans1',
     ]);
     expect(sqlLines(result.sql)).toEqual(
       sqlLines(`
@@ -307,7 +307,7 @@ describe('sheet language', () => {
         .filter({
           'payee.account.trans1.amount': 1,
           'payee.account.trans2.amount': 2,
-          'payee.account.trans3.amount': 3
+          'payee.account.trans3.amount': 3,
         })
         .select(['payee.account.trans2.payee'])
         .serialize(),
@@ -319,7 +319,7 @@ describe('sheet language', () => {
       'transactions.payee.account.trans2',
       'transactions.payee.account.trans2.payee',
       'transactions.payee.account.trans1',
-      'transactions.payee.account.trans3'
+      'transactions.payee.account.trans3',
     ]);
     // It should not join `transactions.payee.account` multiple times,
     // only once
@@ -385,7 +385,7 @@ describe('sheet language', () => {
           'payee.id',
           { 'payee.name': 'desc' },
           { $substr: ['$payee.name', 0, 4] },
-          { $substr: ['$payee.name', 0, 4], $dir: 'desc' }
+          { $substr: ['$payee.name', 0, 4], $dir: 'desc' },
         ])
         .select('id')
         .serialize(),
@@ -411,7 +411,7 @@ describe('sheet language', () => {
       query('transactions')
         .select([
           'id',
-          { name: { $substr: [{ $substr: ['$payee.name', 1, 5] }, 3, 4] } }
+          { name: { $substr: [{ $substr: ['$payee.name', 1, 5] }, 3, 4] } },
         ])
         .serialize(),
       schemaWithRefs
@@ -426,7 +426,7 @@ describe('sheet language', () => {
       query('transactions')
         .filter({
           date: [{ $lt: '2020-01-01' }],
-          $or: [{ 'payee.name': 'foo' }, { 'payee.name': 'bar' }]
+          $or: [{ 'payee.name': 'foo' }, { 'payee.name': 'bar' }],
         })
         .select(['id'])
         .serialize(),
@@ -452,10 +452,10 @@ describe('sheet language', () => {
             {
               $and: [
                 { date: [{ $gt: '2019-12-31' }] },
-                { date: [{ $lt: '2020-01-01' }] }
-              ]
-            }
-          ]
+                { date: [{ $lt: '2020-01-01' }] },
+              ],
+            },
+          ],
         })
         .select(['id'])
         .serialize(),
@@ -507,7 +507,7 @@ describe('sheet language', () => {
     let result = generateSQLWithState(
       query('transactions')
         .filter({
-          $and: { payee: 'payee1', amount: 12 }
+          $and: { payee: 'payee1', amount: 12 },
         })
         .select(['id'])
         .withoutValidatedRefs()
@@ -521,7 +521,7 @@ describe('sheet language', () => {
     result = generateSQLWithState(
       query('transactions')
         .filter({
-          $or: { payee: 'payee1', amount: 12 }
+          $or: { payee: 'payee1', amount: 12 },
         })
         .select(['id'])
         .withoutValidatedRefs()
@@ -538,7 +538,7 @@ describe('sheet language', () => {
     let result = generateSQLWithState(
       query('transactions')
         .filter({
-          'payee.name': { $transform: { $substr: ['$', 0, 4] }, $lt: 'foo' }
+          'payee.name': { $transform: { $substr: ['$', 0, 4] }, $lt: 'foo' },
         })
         .select(['id'])
         .serialize(),
@@ -557,7 +557,7 @@ describe('sheet language', () => {
     result = generateSQLWithState(
       query('transactions')
         .filter({
-          date: { $transform: '$month', $lt: { $month: '$date' } }
+          date: { $transform: '$month', $lt: { $month: '$date' } },
         })
         .select(['id'])
         .serialize(),
@@ -572,8 +572,8 @@ describe('sheet language', () => {
       query('transactions')
         .filter({
           'payee.name': {
-            $lt: { $substr: [{ $substr: ['$payee.name', 1, 5] }, 3, 4] }
-          }
+            $lt: { $substr: [{ $substr: ['$payee.name', 1, 5] }, 3, 4] },
+          },
         })
         .select(['id'])
         .serialize(),
@@ -644,7 +644,7 @@ describe('sheet language', () => {
       {
         tableViews: { transactions: 'v_transactions' },
         tableFilters: name =>
-          name === 'transactions' ? [{ amount: { $gt: 0 } }] : []
+          name === 'transactions' ? [{ amount: { $gt: 0 } }] : [],
       }
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -661,7 +661,7 @@ describe('sheet language', () => {
       {
         tableViews: { transactions: 'v_transactions' },
         tableFilters: name =>
-          name === 'transactions' ? [{ amount: { $gt: 0 } }] : []
+          name === 'transactions' ? [{ amount: { $gt: 0 } }] : [],
       }
     );
     // The joined table should be customized
@@ -686,7 +686,7 @@ describe('sheet language', () => {
         {
           tableViews: { transactions: 'v_transactions' },
           tableFilters: name =>
-            name === 'transactions' ? [{ 'payee.name': 'foo' }] : []
+            name === 'transactions' ? [{ 'payee.name': 'foo' }] : [],
         }
       )
     ).toThrow(/cannot contain paths/);
@@ -699,7 +699,7 @@ describe('sheet language', () => {
       {
         tableViews: { transactions: 'v_transactions' },
         tableFilters: name =>
-          name === 'transactions' ? [{ amount: { $gt: 0 } }] : []
+          name === 'transactions' ? [{ amount: { $gt: 0 } }] : [],
       }
     );
     expect(sqlLines(result.sql)).toEqual(
@@ -843,7 +843,7 @@ describe('Type conversions', () => {
     let result = generateSQLWithState(
       query('accounts')
         .filter({
-          'trans1.date': { $transform: '$month', $eq: '$trans2.date' }
+          'trans1.date': { $transform: '$month', $eq: '$trans2.date' },
         })
         .select(['id'])
         .serialize(),

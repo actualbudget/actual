@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {
   fromPlaidAccountType,
   determineOffBudget,
-  prettyAccountType
+  prettyAccountType,
 } from 'loot-core/src/shared/accounts';
 import Checkmark from 'loot-design/src/svg/v1/Checkmark';
 
@@ -19,7 +19,7 @@ function Account({ account, offbudget, onSelect }) {
     <View
       style={[
         { marginBottom: 8, flexShrink: 0, userSelect: 'none' },
-        styles.mediumText
+        styles.mediumText,
       ]}
       onClick={onSelect}
     >
@@ -34,8 +34,8 @@ function Account({ account, offbudget, onSelect }) {
             borderRadius: 4,
             flexDirection: 'row',
             alignItems: 'center',
-            border: '1px solid ' + colors.n10
-          }
+            border: '1px solid ' + colors.n10,
+          },
         ]}
       >
         <View style={{ flex: 1 }}>
@@ -44,7 +44,7 @@ function Account({ account, offbudget, onSelect }) {
             style={{
               fontSize: 13,
               color: colors.n5,
-              flexDirection: 'row'
+              flexDirection: 'row',
             }}
           >
             {prettyAccountType(
@@ -76,7 +76,7 @@ export default function ConfigureLinkedAccounts({
   upgradingId,
   modalProps,
   accounts,
-  actions
+  actions,
 }) {
   let [offbudgetAccounts, setOffbudgetAccounts] = useState(() =>
     accounts
@@ -131,7 +131,7 @@ export default function ConfigureLinkedAccounts({
               paddingLeft: 5,
               paddingRight: 5,
               marginLeft: -5,
-              marginRight: -5
+              marginRight: -5,
             }}
           >
             <View>
@@ -158,7 +158,7 @@ export default function ConfigureLinkedAccounts({
             style={{
               flexDirection: 'row',
               justifyContent: 'flex-end',
-              marginTop: 30
+              marginTop: 30,
             }}
           >
             <Button style={{ marginRight: 10 }} onClick={modalProps.onBack}>

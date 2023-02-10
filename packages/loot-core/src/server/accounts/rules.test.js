@@ -5,7 +5,7 @@ import {
   Condition,
   Action,
   Rule,
-  RuleIndexer
+  RuleIndexer,
 } from './rules';
 
 let fieldTypes = new Map(
@@ -16,7 +16,7 @@ let fieldTypes = new Map(
     category: 'string',
     description: 'id',
     description2: 'id',
-    amount: 'number'
+    amount: 'number',
   })
 );
 
@@ -24,15 +24,15 @@ describe('Condition', () => {
   test('parses date formats correctly', () => {
     expect(parseDateString('2020-08-10')).toEqual({
       type: 'date',
-      date: '2020-08-10'
+      date: '2020-08-10',
     });
     expect(parseDateString('2020-08')).toEqual({
       type: 'month',
-      date: '2020-08'
+      date: '2020-08',
     });
     expect(parseDateString('2020')).toEqual({
       type: 'year',
-      date: '2020'
+      date: '2020',
     });
 
     // Invalid dates
@@ -119,7 +119,7 @@ describe('Condition', () => {
       {
         start: '2019-01-01',
         frequency: 'monthly',
-        patterns: [{ type: 'day', value: 15 }]
+        patterns: [{ type: 'day', value: 15 }],
       },
       null,
       fieldTypes
@@ -136,7 +136,7 @@ describe('Condition', () => {
       {
         start: '2018-01-12',
         frequency: 'monthly',
-        interval: 3
+        interval: 3,
       },
       null,
       fieldTypes
@@ -153,7 +153,7 @@ describe('Condition', () => {
       {
         start: '2019-01-01',
         frequency: 'monthly',
-        patterns: [{ type: 'day', value: 15 }]
+        patterns: [{ type: 'day', value: 15 }],
       },
       null,
       fieldTypes
@@ -328,14 +328,14 @@ describe('Rule', () => {
     let rule = new Rule({
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
 
     // This matches
     expect(rule.exec({ name: 'James' })).toEqual({ name: 'Sarah' });
     // It returns updates, not the whole object
     expect(rule.exec({ name: 'James', date: '2018-10-01' })).toEqual({
-      name: 'Sarah'
+      name: 'Sarah',
     });
     // This does not match
     expect(rule.exec({ name: 'James2' })).toEqual(null);
@@ -345,14 +345,14 @@ describe('Rule', () => {
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
       actions: [
         { op: 'set', field: 'name', value: 'Sarah' },
-        { op: 'set', field: 'category', value: 'Sarah' }
+        { op: 'set', field: 'category', value: 'Sarah' },
       ],
-      fieldTypes
+      fieldTypes,
     });
 
     expect(rule.exec({ name: 'James' })).toEqual({
       name: 'Sarah',
-      category: 'Sarah'
+      category: 'Sarah',
     });
     expect(rule.exec({ name: 'James2' })).toEqual(null);
     expect(rule.apply({ name: 'James2' })).toEqual({ name: 'James2' });
@@ -368,20 +368,20 @@ describe('Rule', () => {
           value: {
             start: '2018-01-12',
             frequency: 'monthly',
-            interval: 3
-          }
-        }
+            interval: 3,
+          },
+        },
       ],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
 
     expect(rule.exec({ name: 'James', date: '2018-01-12' })).toEqual({
-      name: 'Sarah'
+      name: 'Sarah',
     });
     expect(rule.exec({ name: 'James2', date: '2018-01-12' })).toEqual(null);
     expect(rule.exec({ name: 'James', date: '2018-01-10' })).toEqual({
-      name: 'Sarah'
+      name: 'Sarah',
     });
     expect(rule.exec({ name: 'James', date: '2018-01-15' })).toEqual(null);
   });
@@ -395,7 +395,7 @@ describe('Rule', () => {
     let rules = [
       rule('id1', [{ op: 'contains', field: 'name', value: 'sar' }]),
       rule('id2', [{ op: 'contains', field: 'name', value: 'jim' }]),
-      rule('id3', [{ op: 'is', field: 'name', value: 'James' }])
+      rule('id3', [{ op: 'is', field: 'name', value: 'James' }]),
     ];
 
     expectOrder(rankRules(rules), ['id1', 'id2', 'id3']);
@@ -406,13 +406,13 @@ describe('Rule', () => {
       rule('id3', [{ op: 'is', field: 'name', value: 'James' }]),
       rule('id4', [
         { op: 'is', field: 'name', value: 'James' },
-        { op: 'gt', field: 'amount', value: 5 }
+        { op: 'gt', field: 'amount', value: 5 },
       ]),
       rule('id5', [
         { op: 'is', field: 'name', value: 'James' },
         { op: 'gt', field: 'amount', value: 5 },
-        { op: 'lt', field: 'amount', value: 10 }
-      ])
+        { op: 'lt', field: 'amount', value: 10 },
+      ]),
     ];
     expectOrder(rankRules(rules), ['id1', 'id4', 'id5', 'id2', 'id3']);
   });
@@ -428,7 +428,7 @@ describe('Rule', () => {
         [{ op: 'set', field: 'name', value: 'sar' }]
       ),
       rule('second', [
-        { op: 'oneOf', field: 'description', value: ['id2', 'id3'] }
+        { op: 'oneOf', field: 'description', value: ['id2', 'id3'] },
       ]),
       rule(
         'third',
@@ -437,13 +437,13 @@ describe('Rule', () => {
       ),
       rule('fourth', [
         { op: 'is', field: 'name', value: 'James' },
-        { op: 'gt', field: 'amount', value: 5 }
+        { op: 'gt', field: 'amount', value: 5 },
       ]),
       rule('fifth', [
         { op: 'is', field: 'description2', value: 'id5' },
         { op: 'gt', field: 'amount', value: 5 },
-        { op: 'lt', field: 'amount', value: 10 }
-      ])
+        { op: 'lt', field: 'amount', value: 10 },
+      ]),
     ];
 
     let foundRules = [];
@@ -461,14 +461,14 @@ describe('RuleIndexer', () => {
     let rule = new Rule({
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule);
 
     let rule2 = new Rule({
       conditions: [{ op: 'is', field: 'category', value: 'foo' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule2);
 
@@ -491,24 +491,24 @@ describe('RuleIndexer', () => {
     let rule = new Rule({
       conditions: [
         { op: 'is', field: 'name', value: 'James' },
-        { op: 'is', field: 'category', value: 'food' }
+        { op: 'is', field: 'category', value: 'food' },
       ],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule);
 
     let rule2 = new Rule({
       conditions: [{ op: 'is', field: 'category', value: 'bars' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule2);
 
     let rule3 = new Rule({
       conditions: [{ op: 'is', field: 'date', value: '2020-01-20' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule3);
 
@@ -541,7 +541,7 @@ describe('RuleIndexer', () => {
       id: 'id1',
       conditions: [{ op: 'is', field: 'category', value: 'food' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule);
 
@@ -559,7 +559,7 @@ describe('RuleIndexer', () => {
     rule = new Rule({
       conditions: [{ op: 'is', field: 'category', value: 'alcohol' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule);
 
@@ -574,17 +574,17 @@ describe('RuleIndexer', () => {
 
     let rule = new Rule({
       conditions: [
-        { op: 'oneOf', field: 'name', value: ['James', 'Sarah', 'Evy'] }
+        { op: 'oneOf', field: 'name', value: ['James', 'Sarah', 'Evy'] },
       ],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule);
 
     let rule2 = new Rule({
       conditions: [{ op: 'is', field: 'name', value: 'Georgia' }],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
-      fieldTypes
+      fieldTypes,
     });
     indexer.index(rule2);
 

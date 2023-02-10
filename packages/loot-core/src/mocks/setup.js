@@ -4,7 +4,7 @@ import * as rules from '../server/accounts/transaction-rules';
 import * as db from '../server/db';
 import {
   enableGlobalMutations,
-  disableGlobalMutations
+  disableGlobalMutations,
 } from '../server/mutators';
 import { setServer } from '../server/server-config';
 import * as sheet from '../server/sheet';
@@ -92,7 +92,7 @@ global.getDatabaseDump = async function (tables) {
           'SELECT * FROM ' + table + ' ORDER BY ' + sortColumn,
           [],
           true
-        )
+        ),
       ];
     })
   );

@@ -30,7 +30,7 @@ export async function getBackups(id) {
       const mtime = await fs.getModifiedTime(fs.join(backupDir, path));
       return {
         id: path,
-        date: new Date(mtime)
+        date: new Date(mtime),
       };
     })
   );
@@ -53,7 +53,7 @@ export async function getLatestBackup(id) {
     return {
       id: LATEST_BACKUP_FILENAME,
       date: null,
-      isLatest: true
+      isLatest: true,
     };
   }
   return null;
@@ -69,7 +69,7 @@ export async function getAvailableBackups(id) {
 
   backups = backups.map(backup => ({
     ...backup,
-    date: backup.date ? dateFns.format(backup.date, 'yyyy-MM-dd h:mm') : null
+    date: backup.date ? dateFns.format(backup.date, 'yyyy-MM-dd h:mm') : null,
   }));
 
   return backups;
@@ -189,7 +189,7 @@ export async function loadBackup(id, backupId) {
     await prefs.savePrefs({
       groupId: null,
       lastSyncedTimestamp: null,
-      lastUploaded: null
+      lastUploaded: null,
     });
 
     // Re-upload the new file

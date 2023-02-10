@@ -6,21 +6,21 @@ import React, {
   useLayoutEffect,
   useEffect,
   useContext,
-  useReducer
+  useReducer,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
   format as formatDate,
   parseISO,
-  isValid as isDateValid
+  isValid as isDateValid,
 } from 'date-fns';
 
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   getAccountsById,
   getPayeesById,
-  getCategoriesById
+  getCategoriesById,
 } from 'loot-core/src/client/reducers/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
@@ -29,12 +29,12 @@ import {
   splitTransaction,
   updateTransaction,
   deleteTransaction,
-  addSplitTransaction
+  addSplitTransaction,
 } from 'loot-core/src/shared/transactions';
 import {
   integerToCurrency,
   amountToInteger,
-  titleFirst
+  titleFirst,
 } from 'loot-core/src/shared/util';
 import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
 import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
@@ -51,12 +51,12 @@ import {
   CustomCell,
   CellButton,
   useTableNavigator,
-  Table
+  Table,
 } from 'loot-design/src/components/table';
 import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
 import {
   useSelectedDispatch,
-  useSelectedItems
+  useSelectedItems,
 } from 'loot-design/src/components/useSelected';
 import { styles, colors } from 'loot-design/src/style';
 import LeftArrow2 from 'loot-design/src/svg/v0/LeftArrow2';
@@ -103,7 +103,7 @@ function serializeTransaction(transaction, showZeroInDeposit, dateFormat) {
     ...transaction,
     date,
     debit: debit != null ? integerToCurrency(debit) : '',
-    credit: credit != null ? integerToCurrency(credit) : ''
+    credit: credit != null ? integerToCurrency(credit) : '',
   };
 }
 
@@ -163,7 +163,7 @@ export function useSplitsExpanded() {
       expanded: id =>
         data.state.mode === 'collapse'
           ? !data.state.ids.has(id)
-          : data.state.ids.has(id)
+          : data.state.ids.has(id),
     }),
     [data]
   );
@@ -200,7 +200,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
           ...state,
           mode: action.mode,
           ids: new Set(),
-          transitionId: null
+          transitionId: null,
         };
       }
       case 'switch-mode':
@@ -213,7 +213,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
           ...state,
           mode: state.mode === 'expand' ? 'collapse' : 'expand',
           transitionId: action.id,
-          ids: new Set()
+          ids: new Set(),
         };
       case 'finish-switch-mode':
         return { ...state, transitionId: null };
@@ -258,7 +258,7 @@ export const TransactionHeader = React.memo(
         style={{
           color: colors.n4,
           fontWeight: 300,
-          zIndex: 200
+          zIndex: 200,
         }}
       >
         <SelectCell
@@ -292,14 +292,14 @@ function getPayeePretty(transaction, payee, transferAcct) {
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'center'
+          alignItems: 'center',
         }}
       >
         <Icon width={10} height={8} style={{ marginRight: 5, flexShrink: 0 }} />
         <div
           style={{
             overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
           }}
         >
           {transferAcct.name}
@@ -325,7 +325,7 @@ function StatusCell({
   status,
   isChild,
   onEdit,
-  onUpdate
+  onUpdate,
 }) {
   let isClearedField = status === 'cleared' || status == null;
   let statusProps = getStatusProps(status);
@@ -340,7 +340,7 @@ function StatusCell({
         ? colors.y5
         : selected
         ? colors.b7
-        : colors.n7
+        : colors.n7,
   };
 
   function onSelect() {
@@ -365,12 +365,12 @@ function StatusCell({
             borderRadius: 50,
             ':focus': {
               border: '1px solid ' + props.color,
-              boxShadow: `0 1px 2px ${props.color}`
+              boxShadow: `0 1px 2px ${props.color}`,
             },
-            cursor: isClearedField ? 'pointer' : 'default'
+            cursor: isClearedField ? 'pointer' : 'default',
           },
 
-          isChild && { visibility: 'hidden' }
+          isChild && { visibility: 'hidden' },
         ]}
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
@@ -380,8 +380,8 @@ function StatusCell({
             width: 13,
             height: 13,
             color: props.color,
-            marginTop: status === 'due' ? -1 : 0
-          }
+            marginTop: status === 'due' ? -1 : 0,
+          },
         })}
       </CellButton>
     </Cell>
@@ -404,7 +404,7 @@ function PayeeCell({
   onEdit,
   onUpdate,
   onCreatePayee,
-  onManagePayees
+  onManagePayees,
 }) {
   let isCreatingPayee = useRef(false);
 
@@ -434,7 +434,7 @@ function PayeeCell({
         onUpdate,
         onSave,
         shouldSaveFromKey,
-        inputStyle
+        inputStyle,
       }) => {
         return (
           <>
@@ -446,7 +446,7 @@ function PayeeCell({
               inputProps={{
                 onBlur,
                 onKeyDown,
-                style: inputStyle
+                style: inputStyle,
               }}
               showManagePayees={true}
               tableBehavior={true}
@@ -480,7 +480,7 @@ function CellWithScheduleIcon({ scheduleId, children }) {
     height: 13,
     marginLeft: 5,
     marginRight: 3,
-    color: 'inherit'
+    color: 'inherit',
   };
 
   return (
@@ -529,7 +529,7 @@ export const Transaction = React.memo(function Transaction(props) {
     onSplit,
     onManagePayees,
     onCreatePayee,
-    onToggleSplit
+    onToggleSplit,
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
@@ -606,7 +606,7 @@ export const Transaction = React.memo(function Transaction(props) {
     category,
     cleared,
     is_parent: isParent,
-    _unmatched = false
+    _unmatched = false,
   } = transaction;
 
   // Join in some data
@@ -641,7 +641,7 @@ export const Transaction = React.memo(function Transaction(props) {
       style={[
         style,
         isPreview && { color: colors.n5, fontStyle: 'italic' },
-        _unmatched && { opacity: 0.5 }
+        _unmatched && { opacity: 0.5 },
       ]}
       onMouseEnter={() => onHover && onHover(transaction.id)}
     >
@@ -652,7 +652,7 @@ export const Transaction = React.memo(function Transaction(props) {
           style={{
             width: 110,
             backgroundColor: colors.n11,
-            borderBottomWidth: 0
+            borderBottomWidth: 0,
           }}
         />
       )}
@@ -662,7 +662,7 @@ export const Transaction = React.memo(function Transaction(props) {
           style={{
             flex: 1,
             backgroundColor: colors.n11,
-            opacity: 0
+            opacity: 0,
           }}
         />
       )}
@@ -716,7 +716,7 @@ export const Transaction = React.memo(function Transaction(props) {
             onUpdate,
             onSave,
             shouldSaveFromKey,
-            inputStyle
+            inputStyle,
           }) => (
             <DateSelect
               value={date || ''}
@@ -759,7 +759,7 @@ export const Transaction = React.memo(function Transaction(props) {
             onUpdate,
             onSave,
             shouldSaveFromKey,
-            inputStyle
+            inputStyle,
           }) => (
             <AccountAutocomplete
               value={accountId}
@@ -819,7 +819,7 @@ export const Transaction = React.memo(function Transaction(props) {
           onExpose={!isPreview && (name => onEdit(id, name))}
           inputProps={{
             value: notes || '',
-            onUpdate: onUpdate.bind(null, 'notes')
+            onUpdate: onUpdate.bind(null, 'notes'),
           }}
         />
       )}
@@ -847,7 +847,7 @@ export const Transaction = React.memo(function Transaction(props) {
                     : colors.n10,
                 margin: '0 5px',
                 padding: '3px 7px',
-                borderRadius: 4
+                borderRadius: 4,
               }}
             >
               {titleFirst(notes)}
@@ -870,8 +870,8 @@ export const Transaction = React.memo(function Transaction(props) {
               transition: 'none',
               '&:hover': {
                 backgroundColor: 'rgba(100, 100, 100, .15)',
-                color: colors.n5
-              }
+                color: colors.n5,
+              },
             }}
             disabled={isTemporaryId(transaction.id)}
             onEdit={() => onEdit(id, 'category')}
@@ -884,7 +884,7 @@ export const Transaction = React.memo(function Transaction(props) {
                 alignSelf: 'stretch',
                 borderRadius: 4,
                 flex: 1,
-                padding: 4
+                padding: 4,
               }}
             >
               {isParent && (
@@ -894,7 +894,7 @@ export const Transaction = React.memo(function Transaction(props) {
                     height: 14,
                     color: 'currentColor',
                     transition: 'transform .08s',
-                    transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)'
+                    transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
                   }}
                 />
               )}
@@ -924,7 +924,7 @@ export const Transaction = React.memo(function Transaction(props) {
           style={{ fontStyle: 'italic', color: '#c0c0c0', fontWeight: 300 }}
           inputProps={{
             readOnly: true,
-            style: { fontStyle: 'italic' }
+            style: { fontStyle: 'italic' },
           }}
         />
       ) : (
@@ -949,7 +949,7 @@ export const Transaction = React.memo(function Transaction(props) {
               ? {
                   fontStyle: 'italic',
                   fontWeight: 300,
-                  color: colors.p8
+                  color: colors.p8,
                 }
               : valueStyle
           }
@@ -967,7 +967,7 @@ export const Transaction = React.memo(function Transaction(props) {
             onUpdate,
             onSave,
             shouldSaveFromKey,
-            inputStyle
+            inputStyle,
           }) => (
             <CategoryAutocomplete
               categoryGroups={categoryGroups}
@@ -998,7 +998,7 @@ export const Transaction = React.memo(function Transaction(props) {
         style={[isParent && { fontStyle: 'italic' }, styles.tnum]}
         inputProps={{
           value: debit,
-          onUpdate: onUpdate.bind(null, 'debit')
+          onUpdate: onUpdate.bind(null, 'debit'),
         }}
       />
 
@@ -1016,7 +1016,7 @@ export const Transaction = React.memo(function Transaction(props) {
         style={[isParent && { fontStyle: 'italic' }, styles.tnum]}
         inputProps={{
           value: credit,
-          onUpdate: onUpdate.bind(null, 'credit')
+          onUpdate: onUpdate.bind(null, 'credit'),
         }}
       />
 
@@ -1061,9 +1061,9 @@ export function TransactionError({ error, isDeposit, onAddSplit, style }) {
               {
                 flexDirection: 'row',
                 alignItems: 'center',
-                padding: '0 5px'
+                padding: '0 5px',
               },
-              style
+              style,
             ]}
             data-testid="transaction-error"
           >
@@ -1099,8 +1099,8 @@ function makeTemporaryTransactions(currentAccountId, lastDate) {
       date: lastDate || currentDay(),
       account: currentAccountId || null,
       cleared: false,
-      amount: 0
-    }
+      amount: 0,
+    },
   ];
 }
 
@@ -1134,7 +1134,7 @@ function NewTransaction({
   onAdd,
   onAddSplit,
   onManagePayees,
-  onCreatePayee
+  onCreatePayee,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1144,7 +1144,7 @@ function NewTransaction({
       style={{
         borderBottom: '1px solid #ebebeb',
         paddingBottom: 6,
-        backgroundColor: 'white'
+        backgroundColor: 'white',
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
@@ -1187,7 +1187,7 @@ function NewTransaction({
           alignItems: 'center',
           justifyContent: 'flex-end',
           marginTop: 6,
-          marginRight: 20
+          marginRight: 20,
         }}
       >
         <Button
@@ -1272,7 +1272,7 @@ class TransactionTable_ extends React.Component {
       tableNavigator,
       isNew,
       isMatched,
-      isExpanded
+      isExpanded,
     } = this.props;
 
     let trans = item;
@@ -1357,7 +1357,7 @@ class TransactionTable_ extends React.Component {
       newNavigator,
       renderEmpty,
       onHover,
-      onScroll
+      onScroll,
     } = props;
 
     return (
@@ -1376,7 +1376,7 @@ class TransactionTable_ extends React.Component {
           {props.isAdding && (
             <View
               {...newNavigator.getNavigatorProps({
-                onKeyDown: e => props.onCheckNewEnter(e)
+                onKeyDown: e => props.onCheckNewEnter(e),
               })}
             >
               <NewTransaction
@@ -1436,7 +1436,7 @@ class TransactionTable_ extends React.Component {
                 right: 0,
                 height: 20,
                 backgroundColor: 'red',
-                boxShadow: '0 0 6px rgba(0, 0, 0, .20)'
+                boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
               }}
             />
           )}
@@ -1522,7 +1522,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
       newTransactions,
       newNavigator,
       tableNavigator,
-      transactions: props.transactions
+      transactions: props.transactions,
     };
   });
 
@@ -1539,7 +1539,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
       if (newTransactions[0].account == null) {
         props.addNotification({
           type: 'error',
-          message: 'Account is a required field'
+          message: 'Account is a required field',
         });
         newNavigator.onEdit('temp', 'account');
       } else {
@@ -1574,7 +1574,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
       'category',
       'debit',
       'credit',
-      'cleared'
+      'cleared',
     ];
 
     fields = item.is_child

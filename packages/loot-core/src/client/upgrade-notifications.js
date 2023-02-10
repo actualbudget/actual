@@ -40,11 +40,11 @@ export default function checkForUpgradeNotifications(
                     // eslint-disable-next-line
                     locationPtr: __history.location
                   });
-              }
+              },
             },
             onClose: () => {
               send('seen-upgrade-notification', { type: 'schedules' });
-            }
+            },
           });
           break;
         }
@@ -62,12 +62,12 @@ export default function checkForUpgradeNotifications(
                 title: 'Repair splits...',
                 action: () =>
                   history.push('/tools/fix-splits', {
-                    locationPtr: history.location
-                  })
+                    locationPtr: history.location,
+                  }),
               },
               onClose: () => {
                 send('seen-upgrade-notification', { type: 'repair-splits' });
-              }
+              },
             });
           }
           break;

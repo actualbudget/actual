@@ -11,7 +11,7 @@ export default function BalanceWithCarryover({
   carryover,
   balance,
   category,
-  disabled
+  disabled,
 }) {
   let carryoverValue = useSheetValue(carryover);
   let balanceValue = useSheetValue(balance);
@@ -26,8 +26,8 @@ export default function BalanceWithCarryover({
           { textAlign: 'right' },
           !disabled && {
             cursor: 'pointer',
-            ':hover': { textDecoration: 'underline' }
-          }
+            ':hover': { textDecoration: 'underline' },
+          },
         ]}
       />
       {carryoverValue === true && (
@@ -39,14 +39,14 @@ export default function BalanceWithCarryover({
             right: -4,
             top: 0,
             bottom: 0,
-            justifyContent: 'center'
+            justifyContent: 'center',
           }}
         >
           <ArrowThinRight
             width={7}
             height={7}
             style={{
-              ...makeAmountStyle(balanceValue)
+              ...makeAmountStyle(balanceValue),
             }}
           />
         </View>

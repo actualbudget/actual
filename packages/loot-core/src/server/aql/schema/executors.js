@@ -11,7 +11,7 @@ export function toGroup(parents, children, mapper = x => x) {
     let childs = children.get(parent.id) || [];
     list.push({
       ...mapper(parent),
-      subtransactions: childs.map(mapper)
+      subtransactions: childs.map(mapper),
     });
     return list;
   }, []);
@@ -216,5 +216,5 @@ async function execTransactionsBasic(
 }
 
 export default {
-  transactions: execTransactions
+  transactions: execTransactions,
 };
