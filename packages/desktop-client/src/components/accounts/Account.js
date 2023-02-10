@@ -1614,7 +1614,6 @@ class AccountInternal extends React.PureComponent {
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
-    debugger;
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f))
     );
