@@ -109,6 +109,8 @@ export function Value({
           : null;
       } else if (field === 'year') {
         return value ? formatDate(parseISO(value), 'yyyy') : null;
+      } else if (field === 'notes') {
+        return value;
       } else {
         if (data && data.length) {
           let item = data.find(item => item.id === value);
