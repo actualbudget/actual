@@ -636,6 +636,7 @@ const AccountHeader = React.memo(
     onBatchEdit,
     onBatchUnlink,
     onApplyFilter,
+    onUpdateFilter,
     onDeleteFilter,
     onScheduleAction
   }) => {
@@ -915,7 +916,11 @@ const AccountHeader = React.memo(
           </Stack>
 
           {filters && filters.length > 0 && (
-            <AppliedFilters filters={filters} onDelete={onDeleteFilter} />
+            <AppliedFilters
+              filters={filters}
+              onUpdate={onUpdateFilter}
+              onDelete={onDeleteFilter}
+            />
           )}
         </View>
         {reconcileAmount != null && (
@@ -1608,6 +1613,12 @@ class AccountInternal extends React.PureComponent {
     await this.refetchTransactions();
   };
 
+  onUpdateFilter = (oldFilter, updatedFilter) => {
+    this.applyFilters(
+      this.state.filters.map(f => (f === oldFilter ? updatedFilter : f))
+    );
+  };
+
   onDeleteFilter = filter => {
     this.applyFilters(this.state.filters.filter(f => f !== filter));
   };
@@ -1755,6 +1766,7 @@ class AccountInternal extends React.PureComponent {
                   onBatchDuplicate={this.onBatchDuplicate}
                   onBatchEdit={this.onBatchEdit}
                   onBatchUnlink={this.onBatchUnlink}
+                  onUpdateFilter={this.onUpdateFilter}
                   onDeleteFilter={this.onDeleteFilter}
                   onApplyFilter={this.onApplyFilter}
                   onScheduleAction={this.onScheduleAction}
