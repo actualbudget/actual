@@ -1,3 +1,4 @@
+import asyncStorage from '../../platform/server/asyncStorage';
 import * as monthUtils from '../../shared/months';
 import {
   makeChild as makeChildTransaction,
@@ -60,19 +61,28 @@ async function updateAccountBalance(id, balance) {
 }
 
 export async function getAccounts(userId, userKey, id) {
-  let res = await post(getServer().NORDIGEN_SERVER + '/accounts', {
-    userId,
-    key: userKey,
-    item_id: id
-  });
+  const userToken = await asyncStorage.getItem('user-token');
+  if (userToken) {
+    let res = await post(
+      getServer().NORDIGEN_SERVER + '/accounts',
+      {
+        userId,
+        key: userKey,
+        item_id: id
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken
+      }
+    );
 
-  let { accounts } = res;
+    let { accounts } = res;
 
-  accounts.forEach(acct => {
-    acct.balances.current = getAccountBalance(acct);
-  });
+    accounts.forEach(acct => {
+      acct.balances.current = getAccountBalance(acct);
+    });
 
-  return accounts;
+    return accounts;
+  }
 }
 
 export function fromPlaid(trans) {
@@ -93,32 +103,41 @@ async function downloadTransactions(
   since,
   count
 ) {
-  const endDate = monthUtils.currentDay();
-  const res = await post(getServer().NORDIGEN_SERVER + '/transactions', {
-    userId: userId,
-    key: userKey,
-    requisitionId: bankId,
-    accountId: acctId,
-    startDate: since,
-    endDate: endDate
-  });
-  console.log({ res });
+  let userToken = await asyncStorage.getItem('user-token');
+  if (userToken) {
+    const endDate = monthUtils.currentDay();
+    const res = await post(
+      getServer().NORDIGEN_SERVER + '/transactions',
+      {
+        userId: userId,
+        key: userKey,
+        requisitionId: bankId,
+        accountId: acctId,
+        startDate: since,
+        endDate: endDate
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken
+      }
+    );
 
-  if (res.error_code) {
-    throw BankSyncError(res.error_type, res.error_code);
+    if (res.error_code) {
+      throw BankSyncError(res.error_type, res.error_code);
+    }
+
+    const {
+      transactions: { booked },
+      balances,
+      startingBalance
+    } = res;
+
+    return {
+      transactions: booked,
+      accountBalances: balances,
+      startingBalance
+    };
   }
-
-  const {
-    transactions: { booked },
-    balances,
-    startingBalance
-  } = res;
-
-  return {
-    transactions: booked,
-    accountBalances: balances,
-    startingBalance
-  };
+  return;
 }
 
 async function resolvePayee(trans, payeeName, payeesToCreate) {

@@ -7,7 +7,6 @@ import asyncStorage from '../platform/server/asyncStorage';
 import fs from '../platform/server/fs';
 import logger from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
-import { fromPlaidAccountType } from '../shared/accounts';
 import * as monthUtils from '../shared/months';
 import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
@@ -802,7 +801,7 @@ handlers['accounts-link'] = async function ({
       bank: bank.id
     });
   } else {
-    id = uuid.v4Sync()
+    id = uuid.v4Sync();
     await db.insertWithUUID('accounts', {
       id,
       account_id: account.account_id,
@@ -811,6 +810,10 @@ handlers['accounts-link'] = async function ({
       official_name: account.official_name,
       type: account.type,
       bank: bank.id
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id
     });
   }
 
@@ -916,7 +919,10 @@ handlers['account-close'] = mutator(async function ({
         true
       );
 
-      const { id: payeeId} = (await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [id])) || {};
+      const { id: payeeId } =
+        (await db.first('SELECT id FROM payees WHERE transfer_acct = ?', [
+          id
+        ])) || {};
 
       await batchMessages(() => {
         // TODO: what this should really do is send a special message that
@@ -985,48 +991,60 @@ handlers['account-move'] = mutator(async function ({ id, targetId }) {
 
 let stopPolling = false;
 
-handlers['poll-web-token'] = async function({
+handlers['poll-web-token'] = async function ({
   upgradingAccountId,
   requisitionId
 }) {
-  let startTime = Date.now();
-  stopPolling = false;
+  let userToken = await asyncStorage.getItem('user-token');
 
-  async function getData(cb) {
-    if (stopPolling) {
-      return;
-    }
+  if (userToken) {
+    let startTime = Date.now();
+    stopPolling = false;
 
-    if (Date.now() - startTime >= 1000 * 60 * 10) {
-      cb('timeout');
-      return;
-    }
-
-    let data = await post(getServer().NORDIGEN_SERVER + '/get-accounts', {
-      upgradingAccountId,
-      requisitionId
-    });
-
-    if (data) {
-      if (data.error) {
-        cb('unknown');
-      } else {
-        cb(null, data);
+    async function getData(cb) {
+      if (stopPolling) {
+        return;
       }
-    } else {
-      setTimeout(() => getData(cb), 3000);
+
+      if (Date.now() - startTime >= 1000 * 60 * 10) {
+        cb('timeout');
+        return;
+      }
+
+      let data = await post(
+        getServer().NORDIGEN_SERVER + '/get-accounts',
+        {
+          upgradingAccountId,
+          requisitionId
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken
+        }
+      );
+
+      if (data) {
+        if (data.error) {
+          cb('unknown');
+        } else {
+          cb(null, data);
+        }
+      } else {
+        setTimeout(() => getData(cb), 3000);
+      }
     }
+
+    return new Promise(resolve => {
+      getData((error, data) => {
+        if (error) {
+          resolve({ error });
+        } else {
+          resolve({ data });
+        }
+      });
+    });
   }
 
-  return new Promise(resolve => {
-    getData((error, data) => {
-      if (error) {
-        resolve({ error });
-      } else {
-        resolve({ data });
-      }
-    });
-  });
+  return null;
 };
 
 handlers['poll-web-token-stop'] = async function () {
@@ -1034,19 +1052,30 @@ handlers['poll-web-token-stop'] = async function () {
   return 'ok';
 };
 
-handlers['create-web-token'] = async function({
+handlers['create-web-token'] = async function ({
   upgradingAccountId,
   institutionId,
   accessValidForDays
 }) {
-  return await post(getServer().NORDIGEN_SERVER + '/create-web-token', {
-    upgradingAccountId,
-    institutionId,
-    accessValidForDays
-  });
+  let userToken = await asyncStorage.getItem('user-token');
+
+  if (userToken) {
+    return await post(
+      getServer().NORDIGEN_SERVER + '/create-web-token',
+      {
+        upgradingAccountId,
+        institutionId,
+        accessValidForDays
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken
+      }
+    );
+  }
+  return null;
 };
 
-handlers['accounts-sync'] = async function({ id }) {
+handlers['accounts-sync'] = async function ({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key'
@@ -1174,13 +1203,25 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 
   // No more accounts are associated with this bank. We can remove
   // it from Nordigen.
-  if (count === 0) {
-    let { bank_id: requisitionId } = await db.first('SELECT bank_id FROM banks WHERE id = ?',
-      [bankId])
-    await post(getServer().NORDIGEN_SERVER + '/remove-account', {
-      requisitionId: requisitionId
-    });
+  // if (local['flags.syncAccount']) {
+  let userToken = await asyncStorage.getItem('user-token');
+
+  if (userToken && count === 0) {
+    let { bank_id: requisitionId } = await db.first(
+      'SELECT bank_id FROM banks WHERE id = ?',
+      [bankId]
+    );
+    await post(
+      getServer().NORDIGEN_SERVER + '/remove-account',
+      {
+        requisitionId: requisitionId
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken
+      }
+    );
   }
+  // }
 
   return 'ok';
 });
