@@ -8,7 +8,7 @@ import {
   View,
   Text,
   Button,
-  ButtonWithLoading
+  ButtonWithLoading,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -67,7 +67,7 @@ export default function Login() {
           style={{
             fontSize: 16,
             color: colors.n2,
-            lineHeight: 1.4
+            lineHeight: 1.4,
           }}
         >
           If you lost your password, you likely still have access to your server
@@ -80,7 +80,7 @@ export default function Login() {
               marginTop: 20,
               color: colors.r4,
               borderRadius: 4,
-              fontSize: 15
+              fontSize: 15,
             }}
           >
             {getErrorMessage(error)}
@@ -106,7 +106,7 @@ export default function Login() {
           style={{
             flexDirection: 'row',
             justifyContent: 'center',
-            marginTop: 15
+            marginTop: 15,
           }}
         >
           <Button

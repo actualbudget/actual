@@ -5,7 +5,7 @@ import {
   View,
   Select,
   Button,
-  ButtonLink
+  ButtonLink,
 } from 'loot-design/src/components/common';
 import { styles } from 'loot-design/src/style';
 import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
@@ -55,7 +55,7 @@ function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
       style={{
         padding: 20,
         paddingTop: 0,
-        flexShrink: 0
+        flexShrink: 0,
       }}
     >
       <ButtonLink
@@ -71,7 +71,7 @@ function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          marginTop: 15
+          marginTop: 15,
         }}
       >
         <div>

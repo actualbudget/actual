@@ -15,7 +15,7 @@ let categoryGroups = [
     name: 'Investments and Savings',
     is_income: 0,
     sort_order: 1,
-    categories: [{ id: 'savings', name: 'Savings' }]
+    categories: [{ id: 'savings', name: 'Savings' }],
   },
   {
     id: 'usual',
@@ -25,17 +25,17 @@ let categoryGroups = [
     categories: [
       { id: 'food', name: 'Food' },
       { id: 'general', name: 'General' },
-      { id: 'home', name: 'Home' }
-    ]
+      { id: 'home', name: 'Home' },
+    ],
   },
   {
     id: 'projects',
     name: 'Projects',
     categories: [
       { id: 'big', name: 'Big Projects' },
-      { id: 'shed', name: 'Shed' }
-    ]
-  }
+      { id: 'shed', name: 'Shed' },
+    ],
+  },
 ];
 
 let payees = [
@@ -44,7 +44,7 @@ let payees = [
     id: 'two',
     name: 'Lowes',
     category: categoryGroups[1].categories[1].id,
-    ruleCount: 1
+    ruleCount: 1,
   },
   { id: 'three', name: 'Publix', ruleCount: 1 },
   { id: 'four', name: 'Verizon', ruleCount: 3 },
@@ -67,7 +67,7 @@ let payees = [
   { id: 'sixxx1', name: 'Aldi', ruleCount: 1 },
   { id: 'five', name: 'T-Mobile', transfer_acct: 'one', ruleCount: 5 },
   { id: 'six', name: 'Google', transfer_acct: 'one', ruleCount: 1 },
-  { id: 'seven', name: 'Sentry', transfer_acct: 'one', ruleCount: 1 }
+  { id: 'seven', name: 'Sentry', transfer_acct: 'one', ruleCount: 1 },
 ];
 
 for (let i = 0; i < 4; i++) {
@@ -76,7 +76,7 @@ for (let i = 0; i < 4; i++) {
 
 let defaultRules = [
   { id: '1', type: 'equals', value: 'target' },
-  { id: '2', type: 'contains', value: 'targ#' }
+  { id: '2', type: 'contains', value: 'targ#' },
 ];
 
 export default () => (
@@ -96,13 +96,13 @@ export default () => (
                   modalProps={{
                     isCurrent: state.isCurrent,
                     parent: node,
-                    onClose: () => setState({ isCurrent: true })
+                    onClose: () => setState({ isCurrent: true }),
                   }}
                   payees={state.payees}
                   ruleCounts={
                     new Map([
                       ['three', 1],
-                      ['tw', 3]
+                      ['tw', 3],
                     ])
                   }
                   categoryGroups={categoryGroups}
@@ -119,7 +119,7 @@ export default () => (
                     addRule: rule => {
                       return { ...rule, id: Math.random().toString() };
                     },
-                    listenForUndo: () => {}
+                    listenForUndo: () => {},
                   }}
                 />
               );

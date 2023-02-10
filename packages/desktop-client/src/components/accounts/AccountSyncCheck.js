@@ -67,7 +67,7 @@ function AccountSyncCheck({
   pushModal,
   closeModal,
   getAccounts,
-  addNotification
+  addNotification,
 }) {
   if (!failedAccounts) {
     return null;
@@ -101,7 +101,7 @@ function AccountSyncCheck({
     if (!modalOpened) {
       addNotification({
         type: 'error',
-        message: 'Unable to process this item, sorry!'
+        message: 'Unable to process this item, sorry!',
       });
     }
   }
@@ -121,7 +121,7 @@ function AccountSyncCheck({
           color: colors.r5,
           backgroundColor: colors.r10,
           padding: '4px 8px',
-          borderRadius: 4
+          borderRadius: 4,
         }}
         onClick={() => setOpen(true)}
       >
@@ -130,7 +130,7 @@ function AccountSyncCheck({
             width: 14,
             height: 14,
             marginRight: 5,
-            color: 'currentColor'
+            color: 'currentColor',
           }}
         />{' '}
         This account is experiencing connection problems. Let{"'"}s fix it.
@@ -171,7 +171,7 @@ function AccountSyncCheck({
 export default connect(
   state => ({
     accounts: state.queries.accounts,
-    failedAccounts: state.account.failedAccounts
+    failedAccounts: state.account.failedAccounts,
   }),
-  actions
+  actions,
 )(AccountSyncCheck);

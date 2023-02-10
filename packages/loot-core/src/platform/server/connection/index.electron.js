@@ -35,7 +35,7 @@ function init(socketName, handlers) {
                 isMutating(handlers[name]) &&
                 name !== 'undo' &&
                 name !== 'redo',
-              undoTag
+              undoTag,
             });
           },
           nativeError => {
@@ -49,7 +49,7 @@ function init(socketName, handlers) {
               ipc.server.emit(socket, 'message', {
                 type: 'reply',
                 id,
-                result: { error, data: null }
+                result: { error, data: null },
               });
             } else {
               ipc.server.emit(socket, 'message', { type: 'error', id });
@@ -63,7 +63,7 @@ function init(socketName, handlers) {
               // Notify the frontend that something bad happend
               send('server-error');
             }
-          }
+          },
         );
       } else {
         console.warn('Unknown method: ' + name);
@@ -72,7 +72,7 @@ function init(socketName, handlers) {
           type: 'reply',
           id,
           result: null,
-          error: { type: 'APIError', message: 'Unknown method: ' + name }
+          error: { type: 'APIError', message: 'Unknown method: ' + name },
         });
       }
     });

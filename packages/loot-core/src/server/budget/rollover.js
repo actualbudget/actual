@@ -50,15 +50,15 @@ export function createCategory(cat, sheetName, prevSheetName) {
         `sum-amount-${cat.id}`,
         `${prevSheetName}!carryover-${cat.id}`,
         `${prevSheetName}!leftover-${cat.id}`,
-        `${prevSheetName}!leftover-pos-${cat.id}`
+        `${prevSheetName}!leftover-pos-${cat.id}`,
       ],
       run: (budgeted, spent, prevCarryover, prevLeftover, prevLeftoverPos) => {
         return safeNumber(
           number(budgeted) +
             number(spent) +
-            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos))
+            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos)),
         );
-      }
+      },
     });
 
     sheet.get().createDynamic(sheetName, 'leftover-pos-' + cat.id, {
@@ -66,7 +66,7 @@ export function createCategory(cat, sheetName, prevSheetName) {
       dependencies: [`leftover-${cat.id}`],
       run: leftover => {
         return leftover < 0 ? 0 : leftover;
-      }
+      },
     });
   }
 }
@@ -80,21 +80,22 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'from-last-month', {
     initialValue: 0,
     dependencies: [`${prevSheetName}!to-budget`, `${prevSheetName}!buffered`],
-    run: (toBudget, buffered) => safeNumber(number(toBudget) + number(buffered))
+    run: (toBudget, buffered) =>
+      safeNumber(number(toBudget) + number(buffered)),
   });
 
   // Alias the group income total to `total-income`
   sheet.get().createDynamic(sheetName, 'total-income', {
     initialValue: 0,
     dependencies: [`group-sum-amount-${incomeGroup.id}`],
-    run: amount => amount
+    run: amount => amount,
   });
 
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
     dependencies: ['total-income', 'from-last-month'],
     run: (income, fromLastMonth) =>
-      safeNumber(number(income) + number(fromLastMonth))
+      safeNumber(number(income) + number(fromLastMonth)),
   });
 
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {
@@ -102,8 +103,8 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     dependencies: flatten2(
       expenseCategories.map(cat => [
         `${prevSheetName}!leftover-${cat.id}`,
-        `${prevSheetName}!carryover-${cat.id}`
-      ])
+        `${prevSheetName}!carryover-${cat.id}`,
+      ]),
     ),
     run: (...data) => {
       data = unflatten2(data);
@@ -113,9 +114,9 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
             return total;
           }
           return total + Math.min(0, number(leftover));
-        }, 0)
+        }, 0),
       );
-    }
+    },
   });
 
   sheet.get().createDynamic(sheetName, 'total-budgeted', {
@@ -126,7 +127,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     run: (...amounts) => {
       // Negate budgeted amount
       return -sumAmounts(...amounts);
-    }
+    },
   });
 
   sheet.get().createDynamic(sheetName, 'buffered', { initialValue: 0 });
@@ -137,16 +138,16 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       'available-funds',
       'last-month-overspent',
       'total-budgeted',
-      'buffered'
+      'buffered',
     ],
     run: (available, lastOverspent, totalBudgeted, buffered) => {
       return safeNumber(
         number(available) +
           number(lastOverspent) +
           number(totalBudgeted) -
-          number(buffered)
+          number(buffered),
       );
-    }
+    },
   });
 
   sheet.get().createDynamic(sheetName, 'total-spent', {
@@ -154,7 +155,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     dependencies: groups
       .filter(group => !group.is_income)
       .map(group => `group-sum-amount-${group.id}`),
-    run: sumAmounts
+    run: sumAmounts,
   });
 
   sheet.get().createDynamic(sheetName, 'total-leftover', {
@@ -162,7 +163,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     dependencies: groups
       .filter(group => !group.is_income)
       .map(group => `group-leftover-${group.id}`),
-    run: sumAmounts
+    run: sumAmounts,
   });
 }
 

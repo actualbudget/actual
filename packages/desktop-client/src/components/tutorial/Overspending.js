@@ -91,5 +91,5 @@ function Overspending({ navigationProps, stepTwo }) {
 }
 
 export default connect(null, dispatch => bindActionCreators(actions, dispatch))(
-  Overspending
+  Overspending,
 );

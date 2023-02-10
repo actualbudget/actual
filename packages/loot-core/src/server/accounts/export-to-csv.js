@@ -7,7 +7,7 @@ export async function exportToCSV(
   transactions,
   accounts,
   categoryGroups,
-  payees
+  payees,
 ) {
   const accountNamesById = accounts.reduce((reduced, { id, name }) => {
     reduced[id] = name;
@@ -18,11 +18,11 @@ export async function exportToCSV(
     (reduced, { name, categories: subCategories }) => {
       subCategories.forEach(
         subCategory =>
-          (reduced[subCategory.id] = `${name}: ${subCategory.name}`)
+          (reduced[subCategory.id] = `${name}: ${subCategory.name}`),
       );
       return reduced;
     },
-    {}
+    {},
   );
 
   const payeeNamesById = payees.reduce((reduced, { id, name }) => {
@@ -37,8 +37,8 @@ export async function exportToCSV(
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
-      Amount: amount == null ? 0 : integerToAmount(amount)
-    })
+      Amount: amount == null ? 0 : integerToAmount(amount),
+    }),
   );
 
   return csvStringify(transactionsForExport, { header: true });
@@ -56,9 +56,9 @@ export async function exportQueryToCSV(query) {
         { IsParent: 'is_parent' },
         { Notes: 'notes' },
         { Category: 'category.name' },
-        { Amount: 'amount' }
+        { Amount: 'amount' },
       ])
-      .options({ splits: 'all' })
+      .options({ splits: 'all' }),
   );
 
   let parentsPayees = new Map();
@@ -79,7 +79,7 @@ export async function exportQueryToCSV(query) {
       Payee: trans.ParentId ? parentsPayees.get(trans.ParentId) : trans.Payee,
       Notes: trans.Notes,
       Category: trans.Category,
-      Amount: trans.Amount == null ? 0 : integerToAmount(trans.Amount)
+      Amount: trans.Amount == null ? 0 : integerToAmount(trans.Amount),
     };
   });
 

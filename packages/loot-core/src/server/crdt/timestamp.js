@@ -43,7 +43,7 @@ export function makeClock(timestamp, merkle = {}) {
 export function serializeClock(clock) {
   return JSON.stringify({
     timestamp: clock.timestamp.toString(),
-    merkle: clock.merkle
+    merkle: clock.merkle,
   });
 }
 
@@ -54,13 +54,13 @@ export function deserializeClock(clock) {
   } catch (e) {
     data = {
       timestamp: '1970-01-01T00:00:00.000Z-0000-' + makeClientId(),
-      merkle: {}
+      merkle: {},
     };
   }
 
   return {
     timestamp: MutableTimestamp.from(Timestamp.parse(data.timestamp)),
-    merkle: data.merkle
+    merkle: data.merkle,
   };
 }
 
@@ -70,7 +70,7 @@ export function makeClientId() {
 
 var config = {
   // Allow 5 minutes of clock drift
-  maxDrift: 5 * 60 * 1000
+  maxDrift: 5 * 60 * 1000,
 };
 
 const MAX_COUNTER = parseInt('0xFFFF');
@@ -84,7 +84,7 @@ export class Timestamp {
     this._state = {
       millis: millis,
       counter: counter,
-      node: node
+      node: node,
     };
   }
 
@@ -96,7 +96,7 @@ export class Timestamp {
     return [
       new Date(this.millis()).toISOString(),
       ('0000' + this.counter().toString(16).toUpperCase()).slice(-4),
-      ('0000000000000000' + this.node()).slice(-16)
+      ('0000000000000000' + this.node()).slice(-16),
     ].join('-');
   }
 
@@ -135,7 +135,7 @@ MutableTimestamp.from = timestamp => {
   return new MutableTimestamp(
     timestamp.millis(),
     timestamp.counter(),
-    timestamp.node()
+    timestamp.node(),
   );
 };
 
@@ -154,10 +154,10 @@ Timestamp.init = function (options = {}) {
         0,
         options.node
           ? ('0000000000000000' + options.node).toString().slice(-16)
-          : ''
-      )
+          : '',
+      ),
     ),
-    null
+    null,
   );
 };
 
@@ -198,7 +198,7 @@ Timestamp.send = function () {
   return new Timestamp(
     clock.timestamp.millis(),
     clock.timestamp.counter(),
-    clock.timestamp.node()
+    clock.timestamp.node(),
   );
 };
 
@@ -260,7 +260,7 @@ Timestamp.recv = function (msg) {
   return new Timestamp(
     clock.timestamp.millis(),
     clock.timestamp.counter(),
-    clock.timestamp.node()
+    clock.timestamp.node(),
   );
 };
 

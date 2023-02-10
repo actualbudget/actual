@@ -17,9 +17,9 @@ export const ListItem = ({ children, style, ...props }) => {
           alignItems: 'center',
           paddingLeft: 10,
           paddingRight: 10,
-          zIndex: 1
+          zIndex: 1,
         },
-        style
+        style,
       ]}
       {...props}
     >

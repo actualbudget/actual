@@ -5,24 +5,24 @@ import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 export const TYPE_INFO = {
   date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
-    nullable: false
+    nullable: false,
   },
   id: {
     ops: ['is', 'contains', 'oneOf'],
-    nullable: true
+    nullable: true,
   },
   string: {
     ops: ['is', 'contains', 'oneOf'],
-    nullable: false
+    nullable: false,
   },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
-    nullable: false
+    nullable: false,
   },
   boolean: {
     ops: ['is'],
-    nullable: false
-  }
+    nullable: false,
+  },
 };
 
 export const FIELD_TYPES = new Map(
@@ -36,8 +36,8 @@ export const FIELD_TYPES = new Map(
     amountOutfow: 'number',
     category: 'id',
     account: 'id',
-    cleared: 'boolean'
-  })
+    cleared: 'boolean',
+  }),
 );
 
 export function mapField(field, opts) {
@@ -197,7 +197,7 @@ export function makeValue(value, cond) {
         return {
           ...cond,
           error: null,
-          value: value ? currencyToAmount(value) || 0 : 0
+          value: value ? currencyToAmount(value) || 0 : 0,
         };
       }
       break;

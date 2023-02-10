@@ -10,7 +10,7 @@ export function getUserData() {
 
     dispatch({
       type: constants.GET_USER_DATA,
-      data
+      data,
     });
     return data;
   };

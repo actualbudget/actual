@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Modal } from 'loot-design/src/components/common';
 import {
   isDevelopmentEnvironment,
-  isPreviewEnvironment
+  isPreviewEnvironment,
 } from 'loot-design/src/util/environment';
 
 import ManageRules from '../ManageRules';
@@ -13,7 +13,7 @@ export default function ManageRulesModal({ modalProps, payeeId }) {
   if (isDevelopmentEnvironment() || isPreviewEnvironment()) {
     if (location.pathname !== '/payees') {
       throw new Error(
-        `Possibly invalid use of ManageRulesModal, add the current url '${location.pathname}' to the allowlist if you're confident the modal can never appear on top of the '/rules' page.`
+        `Possibly invalid use of ManageRulesModal, add the current url '${location.pathname}' to the allowlist if you're confident the modal can never appear on top of the '/rules' page.`,
       );
     }
   }

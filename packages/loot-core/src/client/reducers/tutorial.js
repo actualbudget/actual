@@ -2,7 +2,7 @@ import constants from '../constants';
 
 const initialState = {
   stage: null,
-  fromYNAB: false
+  fromYNAB: false,
 };
 
 export default function update(state = initialState, action) {
@@ -12,7 +12,7 @@ export default function update(state = initialState, action) {
         ...state,
         deactivated: false,
         stage: action.stage,
-        fromYNAB: 'fromYNAB' in action ? action.fromYNAB : state.fromYNAB
+        fromYNAB: 'fromYNAB' in action ? action.fromYNAB : state.fromYNAB,
       };
     case constants.DEACTIVATE_TUTORIAL:
       return { ...state, stage: null };

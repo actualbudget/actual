@@ -8,7 +8,7 @@ import {
   Text,
   Button,
   Tooltip,
-  Menu
+  Menu,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -24,7 +24,7 @@ function LoggedInUser({
   pushModal,
   closeBudget,
   style,
-  color
+  color,
 }) {
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
@@ -89,7 +89,7 @@ function LoggedInUser({
               onMenuSelect={onMenuSelect}
               items={[
                 { name: 'change-password', text: 'Change password' },
-                { name: 'sign-out', text: 'Sign out' }
+                { name: 'sign-out', text: 'Sign out' },
               ]}
             />
           </Tooltip>
@@ -105,7 +105,7 @@ export default connect(
   state => ({
     userData: state.user.data,
     files: state.budgets.allFiles,
-    budgetId: state.prefs.local && state.prefs.local.id
+    budgetId: state.prefs.local && state.prefs.local.id,
   }),
-  actions
+  actions,
 )(withRouter(LoggedInUser));

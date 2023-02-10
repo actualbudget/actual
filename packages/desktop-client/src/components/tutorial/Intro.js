@@ -5,7 +5,7 @@ import {
   Text,
   P,
   ModalButtons,
-  Button
+  Button,
 } from 'loot-design/src/components/common';
 
 import { Standalone, Title, ExternalLink } from './common';

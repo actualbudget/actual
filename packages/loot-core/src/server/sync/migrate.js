@@ -20,7 +20,7 @@ function migrateParentIds(_oldValues, newValues) {
             row: newValue.id,
             column: 'parent_id',
             value: parentId,
-            timestamp: Timestamp.send()
+            timestamp: Timestamp.send(),
           });
         }
       });

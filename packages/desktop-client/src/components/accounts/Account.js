@@ -8,7 +8,7 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 import {
   SchedulesProvider,
-  useCachedSchedules
+  useCachedSchedules,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
@@ -19,12 +19,12 @@ import {
   updateTransaction,
   realizeTempTransactions,
   ungroupTransaction,
-  ungroupTransactions
+  ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 import {
   currencyToInteger,
   applyChanges,
-  groupById
+  groupById,
 } from 'loot-core/src/shared/util';
 import {
   View,
@@ -35,7 +35,7 @@ import {
   InitialFocus,
   Tooltip,
   Menu,
-  Stack
+  Stack,
 } from 'loot-design/src/components/common';
 import { KeyHandlers } from 'loot-design/src/components/KeyHandlers';
 import NotesButton from 'loot-design/src/components/NotesButton';
@@ -45,7 +45,7 @@ import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue'
 import { SelectedItemsButton } from 'loot-design/src/components/table';
 import {
   SelectedProviderWithItems,
-  useSelectedItems
+  useSelectedItems,
 } from 'loot-design/src/components/useSelected';
 import { styles, colors } from 'loot-design/src/style';
 import Loading from 'loot-design/src/svg/AnimatedLoading';
@@ -68,7 +68,7 @@ import TransactionList from './TransactionList';
 import {
   SplitsExpandedProvider,
   useSplitsExpanded,
-  isPreviewId
+  isPreviewId,
 } from './TransactionsTable';
 
 function EmptyMessage({ onAdd }) {
@@ -79,7 +79,7 @@ function EmptyMessage({ onAdd }) {
         flex: 1,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderColor: colors.n9
+        borderColor: colors.n9,
       }}
     >
       <View
@@ -87,7 +87,7 @@ function EmptyMessage({ onAdd }) {
           width: 550,
           marginTop: 75,
           fontSize: 15,
-          alignItems: 'center'
+          alignItems: 'center',
         }}
       >
         <Text style={{ textAlign: 'center', lineHeight: '1.4em' }}>
@@ -112,12 +112,12 @@ function ReconcilingMessage({
   balanceQuery,
   targetBalance,
   onDone,
-  onCreateTransaction
+  onCreateTransaction,
 }) {
   let cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
     value: 0,
-    query: balanceQuery.query.filter({ cleared: true })
+    query: balanceQuery.query.filter({ cleared: true }),
   });
   let targetDiff = targetBalance - cleared;
 
@@ -131,7 +131,7 @@ function ReconcilingMessage({
         borderRadius: 4,
         marginTop: 5,
         marginBottom: 15,
-        padding: 10
+        padding: 10,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -142,7 +142,7 @@ function ReconcilingMessage({
               flex: 1,
               flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
             }}
           >
             <CheckCircle1
@@ -150,7 +150,7 @@ function ReconcilingMessage({
                 width: 13,
                 height: 13,
                 color: colors.g5,
-                marginRight: 3
+                marginRight: 3,
               }}
             />
             All reconciled!
@@ -254,7 +254,7 @@ function AccountMenu({
   canShowBalances,
   onClose,
   onReconcile,
-  onMenuSelect
+  onMenuSelect,
 }) {
   let [tooltip, setTooltip] = useState('default');
 
@@ -277,7 +277,7 @@ function AccountMenu({
         items={[
           canShowBalances && {
             name: 'toggle-balance',
-            text: (showBalances ? 'Hide' : 'Show') + ' Running Balance'
+            text: (showBalances ? 'Hide' : 'Show') + ' Running Balance',
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
@@ -289,7 +289,7 @@ function AccountMenu({
               : { name: 'link', text: 'Link Account' }),
           account.closed
             ? { name: 'reopen', text: 'Reopen Account' }
-            : { name: 'close', text: 'Close Account' }
+            : { name: 'close', text: 'Close Account' },
         ].filter(x => x)}
       />
     </MenuTooltip>
@@ -317,7 +317,7 @@ function DetailedBalance({ name, balance }) {
         backgroundColor: colors.n10,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colors.n5
+        color: colors.n5,
       }}
     >
       {name}{' '}
@@ -334,9 +334,9 @@ function SelectedBalance({ selectedItems }) {
     query: q('transactions')
       .filter({
         id: { $oneof: [...selectedItems] },
-        parent_id: { $oneof: [...selectedItems] }
+        parent_id: { $oneof: [...selectedItems] },
       })
-      .select('id')
+      .select('id'),
   });
   let ids = new Set((rows || []).map(r => r.id));
 
@@ -346,7 +346,7 @@ function SelectedBalance({ selectedItems }) {
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
       .options({ splits: 'all' })
-      .calculate({ $sum: '$amount' })
+      .calculate({ $sum: '$amount' }),
   });
 
   if (balance == null) {
@@ -358,11 +358,11 @@ function SelectedBalance({ selectedItems }) {
 function MoreBalances({ balanceQuery }) {
   let cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
-    query: balanceQuery.query.filter({ cleared: true })
+    query: balanceQuery.query.filter({ cleared: true }),
   });
   let uncleared = useSheetValue({
     name: balanceQuery.name + '-uncleared',
-    query: balanceQuery.query.filter({ cleared: false })
+    query: balanceQuery.query.filter({ cleared: false }),
   });
 
   return (
@@ -382,7 +382,7 @@ function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: -5,
-        marginLeft: -5
+        marginLeft: -5,
       }}
     >
       <Button
@@ -390,9 +390,9 @@ function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
         onClick={onToggleExtraBalances}
         style={{
           '& svg': {
-            opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0
+            opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0,
           },
-          '&:hover svg': { opacity: 1 }
+          '&:hover svg': { opacity: 1 },
         }}
       >
         <CellValue
@@ -400,7 +400,7 @@ function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
           type="financial"
           style={{ fontSize: 22, fontWeight: 400 }}
           getStyle={value => ({
-            color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8
+            color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
           })}
         />
 
@@ -410,7 +410,7 @@ function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
             height: 10,
             marginLeft: 10,
             color: colors.n5,
-            transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)'
+            transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
           }}
         />
       </Button>
@@ -465,7 +465,7 @@ function SelectedTransactionsButton({
   onDelete,
   onEdit,
   onUnlink,
-  onScheduleAction
+  onScheduleAction,
 }) {
   let selectedItems = useSelectedItems();
   let history = useHistory();
@@ -474,7 +474,7 @@ function SelectedTransactionsButton({
     let items = [...selectedItems];
     return {
       preview: !!items.find(id => isPreviewId(id)),
-      trans: !!items.find(id => !isPreviewId(id))
+      trans: !!items.find(id => !isPreviewId(id)),
     };
   }, [selectedItems]);
 
@@ -505,7 +505,7 @@ function SelectedTransactionsButton({
           p: () => onEdit('payee', [...selectedItems]),
           n: () => onEdit('notes', [...selectedItems]),
           c: () => onEdit('category', [...selectedItems]),
-          l: () => onEdit('cleared', [...selectedItems])
+          l: () => onEdit('cleared', [...selectedItems]),
         }
       }
       items={[
@@ -513,14 +513,14 @@ function SelectedTransactionsButton({
           ? [
               { name: 'view-schedule', text: 'View schedule' },
               { name: 'post-transaction', text: 'Post transaction' },
-              { name: 'skip', text: 'Skip scheduled date' }
+              { name: 'skip', text: 'Skip scheduled date' },
             ]
           : [
               { name: 'show', text: 'Show', key: 'F' },
               {
                 name: 'duplicate',
                 text: 'Duplicate',
-                disabled: ambiguousDuplication
+                disabled: ambiguousDuplication,
               },
               { name: 'delete', text: 'Delete', key: 'D' },
               ...(linked
@@ -528,15 +528,15 @@ function SelectedTransactionsButton({
                     {
                       name: 'view-schedule',
                       text: 'View schedule',
-                      disabled: selectedItems.size > 1
+                      disabled: selectedItems.size > 1,
                     },
-                    { name: 'unlink-schedule', text: 'Unlink schedule' }
+                    { name: 'unlink-schedule', text: 'Unlink schedule' },
                   ]
                 : [
                     {
                       name: 'link-schedule',
-                      text: 'Link schedule'
-                    }
+                      text: 'Link schedule',
+                    },
                   ]),
               Menu.line,
               { type: Menu.label, name: 'Edit field' },
@@ -546,8 +546,8 @@ function SelectedTransactionsButton({
               { name: 'notes', text: 'Notes', key: 'N' },
               { name: 'category', text: 'Category', key: 'C' },
               { name: 'amount', text: 'Amount' },
-              { name: 'cleared', text: 'Cleared', key: 'L' }
-            ])
+              { name: 'cleared', text: 'Cleared', key: 'L' },
+            ]),
       ]}
       onSelect={name => {
         switch (name) {
@@ -577,14 +577,14 @@ function SelectedTransactionsButton({
 
             if (scheduleId) {
               history.push(`/schedule/edit/${scheduleId}`, {
-                locationPtr: history.location
+                locationPtr: history.location,
               });
             }
             break;
           case 'link-schedule':
             history.push(`/schedule/link`, {
               locationPtr: history.location,
-              transactionIds: [...selectedItems]
+              transactionIds: [...selectedItems],
             });
             break;
           case 'unlink-schedule':
@@ -638,7 +638,7 @@ const AccountHeader = React.memo(
     onApplyFilter,
     onUpdateFilter,
     onDeleteFilter,
-    onScheduleAction
+    onScheduleAction,
   }) => {
     let [menuOpen, setMenuOpen] = useState(false);
     let searchInput = useRef(null);
@@ -654,11 +654,11 @@ const AccountHeader = React.memo(
       if (tableRef.current) {
         splitsExpanded.dispatch({
           type: 'switch-mode',
-          id: tableRef.current.getScrolledItem()
+          id: tableRef.current.getScrolledItem(),
         });
 
         savePrefs({
-          'expand-splits': !(splitsExpanded.state.mode === 'expand')
+          'expand-splits': !(splitsExpanded.state.mode === 'expand'),
         });
       }
     }
@@ -671,7 +671,7 @@ const AccountHeader = React.memo(
               if (searchInput.current) {
                 searchInput.current.focus();
               }
-            }
+            },
           }}
         />
 
@@ -691,7 +691,7 @@ const AccountHeader = React.memo(
                       fontWeight: 500,
                       marginTop: -5,
                       marginBottom: -2,
-                      marginLeft: -5
+                      marginLeft: -5,
                     }}
                   />
                 </InitialFocus>
@@ -703,11 +703,11 @@ const AccountHeader = React.memo(
                     gap: 3,
                     '& .hover-visible': {
                       opacity: 0,
-                      transition: 'opacity .25s'
+                      transition: 'opacity .25s',
                     },
                     '&:hover .hover-visible': {
-                      opacity: 1
-                    }
+                      opacity: 1,
+                    },
                   }}
                 >
                   <View
@@ -715,7 +715,7 @@ const AccountHeader = React.memo(
                       fontSize: 25,
                       fontWeight: 500,
                       marginRight: 5,
-                      marginBottom: 5
+                      marginBottom: 5,
                     }}
                   >
                     {account && account.closed
@@ -733,7 +733,7 @@ const AccountHeader = React.memo(
                       style={{
                         width: 11,
                         height: 11,
-                        color: colors.n8
+                        color: colors.n8,
                       }}
                     />
                   </Button>
@@ -811,7 +811,7 @@ const AccountHeader = React.memo(
                     flexShrink: 0,
                     color: search ? colors.p7 : 'inherit',
                     margin: 5,
-                    marginRight: 0
+                    marginRight: 0,
                   }}
                 />
               }
@@ -826,11 +826,11 @@ const AccountHeader = React.memo(
                   transition: 'color .15s',
                   '& input::placeholder': {
                     color: colors.n1,
-                    transition: 'color .25s'
-                  }
+                    transition: 'color .25s',
+                  },
                 },
                 focused && { boxShadow: '0 0 0 2px ' + colors.b5 },
-                !focused && search !== '' && { color: colors.p4 }
+                !focused && search !== '' && { color: colors.p4 },
               ]}
               onChange={e => onSearch(e.target.value)}
             />
@@ -865,7 +865,7 @@ const AccountHeader = React.memo(
                   style={{
                     width: 14,
                     height: 14,
-                    color: 'inherit'
+                    color: 'inherit',
                   }}
                 />
               ) : (
@@ -873,7 +873,7 @@ const AccountHeader = React.memo(
                   style={{
                     width: 14,
                     height: 14,
-                    color: 'inherit'
+                    color: 'inherit',
                   }}
                 />
               )}
@@ -933,7 +933,7 @@ const AccountHeader = React.memo(
         )}
       </>
     );
-  }
+  },
 );
 
 function AllTransactions({ transactions, filtered, children }) {
@@ -946,11 +946,11 @@ function AllTransactions({ transactions, filtered, children }) {
             s =>
               !s.completed &&
               ['due', 'upcoming', 'missed'].includes(
-                scheduleData.statuses.get(s.id)
-              )
+                scheduleData.statuses.get(s.id),
+              ),
           )
         : [],
-    [scheduleData]
+    [scheduleData],
   );
 
   let prependTransactions = useMemo(() => {
@@ -961,7 +961,7 @@ function AllTransactions({ transactions, filtered, children }) {
       amount: schedule._amount,
       date: schedule.next_date,
       notes: scheduleData.statuses.get(schedule.id),
-      schedule: schedule.id
+      schedule: schedule.id,
     }));
   }, [schedules]);
 
@@ -998,7 +998,7 @@ class AccountInternal extends React.PureComponent {
       balances: [],
       editingName: false,
       isAdding: false,
-      latestDate: null
+      latestDate: null,
     };
   }
 
@@ -1026,7 +1026,8 @@ class AccountInternal extends React.PureComponent {
         !messages.find(msg => msg.column === 'tombstone')
       ) {
         let focusableMsgs = messages.filter(
-          msg => msg.dataset === 'transactions' && !(msg.column === 'tombstone')
+          msg =>
+            msg.dataset === 'transactions' && !(msg.column === 'tombstone'),
         );
 
         focusId = focusableMsgs.length === 1 ? focusableMsgs[0].row : null;
@@ -1128,7 +1129,7 @@ class AccountInternal extends React.PureComponent {
         .options({ splits: 'grouped' })
         .filter({
           'account.offbudget': false,
-          ...locationState.filter
+          ...locationState.filter,
         });
     }
 
@@ -1151,12 +1152,12 @@ class AccountInternal extends React.PureComponent {
           if (isFiltered) {
             this.props.splitsExpandedDispatch({
               type: 'set-mode',
-              mode: 'collapse'
+              mode: 'collapse',
             });
           } else {
             this.props.splitsExpandedDispatch({
               type: 'set-mode',
-              mode: this.props.expandSplits ? 'expand' : 'collapse'
+              mode: this.props.expandSplits ? 'expand' : 'collapse',
             });
           }
         }
@@ -1167,7 +1168,7 @@ class AccountInternal extends React.PureComponent {
             transactionCount: this.paged.getTotalCount(),
             transactionsFiltered: isFiltered,
             loading: false,
-            workingHard: false
+            workingHard: false,
           },
           () => {
             if (this.state.showBalances) {
@@ -1181,14 +1182,14 @@ class AccountInternal extends React.PureComponent {
             setTimeout(() => {
               this.table.current && this.table.current.setRowAnimation(true);
             }, 0);
-          }
+          },
         );
       },
       {
         pageCount: 150,
         onlySync: true,
-        mapper: ungroupTransactions
-      }
+        mapper: ungroupTransactions,
+      },
     );
   }
 
@@ -1200,11 +1201,11 @@ class AccountInternal extends React.PureComponent {
           loading: true,
           search: '',
           showBalances: nextProps.showBalances,
-          balances: []
+          balances: [],
         },
         () => {
           this.fetchTransactions();
-        }
+        },
       );
     }
   }
@@ -1222,9 +1223,9 @@ class AccountInternal extends React.PureComponent {
         queries.makeTransactionSearchQuery(
           this.currentQuery,
           this.state.search,
-          this.props.dateFormat
+          this.props.dateFormat,
         ),
-        true
+        true,
       );
     }
   }, 150);
@@ -1243,8 +1244,8 @@ class AccountInternal extends React.PureComponent {
     if (account) {
       const res = await window.Actual.openFileDialog({
         filters: [
-          { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] }
-        ]
+          { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+        ],
       });
 
       if (res) {
@@ -1255,7 +1256,7 @@ class AccountInternal extends React.PureComponent {
             if (didChange) {
               this.fetchTransactions();
             }
-          }
+          },
         });
       }
     }
@@ -1263,7 +1264,7 @@ class AccountInternal extends React.PureComponent {
 
   onExport = async accountName => {
     let exportedTransactions = await send('transactions-export-query', {
-      query: this.currentQuery.serialize()
+      query: this.currentQuery.serialize(),
     });
     let normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
@@ -1272,7 +1273,7 @@ class AccountInternal extends React.PureComponent {
     window.Actual.saveFile(
       exportedTransactions,
       filename,
-      'Export Transactions'
+      'Export Transactions',
     );
   };
 
@@ -1290,7 +1291,7 @@ class AccountInternal extends React.PureComponent {
       },
       mappedData => {
         return data;
-      }
+      },
     );
 
     this.props.updateNewTransactions(newTransaction.id);
@@ -1313,7 +1314,7 @@ class AccountInternal extends React.PureComponent {
       this.paged
         .getQuery()
         .options({ splits: 'none' })
-        .select([{ balance: { $sumOver: '$amount' } }])
+        .select([{ balance: { $sumOver: '$amount' } }]),
     );
 
     this.setState({ balances: groupById(data) });
@@ -1331,7 +1332,7 @@ class AccountInternal extends React.PureComponent {
     if (name.trim().length) {
       const accountId = this.props.accountId;
       const account = this.props.accounts.find(
-        account => account.id === accountId
+        account => account.id === accountId,
       );
       this.props.updateAccount({ ...account, name });
       this.setState({ editingName: false });
@@ -1348,7 +1349,7 @@ class AccountInternal extends React.PureComponent {
   onMenuSelect = async item => {
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(
-      account => account.id === accountId
+      account => account.id === accountId,
     );
 
     switch (item) {
@@ -1408,7 +1409,7 @@ class AccountInternal extends React.PureComponent {
   getBalanceQuery(account, id) {
     return {
       name: `balance-query-${id}`,
-      query: this.makeRootQuery().calculate({ $sum: '$amount' })
+      query: this.makeRootQuery().calculate({ $sum: '$amount' }),
     };
   }
 
@@ -1445,18 +1446,18 @@ class AccountInternal extends React.PureComponent {
         cleared: true,
         amount: diff,
         date: currentDay(),
-        notes: 'Reconciliation balance adjustment'
-      }
+        notes: 'Reconciliation balance adjustment',
+      },
     ]);
 
     // Optimistic UI: update the transaction list before sending the data to the database
     this.setState({
-      transactions: [...this.state.transactions, ...reconciliationTransactions]
+      transactions: [...this.state.transactions, ...reconciliationTransactions],
     });
 
     // sync the reconciliation transaction
     await send('transactions-batch-update', {
-      added: reconciliationTransactions
+      added: reconciliationTransactions,
     });
     await this.refetchTransactions();
   };
@@ -1464,7 +1465,7 @@ class AccountInternal extends React.PureComponent {
   onShowTransactions = async ids => {
     this.onApplyFilter({
       customName: 'Selected transactions',
-      filter: { id: { $oneof: ids } }
+      filter: { id: { $oneof: ids } },
     });
   };
 
@@ -1476,7 +1477,7 @@ class AccountInternal extends React.PureComponent {
         q('transactions')
           .filter({ id: { $oneof: ids } })
           .select('*')
-          .options({ splits: 'grouped' })
+          .options({ splits: 'grouped' }),
       );
       let transactions = ungroupTransactions(data);
 
@@ -1499,7 +1500,7 @@ class AccountInternal extends React.PureComponent {
 
         let { diff } = updateTransaction(transactions, {
           ...trans,
-          [name]: value
+          [name]: value,
         });
 
         // TODO: We need to keep an updated list of transactions so
@@ -1543,17 +1544,17 @@ class AccountInternal extends React.PureComponent {
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
-        .options({ splits: 'grouped' })
+        .options({ splits: 'grouped' }),
     );
 
     let changes = {
       added: data
         .reduce((newTransactions, trans) => {
           return newTransactions.concat(
-            realizeTempTransactions(ungroupTransaction(trans))
+            realizeTempTransactions(ungroupTransaction(trans)),
           );
         }, [])
-        .map(({ sort_order, ...trans }) => ({ ...trans }))
+        .map(({ sort_order, ...trans }) => ({ ...trans })),
     };
 
     await send('transactions-batch-update', changes);
@@ -1568,7 +1569,7 @@ class AccountInternal extends React.PureComponent {
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
-        .options({ splits: 'grouped' })
+        .options({ splits: 'grouped' }),
     );
     let transactions = ungroupTransactions(data);
 
@@ -1607,7 +1608,7 @@ class AccountInternal extends React.PureComponent {
 
   onBatchUnlink = async ids => {
     await send('transactions-batch-update', {
-      updated: ids.map(id => ({ id, schedule: null }))
+      updated: ids.map(id => ({ id, schedule: null })),
     });
 
     await this.refetchTransactions();
@@ -1615,7 +1616,7 @@ class AccountInternal extends React.PureComponent {
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
     this.applyFilters(
-      this.state.filters.map(f => (f === oldFilter ? updatedFilter : f))
+      this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
   };
 
@@ -1656,11 +1657,11 @@ class AccountInternal extends React.PureComponent {
         .filter(cond => !!cond.customName)
         .map(f => f.filter);
       let { filters } = await send('make-filters-from-conditions', {
-        conditions: conditions.filter(cond => !cond.customName)
+        conditions: conditions.filter(cond => !cond.customName),
       });
 
       this.currentQuery = this.rootQuery.filter({
-        $and: [...filters, ...customFilters]
+        $and: [...filters, ...customFilters],
       });
       this.updateQuery(this.currentQuery, true);
       this.setState({ filters: conditions, search: '' });
@@ -1682,7 +1683,7 @@ class AccountInternal extends React.PureComponent {
       accountsSyncing,
       replaceModal,
       showExtraBalances,
-      accountId
+      accountId,
     } = this.props;
     let {
       transactions,
@@ -1692,7 +1693,7 @@ class AccountInternal extends React.PureComponent {
       transactionsFiltered,
       editingName,
       showBalances,
-      balances
+      balances,
     } = this.state;
 
     let account = accounts.find(account => account.id === accountId);
@@ -1809,7 +1810,7 @@ class AccountInternal extends React.PureComponent {
                         <EmptyMessage
                           onAdd={() =>
                             replaceModal(
-                              syncEnabled ? 'add-account' : 'add-local-account'
+                              syncEnabled ? 'add-account' : 'add-local-account',
                             )
                           }
                         />
@@ -1818,7 +1819,7 @@ class AccountInternal extends React.PureComponent {
                           style={{
                             marginTop: 20,
                             textAlign: 'center',
-                            fontStyle: 'italic'
+                            fontStyle: 'italic',
                           }}
                         >
                           No transactions
@@ -1830,7 +1831,7 @@ class AccountInternal extends React.PureComponent {
                     onRefetchUpToRow={row =>
                       this.paged.refetchUpToRow(row, {
                         field: 'date',
-                        order: 'desc'
+                        order: 'desc',
                       })
                     }
                     onCloseAddTransaction={() =>
@@ -1878,13 +1879,13 @@ export default function Account(props) {
     modalShowing: state.modals.modalStack.length > 0,
     accountsSyncing: state.account.accountsSyncing,
     lastUndoState: state.app.lastUndoState,
-    tutorialStage: state.tutorial.stage
+    tutorialStage: state.tutorial.stage,
   }));
 
   let dispatch = useDispatch();
   let actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
-    [dispatch]
+    [dispatch],
   );
 
   let params = useParams();

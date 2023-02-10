@@ -13,7 +13,7 @@ export function Section({ title, children, style, titleProps, ...props }) {
       <View
         style={[
           { fontSize: 20, fontWeight: 500, flexShrink: 0 },
-          titleProps && titleProps.style
+          titleProps && titleProps.style,
         ]}
         {...titleProps}
       >
@@ -35,11 +35,11 @@ export function Setting({ primaryAction, children }) {
           padding: 15,
           borderRadius: 4,
           border: '1px solid ' + colors.n8,
-          width: '100%'
+          width: '100%',
         },
         media(`(min-width: ${tokens.breakpoint_medium})`, {
-          width: 'auto'
-        })
+          width: 'auto',
+        }),
       )}
     >
       <View
@@ -47,7 +47,7 @@ export function Setting({ primaryAction, children }) {
           marginBottom: primaryAction ? 10 : 0,
           maxWidth: 500,
           lineHeight: 1.5,
-          gap: 10
+          gap: 10,
         }}
       >
         {children}
@@ -73,11 +73,11 @@ export function AdvancedToggle({ children }) {
       {...css(
         {
           marginBottom: 25,
-          width: '100%'
+          width: '100%',
         },
         media(`(min-width: ${tokens.breakpoint_medium})`, {
-          width: 'auto'
-        })
+          width: 'auto',
+        }),
       )}
     >
       {children}
@@ -90,7 +90,7 @@ export function AdvancedToggle({ children }) {
         flexShrink: 0,
         alignSelf: 'flex-start',
         color: colors.p4,
-        marginBottom: 25
+        marginBottom: 25,
       }}
     >
       Show advanced settings

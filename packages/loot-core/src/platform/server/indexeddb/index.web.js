@@ -153,5 +153,5 @@ module.exports = {
   getStore,
   get,
   set,
-  del
+  del,
 };

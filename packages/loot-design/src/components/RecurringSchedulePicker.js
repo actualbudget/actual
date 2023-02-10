@@ -18,7 +18,7 @@ const MAX_DAY_OF_WEEK_INTERVAL = 5;
 const FREQUENCY_OPTIONS = [
   { id: 'weekly', name: 'Weeks' },
   { id: 'monthly', name: 'Months' },
-  { id: 'yearly', name: 'Years' }
+  { id: 'yearly', name: 'Years' },
 ];
 
 const DAY_OF_MONTH_OPTIONS = [...Array(31).keys()].map(day => day + 1);
@@ -30,7 +30,7 @@ const DAY_OF_WEEK_OPTIONS = [
   { id: 'WE', name: 'Wednesday' },
   { id: 'TH', name: 'Thursday' },
   { id: 'FR', name: 'Friday' },
-  { id: 'SA', name: 'Saturday' }
+  { id: 'SA', name: 'Saturday' },
 ];
 
 function parsePatternValue(value) {
@@ -46,7 +46,7 @@ function parseConfig(config) {
       start: monthUtils.currentDay(),
       interval: 1,
       frequency: 'monthly',
-      patterns: [createMonthlyRecurrence(monthUtils.currentDay())]
+      patterns: [createMonthlyRecurrence(monthUtils.currentDay())],
     }
   );
 }
@@ -54,14 +54,14 @@ function parseConfig(config) {
 function unparseConfig(parsed) {
   return {
     ...parsed,
-    interval: validInterval(parsed.interval)
+    interval: validInterval(parsed.interval),
   };
 }
 
 function createMonthlyRecurrence(startDate) {
   return {
     value: parseInt(monthUtils.format(startDate, 'd')),
-    type: 'day'
+    type: 'day',
   };
 }
 
@@ -90,8 +90,8 @@ function reducer(state, action) {
           ...state.config,
           [action.field]: action.value,
           patterns:
-            state.config.frequency !== 'monthly' ? [] : state.config.patterns
-        }
+            state.config.frequency !== 'monthly' ? [] : state.config.patterns,
+        },
       };
     case 'update-recurrence':
       return {
@@ -101,9 +101,9 @@ function reducer(state, action) {
           patterns: state.config.patterns.map(p =>
             p === action.recurrence
               ? { ...action.recurrence, ...boundedRecurrence(action) }
-              : p
-          )
-        }
+              : p,
+          ),
+        },
       };
     case 'add-recurrence':
       return {
@@ -112,17 +112,17 @@ function reducer(state, action) {
           ...state.config,
           patterns: [
             ...(state.config.patterns || []),
-            createMonthlyRecurrence(state.config.start)
-          ]
-        }
+            createMonthlyRecurrence(state.config.start),
+          ],
+        },
       };
     case 'remove-recurrence':
       return {
         ...state,
         config: {
           ...state.config,
-          patterns: state.config.patterns.filter(p => p !== action.recurrence)
-        }
+          patterns: state.config.patterns.filter(p => p !== action.recurrence),
+        },
       };
     default:
       return state;
@@ -135,7 +135,7 @@ function SchedulePreview({ previewDates }) {
   }
 
   let dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy'
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
   dateFormat = dateFormat.replace('MM', 'M').replace('dd', 'd');
 
@@ -187,7 +187,7 @@ function MonthlyPatterns({ config, dispatch }) {
           key={idx}
           style={{
             display: 'flex',
-            flexDirection: 'row'
+            flexDirection: 'row',
           }}
         >
           <Select
@@ -197,7 +197,7 @@ function MonthlyPatterns({ config, dispatch }) {
               updateRecurrence(
                 recurrence,
                 'value',
-                parsePatternValue(e.target.value)
+                parsePatternValue(e.target.value),
               )
             }
           >
@@ -228,7 +228,7 @@ function MonthlyPatterns({ config, dispatch }) {
             onClick={() =>
               dispatch({
                 type: 'remove-recurrence',
-                recurrence: recurrence
+                recurrence: recurrence,
               })
             }
           >
@@ -251,17 +251,17 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   let [previewDates, setPreviewDates] = useState(null);
 
   let [state, dispatch] = useReducer(reducer, {
-    config: parseConfig(currentConfig)
+    config: parseConfig(currentConfig),
   });
 
   let dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy'
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
 
   useEffect(() => {
     dispatch({
       type: 'replace-config',
-      config: parseConfig(currentConfig)
+      config: parseConfig(currentConfig),
     });
   }, [currentConfig]);
 
@@ -274,7 +274,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
     async function run() {
       let { data, error } = await sendCatch('schedule/get-upcoming-dates', {
         config: unparseConfig(config),
-        count: 4
+        count: 4,
       });
       setPreviewDates(error ? 'Invalid rule' : data);
     }
@@ -364,7 +364,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
 export default function RecurringSchedulePicker({
   value,
   buttonStyle,
-  onChange
+  onChange,
 }) {
   let { isOpen, close, getOpenEvents } = useTooltip();
 

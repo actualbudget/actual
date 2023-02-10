@@ -3,7 +3,7 @@ import {
   openDatabase,
   transaction,
   execQuery,
-  runQuery
+  runQuery,
 } from './index.web';
 
 beforeAll(() => {

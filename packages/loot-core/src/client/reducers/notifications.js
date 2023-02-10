@@ -1,7 +1,7 @@
 import constants from '../constants';
 
 const initialState = {
-  notifications: []
+  notifications: [],
 };
 
 export default function update(state = initialState, action) {
@@ -13,12 +13,12 @@ export default function update(state = initialState, action) {
 
       return {
         ...state,
-        notifications: [...state.notifications, action.notification]
+        notifications: [...state.notifications, action.notification],
       };
     case constants.REMOVE_NOTIFICATION:
       return {
         ...state,
-        notifications: state.notifications.filter(n => n.id !== action.id)
+        notifications: state.notifications.filter(n => n.id !== action.id),
       };
     default:
   }

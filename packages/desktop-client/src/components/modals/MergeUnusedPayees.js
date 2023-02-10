@@ -10,7 +10,7 @@ import {
   Modal,
   ModalButtons,
   Button,
-  P
+  P,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -20,11 +20,11 @@ export default function MergeUnusedPayees({
   history,
   modalProps,
   payeeIds,
-  targetPayeeId
+  targetPayeeId,
 }) {
   let { payees: allPayees, modalStack } = useSelector(state => ({
     payees: state.queries.payees,
-    modalStack: state.modals.modalStack
+    modalStack: state.modals.modalStack,
   }));
   let isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
   let dispatch = useDispatch();
@@ -48,7 +48,7 @@ export default function MergeUnusedPayees({
   // TODO: I think a custom `useSelector` hook that doesn't bind would
   // be nice
   let [payees] = useState(() =>
-    payeeIds.map(id => allPayees.find(p => p.id === id))
+    payeeIds.map(id => allPayees.find(p => p.id === id)),
   );
   let targetPayee = allPayees.find(p => p.id === targetPayeeId);
 
@@ -59,14 +59,14 @@ export default function MergeUnusedPayees({
   async function onMerge() {
     await send('payees-merge', {
       targetId: targetPayee.id,
-      mergeIds: payees.map(p => p.id)
+      mergeIds: payees.map(p => p.id),
     });
 
     let ruleId;
     if (shouldCreateRule && !isEditingRule) {
       let id = await send('rule-add-payee-rename', {
         fromNames: payees.map(p => p.name),
-        to: targetPayee.id
+        to: targetPayee.id,
       });
       ruleId = id;
     }
@@ -114,7 +114,7 @@ export default function MergeUnusedPayees({
                       margin: 0,
                       marginTop: 10,
                       maxHeight: 140,
-                      overflow: 'auto'
+                      overflow: 'auto',
                     }}
                   >
                     {payees.map(p => (
@@ -142,7 +142,7 @@ export default function MergeUnusedPayees({
                   userSelect: 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
                 }}
               >
                 <input

@@ -17,7 +17,7 @@ app.method('tools/fix-split-transactions', async () => {
   await runMutator(async () => {
     let updated = blankPayeeRows.map(row => ({
       id: row.id,
-      payee: row.parentPayee
+      payee: row.parentPayee,
     }));
     await batchUpdateTransactions({ updated });
   });
@@ -33,7 +33,7 @@ app.method('tools/fix-split-transactions', async () => {
   await runMutator(async () => {
     let updated = clearedRows.map(row => ({
       id: row.id,
-      cleared: row.cleared === 1
+      cleared: row.cleared === 1,
     }));
     await batchUpdateTransactions({ updated });
   });
@@ -54,7 +54,7 @@ app.method('tools/fix-split-transactions', async () => {
   return {
     numBlankPayees: blankPayeeRows.length,
     numCleared: clearedRows.length,
-    numDeleted: deletedRows.length
+    numDeleted: deletedRows.length,
   };
 });
 

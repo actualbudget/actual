@@ -8,7 +8,7 @@ import {
   Modal,
   P,
   Link,
-  Button
+  Button,
 } from 'loot-design/src/components/common';
 import { Checkbox } from 'loot-design/src/components/forms';
 import { colors } from 'loot-design/src/style';
@@ -63,7 +63,7 @@ class FatalError extends React.Component {
         style={{
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100%'
+          height: '100%',
         }}
       >
         <Stack
@@ -73,7 +73,7 @@ class FatalError extends React.Component {
             color: colors.r4,
             lineHeight: '1.5em',
             fontSize: 15,
-            '& a': { color: colors.r4 }
+            '& a': { color: colors.r4 },
           }}
         >
           <Text>{msg}</Text>
@@ -127,7 +127,7 @@ class FatalError extends React.Component {
                   style={{
                     marginTop: 5,
                     height: 100,
-                    overflow: 'auto'
+                    overflow: 'auto',
                   }}
                 >
                   {error.stack}
@@ -183,7 +183,7 @@ function SharedArrayBufferOverride() {
         textDecoration: 'underline !important',
         boxShadow: 'none !important',
         display: 'inline !important',
-        font: 'inherit !important'
+        font: 'inherit !important',
       }}
     >
       Advanced options

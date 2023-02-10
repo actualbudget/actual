@@ -34,5 +34,5 @@ module.exports = {
   firstValue,
   number,
   min,
-  max
+  max,
 };

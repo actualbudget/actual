@@ -13,7 +13,7 @@ async function runMigrations() {
 export async function updateViews() {
   let hashKey = 'view-hash';
   let row = await db.first('SELECT value FROM __meta__ WHERE key = ?', [
-    hashKey
+    hashKey,
   ]);
   let { value: hash } = row || {};
 
@@ -24,7 +24,7 @@ export async function updateViews() {
     await db.execQuery(views);
     await db.runQuery(
       'INSERT OR REPLACE INTO __meta__ (key, value) VALUES (?, ?)',
-      [hashKey, currentHash]
+      [hashKey, currentHash],
     );
   }
 }

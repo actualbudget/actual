@@ -29,7 +29,7 @@ export default () => {
             display: 'grid',
             gridTemplateColumns: 'repeat(6, 1fr)',
             gridGap: 10,
-            width: 500
+            width: 500,
           }}
         >
           {Object.keys(modules).map(path => {
@@ -43,7 +43,7 @@ export default () => {
                     height: 20,
                     display: 'flex',
                     justifyContent: 'center',
-                    alignItems: 'center'
+                    alignItems: 'center',
                   }}
                 >
                   <Component width={25} />

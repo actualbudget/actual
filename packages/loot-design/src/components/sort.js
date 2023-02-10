@@ -4,7 +4,7 @@ import React, {
   useLayoutEffect,
   useMemo,
   useState,
-  useContext
+  useContext,
 } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
@@ -34,7 +34,7 @@ export function useDraggable({
   makePreview,
   children,
   canDrag,
-  onDragChange
+  onDragChange,
 }) {
   let _onDragChange = useRef(onDragChange);
 
@@ -57,7 +57,7 @@ export function useDraggable({
 
     canDrag() {
       return canDrag;
-    }
+    },
   });
 
   useLayoutEffect(() => {
@@ -88,7 +88,7 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
     },
     collect(monitor) {
       return { isOver: monitor.isOver() };
-    }
+    },
   });
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
 
   return {
     dropRef: useMergedRefs(dropRef, ref),
-    dropPos: isOver ? dropPos : null
+    dropPos: isOver ? dropPos : null,
   };
 }
 
@@ -131,9 +131,9 @@ export function DropHighlight({ pos, offset = {} }) {
           height: 3,
           background: `linear-gradient(90deg, ${colors.b4} 0%, ${colors.b5} 100%)`,
           zIndex: 10000,
-          pointerEvents: 'none'
+          pointerEvents: 'none',
         },
-        posStyle
+        posStyle,
       ]}
     />
   );

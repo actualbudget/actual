@@ -32,7 +32,7 @@ class Debug extends React.Component {
       code: null,
       sql: null,
       sqlgenValue: localStorage.sqlgenValue,
-      sqlgenRow: localStorage.sqlgenRow
+      sqlgenRow: localStorage.sqlgenRow,
     };
   }
 
@@ -62,7 +62,7 @@ class Debug extends React.Component {
     } catch (e) {}
 
     const res = await send('debug-sqlgen', {
-      expr: this.state.sqlgenValue
+      expr: this.state.sqlgenValue,
     });
     this.setState({ sqlgenResult: res });
   }
@@ -92,7 +92,7 @@ class Debug extends React.Component {
       // sql,
       sqlgenValue,
       sqlgenRow,
-      sqlgenResult
+      sqlgenResult,
     } = this.state;
 
     return (

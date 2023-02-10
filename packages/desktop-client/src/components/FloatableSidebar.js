@@ -23,7 +23,7 @@ export function SidebarProvider({ children }) {
         on: (name, listener) => {
           emitter.on(name, listener);
           return () => emitter.off(name, listener);
-        }
+        },
       }}
     >
       {children}
@@ -46,7 +46,7 @@ function Sidebar({ floatingSidebar }) {
   useEffect(() => {
     let cleanups = [
       sidebar.on('show', () => setHidden(false)),
-      sidebar.on('hide', () => setHidden(true))
+      sidebar.on('hide', () => setHidden(true)),
     ];
     return () => {
       cleanups.forEach(fn => fn());
@@ -65,7 +65,7 @@ function Sidebar({ floatingSidebar }) {
             bottom: 0,
             left: 0,
             width: hidden ? 0 : 160,
-            zIndex: 999
+            zIndex: 999,
           }}
         ></View>
       )}
@@ -94,7 +94,7 @@ function Sidebar({ floatingSidebar }) {
               : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
           transform: `translateY(${!floatingSidebar ? -50 : 0}px)
                       translateX(${hidden ? -SIDEBAR_WIDTH : 0}px)`,
-          transition: 'transform .5s, box-shadow .5s'
+          transition: 'transform .5s, box-shadow .5s',
         }}
       >
         <SidebarWithData />
@@ -107,14 +107,14 @@ function Sidebar({ floatingSidebar }) {
             opacity: floatingSidebar ? 0 : 1,
             transform: `translateX(${floatingSidebar ? -50 : 0}px)`,
             transition: 'transform .4s, opacity .2s',
-            width: SIDEBAR_WIDTH
+            width: SIDEBAR_WIDTH,
           },
           floatingSidebar && {
             position: 'absolute',
             top: 0,
             bottom: 0,
-            left: 0
-          }
+            left: 0,
+          },
         ]}
       ></View>
     </>
@@ -124,6 +124,6 @@ function Sidebar({ floatingSidebar }) {
 export default withRouter(
   connect(
     state => ({ floatingSidebar: state.prefs.global.floatingSidebar }),
-    actions
-  )(Sidebar)
+    actions,
+  )(Sidebar),
 );

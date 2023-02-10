@@ -7,7 +7,7 @@ const SvgMoodNeutralOutline = props => (
     viewBox="0 0 20 20"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path

@@ -7,7 +7,7 @@ import { TestProvider } from 'loot-core/src/mocks/redux';
 
 global.IS_DESIGN_MODE = true;
 window.Actual = {
-  IS_FAKE_WEB: true
+  IS_FAKE_WEB: true,
 };
 
 const modules = {};
@@ -22,7 +22,7 @@ function Usage({ name, render }) {
     <TestProvider>
       <div
         style={{
-          margin: 40
+          margin: 40,
         }}
       >
         <h1>{name}</h1>
@@ -51,7 +51,7 @@ export default async function render(rootNode) {
       return {
         path,
         name: pathToName(path),
-        key: path
+        key: path,
       };
     })
     .filter(guide => guide.path.toLowerCase().includes(filter.toLowerCase()))
@@ -79,12 +79,12 @@ export default async function render(rootNode) {
           </Text>
           {modules[key].default()}
         </View>,
-        mount
+        mount,
       );
     } else {
       ReactDOM.render(
         <Usage name={name} render={modules[key].default} />,
-        mount
+        mount,
       );
     }
   });
@@ -124,7 +124,7 @@ function reloadUsage(path, module) {
     ReactDOM.unmountComponentAtNode(mount);
     ReactDOM.render(
       <Usage name={pathToName(path)} render={module.default} updated={true} />,
-      mount
+      mount,
     );
     document.documentElement.scrollTop = scrollTop;
   } catch (e) {
