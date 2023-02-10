@@ -33,5 +33,5 @@ export default lively(ElementQuery, {
   },
   componentWillUnmount({ inst }) {
     inst.observer.disconnect();
-  }
+  },
 });

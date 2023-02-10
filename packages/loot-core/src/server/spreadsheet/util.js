@@ -3,7 +3,7 @@ function unresolveName(name) {
   if (idx !== -1) {
     return {
       sheet: name.slice(0, idx),
-      name: name.slice(idx + 1)
+      name: name.slice(idx + 1),
     };
   }
   return { sheet: null, name };
@@ -42,5 +42,5 @@ module.exports = {
   unresolveName,
   resolveName,
   resolveNamesAsObjects,
-  resolveNamesAsArrays
+  resolveNamesAsArrays,
 };

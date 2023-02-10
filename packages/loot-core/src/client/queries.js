@@ -5,7 +5,7 @@ import {
   getDayMonthRegex,
   getDayMonthFormat,
   getShortYearRegex,
-  getShortYearFormat
+  getShortYearFormat,
 } from '../shared/months';
 import q from '../shared/query';
 import { currencyToAmount, amountToInteger } from '../shared/util';
@@ -15,12 +15,12 @@ export function getAccountFilter(accountId, field = 'account') {
     if (accountId === 'budgeted') {
       return {
         [`${field}.offbudget`]: false,
-        [`${field}.closed`]: false
+        [`${field}.closed`]: false,
       };
     } else if (accountId === 'offbudget') {
       return {
         [`${field}.offbudget`]: true,
-        [`${field}.closed`]: false
+        [`${field}.closed`]: false,
       };
     } else if (accountId === 'uncategorized') {
       return {
@@ -30,9 +30,9 @@ export function getAccountFilter(accountId, field = 'account') {
         $or: [
           {
             'payee.transfer_acct.offbudget': true,
-            'payee.transfer_acct': null
-          }
-        ]
+            'payee.transfer_acct': null,
+          },
+        ],
       };
     } else {
       return { [field]: accountId };
@@ -75,17 +75,17 @@ export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
       $or: [
         isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
         amount != null && {
-          amount: { $transform: '$abs', $eq: amountToInteger(amount) }
+          amount: { $transform: '$abs', $eq: amountToInteger(amount) },
         },
         amount != null &&
           Number.isInteger(amount) && {
             amount: {
               $transform: { $abs: { $idiv: ['$', 100] } },
-              $eq: amount
-            }
-          }
-      ].filter(Boolean)
-    }
+              $eq: amount,
+            },
+          },
+      ].filter(Boolean),
+    },
   });
 }
 
@@ -95,7 +95,7 @@ export function accountBalance(acct) {
     query: q('transactions')
       .filter({ account: acct.id })
       .options({ splits: 'none' })
-      .calculate({ $sum: '$amount' })
+      .calculate({ $sum: '$amount' }),
   };
 }
 
@@ -104,7 +104,7 @@ export function allAccountBalance() {
     query: q('transactions')
       .filter({ 'account.closed': false })
       .calculate({ $sum: '$amount' }),
-    name: 'accounts-balance'
+    name: 'accounts-balance',
   };
 }
 
@@ -113,7 +113,7 @@ export function budgetedAccountBalance() {
     name: `budgeted-accounts-balance`,
     query: q('transactions')
       .filter({ 'account.offbudget': false, 'account.closed': false })
-      .calculate({ $sum: '$amount' })
+      .calculate({ $sum: '$amount' }),
   };
 }
 
@@ -122,7 +122,7 @@ export function offbudgetAccountBalance() {
     name: `offbudget-accounts-balance`,
     query: q('transactions')
       .filter({ 'account.offbudget': true, 'account.closed': false })
-      .calculate({ $sum: '$amount' })
+      .calculate({ $sum: '$amount' }),
   };
 }
 
@@ -132,22 +132,22 @@ let uncategorizedQuery = q('transactions').filter({
   $or: [
     {
       'payee.transfer_acct.offbudget': true,
-      'payee.transfer_acct': null
-    }
-  ]
+      'payee.transfer_acct': null,
+    },
+  ],
 });
 
 export function uncategorizedBalance() {
   return {
     name: 'uncategorized-balance',
-    query: uncategorizedQuery.calculate({ $sum: '$amount' })
+    query: uncategorizedQuery.calculate({ $sum: '$amount' }),
   };
 }
 
 export function uncategorizedCount() {
   return {
     name: 'uncategorized-amount',
-    query: uncategorizedQuery.calculate({ $count: '$id' })
+    query: uncategorizedQuery.calculate({ $count: '$id' }),
   };
 }
 
@@ -172,7 +172,7 @@ export const rolloverBudget = {
   catBudgeted: id => `budget-${id}`,
   catSumAmount: id => `sum-amount-${id}`,
   catBalance: id => `leftover-${id}`,
-  catCarryover: id => `carryover-${id}`
+  catCarryover: id => `carryover-${id}`,
 };
 
 export const reportBudget = {
@@ -194,5 +194,5 @@ export const reportBudget = {
   catBudgeted: id => `budget-${id}`,
   catSumAmount: id => `sum-amount-${id}`,
   catBalance: id => `leftover-${id}`,
-  catCarryover: id => `carryover-${id}`
+  catCarryover: id => `carryover-${id}`,
 };

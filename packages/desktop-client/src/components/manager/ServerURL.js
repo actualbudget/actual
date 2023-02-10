@@ -17,7 +17,7 @@ export default function ServerURL() {
         justifyContent: 'center',
         flexDirection: 'row',
         marginBottom: 15,
-        zIndex: 5000
+        zIndex: 5000,
       }}
     >
       <Text>

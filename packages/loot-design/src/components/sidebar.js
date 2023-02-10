@@ -24,7 +24,7 @@ import {
   AlignedText,
   AnchorLink,
   ButtonLink,
-  Button
+  Button,
 } from './common';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CellValue from './spreadsheet/CellValue';
@@ -44,15 +44,15 @@ function Item({
   onClick,
   button,
   forceHover = false,
-  forceActive = false
+  forceActive = false,
 }) {
   const hoverStyle = {
-    backgroundColor: colors.n2
+    backgroundColor: colors.n2,
   };
   const activeStyle = {
     borderLeft: '4px solid ' + colors.p8,
     paddingLeft: 19 + indent - 4,
-    color: colors.p8
+    color: colors.p8,
   };
   const linkStyle = [
     {
@@ -64,9 +64,9 @@ function Item({
       textDecoration: 'none',
       color: colors.n9,
       ...(forceHover ? hoverStyle : {}),
-      ...(forceActive ? activeStyle : {})
+      ...(forceActive ? activeStyle : {}),
     },
-    { ':hover': hoverStyle }
+    { ':hover': hoverStyle },
   ];
 
   const content = (
@@ -74,7 +74,7 @@ function Item({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        height: 20
+        height: 20,
       }}
     >
       <Icon width={15} height={15} style={{ color: 'inherit' }} />
@@ -114,25 +114,25 @@ function SecondaryItem({
   exact,
   onClick,
   bold,
-  indent = 0
+  indent = 0,
 }) {
   const hoverStyle = {
-    backgroundColor: colors.n2
+    backgroundColor: colors.n2,
   };
   const activeStyle = {
     borderLeft: '4px solid ' + colors.p8,
     paddingLeft: 14 - 4 + indent,
     color: colors.p8,
-    fontWeight: bold ? fontWeight : null
+    fontWeight: bold ? fontWeight : null,
   };
   const linkStyle = [
     accountNameStyle,
     {
       color: colors.n9,
       paddingLeft: 14 + indent,
-      fontWeight: bold ? fontWeight : null
+      fontWeight: bold ? fontWeight : null,
     },
-    { ':hover': hoverStyle }
+    { ':hover': hoverStyle },
   ];
 
   const content = (
@@ -140,7 +140,7 @@ function SecondaryItem({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        height: 16
+        height: 16,
       }}
     >
       {Icon && <Icon width={12} height={12} style={{ color: 'inherit' }} />}
@@ -179,10 +179,10 @@ let accountNameStyle = [
     paddingRight: 15,
     paddingLeft: 10,
     textDecoration: 'none',
-    color: colors.n9
+    color: colors.n9,
   },
   { ':hover': { backgroundColor: colors.n2 } },
-  styles.smallText
+  styles.smallText,
 ];
 
 function Account({
@@ -196,7 +196,7 @@ function Account({
   style,
   outerStyle,
   onDragChange,
-  onDrop
+  onDrop,
 }) {
   let type = account
     ? account.closed
@@ -210,13 +210,13 @@ function Account({
     type,
     onDragChange,
     item: { id: account && account.id },
-    canDrag: account != null
+    canDrag: account != null,
   });
 
   let { dropRef, dropPos } = useDroppable({
     types: account ? [type] : [],
     id: account && account.id,
-    onDrop: onDrop
+    onDrop: onDrop,
   });
 
   return (
@@ -230,7 +230,7 @@ function Account({
               accountNameStyle,
               style,
               { position: 'relative', borderLeft: '4px solid transparent' },
-              updated && { fontWeight: 700 }
+              updated && { fontWeight: 700 },
             ]}
             activeStyle={{
               borderColor: colors.p8,
@@ -243,8 +243,8 @@ function Account({
               fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
                 backgroundColor: colors.p8,
-                transform: 'translateX(-4.5px)'
-              }
+                transform: 'translateX(-4.5px)',
+              },
             }}
           >
             <View
@@ -254,7 +254,7 @@ function Account({
                 top: 0,
                 bottom: 0,
                 flexDirection: 'row',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <div
@@ -267,7 +267,7 @@ function Account({
                   backgroundColor: failed ? colors.r7 : colors.g5,
                   marginLeft: 2,
                   transition: 'transform .3s',
-                  opacity: connected ? 1 : 0
+                  opacity: connected ? 1 : 0,
                 })}
               />
             </View>
@@ -300,26 +300,26 @@ function Accounts({
   showClosedAccounts,
   onAddAccount,
   onToggleClosedAccounts,
-  onReorder
+  onReorder,
 }) {
   let [isDragging, setIsDragging] = useState(false);
   let offbudgetAccounts = useMemo(
     () =>
       accounts.filter(
-        account => account.closed === 0 && account.offbudget === 1
+        account => account.closed === 0 && account.offbudget === 1,
       ),
-    [accounts]
+    [accounts],
   );
   let budgetedAccounts = useMemo(
     () =>
       accounts.filter(
-        account => account.closed === 0 && account.offbudget === 0
+        account => account.closed === 0 && account.offbudget === 0,
       ),
-    [accounts]
+    [accounts],
   );
   let closedAccounts = useMemo(
     () => accounts.filter(account => account.closed === 1),
-    [accounts]
+    [accounts],
   );
 
   function onDragChange(drag) {
@@ -330,7 +330,7 @@ function Accounts({
     if (i === 0) {
       return {
         paddingTop: isDragging ? 15 : 0,
-        marginTop: isDragging ? -15 : 0
+        marginTop: isDragging ? -15 : 0,
       };
     }
     return null;
@@ -420,7 +420,7 @@ function Accounts({
       <SecondaryItem
         style={{
           marginTop: 15,
-          marginBottom: 9
+          marginBottom: 9,
         }}
         onClick={onAddAccount}
         Icon={Add}
@@ -446,7 +446,7 @@ function Tools() {
   let location = useLocation();
 
   const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
-    location.pathname.startsWith(route)
+    location.pathname.startsWith(route),
   );
 
   useEffect(() => {
@@ -505,7 +505,7 @@ export function Sidebar({
   onFloat,
   onAddAccount,
   onToggleClosedAccounts,
-  onReorder
+  onReorder,
 }) {
   let hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
@@ -519,14 +519,14 @@ export function Sidebar({
           '& .float': {
             opacity: 0,
             transition: 'opacity .25s, width .25s',
-            width: hasWindowButtons ? null : 0
+            width: hasWindowButtons ? null : 0,
           },
           '&:hover .float': {
             opacity: 1,
-            width: hasWindowButtons ? null : 'auto'
-          }
+            width: hasWindowButtons ? null : 'auto',
+          },
         },
-        style
+        style,
       ]}
     >
       {hasWindowButtons && (
@@ -538,8 +538,8 @@ export function Sidebar({
               justifyContent: 'center',
               overflow: 'hidden',
               WebkitAppRegion: 'drag',
-              paddingRight: 8
-            }
+              paddingRight: 8,
+            },
           ]}
           onFloat={onFloat}
         />
@@ -552,12 +552,12 @@ export function Sidebar({
             flexDirection: 'row',
             alignItems: 'center',
             margin: '0 8px 23px 20px',
-            transition: 'padding .4s'
+            transition: 'padding .4s',
           },
           hasWindowButtons && {
             paddingTop: 20,
-            justifyContent: 'flex-start'
-          }
+            justifyContent: 'flex-start',
+          },
         ]}
       >
         {budgetName}
@@ -571,7 +571,7 @@ export function Sidebar({
               display: 'inherit',
               color: colors.n5,
               marginLeft: hasWindowButtons ? 0 : 5,
-              flexShrink: 0
+              flexShrink: 0,
             }}
             activeStyle={{ color: colors.p7 }}
           >
@@ -597,7 +597,7 @@ export function Sidebar({
             height: 1,
             backgroundColor: colors.n3,
             marginTop: 15,
-            flexShrink: 0
+            flexShrink: 0,
           }}
         />
 

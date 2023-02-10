@@ -2,7 +2,7 @@ import {
   differenceInCalendarMonths,
   addMonths,
   addWeeks,
-  format
+  format,
 } from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
@@ -23,7 +23,7 @@ async function processTemplate(month, force) {
   let category_templates = await getCategoryTemplates();
 
   let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0'
+    'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
   let num_applied = 0;
@@ -32,7 +32,7 @@ async function processTemplate(month, force) {
 
     let budgeted = await getSheetValue(
       monthUtils.sheetForMonth(month),
-      `budget-${category.id}`
+      `budget-${category.id}`,
     );
 
     if (budgeted === 0 || force) {
@@ -43,7 +43,7 @@ async function processTemplate(month, force) {
           category,
           template,
           month,
-          force
+          force,
         );
         if (to_budget != null) {
           num_applied++;
@@ -64,84 +64,84 @@ async function getCategoryTemplates() {
     {
       type: 'simple',
         re: /^#template \$?(\-?\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['monthly']
+      params: ['monthly'],
     },
     {
       type: 'simple',
       re: /^#template up to \$?(\d+(\.\d{2})?)$/im,
-      params: ['limit']
+      params: ['limit'],
     },
     {
       type: 'simple',
       re: /^#template \$?(\d+(\.\d{2})?) up to \$?(\d+(\.\d{2})?)$/im,
-      params: ['monthly', null, 'limit']
+      params: ['monthly', null, 'limit'],
     },
     {
       type: 'by',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'month']
+      params: ['amount', null, 'month'],
     },
     {
       type: 'by',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'repeat']
+      params: ['amount', null, 'month', 'repeat'],
     },
     {
       type: 'week',
         re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'starting']
+      params: ['amount', null, 'starting'],
     },
     {
       type: 'week',
         re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['amount', null, 'starting', 'limit']
+      params: ['amount', null, 'starting', 'limit'],
     },
     {
       type: 'weeks',
         re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'weeks', 'starting']
+      params: ['amount', null, 'weeks', 'starting'],
     },
     {
       type: 'weeks',
         re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['amount', null, 'weeks', 'starting', 'limit']
+      params: ['amount', null, 'weeks', 'starting', 'limit'],
     },
     {
       type: 'by_annual',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
-      params: ['amount', null, 'month']
+      params: ['amount', null, 'month'],
     },
     {
       type: 'by_annual',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'repeat']
+      params: ['amount', null, 'month', 'repeat'],
     },
     {
       type: 'spend',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from']
+      params: ['amount', null, 'month', 'from'],
     },
     {
       type: 'spend',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from', 'repeat']
+      params: ['amount', null, 'month', 'from', 'repeat'],
     },
     {
       type: 'spend_annual',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from']
+      params: ['amount', null, 'month', 'from'],
     },
     {
       type: 'spend_annual',
         re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from', 'repeat']
+      params: ['amount', null, 'month', 'from', 'repeat'],
     },
     {
       type: 'percentage',
       re: /^#template (\d+(\.\d+)?)% of (.*)$/im,
-      params: ['percent', null, 'category']
+      params: ['percent', null, 'category'],
     },
-    { type: 'error', re: /^#template .*$/im, params: [] }
+    { type: 'error', re: /^#template .*$/im, params: [] },
   ];
 
   let templates = {};
@@ -192,7 +192,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let target_month = new Date(`${template.month}-01`);
         let num_months = differenceInCalendarMonths(
           target_month,
-          current_month
+          current_month,
         );
         let repeat = template.type.includes('annual')
           ? (template.repeat || 1) * 12
@@ -213,7 +213,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           console.log(
             `${category.name}: ${`${template.month} is in the past:`} ${
               template.line
-            }`
+            }`,
           );
           return null;
         }
@@ -236,7 +236,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         ) {
           return differenceInCalendarMonths(
             new Date(`${a.month}-01`),
-            new Date(`${b.month}-01`)
+            new Date(`${b.month}-01`),
           );
         } else {
           return a.type.localeCompare(b.type);
@@ -273,7 +273,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             console.log(
               `${category.name}: ${`More than one 'up to' limit found.`} ${
                 template.line
-              }`
+              }`,
             );
             return null;
           } else {
@@ -295,7 +295,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let target = amountToInteger(template.amount);
         let num_months = differenceInCalendarMonths(
           target_month,
-          current_month
+          current_month,
         );
         let repeat =
           template.type === 'by'
@@ -322,7 +322,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             console.log(
               `${category.name}: ${`More than one 'up to' limit found.`} ${
                 template.line
-              }`
+              }`,
             );
             return null;
           } else {
@@ -358,18 +358,18 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           if (first_month) {
             let spent = await getSheetValue(
               sheetName,
-              `sum-amount-${category.id}`
+              `sum-amount-${category.id}`,
             );
             let balance = await getSheetValue(
               sheetName,
-              `leftover-${category.id}`
+              `leftover-${category.id}`,
             );
             already_budgeted = balance - spent;
             first_month = false;
           } else {
             let budgeted = await getSheetValue(
               sheetName,
-              `budget-${category.id}`
+              `budget-${category.id}`,
             );
             already_budgeted += budgeted;
           }
@@ -380,14 +380,14 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           console.log(
             `${category.name}: ${`${template.to} is in the past:`} ${
               template.line
-            }`
+            }`,
           );
           return null;
         } else if (num_months === 0) {
           to_budget = target - already_budgeted;
         } else {
           to_budget = Math.round(
-            (target - already_budgeted) / (num_months + 1)
+            (target - already_budgeted) / (num_months + 1),
           );
         }
         break;

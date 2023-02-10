@@ -15,7 +15,7 @@ export default function TransferTooltip({
   showToBeBudgeted,
   tooltipProps,
   onSubmit,
-  onClose
+  onClose,
 }) {
   let spreadsheet = useContext(SpreadsheetContext);
   let sheetName = useContext(NamespaceContext);
@@ -88,7 +88,7 @@ export default function TransferTooltip({
       <View
         style={{
           alignItems: 'flex-end',
-          marginTop: 10
+          marginTop: 10,
         }}
       >
         <Button
@@ -96,7 +96,7 @@ export default function TransferTooltip({
           style={{
             fontSize: 12,
             paddingTop: 3,
-            paddingBottom: 3
+            paddingBottom: 3,
           }}
           onClick={submit}
         >

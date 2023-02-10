@@ -13,7 +13,7 @@ function makeContext(queryState, opts, QueryClass) {
     useEffect(() => {
       if (query.getNumListeners() !== 0) {
         throw new Error(
-          'Query already has listeners. You cannot use the same query context `Provider` twice'
+          'Query already has listeners. You cannot use the same query context `Provider` twice',
         );
       }
 
@@ -44,7 +44,7 @@ function makeContext(queryState, opts, QueryClass) {
     let queryData = useContext(Context);
     if (queryData == null) {
       throw new Error(
-        "`useQuery` tried to access a query that hasn't been run. You need to put its `Provider` in a parent component"
+        "`useQuery` tried to access a query that hasn't been run. You need to put its `Provider` in a parent component",
       );
     }
     return queryData;
@@ -52,7 +52,7 @@ function makeContext(queryState, opts, QueryClass) {
 
   return {
     Provider,
-    useQuery
+    useQuery,
   };
 }
 
@@ -80,7 +80,7 @@ export function queryContext(queryState, opts) {
 
   return {
     Provider,
-    useQuery
+    useQuery,
   };
 }
 
@@ -103,7 +103,7 @@ export function useLiveQuery(query, opts) {
           setData(data);
         }
       },
-      opts
+      opts,
     );
 
     return () => {

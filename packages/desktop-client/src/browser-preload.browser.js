@@ -28,8 +28,8 @@ function createBackendWorker() {
     isDev: IS_DEV,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
     isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride'
-    )
+      'SharedArrayBufferOverride',
+    ),
   });
 
   if (IS_DEV || IS_PERF_BUILD) {
@@ -102,8 +102,8 @@ global.Actual = {
         new MouseEvent('click', {
           view: window,
           bubbles: true,
-          cancelable: true
-        })
+          cancelable: true,
+        }),
       );
 
       input.addEventListener('change', e => {
@@ -149,7 +149,7 @@ global.Actual = {
   ipcConnect: () => {},
   getServerSocket: async () => {
     return worker;
-  }
+  },
 };
 
 if (IS_DEV) {

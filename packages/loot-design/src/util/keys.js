@@ -14,7 +14,7 @@ export const keys = {
   DOWN: 40,
   J: 74,
   K: 75,
-  X: 88
+  X: 88,
 };
 
 let _keyHandlers = {};
@@ -23,7 +23,7 @@ let _modifierState = {
   shift: false,
   ctrl: false,
   alt: false,
-  meta: false
+  meta: false,
 };
 
 export function hasModifierKey(modifier) {

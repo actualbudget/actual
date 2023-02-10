@@ -12,22 +12,22 @@ const accounts = [
   generateAccount('Wells Fargo', null, null, false),
   generateAccount('Ally', null, null, false),
   generateAccount('Savings', null, null, true),
-  generateAccount('Another', null, null, true)
+  generateAccount('Another', null, null, true),
 ];
 
 const categoryGroups = generateCategoryGroups([
   {
     name: 'Investments and Savings',
-    categories: [{ name: 'Savings' }]
+    categories: [{ name: 'Savings' }],
   },
   {
     name: 'Usual Expenses',
-    categories: [{ name: 'Food' }, { name: 'General' }, { name: 'Home' }]
+    categories: [{ name: 'Food' }, { name: 'General' }, { name: 'Home' }],
   },
   {
     name: 'Projects',
-    categories: [{ name: 'Big Projects' }, { name: 'Shed' }]
-  }
+    categories: [{ name: 'Big Projects' }, { name: 'Shed' }],
+  },
 ]);
 
 export default () => (

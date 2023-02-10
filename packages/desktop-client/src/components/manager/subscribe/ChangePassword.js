@@ -49,7 +49,7 @@ export default function ChangePassword() {
           style={{
             fontSize: 16,
             color: colors.n2,
-            lineHeight: 1.4
+            lineHeight: 1.4,
           }}
         >
           This will change the password for this server instance. All existing
@@ -62,7 +62,7 @@ export default function ChangePassword() {
               marginTop: 20,
               color: colors.r4,
               borderRadius: 4,
-              fontSize: 15
+              fontSize: 15,
             }}
           >
             {getErrorMessage(error)}
@@ -75,7 +75,7 @@ export default function ChangePassword() {
               marginTop: 20,
               color: colors.g4,
               borderRadius: 4,
-              fontSize: 15
+              fontSize: 15,
             }}
           >
             {msg}

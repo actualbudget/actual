@@ -13,7 +13,7 @@ function makeSpreadsheet() {
       cells[resolvedName] = {
         name: resolvedName,
         sheet: sheetName,
-        value: null
+        value: null,
       };
       return cells[resolvedName];
     },
@@ -37,7 +37,7 @@ function makeSpreadsheet() {
       // it's a noop.
       return () => {
         this.observers[resolvedName] = this.observers[resolvedName].filter(
-          x => x !== cb
+          x => x !== cb,
         );
       };
     },
@@ -95,7 +95,7 @@ function makeSpreadsheet() {
     batchChange(batch) {
       this.setCells(batch.updateCells);
       this.deleteCells(batch.deleteCells);
-    }
+    },
   };
 }
 

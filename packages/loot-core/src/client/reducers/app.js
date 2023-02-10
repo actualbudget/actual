@@ -6,7 +6,7 @@ export const initialState = {
   showUpdateNotification: true,
   managerHasInitialized: false,
   lastUndoState: { current: null },
-  lastSplitState: { current: null }
+  lastSplitState: { current: null },
 };
 
 export default function update(state = initialState, action) {
@@ -14,7 +14,7 @@ export default function update(state = initialState, action) {
     case constants.SET_APP_STATE:
       return {
         ...state,
-        ...action.state
+        ...action.state,
       };
     case constants.SET_LAST_UNDO_STATE:
       // Intentionally mutate it. Components should never rerender

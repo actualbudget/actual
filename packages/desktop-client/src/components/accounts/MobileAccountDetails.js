@@ -5,7 +5,7 @@ import {
   Button,
   InputWithContent,
   Label,
-  View
+  View,
 } from 'loot-design/src/components/common';
 import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
 import Text from 'loot-design/src/components/Text';
@@ -40,7 +40,7 @@ class TransactionSearchInput extends React.Component {
           margin: '11px auto 4px',
           borderRadius: 4,
           padding: 10,
-          width: '100%'
+          width: '100%',
         }}
       >
         <InputWithContent
@@ -52,7 +52,7 @@ class TransactionSearchInput extends React.Component {
                 flexShrink: 0,
                 color: text ? colors.p7 : 'inherit',
                 margin: 5,
-                marginRight: 0
+                marginRight: 0,
               }}
             />
           }
@@ -66,7 +66,7 @@ class TransactionSearchInput extends React.Component {
             flex: 1,
             height: 32,
             marginLeft: 4,
-            padding: 8
+            padding: 8,
           }}
         />
       </View>
@@ -86,7 +86,7 @@ export default function AccountDetails({
   isNewTransaction,
   onLoadMore,
   onSearch,
-  onSelectTransaction
+  onSelectTransaction,
   // refreshControl
 }) {
   let allTransactions = useMemo(() => {
@@ -99,7 +99,7 @@ export default function AccountDetails({
         flex: 1,
         backgroundColor: colors.n11,
         overflowY: 'hidden',
-        width: '100%'
+        width: '100%',
       }}
     >
       <View
@@ -110,7 +110,7 @@ export default function AccountDetails({
           overflowY: 'hidden',
           paddingTop: 20,
           top: 0,
-          width: '100%'
+          width: '100%',
         }}
       >
         <View
@@ -118,7 +118,7 @@ export default function AccountDetails({
             alignItems: 'center',
             flexDirection: 'row',
             justifyContent: 'space-between',
-            width: '100%'
+            width: '100%',
           }}
         >
           <Link
@@ -127,14 +127,14 @@ export default function AccountDetails({
               alignItems: 'center',
               display: 'flex',
               textDecoration: 'none',
-              width: LEFT_RIGHT_FLEX_WIDTH
+              width: LEFT_RIGHT_FLEX_WIDTH,
             }}
           >
             <CheveronLeft
               style={{
                 color: colors.b5,
                 width: 32,
-                height: 32
+                height: 32,
               }}
             />
             <Text style={{ ...styles.text, color: colors.b5, fontWeight: 500 }}>
@@ -144,7 +144,7 @@ export default function AccountDetails({
           <View
             style={{
               fontSize: 16,
-              fontWeight: 500
+              fontWeight: 500,
             }}
           >
             {account.name}
@@ -169,10 +169,10 @@ export default function AccountDetails({
           debug={true}
           style={{
             fontSize: 18,
-            fontWeight: '500'
+            fontWeight: '500',
           }}
           getStyle={value => ({
-            color: value < 0 ? colors.r4 : colors.p5
+            color: value < 0 ? colors.r4 : colors.p5,
           })}
         />
         <TransactionSearchInput

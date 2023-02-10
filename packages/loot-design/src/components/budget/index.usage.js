@@ -24,8 +24,8 @@ const categoryGroups = generateCategoryGroups([
       { name: 'beer' },
       { name: 'home' },
       { name: 'general' },
-      { name: 'bills' }
-    ]
+      { name: 'bills' },
+    ],
   },
   {
     name: 'other stuff',
@@ -36,28 +36,28 @@ const categoryGroups = generateCategoryGroups([
       { name: 'general' },
       { name: 'bills' },
       { name: 'beer' },
-      { name: 'home' }
-    ]
+      { name: 'home' },
+    ],
   },
   {
     name: 'yet more stuff',
-    categories: [{ name: 'general' }, { name: 'bills' }]
+    categories: [{ name: 'general' }, { name: 'bills' }],
   },
   {
     name: 'Income',
     is_income: true,
     categories: [
       { name: 'income', is_income: true },
-      { name: 'salary', is_income: true }
-    ]
-  }
+      { name: 'salary', is_income: true },
+    ],
+  },
 ]);
 
 function makeLoadedSpreadsheet() {
   let spreadsheet = makeSpreadsheet();
   let months = monthUtils.rangeInclusive(
     monthUtils.subMonths('2017-01', 3),
-    '2017-10'
+    '2017-10',
   );
 
   // Something random
@@ -69,7 +69,7 @@ function makeLoadedSpreadsheet() {
       spreadsheet.set(
         monthUtils.sheetForMonth(month),
         name,
-        v || currentNumber++
+        v || currentNumber++,
       );
     }
 
@@ -83,7 +83,7 @@ function makeLoadedSpreadsheet() {
       value('from-last-month'),
       value('total-income'),
       value('total-spent'),
-      value('total-leftover')
+      value('total-leftover'),
     ];
 
     for (let group of categoryGroups) {
@@ -97,7 +97,7 @@ function makeLoadedSpreadsheet() {
         values = values.concat([
           value(`group-budget-${group.id}`),
           value(`group-sum-amount-${group.id}`),
-          value(`group-leftover-${group.id}`)
+          value(`group-leftover-${group.id}`),
         ]);
 
         for (let cat of group.categories) {
@@ -106,7 +106,7 @@ function makeLoadedSpreadsheet() {
             value(`budget-${cat.id}`),
             value(`sum-amount-${cat.id}`),
             value(`leftover-${cat.id}`, carryover ? -currentNumber : null),
-            value(`carryover-${cat.id}`, carryover)
+            value(`carryover-${cat.id}`, carryover),
           ]);
         }
       }
@@ -121,7 +121,7 @@ export class LiveBudgetPage extends React.Component {
     startMonth: '2017-01',
     categoryGroups,
     collapsed: [],
-    newCategoryForGroup: false
+    newCategoryForGroup: false,
   };
 
   render() {
@@ -136,7 +136,7 @@ export class LiveBudgetPage extends React.Component {
       IncomeCategoryComponent: rollover.IncomeCategoryMonth,
       IncomeGroupComponent: rollover.IncomeGroupMonth,
       BudgetTotalsComponent: rollover.BudgetTotalsMonth,
-      IncomeHeaderComponent: rollover.IncomeHeaderMonth
+      IncomeHeaderComponent: rollover.IncomeHeaderMonth,
     };
 
     return (
@@ -149,7 +149,7 @@ export class LiveBudgetPage extends React.Component {
             style={{
               height: 800,
               backgroundColor: colors.n10,
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}
           >
             <DynamicBudgetTable
@@ -157,7 +157,7 @@ export class LiveBudgetPage extends React.Component {
               startMonth={startMonth}
               monthBounds={{
                 start: monthUtils.subMonths('2017-01', 3),
-                end: '2017-10'
+                end: '2017-10',
               }}
               maxMonths={maxMonths}
               onMonthSelect={month => {
@@ -175,7 +175,7 @@ export class LiveBudgetPage extends React.Component {
               onShowNewCategory={groupId => {
                 this.setState({
                   newCategoryForGroup: groupId,
-                  collapsed: collapsed.filter(c => c !== groupId)
+                  collapsed: collapsed.filter(c => c !== groupId),
                 });
               }}
               onHideNewCategory={() => {
@@ -190,12 +190,12 @@ export class LiveBudgetPage extends React.Component {
                       if (group.id === cat.cat_group) {
                         return {
                           ...group,
-                          categories: group.categories.concat([cat])
+                          categories: group.categories.concat([cat]),
                         };
                       }
                       return group;
                     }),
-                    newCategoryForGroup: null
+                    newCategoryForGroup: null,
                   });
                 } else {
                   this.setState({
@@ -204,20 +204,20 @@ export class LiveBudgetPage extends React.Component {
                         return {
                           ...group,
                           categories: group.categories.map(c =>
-                            c.id === cat.id ? cat : c
-                          )
+                            c.id === cat.id ? cat : c,
+                          ),
                         };
                       }
                       return group;
-                    })
+                    }),
                   });
                 }
               }}
               onSaveGroup={group => {
                 this.setState({
                   categoryGroups: categoryGroups.map(g =>
-                    g.id === group.id ? group : g
-                  )
+                    g.id === group.id ? group : g,
+                  ),
                 });
               }}
               onDeleteCategory={id => {
@@ -225,14 +225,14 @@ export class LiveBudgetPage extends React.Component {
                   categoryGroups: categoryGroups.map(group => {
                     return {
                       ...group,
-                      categories: group.categories.filter(c => c.id !== id)
+                      categories: group.categories.filter(c => c.id !== id),
                     };
-                  })
+                  }),
                 });
               }}
               onDeleteGroup={id =>
                 this.setState({
-                  categoryGroups: categoryGroups.filter(g => g.id !== id)
+                  categoryGroups: categoryGroups.filter(g => g.id !== id),
                 })
               }
               onReorderCategory={sortInfo => {}}

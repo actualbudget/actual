@@ -10,7 +10,7 @@ function timeout(promise, n) {
       clearTimeout(timer);
       return res;
     }),
-    timeoutPromise
+    timeoutPromise,
   ]);
 }
 
@@ -37,15 +37,15 @@ export function execTracer() {
       if (ended) {
         throw new Error(
           `Tracer received event but didn't expect it: ${name} with data: ${JSON.stringify(
-            data
-          )}`
+            data,
+          )}`,
         );
       } else if (waitingFor) {
         if (waitingFor.name !== name) {
           waitingFor.reject(
             new Error(
-              `Event traced "${name}" but expected "${waitingFor.name}"`
-            )
+              `Event traced "${name}" but expected "${waitingFor.name}"`,
+            ),
           );
         } else {
           waitingFor.resolve(data);
@@ -59,7 +59,7 @@ export function execTracer() {
     wait(name) {
       if (waitingFor) {
         throw new Error(
-          `Already waiting for ${waitingFor.name}, cannot wait for multiple events`
+          `Already waiting for ${waitingFor.name}, cannot wait for multiple events`,
         );
       }
 
@@ -105,7 +105,7 @@ export function execTracer() {
 
       if (queue.length === 0) {
         throw new Error(
-          `Expected event "${name}" but none found - has it happened yet?`
+          `Expected event "${name}" but none found - has it happened yet?`,
         );
       } else if (queue[0].name === name) {
         let entry = queue.shift();
@@ -117,7 +117,7 @@ export function execTracer() {
         }
       } else {
         throw new Error(
-          `Event traced "${queue[0].name}" but expected "${name}"`
+          `Event traced "${queue[0].name}" but expected "${name}"`,
         );
       }
     },
@@ -137,10 +137,10 @@ export function execTracer() {
       if (hasStarted && queue.length !== 0) {
         let str = queue.map(x => JSON.stringify(x));
         throw new Error(
-          'Event tracer ended with existing events: ' + str.join('\n\n')
+          'Event tracer ended with existing events: ' + str.join('\n\n'),
         );
       }
       ended = true;
-    }
+    },
   };
 }

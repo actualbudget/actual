@@ -13,7 +13,7 @@ export function applyBudgetAction(month, type, args) {
         await send('budget/budget-amount', {
           month,
           category: args.category,
-          amount: args.amount
+          amount: args.amount,
         });
         break;
       case 'copy-last':
@@ -34,7 +34,7 @@ export function applyBudgetAction(month, type, args) {
       case 'hold':
         await send('budget/hold-for-next-month', {
           month,
-          amount: args.amount
+          amount: args.amount,
         });
         break;
       case 'reset-hold':
@@ -44,14 +44,14 @@ export function applyBudgetAction(month, type, args) {
         await send('budget/cover-overspending', {
           month,
           to: args.to,
-          from: args.from
+          from: args.from,
         });
         break;
       case 'transfer-available':
         await send('budget/transfer-available', {
           month,
           amount: args.amount,
-          category: args.category
+          category: args.category,
         });
         break;
       case 'transfer-category':
@@ -59,14 +59,14 @@ export function applyBudgetAction(month, type, args) {
           month,
           amount: args.amount,
           from: args.from,
-          to: args.to
+          to: args.to,
         });
         break;
       case 'carryover': {
         await send('budget/set-carryover', {
           startMonth: month,
           category: args.category,
-          flag: args.flag
+          flag: args.flag,
         });
         break;
       }
@@ -80,7 +80,7 @@ export function getCategories() {
     const categories = await send('get-categories');
     dispatch({
       type: constants.LOAD_CATEGORIES,
-      categories
+      categories,
     });
     return categories;
   };
@@ -91,7 +91,7 @@ export function createCategory(name, groupId, isIncome) {
     let id = await send('category-create', {
       name,
       groupId,
-      isIncome
+      isIncome,
     });
     dispatch(getCategories());
     return id;
@@ -109,8 +109,8 @@ export function deleteCategory(id, transferId) {
             addNotification({
               type: 'error',
               message:
-                'A category must be transferred to another of the same type (expense or income)'
-            })
+                'A category must be transferred to another of the same type (expense or income)',
+            }),
           );
           break;
         default:
@@ -182,7 +182,7 @@ export function getPayees() {
     let payees = await send('payees-get');
     dispatch({
       type: constants.LOAD_PAYEES,
-      payees
+      payees,
     });
     return payees;
   };
@@ -229,18 +229,18 @@ export function createAccount(name, type, balance, offBudget) {
 export function openAccountCloseModal(accountId) {
   return async function (dispatch, getState) {
     const { balance, numTransactions } = await send('account-properties', {
-      id: accountId
+      id: accountId,
     });
     const account = getState().queries.accounts.find(
-      acct => acct.id === accountId
+      acct => acct.id === accountId,
     );
 
     dispatch(
       pushModal('close-account', {
         account,
         balance,
-        canDelete: numTransactions === 0
-      })
+        canDelete: numTransactions === 0,
+      }),
     );
   };
 }
@@ -251,7 +251,7 @@ export function closeAccount(accountId, transferAccountId, categoryId, forced) {
       id: accountId,
       transferAccountId,
       categoryId,
-      forced
+      forced,
     });
     dispatch(getAccounts());
   };

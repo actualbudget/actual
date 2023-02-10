@@ -8,19 +8,19 @@ import {
   View,
   Stack,
   ButtonWithLoading,
-  P
+  P,
 } from 'loot-design/src/components/common';
 import {
   Table,
   TableHeader,
   Row,
   Field,
-  SelectCell
+  SelectCell,
 } from 'loot-design/src/components/table';
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
-  SelectedProvider
+  SelectedProvider,
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
 
@@ -54,8 +54,8 @@ function DiscoverSchedulesTable({ schedules, loading }) {
           cursor: 'pointer',
           backgroundColor: selected ? colors.selected : 'white',
           ':hover': {
-            backgroundColor: selected ? colors.selected : colors.hover
-          }
+            backgroundColor: selected ? colors.selected : colors.hover,
+          },
         }}
       >
         <SelectCell
@@ -104,7 +104,8 @@ function DiscoverSchedulesTable({ schedules, loading }) {
         backgroundColor={pageType.type === 'modal' ? 'transparent' : undefined}
         style={{
           flex: 1,
-          backgroundColor: pageType.type === 'modal' ? 'transparent' : undefined
+          backgroundColor:
+            pageType.type === 'modal' ? 'transparent' : undefined,
         }}
         items={schedules}
         loading={loading}
@@ -137,23 +138,23 @@ export default function DiscoverSchedules() {
 
     for (let schedule of selected) {
       let scheduleId = await send('schedule/create', {
-        conditions: schedule._conditions
+        conditions: schedule._conditions,
       });
 
       // Now query for matching transactions and link them automatically
       let { filters } = await send('make-filters-from-conditions', {
-        conditions: schedule._conditions
+        conditions: schedule._conditions,
       });
 
       if (filters.length > 0) {
         let { data: transactions } = await runQuery(
-          q('transactions').filter({ $and: filters }).select('id')
+          q('transactions').filter({ $and: filters }).select('id'),
         );
         await send('transactions-batch-update', {
           updated: transactions.map(t => ({
             id: t.id,
-            schedule: scheduleId
-          }))
+            schedule: scheduleId,
+          })),
         });
       }
     }
@@ -190,7 +191,7 @@ export default function DiscoverSchedules() {
         justify="flex-end"
         style={{
           paddingTop: 20,
-          paddingBottom: pageType.type === 'modal' ? 0 : 20
+          paddingBottom: pageType.type === 'modal' ? 0 : 20,
         }}
       >
         <ButtonWithLoading

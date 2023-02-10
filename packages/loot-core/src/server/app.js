@@ -18,7 +18,7 @@ class App {
   method(name, func) {
     if (this.handlers[name] != null) {
       throw new Error(
-        'Conflicting method name, names must be globally unique: ' + name
+        'Conflicting method name, names must be globally unique: ' + name,
       );
     }
     this.handlers[name] = func;
@@ -50,8 +50,8 @@ class App {
     if (this.unlistenServices.length > 0) {
       captureException(
         new Error(
-          'App: startServices called while services are already running'
-        )
+          'App: startServices called while services are already running',
+        ),
       );
     }
     this.unlistenServices = this.services.map(service => service());

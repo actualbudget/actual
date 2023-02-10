@@ -7,7 +7,7 @@ const SvgBookmarkCopy2 = props => (
     viewBox="0 0 20 20"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path d="M18 12v1H8v5l-6-6 6-6v5h8V2h2z" fill="currentColor" />

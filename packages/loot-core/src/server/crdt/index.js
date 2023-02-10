@@ -8,5 +8,5 @@ export {
   makeClientId,
   serializeClock,
   deserializeClock,
-  Timestamp
+  Timestamp,
 } from './timestamp';

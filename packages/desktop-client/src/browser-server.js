@@ -13,7 +13,7 @@ self.addEventListener('message', e => {
       if (!self.SharedArrayBuffer && !msg.isSharedArrayBufferOverrideEnabled) {
         self.postMessage({
           type: 'app-init-failure',
-          SharedArrayBufferMissing: true
+          SharedArrayBufferMissing: true,
         });
         return;
       }
@@ -33,12 +33,12 @@ self.addEventListener('message', e => {
           console.log(err);
           let msg = {
             type: 'app-init-failure',
-            IDBFailure: err.message.includes('indexeddb-failure')
+            IDBFailure: err.message.includes('indexeddb-failure'),
           };
           self.postMessage(msg);
 
           throw err;
-        }
+        },
       );
     }
   }

@@ -17,7 +17,7 @@ const intended = [
   'WordPress',
   'JavaScript',
   'Next.js',
-  'Node.js'
+  'Node.js',
 ];
 
 module.exports = intended;

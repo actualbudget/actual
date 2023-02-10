@@ -105,7 +105,7 @@ export function getMutatorContext() {
   if (currentContext == null) {
     captureBreadcrumb({
       category: 'server',
-      message: 'Recent methods: ' + _latestHandlerNames.join(', ')
+      message: 'Recent methods: ' + _latestHandlerNames.join(', '),
     });
     // captureException(new Error('getMutatorContext: mutator not running'));
 

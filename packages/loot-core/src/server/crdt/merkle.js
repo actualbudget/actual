@@ -36,8 +36,8 @@ function insertKey(trie, key, hash) {
   const n = trie[c] || {};
   return Object.assign({}, trie, {
     [c]: Object.assign({}, n, insertKey(n, key.slice(1), hash), {
-      hash: n.hash ^ hash
-    })
+      hash: n.hash ^ hash,
+    }),
   });
 }
 

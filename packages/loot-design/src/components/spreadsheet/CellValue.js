@@ -15,7 +15,7 @@ function CellValue({ binding, type, formatter, style, getStyle, debug }) {
             style={[
               type === 'financial' && styles.tnum,
               style,
-              getStyle && getStyle(value)
+              getStyle && getStyle(value),
             ]}
             numberOfLines={1}
             data-testid={name}

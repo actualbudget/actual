@@ -3,7 +3,7 @@ import constants from '../constants';
 
 const initialState = {
   local: null,
-  global: null
+  global: null,
 };
 
 export default function update(state = initialState, action) {
@@ -20,12 +20,12 @@ export default function update(state = initialState, action) {
 
       return {
         ...state,
-        local: { ...state.local, ...action.prefs }
+        local: { ...state.local, ...action.prefs },
       };
     case constants.MERGE_GLOBAL_PREFS:
       return {
         ...state,
-        global: { ...state.global, ...action.globalPrefs }
+        global: { ...state.global, ...action.globalPrefs },
       };
 
     default:

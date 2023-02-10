@@ -46,12 +46,12 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
          WHERE t.date >= ${start} AND t.date <= ${end}
            AND category = '${cat.id}' AND a.offbudget = 0`,
         [],
-        true
+        true,
       );
       let row = rows[0];
       let amount = row ? row.amount : 0;
       return amount || 0;
-    }
+    },
   });
 
   if (getBudgetType() === 'rollover') {
@@ -65,20 +65,20 @@ function createCategoryGroup(group, sheetName) {
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
     dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
-    run: sumAmounts
+    run: sumAmounts,
   });
 
   if (!group.is_income || getBudgetType() !== 'rollover') {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
       dependencies: group.categories.map(cat => `budget-${cat.id}`),
-      run: sumAmounts
+      run: sumAmounts,
     });
 
     sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
       initialValue: 0,
       dependencies: group.categories.map(cat => `leftover-${cat.id}`),
-      run: sumAmounts
+      run: sumAmounts,
     });
   }
 }
@@ -91,7 +91,7 @@ function handleAccountChange(months, oldValue, newValue) {
         WHERE acct = ?
       `,
       [newValue.id],
-      true
+      true,
     );
 
     months.forEach(month => {
@@ -145,17 +145,17 @@ function handleCategoryChange(months, oldValue, newValue) {
     sheet
       .get()
       .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`
+        `sum-amount-${catId}`,
       ]);
     sheet
       .get()
       .addDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`
+        `budget-${catId}`,
       ]);
     sheet
       .get()
       .addDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`
+        `leftover-${catId}`,
       ]);
   }
 
@@ -163,17 +163,17 @@ function handleCategoryChange(months, oldValue, newValue) {
     sheet
       .get()
       .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`
+        `sum-amount-${catId}`,
       ]);
     sheet
       .get()
       .removeDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`
+        `budget-${catId}`,
       ]);
     sheet
       .get()
       .removeDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`
+        `leftover-${catId}`,
       ]);
   }
 
@@ -211,7 +211,7 @@ function handleCategoryChange(months, oldValue, newValue) {
           .get()
           .addDependencies(sheetName, 'last-month-overspent', [
             `${prevSheetName}!leftover-${id}`,
-            `${prevSheetName}!carryover-${id}`
+            `${prevSheetName}!carryover-${id}`,
           ]);
       }
 
@@ -236,17 +236,17 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
     sheet
       .get()
       .addDependencies(sheetName, 'total-budgeted', [
-        `group-budget-${groupId}`
+        `group-budget-${groupId}`,
       ]);
     sheet
       .get()
       .addDependencies(sheetName, 'total-spent', [
-        `group-sum-amount-${groupId}`
+        `group-sum-amount-${groupId}`,
       ]);
     sheet
       .get()
       .addDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`
+        `group-leftover-${groupId}`,
       ]);
   }
 
@@ -254,17 +254,17 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
     sheet
       .get()
       .removeDependencies(sheetName, 'total-budgeted', [
-        `group-budget-${groupId}`
+        `group-budget-${groupId}`,
       ]);
     sheet
       .get()
       .removeDependencies(sheetName, 'total-spent', [
-        `group-sum-amount-${groupId}`
+        `group-sum-amount-${groupId}`,
       ]);
     sheet
       .get()
       .removeDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`
+        `group-leftover-${groupId}`,
       ]);
   }
 
@@ -291,7 +291,7 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
         let categories = db.runQuery(
           'SELECT * FROM categories WHERE tombstone = 0 AND cat_group = ?',
           [group.id],
-          true
+          true,
         );
         createCategoryGroup({ ...group, categories }, sheetName);
 
@@ -316,7 +316,7 @@ function handleBudgetChange(budget) {
       .get()
       .set(
         `${sheetName}!carryover-${budget.category}`,
-        budget.carryover === 1 ? true : false
+        budget.carryover === 1 ? true : false,
       );
   }
 }
@@ -338,7 +338,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
           handleBudgetChange(newValue);
         } else if (table === 'transactions') {
           let changed = new Set(
-            Object.keys(getChangedValues(oldValue || {}, newValue) || {})
+            Object.keys(getChangedValues(oldValue || {}, newValue) || {}),
           );
 
           if (oldValue) {
@@ -373,13 +373,13 @@ export async function doTransfer(categoryIds, transferId) {
 
     let transferValue = budgetActions.getBudget({
       month,
-      category: transferId
+      category: transferId,
     });
 
     budgetActions.setBudget({
       month,
       category: transferId,
-      amount: totalValue + transferValue
+      amount: totalValue + transferValue,
     });
   });
 }
@@ -433,7 +433,7 @@ export async function createBudget(months) {
 
 export async function createAllBudgets() {
   let earliestTransaction = await db.first(
-    'SELECT * FROM transactions WHERE isChild=0 AND date IS NOT NULL ORDER BY date ASC LIMIT 1'
+    'SELECT * FROM transactions WHERE isChild=0 AND date IS NOT NULL ORDER BY date ASC LIMIT 1',
   );
   let earliestDate =
     earliestTransaction && db.fromDateRepr(earliestTransaction.date);
@@ -444,7 +444,7 @@ export async function createAllBudgets() {
   // month is also used as the starting month
   let { start, end, range } = getBudgetRange(
     earliestDate || currentMonth,
-    currentMonth
+    currentMonth,
   );
 
   let meta = sheet.get().meta();

@@ -16,7 +16,7 @@ import {
   InitialFocus,
   Text,
   Tooltip,
-  Menu
+  Menu,
 } from 'loot-design/src/components/common';
 import { Sidebar } from 'loot-design/src/components/sidebar';
 import { styles, colors } from 'loot-design/src/style';
@@ -51,7 +51,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
   let items = [
     { name: 'rename', text: 'Rename Budget' },
     ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
-    { name: 'close', text: 'Close File' }
+    { name: 'close', text: 'Close File' },
   ];
 
   if (editing) {
@@ -61,14 +61,14 @@ function EditableBudgetName({ prefs, savePrefs }) {
           style={{
             width: 160,
             fontSize: 16,
-            fontWeight: 500
+            fontWeight: 500,
           }}
           defaultValue={prefs.budgetName}
           onEnter={async e => {
             const newBudgetName = e.target.value;
             if (newBudgetName.trim() !== '') {
               await savePrefs({
-                budgetName: e.target.value
+                budgetName: e.target.value,
               });
               setEditing(false);
             }
@@ -86,7 +86,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,
-          flex: '0 auto'
+          flex: '0 auto',
         }}
         onClick={() => setMenuOpen(true)}
       >
@@ -121,7 +121,7 @@ function SidebarWithData({
   floatingSidebar,
   savePrefs,
   saveGlobalPrefs,
-  getAccounts
+  getAccounts,
 }) {
   useEffect(() => void getAccounts(), [getAccounts]);
 
@@ -150,13 +150,13 @@ function SidebarWithData({
       onReorder={onReorder}
       onAddAccount={() =>
         replaceModal(
-          prefs['flags.syncAccount'] ? 'add-account' : 'add-local-account'
+          prefs['flags.syncAccount'] ? 'add-account' : 'add-local-account',
         )
       }
       showClosedAccounts={prefs['ui.showClosedAccounts']}
       onToggleClosedAccounts={() =>
         savePrefs({
-          'ui.showClosedAccounts': !prefs['ui.showClosedAccounts']
+          'ui.showClosedAccounts': !prefs['ui.showClosedAccounts'],
         })
       }
       style={[{ flex: 1 }, styles.darkScrollbar]}
@@ -171,8 +171,8 @@ export default withRouter(
       failedAccounts: state.account.failedAccounts,
       updatedAccounts: state.queries.updatedAccounts,
       prefs: state.prefs.local,
-      floatingSidebar: state.prefs.global.floatingSidebar
+      floatingSidebar: state.prefs.global.floatingSidebar,
     }),
-    dispatch => bindActionCreators(actions, dispatch)
-  )(SidebarWithData)
+    dispatch => bindActionCreators(actions, dispatch),
+  )(SidebarWithData),
 );

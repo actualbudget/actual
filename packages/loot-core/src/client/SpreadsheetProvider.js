@@ -104,7 +104,7 @@ function makeSpreadsheet() {
       return send('create-query', {
         sheetName,
         name,
-        query: query.serialize()
+        query: query.serialize(),
       });
     }
   }

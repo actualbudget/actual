@@ -12,7 +12,7 @@ import Add from '../svg/v1/Add';
 import Autocomplete, {
   defaultFilterSuggestion,
   AutocompleteFooter,
-  AutocompleteFooterButton
+  AutocompleteFooterButton,
 } from './Autocomplete';
 import { View } from './common';
 
@@ -48,7 +48,7 @@ export function PayeeList({
   highlightedIndex,
   embedded,
   inputValue,
-  footer
+  footer,
 }) {
   let isFiltered = items.filtered;
   let createNew = null;
@@ -71,7 +71,7 @@ export function PayeeList({
       <View
         style={[
           { overflow: 'auto', padding: '5px 0' },
-          !embedded && { maxHeight: 175 }
+          !embedded && { maxHeight: 175 },
         ]}
       >
         {createNew && (
@@ -82,7 +82,7 @@ export function PayeeList({
               padding: '6px 9px',
               backgroundColor:
                 highlightedIndex === 0 ? colors.n4 : 'transparent',
-              borderRadius: embedded ? 4 : 0
+              borderRadius: embedded ? 4 : 0,
             }}
           >
             <View
@@ -91,7 +91,7 @@ export function PayeeList({
                 color: colors.g8,
                 borderRadius: 4,
                 fontSize: 11,
-                fontWeight: 500
+                fontWeight: 500,
               }}
             >
               <Add
@@ -100,7 +100,7 @@ export function PayeeList({
                 style={{
                   color: colors.g8,
                   marginRight: 5,
-                  display: 'inline-block'
+                  display: 'inline-block',
                 }}
               />
               Create Payee "{inputValue}"
@@ -126,7 +126,7 @@ export function PayeeList({
                   key={'title-' + idx}
                   style={{
                     color: colors.y9,
-                    padding: '4px 9px'
+                    padding: '4px 9px',
                   }}
                 >
                   {title}
@@ -143,7 +143,7 @@ export function PayeeList({
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   padding: 4,
-                  paddingLeft: 20
+                  paddingLeft: 20,
                 }}
               >
                 {item.name}
@@ -155,7 +155,7 @@ export function PayeeList({
                     fontSize: 11,
                     padding: 5,
                     color: colors.n5,
-                    textAlign: 'center'
+                    textAlign: 'center',
                   }}
                 >
                   More payees are available, search to find them
@@ -187,14 +187,14 @@ export default function PayeeAutocomplete({
   let accounts = useCachedAccounts();
 
   let [focusTransferPayees, setFocusTransferPayees] = useState(
-    defaultFocusTransferPayees
+    defaultFocusTransferPayees,
   );
   let payeeSuggestions = useMemo(
     () => [
       { id: 'new', name: '' },
-      ...getPayeeSuggestions(payees, focusTransferPayees, accounts)
+      ...getPayeeSuggestions(payees, focusTransferPayees, accounts),
     ],
-    [payees, focusTransferPayees, accounts]
+    [payees, focusTransferPayees, accounts],
   );
 
   let rawPayee = useRef('');
@@ -240,7 +240,7 @@ export default function PayeeAutocomplete({
         ...inputProps,
         onBlur: () => setPayeeFieldFocused(false),
         onFocus: () => setPayeeFieldFocused(true),
-        onChange: text => (rawPayee.current = text)
+        onChange: text => (rawPayee.current = text),
       }}
       onUpdate={value => onUpdate && onUpdate(makeNew(value, rawPayee))}
       onSelect={handleSelect}
@@ -338,13 +338,13 @@ export default function PayeeAutocomplete({
                     focusTransferPayees && {
                       backgroundColor: colors.y8,
                       color: colors.g2,
-                      borderColor: colors.y8
-                    }
+                      borderColor: colors.y8,
+                    },
                   ]}
                   hoveredStyle={
                     focusTransferPayees && {
                       backgroundColor: colors.y8,
-                      colors: colors.y2
+                      colors: colors.y2,
                     }
                   }
                   onClick={() => {

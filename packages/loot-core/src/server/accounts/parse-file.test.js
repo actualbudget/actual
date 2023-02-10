@@ -24,7 +24,7 @@ async function getTransactions(accountId) {
   return db.runQuery(
     'SELECT * FROM transactions WHERE acct = ?',
     [accountId],
-    true
+    true,
   );
 }
 
@@ -40,7 +40,7 @@ async function importFileWithRealTime(accountId, filepath, dateFormat) {
       amount: amountToInteger(trans.amount),
       date: dateFormat
         ? d.format(d.parse(trans.date, dateFormat, new Date()), 'yyyy-MM-dd')
-        : trans.date
+        : trans.date,
     }));
   }
 
@@ -59,7 +59,7 @@ describe('File import', () => {
     let { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qif',
-      'MM/dd/yy'
+      'MM/dd/yy',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -71,7 +71,7 @@ describe('File import', () => {
 
     let { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/data.ofx'
+      __dirname + '/../../mocks/files/data.ofx',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -83,7 +83,7 @@ describe('File import', () => {
 
     let { errors } = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/data.qfx'
+      __dirname + '/../../mocks/files/data.qfx',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
@@ -95,14 +95,14 @@ describe('File import', () => {
 
     let res = await importFileWithRealTime(
       'one',
-      __dirname + '/../../mocks/files/best.data-ever$.QFX'
+      __dirname + '/../../mocks/files/best.data-ever$.QFX',
     );
     expect(res.errors.length).toBe(0);
 
     res = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/big.data.QiF',
-      'MM/dd/yy'
+      'MM/dd/yy',
     );
     expect(res.errors.length).toBe(0);
 
@@ -118,7 +118,7 @@ describe('File import', () => {
     let { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/8859-1.qfx',
-      'yyyy-MM-dd'
+      'yyyy-MM-dd',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();

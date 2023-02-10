@@ -19,7 +19,7 @@ class ReconstructedError extends Error {
       },
       set: function (value) {
         this._stack = value;
-      }
+      },
     });
 
     this.stack = stack;
@@ -102,14 +102,14 @@ function connectWorker(worker, onOpen, onError) {
               msg.stack,
               msg.url,
               msg.line,
-              msg.column
+              msg.column,
             )
-          : msg.exc
+          : msg.exc,
       );
 
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
         alert(
-          'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.github.io/docs/Contact/ so we can help debug this.'
+          'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.github.io/docs/Contact/ so we can help debug this.',
         );
       }
     } else if (msg.type === 'capture-breadcrumb') {
@@ -130,7 +130,7 @@ function connectWorker(worker, onOpen, onError) {
 
 module.exports.init = async function init(worker) {
   return new Promise((resolve, reject) =>
-    connectWorker(worker, resolve, reject)
+    connectWorker(worker, resolve, reject),
   );
 };
 
@@ -144,7 +144,7 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
           name,
           args,
           undoTag: undo.snapshot(),
-          catchErrors
+          catchErrors,
         });
       } else {
         messageQueue.push({
@@ -152,7 +152,7 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
           name,
           args,
           undoTag: undo.snapshot(),
-          catchErrors
+          catchErrors,
         });
       }
     });
@@ -173,7 +173,7 @@ module.exports.listen = function listen(name, cb) {
     let arr = listeners.get(name);
     listeners.set(
       name,
-      arr.filter(cb_ => cb_ !== cb)
+      arr.filter(cb_ => cb_ !== cb),
     );
   };
 };

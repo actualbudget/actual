@@ -9,7 +9,7 @@ jest.mock(
   'react-virtualized-auto-sizer',
   () =>
     ({ children }) =>
-      children({ height: 1000, width: 600 })
+      children({ height: 1000, width: 600 }),
 );
 
 // Why 2? There were already tests written assuming a specific

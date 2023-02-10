@@ -36,7 +36,7 @@ function Modals({
   categories,
   payees,
   budgetId,
-  actions
+  actions,
 }) {
   return modalStack.map(({ name, options = {} }, idx) => {
     const modalProps = {
@@ -45,7 +45,7 @@ function Modals({
       showBack: idx > 0,
       isCurrent: idx === modalStack.length - 1,
       isHidden,
-      stackIndex: idx
+      stackIndex: idx,
     };
 
     let location = createLocation('/' + name);
@@ -126,7 +126,7 @@ function Modals({
                 initialState={{ backups: [] }}
                 didMount={async ({ setState }) => {
                   setState({
-                    backups: await send('backups-get', { id: budgetId })
+                    backups: await send('backups-get', { id: budgetId }),
                   });
 
                   listen('backups-updated', backups => {
@@ -277,7 +277,7 @@ export default connect(
     categoryGroups: state.queries.categories.grouped,
     categories: state.queries.categories.list,
     payees: state.queries.payees,
-    budgetId: state.prefs.local && state.prefs.local.id
+    budgetId: state.prefs.local && state.prefs.local.id,
   }),
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) })
+  dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
 )(Modals);

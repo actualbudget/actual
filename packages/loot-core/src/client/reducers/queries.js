@@ -11,10 +11,10 @@ const initialState = {
   accounts: [],
   categories: {
     grouped: [],
-    list: []
+    list: [],
   },
   payees: [],
-  earliestTransaction: null
+  earliestTransaction: null,
 };
 
 export default function update(state = initialState, action) {
@@ -24,34 +24,34 @@ export default function update(state = initialState, action) {
         ...state,
         newTransactions: action.newTransactions || [],
         matchedTransactions: action.matchedTransactions || [],
-        updatedAccounts: action.updatedAccounts || []
+        updatedAccounts: action.updatedAccounts || [],
       };
     case constants.UPDATE_NEW_TRANSACTIONS:
       return {
         ...state,
         newTransactions: state.newTransactions.filter(
-          id => id !== action.changedId
+          id => id !== action.changedId,
         ),
         matchedTransactions: state.matchedTransactions.filter(
-          id => id !== action.changedId
-        )
+          id => id !== action.changedId,
+        ),
       };
     case constants.SET_LAST_TRANSACTION:
       return {
         ...state,
-        lastTransaction: action.transaction
+        lastTransaction: action.transaction,
       };
     case constants.MARK_ACCOUNT_READ:
       return {
         ...state,
         updatedAccounts: state.updatedAccounts.filter(
-          id => id !== action.accountId
-        )
+          id => id !== action.accountId,
+        ),
       };
     case constants.LOAD_ACCOUNTS:
       return {
         ...state,
-        accounts: action.accounts
+        accounts: action.accounts,
       };
     case constants.UPDATE_ACCOUNT: {
       return {
@@ -61,18 +61,18 @@ export default function update(state = initialState, action) {
             return { ...account, ...action.account };
           }
           return account;
-        })
+        }),
       };
     }
     case constants.LOAD_CATEGORIES:
       return {
         ...state,
-        categories: action.categories
+        categories: action.categories,
       };
     case constants.LOAD_PAYEES:
       return {
         ...state,
-        payees: action.payees
+        payees: action.payees,
       };
     case constants.ADD_CATEGORY: {
       let category = { id: 'temp', name: action.name };
@@ -86,8 +86,8 @@ export default function update(state = initialState, action) {
             }
             return group;
           }),
-          list: [category, ...state.categories.list]
-        }
+          list: [category, ...state.categories.list],
+        },
       };
     }
     case constants.DELETE_CATEGORY: {
@@ -97,11 +97,11 @@ export default function update(state = initialState, action) {
           grouped: state.categories.grouped.map(group => {
             return {
               ...group,
-              categories: group.categories.filter(cat => cat.id !== action.id)
+              categories: group.categories.filter(cat => cat.id !== action.id),
             };
           }),
-          list: state.categories.list.filter(cat => cat.id !== action.id)
-        }
+          list: state.categories.list.filter(cat => cat.id !== action.id),
+        },
       };
     }
 

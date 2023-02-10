@@ -6,7 +6,7 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   addCategory,
   moveCategory,
-  moveCategoryGroup
+  moveCategoryGroup,
 } from 'loot-core/src/shared/categories.js';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { View } from 'loot-design/src/components/common';
@@ -31,7 +31,7 @@ class Budget extends React.Component {
       currentMonth: currentMonth,
       initialized: false,
       editMode: false,
-      categoryGroups: null
+      categoryGroups: null,
     };
   }
 
@@ -112,10 +112,10 @@ class Budget extends React.Component {
             name,
             cat_group: groupId,
             is_income: 0,
-            id
-          })
+            id,
+          }),
         });
-      }
+      },
     });
   };
 
@@ -129,7 +129,7 @@ class Budget extends React.Component {
       let { id: catId, position } = aroundCategory;
 
       let group = categoryGroups.find(group =>
-        group.categories.find(cat => cat.id === catId)
+        group.categories.find(cat => cat.id === catId),
       );
 
       if (position === 'bottom') {
@@ -145,7 +145,7 @@ class Budget extends React.Component {
     this.props.moveCategory(id, groupId, targetId);
 
     this.setState({
-      categoryGroups: moveCategory(categoryGroups, id, groupId, targetId)
+      categoryGroups: moveCategory(categoryGroups, id, groupId, targetId),
     });
   };
 
@@ -161,7 +161,7 @@ class Budget extends React.Component {
     this.props.moveCategoryGroup(id, targetId);
 
     this.setState({
-      categoryGroups: moveCategoryGroup(categoryGroups, id, targetId)
+      categoryGroups: moveCategoryGroup(categoryGroups, id, targetId),
     });
   };
 
@@ -196,14 +196,14 @@ class Budget extends React.Component {
       'Set budgets to zero',
       'Set budgets to 3 month average',
       budgetType === 'report' && 'Apply to all future budgets',
-      'Cancel'
+      'Cancel',
     ].filter(Boolean);
 
     this.props.showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex: options.length - 1,
-        title: 'Actions'
+        title: 'Actions',
       },
       idx => {
         switch (idx) {
@@ -226,7 +226,7 @@ class Budget extends React.Component {
             break;
           default:
         }
-      }
+      },
     );
   };
 
@@ -238,7 +238,7 @@ class Budget extends React.Component {
       prefs,
       budgetType,
       navigation,
-      applyBudgetAction
+      applyBudgetAction,
     } = this.props;
     let numberFormat = prefs.numberFormat || 'comma-dot';
 
@@ -250,7 +250,7 @@ class Budget extends React.Component {
             backgroundColor: 'white',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: 25
+            marginBottom: 25,
           }}
         >
           <AnimatedLoading width={25} height={25} />
@@ -302,7 +302,7 @@ export default connect(
     categories: state.queries.categories.list,
     budgetType: state.prefs.local.budgetType || 'rollover',
     prefs: state.prefs.local,
-    initialBudgetMonth: state.app.budgetMonth
+    initialBudgetMonth: state.app.budgetMonth,
   }),
-  actions
+  actions,
 )(withThemeColor(colors.p5)(BudgetWrapper));

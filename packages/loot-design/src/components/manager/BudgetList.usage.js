@@ -13,7 +13,7 @@ const files = [
   { name: 'Finances 2', id: '5', state: 'synced' },
   { name: 'Finances 2', id: '6', state: 'remote' },
   { name: 'Shift Reset LLC', id: '7' },
-  { name: 'Shift Reset LLC', id: '8', state: 'unknown' }
+  { name: 'Shift Reset LLC', id: '8', state: 'unknown' },
 ];
 
 export default () => (

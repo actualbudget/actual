@@ -9,7 +9,7 @@ export function RolloverContext({
   summaryCollapsed,
   onBudgetAction,
   onToggleSummaryCollapse,
-  children
+  children,
 }) {
   let currentMonth = monthUtils.currentMonth();
 
@@ -20,7 +20,7 @@ export function RolloverContext({
         categoryGroups,
         summaryCollapsed,
         onBudgetAction,
-        onToggleSummaryCollapse
+        onToggleSummaryCollapse,
       }}
       children={children}
     />

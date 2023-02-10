@@ -22,8 +22,8 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat1',
       date: '2017-01-08',
-      description: payeeId
-    })[0]
+      description: payeeId,
+    })[0],
   );
   await db.insertTransaction(
     generateTransaction({
@@ -31,8 +31,8 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat2',
       date: '2017-01-10',
-      description: payeeId
-    })[0]
+      description: payeeId,
+    })[0],
   );
   await db.insertTransaction(
     generateTransaction({
@@ -40,8 +40,8 @@ async function insertTransactions(payeeId = null) {
       account: '1',
       category: 'cat2',
       date: '2017-01-15',
-      description: payeeId
-    })[0]
+      description: payeeId,
+    })[0],
   );
 }
 
@@ -132,7 +132,7 @@ describe('Spreadsheet', () => {
 
     spreadsheet.set(
       'g!foo',
-      '=from transactions where acct.offbudget = 0 and (description.transfer_acct.offbudget = null or description.transfer_acct.offbudget = 1) select { acct.offbudget, description.transfer_acct.offbudget as foo, amount }'
+      '=from transactions where acct.offbudget = 0 and (description.transfer_acct.offbudget = null or description.transfer_acct.offbudget = 1) select { acct.offbudget, description.transfer_acct.offbudget as foo, amount }',
     );
 
     return new Promise(resolve => {
@@ -151,7 +151,7 @@ describe('Spreadsheet', () => {
       run: async () => {
         await wait(100);
         return 5;
-      }
+      },
     });
 
     spreadsheet.onFinish(() => {
@@ -171,7 +171,7 @@ describe('Spreadsheet', () => {
         run: async () => {
           await wait(100);
           return 5;
-        }
+        },
       });
 
       spreadsheet.createDynamic('foo', 'y', {
@@ -179,7 +179,7 @@ describe('Spreadsheet', () => {
         dependencies: ['x'],
         run: x => {
           return x * 3;
-        }
+        },
       });
     });
 

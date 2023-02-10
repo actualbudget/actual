@@ -23,7 +23,7 @@ function AppBackground({ initializing, loadingText }) {
             padding: 50,
             paddingTop: 200,
             color: colors.n1,
-            alignItems: 'center'
+            alignItems: 'center',
           })}
         >
           <Block style={{ marginBottom: 20, fontSize: 18 }}>

@@ -6,7 +6,7 @@ export default function checkForUpgradeNotifications(
   addNotification,
   resetSync,
   // Note: history is only available on desktop
-  history
+  history,
 ) {
   // TODO: Probably should only show one of these at at time?
   send('get-upgrade-notifications').then(types => {
@@ -40,11 +40,11 @@ export default function checkForUpgradeNotifications(
                     // eslint-disable-next-line
                     locationPtr: __history.location
                   });
-              }
+              },
             },
             onClose: () => {
               send('seen-upgrade-notification', { type: 'schedules' });
-            }
+            },
           });
           break;
         }
@@ -62,12 +62,12 @@ export default function checkForUpgradeNotifications(
                 title: 'Repair splits...',
                 action: () =>
                   history.push('/tools/fix-splits', {
-                    locationPtr: history.location
-                  })
+                    locationPtr: history.location,
+                  }),
               },
               onClose: () => {
                 send('seen-upgrade-notification', { type: 'repair-splits' });
-              }
+              },
             });
           }
           break;
