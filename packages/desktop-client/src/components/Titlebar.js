@@ -25,13 +25,12 @@ import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
 import tokens from 'loot-design/src/tokens';
 
-import { useServerURL } from '../hooks/useServerURL';
-
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
+import { useServerURL } from './ServerContext';
 
 export let TitlebarContext = React.createContext();
 

@@ -3,7 +3,7 @@ import React from 'react';
 import { Text, Button } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import { useServerURL } from '../../hooks/useServerURL';
+import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
 

@@ -12,7 +12,7 @@ import {
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import { useServerURL } from '../hooks/useServerURL';
+import { useServerURL } from './ServerContext';
 
 function LoggedInUser({
   files,

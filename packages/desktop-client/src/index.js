@@ -27,6 +27,7 @@ import { initialState as initialAppState } from 'loot-core/src/client/reducers/a
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import App from './components/App';
+import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
@@ -71,7 +72,9 @@ window.$q = q;
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <ServerProvider>
+      <App />
+    </ServerProvider>
   </Provider>,
   document.getElementById('root'),
 );
