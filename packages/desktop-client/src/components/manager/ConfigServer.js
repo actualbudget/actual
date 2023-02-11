@@ -27,7 +27,7 @@ export default function ConfigServer() {
   let history = useHistory();
   let [url, setUrl] = useState('');
   let currentUrl = useServerURL();
-  let setServerUrl = useSetServerURL;
+  let setServerUrl = useSetServerURL();
   useEffect(() => {
     setUrl(currentUrl);
   }, [currentUrl]);
