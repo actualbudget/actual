@@ -33,11 +33,7 @@ export function useBootstrapped() {
         }
       };
 
-      let url = await send('get-server-url');
-      if (url == null) {
-        // A server hasn't been specified yet
-        history.push('/config-server');
-      } else {
+      let afterBootstrap = async () => {
         let { error, bootstrapped } = await send('subscribe-needs-bootstrap');
         if (error) {
           history.push('/error', { error });
@@ -46,6 +42,27 @@ export function useBootstrapped() {
         } else {
           ensure('/bootstrap');
         }
+      };
+
+      let url = await send('get-server-url');
+      if (url == null) {
+        // A server hasn't been specified yet
+        try {
+          let response = await fetch('/client-bootstrap');
+          let { isActual, serverURL } = await response.json();
+          if (isActual) {
+            await send('set-server-url', {
+              url: serverURL || window.location.origin,
+            });
+            await afterBootstrap();
+          } else {
+            throw new Error();
+          }
+        } catch {
+          history.push('/config-server');
+        }
+      } else {
+        await afterBootstrap();
       }
     }
     run();
