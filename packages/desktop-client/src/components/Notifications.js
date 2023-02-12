@@ -65,7 +65,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
 }
 
 function Notification({ notification, onRemove }) {
-  let { type, title, message, messageActions, sticky, internal, button } =
+  let { type, title, message, pre, messageActions, sticky, internal, button } =
     notification;
 
   let [loading, setLoading] = useState(false);
@@ -121,6 +121,23 @@ function Notification({ notification, onRemove }) {
             <View style={{ fontWeight: 700, marginBottom: 10 }}>{title}</View>
           )}
           <View>{processedMessage}</View>
+          {pre
+            ? pre.split('\n\n').map((text, idx) => (
+                <View
+                  key={idx}
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    backgroundColor: 'rgba(0, 0, 0, .05)',
+                    padding: 10,
+                    borderRadius: 4,
+                  }}
+                >
+                  {text}
+                </View>
+              ))
+            : null}
           {button && (
             <ButtonWithLoading
               bare
