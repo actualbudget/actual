@@ -13,28 +13,28 @@ module.exports = {
     path: path.resolve(path.join(__dirname, '/../lib-dist')),
     filename: 'bundle.desktop.js',
     sourceMapFilename: 'bundle.desktop.js.map',
-    libraryTarget: 'commonjs2'
+    libraryTarget: 'commonjs2',
   },
   resolve: {
     extensions: ['.electron.js', '.js', '.json'],
     alias: {
-      'perf-deets': require.resolve('perf-deets/noop')
-    }
+      'perf-deets': require.resolve('perf-deets/noop'),
+    },
   },
   externals: [
     'better-sqlite3',
     'node-ipc',
     'electron-log',
     'node-fetch',
-    'node-libofx'
+    'node-libofx',
   ],
   plugins: [
     new webpack.IgnorePlugin({
-      resourceRegExp: /original-fs/
-    })
+      resourceRegExp: /original-fs/,
+    }),
   ],
   node: {
     __dirname: false,
-    __filename: false
-  }
+    __filename: false,
+  },
 };

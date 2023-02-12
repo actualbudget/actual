@@ -131,7 +131,7 @@ function Notification({ notification, onRemove }) {
                     fontSize: 12,
                     backgroundColor: 'rgba(0, 0, 0, .05)',
                     padding: 10,
-                    borderRadius: 4
+                    borderRadius: 4,
                   }}
                 >
                   {text}

@@ -11,7 +11,7 @@ module.exports = {
   output: {
     path: path.resolve(path.join(__dirname, '/../lib-dist/browser')),
     library: 'backend',
-    publicPath: '/kcab/'
+    publicPath: '/kcab/',
   },
   resolve: {
     extensions: ['.web.js', '.js', '.json'],
@@ -22,13 +22,13 @@ module.exports = {
       'perf-deets':
         process.env.NODE_ENV === 'development' || process.env.PERF_BUILD
           ? 'perf-deets'
-          : require.resolve('perf-deets/noop')
-    }
+          : require.resolve('perf-deets/noop'),
+    },
   },
   resolveLoader: {
     alias: {
-      'pegjs-loader': require.resolve('pegjs-loader')
-    }
+      'pegjs-loader': require.resolve('pegjs-loader'),
+    },
   },
   module: {
     rules: [
@@ -37,42 +37,42 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['babel-preset-jwl-app']
-          }
-        }
+            presets: ['babel-preset-jwl-app'],
+          },
+        },
       },
       {
         test: /\.pegjs$/,
-        use: { loader: 'pegjs-loader' }
-      }
-    ]
+        use: { loader: 'pegjs-loader' },
+      },
+    ],
   },
   optimization: {
-    namedChunks: true
+    namedChunks: true,
   },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.IS_DEV': JSON.stringify(
-        process.env.NODE_ENV === 'development'
+        process.env.NODE_ENV === 'development',
       ),
       'process.env.IS_BETA': JSON.stringify(
-        process.env.ACTUAL_RELEASE_TYPE === 'beta'
+        process.env.ACTUAL_RELEASE_TYPE === 'beta',
       ),
       'process.env.PUBLIC_URL': JSON.stringify(process.env.PUBLIC_URL || '/'),
       'process.env.ACTUAL_DATA_DIR': JSON.stringify('/'),
-      'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents')
+      'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
     }),
     new webpack.SourceMapDevToolPlugin({
       filename: '[file].map',
-      exclude: /xfo.kcab/
+      exclude: /xfo.kcab/,
     }),
     new webpack.IgnorePlugin({
-      resourceRegExp: /worker_threads|original-fs/
-    })
+      resourceRegExp: /worker_threads|original-fs/,
+    }),
   ],
   node: {
     dgram: 'empty',
     net: 'empty',
-    tls: 'empty'
-  }
+    tls: 'empty',
+  },
 };
