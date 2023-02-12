@@ -12,8 +12,7 @@
     "lint": "eslint src",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "jest -c jest.config.js",
-    "test:web": "jest -c jest.web.config.js",
-    "postinstall": "patch-package"
+    "test:web": "jest -c jest.web.config.js"
   },
   "author": "",
   "license": "ISC",
@@ -64,7 +63,6 @@
     "mockdate": "^3.0.5",
     "murmurhash": "^0.0.2",
     "npm-run-all": "^4.1.3",
-    "patch-package": "^6.5.1",
     "pegjs": "^0.10.0",
     "pegjs-jest-transformer": "^1.2.3",
     "pegjs-loader": "^0.5.6",
