@@ -1,7 +1,7 @@
 export function sequential(fn) {
   let sequenceState = {
     running: null,
-    queue: []
+    queue: [],
   };
 
   function pump() {
@@ -24,7 +24,7 @@ export function sequential(fn) {
       err => {
         pump();
         reject(err);
-      }
+      },
     );
   }
 

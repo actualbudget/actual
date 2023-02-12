@@ -16,10 +16,10 @@ export function useTooltip() {
         e.stopPropagation();
         events.onClick && events.onClick(e);
         setIsOpen(true);
-      }
+      },
     }),
     isOpen,
-    close: () => setIsOpen(false)
+    close: () => setIsOpen(false),
   };
 }
 
@@ -140,7 +140,7 @@ export class Tooltip extends React.Component {
       top: anchorRect.top,
       left: anchorRect.left,
       width: anchorRect.width,
-      height: anchorRect.height
+      height: anchorRect.height,
     };
 
     let container = this.getBoundsContainer();
@@ -183,7 +183,7 @@ export class Tooltip extends React.Component {
       box,
       anchorRect,
       this.getContainer().getBoundingClientRect(),
-      offset
+      offset,
     );
 
     contentEl.style.top = style.top;
@@ -230,7 +230,7 @@ export class Tooltip extends React.Component {
       top: 'inherit',
       bottom: 'inherit',
       left: 'inherit',
-      right: 'inherit'
+      right: 'inherit',
     };
 
     if (
@@ -299,7 +299,7 @@ export class Tooltip extends React.Component {
       width,
       ...styles.shadowLarge,
       borderRadius: 4,
-      backgroundColor: 'white'
+      backgroundColor: 'white',
       // opacity: 0,
       // transition: 'transform .1s, opacity .1s',
       // transitionTimingFunction: 'ease-out'
@@ -332,7 +332,7 @@ export class Tooltip extends React.Component {
           >
             {children}
           </div>,
-          this.getContainer()
+          this.getContainer(),
         )}
       </div>
     );
@@ -349,7 +349,7 @@ export function Pointer({
   style,
   innerStyle,
   pointerStyle,
-  children
+  children,
 }) {
   return (
     <div {...css({ position: 'relative' }, style)}>
@@ -362,7 +362,7 @@ export function Pointer({
             padding: 10,
             boxShadow: '0 2px 6px rgba(0, 0, 0, .25)',
             border: border && '1px solid ' + borderColor,
-            borderRadius: 2
+            borderRadius: 2,
           },
           before({
             position: 'absolute',
@@ -383,7 +383,7 @@ export function Pointer({
                     ? { left: 'calc(50% - 3.5px)' }
                     : pointerPosition === 'left'
                     ? { left: 40 }
-                    : { right: 40 })
+                    : { right: 40 }),
                 }
               : pointerDirection === 'down'
               ? {
@@ -394,19 +394,19 @@ export function Pointer({
                     ? { left: 'calc(50% - 3.5px)' }
                     : pointerPosition === 'left'
                     ? { left: 40 }
-                    : { right: 40 })
+                    : { right: 40 }),
                 }
               : pointerDirection === 'right'
               ? {
                   transform: 'rotate(45deg)',
                   content: '" "',
                   top: 'calc(50% - 3.5px)',
-                  right: -3
+                  right: -3,
                 }
               : {}),
-            ...pointerStyle
+            ...pointerStyle,
           }),
-          innerStyle
+          innerStyle,
         )}
       >
         {children}

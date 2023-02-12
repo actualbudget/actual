@@ -2,7 +2,7 @@ import {
   differenceInCalendarMonths,
   addMonths,
   addWeeks,
-  format
+  format,
 } from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
@@ -25,7 +25,7 @@ async function processTemplate(month, force) {
   let errors = [];
 
   let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0'
+    'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
   let num_applied = 0;
@@ -34,7 +34,7 @@ async function processTemplate(month, force) {
 
     let budgeted = await getSheetValue(
       monthUtils.sheetForMonth(month),
-      `budget-${category.id}`
+      `budget-${category.id}`,
     );
 
     if (budgeted === 0 || force) {
@@ -49,16 +49,16 @@ async function processTemplate(month, force) {
                 category.name + ': ' + error.message,
                 line,
                 ' '.repeat(
-                  TEMPLATE_PREFIX.length + error.location.start.offset
-                ) + '^'
-              ].join('\n')
-            )
+                  TEMPLATE_PREFIX.length + error.location.start.offset,
+                ) + '^',
+              ].join('\n'),
+            ),
         );
         let to_budget = await applyCategoryTemplate(
           category,
           template,
           month,
-          force
+          force,
         );
         if (to_budget != null) {
           num_applied++;
@@ -73,7 +73,7 @@ async function processTemplate(month, force) {
         type: 'error',
         sticky: true,
         message: `There were errors interpreting some templates:`,
-        pre: errors.join('\n\n')
+        pre: errors.join('\n\n'),
       };
     } else {
       return { type: 'message', message: 'All categories were up to date.' };
@@ -86,12 +86,12 @@ async function processTemplate(month, force) {
       return {
         sticky: true,
         message: `${applied} There were errors interpreting some templates:`,
-        pre: errors.join('\n\n')
+        pre: errors.join('\n\n'),
       };
     } else {
       return {
         type: 'message',
-        message: applied
+        message: applied,
       };
     }
   }
@@ -103,7 +103,7 @@ async function getCategoryTemplates() {
   let templates = {};
 
   let notes = await db.all(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`
+    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
 
   for (let n = 0; n < notes.length; n++) {
@@ -141,7 +141,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let target_month = new Date(`${template.month}-01`);
         let num_months = differenceInCalendarMonths(
           target_month,
-          current_month
+          current_month,
         );
         let repeat = template.annual
           ? (template.repeat || 1) * 12
@@ -162,7 +162,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           console.log(
             `${category.name}: ${`${template.month} is in the past:`} ${
               template.line
-            }`
+            }`,
           );
           return null;
         }
@@ -182,7 +182,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         if (a.type === 'by' && !a.annual) {
           return differenceInCalendarMonths(
             new Date(`${a.month}-01`),
-            new Date(`${b.month}-01`)
+            new Date(`${b.month}-01`),
           );
         } else {
           return a.type.localeCompare(b.type);
@@ -219,7 +219,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             console.log(
               `${category.name}: ${`More than one 'up to' limit found.`} ${
                 template.line
-              }`
+              }`,
             );
             return null;
           } else {
@@ -240,7 +240,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let target = amountToInteger(template.amount);
         let num_months = differenceInCalendarMonths(
           target_month,
-          current_month
+          current_month,
         );
         let repeat =
           template.type === 'by'
@@ -265,7 +265,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             console.log(
               `${category.name}: ${`More than one 'up to' limit found.`} ${
                 template.line
-              }`
+              }`,
             );
             return null;
           } else {
@@ -300,18 +300,18 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           if (first_month) {
             let spent = await getSheetValue(
               sheetName,
-              `sum-amount-${category.id}`
+              `sum-amount-${category.id}`,
             );
             let balance = await getSheetValue(
               sheetName,
-              `leftover-${category.id}`
+              `leftover-${category.id}`,
             );
             already_budgeted = balance - spent;
             first_month = false;
           } else {
             let budgeted = await getSheetValue(
               sheetName,
-              `budget-${category.id}`
+              `budget-${category.id}`,
             );
             already_budgeted += budgeted;
           }
@@ -322,14 +322,14 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           console.log(
             `${category.name}: ${`${template.to} is in the past:`} ${
               template.line
-            }`
+            }`,
           );
           return null;
         } else if (num_months === 0) {
           to_budget = target - already_budgeted;
         } else {
           to_budget = Math.round(
-            (target - already_budgeted) / (num_months + 1)
+            (target - already_budgeted) / (num_months + 1),
           );
         }
         break;

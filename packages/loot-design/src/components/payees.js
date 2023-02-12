@@ -5,7 +5,7 @@ import React, {
   useRef,
   useMemo,
   useCallback,
-  useImperativeHandle
+  useImperativeHandle,
 } from 'react';
 
 import Component from '@reactions/component';
@@ -26,7 +26,7 @@ import {
   Input,
   Button,
   Tooltip,
-  Menu
+  Menu,
 } from './common';
 import {
   Table,
@@ -36,12 +36,12 @@ import {
   InputCell,
   SelectCell,
   CellButton,
-  useTableNavigator
+  useTableNavigator,
 } from './table';
 import useSelected, {
   SelectedProvider,
   useSelectedItems,
-  useSelectedDispatch
+  useSelectedDispatch,
 } from './useSelected';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
@@ -66,7 +66,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
           backgroundColor: colors.g9,
           border: '1px solid ' + colors.g9,
           color: colors.g1,
-          fontSize: 12
+          fontSize: 12,
         }}
         onEdit={onEdit}
         onSelect={onClick}
@@ -103,7 +103,7 @@ let Payee = React.memo(
     onHover,
     onEdit,
     onUpdate,
-    ruleActions
+    ruleActions,
   }) => {
     let { id } = payee;
     let dispatchSelected = useSelectedDispatch();
@@ -121,12 +121,12 @@ let Payee = React.memo(
           { alignItems: 'stretch' },
           style,
           {
-            backgroundColor: hovered ? colors.hover : null
+            backgroundColor: hovered ? colors.hover : null,
           },
           selected && {
             backgroundColor: colors.b9,
-            zIndex: 100
-          }
+            zIndex: 100,
+          },
         ]}
         data-focus-key={payee.id}
         onMouseEnter={() => onHover && onHover(payee.id)}
@@ -162,7 +162,7 @@ let Payee = React.memo(
         />
       </Row>
     );
-  }
+  },
 );
 
 const PayeeTable = React.forwardRef(
@@ -176,9 +176,9 @@ const PayeeTable = React.forwardRef(
       ruleActions,
       onUpdate,
       onViewRules,
-      onCreateRule
+      onCreateRule,
     },
-    ref
+    ref,
   ) => {
     let [hovered, setHovered] = useState(null);
     let selectedItems = useSelectedItems();
@@ -221,7 +221,7 @@ const PayeeTable = React.forwardRef(
         />
       </View>
     );
-  }
+  },
 );
 
 function PayeeTableHeader() {
@@ -237,7 +237,7 @@ function PayeeTableHeader() {
           backgroundColor: 'white',
           color: colors.n4,
           zIndex: 200,
-          userSelect: 'none'
+          userSelect: 'none',
         }}
         collapsed={true}
         version="v2"
@@ -263,9 +263,9 @@ function EmptyMessage({ text, style }) {
           color: colors.n7,
           fontStyle: 'italic',
           fontSize: 13,
-          marginTop: 5
+          marginTop: 5,
         },
-        style
+        style,
       ]}
     >
       {text}
@@ -276,7 +276,7 @@ function EmptyMessage({ text, style }) {
 function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
   // Transfer accounts are never editable
   let isDisabled = [...selectedPayees].some(
-    id => payeesById[id] == null || payeesById[id].transfer_acct
+    id => payeesById[id] == null || payeesById[id].transfer_acct,
   );
 
   return (
@@ -305,7 +305,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
               padding: 3,
               fontSize: 11,
               fontStyle: 'italic',
-              color: colors.n7
+              color: colors.n7,
             }}
           >
             {[...selectedPayees]
@@ -319,16 +319,16 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
             icon: Delete,
             name: 'delete',
             text: 'Delete',
-            disabled: isDisabled
+            disabled: isDisabled,
           },
           {
             icon: Merge,
             iconSize: 9,
             name: 'merge',
             text: 'Merge',
-            disabled: isDisabled || selectedPayees.size < 2
+            disabled: isDisabled || selectedPayees.size < 2,
           },
-          Menu.line
+          Menu.line,
         ]}
       />
     </Tooltip>
@@ -350,7 +350,7 @@ export const ManagePayees = React.forwardRef(
       onCreateRule,
       ...props
     },
-    ref
+    ref,
   ) => {
     let [highlightedRows, setHighlightedRows] = useState(null);
     let [filter, setFilter] = useState('');
@@ -363,9 +363,9 @@ export const ManagePayees = React.forwardRef(
         filter === ''
           ? payees
           : payees.filter(p =>
-              p.name.toLowerCase().includes(filter.toLowerCase())
+              p.name.toLowerCase().includes(filter.toLowerCase()),
             ),
-      [payees, filter]
+      [payees, filter],
     );
 
     let selected = useSelected('payees', filteredPayees, initialSelectedIds);
@@ -410,7 +410,7 @@ export const ManagePayees = React.forwardRef(
         tableNavigator.onEdit(null);
         setHighlightedRows(new Set([id]));
         _scrollTo(id);
-      }
+      },
     }));
 
     // `highlightedRows` should only ever be true once, and we
@@ -466,7 +466,7 @@ export const ManagePayees = React.forwardRef(
               return true;
           }
         }),
-      tableNavigatorOpts
+      tableNavigatorOpts,
     );
 
     let payeesById = getPayeesById(payees);
@@ -477,7 +477,7 @@ export const ManagePayees = React.forwardRef(
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            padding: '0 10px 5px'
+            padding: '0 10px 5px',
           }}
         >
           <Component initialState={{ menuOpen: false }}>
@@ -522,8 +522,8 @@ export const ManagePayees = React.forwardRef(
               backgroundColor: colors.n11,
               ':focus': {
                 backgroundColor: 'white',
-                '::placeholder': { color: colors.n8 }
-              }
+                '::placeholder': { color: colors.n8 },
+              },
             }}
           />
         </View>
@@ -534,7 +534,7 @@ export const ManagePayees = React.forwardRef(
               flex: 1,
               border: '1px solid ' + colors.border,
               borderRadius: 4,
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}
           >
             <PayeeTableHeader />
@@ -557,5 +557,5 @@ export const ManagePayees = React.forwardRef(
         </SelectedProvider>
       </View>
     );
-  }
+  },
 );

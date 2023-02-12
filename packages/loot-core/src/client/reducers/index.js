@@ -21,5 +21,5 @@ export default {
   notifications,
   budgets,
   tutorial,
-  user
+  user,
 };

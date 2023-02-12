@@ -22,7 +22,7 @@ export const NativeCategorySelect = React.forwardRef(
         ))}
       </Select>
     );
-  }
+  },
 );
 
 export function CategoryList({
@@ -30,7 +30,7 @@ export function CategoryList({
   getItemProps,
   highlightedIndex,
   embedded,
-  footer
+  footer,
 }) {
   let lastGroup = null;
 
@@ -40,9 +40,9 @@ export function CategoryList({
         style={[
           {
             overflow: 'auto',
-            padding: '5px 0'
+            padding: '5px 0',
           },
-          !embedded && { maxHeight: 175 }
+          !embedded && { maxHeight: 175 },
         ]}
       >
         {items.map((item, idx) => {
@@ -61,12 +61,16 @@ export function CategoryList({
                   fontSize: 11,
                   fontWeight: 500,
                   color: colors.g8,
-                  padding: '6px 8px'
+                  padding: '6px 8px',
                 }}
                 data-testid="split-transaction-button"
               >
                 <Text style={{ lineHeight: 0 }}>
-                  <Split width={10} height={10} style={{ marginRight: 5 }} />
+                  <Split
+                    width={10}
+                    height={10}
+                    style={{ marginRight: 5, color: 'inherit' }}
+                  />
                 </Text>
                 Split Transaction
               </View>
@@ -81,7 +85,7 @@ export function CategoryList({
                 <div
                   style={{
                     color: colors.y9,
-                    padding: '4px 9px'
+                    padding: '4px 9px',
                   }}
                   data-testid="category-item-group"
                 >
@@ -95,7 +99,7 @@ export function CategoryList({
                     highlightedIndex === idx ? colors.n4 : 'transparent',
                   padding: 4,
                   paddingLeft: 20,
-                  borderRadius: embedded ? 4 : 0
+                  borderRadius: embedded ? 4 : 0,
                 }}
                 data-testid={
                   'category-item' +
@@ -127,12 +131,12 @@ export default function CategoryAutocomplete({
           list.concat(
             group.categories.map(category => ({
               ...category,
-              groupName: group.name
-            }))
+              groupName: group.name,
+            })),
           ),
-        showSplitOption ? [{ id: 'split', name: '' }] : []
+        showSplitOption ? [{ id: 'split', name: '' }] : [],
       ),
-    [categoryGroups]
+    [categoryGroups],
   );
 
   return (

@@ -41,7 +41,7 @@ export async function savePrefs(prefsToSet, { avoidSync = false } = {}) {
             row: key,
             column: 'value',
             value: prefsToSet[key],
-            timestamp: Timestamp.send()
+            timestamp: Timestamp.send(),
           };
         }
         return null;
@@ -74,7 +74,7 @@ export function getDefaultPrefs(id, budgetName) {
     id,
     budgetName,
     'notifications.schedules': true,
-    'notifications.repair-splits': true
+    'notifications.repair-splits': true,
   };
 }
 

@@ -46,7 +46,7 @@ function LoadBackup({
   backups,
   backupDisabled,
   actions,
-  modalProps
+  modalProps,
 }) {
   const latestBackup = backups.find(backup => backup.isLatest);
   const previousBackups = backups.filter(backup => !backup.isLatest);
@@ -60,7 +60,7 @@ function LoadBackup({
               margin: 20,
               marginTop: 0,
               marginBottom: 15,
-              lineHeight: 1.5
+              lineHeight: 1.5,
             }}
           >
             {latestBackup ? (

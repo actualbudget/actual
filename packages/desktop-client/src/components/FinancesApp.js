@@ -8,7 +8,7 @@ import {
   Redirect,
   Switch,
   useLocation,
-  NavLink
+  NavLink,
 } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 
@@ -64,7 +64,7 @@ function PageRoute({ path, component: Component }) {
           <View
             style={{
               flex: 1,
-              display: props.match ? 'flex' : 'none'
+              display: props.match ? 'flex' : 'none',
             }}
           >
             <Component {...props} />
@@ -159,7 +159,7 @@ function NavTab({ icon: TabIcon, name, path }) {
         color: '#8E8E8F',
         display: 'flex',
         flexDirection: 'column',
-        textDecoration: 'none'
+        textDecoration: 'none',
       }}
       activeStyle={{ color: colors.p5 }}
     >
@@ -185,7 +185,7 @@ function MobileNavTabs() {
         height: '80px',
         justifyContent: 'space-around',
         paddingTop: 10,
-        width: '100%'
+        width: '100%',
       }}
     >
       <NavTab name="Budget" path="/budget" icon={Wallet} isActive={false} />
@@ -203,7 +203,7 @@ function MobileNavTabs() {
 class FinancesApp extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isMobile: isMobile(window.innerWidth) };
+    this.state = { isMobile: isMobile() };
     this.history = createBrowserHistory();
 
     let oldPush = this.history.push;
@@ -232,8 +232,8 @@ class FinancesApp extends React.Component {
 
   handleWindowResize() {
     this.setState({
-      isMobile: isMobile(window.innerWidth),
-      windowWidth: window.innerWidth
+      isMobile: isMobile(),
+      windowWidth: window.innerWidth,
     });
   }
 
@@ -266,7 +266,7 @@ class FinancesApp extends React.Component {
       checkForUpgradeNotifications(
         this.props.addNotification,
         this.props.resetSync,
-        this.history
+        this.history,
       );
     }, 100);
 
@@ -295,7 +295,7 @@ class FinancesApp extends React.Component {
                   flexDirection: 'column',
                   overflow: 'hidden',
                   position: 'relative',
-                  width: '100%'
+                  width: '100%',
                 }}
               >
                 {!this.state.isMobile && (
@@ -306,7 +306,7 @@ class FinancesApp extends React.Component {
                       top: 0,
                       left: 0,
                       right: 0,
-                      zIndex: 1000
+                      zIndex: 1000,
                     }}
                   />
                 )}
@@ -315,7 +315,7 @@ class FinancesApp extends React.Component {
                     flex: 1,
                     display: 'flex',
                     overflow: 'auto',
-                    position: 'relative'
+                    position: 'relative',
                   }}
                 >
                   <Notifications />

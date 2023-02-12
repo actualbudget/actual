@@ -7,7 +7,7 @@ const SvgRightArrow2 = props => (
     viewBox="0 0 91 51"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path

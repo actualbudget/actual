@@ -1,5 +1,5 @@
 export const stages = {
-  BUDGET: 'budget'
+  BUDGET: 'budget',
 };
 
 export const order = [stages.BUDGET];

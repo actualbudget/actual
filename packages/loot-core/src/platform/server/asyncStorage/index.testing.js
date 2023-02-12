@@ -21,7 +21,7 @@ function multiGet(keys) {
     return resolve(
       keys.map(function (key) {
         return [key, store[key]];
-      })
+      }),
     );
   });
 }
@@ -45,5 +45,5 @@ module.exports = {
   removeItem,
   multiGet,
   multiSet,
-  multiRemove
+  multiRemove,
 };

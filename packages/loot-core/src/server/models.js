@@ -60,11 +60,11 @@ export const accountModel = {
       'account',
       account,
       update ? ['name', 'type', 'offbudget', 'closed'] : ['name', 'type'],
-      update
+      update,
     );
 
     return account;
-  }
+  },
 };
 
 export const categoryModel = {
@@ -73,12 +73,12 @@ export const categoryModel = {
       'category',
       category,
       update ? ['name', 'is_income', 'cat_group'] : ['name', 'cat_group'],
-      update
+      update,
     );
 
     let { sort_order, ...rest } = category;
     return rest;
-  }
+  },
 };
 
 export const categoryGroupModel = {
@@ -87,19 +87,19 @@ export const categoryGroupModel = {
       'categoryGroup',
       categoryGroup,
       update ? ['name', 'is_income'] : ['name'],
-      update
+      update,
     );
 
     let { sort_order, ...rest } = categoryGroup;
     return rest;
-  }
+  },
 };
 
 export const payeeModel = {
   validate(payee, { update } = {}) {
     requiredFields('payee', payee, ['name'], update);
     return payee;
-  }
+  },
 };
 
 export const payeeRuleModel = {
@@ -117,7 +117,7 @@ export const payeeRuleModel = {
 
     requiredFields('payee_rules', rule, ['payee_id', 'type'], update);
     return rule;
-  }
+  },
 };
 
 export const transactionModel = {
@@ -146,7 +146,7 @@ export const transactionModel = {
     if (!('location' in row)) {
       throw new Error(
         'A full transaction is required to be passed to `toJS`. Instead got: ' +
-          JSON.stringify(row)
+          JSON.stringify(row),
       );
     }
 
@@ -187,5 +187,5 @@ export const transactionModel = {
     }
 
     return row;
-  }
+  },
 };

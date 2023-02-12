@@ -7,7 +7,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import {
   integerToCurrency,
   integerToAmount,
-  amountToInteger
+  amountToInteger,
 } from 'loot-core/src/shared/util';
 import { AlignedText } from 'loot-design/src/components/common';
 
@@ -25,7 +25,7 @@ export default function createSpreadsheet(start, end, accounts) {
           runQuery(
             q('transactions')
               .filter({ account: acct.id, date: { $lt: start + '-01' } })
-              .calculate({ $sum: '$amount' })
+              .calculate({ $sum: '$amount' }),
           ).then(({ data }) => data),
 
           runQuery(
@@ -34,23 +34,23 @@ export default function createSpreadsheet(start, end, accounts) {
                 account: acct.id,
                 $and: [
                   { date: { $gte: start + '-01' } },
-                  { date: { $lte: end + '-31' } }
-                ]
+                  { date: { $lte: end + '-31' } },
+                ],
               })
               .groupBy({ $month: '$date' })
               .select([
                 { date: { $month: '$date' } },
-                { amount: { $sum: '$amount' } }
-              ])
-          ).then(({ data }) => data)
+                { amount: { $sum: '$amount' } },
+              ]),
+          ).then(({ data }) => data),
         ]);
 
         return {
           id: acct.id,
           balances: index(balances, 'date'),
-          starting
+          starting,
         };
-      })
+      }),
     );
 
     setData(recalculate(data, start, end));
@@ -129,9 +129,9 @@ function recalculate(data, start, end) {
       data: graphData,
       hasNegative,
       start,
-      end
+      end,
     },
     netWorth: endNetWorth,
-    totalChange: endNetWorth - startNetWorth
+    totalChange: endNetWorth - startNetWorth,
   };
 }

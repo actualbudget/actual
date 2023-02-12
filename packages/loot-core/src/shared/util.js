@@ -90,7 +90,7 @@ export function applyChanges(changes, items) {
       const idx = items.findIndex(t => t.id === id);
       items[idx] = {
         ...items[idx],
-        ...fields
+        ...fields,
       };
     });
   }
@@ -251,13 +251,13 @@ export function titleFirst(str) {
 export let numberFormats = [
   { value: 'comma-dot', label: '1,000.33' },
   { value: 'dot-comma', label: '1.000,33' },
-  { value: 'space-comma', label: '1 000,33' }
+  { value: 'space-comma', label: '1 000,33' },
 ];
 
 let numberFormat = {
   value: null,
   formatter: null,
-  regex: null
+  regex: null,
 };
 
 export function setNumberFormat(format) {
@@ -286,9 +286,9 @@ export function setNumberFormat(format) {
     separator,
     formatter: new Intl.NumberFormat(locale, {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }),
-    regex
+    regex,
   };
 }
 
@@ -313,12 +313,12 @@ const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 export function safeNumber(value) {
   if (!Number.isInteger(value)) {
     throw new Error(
-      'safeNumber: number is not an integer: ' + JSON.stringify(value)
+      'safeNumber: number is not an integer: ' + JSON.stringify(value),
     );
   }
   if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
     throw new Error(
-      "safeNumber: can't safely perform arithmetic with number: " + value
+      "safeNumber: can't safely perform arithmetic with number: " + value,
     );
   }
   return value;
@@ -342,7 +342,7 @@ export function amountToCurrency(n) {
 
 export function currencyToAmount(str) {
   let amount = parseFloat(
-    str.replace(numberFormat.regex, '').replace(numberFormat.separator, '.')
+    str.replace(numberFormat.regex, '').replace(numberFormat.separator, '.'),
   );
   return isNaN(amount) ? null : amount;
 }
@@ -396,6 +396,6 @@ export function semverToNumber(str) {
         .map(x => {
           return ('000' + x.replace(/[^0-9]/g, '')).slice(-3);
         })
-        .join('')
+        .join(''),
   );
 }

@@ -5,7 +5,7 @@ import {
   View,
   Text,
   P,
-  ButtonWithLoading
+  ButtonWithLoading,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -41,7 +41,7 @@ function renderResults(results) {
         marginBottom: 0,
         marginLeft: '1em',
         textAlign: 'right',
-        whiteSpace: 'pre-wrap'
+        whiteSpace: 'pre-wrap',
       }}
     >
       {result}
@@ -69,7 +69,7 @@ export default function FixSplitsTool() {
             justifyContent: 'space-between',
             maxWidth: 500,
             width: '100%',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
         >
           <ButtonWithLoading loading={loading} onClick={onFix}>

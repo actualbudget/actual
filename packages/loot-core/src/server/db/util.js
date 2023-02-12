@@ -3,7 +3,7 @@ export async function incrFetch(
   terms,
   compare,
   makeQuery,
-  params = []
+  params = [],
 ) {
   let pageCount = 500;
   let results = [];

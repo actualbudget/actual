@@ -1,7 +1,7 @@
 import * as monthUtils from '../../shared/months';
 import {
   makeChild as makeChildTransaction,
-  recalculateSplit
+  recalculateSplit,
 } from '../../shared/transactions';
 import { hasFieldsChanged, amountToInteger } from '../../shared/util';
 import * as db from '../db';
@@ -34,9 +34,9 @@ function makeSplitTransaction(trans, subtransactions) {
     subtransactions: subtransactions.map((transaction, idx) =>
       makeChildTransaction(trans, {
         ...transaction,
-        sort_order: 0 - idx
-      })
-    )
+        sort_order: 0 - idx,
+      }),
+    ),
   });
   return [parent, ...sub];
 }
@@ -55,7 +55,7 @@ function getAccountBalance(account) {
 async function updateAccountBalance(id, balance) {
   await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
     amountToInteger(balance),
-    id
+    id,
   ]);
 }
 
@@ -63,7 +63,7 @@ export async function getAccounts(userId, userKey, id) {
   let res = await post(getServer().PLAID_SERVER + '/accounts', {
     userId,
     key: userKey,
-    item_id: id
+    item_id: id,
   });
 
   let { accounts } = res;
@@ -81,7 +81,7 @@ export function fromPlaid(trans) {
     payee_name: trans.name,
     imported_payee: trans.name,
     amount: -amountToInteger(trans.amount),
-    date: trans.date
+    date: trans.date,
   };
 }
 
@@ -91,7 +91,7 @@ async function downloadTransactions(
   acctId,
   bankId,
   since,
-  count
+  count,
 ) {
   let allTransactions = [];
   let accountBalance = null;
@@ -110,7 +110,7 @@ async function downloadTransactions(
       start_date: since,
       end_date: endDate,
       count: pageSize,
-      offset
+      offset,
     });
 
     if (res.error_code) {
@@ -126,7 +126,7 @@ async function downloadTransactions(
     // Remove pending transactions for now - we will handle them in
     // the future.
     allTransactions = allTransactions.concat(
-      res.transactions.filter(t => !t.pending)
+      res.transactions.filter(t => !t.pending),
     );
     accountBalance = getAccountBalance(res.accounts[0]);
 
@@ -145,7 +145,7 @@ async function downloadTransactions(
 
   return {
     transactions: allTransactions.map(fromPlaid),
-    accountBalance
+    accountBalance,
   };
 }
 
@@ -172,7 +172,7 @@ async function resolvePayee(trans, payeeName, payeesToCreate) {
 async function normalizeTransactions(
   transactions,
   acctId,
-  { rawPayeeName } = {}
+  { rawPayeeName } = {},
 ) {
   let payeesToCreate = new Map();
 
@@ -213,7 +213,7 @@ async function normalizeTransactions(
       subtransactions: subtransactions
         ? subtransactions.map(t => ({ ...t, account: acctId }))
         : null,
-      trans
+      trans,
     });
   }
 
@@ -240,7 +240,7 @@ export async function reconcileTransactions(acctId, transactions) {
 
   let { normalized, payeesToCreate } = await normalizeTransactions(
     transactions,
-    acctId
+    acctId,
   );
 
   // The first pass runs the rules, and preps data for fuzzy matching
@@ -258,7 +258,7 @@ export async function reconcileTransactions(acctId, transactions) {
     if (trans.imported_id) {
       match = await db.first(
         'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
-        [trans.imported_id, acctId]
+        [trans.imported_id, acctId],
       );
 
       // TODO: Pending transactions
@@ -281,8 +281,8 @@ export async function reconcileTransactions(acctId, transactions) {
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
           db.toDateRepr(monthUtils.addDays(trans.date, 1)),
           trans.amount || 0,
-          acctId
-        ]
+          acctId,
+        ],
       );
     }
 
@@ -291,7 +291,7 @@ export async function reconcileTransactions(acctId, transactions) {
       trans,
       subtransactions,
       match,
-      fuzzyDataset
+      fuzzyDataset,
     });
   }
 
@@ -304,7 +304,7 @@ export async function reconcileTransactions(acctId, transactions) {
     if (!data.match && data.fuzzyDataset) {
       // Try to find one where the payees match.
       let match = data.fuzzyDataset.find(
-        row => !hasMatched.has(row.id) && data.trans.payee === row.payee
+        row => !hasMatched.has(row.id) && data.trans.payee === row.payee,
       );
 
       if (match) {
@@ -337,7 +337,7 @@ export async function reconcileTransactions(acctId, transactions) {
       let existing = {
         ...match,
         cleared: match.cleared === 1,
-        date: db.fromDateRepr(match.date)
+        date: db.fromDateRepr(match.date),
       };
 
       // Update the transaction
@@ -348,7 +348,7 @@ export async function reconcileTransactions(acctId, transactions) {
         category: existing.category || trans.category || null,
         imported_payee: trans.imported_payee || null,
         notes: existing.notes || trans.notes || null,
-        cleared: trans.cleared != null ? trans.cleared : true
+        cleared: trans.cleared != null ? trans.cleared : true,
       };
 
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
@@ -360,7 +360,7 @@ export async function reconcileTransactions(acctId, transactions) {
         ...trans,
         id: uuid.v4Sync(),
         category: trans.category || null,
-        cleared: trans.cleared != null ? trans.cleared : true
+        cleared: trans.cleared != null ? trans.cleared : true,
       };
 
       if (subtransactions && subtransactions.length > 0) {
@@ -376,7 +376,7 @@ export async function reconcileTransactions(acctId, transactions) {
 
   return {
     added: added.map(trans => trans.id),
-    updated: updated.map(trans => trans.id)
+    updated: updated.map(trans => trans.id),
   };
 }
 
@@ -385,14 +385,14 @@ export async function reconcileTransactions(acctId, transactions) {
 export async function addTransactions(
   acctId,
   transactions,
-  { runTransfers = true } = {}
+  { runTransfers = true } = {},
 ) {
   const added = [];
 
   let { normalized, payeesToCreate } = await normalizeTransactions(
     transactions,
     acctId,
-    { rawPayeeName: true }
+    { rawPayeeName: true },
   );
 
   for (let { trans, subtransactions } of normalized) {
@@ -403,7 +403,7 @@ export async function addTransactions(
       id: uuid.v4Sync(),
       ...trans,
       account: acctId,
-      cleared: trans.cleared != null ? trans.cleared : true
+      cleared: trans.cleared != null ? trans.cleared : true,
     };
 
     // Add split transactions if they are given
@@ -423,7 +423,7 @@ export async function addTransactions(
   } else {
     await batchMessages(async () => {
       newTransactions = await Promise.all(
-        added.map(async trans => db.insertTransaction(trans))
+        added.map(async trans => db.insertTransaction(trans)),
       );
     });
   }
@@ -435,13 +435,13 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
   // (that will make start date after end date)
   const latestTransaction = await db.first(
     'SELECT * FROM v_transactions WHERE account = ? ORDER BY date DESC LIMIT 1',
-    [id]
+    [id],
   );
 
   if (latestTransaction) {
     const startingTransaction = await db.first(
       'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
-      [id]
+      [id],
     );
     const startingDate = db.fromDateRepr(startingTransaction.date);
     // assert(startingTransaction)
@@ -465,7 +465,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       userKey,
       acctId,
       bankId,
-      date
+      date,
     );
     if (transactions.length === 0) {
       return { added: [], updated: [] };
@@ -485,7 +485,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     // on-budget account, or for the past 30 days if off-budget
     const startingDay = monthUtils.subDays(
       monthUtils.currentDay(),
-      acctRow.offbudget === 0 ? 1 : 30
+      acctRow.offbudget === 0 ? 1 : 30,
     );
 
     const { transactions } = await downloadTransactions(
@@ -493,7 +493,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       userKey,
       acctId,
       bankId,
-      dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd')
+      dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd'),
     );
 
     // We need to add a transaction that represents the starting
@@ -522,13 +522,13 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
         payee: payee.id,
         date: oldestDate,
         cleared: true,
-        starting_balance_flag: true
+        starting_balance_flag: true,
       });
 
       let result = await reconcileTransactions(id, transactions);
       return {
         ...result,
-        added: [initialId, ...result.added]
+        added: [initialId, ...result.added],
       };
     });
   }

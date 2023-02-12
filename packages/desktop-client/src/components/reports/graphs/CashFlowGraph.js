@@ -7,7 +7,7 @@ import {
   VictoryLine,
   VictoryAxis,
   VictoryVoronoiContainer,
-  VictoryGroup
+  VictoryGroup,
 } from 'victory';
 
 import { colors } from 'loot-design/src/style';
@@ -43,7 +43,7 @@ function CashFlowGraph({ style, start, end, graphData, isConcise, compact }) {
               labelComponent={<Tooltip portalHost={portalHost} />}
               labels={x => x.premadeLabel}
               style={{
-                data: { stroke: colors.n5 }
+                data: { stroke: colors.n5 },
               }}
             />
             <VictoryAxis

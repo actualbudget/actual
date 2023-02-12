@@ -1,10 +1,10 @@
 /*
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: require-corp
-  Content-Security-Policy: default-src 'self' https://sentry.io blob:; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.actualbudget.com https://api.mixpanel.com https://sentry.io;
+  Content-Security-Policy: default-src 'self' blob:; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; connect-src http: https:;
 
 /kcab/*
-  Content-Security-Policy: default-src 'self' https://sentry.io blob:; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.actualbudget.com https://api.mixpanel.com https://sentry.io;
+  Content-Security-Policy: default-src 'self' blob:; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; connect-src http: https:;
 
 /*.wasm
   Content-Type: application/wasm

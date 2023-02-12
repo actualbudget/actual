@@ -46,7 +46,7 @@ export function reconcileFiles(localFiles, remoteFiles) {
             deleted: remote.deleted,
             encryptKeyId: remote.encryptKeyId,
             hasKey: remote.hasKey,
-            state: 'synced'
+            state: 'synced',
           };
         } else {
           return {
@@ -55,7 +55,7 @@ export function reconcileFiles(localFiles, remoteFiles) {
             deleted: remote.deleted,
             encryptKeyId: remote.encryptKeyId,
             hasKey: remote.hasKey,
-            state: 'detached'
+            state: 'detached',
           };
         }
       } else {
@@ -79,11 +79,11 @@ export function reconcileFiles(localFiles, remoteFiles) {
               deleted: f.deleted,
               encryptKeyId: f.encryptKeyId,
               hasKey: f.hasKey,
-              state: 'remote'
+              state: 'remote',
             };
-          })
+          }),
       )
-      .filter(f => !f.deleted)
+      .filter(f => !f.deleted),
   );
 
   // One last pass to list all the broken (unauthorized) files at the
@@ -97,7 +97,7 @@ const initialState = {
   budgets: [],
   availableImports: [],
   remoteFiles: null,
-  allFiles: null
+  allFiles: null,
 };
 
 export default function update(state = initialState, action) {
@@ -106,25 +106,25 @@ export default function update(state = initialState, action) {
       return {
         ...state,
         budgets: action.budgets,
-        allFiles: reconcileFiles(action.budgets, state.remoteFiles)
+        allFiles: reconcileFiles(action.budgets, state.remoteFiles),
       };
     case constants.SET_REMOTE_FILES:
       return {
         ...state,
         remoteFiles: action.files,
-        allFiles: reconcileFiles(state.budgets, action.files)
+        allFiles: reconcileFiles(state.budgets, action.files),
       };
     case constants.SET_ALL_FILES:
       return {
         ...state,
         budgets: action.budgetes,
         remoteFiles: action.remoteFiles,
-        allFiles: reconcileFiles(action.budgets, action.remoteFiles)
+        allFiles: reconcileFiles(action.budgets, action.remoteFiles),
       };
     case constants.SET_AVAILABLE_IMPORTS:
       return {
         ...state,
-        availableImports: action.imports
+        availableImports: action.imports,
       };
     case constants.SIGN_OUT:
       // If the user logs out, make sure to reset all the files

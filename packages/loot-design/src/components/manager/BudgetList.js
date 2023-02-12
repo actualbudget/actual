@@ -12,7 +12,7 @@ import FileDouble from '../../svg/v1/FileDouble';
 import CloudUnknown from '../../svg/v2/CloudUnknown';
 import {
   isDevelopmentEnvironment,
-  isPreviewEnvironment
+  isPreviewEnvironment,
 } from '../../util/environment';
 import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
 
@@ -114,7 +114,7 @@ function FileState({ file }) {
         color,
         alignItems: 'center',
         flexDirection: 'row',
-        marginTop: 8
+        marginTop: 8,
       }}
     >
       <Icon
@@ -122,7 +122,7 @@ function FileState({ file }) {
         style={{
           width: 18,
           height: 18,
-          color: 'currentColor'
+          color: 'currentColor',
         }}
       />
 
@@ -161,9 +161,9 @@ function File({ file, onSelect, onDelete }) {
           flexShrink: 0,
           cursor: 'pointer',
           ':hover': {
-            backgroundColor: colors.hover
-          }
-        }
+            backgroundColor: colors.hover,
+          },
+        },
       ]}
     >
       <View style={{ alignItems: 'flex-start' }}>
@@ -181,7 +181,7 @@ function File({ file, onSelect, onDelete }) {
               width: 13,
               height: 13,
               marginRight: 8,
-              color: file.hasKey ? colors.b5 : colors.n8
+              color: file.hasKey ? colors.b5 : colors.n8,
             }}
           />
         )}
@@ -202,7 +202,7 @@ class BudgetTable extends React.Component {
           flex: 1,
           maxHeight: 310,
           overflow: 'auto',
-          '& *': { userSelect: 'none' }
+          '& *': { userSelect: 'none' },
         }}
       >
         {files.map((file, idx) => (
@@ -272,7 +272,7 @@ class BudgetList extends React.Component {
                   top: 0,
                   bottom: 0,
                   justifyContent: 'center',
-                  marginRight: 5
+                  marginRight: 5,
                 }}
               >
                 <RefreshButton
@@ -300,14 +300,14 @@ class BudgetList extends React.Component {
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
                 padding: 25,
-                paddingLeft: 5
+                paddingLeft: 5,
               }}
             >
               <Button
                 bare
                 style={{
                   marginLeft: 10,
-                  color: colors.n4
+                  color: colors.n4,
                 }}
                 onClick={e => {
                   e.preventDefault();

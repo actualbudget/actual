@@ -17,7 +17,7 @@ function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
     },
 
     onClose,
-    onSuccess
+    onSuccess,
   });
 }
 
@@ -28,15 +28,15 @@ export async function authorizeBank(pushModal, { upgradingId } = {}) {
         institution: data.metadata.institution,
         publicToken: data.publicToken,
         accounts: data.metadata.accounts,
-        upgradingId
+        upgradingId,
       });
-    }
+    },
   });
 }
 
 export async function reauthorizeBank(pushModal, bankId, onSuccess) {
   let { linkToken } = await send('make-plaid-public-token', {
-    bankId
+    bankId,
   });
 
   // We don't do anything with the error right now

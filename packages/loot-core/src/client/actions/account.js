@@ -7,7 +7,7 @@ import { getPayees, getAccounts } from './queries';
 export function setAccountsSyncing(name) {
   return {
     type: constants.SET_ACCOUNTS_SYNCING,
-    name
+    name,
   };
 }
 
@@ -17,20 +17,20 @@ export function markAccountFailed(id, errorType, errorCode) {
     id,
     failed: true,
     errorType,
-    errorCode
+    errorCode,
   };
 }
 export function markAccountSuccess(id) {
   return {
     type: 'ACCOUNT_SYNC_STATUS',
     id,
-    failed: false
+    failed: false,
   };
 }
 export function setFailedAccounts(syncErrors) {
   return {
     type: 'ACCOUNT_SYNC_FAILURES',
-    syncErrors
+    syncErrors,
   };
 }
 
@@ -48,7 +48,7 @@ export function linkAccount(institution, publicToken, accountId, upgradingId) {
       institution,
       publicToken,
       accountId,
-      upgradingId
+      upgradingId,
     });
     await dispatch(getPayees());
     await dispatch(getAccounts());
@@ -59,14 +59,14 @@ export function connectAccounts(
   institution,
   publicToken,
   accountIds,
-  offbudgetIds
+  offbudgetIds,
 ) {
   return async dispatch => {
     let ids = await send('accounts-connect', {
       institution,
       publicToken,
       accountIds,
-      offbudgetIds
+      offbudgetIds,
     });
     await dispatch(getPayees());
     await dispatch(getAccounts());
@@ -111,9 +111,9 @@ export function syncAccounts(id) {
             .map(error => ({
               id: error.accountId,
               type: error.category,
-              code: error.code
-            }))
-        )
+              code: error.code,
+            })),
+        ),
       );
     }
 
@@ -122,16 +122,16 @@ export function syncAccounts(id) {
         dispatch(
           addNotification({
             type: 'error',
-            message: error.message
-          })
+            message: error.message,
+          }),
         );
       } else {
         dispatch(
           addNotification({
             type: 'error',
             message: error.message,
-            internal: error.internal
-          })
+            internal: error.internal,
+          }),
         );
       }
     });
@@ -140,7 +140,7 @@ export function syncAccounts(id) {
       type: constants.SET_NEW_TRANSACTIONS,
       newTransactions,
       matchedTransactions,
-      updatedAccounts
+      updatedAccounts,
     });
 
     return newTransactions.length > 0 || matchedTransactions.length > 0;
@@ -151,7 +151,7 @@ export function syncAccounts(id) {
 export function setLastTransaction(transaction) {
   return {
     type: constants.SET_LAST_TRANSACTION,
-    transaction
+    transaction,
   };
 }
 
@@ -159,7 +159,7 @@ export function parseTransactions(filepath, options) {
   return async dispatch => {
     return await send('transactions-parse-file', {
       filepath,
-      options
+      options,
     });
   };
 }
@@ -169,10 +169,10 @@ export function importTransactions(id, transactions) {
     let {
       errors = [],
       added,
-      updated
+      updated,
     } = await send('transactions-import', {
       accountId: id,
-      transactions
+      transactions,
     });
 
     errors.forEach(error => {
@@ -180,8 +180,8 @@ export function importTransactions(id, transactions) {
         addNotification({
           type: 'error',
           message: error.message,
-          internal: error.internal
-        })
+          internal: error.internal,
+        }),
       );
     });
 
@@ -189,7 +189,7 @@ export function importTransactions(id, transactions) {
       type: constants.SET_NEW_TRANSACTIONS,
       newTransactions: added,
       matchedTransactions: updated,
-      updatedAccounts: added.length > 0 ? [id] : []
+      updatedAccounts: added.length > 0 ? [id] : [],
     });
 
     return added.length > 0 || updated.length > 0;
@@ -199,14 +199,14 @@ export function importTransactions(id, transactions) {
 export function updateNewTransactions(changedId) {
   return {
     type: constants.UPDATE_NEW_TRANSACTIONS,
-    changedId
+    changedId,
   };
 }
 
 export function markAccountRead(accountId) {
   return {
     type: constants.MARK_ACCOUNT_READ,
-    accountId: accountId
+    accountId: accountId,
   };
 }
 
@@ -214,7 +214,7 @@ export function getBanks() {
   return async dispatch => {
     dispatch({
       type: constants.LOAD_BANKS,
-      banks: await send('banks')
+      banks: await send('banks'),
     });
   };
 }

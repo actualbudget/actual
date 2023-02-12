@@ -2,7 +2,7 @@ import constants from '../constants';
 
 const initialState = {
   modalStack: [],
-  isHidden: false
+  isHidden: false,
 };
 
 function update(state = initialState, action) {
@@ -12,13 +12,13 @@ function update(state = initialState, action) {
         ...state,
         modalStack: [
           ...state.modalStack,
-          { name: action.name, options: action.options }
-        ]
+          { name: action.name, options: action.options },
+        ],
       };
     case constants.REPLACE_MODAL:
       return {
         ...state,
-        modalStack: [{ name: action.name, options: action.options }]
+        modalStack: [{ name: action.name, options: action.options }],
       };
     case constants.POP_MODAL:
       return { ...state, modalStack: state.modalStack.slice(0, -1) };
@@ -32,7 +32,7 @@ function update(state = initialState, action) {
       if ('loadingText' in action.state) {
         return {
           ...state,
-          isHidden: action.state.loadingText != null
+          isHidden: action.state.loadingText != null,
         };
       }
       break;

@@ -2,7 +2,7 @@ import {
   conform,
   convertForInsert,
   convertForUpdate,
-  convertFromSelect
+  convertFromSelect,
 } from './schema-helpers';
 
 let basicSchema = {
@@ -13,8 +13,8 @@ let basicSchema = {
     amount: { type: 'integer', default: 0, required: true },
     cleared: { type: 'boolean', default: true },
     notes: { type: 'text' },
-    sort_order: { type: 'float', default: () => Date.now() }
-  }
+    sort_order: { type: 'float', default: () => Date.now() },
+  },
 };
 
 describe('schema-helpers', () => {
@@ -22,12 +22,12 @@ describe('schema-helpers', () => {
     let trans = convertFromSelect(basicSchema, {}, 'transactions', {
       amount: 5,
       cleared: 0,
-      date: 20200101
+      date: 20200101,
     });
     expect(trans).toEqual({
       amount: 5,
       cleared: false,
-      date: '2020-01-01'
+      date: '2020-01-01',
     });
   });
 
@@ -36,7 +36,7 @@ describe('schema-helpers', () => {
       id: 't1',
       account: 'foo',
       amount: 5,
-      date: '2020-01-01'
+      date: '2020-01-01',
     });
     expect(trans).toEqual({
       id: 't1',
@@ -44,14 +44,14 @@ describe('schema-helpers', () => {
       amount: 5,
       cleared: 1,
       date: 20200101,
-      sort_order: 123456789
+      sort_order: 123456789,
     });
   });
 
   test('a basic update works', () => {
     let trans = convertForUpdate(basicSchema, {}, 'transactions', {
       id: 'foo',
-      amount: 5001
+      amount: 5001,
     });
     expect(trans).toEqual({ id: 'foo', amount: 5001 });
   });
@@ -61,7 +61,7 @@ describe('schema-helpers', () => {
       convertForInsert(basicSchema, {}, 'transactions2', {
         id: 't1',
         account: 'foo',
-        amount: 5
+        amount: 5,
       });
     }).toThrow(/"transactions2" does not exist/);
 
@@ -69,7 +69,7 @@ describe('schema-helpers', () => {
       convertForInsert(basicSchema, {}, 'transactions', {
         id: 't1',
         account: 'foo',
-        amount: 5
+        amount: 5,
       });
     }).toThrow(/"date" is required/);
 
@@ -78,7 +78,7 @@ describe('schema-helpers', () => {
         id: 't1',
         account: 'foo',
         amount: 5,
-        date: null
+        date: null,
       });
     }).toThrow(/"date" is required/);
   });
@@ -88,7 +88,7 @@ describe('schema-helpers', () => {
       convertForUpdate(basicSchema, {}, 'transactions2', {
         id: 'trans',
         account: 'acct',
-        amount: 5
+        amount: 5,
       });
     }).toThrow(/"transactions2" does not exist/);
 
@@ -96,7 +96,7 @@ describe('schema-helpers', () => {
       convertForUpdate(basicSchema, {}, 'transactions', {
         id: 'trans',
         account: 'acct',
-        amount: 5
+        amount: 5,
       });
     }).not.toThrow(/"date" is required/);
 
@@ -105,7 +105,7 @@ describe('schema-helpers', () => {
         id: 'trans',
         account: 'acct',
         amount: 5,
-        date: null
+        date: null,
       });
     }).toThrow(/"date" is required/);
 
@@ -114,7 +114,7 @@ describe('schema-helpers', () => {
       convertForUpdate(basicSchema, {}, 'transactions', {
         id: 'trans',
         account: 'acct',
-        amount: null
+        amount: null,
       });
     }).toThrow(/"amount" is required/);
   });
@@ -122,7 +122,7 @@ describe('schema-helpers', () => {
   test('conform converts types to db representations', () => {
     let obj = conform(basicSchema, {}, 'transactions', {
       date: '2020-01-01',
-      cleared: false
+      cleared: false,
     });
     expect(obj.date).toBe(20200101);
     expect(obj.cleared).toBe(0);
@@ -133,11 +133,11 @@ describe('schema-helpers', () => {
       basicSchema,
       {
         views: {
-          transactions: { fields: { amount: 'amount2', cleared: 'cleared2' } }
-        }
+          transactions: { fields: { amount: 'amount2', cleared: 'cleared2' } },
+        },
       },
       'transactions',
-      { amount: 100, cleared: false, date: '2020-01-01' }
+      { amount: 100, cleared: false, date: '2020-01-01' },
     );
     expect(obj.amount2).toBe(100);
     expect(obj.cleared2).toBe(0);
@@ -151,7 +151,7 @@ describe('schema-helpers', () => {
       id: 't1',
       account: 'foo',
       date: '2020-01-01',
-      cleared: null
+      cleared: null,
     });
     expect(trans).toEqual({
       id: 't1',
@@ -159,17 +159,17 @@ describe('schema-helpers', () => {
       amount: 0,
       date: 20200101,
       cleared: 1,
-      sort_order: 123456789
+      sort_order: 123456789,
     });
 
     // Updates should never apply defaults
     trans = convertForUpdate(basicSchema, {}, 'transactions', {
       id: 'id',
-      cleared: null
+      cleared: null,
     });
     expect(trans).toEqual({
       id: 'id',
-      cleared: 0
+      cleared: 0,
     });
   });
 
@@ -179,7 +179,7 @@ describe('schema-helpers', () => {
       id: 't1',
       account: 'foo',
       date: '2020-01-01',
-      notes: null
+      notes: null,
     });
     expect(trans).toEqual({
       id: 't1',
@@ -187,17 +187,17 @@ describe('schema-helpers', () => {
       date: 20200101,
       amount: 0,
       cleared: 1,
-      sort_order: 123456789
+      sort_order: 123456789,
     });
 
     // `notes` is null and must be included in an update
     trans = convertForUpdate(basicSchema, {}, 'transactions', {
       id: 'id',
-      notes: null
+      notes: null,
     });
     expect(trans).toEqual({
       id: 'id',
-      notes: null
+      notes: null,
     });
   });
 
@@ -205,7 +205,7 @@ describe('schema-helpers', () => {
     expect(() => {
       convertForUpdate(basicSchema, {}, 'transactions', {
         id: 'id',
-        amount: 45.5
+        amount: 45.5,
       });
     }).toThrow("Can't convert to integer");
   });

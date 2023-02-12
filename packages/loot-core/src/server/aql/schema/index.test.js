@@ -28,7 +28,7 @@ describe('schema', () => {
     expect((await db.all('SELECT * FROM v_transactions')).length).toBe(0);
     await db.runQuery(
       'INSERT INTO transactions (date, acct, isChild) VALUES (?, ?, ?)',
-      [20200101, 'foo', 1]
+      [20200101, 'foo', 1],
     );
     expect((await db.all('SELECT * FROM transactions')).length).toBe(1);
     expect((await db.all('SELECT * FROM v_transactions')).length).toBe(0);

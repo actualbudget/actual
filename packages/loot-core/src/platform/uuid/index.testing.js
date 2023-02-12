@@ -5,5 +5,5 @@ module.exports = {
 
   v4Sync: function () {
     return global.randomId();
-  }
+  },
 };

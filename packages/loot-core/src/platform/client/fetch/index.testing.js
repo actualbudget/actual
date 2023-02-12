@@ -11,7 +11,7 @@ module.exports.initServer = handlers => {
         if (catchErrors) {
           return promise.then(
             data => ({ data }),
-            err => ({ error: { message: err.message } })
+            err => ({ error: { message: err.message } }),
           );
         }
         return promise;
@@ -39,7 +39,7 @@ module.exports.serverPush = (name, args) => {
 module.exports.send = async function (
   name,
   args,
-  { catchErrors = false } = {}
+  { catchErrors = false } = {},
 ) {
   if (serverHandler) {
     return serverHandler({ name, args, catchErrors });
@@ -62,7 +62,7 @@ module.exports.listen = function listen(name, cb) {
     let arr = listeners.get(name);
     listeners.set(
       name,
-      arr.filter(cb_ => cb_ !== cb)
+      arr.filter(cb_ => cb_ !== cb),
     );
   };
 };

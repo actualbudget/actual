@@ -47,7 +47,7 @@ export function KeyHandler({ keyName, eventType = 'keydown', handler }) {
       hotkeys.unbind({
         key: keyName,
         scope,
-        method: _handler
+        method: _handler,
       });
     };
   }, [keyName, handler, scope]);
