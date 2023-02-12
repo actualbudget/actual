@@ -7,7 +7,7 @@ import { pushModal } from './modals';
 import { addNotification, addGenericErrorNotification } from './notifications';
 
 export function applyBudgetAction(month, type, args) {
-  return async function () {
+  return async function (dispatch) {
     switch (type) {
       case 'budget-amount':
         await send('budget/budget-amount', {
@@ -26,10 +26,16 @@ export function applyBudgetAction(month, type, args) {
         await send('budget/set-3month-avg', { month });
         break;
       case 'apply-goal-template':
-        await send('budget/apply-goal-template', { month });
+        dispatch(
+          addNotification(await send('budget/apply-goal-template', { month })),
+        );
         break;
       case 'overwrite-goal-template':
-        await send('budget/overwrite-goal-template', { month });
+        dispatch(
+          addNotification(
+            await send('budget/overwrite-goal-template', { month }),
+          ),
+        );
         break;
       case 'hold':
         await send('budget/hold-for-next-month', {
