@@ -7,7 +7,7 @@ describe('Encryption', () => {
     let key = await encryption.createKey({
       id: 'foo',
       password: 'mypassword',
-      salt: 'salt'
+      salt: 'salt',
     });
     await encryption.loadKey(key);
 

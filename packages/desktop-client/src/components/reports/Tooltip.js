@@ -22,7 +22,7 @@ class Tooltip extends React.Component {
       position,
       light,
       forceActive,
-      style
+      style,
     } = this.props;
     const xRange = scale.x.range();
     const xPos = x - xRange[0];
@@ -59,7 +59,7 @@ class Tooltip extends React.Component {
             // TODO: Transparent background
             backgroundColor: light ? 'transparent' : colors.n1,
             color: light ? 'inherit' : 'white',
-            padding: 10
+            padding: 10,
           },
           !light &&
             before({
@@ -71,14 +71,14 @@ class Tooltip extends React.Component {
                 '7px solid ' + colors.n1,
               [position === 'right' ? 'left' : 'right']: -6,
               top: 'calc(50% - 7px)',
-              content: '" "'
+              content: '" "',
             }),
-          style
+          style,
         )}
       >
         {datum.premadeLabel}
       </div>,
-      portalHost
+      portalHost,
     );
   }
 }

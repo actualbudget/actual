@@ -136,7 +136,7 @@ export function isAfter(month1, month2) {
 export function bounds(month) {
   return {
     start: parseInt(d.format(d.startOfMonth(_parse(month)), 'yyyyMMdd')),
-    end: parseInt(d.format(d.endOfMonth(_parse(month)), 'yyyyMMdd'))
+    end: parseInt(d.format(d.endOfMonth(_parse(month)), 'yyyyMMdd')),
   };
 }
 
@@ -223,7 +223,7 @@ export const getDateFormatRegex = memoizeOne(format => {
     format
       .replace(/d+/g, '\\d{1,2}')
       .replace(/M+/g, '\\d{1,2}')
-      .replace(/y+/g, '\\d{4}')
+      .replace(/y+/g, '\\d{4}'),
   );
 });
 

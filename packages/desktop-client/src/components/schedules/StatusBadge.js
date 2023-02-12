@@ -83,9 +83,9 @@ export function StatusBadge({ status, style }) {
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
-          flexShrink: 0
+          flexShrink: 0,
         },
-        style
+        style,
       ]}
     >
       <Icon
@@ -93,7 +93,7 @@ export function StatusBadge({ status, style }) {
           width: 13,
           height: 13,
           color: 'inherit',
-          marginRight: 7
+          marginRight: 7,
         }}
       />
       <Text style={{ lineHeight: '1em' }}>{titleFirst(status)}</Text>

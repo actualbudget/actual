@@ -42,7 +42,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
             paddingTop: 0,
             paddingBottom: 25,
             width: 500,
-            lineHeight: '1.5em'
+            lineHeight: '1.5em',
           }}
         >
           {isRemote && (
@@ -62,7 +62,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                   border: 0,
                   marginTop: 10,
                   padding: '10px 30px',
-                  fontSize: 14
+                  fontSize: 14,
                 }}
                 onClick={onDeleteCloud}
               >
@@ -108,17 +108,17 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                     alignSelf: 'center',
                     marginTop: 10,
                     padding: '10px 30px',
-                    fontSize: 14
+                    fontSize: 14,
                   },
                   isRemote
                     ? {
                         color: colors.r4,
-                        borderColor: colors.r4
+                        borderColor: colors.r4,
                       }
                     : {
                         border: 0,
-                        backgroundColor: colors.r4
-                      }
+                        backgroundColor: colors.r4,
+                      },
                 ]}
                 onClick={onDeleteLocal}
               >

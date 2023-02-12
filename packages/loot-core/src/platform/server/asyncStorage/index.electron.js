@@ -30,7 +30,7 @@ function _saveStore() {
         'utf8',
         function (err, _) {
           return err ? reject(err) : resolve();
-        }
+        },
       );
     });
   }
@@ -57,7 +57,7 @@ function multiGet(keys) {
     return resolve(
       keys.map(function (key) {
         return [key, store[key]];
-      })
+      }),
     );
   });
 }
@@ -83,5 +83,5 @@ module.exports = {
   removeItem,
   multiGet,
   multiSet,
-  multiRemove
+  multiRemove,
 };

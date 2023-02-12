@@ -23,7 +23,7 @@ const accounts = [
   generateAccount('Wells Fargo', true),
   generateAccount('Ally'),
   { ...generateAccount('401k'), closed: 1 },
-  { ...generateAccount('Old Savings'), closed: 1 }
+  { ...generateAccount('Old Savings'), closed: 1 },
 ];
 
 function makeSidebar(selected) {

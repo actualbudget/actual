@@ -17,7 +17,7 @@ export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
 
   async function onChooseDocumentDir() {
     let res = await window.Actual.openFileDialog({
-      properties: ['openDirectory']
+      properties: ['openDirectory'],
     });
     if (res) {
       saveGlobalPrefs({ documentDir: res[0] });
@@ -31,7 +31,7 @@ export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         <Text style={{ flexShrink: 0 }}>Store files here: </Text>
@@ -47,7 +47,7 @@ export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
             // TODO: When we update electron, we should be able to
             // remove this. In previous versions of Chrome, once the
             // scrollbar appears it never goes away
-            '::-webkit-scrollbar': { display: 'none' }
+            '::-webkit-scrollbar': { display: 'none' },
           }}
         >
           {globalPrefs.documentDir}
@@ -59,7 +59,7 @@ export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
             fontSize: 14,
             marginLeft: 5,
             flexShrink: 0,
-            alignSelf: 'flex-start'
+            alignSelf: 'flex-start',
           }}
         >
           Change location

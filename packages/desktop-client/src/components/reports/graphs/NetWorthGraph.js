@@ -7,7 +7,7 @@ import {
   VictoryArea,
   VictoryAxis,
   VictoryVoronoiContainer,
-  VictoryGroup
+  VictoryGroup,
 } from 'victory';
 
 import theme from '../chart-theme';
@@ -93,7 +93,7 @@ function NetWorthGraph({ style, start, end, graphData, compact }) {
                 top: 0,
                 bottom: 0,
                 left: 0,
-                right: 0
+                right: 0,
               }
             }
           >
@@ -114,10 +114,10 @@ function NetWorthGraph({ style, start, end, graphData, compact }) {
                       ? { width: 50 }
                       : {
                           clipPath: 'url(#positive)',
-                          fill: 'url(#positive-gradient)'
-                        }
-                }
-              }
+                          fill: 'url(#positive-gradient)',
+                        },
+                },
+              },
             )}
             {graphData.data.length > 1 && (
               <VictoryArea
@@ -127,8 +127,8 @@ function NetWorthGraph({ style, start, end, graphData, compact }) {
                     clipPath: 'url(#negative)',
                     fill: 'url(#negative-gradient)',
                     stroke: theme.colors.red,
-                    strokeLinejoin: 'round'
-                  }
+                    strokeLinejoin: 'round',
+                  },
                 }}
               />
             )}

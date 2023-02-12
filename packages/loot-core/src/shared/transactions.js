@@ -17,7 +17,7 @@ function SplitTransactionError(total, parent) {
   return {
     type: 'SplitTransactionError',
     version: 1,
-    difference
+    difference,
   };
 }
 
@@ -38,7 +38,7 @@ export function makeChild(parent, data) {
         : null,
     is_child: true,
     parent_id: parent.id,
-    error: null
+    error: null,
   };
 }
 
@@ -47,12 +47,12 @@ export function recalculateSplit(trans) {
   // that it equals the parent amount
   const total = trans.subtransactions.reduce(
     (acc, t) => acc + num(t.amount),
-    0
+    0,
   );
   return {
     ...trans,
     error:
-      total === num(trans.amount) ? null : SplitTransactionError(total, trans)
+      total === num(trans.amount) ? null : SplitTransactionError(total, trans),
   };
 }
 
@@ -154,7 +154,7 @@ export function replaceTransactions(transactions, id, func) {
     return {
       data: transactionsCopy,
       newTransaction: grouped || { id: trans.id, _deleted: true },
-      diff: diffItems([trans], newTrans)
+      diff: diffItems([trans], newTrans),
     };
   }
 }
@@ -168,8 +168,8 @@ export function addSplitTransaction(transactions, id) {
     trans.subtransactions.push(
       makeChild(trans, {
         amount: 0,
-        sort_order: num(prevSub && prevSub.sort_order) - 1
-      })
+        sort_order: num(prevSub && prevSub.sort_order) - 1,
+      }),
     );
     return trans;
   });
@@ -187,7 +187,7 @@ export function updateTransaction(transactions, transaction) {
         if (trans.id === transaction.id) {
           child = {
             ...t,
-            payee: t.payee === trans.payee ? transaction.payee : t.payee
+            payee: t.payee === trans.payee ? transaction.payee : t.payee,
           };
         } else if (t.id === transaction.id) {
           child = transaction;
@@ -213,7 +213,7 @@ export function deleteTransaction(transactions, id) {
           ...trans,
           subtransactions: null,
           is_parent: false,
-          error: null
+          error: null,
         };
       } else {
         let sub = trans.subtransactions.filter(t => t.id !== id);
@@ -235,7 +235,7 @@ export function splitTransaction(transactions, id) {
       ...trans,
       is_parent: true,
       error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
-      subtransactions: [makeChild(trans, { amount: 0, sort_order: -1 })]
+      subtransactions: [makeChild(trans, { amount: 0, sort_order: -1 })],
     };
   });
 }
@@ -250,7 +250,7 @@ export function realizeTempTransactions(transactions) {
     ...children.map(child => ({
       ...child,
       id: uuid.v4Sync(),
-      parent_id: parent.id
-    }))
+      parent_id: parent.id,
+    })),
   ];
 }

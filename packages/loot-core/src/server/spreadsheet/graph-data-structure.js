@@ -9,7 +9,7 @@ function Graph(serialized) {
     removeIncomingEdges,
     topologicalSort,
     generateDOT,
-    getEdges
+    getEdges,
   };
 
   var edges = new Map();

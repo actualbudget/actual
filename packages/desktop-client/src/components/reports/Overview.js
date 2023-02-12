@@ -34,11 +34,11 @@ function Card({ flex, to, style, children }) {
           boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
           transition: 'box-shadow .25s',
           ':hover': to && {
-            boxShadow: '0 4px 6px rgba(0, 0, 0, .15)'
-          }
+            boxShadow: '0 4px 6px rgba(0, 0, 0, .15)',
+          },
         },
         to ? null : containerProps,
-        style
+        style,
       ]}
     >
       {children}
@@ -65,7 +65,7 @@ function NetWorthCard({ accounts }) {
 
   const data = useReport(
     'net_worth',
-    useArgsMemo(netWorthSpreadsheet)(start, end, accounts)
+    useArgsMemo(netWorthSpreadsheet)(start, end, accounts),
   );
 
   if (!data) {
@@ -115,7 +115,7 @@ function CashFlowCard() {
 
   const data = useReport(
     'cash_flow_simple',
-    useArgsMemo(simpleCashFlow)(start, end)
+    useArgsMemo(simpleCashFlow)(start, end),
   );
   if (!data) {
     return null;
@@ -154,7 +154,7 @@ function CashFlowCard() {
               theme={theme}
               domain={{
                 x: [0, 100],
-                y: [0, Math.max(income, expense, 100)]
+                y: [0, Math.max(income, expense, 100)],
               }}
               containerComponent={
                 <VictoryVoronoiContainer voronoiDimension="x" />
@@ -167,7 +167,7 @@ function CashFlowCard() {
                   light={true}
                   forceActive={true}
                   style={{
-                    padding: 0
+                    padding: 0,
                   }}
                 />
               }
@@ -175,7 +175,7 @@ function CashFlowCard() {
                 top: 0,
                 bottom: 0,
                 left: 0,
-                right: 0
+                right: 0,
               }}
             >
               <VictoryBar
@@ -190,8 +190,8 @@ function CashFlowCard() {
                         <div>{integerToCurrency(income)}</div>
                       </div>
                     ),
-                    labelPosition: 'left'
-                  }
+                    labelPosition: 'left',
+                  },
                 ]}
                 labels={d => d.premadeLabel}
               />
@@ -208,8 +208,8 @@ function CashFlowCard() {
                       </div>
                     ),
                     labelPosition: 'right',
-                    fill: theme.colors.red
-                  }
+                    fill: theme.colors.red,
+                  },
                 ]}
                 labels={d => d.premadeLabel}
               />
@@ -226,13 +226,13 @@ function Overview({ accounts }) {
     <View
       style={[
         styles.page,
-        { paddingLeft: 40, paddingRight: 40, minWidth: 700 }
+        { paddingLeft: 40, paddingRight: 40, minWidth: 700 },
       ]}
     >
       <View
         style={{
           flexDirection: 'row',
-          flex: '0 0 auto'
+          flex: '0 0 auto',
         }}
       >
         <NetWorthCard accounts={accounts} />
@@ -242,7 +242,7 @@ function Overview({ accounts }) {
       <View
         style={{
           flex: '0 0 auto',
-          flexDirection: 'row'
+          flexDirection: 'row',
         }}
       >
         <Card
@@ -251,9 +251,9 @@ function Overview({ accounts }) {
               color: '#a0a0a0',
               justifyContent: 'center',
               alignItems: 'center',
-              width: 200
+              width: 200,
             },
-            styles.mediumText
+            styles.mediumText,
           ]}
         >
           More reports
@@ -266,5 +266,5 @@ function Overview({ accounts }) {
 
 export default connect(
   state => ({ accounts: state.queries.accounts }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(Overview);

@@ -22,7 +22,7 @@ body:
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us, what did you expect to happen?
+      description: Also tell us, what did you expect to happen? If you’re reporting an issue with imports, please attach a (redacted) version of the file you’re having trouble importing. You may need to zip it before uploading.
       placeholder: Tell us what you see!
       value: 'A bug happened!'
     validations:

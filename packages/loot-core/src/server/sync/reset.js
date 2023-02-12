@@ -50,7 +50,7 @@ export default async function resetSync(keyState) {
   await prefs.savePrefs({
     groupId: null,
     lastSyncedTimestamp: null,
-    lastUploaded: null
+    lastUploaded: null,
   });
 
   if (keyState) {

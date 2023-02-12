@@ -60,7 +60,7 @@ function flattenSortTransactions(arr) {
         ...fields,
         is_parent: true,
         is_child: false,
-        parent_id: null
+        parent_id: null,
       });
       subtransactions.forEach(subtrans => {
         list.push({
@@ -69,7 +69,7 @@ function flattenSortTransactions(arr) {
           is_child: true,
           parent_id: trans.id,
           date: trans.date,
-          account: trans.account
+          account: trans.account,
         });
       });
     } else {
@@ -77,7 +77,7 @@ function flattenSortTransactions(arr) {
         ...fields,
         is_parent: false,
         is_child: false,
-        parent_id: null
+        parent_id: null,
       });
     }
     return list;
@@ -99,19 +99,19 @@ function tableArbitrary(tableSchema, extraArbs, requiredKeys = []) {
       ...Object.fromEntries(
         Object.entries(tableSchema).map(([name, field]) => {
           return [name, typeArbitrary(field, name)];
-        })
+        }),
       ),
       // Override the amount to make it a smaller integer
       amount: fc.integer({ min: -1000000, max: 1000000 }),
-      ...extraArbs
+      ...extraArbs,
     },
     {
       requiredKeys: [
         'id',
         ...requiredKeys,
-        ...Object.keys(tableSchema).filter(name => tableSchema[name].required)
-      ]
-    }
+        ...Object.keys(tableSchema).filter(name => tableSchema[name].required),
+      ],
+    },
   );
 
   return arb;
@@ -130,10 +130,10 @@ function makeTransaction({ splitFreq = 1, payeeIds } = {}) {
       ...payeeField,
       subtransactions: fc.frequency(
         { arbitrary: fc.constant([]), weight: 1 },
-        { arbitrary: fc.array(subtrans), weight: splitFreq }
-      )
+        { arbitrary: fc.array(subtrans), weight: splitFreq },
+      ),
     },
-    ['subtransactions']
+    ['subtransactions'],
   );
 }
 
@@ -150,5 +150,5 @@ export default {
   payee: tableArbitrary(schema.payees),
   account: tableArbitrary(schema.accounts),
   category: tableArbitrary(schema.categories),
-  category_group: tableArbitrary(schema.category_groups)
+  category_group: tableArbitrary(schema.category_groups),
 };

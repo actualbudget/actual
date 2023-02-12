@@ -19,9 +19,9 @@ export function simpleCashFlow(start, end) {
           $or: [
             {
               'payee.transfer_acct.offbudget': true,
-              'payee.transfer_acct': null
-            }
-          ]
+              'payee.transfer_acct': null,
+            },
+          ],
         })
         .calculate({ $sum: '$amount' });
     }
@@ -29,16 +29,16 @@ export function simpleCashFlow(start, end) {
     return runAll(
       [
         makeQuery().filter({ amount: { $gt: 0 } }),
-        makeQuery().filter({ amount: { $lt: 0 } })
+        makeQuery().filter({ amount: { $lt: 0 } }),
       ],
       data => {
         setData({
           graphData: {
             income: data[0],
-            expense: data[1]
-          }
+            expense: data[1],
+          },
         });
-      }
+      },
     );
   };
 }
@@ -49,15 +49,15 @@ export function cashFlowByDate(start, end, isConcise) {
       let query = q('transactions').filter({
         $and: [
           { date: { $transform: '$month', $gte: start } },
-          { date: { $transform: '$month', $lte: end } }
+          { date: { $transform: '$month', $lte: end } },
         ],
         'account.offbudget': false,
         $or: [
           {
             'payee.transfer_acct.offbudget': true,
-            'payee.transfer_acct': null
-          }
-        ]
+            'payee.transfer_acct': null,
+          },
+        ],
       });
 
       if (isConcise) {
@@ -65,7 +65,7 @@ export function cashFlowByDate(start, end, isConcise) {
           .groupBy({ $month: '$date' })
           .select([
             { date: { $month: '$date' } },
-            { amount: { $sum: '$amount' } }
+            { amount: { $sum: '$amount' } },
           ]);
       }
 
@@ -79,15 +79,15 @@ export function cashFlowByDate(start, end, isConcise) {
         q('transactions')
           .filter({
             date: { $transform: '$month', $lt: start },
-            'account.offbudget': false
+            'account.offbudget': false,
           })
           .calculate({ $sum: '$amount' }),
         makeQuery('amount > 0').filter({ amount: { $gt: 0 } }),
-        makeQuery('amount < 0').filter({ amount: { $lt: 0 } })
+        makeQuery('amount < 0').filter({ amount: { $lt: 0 } }),
       ],
       data => {
         setData(recalculate(data, start, end, isConcise));
-      }
+      },
     );
   };
 }
@@ -97,18 +97,18 @@ function recalculate(data, start, end, isConcise) {
   const dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),
-        monthUtils.getMonth(end)
+        monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
   const incomes = index(
     income,
     'date',
-    isConcise ? fromDateRepr : fromDateReprToDay
+    isConcise ? fromDateRepr : fromDateReprToDay,
   );
   const expenses = index(
     expense,
     'date',
-    isConcise ? fromDateRepr : fromDateReprToDay
+    isConcise ? fromDateRepr : fromDateReprToDay,
   );
 
   let balance = startingBalance;
@@ -156,11 +156,11 @@ function recalculate(data, start, end, isConcise) {
         x,
         y: integerToAmount(balance),
         premadeLabel: label,
-        amount: balance
+        amount: balance,
       });
       return res;
     },
-    { expenses: [], income: [], balances: [] }
+    { expenses: [], income: [], balances: [] },
   );
 
   const { balances } = graphData;
@@ -170,6 +170,6 @@ function recalculate(data, start, end, isConcise) {
     balance: balances[balances.length - 1].amount,
     totalExpenses,
     totalIncome,
-    totalChange: balances[balances.length - 1].amount - balances[0].amount
+    totalChange: balances[balances.length - 1].amount - balances[0].amount,
   };
 }

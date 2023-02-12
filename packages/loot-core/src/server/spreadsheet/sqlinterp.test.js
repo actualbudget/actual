@@ -7,13 +7,13 @@ test('sql interpretation works', async () => {
     date: 20170106,
     amount: -5000,
     acct: 'boa',
-    category: 1
+    category: 1,
   };
   const transFeb = {
     date: 20170215,
     amount: -7620,
     acct: 'boa',
-    category: 1
+    category: 1,
   };
 
   const { sqlDependencies } = compile(`

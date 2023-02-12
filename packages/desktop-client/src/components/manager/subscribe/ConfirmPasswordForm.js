@@ -35,7 +35,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'stretch',
-        marginTop: 30
+        marginTop: 30,
       }}
       onSubmit={onSubmit}
     >
@@ -61,7 +61,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
           flexDirection: 'row',
           alignItems: 'center',
           fontSize: 15,
-          marginTop: 20
+          marginTop: 20,
         }}
       >
         <label style={{ userSelect: 'none' }}>

@@ -54,7 +54,7 @@ function Settings({
   globalPrefs,
   pushModal,
   resetSync,
-  closeBudget
+  closeBudget,
 }) {
   useEffect(() => {
     let unlisten = listen('prefs-updated', () => {
@@ -68,7 +68,7 @@ function Settings({
   return (
     <View
       style={{
-        marginInline: globalPrefs.floatingSidebar && !isMobile() ? 'auto' : 0
+        marginInline: globalPrefs.floatingSidebar && !isMobile() ? 'auto' : 0,
       }}
     >
       <Page title="Settings">
@@ -78,8 +78,8 @@ function Settings({
             title="Budget"
             style={css(
               media(`(min-width: ${tokens.breakpoint_medium})`, {
-                display: 'none'
-              })
+                display: 'none',
+              }),
             )}
           >
             <FormField>
@@ -123,8 +123,8 @@ export default withThemeColor(colors.n10)(
   connect(
     state => ({
       prefs: state.prefs.local,
-      globalPrefs: state.prefs.global
+      globalPrefs: state.prefs.global,
     }),
-    actions
-  )(Settings)
+    actions,
+  )(Settings),
 );

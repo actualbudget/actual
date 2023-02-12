@@ -56,7 +56,7 @@ export default function Bootstrap() {
           style={{
             fontSize: 16,
             color: colors.n2,
-            lineHeight: 1.4
+            lineHeight: 1.4,
           }}
         >
           Set a password for this server instance
@@ -68,7 +68,7 @@ export default function Bootstrap() {
               marginTop: 20,
               color: colors.r4,
               borderRadius: 4,
-              fontSize: 15
+              fontSize: 15,
             }}
           >
             {getErrorMessage(error)}

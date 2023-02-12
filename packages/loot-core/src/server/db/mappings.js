@@ -23,11 +23,11 @@ export async function loadMappings() {
   // data. But you know, we really could keep a global mapping table.
   let categories = (await db.all('SELECT * FROM category_mapping')).map(r => [
     r.id,
-    r.transferId
+    r.transferId,
   ]);
   let payees = (await db.all('SELECT * FROM payee_mapping')).map(r => [
     r.id,
-    r.targetId
+    r.targetId,
   ]);
 
   // All ids are unique, so we can just keep a global table of mappings

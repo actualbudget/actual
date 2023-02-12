@@ -9,7 +9,7 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 import {
   SchedulesProvider,
-  useCachedSchedules
+  useCachedSchedules,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
@@ -17,7 +17,7 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   getSplit,
   isPreviewId,
-  ungroupTransactions
+  ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 import { colors } from 'loot-design/src/style';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
@@ -50,7 +50,7 @@ function PreviewTransactions({ accountId, children }) {
   let schedules = scheduleData.schedules.filter(
     s =>
       !s.completed &&
-      ['due', 'upcoming', 'missed'].includes(scheduleData.statuses.get(s.id))
+      ['due', 'upcoming', 'missed'].includes(scheduleData.statuses.get(s.id)),
   );
 
   return children(
@@ -61,8 +61,8 @@ function PreviewTransactions({ accountId, children }) {
       amount: schedule._amount,
       date: schedule.next_date,
       notes: scheduleData.statuses.get(schedule.id),
-      schedule: schedule.id
-    }))
+      schedule: schedule.id,
+    })),
   );
 }
 
@@ -79,13 +79,13 @@ function Account(props) {
     newTransactions: state.queries.newTransactions,
     categories: state.queries.categories.list,
     prefs: state.prefs.local,
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy'
+    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
   }));
 
   let dispatch = useDispatch();
   let actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
-    [dispatch]
+    [dispatch],
   );
 
   const { id: accountId } = props.match.params;
@@ -103,7 +103,7 @@ function Account(props) {
     paged = pagedQuery(
       query.options({ splits: 'grouped' }).select('*'),
       data => setTransactions(data),
-      { pageCount: 150, mapper: ungroupTransactions }
+      { pageCount: 150, mapper: ungroupTransactions },
     );
   };
 
@@ -159,8 +159,8 @@ function Account(props) {
         queries.makeTransactionSearchQuery(
           currentQuery,
           searchText,
-          state.dateFormat
-        )
+          state.dateFormat,
+        ),
       );
     }
   }, 150);
@@ -194,7 +194,7 @@ function Account(props) {
       props.showActionSheetWithOptions(
         {
           options,
-          cancelButtonIndex
+          cancelButtonIndex,
         },
         buttonIndex => {
           switch (buttonIndex) {
@@ -208,19 +208,19 @@ function Account(props) {
               break;
             default:
           }
-        }
+        },
       );
     } else {
       let trans = [transaction];
       if (transaction.parent_id || transaction.is_parent) {
         let index = transactions.findIndex(
-          t => t.id === (transaction.parent_id || transaction.id)
+          t => t.id === (transaction.parent_id || transaction.id),
         );
         trans = getSplit(transactions, index);
       }
 
       navigate('Transaction', {
-        transactions: trans
+        transactions: trans,
       });
     }
   };
@@ -282,7 +282,7 @@ export default connect(
     newTransactions: state.queries.newTransactions,
     updatedAccounts: state.queries.updatedAccounts,
     categories: state.queries.categories.list,
-    prefs: state.prefs.local
+    prefs: state.prefs.local,
   }),
-  actions
+  actions,
 )(withThemeColor(colors.n11)(Account));

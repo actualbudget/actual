@@ -32,7 +32,7 @@
     "google-protobuf": "^3.12.0-rc.1",
     "md5": "^2.3.0",
     "mitt": "^2.1.0",
-    "node-fetch": "^1.6.3",
+    "node-fetch": "^2.6.9",
     "node-libofx": "*",
     "regenerator-runtime": "^0.13.7"
   },

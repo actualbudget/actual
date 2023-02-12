@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "4.1.5",
+  "version": "4.1.6",
   "license": "MIT",
   "description": "An API for Actual",
   "main": "index.js",
@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "better-sqlite3": "^7.5.0",
-    "node-fetch": "^1.6.3",
+    "node-fetch": "^2.6.9",
     "uuid": "3.3.2"
   }
 }

@@ -5,5 +5,5 @@ module.exports = {
   postBinary: mockServer.handleRequestBinary,
   get(url) {
     throw new Error('get unimplemented');
-  }
+  },
 };

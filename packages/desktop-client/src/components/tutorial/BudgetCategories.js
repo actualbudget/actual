@@ -17,7 +17,7 @@ function BudgetInitial({ targetRect, navigationProps }) {
         backgroundColor: 'transparent',
         boxShadow: 'none',
         transform: 'translateX(-5px)',
-        fontSize: 14
+        fontSize: 14,
       }}
     >
       <Pointer

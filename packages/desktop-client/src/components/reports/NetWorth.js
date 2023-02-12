@@ -21,13 +21,13 @@ import { fromDateRepr, useArgsMemo } from './util';
 function NetWorth({ accounts }) {
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 5)
+    monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const data = useReport(
     'net_worth',
-    useArgsMemo(netWorthSpreadsheet)(start, end, accounts)
+    useArgsMemo(netWorthSpreadsheet)(start, end, accounts),
   );
 
   useEffect(() => {
@@ -50,7 +50,7 @@ function NetWorth({ accounts }) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy')
+          pretty: monthUtils.format(month, 'MMMM, yyyy'),
         }))
         .reverse();
 
@@ -81,7 +81,7 @@ function NetWorth({ accounts }) {
         style={{
           backgroundColor: 'white',
           padding: '30px',
-          overflow: 'auto'
+          overflow: 'auto',
         }}
       >
         <View style={{ textAlign: 'right', paddingRight: 20, flexShrink: 0 }}>
@@ -114,5 +114,5 @@ function NetWorth({ accounts }) {
 
 export default connect(
   state => ({ accounts: state.queries.accounts }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(NetWorth);

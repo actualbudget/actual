@@ -4,5 +4,5 @@ export default {
   },
   warn: (...args) => {
     console.warn(...args);
-  }
+  },
 };

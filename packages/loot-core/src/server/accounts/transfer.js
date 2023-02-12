@@ -8,7 +8,7 @@ async function getTransferredAccount(transaction) {
   if (transaction.payee) {
     let { transfer_acct } = await db.first(
       'SELECT id, transfer_acct FROM v_payees WHERE id = ?',
-      [transaction.payee]
+      [transaction.payee],
     );
     return transfer_acct;
   }
@@ -18,11 +18,11 @@ async function getTransferredAccount(transaction) {
 async function clearCategory(transaction, transferAcct) {
   const { offbudget: fromOffBudget } = await db.first(
     'SELECT offbudget FROM accounts WHERE id = ?',
-    [transaction.account]
+    [transaction.account],
   );
   const { offbudget: toOffBudget } = await db.first(
     'SELECT offbudget FROM accounts WHERE id = ?',
-    [transferAcct]
+    [transferAcct],
   );
 
   // We should clear the category to make sure it's not being
@@ -38,7 +38,7 @@ async function clearCategory(transaction, transferAcct) {
 export async function addTransfer(transaction, transferredAccount) {
   let { id: fromPayee } = await db.first(
     'SELECT id FROM payees WHERE transfer_acct = ?',
-    [transaction.account]
+    [transaction.account],
   );
 
   // We need to enforce certain constraints with child transaction transfers
@@ -49,7 +49,7 @@ export async function addTransfer(transaction, transferredAccount) {
         LEFT JOIN payees p ON p.id = t.payee
         WHERE t.id = ?
       `,
-      [transaction.parent_id]
+      [transaction.parent_id],
     );
 
     if (row.transfer_acct) {
@@ -75,7 +75,7 @@ export async function addTransfer(transaction, transferredAccount) {
     date: transaction.date,
     transfer_id: transaction.id,
     notes: transaction.notes || null,
-    cleared: false
+    cleared: false,
   });
 
   await db.updateTransaction({ id: transaction.id, transfer_id: id });
@@ -84,7 +84,7 @@ export async function addTransfer(transaction, transferredAccount) {
   return {
     id: transaction.id,
     transfer_id: id,
-    ...(categoryCleared ? { category: null } : {})
+    ...(categoryCleared ? { category: null } : {}),
   };
 }
 
@@ -103,7 +103,7 @@ export async function removeTransfer(transaction) {
       await db.updateTransaction({
         id: transaction.transfer_id,
         transfer_id: null,
-        payee: null
+        payee: null,
       });
     } else {
       await db.deleteTransaction({ id: transaction.transfer_id });
@@ -124,7 +124,7 @@ export async function updateTransfer(transaction, transferredAccount) {
     payee: payee.id,
     date: transaction.date,
     notes: transaction.notes,
-    amount: -transaction.amount
+    amount: -transaction.amount,
   });
 
   const categoryCleared = await clearCategory(transaction, transferredAccount);

@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useImperativeHandle,
-  useMemo
+  useMemo,
 } from 'react';
 
 import * as d from 'date-fns';
@@ -15,7 +15,7 @@ import {
   getDayMonthFormat,
   getDayMonthRegex,
   getShortYearFormat,
-  getShortYearRegex
+  getShortYearRegex,
 } from 'loot-core/src/shared/months';
 
 import { colors } from '../style';
@@ -30,39 +30,39 @@ let pickerStyles = {
     background: colors.n1,
     border: 'none',
     boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
-    borderRadius: 4
+    borderRadius: 4,
   },
 
   '& .actual-date-picker': {
     '& .pika-lendar': {
       float: 'none',
-      width: 'auto'
+      width: 'auto',
     },
     '& .pika-label': {
-      backgroundColor: colors.n1
+      backgroundColor: colors.n1,
     },
     '& .pika-prev': {
-      backgroundImage: `url(${DateSelectLeft})`
+      backgroundImage: `url(${DateSelectLeft})`,
     },
     '& .pika-next': {
-      backgroundImage: `url(${DateSelectRight})`
+      backgroundImage: `url(${DateSelectRight})`,
     },
     '& .pika-table th': {
       color: colors.n11,
-      '& abbr': { textDecoration: 'none' }
+      '& abbr': { textDecoration: 'none' },
     },
     '& .pika-button': {
       backgroundColor: colors.n2,
-      color: colors.n11
+      color: colors.n11,
     },
     '& .is-today .pika-button': {
-      textDecoration: 'underline'
+      textDecoration: 'underline',
     },
     '& .is-selected .pika-button': {
       backgroundColor: colors.n5,
-      boxShadow: 'none'
-    }
-  }
+      boxShadow: 'none',
+    },
+  },
 };
 
 export let DatePicker = React.forwardRef(
@@ -98,9 +98,9 @@ export let DatePicker = React.forwardRef(
             picker.current.setDate(newDate, true);
             onUpdate && onUpdate(newDate);
           }
-        }
+        },
       }),
-      []
+      [],
     );
 
     useLayoutEffect(() => {
@@ -117,7 +117,7 @@ export let DatePicker = React.forwardRef(
         parse(dateString) {
           return d.parse(dateString, dateFormat, new Date());
         },
-        onSelect
+        onSelect,
       });
 
       mountPoint.current.appendChild(picker.current.el);
@@ -136,7 +136,7 @@ export let DatePicker = React.forwardRef(
     return (
       <View style={[pickerStyles, { flex: 1 }]} innerRef={mountPoint}></View>
     );
-  }
+  },
 );
 
 function defaultShouldSaveFromKey(e) {
@@ -158,7 +158,7 @@ export default function DateSelect({
   shouldSaveFromKey = defaultShouldSaveFromKey,
   tableBehavior,
   onUpdate,
-  onSelect
+  onSelect,
 }) {
   let parsedDefaultValue = useMemo(() => {
     if (defaultValue) {
@@ -348,7 +348,7 @@ export default function DateSelect({
               onSelect(d.format(date, 'yyyy-MM-dd'));
               setOpen(false);
             }}
-          />
+          />,
         )}
     </View>
   );

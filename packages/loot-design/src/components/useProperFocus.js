@@ -38,9 +38,9 @@ export function AvoidRefocusScrollProvider({ children }) {
       keyRef,
       onKeyChange: key => {
         keyRef.current = key;
-      }
+      },
     }),
-    [keyRef]
+    [keyRef],
   );
 
   return (

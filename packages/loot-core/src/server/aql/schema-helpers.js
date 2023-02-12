@@ -112,16 +112,16 @@ export function conform(schema, schemaConfig, table, obj, { skipNull } = {}) {
         if (fieldDesc == null) {
           throw new Error(
             `Field "${field}" does not exist on table ${table}: ${JSON.stringify(
-              obj
-            )}`
+              obj,
+            )}`,
           );
         }
 
         if (isRequired(field, fieldDesc) && obj[field] == null) {
           throw new Error(
             `"${field}" is required for table "${table}": ${JSON.stringify(
-              obj
-            )}`
+              obj,
+            )}`,
           );
         }
 
@@ -132,7 +132,7 @@ export function conform(schema, schemaConfig, table, obj, { skipNull } = {}) {
 
         return [fieldRef(field), convertInputType(obj[field], fieldDesc.type)];
       })
-      .filter(Boolean)
+      .filter(Boolean),
   );
 }
 
@@ -160,7 +160,7 @@ export function convertForInsert(schema, schemaConfig, table, rawObj) {
         // checks the fields in `obj`. For insert, we need to do it
         // here to check that all required fields in the table exist
         throw new Error(
-          `"${field}" is required for table "${table}": ${JSON.stringify(obj)}`
+          `"${field}" is required for table "${table}": ${JSON.stringify(obj)}`,
         );
       }
     }
