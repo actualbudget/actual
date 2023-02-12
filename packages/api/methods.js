@@ -93,7 +93,7 @@ function closeAccount(id, transferAccountId, transferCategoryId) {
   return send('api/account-close', {
     id,
     transferAccountId,
-    transferCategoryId
+    transferCategoryId,
   });
 }
 
@@ -212,5 +212,5 @@ module.exports = {
   getPayeeRules,
   createPayeeRule,
   deletePayeeRule,
-  updatePayeeRule
+  updatePayeeRule,
 };

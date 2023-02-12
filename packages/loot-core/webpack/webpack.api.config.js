@@ -10,13 +10,13 @@ config.output.sourceMapFilename = 'bundle.api.js.map';
 config.output.path = path.join(
   path.dirname(path.dirname(__dirname)),
   'api',
-  'app'
+  'app',
 );
 
 config.plugins.push(
   new webpack.DefinePlugin({
-    ACTUAL_APP_VERSION: '"0.0.147"'
-  })
+    ACTUAL_APP_VERSION: '"0.0.147"',
+  }),
 );
 
 module.exports = config;

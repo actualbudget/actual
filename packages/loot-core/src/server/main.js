@@ -2197,7 +2197,7 @@ export async function init(config) {
 
     if (config.password) {
       await runHandler(handlers['subscribe-sign-in'], {
-        password: config.password
+        password: config.password,
       });
     }
   } else {

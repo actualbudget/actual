@@ -30,5 +30,5 @@ module.exports = {
   shutdown,
   utils,
   internal: bundle.lib,
-  ...methods
+  ...methods,
 };
