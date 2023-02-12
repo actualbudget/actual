@@ -58,7 +58,7 @@ export default async function run() {
   await syncApp.init();
 
   if (config.https) {
-    const https = require('https');
+    const https = await import('node:https');
     const httpsOptions = {
       ...config.https,
       key: parseHTTPSConfig(config.https.key),
