@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 
 import {
   fromPlaidAccountType,
-  prettyAccountType
+  prettyAccountType,
 } from 'loot-core/src/shared/accounts';
 
 import { styles, colors } from '../../style';
 import { View, Text, Modal, P, Button } from '../common';
 
 let selectedStyle = {
-  color: colors.n1
+  color: colors.n1,
 };
 
 function EmptyMessage() {
@@ -21,7 +21,7 @@ function Account({ account, selected, onSelect }) {
     <View
       style={[
         { marginBottom: 8, flexShrink: 0, userSelect: 'none' },
-        styles.mediumText
+        styles.mediumText,
       ]}
       onClick={onSelect}
     >
@@ -37,13 +37,13 @@ function Account({ account, selected, onSelect }) {
             flexDirection: 'row',
             alignItems: 'center',
             border: '1px solid ' + colors.n10,
-            ':hover': selectedStyle
+            ':hover': selectedStyle,
           },
           selected && {
             ...selectedStyle,
             borderColor: colors.b9,
-            backgroundColor: colors.b10
-          }
+            backgroundColor: colors.b10,
+          },
         ]}
       >
         <View>
@@ -52,11 +52,11 @@ function Account({ account, selected, onSelect }) {
             style={{
               fontSize: 13,
               color: colors.n5,
-              flexDirection: 'row'
+              flexDirection: 'row',
             }}
           >
             {prettyAccountType(
-              fromPlaidAccountType(account.type, account.subtype)
+              fromPlaidAccountType(account.type, account.subtype),
             )}
             <Text style={{ marginLeft: 4 }}>
               ...
@@ -75,7 +75,7 @@ export default function SelectLinkedAccounts({
   upgradingId,
   modalProps,
   accounts,
-  actions
+  actions,
 }) {
   let [selectedAccounts, setSelectedAccounts] = useState([]);
 
@@ -98,7 +98,7 @@ export default function SelectLinkedAccounts({
           institution,
           publicToken,
           selectedAccounts[0],
-          upgradingId
+          upgradingId,
         );
         actions.closeModal();
       } else {
@@ -106,8 +106,8 @@ export default function SelectLinkedAccounts({
           institution,
           publicToken,
           accounts: selectedAccounts.map(id =>
-            accounts.find(acct => acct.id === id)
-          )
+            accounts.find(acct => acct.id === id),
+          ),
         });
       }
     }
@@ -140,7 +140,7 @@ export default function SelectLinkedAccounts({
               paddingLeft: 5,
               paddingRight: 5,
               marginLeft: -5,
-              marginRight: -5
+              marginRight: -5,
             }}
           >
             <View>
@@ -167,7 +167,7 @@ export default function SelectLinkedAccounts({
             style={{
               flexDirection: 'row',
               justifyContent: 'flex-end',
-              marginTop: 30
+              marginTop: 30,
             }}
           >
             <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>

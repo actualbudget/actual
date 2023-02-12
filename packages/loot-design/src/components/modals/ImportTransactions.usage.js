@@ -15,7 +15,7 @@ transactions = transactions.map(trans => ({
   date: trans.date,
   payee: trans.description,
   imported_payee: trans.description,
-  notes: trans.notes
+  notes: trans.notes,
 }));
 
 export default () => (
@@ -29,7 +29,7 @@ export default () => (
             options={{ filename: 'file.csv' }}
             parseTransactions={filename => ({
               errors: [],
-              transactions
+              transactions,
             })}
             prefs={{}}
           />

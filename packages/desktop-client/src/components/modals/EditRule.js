@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import {
   initiallyLoadPayees,
-  setUndoEnabled
+  setUndoEnabled,
 } from 'loot-core/src/client/actions/queries';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
@@ -17,12 +17,12 @@ import {
   unparse,
   makeValue,
   FIELD_TYPES,
-  TYPE_INFO
+  TYPE_INFO,
 } from 'loot-core/src/shared/rules';
 import {
   integerToCurrency,
   integerToAmount,
-  amountToInteger
+  amountToInteger,
 } from 'loot-core/src/shared/util';
 import {
   View,
@@ -31,10 +31,10 @@ import {
   Button,
   Stack,
   CustomSelect,
-  Tooltip
+  Tooltip,
 } from 'loot-design/src/components/common';
 import useSelected, {
-  SelectedProvider
+  SelectedProvider,
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
 import AddIcon from 'loot-design/src/svg/v0/Add';
@@ -99,7 +99,7 @@ export function OpSelect({
   style,
   value,
   formatOp = friendlyOp,
-  onChange
+  onChange,
 }) {
   // We don't support the `contains` operator for the id type for
   // rules yet
@@ -141,7 +141,7 @@ function FieldError({ type }) {
         fontSize: 12,
         textAlign: 'center',
         color: colors.r5,
-        marginBottom: 5
+        marginBottom: 5,
       }}
     >
       {getFieldError(type)}
@@ -157,7 +157,7 @@ function Editor({ error, style, children }) {
         align="center"
         spacing={1}
         style={{
-          padding: '3px 5px'
+          padding: '3px 5px',
         }}
       >
         {children}
@@ -175,7 +175,7 @@ export function ConditionEditor({
   isSchedule,
   onChange,
   onDelete,
-  onAdd
+  onAdd,
 }) {
   let { field, op, value, type, options, error } = condition;
 
@@ -231,7 +231,7 @@ function formatAmount(amount) {
     return integerToCurrency(amount);
   } else {
     return `${integerToCurrency(amount.num1)} to ${integerToCurrency(
-      amount.num2
+      amount.num2,
     )}`;
   }
 }
@@ -241,7 +241,7 @@ function ScheduleDescription({ id }) {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
   let scheduleData = useSchedules({
-    transform: useCallback(q => q.filter({ id }), [])
+    transform: useCallback(q => q.filter({ id }), []),
   });
 
   if (scheduleData == null) {
@@ -262,7 +262,7 @@ function ScheduleDescription({ id }) {
           style={{
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
           }}
         >
           Payee:{' '}
@@ -289,7 +289,7 @@ let actionFields = [
   'amount',
   'category',
   'account',
-  'cleared'
+  'cleared',
 ].map(field => [field, mapField(field)]);
 function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
   let { field, op, value, type, error, inputKey = 'initial' } = action;
@@ -360,7 +360,7 @@ function StageInfo() {
             padding: 10,
             color: colors.n4,
             maxWidth: 450,
-            lineHeight: 1.5
+            lineHeight: 1.5,
           }}
         >
           The stage of a rule allows you to force a specific order. Pre rules
@@ -380,9 +380,9 @@ function StageButton({ selected, children, style, onSelect }) {
         { fontSize: 'inherit' },
         selected && {
           backgroundColor: colors.b9,
-          ':hover': { backgroundColor: colors.b9 }
+          ':hover': { backgroundColor: colors.b9 },
         },
-        style
+        style,
       ]}
       onClick={onSelect}
     >
@@ -400,7 +400,7 @@ export function ConditionsList({
   conditionFields,
   editorStyle,
   isSchedule,
-  onChangeConditions
+  onChangeConditions,
 }) {
   function addCondition(index) {
     let field = 'payee';
@@ -409,7 +409,7 @@ export function ConditionsList({
       type: FIELD_TYPES.get(field),
       field,
       op: 'is',
-      value: null
+      value: null,
     });
     onChangeConditions(copy);
   }
@@ -462,15 +462,15 @@ export function ConditionsList({
             return newInput(
               makeValue(cond.value != null ? [cond.value] : [], {
                 ...cond,
-                op: value
-              })
+                op: value,
+              }),
             );
           } else if (cond.op === 'oneOf' && op !== 'oneOf') {
             return newInput(
               makeValue(cond.value.length > 0 ? cond.value[0] : null, {
                 ...cond,
-                op: value
-              })
+                op: value,
+              }),
             );
           } else if (cond.op !== 'isbetween' && op === 'isbetween') {
             // TODO: I don't think we need `makeValue` anymore. It
@@ -480,14 +480,14 @@ export function ConditionsList({
             return makeValue(
               {
                 num1: amountToInteger(cond.value),
-                num2: amountToInteger(cond.value)
+                num2: amountToInteger(cond.value),
               },
-              { ...cond, op: value }
+              { ...cond, op: value },
             );
           } else if (cond.op === 'isbetween' && op !== 'isbetween') {
             return makeValue(integerToAmount(cond.value.num1 || 0), {
               ...cond,
-              op: value
+              op: value,
             });
           } else {
             return { ...cond, op: value };
@@ -497,7 +497,7 @@ export function ConditionsList({
         }
 
         return cond;
-      })
+      }),
     );
   }
 
@@ -552,19 +552,19 @@ let conditionFields = [
   'category',
   'date',
   'notes',
-  'amount'
+  'amount',
 ]
   .map(field => [field, mapField(field)])
   .concat([
     ['amount-inflow', mapField('amount', { inflow: true })],
-    ['amount-outflow', mapField('amount', { outflow: true })]
+    ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
 export default function EditRule({
   history,
   modalProps,
   defaultRule,
-  onSave: originalOnSave
+  onSave: originalOnSave,
 }) {
   let [conditions, setConditions] = useState(defaultRule.conditions.map(parse));
   let [actions, setActions] = useState(defaultRule.actions.map(parse));
@@ -595,12 +595,12 @@ export default function EditRule({
     // Run it here
     async function run() {
       let { filters } = await send('make-filters-from-conditions', {
-        conditions: conditions.map(unparse)
+        conditions: conditions.map(unparse),
       });
 
       if (filters.length > 0) {
         let { data: transactions } = await runQuery(
-          q('transactions').filter({ $and: filters }).select('*')
+          q('transactions').filter({ $and: filters }).select('*'),
         );
         setTransactions(transactions);
       } else {
@@ -624,7 +624,7 @@ export default function EditRule({
       type: FIELD_TYPES.get(field),
       field,
       op: 'set',
-      value: null
+      value: null,
     });
     setActions(copy);
   }
@@ -646,7 +646,7 @@ export default function EditRule({
         }
 
         return a;
-      })
+      }),
     );
   }
 
@@ -661,7 +661,7 @@ export default function EditRule({
   function onApply() {
     send('rule-apply-actions', {
       transactionIds: [...selectedInst.items],
-      actions
+      actions,
     }).then(() => {
       // This makes it refetch the transactions
       setActions([...actions]);
@@ -673,7 +673,7 @@ export default function EditRule({
       ...defaultRule,
       stage,
       conditions: conditions.map(unparse),
-      actions: actions.map(unparse)
+      actions: actions.map(unparse),
     };
 
     let method = rule.id ? 'rule-update' : 'rule-add';
@@ -700,7 +700,7 @@ export default function EditRule({
 
   let editorStyle = {
     backgroundColor: colors.n10,
-    borderRadius: 4
+    borderRadius: 4,
   };
 
   return (
@@ -719,7 +719,7 @@ export default function EditRule({
             flexGrow: 0,
             flexShrink: 0,
             flexBasis: 'auto',
-            overflow: 'hidden'
+            overflow: 'hidden',
           }}
         >
           <View
@@ -727,7 +727,7 @@ export default function EditRule({
               flexDirection: 'row',
               alignItems: 'center',
               marginBottom: 15,
-              padding: '0 20px'
+              padding: '0 20px',
             }}
           >
             <Text style={{ color: colors.n4, marginRight: 15 }}>
@@ -764,7 +764,7 @@ export default function EditRule({
               borderBottom: '1px solid ' + colors.border,
               padding: 20,
               overflow: 'auto',
-              maxHeight: 'calc(100% - 300px)'
+              maxHeight: 'calc(100% - 300px)',
             }}
           >
             <View style={{ flexShrink: 0 }}>
@@ -821,7 +821,7 @@ export default function EditRule({
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  marginBottom: 12
+                  marginBottom: 12,
                 }}
               >
                 <Text style={{ color: colors.n4, marginBottom: 0 }}>

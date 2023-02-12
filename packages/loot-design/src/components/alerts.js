@@ -19,10 +19,10 @@ export function Alert({ icon: Icon, color, backgroundColor, style, children }) {
           padding: 10,
           flexDirection: 'row',
           '& a, & a:active, & a:visited': {
-            color: colors.b3
-          }
+            color: colors.b3,
+          },
         },
-        style
+        style,
       ]}
     >
       <View
@@ -31,7 +31,7 @@ export function Alert({ icon: Icon, color, backgroundColor, style, children }) {
           paddingTop: '.11em',
           alignSelf: 'stretch',
           flexShrink: 0,
-          marginRight: 5
+          marginRight: 5,
         }}
       >
         <Icon width={13} style={{ color, marginTop: 2 }} />

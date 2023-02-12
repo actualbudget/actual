@@ -19,14 +19,14 @@ export default function GenericInput({
   value,
   inputRef,
   style,
-  onChange
+  onChange,
 }) {
   let { payees, accounts, categoryGroups, dateFormat } = useSelector(state => {
     return {
       payees: state.queries.payees,
       accounts: state.queries.accounts,
       categoryGroups: state.queries.categories.grouped,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy'
+      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
 
@@ -56,7 +56,7 @@ export default function GenericInput({
                 onSelect={onChange}
                 inputProps={{
                   inputRef,
-                  ...(showPlaceholder ? { placeholder: 'nothing' } : null)
+                  ...(showPlaceholder ? { placeholder: 'nothing' } : null),
                 }}
               />
             );
@@ -73,7 +73,7 @@ export default function GenericInput({
               onSelect={onChange}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null)
+                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
               }}
             />
           );
@@ -89,7 +89,7 @@ export default function GenericInput({
               onSelect={onChange}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null)
+                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
               }}
             />
           );

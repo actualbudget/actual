@@ -3,7 +3,7 @@ import React, {
   useState,
   useRef,
   useCallback,
-  useLayoutEffect
+  useLayoutEffect,
 } from 'react';
 
 import { css } from 'glamor';
@@ -25,7 +25,7 @@ export default function BudgetSummaries({ SummaryComponent }) {
   let containerRef = useResizeObserver(
     useCallback(rect => {
       setWidthState(rect.width);
-    }, [])
+    }, []),
   );
   let scrollerRef = useRef();
 
@@ -46,7 +46,7 @@ export default function BudgetSummaries({ SummaryComponent }) {
         stiffness: 600,
         damping: 80,
         mass: 3,
-        fromValue: -monthWidth
+        fromValue: -monthWidth,
       });
 
       spring.current.onUpdate(s => {
@@ -84,8 +84,8 @@ export default function BudgetSummaries({ SummaryComponent }) {
         { flex: 1, overflow: 'hidden' },
         months.length === 1 && {
           marginLeft: -4,
-          marginRight: -4
-        }
+          marginRight: -4,
+        },
       ])}
       ref={containerRef}
     >
@@ -93,7 +93,7 @@ export default function BudgetSummaries({ SummaryComponent }) {
         style={{
           flexDirection: 'row',
           width: widthState,
-          willChange: 'transform'
+          willChange: 'transform',
         }}
         innerRef={scrollerRef}
       >
@@ -103,7 +103,7 @@ export default function BudgetSummaries({ SummaryComponent }) {
               key={month}
               style={[
                 { flex: `0 0 ${monthWidth}px` },
-                { paddingLeft: 4, paddingRight: 4 }
+                { paddingLeft: 4, paddingRight: 4 },
               ]}
             >
               <SummaryComponent month={month} />

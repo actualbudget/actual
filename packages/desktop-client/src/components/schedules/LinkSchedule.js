@@ -13,7 +13,7 @@ export default function ScheduleLink() {
   let location = useLocation();
   let history = useHistory();
   let scheduleData = useSchedules(
-    useCallback(query => query.filter({ completed: false }), [])
+    useCallback(query => query.filter({ completed: false }), []),
   );
 
   let [filter, setFilter] = useState('');
@@ -29,7 +29,7 @@ export default function ScheduleLink() {
     let ids = state.transactionIds;
     if (ids && ids.length > 0) {
       await send('transactions-batch-update', {
-        updated: ids.map(id => ({ id, schedule: scheduleId }))
+        updated: ids.map(id => ({ id, schedule: scheduleId })),
       });
     }
     history.goBack();

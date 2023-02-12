@@ -25,7 +25,7 @@ function Import({ modalProps, availableImports }) {
   async function onImport() {
     const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
-      filters: [{ name: 'actual', extensions: ['zip'] }]
+      filters: [{ name: 'actual', extensions: ['zip'] }],
     });
     if (res) {
       setImporting(true);
@@ -77,7 +77,7 @@ function Import({ modalProps, availableImports }) {
             style={{
               flexDirection: 'row',
               marginTop: 20,
-              alignItems: 'center'
+              alignItems: 'center',
             }}
           >
             <View style={{ flex: 1 }} />

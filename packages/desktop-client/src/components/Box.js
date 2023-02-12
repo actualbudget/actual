@@ -15,7 +15,7 @@ function Box({ flex, children, direction, style }) {
         ...style,
         flex: getFlex(flex),
         display: 'flex',
-        flexDirection: direction || 'column'
+        flexDirection: direction || 'column',
       }}
     >
       {children}

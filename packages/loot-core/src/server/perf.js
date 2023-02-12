@@ -46,7 +46,7 @@ export function stop() {
     const avg = total / records.length;
 
     console.log(
-      `[${name}] count: ${records.length} total: ${total}s avg: ${avg}`
+      `[${name}] count: ${records.length} total: ${total}s avg: ${avg}`,
     );
   }
 

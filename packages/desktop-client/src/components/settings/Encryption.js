@@ -36,7 +36,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
     </Setting>
   ) : serverURL ? (
     <Setting
-      button={
+      primaryAction={
         <Button onClick={() => pushModal('create-encryption-key')}>
           Enable encryption…
         </Button>
@@ -58,7 +58,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
       </Text>
     </Setting>
   ) : (
-    <Setting button={<Button disabled>Enable encryption…</Button>}>
+    <Setting primaryAction={<Button disabled>Enable encryption…</Button>}>
       <Text>
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and

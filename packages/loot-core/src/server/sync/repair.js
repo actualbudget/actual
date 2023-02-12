@@ -11,7 +11,7 @@ export function rebuildMerkleHash() {
 
   return {
     numMessages: rows.length,
-    trie: trie
+    trie: trie,
   };
 }
 
@@ -25,6 +25,6 @@ export default async function repairSync() {
   // Persist it in the db
   db.runQuery(
     db.cache('INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)'),
-    [serializeClock(clock)]
+    [serializeClock(clock)],
   );
 }

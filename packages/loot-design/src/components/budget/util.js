@@ -9,16 +9,16 @@ export function addToBeBudgetedGroup(groups) {
     {
       id: 'to-be-budgeted',
       name: 'To Be Budgeted',
-      categories: [{ id: 'to-be-budgeted', name: 'To Be Budgeted' }]
+      categories: [{ id: 'to-be-budgeted', name: 'To Be Budgeted' }],
     },
-    ...groups
+    ...groups,
   ];
 }
 
 export function separateGroups(categoryGroups) {
   return [
     categoryGroups.filter(g => !g.is_income),
-    categoryGroups.find(g => g.is_income)
+    categoryGroups.find(g => g.is_income),
   ];
 }
 
@@ -41,7 +41,7 @@ export function makeAmountStyle(value) {
 
 export function makeAmountFullStyle(value) {
   return {
-    color: value < 0 ? colors.r4 : value === 0 ? colors.n10 : colors.g4
+    color: value < 0 ? colors.r4 : value === 0 ? colors.n10 : colors.g4,
   };
 }
 

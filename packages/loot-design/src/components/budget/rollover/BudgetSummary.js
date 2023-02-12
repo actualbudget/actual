@@ -19,7 +19,7 @@ import {
   Tooltip,
   Menu,
   HoverTarget,
-  AlignedText
+  AlignedText,
 } from '../../common';
 import NotesButton from '../../NotesButton';
 import CellValue from '../../spreadsheet/CellValue';
@@ -39,7 +39,7 @@ function TotalsList({ prevMonthName, collapsed }) {
         {
           flexDirection: 'row',
           lineHeight: 1.5,
-          justifyContent: 'center'
+          justifyContent: 'center',
         },
         !collapsed && {
           padding: '5px 0',
@@ -47,19 +47,19 @@ function TotalsList({ prevMonthName, collapsed }) {
           backgroundColor: colors.n11,
           borderTopWidth: 1,
           borderBottomWidth: 1,
-          borderColor: colors.n9
+          borderColor: colors.n9,
         },
         collapsed && {
-          padding: 7
+          padding: 7,
         },
-        styles.smallText
+        styles.smallText,
       ]}
     >
       <View
         style={{
           textAlign: 'right',
           marginRight: 10,
-          minWidth: 50
+          minWidth: 50,
         }}
       >
         <HoverTarget
@@ -174,9 +174,9 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                           marginBottom: -1,
                           borderBottom: '1px solid transparent',
                           ':hover': {
-                            borderColor: isNegative ? colors.r4 : colors.p5
-                          }
-                        }
+                            borderColor: isNegative ? colors.r4 : colors.p5,
+                          },
+                        },
                       ])}
                     >
                       {format(num, 'financial')}
@@ -201,16 +201,16 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                         items={[
                           {
                             name: 'transfer',
-                            text: 'Move to a category'
+                            text: 'Move to a category',
                           },
                           {
                             name: 'buffer',
-                            text: 'Hold for next month'
+                            text: 'Hold for next month',
                           },
                           {
                             name: 'reset-buffer',
-                            text: "Reset next month's buffer"
-                          }
+                            text: "Reset next month's buffer",
+                          },
                         ]}
                       />
                     </Tooltip>
@@ -230,7 +230,7 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                       onSubmit={(amount, category) => {
                         onBudgetAction(month, 'transfer-available', {
                           amount,
-                          category
+                          category,
                         });
                       }}
                     />
@@ -250,7 +250,7 @@ function BudgetSummary({ month, localPrefs }) {
     currentMonth,
     summaryCollapsed: collapsed,
     onBudgetAction,
-    onToggleSummaryCollapse
+    onToggleSummaryCollapse,
   } = useRollover();
 
   let [menuOpen, setMenuOpen] = useState(false);
@@ -283,25 +283,25 @@ function BudgetSummary({ month, localPrefs }) {
         overflow: 'hidden',
         '& .hover-visible': {
           opacity: 0,
-          transition: 'opacity .25s'
+          transition: 'opacity .25s',
         },
         '&:hover .hover-visible': {
-          opacity: 1
-        }
+          opacity: 1,
+        },
       }}
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
           style={[
             { padding: '0 13px' },
-            collapsed ? { margin: '10px 0' } : { marginTop: 16 }
+            collapsed ? { margin: '10px 0' } : { marginTop: 16 },
           ]}
         >
           <View
             style={{
               position: 'absolute',
               left: 10,
-              top: 0
+              top: 0,
             }}
           >
             <Button
@@ -325,9 +325,9 @@ function BudgetSummary({ month, localPrefs }) {
                 marginTop: 3,
                 fontSize: 18,
                 fontWeight: 500,
-                textDecorationSkip: 'ink'
+                textDecorationSkip: 'ink',
               },
-              currentMonth === month && { textDecoration: 'underline' }
+              currentMonth === month && { textDecoration: 'underline' },
             ])}
           >
             {monthUtils.format(month, 'MMMM')}
@@ -339,7 +339,7 @@ function BudgetSummary({ month, localPrefs }) {
               right: 10,
               top: 0,
               flexDirection: 'row',
-              alignItems: 'center'
+              alignItems: 'center',
             }}
           >
             <View>
@@ -376,16 +376,16 @@ function BudgetSummary({ month, localPrefs }) {
                       { name: 'set-zero', text: 'Set budgets to zero' },
                       {
                         name: 'set-3-avg',
-                        text: 'Set budgets to 3 month avg'
+                        text: 'Set budgets to 3 month avg',
                       },
                       goalTemplatesEnabled && {
                         name: 'apply-goal-template',
-                        text: 'Apply budget template'
+                        text: 'Apply budget template',
                       },
                       goalTemplatesEnabled && {
                         name: 'overwrite-goal-template',
-                        text: 'Overwrite with budget template'
-                      }
+                        text: 'Overwrite with budget template',
+                      },
                     ]}
                   />
                 </Tooltip>
@@ -401,7 +401,7 @@ function BudgetSummary({ month, localPrefs }) {
               padding: '10px 20px',
               justifyContent: 'space-between',
               backgroundColor: colors.n11,
-              borderTop: '1px solid ' + colors.n10
+              borderTop: '1px solid ' + colors.n10,
             }}
           >
             <ToBudget
@@ -426,5 +426,5 @@ function BudgetSummary({ month, localPrefs }) {
 
 export default connect(
   state => ({ localPrefs: state.prefs.local }),
-  actions
+  actions,
 )(BudgetSummary);

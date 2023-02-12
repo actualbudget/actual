@@ -11,7 +11,7 @@ import {
   deleteCategory,
   addGroup,
   updateGroup,
-  deleteGroup
+  deleteGroup,
 } from 'loot-core/src/shared/categories.js';
 import * as monthUtils from 'loot-core/src/shared/months';
 import DynamicBudgetTable from 'loot-design/src/components/budget/DynamicBudgetTable';
@@ -42,7 +42,7 @@ class Budget extends React.PureComponent {
       collapsed: props.collapsedPrefs || [],
       bounds: { start: currentMonth, end: currentMonth },
       categoryGroups: null,
-      summaryCollapsed: props.summaryCollapsed
+      summaryCollapsed: props.summaryCollapsed,
     };
   }
 
@@ -89,7 +89,7 @@ class Budget extends React.PureComponent {
         }
       }),
 
-      titlebar.subscribe(this.onTitlebarEvent)
+      titlebar.subscribe(this.onTitlebarEvent),
     ];
 
     this.cleanup = () => {
@@ -146,7 +146,7 @@ class Budget extends React.PureComponent {
     bounds = getValidMonthBounds(
       bounds,
       monthUtils.subMonths(startMonth, 1),
-      monthUtils.addMonths(startMonth, numMonths + 1)
+      monthUtils.addMonths(startMonth, numMonths + 1),
     );
     let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
@@ -184,7 +184,7 @@ class Budget extends React.PureComponent {
   onShowNewCategory = groupId => {
     this.setState({
       newCategoryForGroup: groupId,
-      collapsed: this.state.collapsed.filter(c => c !== groupId)
+      collapsed: this.state.collapsed.filter(c => c !== groupId),
     });
   };
 
@@ -215,7 +215,7 @@ class Budget extends React.PureComponent {
       let id = await this.props.createCategory(
         category.name,
         category.cat_group,
-        category.is_income
+        category.is_income,
       );
 
       this.setState({
@@ -223,14 +223,14 @@ class Budget extends React.PureComponent {
         categoryGroups: addCategory(categoryGroups, {
           ...category,
           is_income: category.is_income ? 1 : 0,
-          id
-        })
+          id,
+        }),
       });
     } else {
       this.props.updateCategory(category);
 
       this.setState({
-        categoryGroups: updateCategory(categoryGroups, category)
+        categoryGroups: updateCategory(categoryGroups, category),
       });
     }
   };
@@ -247,16 +247,16 @@ class Budget extends React.PureComponent {
             this.props.deleteCategory(id, transferCategory);
 
             this.setState({
-              categoryGroups: deleteCategory(categoryGroups, id)
+              categoryGroups: deleteCategory(categoryGroups, id),
             });
           }
-        }
+        },
       });
     } else {
       this.props.deleteCategory(id);
 
       this.setState({
-        categoryGroups: deleteCategory(categoryGroups, id)
+        categoryGroups: deleteCategory(categoryGroups, id),
       });
     }
   };
@@ -272,13 +272,13 @@ class Budget extends React.PureComponent {
           ...group,
           is_income: 0,
           categories: group.categories || [],
-          id
-        })
+          id,
+        }),
       });
     } else {
       this.props.updateGroup(group);
       this.setState({
-        categoryGroups: updateGroup(categoryGroups, group)
+        categoryGroups: updateGroup(categoryGroups, group),
       });
     }
   };
@@ -302,15 +302,15 @@ class Budget extends React.PureComponent {
           this.props.deleteGroup(id, transferCategory);
 
           this.setState({
-            categoryGroups: deleteGroup(categoryGroups, id)
+            categoryGroups: deleteGroup(categoryGroups, id),
           });
-        }
+        },
       });
     } else {
       this.props.deleteGroup(id);
 
       this.setState({
-        categoryGroups: deleteGroup(categoryGroups, id)
+        categoryGroups: deleteGroup(categoryGroups, id),
       });
     }
   };
@@ -326,13 +326,13 @@ class Budget extends React.PureComponent {
         goBack: true,
         filterName: `${categoryName} (${monthUtils.format(
           month,
-          'MMMM yyyy'
+          'MMMM yyyy',
         )})`,
         filter: {
           category: categoryId,
-          date: { $transform: '$month', $eq: month }
-        }
-      }
+          date: { $transform: '$month', $eq: month },
+        },
+      },
     });
   };
 
@@ -345,8 +345,8 @@ class Budget extends React.PureComponent {
         categoryGroups,
         sortInfo.id,
         sortInfo.groupId,
-        sortInfo.targetId
-      )
+        sortInfo.targetId,
+      ),
     });
   };
 
@@ -358,8 +358,8 @@ class Budget extends React.PureComponent {
       categoryGroups: moveCategoryGroup(
         categoryGroups,
         sortInfo.id,
-        sortInfo.targetId
-      )
+        sortInfo.targetId,
+      ),
     });
   };
 
@@ -391,7 +391,7 @@ class Budget extends React.PureComponent {
       maxMonths,
       budgetType: type,
       reportComponents,
-      rolloverComponents
+      rolloverComponents,
     } = this.props;
     let {
       initialized,
@@ -402,7 +402,7 @@ class Budget extends React.PureComponent {
       isAddingGroup,
       collapsed,
       summaryCollapsed,
-      bounds
+      bounds,
     } = this.state;
 
     maxMonths = maxMonths || 1;
@@ -507,9 +507,9 @@ function BudgetWrapper(props) {
       IncomeCategoryComponent: report.IncomeCategoryMonth,
       IncomeGroupComponent: report.IncomeGroupMonth,
       BudgetTotalsComponent: report.BudgetTotalsMonth,
-      IncomeHeaderComponent: report.IncomeHeaderMonth
+      IncomeHeaderComponent: report.IncomeHeaderMonth,
     }),
-    [report]
+    [report],
   );
 
   let rolloverComponents = useMemo(
@@ -520,9 +520,9 @@ function BudgetWrapper(props) {
       IncomeCategoryComponent: rollover.IncomeCategoryMonth,
       IncomeGroupComponent: rollover.IncomeGroupMonth,
       BudgetTotalsComponent: rollover.BudgetTotalsMonth,
-      IncomeHeaderComponent: rollover.IncomeHeaderMonth
+      IncomeHeaderComponent: rollover.IncomeHeaderMonth,
     }),
-    [rollover]
+    [rollover],
   );
 
   // In a previous iteration, the wrapper needs `overflow: hidden` for
@@ -533,7 +533,7 @@ function BudgetWrapper(props) {
     <View
       style={[
         styles.page,
-        { paddingLeft: 8, paddingRight: 8, overflow: 'hidden' }
+        { paddingLeft: 8, paddingRight: 8, overflow: 'hidden' },
       ]}
     >
       <Budget
@@ -553,7 +553,7 @@ export default connect(
     summaryCollapsed: state.prefs.local['budget.summaryCollapsed'],
     budgetType: state.prefs.local.budgetType || 'rollover',
     maxMonths: state.prefs.global.maxMonths,
-    categoryGroups: state.queries.categories.grouped
+    categoryGroups: state.queries.categories.grouped,
   }),
-  actions
+  actions,
 )(BudgetWrapper);

@@ -22,23 +22,23 @@ const sheet = new Spreadsheet({
           data: {
             type: 'query',
             query: query,
-            sql: sql
+            sql: sql,
           },
 
           ast: {
             type: 'CallExpression',
             callee: {
               type: 'Identifier',
-              name: 'runQuery'
+              name: 'runQuery',
             },
             arguments: [
               {
                 type: 'Literal',
                 raw: sql,
-                value: sql
-              }
-            ]
-          }
+                value: sql,
+              },
+            ],
+          },
         };
       },
       run: sql => {
@@ -50,9 +50,9 @@ const sheet = new Spreadsheet({
             resolve(rows);
           });
         });
-      }
-    }
-  }
+      },
+    },
+  },
 });
 
 db.on('preupdate', function (type, dbname, table, old, _new, oldId, newId) {
@@ -82,7 +82,7 @@ function insertRow() {
       const t = Math.random() * 100;
       console.log('[insertRow] waiting', t);
       setTimeout(insertRow, t);
-    }
+    },
   );
 }
 

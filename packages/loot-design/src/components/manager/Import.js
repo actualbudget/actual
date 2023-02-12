@@ -48,7 +48,7 @@ function Import({ modalProps, actions }) {
     border: '1px solid ' + colors.border,
     borderRadius: 6,
     marginBottom: 10,
-    display: 'block'
+    display: 'block',
   };
 
   return (
@@ -98,7 +98,7 @@ function Import({ modalProps, actions }) {
             style={{
               flexDirection: 'row',
               marginTop: 20,
-              alignItems: 'center'
+              alignItems: 'center',
             }}
           >
             <View style={{ flex: 1 }} />

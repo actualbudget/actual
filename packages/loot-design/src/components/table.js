@@ -6,7 +6,7 @@ import React, {
   useLayoutEffect,
   useImperativeHandle,
   useContext,
-  useMemo
+  useMemo,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -27,7 +27,7 @@ import {
   Input,
   Tooltip,
   IntersectionBoundary,
-  Menu
+  Menu,
 } from './common';
 import DateSelect from './DateSelect';
 import { FixedSizeList } from './FixedSizeList';
@@ -54,16 +54,16 @@ function fireBlur(onBlur, e) {
 
 const CellContext = React.createContext({
   backgroundColor: 'white',
-  borderColor: colors.n9
+  borderColor: colors.n9,
 });
 
 function CellProvider({ backgroundColor, borderColor, children }) {
   let value = useMemo(
     () => ({
       backgroundColor,
-      borderColor
+      borderColor,
     }),
-    [backgroundColor, borderColor]
+    [backgroundColor, borderColor],
   );
 
   return <CellContext.Provider value={value}>{children}</CellContext.Provider>;
@@ -80,7 +80,7 @@ export const Field = React.forwardRef(function Field(
     contentStyle,
     ...props
   },
-  ref
+  ref,
 ) {
   let { backgroundColor, borderColor } = useContext(CellContext);
 
@@ -101,10 +101,10 @@ export const Field = React.forwardRef(function Field(
           borderTopWidth: borderColor ? 1 : 0,
           borderBottomWidth: borderColor ? 1 : 0,
           borderColor,
-          backgroundColor
+          backgroundColor,
         },
         styles.smallText,
-        style
+        style,
       ]}
       data-testid={name}
     >
@@ -116,9 +116,9 @@ export const Field = React.forwardRef(function Field(
           {
             flex: 1,
             padding: '0 5px',
-            justifyContent: 'center'
+            justifyContent: 'center',
           },
-          contentStyle
+          contentStyle,
         ]}
       >
         {truncate ? (
@@ -126,7 +126,7 @@ export const Field = React.forwardRef(function Field(
             style={{
               whiteSpace: 'nowrap',
               overflow: 'hidden',
-              textOverflow: 'ellipsis'
+              textOverflow: 'ellipsis',
             }}
           >
             {children}
@@ -176,7 +176,7 @@ export function Cell({
     borderTopWidth: borderColor ? 1 : 0,
     borderBottomWidth: borderColor ? 1 : 0,
     borderColor,
-    backgroundColor
+    backgroundColor,
   };
 
   return (
@@ -197,10 +197,10 @@ export function Cell({
             {
               flex: 1,
               padding: '0 5px',
-              justifyContent: 'center'
+              justifyContent: 'center',
             },
             styles.smallText,
-            valueStyle
+            valueStyle,
           ]}
           // Can't use click because we only want to expose the cell if
           // the user does a direct click, not if they also drag the
@@ -222,7 +222,7 @@ export function Cell({
             style={{
               whiteSpace: 'nowrap',
               overflow: 'hidden',
-              textOverflow: 'ellipsis'
+              textOverflow: 'ellipsis',
             }}
           >
             {formatter ? formatter(value) : value}
@@ -286,11 +286,11 @@ export function Row({
             flex: '0 0 ' + (height || ROW_HEIGHT) + 'px',
             userSelect: 'text',
             '&.animated .animated-cell': {
-              transition: '.7s background-color'
-            }
+              transition: '.7s background-color',
+            },
           },
           collapsed && { marginTop: -1 },
-          style
+          style,
         ]}
         data-testid="row"
         {...nativeProps}
@@ -306,12 +306,12 @@ export function Row({
 const inputCellStyle = {
   backgroundColor: 'white',
   padding: '5px 3px',
-  margin: '0 1px'
+  margin: '0 1px',
 };
 
 const readonlyInputStyle = {
   backgroundColor: 'transparent',
-  '::selection': { backgroundColor: '#d9d9d9' }
+  '::selection': { backgroundColor: '#d9d9d9' },
 };
 
 function InputValue({ value: defaultValue, onUpdate, onBlur, ...props }) {
@@ -348,7 +348,7 @@ function InputValue({ value: defaultValue, onUpdate, onBlur, ...props }) {
       style={[
         inputCellStyle,
         props.readOnly ? readonlyInputStyle : null,
-        props.style
+        props.style,
       ]}
     />
   );
@@ -442,7 +442,7 @@ export function CustomCell({
             onUpdate && onUpdate(val);
           },
           shouldSaveFromKey,
-          inputStyle: inputCellStyle
+          inputStyle: inputCellStyle,
         })
       }
     </Cell>
@@ -457,7 +457,7 @@ export const DateSelectCell = scope(lively => {
         {...props}
         style={{
           zIndex: props.exposed ? 1 : 0,
-          ...props.style
+          ...props.style,
         }}
       >
         {() => (
@@ -467,7 +467,7 @@ export const DateSelectCell = scope(lively => {
             inputProps={{
               ...inputProps,
               onBlur: e => fireBlur(inputProps && inputProps.onBlur, e),
-              style: [inputCellStyle, { zIndex: 300 }]
+              style: [inputCellStyle, { zIndex: 300 }],
             }}
           />
         )}
@@ -531,10 +531,10 @@ export const CellButton = React.forwardRef(
             transition: 'box-shadow .15s',
             ':focus': {
               outline: 0,
-              boxShadow: `0 0 0 3px white, 0 0 0 5px ${colors.b5}`
-            }
+              boxShadow: `0 0 0 3px white, 0 0 0 5px ${colors.b5}`,
+            },
           },
-          style
+          style,
         ]}
         onFocus={() => onEdit && onEdit()}
         data-testid="cell-button"
@@ -552,7 +552,7 @@ export const CellButton = React.forwardRef(
         {children}
       </View>
     );
-  }
+  },
 );
 
 export function SelectCell({
@@ -590,13 +590,13 @@ export function SelectCell({
 
               ':focus': {
                 border: '1px solid ' + colors.b5,
-                boxShadow: '0 1px 2px ' + colors.b5
-              }
+                boxShadow: '0 1px 2px ' + colors.b5,
+              },
             },
             selected && {
               backgroundColor: partial ? colors.b9 : colors.b5,
-              borderColor: partial ? colors.b9 : colors.b5
-            }
+              borderColor: partial ? colors.b9 : colors.b5,
+            },
           ]}
           onEdit={onEdit}
           onSelect={onSelect}
@@ -681,7 +681,7 @@ export const Highlight = scope(lively => {
           right: 0,
           bottom: 0,
           transition: 'background-color 1.8s',
-          backgroundColor: 'white'
+          backgroundColor: 'white',
         }}
       />
     );
@@ -713,7 +713,7 @@ export const Highlight = scope(lively => {
       if (bag.props.active) {
         return activate(bag);
       }
-    }
+    },
   });
 });
 
@@ -724,7 +724,7 @@ export function TableHeader({ headers, children, version, ...rowProps }) {
         version === 'v2' && {
           borderRadius: '6px 6px 0 0',
           overflow: 'hidden',
-          flexShrink: 0
+          flexShrink: 0,
         }
       }
     >
@@ -738,7 +738,7 @@ export function TableHeader({ headers, children, version, ...rowProps }) {
           version === 'v2'
             ? { color: colors.n4, fontWeight: 500 }
             : { color: colors.n4 },
-          rowProps.style
+          rowProps.style,
         ]}
       >
         {headers
@@ -806,7 +806,7 @@ export const TableWithNavigator = React.forwardRef(
   ({ fields, ...props }, ref) => {
     let navigator = useTableNavigator(props.items, fields);
     return <Table {...props} navigator={navigator} />;
-  }
+  },
 );
 
 export const Table = React.forwardRef(
@@ -833,14 +833,14 @@ export const Table = React.forwardRef(
       isSelected,
       ...props
     },
-    ref
+    ref,
   ) => {
     if (!navigator) {
       navigator = {
         onEdit: () => {},
         editingId: null,
         focusedField: null,
-        getNavigatorProps: props => props
+        getNavigatorProps: props => props,
       };
     }
 
@@ -900,7 +900,7 @@ export const Table = React.forwardRef(
 
       isAnchored() {
         return list.current && list.current.isAnchored();
-      }
+      },
     }));
 
     useLayoutEffect(() => {
@@ -924,7 +924,7 @@ export const Table = React.forwardRef(
         focusedField: editing && focusedField,
         onEdit,
         index,
-        position: style.top
+        position: style.top,
       });
 
       // TODO: Need to also apply zIndex if item is selected
@@ -938,8 +938,8 @@ export const Table = React.forwardRef(
             rowStyle,
             {
               zIndex: editing || selected ? 101 : 'auto',
-              transform: 'translateY(var(--pos))'
-            }
+              transform: 'translateY(var(--pos))',
+            },
           ]}
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
@@ -978,7 +978,7 @@ export const Table = React.forwardRef(
             alignItems: 'center',
             fontStyle: 'italic',
             color: colors.n6,
-            flex: 1
+            flex: 1,
           }}
         >
           {empty}
@@ -994,8 +994,8 @@ export const Table = React.forwardRef(
               flex: 1,
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor
-            }
+              backgroundColor,
+            },
           ]}
         >
           <AnimatedLoading width={25} color={colors.n1} />
@@ -1011,9 +1011,9 @@ export const Table = React.forwardRef(
           {
             flex: 1,
             outline: 'none',
-            '& .animated .animated-row': { transition: '.25s transform' }
+            '& .animated .animated-row': { transition: '.25s transform' },
           },
-          style
+          style,
         ]}
         tabIndex="1"
         {...getNavigatorProps(props)}
@@ -1077,7 +1077,7 @@ export const Table = React.forwardRef(
         </View>
       </View>
     );
-  }
+  },
 );
 
 export function useTableNavigator(data, fields, opts = {}) {
@@ -1242,7 +1242,7 @@ export function useTableNavigator(data, fields, opts = {}) {
                     : 'down'
                   : e.shiftKey
                   ? 'left'
-                  : 'right'
+                  : 'right',
               );
               break;
             default:
@@ -1275,7 +1275,7 @@ export function useTableNavigator(data, fields, opts = {}) {
         ) {
           onEdit(null);
         }
-      }
+      },
     };
   }
 

@@ -6,7 +6,7 @@ import Loading from './Loading';
 
 const rotation = css.keyframes({
   '0%': { transform: 'rotate(-90deg)' },
-  '100%': { transform: 'rotate(666deg)' }
+  '100%': { transform: 'rotate(666deg)' },
 });
 
 function AnimatedLoading(props) {
@@ -17,7 +17,7 @@ function AnimatedLoading(props) {
         animationDuration: '1.6s',
         animationTimingFunction: 'cubic-bezier(0.17, 0.67, 0.83, 0.67)',
         animationIterationCount: 'infinite',
-        lineHeight: 0
+        lineHeight: 0,
       })}
     >
       <Loading {...props} />

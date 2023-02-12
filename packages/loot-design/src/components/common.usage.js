@@ -34,7 +34,7 @@ export default () => {
                       setState({ modalCount: state.modalCount - 1 }),
                     isCurrent: i === state.modalCount - 1,
                     stackIndex: i,
-                    parent: node
+                    parent: node,
                   };
 
                   modals.push(
@@ -60,7 +60,7 @@ export default () => {
                           Pop modal
                         </Button>
                       </View>
-                    </Modal>
+                    </Modal>,
                   );
                 }
 

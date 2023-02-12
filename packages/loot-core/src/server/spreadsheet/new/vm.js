@@ -76,7 +76,7 @@ export default class VM {
     const func = this.get(callee);
     this.reg1 = func.apply(
       null,
-      args.map(arg => this.get(arg))
+      args.map(arg => this.get(arg)),
     );
   }
 
@@ -89,7 +89,7 @@ export default class VM {
         }
         return res;
       }),
-      'Running sql: ' + sql
+      'Running sql: ' + sql,
     );
   }
 
@@ -113,7 +113,7 @@ export default class VM {
         console.log('VM caught error during activity: ' + activityName);
         console.log(err);
         this.resume(null);
-      }
+      },
     );
   }
 

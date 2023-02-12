@@ -55,7 +55,7 @@ function GraphBackground2({ width, height, style }) {
               style={{
                 fill: 'rgba(255, 255, 214, 0.8)',
                 stroke: 'none',
-                width: 200
+                width: 200,
               }}
             />
           </g>
@@ -82,7 +82,7 @@ function GraphBackground2({ width, height, style }) {
               style={{
                 fill: 'rgba(155, 102, 255, 0.9)',
                 stroke: 'none',
-                width: 200
+                width: 200,
               }}
             />
           </g>
@@ -109,7 +109,7 @@ function GraphBackground2({ width, height, style }) {
               style={{
                 fill: 'rgba(155, 102, 255, 0.6)',
                 stroke: 'none',
-                width: 200
+                width: 200,
               }}
             />
           </g>
@@ -136,7 +136,7 @@ function GraphBackground2({ width, height, style }) {
               style={{
                 fill: 'rgba(155, 102, 255, 0.3)',
                 stroke: 'none',
-                width: 200
+                width: 200,
               }}
             />
           </g>
@@ -186,7 +186,7 @@ function GraphBackground2({ width, height, style }) {
               style={{
                 fill: 'rgba(155, 102, 255, 0.18)',
                 stroke: 'none',
-                width: 200
+                width: 200,
               }}
             />
           </g>
@@ -236,7 +236,7 @@ function GraphBackground2({ width, height, style }) {
               style={{
                 fill: 'rgba(155, 102, 255, 0.06)',
                 stroke: 'none',
-                width: 200
+                width: 200,
               }}
             />
           </g>

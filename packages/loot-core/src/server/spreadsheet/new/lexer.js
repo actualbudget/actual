@@ -27,7 +27,7 @@ function token(type, value, lineno, colno) {
     type: type,
     value: value,
     lineno: lineno,
-    colno: colno
+    colno: colno,
   };
 }
 

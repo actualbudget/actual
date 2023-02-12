@@ -4,7 +4,7 @@ import * as rules from '../server/accounts/transaction-rules';
 import * as db from '../server/db';
 import {
   enableGlobalMutations,
-  disableGlobalMutations
+  disableGlobalMutations,
 } from '../server/mutators';
 import { setServer } from '../server/server-config';
 import * as sheet from '../server/sheet';
@@ -62,7 +62,7 @@ global.getDatabaseDump = async function (tables) {
       db.getDatabase(),
       "SELECT name FROM sqlite_master WHERE type='table'",
       [],
-      true
+      true,
     );
 
     tables = rows.map(row => row.name);
@@ -91,10 +91,10 @@ global.getDatabaseDump = async function (tables) {
           db.getDatabase(),
           'SELECT * FROM ' + table + ' ORDER BY ' + sortColumn,
           [],
-          true
-        )
+          true,
+        ),
       ];
-    })
+    }),
   );
 
   let grouped = {};
@@ -117,7 +117,7 @@ global.emptyDatabase = function (avoidUpdate) {
     let memoryDB = new sqlite.openDatabase(path);
     sqlite.execQuery(
       memoryDB,
-      nativeFs.readFileSync(__dirname + '/../server/sql/init.sql', 'utf8')
+      nativeFs.readFileSync(__dirname + '/../server/sql/init.sql', 'utf8'),
     );
 
     db.setDatabase(memoryDB);

@@ -11,14 +11,14 @@ export class Query {
       validateRefs: true,
       limit: null,
       offset: null,
-      ...state
+      ...state,
     };
   }
 
   filter(expr) {
     return new Query({
       ...this.state,
-      filterExpressions: [...this.state.filterExpressions, expr]
+      filterExpressions: [...this.state.filterExpressions, expr],
     });
   }
 
@@ -27,8 +27,8 @@ export class Query {
     return new Query({
       ...this.state,
       filterExpressions: this.state.filterExpressions.filter(
-        expr => !exprSet.has(Object.keys(expr)[0])
-      )
+        expr => !exprSet.has(Object.keys(expr)[0]),
+      ),
     });
   }
 
@@ -55,7 +55,7 @@ export class Query {
 
     return new Query({
       ...this.state,
-      groupExpressions: [...this.state.groupExpressions, ...exprs]
+      groupExpressions: [...this.state.groupExpressions, ...exprs],
     });
   }
 
@@ -66,7 +66,7 @@ export class Query {
 
     return new Query({
       ...this.state,
-      orderExpressions: [...this.state.orderExpressions, ...exprs]
+      orderExpressions: [...this.state.orderExpressions, ...exprs],
     });
   }
 

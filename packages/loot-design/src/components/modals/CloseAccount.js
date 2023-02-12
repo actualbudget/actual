@@ -40,7 +40,7 @@ function CloseAccount({
   balance,
   canDelete,
   actions,
-  modalProps
+  modalProps,
 }) {
   let [loading, setLoading] = useState(false);
 
@@ -94,7 +94,7 @@ function CloseAccount({
                   .closeAccount(
                     account.id,
                     values.transfer || null,
-                    values.category || null
+                    values.category || null,
                   )
                   .then(() => {
                     modalProps.onClose();
@@ -109,7 +109,7 @@ function CloseAccount({
               handleBlur,
               handleSubmit,
               isSubmitting,
-              setFieldValue
+              setFieldValue,
             }) => (
               <form onSubmit={handleSubmit}>
                 {balance !== 0 && (
@@ -203,7 +203,7 @@ function CloseAccount({
                 <View
                   style={{
                     flexDirection: 'row',
-                    justifyContent: 'flex-end'
+                    justifyContent: 'flex-end',
                   }}
                 >
                   <Button

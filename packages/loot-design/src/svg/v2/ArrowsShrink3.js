@@ -8,7 +8,7 @@ const SvgArrowsShrink3 = props => (
     xmlns="http://www.w3.org/2000/svg"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path

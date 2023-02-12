@@ -26,7 +26,7 @@ export function loadBudgets() {
 
     dispatch({
       type: constants.SET_BUDGETS,
-      budgets
+      budgets,
     });
   };
 }
@@ -37,7 +37,7 @@ export function loadRemoteFiles() {
 
     dispatch({
       type: constants.SET_REMOTE_FILES,
-      files
+      files,
     });
   };
 }
@@ -50,7 +50,7 @@ export function loadAllFiles() {
     dispatch({
       type: constants.SET_ALL_FILES,
       budgets,
-      remoteFiles: files
+      remoteFiles: files,
     });
 
     return getState().budgets.allFiles;
@@ -73,7 +73,7 @@ export function loadBudget(id, loadingText = '', options = {}) {
           // eslint-disable-next-line
           let showBackups = confirm(
             message +
-              ' Make sure the app is up-to-date. Do you want to load a backup?'
+              ' Make sure the app is up-to-date. Do you want to load a backup?',
           );
 
           if (showBackups) {
@@ -111,6 +111,9 @@ export function closeBudget() {
       dispatch(setAppState({ loadingText: 'Closing...' }));
       await send('close-budget');
       dispatch(setAppState({ loadingText: null }));
+      if (localStorage.getItem('SharedArrayBufferOverride')) {
+        location.reload();
+      }
     }
   };
 }
@@ -134,7 +137,9 @@ export function deleteBudget(id, cloudFileId) {
 export function createBudget({ testMode, demoMode } = {}) {
   return async (dispatch, getState) => {
     dispatch(
-      setAppState({ loadingText: testMode || demoMode ? 'Making demo...' : '' })
+      setAppState({
+        loadingText: testMode || demoMode ? 'Making demo...' : '',
+      }),
     );
 
     if (demoMode) {
@@ -199,7 +204,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
 
     let { id, error } = await send('download-budget', {
       fileId: cloudFileId,
-      replace
+      replace,
     });
 
     if (error) {
@@ -209,7 +214,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
           cloudFileId,
           onSuccess: () => {
             dispatch(downloadBudget(cloudFileId, { replace }));
-          }
+          },
         };
 
         dispatch(pushModal('fix-encryption-key', opts));
@@ -218,7 +223,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
         alert(
           `A file with id "${error.meta.id}" already exists with the name "${error.meta.name}". ` +
             'This file will be replaced. This probably happened because files were manually ' +
-            'moved around outside of Actual.'
+            'moved around outside of Actual.',
         );
 
         return dispatch(downloadBudget(cloudFileId, { replace: true }));
@@ -231,7 +236,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
       await Promise.all([
         dispatch(loadGlobalPrefs()),
         dispatch(loadAllFiles()),
-        dispatch(loadBudget(id))
+        dispatch(loadBudget(id)),
       ]);
       dispatch(setAppState({ loadingText: null }));
     }
@@ -245,7 +250,7 @@ export function getYNAB4Imports() {
     let imports = await send('get-ynab4-files');
     dispatch({
       type: 'SET_AVAILABLE_IMPORTS',
-      imports
+      imports,
     });
     return imports;
   };

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 class TutorialPoint extends React.Component {
   static contextTypes = {
-    setTutorialNode: PropTypes.func
+    setTutorialNode: PropTypes.func,
   };
 
   ref = el => {

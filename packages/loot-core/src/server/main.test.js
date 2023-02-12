@@ -9,7 +9,7 @@ import {
   runHandler,
   runMutator,
   disableGlobalMutations,
-  enableGlobalMutations
+  enableGlobalMutations,
 } from './mutators';
 import * as prefs from './prefs';
 
@@ -41,11 +41,11 @@ async function createTestBudget(name) {
   await fs.mkdir(budgetPath);
   await fs.copyFile(
     fs.join(templatePath, 'metadata.json'),
-    fs.join(budgetPath, 'metadata.json')
+    fs.join(budgetPath, 'metadata.json'),
   );
   await fs.copyFile(
     fs.join(templatePath, 'db.sqlite'),
-    fs.join(budgetPath, 'db.sqlite')
+    fs.join(budgetPath, 'db.sqlite'),
   );
 }
 
@@ -67,7 +67,7 @@ describe('Budgets', () => {
     let row = await db.first('SELECT * FROM messages_clock');
 
     let { error } = await runHandler(handlers['load-budget'], {
-      id: 'test-budget'
+      id: 'test-budget',
     });
     expect(error).toBe(undefined);
 
@@ -87,7 +87,7 @@ describe('Budgets', () => {
     const spy = jest.spyOn(console, 'warn').mockImplementation();
 
     let { error } = await runHandler(handlers['load-budget'], {
-      id: 'test-budget'
+      id: 'test-budget',
     });
     // There should be an error and the budget should be unloaded
     expect(error).toBe('out-of-sync-migrations');
@@ -109,12 +109,12 @@ describe('Accounts', () => {
       await db.insertCategoryGroup({
         id: 'group1',
         name: 'income',
-        is_income: 1
+        is_income: 1,
       });
       await db.insertCategory({
         name: 'income',
         cat_group: 'group1',
-        is_income: 1
+        is_income: 1,
       });
     });
 
@@ -126,7 +126,7 @@ describe('Accounts', () => {
     await runHandler(handlers['accounts-connect'], {
       institution: { institution_id: 1, name: 'Jamesy Bank' },
       publicToken: 'foo',
-      accountIds: accounts.map(acct => acct.account_id)
+      accountIds: accounts.map(acct => acct.account_id),
     });
 
     // Import transactions for all accounts
@@ -138,11 +138,11 @@ describe('Accounts', () => {
     for (let account of res) {
       const sum = await db.first(
         'SELECT sum(amount) as sum FROM transactions WHERE acct = ? AND starting_balance_flag = 0',
-        [account.id]
+        [account.id],
       );
       const starting = await db.first(
         'SELECT * FROM transactions WHERE acct = ? AND starting_balance_flag = 1',
-        [account.id]
+        [account.id],
       );
       expect(account.balance_current - sum.sum).toBe(starting.amount);
 
@@ -150,7 +150,7 @@ describe('Accounts', () => {
       // possible
       const earliestTrans = await db.first(
         'SELECT p.name as payee_name FROM transactions t LEFT JOIN payees p ON p.id = t.description WHERE acct = ? ORDER BY date LIMIT 1',
-        [account.id]
+        [account.id],
       );
       expect(earliestTrans.payee_name).toBe('Starting Balance');
     }
@@ -164,17 +164,17 @@ describe('Accounts', () => {
       await db.insertPayee({
         id: 'transfer-one',
         name: '',
-        transfer_acct: 'one'
+        transfer_acct: 'one',
       });
       await db.insertPayee({
         id: 'transfer-two',
         name: '',
-        transfer_acct: 'two'
+        transfer_acct: 'two',
       });
       await db.insertPayee({
         id: 'transfer-three',
         name: '',
-        transfer_acct: 'three'
+        transfer_acct: 'three',
       });
     });
 
@@ -184,17 +184,17 @@ describe('Accounts', () => {
       account: 'one',
       amount: 5000,
       payee: 'transfer-two',
-      date: '2017-01-01'
+      date: '2017-01-01',
     });
     let differ = expectSnapshotWithDiffer(
-      await db.all('SELECT * FROM transactions')
+      await db.all('SELECT * FROM transactions'),
     );
 
     let transaction = await db.getTransaction(id);
     await runHandler(handlers['transaction-update'], {
       ...(await db.getTransaction(id)),
       payee: 'transfer-three',
-      date: '2017-01-03'
+      date: '2017-01-03',
     });
     differ.expectToMatchDiff(await db.all('SELECT * FROM transactions'));
 
@@ -212,7 +212,7 @@ describe('Budget', () => {
       await db.insertCategoryGroup({
         id: 'incomeGroup',
         name: 'incomeGroup',
-        is_income: 1
+        is_income: 1,
       });
       await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
       await db.insertCategory({ name: 'foo', cat_group: 'group1' });
@@ -231,7 +231,7 @@ describe('Budget', () => {
     await runHandler(handlers['transaction-add'], {
       date: '2016-05-06',
       amount: 50,
-      account: 'one'
+      account: 'one',
     });
 
     // Fast-forward in time to a future month and make sure it creates
@@ -265,40 +265,40 @@ describe('Budget', () => {
     // Force the system to start tracking these months so budgets are
     // automatically updated when adding/deleting categories
     await db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', [
-      '2017-01'
+      '2017-01',
     ]);
     await db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', [
-      '2017-02'
+      '2017-02',
     ]);
     await db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', [
-      '2017-03'
+      '2017-03',
     ]);
     await db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', [
-      '2017-04'
+      '2017-04',
     ]);
 
     let categories;
     await captureChangedCells(async () => {
       await runMutator(() =>
-        db.insertCategoryGroup({ id: 'group1', name: 'group1' })
+        db.insertCategoryGroup({ id: 'group1', name: 'group1' }),
       );
       categories = [
         await runHandler(handlers['category-create'], {
           name: 'foo',
-          groupId: 'group1'
+          groupId: 'group1',
         }),
         await runHandler(handlers['category-create'], {
           name: 'bar',
-          groupId: 'group1'
+          groupId: 'group1',
         }),
         await runHandler(handlers['category-create'], {
           name: 'baz',
-          groupId: 'group1'
+          groupId: 'group1',
         }),
         await runHandler(handlers['category-create'], {
           name: 'biz',
-          groupId: 'group1'
-        })
+          groupId: 'group1',
+        }),
       ];
     });
 
@@ -308,18 +308,18 @@ describe('Budget', () => {
       date: '2017-02-06',
       amount: 5000,
       account: 'boa',
-      category: categories[0]
+      category: categories[0],
     };
     // Test insertions
     let changed = await captureChangedCells(() =>
-      runHandler(handlers['transaction-add'], trans)
+      runHandler(handlers['transaction-add'], trans),
     );
     expect(changed.sort()).toMatchSnapshot();
     // Test updates
     changed = await captureChangedCells(async () => {
       await runHandler(handlers['transaction-update'], {
         ...(await db.getTransaction(trans.id)),
-        amount: 7000
+        amount: 7000,
       });
     });
     expect(changed.sort()).toMatchSnapshot();
@@ -361,7 +361,7 @@ describe('Categories', () => {
       await db.insertCategoryGroup({
         id: 'group2',
         name: 'group2',
-        is_income: 1
+        is_income: 1,
       });
       await db.insertCategory({ id: 'foo', name: 'foo', cat_group: 'group1' });
       await db.insertCategory({ id: 'bar', name: 'bar', cat_group: 'group1b' });
@@ -369,20 +369,20 @@ describe('Categories', () => {
         id: 'income1',
         name: 'income1',
         is_income: 1,
-        cat_group: 'group2'
+        cat_group: 'group2',
       });
       await db.insertCategory({
         id: 'income2',
         name: 'income2',
         is_income: 1,
-        cat_group: 'group2'
+        cat_group: 'group2',
       });
 
       return await db.insertTransaction({
         date: '2017-01-01',
         account: 'acct',
         amount: 4500,
-        category: 'foo'
+        category: 'foo',
       });
     });
 
@@ -393,7 +393,7 @@ describe('Categories', () => {
     await budgetActions.setBudget({
       category: 'foo',
       month: '2018-01',
-      amount: 1000
+      amount: 1000,
     });
     expect(sheet.getCellValue(sheetName, 'group-budget-group1')).toBe(1000);
     expect(sheet.getCellValue(sheetName, 'group-budget-group1b')).toBe(0);
@@ -404,7 +404,7 @@ describe('Categories', () => {
 
     await runHandler(handlers['category-delete'], {
       id: 'foo',
-      transferId: 'bar'
+      transferId: 'bar',
     });
 
     // Make sure the transaction has been updated
@@ -419,7 +419,7 @@ describe('Categories', () => {
     // sense. Make sure this doesn't do anything.
     let { error } = await runHandler(handlers['category-delete'], {
       id: 'income1',
-      transferId: 'bar'
+      transferId: 'bar',
     });
     expect(error).toBe('category-type');
 
@@ -429,7 +429,7 @@ describe('Categories', () => {
     // Make sure you can delete income categories
     await runHandler(handlers['category-delete'], {
       id: 'income1',
-      transferId: 'income2'
+      transferId: 'income2',
     });
 
     categories = await db.getCategories();

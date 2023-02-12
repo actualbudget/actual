@@ -26,8 +26,8 @@ export function encrypt(masterKey, value) {
       keyId: masterKey.getId(),
       algorithm: ENCRYPTION_ALGORITHM,
       iv: iv.toString('base64'),
-      authTag: authTag.toString('base64')
-    }
+      authTag: authTag.toString('base64'),
+    },
   };
 }
 
@@ -50,14 +50,14 @@ export function createKey({ secret, salt }) {
   let buffer = createKeyBuffer({ secret, salt });
   return {
     raw: buffer,
-    base64: buffer.toString('base64')
+    base64: buffer.toString('base64'),
   };
 }
 
 export function importKey(str) {
   return {
     raw: Buffer.from(str, 'base64'),
-    base64: str
+    base64: str,
   };
 }
 
@@ -75,6 +75,6 @@ function createKeyBuffer({ numBytes, secret, salt }) {
     salt || crypto.randomBytes(32).toString('base64'),
     10000,
     numBytes || 32,
-    'sha512'
+    'sha512',
   );
 }

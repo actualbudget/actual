@@ -41,8 +41,8 @@ function getInitialState({
     embedded,
     isOpen = false,
     strict,
-    initialFilterSuggestions
-  }
+    initialFilterSuggestions,
+  },
 }) {
   let selectedItem = findItem(strict, suggestions, value);
   let filteredSuggestions = initialFilterSuggestions
@@ -55,7 +55,7 @@ function getInitialState({
     originalItem: selectedItem,
     filteredSuggestions,
     highlightedIndex: null,
-    isOpen: embedded || isOpen
+    isOpen: embedded || isOpen,
   };
 }
 
@@ -66,7 +66,7 @@ function componentWillReceiveProps(bag, nextProps) {
     filterSuggestions = defaultFilterSuggestions,
     initialFilterSuggestions,
     value,
-    itemToString = defaultItemToString
+    itemToString = defaultItemToString,
   } = nextProps;
   let { value: currValue } = bag.state;
   let updates = null;
@@ -113,7 +113,7 @@ export function defaultFilterSuggestion(suggestion, value) {
 
 export function defaultFilterSuggestions(suggestions, value) {
   return suggestions.filter(suggestion =>
-    defaultFilterSuggestion(suggestion, value)
+    defaultFilterSuggestion(suggestion, value),
   );
 }
 
@@ -151,12 +151,12 @@ function onInputValueChange(
       highlightFirst,
       strict,
       filterSuggestions = defaultFilterSuggestions,
-      getHighlightedIndex
+      getHighlightedIndex,
     },
-    state: { isOpen }
+    state: { isOpen },
   },
   value,
-  changes
+  changes,
 ) {
   // OMG this is the dumbest thing ever. I need to remove Downshift
   // and build my own component. For some reason this is fired on blur
@@ -188,14 +188,14 @@ function onInputValueChange(
     return {
       value,
       filteredSuggestions,
-      highlightedIndex: null
+      highlightedIndex: null,
     };
   } else {
     let defaultGetHighlightedIndex = filteredSuggestions => {
       return highlightFirst && filteredSuggestions.length ? 0 : null;
     };
     let highlightedIndex = (getHighlightedIndex || defaultGetHighlightedIndex)(
-      filteredSuggestions
+      filteredSuggestions,
     );
 
     if (changes.type !== Downshift.stateChangeTypes.clickItem) {
@@ -204,14 +204,14 @@ function onInputValueChange(
         strict,
         filteredSuggestions,
         highlightedIndex,
-        value
+        value,
       );
     }
 
     return {
       value,
       filteredSuggestions,
-      highlightedIndex
+      highlightedIndex,
     };
   }
 }
@@ -251,7 +251,7 @@ function onStateChange({ props, state, inst }, changes, stateAndHelpers) {
       newState.highlightedIndex != null
         ? newState.highlightedIndex
         : state.highlightedIndex,
-      state.value
+      state.value,
     );
   }
 
@@ -261,7 +261,7 @@ function onStateChange({ props, state, inst }, changes, stateAndHelpers) {
 
 function onSelect(
   { props: { onSelect, clearAfterSelect, suggestions }, inst },
-  item
+  item,
 ) {
   if (onSelect) {
     // I AM NOT PROUD OF THIS OK??
@@ -290,7 +290,7 @@ function onSelectAfter(suggestions, clearAfterSelect, inst) {
       value: '',
       selectedItem: null,
       highlightedIndex: null,
-      filteredSuggestions: suggestions
+      filteredSuggestions: suggestions,
     };
   } else if (inst.input) {
     inst.input.setSelectionRange(0, 10000);
@@ -313,7 +313,7 @@ function onKeyDown(
       onSelect,
       inputProps,
       shouldSaveFromKey = defaultShouldSaveFromKey,
-      strict
+      strict,
     },
     state: {
       selectedItem,
@@ -322,11 +322,11 @@ function onKeyDown(
       originalItem,
       isNulled,
       isOpen,
-      value
+      value,
     },
-    inst
+    inst,
   },
-  e
+  e,
 ) {
   let ENTER = 13;
   let ESC = 27;
@@ -381,7 +381,7 @@ function onKeyDown(
       selectedItem: findItem(strict, suggestions, originalItem),
       filteredSuggestions,
       highlightedIndex: null,
-      isOpen: embedded ? true : false
+      isOpen: embedded ? true : false,
     };
   }
 }
@@ -402,7 +402,7 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
             {...css({
               padding: 5,
               cursor: 'default',
-              backgroundColor: highlightedIndex === index ? colors.n4 : null
+              backgroundColor: highlightedIndex === index ? colors.n4 : null,
             })}
           >
             {name}
@@ -446,8 +446,8 @@ function onBlur({ inst, props, state: { selectedItem } }, e) {
       props: {
         ...props,
         value,
-        originalValue: value
-      }
+        originalValue: value,
+      },
     });
   } else {
     return { isOpen: false };
@@ -472,11 +472,11 @@ function _SingleAutocomplete({
     tooltipProps,
     renderInput = defaultRenderInput,
     renderItems = defaultRenderItems,
-    itemToString = defaultItemToString
+    itemToString = defaultItemToString,
   },
   state: { value, selectedItem, filteredSuggestions, highlightedIndex, isOpen },
   updater,
-  inst
+  inst,
 }) {
   const filtered = filteredSuggestions || suggestions;
 
@@ -498,7 +498,7 @@ function _SingleAutocomplete({
         isOpen,
         inputValue,
         selectedItem,
-        highlightedIndex
+        highlightedIndex,
       }) => (
         // Super annoying but it works best to return a div so we
         // can't use a View here, but we can fake it be using the
@@ -514,8 +514,8 @@ function _SingleAutocomplete({
               onFocus: updater(onFocus),
               onBlur: updater(onBlur),
               onKeyDown: updater(onKeyDown),
-              onChange: updater(onChange)
-            })
+              onChange: updater(onChange),
+            }),
           )}
           {isOpen &&
             filtered.length > 0 &&
@@ -525,7 +525,7 @@ function _SingleAutocomplete({
                   filtered,
                   getItemProps,
                   highlightedIndex,
-                  inputValue
+                  inputValue,
                 )}
               </View>
             ) : (
@@ -536,7 +536,7 @@ function _SingleAutocomplete({
                   padding: 0,
                   backgroundColor: colors.n1,
                   color: 'white',
-                  ...tooltipStyle
+                  ...tooltipStyle,
                 }}
                 {...tooltipProps}
                 data-testid="autocomplete"
@@ -545,7 +545,7 @@ function _SingleAutocomplete({
                   filtered,
                   getItemProps,
                   highlightedIndex,
-                  inputValue
+                  inputValue,
                 )}
               </Tooltip>
             ))}
@@ -557,7 +557,7 @@ function _SingleAutocomplete({
 
 const SingleAutocomplete = lively(_SingleAutocomplete, {
   getInitialState,
-  componentWillReceiveProps
+  componentWillReceiveProps,
 });
 
 function MultiItem({ name, onRemove }) {
@@ -569,7 +569,7 @@ function MultiItem({ name, onRemove }) {
         backgroundColor: colors.b9,
         padding: '2px 4px',
         margin: '2px',
-        borderRadius: 4
+        borderRadius: 4,
       }}
     >
       {name}
@@ -619,14 +619,14 @@ export function MultiAutocomplete({
       {...props}
       value={null}
       suggestions={suggestions.filter(
-        item => !selectedItems.includes(getItemId(item))
+        item => !selectedItems.includes(getItemId(item)),
       )}
       onSelect={onAddItem}
       clearAfterSelect
       highlightFirst
       strict={strict}
       tooltipProps={{
-        forceLayout: lastSelectedItems.current !== selectedItems
+        forceLayout: lastSelectedItems.current !== selectedItems,
       }}
       renderInput={props => (
         <View
@@ -638,12 +638,12 @@ export function MultiAutocomplete({
               alignItems: 'center',
               backgroundColor: 'white',
               borderRadius: 4,
-              border: '1px solid #d0d0d0'
+              border: '1px solid #d0d0d0',
             },
             focused && {
               border: '1px solid ' + colors.b5,
-              boxShadow: '0 1px 1px ' + colors.b7
-            }
+              boxShadow: '0 1px 1px ' + colors.b7,
+            },
           ]}
         >
           {selectedItems.map((item, idx) => {
@@ -674,9 +674,9 @@ export function MultiAutocomplete({
                 flex: 1,
                 minWidth: 30,
                 border: 0,
-                ':focus': { border: 0, boxShadow: 'none' }
+                ':focus': { border: 0, boxShadow: 'none' },
               },
-              props.style
+              props.style,
             ]}
           />
         </View>
@@ -689,7 +689,7 @@ export function AutocompleteFooterButton({
   title,
   style,
   hoveredStyle,
-  onClick
+  onClick,
 }) {
   return (
     <Button
@@ -698,13 +698,13 @@ export function AutocompleteFooterButton({
           fontSize: 12,
           color: colors.n10,
           backgroundColor: 'transparent',
-          borderColor: colors.n5
+          borderColor: colors.n5,
         },
-        style
+        style,
       ]}
       hoveredStyle={[
         { backgroundColor: 'rgba(200, 200, 200, .25)' },
-        hoveredStyle
+        hoveredStyle,
       ]}
       onClick={onClick}
     >
@@ -719,7 +719,7 @@ export function AutocompleteFooter({ show = true, embedded, children }) {
       <View
         style={[
           { flexShrink: 0 },
-          embedded ? { paddingTop: 5 } : { padding: 5 }
+          embedded ? { paddingTop: 5 } : { padding: 5 },
         ]}
         onMouseDown={e => e.preventDefault()}
       >

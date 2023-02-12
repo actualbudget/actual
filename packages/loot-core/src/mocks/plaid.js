@@ -6,13 +6,13 @@ export function generateAccount(balance) {
     balances: {
       available: balance,
       current: balance,
-      limit: null
+      limit: null,
     },
     mask: '0000',
     name: 'Plaid Checking',
     official_name: 'Plaid Interest Checking',
     subtype: 'checking',
-    type: 'depository'
+    type: 'depository',
   };
 }
 
@@ -21,7 +21,7 @@ export function generateTransaction(
   amount,
   name,
   date,
-  pending = false
+  pending = false,
 ) {
   return {
     account_id: acctId,
@@ -37,7 +37,7 @@ export function generateTransaction(
       lon: null,
       state: null,
       store_number: null,
-      zip: null
+      zip: null,
     },
     name,
     payment_meta: {
@@ -48,11 +48,11 @@ export function generateTransaction(
       payment_processor: null,
       ppd_id: null,
       reason: null,
-      reference_number: null
+      reference_number: null,
     },
     pending: pending,
     pending_transaction_id: null,
     transaction_id: uuid.v4Sync(),
-    transaction_type: 'special'
+    transaction_type: 'special',
   };
 }

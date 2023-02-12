@@ -8,7 +8,7 @@ function unresolveName(name) {
   if (idx !== -1) {
     return {
       sheet: name.slice(0, idx),
-      name: name.slice(idx + 1)
+      name: name.slice(idx + 1),
     };
   }
   return { sheet: null, name };
@@ -42,7 +42,7 @@ export default function useSheetValue(binding, onChange) {
   let [result, setResult] = useState({
     name: sheetName + '!' + binding.name,
     value: binding.value === undefined ? null : binding.value,
-    query: binding.query
+    query: binding.query,
   });
   let latestOnChange = useRef(onChange);
   let latestValue = useRef(result.value);

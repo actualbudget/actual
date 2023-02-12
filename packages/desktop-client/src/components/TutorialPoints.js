@@ -7,7 +7,7 @@ class Tutorial extends React.Component {
   static childContextTypes = {
     setTutorialNode: PropTypes.func,
     getTutorialNode: PropTypes.func,
-    endTutorial: PropTypes.func
+    endTutorial: PropTypes.func,
   };
 
   constructor() {
@@ -18,7 +18,7 @@ class Tutorial extends React.Component {
   getChildContext() {
     return {
       setTutorialNode: this.setTutorialNode,
-      getTutorialNode: this.getTutorialNode
+      getTutorialNode: this.getTutorialNode,
     };
   }
 
@@ -37,5 +37,5 @@ class Tutorial extends React.Component {
 }
 
 export default connect(state => ({ deactivated: state.tutorial.deactivated }))(
-  Tutorial
+  Tutorial,
 );
