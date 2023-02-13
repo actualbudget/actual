@@ -105,7 +105,13 @@ async function downloadTransactions(
 ) {
   let userToken = await asyncStorage.getItem('user-token');
   if (userToken) {
-    const endDate = monthUtils.currentDay();
+    const date = new Date();
+    const endDate = new Date(
+      date.getTime() + date.getTimezoneOffset() * 60 * 1000
+    )
+      .toISOString()
+      .slice(0, 10);
+
     const res = await post(
       getServer().NORDIGEN_SERVER + '/transactions',
       {
@@ -114,7 +120,7 @@ async function downloadTransactions(
         requisitionId: bankId,
         accountId: acctId,
         startDate: since,
-        endDate: endDate
+        endDate
       },
       {
         'X-ACTUAL-TOKEN': userToken
