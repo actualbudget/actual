@@ -1,6 +1,6 @@
 ## Expectations
 
-Please ask first before making a large change; you might waste a lot of work if it doesn't align with how Actual should work.
+For smaller improvements or features - feel free to submit a PR or an issue if you don't have the necessary skills to build it yourself. For larger features we would recommend first opening an issue to discuss it with the team.
 
 We aren't going to take every single little change. Don't be offended if we close your PR. In order for the project to stay healthy, we need to guard our bandwidth and also only take changes that align with Actual.
 
