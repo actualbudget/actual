@@ -16,6 +16,8 @@ Here are some initial guidelines for how contributions will be treated:
 
 ## Main contributors
 
+(sorted alphabetically)
+
 - @j-f1
 - @jlongster
 - @MatissJanis
