@@ -8,13 +8,11 @@ import React, {
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-const URLContext = createContext(null);
-const SetURLContext = createContext(null);
-const VersionContext = createContext(null);
+const ServerContext = createContext({});
 
-export const useServerURL = () => useContext(URLContext);
-export const useServerVersion = () => useContext(VersionContext);
-export const useSetServerURL = () => useContext(SetURLContext);
+export const useServerURL = () => useContext(ServerContext).url;
+export const useServerVersion = () => useContext(ServerContext).version;
+export const useSetServerURL = () => useContext(ServerContext).setURL;
 
 async function getServerUrl() {
   let url = (await send('get-server-url')) || '';
@@ -54,12 +52,14 @@ export function ServerProvider({ children }) {
   );
 
   return (
-    <URLContext.Provider value={serverURL}>
-      <SetURLContext.Provider value={setURL}>
-        <VersionContext.Provider value={version ? `v${version}` : 'N/A'}>
-          {children}
-        </VersionContext.Provider>
-      </SetURLContext.Provider>
-    </URLContext.Provider>
+    <ServerContext.Provider
+      value={{
+        url: serverURL,
+        setURL,
+        version: version ? `v${version}` : 'N/A',
+      }}
+    >
+      {children}
+    </ServerContext.Provider>
   );
 }
