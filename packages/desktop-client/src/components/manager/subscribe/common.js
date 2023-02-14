@@ -54,15 +54,11 @@ export function useBootstrapped() {
           let response = await fetch('/account/needs-bootstrap');
           let { status, data } = await response.json();
           if (!status.ok) {
-            throw new Error();
+            throw new Error(JSON.stringify(status.error));
           }
-          const { isActual, serverURL } = data;
-          if (isActual) {
-            await setServerURL(serverURL || window.location.origin);
-            await afterBootstrap();
-          } else {
-            throw new Error();
-          }
+          const { serverURL } = data;
+          await setServerURL(serverURL || window.location.origin);
+          await afterBootstrap();
         } catch (e) {
           console.log(e);
           history.push('/config-server');
