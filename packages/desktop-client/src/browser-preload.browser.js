@@ -168,6 +168,7 @@ document.addEventListener('keydown', e => {
     }
     // Cmd/Ctrl+z
     else if (e.keyCode === 90) {
+      e.preventDefault();
       if (e.shiftKey) {
         // Redo
         window.__actionsForMenu.redo();
