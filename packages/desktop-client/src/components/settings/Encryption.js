@@ -9,6 +9,9 @@ import { Setting } from './UI';
 
 export default function EncryptionSettings({ prefs, pushModal }) {
   const serverURL = useServerURL();
+  const missingCryptoAPI = !(
+    window.crypto && Object.hasOwnProperty.call(crypto, 'subtle')
+  );
 
   function onChangeKey() {
     pushModal('create-encryption-key', { recreate: true });
@@ -27,6 +30,22 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         your password you can re-encrypt it.{' '}
         <a
           href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn more…
+        </a>
+      </Text>
+    </Setting>
+  ) : missingCryptoAPI ? (
+    <Setting primaryAction={<Button disabled>Enable encryption…</Button>}>
+      <Text>
+        <strong>End-to-end encryption</strong> is not available when making an
+        unencrypted connection to a remote server. You’ll need to enable HTTPS
+        on your server to use end-to-end encryption. This problem may also occur
+        if your browser is too old to work with Actual.{' '}
+        <a
+          href="https://actualbudget.github.io/docs/Installing/HTTPS"
           target="_blank"
           rel="noopener noreferrer"
         >

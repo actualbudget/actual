@@ -248,7 +248,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
 }
 
 export const TransactionHeader = React.memo(
-  ({ hasSelected, showAccount, showCategory, showBalance }) => {
+  ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
     let dispatchSelected = useSelectedDispatch();
 
     return (
@@ -276,7 +276,7 @@ export const TransactionHeader = React.memo(
         <Cell value="Payment" width={80} textAlign="right" />
         <Cell value="Deposit" width={80} textAlign="right" />
         {showBalance && <Cell value="Balance" width={85} textAlign="right" />}
-        <Field width={21} truncate={false} />
+        {showCleared && <Field width={21} truncate={false} />}
         <Cell value="" width={15 + styles.scrollbarWidth} />
       </Row>
     );
@@ -507,6 +507,7 @@ export const Transaction = React.memo(function Transaction(props) {
     backgroundColor = 'white',
     showAccount,
     showBalance,
+    showCleared,
     showZeroInDeposit,
     style,
     hovered,
@@ -1035,16 +1036,18 @@ export const Transaction = React.memo(function Transaction(props) {
         />
       )}
 
-      <StatusCell
-        id={id}
-        focused={focusedField === 'cleared'}
-        selected={selected}
-        isPreview={isPreview}
-        status={isPreview ? notes : cleared ? 'cleared' : null}
-        isChild={isChild}
-        onEdit={onEdit}
-        onUpdate={onUpdate}
-      />
+      {showCleared && (
+        <StatusCell
+          id={id}
+          focused={focusedField === 'cleared'}
+          selected={selected}
+          isPreview={isPreview}
+          status={isPreview ? notes : cleared ? 'cleared' : null}
+          isChild={isChild}
+          onEdit={onEdit}
+          onUpdate={onUpdate}
+        />
+      )}
 
       <Cell width={15} />
     </Row>
@@ -1124,6 +1127,7 @@ function NewTransaction({
   showAccount,
   showCategory,
   showBalance,
+  showCleared,
   dateFormat,
   onHover,
   onClose,
@@ -1163,6 +1167,7 @@ function NewTransaction({
           showAccount={showAccount}
           showCategory={showCategory}
           showBalance={showBalance}
+          showCleared={showCleared}
           focusedField={editingTransaction === transaction.id && focusedField}
           showZeroInDeposit={isDeposit}
           accounts={accounts}
@@ -1265,6 +1270,7 @@ class TransactionTable_ extends React.Component {
       accounts,
       categoryGroups,
       payees,
+      showCleared,
       showAccount,
       showCategory,
       balances,
@@ -1317,6 +1323,7 @@ class TransactionTable_ extends React.Component {
           showAccount={showAccount}
           showCategory={showCategory}
           showBalance={!!balances}
+          showCleared={showCleared}
           hovered={hovered}
           selected={selected}
           highlighted={highlighted}
@@ -1371,6 +1378,7 @@ class TransactionTable_ extends React.Component {
             showAccount={props.showAccount}
             showCategory={props.showCategory}
             showBalance={!!props.balances}
+            showCleared={props.showCleared}
           />
 
           {props.isAdding && (
@@ -1391,6 +1399,7 @@ class TransactionTable_ extends React.Component {
                 showAccount={props.showAccount}
                 showCategory={props.showCategory}
                 showBalance={!!props.balances}
+                showCleared={props.showCleared}
                 dateFormat={dateFormat}
                 onClose={props.onCloseAddTransaction}
                 onAdd={this.props.onAddTemporary}

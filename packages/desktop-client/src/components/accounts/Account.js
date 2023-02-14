@@ -252,6 +252,7 @@ function AccountMenu({
   syncEnabled,
   showBalances,
   canShowBalances,
+  showCleared,
   onClose,
   onReconcile,
   onMenuSelect,
@@ -278,6 +279,10 @@ function AccountMenu({
           canShowBalances && {
             name: 'toggle-balance',
             text: (showBalances ? 'Hide' : 'Show') + ' Running Balance',
+          },
+          {
+            name: 'toggle-cleared',
+            text: (showCleared ? 'Hide' : 'Show') + ' "Cleared" Checkboxes',
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
@@ -612,6 +617,7 @@ const AccountHeader = React.memo(
     syncEnabled,
     showBalances,
     showExtraBalances,
+    showCleared,
     showEmptyMessage,
     balanceQuery,
     reconcileAmount,
@@ -889,6 +895,7 @@ const AccountHeader = React.memo(
                     syncEnabled={syncEnabled}
                     canShowBalances={canCalculateBalance()}
                     showBalances={showBalances}
+                    showCleared={showCleared}
                     onMenuSelect={item => {
                       setMenuOpen(false);
                       onMenuSelect(item);
@@ -996,6 +1003,7 @@ class AccountInternal extends React.PureComponent {
       transactionsCount: 0,
       showBalances: props.showBalances,
       balances: [],
+      showCleared: props.showCleared,
       editingName: false,
       isAdding: false,
       latestDate: null,
@@ -1202,6 +1210,7 @@ class AccountInternal extends React.PureComponent {
           search: '',
           showBalances: nextProps.showBalances,
           balances: [],
+          showCleared: nextProps.showCleared,
         },
         () => {
           this.fetchTransactions();
@@ -1377,6 +1386,15 @@ class AccountInternal extends React.PureComponent {
           this.props.savePrefs({ ['show-balances-' + accountId]: true });
           this.setState({ showBalances: true });
           this.calculateBalances();
+        }
+        break;
+      case 'toggle-cleared':
+        if (this.state.showCleared) {
+          this.props.savePrefs({ ['hide-cleared-' + accountId]: true });
+          this.setState({ showCleared: false });
+        } else {
+          this.props.savePrefs({ ['hide-cleared-' + accountId]: false });
+          this.setState({ showCleared: true });
         }
         break;
       default:
@@ -1694,6 +1712,7 @@ class AccountInternal extends React.PureComponent {
       editingName,
       showBalances,
       balances,
+      showCleared,
     } = this.state;
 
     let account = accounts.find(account => account.id === accountId);
@@ -1741,6 +1760,7 @@ class AccountInternal extends React.PureComponent {
                   transactions={transactions}
                   showBalances={showBalances}
                   showExtraBalances={showExtraBalances}
+                  showCleared={showCleared}
                   showEmptyMessage={showEmptyMessage}
                   balanceQuery={balanceQuery}
                   syncEnabled={syncEnabled}
@@ -1791,6 +1811,7 @@ class AccountInternal extends React.PureComponent {
                         ? balances
                         : null
                     }
+                    showCleared={showCleared}
                     showAccount={
                       !accountId ||
                       accountId === 'offbudget' ||
@@ -1872,6 +1893,9 @@ export default function Account(props) {
     showBalances:
       props.match &&
       state.prefs.local['show-balances-' + props.match.params.id],
+    showCleared:
+      props.match &&
+      !state.prefs.local['hide-cleared-' + props.match.params.id],
     showExtraBalances:
       props.match &&
       state.prefs.local['show-extra-balances-' + props.match.params.id],
