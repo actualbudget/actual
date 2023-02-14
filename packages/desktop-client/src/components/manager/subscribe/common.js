@@ -51,9 +51,12 @@ export function useBootstrapped() {
       if (url == null) {
         // A server hasn't been specified yet
         try {
-          let response = await fetch('/client-bootstrap');
-          let { isActual, serverURL } = await response.json();
-          console.log({ isActual, serverURL });
+          let response = await fetch('/account/needs-bootstrap');
+          let { status, data } = await response.json();
+          if (!status.ok) {
+            throw new Error();
+          }
+          const { isActual, serverURL } = data;
           if (isActual) {
             await setServerURL(serverURL || window.location.origin);
             await afterBootstrap();
