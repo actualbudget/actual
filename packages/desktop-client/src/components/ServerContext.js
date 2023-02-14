@@ -24,32 +24,31 @@ async function getServerUrl() {
   return url;
 }
 
+async function getServerVersion() {
+  let { error, version } = await send('get-server-version');
+  if (error) {
+    return '';
+  }
+  return version;
+}
+
 export function ServerProvider({ children }) {
   let [serverURL, setServerURL] = useState('');
+  let [version, setVersion] = useState('');
+
   useEffect(() => {
     async function run() {
       setServerURL(await getServerUrl());
+      setVersion(await getServerVersion());
     }
     run();
   }, []);
-
-  let [version, setVersion] = useState('');
-  useEffect(() => {
-    (async () => {
-      const { error, version } = await send('get-server-version');
-
-      if (error) {
-        setVersion('');
-      } else {
-        setVersion(version);
-      }
-    })();
-  }, [serverURL]);
 
   let setURL = useCallback(
     async url => {
       await send('set-server-url', { url });
       setServerURL(await getServerUrl());
+      setVersion(await getServerVersion());
     },
     [setServerURL],
   );
