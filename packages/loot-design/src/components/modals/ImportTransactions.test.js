@@ -27,7 +27,7 @@ describe('Import transactions', function () {
         { str: '11 31 2020', order: 'mm dd yyyy' },
         { str: '2046 31 2020', order: 'mm dd yyyy' },
         { str: '2011 31 2020', order: 'mm dd yy' },
-        { str: '2020', order: 'mm dd yy' }
+        { str: '2020', order: 'mm dd yy' },
       ];
 
       for (const { str, order } of invalidInputs) {
@@ -46,8 +46,8 @@ describe('Import transactions', function () {
             '2020/12/24',
             ' 2020 / 12 / 24',
             '2020/12/24 ',
-            '2020 12-24 '
-          ]
+            '2020 12-24 ',
+          ],
         },
         {
           order: 'yy mm dd',
@@ -58,8 +58,8 @@ describe('Import transactions', function () {
             '20/12/24',
             '20/12/24',
             '20/12/24 ',
-            '20 12-24 '
-          ]
+            '20 12-24 ',
+          ],
         },
         {
           order: 'mm dd yyyy',
@@ -70,8 +70,8 @@ describe('Import transactions', function () {
             '12/24/2020',
             ' 12/24/2020',
             '12/24/2020',
-            '12 24-2020'
-          ]
+            '12 24-2020',
+          ],
         },
         {
           order: 'mm dd yy',
@@ -82,8 +82,8 @@ describe('Import transactions', function () {
             '12/24/20',
             ' 12/24/20',
             '12/24/20',
-            '12 24-20'
-          ]
+            '12 24-20',
+          ],
         },
         {
           order: 'dd mm yyyy',
@@ -94,8 +94,8 @@ describe('Import transactions', function () {
             '24/12/2020',
             ' 24/12/2020',
             '24/12/2020 ',
-            '24-12 2020'
-          ]
+            '24-12 2020',
+          ],
         },
         {
           order: 'dd mm yy',
@@ -106,9 +106,9 @@ describe('Import transactions', function () {
             '24/12/20',
             ' 24/12/20',
             '24/12/20 ',
-            '24 12-20 '
-          ]
-        }
+            '24 12-20 ',
+          ],
+        },
       ];
 
       for (const { order, cases } of validInputs) {

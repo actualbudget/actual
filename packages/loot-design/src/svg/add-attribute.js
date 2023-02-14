@@ -1,6 +1,6 @@
 const positionMethod = {
   start: 'unshiftContainer',
-  end: 'pushContainer'
+  end: 'pushContainer',
 };
 
 const addJSXAttribute = ({ types: t, template }, opts) => {
@@ -31,7 +31,7 @@ const addJSXAttribute = ({ types: t, template }, opts) => {
 
     return t.jsxAttribute(
       t.jsxIdentifier(name),
-      getAttributeValue({ value, literal })
+      getAttributeValue({ value, literal }),
     );
   }
 
@@ -46,7 +46,7 @@ const addJSXAttribute = ({ types: t, template }, opts) => {
             value = null,
             spread = false,
             literal = false,
-            position = 'end'
+            position = 'end',
           }) => {
             const method = positionMethod[position];
             const newAttribute = getAttribute({ spread, name, value, literal });
@@ -77,10 +77,10 @@ const addJSXAttribute = ({ types: t, template }, opts) => {
             if (!replaced) {
               path[method]('attributes', newAttribute);
             }
-          }
+          },
         );
-      }
-    }
+      },
+    },
   };
 };
 

@@ -28,6 +28,6 @@ export function LABEL() {
 
     resolve(n) {
       idx = n;
-    }
+    },
   };
 }

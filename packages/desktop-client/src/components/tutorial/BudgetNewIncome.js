@@ -18,7 +18,7 @@ function BudgetSummary({ targetRect, navigationProps }) {
         color: colors.n1,
         boxShadow: 'none',
         marginTop: 5,
-        fontSize: 14
+        fontSize: 14,
       }}
     >
       <Pointer

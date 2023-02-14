@@ -9,7 +9,7 @@ function Navigation({
   showBack = true,
   showNext = true,
   leftContent,
-  disableNext
+  disableNext,
 }) {
   return (
     <ModalButtons leftContent={leftContent} style={{ marginTop: 20 }}>

@@ -11,7 +11,7 @@ import {
   Button,
   P,
   ModalButtons,
-  Strong
+  Strong,
 } from '../common';
 
 function renderError(error) {
@@ -28,7 +28,7 @@ export default function NordigenExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,
-  onClose: originalOnClose
+  onClose: originalOnClose,
 }) {
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
@@ -72,7 +72,7 @@ export default function NordigenExternalMsg({
             ['default', 'Choose your bank'],
             ['ING_PL_INGBPLPW', 'ING PL'],
             ['MBANK_RETAIL_BREXPLPW', 'MBANK'],
-            ['SANDBOXFINANCE_SFIN0000', 'DEMO - TEST']
+            ['SANDBOXFINANCE_SFIN0000', 'DEMO - TEST'],
           ]}
           disabledKeys={['default']}
           onChange={val => {
@@ -86,7 +86,7 @@ export default function NordigenExternalMsg({
             padding: '10px 0',
             fontSize: 15,
             fontWeight: 600,
-            marginTop: 10
+            marginTop: 10,
           }}
           onClick={onJump}
           disabled={institutionId === 'default'}
@@ -137,7 +137,7 @@ export default function NordigenExternalMsg({
                 fontWeight: 600,
                 marginTop: 10,
                 backgroundColor: colors.g4,
-                borderColor: colors.g4
+                borderColor: colors.g4,
               }}
               onClick={onContinue}
             >
@@ -157,8 +157,8 @@ export default function NordigenExternalMsg({
               color: colors.n5,
               fontSize: 13,
               '& a, & a:visited': {
-                color: colors.n5
-              }
+                color: colors.n5,
+              },
             }}
           >
             Typing your bank{"'"}s username and password is one of the most

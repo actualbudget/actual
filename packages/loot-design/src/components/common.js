@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useState,
-  useCallback
+  useCallback,
 } from 'react';
 import mergeRefs from 'react-merge-refs';
 import ReactModal from 'react-modal';
@@ -47,7 +47,7 @@ export const useStableCallback = callback => {
   const callbackRef = useRef();
   const memoCallback = useCallback(
     (...args) => callbackRef.current(...args),
-    []
+    [],
   );
   useLayoutEffect(() => {
     callbackRef.current = callback;
@@ -79,15 +79,15 @@ export const Card = React.forwardRef(({ children, ...props }, ref) => {
           borderRadius: 6,
           backgroundColor: 'white',
           borderColor: colors.p3,
-          boxShadow: '0 1px 2px #9594A8'
+          boxShadow: '0 1px 2px #9594A8',
         },
-        props.style
+        props.style,
       ]}
     >
       <View
         style={{
           borderRadius: 6,
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         {children}
@@ -109,11 +109,11 @@ export function Link({ style, children, ...nativeProps }) {
           padding: 0,
           font: 'inherit',
           ':hover': {
-            textDecoration: 'underline'
-          }
+            textDecoration: 'underline',
+          },
         },
         styles.smallText,
-        style
+        style,
       )}
       {...nativeProps}
     >
@@ -155,7 +155,7 @@ export const ExternalLink = React.forwardRef(
         {children}
       </Button>
     );
-  }
+  },
 );
 
 function ButtonLink_({
@@ -203,13 +203,13 @@ export const Button = React.forwardRef(
       as = 'button',
       ...nativeProps
     },
-    ref
+    ref,
   ) => {
     hoveredStyle = [
       bare
         ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
         : { ...styles.shadow },
-      hoveredStyle
+      hoveredStyle,
     ];
     activeStyle = [
       bare
@@ -221,9 +221,9 @@ export const Button = React.forwardRef(
               (primary
                 ? '0 1px 4px 0 rgba(0,0,0,0.3)'
                 : '0 1px 4px 0 rgba(0,0,0,0.2)'),
-            transition: 'none'
+            transition: 'none',
           },
-      activeStyle
+      activeStyle,
     ];
 
     let Component = as;
@@ -250,13 +250,13 @@ export const Button = React.forwardRef(
             (primary ? (disabled ? colors.n7 : colors.p5) : colors.n9),
         color: primary ? 'white' : disabled ? colors.n6 : colors.n1,
         transition: 'box-shadow .25s',
-        ...styles.smallText
+        ...styles.smallText,
       },
       { ':hover': !disabled && hoveredStyle },
       { ':active': !disabled && activeStyle },
       hover && hoveredStyle,
       pressed && activeStyle,
-      style
+      style,
     ];
 
     return (
@@ -271,7 +271,7 @@ export const Button = React.forwardRef(
         {children}
       </Component>
     );
-  }
+  },
 );
 
 export const ButtonWithLoading = React.forwardRef((props, ref) => {
@@ -290,7 +290,7 @@ export const ButtonWithLoading = React.forwardRef((props, ref) => {
             right: 0,
             bottom: 0,
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
           }}
         >
           <Loading
@@ -303,7 +303,7 @@ export const ButtonWithLoading = React.forwardRef((props, ref) => {
         style={{
           opacity: loading ? 0 : 1,
           flexDirection: 'row',
-          alignItems: 'center'
+          alignItems: 'center',
         }}
       >
         {children}
@@ -318,7 +318,7 @@ const defaultInputStyle = {
   margin: 0,
   padding: 5,
   borderRadius: 4,
-  border: '1px solid #d0d0d0'
+  border: '1px solid #d0d0d0',
 };
 
 export function Input({
@@ -340,12 +340,12 @@ export function Input({
         {
           ':focus': {
             border: '1px solid ' + colors.b5,
-            boxShadow: '0 1px 1px ' + colors.b7
+            boxShadow: '0 1px 1px ' + colors.b7,
           },
-          '::placeholder': { color: colors.n7 }
+          '::placeholder': { color: colors.n7 },
         },
         styles.smallText,
-        style
+        style,
       )}
       {...nativeProps}
       onKeyDown={e => {
@@ -383,14 +383,14 @@ export function InputWithContent({
           padding: 0,
           flex: 1,
           flexDirection: 'row',
-          alignItems: 'center'
+          alignItems: 'center',
         },
         focused && {
           border: '1px solid ' + colors.b5,
-          boxShadow: '0 1px 1px ' + colors.b7
+          boxShadow: '0 1px 1px ' + colors.b7,
         },
         style,
-        getStyle && getStyle(focused)
+        getStyle && getStyle(focused),
       ]}
     >
       {leftContent}
@@ -404,9 +404,9 @@ export function InputWithContent({
               border: 0,
               backgroundColor: 'transparent',
               boxShadow: 'none',
-              color: 'inherit'
-            }
-          }
+              color: 'inherit',
+            },
+          },
         ]}
         onFocus={e => {
           setFocused(true);
@@ -428,7 +428,7 @@ export function Search({
   onChange,
   placeholder,
   isInModal,
-  width = 350
+  width = 350,
 }) {
   return (
     <Input
@@ -444,8 +444,8 @@ export function Search({
           ? null
           : {
               backgroundColor: 'white',
-              '::placeholder': { color: colors.n8 }
-            }
+              '::placeholder': { color: colors.n8 },
+            },
       }}
     />
   );
@@ -466,10 +466,10 @@ export function KeyboardButton({ highlighted, children, ...props }) {
           elevation: 4,
           borderWidth: 0,
           paddingLeft: 17,
-          paddingRight: 17
+          paddingRight: 17,
         },
         highlighted && { backgroundColor: colors.p6 },
-        props.style
+        props.style,
       ]}
       textStyle={[highlighted && { color: 'white' }]}
     >
@@ -495,20 +495,26 @@ export const Select = React.forwardRef(
             ':focus': {
               border: '1px solid ' + colors.b5,
               boxShadow: '0 1px 1px ' + colors.b7,
-              outline: 'none'
-            }
+              outline: 'none',
+            },
           },
-          style
+          style,
         )}
         {...nativeProps}
       >
         {children}
       </select>
     );
-  }
+  },
 );
 
-export function CustomSelect({ options, value, onChange, style, disabledKeys=[] }) {
+export function CustomSelect({
+  options,
+  value,
+  onChange,
+  style,
+  disabledKeys = [],
+}) {
   return (
     <ListboxInput
       value={value}
@@ -522,7 +528,11 @@ export function CustomSelect({ options, value, onChange, style, disabledKeys=[] 
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
         <ListboxList>
           {options.map(([value, label]) => (
-            <ListboxOption key={value} value={value} disabled={disabledKeys.includes(value)}>
+            <ListboxOption
+              key={value}
+              value={value}
+              disabled={disabledKeys.includes(value)}
+            >
               {label}
             </ListboxOption>
           ))}
@@ -550,7 +560,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
       const ENTER = 13;
 
       let filteredItems = items.filter(
-        item => item && item !== Menu.line && item.type !== Menu.label
+        item => item && item !== Menu.line && item.type !== Menu.label,
       );
       let currentIndex = filteredItems.indexOf(items[hoveredIndex]);
 
@@ -562,7 +572,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
           setHoveredIndex(
             hoveredIndex === null
               ? 0
-              : transformIndex(Math.max(currentIndex - 1, 0))
+              : transformIndex(Math.max(currentIndex - 1, 0)),
           );
           break;
         case DOWN:
@@ -571,8 +581,8 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
             hoveredIndex === null
               ? 0
               : transformIndex(
-                  Math.min(currentIndex + 1, filteredItems.length - 1)
-                )
+                  Math.min(currentIndex + 1, filteredItems.length - 1),
+                ),
           );
           break;
         case ENTER:
@@ -614,7 +624,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',
-                margin: '3px 9px'
+                margin: '3px 9px',
               }}
             >
               {item.name}
@@ -638,11 +648,11 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
                     ? 0
                     : -3,
                 flexDirection: 'row',
-                alignItems: 'center'
+                alignItems: 'center',
               },
               item.disabled && { color: colors.n7 },
               !item.disabled &&
-                hoveredIndex === idx && { backgroundColor: colors.n10 }
+                hoveredIndex === idx && { backgroundColor: colors.n10 },
             ]}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
@@ -656,7 +666,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
                 React.createElement(item.icon, {
                   width: item.iconSize || 10,
                   height: item.iconSize || 10,
-                  style: { marginRight: 7, width: 10 }
+                  style: { marginRight: 7, width: 10 },
                 })}
             </Text>
             <Text>{item.text}</Text>
@@ -685,7 +695,7 @@ export function AlignedText({
   const truncateStyle = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    overflow: 'hidden'
+    overflow: 'hidden',
   };
 
   return (
@@ -697,7 +707,7 @@ export function AlignedText({
         style={[
           { marginRight: 10 },
           truncate === 'left' && truncateStyle,
-          leftStyle
+          leftStyle,
         ]}
       >
         {left}
@@ -706,7 +716,7 @@ export function AlignedText({
         style={[
           { flex: 1, textAlign: 'right' },
           truncate === 'right' && truncateStyle,
-          rightStyle
+          rightStyle,
         ]}
       >
         {right}
@@ -752,7 +762,7 @@ function ModalContent({
   noAnimation,
   isCurrent,
   stackIndex,
-  children
+  children,
 }) {
   let contentRef = useRef(null);
   let mounted = useRef(false);
@@ -809,7 +819,7 @@ function ModalContent({
       style={[
         style,
         size && { width: size.width, height: size.height },
-        noAnimation && !isCurrent && { display: 'none' }
+        noAnimation && !isCurrent && { display: 'none' },
       ]}
     >
       {children}
@@ -836,7 +846,7 @@ export function Modal({
   contentStyle,
   overlayStyle,
   children,
-  onClose
+  onClose,
 }) {
   useEffect(() => {
     // This deactivates any key handlers in the "app" scope. Ideally
@@ -871,7 +881,7 @@ export function Modal({
           backgroundColor: 'transparent',
           padding: 0,
           pointerEvents: 'auto',
-          ...contentStyle
+          ...contentStyle,
         },
         overlay: {
           zIndex: 3000,
@@ -885,10 +895,10 @@ export function Modal({
                 top: 0,
                 left: 0,
                 right: 0,
-                bottom: 0
+                bottom: 0,
               }
-            : {})
-        }
+            : {}),
+        },
       }}
     >
       <ModalContent
@@ -904,12 +914,12 @@ export function Modal({
             backgroundColor: 'white',
             opacity: isHidden ? 0 : 1,
             [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
-              minWidth: tokens.breakpoint_narrow
-            }
+              minWidth: tokens.breakpoint_narrow,
+            },
           },
           styles.shadowLarge,
           style,
-          styles.lightScrollbar
+          styles.lightScrollbar,
         ]}
       >
         {showHeader && (
@@ -917,7 +927,7 @@ export function Modal({
             style={{
               padding: 20,
               position: 'relative',
-              flexShrink: 0
+              flexShrink: 0,
             }}
           >
             {showTitle && (
@@ -930,7 +940,7 @@ export function Modal({
                   // We need to force a width for the text-overflow
                   // ellipses to work because we are aligning center.
                   // This effectively gives it a padding of 20px
-                  width: 'calc(100% - 40px)'
+                  width: 'calc(100% - 40px)',
                 }}
               >
                 <Text
@@ -939,7 +949,7 @@ export function Modal({
                     fontWeight: 700,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis'
+                    textOverflow: 'ellipsis',
                   }}
                 >
                   {title}
@@ -954,13 +964,13 @@ export function Modal({
                 top: 0,
                 bottom: 0,
                 justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <View
                 style={{
                   flexDirection: 'row',
-                  marginRight: 15
+                  marginRight: 15,
                 }}
               >
                 {showClose && (
@@ -991,7 +1001,7 @@ export function Modal({
               backgroundColor: 'rgba(255, 255, 255, .6)',
               alignItems: 'center',
               justifyContent: 'center',
-              zIndex: 1000
+              zIndex: 1000,
             }}
           >
             <Loading style={{ width: 20, height: 20 }} color={colors.n1} />
@@ -1006,14 +1016,14 @@ export function ModalButtons({
   style,
   leftContent,
   focusButton = false,
-  children
+  children,
 }) {
   let containerRef = useRef(null);
 
   useEffect(() => {
     if (focusButton && containerRef.current) {
       let button = containerRef.current.querySelector(
-        'button:not([data-hidden])'
+        'button:not([data-hidden])',
       );
 
       if (button) {
@@ -1028,9 +1038,9 @@ export function ModalButtons({
       style={[
         {
           flexDirection: 'row',
-          marginTop: 30
+          marginTop: 30,
         },
-        style
+        style,
       ]}
     >
       {leftContent}
@@ -1049,16 +1059,16 @@ export function InlineField({ label, labelWidth, children, width, style }) {
           flexDirection: 'row',
           alignItems: 'center',
           margin: '7px 0',
-          width
+          width,
         },
-        style
+        style,
       )}
     >
       <div
         style={{
           width: labelWidth || 75,
           textAlign: 'right',
-          paddingRight: 10
+          paddingRight: 10,
         }}
       >
         {label}:
@@ -1164,9 +1174,9 @@ export function Label({ title, style }) {
           color: colors.n2,
           textAlign: 'right',
           fontSize: 12,
-          marginBottom: 2
+          marginBottom: 2,
         },
-        style
+        style,
       ]}
     >
       {title}

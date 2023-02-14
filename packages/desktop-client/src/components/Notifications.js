@@ -10,7 +10,7 @@ import {
   Button,
   ButtonWithLoading,
   Stack,
-  ExternalLink
+  ExternalLink,
 } from 'loot-design/src/components/common';
 import { styles, colors } from 'loot-design/src/style';
 import Loading from 'loot-design/src/svg/AnimatedLoading';
@@ -65,7 +65,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
 }
 
 function Notification({ notification, onRemove }) {
-  let { type, title, message, messageActions, sticky, internal, button } =
+  let { type, title, message, pre, messageActions, sticky, internal, button } =
     notification;
 
   let [loading, setLoading] = useState(false);
@@ -86,14 +86,14 @@ function Notification({ notification, onRemove }) {
 
   let processedMessage = useMemo(
     () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
-    [message, messageActions]
+    [message, messageActions],
   );
 
   return (
     <View
       style={{
         marginTop: 10,
-        color: positive ? colors.g3 : error ? colors.r3 : colors.y2
+        color: positive ? colors.g3 : error ? colors.r3 : colors.y2,
       }}
     >
       <Stack
@@ -113,7 +113,7 @@ function Notification({ notification, onRemove }) {
           ...styles.shadowLarge,
           maxWidth: 550,
 
-          '& a': { color: 'currentColor' }
+          '& a': { color: 'currentColor' },
         }}
       >
         <Stack align="flex-start">
@@ -121,6 +121,23 @@ function Notification({ notification, onRemove }) {
             <View style={{ fontWeight: 700, marginBottom: 10 }}>{title}</View>
           )}
           <View>{processedMessage}</View>
+          {pre
+            ? pre.split('\n\n').map((text, idx) => (
+                <View
+                  key={idx}
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    backgroundColor: 'rgba(0, 0, 0, .05)',
+                    padding: 10,
+                    borderRadius: 4,
+                  }}
+                >
+                  {text}
+                </View>
+              ))
+            : null}
           {button && (
             <ButtonWithLoading
               bare
@@ -144,8 +161,8 @@ function Notification({ notification, onRemove }) {
                     ? colors.g9
                     : error
                     ? colors.r10
-                    : colors.y9
-                }
+                    : colors.y9,
+                },
               }}
             >
               {button.title}
@@ -172,7 +189,7 @@ function Notification({ notification, onRemove }) {
             bottom: 0,
             backgroundColor: 'rgba(250, 250, 250, .75)',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
           }}
         >
           <Loading
@@ -193,9 +210,9 @@ function Notifications({ notifications, removeNotification, style }) {
           position: 'absolute',
           bottom: 20,
           right: 13,
-          zIndex: 10000
+          zIndex: 10000,
         },
-        style
+        style,
       ]}
     >
       {notifications.map(note => (
@@ -216,5 +233,5 @@ function Notifications({ notifications, removeNotification, style }) {
 
 export default connect(
   state => ({ notifications: state.notifications.notifications }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(Notifications);

@@ -22,7 +22,7 @@ function BudgetSummary({ month, modalProps }) {
               flexDirection: 'row',
               justifyContent: 'center',
               paddingTop: 15,
-              paddingBottom: 15
+              paddingBottom: 15,
             }}
           >
             <View
@@ -31,8 +31,8 @@ function BudgetSummary({ month, modalProps }) {
                 {
                   fontWeight: '600',
                   textAlign: 'right',
-                  marginRight: 10
-                }
+                  marginRight: 10,
+                },
               ]}
             >
               <CellValue
@@ -59,8 +59,8 @@ function BudgetSummary({ month, modalProps }) {
                 {
                   display: 'flex',
                   flexDirection: 'column',
-                  textAlign: 'left'
-                }
+                  textAlign: 'left',
+                },
               ]}
             >
               <Text>Available Funds</Text>
@@ -84,8 +84,8 @@ function BudgetSummary({ month, modalProps }) {
                         {
                           fontWeight: '600',
                           fontSize: 22,
-                          color: amount < 0 ? colors.r4 : colors.n1
-                        }
+                          color: amount < 0 ? colors.r4 : colors.n1,
+                        },
                       ]}
                     >
                       {format(amount, 'financial')}
@@ -100,7 +100,7 @@ function BudgetSummary({ month, modalProps }) {
             style={{
               flexDirection: 'row',
               justifyContent: 'center',
-              paddingBottom: 15
+              paddingBottom: 15,
             }}
           >
             <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>

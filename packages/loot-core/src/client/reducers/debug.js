@@ -1,7 +1,7 @@
 import constants from '../constants';
 
 const initialState = {
-  selectedCell: null
+  selectedCell: null,
 };
 
 function update(state = initialState, action) {
@@ -11,7 +11,7 @@ function update(state = initialState, action) {
         ...state,
         selectedCell: action.sheet
           ? { sheet: action.sheet, name: action.name }
-          : null
+          : null,
       };
     default:
   }

@@ -18,7 +18,7 @@ export default function MobileWebMessage() {
   let [show, setShow] = useState(
     isMobile() &&
       !hideMobileMessagePref &&
-      !document.cookie.match(/hideMobileMessage=true/)
+      !document.cookie.match(/hideMobileMessage=true/),
   );
   let [requestDontRemindMe, setRequestDontRemindMe] = useState(false);
 
@@ -57,7 +57,7 @@ export default function MobileWebMessage() {
         borderRadius: 6,
         zIndex: 10000,
         fontSize: 15,
-        ...styles.shadowLarge
+        ...styles.shadowLarge,
       }}
     >
       <Text style={{ lineHeight: '1.5em' }}>
@@ -73,7 +73,7 @@ export default function MobileWebMessage() {
         style={{
           gap: 16,
           marginTop: 20,
-          justifyContent: 'center'
+          justifyContent: 'center',
         }}
       >
         <Button style={buttonStyle} onClick={onTry}>
@@ -83,7 +83,7 @@ export default function MobileWebMessage() {
           style={{
             alignItems: 'center',
             flexDirection: 'row',
-            justifyContent: 'flex-end'
+            justifyContent: 'flex-end',
           }}
         >
           <Checkbox
@@ -96,7 +96,7 @@ export default function MobileWebMessage() {
           <label
             htmlFor="dont_remind_me"
             style={{
-              userSelect: 'none'
+              userSelect: 'none',
             }}
           >
             Don't remind me again

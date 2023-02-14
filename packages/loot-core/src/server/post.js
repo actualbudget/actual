@@ -29,8 +29,8 @@ export async function post(url, data, headers = {}) {
       body: JSON.stringify(data),
       headers: {
         ...headers,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
     text = await res.text();
   } catch (err) {
@@ -53,7 +53,7 @@ export async function post(url, data, headers = {}) {
         '\nData: ' +
         JSON.stringify(data, null, 2) +
         '\nResponse: ' +
-        JSON.stringify(res, null, 2)
+        JSON.stringify(res, null, 2),
     );
 
     throw new PostError(res.description || res.reason || 'unknown');
@@ -71,8 +71,8 @@ export async function postBinary(url, data, headers) {
       headers: {
         'Content-Length': data.length,
         'Content-Type': 'application/actual-sync',
-        ...headers
-      }
+        ...headers,
+      },
     });
   } catch (err) {
     throw new PostError('network-failure');

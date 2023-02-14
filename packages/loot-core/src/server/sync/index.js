@@ -9,7 +9,7 @@ import {
   deserializeClock,
   getClock,
   Timestamp,
-  merkle
+  merkle,
 } from '../crdt';
 import * as db from '../db';
 import app from '../main-app';
@@ -80,12 +80,12 @@ function apply(msg, prev) {
       if (prev) {
         query = {
           sql: db.cache(`UPDATE ${dataset} SET ${column} = ? WHERE id = ?`),
-          params: [value, row]
+          params: [value, row],
         };
       } else {
         query = {
           sql: db.cache(`INSERT INTO ${dataset} (id, ${column}) VALUES (?, ?)`),
-          params: [row, value]
+          params: [row, value],
         };
       }
 
@@ -183,10 +183,10 @@ async function compareMessages(messages) {
 
     let res = db.runQuery(
       db.cache(
-        'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?'
+        'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?',
       ),
       [dataset, row, column, timestampStr],
-      true
+      true,
     );
 
     // Returned message is any one that is "later" than this message,
@@ -328,7 +328,7 @@ export const applyMessages = sequential(async messages => {
         db.runQuery(
           db.cache(`INSERT INTO messages_crdt (timestamp, dataset, row, column, value)
            VALUES (?, ?, ?, ?, ?)`),
-          [timestamp.toString(), dataset, row, column, serializeValue(value)]
+          [timestamp.toString(), dataset, row, column, serializeValue(value)],
         );
 
         currentMerkle = merkle.insert(currentMerkle, msg.timestamp);
@@ -342,9 +342,9 @@ export const applyMessages = sequential(async messages => {
       // exceptions)
       db.runQuery(
         db.cache(
-          'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)'
+          'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
         ),
-        [serializeClock({ ...clock, merkle: currentMerkle })]
+        [serializeClock({ ...clock, merkle: currentMerkle })],
       );
     }
   });
@@ -388,7 +388,7 @@ export const applyMessages = sequential(async messages => {
     type: 'applied',
     tables,
     data: newData,
-    prevData: oldData
+    prevData: oldData,
   });
 
   return messages;
@@ -414,7 +414,7 @@ async function _sendMessages(messages) {
         // message.
         app.events.emit('sync', {
           type: 'error',
-          subtype: 'apply-failure'
+          subtype: 'apply-failure',
         });
       } else {
         app.events.emit('sync', { type: 'error' });
@@ -464,7 +464,7 @@ export function getMessagesSince(since) {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
     [since],
-    true
+    true,
   );
 }
 
@@ -474,8 +474,8 @@ export async function syncAndReceiveMessages(messages, since) {
     messages.map(msg => ({
       ...msg,
       value: deserializeValue(msg.value),
-      timestamp: Timestamp.parse(msg.timestamp)
-    }))
+      timestamp: Timestamp.parse(msg.timestamp),
+    })),
   );
   return localMessages;
 }
@@ -544,12 +544,12 @@ export const fullSync = once(async function () {
 
         app.events.emit('sync', {
           type: 'error',
-          subtype: 'out-of-sync'
+          subtype: 'out-of-sync',
         });
       } else if (e.reason === 'invalid-schema') {
         app.events.emit('sync', {
           type: 'error',
-          subtype: 'invalid-schema'
+          subtype: 'invalid-schema',
         });
       } else if (
         e.reason === 'decrypt-failure' ||
@@ -558,12 +558,12 @@ export const fullSync = once(async function () {
         app.events.emit('sync', {
           type: 'error',
           subtype: e.reason,
-          meta: e.meta
+          meta: e.meta,
         });
       } else if (e.reason === 'beta-version') {
         app.events.emit('sync', {
           type: 'error',
-          subtype: e.reason
+          subtype: e.reason,
         });
       } else {
         app.events.emit('sync', { type: 'error' });
@@ -594,7 +594,7 @@ export const fullSync = once(async function () {
   app.events.emit('sync', {
     type: 'success',
     tables,
-    syncDisabled: checkSyncingMode('disabled')
+    syncDisabled: checkSyncingMode('disabled'),
   });
   return { messages };
 });
@@ -625,7 +625,7 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
     'Syncing since',
     since,
     messages.length,
-    '(attempt: ' + count + ')'
+    '(attempt: ' + count + ')',
   );
 
   let buffer = await encoder.encode(groupId, cloudFileId, since, messages);
@@ -635,7 +635,7 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
   // check the worst case here and make multiple requests if it's
   // really large.
   let resBuffer = await postBinary(getServer().SYNC_SERVER + '/sync', buffer, {
-    'X-ACTUAL-TOKEN': userToken
+    'X-ACTUAL-TOKEN': userToken,
   });
 
   // Abort if the file is either no longer loaded, the group id has
@@ -657,8 +657,8 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
       res.messages.map(msg => ({
         ...msg,
         value: deserializeValue(msg.value),
-        timestamp: Timestamp.parse(msg.timestamp)
-      }))
+        timestamp: Timestamp.parse(msg.timestamp),
+      })),
     );
   }
 
@@ -711,7 +711,7 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
         'server hash:',
         res.merkle.hash,
         'localTimeChanged:',
-        localTimeChanged
+        localTimeChanged,
       );
 
       if (rebuiltMerkle.trie.hash === res.merkle.hash) {
@@ -736,14 +736,14 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
         // but it was because the user kept changing stuff in the
         // middle of syncing.
         localTimeChanged ? 0 : count + 1,
-        diffTime
-      )
+        diffTime,
+      ),
     );
   } else {
     // All synced up, store the current time as a simple optimization
     // for the next sync
     await prefs.savePrefs({
-      lastSyncedTimestamp: getClock().timestamp.toString()
+      lastSyncedTimestamp: getClock().timestamp.toString(),
     });
   }
 

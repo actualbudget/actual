@@ -1,7 +1,7 @@
 import constants from '../constants';
 
 const initialState = {
-  data: null
+  data: null,
 };
 
 export default function update(state = initialState, action) {

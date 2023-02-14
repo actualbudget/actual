@@ -10,7 +10,7 @@ const uuid = require('../../platform/uuid');
 let MIGRATIONS_DIR = fs.migrationsPath;
 
 let javascriptMigrations = {
-  1632571489012: m1632571489012
+  1632571489012: m1632571489012,
 };
 
 export async function withMigrationsDir(dir, func) {
@@ -41,7 +41,7 @@ export async function getAppliedMigrations(db) {
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
     [],
-    true
+    true,
   );
   return rows.map(row => row.id);
 }
@@ -74,7 +74,7 @@ async function applyJavaScript(db, id) {
     runQuery: (query, params, fetchAll) =>
       sqlite.runQuery(db, query, params, fetchAll),
     execQuery: query => sqlite.execQuery(db, query),
-    transaction: func => sqlite.transaction(db, func)
+    transaction: func => sqlite.transaction(db, func),
   };
 
   if (javascriptMigrations[id] == null) {
@@ -102,7 +102,7 @@ export async function applyMigration(db, name, migrationsDir) {
     await applySql(db, code);
   }
   await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
-    getMigrationId(name)
+    getMigrationId(name),
   ]);
 }
 

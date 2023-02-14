@@ -12,7 +12,7 @@ export default () => (
         <PlaidExternalMsg
           modalProps={{
             isCurrent: true,
-            parent: node
+            parent: node,
           }}
         />
       )}

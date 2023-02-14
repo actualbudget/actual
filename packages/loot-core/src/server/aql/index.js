@@ -2,7 +2,7 @@ export {
   convertForInsert,
   convertForUpdate,
   convertFromSelect,
-  convertInputType
+  convertInputType,
 } from './schema-helpers';
 export { compileQuery } from './compiler';
 export { makeViews } from './views';

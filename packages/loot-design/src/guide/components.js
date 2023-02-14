@@ -6,7 +6,7 @@ export function Section({
   children,
   style,
   contentStyle,
-  direction = 'vertical'
+  direction = 'vertical',
 }) {
   const arr = React.Children.toArray(children);
 
@@ -29,9 +29,9 @@ export function Section({
       {...css(
         {
           display: 'flex',
-          flexDirection: direction === 'horizontal' ? 'row' : 'column'
+          flexDirection: direction === 'horizontal' ? 'row' : 'column',
         },
-        style
+        style,
       )}
       data-section="true"
     >
@@ -64,9 +64,9 @@ export function MobileSection({ style, headerComponent, children }) {
           border: '1px solid #f0f0f0',
           overflow: 'hidden',
           display: 'flex',
-          backgroundColor: '#fafafa'
+          backgroundColor: '#fafafa',
         },
-        style
+        style,
       ]}
     >
       {children}
@@ -82,9 +82,9 @@ export function WithHeader({ title, style, children }) {
           flex: 1,
           fontSize: 14,
           fontWeight: 500,
-          color: '#303030'
+          color: '#303030',
         },
-        style
+        style,
       ])}
     >
       <div {...css({ textAlign: 'center', paddingTop: 10, paddingBottom: 5 })}>
@@ -102,7 +102,7 @@ export function MobileScreen({ children }) {
         width: 375,
         height: 667,
         overflow: 'hidden',
-        display: 'flex'
+        display: 'flex',
       }}
     >
       {children}
@@ -121,7 +121,7 @@ export function Note({ top, left, width, children }) {
         backgroundColor: '#fff971',
         padding: 5,
         fontSize: 12,
-        fontStyle: 'italic'
+        fontStyle: 'italic',
       }}
     >
       {children}
@@ -148,10 +148,10 @@ export class TestModal extends React.Component {
           width,
           height,
           position: 'relative',
-          backgroundColor: backgroundColor || '#f0f0f0'
+          backgroundColor: backgroundColor || '#f0f0f0',
         }}
       />,
-      parentNode && children(parentNode)
+      parentNode && children(parentNode),
     ];
   }
 }

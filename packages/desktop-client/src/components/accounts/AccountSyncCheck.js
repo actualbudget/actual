@@ -42,7 +42,19 @@ function getErrorMessage(type, code) {
     default:
   }
 
-  return 'An internal error occurred. Try to login again, or contact help@actualbudget.com for support.';
+  return (
+    <>
+      An internal error occurred. Try to login again, or get{' '}
+      <a
+        href="https://actualbudget.github.io/docs/Contact/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        in touch
+      </a>{' '}
+      for support.
+    </>
+  );
 }
 
 function AccountSyncCheck({
@@ -55,7 +67,7 @@ function AccountSyncCheck({
   pushModal,
   closeModal,
   getAccounts,
-  addNotification
+  addNotification,
 }) {
   if (!failedAccounts) {
     return null;
@@ -95,7 +107,7 @@ function AccountSyncCheck({
           color: colors.r5,
           backgroundColor: colors.r10,
           padding: '4px 8px',
-          borderRadius: 4
+          borderRadius: 4,
         }}
         onClick={() => setOpen(true)}
       >
@@ -104,7 +116,7 @@ function AccountSyncCheck({
             width: 14,
             height: 14,
             marginRight: 5,
-            color: 'currentColor'
+            color: 'currentColor',
           }}
         />{' '}
         This account is experiencing connection problems. Let{"'"}s fix it.
@@ -145,7 +157,7 @@ function AccountSyncCheck({
 export default connect(
   state => ({
     accounts: state.queries.accounts,
-    failedAccounts: state.account.failedAccounts
+    failedAccounts: state.account.failedAccounts,
   }),
-  actions
+  actions,
 )(AccountSyncCheck);

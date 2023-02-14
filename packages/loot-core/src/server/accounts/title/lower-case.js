@@ -5,13 +5,13 @@ const conjunctions = [
   'but',
   'or',
   'yet',
-  'so'
+  'so',
 ];
 
 const articles = [
   'a', //
   'an',
-  'the'
+  'the',
 ];
 
 const prepositions = [
@@ -83,7 +83,7 @@ const prepositions = [
   'via',
   'with',
   'within',
-  'without'
+  'without',
 ];
 
 module.exports = new Set([...conjunctions, ...articles, ...prepositions]);

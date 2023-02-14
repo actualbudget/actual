@@ -67,7 +67,7 @@ async function multiGet(keys) {
         req.onerror = e => reject(e);
         req.onsuccess = e => resolve([key, e.target.result]);
       });
-    })
+    }),
   );
 
   commit(transaction);
@@ -87,7 +87,7 @@ async function multiSet(keyValues) {
         req.onerror = e => reject(e);
         req.onsuccess = e => resolve();
       });
-    })
+    }),
   );
 
   commit(transaction);
@@ -107,7 +107,7 @@ async function multiRemove(keys) {
         req.onerror = e => reject(e);
         req.onsuccess = e => resolve();
       });
-    })
+    }),
   );
 
   commit(transaction);
@@ -122,5 +122,5 @@ module.exports = {
   removeItem,
   multiGet,
   multiSet,
-  multiRemove
+  multiRemove,
 };

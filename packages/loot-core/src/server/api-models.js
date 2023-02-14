@@ -74,7 +74,7 @@ export const transactionModel = {
       result.cleared = transaction.cleared;
     }
     return result;
-  }
+  },
 };
 
 export const accountModel = {
@@ -86,7 +86,7 @@ export const accountModel = {
       name: account.name,
       type: account.type,
       offbudget: account.offbudget ? true : false,
-      closed: account.closed ? true : false
+      closed: account.closed ? true : false,
     };
   },
 
@@ -99,7 +99,7 @@ export const accountModel = {
       result.closed = account.closed ? 1 : 0;
     }
     return result;
-  }
+  },
 };
 
 export const categoryModel = {
@@ -110,7 +110,7 @@ export const categoryModel = {
       id: category.id,
       name: category.name,
       is_income: category.is_income ? true : false,
-      group_id: category.cat_group
+      group_id: category.cat_group,
     };
   },
 
@@ -123,7 +123,7 @@ export const categoryModel = {
       result.cat_group = category.group_id;
     }
     return result;
-  }
+  },
 };
 
 export const categoryGroupModel = {
@@ -134,7 +134,7 @@ export const categoryGroupModel = {
       id: group.id,
       name: group.name,
       is_income: group.is_income ? true : false,
-      categories: group.categories.map(categoryModel.toExternal)
+      categories: group.categories.map(categoryModel.toExternal),
     };
   },
 
@@ -147,7 +147,7 @@ export const categoryGroupModel = {
       result.categories = group.categories.map(categoryModel.fromExternal);
     }
     return result;
-  }
+  },
 };
 
 export const payeeModel = {
@@ -158,14 +158,14 @@ export const payeeModel = {
       id: payee.id,
       name: payee.name,
       category: payee.category,
-      transfer_acct: payee.transfer_acct
+      transfer_acct: payee.transfer_acct,
     };
   },
 
   fromExternal(payee) {
     // No translation is needed
     return payee;
-  }
+  },
 };
 
 export const payeeRuleModel = {
@@ -178,5 +178,5 @@ export const payeeRuleModel = {
 
   fromExternal(rule) {
     return rule;
-  }
+  },
 };

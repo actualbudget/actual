@@ -26,7 +26,7 @@ const builtinFuncs = {
   },
   date: function (str) {
     return dateFns.parseISO(str);
-  }
+  },
 };
 
 function interpretExpr(expr, context) {

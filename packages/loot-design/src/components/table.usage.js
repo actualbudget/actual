@@ -8,7 +8,7 @@ import {
   Row,
   Cell,
   InputCell,
-  useTableNavigator
+  useTableNavigator,
 } from './table';
 
 let uuid = require('loot-core/src/platform/uuid');
@@ -58,7 +58,7 @@ let people = [
   { id: 2, name: 'Sarah', poop: 1, age: 33, height: 5.6 },
   { id: 3, name: 'Evy', age: 4, height: 3 },
   { id: 4, name: 'Georgia', poop: 2, age: 3, height: 2.5 },
-  { id: 5, name: 'Charlotte', age: 0, height: 1.2 }
+  { id: 5, name: 'Charlotte', age: 0, height: 1.2 },
 ];
 
 let getFields = item =>
@@ -130,7 +130,7 @@ export default () => (
           let lots = [];
           for (let i = 0; i < 100; i++) {
             lots = lots.concat(
-              people.map(person => ({ ...person, id: uuid.v4Sync() }))
+              people.map(person => ({ ...person, id: uuid.v4Sync() })),
             );
           }
           return lots;

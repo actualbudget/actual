@@ -7,7 +7,7 @@ import {
   updateTransaction,
   addSplitTransaction,
   realizeTempTransactions,
-  applyTransactionDiff
+  applyTransactionDiff,
 } from 'loot-core/src/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
@@ -36,7 +36,7 @@ import { TransactionTable } from './TransactionsTable';
 async function saveDiff(diff) {
   let remoteUpdates = await send('transactions-batch-update', {
     ...diff,
-    learnCategories: true
+    learnCategories: true,
   });
   if (remoteUpdates.length > 0) {
     return { updates: remoteUpdates };
@@ -48,7 +48,7 @@ async function saveDiffAndApply(diff, changes, onChange) {
   let remoteDiff = await saveDiff(diff);
   onChange(
     applyTransactionDiff(changes.newTransaction, remoteDiff),
-    applyChanges(remoteDiff, changes.data)
+    applyChanges(remoteDiff, changes.data),
   );
 }
 
@@ -62,6 +62,7 @@ export default function TransactionList({
   categoryGroups,
   payees,
   balances,
+  showCleared,
   showAccount,
   headerContent,
   animated,
@@ -75,7 +76,7 @@ export default function TransactionList({
   onChange,
   onRefetch,
   onCloseAddTransaction,
-  onCreatePayee
+  onCreatePayee,
 }) {
   let transactionsLatest = useRef();
   let history = useHistory();
@@ -147,7 +148,7 @@ export default function TransactionList({
     id => {
       history.push('/payees', { selectedPayee: id });
     },
-    [history]
+    [history],
   );
 
   return (
@@ -159,6 +160,7 @@ export default function TransactionList({
       categoryGroups={categoryGroups}
       payees={payees}
       balances={balances}
+      showCleared={showCleared}
       showAccount={showAccount}
       showCategory={true}
       animated={animated}

@@ -16,7 +16,7 @@ export function loadPrefs() {
     dispatch({
       type: constants.SET_PREFS,
       prefs,
-      globalPrefs: await send('load-global-prefs')
+      globalPrefs: await send('load-global-prefs'),
     });
 
     return prefs;
@@ -28,7 +28,7 @@ export function savePrefs(prefs) {
     await send('save-prefs', prefs);
     dispatch({
       type: constants.MERGE_LOCAL_PREFS,
-      prefs
+      prefs,
     });
   };
 }
@@ -39,7 +39,7 @@ export function loadGlobalPrefs() {
     dispatch({
       type: constants.SET_PREFS,
       prefs: getState().prefs.local,
-      globalPrefs
+      globalPrefs,
     });
     return globalPrefs;
   };
@@ -50,7 +50,7 @@ export function saveGlobalPrefs(prefs) {
     await send('save-global-prefs', prefs);
     dispatch({
       type: constants.MERGE_GLOBAL_PREFS,
-      globalPrefs: prefs
+      globalPrefs: prefs,
     });
   };
 }

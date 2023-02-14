@@ -85,7 +85,7 @@ async function _readFile(filepath, opts) {
     if (opts.encoding === 'utf8' && ArrayBuffer.isView(item.contents)) {
       return String.fromCharCode.apply(
         null,
-        new Uint16Array(item.contents.buffer)
+        new Uint16Array(item.contents.buffer),
       );
     }
 
@@ -188,7 +188,7 @@ async function populateDefaultFilesystem() {
     files.map(async file => {
       let contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
       _writeFile('/' + file, contents);
-    })
+    }),
   );
 }
 
@@ -313,7 +313,7 @@ async function removeDirRecursively(dirpath) {
 
 async function getModifiedTime(filepath) {
   throw new Error(
-    'getModifiedTime not supported on the web (only used for backups)'
+    'getModifiedTime not supported on the web (only used for backups)',
   );
 }
 
@@ -341,5 +341,5 @@ module.exports = {
   removeFile,
   removeDir,
   removeDirRecursively,
-  getModifiedTime
+  getModifiedTime,
 };

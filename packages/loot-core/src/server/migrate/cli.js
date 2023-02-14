@@ -8,7 +8,7 @@ import {
   getMigrationList,
   getAppliedMigrations,
   getPending,
-  migrate
+  migrate,
 } from './migrations';
 
 const fs = require('fs');
@@ -19,18 +19,18 @@ const argv = require('yargs').options({
     alias: 'migrationsDir',
     requiresArg: true,
     type: 'string',
-    describe: 'Migrations directory'
+    describe: 'Migrations directory',
   },
   name: {
     requiresArg: true,
     type: 'string',
-    describe: 'Name of new migration'
+    describe: 'Name of new migration',
   },
   db: {
     requiresArg: true,
     type: 'string',
-    describe: 'Path to database'
-  }
+    describe: 'Path to database',
+  },
 }).argv;
 
 function getDatabase(shouldReset) {
@@ -66,7 +66,7 @@ withMigrationsDir(argv.migrationsDir || getMigrationsDir(), async () => {
       fs.unlinkSync(argv.db);
       const initSql = fs.readFileSync(
         path.join(__dirname, '../../../src/server/sql/init.sql'),
-        'utf8'
+        'utf8',
       );
       getDatabase().exec(initSql);
       break;

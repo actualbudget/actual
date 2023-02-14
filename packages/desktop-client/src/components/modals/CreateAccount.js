@@ -40,7 +40,7 @@ class CreateAccount extends React.Component {
                 padding: '10px 0',
                 fontSize: 15,
                 fontWeight: 600,
-                marginTop: 10
+                marginTop: 10,
               }}
               onClick={this.onConnect}
             >
@@ -52,7 +52,7 @@ class CreateAccount extends React.Component {
                 marginTop: 30,
                 marginBottom: 10,
                 lineHeight: '1.4em',
-                fontSize: 15
+                fontSize: 15,
               }}
             >
               You can also create a local account if you want to track
@@ -66,7 +66,7 @@ class CreateAccount extends React.Component {
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                color: colors.n3
+                color: colors.n3,
               }}
               onClick={this.onCreateLocalAccount}
             >
@@ -81,7 +81,7 @@ class CreateAccount extends React.Component {
 
 export default connect(
   state => ({
-    currentModal: state.modals.currentModal
+    currentModal: state.modals.currentModal,
   }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(CreateAccount);

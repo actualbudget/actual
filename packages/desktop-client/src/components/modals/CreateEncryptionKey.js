@@ -13,14 +13,14 @@ import {
   P,
   ModalButtons,
   Input,
-  InitialFocus
+  InitialFocus,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
 export default function CreateEncryptionKey({
   modalProps,
   actions,
-  options = {}
+  options = {},
 }) {
   let [password, setPassword] = useState('');
   let [loading, setLoading] = useState(false);
@@ -134,7 +134,7 @@ export default function CreateEncryptionKey({
                     color: colors.r4,
                     textAlign: 'center',
                     fontSize: 13,
-                    marginBottom: 3
+                    marginBottom: 3,
                   }}
                 >
                   {error}

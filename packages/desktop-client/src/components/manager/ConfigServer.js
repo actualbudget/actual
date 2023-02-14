@@ -9,13 +9,13 @@ import {
   View,
   Text,
   Button,
-  ButtonWithLoading
+  ButtonWithLoading,
 } from 'loot-design/src/components/common';
 import { useSetThemeColor } from 'loot-design/src/components/hooks';
 import { colors } from 'loot-design/src/style';
 import {
   isDevelopmentEnvironment,
-  isPreviewEnvironment
+  isPreviewEnvironment,
 } from 'loot-design/src/util/environment';
 
 import { useServerURL } from '../../hooks/useServerURL';
@@ -101,7 +101,7 @@ export default function ConfigServer() {
           style={{
             fontSize: 16,
             color: colors.n2,
-            lineHeight: 1.5
+            lineHeight: 1.5,
           }}
         >
           {currentUrl ? (
@@ -124,7 +124,7 @@ export default function ConfigServer() {
               marginTop: 20,
               color: colors.r4,
               borderRadius: 4,
-              fontSize: 15
+              fontSize: 15,
             }}
           >
             {getErrorMessage(error)}
@@ -165,7 +165,7 @@ export default function ConfigServer() {
             flexDirection: 'row',
             flexFlow: 'row wrap',
             justifyContent: 'center',
-            marginTop: 15
+            marginTop: 15,
           }}
         >
           {currentUrl ? (
@@ -179,7 +179,7 @@ export default function ConfigServer() {
                 style={{
                   color: colors.n4,
                   margin: 5,
-                  marginRight: 15
+                  marginRight: 15,
                 }}
                 onClick={onSameDomain}
               >

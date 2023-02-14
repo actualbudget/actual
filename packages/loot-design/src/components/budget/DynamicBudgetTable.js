@@ -40,7 +40,7 @@ const DynamicBudgetTableInner = React.forwardRef(
       onPreload,
       ...props
     },
-    ref
+    ref,
   ) => {
     let { setDisplayMax } = useBudgetMonthCount();
 
@@ -63,7 +63,7 @@ const DynamicBudgetTableInner = React.forwardRef(
             width,
             height,
             alignItems: 'center',
-            opacity: width <= 0 || height <= 0 ? 0 : 1
+            opacity: width <= 0 || height <= 0 ? 0 : 1,
           }}
         >
           <View style={{ width: '100%', maxWidth }}>
@@ -86,7 +86,7 @@ const DynamicBudgetTableInner = React.forwardRef(
         </View>
       </CategoryGroupsContext.Provider>
     );
-  }
+  },
 );
 
 export default React.forwardRef((props, ref) => {

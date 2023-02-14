@@ -48,7 +48,7 @@ export default function Schedules() {
       case 'restart':
         await send('schedule/update', {
           schedule: { id, completed: false },
-          resetNextDate: true
+          resetNextDate: true,
         });
         break;
       case 'delete':
@@ -72,7 +72,7 @@ export default function Schedules() {
         style={{
           marginTop: 20,
           flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         <SchedulesTable
@@ -91,7 +91,7 @@ export default function Schedules() {
           flexDirection: 'row',
           justifyContent: 'space-between',
           margin: '20px 0',
-          flexShrink: 0
+          flexShrink: 0,
         }}
       >
         <Button onClick={onDiscover}>Find schedules</Button>

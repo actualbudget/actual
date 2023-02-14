@@ -4,7 +4,7 @@ import { styles, colors } from '../../style';
 import { View, Text, Modal, P, Button, Strong, CustomSelect } from '../common';
 
 let selectedStyle = {
-  color: colors.n1
+  color: colors.n1,
 };
 
 function EmptyMessage() {
@@ -16,7 +16,7 @@ function Account({ account, selected, onSelect }) {
     <View
       style={[
         { marginBottom: 8, flexShrink: 0, userSelect: 'none' },
-        styles.mediumText
+        styles.mediumText,
       ]}
       onClick={onSelect}
     >
@@ -32,13 +32,13 @@ function Account({ account, selected, onSelect }) {
             flexDirection: 'row',
             alignItems: 'center',
             border: '1px solid ' + colors.n10,
-            ':hover': selectedStyle
+            ':hover': selectedStyle,
           },
           selected && {
             ...selectedStyle,
             borderColor: colors.b9,
-            backgroundColor: colors.b10
-          }
+            backgroundColor: colors.b10,
+          },
         ]}
       >
         <View>
@@ -47,7 +47,7 @@ function Account({ account, selected, onSelect }) {
             style={{
               fontSize: 13,
               color: colors.n5,
-              flexDirection: 'row'
+              flexDirection: 'row',
             }}
           >
             {account.product}
@@ -68,7 +68,7 @@ export default function SelectLinkedAccounts({
   requisitionId,
   accounts: importedAccounts,
   actualAccounts,
-  actions
+  actions,
 }) {
   let [chosenAccounts, setChosenAccounts] = useState([]);
 
@@ -78,7 +78,7 @@ export default function SelectLinkedAccounts({
     account =>
       !chosenAccounts
         .map(acc => acc.chosenImportedAccountId)
-        .includes(account.account_id)
+        .includes(account.account_id),
   );
 
   const actualAccountsToSelect = [
@@ -87,8 +87,8 @@ export default function SelectLinkedAccounts({
       account =>
         !chosenAccounts
           .map(acc => acc.chosenActualAccountId)
-          .includes(account.id)
-    )
+          .includes(account.id),
+    ),
   ];
 
   useEffect(() => {
@@ -102,35 +102,31 @@ export default function SelectLinkedAccounts({
             actualAccount.account_id === importedAccount.account_id ||
             actualAccount.mask === importedAccount.mask
           );
-        }
+        },
       );
 
       if (matchedActualAccount) {
-        chosenAccountsToAdd.push(
-          {
-            chosenImportedAccountId: importedAccount.account_id,
-            chosenActualAccountId: matchedActualAccount.id
-          })
+        chosenAccountsToAdd.push({
+          chosenImportedAccountId: importedAccount.account_id,
+          chosenActualAccountId: matchedActualAccount.id,
+        });
       }
     });
 
-    setChosenAccounts([
-      ...chosenAccounts,
-      ...chosenAccountsToAdd,
-    ]);
+    setChosenAccounts([...chosenAccounts, ...chosenAccountsToAdd]);
   }, []);
 
   let [selectedImportAccountId, setSelectedImportAccountId] = useState(
-    importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id
+    importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id,
   );
   let [selectedAccountId, setSelectedAccountId] = useState(
-    actualAccountsToSelect[0] && actualAccountsToSelect[0].id
+    actualAccountsToSelect[0] && actualAccountsToSelect[0].id,
   );
 
   async function onNext() {
     chosenAccounts.forEach(chosenAccount => {
       const importedAccount = importedAccounts.find(
-        account => account.account_id === chosenAccount.chosenImportedAccountId
+        account => account.account_id === chosenAccount.chosenImportedAccountId,
       );
 
       actions.linkAccount(
@@ -138,7 +134,7 @@ export default function SelectLinkedAccounts({
         importedAccount,
         chosenAccount.chosenActualAccountId !== addAccountOption.id
           ? chosenAccount.chosenActualAccountId
-          : undefined
+          : undefined,
       );
     });
 
@@ -150,8 +146,8 @@ export default function SelectLinkedAccounts({
       ...chosenAccounts,
       {
         chosenImportedAccountId: selectedImportAccountId,
-        chosenActualAccountId: selectedAccountId
-      }
+        chosenActualAccountId: selectedAccountId,
+      },
     ]);
   }
 
@@ -193,7 +189,7 @@ export default function SelectLinkedAccounts({
               paddingLeft: 5,
               paddingRight: 5,
               marginLeft: -5,
-              marginRight: -5
+              marginRight: -5,
             }}
           >
             <View>
@@ -207,7 +203,7 @@ export default function SelectLinkedAccounts({
                         flexDirection: 'row',
                         justifyContent: 'flex-center',
                         margin: '30px 0',
-                        borderBottom: 'solid 1px'
+                        borderBottom: 'solid 1px',
                       }}
                     >
                       <View>
@@ -215,7 +211,7 @@ export default function SelectLinkedAccounts({
                         <CustomSelect
                           options={importedAccountsToSelect.map(account => [
                             account.account_id,
-                            account.name
+                            account.name,
                           ])}
                           onChange={val => {
                             setSelectedImportAccountId(val);
@@ -229,7 +225,7 @@ export default function SelectLinkedAccounts({
                         <CustomSelect
                           options={actualAccountsToSelect.map(account => [
                             account.id,
-                            account.name
+                            account.name,
                           ])}
                           onChange={val => {
                             setSelectedAccountId(val);
@@ -243,7 +239,7 @@ export default function SelectLinkedAccounts({
                         style={{
                           padding: '10px',
                           fontSize: 15,
-                          margin: 10
+                          margin: 10,
                         }}
                         onClick={addToChosenAccounts}
                       >
@@ -254,16 +250,14 @@ export default function SelectLinkedAccounts({
                     ''
                   )}
                   {chosenAccounts.map(chosenAccount => {
-                    const {
-                      chosenImportedAccountId,
-                      chosenActualAccountId
-                    } = chosenAccount;
+                    const { chosenImportedAccountId, chosenActualAccountId } =
+                      chosenAccount;
                     const importedAccount = importedAccounts.find(
-                      acc => acc.account_id === chosenImportedAccountId
+                      acc => acc.account_id === chosenImportedAccountId,
                     );
                     const actualAccount = [
                       addAccountOption,
-                      ...actualAccounts
+                      ...actualAccounts,
                     ].find(acc => acc.id === chosenActualAccountId);
 
                     return (
@@ -272,7 +266,7 @@ export default function SelectLinkedAccounts({
                         style={{
                           flexDirection: 'row',
                           justifyContent: 'flex-center',
-                          marginTop: 30
+                          marginTop: 30,
                         }}
                       >
                         {importedAccount.name} -{'>'} {actualAccount.name}
@@ -281,7 +275,7 @@ export default function SelectLinkedAccounts({
                           style={{
                             padding: '10px',
                             fontSize: 15,
-                            margin: 10
+                            margin: 10,
                           }}
                           onClick={() => removeChoose(chosenAccount)}
                         >
@@ -299,7 +293,7 @@ export default function SelectLinkedAccounts({
             style={{
               flexDirection: 'row',
               justifyContent: 'flex-end',
-              marginTop: 30
+              marginTop: 30,
             }}
           >
             <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>

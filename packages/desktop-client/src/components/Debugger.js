@@ -5,13 +5,13 @@ import CodeMirror from 'codemirror';
 import * as spreadsheet from 'loot-core/src/client/sheetql/spreadsheet';
 import {
   send,
-  init as initConnection
+  init as initConnection,
 } from 'loot-core/src/platform/client/fetch';
 import {
   View,
   Button,
   Input,
-  InlineField
+  InlineField,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -24,7 +24,7 @@ class Debugger extends React.Component {
     selecting: false,
     name: '__global!tmp',
     collapsed: true,
-    node: null
+    node: null,
   };
 
   toggleRecord = () => {
@@ -44,7 +44,7 @@ class Debugger extends React.Component {
 
   init() {
     this.mirror = CodeMirror(this.node, {
-      theme: 'monokai'
+      theme: 'monokai',
     });
 
     this.mirror.setSize('100%', '100%');
@@ -173,7 +173,7 @@ class Debugger extends React.Component {
       <View
         style={{
           height: '100%',
-          '& .CodeMirror': { border: '1px solid ' + colors.b4 }
+          '& .CodeMirror': { border: '1px solid ' + colors.b4 },
         }}
       >
         <div style={{ flex: 1, overflow: 'hidden' }}>{children}</div>
@@ -190,12 +190,12 @@ class Debugger extends React.Component {
               color: 'white',
               zIndex: 1000,
               flexDirection: 'row',
-              alignItems: 'center'
+              alignItems: 'center',
             },
             !collapsed && {
               width: 700,
-              height: 200
-            }
+              height: 200,
+            },
           ]}
         >
           {collapsed ? (
@@ -207,7 +207,7 @@ class Debugger extends React.Component {
                   height: 10,
                   backgroundColor: '#303030',
                   marginRight: 10,
-                  borderRadius: 10
+                  borderRadius: 10,
                 }}
               />
               <Button onClick={this.toggleRecord} style={{ marginRight: 10 }}>
@@ -225,7 +225,7 @@ class Debugger extends React.Component {
                   flexDirection: 'row',
                   justifyContent: 'flex-start',
                   marginBottom: 5,
-                  flexShrink: 0
+                  flexShrink: 0,
                 }}
               >
                 <Button
@@ -233,7 +233,7 @@ class Debugger extends React.Component {
                     backgroundColor: '#303030',
                     color: 'white',
                     padding: '2px 5px',
-                    marginRight: 5
+                    marginRight: 5,
                   }}
                   onClick={this.onClose}
                 >
@@ -244,11 +244,11 @@ class Debugger extends React.Component {
                     {
                       backgroundColor: '#303030',
                       color: 'white',
-                      padding: '2px 5px'
+                      padding: '2px 5px',
                     },
                     selecting && {
-                      backgroundColor: colors.p7
-                    }
+                      backgroundColor: colors.p7,
+                    },
                   ]}
                   onClick={this.onSelect}
                 >
@@ -262,7 +262,7 @@ class Debugger extends React.Component {
                   style={{
                     backgroundColor: '#303030',
                     color: 'white',
-                    flex: 1
+                    flex: 1,
                   }}
                 />
               </InlineField>
@@ -284,7 +284,7 @@ class Debugger extends React.Component {
                   style={{
                     backgroundColor: 'rgba(0, 0, 0, 0)',
                     height: 30,
-                    overflow: 'scroll'
+                    overflow: 'scroll',
                   }}
                 >
                   {node && JSON.stringify(node._dependencies, null, 2)}
@@ -296,7 +296,7 @@ class Debugger extends React.Component {
                     backgroundColor: 'rgba(0, 0, 0, 0)',
                     transition: 'background-color .5s',
                     height: 30,
-                    overflow: 'scroll'
+                    overflow: 'scroll',
                   }}
                   ref={n => (this.valueNode = n)}
                 >

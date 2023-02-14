@@ -11,7 +11,7 @@ export function toGroup(parents, children, mapper = x => x) {
     let childs = children.get(parent.id) || [];
     list.push({
       ...mapper(parent),
-      subtransactions: childs.map(mapper)
+      subtransactions: childs.map(mapper),
     });
     return list;
   }, []);
@@ -41,7 +41,7 @@ function execTransactions(state, query, sql, params, outputTypes) {
       sql,
       params,
       splitType,
-      outputTypes
+      outputTypes,
     );
   } else if (splitType === 'grouped') {
     return execTransactionsGrouped(
@@ -50,7 +50,7 @@ function execTransactions(state, query, sql, params, outputTypes) {
       sql,
       params,
       splitType,
-      outputTypes
+      outputTypes,
     );
   }
 }
@@ -80,7 +80,7 @@ async function execTransactionsGrouped(
   sql,
   params,
   splitType,
-  outputTypes
+  outputTypes,
 ) {
   let { withDead } = queryState;
   let whereDead = withDead ? '' : `AND ${sql.from}.tombstone = 0`;
@@ -144,14 +144,14 @@ async function execTransactionsGrouped(
     matched = new Set(
       [].concat.apply(
         [],
-        rows.map(row => row.matched.split(','))
-      )
+        rows.map(row => row.matched.split(',')),
+      ),
     );
   }
 
   let where = whereIn(
     rows.map(row => row.group_id),
-    `IFNULL(${sql.from}.parent_id, ${sql.from}.id)`
+    `IFNULL(${sql.from}.parent_id, ${sql.from}.id)`,
   );
   let finalSql = `
     SELECT ${sql.select}, parent_id AS _parent_id FROM ${sql.from}
@@ -177,7 +177,7 @@ async function execTransactionsGrouped(
       }
       return acc;
     },
-    { parents: [], children: new Map() }
+    { parents: [], children: new Map() },
   );
 
   let mapper = trans => {
@@ -200,7 +200,7 @@ async function execTransactionsBasic(
   sql,
   params,
   splitType,
-  outputTypes
+  outputTypes,
 ) {
   let s = { ...sql };
 
@@ -216,5 +216,5 @@ async function execTransactionsBasic(
 }
 
 export default {
-  transactions: execTransactions
+  transactions: execTransactions,
 };

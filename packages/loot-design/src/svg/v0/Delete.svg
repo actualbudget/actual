@@ -7,7 +7,7 @@
 >
   <line
     fill="none"
-    stroke="black"
+    stroke="currentColor"
     strokeWidth="4"
     strokeLinecap="round"
     strokeMiterlimit="10"
@@ -18,7 +18,7 @@
   />
   <line
     fill="none"
-    stroke="black"
+    stroke="currentColor"
     strokeWidth="4"
     strokeLinecap="round"
     strokeMiterlimit="10"

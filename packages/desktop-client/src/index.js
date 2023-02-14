@@ -15,7 +15,7 @@ import {
   createStore,
   combineReducers,
   applyMiddleware,
-  bindActionCreators
+  bindActionCreators,
 } from 'redux';
 import thunk from 'redux-thunk';
 
@@ -47,8 +47,8 @@ function rootReducer(state, action) {
         updateInfo: state.updateInfo,
         showUpdateNotification: state.showUpdateNotification,
         managerHasInitialized: state.app.managerHasInitialized,
-        loadingText: state.app.loadingText
-      }
+        loadingText: state.app.loadingText,
+      },
     };
   }
 
@@ -73,5 +73,5 @@ ReactDOM.render(
   <Provider store={store}>
     <App />
   </Provider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );

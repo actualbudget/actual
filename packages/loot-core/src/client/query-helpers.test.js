@@ -20,7 +20,7 @@ function isCountQuery(query) {
 
 function select(row, selectExpressions) {
   return Object.fromEntries(
-    selectExpressions.map(fieldName => [fieldName, row[fieldName]])
+    selectExpressions.map(fieldName => [fieldName, row[fieldName]]),
   );
 }
 
@@ -63,14 +63,14 @@ function runPagedQuery(query, data) {
           })
           .map(row => select(row, query.selectExpressions)),
         query.limit,
-        query.offset
+        query.offset,
       );
     }
   } else if (query.offset != null || query.limit != null) {
     return limitOffset(
       data.map(row => select(row, query.selectExpressions)),
       query.limit,
-      query.offset
+      query.offset,
     );
   }
 
@@ -87,7 +87,7 @@ function initBasicServer(delay) {
         await wait(delay);
       }
       return { data: query.selectExpressions, dependencies: ['transactions'] };
-    }
+    },
   });
 }
 
@@ -101,16 +101,16 @@ function initPagingServer(dataLength, { delay, eventType = 'select' } = {}) {
     query: async query => {
       tracer.event(
         'server-query',
-        eventType === 'select' ? query.selectExpressions : query
+        eventType === 'select' ? query.selectExpressions : query,
       );
       if (delay) {
         await wait(delay);
       }
       return {
         data: runPagedQuery(query, data),
-        dependencies: ['transactions']
+        dependencies: ['transactions'],
       };
-    }
+    },
   });
 
   return data;
@@ -182,13 +182,13 @@ describe('query helpers', () => {
           }
           await wait(500);
           return { data: requestId, dependencies: ['transactions'] };
-        }
+        },
       });
 
       tracer.start();
       let query = q('transactions').select('*');
       let lq = doQuery(query, data => tracer.event('data', data), {
-        onlySync: true
+        onlySync: true,
       });
 
       // Users should never call `run` manually but we'll do it to
@@ -279,7 +279,7 @@ describe('query helpers', () => {
 
     let query = q('transactions').select('id');
     let paged = pagedQuery(query, data => tracer.event('data', data), {
-      onPageData: data => tracer.event('page-data', data)
+      onPageData: data => tracer.event('page-data', data),
     });
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
@@ -339,7 +339,7 @@ describe('query helpers', () => {
 
     let query = q('transactions').select('id');
     pagedQuery(query, data => tracer.event('data', data), {
-      pageCount: 10
+      pageCount: 10,
     });
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
@@ -380,7 +380,7 @@ describe('query helpers', () => {
     let query = q('transactions').select('id');
     let paged = pagedQuery(query, data => tracer.event('data', data), {
       pageCount: 20,
-      onPageData: data => tracer.event('page-data', data)
+      onPageData: data => tracer.event('page-data', data),
     });
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
@@ -415,7 +415,7 @@ describe('query helpers', () => {
     let query = q('transactions').select('id');
     let paged = pagedQuery(query, data => tracer.event('data', data), {
       pageCount: 20,
-      onPageData: data => tracer.event('page-data', data)
+      onPageData: data => tracer.event('page-data', data),
     });
 
     await paged.fetchNext();
@@ -458,7 +458,7 @@ describe('query helpers', () => {
     let query = q('transactions').select(['id', 'date']);
     let paged = pagedQuery(query, data => tracer.event('data', data), {
       pageCount: 20,
-      onPageData: data => tracer.event('page-data', data)
+      onPageData: data => tracer.event('page-data', data),
     });
     await paged.run();
 
@@ -470,29 +470,29 @@ describe('query helpers', () => {
     await tracer.expect(
       'server-query',
       expect.objectContaining({
-        selectExpressions: [{ result: { $count: '*' } }]
-      })
+        selectExpressions: [{ result: { $count: '*' } }],
+      }),
     );
     await tracer.expect(
       'server-query',
-      expect.objectContaining({ filterExpressions: [{ id: 300 }] })
+      expect.objectContaining({ filterExpressions: [{ id: 300 }] }),
     );
     await tracer.expect(
       'server-query',
       expect.objectContaining({
-        filterExpressions: [{ date: { $gte: item.date } }]
-      })
+        filterExpressions: [{ date: { $gte: item.date } }],
+      }),
     );
     await tracer.expect(
       'server-query',
       expect.objectContaining({
         filterExpressions: [{ date: { $lt: item.date } }],
-        limit: 20
-      })
+        limit: 20,
+      }),
     );
     await tracer.expect(
       'data',
-      data.slice(0, data.findIndex(row => row.date < item.date) + 20)
+      data.slice(0, data.findIndex(row => row.date < item.date) + 20),
     );
 
     await wait(1000);

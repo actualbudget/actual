@@ -23,7 +23,7 @@ export default function BankSync({ prefs, savePrefs }) {
             color: colors.n2,
             marginTop: 10,
             maxWidth: 600,
-            lineHeight: '1.4em'
+            lineHeight: '1.4em',
           }}
         >
           {prefs['flags.syncAccount'] ? (

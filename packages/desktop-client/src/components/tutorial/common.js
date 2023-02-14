@@ -32,7 +32,7 @@ export function Standalone({ children, width = 320, skipAnimation = false }) {
             boxShadow: '0 2px 8px rgba(0, 0, 0, .3)',
             borderRadius: 4,
             zIndex: 1000,
-            fontSize: 14
+            fontSize: 14,
           }}
         >
           {children}

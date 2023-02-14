@@ -7,7 +7,7 @@ function _authorize(pushModal, upgradingAccountId, { onSuccess, onClose }) {
       const resp = await send('create-web-token', {
         upgradingAccountId,
         institutionId,
-        accessValidForDays
+        accessValidForDays,
       });
 
       console.log({ resp });
@@ -17,14 +17,14 @@ function _authorize(pushModal, upgradingAccountId, { onSuccess, onClose }) {
 
       let { error, data } = await send('poll-web-token', {
         upgradingAccountId,
-        requisitionId
+        requisitionId,
       });
 
       return { error, data };
     },
 
     onClose,
-    onSuccess
+    onSuccess,
   });
 }
 
@@ -34,8 +34,8 @@ export async function authorizeBank(pushModal, { upgradingAccountId } = {}) {
       pushModal('select-linked-accounts', {
         accounts: data.accounts,
         requisitionId: data.id,
-        upgradingAccountId
+        upgradingAccountId,
       });
-    }
+    },
   });
 }

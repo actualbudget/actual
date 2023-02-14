@@ -29,12 +29,12 @@ async function insertTransactions(repeatTimes = 1) {
     let cat1 = await db.insertCategory({
       id: 'cat' + i + 'a',
       name: 'cat' + i + 'a',
-      cat_group: group
+      cat_group: group,
     });
     let cat2 = await db.insertCategory({
       id: 'cat' + i + 'b',
       name: 'cat' + i + 'b',
-      cat_group: group
+      cat_group: group,
     });
 
     let parent = {
@@ -42,14 +42,14 @@ async function insertTransactions(repeatTimes = 1) {
       account: 'acct',
       date: '2020-01-04',
       amount: -100,
-      is_parent: true
+      is_parent: true,
     };
     let parent2 = {
       id: uuid.v4Sync(),
       account: 'acct',
       date: '2020-01-01',
       amount: -89,
-      is_parent: true
+      is_parent: true,
     };
 
     transactions = transactions.concat([
@@ -61,7 +61,7 @@ async function insertTransactions(repeatTimes = 1) {
       parent2,
       makeChild(parent2, { amount: -9, category: cat2 }),
       makeChild(parent2, { amount: -80, category: cat1 }),
-      { account: 'acct', date: '2020-01-03', amount: -53, category: cat1 }
+      { account: 'acct', date: '2020-01-03', amount: -53, category: cat1 },
     ]);
   }
 
@@ -76,7 +76,7 @@ describe('runQuery', () => {
 
     // date
     let { data } = await runQuery(
-      query('transactions').select('date').serialize()
+      query('transactions').select('date').serialize(),
     );
     expect(data[0].date).toBe('2020-01-04');
 
@@ -85,7 +85,7 @@ describe('runQuery', () => {
       await runQuery(
         query('transactions')
           .select({ month: { $month: '$date' } })
-          .serialize()
+          .serialize(),
       )
     ).data;
     expect(data[0].month).toBe('2020-01');
@@ -95,7 +95,7 @@ describe('runQuery', () => {
       await runQuery(
         query('transactions')
           .select({ year: { $year: '$date' } })
-          .serialize()
+          .serialize(),
       )
     ).data;
     expect(data[0].year).toBe('2020');
@@ -106,7 +106,7 @@ describe('runQuery', () => {
         query('transactions')
           .select(['is_child', 'is_parent'])
           .raw()
-          .serialize()
+          .serialize(),
       )
     ).data;
     expect(data[0].is_child).toBe(false);
@@ -122,7 +122,7 @@ describe('runQuery', () => {
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
-      cleared: true
+      cleared: true,
     });
 
     let { data } = await runQuery(
@@ -130,7 +130,7 @@ describe('runQuery', () => {
         .filter({ amount: { $lt: { $neg: ':amount' } } })
         .select()
         .serialize(),
-      { params: { amount: 5000 } }
+      { params: { amount: 5000 } },
     );
     expect(data[0].id).toBe(transId);
 
@@ -140,7 +140,7 @@ describe('runQuery', () => {
           .filter({ date: { $transform: '$month', $eq: { $month: ':month' } } })
           .select('date')
           .serialize(),
-        { params: { month: '2020-01-02' } }
+        { params: { month: '2020-01-02' } },
       )
     ).data;
     expect(data[0].id).toBe(transId);
@@ -151,7 +151,7 @@ describe('runQuery', () => {
           .filter({ date: { $transform: '$year', $eq: { $year: ':month' } } })
           .select('date')
           .serialize(),
-        { params: { month: '2020-01-02' } }
+        { params: { month: '2020-01-02' } },
       )
     ).data;
     expect(data[0].id).toBe(transId);
@@ -162,7 +162,7 @@ describe('runQuery', () => {
           .filter({ cleared: ':cleared' })
           .select('date')
           .serialize(),
-        { params: { cleared: true } }
+        { params: { cleared: true } },
       )
     ).data;
     expect(data[0].id).toBe(transId);
@@ -175,13 +175,13 @@ describe('runQuery', () => {
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
-      category: null
+      category: null,
     });
     let transCat = await db.insertTransaction({
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
-      category: 'cat'
+      category: 'cat',
     });
 
     let queryState = query('transactions')
@@ -202,18 +202,18 @@ describe('runQuery', () => {
       id: transId,
       account: 'acct',
       date: '2020-01-01',
-      amount: -5001
+      amount: -5001,
     });
 
     let { data } = await runQuery(
       query('transactions')
         .filter({
           amount: { $lt: { $neg: ':amount' } },
-          date: [{ $lte: ':date' }, { $gte: ':date' }]
+          date: [{ $lte: ':date' }, { $gte: ':date' }],
         })
         .select()
         .serialize(),
-      { params: { amount: 5000, date: '2020-01-01' } }
+      { params: { amount: 5000, date: '2020-01-01' } },
     );
     expect(data[0].id).toBe(transId);
   });
@@ -230,7 +230,7 @@ describe('runQuery', () => {
         .filter({ id: { $oneof: repeat(ids, 1000) }, amount: { $lt: 50 } })
         .select('id')
         .raw()
-        .serialize()
+        .serialize(),
     );
     expect(data.map(row => row.id).sort()).toEqual(ids);
   });

@@ -47,11 +47,11 @@ describe('web filesystem', () => {
     // Make sure they are in idb
     expect(await idb.get(store, '/documents/foo.txt')).toEqual({
       filepath: '/documents/foo.txt',
-      contents: 'hello'
+      contents: 'hello',
     });
     expect(await idb.get(store, '/documents/foo.bin')).toEqual({
       filepath: '/documents/foo.bin',
-      contents: new Uint8Array(buf)
+      contents: new Uint8Array(buf),
     });
 
     // Write a file outside of documents
@@ -71,7 +71,7 @@ describe('web filesystem', () => {
 
     expect(await readFile('/documents/db.sqlite')).toBe('some junk');
     expect(await readFile('/blocked/' + pathToId('/documents/db.sqlite'))).toBe(
-      'some junk'
+      'some junk',
     );
   });
 
@@ -81,11 +81,11 @@ describe('web filesystem', () => {
     idb.set(store, { filepath: '/documents/ok.txt', contents: 'oh yeah' });
     idb.set(store, {
       filepath: '/documents/deep/nested/file/ok.txt',
-      contents: 'deeper'
+      contents: 'deeper',
     });
     idb.set(store, {
       filepath: '/documents/deep/nested/db.sqlite',
-      contents: 'this will be blank and just create a symlink'
+      contents: 'this will be blank and just create a symlink',
     });
 
     await sqlite.init();
@@ -98,7 +98,7 @@ describe('web filesystem', () => {
     let FS = sqlite._getModule().FS;
     let { node } = FS.lookupPath('/documents/deep/nested/db.sqlite');
     expect(node.link).toBe(
-      '/blocked/' + pathToId('/documents/deep/nested/db.sqlite')
+      '/blocked/' + pathToId('/documents/deep/nested/db.sqlite'),
     );
   });
 });

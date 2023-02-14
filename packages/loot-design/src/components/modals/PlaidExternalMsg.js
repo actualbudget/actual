@@ -19,7 +19,7 @@ export default function PlaidExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,
-  onClose: originalOnClose
+  onClose: originalOnClose,
 }) {
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
@@ -92,7 +92,7 @@ export default function PlaidExternalMsg({
                 fontWeight: 600,
                 marginTop: 10,
                 backgroundColor: colors.g4,
-                borderColor: colors.g4
+                borderColor: colors.g4,
               }}
               onClick={onContinue}
             >
@@ -105,7 +105,7 @@ export default function PlaidExternalMsg({
                 padding: '10px 0',
                 fontSize: 15,
                 fontWeight: 600,
-                marginTop: 10
+                marginTop: 10,
               }}
               onClick={onJump}
             >
@@ -123,17 +123,14 @@ export default function PlaidExternalMsg({
               color: colors.n5,
               fontSize: 13,
               '& a, & a:visited': {
-                color: colors.n5
-              }
+                color: colors.n5,
+              },
             }}
           >
             Typing your bank{"'"}s username and password is one of the most
             security-sensitive things you can do, and the browser is the most
             secure app in the world. Why not use it to make sure your
-            information is safe?{' '}
-            <a href="https://actualbudget.com/security-learn-more">
-              Learn more about security
-            </a>
+            information is safe? [TODO: Link to docs article]
           </Text>
 
           <ModalButtons style={{ marginTop: 10 }}>

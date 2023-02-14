@@ -7,7 +7,7 @@ const SvgPlay = props => (
     viewBox="0 0 20 20"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path d="m4 4 12 6-12 6z" fill="currentColor" />

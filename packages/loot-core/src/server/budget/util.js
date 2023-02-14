@@ -7,7 +7,7 @@ export function sumAmounts(...amounts) {
   return safeNumber(
     amounts.reduce((total, amount) => {
       return total + number(amount);
-    }, 0)
+    }, 0),
   );
 }
 
