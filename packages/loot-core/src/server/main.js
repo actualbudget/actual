@@ -1368,16 +1368,6 @@ handlers['key-test'] = async function ({ fileId, password }) {
   return {};
 };
 
-handlers['should-pitch-subscribe'] = async function () {
-  let seenSubscribe = await asyncStorage.getItem('seenSubscribe');
-  return seenSubscribe !== 'true';
-};
-
-handlers['has-pitched-subscribe'] = async function () {
-  await asyncStorage.setItem('seenSubscribe', 'true');
-  return 'ok';
-};
-
 handlers['subscribe-needs-bootstrap'] = async function ({ url } = {}) {
   if (getServer(url).BASE_SERVER === UNCONFIGURED_SERVER) {
     return { bootstrapped: true };
