@@ -16,7 +16,7 @@ If you want to Actual to serve over HTTPS, you can set this key to an object wit
 - `cert`: The path to the certificate file. (environment variable: `ACTUAL_HTTPS_CERT`)
 - any other options from Node’s [`tls.createServer()`](https://nodejs.org/docs/latest-v16.x/api/tls.html#tlscreateserveroptions-secureconnectionlistener), [`tls.createSecureContext()`](https://nodejs.org/docs/latest-v16.x/api/tls.html#tlscreatesecurecontextoptions), or [`http.createServer()`](https://nodejs.org/docs/latest-v16.x/api/http.html#httpcreateserveroptions-requestlistener) functions (optional, most people won’t need to set any of these).
 
-The value of `key` and `cert` can either be a file path or a string containing the contents of the file. If you use the environment variables, you can replace newlines with `\n` if you can’t put real newlines in your environment variable.
+See [Activating HTTPS](/Installing/HTTPS/) for more information on how to get HTTPS working.
 
 <!-- ## `mode`
 

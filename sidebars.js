@@ -63,9 +63,7 @@ const sidebars = {
               type: 'category',
               label: 'On Your Own Server',
               collapsible: false,
-              items: [
-                'Installing/Docker',               
-              ],
+              items: ['Installing/Docker'],
             },
             {
               type: 'category',
@@ -88,12 +86,20 @@ const sidebars = {
                     'Installing/fly/Fly-persisting',
                   ],
                 },
-                'Installing/PikaPods',               
+                'Installing/PikaPods',
               ],
             },
           ],
         },
-        'Installing/Configuration',
+        {
+          type: 'category',
+          label: 'Configuring the Server',
+          link: {
+            type: 'doc',
+            id: 'Installing/Configuration',
+          },
+          items: ['Installing/HTTPS'],
+        },
         {
           type: 'category',
           label: 'A Tour of Actual',
@@ -266,7 +272,7 @@ const sidebars = {
           items: [
             'Advanced/Experimental-Features/goal-templates',
             unavailable('Report Budget'),
-            unavailable('Account syncing')
+            unavailable('Account syncing'),
           ],
         },
       ],
