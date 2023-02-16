@@ -168,6 +168,14 @@ document.addEventListener('keydown', e => {
     }
     // Cmd/Ctrl+z
     else if (e.keyCode === 90) {
+      if (
+        e.target.tagName === 'INPUT' ||
+        e.target.tagName === 'TEXTAREA' ||
+        e.target.isContentEditable
+      ) {
+        return;
+      }
+      e.preventDefault();
       if (e.shiftKey) {
         // Redo
         window.__actionsForMenu.redo();
