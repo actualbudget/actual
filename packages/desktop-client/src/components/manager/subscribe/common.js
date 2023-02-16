@@ -39,28 +39,23 @@ export function useBootstrapped() {
       let url = await send('get-server-url');
       if (url == null) {
         // A server hasn't been specified yet
-        try {
-          let serverURL = window.location.origin;
-          let { error, hasServer, bootstrapped } = await send(
-            'subscribe-needs-bootstrap',
-            { url: serverURL },
-          );
-          if (error) {
-            throw new Error(JSON.stringify(error));
-          }
-          if (!hasServer) {
-            throw new Error();
-          }
-          await setServerURL(serverURL, { validate: false });
-
-          if (bootstrapped) {
-            ensure('/login');
-          } else {
-            ensure('/bootstrap');
-          }
-        } catch (e) {
-          console.log(e);
+        let serverURL = window.location.origin;
+        let { error, hasServer, bootstrapped } = await send(
+          'subscribe-needs-bootstrap',
+          { url: serverURL },
+        );
+        if (error || !hasServer) {
+          console.log(error);
           history.push('/config-server');
+          return;
+        }
+
+        await setServerURL(serverURL, { validate: false });
+
+        if (bootstrapped) {
+          ensure('/login');
+        } else {
+          ensure('/bootstrap');
         }
       } else {
         let { error, bootstrapped } = await send('subscribe-needs-bootstrap');
