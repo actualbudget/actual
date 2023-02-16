@@ -557,6 +557,11 @@ export const Transaction = React.memo(function Transaction(props) {
     if (transaction[name] !== value) {
       let newTransaction = { ...transaction, [name]: value };
 
+      // Don't change the note to an empty string if it's null (since they are both rendered the same)
+      if (name === 'note' && value === '' && transaction.note == null) {
+        return;
+      }
+
       if (
         name === 'account' &&
         value &&
