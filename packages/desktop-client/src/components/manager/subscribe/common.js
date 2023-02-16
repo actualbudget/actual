@@ -36,7 +36,33 @@ export function useBootstrapped() {
         }
       };
 
-      let afterBootstrap = async () => {
+      let url = await send('get-server-url');
+      if (url == null) {
+        // A server hasn't been specified yet
+        try {
+          let serverURL = window.location.origin;
+          let { error, hasServer, bootstrapped } = await send(
+            'subscribe-needs-bootstrap',
+            { url: serverURL },
+          );
+          if (error) {
+            throw new Error(JSON.stringify(error));
+          }
+          if (!hasServer) {
+            throw new Error();
+          }
+          await setServerURL(serverURL);
+
+          if (bootstrapped) {
+            ensure('/login');
+          } else {
+            ensure('/bootstrap');
+          }
+        } catch (e) {
+          console.log(e);
+          history.push('/config-server');
+        }
+      } else {
         let { error, bootstrapped } = await send('subscribe-needs-bootstrap');
         if (error) {
           history.push('/error', { error });
@@ -45,30 +71,6 @@ export function useBootstrapped() {
         } else {
           ensure('/bootstrap');
         }
-      };
-
-      let url = await send('get-server-url');
-      if (url == null) {
-        // A server hasn't been specified yet
-        try {
-          let serverURL = window.location.origin;
-          let { error, hasServer } = await send('subscribe-needs-bootstrap', {
-            url: serverURL,
-          });
-          if (error) {
-            throw new Error(JSON.stringify(error));
-          }
-          if (!hasServer) {
-            throw new Error();
-          }
-          await setServerURL(serverURL);
-          await afterBootstrap();
-        } catch (e) {
-          console.log(e);
-          history.push('/config-server');
-        }
-      } else {
-        await afterBootstrap();
       }
     }
     run();
