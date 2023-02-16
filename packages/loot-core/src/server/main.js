@@ -1380,7 +1380,7 @@ handlers['has-pitched-subscribe'] = async function () {
 
 handlers['subscribe-needs-bootstrap'] = async function ({ url } = {}) {
   if (getServer(url).BASE_SERVER === UNCONFIGURED_SERVER) {
-    return { bootstrapped: true };
+    return { bootstrapped: true, hasServer: false };
   }
 
   let res;
@@ -1400,7 +1400,7 @@ handlers['subscribe-needs-bootstrap'] = async function ({ url } = {}) {
     return { error: res.reason };
   }
 
-  return { bootstrapped: res.data.bootstrapped };
+  return { bootstrapped: res.data.bootstrapped, hasServer: true };
 };
 
 handlers['subscribe-bootstrap'] = async function ({ password }) {
