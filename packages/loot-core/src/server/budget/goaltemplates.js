@@ -10,17 +10,19 @@ import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 
 import { setBudget, getSheetValue } from './actions';
+import { parse } from './goal-template.pegjs';
 
-export async function applyTemplate({ month }) {
-  await processTemplate(month, false);
+export function applyTemplate({ month }) {
+  return processTemplate(month, false);
 }
 
-export async function overwriteTemplate({ month }) {
-  await processTemplate(month, true);
+export function overwriteTemplate({ month }) {
+  return processTemplate(month, true);
 }
 
 async function processTemplate(month, force) {
   let category_templates = await getCategoryTemplates();
+  let errors = [];
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -39,6 +41,19 @@ async function processTemplate(month, force) {
       let template = category_templates[category.id];
 
       if (template) {
+        errors = errors.concat(
+          template
+            .filter(t => t.type === 'error')
+            .map(({ line, error }) =>
+              [
+                category.name + ': ' + error.message,
+                line,
+                ' '.repeat(
+                  TEMPLATE_PREFIX.length + error.location.start.offset,
+                ) + '^',
+              ].join('\n'),
+            ),
+        );
         let to_budget = await applyCategoryTemplate(
           category,
           template,
@@ -53,120 +68,56 @@ async function processTemplate(month, force) {
     }
   }
   if (num_applied === 0) {
-    console.log('All categories were up to date.');
+    if (errors.length) {
+      return {
+        type: 'error',
+        sticky: true,
+        message: `There were errors interpreting some templates:`,
+        pre: errors.join('\n\n'),
+      };
+    } else {
+      return { type: 'message', message: 'All categories were up to date.' };
+    }
   } else {
-    console.log(`${num_applied} categories updated.`);
+    let applied = `Successfully applied templates to ${num_applied} ${
+      num_applied === 1 ? 'category' : 'categories'
+    }.`;
+    if (errors.length) {
+      return {
+        sticky: true,
+        message: `${applied} There were errors interpreting some templates:`,
+        pre: errors.join('\n\n'),
+      };
+    } else {
+      return {
+        type: 'message',
+        message: applied,
+      };
+    }
   }
 }
 
-async function getCategoryTemplates() {
-  const matches = [
-    {
-      type: 'simple',
-        re: /^#template \$?(\-?\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['monthly'],
-    },
-    {
-      type: 'simple',
-      re: /^#template up to \$?(\d+(\.\d{2})?)$/im,
-      params: ['limit'],
-    },
-    {
-      type: 'simple',
-      re: /^#template \$?(\d+(\.\d{2})?) up to \$?(\d+(\.\d{2})?)$/im,
-      params: ['monthly', null, 'limit'],
-    },
-    {
-      type: 'by',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'month'],
-    },
-    {
-      type: 'by',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'repeat'],
-    },
-    {
-      type: 'week',
-        re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'starting'],
-    },
-    {
-      type: 'week',
-        re: /^#template \$?(\d+(\.\d{2})?) repeat every week starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['amount', null, 'starting', 'limit'],
-    },
-    {
-      type: 'weeks',
-        re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'weeks', 'starting'],
-    },
-    {
-      type: 'weeks',
-        re: /^#template \$?(\d+(\.\d{2})?) repeat every (\d+) weeks starting (\d{4}\-\d{2}\-\d{2}) up to \$?(\d+(\.\d{2})?)$/im,//eslint-disable-line
-      params: ['amount', null, 'weeks', 'starting', 'limit'],
-    },
-    {
-      type: 'by_annual',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
-      params: ['amount', null, 'month'],
-    },
-    {
-      type: 'by_annual',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'repeat'],
-    },
-    {
-      type: 'spend',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2})$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from'],
-    },
-    {
-      type: 'spend',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) months$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from', 'repeat'],
-    },
-    {
-      type: 'spend_annual',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every year$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from'],
-    },
-    {
-      type: 'spend_annual',
-        re: /^#template \$?(\d+(\.\d{2})?) by (\d{4}\-\d{2}) spend from (\d{4}\-\d{2}) repeat every (\d+) years$/im,//eslint-disable-line
-      params: ['amount', null, 'month', 'from', 'repeat'],
-    },
-    {
-      type: 'percentage',
-      re: /^#template (\d+(\.\d+)?)% of (.*)$/im,
-      params: ['percent', null, 'category'],
-    },
-    { type: 'error', re: /^#template .*$/im, params: [] },
-  ];
+const TEMPLATE_PREFIX = '#template ';
 
+async function getCategoryTemplates() {
   let templates = {};
 
-  let notes = await db.all(`SELECT * FROM notes WHERE note like '%#template%'`);
+  let notes = await db.all(
+    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
+  );
 
   for (let n = 0; n < notes.length; n++) {
     let lines = notes[n].note.split('\n');
     let template_lines = [];
     for (let l = 0; l < lines.length; l++) {
-      for (let m = 0; m < matches.length; m++) {
-        let arr = matches[m].re.exec(lines[l]);
-        if (arr) {
-          let matched = {};
-          matched.line = arr[0];
-          matched.type = matches[m].type;
-          for (let p = 0; p < matches[m].params.length; p++) {
-            let param_name = matches[m].params[p];
-            if (param_name) {
-              matched[param_name] = arr[p + 1];
-            }
-          }
-          template_lines.push(matched);
-          break;
-        }
+      let line = lines[l].trim();
+      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
+      let expression = line.slice(TEMPLATE_PREFIX.length);
+      try {
+        let parsed = parse(expression);
+        template_lines.push(parsed);
+      } catch (e) {
+        template_lines.push({ type: 'error', line, error: e });
       }
     }
     if (template_lines.length) {
@@ -186,20 +137,18 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
 
     switch (template.type) {
       case 'by':
-      case 'by_annual':
       case 'spend':
-      case 'spend_annual':
         let target_month = new Date(`${template.month}-01`);
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month,
         );
-        let repeat = template.type.includes('annual')
+        let repeat = template.annual
           ? (template.repeat || 1) * 12
           : template.repeat;
 
         let spend_from;
-        if (template.type.includes('spend')) {
+        if (template.type === 'spend') {
           spend_from = new Date(`${template.from}-01`);
         }
         while (num_months < 0 && repeat) {
@@ -230,10 +179,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   if (template_lines.length > 1) {
     template_lines = template_lines
       .sort((a, b) => {
-        if (
-          a.type.slice(0, 2) === b.type.slice(0, 2) &&
-          a.type.slice(0, 2) === 'by'
-        ) {
+        if (a.type === 'by' && !a.annual) {
           return differenceInCalendarMonths(
             new Date(`${a.month}-01`),
             new Date(`${b.month}-01`),
@@ -243,7 +189,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
       })
       .filter(el => {
-        if (el.type.slice(0, 2) === 'by') {
+        if (el.type === 'by') {
           if (!got_by) {
             got_by = true;
             return el;
@@ -288,8 +234,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
         break;
       }
-      case 'by':
-      case 'by_annual': {
+      case 'by': {
         // by has 'amount' and 'month' params
         let target_month = new Date(`${template.month}-01`);
         let target = amountToInteger(template.amount);
@@ -311,10 +256,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
         break;
       }
-      case 'week':
-      case 'weeks': {
-        // weeks has 'amount', 'starting' and optional 'limit' params
-        // weeks has 'amount', 'starting', 'weeks' and optional 'limit' params
+      case 'week': {
+        // week has 'amount', 'starting', 'weeks' and optional 'limit' params
         let amount = amountToInteger(template.amount);
         let weeks = template.weeks != null ? Math.round(template.weeks) : 1;
         if (template.limit != null) {
@@ -341,8 +284,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
         break;
       }
-      case 'spend':
-      case 'spend_annual': {
+      case 'spend': {
         // spend has 'amount' and 'from' and 'month' params
         let from_month = new Date(`${template.from}-01`);
         let to_month = new Date(`${template.month}-01`);
@@ -409,7 +351,6 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       }
       case 'error':
-        console.log(`${category.name}: ${`Failed to match:`} ${template.line}`);
         return null;
       default:
     }

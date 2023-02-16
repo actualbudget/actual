@@ -262,6 +262,7 @@ function renderTransactions(extraProps) {
     currentAccountId: accounts[0].id,
     showAccount: true,
     showCategory: true,
+    showCleared: true,
     isAdding: false,
     onTransactionsChange: t => {
       transactions = t;
