@@ -43,8 +43,8 @@ export function ServerProvider({ children }) {
   }, []);
 
   let setURL = useCallback(
-    async url => {
-      await send('set-server-url', { url });
+    async (url, opts = {}) => {
+      await send('set-server-url', { ...opts, url });
       setServerURL(await getServerUrl());
       setVersion(await getServerVersion());
     },

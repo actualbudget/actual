@@ -51,7 +51,7 @@ export function useBootstrapped() {
           if (!hasServer) {
             throw new Error();
           }
-          await setServerURL(serverURL);
+          await setServerURL(serverURL, { validate: false });
 
           if (bootstrapped) {
             ensure('/login');
