@@ -8,11 +8,11 @@ function create(libofx) {
     ofx_set_transaction_cb: libofx.cwrap('ofx_set_transaction_cb', null, [
       'number',
       'number',
-      'number'
+      'number',
     ]),
 
     transaction_amount: libofx.cwrap('transaction_amount', 'number', [
-      'number'
+      'number',
     ]),
     transaction_fi_id: libofx.cwrap('transaction_fi_id', 'string', ['number']),
     transaction_date: libofx.cwrap('transaction_date', 'number', ['number']),
@@ -22,10 +22,13 @@ function create(libofx) {
 
     set_ofx_version: libofx.cwrap('set_ofx_version', null, [
       'number',
-      'string'
+      'string',
     ]),
     set_app_id: libofx.cwrap('set_app_id', null, ['number', 'string']),
-    set_app_version: libofx.cwrap('set_app_version', null, ['number', 'string'])
+    set_app_version: libofx.cwrap('set_app_version', null, [
+      'number',
+      'string',
+    ]),
   };
 }
 
