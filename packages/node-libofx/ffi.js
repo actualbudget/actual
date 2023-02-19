@@ -11,6 +11,9 @@ function create(libofx) {
       'number',
     ]),
 
+    transaction_acct_name: libofx.cwrap('transaction_acct_name', 'string', [
+      'number',
+    ]),
     transaction_amount: libofx.cwrap('transaction_amount', 'number', [
       'number',
     ]),
