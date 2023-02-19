@@ -75,8 +75,8 @@ function apply(msg, prev) {
   if (dataset === 'prefs') {
     // Do nothing, it doesn't exist in the db
   } else {
+    let query;
     try {
-      let query;
       if (prev) {
         query = {
           sql: db.cache(`UPDATE ${dataset} SET ${column} = ? WHERE id = ?`),
@@ -91,7 +91,7 @@ function apply(msg, prev) {
 
       db.runQuery(query.sql, query.params);
     } catch (e) {
-      //console.log(e);
+      console.log('apply error', e, query);
       throw new SyncError('invalid-schema');
     }
   }
@@ -129,6 +129,7 @@ async function fetchAll(table, ids) {
       let rows = await db.runQuery(sql, partIds, true);
       results = results.concat(rows);
     } catch (e) {
+      console.log('fetchAll error', e, sql, partIds);
       throw new SyncError('invalid-schema');
     }
   }
