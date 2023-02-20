@@ -90,9 +90,11 @@ function apply(msg, prev) {
       }
 
       db.runQuery(query.sql, query.params);
-    } catch (e) {
-      console.log('apply error', e, query);
-      throw new SyncError('invalid-schema');
+    } catch (error) {
+      throw new SyncError('invalid-schema', {
+        error: { message: error.message, stack: error.stack },
+        query,
+      });
     }
   }
 }
@@ -128,9 +130,8 @@ async function fetchAll(table, ids) {
     try {
       let rows = await db.runQuery(sql, partIds, true);
       results = results.concat(rows);
-    } catch (e) {
-      console.log('fetchAll error', e, sql, partIds);
-      throw new SyncError('invalid-schema');
+    } catch (error) {
+      throw new SyncError('invalid-schema', { error, sql, params: partIds });
     }
   }
 
@@ -416,9 +417,10 @@ async function _sendMessages(messages) {
         app.events.emit('sync', {
           type: 'error',
           subtype: 'apply-failure',
+          meta: e.meta,
         });
       } else {
-        app.events.emit('sync', { type: 'error' });
+        app.events.emit('sync', { type: 'error', meta: e.meta });
       }
     }
 
