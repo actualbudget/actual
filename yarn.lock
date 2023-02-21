@@ -5489,7 +5489,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual@workspace:."
   dependencies:
-    cross-env: ^5.1.5
+    cross-env: ^7.0.3
     husky: ^3.0.4
     npm-run-all: ^4.1.3
     patch-package: ^6.1.2
@@ -8362,18 +8362,6 @@ __metadata:
   version: 1.1.1
   resolution: "create-require@npm:1.1.1"
   checksum: a9a1503d4390d8b59ad86f4607de7870b39cad43d929813599a23714831e81c520bddf61bcdd1f8e30f05fd3a2b71ae8538e946eb2786dc65c2bbc520f692eff
-  languageName: node
-  linkType: hard
-
-"cross-env@npm:^5.1.5":
-  version: 5.2.1
-  resolution: "cross-env@npm:5.2.1"
-  dependencies:
-    cross-spawn: ^6.0.5
-  bin:
-    cross-env: dist/bin/cross-env.js
-    cross-env-shell: dist/bin/cross-env-shell.js
-  checksum: 364f72482f0d6b65c6d560b942ce9da7e71ea66ec2eaa8226f7127b49094355277aadd23e6ff922c1d154a6ab1ad828ebc4ec8af9b44a39936d9013fb23ae4df
   languageName: node
   linkType: hard
 
