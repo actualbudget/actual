@@ -1270,7 +1270,8 @@ export function useTableNavigator(data, fields, opts = {}) {
         if (
           document.hasFocus() &&
           (e.relatedTarget == null ||
-            !containerRef.current.contains(e.relatedTarget)) &&
+            !containerRef.current.contains(e.relatedTarget) ||
+            containerRef.current === e.relatedTarget) &&
           prevNumModals === numModals
         ) {
           onEdit(null);
