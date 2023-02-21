@@ -122,7 +122,7 @@ export default function NordigenExternalMsg({
               />
               <View style={{ marginTop: 10, color: colors.n4 }}>
                 {waiting === 'browser'
-                  ? 'Waiting on Nordigen ...'
+                  ? 'Waiting on Nordigen...'
                   : waiting === 'accounts'
                   ? 'Loading accounts...'
                   : null}
