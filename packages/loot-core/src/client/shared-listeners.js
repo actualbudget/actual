@@ -227,6 +227,7 @@ export function listenForSyncEvent(actions, store) {
           }
           break;
         case 'invalid-schema':
+          console.trace('invalid-schema', meta);
           notif = {
             title: 'Update required',
             message:
@@ -236,6 +237,7 @@ export function listenForSyncEvent(actions, store) {
           };
           break;
         case 'apply-failure':
+          console.trace('apply-failure', meta);
           notif = {
             message: `We couldn't apply that change to the database. Please report this as a bug by [opening a Github issue](${githubIssueLink}).`,
           };
@@ -245,6 +247,7 @@ export function listenForSyncEvent(actions, store) {
           // Show nothing
           break;
         default:
+          console.trace('unkown error', info);
           notif = {
             message: `We had problems syncing your changes. Please report this as a bug by [opening a Github issue](${githubIssueLink}).`,
           };
