@@ -22,8 +22,8 @@ export default function ExportBudget({ prefs }) {
       <Text>
         <strong>Export</strong> your data as a zip file containing{' '}
         <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
-        imported into another Actual instance by clicking the “Import file”
-        button and then choosing “Actual” on the Files page.
+        imported into another Actual instance by closing an open file (if any),
+        then clicking the “Import file” button, then choosing “Actual.”
       </Text>
       {prefs.encryptKeyId ? (
         <Text>
