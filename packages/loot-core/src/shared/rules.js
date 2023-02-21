@@ -197,7 +197,7 @@ export function makeValue(value, cond) {
         return {
           ...cond,
           error: null,
-          value: value ? currencyToAmount(value) || 0 : 0,
+          value: value ? currencyToAmount(String(value)) || 0 : 0,
         };
       }
       break;
