@@ -34,10 +34,8 @@ export default function ChangePassword() {
       setError(error);
     } else {
       setMessage('Password successfully changed');
-
-      setTimeout(() => {
-        history.push('/');
-      }, 1500);
+      await send('subscribe-sign-in', { password });
+      history.push('/');
     }
   }
 
