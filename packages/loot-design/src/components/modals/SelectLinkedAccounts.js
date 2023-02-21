@@ -94,7 +94,7 @@ export default function SelectLinkedAccounts({
   useEffect(() => {
     const chosenAccountsToAdd = [];
     importedAccountsToSelect.forEach(importedAccount => {
-      // Try to auto-mach accounts based on account_id or mask
+      // Try to auto-match accounts based on account_id or mask
       // Add matched accounts to list of selected accounts
       const matchedActualAccount = actualAccountsToSelect.find(
         actualAccount => {

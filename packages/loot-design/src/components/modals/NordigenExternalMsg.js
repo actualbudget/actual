@@ -107,9 +107,9 @@ export default function NordigenExternalMsg({
       {() => (
         <View>
           <P style={{ fontSize: 15 }}>
-            To link your bank account, you will be moved to your browser for
-            enhanced security. Click below and Actual will automatically resume
-            when you have given your bank{"'"}s credentials.
+            To link your bank account, you will be redirected to a new tab where
+            you will have the possibility to grant access to your bank for
+            Nordigen.
           </P>
 
           {error && renderError(error)}
@@ -122,7 +122,7 @@ export default function NordigenExternalMsg({
               />
               <View style={{ marginTop: 10, color: colors.n4 }}>
                 {waiting === 'browser'
-                  ? 'Waiting on browser...'
+                  ? 'Waiting on Nordigen ...'
                   : waiting === 'accounts'
                   ? 'Loading accounts...'
                   : null}
@@ -146,29 +146,6 @@ export default function NordigenExternalMsg({
           ) : (
             renderLinkButton()
           )}
-          <div style={{ marginTop: waiting ? 30 : 35 }}>
-            <Text style={{ color: colors.n5, fontWeight: 600 }}>
-              Why not link it in the app?
-            </Text>
-          </div>
-          <Text
-            style={{
-              marginTop: 10,
-              color: colors.n5,
-              fontSize: 13,
-              '& a, & a:visited': {
-                color: colors.n5,
-              },
-            }}
-          >
-            Typing your bank{"'"}s username and password is one of the most
-            security-sensitive things you can do, and the browser is the most
-            secure app in the world. Why not use it to make sure your
-            information is safe?{' '}
-            <a href="https://actualbudget.com/security-learn-more">
-              Learn more about security
-            </a>
-          </Text>
 
           <ModalButtons style={{ marginTop: 10 }}>
             <Button onClick={() => modalProps.onBack()}>Back</Button>
