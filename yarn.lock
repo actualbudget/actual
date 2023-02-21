@@ -15925,7 +15925,7 @@ __metadata:
     sanitize-filename: ^1.6.1
     search-query-parser: ^1.3.0
     snapshot-diff: ^0.10.0
-    source-map: ^0.7.3
+    source-map: ^0.7.4
     throttleit: ^1.0.0
     ts-jest: ^28.0.1
     ts-node: ^10.7.0
@@ -22141,6 +22141,13 @@ __metadata:
   version: 0.7.3
   resolution: "source-map@npm:0.7.3"
   checksum: cd24efb3b8fa69b64bf28e3c1b1a500de77e84260c5b7f2b873f88284df17974157cc88d386ee9b6d081f08fdd8242f3fc05c953685a6ad81aad94c7393dedea
+  languageName: node
+  linkType: hard
+
+"source-map@npm:^0.7.4":
+  version: 0.7.4
+  resolution: "source-map@npm:0.7.4"
+  checksum: 01cc5a74b1f0e1d626a58d36ad6898ea820567e87f18dfc9d24a9843a351aaa2ec09b87422589906d6ff1deed29693e176194dc88bcae7c9a852dc74b311dbf5
   languageName: node
   linkType: hard
 
