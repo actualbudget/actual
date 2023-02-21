@@ -1370,7 +1370,7 @@ handlers['key-test'] = async function ({ fileId, password }) {
 
 handlers['subscribe-needs-bootstrap'] = async function ({ url } = {}) {
   if (getServer(url).BASE_SERVER === UNCONFIGURED_SERVER) {
-    return { bootstrapped: true };
+    return { bootstrapped: true, hasServer: false };
   }
 
   let res;
@@ -1390,7 +1390,7 @@ handlers['subscribe-needs-bootstrap'] = async function ({ url } = {}) {
     return { error: res.reason };
   }
 
-  return { bootstrapped: res.data.bootstrapped };
+  return { bootstrapped: res.data.bootstrapped, hasServer: true };
 };
 
 handlers['subscribe-bootstrap'] = async function ({ password }) {
@@ -1505,14 +1505,16 @@ handlers['get-server-url'] = async function () {
   return getServer() && getServer().BASE_SERVER;
 };
 
-handlers['set-server-url'] = async function ({ url }) {
+handlers['set-server-url'] = async function ({ url, validate = true }) {
   if (url != null) {
-    // Validate the server is running
-    let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
-      url,
-    });
-    if (error) {
-      return { error };
+    if (validate) {
+      // Validate the server is running
+      let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
+        url,
+      });
+      if (error) {
+        return { error };
+      }
     }
   } else {
     // When the server isn't configured, we just use a placeholder
