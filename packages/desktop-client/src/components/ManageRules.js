@@ -51,6 +51,7 @@ let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 export function Value({
   value,
   field,
+  valueIsRaw,
   inline = false,
   data: dataProp,
   describe = x => x.name,
@@ -116,6 +117,9 @@ export function Value({
         case 'payee':
         case 'category':
         case 'account':
+          if (valueIsRaw) {
+            return value;
+          }
           if (data && data.length) {
             let item = data.find(item => item.id === value);
             if (item) {
@@ -123,9 +127,9 @@ export function Value({
             } else {
               return '(deleted)';
             }
-          } else {
-            return '…';
           }
+
+          return '…';
         default:
           throw new Error(`Unknown field ${field}`);
       }
