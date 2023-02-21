@@ -16,7 +16,6 @@ import useServerVersion from '../../hooks/useServerVersion';
 import { isMobile } from '../../util';
 import { Page } from '../Page';
 
-import BankSync from './BankSync';
 import EncryptionSettings from './Encryption';
 import ExperimentalFeatures from './Experimental';
 import ExportBudget from './Export';
@@ -106,8 +105,6 @@ function Settings({
           <FormatSettings prefs={prefs} savePrefs={savePrefs} />
           <EncryptionSettings prefs={prefs} pushModal={pushModal} />
           <ExportBudget prefs={prefs} />
-
-          <BankSync prefs={prefs} savePrefs={savePrefs} />
 
           <AdvancedToggle>
             <AdvancedAbout prefs={prefs} />
