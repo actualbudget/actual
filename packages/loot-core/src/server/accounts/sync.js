@@ -523,13 +523,6 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd'),
     );
 
-    // if (!transactions.length) {
-    //   return {
-    //     added: [],
-    //     updated: []
-    //   };
-    // }
-
     // We need to add a transaction that represents the starting
     // balance for everything to balance out. In order to get balance
     // before the first imported transaction, we need to get the
