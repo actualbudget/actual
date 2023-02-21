@@ -124,7 +124,7 @@ __metadata:
     resolve: 1.8.1
     sass-loader: 7.1.0
     style-loader: 0.23.0
-    terser-webpack-plugin: 1.1.0
+    terser-webpack-plugin: 1.4.5
     victory: ^36.6.8
     webpack: 4.19.1
     webpack-dev-server: 3.11.0
@@ -7131,28 +7131,6 @@ __metadata:
     unique-filename: ^1.1.0
     y18n: ^4.0.0
   checksum: 787207714c7624f1569448db576fb7f595e5612b6c0a4d2eaa951d1bab70c01746e2d77942a7cbecd938222ce6cc55ef758c228aa9022741864aed8e097e487c
-  languageName: node
-  linkType: hard
-
-"cacache@npm:^11.0.2":
-  version: 11.3.3
-  resolution: "cacache@npm:11.3.3"
-  dependencies:
-    bluebird: ^3.5.5
-    chownr: ^1.1.1
-    figgy-pudding: ^3.5.1
-    glob: ^7.1.4
-    graceful-fs: ^4.1.15
-    lru-cache: ^5.1.1
-    mississippi: ^3.0.0
-    mkdirp: ^0.5.1
-    move-concurrently: ^1.0.1
-    promise-inflight: ^1.0.1
-    rimraf: ^2.6.3
-    ssri: ^6.0.1
-    unique-filename: ^1.1.1
-    y18n: ^4.0.0
-  checksum: e66dd0f0b3e9a8a18fd6e027b15848920fc52fe2264cb7b11efa6553576a34b42d6b4b93b05c453269bc8e31adb2e63c092651a553a6f6d6b9d9fce8129b50cb
   languageName: node
   linkType: hard
 
@@ -22106,7 +22084,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-support@npm:^0.5.16, source-map-support@npm:^0.5.19, source-map-support@npm:^0.5.21, source-map-support@npm:~0.5.10, source-map-support@npm:~0.5.12, source-map-support@npm:~0.5.20":
+"source-map-support@npm:^0.5.16, source-map-support@npm:^0.5.19, source-map-support@npm:^0.5.21, source-map-support@npm:~0.5.12, source-map-support@npm:~0.5.20":
   version: 0.5.21
   resolution: "source-map-support@npm:0.5.21"
   dependencies:
@@ -22908,27 +22886,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser-webpack-plugin@npm:1.1.0":
-  version: 1.1.0
-  resolution: "terser-webpack-plugin@npm:1.1.0"
-  dependencies:
-    cacache: ^11.0.2
-    find-cache-dir: ^2.0.0
-    schema-utils: ^1.0.0
-    serialize-javascript: ^1.4.0
-    source-map: ^0.6.1
-    terser: ^3.8.1
-    webpack-sources: ^1.1.0
-    worker-farm: ^1.5.2
-  peerDependencies:
-    webpack: ^4.3.0
-  bin:
-    terser-webpack-plugin: ""
-  checksum: 44e8f023eadf530f07cb01ff490f0a4008f35c66e5a788789520053189d07d69fc4d112b12e4c6f709230db3e1365c61eca887cdaad55e99f6f96bac6db684ce
-  languageName: node
-  linkType: hard
-
-"terser-webpack-plugin@npm:^1.4.3":
+"terser-webpack-plugin@npm:1.4.5, terser-webpack-plugin@npm:^1.4.3":
   version: 1.4.5
   resolution: "terser-webpack-plugin@npm:1.4.5"
   dependencies:
@@ -22966,19 +22924,6 @@ __metadata:
     uglify-js:
       optional: true
   checksum: 8f3448d7fdb0434ce6a0c09d95c462bfd2f4a5a430233d854163337f734a7f5c07c74513d16081e06d4ca33d366d5b1a36f5444219bc41a7403afd6162107bad
-  languageName: node
-  linkType: hard
-
-"terser@npm:^3.8.1":
-  version: 3.17.0
-  resolution: "terser@npm:3.17.0"
-  dependencies:
-    commander: ^2.19.0
-    source-map: ~0.6.1
-    source-map-support: ~0.5.10
-  bin:
-    terser: bin/uglifyjs
-  checksum: 4fed679470b65a3290b6b5c9b104fb5007aa195824e421d37c0a65656de927f55bf6b210c20b2dff5664101cbdd7c0f93daa03d4d0da7758e660c9716411d279
   languageName: node
   linkType: hard
 
