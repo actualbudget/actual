@@ -109,7 +109,7 @@ export function Value({
           : null;
       } else if (field === 'year') {
         return value ? formatDate(parseISO(value), 'yyyy') : null;
-      } else if (field === 'notes') {
+      } else if (field === 'notes' || field === 'imported_payee') {
         return value;
       } else {
         if (data && data.length) {
