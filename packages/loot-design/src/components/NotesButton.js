@@ -98,7 +98,7 @@ export default function NotesButton({
         },
       ]}
       onMouseEnter={ () => {
-        await delay(2000);
+        await delay(500);
         setHover(true)}}
       onMouseLeave={() => setHover(false)}
     >
