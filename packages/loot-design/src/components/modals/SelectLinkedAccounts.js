@@ -269,7 +269,7 @@ export default function SelectLinkedAccounts({
                           marginTop: 30,
                         }}
                       >
-                        {importedAccount.name} -{'>'} {actualAccount.name}
+                        {importedAccount.name} &rarr; {actualAccount.name}
                         <Button
                           primary
                           style={{
