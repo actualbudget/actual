@@ -97,7 +97,7 @@ export default function NotesButton({
           '& button, & .hover-visible': { display: 'flex', opacity: 1 },
         },
       ]}
-      onMouseEnter={ () => {
+      onMouseEnter={ async () => {
         await delay(500);
         setHover(true)}}
       onMouseLeave={() => setHover(false)}
