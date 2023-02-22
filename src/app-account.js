@@ -20,6 +20,7 @@ function hashPassword(password) {
 
 // Non-authenticated endpoints:
 //
+// /needs-bootstrap
 // /boostrap (special endpoint for setting up the instance, cant call again)
 // /login
 
