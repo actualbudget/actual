@@ -133,7 +133,7 @@ export default class Spreadsheet {
 
           if (result instanceof Promise) {
             console.warn(
-              'dynamic cell returned a promise! this is discouraged because errors are not handled properly',
+              `dynamic cell ${name} returned a promise! this is discouraged because errors are not handled properly`,
             );
           }
         } else if (node.sql) {
