@@ -411,7 +411,13 @@ export function ConditionsList({
   onChangeConditions,
 }) {
   function addCondition(index) {
-    let field = 'payee';
+    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
+    let fields = conditionFields.slice(0, -2).map(f => f[0]);
+    for (let cond of conditions) {
+      fields = fields.filter(f => f !== cond.field);
+    }
+    let field = fields[0] || 'payee';
+
     let copy = [...conditions];
     copy.splice(index + 1, 0, {
       type: FIELD_TYPES.get(field),
@@ -553,11 +559,11 @@ export function ConditionsList({
 // * Dont touch child transactions?
 
 let conditionFields = [
-  'account',
   'imported_payee',
-  'payee',
+  'account',
   'category',
   'date',
+  'payee',
   'notes',
   'amount',
 ]
