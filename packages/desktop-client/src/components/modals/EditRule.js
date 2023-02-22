@@ -627,7 +627,19 @@ export default function EditRule({
   }
 
   function addAction(index) {
-    let field = 'category';
+    let fields = [
+      'category',
+      'payee',
+      'notes',
+      'cleared',
+      'account',
+      'date',
+      'amount',
+    ];
+    for (let action of actions) {
+      fields = fields.filter(f => f !== action.field);
+    }
+    let field = fields[0] || 'category';
 
     let copy = [...actions];
     copy.splice(index + 1, 0, {
