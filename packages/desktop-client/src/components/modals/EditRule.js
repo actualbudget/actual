@@ -178,7 +178,6 @@ function Editor({ error, style, children }) {
 }
 
 export function ConditionEditor({
-  conditionFields,
   ops,
   condition,
   editorStyle,
@@ -407,7 +406,6 @@ function newInput(item) {
 
 export function ConditionsList({
   conditions,
-  conditionFields,
   editorStyle,
   isSchedule,
   onChangeConditions,
@@ -534,7 +532,6 @@ export function ConditionsList({
         return (
           <View key={i}>
             <ConditionEditor
-              conditionFields={conditionFields}
               editorStyle={editorStyle}
               ops={ops}
               condition={cond}
@@ -789,7 +786,6 @@ export default function EditRule({
 
                 <ConditionsList
                   conditions={conditions}
-                  conditionFields={conditionFields}
                   editorStyle={editorStyle}
                   isSchedule={isSchedule}
                   onChangeConditions={conds => setConditions(conds)}
