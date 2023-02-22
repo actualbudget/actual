@@ -293,13 +293,13 @@ function ScheduleDescription({ id }) {
 }
 
 let actionFields = [
+  'category',
   'payee',
   'notes',
+  'cleared',
+  'account',
   'date',
   'amount',
-  'category',
-  'account',
-  'cleared',
 ].map(field => [field, mapField(field)]);
 function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
   let { field, op, value, type, error, inputKey = 'initial' } = action;
@@ -627,15 +627,7 @@ export default function EditRule({
   }
 
   function addAction(index) {
-    let fields = [
-      'category',
-      'payee',
-      'notes',
-      'cleared',
-      'account',
-      'date',
-      'amount',
-    ];
+    let fields = actionFields.map(f => f[0]);
     for (let action of actions) {
       fields = fields.filter(f => f !== action.field);
     }
