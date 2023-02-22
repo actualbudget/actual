@@ -219,7 +219,7 @@ function Modals({
                 onMoveExternal={options.onMoveExternal}
                 onClose={() => {
                   options.onClose && options.onClose();
-                  send('poll-web-token-stop');
+                  send('nordigen-poll-web-token-stop');
                 }}
                 onSuccess={options.onSuccess}
               />

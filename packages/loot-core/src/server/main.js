@@ -7,6 +7,7 @@ import asyncStorage from '../platform/server/asyncStorage';
 import fs from '../platform/server/fs';
 import logger from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
+import { fromPlaidAccountType } from '../shared/accounts';
 import * as monthUtils from '../shared/months';
 import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
@@ -785,6 +786,51 @@ handlers['account-properties'] = async function ({ id }) {
 };
 
 handlers['accounts-link'] = async function ({
+  institution,
+  publicToken,
+  accountId,
+  upgradingId,
+}) {
+  let bankId = await link.handoffPublicToken(institution, publicToken);
+
+  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
+    'user-id',
+    'user-key',
+  ]);
+
+  // Get all the available accounts and find the selected one
+  let accounts = await bankSync.getAccounts(userId, userKey, bankId);
+  let account = accounts.find(acct => acct.account_id === accountId);
+
+  await db.update('accounts', {
+    id: upgradingId,
+    account_id: account.account_id,
+    official_name: account.official_name,
+    type: fromPlaidAccountType(account.type),
+    balance_current: amountToInteger(account.balances.current),
+    balance_available: amountToInteger(account.balances.available),
+    balance_limit: amountToInteger(account.balances.limit),
+    mask: account.mask,
+    bank: bankId,
+  });
+
+  await bankSync.syncAccount(
+    userId,
+    userKey,
+    upgradingId,
+    account.account_id,
+    bankId,
+  );
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+};
+
+handlers['nordigen-accounts-link'] = async function ({
   requisitionId,
   account,
   upgradingId,
@@ -991,7 +1037,143 @@ handlers['account-move'] = mutator(async function ({ id, targetId }) {
 
 let stopPolling = false;
 
-handlers['poll-web-token'] = async function ({
+handlers['poll-web-token'] = async function ({ token }) {
+  let [[, userId], [, key]] = await asyncStorage.multiGet([
+    'user-id',
+    'user-key',
+  ]);
+
+  let startTime = Date.now();
+  stopPolling = false;
+
+  async function getData(cb) {
+    if (stopPolling) {
+      return;
+    }
+
+    if (Date.now() - startTime >= 1000 * 60 * 10) {
+      cb('timeout');
+      return;
+    }
+
+    let data = await post(
+      getServer().PLAID_SERVER + '/get-web-token-contents',
+      {
+        userId,
+        key,
+        token,
+      },
+    );
+
+    if (data) {
+      if (data.error) {
+        cb('unknown');
+      } else {
+        cb(null, data);
+      }
+    } else {
+      setTimeout(() => getData(cb), 3000);
+    }
+  }
+
+  return new Promise(resolve => {
+    getData((error, data) => {
+      if (error) {
+        resolve({ error });
+      } else {
+        resolve({ data });
+      }
+    });
+  });
+};
+
+handlers['poll-web-token-stop'] = async function () {
+  stopPolling = true;
+  return 'ok';
+};
+
+handlers['accounts-sync'] = async function ({ id }) {
+  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
+    'user-id',
+    'user-key',
+  ]);
+  let accounts = await db.runQuery(
+    `SELECT a.*, b.id as bankId FROM accounts a
+         LEFT JOIN banks b ON a.bank = b.id
+         WHERE a.tombstone = 0 AND a.closed = 0`,
+    [],
+    true,
+  );
+
+  if (id) {
+    accounts = accounts.filter(acct => acct.id === id);
+  }
+
+  let errors = [];
+  let newTransactions = [];
+  let matchedTransactions = [];
+  let updatedAccounts = [];
+
+  for (var i = 0; i < accounts.length; i++) {
+    const acct = accounts[i];
+    if (acct.bankId) {
+      try {
+        const res = await bankSync.syncAccount(
+          userId,
+          userKey,
+          acct.id,
+          acct.account_id,
+          acct.bankId,
+        );
+        let { added, updated } = res;
+
+        newTransactions = newTransactions.concat(added);
+        matchedTransactions = matchedTransactions.concat(updated);
+
+        if (added.length > 0 || updated.length > 0) {
+          updatedAccounts = updatedAccounts.concat(acct.id);
+        }
+      } catch (err) {
+        if (err.type === 'BankSyncError') {
+          errors.push({
+            type: 'SyncError',
+            accountId: acct.id,
+            message: 'Failed syncing account "' + acct.name + '".',
+            category: err.category,
+            code: err.code,
+          });
+        } else if (err instanceof PostError && err.reason !== 'internal') {
+          errors.push({
+            accountId: acct.id,
+            message: `Account "${acct.name}" is not linked properly. Please link it again`,
+          });
+        } else {
+          errors.push({
+            accountId: acct.id,
+            message:
+              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
+            internal: err.stack,
+          });
+
+          err.message = 'Failed syncing account: ' + err.message;
+
+          captureException(err);
+        }
+      }
+    }
+  }
+
+  if (updatedAccounts.length > 0) {
+    connection.send('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+  }
+
+  return { errors, newTransactions, matchedTransactions, updatedAccounts };
+};
+
+handlers['nordigen-poll-web-token'] = async function ({
   upgradingAccountId,
   requisitionId,
 }) {
@@ -1047,12 +1229,12 @@ handlers['poll-web-token'] = async function ({
   return null;
 };
 
-handlers['poll-web-token-stop'] = async function () {
+handlers['nordigen-poll-web-token-stop'] = async function () {
   stopPolling = true;
   return 'ok';
 };
 
-handlers['create-web-token'] = async function ({
+handlers['nordigen-create-web-token'] = async function ({
   upgradingAccountId,
   institutionId,
   accessValidForDays,
@@ -1072,10 +1254,10 @@ handlers['create-web-token'] = async function ({
       },
     );
   }
-  return null;
+  return { error: 'unauthorized' };
 };
 
-handlers['accounts-sync'] = async function ({ id }) {
+handlers['nordigen-accounts-sync'] = async function ({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
@@ -1203,8 +1385,6 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 
   // No more accounts are associated with this bank. We can remove
   // it from Nordigen.
-  // TODO Check the flag
-  // if (local['flags.syncAccount']) {
   let userToken = await asyncStorage.getItem('user-token');
 
   if (userToken && count === 0) {
@@ -1212,17 +1392,20 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
       'SELECT bank_id FROM banks WHERE id = ?',
       [bankId],
     );
-    await post(
-      getServer().NORDIGEN_SERVER + '/remove-account',
-      {
-        requisitionId: requisitionId,
-      },
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
-    );
+    try {
+      await post(
+        getServer().NORDIGEN_SERVER + '/remove-account',
+        {
+          requisitionId: requisitionId,
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
+    } catch (error) {
+      console.log({ error });
+    }
   }
-  // }
 
   return 'ok';
 });

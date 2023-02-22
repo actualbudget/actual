@@ -44,7 +44,7 @@ export function unlinkAccount(id) {
 
 export function linkAccount(requisitionId, account, upgradingId) {
   return async dispatch => {
-    await send('accounts-link', {
+    await send('nordigen-accounts-link', {
       requisitionId,
       account,
       upgradingId,
@@ -87,7 +87,7 @@ export function syncAccounts(id) {
     }
 
     const { errors, newTransactions, matchedTransactions, updatedAccounts } =
-      await send('accounts-sync', { id });
+      await send('nordigen-accounts-sync', { id });
     dispatch(setAccountsSyncing(null));
 
     if (id) {
