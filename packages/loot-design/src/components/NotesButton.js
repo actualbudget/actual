@@ -80,7 +80,7 @@ export default function NotesButton({
   }
 
   function timeout(delay) {
-    return new Promise( res => setTimeout(res, delay) );
+    return new Promise(res => setTimeout(res, delay));
   }
   // This account for both the tooltip hover, and editing tooltip
   const tooltipOpen = tooltip.isOpen || (hasNotes && hover);
@@ -100,9 +100,10 @@ export default function NotesButton({
           '& button, & .hover-visible': { display: 'flex', opacity: 1 },
         },
       ]}
-      onMouseEnter={ async () => {
+      onMouseEnter={async () => {
         await timeout(500);
-        setHover(true)}}
+        setHover(true);
+      }}
       onMouseLeave={() => setHover(false)}
     >
       <Button
