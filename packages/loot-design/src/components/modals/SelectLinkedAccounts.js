@@ -1,65 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-import { styles, colors } from '../../style';
-import { View, Text, Modal, P, Button, Strong, CustomSelect } from '../common';
-
-let selectedStyle = {
-  color: colors.n1,
-};
+import { View, Modal, P, Button, Strong, CustomSelect } from '../common';
 
 function EmptyMessage() {
   return null;
-}
-
-function Account({ account, selected, onSelect }) {
-  return (
-    <View
-      style={[
-        { marginBottom: 8, flexShrink: 0, userSelect: 'none' },
-        styles.mediumText,
-      ]}
-      onClick={onSelect}
-    >
-      <View
-        style={[
-          {
-            padding: 12,
-            ...styles.shadow,
-            cursor: 'pointer',
-            transition: 'transform .20s',
-            fontSize: 14,
-            borderRadius: 4,
-            flexDirection: 'row',
-            alignItems: 'center',
-            border: '1px solid ' + colors.n10,
-            ':hover': selectedStyle,
-          },
-          selected && {
-            ...selectedStyle,
-            borderColor: colors.b9,
-            backgroundColor: colors.b10,
-          },
-        ]}
-      >
-        <View>
-          <View style={{ fontWeight: 600, flex: 1 }}>{account.name}</View>
-          <View
-            style={{
-              fontSize: 13,
-              color: colors.n5,
-              flexDirection: 'row',
-            }}
-          >
-            {account.product}
-            <Text style={{ marginLeft: 4 }}>
-              ...
-              {account.currency}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
 }
 
 export default function SelectLinkedAccounts({

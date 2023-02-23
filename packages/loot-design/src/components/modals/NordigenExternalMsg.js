@@ -6,7 +6,6 @@ import { Error } from '../alerts';
 import {
   CustomSelect,
   View,
-  Text,
   Modal,
   Button,
   P,
