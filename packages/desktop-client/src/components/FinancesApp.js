@@ -42,6 +42,7 @@ import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
+import NordigenLink from './nordigen/NordigenLink';
 import Notifications from './Notifications';
 import { PageTypeProvider } from './Page';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
@@ -100,6 +101,7 @@ function Routes({ isMobile, location }) {
         <Route path="/payees" exact component={ManagePayeesPage} />
         <Route path="/rules" exact component={ManageRulesPage} />
         <Route path="/settings" component={Settings} />
+        <Route path="/nordigen/link" exact component={NordigenLink} />
 
         <Route
           path="/accounts/:id"

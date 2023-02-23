@@ -42,12 +42,11 @@ export function unlinkAccount(id) {
   };
 }
 
-export function linkAccount(institution, publicToken, accountId, upgradingId) {
+export function linkAccount(requisitionId, account, upgradingId) {
   return async dispatch => {
-    await send('accounts-link', {
-      institution,
-      publicToken,
-      accountId,
+    await send('nordigen-accounts-link', {
+      requisitionId,
+      account,
       upgradingId,
     });
     await dispatch(getPayees());
@@ -74,6 +73,25 @@ export function connectAccounts(
   };
 }
 
+export function connectNordigenAccounts(
+  institution,
+  publicToken,
+  accountIds,
+  offbudgetIds,
+) {
+  return async dispatch => {
+    let ids = await send('nordigen-accounts-connect', {
+      institution,
+      publicToken,
+      accountIds,
+      offbudgetIds,
+    });
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
+    return ids;
+  };
+}
+
 export function syncAccounts(id) {
   return async (dispatch, getState) => {
     if (getState().account.accountsSyncing) {
@@ -88,7 +106,7 @@ export function syncAccounts(id) {
     }
 
     const { errors, newTransactions, matchedTransactions, updatedAccounts } =
-      await send('accounts-sync', { id });
+      await send('nordigen-accounts-sync', { id });
     dispatch(setAccountsSyncing(null));
 
     if (id) {

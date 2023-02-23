@@ -59,7 +59,7 @@ import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
 import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
 import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 
-import { authorizeBank } from '../../plaid';
+import { authorizeBank } from '../../nordigen';
 import { useActiveLocation } from '../ActiveLocation';
 import AnimatedRefresh from '../AnimatedRefresh';
 
@@ -1363,7 +1363,7 @@ class AccountInternal extends React.PureComponent {
 
     switch (item) {
       case 'link':
-        authorizeBank(this.props.pushModal, { upgradingId: accountId });
+        authorizeBank(this.props.pushModal, { upgradingAccountId: accountId });
         break;
       case 'unlink':
         this.props.unlinkAccount(accountId);
