@@ -486,7 +486,12 @@ function FilterExpression({
                 {mapField(field, options)}
               </Text>{' '}
               <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
-              <Value value={value} field={field} inline={true} />
+              <Value
+                value={value}
+                field={field}
+                inline={true}
+                valueIsRaw={op === 'contains'}
+              />
             </>
           )}
         </div>
