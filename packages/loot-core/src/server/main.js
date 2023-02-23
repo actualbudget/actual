@@ -799,7 +799,7 @@ handlers['accounts-link'] = async function ({
   ]);
 
   // Get all the available accounts and find the selected one
-  let accounts = await bankSync.getAccounts(userId, userKey, bankId);
+  let accounts = await bankSync.getNordigenAccounts(userId, userKey, bankId);
   let account = accounts.find(acct => acct.account_id === accountId);
 
   await db.update('accounts', {
@@ -865,7 +865,7 @@ handlers['nordigen-accounts-link'] = async function ({
     });
   }
 
-  await bankSync.syncAccount(
+  await bankSync.syncNordigenAccount(
     undefined,
     undefined,
     id,
@@ -889,6 +889,17 @@ handlers['accounts-connect'] = async function ({
 }) {
   let bankId = await link.handoffPublicToken(institution, publicToken);
   let ids = await link.addAccounts(bankId, accountIds, offbudgetIds);
+  return ids;
+};
+
+handlers['nordigen-accounts-connect'] = async function ({
+  institution,
+  publicToken,
+  accountIds,
+  offbudgetIds,
+}) {
+  let bankId = await link.handoffPublicToken(institution, publicToken);
+  let ids = await link.addNordigenAccounts(bankId, accountIds, offbudgetIds);
   return ids;
 };
 
@@ -1283,7 +1294,7 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncAccount(
+        const res = await bankSync.syncNordigenAccount(
           userId,
           userKey,
           acct.id,

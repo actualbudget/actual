@@ -73,6 +73,25 @@ export function connectAccounts(
   };
 }
 
+export function connectNordigenAccounts(
+  institution,
+  publicToken,
+  accountIds,
+  offbudgetIds,
+) {
+  return async dispatch => {
+    let ids = await send('nordigen-accounts-connect', {
+      institution,
+      publicToken,
+      accountIds,
+      offbudgetIds,
+    });
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
+    return ids;
+  };
+}
+
 export function syncAccounts(id) {
   return async (dispatch, getState) => {
     if (getState().account.accountsSyncing) {
