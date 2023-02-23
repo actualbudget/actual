@@ -9,9 +9,9 @@ import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
 
-import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
+import { useServerVersion } from '../ServerContext';
 
 import ConfigServer from './ConfigServer';
 import Modals from './Modals';

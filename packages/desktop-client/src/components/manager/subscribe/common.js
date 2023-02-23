@@ -9,6 +9,8 @@ import {
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 
+import { useSetServerURL } from '../../ServerContext';
+
 // There are two URLs that dance with each other: `/login` and
 // `/bootstrap`. Both of these URLs check the state of the the server
 // and make sure the user is looking at the right page. For example,
@@ -22,6 +24,7 @@ export function useBootstrapped() {
   let [checked, setChecked] = useState(false);
   let history = useHistory();
   let location = useLocation();
+  let setServerURL = useSetServerURL();
 
   useEffect(() => {
     async function run() {
@@ -36,7 +39,24 @@ export function useBootstrapped() {
       let url = await send('get-server-url');
       if (url == null) {
         // A server hasn't been specified yet
-        history.push('/config-server');
+        let serverURL = window.location.origin;
+        let { error, hasServer, bootstrapped } = await send(
+          'subscribe-needs-bootstrap',
+          { url: serverURL },
+        );
+        if (error || !hasServer) {
+          console.log(error);
+          history.push('/config-server');
+          return;
+        }
+
+        await setServerURL(serverURL, { validate: false });
+
+        if (bootstrapped) {
+          ensure('/login');
+        } else {
+          ensure('/bootstrap');
+        }
       } else {
         let { error, bootstrapped } = await send('subscribe-needs-bootstrap');
         if (error) {

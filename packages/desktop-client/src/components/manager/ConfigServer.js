@@ -4,7 +4,6 @@ import { useHistory } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
-import { send } from 'loot-core/src/platform/client/fetch';
 import {
   View,
   Text,
@@ -18,7 +17,7 @@ import {
   isPreviewEnvironment,
 } from 'loot-design/src/util/environment';
 
-import { useServerURL } from '../../hooks/useServerURL';
+import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title, Input } from './subscribe/common';
 
@@ -28,6 +27,7 @@ export default function ConfigServer() {
   let history = useHistory();
   let [url, setUrl] = useState('');
   let currentUrl = useServerURL();
+  let setServerUrl = useSetServerURL();
   useEffect(() => {
     setUrl(currentUrl);
   }, [currentUrl]);
@@ -50,14 +50,14 @@ export default function ConfigServer() {
 
     setError(null);
     setLoading(true);
-    let { error } = await send('set-server-url', { url });
+    let { error } = await setServerUrl(url);
 
     if (
       error === 'network-failure' &&
       !url.startsWith('http://') &&
       !url.startsWith('https://')
     ) {
-      let { error } = await send('set-server-url', { url: 'https://' + url });
+      let { error } = await setServerUrl('https://' + url);
       if (error) {
         setUrl('https://' + url);
         setError(error);
@@ -81,13 +81,13 @@ export default function ConfigServer() {
   }
 
   async function onSkip() {
-    await send('set-server-url', { url: null });
+    await setServerUrl(null);
     await dispatch(loggedIn());
     history.push('/');
   }
 
   async function onCreateTestFile() {
-    await send('set-server-url', { url: null });
+    await setServerUrl(null);
     await dispatch(createBudget({ testMode: true }));
     window.__history.push('/');
   }
