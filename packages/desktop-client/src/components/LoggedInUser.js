@@ -54,11 +54,14 @@ function LoggedInUser({
   }
 
   async function onClick() {
-    if (serverUrl) {
+    if (!serverUrl) {
+      await closeBudget();
+      window.__history.push('/config-server');
+    } else if (userData) {
       setMenuOpen(true);
     } else {
       await closeBudget();
-      window.__history.push('/config-server');
+      window.__history.push('/login');
     }
   }
 
@@ -97,7 +100,11 @@ function LoggedInUser({
       </View>
     );
   } else {
-    return <View style={[{ color }, style]}>Not logged in</View>;
+    return (
+      <Button bare onClick={onClick} style={[{ color }, style]}>
+        Not logged in
+      </Button>
+    );
   }
 }
 
