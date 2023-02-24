@@ -88,7 +88,7 @@ function connectWorker(worker, onOpen, onError) {
       // Send any messages that were queued while closed
       if (messageQueue.length > 0) {
         messageQueue.forEach(msg => worker.postMessage(msg));
-        messageQueue = [];
+        messageQueue = null;
       }
 
       onOpen();
@@ -138,22 +138,17 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
   return new Promise((resolve, reject) => {
     uuid.v4().then(id => {
       replyHandlers.set(id, { resolve, reject });
-      if (globalWorker) {
-        globalWorker.postMessage({
-          id,
-          name,
-          args,
-          undoTag: undo.snapshot(),
-          catchErrors,
-        });
+      let message = {
+        id,
+        name,
+        args,
+        undoTag: undo.snapshot(),
+        catchErrors,
+      };
+      if (messageQueue) {
+        messageQueue.push(message);
       } else {
-        messageQueue.push({
-          id,
-          name,
-          args,
-          undoTag: undo.snapshot(),
-          catchErrors,
-        });
+        globalWorker.postMessage(message);
       }
     });
   });
