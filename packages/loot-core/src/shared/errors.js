@@ -87,3 +87,17 @@ export function getSubscribeError({ reason }) {
       return 'An error occurred. Please try again later.';
   }
 }
+
+export function getSyncError(error, id) {
+  if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
+    return 'This budget cannot be loaded with this version of the app.';
+  } else if (error === 'budget-not-found') {
+    return (
+      'Budget "' +
+      id +
+      '" not found. Check the id of your budget in the "Advanced" section of the settings page.'
+    );
+  } else {
+    return 'We had an unknown problem opening "' + id + '".';
+  }
+}
