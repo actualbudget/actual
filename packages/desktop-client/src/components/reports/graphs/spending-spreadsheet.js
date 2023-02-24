@@ -99,7 +99,7 @@ export function spendingByDate(start, end, isConcise, filt) {
 }
 
 function recalculate(data, start, end, isConcise) {
-  let [income, expense] = data;
+  let [startingBalance, income, expense] = data;
   const dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),
@@ -117,7 +117,7 @@ function recalculate(data, start, end, isConcise) {
     isConcise ? fromDateRepr : fromDateReprToDay,
   );
 
-  let balance = 0;
+  let balance = startingBalance - startingBalance;
   let totalExpenses = 0;
   let totalIncome = 0;
   const graphData = dates.reduce(
