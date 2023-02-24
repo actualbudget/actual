@@ -510,6 +510,7 @@ export function ImportTransactions({
   getPayees,
   savePrefs,
 }) {
+  let [exchangeRate, setExchangeRate] = useState('');
   let [loadingState, setLoadingState] = useState('parsing');
   let [error, setError] = useState(null);
   let [filename, setFilename] = useState(options.filename);
@@ -586,6 +587,13 @@ export function ImportTransactions({
     }
   }
 
+  function onExchangeChange(e) {
+    const amt = e.target.value;
+    if (!amt || amt.match(/^\d{1,}(\.\d{0,4})?$/)) {
+      setExchangeRate(amt);
+    }
+  };
+
   useEffect(() => {
     parse(
       options.filename,
@@ -644,6 +652,14 @@ export function ImportTransactions({
     let finalTransactions = [];
     let errorMessage;
 
+    const num = (() => {
+      if (exchangeRate == '') {
+        return parseFloat("1").toFixed(4);
+      } else {
+        return parseFloat(exchangeRate).toFixed(4);
+      }
+    })();
+
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
@@ -668,7 +684,7 @@ export function ImportTransactions({
       finalTransactions.push({
         ...finalTransaction,
         date,
-        amount: amountToInteger(amount),
+        amount: amountToInteger(amount * num),
       });
     }
 
@@ -811,20 +827,43 @@ export function ImportTransactions({
       {(filetype === 'qif' || filetype === 'csv') && (
         <View style={{ marginTop: 25 }}>
           <SectionLabel title="IMPORT OPTIONS" />
-          <View style={{ marginTop: 5 }}>
-            <FlipAmountOption
-              value={flipAmount}
-              disabled={splitMode}
-              onChange={() => {
-                setFlipAmount(!flipAmount);
-              }}
-            />
-          </View>
-          {filetype === 'csv' && (
-            <View style={{ marginTop: 10 }}>
-              <SplitOption value={splitMode} onChange={onSplitMode} />
+          <Stack
+            direction="row"
+            align="flex-start"
+            spacing={1}
+            style={{ marginTop: 5 }}
+          >
+            <View style={{ width: 500 }}>
+              <SubLabel title="Options" />
+              <View style={{ marginTop: 5 }}>
+                <FlipAmountOption
+                  value={flipAmount}
+                  disabled={splitMode}
+                  onChange={() => {
+                    setFlipAmount(!flipAmount);
+                  }}
+                />
+              </View>
+              {filetype === 'csv' && (
+                <View style={{ marginTop: 10 }}>
+                  <SplitOption value={splitMode} onChange={onSplitMode} />
+                </View>
+              )}
             </View>
-          )}
+            <View style={{ flex: 1 }}>
+              <Text></Text>
+            </View>
+            <View style={{ width: 100 }}>
+              <SubLabel title="Exchange Rate" />
+              <input
+                type="text"
+                name="exchange"
+                value={exchangeRate}
+                placeholder="Optional"
+                onChange={onExchangeChange}
+              />
+            </View>
+          </Stack>
         </View>
       )}
 
