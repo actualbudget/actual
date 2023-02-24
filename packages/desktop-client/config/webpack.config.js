@@ -282,7 +282,7 @@ module.exports = function(webpackEnv) {
 
         // First, run the linter.
         // It's important to do this before Babel processes the JS.
-        {
+        !process.env.CI && {
           test: /\.(js|mjs|jsx)$/,
           enforce: 'pre',
           use: [
@@ -428,7 +428,7 @@ module.exports = function(webpackEnv) {
             // Make sure to add the new loader(s) before the "file" loader.
           ]
         }
-      ]
+      ].filter(Boolean)
     },
     plugins: [
       // Generates an `index.html` file with the <script> injected.
