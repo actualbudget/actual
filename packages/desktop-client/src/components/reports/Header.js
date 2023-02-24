@@ -129,7 +129,7 @@ function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
         <Button
           bare
           style={{ marginLeft: 15 }}
-          onClick={() => onChangeDates(...getLatestRange(12))}
+          onClick={() => onChangeDates(...getLatestRange(11))}
         >
           1 Year
         </Button>
