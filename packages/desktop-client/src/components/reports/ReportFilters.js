@@ -38,13 +38,13 @@ import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 
 let filterFields = [
-  'date',
+  //'date',
   'account',
   'payee',
-  'notes',
+  //'notes',
   'category',
-  'amount',
-  'cleared',
+  //'amount',
+  //'cleared',
 ].map(field => [field, mapField(field)]);
 
 function subfieldFromFilter({ field, options, value }) {
@@ -371,13 +371,20 @@ export function FilterButton({ onApply }) {
 
   return (
     <View>
-      <Button bare onClick={() => dispatch({ type: 'select-field' })}>
+      <Button 
+        bare 
+        onClick={() => dispatch({ type: 'select-field' })}
+        style={{ 
+          paddingRight: 5,
+          marginRight: 10
+        }}
+      >
         <SettingsSliderAlternate
           style={{
             width: 16,
             height: 16,
             color: 'inherit',
-            marginRight: 5,
+            marginRight: 10
           }}
         />{' '}
         Filter
@@ -385,7 +392,9 @@ export function FilterButton({ onApply }) {
       {state.fieldsOpen && (
         <Tooltip
           position="bottom-left"
-          style={{ padding: 0 }}
+          style={{ 
+            padding: 0
+          }}
           onClose={() => dispatch({ type: 'close' })}
         >
           <Menu
@@ -525,7 +534,7 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
-        marginTop: 10,
+        marginTop: 5,
         marginBottom: -5,
       }}
     >
