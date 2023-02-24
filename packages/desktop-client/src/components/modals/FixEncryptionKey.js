@@ -16,7 +16,7 @@ import {
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-export default function   FixEncryptionKey({
+export default function FixEncryptionKey({
   modalProps,
   actions,
   options = {},
