@@ -1,4 +1,3 @@
-import { FilterButton, AppliedFilters } from './ReportFilters';
 import React, { useState, useEffect } from 'react';
 
 import * as d from 'date-fns';
@@ -11,15 +10,15 @@ import {
   Text,
   Block,
   P,
-  Button,
   AlignedText,
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 
 import Change from './Change';
-import { spendingByDate } from './graphs/spending-spreadsheet';
 import CashFlowGraph from './graphs/CashFlowGraph';
+import { spendingByDate } from './graphs/spending-spreadsheet';
 import Header from './Header';
+import { FilterButton, AppliedFilters } from './ReportFilters';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
 
@@ -65,10 +64,10 @@ function Spending() {
     }
     run();
   }, []);
-  
+
   function onDeleteFilter(filter) {
     applyFilters(filterz.filter(f => f !== filter));
-  };
+  }
 
   async function onApplyFilter(cond) {
     //setFilterz({cond});
@@ -76,21 +75,23 @@ function Spending() {
     //cond.field = category
     //let conds = Value(value={value}, field={field}, inline={true});
     applyFilters([...filters, cond]);
-  };
+  }
 
   async function applyFilters(conditions) {
     if (conditions.length > 0) {
-      let { filters } = await send('make-filters-from-conditions', { conditions });
+      let { filters } = await send('make-filters-from-conditions', {
+        conditions,
+      });
 
       let filte = [...filters];
       setFilt(filte);
       setFilterz(conditions);
-      //setFilterz([filte])
+      //setFilterz([filte]);
     } else {
-      setFilt([])
+      setFilt([]);
       setFilterz(conditions);
     }
-  };
+  }
 
   function onChangeDates(start, end) {
     const numDays = d.differenceInCalendarDays(
@@ -131,11 +132,10 @@ function Spending() {
           flexDirection: 'row',
           alignItems: 'center',
           padding: 20,
-          paddingTop: 0
+          paddingTop: 0,
         }}
       >
-        <Text>
-        </Text>
+        <Text></Text>
         <View>
           <FilterButton onApply={onApplyFilter} />
         </View>
@@ -198,9 +198,10 @@ function Spending() {
             <strong>How is spending calculated?</strong>
           </P>
           <P>
-            Spending shows your spending habits over time and the expenses/income
-            based on your filters. This allows you to look at single accounts or
-            payees or categories and track money spent in any way you like.
+            Spending shows your spending habits over time and the
+            expenses/income based on your filters. This allows you to look at
+            single accounts or payees or categories and track money spent in any
+            way you like.
           </P>
         </View>
       </View>

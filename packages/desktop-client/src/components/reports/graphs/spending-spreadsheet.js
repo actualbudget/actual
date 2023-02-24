@@ -59,9 +59,11 @@ export function spendingByDate(start, end, isConcise, filt) {
           },
         ],
       });
-    
+
       if (filt.length > 0) {
-        query = query.filter({ $and: [...filt]});
+        query = query.filter({
+          $and: [...filt],
+        });
       }
 
       if (isConcise) {
@@ -97,7 +99,7 @@ export function spendingByDate(start, end, isConcise, filt) {
 }
 
 function recalculate(data, start, end, isConcise) {
-  let [startingBalance, income, expense] = data;
+  let [income, expense] = data;
   const dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),

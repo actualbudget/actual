@@ -371,12 +371,12 @@ export function FilterButton({ onApply }) {
 
   return (
     <View>
-      <Button 
-        bare 
+      <Button
+        bare
         onClick={() => dispatch({ type: 'select-field' })}
-        style={{ 
+        style={{
           paddingRight: 5,
-          marginRight: 10
+          marginRight: 10,
         }}
       >
         <SettingsSliderAlternate
@@ -384,7 +384,7 @@ export function FilterButton({ onApply }) {
             width: 16,
             height: 16,
             color: 'inherit',
-            marginRight: 10
+            marginRight: 10,
           }}
         />{' '}
         Filter
@@ -392,8 +392,8 @@ export function FilterButton({ onApply }) {
       {state.fieldsOpen && (
         <Tooltip
           position="bottom-left"
-          style={{ 
-            padding: 0
+          style={{
+            padding: 0,
           }}
           onClose={() => dispatch({ type: 'close' })}
         >

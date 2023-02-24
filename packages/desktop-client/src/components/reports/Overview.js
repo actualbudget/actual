@@ -16,8 +16,8 @@ import Container from './Container';
 import DateRange from './DateRange';
 import { simpleCashFlow } from './graphs/cash-flow-spreadsheet';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
-import { simpleSpending} from './graphs/spending-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
+import { simpleSpending } from './graphs/spending-spreadsheet';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
@@ -342,7 +342,6 @@ function Overview({ accounts }) {
         { paddingLeft: 40, paddingRight: 40, minWidth: 700 },
       ]}
     >
-      
       <View
         style={{
           flexDirection: 'row',
