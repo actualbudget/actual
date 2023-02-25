@@ -1,4 +1,5 @@
 import { AccountPage } from './account-page';
+import { SchedulesPage } from './schedules-page';
 
 export class Navigation {
   constructor(page) {
@@ -11,5 +12,11 @@ export class Navigation {
       .click();
 
     return new AccountPage(this.page);
+  }
+
+  async goToSchedulesPage() {
+    await this.page.getByRole('link', { name: 'Schedules' }).click();
+
+    return new SchedulesPage(this.page);
   }
 }
