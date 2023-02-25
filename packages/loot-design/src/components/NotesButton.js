@@ -104,7 +104,7 @@ export default function NotesButton({
         await timeout(300);
         setHover(true);
       }}
-      onMouseOut={() => setHover(false)}
+      onMouseLeave={() => setHover(false)}
     >
       <Button
         bare
