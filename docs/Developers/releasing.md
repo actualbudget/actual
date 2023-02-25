@@ -43,3 +43,16 @@ This will compile both the backend and the frontend into a single directory in p
 cd packages/desktop-client
 npm publish
 ```
+
+### Versioning strategy
+
+We used to version according to the date when the release was made. For example: if a release was cut on 02-10-2022, then the release number was `22.10.2`. This posed some challenges if critical bugs were spotted after the release. It meant we had to wait for the next day to cut a new relase.
+
+Starting from `v23.3.x` we changed how we version Actual by keeping the core philosophy the same. The new versioning strategy is: include the year and month of the release in the version number. But for minor version numbers: start at `0` and increment by +1 for each subsequent bug-fix release.
+
+For example:
+
+- `v23.3.0` - first release launched on 15th of March, 2023;
+- `v23.3.1` - critical bugfix launched on the same date;
+- `v23.3.2` - another bugfix launched later in the month of March;
+- `v23.4.0` - first release launched on 9th of April, 2023;
