@@ -12,9 +12,9 @@ import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
-import useServerVersion from '../../hooks/useServerVersion';
 import { isMobile } from '../../util';
 import { Page } from '../Page';
+import { useServerVersion } from '../ServerContext';
 
 import EncryptionSettings from './Encryption';
 import ExperimentalFeatures from './Experimental';

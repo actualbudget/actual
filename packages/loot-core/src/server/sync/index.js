@@ -75,8 +75,8 @@ function apply(msg, prev) {
   if (dataset === 'prefs') {
     // Do nothing, it doesn't exist in the db
   } else {
+    let query;
     try {
-      let query;
       if (prev) {
         query = {
           sql: db.cache(`UPDATE ${dataset} SET ${column} = ? WHERE id = ?`),
@@ -90,9 +90,11 @@ function apply(msg, prev) {
       }
 
       db.runQuery(query.sql, query.params);
-    } catch (e) {
-      //console.log(e);
-      throw new SyncError('invalid-schema');
+    } catch (error) {
+      throw new SyncError('invalid-schema', {
+        error: { message: error.message, stack: error.stack },
+        query,
+      });
     }
   }
 }
@@ -128,8 +130,8 @@ async function fetchAll(table, ids) {
     try {
       let rows = await db.runQuery(sql, partIds, true);
       results = results.concat(rows);
-    } catch (e) {
-      throw new SyncError('invalid-schema');
+    } catch (error) {
+      throw new SyncError('invalid-schema', { error, sql, params: partIds });
     }
   }
 
@@ -415,9 +417,10 @@ async function _sendMessages(messages) {
         app.events.emit('sync', {
           type: 'error',
           subtype: 'apply-failure',
+          meta: e.meta,
         });
       } else {
-        app.events.emit('sync', { type: 'error' });
+        app.events.emit('sync', { type: 'error', meta: e.meta });
       }
     }
 
