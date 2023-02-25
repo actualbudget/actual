@@ -100,11 +100,11 @@ export default function NotesButton({
           '& button, & .hover-visible': { display: 'flex', opacity: 1 },
         },
       ]}
-      onMouseEnter={async () => {
-        await timeout(500);
+      onMouseOver={async () => {
+        await timeout(300);
         setHover(true);
       }}
-      onMouseLeave={() => setHover(false)}
+      onMouseOut={() => setHover(false)}
     >
       <Button
         bare
