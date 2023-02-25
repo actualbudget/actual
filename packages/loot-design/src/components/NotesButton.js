@@ -79,9 +79,22 @@ export default function NotesButton({
     tooltip.close();
   }
 
-  function timeout(delay) {
-    return new Promise(res => setTimeout(res, delay));
-  }
+  const [delayHandler, setDelayHandler] = useState(null);
+
+  const handleMouseEnter = event => {
+    setDelayHandler(
+      setTimeout(() => {
+        // whatever your data is
+        setHover(true);
+      }, 300),
+    );
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(delayHandler);
+    setHover(false);
+  };
+
   // This account for both the tooltip hover, and editing tooltip
   const tooltipOpen = tooltip.isOpen || (hasNotes && hover);
 
@@ -100,11 +113,12 @@ export default function NotesButton({
           '& button, & .hover-visible': { display: 'flex', opacity: 1 },
         },
       ]}
-      onMouseOver={async () => {
-        await timeout(300);
-        setHover(true);
+      onMouseEnter={async () => {
+        handleMouseEnter();
       }}
-      onMouseLeave={() => setHover(false)}
+      onMouseLeave={() => {
+        handleMouseLeave();
+      }}
     >
       <Button
         bare
