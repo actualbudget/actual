@@ -12,7 +12,7 @@ import {
 import Add from 'loot-design/src/svg/v1/Add';
 import Subtract from 'loot-design/src/svg/v1/Subtract';
 
-export function AmountInput({ defaultValue = 0, onChange, style }) {
+export function AmountInput({ id, defaultValue = 0, onChange, style }) {
   let [negative, setNegative] = useState(defaultValue <= 0);
   let [value, setValue] = useState(integerToCurrency(Math.abs(defaultValue)));
 
@@ -30,6 +30,7 @@ export function AmountInput({ defaultValue = 0, onChange, style }) {
 
   return (
     <InputWithContent
+      id={id}
       leftContent={
         <Button bare style={{ padding: '0 7px' }} onClick={onSwitch}>
           {negative ? (
