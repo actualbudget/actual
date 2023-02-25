@@ -24,6 +24,7 @@ test.describe('Reports', () => {
 
   test.beforeEach(async () => {
     reportsPage = await navigation.goToReportsPage();
+    await reportsPage.waitToLoad();
   });
 
   test('loads net worth and cash flow reports', async () => {

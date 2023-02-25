@@ -4,8 +4,12 @@ export class ReportsPage {
     this.pageContent = page.getByTestId('reports-page');
   }
 
+  async waitToLoad() {
+    return this.pageContent.getByRole('link', { name: /^Net/ }).waitFor();
+  }
+
   async getAvailableReportList() {
-    return await this.pageContent
+    return this.pageContent
       .getByRole('link')
       .getByRole('heading')
       .allTextContents();
