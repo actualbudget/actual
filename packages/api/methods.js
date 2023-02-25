@@ -20,6 +20,10 @@ async function loadBudget(budgetId) {
   return send('api/load-budget', { id: budgetId });
 }
 
+async function downloadBudget(syncId, { password } = {}) {
+  return send('api/download-budget', { syncId, password });
+}
+
 async function batchBudgetUpdates(func) {
   await send('api/batch-budget-start');
   try {
@@ -89,7 +93,7 @@ function closeAccount(id, transferAccountId, transferCategoryId) {
   return send('api/account-close', {
     id,
     transferAccountId,
-    transferCategoryId
+    transferCategoryId,
   });
 }
 
@@ -172,6 +176,7 @@ module.exports = {
   q,
 
   loadBudget,
+  downloadBudget,
   batchBudgetUpdates,
   getBudgetMonths,
   getBudgetMonth,
@@ -207,5 +212,5 @@ module.exports = {
   getPayeeRules,
   createPayeeRule,
   deletePayeeRule,
-  updatePayeeRule
+  updatePayeeRule,
 };

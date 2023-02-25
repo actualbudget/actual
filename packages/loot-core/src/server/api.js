@@ -1,3 +1,8 @@
+import {
+  getDownloadError,
+  getSyncError,
+  getTestKeyError,
+} from '../shared/errors';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import {
@@ -144,20 +149,54 @@ handlers['api/load-budget'] = async function ({ id }) {
     } else {
       connection.send('show-budgets');
 
-      if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
-        throw new Error(
-          'This budget cannot be loaded with this version of the app.',
-        );
-      } else if (error === 'budget-not-found') {
-        throw new Error(
-          'Budget "' +
-            id +
-            '" not found. Check the id of your budget in the "Advanced" section of the settings page.',
-        );
-      } else {
-        throw new Error('We had an unknown problem opening "' + id + '".');
+      throw new Error(getSyncError(error, id));
+    }
+  }
+};
+
+handlers['api/download-budget'] = async function ({ syncId, password }) {
+  let { id: currentId } = prefs.getPrefs() || {};
+  if (currentId) {
+    await handlers['close-budget']();
+  }
+
+  let localBudget = (await handlers['get-budgets']()).find(
+    b => b.groupId === syncId,
+  );
+  if (localBudget) {
+    await handlers['load-budget']({ id: localBudget.id });
+    let result = await handlers['sync-budget']({ id: localBudget.id });
+    if (result.error) {
+      throw new Error(getSyncError(result.error, localBudget.id));
+    }
+  } else {
+    let files = await handlers['get-remote-files']();
+    let file = files.find(f => f.groupId === syncId);
+    if (!file) {
+      throw new Error(
+        `Budget "${syncId}" not found. Check the sync id of your budget in the "Advanced" section of the settings page.`,
+      );
+    }
+    if (file.encryptKeyId && !password) {
+      throw new Error(
+        `File ${file.name} is encrypted. Please provide a password.`,
+      );
+    }
+    if (password) {
+      let result = await handlers['key-test']({
+        fileId: file.fileId,
+        password,
+      });
+      if (result.error) {
+        throw new Error(getTestKeyError(result.error));
       }
     }
+
+    let result = await handlers['download-budget']({ fileId: file.fileId });
+    if (result.error) {
+      throw new Error(getDownloadError(result.error, result.id));
+    }
+    await handlers['load-budget']({ id: result.id });
   }
 };
 

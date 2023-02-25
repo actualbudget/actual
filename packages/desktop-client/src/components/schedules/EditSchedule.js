@@ -427,10 +427,10 @@ export default function ScheduleDetails() {
     >
       <Stack direction="row" style={{ marginTop: 20 }}>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Payee" />
+          <FormLabel title="Payee" htmlFor="payee-field" />
           <PayeeAutocomplete
             value={state.fields.payee}
-            inputProps={{ placeholder: '(none)' }}
+            inputProps={{ id: 'payee-field', placeholder: '(none)' }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
             }
@@ -438,11 +438,11 @@ export default function ScheduleDetails() {
         </FormField>
 
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Account" />
+          <FormLabel title="Account" htmlFor="account-field" />
           <AccountAutocomplete
             includeClosedAccounts={false}
             value={state.fields.account}
-            inputProps={{ placeholder: '(none)' }}
+            inputProps={{ id: 'account-field', placeholder: '(none)' }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'account', value: id })
             }
@@ -451,7 +451,11 @@ export default function ScheduleDetails() {
 
         <FormField style={{ flex: 1 }}>
           <Stack direction="row" align="center" style={{ marginBottom: 3 }}>
-            <FormLabel title="Amount" style={{ margin: 0, flex: 1 }} />
+            <FormLabel
+              title="Amount"
+              htmlFor="amount-field"
+              style={{ margin: 0, flex: 1 }}
+            />
             <OpSelect
               ops={['is', 'isapprox', 'isbetween']}
               value={state.fields.amountOp}
@@ -490,6 +494,7 @@ export default function ScheduleDetails() {
             />
           ) : (
             <AmountInput
+              id="amount-field"
               defaultValue={state.fields.amount}
               onChange={value =>
                 dispatch({
