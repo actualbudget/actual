@@ -1,5 +1,6 @@
 import { AccountPage } from './account-page';
 import { ReportsPage } from './reports-page';
+import { RulesPage } from './rules-page';
 import { SchedulesPage } from './schedules-page';
 import { SettingsPage } from './settings-page';
 
@@ -26,6 +27,19 @@ export class Navigation {
     await this.page.getByRole('link', { name: 'Schedules' }).click();
 
     return new SchedulesPage(this.page);
+  }
+
+  async goToRulesPage() {
+    const rulesLink = this.page.getByRole('link', { name: 'Rules' });
+
+    // Expand the "more" menu only if it is not already expanded
+    if (!(await rulesLink.isVisible())) {
+      await this.page.getByRole('button', { name: 'More' }).click();
+    }
+
+    await rulesLink.click();
+
+    return new RulesPage(this.page);
   }
 
   async goToSettingsPage() {
