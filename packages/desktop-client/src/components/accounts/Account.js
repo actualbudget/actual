@@ -57,6 +57,7 @@ import ArrowsShrink3 from 'loot-design/src/svg/v2/ArrowsShrink3';
 import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
 import DownloadThickBottom from 'loot-design/src/svg/v2/DownloadThickBottom';
 import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
+import SvgRemove from 'loot-design/src/svg/v2/Remove';
 import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 
 import { authorizeBank } from '../../plaid';
@@ -821,9 +822,30 @@ const AccountHeader = React.memo(
                   }}
                 />
               }
+              rightContent={
+                search && (
+                  <Button
+                    bare
+                    style={{ padding: 8 }}
+                    onClick={() => onSearch('')}
+                    title="Clear search term"
+                  >
+                    <SvgRemove
+                      style={{
+                        width: 8,
+                        height: 8,
+                        color: 'inherit',
+                      }}
+                    />
+                  </Button>
+                )
+              }
               inputRef={searchInput}
               value={search}
               placeholder="Search"
+              onKeyDown={e => {
+                if (e.key === 'Escape') onSearch('');
+              }}
               getStyle={focused => [
                 {
                   backgroundColor: 'transparent',
