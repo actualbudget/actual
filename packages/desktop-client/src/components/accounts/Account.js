@@ -224,7 +224,7 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
 
 function MenuButton({ onClick }) {
   return (
-    <Button bare onClick={onClick}>
+    <Button bare onClick={onClick} aria-label="Menu">
       <DotsHorizontalTriple
         width={15}
         height={15}
@@ -724,6 +724,7 @@ const AccountHeader = React.memo(
                       marginRight: 5,
                       marginBottom: 5,
                     }}
+                    data-testid="account-name"
                   >
                     {account && account.closed
                       ? 'Closed: ' + accountName
