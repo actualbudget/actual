@@ -70,6 +70,11 @@
     "e2e": "npx playwright test e2e --browser=chromium",
     "lint": "eslint src"
   },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "<rootDir>/../loot-design/src/setupTests.js"
+    ]
+  },
   "browserslist": [
     "electron 3.0"
   ]
