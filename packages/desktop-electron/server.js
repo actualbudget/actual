@@ -14,18 +14,15 @@ if (process.argv[2] === '--subprocess') {
   let socketName = process.argv[4];
 
   // Start the app
-  console.log('starting 111');
   getBackend().initApp(version, isDev, socketName);
 } else if (process.argv[2] === '--standalone') {
   require('source-map-support').install();
-  console.log('starting 222');
   getBackend().initApp('0.0.0-standalone', true, 'actual-standalone');
 } else {
   let { ipcRenderer } = require('electron');
   let isDev = true;
   let versionPromise = ipcRenderer.invoke('get-version');
 
-  console.log('starting 3333');
   ipcRenderer.on('set-socket', (event, { name }) => {
     versionPromise.then(version => {
       // Start the app
