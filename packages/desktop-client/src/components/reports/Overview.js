@@ -80,6 +80,7 @@ function NetWorthCard({ accounts }) {
           <View style={{ flex: 1 }}>
             <Block
               style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              role="heading"
             >
               Net Worth
             </Block>
@@ -133,6 +134,7 @@ function CashFlowCard() {
           <View style={{ flex: 1 }}>
             <Block
               style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              role="heading"
             >
               Cash Flow
             </Block>

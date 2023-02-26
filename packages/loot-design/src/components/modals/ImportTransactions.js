@@ -43,6 +43,14 @@ export function parseDate(str, order) {
   }
 
   const dateGroups = (a, b) => str => {
+    const parts = str
+      .replace(/^[^\d]+/, '')
+      .replace(/[^\d]+$/, '')
+      .split(/[^\d]+/);
+    if (parts.length >= 3) {
+      return parts.slice(0, 3);
+    }
+
     const digits = str.replace(/[^\d]/g, '');
     return [digits.slice(0, a), digits.slice(a, a + b), digits.slice(a + b)];
   };
