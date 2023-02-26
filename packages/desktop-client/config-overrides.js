@@ -6,10 +6,6 @@ const {
 } = require('customize-cra');
 const path = require('path');
 
-// const isGenericBrowser = process.env.IS_GENERIC_BROWSER;
-// console.log('isGenericBrowser', isGenericBrowser);
-// throw new Error();
-
 module.exports = {
   webpack: override(
     babelInclude([

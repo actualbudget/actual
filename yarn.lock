@@ -6104,6 +6104,7 @@ __metadata:
     loot-core: "*"
     node-fetch: ^2.6.9
     node-ipc: 9.1.4
+    promise-retry: ^2.0.1
   languageName: unknown
   linkType: soft
 
