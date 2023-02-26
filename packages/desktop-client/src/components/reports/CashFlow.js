@@ -18,16 +18,30 @@ import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
 import CashFlowGraph from './graphs/CashFlowGraph';
 import Header from './Header';
+import { FilterButton, AppliedFilters } from './ReportFilters';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
 
+const sty = {
+  SquareShapeView: {
+    height: 5,
+    backgroundColor: colors.n3,
+  },
+};
+
 function CashFlow() {
+  const [filterz, setFilterz] = useState([]);
+  const [filt, setFilt] = useState([]);
+  const [displaySpending, setDisplaySpending] = useState('none');
+  const [displayCashFlow, setDisplayCashFlow] = useState('inherit');
+
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 30),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
 
+  const [isCashFlow, setIsCashFlow] = useState(true);
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
@@ -38,7 +52,7 @@ function CashFlow() {
 
   const data = useReport(
     'cash_flow',
-    useArgsMemo(cashFlowByDate)(start, end, isConcise),
+    useArgsMemo(cashFlowByDate)(start, end, isConcise, isCashFlow, filt),
   );
 
   useEffect(() => {
@@ -61,6 +75,34 @@ function CashFlow() {
     run();
   }, []);
 
+  function onDeleteFilter(filter) {
+    applyFilters(filterz.filter(f => f !== filter));
+  }
+
+  function deleteAllFilters() {
+    applyFilters([]);
+  }
+
+  async function onApplyFilter(cond) {
+    let filters = filterz;
+    applyFilters([...filters, cond]);
+  }
+
+  async function applyFilters(conditions) {
+    if (conditions.length > 0) {
+      let { filters } = await send('make-filters-from-conditions', {
+        conditions,
+      });
+
+      let filte = [...filters];
+      setFilt(filte);
+      setFilterz(conditions);
+    } else {
+      setFilt([]);
+      setFilterz(conditions);
+    }
+  }
+
   function onChangeDates(start, end) {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
@@ -82,18 +124,107 @@ function CashFlow() {
     return null;
   }
 
+  const handleMouseHover = e => {
+    e.target.style.cursor = 'pointer';
+  };
+
   const { graphData, totalExpenses, totalIncome } = data;
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+      <View
+        style={{
+          paddingTop: 0,
+          flexShrink: 0,
+          flexDirection: 'row',
+        }}
+      >
+        <View
+          style={[
+            styles.veryLargeText,
+            {
+              marginLeft: 20,
+              flexShrink: 0,
+              width: 160,
+            },
+          ]}
+        >
+          <View
+            onMouseOver={handleMouseHover}
+            onClick={() => {
+              setDisplaySpending('none');
+              setDisplayCashFlow('inherit');
+              setIsCashFlow(true);
+              deleteAllFilters();
+            }}
+            style={[
+              styles.veryLargeText,
+              {
+                alignItems: 'center',
+                marginBottom: 2,
+              },
+            ]}
+          >
+            Cash Flow
+          </View>
+          <View style={[sty.SquareShapeView, { display: displayCashFlow }]} />
+        </View>
+        <View
+          style={[
+            styles.veryLargeText,
+            {
+              marginLeft: 20,
+              flexShrink: 0,
+              width: 160,
+            },
+          ]}
+        >
+          <View
+            onMouseOver={handleMouseHover}
+            onClick={() => {
+              setDisplaySpending('inherit');
+              setDisplayCashFlow('none');
+              setIsCashFlow(false);
+            }}
+            style={[
+              styles.veryLargeText,
+              {
+                alignItems: 'center',
+                marginBottom: 2,
+              },
+            ]}
+          >
+            Spending
+          </View>
+          <View style={[sty.SquareShapeView, { display: displaySpending }]} />
+        </View>
+      </View>
+
       <Header
-        title="Cash Flow"
         allMonths={allMonths}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
         show1Month={true}
         onChangeDates={onChangeDates}
       />
+
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          padding: 20,
+          paddingTop: 0,
+          display: displaySpending,
+        }}
+      >
+        <View>
+          <FilterButton onApply={onApplyFilter} />
+        </View>
+
+        {filterz && filterz.length > 0 && (
+          <AppliedFilters filters={filterz} onDelete={onDeleteFilter} />
+        )}
+      </View>
       <View
         style={{
           backgroundColor: 'white',

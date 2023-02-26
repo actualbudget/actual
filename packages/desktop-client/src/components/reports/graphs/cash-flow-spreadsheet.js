@@ -43,7 +43,7 @@ export function simpleCashFlow(start, end) {
   };
 }
 
-export function cashFlowByDate(start, end, isConcise) {
+export function cashFlowByDate(start, end, isConcise, isCashFlow, filt) {
   return async (spreadsheet, setData) => {
     function makeQuery(where) {
       let query = q('transactions').filter({
@@ -59,6 +59,12 @@ export function cashFlowByDate(start, end, isConcise) {
           },
         ],
       });
+
+      if (filt.length > 0) {
+        query = query.filter({
+          $and: [...filt],
+        });
+      }
 
       if (isConcise) {
         return query
@@ -86,13 +92,13 @@ export function cashFlowByDate(start, end, isConcise) {
         makeQuery('amount < 0').filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, end, isConcise));
+        setData(recalculate(data, start, end, isConcise, isCashFlow));
       },
     );
   };
 }
 
-function recalculate(data, start, end, isConcise) {
+function recalculate(data, start, end, isConcise, isCashFlow) {
   let [startingBalance, income, expense] = data;
   const dates = isConcise
     ? monthUtils.rangeInclusive(
@@ -114,6 +120,13 @@ function recalculate(data, start, end, isConcise) {
   let balance = startingBalance;
   let totalExpenses = 0;
   let totalIncome = 0;
+
+  if (isCashFlow) {
+    balance = startingBalance;
+  } else {
+    balance = 0;
+  }
+
   const graphData = dates.reduce(
     (res, date) => {
       let income = 0;
