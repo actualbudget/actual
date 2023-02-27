@@ -222,9 +222,9 @@ function parseAmount(amount, mapper) {
 function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
   const num = (() => {
     if (multiplierAmount === '') {
-      return parseFloat('1').toFixed(4);
+      return parseFloat('1');
     } else {
-      return parseFloat(multiplierAmount).toFixed(4);
+      return parseFloat(multiplierAmount);
     }
   })();
 
@@ -232,8 +232,8 @@ function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    let outflow = parseAmount(trans.outflow * num, n => -Math.abs(n));
-    let inflow = outflow ? 0 : parseAmount(trans.inflow * num, n => Math.abs(n));
+    let outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * num;
+    let inflow = outflow ? 0 : parseAmount(trans.inflow, n => Math.abs(n)) * num;
 
     return {
       amount: outflow || inflow,
@@ -242,7 +242,7 @@ function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
     };
   }
   return {
-    amount: parseAmount(trans.amount * num, n => (flipAmount ? n * -1 : n)),
+    amount: parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * num,
     outflow: null,
     inflow: null,
   };
