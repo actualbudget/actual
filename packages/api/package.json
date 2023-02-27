@@ -17,7 +17,7 @@
     "build": "yarn workspace loot-core build:api"
   },
   "dependencies": {
-    "better-sqlite3": "^7.5.0",
+    "better-sqlite3": "^8.1.0",
     "node-fetch": "^2.6.9",
     "uuid": "3.3.2"
   }
