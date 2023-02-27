@@ -220,7 +220,7 @@ function parseAmount(amount, mapper) {
 }
 
 function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
-  const num = (() => {
+  const multiplier = (() => {
     if (multiplierAmount === '') {
       return parseFloat('1');
     } else {
@@ -232,8 +232,10 @@ function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    let outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * num;
-    let inflow = outflow ? 0 : parseAmount(trans.inflow, n => Math.abs(n)) * num;
+    let outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * multiplier;
+    let inflow = outflow
+      ? 0
+      : parseAmount(trans.inflow, n => Math.abs(n)) * multiplier;
 
     return {
       amount: outflow || inflow,
@@ -242,7 +244,8 @@ function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
     };
   }
   return {
-    amount: parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * num,
+    amount:
+      parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * multiplier,
     outflow: null,
     inflow: null,
   };
@@ -401,10 +404,8 @@ function MultipliersOption({ value, onChange }) {
         userSelect: 'none',
       }}
     >
-      <Checkbox id="add_multiplier" checked={value} onChange={onChange}/>
-      <label htmlFor="add_multiplier">
-        Add Multiplier
-      </label>
+      <Checkbox id="add_multiplier" checked={value} onChange={onChange} />
+      <label htmlFor="add_multiplier">Add Multiplier</label>
     </View>
   );
 }
@@ -537,7 +538,7 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
   );
 }
 
-function MultipliersField({ multiplierCB, value, onChange }){
+function MultipliersField({ multiplierCB, value, onChange }) {
   const styl = (() => {
     if (multiplierCB) {
       return 'inherit';
@@ -546,13 +547,13 @@ function MultipliersField({ multiplierCB, value, onChange }){
     }
   })();
 
-  return(
+  return (
     <Input
-    type="text"
-    style={{ display: styl }}
-    value={value}
-    placeholder="Optional"
-    onUpdate={onChange}
+      type="text"
+      style={{ display: styl }}
+      value={value}
+      placeholder="Optional"
+      onUpdate={onChange}
     />
   );
 }
@@ -650,7 +651,7 @@ export function ImportTransactions({
     if (!amt || amt.match(/^\d{1,}(\.\d{0,4})?$/)) {
       setMultiplierAmount(amt);
     }
-  };
+  }
 
   useEffect(() => {
     parse(
@@ -732,7 +733,7 @@ export function ImportTransactions({
         trans,
         splitMode,
         flipAmount,
-        multiplierAmount
+        multiplierAmount,
       );
       if (amount == null) {
         errorMessage = `Transaction on ${trans.date} has no amount`;
@@ -886,14 +887,13 @@ export function ImportTransactions({
 
       {/*Import Options */}
       {(filetype === 'qif' || filetype === 'csv') && (
-        <View style={{ marginTop: 25 }}> 
+        <View style={{ marginTop: 25 }}>
           <Stack
             direction="row"
             align="flex-start"
             spacing={1}
             style={{ marginTop: 5 }}
           >
-
             {/*Date Format */}
             <View>
               {(filetype === 'qif' || filetype === 'csv') && (
@@ -986,7 +986,6 @@ export function ImportTransactions({
         </View>
 
         <View style={{ flex: 1 }} />
-
       </View>
     </Modal>
   );
