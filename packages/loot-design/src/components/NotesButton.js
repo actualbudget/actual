@@ -81,10 +81,9 @@ export default function NotesButton({
 
   const [delayHandler, setDelayHandler] = useState(null);
 
-  const handleMouseEnter = event => {
+  const handleMouseEnter = () => {
     setDelayHandler(
       setTimeout(() => {
-        // whatever your data is
         setHover(true);
       }, 300),
     );
@@ -100,30 +99,19 @@ export default function NotesButton({
 
   return (
     <View
-      style={[
-        { flexShrink: 0 },
-        tooltipOpen && {
-          '& button, & .hover-visible': {
-            display: 'flex',
-            opacity: 1,
-            color: colors.n1,
-          },
-        },
-        hasNotes && {
-          '& button, & .hover-visible': { display: 'flex', opacity: 1 },
-        },
-      ]}
-      onMouseEnter={async () => {
-        handleMouseEnter();
-      }}
-      onMouseLeave={() => {
-        handleMouseLeave();
-      }}
+      style={[{ flexShrink: 0 }]}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Button
         bare
-        className="hover-visible"
-        style={[{ color: defaultColor }, style]}
+        className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
+        style={[
+          { color: defaultColor },
+          style,
+          hasNotes && { display: 'flex !important' },
+          tooltipOpen && { color: colors.n1 },
+        ]}
         {...tooltip.getOpenEvents()}
       >
         <CustomNotesPaper style={{ width, height, color: 'currentColor' }} />
