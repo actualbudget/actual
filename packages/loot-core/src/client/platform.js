@@ -12,6 +12,5 @@ export default {
   OS: isWindows ? 'windows' : isMac ? 'mac' : 'linux',
   env: 'web',
   isBrowser: !!window.Actual?.IS_FAKE_WEB,
-  isReactNativeWeb: false,
   isProbablySafari,
 };

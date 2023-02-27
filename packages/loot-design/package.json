@@ -29,7 +29,6 @@
     "react-dnd-html5-backend": "^10.0.2",
     "react-dom": "16.13.1",
     "react-element-query": "^3.0.2",
-    "react-native-web": "^0.11.7",
     "react-test-renderer": "^16.3.1",
     "velocity-animate": "^1.5.0",
     "wobble": "^1.5.0"
@@ -41,7 +40,6 @@
     "react-dnd": "^10.0.2",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.4.4",
-    "react-native": "0.65.1",
     "react-native-gesture-handler": "1.10.3",
     "react-spring": "^8.0.27",
     "react-virtualized-auto-sizer": "^1.0.2"
@@ -55,8 +53,7 @@
   "homepage": "./",
   "manifest": "manifest.json",
   "pathAliases": {
-    "react-art": "../../node_modules/node-noop",
-    "react-native": "./node_modules/react-native-web"
+    "react-art": "../../node_modules/node-noop"
   },
   "browserslist": [
     "electron 3.0"
