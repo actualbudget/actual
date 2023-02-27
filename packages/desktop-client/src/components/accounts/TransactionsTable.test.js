@@ -20,15 +20,11 @@ import {
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { SelectedProviderWithItems } from 'loot-design/src/components/useSelected';
 
-import installPolyfills from '../../polyfills';
-
 import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 
 const uuid = require('loot-core/src/platform/uuid');
 
 jest.mock('loot-core/src/platform/client/fetch');
-
-installPolyfills();
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
