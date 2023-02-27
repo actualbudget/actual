@@ -85,7 +85,7 @@ function Modals({
             modalProps={modalProps}
             accounts={options.accounts}
             requisitionId={options.requisitionId}
-            actualAccounts={accounts}
+            actualAccounts={accounts.filter(acct => acct.closed === 0)}
             upgradingAccountId={options.upgradingAccountId}
             actions={actions}
           />
