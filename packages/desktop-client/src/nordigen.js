@@ -10,6 +10,7 @@ function _authorize(pushModal, upgradingAccountId, { onSuccess, onClose }) {
         accessValidForDays,
       });
 
+      if (resp.error) return resp;
       const { link, requisitionId } = resp;
       window.Actual.openURLInBrowser(link);
 
