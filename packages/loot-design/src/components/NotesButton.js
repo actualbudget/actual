@@ -81,10 +81,9 @@ export default function NotesButton({
 
   const [delayHandler, setDelayHandler] = useState(null);
 
-  const handleMouseEnter = event => {
+  const handleMouseEnter = () => {
     setDelayHandler(
       setTimeout(() => {
-        // whatever your data is
         setHover(true);
       }, 300),
     );
@@ -101,12 +100,8 @@ export default function NotesButton({
   return (
     <View
       style={[{ flexShrink: 0 }]}
-      onMouseEnter={async () => {
-        handleMouseEnter();
-      }}
-      onMouseLeave={() => {
-        handleMouseLeave();
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Button
         bare
