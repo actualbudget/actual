@@ -18,6 +18,7 @@ import {
   Stack,
   Modal,
   Select,
+  Input,
   Button,
   ButtonWithLoading,
 } from '../common';
@@ -553,13 +554,12 @@ function MultipliersField({ multiplierCB, value, onChange }){
   })();
 
   return(
-    <input
+    <Input
     type="text"
-    name="multiplier"
     style={{ display: styl }}
     value={value}
     placeholder="Optional"
-    onChange={onChange}
+    onUpdate={onChange}
     />
   );
 }
@@ -653,7 +653,7 @@ export function ImportTransactions({
   }
 
   function onMultiplierChange(e) {
-    const amt = e.target.value;
+    const amt = e;
     if (!amt || amt.match(/^\d{1,}(\.\d{0,4})?$/)) {
       setMultiplierAmount(amt);
     }
@@ -955,7 +955,7 @@ export function ImportTransactions({
                     }}
                   />
                 </View>
-                <View style={{ width: 65 }}>
+                <View style={{ width: 75 }}>
                   <MultipliersField
                     multiplierCB={multiplier}
                     value={multiplierAmount}
