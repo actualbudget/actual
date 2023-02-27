@@ -78,7 +78,7 @@ __metadata:
     jest-watch-typeahead: ^2.2.2
     load-js: ^3.0.3
     mini-css-extract-plugin: 0.4.3
-    mitt: ^1.1.2
+    mitt: ^3.0.0
     perf-deets: ^1.0.15
     prop-types: 15.6.0
     react: 16.13.1
@@ -15091,7 +15091,7 @@ __metadata:
     md5: ^2.3.0
     memfs: 3.1.1
     memoize-one: ^4.0.0
-    mitt: ^2.1.0
+    mitt: ^3.0.0
     mockdate: ^3.0.5
     murmurhash: ^0.0.2
     node-fetch: ^2.6.9
@@ -15784,17 +15784,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mitt@npm:^1.1.2":
-  version: 1.2.0
-  resolution: "mitt@npm:1.2.0"
-  checksum: 53abb94c6203250e2498e152ae096288c4866c6aab1dc093922084a7414af4aa6cda5a51d480267a8f0bd7908b0e896099bc953317aca8a18672dc67ee7e923d
-  languageName: node
-  linkType: hard
-
-"mitt@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "mitt@npm:2.1.0"
-  checksum: 5b0f698cbff2e47cc3b81b991f1230fadd429bdf4a2d9051d936059ad8090e36932694f299dd52434365463e6c52075026fb2161adcfd52b234b6f5392a514d2
+"mitt@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "mitt@npm:3.0.0"
+  checksum: f7be5049d27d18b1dbe9408452d66376fa60ae4a79fe9319869d1b90ae8cbaedadc7e9dab30b32d781411256d468be5538996bb7368941c09009ef6bbfa6bfc7
   languageName: node
   linkType: hard
 

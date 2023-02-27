@@ -32,7 +32,7 @@
     "jest-watch-typeahead": "^2.2.2",
     "load-js": "^3.0.3",
     "mini-css-extract-plugin": "0.4.3",
-    "mitt": "^1.1.2",
+    "mitt": "^3.0.0",
     "perf-deets": "^1.0.15",
     "prop-types": "15.6.0",
     "react": "16.13.1",
