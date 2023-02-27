@@ -220,10 +220,9 @@ function parseAmount(amount, mapper) {
 }
 
 function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
-
   const num = (() => {
-    if (multiplierAmount == '') {
-      return parseFloat("1").toFixed(4);
+    if (multiplierAmount === '') {
+      return parseFloat('1').toFixed(4);
     } else {
       return parseFloat(multiplierAmount).toFixed(4);
     }
@@ -402,14 +401,8 @@ function MultipliersOption({ value, onChange }) {
         userSelect: 'none',
       }}
     >
-      <Checkbox
-        id="add_multiplier"
-        checked={value}      
-        onChange={onChange}
-      />
-      <label
-        htmlFor="add_multiplier"
-      >
+      <Checkbox id="add_multiplier" checked={value} onChange={onChange}/>
+      <label htmlFor="add_multiplier">
         Add Multiplier
       </label>
     </View>
@@ -673,7 +666,7 @@ export function ImportTransactions({
       return;
     }
 
-    if (flipAmount == true) {
+    if (flipAmount === true) {
       setFlipAmount(!flipAmount);
     }
 
@@ -735,7 +728,12 @@ export function ImportTransactions({
         break;
       }
 
-      let { amount } = parseAmountFields(trans, splitMode, flipAmount, multiplierAmount);
+      let { amount } = parseAmountFields(
+        trans,
+        splitMode,
+        flipAmount,
+        multiplierAmount
+      );
       if (amount == null) {
         errorMessage = `Transaction on ${trans.date} has no amount`;
         break;
@@ -905,7 +903,7 @@ export function ImportTransactions({
                   parseDateFormat={parseDateFormat}
                   onChange={setParseDateFormat}
                 />
-              )}              
+              )}
             </View>
 
             {/*csv Delimiter */}
