@@ -38,7 +38,6 @@
     "eslint": "8.35.0",
     "eslint-config-react-app": "7.0.1",
     "eslint-plugin-prettier": "4.2.1",
-    "husky": "^3.0.4",
     "npm-run-all": "^4.1.3",
     "patch-package": "^6.1.2",
     "prettier": "2.8.2",
