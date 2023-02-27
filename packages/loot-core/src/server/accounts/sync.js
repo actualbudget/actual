@@ -185,12 +185,7 @@ async function downloadNordigenTransactions(
 ) {
   let userToken = await asyncStorage.getItem('user-token');
   if (userToken) {
-    const date = new Date();
-    const endDate = new Date(
-      date.getTime() + date.getTimezoneOffset() * 60 * 1000,
-    )
-      .toISOString()
-      .slice(0, 10);
+    const endDate = new Date().toISOString().split('T')[0];
 
     const res = await post(
       getServer().NORDIGEN_SERVER + '/transactions',
