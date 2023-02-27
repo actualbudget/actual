@@ -131,7 +131,14 @@ async function fetchAll(table, ids) {
       let rows = await db.runQuery(sql, partIds, true);
       results = results.concat(rows);
     } catch (error) {
-      throw new SyncError('invalid-schema', { error, sql, params: partIds });
+      throw new SyncError('invalid-schema', {
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+        sql,
+        params: partIds,
+      });
     }
   }
 
