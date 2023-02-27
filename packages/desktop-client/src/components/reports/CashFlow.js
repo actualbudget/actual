@@ -50,6 +50,43 @@ function CashFlow() {
     return numDays > 31 * 3;
   });
 
+  const reportDescription = (() => {
+    if (isCashFlow) {
+      return (
+        <P>
+          Cash flow shows the balance of your budgeted accounts over time, and
+          the amount of expenses/income each day or month. Your budgeted
+          accounts are considered to be &quot;cash on hand&quot;, so this gives
+          you a picture of how available money fluctuates.
+        </P>
+      );
+    } else {
+      return (
+        <P>
+          Spending shows your expenses over time and is based on your filters.
+          This allows you to look at accounts or payees or categories and track
+          money spent in any way you like.
+        </P>
+      );
+    }
+  })();
+
+  const reportDescriptionTitle = (() => {
+    if (isCashFlow) {
+      return (
+        <P>
+          <strong>How is cash flow calculated?</strong>
+        </P>
+      );
+    } else {
+      return (
+        <P>
+          <strong>How is spending calculated?</strong>
+        </P>
+      );
+    }
+  })();
+
   const data = useReport(
     'cash_flow',
     useArgsMemo(cashFlowByDate)(start, end, isConcise, isCashFlow, filt),
@@ -274,15 +311,8 @@ function CashFlow() {
         />
 
         <View style={{ marginTop: 30 }}>
-          <P>
-            <strong>How is cash flow calculated?</strong>
-          </P>
-          <P>
-            Cash flow shows the balance of your budgeted accounts over time, and
-            the amount of expenses/income each day or month. Your budgeted
-            accounts are considered to be "cash on hand", so this gives you a
-            picture of how available money fluctuates.
-          </P>
+          {reportDescriptionTitle}
+          {reportDescription}
         </View>
       </View>
     </View>
