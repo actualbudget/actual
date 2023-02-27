@@ -1253,17 +1253,22 @@ handlers['nordigen-create-web-token'] = async function ({
   let userToken = await asyncStorage.getItem('user-token');
 
   if (userToken) {
-    return await post(
-      getServer().NORDIGEN_SERVER + '/create-web-token',
-      {
-        upgradingAccountId,
-        institutionId,
-        accessValidForDays,
-      },
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
-    );
+    try {
+      return await post(
+        getServer().NORDIGEN_SERVER + '/create-web-token',
+        {
+          upgradingAccountId,
+          institutionId,
+          accessValidForDays,
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
+    } catch (error) {
+      console.error(error);
+      return { error: 'failed' };
+    }
   }
   return { error: 'unauthorized' };
 };
