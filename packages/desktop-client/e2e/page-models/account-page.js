@@ -1,16 +1,22 @@
+import { CloseAccountModal } from './close-account-modal';
+
 export class AccountPage {
   constructor(page) {
     this.page = page;
 
+    this.accountName = this.page.getByTestId('account-name');
     this.addNewTransactionButton = this.page.getByRole('button', {
-      name: 'Add New'
+      name: 'Add New',
     });
     this.newTransactionRow = this.page
       .getByTestId('new-transaction')
       .getByTestId('row');
     this.addTransactionButton = this.page.getByTestId('add-button');
     this.cancelTransactionButton = this.page.getByRole('button', {
-      name: 'Cancel'
+      name: 'Cancel',
+    });
+    this.menuButton = this.page.getByRole('button', {
+      name: 'Menu',
     });
 
     this.transactionTableRow = this.page
@@ -40,14 +46,14 @@ export class AccountPage {
     const transactionRow = this.newTransactionRow.first();
     await this._fillTransactionFields(transactionRow, {
       ...rootTransaction,
-      category: 'split'
+      category: 'split',
     });
 
     // Child transactions
     for (let i = 0; i < transactions.length; i++) {
       await this._fillTransactionFields(
         this.newTransactionRow.nth(i + 1),
-        transactions[i]
+        transactions[i],
       );
 
       if (i + 1 < transactions.length) {
@@ -71,8 +77,17 @@ export class AccountPage {
       notes: await row.getByTestId('notes').textContent(),
       category: await row.getByTestId('category').textContent(),
       debit: await row.getByTestId('debit').textContent(),
-      credit: await row.getByTestId('credit').textContent()
+      credit: await row.getByTestId('credit').textContent(),
     };
+  }
+
+  /**
+   * Open the modal for closing the account.
+   */
+  async clickCloseAccount() {
+    await this.menuButton.click();
+    await this.page.getByRole('button', { name: 'Close Account' }).click();
+    return new CloseAccountModal(this.page.locator('css=[aria-modal]'));
   }
 
   async _fillTransactionFields(transactionRow, transaction) {

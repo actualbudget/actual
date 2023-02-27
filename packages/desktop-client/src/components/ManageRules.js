@@ -356,7 +356,10 @@ let Rule = React.memo(
 
         <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
           <Stack direction="row" align="center">
-            <View style={{ flex: 1, alignItems: 'flex-start' }}>
+            <View
+              style={{ flex: 1, alignItems: 'flex-start' }}
+              data-testid="conditions"
+            >
               {rule.conditions.map((cond, i) => (
                 <ConditionExpression
                   key={i}
@@ -374,7 +377,10 @@ let Rule = React.memo(
               <ArrowRight color={colors.n4} style={{ width: 12, height: 12 }} />
             </Text>
 
-            <View style={{ flex: 1, alignItems: 'flex-start' }}>
+            <View
+              style={{ flex: 1, alignItems: 'flex-start' }}
+              data-testid="actions"
+            >
               {rule.actions.map((action, i) => (
                 <ActionExpression
                   key={i}
@@ -446,6 +452,7 @@ let SimpleTable = React.forwardRef(
           style,
         ]}
         tabIndex="1"
+        data-testid="table"
         {...getNavigatorProps(props)}
       >
         <View
