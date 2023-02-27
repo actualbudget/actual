@@ -79,31 +79,39 @@ export default function NotesButton({
     tooltip.close();
   }
 
+  const [delayHandler, setDelayHandler] = useState(null);
+
+  const handleMouseEnter = () => {
+    setDelayHandler(
+      setTimeout(() => {
+        setHover(true);
+      }, 300),
+    );
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(delayHandler);
+    setHover(false);
+  };
+
   // This account for both the tooltip hover, and editing tooltip
   const tooltipOpen = tooltip.isOpen || (hasNotes && hover);
 
   return (
     <View
-      style={[
-        { flexShrink: 0 },
-        tooltipOpen && {
-          '& button, & .hover-visible': {
-            display: 'flex',
-            opacity: 1,
-            color: colors.n1,
-          },
-        },
-        hasNotes && {
-          '& button, & .hover-visible': { display: 'flex', opacity: 1 },
-        },
-      ]}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      style={[{ flexShrink: 0 }]}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Button
         bare
-        className="hover-visible"
-        style={[{ color: defaultColor }, style]}
+        className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
+        style={[
+          { color: defaultColor },
+          style,
+          hasNotes && { display: 'flex !important' },
+          tooltipOpen && { color: colors.n1 },
+        ]}
         {...tooltip.getOpenEvents()}
       >
         <CustomNotesPaper style={{ width, height, color: 'currentColor' }} />
