@@ -100,19 +100,7 @@ export default function NotesButton({
 
   return (
     <View
-      style={[
-        { flexShrink: 0 },
-        tooltipOpen && {
-          '& button, & .hover-visible': {
-            display: 'flex',
-            opacity: 1,
-            color: colors.n1,
-          },
-        },
-        hasNotes && {
-          '& button, & .hover-visible': { display: 'flex', opacity: 1 },
-        },
-      ]}
+      style={[{ flexShrink: 0 }]}
       onMouseEnter={async () => {
         handleMouseEnter();
       }}
@@ -122,8 +110,12 @@ export default function NotesButton({
     >
       <Button
         bare
-        className="hover-visible"
-        style={[{ color: defaultColor }, style]}
+        className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
+        style={[
+          { color: defaultColor, display: 'flex' },
+          style,
+          tooltipOpen && { color: colors.n1 },
+        ]}
         {...tooltip.getOpenEvents()}
       >
         <CustomNotesPaper style={{ width, height, color: 'currentColor' }} />
