@@ -107,8 +107,9 @@ export default function NotesButton({
         bare
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
         style={[
-          { color: defaultColor, display: 'flex' },
+          { color: defaultColor },
           style,
+          hasNotes && { display: 'flex !important' },
           tooltipOpen && { color: colors.n1 },
         ]}
         {...tooltip.getOpenEvents()}
