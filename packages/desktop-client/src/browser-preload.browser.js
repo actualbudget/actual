@@ -1,6 +1,6 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
-const BackendWorker = new URL('./browser-server.js', import.meta.url);
+const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 
 // This file installs global variables that the app expects.
 // Normally these are already provided by electron, but in a real
@@ -15,7 +15,7 @@ let ACTUAL_VERSION = process.env.REACT_APP_ACTUAL_VERSION;
 let worker;
 
 function createBackendWorker() {
-  worker = new Worker(BackendWorker);
+  worker = new Worker(backendWorkerUrl);
   initSQLBackend(worker);
 
   if (window.SharedArrayBuffer) {
