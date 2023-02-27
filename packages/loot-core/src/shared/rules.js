@@ -147,7 +147,11 @@ export function parse(item) {
   switch (item.type) {
     case 'number': {
       let parsed = item.value;
-      if (item.field === 'amount' && item.op !== 'isbetween') {
+      if (
+        item.field === 'amount' &&
+        item.op !== 'isbetween' &&
+        parsed != null
+      ) {
         parsed = integerToAmount(parsed);
       }
       return { ...item, value: parsed };
@@ -197,7 +201,7 @@ export function makeValue(value, cond) {
         return {
           ...cond,
           error: null,
-          value: value ? currencyToAmount(value) || 0 : 0,
+          value: value ? currencyToAmount(String(value)) || 0 : 0,
         };
       }
       break;
