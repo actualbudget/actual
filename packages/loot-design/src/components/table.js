@@ -11,8 +11,6 @@ import React, {
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import { scope } from '@jlongster/lively';
-
 import { styles, colors } from '../style';
 import AnimatedLoading from '../svg/AnimatedLoading';
 import DeleteIcon from '../svg/v0/Delete';
@@ -29,7 +27,6 @@ import {
   IntersectionBoundary,
   Menu,
 } from './common';
-import DateSelect from './DateSelect';
 import { FixedSizeList } from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import format from './spreadsheet/format';
@@ -449,35 +446,6 @@ export function CustomCell({
   );
 }
 
-export const DateSelectCell = scope(lively => {
-  function DateSelectCell({ props: { dateSelectProps, ...props }, updater }) {
-    const { inputProps = {} } = dateSelectProps;
-    return (
-      <Cell
-        {...props}
-        style={{
-          zIndex: props.exposed ? 1 : 0,
-          ...props.style,
-        }}
-      >
-        {() => (
-          <DateSelect
-            {...dateSelectProps}
-            tooltipStyle={{ minWidth: 225 }}
-            inputProps={{
-              ...inputProps,
-              onBlur: e => fireBlur(inputProps && inputProps.onBlur, e),
-              style: [inputCellStyle, { zIndex: 300 }],
-            }}
-          />
-        )}
-      </Cell>
-    );
-  }
-
-  return lively(DateSelectCell);
-});
-
 export function DeleteCell({ onDelete, style, ...props }) {
   return (
     <Cell
@@ -668,54 +636,6 @@ export function SheetCell({
     </SheetValue>
   );
 }
-
-export const Highlight = scope(lively => {
-  function Highlight({ inst, state: { activated, highlightOff } }) {
-    return (
-      <View
-        innerRef={el => (inst.el = el)}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          transition: 'background-color 1.8s',
-          backgroundColor: 'white',
-        }}
-      />
-    );
-  }
-
-  function activate({ inst }) {
-    inst.el.style.transitionDuration = '0s';
-    inst.el.style.backgroundColor = colors.y9;
-    setTimeout(() => {
-      if (inst.el) {
-        inst.el.style.transitionDuration = '1.8s';
-        inst.el.style.backgroundColor = 'white';
-      }
-    }, 0);
-  }
-
-  return lively(Highlight, {
-    getInitialState({ props }) {
-      return { activated: false, highlightOff: true };
-    },
-
-    componentWillReceiveProps(bag, nextProps) {
-      if (!bag.props.active && nextProps.active) {
-        return activate(bag);
-      }
-    },
-
-    componentDidMount(bag) {
-      if (bag.props.active) {
-        return activate(bag);
-      }
-    },
-  });
-});
 
 export function TableHeader({ headers, children, version, ...rowProps }) {
   return (
