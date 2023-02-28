@@ -236,23 +236,3 @@ if (Platform.env === 'web') {
 }
 
 export const hasHiddenScrollbars = () => hiddenScrollbars;
-
-export function transform(spec) {
-  // We've made React Native Web simulate a mobile environment so it
-  // won't return "web" here. Explicit check for it so we can override
-  // mobile behavior and return a value appropriate for the web.
-  if (Platform.env !== 'web' && !Platform.isReactNativeWeb) {
-    return spec;
-  }
-
-  let r = spec.reduce((str, prop) => {
-    let name = Object.keys(prop)[0];
-    let value = prop[name];
-    if (typeof value === 'number') {
-      value = value + 'px';
-    }
-
-    return `${name}(${value})`;
-  }, spec);
-  return r;
-}
