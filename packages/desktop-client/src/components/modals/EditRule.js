@@ -178,7 +178,6 @@ function Editor({ error, style, children }) {
 }
 
 export function ConditionEditor({
-  conditionFields,
   ops,
   condition,
   editorStyle,
@@ -293,13 +292,13 @@ function ScheduleDescription({ id }) {
 }
 
 let actionFields = [
+  'category',
   'payee',
   'notes',
+  'cleared',
+  'account',
   'date',
   'amount',
-  'category',
-  'account',
-  'cleared',
 ].map(field => [field, mapField(field)]);
 function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
   let { field, op, value, type, error, inputKey = 'initial' } = action;
@@ -407,13 +406,20 @@ function newInput(item) {
 
 export function ConditionsList({
   conditions,
-  conditionFields,
   editorStyle,
   isSchedule,
   onChangeConditions,
 }) {
   function addCondition(index) {
-    let field = 'payee';
+    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
+    let fields = conditionFields
+      .map(f => f[0])
+      .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');
+    for (let cond of conditions) {
+      fields = fields.filter(f => f !== cond.field);
+    }
+    let field = fields[0] || 'payee';
+
     let copy = [...conditions];
     copy.splice(index + 1, 0, {
       type: FIELD_TYPES.get(field),
@@ -534,7 +540,6 @@ export function ConditionsList({
         return (
           <View key={i}>
             <ConditionEditor
-              conditionFields={conditionFields}
               editorStyle={editorStyle}
               ops={ops}
               condition={cond}
@@ -556,11 +561,11 @@ export function ConditionsList({
 // * Dont touch child transactions?
 
 let conditionFields = [
-  'account',
   'imported_payee',
-  'payee',
+  'account',
   'category',
   'date',
+  'payee',
   'notes',
   'amount',
 ]
@@ -627,7 +632,11 @@ export default function EditRule({
   }
 
   function addAction(index) {
-    let field = 'category';
+    let fields = actionFields.map(f => f[0]);
+    for (let action of actions) {
+      fields = fields.filter(f => f !== action.field);
+    }
+    let field = fields[0] || 'category';
 
     let copy = [...actions];
     copy.splice(index + 1, 0, {
@@ -785,7 +794,6 @@ export default function EditRule({
 
                 <ConditionsList
                   conditions={conditions}
-                  conditionFields={conditionFields}
                   editorStyle={editorStyle}
                   isSchedule={isSchedule}
                   onChangeConditions={conds => setConditions(conds)}

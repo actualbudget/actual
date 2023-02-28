@@ -57,8 +57,6 @@ export function mapField(field, opts) {
       return 'amount (inflow)';
     case 'amount-outflow':
       return 'amount (outflow)';
-    case 'cleared':
-      return 'cleared';
     default:
       return field;
   }
