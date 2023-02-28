@@ -1,6 +1,7 @@
 module.exports = {
   moduleFileExtensions: ['testing.js', 'web.js', 'mjs', 'js', 'ts', 'json'],
   testEnvironment: 'jsdom',
+  testEnvironmentOptions: {},
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
   testPathIgnorePatterns: [
     '/node_modules/',
