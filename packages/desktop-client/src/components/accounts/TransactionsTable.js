@@ -510,6 +510,7 @@ export const Transaction = React.memo(function Transaction(props) {
     accounts,
     balance,
     dateFormat = 'MM/dd/yyyy',
+    hideFraction,
     onSave,
     onEdit,
     onHover,
@@ -614,6 +615,7 @@ export const Transaction = React.memo(function Transaction(props) {
 
   let valueStyle = added ? { fontWeight: 600 } : null;
   let backgroundFocus = hovered || focusedField === 'select';
+  let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
   return (
     <Row
@@ -985,7 +987,7 @@ export const Transaction = React.memo(function Transaction(props) {
         textAlign="right"
         title={debit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum]}
+        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: debit,
           onUpdate: onUpdate.bind(null, 'debit'),
@@ -1003,7 +1005,7 @@ export const Transaction = React.memo(function Transaction(props) {
         textAlign="right"
         title={credit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum]}
+        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
@@ -1019,7 +1021,7 @@ export const Transaction = React.memo(function Transaction(props) {
               : integerToCurrency(balance)
           }
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
-          style={styles.tnum}
+          style={[styles.tnum, amountStyle]}
           width={85}
           textAlign="right"
         />
@@ -1118,6 +1120,7 @@ function NewTransaction({
   showBalance,
   showCleared,
   dateFormat,
+  hideFraction,
   onHover,
   onClose,
   onSplit,
@@ -1163,6 +1166,7 @@ function NewTransaction({
           categoryGroups={categoryGroups}
           payees={payees}
           dateFormat={dateFormat}
+          hideFraction={hideFraction}
           expanded={true}
           onHover={onHover}
           onEdit={onEdit}
@@ -1243,6 +1247,7 @@ function TransactionTableInner({
       showAccount,
       showCategory,
       balances,
+      hideFraction,
       isNew,
       isMatched,
       isExpanded,
@@ -1307,6 +1312,7 @@ function TransactionTableInner({
               : new Set()
           }
           dateFormat={dateFormat}
+          hideFraction={hideFraction}
           onHover={props.onHover}
           onEdit={tableNavigator.onEdit}
           onSave={props.onSave}
@@ -1354,6 +1360,7 @@ function TransactionTableInner({
               showBalance={!!props.balances}
               showCleared={props.showCleared}
               dateFormat={dateFormat}
+              hideFraction={props.hideFraction}
               onClose={props.onCloseAddTransaction}
               onAdd={props.onAddTemporary}
               onAddSplit={props.onAddSplit}

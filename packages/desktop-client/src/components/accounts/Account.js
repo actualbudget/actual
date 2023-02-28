@@ -1728,6 +1728,7 @@ class AccountInternal extends React.PureComponent {
       payees,
       syncEnabled,
       dateFormat,
+      hideFraction,
       addNotification,
       accountsSyncing,
       replaceModal,
@@ -1856,6 +1857,7 @@ class AccountInternal extends React.PureComponent {
                       this.state.search !== '' || this.state.filters.length > 0
                     }
                     dateFormat={dateFormat}
+                    hideFraction={hideFraction}
                     addNotification={addNotification}
                     renderEmpty={() =>
                       showEmptyMessage ? (
@@ -1920,6 +1922,7 @@ export default function Account(props) {
     categoryGroups: state.queries.categories.grouped,
     syncEnabled: state.prefs.local['flags.syncAccount'],
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
+    hideFraction: state.prefs.local.hideFraction || false,
     expandSplits: props.match && state.prefs.local['expand-splits'],
     showBalances:
       props.match &&
