@@ -1,4 +1,4 @@
 {
-  presets: ['jwl-app'],
+  presets: ['@babel/preset-env'],
   ignore: ['**/__mocks__']
 }
