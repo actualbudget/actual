@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { RectButton } from 'react-native-gesture-handler';
 import { useLocation } from 'react-router';
 
 import { css } from 'glamor';
@@ -33,6 +32,46 @@ export const SIDEBAR_WIDTH = 240;
 
 const fontWeight = 600;
 
+function ItemContent({
+  style,
+  to,
+  exact,
+  onClick,
+  activeStyle,
+  forceActive,
+  children,
+}) {
+  return onClick ? (
+    <View
+      role="button"
+      tabIndex={0}
+      style={[
+        style,
+        {
+          touchAction: 'auto',
+          userSelect: 'none',
+          userDrag: 'none',
+          cursor: 'pointer',
+          ...(forceActive ? activeStyle : {}),
+        },
+      ]}
+      onClick={onClick}
+    >
+      {children}
+    </View>
+  ) : (
+    <AnchorLink
+      to={to}
+      exact={exact}
+      style={style}
+      activeStyle={activeStyle}
+      forceActive={forceActive}
+    >
+      {children}
+    </AnchorLink>
+  );
+}
+
 function Item({
   children,
   Icon,
@@ -64,7 +103,6 @@ function Item({
       textDecoration: 'none',
       color: colors.n9,
       ...(forceHover ? hoverStyle : {}),
-      ...(forceActive ? activeStyle : {}),
     },
     { ':hover': hoverStyle },
   ];
@@ -86,21 +124,16 @@ function Item({
 
   return (
     <View style={[{ flexShrink: 0 }, style]}>
-      {onClick ? (
-        <RectButton onClick={onClick}>
-          <View style={linkStyle}>{content}</View>
-        </RectButton>
-      ) : (
-        <AnchorLink
-          style={linkStyle}
-          to={to}
-          exact={exact}
-          activeStyle={activeStyle}
-        >
-          {content}
-        </AnchorLink>
-      )}
-
+      <ItemContent
+        style={linkStyle}
+        to={to}
+        exact={exact}
+        onClick={onClick}
+        activeStyle={activeStyle}
+        forceActive={forceActive}
+      >
+        {content}
+      </ItemContent>
       {children ? <View style={{ marginTop: 5 }}>{children}</View> : null}
     </View>
   );
@@ -152,20 +185,15 @@ function SecondaryItem({
 
   return (
     <View style={[{ flexShrink: 0 }, style]}>
-      {onClick ? (
-        <RectButton onClick={onClick}>
-          <View style={linkStyle}>{content}</View>
-        </RectButton>
-      ) : (
-        <AnchorLink
-          style={linkStyle}
-          to={to}
-          exact={exact}
-          activeStyle={activeStyle}
-        >
-          {content}
-        </AnchorLink>
-      )}
+      <ItemContent
+        style={linkStyle}
+        to={to}
+        exact={exact}
+        onClick={onClick}
+        activeStyle={activeStyle}
+      >
+        {content}
+      </ItemContent>
     </View>
   );
 }
