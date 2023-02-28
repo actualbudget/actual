@@ -1275,9 +1275,8 @@ export const MonthPicker = ({
   const selectedIndex = monthUtils.getMonthIndex(startMonth);
 
   const [size, setSize] = useState('small');
-
   const containerRef = useResizeObserver(rect => {
-    setSize(rect.width <= 320 ? 'small' : rect.size <= 400 ? 'medium' : 'big');
+    setSize(rect.width <= 320 ? 'small' : rect.width <= 400 ? 'medium' : 'big');
   });
 
   return (
