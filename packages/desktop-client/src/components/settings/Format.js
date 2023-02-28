@@ -1,11 +1,15 @@
 import React from 'react';
 
-import { css } from 'glamor';
-
 import { numberFormats } from 'loot-core/src/shared/util';
-import { Text } from 'loot-design/src/components/common';
+import {
+  Button,
+  CustomSelect,
+  Text,
+  View,
+} from 'loot-design/src/components/common';
+import { Checkbox } from 'loot-design/src/components/forms';
 
-import { Section } from './UI';
+import { Setting } from './UI';
 
 let dateFormats = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
@@ -16,13 +20,11 @@ let dateFormats = [
 ];
 
 export default function FormatSettings({ prefs, savePrefs }) {
-  function onDateFormat(e) {
-    let format = e.target.value;
+  function onDateFormat(format) {
     savePrefs({ dateFormat: format });
   }
 
-  function onNumberFormat(e) {
-    let format = e.target.value;
+  function onNumberFormat(format) {
     savePrefs({ numberFormat: format });
   }
 
@@ -30,38 +32,47 @@ export default function FormatSettings({ prefs, savePrefs }) {
   let numberFormat = prefs.numberFormat || 'comma-dot';
 
   return (
-    <Section title="Formatting">
-      <Text>
-        <label htmlFor="settings-numberFormat">Number format: </label>
-        <select
-          defaultValue={numberFormat}
-          id="settings-numberFormat"
-          {...css({ marginLeft: 5, fontSize: 14 })}
-          onChange={onNumberFormat}
-        >
-          {numberFormats.map(f => (
-            <option key={f.value} value={f.value}>
-              {f.label}
-            </option>
-          ))}
-        </select>
-      </Text>
-
-      <Text>
-        <label htmlFor="settings-dateFormat">Date format: </label>
-        <select
-          defaultValue={dateFormat}
-          id="settings-dateFormat"
-          {...css({ marginLeft: 5, fontSize: 14 })}
-          onChange={onDateFormat}
-        >
-          {dateFormats.map(f => (
-            <option key={f.value} value={f.value}>
-              {f.label}
-            </option>
-          ))}
-        </select>
-      </Text>
-    </Section>
+    <>
+      <Setting
+        primaryAction={
+          <Button style={{ padding: 0 }}>
+            <CustomSelect
+              value={numberFormat}
+              onChange={onNumberFormat}
+              options={numberFormats.map(f => [f.value, f.label])}
+              style={{ padding: '5px 10px', fontSize: 15 }}
+            >
+              {numberFormats.map(f => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </CustomSelect>
+          </Button>
+        }
+      >
+        <Text>
+          <strong>Number format</strong> does not affect how budget data is
+          stored and can be changed at any time.
+        </Text>
+      </Setting>
+      <Setting
+        primaryAction={
+          <Button style={{ padding: 0 }}>
+            <CustomSelect
+              value={dateFormat}
+              onChange={onDateFormat}
+              options={dateFormats.map(f => [f.value, f.label])}
+              style={{ padding: '5px 10px', fontSize: 15 }}
+            />
+          </Button>
+        }
+      >
+        <Text>
+          <strong>Date format</strong> also does not affect how budget data is
+          stored and can be changed at any time.
+        </Text>
+      </Setting>
+    </>
   );
 }
