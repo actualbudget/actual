@@ -117,6 +117,7 @@ export function Value({
         case 'payee':
         case 'category':
         case 'account':
+        case 'rule':
           if (valueIsRaw) {
             return value;
           }
