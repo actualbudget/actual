@@ -19,7 +19,7 @@ self.addEventListener('message', e => {
       }
 
       // eslint-disable-next-line
-      importScripts(`${process.env.PUBLIC_URL}/kcab/kcab.worker.${hash}.js`);
+      importScripts(`${msg.publicUrl}/kcab/kcab.worker.${hash}.js`);
 
       // eslint-disable-next-line
       backend.initApp(version, isDev, self).then(
