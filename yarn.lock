@@ -16,7 +16,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
-    better-sqlite3: ^7.5.0
+    better-sqlite3: ^8.1.0
     node-fetch: ^2.6.9
     uuid: 3.3.2
   languageName: unknown
@@ -5740,26 +5740,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:7.4.1":
-  version: 7.4.1
-  resolution: "better-sqlite3@npm:7.4.1"
+"better-sqlite3@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "better-sqlite3@npm:8.1.0"
   dependencies:
     bindings: ^1.5.0
     node-gyp: latest
-    prebuild-install: ^6.0.1
-    tar: ^6.1.0
-  checksum: 66cc648f7d97455bf2c854e24247a987f07e59a5ad76569a49d80d63924b64c811f09532de885a3b01d4a33c81bb40b147de1c1058334f2d9695000fa05c1122
-  languageName: node
-  linkType: hard
-
-"better-sqlite3@npm:^7.5.0":
-  version: 7.5.0
-  resolution: "better-sqlite3@npm:7.5.0"
-  dependencies:
-    bindings: ^1.5.0
-    node-gyp: latest
-    prebuild-install: ^7.0.0
-  checksum: 049ab5de6b7c13f9957c6a93fe9a044f745b8b47672c8dc0bb8e0d1a9c846d0744be0f5e1f0f80903e010a07ee7a9eb52bf3e12124db214bab5989d0270d4ddc
+    prebuild-install: ^7.1.0
+  checksum: 7e6b4c33142f4b2ee2e60d3926b4db682feb0d09554efdaf7bea53cd5bef406ca0a5115ab9b411458daa45ba14973252ebd6853a3cdf94e4fd49cc8291730ade
   languageName: node
   linkType: hard
 
@@ -8124,15 +8112,6 @@ __metadata:
   dependencies:
     mimic-response: ^1.0.0
   checksum: 952552ac3bd7de2fc18015086b09468645c9638d98a551305e485230ada278c039c91116e946d07894b39ee53c0f0d5b6473f25a224029344354513b412d7380
-  languageName: node
-  linkType: hard
-
-"decompress-response@npm:^4.2.0":
-  version: 4.2.1
-  resolution: "decompress-response@npm:4.2.1"
-  dependencies:
-    mimic-response: ^2.0.0
-  checksum: 4e783ca4dfe9417354d61349750fe05236f565a4415a6ca20983a311be2371debaedd9104c0b0e7b36e5f167aeaae04f84f1a0b3f8be4162f1d7d15598b8fdba
   languageName: node
   linkType: hard
 
@@ -13778,7 +13757,7 @@ __metadata:
     absurd-sql: 0.0.53
     adm-zip: ^0.5.9
     babel-loader: ^8.0.6
-    better-sqlite3: 7.4.1
+    better-sqlite3: ^8.1.0
     buffer: ^5.5.0
     core-js: ^3.8.3
     cross-env: ^7.0.3
@@ -14261,13 +14240,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mimic-response@npm:^2.0.0":
-  version: 2.1.0
-  resolution: "mimic-response@npm:2.1.0"
-  checksum: 014fad6ab936657e5f2f48bd87af62a8e928ebe84472aaf9e14fec4fcb31257a5edff77324d8ac13ddc6685ba5135cf16e381efac324e5f174fb4ddbf902bf07
-  languageName: node
-  linkType: hard
-
 "mimic-response@npm:^3.1.0":
   version: 3.1.0
   resolution: "mimic-response@npm:3.1.0"
@@ -14661,7 +14633,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-abi@npm:^2.19.2, node-abi@npm:^2.21.0":
+"node-abi@npm:^2.19.2":
   version: 2.30.1
   resolution: "node-abi@npm:2.30.1"
   dependencies:
@@ -15008,7 +14980,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npmlog@npm:^4.0.1, npmlog@npm:^4.0.2, npmlog@npm:^4.1.2":
+"npmlog@npm:^4.0.2, npmlog@npm:^4.1.2":
   version: 4.1.2
   resolution: "npmlog@npm:4.1.2"
   dependencies:
@@ -16749,32 +16721,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^6.0.1":
-  version: 6.1.4
-  resolution: "prebuild-install@npm:6.1.4"
-  dependencies:
-    detect-libc: ^1.0.3
-    expand-template: ^2.0.3
-    github-from-package: 0.0.0
-    minimist: ^1.2.3
-    mkdirp-classic: ^0.5.3
-    napi-build-utils: ^1.0.1
-    node-abi: ^2.21.0
-    npmlog: ^4.0.1
-    pump: ^3.0.0
-    rc: ^1.2.7
-    simple-get: ^3.0.3
-    tar-fs: ^2.0.0
-    tunnel-agent: ^0.6.0
-  bin:
-    prebuild-install: bin.js
-  checksum: de4313eda821305912af922700a2db04bb8e77fe8aa9c2788550f1000c026cbefc82da468ec0c0a37764c5417bd8169dbd540928535fb38d00bb9bbd673dd217
-  languageName: node
-  linkType: hard
-
-"prebuild-install@npm:^7.0.0":
-  version: 7.0.1
-  resolution: "prebuild-install@npm:7.0.1"
+"prebuild-install@npm:^7.1.0":
+  version: 7.1.1
+  resolution: "prebuild-install@npm:7.1.1"
   dependencies:
     detect-libc: ^2.0.0
     expand-template: ^2.0.3
@@ -16783,7 +16732,6 @@ __metadata:
     mkdirp-classic: ^0.5.3
     napi-build-utils: ^1.0.1
     node-abi: ^3.3.0
-    npmlog: ^4.0.1
     pump: ^3.0.0
     rc: ^1.2.7
     simple-get: ^4.0.0
@@ -16791,7 +16739,7 @@ __metadata:
     tunnel-agent: ^0.6.0
   bin:
     prebuild-install: bin.js
-  checksum: 117c8966f221242633bbf245755fb469dabc7085909f5e3db83359d6281a88dedbdada7e839315805a192c74b7cce3ed1a86c1382a8d950c1ea60a9d5d8e7bf0
+  checksum: dbf96d0146b6b5827fc8f67f72074d2e19c69628b9a7a0a17d0fad1bf37e9f06922896972e074197fc00a52eae912993e6ef5a0d471652f561df5cb516f3f467
   languageName: node
   linkType: hard
 
@@ -18687,17 +18635,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-get@npm:^3.0.3":
-  version: 3.1.1
-  resolution: "simple-get@npm:3.1.1"
-  dependencies:
-    decompress-response: ^4.2.0
-    once: ^1.3.1
-    simple-concat: ^1.0.0
-  checksum: 80195e70bf171486e75c31e28e5485468195cc42f85940f8b45c4a68472160144d223eb4d07bc82ef80cb974b7c401db021a540deb2d34ac4b3b8883da2d6401
-  languageName: node
-  linkType: hard
-
 "simple-get@npm:^4.0.0":
   version: 4.0.1
   resolution: "simple-get@npm:4.0.1"
@@ -19630,7 +19567,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^6.0.2, tar@npm:^6.0.5, tar@npm:^6.1.0, tar@npm:^6.1.11, tar@npm:^6.1.2":
+"tar@npm:^6.0.2, tar@npm:^6.0.5, tar@npm:^6.1.11, tar@npm:^6.1.2":
   version: 6.1.11
   resolution: "tar@npm:6.1.11"
   dependencies:

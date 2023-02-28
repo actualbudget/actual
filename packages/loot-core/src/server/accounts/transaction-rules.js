@@ -638,7 +638,8 @@ export async function updateCategoryRules(transactions) {
   let register = await db.all(
     `SELECT t.* FROM v_transactions t
      LEFT JOIN accounts a ON a.id = t.account
-     WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0`,
+     WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0
+     ORDER BY date DESC`,
     [toDateRepr(oldestDate), toDateRepr(addDays(currentDay(), 180))],
   );
 
