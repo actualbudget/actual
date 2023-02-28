@@ -1870,21 +1870,19 @@ handlers['download-budget'] = async function ({ fileId, replace }) {
   }
 
   let id = result.id;
-  await handlers['load-budget']({ id });
-  result = await handlers['sync-budget']({ id });
-  await handlers['close-budget']();
-  if (result.error) {
-    return result;
-  }
-  return { id };
-};
 
-// open and sync, but don’t close
-handlers['sync-budget'] = async function ({ id }) {
+  // Load the budget and do a full sync
+  result = await loadBudget(result.id, VERSION, { showUpdate: true });
+  if (result.error) {
+    return { error: { reason: result.error } };
+  }
+
   setSyncingMode('enabled');
   await initialFullSync();
 
-  return {};
+  await handlers['close-budget']();
+
+  return { id };
 };
 
 handlers['load-budget'] = async function ({ id }) {
@@ -2401,7 +2399,7 @@ export async function initApp(version, isDev, socketName) {
   }
 }
 
-export async function init(config) {
+export async function init({ budgetId, config }) {
   // Get from build
   // eslint-disable-next-line
   VERSION = ACTUAL_APP_VERSION;
@@ -2421,12 +2419,6 @@ export async function init(config) {
 
   if (serverURL) {
     setServer(serverURL);
-
-    if (config.password) {
-      await runHandler(handlers['subscribe-sign-in'], {
-        password: config.password,
-      });
-    }
   } else {
     // This turns off all server URLs. In this mode we don't want any
     // access to the server, we are doing things locally
@@ -2435,6 +2427,10 @@ export async function init(config) {
     app.events.on('load-budget', () => {
       setSyncingMode('offline');
     });
+  }
+
+  if (budgetId) {
+    await runHandler(handlers['load-budget'], { id: budgetId });
   }
 
   return lib;

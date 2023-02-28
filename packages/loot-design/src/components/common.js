@@ -636,7 +636,6 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
 
         return (
           <View
-            role="button"
             key={item.name}
             style={[
               {

@@ -25,10 +25,10 @@ export function SectionLabel({ title, style }) {
   );
 }
 
-export function FormLabel({ style, title, htmlFor }) {
+export function FormLabel({ style, title }) {
   return (
     <Text style={[{ fontSize: 13, marginBottom: 3, color: colors.n3 }, style]}>
-      <label htmlFor={htmlFor}>{title}</label>
+      {title}
     </Text>
   );
 }

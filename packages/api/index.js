@@ -4,14 +4,14 @@ let methods = require('./methods');
 let utils = require('./utils');
 let actualApp;
 
-async function init(config = {}) {
+async function init({ budgetId, config } = {}) {
   if (actualApp) {
     return;
   }
 
   global.fetch = require('node-fetch');
 
-  await bundle.init(config);
+  await bundle.init({ budgetId, config });
   actualApp = bundle.lib;
 
   injected.send = bundle.lib.send;
@@ -30,5 +30,5 @@ module.exports = {
   shutdown,
   utils,
   internal: bundle.lib,
-  ...methods,
+  ...methods
 };

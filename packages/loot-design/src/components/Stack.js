@@ -26,7 +26,6 @@ const Stack = React.forwardRef(
       children,
       debug,
       style,
-      ...props
     },
     ref,
   ) => {
@@ -45,7 +44,6 @@ const Stack = React.forwardRef(
           style,
         ]}
         innerRef={ref}
-        {...props}
       >
         {validChildren.map(({ key, child }, index) => {
           let isLastChild = validChildren.length === index + 1;

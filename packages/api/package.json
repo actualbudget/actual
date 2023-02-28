@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "5.0.0",
+  "version": "4.1.6",
   "license": "MIT",
   "description": "An API for Actual",
   "main": "index.js",
@@ -13,9 +13,6 @@
     "migrations",
     "utils.js"
   ],
-  "scripts": {
-    "build": "yarn workspace loot-core build:api"
-  },
   "dependencies": {
     "better-sqlite3": "^7.5.0",
     "node-fetch": "^2.6.9",

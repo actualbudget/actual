@@ -45,7 +45,6 @@ let filterFields = [
   'category',
   'amount',
   'cleared',
-  'custom',
 ].map(field => [field, mapField(field)]);
 
 function subfieldFromFilter({ field, options, value }) {
@@ -115,7 +114,7 @@ function OpButton({ op, selected, style, onClick }) {
     <Button
       bare
       style={[
-        { backgroundColor: colors.n9, marginBottom: 5 },
+        { backgroundColor: colors.n10, marginBottom: 5 },
         style,
         selected && {
           color: 'white',
@@ -462,7 +461,7 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colors.n9,
+          backgroundColor: colors.n10,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
@@ -487,7 +486,12 @@ function FilterExpression({
                 {mapField(field, options)}
               </Text>{' '}
               <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
-              <Value value={value} field={field} inline={true} />
+              <Value
+                value={value}
+                field={field}
+                inline={true}
+                valueIsRaw={op === 'contains'}
+              />
             </>
           )}
         </div>
@@ -526,6 +530,7 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
+        marginTop: 10,
         marginBottom: -5,
       }}
     >

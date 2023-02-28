@@ -121,22 +121,12 @@ function EditorButtons({ onAdd, onDelete, style }) {
   return (
     <>
       {onDelete && (
-        <Button
-          bare
-          onClick={onDelete}
-          style={{ padding: 7 }}
-          aria-label="Delete entry"
-        >
+        <Button bare onClick={onDelete} style={{ padding: 7 }}>
           <SubtractIcon style={{ width: 8, height: 8 }} />
         </Button>
       )}
       {onAdd && (
-        <Button
-          bare
-          onClick={onAdd}
-          style={{ padding: 7 }}
-          aria-label="Add entry"
-        >
+        <Button bare onClick={onAdd} style={{ padding: 7 }}>
           <AddIcon style={{ width: 10, height: 10 }} />
         </Button>
       )}
@@ -161,7 +151,7 @@ function FieldError({ type }) {
 
 function Editor({ error, style, children }) {
   return (
-    <View style={style} data-testid="editor-row">
+    <View style={style}>
       <Stack
         direction="row"
         align="center"
@@ -516,7 +506,7 @@ export function ConditionsList({
       Add condition
     </Button>
   ) : (
-    <Stack spacing={2} data-testid="condition-list">
+    <Stack spacing={2}>
       {conditions.map((cond, i) => {
         let ops = TYPE_INFO[cond.type].ops;
 
@@ -804,7 +794,7 @@ export default function EditRule({
                     Add action
                   </Button>
                 ) : (
-                  <Stack spacing={2} data-testid="action-list">
+                  <Stack spacing={2}>
                     {actions.map((action, i) => (
                       <View key={i}>
                         <ActionEditor

@@ -95,7 +95,6 @@ export function ScheduleAmountCell({ amount, op }) {
         alignItems: 'center',
         padding: '0 5px',
       }}
-      name="amount"
     >
       {isApprox && (
         <View
@@ -207,18 +206,18 @@ export function SchedulesTable({
           ':hover': { backgroundColor: colors.hover },
         }}
       >
-        <Field width="flex" name="payee">
+        <Field width="flex">
           <DisplayId type="payees" id={item._payee} />
         </Field>
-        <Field width="flex" name="account">
+        <Field width="flex">
           <DisplayId type="accounts" id={item._account} />
         </Field>
-        <Field width={110} name="date">
+        <Field width={110}>
           {item.next_date
             ? monthUtils.format(item.next_date, dateFormat)
             : null}
         </Field>
-        <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
+        <Field width={120} style={{ alignItems: 'flex-start' }}>
           <StatusBadge status={statuses.get(item.id)} />
         </Field>
         <ScheduleAmountCell amount={item._amount} op={item._amountOp} />
@@ -230,7 +229,7 @@ export function SchedulesTable({
           </Field>
         )}
         {!minimal && (
-          <Field width={40} name="actions">
+          <Field width={40}>
             <OverflowMenu
               schedule={item}
               status={statuses.get(item.id)}
