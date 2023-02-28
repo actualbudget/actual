@@ -26,6 +26,7 @@
     "glamor": "^2.20.40",
     "identity-obj-proxy": "3.0.0",
     "inter-ui": "^3.19.3",
+    "jest-watch-typeahead": "^2.2.2",
     "mitt": "^3.0.0",
     "perf-deets": "^1.0.15",
     "prop-types": "15.6.0",
