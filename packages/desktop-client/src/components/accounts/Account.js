@@ -945,13 +945,15 @@ const AccountHeader = React.memo(
             )}
           </Stack>
 
-          {filters && filters.length > 0 && (
-            <AppliedFilters
-              filters={filters}
-              onUpdate={onUpdateFilter}
-              onDelete={onDeleteFilter}
-            />
-          )}
+          <View style={{ marginTop: 10 }}>
+            {filters && filters.length > 0 && (
+              <AppliedFilters
+                filters={filters}
+                onUpdate={onUpdateFilter}
+                onDelete={onDeleteFilter}
+              />
+            )}
+          </View>
         </View>
         {reconcileAmount != null && (
           <ReconcilingMessage

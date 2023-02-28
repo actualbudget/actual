@@ -526,7 +526,6 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
-        marginTop: 10,
         marginBottom: -5,
       }}
     >

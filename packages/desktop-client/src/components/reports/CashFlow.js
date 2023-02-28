@@ -14,11 +14,12 @@ import {
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 
+import { FilterButton, AppliedFilters } from '../accounts/Filters';
+
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
 import CashFlowGraph from './graphs/CashFlowGraph';
 import Header from './Header';
-import { FilterButton, AppliedFilters } from './ReportFilters';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
 
@@ -258,9 +259,11 @@ function CashFlow() {
           <FilterButton onApply={onApplyFilter} />
         </View>
 
-        {filterz && filterz.length > 0 && (
-          <AppliedFilters filters={filterz} onDelete={onDeleteFilter} />
-        )}
+        <View style={{ marginLeft: 10 }}>
+          {filterz && filterz.length > 0 && (
+            <AppliedFilters filters={filterz} onDelete={onDeleteFilter} />
+          )}
+        </View>
       </View>
       <View
         style={{
