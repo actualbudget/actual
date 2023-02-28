@@ -59,9 +59,9 @@ export function spendingByDate(start, end, isConcise, filt) {
           },
         ],
       });
-    
+
       if (filt.length > 0) {
-        query = query.filter({ $and: [...filt]});
+        query = query.filter({ $and: [...filt] });
       }
 
       if (isConcise) {
@@ -115,7 +115,7 @@ function recalculate(data, start, end, isConcise) {
     isConcise ? fromDateRepr : fromDateReprToDay,
   );
 
-  let balance = 0;
+  let balance = startingBalance;
   let totalExpenses = 0;
   let totalIncome = 0;
   const graphData = dates.reduce(

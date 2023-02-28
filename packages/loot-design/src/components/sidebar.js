@@ -17,6 +17,7 @@ import TuningIcon from '../svg/v1/Tuning';
 import Wallet from '../svg/v1/Wallet';
 import ArrowButtonLeft1 from '../svg/v2/ArrowButtonLeft1';
 import CalendarIcon from '../svg/v2/Calendar';
+import SettingsSliderAlternate from '../svg/v2/SettingsSliderAlternate';
 
 import {
   View,
@@ -482,6 +483,12 @@ function Tools() {
             title="Settings"
             Icon={Cog}
             to="/settings"
+            indent={15}
+          />
+          <SecondaryItem
+            title="Custom Filters"
+            Icon={SettingsSliderAlternate}
+            to="/filters"
             indent={15}
           />
         </>
