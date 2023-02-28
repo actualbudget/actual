@@ -99,13 +99,15 @@ function apply(msg, prev) {
   }
 }
 
+// TODO: convert to `whereIn`
 async function fetchAll(table, ids) {
   let results = [];
 
-  // TODO: convert to `whereIn`
+  // was 500, but that caused a stack overflow in Safari
+  let batchSize = 100;
 
-  for (let i = 0; i < ids.length; i += 500) {
-    let partIds = ids.slice(i, i + 500);
+  for (let i = 0; i < ids.length; i += batchSize) {
+    let partIds = ids.slice(i, i + batchSize);
     let sql;
     let column = `${table}.id`;
 
