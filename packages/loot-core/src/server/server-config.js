@@ -24,6 +24,7 @@ export function getServer(url) {
       SYNC_SERVER: joinURL(url, '/sync'),
       SIGNUP_SERVER: joinURL(url, '/account'),
       PLAID_SERVER: joinURL(url, '/plaid'),
+      NORDIGEN_SERVER: joinURL(url, '/nordigen'),
     };
   }
   return config;

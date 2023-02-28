@@ -17,6 +17,7 @@ import DateRange from './DateRange';
 import { simpleCashFlow } from './graphs/cash-flow-spreadsheet';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
+import { simpleSpending } from './graphs/spending-spreadsheet';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
@@ -223,6 +224,118 @@ function CashFlowCard() {
   );
 }
 
+function SpendingCard() {
+  const end = monthUtils.currentDay();
+  const start = monthUtils.currentMonth() + '-01';
+
+  const data = useReport(
+    'spending_simple',
+    useArgsMemo(simpleSpending)(start, end),
+  );
+  if (!data) {
+    return null;
+  }
+
+  const { graphData } = data;
+  const expense = -(graphData.expense || 0);
+  const income = graphData.income || 0;
+
+  return (
+    <Card flex={1} to="/reports/spending">
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', padding: 20 }}>
+          <View style={{ flex: 1 }}>
+            <Block
+              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+            >
+              Spending
+            </Block>
+            <DateRange start={start} end={end} />
+          </View>
+          <View style={{ textAlign: 'right' }}>
+            <Change
+              amount={income - expense}
+              style={{ color: colors.n6, fontWeight: 300 }}
+            />
+          </View>
+        </View>
+
+        <Container style={{ height: 'auto', flex: 1 }}>
+          {(width, height, portalHost) => (
+            <VictoryGroup
+              colorScale={[theme.colors.blue, theme.colors.red]}
+              width={100}
+              height={height}
+              theme={theme}
+              domain={{
+                x: [0, 100],
+                y: [0, Math.max(income, expense, 100)],
+              }}
+              containerComponent={
+                <VictoryVoronoiContainer voronoiDimension="x" />
+              }
+              labelComponent={
+                <Tooltip
+                  portalHost={portalHost}
+                  offsetX={(width - 100) / 2}
+                  offsetY={y => (y + 40 > height ? height - 40 : y)}
+                  light={true}
+                  forceActive={true}
+                  style={{
+                    padding: 0,
+                  }}
+                />
+              }
+              padding={{
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+              }}
+            >
+              <VictoryBar
+                barWidth={13}
+                data={[
+                  {
+                    x: 30,
+                    y: Math.max(income, 5),
+                    premadeLabel: (
+                      <div style={{ textAlign: 'right' }}>
+                        <div>Income</div>
+                        <div>{integerToCurrency(income)}</div>
+                      </div>
+                    ),
+                    labelPosition: 'left',
+                  },
+                ]}
+                labels={d => d.premadeLabel}
+              />
+              <VictoryBar
+                barWidth={13}
+                data={[
+                  {
+                    x: 60,
+                    y: Math.max(expense, 5),
+                    premadeLabel: (
+                      <div>
+                        <div>Expenses</div>
+                        <div>{integerToCurrency(expense)}</div>
+                      </div>
+                    ),
+                    labelPosition: 'right',
+                    fill: theme.colors.red,
+                  },
+                ]}
+                labels={d => d.premadeLabel}
+              />
+            </VictoryGroup>
+          )}
+        </Container>
+      </View>
+    </Card>
+  );
+}
+
 function Overview({ accounts }) {
   return (
     <View
@@ -239,6 +352,7 @@ function Overview({ accounts }) {
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
+        <SpendingCard />
       </View>
 
       <View

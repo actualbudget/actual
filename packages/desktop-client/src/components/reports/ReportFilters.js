@@ -534,7 +534,7 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
-        marginBottom: -5,
+        marginTop: 5,
       }}
     >
       {filters.map((filter, i) => (
