@@ -44,8 +44,8 @@ test.describe('Rules', () => {
     });
 
     expect(await rulesPage.getNthRule(0)).toMatchObject({
-      conditions: 'payee is Fast Internet',
-      actions: 'set category to General',
+      conditions: ['payee is Fast Internet'],
+      actions: ['set category to General'],
     });
 
     const accountPage = await navigation.goToAccountPage('Bank of America');
