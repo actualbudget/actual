@@ -923,7 +923,7 @@ const AccountHeader = React.memo(
           </Stack>
 
           {filters && filters.length > 0 && (
-            <View  style={{ marginTop: 10 }}>
+            <View style={{ marginTop: 10 }}>
               <AppliedFilters
                 filters={filters}
                 onUpdate={onUpdateFilter}

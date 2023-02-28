@@ -255,7 +255,7 @@ function CashFlow() {
           display: displaySpending,
         }}
       >
-        <View  style={{ marginRight: 10 }}>
+        <View style={{ marginRight: 10 }}>
           <FilterButton onApply={onApplyFilter} />
         </View>
 
