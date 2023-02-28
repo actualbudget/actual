@@ -412,7 +412,9 @@ export function ConditionsList({
 }) {
   function addCondition(index) {
     // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
-    let fields = conditionFields.slice(0, -2).map(f => f[0]);
+    let fields = conditionFields
+      .map(f => f[0])
+      .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');
     for (let cond of conditions) {
       fields = fields.filter(f => f !== cond.field);
     }
