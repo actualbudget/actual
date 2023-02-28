@@ -54,6 +54,18 @@ test.describe('Schedules', () => {
       credit: '',
     });
 
+    // go to rules page
+    const rulesPage = await navigation.goToRulesPage();
+    expect(await rulesPage.getNthRule(0)).toMatchObject({
+      actions: ['link schedule Home Depot (2023-02-28)'],
+      conditions: [
+        'payee is Home Depot',
+        'account is HSBC',
+        'date is approx Every month on the 28th',
+        'amount is approx -25.00',
+      ],
+    });
+
     // Go back to schedules page
     await navigation.goToSchedulesPage();
     await schedulesPage.completeNthSchedule(0);
