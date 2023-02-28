@@ -1,14 +1,8 @@
 import React from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
-import {
-  View,
-  Select,
-  Button,
-  ButtonLink,
-} from 'loot-design/src/components/common';
+import { View, Select, Button } from 'loot-design/src/components/common';
 import { styles } from 'loot-design/src/style';
-import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
@@ -58,13 +52,6 @@ function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
         flexShrink: 0,
       }}
     >
-      <ButtonLink
-        to="/reports"
-        bare
-        style={{ marginBottom: '15', alignSelf: 'flex-start' }}
-      >
-        <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
-      </ButtonLink>
       <View style={styles.veryLargeText}>{title}</View>
 
       <View
@@ -129,7 +116,7 @@ function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
         <Button
           bare
           style={{ marginLeft: 15 }}
-          onClick={() => onChangeDates(...getLatestRange(12))}
+          onClick={() => onChangeDates(...getLatestRange(11))}
         >
           1 Year
         </Button>

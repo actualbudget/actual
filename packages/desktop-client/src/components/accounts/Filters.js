@@ -114,7 +114,7 @@ function OpButton({ op, selected, style, onClick }) {
     <Button
       bare
       style={[
-        { backgroundColor: colors.n10, marginBottom: 5 },
+        { backgroundColor: colors.n9, marginBottom: 5 },
         style,
         selected && {
           color: 'white',
@@ -461,7 +461,7 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colors.n10,
+          backgroundColor: colors.n9,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
@@ -530,7 +530,6 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
-        marginTop: 10,
         marginBottom: -5,
       }}
     >
