@@ -24,7 +24,7 @@ import FixSplitsTool from './FixSplits';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
-import { Section, AdvancedToggle, Setting } from './UI';
+import { AdvancedToggle, Setting } from './UI';
 
 function About() {
   const version = useServerVersion();
@@ -106,8 +106,8 @@ function Settings({
       <Page title="Settings">
         <View style={{ flexShrink: 0, gap: 30 }}>
           {/* The only spot to close a budget on mobile */}
-          <Section
-            title="Budget"
+          <Setting
+            primaryAction={<Button onClick={closeBudget}>Close Budget</Button>}
             style={css(
               media(`(min-width: ${tokens.breakpoint_medium})`, {
                 display: 'none',
@@ -115,15 +115,14 @@ function Settings({
             )}
           >
             <FormField>
-              <FormLabel title="Name" />
+              <FormLabel title="Name" style={{ fontWeight: 'bold' }} />
               <Input
                 value={prefs.budgetName}
                 disabled
                 style={{ color: '#999' }}
               />
             </FormField>
-            <Button onClick={closeBudget}>Close Budget</Button>
-          </Section>
+          </Setting>
 
           <About />
 
