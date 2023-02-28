@@ -8,13 +8,14 @@ const {
   Menu,
   dialog,
   shell,
-  protocol
+  protocol,
 } = require('electron');
+const promiseRetry = require('promise-retry');
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { standard: true } }
+  { scheme: 'app', privileges: { standard: true } },
 ]);
 
 global.fetch = require('node-fetch');
@@ -68,7 +69,7 @@ function createBackgroundProcess(socketName) {
   serverProcess = fork(__dirname + '/server.js', [
     '--subprocess',
     app.getVersion(),
-    socketName
+    socketName,
   ]);
 
   serverProcess.on('message', msg => {
@@ -95,8 +96,8 @@ function createBackgroundWindow(socketName) {
     title: 'Actual Server',
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
-    }
+      contextIsolation: false,
+    },
   });
   win.loadURL(`file://${__dirname}/server.html`);
 
@@ -125,8 +126,8 @@ async function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: __dirname + '/preload.js'
-    }
+      preload: __dirname + '/preload.js',
+    },
   });
   win.setBackgroundColor('#E8ECF0');
 
@@ -136,7 +137,7 @@ async function createWindow() {
     win.loadURL(`file://${__dirname}/loading.html`);
     // Wait for the development server to start
     setTimeout(() => {
-      win.loadURL('http://localhost:3001/');
+      promiseRetry(retry => win.loadURL('http://localhost:3001/').catch(retry));
     }, 3000);
   } else {
     win.loadURL(`app://actual/`);
@@ -159,7 +160,7 @@ async function createWindow() {
 
   win.on('unresponsive', () => {
     console.log(
-      'browser window went unresponsive (maybe because of a modal though)'
+      'browser window went unresponsive (maybe because of a modal though)',
     );
   });
 
@@ -190,7 +191,8 @@ function updateMenu(isBudgetOpen) {
   const fileItems = file.submenu.items;
   fileItems
     .filter(
-      item => item.label === 'Start Tutorial' || item.label === 'Load Backup...'
+      item =>
+        item.label === 'Start Tutorial' || item.label === 'Load Backup...',
     )
 
     .map(item => (item.enabled = isBudgetOpen));
@@ -244,11 +246,11 @@ app.on('ready', async () => {
 
     if (pathname.startsWith('/static')) {
       callback({
-        path: path.normalize(`${__dirname}/client-build${pathname}`)
+        path: path.normalize(`${__dirname}/client-build${pathname}`),
       });
     } else {
       callback({
-        path: path.normalize(`${__dirname}/client-build/index.html`)
+        path: path.normalize(`${__dirname}/client-build/index.html`),
       });
     }
   });
@@ -294,7 +296,7 @@ app.on('activate', () => {
 ipcMain.on('get-bootstrap-data', event => {
   event.returnValue = {
     version: app.getVersion(),
-    isDev
+    isDev,
   };
 });
 
@@ -310,7 +312,7 @@ ipcMain.handle('relaunch', () => {
 ipcMain.handle('open-file-dialog', (event, { filters, properties }) => {
   return dialog.showOpenDialogSync({
     properties: properties || ['openFile'],
-    filters
+    filters,
   });
 });
 

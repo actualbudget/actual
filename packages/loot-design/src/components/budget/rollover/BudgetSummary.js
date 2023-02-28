@@ -245,7 +245,7 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
   );
 }
 
-function BudgetSummary({ month, localPrefs }) {
+function BudgetSummaryComponent({ month, localPrefs }) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -424,7 +424,7 @@ function BudgetSummary({ month, localPrefs }) {
   );
 }
 
-export default connect(
+export const BudgetSummary = connect(
   state => ({ localPrefs: state.prefs.local }),
   actions,
-)(BudgetSummary);
+)(BudgetSummaryComponent);

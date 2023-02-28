@@ -6,7 +6,7 @@ const fs = require('../platform/server/fs');
 let prefs = null;
 
 export async function loadPrefs(id) {
-  if (global.__TESTING__ && !id) {
+  if (process.env.NODE_ENV === 'test' && !id) {
     prefs = { dummyTestPrefs: true };
     return prefs;
   }

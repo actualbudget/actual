@@ -1951,7 +1951,11 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
     await prefs.savePrefs({ resetClock: false });
   }
 
-  if (!Platform.isWeb && !Platform.isMobile && !global.__TESTING__) {
+  if (
+    !Platform.isWeb &&
+    !Platform.isMobile &&
+    process.env.NODE_ENV !== 'test'
+  ) {
     startBackupService(id);
   }
 
@@ -1976,7 +1980,7 @@ async function loadBudget(id, appVersion, { showUpdate } = {}) {
   clearUndo();
 
   // Ensure that syncing is enabled
-  if (!global.__TESTING__) {
+  if (process.env.NODE_ENV !== 'test') {
     if (process.env.IS_BETA || id === DEMO_BUDGET_ID) {
       setSyncingMode('disabled');
     } else if (id === TEST_BUDGET_ID) {

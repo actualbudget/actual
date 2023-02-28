@@ -86,7 +86,7 @@ function isCacheDirty(mainDb, cacheDb) {
 }
 
 export async function loadSpreadsheet(db, onSheetChange) {
-  let cacheEnabled = !global.__TESTING__;
+  let cacheEnabled = process.env.NODE_ENV !== 'test';
   let mainDb = db.getDatabase();
   let cacheDb;
 
