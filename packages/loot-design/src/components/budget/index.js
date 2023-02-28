@@ -15,7 +15,6 @@ import {
   Menu,
   IntersectionBoundary,
 } from '../common';
-import ElementQuery from '../ElementQuery';
 import NotesButton from '../NotesButton';
 import {
   useDraggable,
@@ -25,6 +24,7 @@ import {
 } from '../sort.js';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import { Row, InputCell, ROW_HEIGHT } from '../table';
+import useResizeObserver from '../useResizeObserver';
 
 import BudgetSummaries from './BudgetSummaries';
 import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
@@ -1274,6 +1274,11 @@ export const MonthPicker = ({
   const year = monthUtils.getYear(startMonth);
   const selectedIndex = monthUtils.getMonthIndex(startMonth);
 
+  const [size, setSize] = useState('small');
+  const containerRef = useResizeObserver(rect => {
+    setSize(rect.width <= 320 ? 'small' : rect.width <= 400 ? 'medium' : 'big');
+  });
+
   return (
     <View
       style={[
@@ -1296,83 +1301,68 @@ export const MonthPicker = ({
       >
         {monthUtils.format(year, 'yyyy')}
       </View>
-      <ElementQuery
-        sizes={[
-          { width: 320, size: 'small' },
-          { width: 400, size: 'medium' },
-          { size: 'big' },
-        ]}
+      <View
+        innerRef={containerRef}
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        {(matched, ref) => (
-          <View
-            innerRef={ref}
-            style={{
-              flexDirection: 'row',
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {monthNames.map((monthName, idx) => {
-              const lastSelectedIndex = selectedIndex + numDisplayed;
-              const selected = idx >= selectedIndex && idx < lastSelectedIndex;
-              const current = monthName === currentMonthName;
-              const month = getMonth(year, idx);
-              const isMonthBudgeted =
-                month >= monthBounds.start && month <= monthBounds.end;
+        {monthNames.map((monthName, idx) => {
+          const lastSelectedIndex = selectedIndex + numDisplayed;
+          const selected = idx >= selectedIndex && idx < lastSelectedIndex;
+          const current = monthName === currentMonthName;
+          const month = getMonth(year, idx);
+          const isMonthBudgeted =
+            month >= monthBounds.start && month <= monthBounds.end;
 
-              return (
-                <View
-                  key={monthName}
-                  style={[
-                    {
-                      marginRight: 1,
-                      padding:
-                        matched && matched.size === 'big'
-                          ? '3px 5px'
-                          : '3px 3px',
-                      textAlign: 'center',
-                      cursor: 'default',
-                      borderRadius: 2,
-                      ':hover': isMonthBudgeted && {
-                        backgroundColor: colors.p6,
-                        color: 'white',
-                      },
-                    },
-                    !isMonthBudgeted && { color: colors.n7 },
-                    styles.smallText,
-                    selected && {
-                      backgroundColor: colors.p6,
-                      color: 'white',
-                      borderRadius: 0,
-                    },
-                    idx === selectedIndex && {
-                      borderTopLeftRadius: 2,
-                      borderBottomLeftRadius: 2,
-                    },
-                    idx === lastSelectedIndex - 1 && {
-                      borderTopRightRadius: 2,
-                      borderBottomRightRadius: 2,
-                    },
-                    idx >= selectedIndex &&
-                      idx < lastSelectedIndex - 1 && {
-                        marginRight: 0,
-                        borderRight: 'solid 1px',
-                        borderColor: colors.p6,
-                      },
-                    current && { textDecoration: 'underline' },
-                  ]}
-                  onClick={() => onSelect(month)}
-                >
-                  {matched && matched.size === 'small'
-                    ? monthName[0]
-                    : monthName}
-                </View>
-              );
-            })}
-          </View>
-        )}
-      </ElementQuery>
+          return (
+            <View
+              key={monthName}
+              style={[
+                {
+                  marginRight: 1,
+                  padding: size === 'big' ? '3px 5px' : '3px 3px',
+                  textAlign: 'center',
+                  cursor: 'default',
+                  borderRadius: 2,
+                  ':hover': isMonthBudgeted && {
+                    backgroundColor: colors.p6,
+                    color: 'white',
+                  },
+                },
+                !isMonthBudgeted && { color: colors.n7 },
+                styles.smallText,
+                selected && {
+                  backgroundColor: colors.p6,
+                  color: 'white',
+                  borderRadius: 0,
+                },
+                idx === selectedIndex && {
+                  borderTopLeftRadius: 2,
+                  borderBottomLeftRadius: 2,
+                },
+                idx === lastSelectedIndex - 1 && {
+                  borderTopRightRadius: 2,
+                  borderBottomRightRadius: 2,
+                },
+                idx >= selectedIndex &&
+                  idx < lastSelectedIndex - 1 && {
+                    marginRight: 0,
+                    borderRight: 'solid 1px',
+                    borderColor: colors.p6,
+                  },
+                current && { textDecoration: 'underline' },
+              ]}
+              onClick={() => onSelect(month)}
+            >
+              {size === 'small' ? monthName[0] : monthName}
+            </View>
+          );
+        })}
+      </View>
       <View
         style={{
           flexDirection: 'row',
