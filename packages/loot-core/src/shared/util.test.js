@@ -30,24 +30,33 @@ describe('utility functions', () => {
   });
 
   test('number formatting works with comma-dot format', () => {
-    setNumberFormat('comma-dot');
-    const formatter = getNumberFormat().formatter;
-
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    let formatter = getNumberFormat().formatter;
     expect(formatter.format('1234.56')).toBe('1,234.56');
+
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    formatter = getNumberFormat().formatter;
+    expect(formatter.format('1234.56')).toBe('1,234');
   });
 
   test('number formatting works with dot-comma format', () => {
-    setNumberFormat('dot-comma');
-    const formatter = getNumberFormat().formatter;
-
+    setNumberFormat({ format: 'dot-comma', hideFraction: false });
+    let formatter = getNumberFormat().formatter;
     expect(formatter.format('1234.56')).toBe('1.234,56');
+
+    setNumberFormat({ format: 'dot-comma', hideFraction: true });
+    formatter = getNumberFormat().formatter;
+    expect(formatter.format('1234.56')).toBe('1.234');
   });
 
   test('number formatting works with space-comma format', () => {
-    setNumberFormat('space-comma');
-    const formatter = getNumberFormat().formatter;
-
+    setNumberFormat({ format: 'space-comma', hideFraction: false });
+    let formatter = getNumberFormat().formatter;
     // grouping separator space char is a non-breaking space, or UTF-16 \xa0
     expect(formatter.format('1234.56')).toBe('1\xa0234,56');
+
+    setNumberFormat({ format: 'space-comma', hideFraction: true });
+    formatter = getNumberFormat().formatter;
+    expect(formatter.format('1234.56')).toBe('1\xa0234');
   });
 });

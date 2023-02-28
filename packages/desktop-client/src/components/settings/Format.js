@@ -52,13 +52,7 @@ export default function FormatSettings({ prefs, savePrefs }) {
                 onChange={onNumberFormat}
                 options={numberFormats.map(f => [f.value, f.label])}
                 style={{ padding: '5px 10px', fontSize: 15 }}
-              >
-                {numberFormats.map(f => (
-                  <option key={f.value} value={f.value}>
-                    {f.label}
-                  </option>
-                ))}
-              </CustomSelect>
+              />
             </Button>
 
             <Text style={{ display: 'flex' }}>

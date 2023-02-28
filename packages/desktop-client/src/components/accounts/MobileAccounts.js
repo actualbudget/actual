@@ -306,13 +306,14 @@ function Accounts(props) {
 
   let { accounts, categories, newTransactions, updatedAccounts, prefs } = props;
   let numberFormat = prefs.numberFormat || 'comma-dot';
+  let hideFraction = prefs.hideFraction || false;
 
   return (
     <View style={{ flex: 1 }}>
       <AccountList
         // This key forces the whole table rerender when the number
         // format changes
-        key={numberFormat}
+        key={numberFormat + hideFraction}
         accounts={accounts.filter(account => !account.closed)}
         categories={categories}
         transactions={transactions || []}
