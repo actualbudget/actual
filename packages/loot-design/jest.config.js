@@ -5,11 +5,10 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/lib/',
-    '/src/components/mobile/'
+    '/src/components/mobile/',
   ],
   moduleNameMapper: {
-    '^react-native$': 'react-native-web',
     '^.+\\.(css|sass|scss)$': 'identity-obj-proxy',
-    '^.+\\.(png)$': '<rootDir>/__mocks__/fileMock.js'
-  }
+    '^.+\\.(png)$': '<rootDir>/__mocks__/fileMock.js',
+  },
 };

@@ -805,7 +805,7 @@ describe('Learning categories', () => {
     await db.insertTransaction({ ...trans, id: 'two' });
     await db.insertTransaction({ ...trans, id: 'three' });
     await updateCategoryRules([{ ...trans, id: 'three' }]);
-    expect(getRules().length).toBe(3);
+    expect(getRules()).toMatchSnapshot();
 
     trans = {
       date: '2016-12-02',
@@ -817,7 +817,7 @@ describe('Learning categories', () => {
     await db.insertTransaction({ ...trans, id: 'five' });
     await db.insertTransaction({ ...trans, id: 'six' });
     await updateCategoryRules([{ ...trans, id: 'three' }]);
-    expect(getRules().length).toBe(3);
+    expect(getRules()).toMatchSnapshot();
 
     let rules = getRules();
     let getPayees = cat => {
