@@ -77,7 +77,7 @@ function handleMessage(msg) {
 function connectWorker(worker, onOpen, onError) {
   globalWorker = worker;
 
-  worker.addEventListener('message', event => {
+  worker.onmessage = event => {
     let msg = event.data;
 
     // The worker implementation implements its own concept of a
@@ -117,7 +117,7 @@ function connectWorker(worker, onOpen, onError) {
     } else {
       handleMessage(msg);
     }
-  });
+  };
 
   // In browsers that don't support wasm in workers well (Safari),
   // we run the server on the main process for now. This might not

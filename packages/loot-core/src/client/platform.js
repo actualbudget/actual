@@ -11,7 +11,7 @@ const isProbablySafari = /^((?!chrome|android).)*safari/i.test(
 export default {
   OS: isWindows ? 'windows' : isMac ? 'mac' : 'linux',
   env: 'web',
-  isBrowser: !!window.Actual.IS_FAKE_WEB,
+  isBrowser: !!window.Actual?.IS_FAKE_WEB,
   isReactNativeWeb: false,
   isProbablySafari,
 };

@@ -29,7 +29,7 @@ import {
 
 import TransferTooltip from './TransferTooltip';
 
-export BudgetSummary from './BudgetSummary';
+export { BudgetSummary } from './BudgetSummary';
 
 function CoverTooltip({
   showToBeBudgeted,

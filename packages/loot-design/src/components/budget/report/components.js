@@ -14,7 +14,7 @@ import BalanceWithCarryover from '../BalanceWithCarryover';
 import { MONTH_RIGHT_PADDING } from '../constants';
 import { makeAmountGrey } from '../util';
 
-export BudgetSummary from './BudgetSummary';
+export { BudgetSummary } from './BudgetSummary';
 
 let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
 
