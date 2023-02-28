@@ -105,24 +105,20 @@ function Settings({
     >
       <Page title="Settings">
         <View style={{ flexShrink: 0, gap: 30 }}>
-          {/* The only spot to close a budget on mobile */}
-          <Setting
-            primaryAction={<Button onClick={closeBudget}>Close Budget</Button>}
-            style={css(
-              media(`(min-width: ${tokens.breakpoint_medium})`, {
-                display: 'none',
-              }),
-            )}
+          <View
+            style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
           >
+            {/* The only spot to close a budget on mobile */}
             <FormField>
-              <FormLabel title="Name" style={{ fontWeight: 'bold' }} />
+              <FormLabel title="Budget Name" />
               <Input
                 value={prefs.budgetName}
                 disabled
                 style={{ color: '#999' }}
               />
             </FormField>
-          </Setting>
+            <Button onClick={closeBudget}>Close Budget</Button>
+          </View>
 
           <About />
 
