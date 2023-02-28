@@ -130,14 +130,15 @@ function reducer(state, action) {
 }
 
 function SchedulePreview({ previewDates }) {
+  const dateFormat = useSelector(state =>
+    (state.prefs.local.dateFormat || 'MM/dd/yyyy')
+      .replace('MM', 'M')
+      .replace('dd', 'd'),
+  );
+
   if (!previewDates) {
     return null;
   }
-
-  let dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
-  dateFormat = dateFormat.replace('MM', 'M').replace('dd', 'd');
 
   let content = null;
   if (typeof previewDates === 'string') {
