@@ -26,8 +26,12 @@ export class RulesPage {
     const row = this.page.getByTestId('table').getByTestId('row').nth(index);
 
     return {
-      conditions: await row.getByTestId('conditions').textContent(),
-      actions: await row.getByTestId('actions').textContent(),
+      conditions: await row
+        .getByTestId('conditions')
+        .evaluate(el => [...el.children].map(c => c.textContent)),
+      actions: await row
+        .getByTestId('actions')
+        .evaluate(el => [...el.children].map(c => c.textContent)),
     };
   }
 
