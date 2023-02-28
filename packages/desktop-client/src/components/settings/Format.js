@@ -28,6 +28,11 @@ export default function FormatSettings({ prefs, savePrefs }) {
     savePrefs({ numberFormat: format });
   }
 
+  function onHideFraction(e) {
+    let hideFraction = e.target.checked;
+    savePrefs({ hideFraction });
+  }
+
   let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
   let numberFormat = prefs.numberFormat || 'comma-dot';
 
@@ -35,20 +40,36 @@ export default function FormatSettings({ prefs, savePrefs }) {
     <>
       <Setting
         primaryAction={
-          <Button style={{ padding: 0 }}>
-            <CustomSelect
-              value={numberFormat}
-              onChange={onNumberFormat}
-              options={numberFormats.map(f => [f.value, f.label])}
-              style={{ padding: '5px 10px', fontSize: 15 }}
-            >
-              {numberFormats.map(f => (
-                <option key={f.value} value={f.value}>
-                  {f.label}
-                </option>
-              ))}
-            </CustomSelect>
-          </Button>
+          <View
+            style={{
+              alignItems: 'flex-start',
+              gap: '1em',
+            }}
+          >
+            <Button style={{ padding: 0, marginLeft: -5 }}>
+              <CustomSelect
+                value={numberFormat}
+                onChange={onNumberFormat}
+                options={numberFormats.map(f => [f.value, f.label])}
+                style={{ padding: '5px 10px', fontSize: 15 }}
+              >
+                {numberFormats.map(f => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </CustomSelect>
+            </Button>
+
+            <Text style={{ display: 'flex' }}>
+              <Checkbox
+                id="settings-textDecimal"
+                checked={prefs.hideFraction}
+                onChange={onHideFraction}
+              />
+              <label htmlFor="settings-textDecimal">Hide decimal places</label>
+            </Text>
+          </View>
         }
       >
         <Text>
