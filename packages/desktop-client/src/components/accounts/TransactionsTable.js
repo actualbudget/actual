@@ -262,7 +262,7 @@ export const TransactionHeader = React.memo(
         {showCategory && <Cell value="Category" width="flex" />}
         <Cell value="Payment" width={80} textAlign="right" />
         <Cell value="Deposit" width={80} textAlign="right" />
-        {showBalance && <Cell value="Balance" width={85} textAlign="right" />}
+        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
         {showCleared && <Field width={21} truncate={false} />}
         <Cell value="" width={15 + styles.scrollbarWidth} />
       </Row>
@@ -1022,7 +1022,7 @@ export const Transaction = React.memo(function Transaction(props) {
           }
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
           style={[styles.tnum, amountStyle]}
-          width={85}
+          width={88}
           textAlign="right"
         />
       )}
