@@ -27,20 +27,15 @@ export function Section({ title, children, style, titleProps, ...props }) {
 export function Setting({ primaryAction, children }) {
   return (
     <View
-      {...css(
-        {
-          backgroundColor: colors.n9,
-          alignSelf: 'flex-start',
-          alignItems: 'flex-start',
-          padding: 15,
-          borderRadius: 4,
-          border: '1px solid ' + colors.n8,
-          width: '100%',
-        },
-        media(`(min-width: ${tokens.breakpoint_medium})`, {
-          width: 'auto',
-        }),
-      )}
+      {...css({
+        backgroundColor: colors.n9,
+        alignSelf: 'flex-start',
+        alignItems: 'flex-start',
+        padding: 15,
+        borderRadius: 4,
+        border: '1px solid ' + colors.n8,
+        width: '100%',
+      })}
     >
       <View
         style={{

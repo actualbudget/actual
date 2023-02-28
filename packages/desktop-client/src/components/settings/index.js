@@ -24,7 +24,7 @@ import FixSplitsTool from './FixSplits';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
-import { Section, AdvancedToggle } from './UI';
+import { Section, AdvancedToggle, Setting } from './UI';
 
 function About() {
   const version = useServerVersion();
@@ -32,20 +32,39 @@ function About() {
   const isOutdated = useIsOutdated();
 
   return (
-    <Section title="About" style={{ gap: 5 }}>
+    <Setting>
       <Text>
-        Client version: v{window.Actual.ACTUAL_VERSION} (
-        {isOutdated ? (
-          <a href="https://actualbudget.github.io/docs/Release-Notes">
-            new version available: {latestVersion}
-          </a>
-        ) : (
-          <span>latest</span>
-        )}
-        )
+        <strong>Actual</strong> is a super fast privacy-focused app for managing
+        your finances.
       </Text>
-      <Text>Server version: {version}</Text>
-    </Section>
+      <View
+        style={[
+          { flexDirection: 'column', gap: '1em' },
+          media(`(min-width: ${tokens.breakpoint_medium})`, {
+            flexDirection: 'row',
+            gap: '2em',
+          }),
+        ]}
+      >
+        <Text>
+          Client version: v{window.Actual.ACTUAL_VERSION} (
+          {isOutdated ? (
+            <a href="https://actualbudget.github.io/docs/Release-Notes">
+              new version available: {latestVersion}
+            </a>
+          ) : (
+            <span>latest</span>
+          )}
+          )
+        </Text>
+        <Text>Server version: {version}</Text>
+        <Text>
+          <a href="https://actualbudget.github.io/docs/Release-Notes">
+            Release Notes
+          </a>
+        </Text>
+      </View>
+    </Setting>
   );
 }
 
