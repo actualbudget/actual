@@ -6,7 +6,7 @@ export default async function checkForUpdateNotification(
   if (!isOutdated) return;
   addNotification({
     type: 'message',
-    title: 'A new version of actual is available!',
+    title: 'A new version of Actual is available!',
     message: 'Click here to learn more',
     sticky: true,
     id: 'update-notification',
