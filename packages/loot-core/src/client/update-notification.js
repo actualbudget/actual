@@ -13,7 +13,7 @@ export default async function checkForUpdateNotification(
     button: {
       title: 'Open changelog',
       action: () => {
-        window.open('https://actualbudget.com/release-notes');
+        window.open('https://actualbudget.github.io/docs/Release-Notes');
       }
     }
   });
