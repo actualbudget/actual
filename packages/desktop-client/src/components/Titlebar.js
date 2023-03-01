@@ -159,68 +159,6 @@ export function SyncButton({ localPrefs, style, onSync }) {
   );
 }
 
-export function OutdatedButton() {
-  async function fetchJSON(...args) {
-    let res = await fetch(...args);
-    let json = await res.json();
-    return json;
-  }
-
-  function cmpSemanticVersion(a, b) {
-    let x = a
-      .replace('v', '')
-      .split('.')
-      .map(n => parseInt(n));
-    let y = b
-      .replace('v', '')
-      .split('.')
-      .map(n => parseInt(n));
-
-    return x[0] - y[0] || x[1] - y[1] || x[2] - y[2];
-  }
-
-  let [latestVersion, setLatestVersion] = useState('');
-  let [clientVersion, _] = useState(`v${window.Actual.ACTUAL_VERSION}`);
-  useEffect(() => {
-    (async () => {
-      let tags = (
-        await fetchJSON('https://api.github.com/repos/actualbudget/actual/tags')
-      )
-        .map(t => t.name)
-        .concat([clientVersion]);
-      tags.sort(cmpSemanticVersion);
-      console.log(tags);
-      setLatestVersion(tags[0]);
-    })();
-  }, []);
-
-  let [showTooltip, setShowTooltip] = useState(false);
-  return (
-    latestVersion !== '' &&
-    cmpSemanticVersion(clientVersion, latestVersion) !== 1 && (
-      <Button
-        bare
-        onClick={_ => {
-          window.open('https://actualbudget.github.io/docs', '_blank');
-        }}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        style={{ color: colors.r5 }}
-      >
-        {showTooltip && (
-          <Tooltip>
-            <P>
-              Your version of Actual ({clientVersion}) is out of date. Please
-              update to the latest version ({latestVersion}).
-            </P>
-          </Tooltip>
-        )}
-        Outdated Actual version
-      </Button>
-    )
-  );
-}
-
 function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
   let { sendEvent } = useContext(TitlebarContext);
   let [loading, setLoading] = useState(false);
@@ -438,7 +376,6 @@ function Titlebar({
           onSync={sync}
         />
       ) : null}
-      <OutdatedButton />
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>
   );

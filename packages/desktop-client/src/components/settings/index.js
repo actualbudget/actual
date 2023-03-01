@@ -12,6 +12,7 @@ import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
+import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import useServerVersion from '../../hooks/useServerVersion';
 import { isMobile } from '../../util';
 import { Page } from '../Page';
@@ -27,10 +28,22 @@ import { Section, AdvancedToggle } from './UI';
 
 function About() {
   const version = useServerVersion();
+  const latestVersion = useLatestVersion();
+  const isOutdated = useIsOutdated();
 
   return (
     <Section title="About" style={{ gap: 5 }}>
-      <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
+      <Text>
+        Client version: v{window.Actual.ACTUAL_VERSION} (
+        {!isOutdated ? (
+          <span>latest</span>
+        ) : (
+          <a href="https://actualbudget.com/release-notes">
+            {'new version available: ' + latestVersion}
+          </a>
+        )}
+        )
+      </Text>
       <Text>Server version: {version}</Text>
     </Section>
   );
