@@ -35,12 +35,12 @@ function About() {
     <Section title="About" style={{ gap: 5 }}>
       <Text>
         Client version: v{window.Actual.ACTUAL_VERSION} (
-        {!isOutdated ? (
-          <span>latest</span>
-        ) : (
-          <a href="https://actualbudget.com/release-notes">
-            {'new version available: ' + latestVersion}
+        {isOutdated ? (
+          <a href="https://actualbudget.github.io/docs/Release-Notes">
+            new version available: {latestVersion}
           </a>
+        ) : (
+          <span>latest</span>
         )}
         )
       </Text>
