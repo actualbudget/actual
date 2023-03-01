@@ -29,7 +29,7 @@
   "dependencies": {
     "@juggle/resize-observer": "^3.1.2",
     "hotkeys-js": "3.8.2",
-    "pikaday": "1.8.0",
+    "pikaday": "1.8.2",
     "react-dnd": "^10.0.2",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.4.4",
