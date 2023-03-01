@@ -158,7 +158,6 @@ function ConfigureField({
   if (subfield === 'month' || subfield === 'year') {
     ops = ['is'];
   }
-  console.log('here');
 
   return (
     <Tooltip
