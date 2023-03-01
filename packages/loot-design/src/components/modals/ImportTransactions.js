@@ -934,16 +934,16 @@ export function ImportTransactions({
               <View style={{ flexDirection: 'row', marginTop: 10 }}>
                 <View style={{ marginRight: 30 }}>
                   <MultipliersOption
-                    value={multiplier}
+                    value={multiplierEnabled}
                     onChange={() => {
-                      setMultiplier(!multiplier);
+                      setMultiplierEnabled(!multiplierEnabled);
                       setMultiplierAmount('');
                     }}
                   />
                 </View>
                 <View style={{ width: 75 }}>
                   <MultipliersField
-                    multiplierCB={multiplier}
+                    multiplierCB={multiplierEnabled}
                     value={multiplierAmount}
                     onChange={onMultiplierChange}
                   />
@@ -972,8 +972,6 @@ export function ImportTransactions({
             Import {transactions.length} transactions
           </ButtonWithLoading>
         </View>
-
-        <View style={{ flex: 1 }} />
       </View>
     </Modal>
   );
