@@ -29,7 +29,7 @@ if [ $NODE_ENV == 'development' ]; then
   ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
 fi
 
-../node_modules/.bin/webpack --config ../webpack/webpack.browser.config.js \
+yarn webpack --config ../webpack/webpack.browser.config.js \
   --target "webworker" \
   --output-filename "kcab.worker.$OUTPUT_HASH.js" \
   --output-chunkfilename "[id].[name].kcab.worker.$OUTPUT_HASH.js" \

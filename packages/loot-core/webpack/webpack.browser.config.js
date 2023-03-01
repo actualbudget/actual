@@ -37,7 +37,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['babel-preset-jwl-app'],
+            presets: ['@babel/preset-env'],
           },
         },
       },

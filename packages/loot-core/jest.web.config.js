@@ -8,9 +8,6 @@ module.exports = {
     '__mocks__',
     '/node_modules/(?!perf-deets|absurd-sql)',
   ],
-  globals: {
-    __TESTING__: true,
-  },
   transform: {
     '\\.pegjs$': 'pegjs-jest-transformer',
   },

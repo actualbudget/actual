@@ -495,7 +495,7 @@ export function scheduleFullSync() {
   clearFullSyncTimeout();
 
   if (checkSyncingMode('enabled') && !checkSyncingMode('offline')) {
-    if (global.__TESTING__) {
+    if (process.env.NODE_ENV === 'test') {
       return fullSync().then(res => {
         if (res.error) {
           throw res.error;

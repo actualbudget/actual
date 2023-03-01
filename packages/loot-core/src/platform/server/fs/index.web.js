@@ -228,7 +228,7 @@ async function init() {
   // is created correctly. We assume the the absurd-sql project tests
   // the blocked fs enough. Additionally, we don't populate the
   // default files in testing.
-  if (!global.__TESTING__) {
+  if (process.env.NODE_ENV !== 'test') {
     let backend = new IndexedDBBackend(() => {
       connection.send('fallback-write-error');
     });
