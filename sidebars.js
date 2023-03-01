@@ -80,8 +80,7 @@ const sidebars = {
                   items: [
                     'Installing/fly/Fly-prerequisites',
                     'Installing/fly/Fly-git',
-                    'Installing/fly/Fly-image',
-                    'Installing/fly/Fly-terraform',
+                    'Installing/fly/Fly-image',                    
                     'Installing/fly/Fly-updating',
                     'Installing/fly/Fly-persisting',
                   ],
