@@ -565,7 +565,7 @@ export function ImportTransactions({
   let [fieldMappings, setFieldMappings] = useState(null);
   let [splitMode, setSplitMode] = useState(false);
   let [flipAmount, setFlipAmount] = useState(false);
-  let [multiplier, setMultiplier] = useState(false);
+  let [multiplierEnabled, setMultiplierEnabled] = useState(false);
   let { accountId, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
