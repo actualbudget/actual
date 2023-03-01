@@ -533,13 +533,7 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
 }
 
 function MultipliersField({ multiplierCB, value, onChange }) {
-  const styl = (() => {
-    if (multiplierCB) {
-      return 'inherit';
-    } else {
-      return 'none';
-    }
-  })();
+  const styl = multiplierCB ? 'inherit' : 'none';
 
   return (
     <Input
