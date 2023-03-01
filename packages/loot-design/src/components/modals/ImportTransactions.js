@@ -220,13 +220,7 @@ function parseAmount(amount, mapper) {
 }
 
 function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
-  const multiplier = (() => {
-    if (multiplierAmount === '') {
-      return parseFloat('1');
-    } else {
-      return parseFloat(multiplierAmount);
-    }
-  })();
+  const multiplier = parseFloat(multiplierAmount) || 1.0;
 
   if (splitMode) {
     // Split mode is a little weird; first we look for an outflow and
