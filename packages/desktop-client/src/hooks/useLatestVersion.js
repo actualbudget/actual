@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 function useIsOutdated() {
@@ -7,7 +8,7 @@ function useIsOutdated() {
 
   useEffect(() => {
     (async () => {
-      setIsOutdated(getIsOutdated());
+      setIsOutdated(await getIsOutdated());
     })();
   }, [latestVersion]);
 

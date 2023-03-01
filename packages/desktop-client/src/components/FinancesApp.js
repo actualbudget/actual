@@ -19,8 +19,8 @@ import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
-import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
+import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/BudgetMonthCountContext';
 import { View } from 'loot-design/src/components/common';
@@ -29,9 +29,9 @@ import Cog from 'loot-design/src/svg/v1/Cog';
 import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
 import Wallet from 'loot-design/src/svg/v1/Wallet';
 
-import { getIsOutdated } from '../util/versions';
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
+import { getIsOutdated } from '../util/versions';
 
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
