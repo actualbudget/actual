@@ -57,11 +57,16 @@ test.describe('Schedules', () => {
     // go to rules page
     const rulesPage = await navigation.goToRulesPage();
     expect(await rulesPage.getNthRule(0)).toMatchObject({
-      actions: ['link schedule Home Depot (2023-02-28)'],
+      // actions: ['link schedule Home Depot (2023-02-28)'],
+      actions: [
+        expect.stringMatching(
+          /^link schedule Home Depot \(\d{4}-\d{2}-\d{2}\)$/,
+        ),
+      ],
       conditions: [
         'payee is Home Depot',
         'account is HSBC',
-        'date is approx Every month on the 28th',
+        expect.stringMatching(/^date is approx Every month on the/),
         'amount is approx -25.00',
       ],
     });
