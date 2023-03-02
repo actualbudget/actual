@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom-v5-compat';
 
 import { Modal } from 'loot-design/src/components/common';
 import {
@@ -10,6 +11,7 @@ import ManageRules from '../ManageRules';
 
 export default function ManageRulesModal({ modalProps, payeeId }) {
   let [loading, setLoading] = useState(true);
+  let location = useLocation();
   if (isDevelopmentEnvironment() || isPreviewEnvironment()) {
     if (location.pathname !== '/payees') {
       throw new Error(

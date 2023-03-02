@@ -139,6 +139,8 @@ function closeDatabase() {
 }
 
 if (process.env.NODE_ENV === 'development') {
+  // (the `self` global is conventional in web workers)
+  /* eslint-disable-next-line no-restricted-globals */
   self.addEventListener('message', e => {
     if (e.data.type === '__actual:shutdown') {
       closeDatabase();

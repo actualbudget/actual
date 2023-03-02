@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-globals */
+// (the `self` global is conventional in web workers)
 let hasInitialized = false;
 
 self.addEventListener('message', e => {

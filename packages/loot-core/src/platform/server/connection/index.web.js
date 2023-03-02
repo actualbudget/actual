@@ -5,8 +5,10 @@ function getGlobalObject() {
   let obj =
     typeof window !== 'undefined'
       ? window
-      : typeof self !== 'undefined'
-      ? self
+      : // eslint-disable-next-line no-restricted-globals
+      typeof self !== 'undefined'
+      ? // eslint-disable-next-line no-restricted-globals
+        self
       : null;
   if (!obj) {
     throw new Error('Cannot get global object');

@@ -112,7 +112,7 @@ export function closeBudget() {
       await send('close-budget');
       dispatch(setAppState({ loadingText: null }));
       if (localStorage.getItem('SharedArrayBufferOverride')) {
-        location.reload();
+        window.location.reload();
       }
     }
   };

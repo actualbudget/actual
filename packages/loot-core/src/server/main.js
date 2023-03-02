@@ -2478,6 +2478,8 @@ export const lib = {
 
 if (process.env.NODE_ENV === 'development' && Platform.isWeb) {
   // Support reloading the backend
+  // (the `self` global is conventional in web workers)
+  /* eslint-disable-next-line no-restricted-globals */
   self.addEventListener('message', async e => {
     if (e.data.type === '__actual:shutdown') {
       await sheet.waitOnSpreadsheet();
@@ -2488,6 +2490,7 @@ if (process.env.NODE_ENV === 'development' && Platform.isWeb) {
 
       setTimeout(() => {
         // Give everything else some time to process shutdown events
+        /* eslint-disable-next-line no-restricted-globals */
         self.close();
       }, 100);
     }

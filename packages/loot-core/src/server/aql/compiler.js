@@ -218,7 +218,7 @@ function inferParam(param, type) {
       (!casts[type] || !casts[type].includes(existingType))
     ) {
       throw new Error(
-        `Parameter "${name}" can't convert to ${type} (already inferred as ${existingType})`,
+        `Parameter "${param.paramName}" can't convert to ${type} (already inferred as ${existingType})`,
       );
     }
   } else {

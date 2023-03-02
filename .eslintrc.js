@@ -12,7 +12,6 @@ module.exports = {
       },
     ],
     'no-loop-func': 'off',
-    'no-restricted-globals': 'off',
 
     // TODO: re-enable these rules
     'import/no-anonymous-default-export': 'off',
