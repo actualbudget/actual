@@ -1,6 +1,6 @@
 import { send } from '../../platform/client/fetch';
 import { getDownloadError, getSyncError } from '../../shared/errors';
-import constants from '../constants';
+import * as constants from '../constants';
 
 import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';

@@ -1,6 +1,6 @@
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
-import constants from '../constants';
+import * as constants from '../constants';
 
 import { syncAccounts } from './account';
 import { pushModal } from './modals';
