@@ -1,6 +1,7 @@
 module.exports = {
   plugins: ['prettier', 'import'],
   extends: ['react-app'],
+  reportUnusedDisableDirectives: true,
   rules: {
     'prettier/prettier': 'error',
     'no-unused-vars': [

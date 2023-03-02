@@ -1526,7 +1526,6 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   let latestState = useRef({ newTransactions, newNavigator, tableNavigator });
   let savePending = useRef(false);
   let afterSaveFunc = useRef(false);
-  // eslint-disable-next-line
   let [_, forceRerender] = useState({});
 
   let selectedItems = useSelectedItems();

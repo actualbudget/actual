@@ -29,7 +29,6 @@ function coerceError(error) {
 function init(serverChannel, handlers) {
   getGlobalObject().__globalServerChannel = serverChannel;
 
-  // eslint-disable-next-line
   serverChannel.addEventListener(
     'message',
     e => {

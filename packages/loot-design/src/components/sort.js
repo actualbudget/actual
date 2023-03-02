@@ -71,7 +71,6 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
   let ref = useRef(null);
   let [dropPos, setDropPos] = useState(null);
 
-  // eslint-disable-next-line
   let [{ isOver }, dropRef] = useDrop({
     accept: types,
     drop({ item }, monitor) {

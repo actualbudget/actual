@@ -54,10 +54,9 @@ export async function checkKey() {
     return { error: { reason: 'network' } };
   }
 
-  // This == comparison is important, they could be null or undefined
-  // eslint-disable-next-line
   return {
     valid:
+      // This == comparison is important, they could be null or undefined
       res.id == encryptKeyId && // eslint-disable-line
       (encryptKeyId == null || encryption.hasKey(encryptKeyId)),
   };
