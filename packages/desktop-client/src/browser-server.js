@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-globals */
 // (the `self` global is conventional in web workers)
+/* globals importScripts, backend */
 let hasInitialized = false;
 
 self.addEventListener('message', e => {
@@ -20,10 +21,8 @@ self.addEventListener('message', e => {
         return;
       }
 
-      // eslint-disable-next-line
       importScripts(`${msg.publicUrl}/kcab/kcab.worker.${hash}.js`);
 
-      // eslint-disable-next-line
       backend.initApp(version, isDev, self).then(
         () => {
           if (isDev) {
