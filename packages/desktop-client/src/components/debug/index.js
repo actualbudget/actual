@@ -58,7 +58,7 @@ class Debug extends React.Component {
   async fetchSqlGenResult() {
     let row = {};
     try {
-      row = (0, eval)('(' + this.state.sqlgenRow + ')'); // eslint-disable-line
+      row = (0, eval)('(' + this.state.sqlgenRow + ')'); // eslint-disable-line no-eval
     } catch (e) {}
 
     const res = await send('debug-sqlgen', {

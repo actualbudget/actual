@@ -2412,7 +2412,7 @@ export async function initApp(version, isDev, socketName) {
 
 export async function init(config) {
   // Get from build
-  // eslint-disable-next-line
+  // eslint-disable-next-line no-undef
   VERSION = ACTUAL_APP_VERSION;
 
   let dataDir, serverURL;

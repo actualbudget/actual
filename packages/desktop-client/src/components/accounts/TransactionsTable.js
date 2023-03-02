@@ -1798,7 +1798,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   );
 
   return (
-    // eslint-disable-next-line
+    // eslint-disable-next-line react/jsx-pascal-case
     <TransactionTable_
       tableRef={mergedRef}
       {...props}

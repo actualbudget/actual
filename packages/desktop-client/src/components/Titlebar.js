@@ -230,7 +230,8 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                 </ButtonWithLoading>
               </P>
               <P isLast={true}>
-                <a // eslint-disable-line
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                <a
                   href="#"
                   style={{
                     color: colors.n4,

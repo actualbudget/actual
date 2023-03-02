@@ -57,7 +57,8 @@ export async function checkKey() {
   return {
     valid:
       // This == comparison is important, they could be null or undefined
-      res.id == encryptKeyId && // eslint-disable-line
+      // eslint-disable-next-line eqeqeq
+      res.id == encryptKeyId &&
       (encryptKeyId == null || encryption.hasKey(encryptKeyId)),
   };
 }
