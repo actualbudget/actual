@@ -279,7 +279,7 @@ class FinancesApp extends React.Component {
         getIsOutdated,
         getLatestVersion,
         this.props.loadPrefs,
-        this.props.savePrefs
+        this.props.savePrefs,
       );
     }, 100);
 

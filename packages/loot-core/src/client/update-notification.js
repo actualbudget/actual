@@ -3,7 +3,7 @@ export default async function checkForUpdateNotification(
   getIsOutdated,
   getLatestVersion,
   loadPrefs,
-  savePrefs
+  savePrefs,
 ) {
   let isOutdated = await getIsOutdated();
   let latestVersion = await getLatestVersion();
@@ -16,7 +16,7 @@ export default async function checkForUpdateNotification(
   }
 
   await savePrefs({
-    'flags.updateNotificationShownForVersion': latestVersion
+    'flags.updateNotificationShownForVersion': latestVersion,
   });
   addNotification({
     type: 'message',
@@ -28,7 +28,7 @@ export default async function checkForUpdateNotification(
       title: 'Open changelog',
       action: () => {
         window.open('https://actualbudget.github.io/docs/Release-Notes');
-      }
-    }
+      },
+    },
   });
 }

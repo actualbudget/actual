@@ -14,7 +14,7 @@ export function cmpSemanticVersion(versionStringA, versionStringB) {
 
 export async function getLatestVersion() {
   let response = await fetch(
-    'https://api.github.com/repos/actualbudget/actual/tags'
+    'https://api.github.com/repos/actualbudget/actual/tags',
   );
   let json = await response.json();
   let tags = json.map(t => t.name).concat([`v${window.Actual.ACTUAL_VERSION}`]);
