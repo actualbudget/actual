@@ -48,8 +48,9 @@
     "electron-log": "4.3.2",
     "electron-updater": "4.3.8",
     "loot-core": "*",
-    "node-fetch": "^1.6.3",
-    "node-ipc": "9.1.4"
+    "node-fetch": "^2.6.9",
+    "node-ipc": "9.1.4",
+    "promise-retry": "^2.0.1"
   },
   "devDependencies": {
     "electron": "12.2.1",

@@ -7,7 +7,7 @@ const SvgMath = props => (
     viewBox="0 0 30 30"
     style={{
       color: '#242134',
-      ...props.style
+      ...props.style,
     }}
   >
     <path

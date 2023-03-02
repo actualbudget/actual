@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { format as formatDate, parseISO } from 'date-fns';
@@ -20,7 +26,8 @@ import {
   Text,
   Button,
   Stack,
-  ExternalLink
+  ExternalLink,
+  Input,
 } from 'loot-design/src/components/common';
 import {
   SelectCell,
@@ -29,12 +36,12 @@ import {
   Cell,
   CellButton,
   TableHeader,
-  useTableNavigator
+  useTableNavigator,
 } from 'loot-design/src/components/table';
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
-  SelectedProvider
+  SelectedProvider,
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
 import ArrowRight from 'loot-design/src/svg/v0/RightArrow2';
@@ -44,9 +51,10 @@ let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 export function Value({
   value,
   field,
+  valueIsRaw,
   inline = false,
   data: dataProp,
-  describe = x => x.name
+  describe = x => x.name,
 }) {
   let { data, dateFormat } = useSelector(state => {
     let data;
@@ -70,7 +78,7 @@ export function Value({
 
     return {
       data,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy'
+      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
   let [expanded, setExpanded] = useState(false);
@@ -86,31 +94,45 @@ export function Value({
     } else if (typeof value === 'boolean') {
       return value ? 'true' : 'false';
     } else {
-      if (field === 'amount') {
-        return integerToCurrency(value);
-      } else if (field === 'date') {
-        if (value) {
-          if (value.frequency) {
-            return getRecurringDescription(value);
+      switch (field) {
+        case 'amount':
+          return integerToCurrency(value);
+        case 'date':
+          if (value) {
+            if (value.frequency) {
+              return getRecurringDescription(value);
+            }
+            return formatDate(parseISO(value), dateFormat);
           }
-          return formatDate(parseISO(value), dateFormat);
-        }
-        return null;
-      } else if (field === 'month') {
-        return value
-          ? formatDate(parseISO(value), getMonthYearFormat(dateFormat))
-          : null;
-      } else if (field === 'year') {
-        return value ? formatDate(parseISO(value), 'yyyy') : null;
-      } else {
-        let name = value;
-        if (data) {
-          let item = data.find(item => item.id === value);
-          if (item) {
-            name = describe(item);
+          return null;
+        case 'month':
+          return value
+            ? formatDate(parseISO(value), getMonthYearFormat(dateFormat))
+            : null;
+        case 'year':
+          return value ? formatDate(parseISO(value), 'yyyy') : null;
+        case 'notes':
+        case 'imported_payee':
+          return value;
+        case 'payee':
+        case 'category':
+        case 'account':
+        case 'rule':
+          if (valueIsRaw) {
+            return value;
           }
-        }
-        return name;
+          if (data && data.length) {
+            let item = data.find(item => item.id === value);
+            if (item) {
+              return describe(item);
+            } else {
+              return '(deleted)';
+            }
+          }
+
+          return '…';
+        default:
+          throw new Error(`Unknown field ${field}`);
       }
     }
   }
@@ -167,7 +189,7 @@ export function Value({
               {...css({
                 color: colors.p4,
                 textDecoration: 'none',
-                ':hover': { textDecoration: 'underline' }
+                ':hover': { textDecoration: 'underline' },
               })}
             >
               {numHidden} more items...
@@ -197,7 +219,7 @@ export function ConditionExpression({
   value,
   options,
   stage,
-  style
+  style,
 }) {
   return (
     <View
@@ -210,9 +232,9 @@ export function ConditionExpression({
           padding: '3px 5px',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
-          textOverflow: 'ellipsis'
+          textOverflow: 'ellipsis',
         },
-        style
+        style,
       ]}
     >
       <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
@@ -220,6 +242,14 @@ export function ConditionExpression({
       <Value value={value} field={field} />
     </View>
   );
+}
+
+function describeSchedule(schedule, payee) {
+  if (payee) {
+    return `${payee.name} (${schedule.next_date})`;
+  } else {
+    return `Next: ${schedule.next_date}`;
+  }
 }
 
 function ScheduleValue({ value }) {
@@ -232,12 +262,7 @@ function ScheduleValue({ value }) {
       value={value}
       field="rule"
       data={schedules}
-      describe={s => {
-        let payeeId = s._payee;
-        return byId[payeeId]
-          ? `${byId[payeeId].name} (${s.next_date})`
-          : `Next: ${s.next_date}`;
-      }}
+      describe={schedule => describeSchedule(schedule, byId[schedule._payee])}
     />
   );
 }
@@ -254,9 +279,9 @@ export function ActionExpression({ field, op, value, options, style }) {
           padding: '3px 5px',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
-          textOverflow: 'ellipsis'
+          textOverflow: 'ellipsis',
         },
-        style
+        style,
       ]}
     >
       {op === 'set' ? (
@@ -285,7 +310,7 @@ let Rule = React.memo(
     focusedField,
     onHover,
     onEdit,
-    onEditRule
+    onEditRule,
   }) => {
     let dispatchSelected = useSelectedDispatch();
     let borderColor = selected ? colors.b8 : colors.border;
@@ -322,7 +347,7 @@ let Rule = React.memo(
                 backgroundColor: colors.b10,
                 color: colors.b1,
                 borderRadius: 4,
-                padding: '3px 5px'
+                padding: '3px 5px',
               }}
             >
               {rule.stage}
@@ -332,7 +357,10 @@ let Rule = React.memo(
 
         <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
           <Stack direction="row" align="center">
-            <View style={{ flex: 1, alignItems: 'flex-start' }}>
+            <View
+              style={{ flex: 1, alignItems: 'flex-start' }}
+              data-testid="conditions"
+            >
               {rule.conditions.map((cond, i) => (
                 <ConditionExpression
                   key={i}
@@ -350,7 +378,10 @@ let Rule = React.memo(
               <ArrowRight color={colors.n4} style={{ width: 12, height: 12 }} />
             </Text>
 
-            <View style={{ flex: 1, alignItems: 'flex-start' }}>
+            <View
+              style={{ flex: 1, alignItems: 'flex-start' }}
+              data-testid="actions"
+            >
               {rule.actions.map((action, i) => (
                 <ActionExpression
                   key={i}
@@ -381,13 +412,13 @@ let Rule = React.memo(
         </Cell>
       </Row>
     );
-  }
+  },
 );
 
 let SimpleTable = React.forwardRef(
   (
     { data, navigator, loadMore, style, onHoverLeave, children, ...props },
-    ref
+    ref,
   ) => {
     let contentRef = useRef();
     let contentHeight = useRef();
@@ -417,11 +448,12 @@ let SimpleTable = React.forwardRef(
           {
             flex: 1,
             outline: 'none',
-            '& .animated .animated-row': { transition: '.25s transform' }
+            '& .animated .animated-row': { transition: '.25s transform' },
           },
-          style
+          style,
         ]}
         tabIndex="1"
+        data-testid="table"
         {...getNavigatorProps(props)}
       >
         <View
@@ -435,7 +467,7 @@ let SimpleTable = React.forwardRef(
         </View>
       </View>
     );
-  }
+  },
 );
 
 function RulesHeader() {
@@ -464,7 +496,7 @@ function RulesList({
   collapsed: borderCollapsed,
   onHover,
   onCollapse,
-  onEditRule
+  onEditRule,
 }) {
   if (rules.length === 0) {
     return null;
@@ -495,15 +527,85 @@ function RulesList({
   );
 }
 
-export default function ManageRules({
-  isModal,
-  payeeId,
-  setLoading = () => {}
-}) {
+function mapValue(field, value, { payees, categories, accounts }) {
+  if (!value) return '';
+
+  let object = null;
+  if (field === 'payee') {
+    object = payees.find(p => p.id === value);
+  } else if (field === 'category') {
+    object = categories.find(c => c.id === value);
+  } else if (field === 'account') {
+    object = accounts.find(a => a.id === value);
+  } else {
+    return value;
+  }
+  if (object) {
+    return object.name;
+  }
+  return '(deleted)';
+}
+
+function ruleToString(rule, data) {
+  let conditions = rule.conditions.flatMap(cond => [
+    mapField(cond.field),
+    friendlyOp(cond.op),
+    cond.op === 'oneOf'
+      ? cond.value.map(v => mapValue(cond.field, v, data)).join(', ')
+      : mapValue(cond.field, cond.value, data),
+  ]);
+  let actions = rule.actions.flatMap(action => {
+    if (action.op === 'set') {
+      return [
+        friendlyOp(action.op),
+        mapField(action.field),
+        'to',
+        mapValue(action.field, action.value, data),
+      ];
+    } else if (action.op === 'link-schedule') {
+      let schedule = data.schedules.find(s => s.id === action.value);
+      return [
+        friendlyOp(action.op),
+        describeSchedule(
+          schedule,
+          data.payees.find(p => p.id === schedule._payee),
+        ),
+      ];
+    } else {
+      return [];
+    }
+  });
+  return (
+    (rule.stage || '') + ' ' + conditions.join(' ') + ' ' + actions.join(' ')
+  );
+}
+
+function ManageRulesContent({ isModal, payeeId, setLoading }) {
   let [allRules, setAllRules] = useState(null);
   let [rules, setRules] = useState(null);
+  let [filter, setFilter] = useState('');
   let dispatch = useDispatch();
   let navigator = useTableNavigator(rules, ['select', 'edit']);
+
+  let { data: schedules } = SchedulesQuery.useQuery();
+  let filterData = useSelector(state => ({
+    payees: state.queries.payees,
+    categories: state.queries.categories.list,
+    accounts: state.queries.accounts,
+    schedules,
+  }));
+
+  let filteredRules = useMemo(
+    () =>
+      filter === '' || !rules
+        ? rules
+        : rules.filter(rule =>
+            ruleToString(rule, filterData)
+              .toLowerCase()
+              .includes(filter.toLowerCase()),
+          ),
+    [rules, filter, filterData],
+  );
   let selectedInst = useSelected('manage-rules', allRules, []);
   let [hoveredRule, setHoveredRule] = useState(null);
   let tableRef = useRef(null);
@@ -514,7 +616,7 @@ export default function ManageRules({
     let loadedRules = null;
     if (payeeId) {
       loadedRules = await send('payees-get-rules', {
-        id: payeeId
+        id: payeeId,
       });
     } else {
       loadedRules = await send('rules-get');
@@ -549,7 +651,7 @@ export default function ManageRules({
   async function onDeleteSelected() {
     setLoading(true);
     let { someDeletionsFailed } = await send('rule-delete-all', [
-      ...selectedInst.items
+      ...selectedInst.items,
     ]);
 
     if (someDeletionsFailed) {
@@ -582,8 +684,8 @@ export default function ManageRules({
           });
 
           setLoading(false);
-        }
-      })
+        },
+      }),
     );
   }, []);
 
@@ -595,17 +697,17 @@ export default function ManageRules({
           field: 'payee',
           op: 'is',
           value: payeeId || null,
-          type: 'id'
-        }
+          type: 'id',
+        },
       ],
       actions: [
         {
           op: 'set',
           field: 'category',
           value: null,
-          type: 'id'
-        }
-      ]
+          type: 'id',
+        },
+      ],
     };
 
     dispatch(
@@ -622,8 +724,8 @@ export default function ManageRules({
           });
 
           setLoading(false);
-        }
-      })
+        },
+      }),
     );
   }
 
@@ -635,78 +737,113 @@ export default function ManageRules({
     return null;
   }
 
-  let actions = (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: isModal ? '13px 15px' : '0 0 15px',
-        borderTop: '1px solid ' + colors.border
-      }}
-    >
-      <View
-        style={{
-          color: colors.n4,
-          flexDirection: 'row',
-          alignItems: 'center',
-          width: '50%'
-        }}
-      >
-        <Text>
-          Rules are always run in the order that you see them.{' '}
-          <ExternalLink
-            asAnchor={true}
-            href="https://actualbudget.github.io/docs/Budgeting/rules/"
-            style={{ color: colors.n4 }}
+  return (
+    <SelectedProvider instance={selectedInst}>
+      <View style={{ overflow: 'hidden' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: isModal ? '0 13px 15px' : '0 0 15px',
+            flexShrink: 0,
+          }}
+        >
+          <View
+            style={{
+              color: colors.n4,
+              flexDirection: 'row',
+              alignItems: 'center',
+              width: '50%',
+            }}
           >
-            Learn more
-          </ExternalLink>
-        </Text>
+            <Text>
+              Rules are always run in the order that you see them.{' '}
+              <ExternalLink
+                asAnchor={true}
+                href="https://actualbudget.github.io/docs/Budgeting/rules/"
+                style={{ color: colors.n4 }}
+              >
+                Learn more
+              </ExternalLink>
+            </Text>
+          </View>
+          <View style={{ flex: 1 }} />
+          <Input
+            placeholder="Filter rules..."
+            value={filter}
+            onChange={e => {
+              setFilter(e.target.value);
+              navigator.onEdit(null);
+            }}
+            style={{
+              width: 350,
+              borderColor: isModal ? null : 'transparent',
+              backgroundColor: isModal ? null : colors.n11,
+              ':focus': isModal
+                ? null
+                : {
+                    backgroundColor: 'white',
+                    '::placeholder': { color: colors.n8 },
+                  },
+            }}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <RulesHeader />
+          <SimpleTable
+            ref={tableRef}
+            data={filteredRules}
+            navigator={navigator}
+            loadMore={loadMore}
+            // Hide the last border of the item in the table
+            style={{ marginBottom: -1 }}
+          >
+            <RulesList
+              rules={filteredRules}
+              selectedItems={selectedInst.items}
+              navigator={navigator}
+              hoveredRule={hoveredRule}
+              onHover={onHover}
+              onEditRule={onEditRule}
+            />
+          </SimpleTable>
+        </View>
+        <View
+          style={{
+            paddingBlock: 15,
+            paddingInline: isModal ? 13 : 0,
+            borderTop: isModal && '1px solid ' + colors.border,
+            flexShrink: 0,
+          }}
+        >
+          <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+            {selectedInst.items.size > 0 && (
+              <Button onClick={onDeleteSelected}>
+                Delete {selectedInst.items.size} rules
+              </Button>
+            )}
+            <Button primary onClick={onCreateRule}>
+              Create new rule
+            </Button>
+          </Stack>
+        </View>
       </View>
-
-      <View style={{ flex: 1 }} />
-
-      <Stack direction="row" align="center" justify="flex-end" spacing={2}>
-        {selectedInst.items.size > 0 && (
-          <Button onClick={onDeleteSelected}>
-            Delete {selectedInst.items.size} rules
-          </Button>
-        )}
-        <Button primary onClick={onCreateRule}>
-          Create new rule
-        </Button>
-      </Stack>
-    </View>
+    </SelectedProvider>
   );
+}
 
+export default function ManageRules({
+  isModal,
+  payeeId,
+  setLoading = () => {},
+}) {
   return (
     <SchedulesQuery.Provider>
-      <SelectedProvider instance={selectedInst}>
-        <View style={{ overflow: 'hidden' }}>
-          {!isModal && actions}
-          <View style={{ flex: 1 }}>
-            <RulesHeader />
-            <SimpleTable
-              ref={tableRef}
-              data={rules}
-              navigator={navigator}
-              loadMore={loadMore}
-              // Hide the last border of the item in the table
-              style={{ marginBottom: -1 }}
-            >
-              <RulesList
-                rules={rules}
-                selectedItems={selectedInst.items}
-                navigator={navigator}
-                hoveredRule={hoveredRule}
-                onHover={onHover}
-                onEditRule={onEditRule}
-              />
-            </SimpleTable>
-          </View>
-          {isModal && actions}
-        </View>
-      </SelectedProvider>
+      <ManageRulesContent
+        isModal={isModal}
+        payeeId={payeeId}
+        setLoading={setLoading}
+      />
     </SchedulesQuery.Provider>
   );
 }

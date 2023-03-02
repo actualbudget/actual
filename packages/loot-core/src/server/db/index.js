@@ -8,7 +8,7 @@ import {
   schemaConfig,
   convertForInsert,
   convertForUpdate,
-  convertFromSelect
+  convertFromSelect,
 } from '../aql';
 import {
   makeClock,
@@ -16,14 +16,14 @@ import {
   serializeClock,
   deserializeClock,
   makeClientId,
-  Timestamp
+  Timestamp,
 } from '../crdt';
 import {
   accountModel,
   categoryModel,
   categoryGroupModel,
   payeeModel,
-  payeeRuleModel
+  payeeRuleModel,
 } from '../models';
 import { sendMessages, batchMessages } from '../sync';
 
@@ -88,7 +88,7 @@ export async function loadClock() {
 
     await runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
       1,
-      serializeClock(clock)
+      serializeClock(clock),
     ]);
   }
 }
@@ -162,7 +162,7 @@ export async function select(table, id) {
   const rows = await runQuery(
     'SELECT * FROM ' + table + ' WHERE id = ?',
     [id],
-    true
+    true,
   );
   return rows[0];
 }
@@ -181,9 +181,9 @@ export async function update(table, params) {
         row: params.id,
         column: k,
         value: params[k],
-        timestamp: Timestamp.send()
+        timestamp: Timestamp.send(),
       };
-    })
+    }),
   );
 }
 
@@ -214,9 +214,9 @@ export async function insert(table, row) {
         row: row.id,
         column: k,
         value: row[k],
-        timestamp: Timestamp.send()
+        timestamp: Timestamp.send(),
       };
-    })
+    }),
   );
 }
 
@@ -227,8 +227,8 @@ export async function delete_(table, id) {
       row: id,
       column: 'tombstone',
       value: 1,
-      timestamp: Timestamp.send()
-    }
+      timestamp: Timestamp.send(),
+    },
   ]);
 }
 
@@ -253,7 +253,7 @@ export function insertWithSchema(table, row) {
 
   return insertWithUUID(
     table,
-    convertForInsert(schema, schemaConfig, table, row)
+    convertForInsert(schema, schemaConfig, table, row),
   );
 }
 
@@ -275,7 +275,7 @@ export async function getCategories() {
 
 export async function getCategoriesGrouped() {
   const groups = await all(
-    'SELECT * FROM category_groups WHERE tombstone = 0 ORDER BY is_income, sort_order, id'
+    'SELECT * FROM category_groups WHERE tombstone = 0 ORDER BY is_income, sort_order, id',
   );
   const rows = await all(`
     SELECT * FROM categories WHERE tombstone = 0
@@ -285,7 +285,7 @@ export async function getCategoriesGrouped() {
   return groups.map(group => {
     return {
       ...group,
-      categories: rows.filter(row => row.cat_group === group.id)
+      categories: rows.filter(row => row.cat_group === group.id),
     };
   });
 }
@@ -298,7 +298,7 @@ export async function insertCategoryGroup(group) {
 
   group = {
     ...categoryGroupModel.validate(group),
-    sort_order: sort_order
+    sort_order: sort_order,
   };
   return insertWithUUID('category_groups', group);
 }
@@ -310,7 +310,7 @@ export function updateCategoryGroup(group) {
 
 export async function moveCategoryGroup(id, targetId) {
   const groups = await all(
-    `SELECT id, sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order, id`
+    `SELECT id, sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
   );
 
   const { updates, sort_order } = shoveSortOrders(groups, targetId);
@@ -322,7 +322,7 @@ export async function moveCategoryGroup(id, targetId) {
 
 export async function deleteCategoryGroup(group, transferId) {
   const categories = await all('SELECT * FROM categories WHERE cat_group = ?', [
-    group.id
+    group.id,
   ]);
 
   // Delete all the categories within a group
@@ -345,12 +345,12 @@ export async function insertCategory(category, { atEnd } = {}) {
       // the sort orders to make sure there's room for it
       const categories = await all(
         `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
-        [category.cat_group]
+        [category.cat_group],
       );
 
       const { updates, sort_order: order } = shoveSortOrders(
         categories,
-        categories.length > 0 ? categories[0].id : null
+        categories.length > 0 ? categories[0].id : null,
       );
       for (let info of updates) {
         await update('categories', info);
@@ -360,7 +360,7 @@ export async function insertCategory(category, { atEnd } = {}) {
 
     category = {
       ...categoryModel.validate(category),
-      sort_order: sort_order
+      sort_order: sort_order,
     };
 
     const id = await insertWithUUID('categories', category);
@@ -383,7 +383,7 @@ export async function moveCategory(id, groupId, targetId) {
 
   const categories = await all(
     `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
-    [groupId]
+    [groupId],
   );
 
   const { updates, sort_order } = shoveSortOrders(categories, targetId);
@@ -400,7 +400,7 @@ export async function deleteCategory(category, transferId) {
     // "forwarded" to the new transferred category.
     const existingTransfers = await all(
       'SELECT * FROM category_mapping WHERE transferId = ?',
-      [category.id]
+      [category.id],
     );
     for (let mapping of existingTransfers) {
       await update('category_mapping', { id: mapping.id, transferId });
@@ -429,7 +429,7 @@ export async function insertPayee(payee) {
 
 export async function deletePayee(payee) {
   let { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
-    payee.id
+    payee.id,
   ]);
   if (transfer_acct) {
     // You should never be able to delete transfer payees
@@ -444,7 +444,7 @@ export async function deletePayee(payee) {
   // );
 
   let rules = await all('SELECT * FROM payee_rules WHERE payee_id = ?', [
-    payee.id
+    payee.id,
   ]);
   await Promise.all(rules.map(rule => deletePayeeRule({ id: rule.id })));
   return delete_('payees', payee.id);
@@ -475,23 +475,23 @@ export async function mergePayees(target, ids) {
       ids.map(async id => {
         let mappings = await all(
           'SELECT id FROM payee_mapping WHERE targetId = ?',
-          [id]
+          [id],
         );
         await Promise.all(
           mappings.map(m =>
-            update('payee_mapping', { id: m.id, targetId: target })
-          )
+            update('payee_mapping', { id: m.id, targetId: target }),
+          ),
         );
-      })
+      }),
     );
 
     return Promise.all(
       ids.map(id =>
         Promise.all([
           update('payee_mapping', { id, targetId: target }),
-          delete_('payees', id)
-        ])
-      )
+          delete_('payees', id),
+        ]),
+      ),
     );
   });
 }
@@ -517,7 +517,7 @@ export async function getOrphanedPayees() {
 
 export async function getPayeeByName(name) {
   return first(`SELECT * FROM payees WHERE LOWER(name) = ? AND tombstone = 0`, [
-    name.toLowerCase()
+    name.toLowerCase(),
   ]);
 }
 
@@ -540,7 +540,7 @@ export function getPayeeRules(id) {
     `SELECT pr.* FROM payee_rules pr
      LEFT JOIN payee_mapping pm ON pm.id = pr.payee_id
      WHERE pm.targetId = ? AND pr.tombstone = 0`,
-    [id]
+    [id],
   );
 }
 
@@ -549,7 +549,7 @@ export function getAccounts() {
     `SELECT a.*, b.name as bankName, b.id as bankId FROM accounts a
        LEFT JOIN banks b ON a.bank = b.id
        WHERE a.tombstone = 0
-       ORDER BY sort_order, name`
+       ORDER BY sort_order, name`,
   );
 }
 
@@ -562,7 +562,7 @@ export async function insertAccount(account) {
 
   const accounts = await all(
     'SELECT * FROM accounts WHERE offbudget = ? ORDER BY sort_order, name',
-    [account.offbudget != null ? account.offbudget : 0]
+    [account.offbudget != null ? account.offbudget : 0],
   );
 
   // Don't pass a target in, it will default to appending at the end
@@ -586,12 +586,12 @@ export async function moveAccount(id, targetId) {
   let accounts;
   if (account.closed) {
     accounts = await all(
-      `SELECT id, sort_order FROM accounts WHERE closed = 1 ORDER BY sort_order, name`
+      `SELECT id, sort_order FROM accounts WHERE closed = 1 ORDER BY sort_order, name`,
     );
   } else {
     accounts = await all(
       `SELECT id, sort_order FROM accounts WHERE tombstone = 0 AND offbudget = ? ORDER BY sort_order, name`,
-      [account.offbudget]
+      [account.offbudget],
     );
   }
 
@@ -608,7 +608,7 @@ export async function getTransaction(id) {
   let rows = await selectWithSchema(
     'transactions',
     'SELECT * FROM v_transactions WHERE id = ?',
-    [id]
+    [id],
   );
   return rows[0];
 }
@@ -617,7 +617,7 @@ export async function getTransactionsByDate(
   accountId,
   startDate,
   endDate,
-  options = {}
+  options = {},
 ) {
   throw new Error('`getTransactionsByDate` is deprecated');
 }
@@ -625,14 +625,14 @@ export async function getTransactionsByDate(
 export async function getTransactions(accountId, arg2) {
   if (arg2 !== undefined) {
     throw new Error(
-      '`getTransactions` was given a second argument, it now only takes a single argument `accountId`'
+      '`getTransactions` was given a second argument, it now only takes a single argument `accountId`',
     );
   }
 
   return selectWithSchema(
     'transactions',
     'SELECT * FROM v_transactions WHERE account = ?',
-    [accountId]
+    [accountId],
   );
 }
 

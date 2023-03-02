@@ -25,15 +25,17 @@ function EditField({
   payees,
   onSubmit,
   dateFormat,
-  createPayee
+  createPayee,
 }) {
   function onSelect(value) {
-    // Process the value if needed
-    if (name === 'amount') {
-      value = amountToInteger(value);
-    }
+    if (value != null) {
+      // Process the value if needed
+      if (name === 'amount') {
+        value = amountToInteger(value);
+      }
 
-    onSubmit(name, value);
+      onSubmit(name, value);
+    }
     modalProps.onClose();
   }
 
@@ -41,7 +43,7 @@ function EditField({
   let inputStyle = { ':focus': { boxShadow: 0 } };
   let autocompleteProps = {
     inputProps: { style: inputStyle },
-    containerProps: { style: { height: 275 } }
+    containerProps: { style: { height: 275 } },
   };
 
   switch (name) {
@@ -159,9 +161,9 @@ function EditField({
           flex: 0,
           padding: '15px 10px',
           backgroundColor: colors.n1,
-          color: 'white'
+          color: 'white',
         },
-        minWidth && { minWidth }
+        minWidth && { minWidth },
       ]}
     >
       {() => (
@@ -171,7 +173,7 @@ function EditField({
             style={{
               alignSelf: 'center',
               color: colors.b10,
-              marginBottom: 10
+              marginBottom: 10,
             }}
           />
           <View style={{ flex: 1 }}>{editor}</View>
@@ -186,7 +188,7 @@ export default connect(
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     categoryGroups: state.queries.categories.grouped,
     accounts: state.queries.accounts,
-    payees: state.queries.payees
+    payees: state.queries.payees,
   }),
-  actions
+  actions,
 )(EditField);

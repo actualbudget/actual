@@ -25,9 +25,10 @@ const Stack = React.forwardRef(
       spacing = 3,
       children,
       debug,
-      style
+      style,
+      ...props
     },
-    ref
+    ref,
   ) => {
     const isReversed = direction.endsWith('reverse');
     const isHorizontal = direction.startsWith('row');
@@ -39,11 +40,12 @@ const Stack = React.forwardRef(
           {
             flexDirection: direction,
             alignItems: align,
-            justifyContent: justify
+            justifyContent: justify,
           },
-          style
+          style,
         ]}
         innerRef={ref}
+        {...props}
       >
         {validChildren.map(({ key, child }, index) => {
           let isLastChild = validChildren.length === index + 1;
@@ -62,14 +64,14 @@ const Stack = React.forwardRef(
               style: [
                 debug && { borderWidth: 1, borderColor: 'red' },
                 isLastChild ? null : { [marginProp]: spacing * 5 },
-                child.props ? child.props.style : null
-              ]
-            }
+                child.props ? child.props.style : null,
+              ],
+            },
           );
         })}
       </View>
     );
-  }
+  },
 );
 
 export default Stack;

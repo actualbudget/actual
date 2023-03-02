@@ -13,7 +13,7 @@ import {
   InitialFocus,
   Tooltip,
   Button,
-  Menu
+  Menu,
 } from '../../common';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
@@ -24,23 +24,23 @@ import { MONTH_RIGHT_PADDING } from '../constants';
 import {
   makeAmountGrey,
   addToBeBudgetedGroup,
-  CategoryGroupsContext
+  CategoryGroupsContext,
 } from '../util';
 
 import TransferTooltip from './TransferTooltip';
 
-export BudgetSummary from './BudgetSummary';
+export { BudgetSummary } from './BudgetSummary';
 
 function CoverTooltip({
   showToBeBudgeted,
   inline,
   tooltipProps,
   onSubmit,
-  onClose
+  onClose,
 }) {
   let categoryGroups = useContext(CategoryGroupsContext);
   categoryGroups = addToBeBudgetedGroup(
-    categoryGroups.filter(g => !g.is_income)
+    categoryGroups.filter(g => !g.is_income),
   );
   let [category, setCategory] = useState(null);
 
@@ -66,7 +66,7 @@ function CoverTooltip({
           <CategoryAutocomplete
             categoryGroups={categoryGroups}
             value={null}
-            openOnFocus={false}
+            openOnFocus={true}
             onUpdate={id => {}}
             onSelect={id => setCategory(id)}
             inputProps={{
@@ -75,7 +75,7 @@ function CoverTooltip({
                 if (e.keyCode === 13) {
                   submit();
                 }
-              }
+              },
             }}
           />
         )}
@@ -84,14 +84,14 @@ function CoverTooltip({
       <View
         style={{
           alignItems: 'flex-end',
-          marginTop: 10
+          marginTop: 10,
         }}
       >
         <Button
           primary
           style={{
             fontSize: 12,
-            paddingTop: 3
+            paddingTop: 3,
           }}
           onClick={submit}
         >
@@ -121,7 +121,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
               if (type === 'carryover') {
                 onBudgetAction(monthIndex, 'carryover', {
                   category: categoryId,
-                  flag: !carryover
+                  flag: !carryover,
                 });
                 tooltip.close();
               } else {
@@ -131,18 +131,18 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
             items={[
               {
                 name: 'transfer',
-                text: 'Transfer to another category'
+                text: 'Transfer to another category',
               },
               {
                 name: 'carryover',
                 text: carryover
                   ? 'Remove overspending rollover'
-                  : 'Rollover overspending'
+                  : 'Rollover overspending',
               },
               balance < 0 && {
                 name: 'cover',
-                text: 'Cover overspending'
-              }
+                text: 'Cover overspending',
+              },
             ].filter(x => x)}
           />
         </Tooltip>
@@ -157,7 +157,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
             onBudgetAction(monthIndex, 'transfer-category', {
               amount,
               from: categoryId,
-              to: toCategory
+              to: toCategory,
             });
           }}
         />
@@ -170,7 +170,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
           onSubmit={fromCategory => {
             onBudgetAction(monthIndex, 'cover', {
               to: categoryId,
-              from: fromCategory
+              from: fromCategory,
             });
           }}
         />
@@ -189,7 +189,7 @@ export const BudgetTotalsMonth = React.memo(function BudgetTotalsMonth() {
         flexDirection: 'row',
         marginRight: MONTH_RIGHT_PADDING,
         paddingTop: 10,
-        paddingBottom: 10
+        paddingBottom: 10,
       }}
     >
       <View style={headerLabelStyle}>
@@ -229,7 +229,7 @@ export function IncomeHeaderMonth() {
       style={{
         color: colors.n4,
         alignItems: 'center',
-        paddingRight: 10
+        paddingRight: 10,
       }}
     >
       <View style={{ flex: 1, textAlign: 'right' }}>Received</View>
@@ -238,7 +238,7 @@ export function IncomeHeaderMonth() {
 }
 
 export const ExpenseGroupMonth = React.memo(function ExpenseGroupMonth({
-  group
+  group,
 }) {
   let borderColor = colors.border;
   let { id } = group;
@@ -253,7 +253,7 @@ export const ExpenseGroupMonth = React.memo(function ExpenseGroupMonth({
         style={[{ fontWeight: 600 }, styles.tnum]}
         valueProps={{
           binding: rolloverBudget.groupBudgeted(id),
-          type: 'financial'
+          type: 'financial',
         }}
       />
       <SheetCell
@@ -264,7 +264,7 @@ export const ExpenseGroupMonth = React.memo(function ExpenseGroupMonth({
         style={[{ fontWeight: 600 }, styles.tnum]}
         valueProps={{
           binding: rolloverBudget.groupSumAmount(id),
-          type: 'financial'
+          type: 'financial',
         }}
       />
       <SheetCell
@@ -274,11 +274,11 @@ export const ExpenseGroupMonth = React.memo(function ExpenseGroupMonth({
         textAlign="right"
         style={[
           { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-          styles.tnum
+          styles.tnum,
         ]}
         valueProps={{
           binding: rolloverBudget.groupBalance(id),
-          type: 'financial'
+          type: 'financial',
         }}
       />
     </View>
@@ -291,7 +291,7 @@ export const ExpenseCategoryMonth = React.memo(function ExpenseCategoryMonth({
   editing,
   onEdit,
   onBudgetAction,
-  onShowActivity
+  onShowActivity,
 }) {
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
@@ -312,14 +312,14 @@ export const ExpenseCategoryMonth = React.memo(function ExpenseCategoryMonth({
             cursor: 'default',
             margin: 1,
             padding: '0 4px',
-            borderRadius: 4
+            borderRadius: 4,
           },
           {
             ':hover': {
               boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-              backgroundColor: 'white'
-            }
-          }
+              backgroundColor: 'white',
+            },
+          },
         ]}
         valueProps={{
           binding: rolloverBudget.catBudgeted(category.id),
@@ -330,17 +330,17 @@ export const ExpenseCategoryMonth = React.memo(function ExpenseCategoryMonth({
           },
           unformatExpr: expr => {
             return amountToInteger(evalArithmetic(expr, 0));
-          }
+          },
         }}
         inputProps={{
           onBlur: () => {
             onEdit(null);
-          }
+          },
         }}
         onSave={amount => {
           onBudgetAction(monthIndex, 'budget-amount', {
             category: category.id,
-            amount
+            amount,
           });
         }}
       />
@@ -360,7 +360,7 @@ export const ExpenseCategoryMonth = React.memo(function ExpenseCategoryMonth({
             getStyle={makeAmountGrey}
             style={{
               cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' }
+              ':hover': { textDecoration: 'underline' },
             }}
           />
         </span>
@@ -404,11 +404,11 @@ export function IncomeGroupMonth({ group }) {
         textAlign="right"
         style={[
           { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-          styles.tnum
+          styles.tnum,
         ]}
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
-          type: 'financial'
+          type: 'financial',
         }}
       />
     </View>
@@ -419,7 +419,7 @@ export function IncomeCategoryMonth({
   category,
   isLast,
   monthIndex,
-  onShowActivity
+  onShowActivity,
 }) {
   return (
     <View style={{ flex: 1 }}>
@@ -429,7 +429,7 @@ export function IncomeCategoryMonth({
         borderColor={colors.border}
         style={[
           { paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' },
-          isLast && { borderBottomWidth: 0 }
+          isLast && { borderBottomWidth: 0 },
         ]}
       >
         <span
@@ -440,7 +440,7 @@ export function IncomeCategoryMonth({
             type="financial"
             style={{
               cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' }
+              ':hover': { textDecoration: 'underline' },
             }}
           />
         </span>

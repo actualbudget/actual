@@ -16,7 +16,7 @@ export default class Spreadsheet {
     this.computeQueue = [];
     this.events = mitt();
     this._meta = {
-      createdMonths: new Set()
+      createdMonths: new Set(),
     };
   }
 
@@ -38,7 +38,7 @@ export default class Spreadsheet {
         name,
         expr: null,
         value: null,
-        sheet: sheet
+        sheet: sheet,
       });
     }
     return this.nodes.get(name);
@@ -63,7 +63,7 @@ export default class Spreadsheet {
   serialize() {
     return {
       graph: this.graph.getEdges(),
-      nodes: [...this.nodes.entries()]
+      nodes: [...this.nodes.entries()],
     };
   }
 
@@ -133,14 +133,14 @@ export default class Spreadsheet {
 
           if (result instanceof Promise) {
             console.warn(
-              'dynamic cell returned a promise! this is discouraged because errors are not handled properly'
+              `dynamic cell ${name} returned a promise! this is discouraged because errors are not handled properly`,
             );
           }
         } else if (node.sql) {
           result = runCompiledQuery(
             node.query,
             node.sql.sqlPieces,
-            node.sql.state
+            node.sql.state,
           );
         } else {
           idx++;
@@ -166,7 +166,7 @@ export default class Spreadsheet {
             // TODO: use captureException here
             console.warn(`Failed running ${node.name}!`, err);
             this.runComputations(idx + 1);
-          }
+          },
         );
 
         return;
@@ -229,7 +229,7 @@ export default class Spreadsheet {
   onFinish(func) {
     if (this.transactionDepth !== 0) {
       throw new Error(
-        'onFinish called while inside a spreadsheet transaction. This is not allowed as it will lead to race conditions'
+        'onFinish called while inside a spreadsheet transaction. This is not allowed as it will lead to race conditions',
       );
     }
 
@@ -338,7 +338,7 @@ export default class Spreadsheet {
   createDynamic(
     sheetName,
     cellName,
-    { dependencies = [], run, initialValue, refresh }
+    { dependencies = [], run, initialValue, refresh },
   ) {
     let name = resolveName(sheetName, cellName);
     let node = this._getNode(name);
@@ -410,7 +410,7 @@ export default class Spreadsheet {
 
     let node = this.getNode(name);
     let newDeps = deps.filter(
-      dep => (node._dependencies || []).indexOf(dep) === -1
+      dep => (node._dependencies || []).indexOf(dep) === -1,
     );
 
     if (newDeps.length > 0) {
@@ -435,7 +435,7 @@ export default class Spreadsheet {
     let node = this.getNode(name);
 
     node._dependencies = (node._dependencies || []).filter(
-      dep => deps.indexOf(dep) === -1
+      dep => deps.indexOf(dep) === -1,
     );
 
     deps.forEach(dep => {

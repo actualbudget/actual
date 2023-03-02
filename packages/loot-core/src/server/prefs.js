@@ -6,7 +6,7 @@ const fs = require('../platform/server/fs');
 let prefs = null;
 
 export async function loadPrefs(id) {
-  if (global.__TESTING__ && !id) {
+  if (process.env.NODE_ENV === 'test' && !id) {
     prefs = { dummyTestPrefs: true };
     return prefs;
   }
@@ -41,7 +41,7 @@ export async function savePrefs(prefsToSet, { avoidSync = false } = {}) {
             row: key,
             column: 'value',
             value: prefsToSet[key],
-            timestamp: Timestamp.send()
+            timestamp: Timestamp.send(),
           };
         }
         return null;
@@ -74,7 +74,7 @@ export function getDefaultPrefs(id, budgetName) {
     id,
     budgetName,
     'notifications.schedules': true,
-    'notifications.repair-splits': true
+    'notifications.repair-splits': true,
   };
 }
 

@@ -8,7 +8,7 @@ import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
   amountToInteger,
-  looselyParseAmount
+  looselyParseAmount,
 } from 'loot-core/src/shared/util';
 
 import { colors, styles } from '../../style';
@@ -18,8 +18,9 @@ import {
   Stack,
   Modal,
   Select,
+  Input,
   Button,
-  ButtonWithLoading
+  ButtonWithLoading,
 } from '../common';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
@@ -30,7 +31,7 @@ let dateFormats = [
   { format: 'mm dd yyyy', label: 'MM DD YYYY' },
   { format: 'mm dd yy', label: 'MM DD YY' },
   { format: 'dd mm yyyy', label: 'DD MM YYYY' },
-  { format: 'dd mm yy', label: 'DD MM YY' }
+  { format: 'dd mm yy', label: 'DD MM YY' },
 ];
 
 export function parseDate(str, order) {
@@ -43,6 +44,14 @@ export function parseDate(str, order) {
   }
 
   const dateGroups = (a, b) => str => {
+    const parts = str
+      .replace(/^[^\d]+/, '')
+      .replace(/[^\d]+$/, '')
+      .split(/[^\d]+/);
+    if (parts.length >= 3) {
+      return parts.slice(0, 3);
+    }
+
     const digits = str.replace(/[^\d]/g, '');
     return [digits.slice(0, a), digits.slice(a, a + b), digits.slice(a + b)];
   };
@@ -116,7 +125,7 @@ function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
     date &&
     formatDate(
       parseDateFormat ? parseDate(date, parseDateFormat) : date,
-      dateFormat
+      dateFormat,
     );
   return (
     <Text>
@@ -162,30 +171,30 @@ function getInitialMappings(transactions) {
 
   let dateField = key(
     fields.find(([name, value]) => name.toLowerCase().includes('date')) ||
-      fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/))
+      fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
   );
 
   let amountField = key(
     fields.find(([name, value]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([name, value]) => value.match(/^-?[.,\d]+$/))
+      fields.find(([name, value]) => value.match(/^-?[.,\d]+$/)),
   );
 
   let payeeField = key(
-    fields.find(([name, value]) => name !== dateField && name !== amountField)
+    fields.find(([name, value]) => name !== dateField && name !== amountField),
   );
 
   let notesField = key(
     fields.find(
       ([name, value]) =>
-        name !== dateField && name !== amountField && name !== payeeField
-    )
+        name !== dateField && name !== amountField && name !== payeeField,
+    ),
   );
 
   return {
     date: dateField,
     amount: amountField,
     payee: payeeField,
-    notes: notesField
+    notes: notesField,
   };
 }
 
@@ -210,24 +219,29 @@ function parseAmount(amount, mapper) {
   return value;
 }
 
-function parseAmountFields(trans, splitMode, flipAmount) {
+function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
+  const multiplier = parseFloat(multiplierAmount) || 1.0;
+
   if (splitMode) {
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    let outflow = parseAmount(trans.outflow, n => -Math.abs(n));
-    let inflow = outflow ? 0 : parseAmount(trans.inflow, n => Math.abs(n));
+    let outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * multiplier;
+    let inflow = outflow
+      ? 0
+      : parseAmount(trans.inflow, n => Math.abs(n)) * multiplier;
 
     return {
       amount: outflow || inflow,
       outflow,
-      inflow
+      inflow,
     };
   }
   return {
-    amount: parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)),
+    amount:
+      parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * multiplier,
     outflow: null,
-    inflow: null
+    inflow: null,
   };
 }
 
@@ -238,20 +252,22 @@ function Transaction({
   parseDateFormat,
   dateFormat,
   splitMode,
-  flipAmount
+  flipAmount,
+  multiplierAmount,
 }) {
   let transaction = useMemo(
     () =>
       fieldMappings
         ? applyFieldMappings(rawTransaction, fieldMappings)
         : rawTransaction,
-    [rawTransaction, fieldMappings]
+    [rawTransaction, fieldMappings],
   );
 
   let { amount, outflow, inflow } = parseAmountFields(
     transaction,
     splitMode,
-    flipAmount
+    flipAmount,
+    multiplierAmount,
   );
   amount = amountToCurrency(amount);
   outflow = amountToCurrency(outflow);
@@ -342,7 +358,7 @@ function DateFormatSelect({
   transactions,
   fieldMappings,
   parseDateFormat,
-  onChange
+  onChange,
 }) {
   // We don't actually care about the delimiter, but we try to render
   // it based on the data we have so far. Look in a transaction and
@@ -372,6 +388,22 @@ function DateFormatSelect({
   );
 }
 
+function MultipliersOption({ value, onChange }) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        userSelect: 'none',
+      }}
+    >
+      <Checkbox id="add_multiplier" checked={value} onChange={onChange} />
+      <label htmlFor="add_multiplier">Add Multiplier</label>
+    </View>
+  );
+}
+
 function FlipAmountOption({ value, disabled, onChange }) {
   return (
     <View
@@ -379,7 +411,7 @@ function FlipAmountOption({ value, disabled, onChange }) {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        userSelect: 'none'
+        userSelect: 'none',
       }}
     >
       <Checkbox
@@ -405,7 +437,7 @@ function SplitOption({ value, onChange }) {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        userSelect: 'none'
+        userSelect: 'none',
       }}
     >
       <Checkbox id="form_split" checked={value} onChange={onChange} />
@@ -500,6 +532,20 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
   );
 }
 
+function MultipliersField({ multiplierCB, value, onChange }) {
+  const styl = multiplierCB ? 'inherit' : 'none';
+
+  return (
+    <Input
+      type="text"
+      style={{ display: styl }}
+      value={value}
+      placeholder="Optional"
+      onUpdate={onChange}
+    />
+  );
+}
+
 export function ImportTransactions({
   modalProps,
   options,
@@ -508,8 +554,9 @@ export function ImportTransactions({
   parseTransactions,
   importTransactions,
   getPayees,
-  savePrefs
+  savePrefs,
 }) {
+  let [multiplierAmount, setMultiplierAmount] = useState('');
   let [loadingState, setLoadingState] = useState('parsing');
   let [error, setError] = useState(null);
   let [filename, setFilename] = useState(options.filename);
@@ -518,6 +565,7 @@ export function ImportTransactions({
   let [fieldMappings, setFieldMappings] = useState(null);
   let [splitMode, setSplitMode] = useState(false);
   let [flipAmount, setFlipAmount] = useState(false);
+  let [multiplierEnabled, setMultiplierEnabled] = useState(false);
   let { accountId, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -526,7 +574,7 @@ export function ImportTransactions({
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
   let [csvDelimiter, setCsvDelimiter] = useState(
-    prefs[`csv-delimiter-${accountId}`] || ','
+    prefs[`csv-delimiter-${accountId}`] || ',',
   );
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
@@ -542,7 +590,7 @@ export function ImportTransactions({
     if (errors.length > 0) {
       setError({
         parsed: true,
-        message: errors[0].message || 'Internal error'
+        message: errors[0].message || 'Internal error',
       });
     } else {
       let filetype = getFileType(filename);
@@ -567,12 +615,12 @@ export function ImportTransactions({
 
         setParseDateFormat(
           prefs[`parse-date-${accountId}-${filetype}`] ||
-            getInitialDateFormat(transactions, mappings)
+            getInitialDateFormat(transactions, mappings),
         );
       } else if (filetype === 'qif') {
         setParseDateFormat(
           prefs[`parse-date-${accountId}-${filetype}`] ||
-            getInitialDateFormat(transactions, { date: 'date' })
+            getInitialDateFormat(transactions, { date: 'date' }),
         );
       } else {
         setFieldMappings(null);
@@ -586,18 +634,29 @@ export function ImportTransactions({
     }
   }
 
+  function onMultiplierChange(e) {
+    const amt = e;
+    if (!amt || amt.match(/^\d{1,}(\.\d{0,4})?$/)) {
+      setMultiplierAmount(amt);
+    }
+  }
+
   useEffect(() => {
     parse(
       options.filename,
       getFileType(options.filename) === 'csv'
         ? { delimiter: csvDelimiter }
-        : null
+        : null,
     );
   }, [parseTransactions, options.filename]);
 
   function onSplitMode() {
     if (fieldMappings == null) {
       return;
+    }
+
+    if (flipAmount === true) {
+      setFlipAmount(!flipAmount);
     }
 
     let isSplit = !splitMode;
@@ -611,12 +670,12 @@ export function ImportTransactions({
       ? {
           amount: null,
           outflow: mappings.amount,
-          inflow: null
+          inflow: null,
         }
       : {
           amount: mappings.amount,
           outflow: null,
-          inflow: null
+          inflow: null,
         };
     setFieldMappings({ ...fieldMappings, ...newFieldMappings });
   }
@@ -624,13 +683,13 @@ export function ImportTransactions({
   function onNewFile() {
     const res = window.Actual.openFileDialog({
       filters: [
-        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] }
-      ]
+        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+      ],
     });
 
     parse(
       res[0],
-      getFileType(res[0]) === 'csv' ? { delimiter: csvDelimiter } : null
+      getFileType(res[0]) === 'csv' ? { delimiter: csvDelimiter } : null,
     );
   }
 
@@ -658,7 +717,12 @@ export function ImportTransactions({
         break;
       }
 
-      let { amount } = parseAmountFields(trans, splitMode, flipAmount);
+      let { amount } = parseAmountFields(
+        trans,
+        splitMode,
+        flipAmount,
+        multiplierAmount,
+      );
       if (amount == null) {
         errorMessage = `Transaction on ${trans.date} has no amount`;
         break;
@@ -668,7 +732,7 @@ export function ImportTransactions({
       finalTransactions.push({
         ...finalTransaction,
         date,
-        amount: amountToInteger(amount)
+        amount: amountToInteger(amount),
       });
     }
 
@@ -685,7 +749,7 @@ export function ImportTransactions({
 
     if (filetype === 'csv') {
       savePrefs({
-        [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings)
+        [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
       savePrefs({ [`csv-delimiter-${accountId}`]: csvDelimiter });
     }
@@ -709,7 +773,7 @@ export function ImportTransactions({
   let headers = [
     { name: 'Date', width: 200 },
     { name: 'Payee', width: 'flex' },
-    { name: 'Notes', width: 'flex' }
+    { name: 'Notes', width: 'flex' },
   ];
 
   if (splitMode) {
@@ -740,7 +804,7 @@ export function ImportTransactions({
           style={{
             flex: 'unset',
             height: 300,
-            border: '1px solid ' + colors.border
+            border: '1px solid ' + colors.border,
           }}
         >
           <TableHeader headers={headers} />
@@ -757,7 +821,7 @@ export function ImportTransactions({
                     textAlign: 'center',
                     marginTop: 25,
                     color: colors.n4,
-                    fontStyle: 'italic'
+                    fontStyle: 'italic',
                   }}
                 >
                   No transactions found
@@ -774,6 +838,7 @@ export function ImportTransactions({
                   fieldMappings={fieldMappings}
                   splitMode={splitMode}
                   flipAmount={flipAmount}
+                  multiplierAmount={multiplierAmount}
                 />
               </View>
             )}
@@ -785,7 +850,7 @@ export function ImportTransactions({
           style={{
             color: colors.r4,
             alignItems: 'center',
-            marginTop: 10
+            marginTop: 10,
           }}
         >
           <Text style={{ maxWidth: 450, marginBottom: 15 }}>
@@ -808,59 +873,94 @@ export function ImportTransactions({
         </View>
       )}
 
+      {/*Import Options */}
       {(filetype === 'qif' || filetype === 'csv') && (
         <View style={{ marginTop: 25 }}>
-          <SectionLabel title="IMPORT OPTIONS" />
-          <View style={{ marginTop: 5 }}>
-            <FlipAmountOption
-              value={flipAmount}
-              disabled={splitMode}
-              onChange={() => {
-                setFlipAmount(!flipAmount);
-              }}
-            />
-          </View>
-          {filetype === 'csv' && (
-            <View style={{ marginTop: 10 }}>
-              <SplitOption value={splitMode} onChange={onSplitMode} />
+          <Stack
+            direction="row"
+            align="flex-start"
+            spacing={1}
+            style={{ marginTop: 5 }}
+          >
+            {/*Date Format */}
+            <View>
+              {(filetype === 'qif' || filetype === 'csv') && (
+                <DateFormatSelect
+                  transactions={transactions}
+                  fieldMappings={fieldMappings}
+                  parseDateFormat={parseDateFormat}
+                  onChange={setParseDateFormat}
+                />
+              )}
             </View>
-          )}
+
+            {/*csv Delimiter */}
+            <View>
+              {filetype === 'csv' && (
+                <View style={{ marginLeft: 25 }}>
+                  <SectionLabel title="CSV DELIMITER" />
+                  <Select
+                    value={csvDelimiter}
+                    onChange={e => {
+                      setCsvDelimiter(e.target.value);
+                      parse(filename, { delimiter: e.target.value });
+                    }}
+                  >
+                    <option value=",">,</option>
+                    <option value=";">;</option>
+                  </Select>
+                </View>
+              )}
+            </View>
+
+            <View style={{ flex: 1 }} />
+
+            <View style={{ marginRight: 25 }}>
+              <SectionLabel title="IMPORT OPTIONS" />
+              <View style={{ marginTop: 5 }}>
+                <FlipAmountOption
+                  value={flipAmount}
+                  disabled={splitMode}
+                  onChange={() => {
+                    setFlipAmount(!flipAmount);
+                  }}
+                />
+              </View>
+              {filetype === 'csv' && (
+                <View style={{ marginTop: 10 }}>
+                  <SplitOption value={splitMode} onChange={onSplitMode} />
+                </View>
+              )}
+              <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                <View style={{ marginRight: 30 }}>
+                  <MultipliersOption
+                    value={multiplierEnabled}
+                    onChange={() => {
+                      setMultiplierEnabled(!multiplierEnabled);
+                      setMultiplierAmount('');
+                    }}
+                  />
+                </View>
+                <View style={{ width: 75 }}>
+                  <MultipliersField
+                    multiplierCB={multiplierEnabled}
+                    value={multiplierAmount}
+                    onChange={onMultiplierChange}
+                  />
+                </View>
+              </View>
+            </View>
+          </Stack>
         </View>
       )}
 
-      <View style={{ flexDirection: 'row', marginTop: 25 }}>
-        {(filetype === 'qif' || filetype === 'csv') && (
-          <DateFormatSelect
-            transactions={transactions}
-            fieldMappings={fieldMappings}
-            parseDateFormat={parseDateFormat}
-            onChange={setParseDateFormat}
-          />
-        )}
-
-        {filetype === 'csv' && (
-          <View style={{ marginLeft: 25 }}>
-            <SectionLabel title="CSV DELIMITER" />
-            <Select
-              value={csvDelimiter}
-              onChange={e => {
-                setCsvDelimiter(e.target.value);
-                parse(filename, { delimiter: e.target.value });
-              }}
-            >
-              <option value=",">,</option>
-              <option value=";">;</option>
-            </Select>
-          </View>
-        )}
-
-        <View style={{ flex: 1 }} />
-
+      <View style={{ flexDirection: 'row', marginTop: 5 }}>
+        {/*Submit Button */}
         <View
           style={{
             alignSelf: 'flex-end',
             flexDirection: 'row',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
         >
           <ButtonWithLoading
@@ -880,7 +980,7 @@ export function ImportTransactions({
 export default connect(
   state => ({
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    prefs: state.prefs.local
+    prefs: state.prefs.local,
   }),
-  actions
+  actions,
 )(ImportTransactions);

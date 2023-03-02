@@ -6,9 +6,9 @@ module.exports = {
   testMatch: ['**/*.web.test.js'],
   transformIgnorePatterns: [
     '__mocks__',
-    '/node_modules/(?!perf-deets|absurd-sql)'
+    '/node_modules/(?!perf-deets|absurd-sql)',
   ],
-  globals: {
-    __TESTING__: true
-  }
+  transform: {
+    '\\.pegjs$': 'pegjs-jest-transformer',
+  },
 };

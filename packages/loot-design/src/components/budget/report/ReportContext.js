@@ -8,7 +8,7 @@ export function ReportProvider({
   summaryCollapsed,
   onBudgetAction,
   onToggleSummaryCollapse,
-  children
+  children,
 }) {
   let currentMonth = monthUtils.currentMonth();
 
@@ -18,7 +18,7 @@ export function ReportProvider({
         currentMonth,
         summaryCollapsed,
         onBudgetAction,
-        onToggleSummaryCollapse
+        onToggleSummaryCollapse,
       }}
       children={children}
     />

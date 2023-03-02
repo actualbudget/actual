@@ -55,7 +55,7 @@ function fail(state, msg, lineno, colno) {
   }
 
   throw new Error(
-    `[${lineno + 1}, ${colno + 1}] ${msg}:\n${lines[lineno]}\n${space}^`
+    `[${lineno + 1}, ${colno + 1}] ${msg}:\n${lines[lineno]}\n${space}^`,
   );
 }
 
@@ -75,7 +75,7 @@ function expectValue(state, type, value) {
       state,
       'expected ' + value + ', got ' + tok.value,
       tok.lineno,
-      tok.colno
+      tok.colno,
     );
   }
   return tok;
@@ -88,7 +88,7 @@ function expect(state, type) {
       state,
       'expected ' + type + ', got ' + tok.type,
       tok.lineno,
-      tok.colno
+      tok.colno,
     );
   }
   return tok;
@@ -154,7 +154,7 @@ function parseCompare(state) {
         tok.colno,
         tok.value,
         node,
-        parseAdd(state)
+        parseAdd(state),
       );
     } else {
       pushToken(state, tok);
@@ -250,7 +250,7 @@ function parsePrimary(state) {
 
     return parsePostfix(
       state,
-      new nodes.Symbol(tok.lineno, tok.colno, tok.value)
+      new nodes.Symbol(tok.lineno, tok.colno, tok.value),
     );
   } else if (tok.type === types.TOKEN_LEFT_PAREN) {
     const node = parseExpression(state);
@@ -312,7 +312,7 @@ function parseQueryExpression(state) {
           state,
           'Unexpected token in query select: ' + tok.value,
           tok.lineno,
-          tok.colno
+          tok.colno,
         );
       }
 
@@ -348,7 +348,7 @@ function parseQueryExpression(state) {
     select,
     where,
     groupby,
-    calculated
+    calculated,
   );
 }
 
@@ -371,7 +371,7 @@ function parsePostfix(state, node) {
         tok.lineno,
         tok.colno,
         node,
-        new nodes.Literal(val.lineno, val.colno, val.value)
+        new nodes.Literal(val.lineno, val.colno, val.value),
       );
     } else if (tok.type === types.TOKEN_EXCLAIM) {
       const name = nextToken(state);
@@ -380,14 +380,14 @@ function parsePostfix(state, node) {
           state,
           'Expected cell name in sheet reference',
           name.lineno,
-          name.colno
+          name.colno,
         );
       }
 
       return new nodes.Symbol(
         node.lineno,
         node.colno,
-        node.value + '!' + name.value
+        node.value + '!' + name.value,
       );
     } else {
       pushToken(state, tok);
@@ -422,7 +422,7 @@ function parseArgs(state) {
         state,
         'Expected comma after function argument',
         tok.lineno,
-        tok.colno
+        tok.colno,
       );
     }
 
@@ -437,7 +437,7 @@ export default function parse(src) {
   let state = {
     src: src,
     tokens: lex(src),
-    peeked: null
+    peeked: null,
   };
 
   if (state.tokens.is_finished()) {
@@ -452,7 +452,7 @@ export default function parse(src) {
         state,
         'Unexpected token after expression: ' + tok.value,
         tok.lineno,
-        tok.colno
+        tok.colno,
       );
     }
 

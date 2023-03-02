@@ -7,7 +7,7 @@ import Refresh from 'loot-design/src/svg/v1/Refresh';
 
 let spin = css.keyframes({
   '0%': { transform: 'rotateZ(0deg)' },
-  '100%': { transform: 'rotateZ(360deg)' }
+  '100%': { transform: 'rotateZ(360deg)' },
 });
 
 export default function AnimatedRefresh({ animating, iconStyle }) {

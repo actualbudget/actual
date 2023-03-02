@@ -6,7 +6,7 @@ import {
   Text,
   Block,
   Modal,
-  Button
+  Button,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -84,7 +84,7 @@ class ConfirmCategoryDelete extends React.Component {
                 marginTop: 20,
                 flexDirection: 'row',
                 justifyContent: 'flex-start',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <Text>Transfer to:</Text>
@@ -95,15 +95,15 @@ class ConfirmCategoryDelete extends React.Component {
                   categoryGroups={
                     group
                       ? categoryGroups.filter(
-                          g => g.id !== group.id && !!g.is_income === isIncome
+                          g => g.id !== group.id && !!g.is_income === isIncome,
                         )
                       : categoryGroups
                           .filter(g => !!g.is_income === isIncome)
                           .map(g => ({
                             ...g,
                             categories: g.categories.filter(
-                              c => c.id !== category.id
-                            )
+                              c => c.id !== category.id,
+                            ),
                           }))
                   }
                   name="category"

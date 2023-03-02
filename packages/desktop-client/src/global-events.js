@@ -31,7 +31,7 @@ export function handleGlobalEvents(actions, store) {
     // Right now, it prompts to merge into the first payee
     actions.pushModal('merge-unused-payees', {
       payeeIds: orphanedIds,
-      targetPayeeId: updatedPayeeIds[0]
+      targetPayeeId: updatedPayeeIds[0],
     });
   });
 
@@ -40,7 +40,7 @@ export function handleGlobalEvents(actions, store) {
     if (history) {
       history.push(`/schedule/posts-offline-notification`, {
         locationPtr: history.location,
-        payees
+        payees,
       });
     }
   });
@@ -68,7 +68,7 @@ export function handleGlobalEvents(actions, store) {
         type: 'warning',
         message: 'Unable to authenticate with server',
         sticky: true,
-        id: 'auth-issue'
+        id: 'auth-issue',
       });
     }
   });
@@ -130,7 +130,7 @@ export function handleGlobalEvents(actions, store) {
       message:
         'This browser only supports using the app in one tab at a time, ' +
         'and another tab has opened the app. No changes will be saved ' +
-        'from this tab; please close it and continue working in the other one.'
+        'from this tab; please close it and continue working in the other one.',
     });
   });
 

@@ -11,7 +11,7 @@ function getAllTransactions() {
        FROM v_transactions t
        LEFT JOIN payees p ON p.id = t.payee
        ORDER BY date DESC, amount DESC, id
-     `
+     `,
   );
 }
 
@@ -21,7 +21,7 @@ async function prepareDatabase() {
     id: '1',
     name: 'cat1',
     cat_group: 'group1',
-    is_income: 0
+    is_income: 0,
   });
   await db.insertAccount({ id: 'one', name: 'one' });
   await db.insertAccount({ id: 'two', name: 'two' });
@@ -30,7 +30,7 @@ async function prepareDatabase() {
   await db.insertPayee({ name: '', transfer_acct: 'two' });
   await db.insertPayee({
     name: '',
-    transfer_acct: 'three'
+    transfer_acct: 'three',
   });
 }
 
@@ -42,7 +42,7 @@ describe('Transfer', () => {
       account: 'one',
       amount: 5000,
       payee: await db.insertPayee({ name: 'Non-transfer' }),
-      date: '2017-01-01'
+      date: '2017-01-01',
     };
     await db.insertTransaction(transaction);
     await transfer.onInsert(transaction);
@@ -50,17 +50,17 @@ describe('Transfer', () => {
     let differ = expectSnapshotWithDiffer(await getAllTransactions());
 
     let transferTwo = await db.first(
-      "SELECT * FROM payees WHERE transfer_acct = 'two'"
+      "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
     let transferThree = await db.first(
-      "SELECT * FROM payees WHERE transfer_acct = 'three'"
+      "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
     transaction = {
       account: 'one',
       amount: 5000,
       payee: transferTwo.id,
-      date: '2017-01-01'
+      date: '2017-01-01',
     };
     transaction.id = await db.insertTransaction(transaction);
     await transfer.onInsert(transaction);
@@ -73,7 +73,7 @@ describe('Transfer', () => {
     transaction = {
       ...transaction,
       date: '2017-01-05',
-      notes: 'This is a note'
+      notes: 'This is a note',
     };
     await db.updateTransaction(transaction);
     await transfer.onUpdate(transaction);
@@ -81,7 +81,7 @@ describe('Transfer', () => {
 
     transaction = {
       ...transaction,
-      payee: transferThree.id
+      payee: transferThree.id,
     };
     await db.updateTransaction(transaction);
     await transfer.onUpdate(transaction);
@@ -89,7 +89,7 @@ describe('Transfer', () => {
 
     transaction = {
       ...transaction,
-      payee: await db.insertPayee({ name: 'Not transferred anymore' })
+      payee: await db.insertPayee({ name: 'Not transferred anymore' }),
     };
     await db.updateTransaction(transaction);
     await transfer.onUpdate(transaction);
@@ -102,7 +102,7 @@ describe('Transfer', () => {
     // Re-transfer it
     transaction = {
       ...transaction,
-      payee: transferTwo.id
+      payee: transferTwo.id,
     };
     await db.updateTransaction(transaction);
     await transfer.onUpdate(transaction);
@@ -120,10 +120,10 @@ describe('Transfer', () => {
     await prepareDatabase();
 
     let transferTwo = await db.first(
-      "SELECT * FROM payees WHERE transfer_acct = 'two'"
+      "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
     let transferThree = await db.first(
-      "SELECT * FROM payees WHERE transfer_acct = 'three'"
+      "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
     let transaction = {
@@ -131,7 +131,7 @@ describe('Transfer', () => {
       amount: 5000,
       payee: await db.insertPayee({ name: 'Non-transfer' }),
       date: '2017-01-01',
-      category: '1'
+      category: '1',
     };
     transaction.id = await db.insertTransaction(transaction);
     await transfer.onInsert(transaction);
@@ -141,7 +141,7 @@ describe('Transfer', () => {
     transaction = {
       ...(await db.getTransaction(transaction.id)),
       payee: transferThree.id,
-      notes: 'hi'
+      notes: 'hi',
     };
     await db.updateTransaction(transaction);
     await transfer.onUpdate(transaction);
@@ -149,7 +149,7 @@ describe('Transfer', () => {
 
     transaction = {
       ...(await db.getTransaction(transaction.id)),
-      payee: transferTwo.id
+      payee: transferTwo.id,
     };
     await db.updateTransaction(transaction);
     await transfer.onUpdate(transaction);

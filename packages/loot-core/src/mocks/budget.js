@@ -39,7 +39,7 @@ function getStartingBalanceCat(categories) {
 function extractCommonThings(payees, groups) {
   let incomePayee = payees.find(p => p.name === 'Deposit');
   let expensePayees = payees.filter(
-    p => p.name !== 'Deposit' && p.name !== 'Starting Balance'
+    p => p.name !== 'Deposit' && p.name !== 'Starting Balance',
   );
   let expenseGroup = groups.find(g => g.is_income === 0);
   let incomeGroup = groups.find(g => g.is_income === 1);
@@ -52,8 +52,8 @@ function extractCommonThings(payees, groups) {
         'Clothing',
         'General',
         'Gift',
-        'Medical'
-      ].indexOf(c.name) !== -1
+        'Medical',
+      ].indexOf(c.name) !== -1,
   );
 
   return {
@@ -62,7 +62,7 @@ function extractCommonThings(payees, groups) {
     incomeGroup,
     expenseCategories: categories,
     billCategories: groups.find(g => g.name === 'Bills').categories,
-    billPayees: expensePayees.filter(p => p.bill)
+    billPayees: expensePayees.filter(p => p.bill),
   };
 }
 
@@ -73,7 +73,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
     incomeGroup,
     expenseCategories,
     billCategories,
-    billPayees
+    billPayees,
   } = extractCommonThings(payees, groups);
   let numTransactions = integer(100, 200);
 
@@ -105,7 +105,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       payee: payee.id,
       account: account.id,
       date: monthUtils.subDays(monthUtils.currentDay(), Math.floor(i / 3)),
-      category: category.id
+      category: category.id,
     };
     transactions.push(transaction);
 
@@ -120,18 +120,18 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
         { amount: a, category: pick() },
         {
           amount: transaction.amount - a * 2,
-          category: pick()
-        }
+          category: pick(),
+        },
       ];
     }
   }
 
   let earliestMonth = monthUtils.monthFromDate(
-    transactions[transactions.length - 1].date
+    transactions[transactions.length - 1].date,
   );
   let months = monthUtils.rangeInclusive(
     earliestMonth,
-    monthUtils.currentMonth()
+    monthUtils.currentMonth(),
   );
   let currentDay = monthUtils.currentDay();
   for (let month of months) {
@@ -142,7 +142,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
         payee: billPayees.find(p => p.name.toLowerCase().includes('power')).id,
         account: account.id,
         date,
-        category: billCategories.find(c => c.name === 'Power').id
+        category: billCategories.find(c => c.name === 'Power').id,
       });
     }
 
@@ -153,7 +153,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
         payee: billPayees.find(p => p.name.toLowerCase().includes('water')).id,
         account: account.id,
         date,
-        category: billCategories.find(c => c.name === 'Water').id
+        category: billCategories.find(c => c.name === 'Water').id,
       });
     }
 
@@ -164,7 +164,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
         payee: billPayees.find(p => p.name.toLowerCase().includes('housy')).id,
         account: account.id,
         date,
-        category: billCategories.find(c => c.name === 'Mortgage').id
+        category: billCategories.find(c => c.name === 'Mortgage').id,
       });
     }
 
@@ -176,7 +176,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
           .id,
         account: account.id,
         date,
-        category: billCategories.find(c => c.name === 'Internet').id
+        category: billCategories.find(c => c.name === 'Internet').id,
       });
     }
 
@@ -188,7 +188,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
           .id,
         account: account.id,
         date,
-        category: billCategories.find(c => c.name === 'Cell').id
+        category: billCategories.find(c => c.name === 'Cell').id,
       });
     }
   }
@@ -206,7 +206,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
     account: account.id,
     date: earliestDate,
     category: getStartingBalanceCat(incomeGroup.categories),
-    starting_balance_flag: true
+    starting_balance_flag: true,
   });
 
   return addTransactions(account.id, transactions);
@@ -241,7 +241,7 @@ async function fillChecking(handlers, account, payees, groups) {
       payee: payee.id,
       account: account.id,
       date: monthUtils.subDays(monthUtils.currentDay(), i * 2),
-      category: category.id
+      category: category.id,
     });
   }
 
@@ -251,12 +251,12 @@ async function fillChecking(handlers, account, payees, groups) {
     account: account.id,
     date: transactions[transactions.length - 1].date,
     category: getStartingBalanceCat(incomeGroup.categories),
-    starting_balance_flag: true
+    starting_balance_flag: true,
   });
 
   await handlers['transactions-batch-update']({
     added: transactions,
-    fastMode: true
+    fastMode: true,
   });
 }
 
@@ -277,7 +277,7 @@ async function fillInvestment(handlers, account, payees, groups) {
       payee: payee.id,
       account: account.id,
       date: monthUtils.subDays(monthUtils.currentDay(), integer(10, 360)),
-      category: category.id
+      category: category.id,
     });
   }
 
@@ -287,12 +287,12 @@ async function fillInvestment(handlers, account, payees, groups) {
     account: account.id,
     date: findMin(transactions, 'date').date,
     category: getStartingBalanceCat(incomeGroup.categories),
-    starting_balance_flag: true
+    starting_balance_flag: true,
   });
 
   await handlers['transactions-batch-update']({
     added: transactions,
-    fastMode: true
+    fastMode: true,
   });
 }
 
@@ -322,7 +322,7 @@ async function fillSavings(handlers, account, payees, groups) {
       payee: payee.id,
       account: account.id,
       date: monthUtils.subDays(monthUtils.currentDay(), i * 5),
-      category: category.id
+      category: category.id,
     });
   }
 
@@ -332,12 +332,12 @@ async function fillSavings(handlers, account, payees, groups) {
     account: account.id,
     date: transactions[transactions.length - 1].date,
     category: getStartingBalanceCat(incomeGroup.categories),
-    starting_balance_flag: true
+    starting_balance_flag: true,
   });
 
   await handlers['transactions-batch-update']({
     added: transactions,
-    fastMode: true
+    fastMode: true,
   });
 }
 
@@ -356,8 +356,8 @@ async function fillMortgage(handlers, account, payees, groups) {
       date:
         monthUtils.subMonths(monthUtils.currentDay(), numTransactions) + '-02',
       category: getStartingBalanceCat(incomeGroup.categories),
-      starting_balance_flag: true
-    }
+      starting_balance_flag: true,
+    },
   ];
   for (let i = 0; i < numTransactions; i++) {
     let payee = incomePayee;
@@ -368,13 +368,13 @@ async function fillMortgage(handlers, account, payees, groups) {
       account: account.id,
       date: monthUtils.subMonths(monthUtils.currentDay(), i) + '-02',
       category: category.id,
-      starting_balance_flag: true
+      starting_balance_flag: true,
     });
   }
 
   await handlers['transactions-batch-update']({
     added: transactions,
-    fastMode: true
+    fastMode: true,
   });
 }
 
@@ -392,8 +392,8 @@ async function fillOther(handlers, account, payees, groups) {
       date:
         monthUtils.subMonths(monthUtils.currentDay(), numTransactions) + '-02',
       category: getStartingBalanceCat(incomeGroup.categories),
-      starting_balance_flag: true
-    }
+      starting_balance_flag: true,
+    },
   ];
   for (let i = 0; i < numTransactions; i++) {
     let payee = incomePayee;
@@ -404,13 +404,13 @@ async function fillOther(handlers, account, payees, groups) {
       payee: payee.id,
       account: account.id,
       date: monthUtils.subMonths(monthUtils.currentDay(), i) + '-02',
-      category: category.id
+      category: category.id,
     });
   }
 
   await handlers['transactions-batch-update']({
     added: transactions,
-    fastMode: true
+    fastMode: true,
   });
 }
 
@@ -419,14 +419,14 @@ async function createBudget(accounts, payees, groups) {
   let earliestDate = (
     await db.first(
       `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
-       WHERE a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`
+       WHERE a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
     )
   ).date;
   let earliestPrimaryDate = (
     await db.first(
       `SELECT * FROM v_transactions t LEFT JOIN accounts a ON t.account = a.id
        WHERE a.id = ? AND a.offbudget = 0 AND t.is_child = 0 ORDER BY date ASC LIMIT 1`,
-      [primaryAccount.id]
+      [primaryAccount.id],
     )
   ).date;
 
@@ -450,7 +450,7 @@ async function createBudget(accounts, payees, groups) {
   function setBudgetIfSpent(month, cat) {
     let spent = sheet.getCellValue(
       monthUtils.sheetForMonth(month),
-      `sum-amount-${cat.id}`
+      `sum-amount-${cat.id}`,
     );
 
     if (spent < 0) {
@@ -494,7 +494,7 @@ async function createBudget(accounts, payees, groups) {
           setBudgetIfSpent(month, category('Power'));
         }
       }
-    })
+    }),
   );
 
   await sheet.waitOnSpreadsheet();
@@ -522,7 +522,7 @@ async function createBudget(accounts, payees, groups) {
           }
         }
       }
-    })
+    }),
   );
 
   await sheet.waitOnSpreadsheet();
@@ -534,8 +534,8 @@ async function createBudget(accounts, payees, groups) {
       {
         amount: -toBudget,
         category: category('Income').id,
-        date: monthUtils.currentMonth() + '-01'
-      }
+        date: monthUtils.currentMonth() + '-01',
+      },
     ]);
   }
 
@@ -565,14 +565,14 @@ export async function createTestBudget(handlers) {
     { name: 'Vanguard 401k', type: 'investment', offBudget: 1 },
     { name: 'Mortgage', type: 'mortgage', offBudget: 1 },
     { name: 'House Asset', type: 'other', offBudget: 1 },
-    { name: 'Roth IRA', type: 'investment', offBudget: 1 }
+    { name: 'Roth IRA', type: 'investment', offBudget: 1 },
   ];
   await runMutator(() =>
     batchMessages(async () => {
       for (let account of accounts) {
         account.id = await handlers['account-create'](account);
       }
-    })
+    }),
   );
 
   let payees = [
@@ -587,7 +587,7 @@ export async function createTestBudget(handlers) {
     { name: 'Extra Watery', bill: true },
     { name: 'Housy House', bill: true },
     { name: 'Fast Internet', bill: true },
-    { name: 'T-mobile', bill: true }
+    { name: 'T-mobile', bill: true },
   ];
 
   await runMutator(() =>
@@ -595,7 +595,7 @@ export async function createTestBudget(handlers) {
       for (let payee of payees) {
         payee.id = await handlers['payee-create']({ name: payee.name });
       }
-    })
+    }),
   );
 
   let categoryGroups = [
@@ -609,8 +609,8 @@ export async function createTestBudget(handlers) {
         { name: 'Clothing' },
         { name: 'Entertainment' },
         { name: 'Restaurants' },
-        { name: 'Food' }
-      ]
+        { name: 'Food' },
+      ],
     },
     {
       name: 'Bills',
@@ -619,8 +619,8 @@ export async function createTestBudget(handlers) {
         { name: 'Water' },
         { name: 'Mortgage' },
         { name: 'Internet' },
-        { name: 'Cell' }
-      ]
+        { name: 'Cell' },
+      ],
     },
     {
       name: 'Income',
@@ -628,23 +628,23 @@ export async function createTestBudget(handlers) {
       categories: [
         { name: 'Income', is_income: true },
         { name: 'Misc', is_income: true },
-        { name: 'Starting Balances', is_income: true }
-      ]
-    }
+        { name: 'Starting Balances', is_income: true },
+      ],
+    },
   ];
 
   await runMutator(async () => {
     for (let group of categoryGroups) {
       group.id = await handlers['category-group-create']({
         name: group.name,
-        isIncome: group.is_income ? 1 : 0
+        isIncome: group.is_income ? 1 : 0,
       });
 
       for (let category of group.categories) {
         category.id = await handlers['category-create']({
           ...category,
           isIncome: category.is_income ? 1 : 0,
-          groupId: group.id
+          groupId: group.id,
         });
       }
     }
@@ -684,7 +684,7 @@ export async function createTestBudget(handlers) {
           default:
         }
       }
-    })
+    }),
   );
 
   setSyncingMode('import');
@@ -698,7 +698,7 @@ export async function createTestBudget(handlers) {
     q('transactions')
       .filter({ account: primaryAccount.id })
       .calculate({ $sum: '$amount' })
-      .serialize()
+      .serialize(),
   );
   if (primaryBalance < 0) {
     let { data: results } = await aqlQuery(
@@ -706,13 +706,13 @@ export async function createTestBudget(handlers) {
         .filter({ account: primaryAccount.id, amount: { $gt: 0 } })
         .limit(1)
         .select(['id', 'amount'])
-        .serialize()
+        .serialize(),
     );
     let lastDeposit = results[0];
 
     await runHandler(handlers['transaction-update'], {
       ...lastDeposit,
-      amount: lastDeposit.amount + -primaryBalance + integer(10000, 20000)
+      amount: lastDeposit.amount + -primaryBalance + integer(10000, 20000),
     });
   }
 

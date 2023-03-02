@@ -8,11 +8,11 @@ import {
   Text,
   Button,
   Tooltip,
-  Menu
+  Menu,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-import { useServerURL } from '../hooks/useServerURL';
+import { useServerURL } from './ServerContext';
 
 function LoggedInUser({
   files,
@@ -24,7 +24,7 @@ function LoggedInUser({
   pushModal,
   closeBudget,
   style,
-  color
+  color,
 }) {
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
@@ -54,11 +54,14 @@ function LoggedInUser({
   }
 
   async function onClick() {
-    if (serverUrl) {
+    if (!serverUrl) {
+      await closeBudget();
+      window.__history.push('/config-server');
+    } else if (userData) {
       setMenuOpen(true);
     } else {
       await closeBudget();
-      window.__history.push('/config-server');
+      window.__history.push('/login');
     }
   }
 
@@ -89,7 +92,7 @@ function LoggedInUser({
               onMenuSelect={onMenuSelect}
               items={[
                 { name: 'change-password', text: 'Change password' },
-                { name: 'sign-out', text: 'Sign out' }
+                { name: 'sign-out', text: 'Sign out' },
               ]}
             />
           </Tooltip>
@@ -97,7 +100,11 @@ function LoggedInUser({
       </View>
     );
   } else {
-    return <View style={[{ color }, style]}>Not logged in</View>;
+    return (
+      <Button bare onClick={onClick} style={[{ color }, style]}>
+        Not logged in
+      </Button>
+    );
   }
 }
 
@@ -105,7 +112,7 @@ export default connect(
   state => ({
     userData: state.user.data,
     files: state.budgets.allFiles,
-    budgetId: state.prefs.local && state.prefs.local.id
+    budgetId: state.prefs.local && state.prefs.local.id,
   }),
-  actions
+  actions,
 )(withRouter(LoggedInUser));

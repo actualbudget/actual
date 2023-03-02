@@ -1,6 +1,0 @@
-{
-  "presets": ["jwl-app"],
-  "ignore": [
-    "**/__mocks__"
-  ]
-}

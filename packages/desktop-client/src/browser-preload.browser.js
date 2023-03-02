@@ -1,6 +1,6 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import BackendWorker from 'worker-loader!./browser-server';
+
+const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 
 // This file installs global variables that the app expects.
 // Normally these are already provided by electron, but in a real
@@ -15,18 +15,26 @@ let ACTUAL_VERSION = process.env.REACT_APP_ACTUAL_VERSION;
 let worker;
 
 function createBackendWorker() {
-  worker = new BackendWorker();
+  worker = new Worker(backendWorkerUrl);
   initSQLBackend(worker);
+
+  if (window.SharedArrayBuffer) {
+    localStorage.removeItem('SharedArrayBufferOverride');
+  }
 
   worker.postMessage({
     type: 'init',
     version: ACTUAL_VERSION,
     isDev: IS_DEV,
-    hash: process.env.REACT_APP_BACKEND_WORKER_HASH
+    publicUrl: process.env.PUBLIC_URL,
+    hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
+    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
+      'SharedArrayBufferOverride',
+    ),
   });
 
   if (IS_DEV || IS_PERF_BUILD) {
-    worker.addEventListener('message', e => {
+    worker.onmessage = e => {
       if (e.data.type === '__actual:backend-running') {
         let activity = document.querySelector('.debugger .activity');
         if (activity) {
@@ -39,7 +47,7 @@ function createBackendWorker() {
           }, 100);
         }
       }
-    });
+    };
 
     import('perf-deets/frontend').then(({ listenForPerfData }) => {
       listenForPerfData(worker);
@@ -95,8 +103,8 @@ global.Actual = {
         new MouseEvent('click', {
           view: window,
           bubbles: true,
-          cancelable: true
-        })
+          cancelable: true,
+        }),
       );
 
       input.addEventListener('change', e => {
@@ -142,7 +150,7 @@ global.Actual = {
   ipcConnect: () => {},
   getServerSocket: async () => {
     return worker;
-  }
+  },
 };
 
 if (IS_DEV) {
@@ -161,6 +169,14 @@ document.addEventListener('keydown', e => {
     }
     // Cmd/Ctrl+z
     else if (e.keyCode === 90) {
+      if (
+        e.target.tagName === 'INPUT' ||
+        e.target.tagName === 'TEXTAREA' ||
+        e.target.isContentEditable
+      ) {
+        return;
+      }
+      e.preventDefault();
       if (e.shiftKey) {
         // Redo
         window.__actionsForMenu.redo();

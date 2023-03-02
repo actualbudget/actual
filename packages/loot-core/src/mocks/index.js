@@ -12,7 +12,7 @@ export function generateAccount(name, isConnected, type, offbudget) {
     bankName: isConnected ? 'boa' : null,
     type: type || 'checking',
     offbudget: offbudget ? 1 : 0,
-    closed: 0
+    closed: 0,
   };
 }
 
@@ -23,7 +23,7 @@ export function generateCategory(name, group, isIncome = false) {
     name: name,
     cat_group: group,
     is_income: isIncome ? 1 : 0,
-    sort_order: sortOrder++
+    sort_order: sortOrder++,
   };
 }
 
@@ -33,7 +33,7 @@ export function generateCategoryGroup(name, isIncome = false) {
     id: uuid.v4Sync(),
     name: name,
     is_income: isIncome ? 1 : 0,
-    sort_order: groupSortOrder++
+    sort_order: groupSortOrder++,
   };
 }
 
@@ -44,8 +44,8 @@ export function generateCategoryGroups(definition) {
     return {
       ...g,
       categories: group.categories.map(cat =>
-        generateCategory(cat.name, g.id, cat.is_income)
-      )
+        generateCategory(cat.name, g.id, cat.is_income),
+      ),
     };
   });
 }
@@ -63,7 +63,7 @@ function _generateTransaction(data) {
     category: data.category,
     sort_order: data.sort_order != null ? data.sort_order : 1,
     cleared: false,
-    error: null
+    error: null,
   };
 }
 
@@ -85,7 +85,7 @@ export function generateTransaction(data, splitAmount, showError = false) {
         date: parent.date,
         notes: null,
         category: null,
-        isChild: true
+        isChild: true,
       },
       {
         id: parent.id + '/' + uuid.v4Sync(),
@@ -94,8 +94,8 @@ export function generateTransaction(data, splitAmount, showError = false) {
         date: parent.date,
         notes: null,
         category: null,
-        isChild: true
-      }
+        isChild: true,
+      },
     );
 
     if (showError) {
@@ -104,7 +104,7 @@ export function generateTransaction(data, splitAmount, showError = false) {
       last.error = {
         type: 'SplitTransactionError',
         version: 1,
-        difference: 500
+        difference: 500,
       };
     }
   }
@@ -117,7 +117,7 @@ export function generateTransactions(
   accountId,
   groupId,
   splitAtIndexes = [],
-  showError = false
+  showError = false,
 ) {
   const transactions = [];
 
@@ -131,11 +131,11 @@ export function generateTransactions(
           account: accountId,
           category: groupId,
           amount: isSplit ? 50 : undefined,
-          sort_order: i
+          sort_order: i,
         },
         isSplit ? 30 : undefined,
-        showError
-      )
+        showError,
+      ),
     );
   }
 

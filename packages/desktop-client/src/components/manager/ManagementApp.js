@@ -9,9 +9,9 @@ import { View, Text } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
 
-import useServerVersion from '../../hooks/useServerVersion';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
+import { useServerVersion } from '../ServerContext';
 
 import ConfigServer from './ConfigServer';
 import Modals from './Modals';
@@ -37,10 +37,10 @@ function Version() {
           right: 0,
           marginLeft: 15,
           marginRight: 17,
-          zIndex: 5001
-        }
+          zIndex: 5001,
+        },
       }}
-      href={'https://actualbudget.com/blog/' + window.Actual.ACTUAL_VERSION}
+      href={'https://actualbudget.github.io/docs/Release-Notes/'}
     >
       {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
     </Text>
@@ -88,7 +88,7 @@ class ManagementApp extends React.Component {
     // id" of some kind.
     this.props.setAppState({
       managerHasInitialized: true,
-      ...(!alreadyLoading ? { loadingText: null } : null)
+      ...(!alreadyLoading ? { loadingText: null } : null),
     });
   }
 
@@ -155,21 +155,21 @@ class ManagementApp extends React.Component {
               left: 0,
               right: 0,
               height: 40,
-              WebkitAppRegion: 'drag'
+              WebkitAppRegion: 'drag',
             }}
           />
           <View
             style={{
               position: 'absolute',
               bottom: 40,
-              right: 15
+              right: 15,
             }}
           >
             <Notifications
               style={{
                 position: 'relative',
                 left: 'initial',
-                right: 'initial'
+                right: 'initial',
               }}
             />
           </View>
@@ -184,7 +184,7 @@ class ManagementApp extends React.Component {
                 padding: 20,
                 position: 'absolute',
                 right: 0,
-                top: 0
+                top: 0,
               }}
             >
               {userData ? (
@@ -211,7 +211,7 @@ class ManagementApp extends React.Component {
                       top: 0,
                       right: 0,
                       padding: '6px 10px',
-                      zIndex: 4000
+                      zIndex: 4000,
                     }}
                   >
                     <Switch>
@@ -241,7 +241,7 @@ class ManagementApp extends React.Component {
 
           <Switch>
             <Route exact path="/config-server" component={null} />
-            <Route exact path="/" component={ServerURL} />
+            <Route path="/" component={ServerURL} />
           </Switch>
           <Version />
         </View>
@@ -258,6 +258,6 @@ export default connect(state => {
     userData: state.user.data,
     managerHasInitialized: state.app.managerHasInitialized,
     loadingText: state.app.loadingText,
-    currentModals: modalStack.map(modal => modal.name)
+    currentModals: modalStack.map(modal => modal.name),
   };
 }, actions)(ManagementApp);

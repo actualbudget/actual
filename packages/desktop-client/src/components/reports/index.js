@@ -10,7 +10,7 @@ import Overview from './Overview';
 class Reports extends React.Component {
   render() {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }} data-testid="reports-page">
         <Route path="/reports" exact component={Overview} />
         <Route path="/reports/net-worth" exact component={NetWorth} />
         <Route path="/reports/cash-flow" exact component={CashFlow} />

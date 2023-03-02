@@ -8,7 +8,7 @@ let UNDO_STATE_MRU = [];
 let currentUndoState = {
   url: null,
   openModal: null,
-  selectedItems: null
+  selectedItems: null,
 };
 
 function setUndoState(name, value) {

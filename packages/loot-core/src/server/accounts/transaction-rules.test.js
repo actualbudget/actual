@@ -15,7 +15,7 @@ import {
   resetState,
   getProbableCategory,
   updateCategoryRules,
-  migrateOldRules
+  migrateOldRules,
 } from './transaction-rules';
 
 // TODO: write tests to make sure payee renaming is "pre" and category
@@ -30,7 +30,7 @@ beforeEach(async () => {
 async function getMatchingTransactions(conds) {
   let { filters } = conditionsToAQL(conds);
   let { data } = await runQuery(
-    q('transactions').filter({ $and: filters }).select('*')
+    q('transactions').filter({ $and: filters }).select('*'),
   );
   return data;
 }
@@ -51,39 +51,39 @@ describe('Transaction rules', () => {
     expect(
       makeRule({
         conditions: JSON.stringify([
-          { op: 'noop', field: 'date', value: '2019-05' }
+          { op: 'noop', field: 'date', value: '2019-05' },
         ]),
         actions: JSON.stringify([
           { op: 'set', field: 'name', value: 'Sarah' },
-          { op: 'set', field: 'category', value: 'Sarah' }
-        ])
-      })
+          { op: 'set', field: 'category', value: 'Sarah' },
+        ]),
+      }),
     ).toBe(null);
 
     // setting an invalid field
     expect(
       makeRule({
         conditions: JSON.stringify([
-          { op: 'is', field: 'date', value: '2019-05' }
+          { op: 'is', field: 'date', value: '2019-05' },
         ]),
         actions: JSON.stringify([
           { op: 'set', field: 'notes', value: 'Sarah' },
-          { op: 'set', field: 'invalid', value: 'Sarah' }
-        ])
-      })
+          { op: 'set', field: 'invalid', value: 'Sarah' },
+        ]),
+      }),
     ).toBe(null);
 
     // condition has valid operator & setting valid fields
     expect(
       makeRule({
         conditions: JSON.stringify([
-          { op: 'is', field: 'date', value: '2019-05' }
+          { op: 'is', field: 'date', value: '2019-05' },
         ]),
         actions: JSON.stringify([
           { op: 'set', field: 'notes', value: 'Sarah' },
-          { op: 'set', field: 'category', value: 'Sarah' }
-        ])
-      })
+          { op: 'set', field: 'category', value: 'Sarah' },
+        ]),
+      }),
     ).not.toBe(null);
 
     spy.mockRestore();
@@ -101,8 +101,8 @@ describe('Transaction rules', () => {
       conditions: [{ op: 'is', field: 'date', value: '2019-05' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
-        { op: 'set', field: 'category', value: 'food' }
-      ]
+        { op: 'set', field: 'category', value: 'food' },
+      ],
     });
     expect((await db.all('SELECT * FROM rules')).length).toBe(2);
     expect(getRules().length).toBe(2);
@@ -123,7 +123,7 @@ describe('Transaction rules', () => {
     let transaction = runRules({
       date: '2019-05-10',
       notes: '',
-      category: null
+      category: null,
     });
     expect(transaction.date).toBe('2019-05-10');
     expect(transaction.notes).toBe('Sarah');
@@ -137,15 +137,15 @@ describe('Transaction rules', () => {
       conditions: [{ op: 'is', field: 'imported_payee', value: 'kroger' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
-        { op: 'set', field: 'category', value: 'food' }
-      ]
+        { op: 'set', field: 'category', value: 'food' },
+      ],
     });
     expect(getRules().length).toBe(1);
 
     let transaction = runRules({
       imported_payee: 'Kroger',
       notes: '',
-      category: null
+      category: null,
     });
     expect(transaction.imported_payee).toBe('Kroger');
     expect(transaction.notes).toBe('Sarah');
@@ -154,14 +154,14 @@ describe('Transaction rules', () => {
     // Change the action
     await updateRule({
       id,
-      actions: [{ op: 'set', field: 'category', value: 'bars' }]
+      actions: [{ op: 'set', field: 'category', value: 'bars' }],
     });
     expect(getRules().length).toBe(1);
 
     transaction = runRules({
       imported_payee: 'Kroger',
       notes: '',
-      category: null
+      category: null,
     });
     expect(transaction.imported_payee).toBe('Kroger');
     expect(transaction.notes).toBe('');
@@ -170,12 +170,12 @@ describe('Transaction rules', () => {
     // If changing the condition, make sure the rule is re-indexed
     await updateRule({
       id,
-      conditions: [{ op: 'is', field: 'imported_payee', value: 'ABC' }]
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'ABC' }],
     });
     transaction = runRules({
       imported_payee: 'ABC',
       notes: '',
-      category: null
+      category: null,
     });
     expect(transaction.category).toBe('bars');
     expect(getRules().length).toBe(1);
@@ -188,15 +188,15 @@ describe('Transaction rules', () => {
       conditions: [{ op: 'is', field: 'payee', value: 'kroger' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
-        { op: 'set', field: 'category', value: 'food' }
-      ]
+        { op: 'set', field: 'category', value: 'food' },
+      ],
     });
     expect(getRules().length).toBe(1);
 
     let transaction = runRules({
       payee: 'Kroger',
       notes: '',
-      category: null
+      category: null,
     });
     expect(transaction.payee).toBe('Kroger');
     expect(transaction.category).toBe('food');
@@ -206,7 +206,7 @@ describe('Transaction rules', () => {
     transaction = runRules({
       payee: 'Kroger',
       notes: '',
-      category: null
+      category: null,
     });
     expect(transaction.payee).toBe('Kroger');
     expect(transaction.category).toBe(null);
@@ -217,13 +217,13 @@ describe('Transaction rules', () => {
     await insertRule({
       stage: 'pre',
       conditions: [{ op: 'contains', field: 'imported_payee', value: 'lowes' }],
-      actions: [{ op: 'set', field: 'payee', value: 'lowes' }]
+      actions: [{ op: 'set', field: 'payee', value: 'lowes' }],
     });
 
     await insertRule({
       stage: 'post',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'kroger' }],
-      actions: [{ op: 'set', field: 'notes', value: 'Sarah' }]
+      actions: [{ op: 'set', field: 'notes', value: 'Sarah' }],
     });
 
     resetState();
@@ -235,13 +235,13 @@ describe('Transaction rules', () => {
     let transaction = runRules({
       imported_payee: 'blah Lowes blah',
       payee: null,
-      category: null
+      category: null,
     });
     expect(transaction.payee).toBe('lowes');
 
     transaction = runRules({
       imported_payee: 'kroger',
-      category: null
+      category: null,
     });
     expect(transaction.notes).toBe('Sarah');
   });
@@ -255,19 +255,19 @@ describe('Transaction rules', () => {
     await db.insertCategory({
       id: 'food_id',
       name: 'food',
-      cat_group: 'group'
+      cat_group: 'group',
     });
     await db.insertCategory({
       id: 'beer_id',
       name: 'beer',
-      cat_group: 'group'
+      cat_group: 'group',
     });
 
     await insertRule({
       id: 'one',
       stage: 'pre',
       conditions: [{ op: 'contains', field: 'imported_payee', value: 'lowes' }],
-      actions: [{ op: 'set', field: 'payee', value: 'lowes_id' }]
+      actions: [{ op: 'set', field: 'payee', value: 'lowes_id' }],
     });
 
     await insertRule({
@@ -275,9 +275,9 @@ describe('Transaction rules', () => {
       stage: 'pre',
       conditions: [
         { op: 'is', field: 'payee', value: 'lowes_id' },
-        { op: 'is', field: 'category', value: 'food_id' }
+        { op: 'is', field: 'category', value: 'food_id' },
       ],
-      actions: [{ op: 'set', field: 'notes', value: 'Sarah' }]
+      actions: [{ op: 'set', field: 'notes', value: 'Sarah' }],
     });
 
     let rule1 = getRules().find(r => r.id === 'one');
@@ -311,44 +311,44 @@ describe('Transaction rules', () => {
         {
           op: 'oneOf',
           field: 'payee',
-          value: ['kroger', 'kroger1', 'kroger2', 'kroger3', 'kroger4']
-        }
+          value: ['kroger', 'kroger1', 'kroger2', 'kroger3', 'kroger4'],
+        },
       ],
-      actions: [{ op: 'set', field: 'notes', value: 'got it2' }]
+      actions: [{ op: 'set', field: 'notes', value: 'got it2' }],
     });
 
     await insertRule({
       stage: 'pre',
       conditions: [{ op: 'is', field: 'imported_payee', value: '123 kroger' }],
-      actions: [{ op: 'set', field: 'payee', value: 'kroger3' }]
+      actions: [{ op: 'set', field: 'payee', value: 'kroger3' }],
     });
 
     await insertRule({
       stage: null,
       conditions: [
-        { op: 'contains', field: 'imported_payee', value: 'kroger' }
+        { op: 'contains', field: 'imported_payee', value: 'kroger' },
       ],
-      actions: [{ op: 'set', field: 'payee', value: 'kroger4' }]
+      actions: [{ op: 'set', field: 'payee', value: 'kroger4' }],
     });
 
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: 'kroger4' }],
-      actions: [{ op: 'set', field: 'notes', value: 'got it' }]
+      actions: [{ op: 'set', field: 'notes', value: 'got it' }],
     });
 
     expect(
       runRules({
         imported_payee: '123 kroger',
         date: '2020-08-11',
-        amount: 50
-      })
+        amount: 50,
+      }),
     ).toEqual({
       date: '2020-08-11',
       imported_payee: '123 kroger',
       payee: 'kroger4',
       amount: 50,
-      notes: 'got it2'
+      notes: 'got it2',
     });
   });
 
@@ -357,7 +357,7 @@ describe('Transaction rules', () => {
     let categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
     let categoryId = await db.insertCategory({
       name: 'food',
-      cat_group: categoryGroupId
+      cat_group: categoryGroupId,
     });
     let krogerId = await db.insertPayee({ name: 'kroger' });
     let lowesId = await db.insertPayee({ name: 'lowes', category: categoryId });
@@ -365,17 +365,17 @@ describe('Transaction rules', () => {
     await db.insertPayeeRule({
       payee_id: krogerId,
       type: 'contains',
-      value: 'kroger'
+      value: 'kroger',
     });
     await db.insertPayeeRule({
       payee_id: lowesId,
       type: 'equals',
-      value: '123 lowes'
+      value: '123 lowes',
     });
     await db.insertPayeeRule({
       payee_id: lowesId,
       type: 'equals',
-      value: 'lowes 456'
+      value: 'lowes 456',
     });
 
     // Migrate!
@@ -386,27 +386,27 @@ describe('Transaction rules', () => {
     expect(runRules({ payee: null, imported_payee: '123 lowes' })).toEqual({
       category: categoryId,
       imported_payee: '123 lowes',
-      payee: lowesId
+      payee: lowesId,
     });
     expect(runRules({ payee: null, imported_payee: 'lowes 456' })).toEqual({
       category: categoryId,
       imported_payee: 'lowes 456',
-      payee: lowesId
+      payee: lowesId,
     });
     expect(runRules({ payee: null, imported_payee: '1 lowes 2' })).toEqual({
       imported_payee: '1 lowes 2',
-      payee: null
+      payee: null,
     });
     expect(
       runRules({
         payee: null,
         imported_payee: 'blah blah kroger bla',
-        category: null
-      })
+        category: null,
+      }),
     ).toEqual({
       imported_payee: 'blah blah kroger bla',
       payee: krogerId,
-      category: null
+      category: null,
     });
   });
 
@@ -416,7 +416,7 @@ describe('Transaction rules', () => {
     let categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
     let categoryId = await db.insertCategory({
       name: 'food',
-      cat_group: categoryGroupId
+      cat_group: categoryGroupId,
     });
     let krogerId = await db.insertPayee({ name: 'kroger' });
     let lowesId = await db.insertPayee({ name: 'lowes', category: categoryId });
@@ -427,7 +427,7 @@ describe('Transaction rules', () => {
       account,
       payee: krogerId,
       notes: 'barr',
-      amount: 353
+      amount: 353,
     });
     await db.insertTransaction({
       id: '2',
@@ -435,7 +435,7 @@ describe('Transaction rules', () => {
       account,
       payee: krogerId,
       notes: 'fooo',
-      amount: 453
+      amount: 453,
     });
     await db.insertTransaction({
       id: '3',
@@ -443,70 +443,70 @@ describe('Transaction rules', () => {
       account,
       payee: lowesId,
       notes: 'FooO',
-      amount: -322
+      amount: -322,
     });
 
     let transactions = await getMatchingTransactions([
-      { field: 'date', op: 'is', value: '2020-10-15' }
+      { field: 'date', op: 'is', value: '2020-10-15' },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2', '3']);
 
     transactions = await getMatchingTransactions([
-      { field: 'payee', op: 'is', value: lowesId }
+      { field: 'payee', op: 'is', value: lowesId },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['3']);
 
     transactions = await getMatchingTransactions([
-      { field: 'amount', op: 'is', value: 353 }
+      { field: 'amount', op: 'is', value: 353 },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['1']);
 
     transactions = await getMatchingTransactions([
-      { field: 'notes', op: 'is', value: 'FooO' }
+      { field: 'notes', op: 'is', value: 'FooO' },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2', '3']);
 
     transactions = await getMatchingTransactions([
-      { field: 'notes', op: 'contains', value: 'oo' }
+      { field: 'notes', op: 'contains', value: 'oo' },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2', '3']);
 
     transactions = await getMatchingTransactions([
-      { field: 'notes', op: 'oneOf', value: ['fooo', 'barr'] }
+      { field: 'notes', op: 'oneOf', value: ['fooo', 'barr'] },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2', '3', '1']);
 
     transactions = await getMatchingTransactions([
-      { field: 'amount', op: 'gt', value: 300 }
+      { field: 'amount', op: 'gt', value: 300 },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2', '1']);
 
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'gt', value: 400 },
-      { field: 'amount', op: 'lt', value: 500 }
+      { field: 'amount', op: 'lt', value: 500 },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2']);
 
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'gt', value: 300, options: { inflow: true } },
-      { field: 'amount', op: 'lt', value: 400, options: { inflow: true } }
+      { field: 'amount', op: 'lt', value: 400, options: { inflow: true } },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['1']);
 
     // If `inflow` is true, it should never return outflow transactions
     transactions = await getMatchingTransactions([
-      { field: 'amount', op: 'gt', value: -1000, options: { inflow: true } }
+      { field: 'amount', op: 'gt', value: -1000, options: { inflow: true } },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2', '1']);
 
     // Same thing for `outflow`: never return `inflow` transactions
     transactions = await getMatchingTransactions([
-      { field: 'amount', op: 'gt', value: 300, options: { outflow: true } }
+      { field: 'amount', op: 'gt', value: 300, options: { outflow: true } },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['3']);
 
     transactions = await getMatchingTransactions([
-      { field: 'date', op: 'gt', value: '2020-10-10' }
+      { field: 'date', op: 'gt', value: '2020-10-10' },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2', '3']);
 
@@ -530,7 +530,7 @@ describe('Learning categories', () => {
     transaction,
     expectedCategory,
     expectedRuleCount = 1,
-    expectedPayee = 'foo'
+    expectedPayee = 'foo',
   ) {
     await db.insertTransaction(transaction);
     await updateCategoryRules([transaction]);
@@ -540,7 +540,7 @@ describe('Learning categories', () => {
       expectCategoryRule(
         getRules()[expectedRuleCount - 1],
         expectedCategory,
-        expectedPayee
+        expectedPayee,
       );
     }
   }
@@ -564,7 +564,7 @@ describe('Learning categories', () => {
     winner = getProbableCategory([
       { category: 'foo' },
       { category: 'foo' },
-      { category: 'foo' }
+      { category: 'foo' },
     ]);
     expect(winner).toBe('foo');
 
@@ -572,7 +572,7 @@ describe('Learning categories', () => {
       { category: 'bar' },
       { category: 'foo' },
       { category: 'foo' },
-      { category: 'foo' }
+      { category: 'foo' },
     ]);
     expect(winner).toBe('foo');
 
@@ -582,7 +582,7 @@ describe('Learning categories', () => {
       { category: 'bar' },
       { category: 'foo' },
       { category: 'foo' },
-      { category: 'foo' }
+      { category: 'foo' },
     ]);
     expect(winner).toBe('bar');
   });
@@ -596,10 +596,10 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'food'
+        category: 'food',
       },
       null,
-      0
+      0,
     );
 
     await insertTransaction(
@@ -608,10 +608,10 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'food'
+        category: 'food',
       },
       null,
-      0
+      0,
     );
 
     await insertTransaction(
@@ -620,9 +620,9 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'food'
+        category: 'food',
       },
-      'food'
+      'food',
     );
   });
 
@@ -635,10 +635,10 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'food'
+        category: 'food',
       },
       null,
-      0
+      0,
     );
 
     await insertTransaction(
@@ -647,10 +647,10 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'beer'
+        category: 'beer',
       },
       null,
-      0
+      0,
     );
 
     await insertTransaction(
@@ -659,16 +659,16 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'beer'
+        category: 'beer',
       },
       null,
-      0
+      0,
     );
 
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: 'set', field: 'category', value: 'fun' }]
+      actions: [{ op: 'set', field: 'category', value: 'fun' }],
     });
 
     // Even though the system couldn't figure out the category to set,
@@ -679,10 +679,10 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'bills'
+        category: 'bills',
       },
       'fun',
-      1
+      1,
     );
   });
 
@@ -692,7 +692,7 @@ describe('Learning categories', () => {
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: 'set', field: 'category', value: 'beer' }]
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
     await insertTransaction(
@@ -701,10 +701,10 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'food'
+        category: 'food',
       },
       'beer',
-      1
+      1,
     );
     await insertTransaction(
       {
@@ -712,10 +712,10 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'food'
+        category: 'food',
       },
       'beer',
-      1
+      1,
     );
     await insertTransaction(
       {
@@ -723,10 +723,10 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: 'food'
+        category: 'food',
       },
       'food',
-      1
+      1,
     );
   });
 
@@ -736,7 +736,7 @@ describe('Learning categories', () => {
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: 'set', field: 'category', value: 'beer' }]
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
     // Use a new payee, so the category should be remembered
@@ -746,10 +746,10 @@ describe('Learning categories', () => {
         date: '2016-12-03',
         account: 'acct',
         payee: 'bar',
-        category: 'fun'
+        category: 'fun',
       },
       'beer',
-      1
+      1,
     );
     await insertTransaction(
       {
@@ -757,10 +757,10 @@ describe('Learning categories', () => {
         date: '2016-12-03',
         account: 'acct',
         payee: 'bar',
-        category: 'fun'
+        category: 'fun',
       },
       'beer',
-      1
+      1,
     );
     await insertTransaction(
       {
@@ -768,11 +768,11 @@ describe('Learning categories', () => {
         date: '2016-12-03',
         account: 'acct',
         payee: 'bar',
-        category: 'fun'
+        category: 'fun',
       },
       'fun',
       2,
-      'bar'
+      'bar',
     );
   });
 
@@ -782,42 +782,42 @@ describe('Learning categories', () => {
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: 'set', field: 'category', value: 'unknown1' }]
+      actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: 'set', field: 'category', value: 'unknown2' }]
+      actions: [{ op: 'set', field: 'category', value: 'unknown2' }],
     });
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: null }],
-      actions: [{ op: 'set', field: 'category', value: 'beer' }]
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
     let trans = {
       date: '2016-12-01',
       account: 'acct',
       payee: 'foo',
-      category: 'food'
+      category: 'food',
     };
     await db.insertTransaction({ ...trans, id: 'one' });
     await db.insertTransaction({ ...trans, id: 'two' });
     await db.insertTransaction({ ...trans, id: 'three' });
     await updateCategoryRules([{ ...trans, id: 'three' }]);
-    expect(getRules().length).toBe(3);
+    expect(getRules()).toMatchSnapshot();
 
     trans = {
       date: '2016-12-02',
       account: 'acct',
       payee: 'foo',
-      category: 'beer'
+      category: 'beer',
     };
     await db.insertTransaction({ ...trans, id: 'four' });
     await db.insertTransaction({ ...trans, id: 'five' });
     await db.insertTransaction({ ...trans, id: 'six' });
     await updateCategoryRules([{ ...trans, id: 'three' }]);
-    expect(getRules().length).toBe(3);
+    expect(getRules()).toMatchSnapshot();
 
     let rules = getRules();
     let getPayees = cat => {
@@ -843,7 +843,7 @@ describe('Learning categories', () => {
       date: '2016-12-01',
       account: 'acct',
       payee: null,
-      category: 'food'
+      category: 'food',
     };
     await db.insertTransaction({ ...trans, id: 'one' });
     await db.insertTransaction({ ...trans, id: 'two' });
@@ -858,12 +858,12 @@ describe('Learning categories', () => {
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: 'set', field: 'category', value: 'unknown1' }]
+      actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
     await insertRule({
       stage: null,
       conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
-      actions: [{ op: 'set', field: 'category', value: 'unknown1' }]
+      actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
 
     expect(getRules().length).toBe(2);
@@ -871,7 +871,7 @@ describe('Learning categories', () => {
       date: '2016-12-01',
       account: 'acct',
       payee: null,
-      category: 'food'
+      category: 'food',
     };
     await db.insertTransaction({ ...trans, id: 'one' });
     await db.insertTransaction({ ...trans, id: 'two' });
@@ -890,7 +890,7 @@ describe('Learning categories', () => {
     await insertRule({
       stage: null,
       conditions: [{ op: 'is', field: 'imported_payee', value: 'foo' }],
-      actions: [{ op: 'set', field: 'payee', value: 'unknown1' }]
+      actions: [{ op: 'set', field: 'payee', value: 'unknown1' }],
     });
 
     // The rule that the system sees should use the new public names
@@ -919,9 +919,9 @@ describe('Learning categories', () => {
     await db.insertWithUUID('rules', {
       stage: null,
       conditions: JSON.stringify([
-        { op: 'is', field: 'imported_payee', value: 'foo' }
+        { op: 'is', field: 'imported_payee', value: 'foo' },
       ]),
-      actions: JSON.stringify([{ op: 'set', field: 'payee', value: 'payee1' }])
+      actions: JSON.stringify([{ op: 'set', field: 'payee', value: 'payee1' }]),
     });
 
     await loadRules();

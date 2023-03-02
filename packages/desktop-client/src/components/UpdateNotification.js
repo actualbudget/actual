@@ -12,7 +12,7 @@ function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session
   setAppState({
     updateInfo: null,
-    showUpdateNotification: false
+    showUpdateNotification: false,
   });
 }
 
@@ -20,7 +20,7 @@ function UpdateNotification({
   updateInfo,
   showUpdateNotification,
   updateApp,
-  setAppState
+  setAppState,
 }) {
   if (updateInfo && showUpdateNotification) {
     let notes = updateInfo.releaseNotes;
@@ -37,7 +37,7 @@ function UpdateNotification({
           padding: '7px 10px',
           borderRadius: 4,
           zIndex: 10000,
-          maxWidth: 450
+          maxWidth: 450,
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -58,7 +58,7 @@ function UpdateNotification({
                 style={{ color: 'white', textDecoration: 'underline' }}
                 onClick={() =>
                   window.Actual.openURLInBrowser(
-                    'https://actualbudget.com/blog/' + updateInfo.version
+                    'https://actualbudget.github.io/docs/Release-Notes/',
                   )
                 }
               >
@@ -88,7 +88,7 @@ function UpdateNotification({
 export default connect(
   state => ({
     updateInfo: state.app.updateInfo,
-    showUpdateNotification: state.app.showUpdateNotification
+    showUpdateNotification: state.app.showUpdateNotification,
   }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(UpdateNotification);

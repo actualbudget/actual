@@ -5,9 +5,11 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import {
   Text,
   Button,
-  Input as BaseInput
+  Input as BaseInput,
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
+
+import { useSetServerURL } from '../../ServerContext';
 
 // There are two URLs that dance with each other: `/login` and
 // `/bootstrap`. Both of these URLs check the state of the the server
@@ -22,6 +24,7 @@ export function useBootstrapped() {
   let [checked, setChecked] = useState(false);
   let history = useHistory();
   let location = useLocation();
+  let setServerURL = useSetServerURL();
 
   useEffect(() => {
     async function run() {
@@ -36,7 +39,24 @@ export function useBootstrapped() {
       let url = await send('get-server-url');
       if (url == null) {
         // A server hasn't been specified yet
-        history.push('/config-server');
+        let serverURL = window.location.origin;
+        let { error, hasServer, bootstrapped } = await send(
+          'subscribe-needs-bootstrap',
+          { url: serverURL },
+        );
+        if (error || !hasServer) {
+          console.log(error);
+          history.push('/config-server');
+          return;
+        }
+
+        await setServerURL(serverURL, { validate: false });
+
+        if (bootstrapped) {
+          ensure('/login');
+        } else {
+          ensure('/bootstrap');
+        }
       } else {
         let { error, bootstrapped } = await send('subscribe-needs-bootstrap');
         if (error) {
@@ -69,7 +89,7 @@ export function Title({ text }) {
         fontSize: 40,
         fontWeight: 700,
         color: colors.p3,
-        marginBottom: 20
+        marginBottom: 20,
       }}
     >
       {text}
@@ -87,9 +107,9 @@ export const Input = React.forwardRef((props, ref) => {
           fontSize: 15,
           border: 'none',
           ...styles.shadow,
-          ':focus': { border: 'none', ...styles.shadow }
+          ':focus': { border: 'none', ...styles.shadow },
         },
-        props.style
+        props.style,
       ]}
     />
   );
@@ -109,13 +129,13 @@ export const BareButton = React.forwardRef((props, ref) => {
           padding: '5px 7px',
           borderRadius: 4,
           ':hover': {
-            backgroundColor: colors.n9
+            backgroundColor: colors.n9,
           },
           ':active': {
-            backgroundColor: colors.n9
-          }
+            backgroundColor: colors.n9,
+          },
         },
-        props.style
+        props.style,
       ]}
     />
   );
@@ -158,9 +178,9 @@ export function Paragraph({ style, children }) {
           fontSize: 15,
           color: colors.n2,
           lineHeight: 1.5,
-          marginTop: 20
+          marginTop: 20,
         },
-        style
+        style,
       ]}
     >
       {children}

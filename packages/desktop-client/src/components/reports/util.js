@@ -24,7 +24,7 @@ export async function runAll(queries, cb) {
   let data = await Promise.all(
     queries.map(q => {
       return runQuery(q).then(({ data }) => data);
-    })
+    }),
   );
   cb(data);
 }

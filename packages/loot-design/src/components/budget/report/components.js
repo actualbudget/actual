@@ -14,7 +14,7 @@ import BalanceWithCarryover from '../BalanceWithCarryover';
 import { MONTH_RIGHT_PADDING } from '../constants';
 import { makeAmountGrey } from '../util';
 
-export BudgetSummary from './BudgetSummary';
+export { BudgetSummary } from './BudgetSummary';
 
 let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
 
@@ -26,7 +26,7 @@ export const BudgetTotalsMonth = React.memo(function BudgetTotalsMonth() {
         flexDirection: 'row',
         marginRight: MONTH_RIGHT_PADDING,
         paddingTop: 10,
-        paddingBottom: 10
+        paddingBottom: 10,
       }}
     >
       <View style={headerLabelStyle}>
@@ -66,7 +66,7 @@ export function IncomeHeaderMonth() {
       style={{
         flexDirection: 'row',
         marginRight: MONTH_RIGHT_PADDING,
-        paddingBottom: 5
+        paddingBottom: 5,
       }}
     >
       <View style={headerLabelStyle}>
@@ -93,7 +93,7 @@ export const GroupMonth = React.memo(function ExpenseGroupMonth({ group }) {
         style={[{ fontWeight: 600 }, styles.tnum]}
         valueProps={{
           binding: reportBudget.groupBudgeted(id),
-          type: 'financial'
+          type: 'financial',
         }}
       />
       <SheetCell
@@ -104,7 +104,7 @@ export const GroupMonth = React.memo(function ExpenseGroupMonth({ group }) {
         style={[{ fontWeight: 600 }, styles.tnum]}
         valueProps={{
           binding: reportBudget.groupSumAmount(id),
-          type: 'financial'
+          type: 'financial',
         }}
       />
       {!group.is_income && (
@@ -115,11 +115,11 @@ export const GroupMonth = React.memo(function ExpenseGroupMonth({ group }) {
           textAlign="right"
           style={[
             { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-            styles.tnum
+            styles.tnum,
           ]}
           valueProps={{
             binding: reportBudget.groupBalance(id),
-            type: 'financial'
+            type: 'financial',
           }}
         />
       )}
@@ -141,7 +141,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
         onMenuSelect={type => {
           onBudgetAction(monthIndex, 'carryover', {
             category: categoryId,
-            flag: !carryover
+            flag: !carryover,
           });
           tooltip.close();
         }}
@@ -150,8 +150,8 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
             name: 'carryover',
             text: carryover
               ? 'Remove overspending rollover'
-              : 'Rollover overspending'
-          }
+              : 'Rollover overspending',
+          },
         ]}
       />
     </Tooltip>
@@ -167,7 +167,7 @@ export const CategoryMonth = React.memo(function CategoryMonth({
   editing,
   onEdit,
   onBudgetAction,
-  onShowActivity
+  onShowActivity,
 }) {
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
@@ -188,14 +188,14 @@ export const CategoryMonth = React.memo(function CategoryMonth({
             cursor: 'default',
             margin: 1,
             padding: '0 4px',
-            borderRadius: 4
+            borderRadius: 4,
           },
           {
             ':hover': {
               boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-              backgroundColor: 'white'
-            }
-          }
+              backgroundColor: 'white',
+            },
+          },
         ]}
         valueProps={{
           binding: reportBudget.catBudgeted(category.id),
@@ -206,17 +206,17 @@ export const CategoryMonth = React.memo(function CategoryMonth({
           },
           unformatExpr: expr => {
             return amountToInteger(evalArithmetic(expr, 0));
-          }
+          },
         }}
         inputProps={{
           onBlur: () => {
             onEdit(null);
-          }
+          },
         }}
         onSave={amount => {
           onBudgetAction(monthIndex, 'budget-amount', {
             category: category.id,
-            amount
+            amount,
           });
         }}
       />
@@ -237,8 +237,8 @@ export const CategoryMonth = React.memo(function CategoryMonth({
             style={{
               cursor: 'pointer',
               ':hover': {
-                textDecoration: 'underline'
-              }
+                textDecoration: 'underline',
+              },
             }}
           />
         </span>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   View,
@@ -8,8 +8,9 @@ import {
   Modal,
   P,
   Link,
-  Button
+  Button,
 } from 'loot-design/src/components/common';
+import { Checkbox } from 'loot-design/src/components/forms';
 import { colors } from 'loot-design/src/style';
 
 class FatalError extends React.Component {
@@ -25,6 +26,20 @@ class FatalError extends React.Component {
           feature that Actual requires to run. This might happen if you are in
           private browsing mode. Please try a different browser or turn off
           private browsing.
+        </Text>
+      );
+    } else if (error.SharedArrayBufferMissing) {
+      // SharedArrayBuffer isn't available
+      msg = (
+        <Text>
+          Actual requires access to <code>SharedArrayBuffer</code> in order to
+          function properly. If you’re seeing this error, either your browser
+          does not support <code>SharedArrayBuffer</code>, or your server is not
+          sending the appropriate headers, or you are not using HTTPS. See{' '}
+          <a href="https://actualbudget.github.io/docs/Troubleshooting/SharedArrayBuffer">
+            our troubleshooting documentation
+          </a>{' '}
+          to learn more. <SharedArrayBufferOverride />
         </Text>
       );
     } else {
@@ -48,7 +63,7 @@ class FatalError extends React.Component {
         style={{
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100%'
+          height: '100%',
         }}
       >
         <Stack
@@ -58,14 +73,14 @@ class FatalError extends React.Component {
             color: colors.r4,
             lineHeight: '1.5em',
             fontSize: 15,
-            '& a': { color: colors.r4 }
+            '& a': { color: colors.r4 },
           }}
         >
           <Text>{msg}</Text>
           <Text>
-            Contact{' '}
-            <a href="mailto:help@actualbudget.com">help@actualbudget.com</a> for
-            support
+            Please get{' '}
+            <a href="https://actualbudget.github.io/docs/Contact">in touch</a>{' '}
+            for support
           </Text>
         </Stack>
       </View>
@@ -84,20 +99,16 @@ class FatalError extends React.Component {
       <Modal isCurrent={true} showClose={false} title="Fatal Error">
         {() => (
           <View style={{ maxWidth: 500 }}>
+            <P>There was an unrecoverable error in the UI. Sorry!</P>
             <P>
-              There was an unrecoverable error in the UI. Sorry! This error has
-              been reported and hopefully will be fixed soon.
-            </P>
-            <P>
-              If you want to talk about what happened or give any feedback, send
-              an email to{' '}
+              If this error persists, please get{' '}
               <a
-                href="mailto:help@actualbudget.com"
+                href="https://actualbudget.github.io/docs/Contact"
                 style={{ color: colors.p4 }}
               >
-                help@actualbudget.com
-              </a>
-              .
+                in touch
+              </a>{' '}
+              so it can be investigated.
             </P>
             <P>
               <Button onClick={() => window.Actual.relaunch()}>
@@ -116,7 +127,7 @@ class FatalError extends React.Component {
                   style={{
                     marginTop: 5,
                     height: 100,
-                    overflow: 'auto'
+                    overflow: 'auto',
                   }}
                 >
                   {error.stack}
@@ -130,3 +141,52 @@ class FatalError extends React.Component {
   }
 }
 export default FatalError;
+
+function SharedArrayBufferOverride() {
+  let [expanded, setExpanded] = useState(false);
+  let [understand, setUnderstand] = useState(false);
+
+  return expanded ? (
+    <>
+      <P style={{ marginTop: 10 }}>
+        Actual uses <code>SharedArrayBuffer</code> to allow usage from multiple
+        tabs at once and to ensure correct behavior when switching files. While
+        it can run without access to <code>SharedArrayBuffer</code>, you may
+        encounter data loss or notice multiple budget files being merged with
+        each other.
+      </P>
+      <label
+        style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}
+      >
+        <Checkbox checked={understand} onChange={setUnderstand} /> I understand
+        the risks, run Actual in the unsupported fallback mode
+      </label>
+      <Button
+        disabled={!understand}
+        onClick={() => {
+          window.localStorage.setItem('SharedArrayBufferOverride', 'true');
+          window.location.reload();
+        }}
+      >
+        Open Actual
+      </Button>
+    </>
+  ) : (
+    <Link
+      onClick={() => setExpanded(true)}
+      style={{
+        color: `inherit !important`,
+        marginLeft: 5,
+        border: 'none !important',
+        background: 'none !important',
+        padding: '0 !important',
+        textDecoration: 'underline !important',
+        boxShadow: 'none !important',
+        display: 'inline !important',
+        font: 'inherit !important',
+      }}
+    >
+      Advanced options
+    </Link>
+  );
+}

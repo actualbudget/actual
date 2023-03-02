@@ -1,5 +1,5 @@
 export default {
   isMobile: false,
   isWeb: false,
-  isDesktop: true
+  isDesktop: true,
 };

@@ -5,7 +5,7 @@ beforeEach(global.emptyDatabase());
 async function insertTransactions(transactions) {
   await db.insertAccount({ id: 'foo', name: 'bar' });
   return Promise.all(
-    transactions.map(transaction => db.insertTransaction(transaction))
+    transactions.map(transaction => db.insertTransaction(transaction)),
   );
 }
 
@@ -21,7 +21,7 @@ async function getTransactions(latestDate) {
       is_parent: row.is_parent,
       amount: row.amount,
       starting_balance_flag: row.starting_balance_flag,
-      sort_order: row.sort_order
+      sort_order: row.sort_order,
     }));
 }
 
@@ -33,7 +33,7 @@ describe('Database', () => {
     await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
     await db.insertCategory({
       name: 'foo',
-      cat_group: 'group1'
+      cat_group: 'group1',
     });
     expect((await db.getCategories()).length).toBe(1);
   });
@@ -44,7 +44,7 @@ describe('Database', () => {
       { date: '2018-01-02', account: 'foo', amount: -24 },
       { date: '2018-01-04', account: 'foo', amount: 12 },
       { date: '2018-01-01', account: 'foo', amount: 2 },
-      { date: '2018-01-03', account: 'foo', amount: -5 }
+      { date: '2018-01-03', account: 'foo', amount: -5 },
     ]);
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
   });
@@ -59,10 +59,10 @@ describe('Database', () => {
         date: '2018-01-03',
         account: 'foo',
         amount: 12,
-        starting_balance_flag: 1
+        starting_balance_flag: 1,
       },
       { date: '2018-01-03', account: 'foo', amount: -25 },
-      { date: '2018-01-03', account: 'foo', amount: -5 }
+      { date: '2018-01-03', account: 'foo', amount: -5 },
     ]);
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
   });
@@ -74,7 +74,7 @@ describe('Database', () => {
       { date: '2018-01-03', account: 'foo', amount: -24, sort_order: 8 },
       { date: '2018-01-03', account: 'foo', amount: 12, sort_order: 2 },
       { date: '2018-01-03', account: 'foo', amount: 2, sort_order: 4 },
-      { date: '2018-01-03', account: 'foo', amount: -5, sort_order: 1 }
+      { date: '2018-01-03', account: 'foo', amount: -5, sort_order: 1 },
     ]);
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
   });
@@ -88,22 +88,22 @@ describe('Database', () => {
         date: '2018-01-03',
         account: 'foo',
         amount: -24,
-        sort_order: 4
+        sort_order: 4,
       },
       {
         id: 'foo1',
         date: '2018-01-03',
         account: 'foo',
         amount: 12,
-        sort_order: 4
+        sort_order: 4,
       },
       {
         id: 'foo2',
         date: '2018-01-03',
         account: 'foo',
         amount: 2,
-        sort_order: 4
-      }
+        sort_order: 4,
+      },
     ]);
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
   });
@@ -118,7 +118,7 @@ describe('Database', () => {
         account: 'foo',
         amount: -24,
         sort_order: 8,
-        is_parent: true
+        is_parent: true,
       },
       {
         id: 'child3',
@@ -127,7 +127,7 @@ describe('Database', () => {
         amount: -5,
         sort_order: 7.97,
         is_child: true,
-        parent_id: 'foo'
+        parent_id: 'foo',
       },
       {
         id: 'child1',
@@ -136,7 +136,7 @@ describe('Database', () => {
         amount: 12,
         sort_order: 7.99,
         is_child: true,
-        parent_id: 'foo'
+        parent_id: 'foo',
       },
       {
         id: 'child2',
@@ -145,8 +145,8 @@ describe('Database', () => {
         amount: 2,
         sort_order: 7.98,
         is_child: true,
-        parent_id: 'foo'
-      }
+        parent_id: 'foo',
+      },
     ]);
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
   });
@@ -160,7 +160,7 @@ describe('Database', () => {
         account: 'foo',
         amount: -5,
         sort_order: 7.97,
-        is_child: true
+        is_child: true,
       },
       {
         id: 'foo/child1',
@@ -168,7 +168,7 @@ describe('Database', () => {
         account: 'foo',
         amount: 12,
         sort_order: 7.99,
-        is_child: true
+        is_child: true,
       },
       {
         id: 'foo/child2',
@@ -176,8 +176,8 @@ describe('Database', () => {
         account: 'foo',
         amount: 2,
         sort_order: 7.98,
-        is_child: true
-      }
+        is_child: true,
+      },
     ]);
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
   });
@@ -187,12 +187,12 @@ describe('Database', () => {
     await db.insertCategory({
       id: 'cat1',
       name: 'cat1',
-      cat_group: 'group1'
+      cat_group: 'group1',
     });
     await db.insertCategory({
       id: 'cat2',
       name: 'cat2',
-      cat_group: 'group1'
+      cat_group: 'group1',
     });
 
     await insertTransactions([
@@ -204,7 +204,7 @@ describe('Database', () => {
         category: 'cat1',
         amount: -24,
         sort_order: 8,
-        is_parent: true
+        is_parent: true,
       },
       {
         id: 'child3',
@@ -214,7 +214,7 @@ describe('Database', () => {
         amount: -5,
         sort_order: 7.97,
         is_child: true,
-        parent_id: 'parent1'
+        parent_id: 'parent1',
       },
       {
         id: 'child2',
@@ -224,8 +224,8 @@ describe('Database', () => {
         amount: 2,
         sort_order: 7.98,
         is_child: true,
-        parent_id: 'parent1'
-      }
+        parent_id: 'parent1',
+      },
     ]);
 
     const rows = await db.getTransactions('foo');
@@ -242,7 +242,7 @@ describe('Database', () => {
         date: '2018-01-05',
         account: 'foo',
         amount: -23,
-        sort_order: 5
+        sort_order: 5,
       },
       {
         id: 'parent1',
@@ -251,7 +251,7 @@ describe('Database', () => {
         category: 'cat1',
         amount: -24,
         sort_order: 8,
-        is_parent: true
+        is_parent: true,
       },
       {
         id: 'child3',
@@ -261,7 +261,7 @@ describe('Database', () => {
         amount: -5,
         sort_order: 7.97,
         is_child: true,
-        parent_id: 'parent1'
+        parent_id: 'parent1',
       },
       {
         id: 'child2',
@@ -271,8 +271,8 @@ describe('Database', () => {
         amount: 2,
         sort_order: 7.98,
         is_child: true,
-        parent_id: 'parent1'
-      }
+        parent_id: 'parent1',
+      },
     ]);
 
     await db.deleteTransaction({ id: 'parent1' });

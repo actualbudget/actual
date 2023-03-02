@@ -15,9 +15,9 @@ export function SectionLabel({ title, style }) {
           textTransform: 'uppercase',
           color: colors.b3,
           marginBottom: 5,
-          lineHeight: '1em'
+          lineHeight: '1em',
         },
-        style
+        style,
       ]}
     >
       {title}
@@ -25,10 +25,10 @@ export function SectionLabel({ title, style }) {
   );
 }
 
-export function FormLabel({ style, title }) {
+export function FormLabel({ style, title, htmlFor }) {
   return (
     <Text style={[{ fontSize: 13, marginBottom: 3, color: colors.n3 }, style]}>
-      {title}
+      <label htmlFor={htmlFor}>{title}</label>
     </Text>
   );
 }
@@ -71,8 +71,8 @@ export function Checkbox(props) {
                   ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
                 width: 9,
                 height: 9,
-                content: ' '
-              }
+                content: ' ',
+              },
             },
             '&.focus-visible:focus': {
               '::before': {
@@ -83,12 +83,12 @@ export function Checkbox(props) {
                 right: -5,
                 border: '2px solid ' + colors.b5,
                 borderRadius: 6,
-                content: ' '
-              }
-            }
-          }
+                content: ' ',
+              },
+            },
+          },
         ],
-        props.style
+        props.style,
       )}
     />
   );

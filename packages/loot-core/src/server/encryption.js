@@ -30,7 +30,7 @@ class Key {
   serialize() {
     return {
       id: this.id,
-      base64: this.value.base64
+      base64: this.value.base64,
     };
   }
 }
@@ -93,5 +93,5 @@ export default {
   getKey,
   hasKey,
   unloadKey,
-  unloadAllKeys
+  unloadAllKeys,
 };

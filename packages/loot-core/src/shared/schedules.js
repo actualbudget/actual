@@ -29,9 +29,9 @@ export function getHasTransactionsQuery(schedules) {
           $gte:
             dateCond && dateCond.op === 'is'
               ? schedule.next_date
-              : monthUtils.subDays(schedule.next_date, 2)
-        }
-      }
+              : monthUtils.subDays(schedule.next_date, 2),
+        },
+      },
     };
   });
 
@@ -56,7 +56,7 @@ function prettyDayName(day) {
     WE: 'Wednesday',
     TH: 'Thursday',
     FR: 'Friday',
-    SA: 'Saturday'
+    SA: 'Saturday',
   };
   return days[day];
 }
@@ -155,7 +155,7 @@ export function recurConfigToRSchedule(config) {
   let base = {
     start: monthUtils.parseDate(config.start),
     frequency: config.frequency.toUpperCase(),
-    byHourOfDay: [12]
+    byHourOfDay: [12],
   };
 
   if (config.interval) {
@@ -177,8 +177,8 @@ export function recurConfigToRSchedule(config) {
           days.length > 0 && { ...base, byDayOfMonth: days.map(p => p.value) },
           dayNames.length > 0 && {
             ...base,
-            byDayOfWeek: dayNames.map(p => [abbrevDay(p.type), p.value])
-          }
+            byDayOfWeek: dayNames.map(p => [abbrevDay(p.type), p.value]),
+          },
         ].filter(Boolean);
       } else {
         // Nothing to do
@@ -196,7 +196,7 @@ export function extractScheduleConds(conditions) {
     payee:
       conditions.find(cond => cond.op === 'is' && cond.field === 'payee') ||
       conditions.find(
-        cond => cond.op === 'is' && cond.field === 'description'
+        cond => cond.op === 'is' && cond.field === 'description',
       ) ||
       null,
     account:
@@ -209,13 +209,13 @@ export function extractScheduleConds(conditions) {
           (cond.op === 'is' ||
             cond.op === 'isapprox' ||
             cond.op === 'isbetween') &&
-          cond.field === 'amount'
+          cond.field === 'amount',
       ) || null,
     date:
       conditions.find(
         cond =>
-          (cond.op === 'is' || cond.op === 'isapprox') && cond.field === 'date'
-      ) || null
+          (cond.op === 'is' || cond.op === 'isapprox') && cond.field === 'date',
+      ) || null,
   };
 }
 

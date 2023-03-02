@@ -70,7 +70,7 @@ export const colors = {
   p8: '#B990FF',
   p9: '#DAC4FF',
   p10: '#F2EBFE',
-  p11: '#F9F6FE'
+  p11: '#F9F6FE',
 };
 
 colors.border = colors.n10;
@@ -89,25 +89,25 @@ colors.resolve = (name, offset) => {
 export const styles = {
   veryLargeText: {
     fontSize: 30,
-    fontWeight: 600
+    fontWeight: 600,
   },
   largeText: {
     fontSize: 20,
     fontWeight: 700,
-    letterSpacing: 0.5
+    letterSpacing: 0.5,
   },
   mediumText: {
     fontSize: 15,
-    fontWeight: 500
+    fontWeight: 500,
   },
   smallText: {
     fontSize: 13,
     [`@media (min-width: ${tokens.breakpoint_medium})`]: {
       // lineHeight: 21 // TODO: This seems like trouble, but what's the right value?
-    }
+    },
   },
   verySmallText: {
-    fontSize: 13
+    fontSize: 13,
   },
   page: {
     // This is the height of the titlebar
@@ -116,8 +116,8 @@ export const styles = {
     flex: 1,
     [`@media (min-width: ${tokens.breakpoint_medium})`]: {
       minWidth: 500,
-      paddingTop: 36
-    }
+      paddingTop: 36,
+    },
   },
   pageHeader: {
     fontSize: 25,
@@ -129,34 +129,34 @@ export const styles = {
     color: colors.grey4,
     marginTop: 40,
     marginBottom: 20,
-    paddingBottom: 5
+    paddingBottom: 5,
   },
   pageContent: {
     paddingLeft: 2,
     paddingRight: 2,
     [`@media (min-width: ${tokens.breakpoint_medium})`]: {
       paddingLeft: 20,
-      paddingRight: 20
-    }
+      paddingRight: 20,
+    },
   },
   settingsPageContent: {
     padding: 20,
     [`@media (min-width: ${tokens.breakpoint_medium})`]: {
-      padding: 'inherit'
-    }
+      padding: 'inherit',
+    },
   },
   staticText: {
     cursor: 'default',
-    userSelect: 'none'
+    userSelect: 'none',
   },
   shadow: {
-    boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)'
+    boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
   },
   shadowLarge: {
-    boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)'
+    boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
   },
   tnum: {
-    fontFeatureSettings: '"tnum"'
+    fontFeatureSettings: '"tnum"',
   },
   notFixed: { fontFeatureSettings: '' },
   header: {
@@ -164,21 +164,21 @@ export const styles = {
       backgroundColor: 'white',
       borderBottomWidth: 1,
       borderBottomColor: colors.n9,
-      elevation: 0
+      elevation: 0,
     },
     headerTintColor: colors.n1,
     headerTitleStyle: {
       color: colors.n1,
       fontSize: 15,
-      fontWeight: 600
+      fontWeight: 600,
     },
-    headerBackTitle: null
+    headerBackTitle: null,
   },
   text: {
-    fontSize: 16
+    fontSize: 16,
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
-  textColor: colors.n1
+  textColor: colors.n1,
 };
 
 let hiddenScrollbars = false;
@@ -187,27 +187,27 @@ function onScrollbarChange() {
   styles.lightScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
-      backgroundColor: 'rgba(200, 200, 200, .2)'
+      backgroundColor: 'rgba(200, 200, 200, .2)',
     },
     '& ::-webkit-scrollbar-thumb': {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
-      border: '2px solid rgba(0, 0, 0, 0)'
+      border: '2px solid rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
-      backgroundColor: '#d0d0d0'
-    }
+      backgroundColor: '#d0d0d0',
+    },
   };
 
   styles.darkScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 7,
-      backgroundColor: 'rgba(0, 0, 0, 0)'
+      backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
-      backgroundColor: 'rgba(200, 200, 200, .5)'
-    }
+      backgroundColor: 'rgba(200, 200, 200, .5)',
+    },
   };
 
   styles.scrollbarWidth = hiddenScrollbars ? 0 : 13;
@@ -236,23 +236,3 @@ if (Platform.env === 'web') {
 }
 
 export const hasHiddenScrollbars = () => hiddenScrollbars;
-
-export function transform(spec) {
-  // We've made React Native Web simulate a mobile environment so it
-  // won't return "web" here. Explicit check for it so we can override
-  // mobile behavior and return a value appropriate for the web.
-  if (Platform.env !== 'web' && !Platform.isReactNativeWeb) {
-    return spec;
-  }
-
-  let r = spec.reduce((str, prop) => {
-    let name = Object.keys(prop)[0];
-    let value = prop[name];
-    if (typeof value === 'number') {
-      value = value + 'px';
-    }
-
-    return `${name}(${value})`;
-  }, spec);
-  return r;
-}

@@ -4,13 +4,13 @@ module.exports = {
     'mjs',
     'js',
     'ts',
-    'json'
+    'json',
   ]),
   setupFilesAfterEnv: ['<rootDir>/src/mocks/setup.js'],
   testEnvironment: 'node',
   testPathIgnorePatterns: ['/node_modules/', '/lib/', '.+/index.web.test.js'],
   transformIgnorePatterns: ['/node_modules/', '__mocks__'],
-  globals: {
-    __TESTING__: true
-  }
+  transform: {
+    '\\.pegjs$': 'pegjs-jest-transformer',
+  },
 };

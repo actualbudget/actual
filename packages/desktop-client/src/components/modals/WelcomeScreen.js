@@ -6,7 +6,7 @@ import {
   View,
   Modal,
   P,
-  ExternalLink
+  ExternalLink,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
@@ -40,7 +40,7 @@ function WelcomeScreen({ modalProps, actions }) {
             style={{
               color: colors.p5,
               fontWeight: 600,
-              '& a, & a:visited': { color: colors.p5 }
+              '& a, & a:visited': { color: colors.p5 },
             }}
           >
             Read the{' '}

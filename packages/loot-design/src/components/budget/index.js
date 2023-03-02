@@ -1,7 +1,5 @@
 import React, { useContext, useState, useMemo } from 'react';
 
-import { scope } from '@jlongster/lively';
-
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { styles, colors } from '../../style';
@@ -15,18 +13,18 @@ import {
   Button,
   Tooltip,
   Menu,
-  IntersectionBoundary
+  IntersectionBoundary,
 } from '../common';
-import ElementQuery from '../ElementQuery';
 import NotesButton from '../NotesButton';
 import {
   useDraggable,
   useDroppable,
   DropHighlight,
-  DropHighlightPosContext
+  DropHighlightPosContext,
 } from '../sort.js';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import { Row, InputCell, ROW_HEIGHT } from '../table';
+import useResizeObserver from '../useResizeObserver';
 
 import BudgetSummaries from './BudgetSummaries';
 import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
@@ -44,7 +42,7 @@ export class BudgetTable extends React.Component {
 
     this.state = {
       editing: null,
-      draggingState: null
+      draggingState: null,
     };
   }
 
@@ -73,7 +71,7 @@ export class BudgetTable extends React.Component {
           targetId:
             categories.length === 0 || dropPos === 'top'
               ? null
-              : categories[0].id
+              : categories[0].id,
         });
       }
     } else {
@@ -89,7 +87,7 @@ export class BudgetTable extends React.Component {
       this.props.onReorderCategory({
         id,
         groupId: targetGroup.id,
-        ...findSortDown(targetGroup.categories, dropPos, targetId)
+        ...findSortDown(targetGroup.categories, dropPos, targetId),
       });
     }
   };
@@ -99,7 +97,7 @@ export class BudgetTable extends React.Component {
 
     this.props.onReorderGroup({
       id,
-      ...findSortDown(categoryGroups, dropPos, targetId)
+      ...findSortDown(categoryGroups, dropPos, targetId),
     });
   };
 
@@ -184,7 +182,7 @@ export class BudgetTable extends React.Component {
       onShowNewCategory,
       onHideNewCategory,
       onShowNewGroup,
-      onHideNewGroup
+      onHideNewGroup,
     } = this.props;
     let { editing, draggingState } = this.state;
 
@@ -194,12 +192,12 @@ export class BudgetTable extends React.Component {
           { flex: 1 },
           styles.lightScrollbar && {
             '& ::-webkit-scrollbar': {
-              backgroundColor: 'transparent'
+              backgroundColor: 'transparent',
             },
             '& ::-webkit-scrollbar-thumb:vertical': {
-              backgroundColor: 'white'
-            }
-          }
+              backgroundColor: 'white',
+            },
+          },
         ]}
       >
         <View
@@ -210,7 +208,7 @@ export class BudgetTable extends React.Component {
             // This is necessary to align with the table because the
             // table has this padding to allow the shadow to show
             paddingLeft: 5,
-            paddingRight: 5 + getScrollbarWidth()
+            paddingRight: 5 + getScrollbarWidth(),
           }}
         >
           <View style={{ width: 200 }} />
@@ -240,14 +238,14 @@ export class BudgetTable extends React.Component {
                 overflowAnchor: 'none',
                 flex: 1,
                 paddingLeft: 5,
-                paddingRight: 5
+                paddingRight: 5,
               }}
               innerRef={this.budgetCategoriesRef}
             >
               <View
                 style={{
                   opacity: draggingState ? 0.5 : 1,
-                  flexShrink: 0
+                  flexShrink: 0,
                 }}
                 onKeyDown={this.onKeyDown}
                 innerRef={el => (this.budgetDataNode = el)}
@@ -298,7 +296,7 @@ export function SidebarCategory({
   onEditName,
   onSave,
   onDelete,
-  onHideNewCategory
+  onHideNewCategory,
 }) {
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -309,7 +307,7 @@ export function SidebarCategory({
         flexDirection: 'row',
         alignItems: 'center',
         userSelect: 'none',
-        WebkitUserSelect: 'none'
+        WebkitUserSelect: 'none',
       }}
     >
       <div
@@ -317,7 +315,7 @@ export function SidebarCategory({
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
-          minWidth: 0
+          minWidth: 0,
         }}
       >
         {category.name}
@@ -355,7 +353,7 @@ export function SidebarCategory({
               }}
               items={[
                 { name: 'rename', text: 'Rename' },
-                { name: 'delete', text: 'Delete' }
+                { name: 'delete', text: 'Delete' },
               ]}
             />
           </Tooltip>
@@ -375,11 +373,11 @@ export function SidebarCategory({
       style={[
         {
           width: 200,
-          '& button': { display: 'none' }
+          '& button': { display: 'none' },
         },
         !dragging &&
           !dragPreview && {
-            '&:hover button': { display: 'flex', color: colors.n1 }
+            '&:hover button': { display: 'flex', color: colors.n1 },
           },
         dragging && { color: colors.n8 },
 
@@ -389,9 +387,9 @@ export function SidebarCategory({
           backgroundColor: 'white',
           zIndex: 10000,
           borderRadius: 6,
-          overflow: 'hidden'
+          overflow: 'hidden',
         },
-        style
+        style,
       ]}
       onKeyDown={e => {
         const ENTER = 13;
@@ -423,7 +421,7 @@ export function SidebarCategory({
         onBlur={() => onEditName(null)}
         style={[{ paddingLeft: 13 }, isLast && { borderBottomWidth: 0 }]}
         inputProps={{
-          placeholder: temporary ? 'New Category Name' : ''
+          placeholder: temporary ? 'New Category Name' : '',
         }}
       />
     </View>
@@ -443,7 +441,7 @@ export function SidebarGroup({
   onDelete,
   onShowNewCategory,
   onHideNewGroup,
-  onToggleCollapse
+  onToggleCollapse,
 }) {
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -454,7 +452,7 @@ export function SidebarGroup({
         flexDirection: 'row',
         alignItems: 'center',
         userSelect: 'none',
-        WebkitUserSelect: 'none'
+        WebkitUserSelect: 'none',
       }}
       onClick={e => {
         onToggleCollapse(group.id);
@@ -469,7 +467,7 @@ export function SidebarGroup({
             marginLeft: 5,
             flexShrink: 0,
             transition: 'transform .1s',
-            transform: collapsed ? 'rotate(-90deg)' : ''
+            transform: collapsed ? 'rotate(-90deg)' : '',
           }}
         />
       )}
@@ -478,7 +476,7 @@ export function SidebarGroup({
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
-          minWidth: 0
+          minWidth: 0,
         }}
       >
         {dragPreview && <Text style={{ fontWeight: 500 }}>Group: </Text>}
@@ -518,7 +516,7 @@ export function SidebarGroup({
                   items={[
                     { name: 'add-category', text: 'Add category' },
                     { name: 'rename', text: 'Rename' },
-                    onDelete && { name: 'delete', text: 'Delete' }
+                    onDelete && { name: 'delete', text: 'Delete' },
                   ]}
                 />
               </Tooltip>
@@ -540,14 +538,14 @@ export function SidebarGroup({
           width: 200,
           backgroundColor: colors.n11,
           '& button': { display: 'none' },
-          '&:hover button': { display: 'flex', color: colors.n1 }
+          '&:hover button': { display: 'flex', color: colors.n1 },
         },
         dragPreview && {
           paddingLeft: 10,
           zIndex: 10000,
           borderRadius: 6,
-          overflow: 'hidden'
-        }
+          overflow: 'hidden',
+        },
       ]}
       onKeyDown={e => {
         const ENTER = 13;
@@ -578,7 +576,7 @@ export function SidebarGroup({
         style={{ fontWeight: 600 }}
         inputProps={{
           style: { marginLeft: 20 },
-          placeholder: temporary ? 'New Group Name' : ''
+          placeholder: temporary ? 'New Group Name' : '',
         }}
       />
     </View>
@@ -600,7 +598,7 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
           style={[
             { flex: 1 },
             { borderLeft: '1px solid ' + colors.border },
-            style
+            style,
           ]}
         >
           <Component monthIndex={index} editing={editing} {...args} />
@@ -621,7 +619,7 @@ const BudgetTotals = React.memo(function BudgetTotals({ MonthComponent }) {
         marginLeft: 5,
         marginRight: 5 + getScrollbarWidth(),
         borderRadius: '4px 4px 0 0',
-        borderBottom: '1px solid ' + colors.border
+        borderBottom: '1px solid ' + colors.border,
       }}
     >
       <View
@@ -629,7 +627,7 @@ const BudgetTotals = React.memo(function BudgetTotals({ MonthComponent }) {
           width: 200,
           color: colors.n4,
           justifyContent: 'center',
-          paddingLeft: 18
+          paddingLeft: 18,
         }}
       >
         Category
@@ -653,7 +651,7 @@ function ExpenseGroup({
   onReorderGroup,
   onReorderCategory,
   onToggleCollapse,
-  onShowNewCategory
+  onShowNewCategory,
 }) {
   let dragging = dragState && dragState.item === group;
 
@@ -661,13 +659,13 @@ function ExpenseGroup({
     type: 'group',
     onDragChange,
     item: group,
-    canDrag: editingCell === null
+    canDrag: editingCell === null,
   });
 
   let { dropRef, dropPos } = useDroppable({
     types: 'group',
     id: group.id,
-    onDrop: onReorderGroup
+    onDrop: onReorderGroup,
   });
 
   let { dropRef: catDropRef, dropPos: catDropPos } = useDroppable({
@@ -678,7 +676,7 @@ function ExpenseGroup({
       if (collapsed) {
         onToggleCollapse(group.id);
       }
-    }
+    },
   });
 
   return (
@@ -697,7 +695,7 @@ function ExpenseGroup({
             height: collapsed
               ? ROW_HEIGHT - 1
               : (1 + group.categories.length) * (ROW_HEIGHT - 1) + 1,
-            zIndex: 10000
+            zIndex: 10000,
           }}
         >
           <DropHighlight pos={dropPos} offset={{ top: 1 }} />
@@ -711,7 +709,7 @@ function ExpenseGroup({
         style={{
           flex: 1,
           flexDirection: 'row',
-          opacity: dragging && !dragState.preview ? 0.3 : 1
+          opacity: dragging && !dragState.preview ? 0.3 : 1,
         }}
       >
         <SidebarGroup
@@ -749,7 +747,7 @@ function ExpenseCategory({
   onBudgetAction,
   onShowActivity,
   onDragChange,
-  onReorder
+  onReorder,
 }) {
   let dragging = dragState && dragState.item === cat;
 
@@ -761,13 +759,13 @@ function ExpenseCategory({
     type: 'category',
     onDragChange,
     item: cat,
-    canDrag: editingCell === null
+    canDrag: editingCell === null,
   });
 
   let { dropRef, dropPos } = useDroppable({
     types: 'category',
     id: cat.id,
-    onDrop: onReorder
+    onDrop: onReorder,
   });
 
   return (
@@ -778,8 +776,8 @@ function ExpenseCategory({
         style={[
           {
             flex: 1,
-            flexDirection: 'row'
-          }
+            flexDirection: 'row',
+          },
         ]}
       >
         <SidebarCategory
@@ -807,7 +805,7 @@ function ExpenseCategory({
             category: cat,
             onEdit: onEditMonth,
             onBudgetAction,
-            onShowActivity
+            onShowActivity,
           }}
         />
       </View>
@@ -823,7 +821,7 @@ function IncomeGroup({
   onEditName,
   onSave,
   onToggleCollapse,
-  onShowNewCategory
+  onShowNewCategory,
 }) {
   return (
     <Row
@@ -861,19 +859,19 @@ function IncomeCategory({
   onDragChange,
   onBudgetAction,
   onReorder,
-  onShowActivity
+  onShowActivity,
 }) {
   let { dragRef } = useDraggable({
     type: 'income-category',
     onDragChange,
     item: cat,
-    canDrag: editingCell === null
+    canDrag: editingCell === null,
   });
 
   let { dropRef, dropPos } = useDroppable({
     types: 'income-category',
     id: cat.id,
-    onDrop: onReorder
+    onDrop: onReorder,
   });
 
   return (
@@ -903,7 +901,7 @@ function IncomeCategory({
           onEdit: onEditMonth,
           isLast,
           onShowActivity,
-          onBudgetAction
+          onBudgetAction,
         }}
       />
     </Row>
@@ -932,7 +930,7 @@ const BudgetCategories = React.memo(
     onShowNewCategory,
     onHideNewCategory,
     onShowNewGroup,
-    onHideNewGroup
+    onHideNewGroup,
   }) => {
     let items = useMemo(() => {
       let [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
@@ -951,11 +949,11 @@ const BudgetCategories = React.memo(
             ...(collapsed.includes(group.id) ? [] : group.categories).map(
               cat => ({
                 type: 'expense-category',
-                value: cat
-              })
-            )
+                value: cat,
+              }),
+            ),
           ];
-        })
+        }),
       );
 
       if (isAddingGroup) {
@@ -973,9 +971,9 @@ const BudgetCategories = React.memo(
               : incomeGroup.categories
             ).map(cat => ({
               type: 'income-category',
-              value: cat
-            }))
-          ].filter(x => x)
+              value: cat,
+            })),
+          ].filter(x => x),
         );
       }
 
@@ -994,13 +992,13 @@ const BudgetCategories = React.memo(
         setDragState({
           type: newDragState.type,
           item: newDragState.item,
-          preview: true
+          preview: true,
         });
       } else if (state === 'start') {
         if (dragState) {
           setDragState({
             ...dragState,
-            preview: false
+            preview: false,
           });
           setSavedCollapsed(collapsed);
         }
@@ -1008,7 +1006,7 @@ const BudgetCategories = React.memo(
         setDragState({
           ...dragState,
           hoveredId: newDragState.id,
-          hoveredPos: newDragState.pos
+          hoveredPos: newDragState.pos,
         });
       } else if (state === 'end') {
         setDragState(null);
@@ -1032,7 +1030,7 @@ const BudgetCategories = React.memo(
           overflow: 'hidden',
           boxShadow: MONTH_BOX_SHADOW,
           borderRadius: '0 0 4px 4px',
-          flex: 1
+          flex: 1,
         }}
       >
         {items.map((item, idx) => {
@@ -1061,7 +1059,7 @@ const BudgetCategories = React.memo(
                       is_income:
                         newCategoryForGroup ===
                         categoryGroups.find(g => g.is_income).id,
-                      id: 'new'
+                      id: 'new',
                     }}
                     editing={true}
                     onSave={onSaveCategory}
@@ -1114,7 +1112,7 @@ const BudgetCategories = React.memo(
                 <View
                   style={{
                     height: INCOME_HEADER_HEIGHT,
-                    backgroundColor: 'white'
+                    backgroundColor: 'white',
                   }}
                 >
                   <IncomeHeader
@@ -1177,7 +1175,7 @@ const BudgetCategories = React.memo(
               <View
                 style={
                   !dragState && {
-                    ':hover': { backgroundColor: '#fcfcfc' }
+                    ':hover': { backgroundColor: '#fcfcfc' },
                   }
                 }
               >
@@ -1188,7 +1186,7 @@ const BudgetCategories = React.memo(
         })}
       </View>
     );
-  }
+  },
 );
 
 function IncomeHeader({ MonthComponent, onShowNewGroup }) {
@@ -1198,7 +1196,7 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }) {
         style={{
           width: 200,
           alignItems: 'flex-start',
-          justifyContent: 'flex-start'
+          justifyContent: 'flex-start',
         }}
       >
         <Button onClick={onShowNewGroup} style={{ fontSize: 12, margin: 10 }}>
@@ -1240,185 +1238,152 @@ export const BudgetPageHeader = React.memo(
         </View>
       </View>
     );
-  }
+  },
 );
 
-export const MonthPicker = scope(lively => {
-  function getRangeForYear(year) {
-    return monthUtils.rangeInclusive(
-      monthUtils.getYearStart(year),
-      monthUtils.getYearEnd(year)
-    );
-  }
+function getRangeForYear(year) {
+  return monthUtils.rangeInclusive(
+    monthUtils.getYearStart(year),
+    monthUtils.getYearEnd(year),
+  );
+}
 
-  function getMonth(year, idx) {
-    return monthUtils.addMonths(year, idx);
-  }
+function getMonth(year, idx) {
+  return monthUtils.addMonths(year, idx);
+}
 
-  function getCurrentMonthName(startMonth, currentMonth) {
-    return monthUtils.getYear(startMonth) === monthUtils.getYear(currentMonth)
-      ? monthUtils.format(currentMonth, 'MMM')
-      : null;
-  }
+function getCurrentMonthName(startMonth, currentMonth) {
+  return monthUtils.getYear(startMonth) === monthUtils.getYear(currentMonth)
+    ? monthUtils.format(currentMonth, 'MMM')
+    : null;
+}
 
-  function getInitialState({ props: { startMonth, monthBounds } }) {
-    const currentMonth = monthUtils.currentMonth();
-    const range = getRangeForYear(currentMonth);
-    const monthNames = range.map(month => {
-      return monthUtils.format(month, 'MMM');
-    });
+export const MonthPicker = ({
+  startMonth,
+  numDisplayed,
+  monthBounds,
+  style,
+  onSelect,
+}) => {
+  const currentMonth = monthUtils.currentMonth();
+  const range = getRangeForYear(currentMonth);
+  const monthNames = range.map(month => {
+    return monthUtils.format(month, 'MMM');
+  });
+  const currentMonthName = getCurrentMonthName(startMonth, currentMonth);
+  const year = monthUtils.getYear(startMonth);
+  const selectedIndex = monthUtils.getMonthIndex(startMonth);
 
-    return {
-      monthNames,
-      currentMonthName: getCurrentMonthName(startMonth, currentMonth)
-    };
-  }
+  const [size, setSize] = useState('small');
+  const containerRef = useResizeObserver(rect => {
+    setSize(rect.width <= 320 ? 'small' : rect.width <= 400 ? 'medium' : 'big');
+  });
 
-  function componentWillReceiveProps({ props }, nextProps) {
-    if (
-      monthUtils.getYear(props.startMonth) !==
-      monthUtils.getYear(nextProps.startMonth)
-    ) {
-      return {
-        currentMonthName: getCurrentMonthName(
-          nextProps.startMonth,
-          monthUtils.currentMonth()
-        )
-      };
-    }
-  }
-
-  function MonthPicker({
-    state: { monthNames, currentMonthName },
-    props: { startMonth, numDisplayed, monthBounds, style, onSelect }
-  }) {
-    const year = monthUtils.getYear(startMonth);
-    const selectedIndex = monthUtils.getMonthIndex(startMonth);
-
-    return (
+  return (
+    <View
+      style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        },
+        style,
+      ]}
+    >
       <View
-        style={[
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          },
-          style
-        ]}
+        style={{
+          padding: '3px 0px',
+          margin: '3px 0',
+          fontWeight: 'bold',
+          fontSize: 14,
+          flex: '0 0 40px',
+        }}
       >
-        <View
-          style={{
-            padding: '3px 0px',
-            margin: '3px 0',
-            fontWeight: 'bold',
-            fontSize: 14,
-            flex: '0 0 40px'
-          }}
-        >
-          {monthUtils.format(year, 'yyyy')}
-        </View>
-        <ElementQuery
-          sizes={[
-            { width: 320, size: 'small' },
-            { width: 400, size: 'medium' },
-            { size: 'big' }
-          ]}
-        >
-          {(matched, ref) => (
-            <View
-              innerRef={ref}
-              style={{
-                flexDirection: 'row',
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              {monthNames.map((monthName, idx) => {
-                const lastSelectedIndex = selectedIndex + numDisplayed;
-                const selected =
-                  idx >= selectedIndex && idx < lastSelectedIndex;
-                const current = monthName === currentMonthName;
-                const month = getMonth(year, idx);
-                const isMonthBudgeted =
-                  month >= monthBounds.start && month <= monthBounds.end;
-
-                return (
-                  <View
-                    key={monthName}
-                    style={[
-                      {
-                        marginRight: 1,
-                        padding:
-                          matched && matched.size === 'big'
-                            ? '3px 5px'
-                            : '3px 3px',
-                        textAlign: 'center',
-                        cursor: 'default',
-                        borderRadius: 2,
-                        ':hover': isMonthBudgeted && {
-                          backgroundColor: colors.p6,
-                          color: 'white'
-                        }
-                      },
-                      !isMonthBudgeted && { color: colors.n7 },
-                      styles.smallText,
-                      selected && {
-                        backgroundColor: colors.p6,
-                        color: 'white',
-                        borderRadius: 0
-                      },
-                      idx === selectedIndex && {
-                        borderTopLeftRadius: 2,
-                        borderBottomLeftRadius: 2
-                      },
-                      idx === lastSelectedIndex - 1 && {
-                        borderTopRightRadius: 2,
-                        borderBottomRightRadius: 2
-                      },
-                      idx >= selectedIndex &&
-                        idx < lastSelectedIndex - 1 && {
-                          marginRight: 0,
-                          borderRight: 'solid 1px',
-                          borderColor: colors.p6
-                        },
-                      current && { textDecoration: 'underline' }
-                    ]}
-                    onClick={() => onSelect(month)}
-                  >
-                    {matched && matched.size === 'small'
-                      ? monthName[0]
-                      : monthName}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </ElementQuery>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            flex: '0 0 50px',
-            justifyContent: 'flex-end'
-          }}
-        >
-          <Button
-            onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
-            bare
-          >
-            <ArrowThinLeft width={12} height={12} />
-          </Button>
-          <Button
-            onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
-            bare
-          >
-            <ArrowThinRight width={12} height={12} />
-          </Button>
-        </View>
+        {monthUtils.format(year, 'yyyy')}
       </View>
-    );
-  }
+      <View
+        innerRef={containerRef}
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {monthNames.map((monthName, idx) => {
+          const lastSelectedIndex = selectedIndex + numDisplayed;
+          const selected = idx >= selectedIndex && idx < lastSelectedIndex;
+          const current = monthName === currentMonthName;
+          const month = getMonth(year, idx);
+          const isMonthBudgeted =
+            month >= monthBounds.start && month <= monthBounds.end;
 
-  return lively(MonthPicker, { getInitialState, componentWillReceiveProps });
-});
+          return (
+            <View
+              key={monthName}
+              style={[
+                {
+                  marginRight: 1,
+                  padding: size === 'big' ? '3px 5px' : '3px 3px',
+                  textAlign: 'center',
+                  cursor: 'default',
+                  borderRadius: 2,
+                  ':hover': isMonthBudgeted && {
+                    backgroundColor: colors.p6,
+                    color: 'white',
+                  },
+                },
+                !isMonthBudgeted && { color: colors.n7 },
+                styles.smallText,
+                selected && {
+                  backgroundColor: colors.p6,
+                  color: 'white',
+                  borderRadius: 0,
+                },
+                idx === selectedIndex && {
+                  borderTopLeftRadius: 2,
+                  borderBottomLeftRadius: 2,
+                },
+                idx === lastSelectedIndex - 1 && {
+                  borderTopRightRadius: 2,
+                  borderBottomRightRadius: 2,
+                },
+                idx >= selectedIndex &&
+                  idx < lastSelectedIndex - 1 && {
+                    marginRight: 0,
+                    borderRight: 'solid 1px',
+                    borderColor: colors.p6,
+                  },
+                current && { textDecoration: 'underline' },
+              ]}
+              onClick={() => onSelect(month)}
+            >
+              {size === 'small' ? monthName[0] : monthName}
+            </View>
+          );
+        })}
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          flex: '0 0 50px',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <Button
+          onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
+          bare
+        >
+          <ArrowThinLeft width={12} height={12} />
+        </Button>
+        <Button
+          onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
+          bare
+        >
+          <ArrowThinRight width={12} height={12} />
+        </Button>
+      </View>
+    </View>
+  );
+};

@@ -12,7 +12,7 @@ export default function SheetValue({
   binding,
   initialValue,
   children,
-  onChange
+  onChange,
 }) {
   if (!binding) {
     throw new Error('SheetValue binding is required');
@@ -34,7 +34,7 @@ export default function SheetValue({
   let [result, setResult] = useState({
     name: sheetName + '!' + binding.name,
     value: initialValue != null ? initialValue : binding.value,
-    query: binding.query
+    query: binding.query,
   });
   let latestOnChange = useRef(onChange);
   let latestValue = useRef(result.value);

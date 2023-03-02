@@ -53,7 +53,7 @@ export default function HoldTooltip({ onSubmit, onClose }) {
       <View
         style={{
           alignItems: 'flex-end',
-          marginTop: 10
+          marginTop: 10,
         }}
       >
         <Button
@@ -61,7 +61,7 @@ export default function HoldTooltip({ onSubmit, onClose }) {
           style={{
             fontSize: 12,
             paddingTop: 3,
-            paddingBottom: 3
+            paddingBottom: 3,
           }}
           onClick={submit}
         >

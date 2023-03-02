@@ -6,7 +6,7 @@ import { css } from 'glamor';
 import * as actions from 'loot-core/src/client/actions';
 import {
   init as initConnection,
-  send
+  send,
 } from 'loot-core/src/platform/client/fetch';
 import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
 
@@ -23,7 +23,7 @@ class App extends React.Component {
   state = {
     fatalError: null,
     initializing: true,
-    hiddenScrollbars: hasHiddenScrollbars()
+    hiddenScrollbars: hasHiddenScrollbars(),
   };
 
   async init() {
@@ -96,9 +96,9 @@ class App extends React.Component {
           {
             height: '100%',
             backgroundColor: '#E8ECF0',
-            overflow: 'hidden'
+            overflow: 'hidden',
           },
-          styles.lightScrollbar
+          styles.lightScrollbar,
         ])}
       >
         {fatalError ? (
@@ -134,7 +134,7 @@ export default connect(
   state => ({
     budgetId: state.prefs.local && state.prefs.local.id,
     cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
-    loadingText: state.app.loadingText
+    loadingText: state.app.loadingText,
   }),
-  actions
+  actions,
 )(App);

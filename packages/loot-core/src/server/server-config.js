@@ -23,7 +23,7 @@ export function getServer(url) {
       BASE_SERVER: url,
       SYNC_SERVER: joinURL(url, '/sync'),
       SIGNUP_SERVER: joinURL(url, '/account'),
-      PLAID_SERVER: joinURL(url, '/plaid')
+      PLAID_SERVER: joinURL(url, '/plaid'),
     };
   }
   return config;

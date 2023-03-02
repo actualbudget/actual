@@ -19,7 +19,7 @@ class ReconstructedError extends Error {
       },
       set: function (value) {
         this._stack = value;
-      }
+      },
     });
 
     this.stack = stack;
@@ -77,7 +77,7 @@ function handleMessage(msg) {
 function connectWorker(worker, onOpen, onError) {
   globalWorker = worker;
 
-  worker.addEventListener('message', event => {
+  worker.onmessage = event => {
     let msg = event.data;
 
     // The worker implementation implements its own concept of a
@@ -88,7 +88,7 @@ function connectWorker(worker, onOpen, onError) {
       // Send any messages that were queued while closed
       if (messageQueue.length > 0) {
         messageQueue.forEach(msg => worker.postMessage(msg));
-        messageQueue = [];
+        messageQueue = null;
       }
 
       onOpen();
@@ -102,15 +102,14 @@ function connectWorker(worker, onOpen, onError) {
               msg.stack,
               msg.url,
               msg.line,
-              msg.column
+              msg.column,
             )
-          : msg.exc
+          : msg.exc,
       );
 
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
         alert(
-          'We hit a limit on the local storage available. ' +
-            'Edits may not be saved. Please contact help@actualbudget.com to help debug this.'
+          'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.github.io/docs/Contact/ so we can help debug this.',
         );
       }
     } else if (msg.type === 'capture-breadcrumb') {
@@ -118,7 +117,7 @@ function connectWorker(worker, onOpen, onError) {
     } else {
       handleMessage(msg);
     }
-  });
+  };
 
   // In browsers that don't support wasm in workers well (Safari),
   // we run the server on the main process for now. This might not
@@ -131,7 +130,7 @@ function connectWorker(worker, onOpen, onError) {
 
 module.exports.init = async function init(worker) {
   return new Promise((resolve, reject) =>
-    connectWorker(worker, resolve, reject)
+    connectWorker(worker, resolve, reject),
   );
 };
 
@@ -139,22 +138,17 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
   return new Promise((resolve, reject) => {
     uuid.v4().then(id => {
       replyHandlers.set(id, { resolve, reject });
-      if (globalWorker) {
-        globalWorker.postMessage({
-          id,
-          name,
-          args,
-          undoTag: undo.snapshot(),
-          catchErrors
-        });
+      let message = {
+        id,
+        name,
+        args,
+        undoTag: undo.snapshot(),
+        catchErrors,
+      };
+      if (messageQueue) {
+        messageQueue.push(message);
       } else {
-        messageQueue.push({
-          id,
-          name,
-          args,
-          undoTag: undo.snapshot(),
-          catchErrors
-        });
+        globalWorker.postMessage(message);
       }
     });
   });
@@ -174,7 +168,7 @@ module.exports.listen = function listen(name, cb) {
     let arr = listeners.get(name);
     listeners.set(
       name,
-      arr.filter(cb_ => cb_ !== cb)
+      arr.filter(cb_ => cb_ !== cb),
     );
   };
 };

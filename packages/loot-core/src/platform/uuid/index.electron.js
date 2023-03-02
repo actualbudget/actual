@@ -7,5 +7,5 @@ module.exports = {
 
   v4Sync: function () {
     return uuid.v4();
-  }
+  },
 };

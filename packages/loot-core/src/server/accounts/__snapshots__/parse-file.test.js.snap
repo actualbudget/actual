@@ -1,5 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`File import handles non-ASCII characters 1`] = `
+Array [
+  Object {
+    "acct": "one",
+    "amount": -2000,
+    "category": null,
+    "cleared": 1,
+    "date": 20221019,
+    "description": "id2",
+    "error": null,
+    "financial_id": "wSoKuCS77",
+    "id": "id3",
+    "imported_description": "Paiement facture/Carte prépayée",
+    "isChild": 0,
+    "isParent": 0,
+    "location": null,
+    "notes": "PWW",
+    "parent_id": null,
+    "pending": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transferred_id": null,
+    "type": null,
+  },
+]
+`;
+
 exports[`File import ofx import works 1`] = `
 Array [
   Object {

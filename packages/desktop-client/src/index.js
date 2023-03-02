@@ -15,7 +15,7 @@ import {
   createStore,
   combineReducers,
   applyMiddleware,
-  bindActionCreators
+  bindActionCreators,
 } from 'redux';
 import thunk from 'redux-thunk';
 
@@ -27,6 +27,7 @@ import { initialState as initialAppState } from 'loot-core/src/client/reducers/a
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import App from './components/App';
+import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
@@ -47,8 +48,8 @@ function rootReducer(state, action) {
         updateInfo: state.updateInfo,
         showUpdateNotification: state.showUpdateNotification,
         managerHasInitialized: state.app.managerHasInitialized,
-        loadingText: state.app.loadingText
-      }
+        loadingText: state.app.loadingText,
+      },
     };
   }
 
@@ -71,7 +72,9 @@ window.$q = q;
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <ServerProvider>
+      <App />
+    </ServerProvider>
   </Provider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );

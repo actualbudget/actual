@@ -28,7 +28,7 @@ export default function Error() {
         style={{
           fontSize: 16,
           color: colors.n2,
-          lineHeight: 1.4
+          lineHeight: 1.4,
         }}
       >
         {getErrorMessage(error)}

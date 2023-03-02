@@ -12,14 +12,14 @@ import {
   ModalButtons,
   Input,
   InitialFocus,
-  ExternalLink
+  ExternalLink,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
 export default function FixEncryptionKey({
   modalProps,
   actions,
-  options = {}
+  options = {},
 }) {
   let { hasExistingKey, cloudFileId, onSuccess } = options;
 
@@ -35,7 +35,7 @@ export default function FixEncryptionKey({
 
       let { error } = await send('key-test', {
         password,
-        fileId: cloudFileId
+        fileId: cloudFileId,
       });
       if (error) {
         setError(getTestKeyError(error));
@@ -57,7 +57,7 @@ export default function FixEncryptionKey({
               fontSize: 25,
               fontWeight: 700,
               color: colors.n2,
-              margin: '20px 0'
+              margin: '20px 0',
             }}
           >
             {hasExistingKey
@@ -98,7 +98,7 @@ export default function FixEncryptionKey({
               style={{
                 marginTop: 15,
                 flexDirection: 'column',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <Text style={{ fontWeight: 600, marginBottom: 5 }}>Password</Text>{' '}
@@ -108,7 +108,7 @@ export default function FixEncryptionKey({
                     color: colors.r4,
                     textAlign: 'center',
                     fontSize: 13,
-                    marginBottom: 3
+                    marginBottom: 3,
                   }}
                 >
                   {error}

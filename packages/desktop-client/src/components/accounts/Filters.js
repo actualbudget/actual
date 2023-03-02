@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import {
   parse as parseDate,
   format as formatDate,
-  isValid as isDateValid
+  isValid as isDateValid,
 } from 'date-fns';
 import scopeTab from 'react-modal/lib/helpers/scopeTab';
 
@@ -18,7 +18,7 @@ import {
   unparse,
   makeValue,
   FIELD_TYPES,
-  TYPE_INFO
+  TYPE_INFO,
 } from 'loot-core/src/shared/rules';
 import { titleFirst } from 'loot-core/src/shared/util';
 import {
@@ -28,7 +28,7 @@ import {
   Stack,
   Button,
   Menu,
-  CustomSelect
+  CustomSelect,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import DeleteIcon from 'loot-design/src/svg/v0/Delete';
@@ -44,8 +44,25 @@ let filterFields = [
   'notes',
   'category',
   'amount',
-  'cleared'
+  'cleared',
 ].map(field => [field, mapField(field)]);
+
+function subfieldFromFilter({ field, options, value }) {
+  if (field === 'date') {
+    if (value.length === 7) {
+      return 'month';
+    } else if (value.length === 4) {
+      return 'year';
+    }
+  } else if (field === 'amount') {
+    if (options && options.inflow) {
+      return 'amount-inflow';
+    } else if (options && options.outflow) {
+      return 'amount-outflow';
+    }
+  }
+  return field;
+}
 
 function subfieldToOptions(field, subfield) {
   switch (field) {
@@ -101,8 +118,8 @@ function OpButton({ op, selected, style, onClick }) {
         style,
         selected && {
           color: 'white',
-          '&,:hover,:active': { backgroundColor: colors.b4 }
-        }
+          '&,:hover,:active': { backgroundColor: colors.b4 },
+        },
       ]}
       onClick={onClick}
     >
@@ -111,8 +128,38 @@ function OpButton({ op, selected, style, onClick }) {
   );
 }
 
-function ConfigureField({ field, op, value, dispatch, onApply }) {
-  let [subfield, setSubfield] = useState(field);
+function updateFilterReducer(state, action) {
+  switch (action.type) {
+    case 'set-op': {
+      let type = FIELD_TYPES.get(state.field);
+      let value = state.value;
+      if (type === 'id' && action.op === 'contains') {
+        // Clear out the value if switching between contains for
+        // the id type
+        value = null;
+      }
+      return { ...state, op: action.op, value };
+    }
+    case 'set-value': {
+      let { value } = makeValue(action.value, {
+        type: FIELD_TYPES.get(state.field),
+      });
+      return { ...state, value: value };
+    }
+    default:
+      throw new Error(`Unhandled action type: ${action.type}`);
+  }
+}
+
+function ConfigureField({
+  field,
+  initialSubfield = field,
+  op,
+  value,
+  dispatch,
+  onApply,
+}) {
+  let [subfield, setSubfield] = useState(initialSubfield);
   let inputRef = useRef();
   let prevOp = useRef(null);
 
@@ -148,13 +195,13 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
                   ? [
                       ['amount', 'Amount'],
                       ['amount-inflow', 'Amount (inflow)'],
-                      ['amount-outflow', 'Amount (outflow)']
+                      ['amount-outflow', 'Amount (outflow)'],
                     ]
                   : field === 'date'
                   ? [
                       ['date', 'Date'],
                       ['month', 'Month'],
-                      ['year', 'Year']
+                      ['year', 'Year'],
                     ]
                   : null
               }
@@ -198,7 +245,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
                     dispatch({ type: 'set-op', op: 'is' });
                     dispatch({ type: 'set-value', value: false });
                   }}
-                />
+                />,
               ]
             : ops.map(currOp => (
                 <OpButton
@@ -234,7 +281,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
                   field,
                   op,
                   value,
-                  options: subfieldToOptions(field, subfield)
+                  options: subfieldToOptions(field, subfield),
                 });
               }}
             >
@@ -250,7 +297,7 @@ function ConfigureField({ field, op, value, dispatch, onApply }) {
 export function FilterButton({ onApply }) {
   let { dateFormat } = useSelector(state => {
     return {
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy'
+      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
 
@@ -269,31 +316,16 @@ export function FilterButton({ onApply }) {
             condOpen: true,
             field: action.field,
             op: ops[0],
-            value: type === 'boolean' ? true : null
+            value: type === 'boolean' ? true : null,
           };
         }
-        case 'set-op': {
-          let type = FIELD_TYPES.get(state.field);
-          let value = state.value;
-          if (type === 'id' && action.op === 'contains') {
-            // Clear out the value if switching between contains for
-            // the id type
-            value = null;
-          }
-          return { ...state, op: action.op, value };
-        }
-        case 'set-value':
-          let { value } = makeValue(action.value, {
-            type: FIELD_TYPES.get(state.field)
-          });
-          return { ...state, value: value };
         case 'close':
           return { fieldsOpen: false, condOpen: false, value: null };
         default:
-          throw new Error('Unknown action: ' + action.type);
+          return updateFilterReducer(state, action);
       }
     },
-    { fieldsOpen: false, condOpen: false, field: null, value: null }
+    { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
 
   async function onValidateAndApply(cond) {
@@ -304,7 +336,7 @@ export function FilterButton({ onApply }) {
         let date = parseDate(
           cond.value,
           getMonthYearFormat(dateFormat),
-          new Date()
+          new Date(),
         );
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy-MM');
@@ -325,7 +357,7 @@ export function FilterButton({ onApply }) {
 
     let { error } = await send('rule-validate', {
       conditions: [cond],
-      actions: []
+      actions: [],
     });
 
     if (error && error.conditionErrors.length > 0) {
@@ -345,7 +377,7 @@ export function FilterButton({ onApply }) {
             width: 16,
             height: 16,
             color: 'inherit',
-            marginRight: 5
+            marginRight: 5,
           }}
         />{' '}
         Filter
@@ -362,7 +394,7 @@ export function FilterButton({ onApply }) {
             }}
             items={filterFields.map(([name, text]) => ({
               name: name,
-              text: titleFirst(text)
+              text: titleFirst(text),
             }))}
           />
         </Tooltip>
@@ -380,6 +412,36 @@ export function FilterButton({ onApply }) {
   );
 }
 
+function FilterEditor({ field, op, value, options, onSave, onClose }) {
+  let [state, dispatch] = useReducer(
+    (state, action) => {
+      switch (action.type) {
+        case 'close':
+          onClose();
+          return state;
+        default:
+          return updateFilterReducer(state, action);
+      }
+    },
+    { field, op, value, options },
+  );
+
+  return (
+    <ConfigureField
+      field={state.field}
+      initialSubfield={subfieldFromFilter({ field, options, value })}
+      op={state.op}
+      value={state.value}
+      options={state.options}
+      dispatch={dispatch}
+      onApply={cond => {
+        onSave(cond);
+        onClose();
+      }}
+    />
+  );
+}
+
 function FilterExpression({
   field: originalField,
   customName,
@@ -388,18 +450,12 @@ function FilterExpression({
   options,
   stage,
   style,
-  onDelete
+  onChange,
+  onDelete,
 }) {
-  let type = FIELD_TYPES.get(originalField);
+  let [editing, setEditing] = useState(false);
 
-  let field = originalField;
-  if (type === 'date') {
-    if (value.length === 7) {
-      field = 'month';
-    } else if (value.length === 4) {
-      field = 'year';
-    }
-  }
+  let field = subfieldFromFilter({ field: originalField, value });
 
   return (
     <View
@@ -409,33 +465,65 @@ function FilterExpression({
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
-          padding: 5,
-          paddingLeft: 10,
           marginBottom: 10,
-          marginRight: 10
+          marginRight: 10,
         },
-        style
+        style,
       ]}
     >
-      <div>
-        {customName ? (
-          <Text style={{ color: colors.p4 }}>{customName}</Text>
-        ) : (
-          <>
-            <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
-            <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
-            <Value value={value} field={field} inline={true} />
-          </>
-        )}
-      </div>
-      <Button bare style={{ marginLeft: 3 }} onClick={onDelete}>
-        <DeleteIcon style={{ width: 8, height: 8, color: colors.n4 }} />
+      <Button
+        bare
+        disabled={customName != null}
+        onClick={() => setEditing(true)}
+        style={{ marginRight: -7 }}
+      >
+        <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
+          {customName ? (
+            <Text style={{ color: colors.p4 }}>{customName}</Text>
+          ) : (
+            <>
+              <Text style={{ color: colors.p4 }}>
+                {mapField(field, options)}
+              </Text>{' '}
+              <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+              <Value
+                value={value}
+                field={field}
+                inline={true}
+                valueIsRaw={op === 'contains'}
+              />
+            </>
+          )}
+        </div>
       </Button>
+      <Button bare onClick={onDelete}>
+        <DeleteIcon
+          style={{
+            width: 8,
+            height: 8,
+            color: colors.n4,
+            margin: 5,
+            marginLeft: 3,
+          }}
+        />
+      </Button>
+      {editing && (
+        <FilterEditor
+          field={originalField}
+          customName={customName}
+          op={op}
+          value={value}
+          options={options}
+          stage={stage}
+          onSave={onChange}
+          onClose={() => setEditing(false)}
+        />
+      )}
     </View>
   );
 }
 
-export function AppliedFilters({ filters, editingFilter, onDelete }) {
+export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
   return (
     <View
       style={{
@@ -443,7 +531,7 @@ export function AppliedFilters({ filters, editingFilter, onDelete }) {
         alignItems: 'center',
         flexWrap: 'wrap',
         marginTop: 10,
-        marginBottom: -5
+        marginBottom: -5,
       }}
     >
       {filters.map((filter, i) => (
@@ -455,6 +543,7 @@ export function AppliedFilters({ filters, editingFilter, onDelete }) {
           value={filter.value}
           options={filter.options}
           editing={editingFilter === filter}
+          onChange={newFilter => onUpdate(filter, newFilter)}
           onDelete={() => onDelete(filter)}
         />
       ))}

@@ -25,7 +25,7 @@ function Modals({
   availableImports,
   globalPrefs,
   isLoggedIn,
-  actions
+  actions,
 }) {
   let stack = modalStack.map(({ name, options }, idx) => {
     const modalProps = {
@@ -34,7 +34,7 @@ function Modals({
       onBack: actions.popModal,
       isCurrent: idx === modalStack.length - 1,
       isHidden,
-      stackIndex: idx
+      stackIndex: idx,
     };
 
     switch (name) {
@@ -86,7 +86,7 @@ function Modals({
             initialState={{ backups: [] }}
             didMount={async ({ setState }) => {
               setState({
-                backups: await send('backups-get', { id: options.budgetId })
+                backups: await send('backups-get', { id: options.budgetId }),
               });
             }}
           >
@@ -95,7 +95,7 @@ function Modals({
                 budgetId={options.budgetId}
                 modalProps={{
                   ...modalProps,
-                  onClose: actions.popModal
+                  onClose: actions.popModal,
                 }}
                 backupDisabled={true}
                 actions={actions}
@@ -139,7 +139,7 @@ export default connect(
     availableImports: state.budgets.availableImports,
     globalPrefs: state.prefs.global,
     allFiles: state.budgets.allFiles,
-    isLoggedIn: !!state.user.data
+    isLoggedIn: !!state.user.data,
   }),
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) })
+  dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
 )(Modals);

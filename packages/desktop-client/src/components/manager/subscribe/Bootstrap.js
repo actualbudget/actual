@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View, Text, Button } from 'loot-design/src/components/common';
+import { View, Text, Button, P } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
 import { useBootstrapped, Title } from './common';
@@ -51,16 +51,25 @@ export default function Bootstrap() {
   return (
     <>
       <View style={{ maxWidth: 450, marginTop: -30 }}>
-        <Title text="Bootstrap this Actual instance" />
-        <Text
-          style={{
-            fontSize: 16,
-            color: colors.n2,
-            lineHeight: 1.4
-          }}
-        >
-          Set a password for this server instance
-        </Text>
+        <Title text="Welcome to Actual!" />
+        <P style={{ fontSize: 16, color: colors.n2 }}>
+          Actual is a super fast privacy-focused app for managing your finances.
+          To secure your data, you’ll need to set a password for your server.
+        </P>
+
+        <P isLast style={{ fontSize: 16, color: colors.n2 }}>
+          Consider opening{' '}
+          <a
+            href="https://actualbudget.github.io/docs/Getting-Started/using-actual/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: colors.b4 }}
+          >
+            our tour
+          </a>{' '}
+          in a new tab for some guidance on what to do when you’ve set your
+          password.
+        </P>
 
         {error && (
           <Text
@@ -68,7 +77,7 @@ export default function Bootstrap() {
               marginTop: 20,
               color: colors.r4,
               borderRadius: 4,
-              fontSize: 15
+              fontSize: 15,
             }}
           >
             {getErrorMessage(error)}
