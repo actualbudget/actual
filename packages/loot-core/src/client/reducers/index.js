@@ -10,7 +10,7 @@ import queries from './queries';
 import tutorial from './tutorial';
 import user from './user';
 
-export default {
+const reducers = {
   app,
   queries,
   account,
@@ -23,3 +23,4 @@ export default {
   tutorial,
   user,
 };
+export default reducers;

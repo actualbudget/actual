@@ -14,7 +14,6 @@ module.exports = {
     'no-loop-func': 'off',
 
     // TODO: re-enable these rules
-    'import/no-anonymous-default-export': 'off',
     'react/destructuring-assignment': 'off',
     'react-hooks/exhaustive-deps': 'off',
 
