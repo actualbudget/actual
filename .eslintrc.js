@@ -11,6 +11,8 @@ module.exports = {
         ignoreRestSiblings: true,
       },
     ],
+    // https://github.com/eslint/eslint/issues/16954
+    // https://github.com/eslint/eslint/issues/16953
     'no-loop-func': 'off',
 
     // TODO: re-enable these rules
