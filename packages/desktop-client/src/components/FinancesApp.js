@@ -31,7 +31,7 @@ import Wallet from 'loot-design/src/svg/v1/Wallet';
 
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
-import { getIsOutdated } from '../util/versions';
+import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
@@ -276,7 +276,10 @@ class FinancesApp extends React.Component {
       await this.props.sync();
       await checkForUpdateNotification(
         this.props.addNotification,
-        getIsOutdated
+        getIsOutdated,
+        getLatestVersion,
+        this.props.loadPrefs,
+        this.props.savePrefs
       );
     }, 100);
 
