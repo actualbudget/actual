@@ -3,7 +3,7 @@ import { useLocation } from 'react-router';
 
 import { css } from 'glamor';
 
-import Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/src/client/platform';
 
 import { styles, colors } from '../style';
 import Add from '../svg/v1/Add';

@@ -1,6 +1,6 @@
 import { send } from '../platform/client/fetch';
 
-import Platform from './platform';
+import * as Platform from './platform';
 
 export default function checkForUpgradeNotifications(
   addNotification,
@@ -38,7 +38,7 @@ export default function checkForUpgradeNotifications(
                   // eslint-disable-next-line
                   __history.push('/schedule/discover', {
                     // eslint-disable-next-line
-                    locationPtr: __history.location
+                    locationPtr: __history.location,
                   });
               },
             },

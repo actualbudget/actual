@@ -50,7 +50,7 @@ import { APIError, TransactionError, PostError, RuleError } from './errors';
 import app from './main-app';
 import { mutator, runHandler } from './mutators';
 import notesApp from './notes/app';
-import Platform from './platform';
+import * as Platform from './platform';
 import { get, post } from './post';
 import * as prefs from './prefs';
 import schedulesApp from './schedules/app';
