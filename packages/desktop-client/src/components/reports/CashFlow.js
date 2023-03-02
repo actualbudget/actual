@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import * as d from 'date-fns';
 
@@ -19,7 +19,6 @@ import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
 import CashFlowGraph from './graphs/CashFlowGraph';
 import Header from './Header';
 import useReport from './useReport';
-import { useArgsMemo } from './util';
 
 function CashFlow() {
   const [allMonths, setAllMonths] = useState(null);
@@ -36,10 +35,11 @@ function CashFlow() {
     return numDays > 31 * 3;
   });
 
-  const data = useReport(
-    'cash_flow',
-    useArgsMemo(cashFlowByDate)(start, end, isConcise),
+  const params = useMemo(
+    () => cashFlowByDate(start, end, isConcise),
+    [start, end, isConcise],
   );
+  const data = useReport('cash_flow', params);
 
   useEffect(() => {
     async function run() {
