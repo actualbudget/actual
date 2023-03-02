@@ -14,7 +14,6 @@ module.exports = {
     'no-loop-func': 'off',
 
     // TODO: re-enable these rules
-    'react/destructuring-assignment': 'off',
     'react-hooks/exhaustive-deps': 'off',
 
     'import/no-useless-path-segments': 'error',
