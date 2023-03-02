@@ -9,7 +9,7 @@ export default async function checkForUpdateNotification(
   let latestVersion = await getLatestVersion();
   if (
     !isOutdated ||
-    (await loadPrefs())['flags.updateNotificationShownForVersion'] ==
+    (await loadPrefs())['flags.updateNotificationShownForVersion'] ===
       latestVersion
   ) {
     return;
