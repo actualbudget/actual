@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 
-import arbs from '../../mocks/arbitrary-schema';
+import * as arbs from '../../mocks/arbitrary-schema';
 import { execTracer } from '../../shared/test-helpers';
 import { convertInputType, schema, schemaConfig } from '../aql';
 import * as db from '../db';
