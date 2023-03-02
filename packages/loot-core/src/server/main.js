@@ -45,7 +45,7 @@ import {
 } from './crdt';
 import * as db from './db';
 import * as mappings from './db/mappings';
-import encryption from './encryption';
+import * as encryption from './encryption';
 import { APIError, TransactionError, PostError, RuleError } from './errors';
 import app from './main-app';
 import { mutator, runHandler } from './mutators';
