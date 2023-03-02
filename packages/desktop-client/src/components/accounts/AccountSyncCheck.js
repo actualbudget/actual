@@ -69,6 +69,7 @@ function AccountSyncCheck({
   getAccounts,
   addNotification,
 }) {
+  let [open, setOpen] = useState(false);
   if (!failedAccounts) {
     return null;
   }
@@ -77,8 +78,6 @@ function AccountSyncCheck({
   if (!error) {
     return null;
   }
-
-  let [open, setOpen] = useState(false);
 
   let account = accounts.find(account => account.id === id);
   let { type, code } = error;

@@ -17,7 +17,6 @@ module.exports = {
     // TODO: re-enable these rules
     'import/no-anonymous-default-export': 'off',
     'react/destructuring-assignment': 'off',
-    'react-hooks/rules-of-hooks': 'off',
     'react-hooks/exhaustive-deps': 'off',
 
     'import/no-useless-path-segments': 'error',

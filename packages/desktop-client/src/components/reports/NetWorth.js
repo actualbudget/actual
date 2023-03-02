@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from 'react-redux';
 
 import * as d from 'date-fns';
@@ -16,7 +16,7 @@ import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
 import Header from './Header';
 import useReport from './useReport';
-import { fromDateRepr, useArgsMemo } from './util';
+import { fromDateRepr } from './util';
 
 function NetWorth({ accounts }) {
   const [allMonths, setAllMonths] = useState(null);
@@ -25,10 +25,11 @@ function NetWorth({ accounts }) {
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
-  const data = useReport(
-    'net_worth',
-    useArgsMemo(netWorthSpreadsheet)(start, end, accounts),
+  const params = useMemo(
+    () => netWorthSpreadsheet(start, end, accounts),
+    [start, end, accounts],
   );
+  const data = useReport('net_worth', params);
 
   useEffect(() => {
     async function run() {
