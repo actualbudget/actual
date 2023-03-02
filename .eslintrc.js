@@ -8,11 +8,16 @@ module.exports = {
       {
         args: 'none',
         varsIgnorePattern: '^_',
-        ignoreRestSiblings: true
-      }
+        ignoreRestSiblings: true,
+      },
     ],
     'no-loop-func': 'off',
     'no-restricted-globals': 'off',
+
+    // TODO: re-enable these rules
+    'import/no-anonymous-default-export': 'off',
+    'react/destructuring-assignment': 'off',
+    'react-hooks/exhaustive-deps': 'off',
 
     'import/no-useless-path-segments': 'error',
     'import/order': [
@@ -20,14 +25,14 @@ module.exports = {
       {
         alphabetize: {
           caseInsensitive: true,
-          order: 'asc'
+          order: 'asc',
         },
         groups: [
           'builtin', // Built-in types are first
           'external',
           'parent',
           'sibling',
-          'index' // Then the index file
+          'index', // Then the index file
         ],
         'newlines-between': 'always',
         pathGroups: [
@@ -37,11 +42,11 @@ module.exports = {
           {
             group: 'external',
             pattern: 'loot-{core,design}/**/*',
-            position: 'after'
-          }
+            position: 'after',
+          },
         ],
-        pathGroupsExcludedImportTypes: ['react']
-      }
-    ]
-  }
+        pathGroupsExcludedImportTypes: ['react'],
+      },
+    ],
+  },
 };

@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transactions adding a new split transaction works 1`] = `
+Array [
+  Object {
+    "account": "testing-uuid-975046",
+    "amount": -5500,
+    "cleared": false,
+    "date": "2017-01-01",
+    "error": null,
+    "id": "testing-uuid-759284",
+    "is_parent": true,
+  },
+  Object {
+    "account": "testing-uuid-975046",
+    "amount": -4500,
+    "cleared": false,
+    "date": "2017-01-01",
+    "error": null,
+    "id": "testing-uuid-57883",
+    "is_child": true,
+    "parent_id": "testing-uuid-759284",
+    "payee": undefined,
+    "sort_order": -1,
+    "starting_balance_flag": null,
+  },
+  Object {
+    "account": "testing-uuid-975046",
+    "amount": -1000,
+    "cleared": false,
+    "date": "2017-01-01",
+    "error": null,
+    "id": "testing-uuid-661157",
+    "is_child": true,
+    "parent_id": "testing-uuid-759284",
+    "payee": undefined,
+    "sort_order": -2,
+    "starting_balance_flag": null,
+  },
+]
+`;
+
+exports[`Transactions transaction can be split, updated, and deleted 1`] = `
+Array [
+  Object {
+    "account": "testing-uuid-975046",
+    "amount": -2777,
+    "category": null,
+    "cleared": false,
+    "date": "2017-01-01",
+    "error": null,
+    "id": "testing-uuid-795958",
+    "is_parent": true,
+    "notes": "Notes",
+    "payee": "guy",
+    "sort_order": 0,
+  },
+  Object {
+    "account": "testing-uuid-975046",
+    "amount": -1000,
+    "cleared": false,
+    "date": "2017-01-01",
+    "error": null,
+    "id": "testing-uuid-216379",
+    "is_child": true,
+    "parent_id": "testing-uuid-795958",
+    "payee": "guy",
+    "sort_order": -1,
+    "starting_balance_flag": null,
+  },
+  Object {
+    "account": "testing-uuid-975046",
+    "amount": -1777,
+    "cleared": false,
+    "date": "2017-01-01",
+    "error": null,
+    "id": "testing-uuid-482499",
+    "is_child": true,
+    "parent_id": "testing-uuid-795958",
+    "payee": "guy",
+    "sort_order": -2,
+    "starting_balance_flag": null,
+  },
+]
+`;

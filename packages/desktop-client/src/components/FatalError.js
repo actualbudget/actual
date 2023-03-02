@@ -107,7 +107,7 @@ class FatalError extends React.Component {
                 style={{ color: colors.p4 }}
               >
                 in touch
-              </a>
+              </a>{' '}
               so it can be investigated.
             </P>
             <P>

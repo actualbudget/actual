@@ -10,9 +10,6 @@ module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: ['/node_modules/', '/lib/', '.+/index.web.test.js'],
   transformIgnorePatterns: ['/node_modules/', '__mocks__'],
-  globals: {
-    __TESTING__: true,
-  },
   transform: {
     '\\.pegjs$': 'pegjs-jest-transformer',
   },

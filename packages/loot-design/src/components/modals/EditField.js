@@ -28,12 +28,14 @@ function EditField({
   createPayee,
 }) {
   function onSelect(value) {
-    // Process the value if needed
-    if (name === 'amount') {
-      value = amountToInteger(value);
-    }
+    if (value != null) {
+      // Process the value if needed
+      if (name === 'amount') {
+        value = amountToInteger(value);
+      }
 
-    onSubmit(name, value);
+      onSubmit(name, value);
+    }
     modalProps.onClose();
   }
 

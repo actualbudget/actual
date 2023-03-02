@@ -71,23 +71,17 @@ export class SchedulesPage {
 
   async _fillScheduleFields(data) {
     if (data.payee) {
-      await this.page.getByLabel('Payee').click();
-      await this.page.keyboard.type(data.payee);
+      await this.page.getByLabel('Payee').fill(data.payee);
       await this.page.keyboard.press('Enter');
     }
 
     if (data.account) {
-      await this.page.getByLabel('Account').click();
-      await this.page.keyboard.type(data.account);
+      await this.page.getByLabel('Account').fill(data.account);
       await this.page.keyboard.press('Enter');
     }
 
     if (data.amount) {
-      await this.page.getByLabel('Amount').click();
-      await this.page.keyboard.press('Control+A');
-      await this.page.keyboard.press('Delete');
-      await this.page.keyboard.type(String(data.amount));
-      await this.page.keyboard.press('Enter');
+      await this.page.getByLabel('Amount').fill(String(data.amount));
     }
   }
 }

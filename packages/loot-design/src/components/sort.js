@@ -109,11 +109,12 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
 export const DropHighlightPosContext = React.createContext(null);
 
 export function DropHighlight({ pos, offset = {} }) {
+  let itemPos = useContext(DropHighlightPosContext);
+
   if (pos == null) {
     return null;
   }
 
-  let itemPos = useContext(DropHighlightPosContext);
   let topOffset = (itemPos === 'first' ? 2 : 0) + (offset.top || 0);
   let bottomOffset = (itemPos === 'last' ? 2 : 0) + (offset.bottom || 0);
 
