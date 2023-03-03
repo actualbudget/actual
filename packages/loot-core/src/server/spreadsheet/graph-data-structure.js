@@ -90,6 +90,9 @@ function Graph(serialized) {
   }
 
   function topologicalSort(sourceNodes) {
+    console.log('topologicalSort source node count: ', sourceNodes.length);
+    console.log('total node count: ', edges.size);
+    console.log(new Error().stack);
     const visited = new Set();
     const sorted = [];
 
