@@ -8,65 +8,65 @@ import APIList from './APIList';
 This is the documentation of all available API methods. The API has not been released yet, but it will be available in the next update. This section is a work in progress.
 
 <APIList title="Transactions" sections={[
-  "Transaction",
-  "addTransactions",
-  "importTransactions",
-  "getTransactions",
-  "filterTransactions",
-  "updateTransaction",
-  "deleteTransaction"
+"Transaction",
+"addTransactions",
+"importTransactions",
+"getTransactions",
+"filterTransactions",
+"updateTransaction",
+"deleteTransaction"
 ]} />
 
 <APIList title="Accounts" sections={[
-  "Account",
-  "getAccounts",
-  "createAccount",
-  "updateAccount",
-  "closeAccount",
-  "reopenAccount",
-  "deleteAccount"
+"Account",
+"getAccounts",
+"createAccount",
+"updateAccount",
+"closeAccount",
+"reopenAccount",
+"deleteAccount"
 ]} />
 
 <APIList title="Categories" sections={[
-  "Category",
-  "getCategories",
-  "createCategory",
-  "updateCategory",
-  "deleteCategory"
+"Category",
+"getCategories",
+"createCategory",
+"updateCategory",
+"deleteCategory"
 ]} />
 
 <APIList title="Category Groups" sections={[
-  "Category group",
-  "getCategoryGroups",
-  "createCategoryGroup",
-  "updateCategoryGroup",
-  "deleteCategoryGroup"
+"Category group",
+"getCategoryGroups",
+"createCategoryGroup",
+"updateCategoryGroup",
+"deleteCategoryGroup"
 ]} />
 
 <APIList title="Payees" sections={[
-  "Payee",
-  "getPayees",
-  "createPayee",
-  "updatePayee",
-  "deletePayee"
+"Payee",
+"getPayees",
+"createPayee",
+"updatePayee",
+"deletePayee"
 ]} />
 
 <APIList title="Payee rules" sections={[
-  "Payee rule",
-  "getPayeeRules",
-  "createPayeeRule",
-  "updatePayeeRule",
-  "deletePayeeRule"
+"Payee rule",
+"getPayeeRules",
+"createPayeeRule",
+"updatePayeeRule",
+"deletePayeeRule"
 ]} />
 
 ## Types of methods
 
 API methods are categorized into one of four types:
 
-* `get`
-* `create`
-* `update`
-* `delete`
+- `get`
+- `create`
+- `update`
+- `delete`
 
 Objects may have fields specific for a type of method. For example, the `payee` field of a `transaction` is only available in a `create` method. This field doesn't exist in objects returned from a `get` method (`payee_id` is used instead).
 
@@ -75,7 +75,6 @@ Fields specific to a type of request are marked as such in the notes.
 `id` is a special field. All objects have an `id` field. However, you don't need to specify an `id` in a `create` method; all `create` methods will return the created `id` back to you.
 
 All `update` and `delete` methods take an `id` to specify the desired object. `update` takes the fields to update as a second argument — it does not take a full object. That means even if a field is required, you don't have to pass it to `update`. For example, a `category` requires the `group_id` field, however `updateCategory(id, { name: "Food" })` is a valid call. Required means that an `update` can't set the field to `null` and `create` method must always have it.
-
 
 ## Primitives
 
@@ -91,15 +90,15 @@ These are types.
 
 #### `getBudgetMonth`
 
-<Method name="getBudgetMonth" args={[{ name: 'month', type: 'month' }]}  returns="Promise<Budget>" />
+<Method name="getBudgetMonth" args={[{ name: 'month', type: 'month' }]} returns="Promise<Budget>" />
 
 #### `setBudgetAmount`
 
-<Method name="setBudgetAmount" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'value', type: 'amount' }]}  returns="Promise<null>" />
+<Method name="setBudgetAmount" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'value', type: 'amount' }]} returns="Promise<null>" />
 
 #### `setBudgetCarryover`
 
-<Method name="setBudgetCarryover" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'flag', type: 'bool' }]}  returns="Promise<null>" />
+<Method name="setBudgetCarryover" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'flag', type: 'bool' }]} returns="Promise<null>" />
 
 #### Examples
 
@@ -117,9 +116,9 @@ an an array of sub-transactions in the `subtransactions` field.
 
 Subtransactions can specify the following fields, and `amount` is the only required field:
 
-* `amount`
-* `category_id`
-* `notes`
+- `amount`
+- `category_id`
+- `notes`
 
 If the amounts of the sub-transactions do not equal the total amount
 of the transaction, currently the API call will succeed but an error
@@ -135,7 +134,7 @@ If you want to create a transfer, use the transfer payee for the account you wis
 
 #### `addTransactions`
 
-<Method name="addTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}]}  returns="Promise<id[]>" />
+<Method name="addTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}]} returns="Promise<id[]>" />
 
 Adds multiple transactions at once. Does not reconcile (see `importTransactions`). Returns an array of ids of the newly created transactions.
 
@@ -155,9 +154,9 @@ It will also create transfers if a transfer payee is specified. See [transfers](
 
 This method returns an object with the following fields:
 
-* `added`: an array of ids of transactions that were added
-* `updated`: an array of ids of transactions that were updated (such as being cleared)
-* `errors`: any errors that occurred during the process (most likely a single error with no changes to transactions)
+- `added`: an array of ids of transactions that were added
+- `updated`: an array of ids of transactions that were updated (such as being cleared)
+- `errors`: any errors that occurred during the process (most likely a single error with no changes to transactions)
 
 #### `getTransactions`
 
@@ -188,34 +187,36 @@ Delete a transaction.
 // automatically created if it does not exist already and
 // assigned to the transaction.
 
-await importTransactions(accountId, [{
-  account_id: "e2564e8c-ec96-43d7-92ce-3b91ee9d2d69",
-  date: "2019-08-20",
-  amount: 1200,
-  payee: "Kroger",
-  category_id: "c179c3f4-28a6-4fbd-a54d-195cced07a80"
-}])
+await importTransactions(accountId, [
+  {
+    account_id: 'e2564e8c-ec96-43d7-92ce-3b91ee9d2d69',
+    date: '2019-08-20',
+    amount: 1200,
+    payee: 'Kroger',
+    category_id: 'c179c3f4-28a6-4fbd-a54d-195cced07a80',
+  },
+]);
 ```
 
 ```js
 // Get all transactions in an account for the month of August
 // (it doesn't matter that August 31st doesn't exist).
 
-await getTransactions(accountId, "2019-08-01", "2019-08-31")
+await getTransactions(accountId, '2019-08-01', '2019-08-31');
 ```
 
 ```js
 // Find transactions with the amount of 3.91. Currently this
 // assumes you are using a currency with two decimal places.
-await filterTransactions(accountId, "3.91")
+await filterTransactions(accountId, '3.91');
 ```
 
 ```js
 // Assign the "Food" category to a transaction
-	
+
 let categories = await getCategories();
-let foodCategory = category.find(cat => cat.name === "Food");
-await updateTransaction(id, { category_id: foodCategory.id })
+let foodCategory = category.find(cat => cat.name === 'Food');
+await updateTransaction(id, { category_id: foodCategory.id });
 ```
 
 ## Accounts
@@ -228,13 +229,13 @@ await updateTransaction(id, { category_id: foodCategory.id })
 
 The account type must be one of these valid strings:
 
-* `checking`
-* `savings`
-* `credit`
-* `investment`
-* `mortgage`
-* `debt`
-* `other`
+- `checking`
+- `savings`
+- `credit`
+- `investment`
+- `mortgage`
+- `debt`
+- `other`
 
 The account type does not effect anything currently. It's simply extra information about the account.
 
@@ -301,7 +302,7 @@ createAccount({
 ```js
 // Get all accounts
 
-let accounts = await getAccounts()
+let accounts = await getAccounts();
 ```
 
 ## Categories
@@ -357,7 +358,7 @@ Set `is_income` to `true` to create an income category. The `group_id` of the ca
 
 ```js
 {
-  name: "Bills"
+  name: 'Bills';
 }
 ```
 

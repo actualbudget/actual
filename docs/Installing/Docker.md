@@ -7,38 +7,37 @@ sidebar_position: 2
 
 Actual is also available as a Docker image ready to be run in your own custom environment.
 
-* [Docker Hub](https://hub.docker.com/r/jlongster/actual-server)
-* [GitHub Registry](https://ghcr.io/actualbudget/actual-server)
+- [Docker Hub](https://hub.docker.com/r/jlongster/actual-server)
+- [GitHub Registry](https://ghcr.io/actualbudget/actual-server)
 
 ## Docker Tags
 
-We publish a number of tags to the official repository now so that users who want to get the latest bleeding edge changes can do that without having to wait for the latest image to be updated. Details of the available tags are below. 
+We publish a number of tags to the official repository now so that users who want to get the latest bleeding edge changes can do that without having to wait for the latest image to be updated. Details of the available tags are below.
 
 ### `latest` Tag
 
 The `latest` tag points to the most recent official release of Actual. This is the recommended tag to use for most users.
 
-* `latest`
-* `latest-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
-  
+- `latest`
+- `latest-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
+
 ### `edge` Tag
 
 The `edge` tag is updated every time a commit is pushed to the `master` branch. This is the recommended tag to use for users who want to get the latest changes. Note that `actual-server` will still use the latest official release of the web UI even when deploying from `edge`
 
-* `edge` 
-* `edge-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
+- `edge`
+- `edge-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
 
 ## Launch container using Docker Compose
 
-Pre-requisites:  Docker
+Pre-requisites: Docker
 
 A [docker-compose file](https://github.com/actualbudget/actual-server/raw/master/docker-compose.yml) is provided together with a [.env
 file](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env).
 These are you need to deploy Actual in your server with docker and you **only** need to edit the
 [.env
 file](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env).
-The options for port assignments and persisting your budget on a volume mounted on your filesystem are all contained in the env file.  This method will build and launch the most current build available from GitHub.
-
+The options for port assignments and persisting your budget on a volume mounted on your filesystem are all contained in the env file. This method will build and launch the most current build available from GitHub.
 
 To create and run the container:
 
@@ -48,9 +47,9 @@ $ docker-compose --env-file actual_server.env up -d
 
 ## Launch container using docker command
 
-Pre-requisites:  Docker
+Pre-requisites: Docker
 
-Alternatively to using docker compose, you may also launch docker using this command.  This command, as shown, will launch the latest stable build of Actual.
+Alternatively to using docker compose, you may also launch docker using this command. This command, as shown, will launch the latest stable build of Actual.
 
 ```bash
 $ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
@@ -62,9 +61,9 @@ $ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH
 
 `-d` -- starts the container as background application
 
-`-p 5006:5006` -- sets the port to access Actual.  (HOST PORT:DOCKER PORT)
+`-p 5006:5006` -- sets the port to access Actual. (HOST PORT:DOCKER PORT)
 
-`-v YOUR/PATH/TO/DATA:/data` -- tells the container where to store your budget data.  This persists the data on your hard disk so it isn't lost if you remove the container.  Change the current value to a folder on your host computer. The server will create `server-files` and `user-files` subfolders at this location.
+`-v YOUR/PATH/TO/DATA:/data` -- tells the container where to store your budget data. This persists the data on your hard disk so it isn't lost if you remove the container. Change the current value to a folder on your host computer. The server will create `server-files` and `user-files` subfolders at this location.
 
 `--name my_actual_budget` -- gives your new docker container a name
 
@@ -82,7 +81,7 @@ $ docker container rm my_actual_budget
 
 ```bash
 $ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
-```  
+```
 
 You can place all of these in a batch script for a 1 click or single command update.
 
@@ -90,24 +89,26 @@ You can place all of these in a batch script for a 1 click or single command upd
 $ docker stop my_actual_budget && docker container rm my_actual_budget && docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
 ```
 
-
 ## Test connection within local network
 
-On another PC within the local network connect to http://*serverIP*:*chosenPort*
+On another PC within the local network connect to http://_serverIP_:_chosenPort_
 
 ## Expose to internet with NGINX
 
 Use the [sample nginx conf file provided](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual.subdomain.conf.sample) and if needed change the
 line with:
+
 ```text
 set $upstream_port 5006;
 ```
+
 to the chosen port (found [here](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env)).
 
 Using nginx web UI:
-* Scheme -> http
-* Forward Hostname/IP -> actual_budget
-* Forward Port -> *The chosen port (found [here](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env))*
+
+- Scheme -> http
+- Forward Hostname/IP -> actual_budget
+- Forward Port -> _The chosen port (found [here](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env))_
 
 ## Configuring the server URL
 
@@ -179,10 +180,11 @@ server {
     }
 }
 ```
+
 ### docker-compose.yml
 
 ```yml
-version: "3"
+version: '3'
 services:
   actual_server:
     container_name: actual_server
@@ -190,7 +192,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     ports:
-      - "${externalPort}:5006"
+      - '${externalPort}:5006'
     volumes:
       - ${dataPath}:/data
     restart: unless-stopped

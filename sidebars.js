@@ -12,7 +12,7 @@
 // @ts-check
 
 /** @type {(title: string) => unknown} */
-const unavailable = (title) => ({
+const unavailable = title => ({
   type: 'html',
   value: title,
   className: 'menu__link menu__link--unavailable',
@@ -80,7 +80,7 @@ const sidebars = {
                   items: [
                     'Installing/fly/Fly-prerequisites',
                     'Installing/fly/Fly-git',
-                    'Installing/fly/Fly-image',                    
+                    'Installing/fly/Fly-image',
                     'Installing/fly/Fly-updating',
                     'Installing/fly/Fly-persisting',
                   ],

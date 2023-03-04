@@ -18,7 +18,6 @@ Depending on your usage, savings accounts can either be on or off the budget. If
 2. Fill out the form describing the account.
 3. Press **Create**
 
-
 ## Closing or deleting an account
 
 1. Navigate to the account by clicking on it in the sidebar

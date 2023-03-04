@@ -65,6 +65,7 @@ more_data:
     or: arrays
 ---
 ```
+
 ### Document Headings
 
 The below shows how a document should be laid out.

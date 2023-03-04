@@ -8,12 +8,13 @@ This is an **experimental feature**. That means we’re still working on finishi
 
 Create a template by adding a note to a category and adding a line that begins with `#template`.
 
-   ![](/img/goal-template-1.png)
+![](/img/goal-template-1.png)
 
 You are welcome to have other lines in your note, but the #template line must match the syntax.
 
 ## How to use the templates
 
+<!-- prettier-ignore -->
 |Syntax|Description|Application|
 |---|---|---|
 |#template $50|Budget $50 each month|Regular monthly bills, such as internet|
@@ -32,12 +33,14 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template $10 repeat every 9 weeks starting 2022-01-04 up to 30|Budget $10 every 9 weeks, up to a maximum of $30|
 
 ### Notes
-* $ sign is optional, `#template $50` and `#template 50` are the same.
-* Other currency symbols are not supported.
-* Number formats that use comma for the decimal seperator are not supported (eg, 123,45). You must use 123.45.
-* Thousands separators are not supported (eg, 1,234). You must use 1234.
+
+- $ sign is optional, `#template $50` and `#template 50` are the same.
+- Other currency symbols are not supported.
+- Number formats that use comma for the decimal seperator are not supported (eg, 123,45). You must use 123.45.
+- Thousands separators are not supported (eg, 1,234). You must use 1234.
 
 ### Multiple Template Lines
+
 You can add multiple `#template` lines for a single category note. Lines that don't have a 'by' keyword in them add together, where as lines that do have the 'by' keyword are run sequentially - only the next next due template line is applied.
 
 For examples:
@@ -47,7 +50,6 @@ For examples:
     #template $600 by 2021-03 repeat every 6 months
 
     #template $1200 by 2021-06 repeat every 6 months
-
 
 **Streaming Services: $42.97**
 
@@ -65,7 +67,7 @@ For examples:
 
 ## Apply the templates
 
-To apply the goal templates you create, enable the feature in the Settings experimental section.  When the feature is on, two new options will appear in the monthly budget actions list.
+To apply the goal templates you create, enable the feature in the Settings experimental section. When the feature is on, two new options will appear in the monthly budget actions list.
 
 ![](/img/goal-template-2.png)
 

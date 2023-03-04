@@ -1,15 +1,12 @@
-name: "⭐ Documentation Improvement"
+name: '⭐ Documentation Improvement'
 description: Create a new ticket to improve existing documentation.
-title: "⭐ [Documentation] - <title>"
-labels: [
-  "documentation",
-  "enhancement"
-]
+title: '⭐ [Documentation] - <title>'
+labels: ['documentation', 'enhancement']
 body:
   - type: textarea
     id: description
     attributes:
-      label: "Description"
+      label: 'Description'
       description: Please enter a description of what needs changing
       placeholder: What needs changing?
     validations:
@@ -17,9 +14,8 @@ body:
   - type: input
     id: url
     attributes:
-      label: "Documentation URL"
+      label: 'Documentation URL'
       description: Please enter the GitHub URL to the documentation file
       placeholder: ex. https://github.com/USERNAME/REPO_NAME/blob/main/docs/Budgeting/categories.md
     validations:
       required: true
-

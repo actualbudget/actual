@@ -28,14 +28,14 @@ While ranking works for the most part, you might want to say "this rule _always_
 
 Conditions can use the following fields:
 
-* account
-* imported payee
-* payee
-* date
-* notes
-* amount
-* amount (inflow)
-* amount (outflow)
+- account
+- imported payee
+- payee
+- date
+- notes
+- amount
+- amount (inflow)
+- amount (outflow)
 
 `imported payee` is different from `payee` in that it is _always_ the original text of the payee or description field when the transaction was imported. `payee` references a payee in Actual. This matters because it allows you to rename a payee before it is created in Actual. You can have several rules that all check `imported payee` and set the payee to something without worrying about them stepping on each other. (Conditions can't reliably check `payee` if previous rules changed it)
 
@@ -45,13 +45,13 @@ All strings are matched case-insensitive. An `imported payee` of "PuBlix" will m
 
 Actions can set the following fields:
 
-* payee
-* notes
-* date
-* amount
-* category
-* account
-* cleared
+- payee
+- notes
+- date
+- amount
+- category
+- account
+- cleared
 
 ## Automatic rules
 

@@ -4,7 +4,7 @@ title: 'Managing Credit Cards'
 
 Using a credit card in any budgeting software can be confusing, and Actual is no different. Of all the questions that are asked about budgeting, credit card usage is near the top of the list so don't feel bad if you're a little confused. We will try to walk through the process of using a credit card, paying a credit card, and carrying a balance on a credit card here.
 
-I have made several purchases on my credit card. I enter these transactions just like every other transaction and make sure to choose the **Credit Card** account in the ledger. I also make sure that the correct category is chosen. You'll notice that the account balance is **red** and negative.  Credit cards are debt, so our starting balance should be 0. Any transaction added to this account will spend money, therefore making the amount more negative.  If you are first starting out with Actual, be sure to enter your current balance as a negative number for the starting balance.
+I have made several purchases on my credit card. I enter these transactions just like every other transaction and make sure to choose the **Credit Card** account in the ledger. I also make sure that the correct category is chosen. You'll notice that the account balance is **red** and negative. Credit cards are debt, so our starting balance should be 0. Any transaction added to this account will spend money, therefore making the amount more negative. If you are first starting out with Actual, be sure to enter your current balance as a negative number for the starting balance.
 
 ![](/img/credit-1.png)
 

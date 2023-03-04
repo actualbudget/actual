@@ -26,4 +26,3 @@ Actual will automatically try to avoid duplicate transactions. This works best w
 After checking the **id**, Actual will look for transactions around the same date, with the same amount, and with a similar payee. If it thinks the transaction already exists, it will avoid creating a duplicate. This means you can manually enter a transaction, and later it will be matched when you import it from a file.
 
 It will always favor the imported transaction. It if matches a manually-entered transaction, it will update the date to match the imported transaction. **Keeping dates in sync with your bank is important** as it allows you compare the balance at any point in time with your bank.
-

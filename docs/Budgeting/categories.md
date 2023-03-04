@@ -62,8 +62,8 @@ If you don't have much experience tracking your finances yet, we recommend start
 
 The basic categories are:
 
-* **Food:** all grocery and restaurant spending.
-* **General:** everything else (you probably want to split this up over time, but having a general category is nice for a lot of miscellaneous expenses).
-* **Bills:** all bills that charge that same amount each month. Some people like to split this up too, but we think reports will eventually make this clearer.
-* **Bills (Flexible):** All bills that charge various amounts (power, water, bi-monthly bills, etc).
-* **Savings:** any transfers to savings accounts. These are treated as expenses because it's moving money out of the budget, but if you add your savings account on the budget you'll want to budget all that money accordingly instead.
+- **Food:** all grocery and restaurant spending.
+- **General:** everything else (you probably want to split this up over time, but having a general category is nice for a lot of miscellaneous expenses).
+- **Bills:** all bills that charge that same amount each month. Some people like to split this up too, but we think reports will eventually make this clearer.
+- **Bills (Flexible):** All bills that charge various amounts (power, water, bi-monthly bills, etc).
+- **Savings:** any transfers to savings accounts. These are treated as expenses because it's moving money out of the budget, but if you add your savings account on the budget you'll want to budget all that money accordingly instead.

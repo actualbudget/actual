@@ -3,7 +3,6 @@
 [terraform-guide]: ./Fly-terraform
 [ci-build]: https://github.com/actualbudget/actual-server/blob/master/.github/workflows/build.yml
 
-
 # Hosting Actual with [fly.io](https://fly.io)
 
 You should deploy your server so it's always running. [Fly.io](https://fly.io) provides an easy
@@ -16,6 +15,7 @@ step unclear, [contact us](/Contact) for support.
 
 Fly offers a variety of ways to get an application deployed on their infrastructure. We currently
 have community contributed documentation for the following deployment methods
+
 - Deploying [from a clone of the main git repository][git-guide]
 - Deploying [from a published Docker container image][image-guide]
 
@@ -42,11 +42,11 @@ engine should be tuned differently, you can open the hood and go to work with yo
 approach also provides you a car, but the engine bay is sealed. If you want different cylinder
 timing, you'll need a new image.
 
-<a name="deployment_1" />¹ *You can find the image build workflow [here][ci-build]*
+<a name="deployment_1" />¹ _You can find the image build workflow [here][ci-build]_
 
 ## Frequent Issues
 
-- **Q.** *I have deployed actual to Fly.io but I am being charged, why is this?*
+- **Q.** _I have deployed actual to Fly.io but I am being charged, why is this?_
 
   **A.** While we wouldn’t know for certain without seeing your configuration, it is likely that during
   deployment you created a Postgres database. Actual doesn’t need this so you can just delete it and

@@ -1,5 +1,5 @@
 ---
-title : 'Syncing Across Devices'
+title: 'Syncing Across Devices'
 ---
 
 Actual is a different kind of app. Instead of storing all of your data on the internet by default, it stores all of your data locally. That means it works regardless of your network connection, and you always have direct access to your data.
@@ -28,12 +28,12 @@ Data on your local device is still unencrypted. We recommend full disk encryptio
 
 There are some things to consider with end-to-end encryption:
 
-* **Pro:** Your data is fully secure and nobody except you can read it
-* **Pro:** If you don't want to sync across devices, this still allows you keep a fully encrypted backup of your data
-* **Pro:** If you want to share the server with someone else, you can use different passwords to encrypt separate budget files, and you won’t be able to access each other’s budgets.
-* **Con:** If you lose your local data copy and forget your password, you can never recover your data
-* **Con:** It is not possible to turn off encryption.  This is a one way process.  If you would like to move back to an unencrypted file after enabling encryption, you can use the steps in the [Backup](/docs/Backup-Restore/Backups.md) and [Restore](/docs/Backup-Restore/Restore.md) sections.
-* **Con:** There is a minor performance hit because of encoding & decoding your data whenever syncing
+- **Pro:** Your data is fully secure and nobody except you can read it
+- **Pro:** If you don't want to sync across devices, this still allows you keep a fully encrypted backup of your data
+- **Pro:** If you want to share the server with someone else, you can use different passwords to encrypt separate budget files, and you won’t be able to access each other’s budgets.
+- **Con:** If you lose your local data copy and forget your password, you can never recover your data
+- **Con:** It is not possible to turn off encryption. This is a one way process. If you would like to move back to an unencrypted file after enabling encryption, you can use the steps in the [Backup](/docs/Backup-Restore/Backups.md) and [Restore](/docs/Backup-Restore/Restore.md) sections.
+- **Con:** There is a minor performance hit because of encoding & decoding your data whenever syncing
 
 Note: even if you don’t have the password, you can still remove an encrypted file from the server.
 
@@ -53,9 +53,9 @@ Since your data is local to each device and they all might not be up-to-date, **
 
 A few scenarios where you want a sync reset:
 
-* You restore from a backup. You wouldn't want to restore from a backup, only to find that it synced back up to where you were before! You want syncing to start fresh from the backup.
-* You turn on end-to-end encryption. If you do this, the server needs to forget about any unencrypted data it already knows about. This requires starting fresh.
-* In the worst case scenario, you have data that is out of sync. This should never happen, but just in case it ever does, you can manually reset sync from the file that you want to treat as the "true" version.
+- You restore from a backup. You wouldn't want to restore from a backup, only to find that it synced back up to where you were before! You want syncing to start fresh from the backup.
+- You turn on end-to-end encryption. If you do this, the server needs to forget about any unencrypted data it already knows about. This requires starting fresh.
+- In the worst case scenario, you have data that is out of sync. This should never happen, but just in case it ever does, you can manually reset sync from the file that you want to treat as the "true" version.
 
 Resetting sync will clear all syncing data from the server, upload your existing data as the "true" version, and your device gets a new "sync id". All devices syncing data must have the same sync id.
 

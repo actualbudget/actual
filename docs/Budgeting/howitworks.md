@@ -19,7 +19,7 @@ If you are **creating a budget for the first time**, here's how that works:
 1. Your total **account balance** is available to budget. It knows how much cash you have currently, and that is all you can currently budget. (Remember, your budget is always based on your current money!)
 2. Click on the **budgeted** column of a category and enter a number for what you think you'll spend that month. **Tip**: don't overthink it. You can always adjust it later.
 3. Continue to budget until the **To budget** amount is **0**.
-4. You can also [customize the categories](/budgeting/categories/).	
+4. You can also [customize the categories](/budgeting/categories/).
 
 ## The budgeting workflow
 
@@ -43,16 +43,16 @@ When you add income for a month, it becomes immediately available to budget. You
 
 Most likely, a common workflow will be to "hold" income you make this month for next month's budget. **Optionally, to hold money instead of budgeting it for a month:**
 
- 1. Click the **To Budget** amount.
- 2. Select **Hold for next month** in the menu.
+1.  Click the **To Budget** amount.
+2.  Select **Hold for next month** in the menu.
 
- ![](/img/buffer-1.png)
+![](/img/buffer-1.png)
 
- 3. Press `Enter` to hold all available money, or enter a custom amount to hold.
+3.  Press `Enter` to hold all available money, or enter a custom amount to hold.
 
 This doesn't do anything except takes out money from the **To Budget** amount for that month, allowing you to "zero it out" and mark it to be used for later. That money will appear in next month's **To Budget**. You can also just leave the **To Budget** amount alone.
 
-It is possible to hold money multiple months ahead.  If you do this, those dollars will be delay to be budgeted until the last month of the hold.  If you need to use that money in the current month to cover over spending, use the **Reset Next Months Buffer** button to bring that money to the current month.  This needs to be done for each month there is a hold.  
+It is possible to hold money multiple months ahead. If you do this, those dollars will be delay to be budgeted until the last month of the hold. If you need to use that money in the current month to cover over spending, use the **Reset Next Months Buffer** button to bring that money to the current month. This needs to be done for each month there is a hold.
 
 :::note
 If you enter a new month and have a negative "To Be Budgeted" amount and you're sure it should be positive, try resetting next month's buffer to bring money that may be held back to the current month.
@@ -97,9 +97,6 @@ Sometimes you want to keep a negative balance in a category across months. The m
 2. Select **Keep negative spending in category**
 3. For all future months, a negative balance will stay in the category
 
-
-
-
 ## Recommended workflow for new users
 
 This might sound complex, but it's really not! You can get as detailed as you want, but it's still very effective if you keep it simple. If you're not sure where to start, we recommend this simple workflow:
@@ -107,10 +104,10 @@ This might sound complex, but it's really not! You can get as detailed as you wa
 1. We recommend opening a savings account if you don't have one. Add it in Actual as an off-budget account.
 2. Stick with the basic categories (you will probably add a few more, but don't overdo it).
 3. Try to budget less than what you are making so that you are saving money each month.
-3. When the month ends, copy last month's budget. Whatever is leftover in **To budget** is the amount of money that you saved.
-4. Note that this automatically will cover overspending from last month by taking it out of the leftover **To budget** amount. You're effectively taking out of savings.
-5. Budget the leftover **To budget** amount to the **Savings** category
-6. Transfer the leftover amount to your savings account and and categorize the transactions with the **Savings** category
+4. When the month ends, copy last month's budget. Whatever is leftover in **To budget** is the amount of money that you saved.
+5. Note that this automatically will cover overspending from last month by taking it out of the leftover **To budget** amount. You're effectively taking out of savings.
+6. Budget the leftover **To budget** amount to the **Savings** category
+7. Transfer the leftover amount to your savings account and and categorize the transactions with the **Savings** category
 
 If you don't have a savings account, you can simply skip step 6. The **Savings** category will build up a balance and represent the savings that you are keeping in your account.
 

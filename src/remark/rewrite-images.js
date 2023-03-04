@@ -1,5 +1,5 @@
 const visit = require('unist-util-visit-parents');
-const path = require('node:path')
+const path = require('node:path');
 
 const plugin = () => {
   const transformer = async (ast, file) => {
@@ -12,19 +12,41 @@ const plugin = () => {
       node.value = `<img img={require(${JSON.stringify(node.url)})} />`;
       const parent = ancestors[ancestors.length - 1];
       if (parent.type === 'paragraph') {
-        if (parent.children.length === 1 || parent.children.every(c => c == node || (c.type === 'text' && c.value.trim() === ''))) {
+        if (
+          parent.children.length === 1 ||
+          parent.children.every(
+            c => c == node || (c.type === 'text' && c.value.trim() === ''),
+          )
+        ) {
           parent.type = 'jsx';
           parent.value = node.value;
           parent.children = [];
         } else {
           const fileName = path.relative(file.cwd, file.path);
-          const pos = node.position.start.line + ':' + node.position.start.column;
-          console.error(JSON.stringify(parent, (key, value) => key === 'position' ? undefined : value, 2));
-          file.fail(`rewrite-images: ${fileName}:${pos} Cannot convert image to JSX: images must be in their own paragraph`);
+          const pos =
+            node.position.start.line + ':' + node.position.start.column;
+          console.error(
+            JSON.stringify(
+              parent,
+              (key, value) => (key === 'position' ? undefined : value),
+              2,
+            ),
+          );
+          file.fail(
+            `rewrite-images: ${fileName}:${pos} Cannot convert image to JSX: images must be in their own paragraph`,
+          );
         }
       } else {
-        console.error(JSON.stringify(parent, (key, value) => key === 'position' ? undefined : value, 2));
-        file.fail(`rewrite-images: Cannot convert image to JSX: Expected parent to be a paragraph, got ${parent.type}`);
+        console.error(
+          JSON.stringify(
+            parent,
+            (key, value) => (key === 'position' ? undefined : value),
+            2,
+          ),
+        );
+        file.fail(
+          `rewrite-images: Cannot convert image to JSX: Expected parent to be a paragraph, got ${parent.type}`,
+        );
       }
     });
   };

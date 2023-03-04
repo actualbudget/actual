@@ -11,22 +11,25 @@ should be comfortable with using the command line to set it up though.
 
 1. [Install the `flyctl`](https://fly.io/docs/flyctl/installing/) utility.
 1. [Create an account](https://fly.io/app/sign-in). You can also create your account by running
+
    ```sh
    fly auth signup
    ```
 
    Although you are required to enter payment details, the resources required to run Actual are
    within the free tier, and you shouldn't be charged.
+
 1. Copy
    [`fly.template.toml`](https://github.com/actualbudget/actual-server/raw/master/fly.template.toml)
    to an empty local directory, and rename the file `fly.toml`.
 
-   - *Optional*: Open `fly.toml` and customize the app name on the first line of the file. e.g.:
+   - _Optional_: Open `fly.toml` and customize the app name on the first line of the file. e.g.:
      ```toml
      app = "actual-budget"
      ```
-     App names must be *globally* unique, so there is a meaningful probability that your chosen name
+     App names must be _globally_ unique, so there is a meaningful probability that your chosen name
      is unavailable. Later steps allow the fly.io system to generate a unique name for you.
+
 1. <a name="mount_config" />Persisting data means the server will retain your configuration and
    budget. Without this, each deployment or restart will wipe away all the data on the server. You
    would need to intialize (also known and listed as 'bootstrapping' in the user interface) the
@@ -34,11 +37,13 @@ should be comfortable with using the command line to set it up though.
    mount a volume.
 
    Open `fly.toml` in a text editor and add the following:
+
    ```toml
    [mounts]
    source="actual_data"
    destination="/data"
-    ```
+   ```
+
 1. Create your app using the following command:
    ```sh
    fly launch --image jlongster/actual-server:latest
@@ -83,8 +88,9 @@ somewhere that persists. With [fly.io](https://fly.io) we can create a [volume](
 1. Select a deployment region. The closest region should be highlighted by default, so you may
    simply hit `enter` if you do not have specific needs.
 
-   *Fly volumes are encrypted at rest by default. See the fly.io docs if you wish to disable this,
-   though we do ***not*** recommend doing so.*
+   \*Fly volumes are encrypted at rest by default. See the fly.io docs if you wish to disable this,
+   though we do **_not_** recommend doing so.\*
+
 1. If you have not already added a mount to your fly config, follow [the instructions above](#mount_config)
    to do so.
 1. Deploy your application:
@@ -95,6 +101,7 @@ somewhere that persists. With [fly.io](https://fly.io) we can create a [volume](
 
 You should have a running app now! Actual will check if the `/data`[¹](#note_1) directory exists and use it
 automatically. You can open the app using
+
 ```sh
 fly apps open
 ```
@@ -102,23 +109,25 @@ fly apps open
 ## Updating Actual
 
 Whenever you want to update Actual, return to the directory containing your `fly.toml` file and run
+
 ```sh
 fly deploy
 ```
 
 If you wish to change the image source (eg to run an unstable build, or a specific tag), run
+
 ```sh
 fly deploy --image [desired image tag]
 ```
+
 with `[desired image tag]` replaced with your desired tag.
 
-<a name="note_1" />¹ *You can also configure the data dir with the `ACTUAL_USER_FILES` environment
-variable.*
-
+<a name="note_1" />¹ _You can also configure the data dir with the `ACTUAL_USER_FILES` environment
+variable._
 
 ## Frequent Issues
 
-- **Q.** *I have deployed actual to Fly.io but I am being charged, why is this?*
+- **Q.** _I have deployed actual to Fly.io but I am being charged, why is this?_
 
   **A.** While we wouldn’t know for certain without seeing your configuration, it is likely that during
   deployment you created a Postgres database. Actual doesn’t need this so you can just delete it and

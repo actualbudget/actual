@@ -1,5 +1,5 @@
 ---
-title: "Migration from Full Sync to Simple Sync"
+title: 'Migration from Full Sync to Simple Sync'
 ---
 
 The Full Sync method used at the launch of the self-hosted version of Actual had some reliability issues with some users and so a Simple Sync approach has replaced this. If you set up Actual before October 2022, you will be likely using the Full Sync method and upgrading Actual will require you to complete the following steps to migrate your transaction history before using Simple Sync.

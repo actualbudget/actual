@@ -1,14 +1,12 @@
-name: "🔧 Change Request"
+name: '🔧 Change Request'
 description: Create a new ticket for a change to the site, this doesn't include documentation.
-title: "🔧 [CHANGE] - <title>"
-labels: [
-  "change"
-]
+title: '🔧 [CHANGE] - <title>'
+labels: ['change']
 body:
   - type: textarea
     id: description
     attributes:
-      label: "Description"
+      label: 'Description'
       description: Please enter an explicit description of what you would like to change
       placeholder: Short and explicit description of your change idea...
     validations:
@@ -16,7 +14,7 @@ body:
   - type: textarea
     id: expbehav
     attributes:
-      label: "Expected behavior"
+      label: 'Expected behavior'
       description: Please explain how your change should work
       placeholder: Short and explicit description of your how this change should work.
     validations:

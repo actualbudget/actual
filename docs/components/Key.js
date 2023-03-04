@@ -46,7 +46,7 @@ export default function Key({ mod, mods = [], k }) {
           acc.push(<span className="ml-1"></span>);
         }
         acc.push(
-          <div className="bg-gray-300 inline-block rounded px-1">{key}</div>
+          <div className="bg-gray-300 inline-block rounded px-1">{key}</div>,
         );
         return acc;
       }, [])}

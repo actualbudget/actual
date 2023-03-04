@@ -26,29 +26,31 @@ const theme = {
     top: 0,
     left: 0,
   },
-}
+};
 
 export default function Image({ img, ...props }) {
   if (img) {
-    const { src, ...rest } = img
-    const match = src.src.match(/@(\d+)x/)
+    const { src, ...rest } = img;
+    const match = src.src.match(/@(\d+)x/);
     if (match) {
-      const scale = parseInt(match[1])
-      return <IdealImage
-        img={{
-          src: {
-            ...src,
-            width: src.width / scale,
-            height: src.height / scale
-          },
-          ...rest
-        }}
-        theme={theme}
-        {...props}
-      />
+      const scale = parseInt(match[1]);
+      return (
+        <IdealImage
+          img={{
+            src: {
+              ...src,
+              width: src.width / scale,
+              height: src.height / scale,
+            },
+            ...rest,
+          }}
+          theme={theme}
+          {...props}
+        />
+      );
     }
-    return <IdealImage img={img} theme={theme} {...props} />
+    return <IdealImage img={img} theme={theme} {...props} />;
   } else {
-    return <img {...props} />
+    return <img {...props} />;
   }
 }

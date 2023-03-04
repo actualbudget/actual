@@ -59,4 +59,3 @@ You can individually select payees and merge them if you like, but filtering & m
 ## Transfer payees
 
 [Transfers](/accounts/transfers/) are just special payees that indicate which account to transfer to/from. Since they are payees, you can create rules like normal which will automatically create transfers. Find them at the bottom of the **Manage Payees** screen if you want to create custom rules.
-

@@ -228,7 +228,7 @@ function Table({ style, headers, className, children }) {
     <table className={`text-sm ${className}`} style={style}>
       <thead>
         <tr>
-          {headers.map((header) => (
+          {headers.map(header => (
             <th className="text-gray-900 font-thin">{header}</th>
           ))}
         </tr>
@@ -241,7 +241,7 @@ function Table({ style, headers, className, children }) {
 export function PrimitiveTypeList() {
   return (
     <Table headers={['Name', 'Type', 'Notes']} style={{ maxWidth: 700 }}>
-      {Object.keys(types).map((name) => {
+      {Object.keys(types).map(name => {
         return (
           <PrimitiveType
             name={types[name].name}
@@ -276,7 +276,7 @@ export function StructType({ name, fields }) {
         showBorder={true}
         headers={['Field', 'Type', 'Required?', 'Notes']}
       >
-        {fields.map((field) => {
+        {fields.map(field => {
           return (
             <tr>
               <td valign="top">
@@ -305,9 +305,7 @@ function Argument({ arg }) {
       <span>
         {arg.name ? arg.name + ': ' : ''}
         {'{ '}
-        {arg.properties
-          .map((prop) => <Argument arg={prop} />)
-          .map(insertCommas)}
+        {arg.properties.map(prop => <Argument arg={prop} />).map(insertCommas)}
         {' }'}
       </span>
     );
@@ -337,7 +335,7 @@ export function Method({ name, args, returns = 'Promise<null>', children }) {
     <p className="method">
       <div className="p-4 pb-6 rounded border-b bg-gray-100 overflow-auto">
         <code className="text-blue-800">
-          {name}({args.map((arg) => <Argument arg={arg} />).map(insertCommas)}){' '}
+          {name}({args.map(arg => <Argument arg={arg} />).map(insertCommas)}){' '}
           <span className="text-gray-500">&rarr; {returns}</span>
         </code>
       </div>

@@ -11,7 +11,9 @@
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids"
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "format": "prettier --write .",
+    "lint": "prettier --check ."
   },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "^0.11.0",
@@ -27,7 +29,8 @@
     "react-dom": "^17.0.2"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.3.1"
+    "@docusaurus/module-type-aliases": "^2.3.1",
+    "prettier": "^2.8.4"
   },
   "browserslist": {
     "production": [

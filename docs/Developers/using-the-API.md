@@ -74,8 +74,8 @@ async function run() {
     await api.addTransactions(
       acctId,
       data.transactions
-        .filter((t) => t.acctId === acctId)
-        .map(convertTransaction)
+        .filter(t => t.acctId === acctId)
+        .map(convertTransaction),
     );
   }
 }

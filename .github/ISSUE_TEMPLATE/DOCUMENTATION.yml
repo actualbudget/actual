@@ -1,14 +1,12 @@
-name: "🗄️ Documentation"
+name: '🗄️ Documentation'
 description: Create a new ticket for documentation you would like to create or would like creating.
-title: "🗄️ [Documentation] - <title>"
-labels: [
-  "documentation"
-]
+title: '🗄️ [Documentation] - <title>'
+labels: ['documentation']
 body:
   - type: textarea
     id: description
     attributes:
-      label: "Description"
+      label: 'Description'
       description: Please enter an explicit description of what you would like documenting
       placeholder: Short and explicit description of your idea...
     validations:
@@ -16,7 +14,7 @@ body:
   - type: textarea
     id: screenshot
     attributes:
-      label: "Screenshots"
+      label: 'Screenshots'
       description: If applicable, add screenshots to help explain what you would like documenting.
       value: |
         ![DESCRIPTION](LINK.png)
@@ -26,7 +24,7 @@ body:
   - type: dropdown
     id: category
     attributes:
-      label: "Category"
+      label: 'Category'
       description: What category does this idea fall into?
       multiple: true
       options:

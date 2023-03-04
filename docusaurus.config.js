@@ -6,7 +6,6 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 module.exports = {
-
   title: 'Actual Budget Documentation',
   tagline: 'Dinosaurs are cool',
   url: 'https://actualbudget.github.io',
@@ -38,11 +37,8 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/actualbudget/docs/tree/master/',
-          beforeDefaultRemarkPlugins: [
-            require('./src/remark/rewrite-images')
-          ],
+          editUrl: 'https://github.com/actualbudget/docs/tree/master/',
+          beforeDefaultRemarkPlugins: [require('./src/remark/rewrite-images')],
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -91,9 +87,9 @@ module.exports = {
               {
                 label: 'Discord',
                 href: 'https://discord.gg/8JfAXSgfRf',
-              }
+              },
             ],
-          }
+          },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Actual Budget. Built with Docusaurus.`,
       },
@@ -101,20 +97,18 @@ module.exports = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
       },
-    }
-    ),
-    plugins: [
-      [
-        require.resolve("@cmfcmf/docusaurus-search-local"),
-        {
-          indexDocs: true,
-          indexDocSidebarParentCategories: 0,
-          indexPages: false,
-          language: "en",
-          style: undefined,
-          maxSearchResults: 8,
-          lunr: {
-
+    }),
+  plugins: [
+    [
+      require.resolve('@cmfcmf/docusaurus-search-local'),
+      {
+        indexDocs: true,
+        indexDocSidebarParentCategories: 0,
+        indexPages: false,
+        language: 'en',
+        style: undefined,
+        maxSearchResults: 8,
+        lunr: {
           tokenizerSeparator: /[\s\-]+/,
 
           b: 0.75,
@@ -126,8 +120,8 @@ module.exports = {
           tagsBoost: 3,
           parentCategoriesBoost: 2, // Only used when indexDocSidebarParentCategories > 0
         },
-        },
-      ],
-      ['@docusaurus/plugin-ideal-image', { disableInDev: false }],
+      },
     ],
+    ['@docusaurus/plugin-ideal-image', { disableInDev: false }],
+  ],
 };

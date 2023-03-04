@@ -8,17 +8,17 @@ While we don't maintain this tool, you can also use https://json-exporter-for-yn
 
 ### Import json file
 
-* Open Actual
-* Select the drop down menu and **Close File**
-* Select **Import file**
+- Open Actual
+- Select the drop down menu and **Close File**
+- Select **Import file**
 
 ![](/img/actual-config-10.png)
 
-* Select **nYnab**
+- Select **nYnab**
 
 ![](/img/actual-config-12.png)
 
-* Choose the exported json file
+- Choose the exported json file
 
 ## Method 2: Beta export and import tools
 
@@ -30,7 +30,7 @@ To run:
 npx @actual-app/import-ynab5 <path-to-ynab5-file>
 ```
 
-***Read below for how to get your YNAB5 file.***
+**_Read below for how to get your YNAB5 file._**
 
 <!-- Almost everything should be working now.
 
@@ -62,7 +62,6 @@ If you haven't already got an API key, you'll need to:
 The API key is only shown once, so make sure you copy it down somewhere! More information on how to access the YNAB API can be found at https://api.youneedabudget.com/
 :::
 
-
 Now open a terminal window / command prompt, and enter:
 
 ```
@@ -91,26 +90,28 @@ This will install the required libraries for the importer.
 
 #### Running the importer
 
-* Have Actual running locally on your computer
-* Open a terminal / command prompt in the unzipped directory from the previous steps
-* Run the following command, substituting the /path/to with where ever you saved the budget.json file:
+- Have Actual running locally on your computer
+- Open a terminal / command prompt in the unzipped directory from the previous steps
+- Run the following command, substituting the /path/to with where ever you saved the budget.json file:
 
 ```
 npx @actual-app/import-ynab5 /path/to/budget.json
 ```
 
-If you have checked out this code and running it locally, do 
+If you have checked out this code and running it locally, do
+
 ```
 node index.js
-``` 
+```
+
 instead of the npx command.
 Refresh the cache.
 
 Once the import is complete, it may not show all the up-to-date information correctly. In order to refresh the view:
 
-* Click the gear icon next to the budget name
-* Click Advanced -> Reset budget cache
-* Restart Actual
+- Click the gear icon next to the budget name
+- Click Advanced -> Reset budget cache
+- Restart Actual
 
 ### Contributions
 
