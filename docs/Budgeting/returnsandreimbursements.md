@@ -51,7 +51,9 @@ Ultimately this is a personal decision.  If you are capable, there is less short
 
 ![](/img/reimbursement-1.png)
 
-![](/img/reimbursement-2.png) Look for the red arrow when you allow over spending to carry from month to month. Check out the [overspending](/budgeting/howitworks#overspending) section in "How Budgeting Works" for an explanation of this feature.
+![](/img/reimbursement-2.png)
+
+Look for the red arrow when you allow over spending to carry from month to month. Check out the [overspending](/budgeting/howitworks#overspending) section in "How Budgeting Works" for an explanation of this feature.
 
 ### Adding the reimbursement transaction
 

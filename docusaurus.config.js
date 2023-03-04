@@ -40,6 +40,9 @@ module.exports = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/actualbudget/docs/tree/master/',
+          beforeDefaultRemarkPlugins: [
+            require('./src/remark/rewrite-images')
+          ],
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -125,5 +128,6 @@ module.exports = {
         },
         },
       ],
+      ['@docusaurus/plugin-ideal-image', { disableInDev: false }],
     ],
 };

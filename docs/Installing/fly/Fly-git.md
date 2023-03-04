@@ -29,20 +29,35 @@ Download git for Windows from here: [https://git-scm.com/download/win](https://g
 1. Copy the settings as they are below and click next, next...
 
    ![](/img/git-install-2.png)
+
    ![](/img/git-install-3.png)
+
    ![](/img/git-install-4.png)
+
    ![](/img/git-install-5.png)
+
    ![](/img/git-install-6.png)
+
    ![](/img/git-install-7.png)
+
    ![](/img/git-install-8.png)
+
    ![](/img/git-install-9.png)
+
    ![](/img/git-install-10.png)
+
    ![](/img/git-install-11.png)
+
    ![](/img/git-install-12.png)
+
    ![](/img/git-install-13.png)
+
    ![](/img/git-install-14.png)
+
    ![](/img/git-install-15.png)
+
    ![](/img/git-install-16.png)
+
 1. Then git should begin installing:
 
    ![](/img/git-install-17.png)
