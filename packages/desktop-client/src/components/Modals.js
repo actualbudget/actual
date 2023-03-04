@@ -15,6 +15,7 @@ import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAcc
 import EditField from 'loot-design/src/components/modals/EditField';
 import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
 import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
+import NordigenExternalMsg from 'loot-design/src/components/modals/NordigenExternalMsg';
 import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
 import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 
@@ -82,10 +83,10 @@ function Modals({
         <Route path="/select-linked-accounts">
           <SelectLinkedAccounts
             modalProps={modalProps}
-            institution={options.institution}
-            publicToken={options.publicToken}
             accounts={options.accounts}
-            upgradingId={options.upgradingId}
+            requisitionId={options.requisitionId}
+            actualAccounts={accounts.filter(acct => acct.closed === 0)}
+            upgradingAccountId={options.upgradingAccountId}
             actions={actions}
           />
         </Route>
@@ -202,6 +203,23 @@ function Modals({
                 onClose={() => {
                   options.onClose && options.onClose();
                   send('poll-web-token-stop');
+                }}
+                onSuccess={options.onSuccess}
+              />
+            );
+          }}
+        />
+        <Route
+          path="/nordigen-external-msg"
+          render={() => {
+            return (
+              <NordigenExternalMsg
+                modalProps={modalProps}
+                actions={actions}
+                onMoveExternal={options.onMoveExternal}
+                onClose={() => {
+                  options.onClose && options.onClose();
+                  send('nordigen-poll-web-token-stop');
                 }}
                 onSuccess={options.onSuccess}
               />
