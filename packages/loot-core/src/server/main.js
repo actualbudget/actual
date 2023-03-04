@@ -799,7 +799,7 @@ handlers['accounts-link'] = async function ({
   ]);
 
   // Get all the available accounts and find the selected one
-  let accounts = await bankSync.getAccounts(userId, userKey, bankId);
+  let accounts = await bankSync.getNordigenAccounts(userId, userKey, bankId);
   let account = accounts.find(acct => acct.account_id === accountId);
 
   await db.update('accounts', {
@@ -830,6 +830,57 @@ handlers['accounts-link'] = async function ({
   return 'ok';
 };
 
+handlers['nordigen-accounts-link'] = async function ({
+  requisitionId,
+  account,
+  upgradingId,
+}) {
+  let id;
+  let bank = await link.findOrCreateBank(account.institution, requisitionId);
+
+  if (upgradingId) {
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+      upgradingId,
+    ]);
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: account.account_id,
+      bank: bank.id,
+    });
+  } else {
+    id = uuid.v4Sync();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: account.account_id,
+      mask: account.mask,
+      name: account.name,
+      official_name: account.official_name,
+      type: account.type,
+      bank: bank.id,
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncNordigenAccount(
+    undefined,
+    undefined,
+    id,
+    account.account_id,
+    bank.bank_id,
+  );
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+};
+
 handlers['accounts-connect'] = async function ({
   institution,
   publicToken,
@@ -838,6 +889,17 @@ handlers['accounts-connect'] = async function ({
 }) {
   let bankId = await link.handoffPublicToken(institution, publicToken);
   let ids = await link.addAccounts(bankId, accountIds, offbudgetIds);
+  return ids;
+};
+
+handlers['nordigen-accounts-connect'] = async function ({
+  institution,
+  publicToken,
+  accountIds,
+  offbudgetIds,
+}) {
+  let bankId = await link.handoffPublicToken(institution, publicToken);
+  let ids = await link.addNordigenAccounts(bankId, accountIds, offbudgetIds);
   return ids;
 };
 
@@ -1122,6 +1184,176 @@ handlers['accounts-sync'] = async function ({ id }) {
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
 };
 
+handlers['nordigen-poll-web-token'] = async function ({
+  upgradingAccountId,
+  requisitionId,
+}) {
+  let userToken = await asyncStorage.getItem('user-token');
+
+  if (userToken) {
+    let startTime = Date.now();
+    stopPolling = false;
+
+    async function getData(cb) {
+      if (stopPolling) {
+        return;
+      }
+
+      if (Date.now() - startTime >= 1000 * 60 * 10) {
+        cb('timeout');
+        return;
+      }
+
+      let data = await post(
+        getServer().NORDIGEN_SERVER + '/get-accounts',
+        {
+          upgradingAccountId,
+          requisitionId,
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
+
+      if (data) {
+        if (data.error) {
+          cb('unknown');
+        } else {
+          cb(null, data);
+        }
+      } else {
+        setTimeout(() => getData(cb), 3000);
+      }
+    }
+
+    return new Promise(resolve => {
+      getData((error, data) => {
+        if (error) {
+          resolve({ error });
+        } else {
+          resolve({ data });
+        }
+      });
+    });
+  }
+
+  return null;
+};
+
+handlers['nordigen-poll-web-token-stop'] = async function () {
+  stopPolling = true;
+  return 'ok';
+};
+
+handlers['nordigen-create-web-token'] = async function ({
+  upgradingAccountId,
+  institutionId,
+  accessValidForDays,
+}) {
+  let userToken = await asyncStorage.getItem('user-token');
+
+  if (userToken) {
+    try {
+      return await post(
+        getServer().NORDIGEN_SERVER + '/create-web-token',
+        {
+          upgradingAccountId,
+          institutionId,
+          accessValidForDays,
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
+    } catch (error) {
+      console.error(error);
+      return { error: 'failed' };
+    }
+  }
+  return { error: 'unauthorized' };
+};
+
+handlers['nordigen-accounts-sync'] = async function ({ id }) {
+  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
+    'user-id',
+    'user-key',
+  ]);
+  let accounts = await db.runQuery(
+    `SELECT a.*, b.bank_id as bankId FROM accounts a
+         LEFT JOIN banks b ON a.bank = b.id
+         WHERE a.tombstone = 0 AND a.closed = 0`,
+    [],
+    true,
+  );
+
+  if (id) {
+    accounts = accounts.filter(acct => acct.id === id);
+  }
+
+  let errors = [];
+  let newTransactions = [];
+  let matchedTransactions = [];
+  let updatedAccounts = [];
+
+  for (var i = 0; i < accounts.length; i++) {
+    const acct = accounts[i];
+    if (acct.bankId) {
+      try {
+        const res = await bankSync.syncNordigenAccount(
+          userId,
+          userKey,
+          acct.id,
+          acct.account_id,
+          acct.bankId,
+        );
+        let { added, updated } = res;
+
+        newTransactions = newTransactions.concat(added);
+        matchedTransactions = matchedTransactions.concat(updated);
+
+        if (added.length > 0 || updated.length > 0) {
+          updatedAccounts = updatedAccounts.concat(acct.id);
+        }
+      } catch (err) {
+        if (err.type === 'BankSyncError') {
+          errors.push({
+            type: 'SyncError',
+            accountId: acct.id,
+            message: 'Failed syncing account "' + acct.name + '".',
+            category: err.category,
+            code: err.code,
+          });
+        } else if (err instanceof PostError && err.reason !== 'internal') {
+          errors.push({
+            accountId: acct.id,
+            message: `Account "${acct.name}" is not linked properly. Please link it again`,
+          });
+        } else {
+          errors.push({
+            accountId: acct.id,
+            message:
+              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
+            internal: err.stack,
+          });
+
+          err.message = 'Failed syncing account: ' + err.message;
+
+          captureException(err);
+        }
+      }
+    }
+  }
+
+  if (updatedAccounts.length > 0) {
+    connection.send('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+  }
+
+  return { errors, newTransactions, matchedTransactions, updatedAccounts };
+};
+
 handlers['transactions-import'] = mutator(function ({
   accountId,
   transactions,
@@ -1167,20 +1399,28 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     [bankId],
   );
 
-  if (count === 0) {
-    // No more accounts are associated with this bank. We can remove
-    // it from Plaid.
+  // No more accounts are associated with this bank. We can remove
+  // it from Nordigen.
+  let userToken = await asyncStorage.getItem('user-token');
 
-    let [[, userId], [, key]] = await asyncStorage.multiGet([
-      'user-id',
-      'user-key',
-    ]);
-
-    await post(getServer().PLAID_SERVER + '/remove-access-token', {
-      userId,
-      key,
-      item_id: bankId,
-    });
+  if (userToken && count === 0) {
+    let { bank_id: requisitionId } = await db.first(
+      'SELECT bank_id FROM banks WHERE id = ?',
+      [bankId],
+    );
+    try {
+      await post(
+        getServer().NORDIGEN_SERVER + '/remove-account',
+        {
+          requisitionId: requisitionId,
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
+    } catch (error) {
+      console.log({ error });
+    }
   }
 
   return 'ok';

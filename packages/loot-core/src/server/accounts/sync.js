@@ -1,3 +1,4 @@
+import asyncStorage from '../../platform/server/asyncStorage';
 import * as monthUtils from '../../shared/months';
 import {
   makeChild as makeChildTransaction,
@@ -75,6 +76,31 @@ export async function getAccounts(userId, userKey, id) {
   return accounts;
 }
 
+export async function getNordigenAccounts(userId, userKey, id) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (userToken) {
+    let res = await post(
+      getServer().NORDIGEN_SERVER + '/accounts',
+      {
+        userId,
+        key: userKey,
+        item_id: id,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    let { accounts } = res;
+
+    accounts.forEach(acct => {
+      acct.balances.current = getAccountBalance(acct);
+    });
+
+    return accounts;
+  }
+}
+
 export function fromPlaid(trans) {
   return {
     imported_id: trans.transaction_id,
@@ -149,6 +175,52 @@ async function downloadTransactions(
   };
 }
 
+async function downloadNordigenTransactions(
+  userId,
+  userKey,
+  acctId,
+  bankId,
+  since,
+  count,
+) {
+  let userToken = await asyncStorage.getItem('user-token');
+  if (userToken) {
+    const endDate = new Date().toISOString().split('T')[0];
+
+    const res = await post(
+      getServer().NORDIGEN_SERVER + '/transactions',
+      {
+        userId: userId,
+        key: userKey,
+        requisitionId: bankId,
+        accountId: acctId,
+        startDate: since,
+        endDate,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    if (res.error_code) {
+      throw BankSyncError(res.error_type, res.error_code);
+    }
+
+    const {
+      transactions: { booked },
+      balances,
+      startingBalance,
+    } = res;
+
+    return {
+      transactions: booked,
+      accountBalances: balances,
+      startingBalance,
+    };
+  }
+  return;
+}
+
 async function resolvePayee(trans, payeeName, payeesToCreate) {
   if (trans.payee == null && payeeName) {
     // First check our registry of new payees (to avoid a db access)
@@ -220,6 +292,90 @@ async function normalizeTransactions(
   return { normalized, payeesToCreate };
 }
 
+async function normalizeNordigenTransactions(transactions, acctId) {
+  let payeesToCreate = new Map();
+
+  let normalized = [];
+  for (let trans of transactions) {
+    if (!trans.date) {
+      trans.date = trans.valueDate;
+    }
+
+    if (!trans.amount) {
+      trans.amount = trans.transactionAmount.amount;
+    }
+
+    // Validate the date because we do some stuff with it. The db
+    // layer does better validation, but this will give nicer errors
+    if (trans.date == null) {
+      throw new Error('`date` is required when adding a transaction');
+    }
+
+    let payee_name;
+    if (trans.amount >= 0) {
+      const nameParts = [];
+      nameParts.push(
+        title(
+          trans.debtorName || trans.remittanceInformationUnstructured || '',
+        ),
+      );
+      if (trans.debtorAccount && trans.debtorAccount.iban) {
+        nameParts.push(
+          '(' +
+            trans.debtorAccount.iban.slice(0, 4) +
+            ' XXX ' +
+            trans.debtorAccount.iban.slice(-4) +
+            ')',
+        );
+      }
+      payee_name = nameParts.join(' ');
+    } else {
+      const nameParts = [];
+      nameParts.push(
+        title(
+          trans.creditorName || trans.remittanceInformationUnstructured || '',
+        ),
+      );
+      if (trans.creditorAccount && trans.creditorAccount.iban) {
+        nameParts.push(
+          '(' +
+            trans.creditorAccount.iban.slice(0, 4) +
+            ' XXX ' +
+            trans.creditorAccount.iban.slice(-4) +
+            ')',
+        );
+      }
+      payee_name = nameParts.join(' ');
+    }
+
+    trans.imported_payee = trans.imported_payee || payee_name;
+    if (trans.imported_payee) {
+      trans.imported_payee = trans.imported_payee.trim();
+    }
+
+    // It's important to resolve both the account and payee early so
+    // when rules are run, they have the right data. Resolving payees
+    // also simplifies the payee creation process
+    trans.account = acctId;
+    trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
+
+    normalized.push({
+      payee_name,
+      trans: {
+        amount: amountToInteger(trans.amount),
+        payee: trans.payee,
+        account: trans.account,
+        date: trans.date,
+        notes: trans.remittanceInformationUnstructured,
+        imported_id: trans.transactionId,
+        imported_payee: trans.imported_payee,
+      },
+    });
+  }
+
+  return { normalized, payeesToCreate };
+}
+
 async function createNewPayees(payeesToCreate, addsAndUpdates) {
   let usedPayeeIds = new Set(addsAndUpdates.map(t => t.payee));
 
@@ -231,6 +387,153 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
       }
     }
   });
+}
+
+export async function reconcileNordigenTransactions(acctId, transactions) {
+  const hasMatched = new Set();
+  const updated = [];
+  const added = [];
+
+  let { normalized, payeesToCreate } = await normalizeNordigenTransactions(
+    transactions,
+    acctId,
+  );
+
+  // The first pass runs the rules, and preps data for fuzzy matching
+  let transactionsStep1 = [];
+  for (let { payee_name, trans, subtransactions } of normalized) {
+    // Run the rules
+    trans = runRules(trans);
+
+    let match = null;
+    let fuzzyDataset = null;
+
+    // First, match with an existing transaction's imported_id. This
+    // is the highest fidelity match and should always be attempted
+    // first.
+    if (trans.imported_id) {
+      match = await db.first(
+        'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
+        [trans.imported_id, acctId],
+      );
+
+      // TODO: Pending transactions
+
+      if (match) {
+        hasMatched.add(match.id);
+      }
+    }
+
+    // If it didn't match, query data needed for fuzzy matching
+    if (!match) {
+      // Look 1 day ahead and 4 days back when fuzzy matching. This
+      // needs to select all fields that need to be read from the
+      // matched transaction. See the final pass below for the needed
+      // fields.
+      fuzzyDataset = await db.all(
+        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+           WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
+        [
+          db.toDateRepr(monthUtils.subDays(trans.date, 4)),
+          db.toDateRepr(monthUtils.addDays(trans.date, 1)),
+          trans.amount || 0,
+          acctId,
+        ],
+      );
+    }
+
+    transactionsStep1.push({
+      payee_name,
+      trans,
+      subtransactions,
+      match,
+      fuzzyDataset,
+    });
+  }
+
+  // Next, do the fuzzy matching. This first pass matches based on the
+  // payee id. We do this in multiple passes so that higher fidelity
+  // matching always happens first, i.e. a transaction should match
+  // match with low fidelity if a later transaction is going to match
+  // the same one with high fidelity.
+  let transactionsStep2 = transactionsStep1.map(data => {
+    if (!data.match && data.fuzzyDataset) {
+      // Try to find one where the payees match.
+      let match = data.fuzzyDataset.find(
+        row => !hasMatched.has(row.id) && data.trans.payee === row.payee,
+      );
+
+      if (match) {
+        hasMatched.add(match.id);
+        return { ...data, match };
+      }
+    }
+    return data;
+  });
+
+  // The final fuzzy matching pass. This is the lowest fidelity
+  // matching: it just find the first transaction that hasn't been
+  // matched yet. Remember the the dataset only contains transactions
+  // around the same date with the same amount.
+  let transactionsStep3 = transactionsStep2.map(data => {
+    if (!data.match && data.fuzzyDataset) {
+      let match = data.fuzzyDataset.find(row => !hasMatched.has(row.id));
+      if (match) {
+        hasMatched.add(match.id);
+        return { ...data, match };
+      }
+    }
+    return data;
+  });
+
+  // Finally, generate & commit the changes
+  for (let { trans, subtransactions, match } of transactionsStep3) {
+    if (match) {
+      // TODO: change the above sql query to use aql
+      let existing = {
+        ...match,
+        cleared: match.cleared === 1,
+        date: db.fromDateRepr(match.date),
+      };
+
+      // Update the transaction
+      const updates = {
+        date: trans.date,
+        imported_id: trans.imported_id || null,
+        payee: existing.payee || trans.payee || null,
+        category: existing.category || trans.category || null,
+        imported_payee: trans.imported_payee || null,
+        notes: existing.notes || trans.notes || null,
+        cleared: trans.cleared != null ? trans.cleared : true,
+      };
+
+      if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
+        updated.push({ id: existing.id, ...updates });
+      }
+    } else {
+      // Insert a new transaction
+      let finalTransaction = {
+        ...trans,
+        id: uuid.v4Sync(),
+        category: trans.category || null,
+        cleared: trans.cleared != null ? trans.cleared : true,
+      };
+
+      if (subtransactions && subtransactions.length > 0) {
+        added.push(...makeSplitTransaction(finalTransaction, subtransactions));
+      } else {
+        added.push(finalTransaction);
+      }
+    }
+  }
+
+  await createNewPayees(payeesToCreate, [...added, ...updated]);
+  await batchUpdateTransactions({ added, updated });
+
+  return {
+    added: added.map(trans => trans.id),
+    updated: updated.map(trans => trans.id),
+  };
 }
 
 export async function reconcileTransactions(acctId, transactions) {
@@ -428,6 +731,105 @@ export async function addTransactions(
     });
   }
   return newTransactions;
+}
+
+export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
+  // TODO: Handle the case where transactions exist in the future
+  // (that will make start date after end date)
+  const latestTransaction = await db.first(
+    'SELECT * FROM v_transactions WHERE account = ? ORDER BY date DESC LIMIT 1',
+    [id],
+  );
+
+  const acctRow = await db.select('accounts', id);
+
+  if (latestTransaction) {
+    const startingTransaction = await db.first(
+      'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
+      [id],
+    );
+    const startingDate = db.fromDateRepr(startingTransaction.date);
+    // assert(startingTransaction)
+
+    // Get all transactions since the latest transaction, plus any 5
+    // days before the latest transaction. This gives us a chance to
+    // resolve any transactions that were entered manually.
+    //
+    // TODO: What this really should do is query the last imported_id
+    // and since then
+    let date = monthUtils.subDays(db.fromDateRepr(latestTransaction.date), 31);
+
+    // Never download transactions before the starting date. This was
+    // when the account was added to the system.
+    if (date < startingDate) {
+      date = startingDate;
+    }
+
+    let { transactions, accountBalance } = await downloadNordigenTransactions(
+      userId,
+      userKey,
+      acctId,
+      bankId,
+      date,
+    );
+
+    if (transactions.length === 0) {
+      return { added: [], updated: [] };
+    }
+
+    transactions = transactions.map(trans => ({ ...trans, account: id }));
+
+    return runMutator(async () => {
+      const result = await reconcileNordigenTransactions(id, transactions);
+      await updateAccountBalance(id, accountBalance);
+      return result;
+    });
+  } else {
+    // Otherwise, download transaction for the past 30 days
+    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 30);
+
+    const { transactions, startingBalance } =
+      await downloadNordigenTransactions(
+        userId,
+        userKey,
+        acctId,
+        bankId,
+        dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd'),
+      );
+
+    // We need to add a transaction that represents the starting
+    // balance for everything to balance out. In order to get balance
+    // before the first imported transaction, we need to get the
+    // current balance from the accounts table and subtract all the
+    // imported transactions.
+
+    const oldestTransaction = transactions[transactions.length - 1];
+
+    const oldestDate =
+      transactions.length > 0
+        ? oldestTransaction.valueDate
+        : monthUtils.currentDay();
+
+    const payee = await getStartingBalancePayee();
+
+    return runMutator(async () => {
+      let initialId = await db.insertTransaction({
+        account: id,
+        amount: startingBalance,
+        category: acctRow.offbudget === 0 ? payee.category : null,
+        payee: payee.id,
+        date: oldestDate,
+        cleared: true,
+        starting_balance_flag: true,
+      });
+
+      let result = await reconcileNordigenTransactions(id, transactions);
+      return {
+        ...result,
+        added: [initialId, ...result.added],
+      };
+    });
+  }
 }
 
 export async function syncAccount(userId, userKey, id, acctId, bankId) {

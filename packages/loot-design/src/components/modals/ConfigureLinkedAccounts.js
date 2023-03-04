@@ -93,7 +93,7 @@ export default function ConfigureLinkedAccounts({
   }
 
   async function onNext() {
-    let ids = await actions.connectAccounts(
+    let ids = await actions.connectNordigenAccounts(
       institution,
       publicToken,
       accounts.map(acct => acct.id),
