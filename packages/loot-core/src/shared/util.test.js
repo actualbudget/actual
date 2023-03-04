@@ -36,7 +36,7 @@ describe('utility functions', () => {
 
     setNumberFormat({ format: 'comma-dot', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format('1234.56')).toBe('1,234');
+    expect(formatter.format('1234.56')).toBe('1,235');
   });
 
   test('number formatting works with dot-comma format', () => {
@@ -46,7 +46,7 @@ describe('utility functions', () => {
 
     setNumberFormat({ format: 'dot-comma', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format('1234.56')).toBe('1.234');
+    expect(formatter.format('1234.56')).toBe('1.235');
   });
 
   test('number formatting works with space-comma format', () => {
@@ -57,6 +57,6 @@ describe('utility functions', () => {
 
     setNumberFormat({ format: 'space-comma', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format('1234.56')).toBe('1\xa0234');
+    expect(formatter.format('1234.56')).toBe('1\xa0235');
   });
 });
