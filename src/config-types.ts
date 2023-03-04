@@ -1,3 +1,5 @@
+import { ServerOptions } from 'https';
+
 export interface Config {
   mode: 'test' | 'development';
   port: number;
@@ -8,5 +10,7 @@ export interface Config {
   https?: {
     key: string;
     cert: string;
-  } & Parameters<typeof import('node:https')['createServer']>[0];
+  } & ServerOptions;
+  nordigen_secret_id?: string;
+  nordigen_secret_key?: string;
 }

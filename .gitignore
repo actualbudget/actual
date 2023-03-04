@@ -23,3 +23,8 @@ build/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+dist
+.idea
+/coverage
+/coverage-e2e

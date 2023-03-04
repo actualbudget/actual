@@ -8,7 +8,7 @@
     "start": "node app",
     "lint": "eslint .",
     "build": "tsc",
-    "test": "NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest",
+    "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest  --coverage",
     "types": "tsc --noEmit --incremental",
     "verify": "yarn -s lint && yarn types"
   },
@@ -22,9 +22,11 @@
     "express": "4.18.2",
     "express-actuator": "1.8.4",
     "express-response-size": "^0.0.3",
+    "nordigen-node": "^1.2.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@babel/preset-flow": "^7.18.6",
     "@types/bcrypt": "^5.0.0",
     "@types/better-sqlite3": "^7.5.0",
     "@types/cors": "^2.8.13",

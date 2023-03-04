@@ -1,4 +1,14 @@
 {
-	"setupFiles": ["./jest.setup.js"],
-	"testPathIgnorePatterns": ["/node_modules/", "/build/"]
+  "setupFiles": ["./jest.setup.js"],
+  "testPathIgnorePatterns": ["dist", "/node_modules/", "/build/"],
+  "roots": ["<rootDir>"],
+  "testMatch": ["<rootDir>/**/*.spec.js"],
+  "moduleFileExtensions": ["ts", "js", "json"],
+  "testEnvironment": "node",
+  "collectCoverage": true,
+  "collectCoverageFrom": ["**/*.{js,ts,tsx}"],
+  "coveragePathIgnorePatterns": ["dist", "/node_modules/", "/build/"],
+  "coverageReporters": ["html", "lcov", "text", "text-summary"],
+  "resetMocks": true,
+  "restoreMocks": true
 }

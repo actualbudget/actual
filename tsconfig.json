@@ -8,6 +8,7 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
+    "skipLibCheck": true,
     "jsx": "preserve",
     // Check JS files too
     "allowJs": true,
@@ -16,5 +17,5 @@
     "module": "node16",
     "outDir": "build"
   },
-  "exclude": ["node_modules", "build", "./app-plaid.js"]
+  "exclude": ["node_modules", "build", "./app-plaid.js", "coverage"],
 }

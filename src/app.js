@@ -7,6 +7,7 @@ import config from './load-config.js';
 
 import * as accountApp from './app-account.js';
 import * as syncApp from './app-sync.js';
+import * as nordigenApp from './app-nordigen/app-nordigen.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
 
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
+app.use('/nordigen', nordigenApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.mode);
