@@ -1,4 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+
+import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../style';
 import AnimatedLoading from '../../svg/AnimatedLoading';
@@ -7,19 +9,30 @@ import Autocomplete from '../Autocomplete';
 import { View, Modal, Button, P } from '../common';
 import { FormField, FormLabel } from '../forms';
 
-import BANKS from './banks.json';
-
-// TODO: replace with an async call to retrieve the supported bank list
-const availableBanks = BANKS.map(({ id, name, country }) => ({
-  id,
-  name: country ? `${name} (${country})` : name,
-}));
-availableBanks.unshift({
-  id: 'SANDBOXFINANCE_SFIN0000',
-  name: 'DEMO BANK - test bank-sync integration with a fake bank account',
-});
 function useAvailableBanks() {
-  return availableBanks;
+  const [banks, setBanks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetch() {
+      const results = await send('nordigen-get-banks');
+
+      setBanks(
+        results.map(({ id, name, country }) => ({
+          id,
+          name: country ? `${name} (${country})` : name,
+        })),
+      );
+      setIsLoading(false);
+    }
+
+    fetch();
+  }, [setBanks, setIsLoading]);
+
+  return {
+    data: banks,
+    isLoading,
+  };
 }
 
 function renderError(error) {
@@ -45,7 +58,8 @@ export default function NordigenExternalMsg({
   let data = useRef(null);
   const [bankFieldFocused, setbankFieldFocused] = useState(true);
 
-  const bankOptions = useAvailableBanks();
+  const { data: bankOptions, isLoading: isBankOptionsLoading } =
+    useAvailableBanks();
 
   async function onJump() {
     setError(null);
@@ -135,7 +149,7 @@ export default function NordigenExternalMsg({
 
           {error && renderError(error)}
 
-          {waiting ? (
+          {waiting || isBankOptionsLoading ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
                 color={colors.n1}
@@ -146,6 +160,8 @@ export default function NordigenExternalMsg({
                   ? 'Waiting on Nordigen...'
                   : waiting === 'accounts'
                   ? 'Loading accounts...'
+                  : isBankOptionsLoading
+                  ? 'Loading available banks...'
                   : null}
               </View>
             </View>
