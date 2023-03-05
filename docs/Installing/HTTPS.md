@@ -16,8 +16,8 @@ Once you have the certificate, you’ll need to configure Actual to use it. Ther
    ```json
    {
      "https": {
-       "keyPath": "/data/selfhost.key",
-       "certPath": "/data/selfhost.crt"
+       "key": "/data/selfhost.key",
+       "cert": "/data/selfhost.crt"
      }
    }
    ```
