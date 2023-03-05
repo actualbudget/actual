@@ -192,8 +192,9 @@ services:
       context: ./
       dockerfile: Dockerfile
     ports:
-      - '${externalPort}:5006'
+      - '5006:5006'
     volumes:
-      - ${dataPath}:/data
+      - ./server-files:/app/server-files
+      - ./user-files:/app/user-files
     restart: unless-stopped
 ```
