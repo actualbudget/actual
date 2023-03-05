@@ -12,7 +12,7 @@ import BANKS from './banks.json';
 // TODO: replace with an async call to retrieve the supported bank list
 const availableBanks = BANKS.map(({ id, name, country }) => ({
   id,
-  name: `${name} (${country})`,
+  name: country ? `${name} (${country})` : name,
 }));
 function useAvailableBanks() {
   return availableBanks;
