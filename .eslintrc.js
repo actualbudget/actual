@@ -12,6 +12,11 @@ module.exports = {
         ignoreRestSiblings: true,
       },
     ],
+
+    'no-restricted-globals': ['error'].concat(
+      require('confusing-browser-globals').filter(g => g !== 'self'),
+    ),
+
     // https://github.com/eslint/eslint/issues/16954
     // https://github.com/eslint/eslint/issues/16953
     'no-loop-func': 'off',

@@ -2,8 +2,6 @@ import { send } from '../platform/client/fetch';
 
 import * as Platform from './platform';
 
-/* globals __history */
-
 export default function checkForUpgradeNotifications(
   addNotification,
   resetSync,
@@ -35,9 +33,9 @@ export default function checkForUpgradeNotifications(
             button: Platform.env !== 'mobile' && {
               title: 'Find schedules',
               action: async () => {
-                __history &&
-                  __history.push('/schedule/discover', {
-                    locationPtr: __history.location,
+                window.__history &&
+                  window.__history.push('/schedule/discover', {
+                    locationPtr: window.__history.location,
                   });
               },
             },

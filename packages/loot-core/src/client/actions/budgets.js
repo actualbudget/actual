@@ -68,10 +68,8 @@ export function loadBudget(id, loadingText = '', options = {}) {
       let message = getSyncError(error, id);
       if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
         // confirm is not available on iOS
-        // eslint-disable-next-line no-restricted-globals
-        if (typeof confirm !== 'undefined') {
-          // eslint-disable-next-line no-restricted-globals
-          let showBackups = confirm(
+        if (typeof window.confirm !== 'undefined') {
+          let showBackups = window.confirm(
             message +
               ' Make sure the app is up-to-date. Do you want to load a backup?',
           );

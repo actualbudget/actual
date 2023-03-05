@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-globals */
-// (the `self` global is conventional in web workers)
 /* globals importScripts, backend */
 let hasInitialized = false;
 
