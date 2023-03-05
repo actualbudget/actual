@@ -8,6 +8,19 @@ This repo forms the basis for what will become the new Actual Budget community d
 
 Firstly, thankyou for stopping by and giving up some of your time to either check out the documentation we have already produced or pick off some of the [issues](https://github.com/rich-howell/actual-community-docs/issues) and help create some new documentation for our future users.
 
+### Installation Methods
+
+Actual Budget can be installed on many different platforms, however at this time the official Actual Budget documentation only supports the following methods
+
+- Local Installation (on your own machine)
+- Fly.io
+- PikaPods 
+- Docker
+
+If you would like to write documentation for another installation variant, please feel free to continue to do this and host it on your own personal blog, medium, Tumblr or any other short form publication service and we will be more than happy to add a link to that from our documentation, open a [PR](https://github.com/actualbudget/docs/pulls) and add it to the list in the [installation overview](https://github.com/actualbudget/docs/blob/master/docs/Installing/overview.md).
+
+However, in doing so you would become responsible for these instructions, if they become out of date or people want in-depth help with them we will point them to you for assistance if the community is unable to help and if lots of people report issues with them we may have to remove the link altogether. 
+
 ## Document Standards
 
 Below are some basic standards on how the documentation should be formatted, everyone has there own writing style but the layout of the documents should be the same across all documents.
