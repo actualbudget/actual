@@ -9,20 +9,15 @@ This only applies to Actual Web
 :::
 
 You can export your data from Actual at any time. To do so,
+1. Login to your budget, click 'More' > 'Settings'
 
-1. Login to your budget and click the three dots
+   ![](/img/backup-restore/sidebar-settings@2x.png)
 
-   ![](/img/actual-config-4.png)
+2. Scroll down to the Export section and click Export Data
 
-2. Select Settings
+   ![](/img/backup-restore/settings-export.png)
 
-   ![](/img/actual-config-5.png)
-
-3. Scroll down to the Export section and click Export Data
-
-   ![](/img/actual-config-6.png)
-
-4. Save the file somewhere on your computer - that is it done.
+3. Save the file somewhere on your computer - that is it done.
 
 ## Manually creating a backup from the desktop app
 

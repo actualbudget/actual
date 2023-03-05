@@ -14,14 +14,14 @@ Depending on your usage, savings accounts can either be on or off the budget. If
 
 ## Adding an account
 
-1. Click the **+** button beside the **Accounts** link in the sidebar.
+1. Click the **+ Add account** button in the sidebar.
 2. Fill out the form describing the account.
 3. Press **Create**
 
 ## Closing or deleting an account
 
 1. Navigate to the account by clicking on it in the sidebar
-2. Click on the 3 dots to show the actions menu
+2. Click on the 3 dots (top right of the transactions list) to show the actions menu
 3. Select **Close Account**
 4. You need to select another account to transfer the existing balance to. Choose the account that you have moved funds to.
 5. Press **Close Account**

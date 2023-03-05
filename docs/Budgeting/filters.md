@@ -26,7 +26,7 @@ Payees have been redacted in all images for privacy reasons
 
 First go to the **Accounts** view. This is to be sure that you are picking up all relevant transactions, rather than those from just one Account or Credit Card.
 
-![](/img/filtering/accounts.png)
+![](/img/filtering/accounts@2x.png)
 
 Now select **Filter**. You will see from this drop-down that there are a number to choose from:
 

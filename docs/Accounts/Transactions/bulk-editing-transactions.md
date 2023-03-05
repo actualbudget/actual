@@ -22,9 +22,9 @@ There are various components of a transaction that can be changed through bulk e
 
 ![](/img/bulk-edit/1.png)
 
-To Access this drop down first go to “Accounts” so that you can see all transactions.
+To Access this drop down first go to “All accounts” so that you can see all transactions.
 
-![](/img/bulk-edit/2.png)
+![](/img/bulk-edit/sidebar-accounts@2x.png)
 
 Then Search or Filter to identify the transactions that you wish to change and select the tick box in the left hand column (by the date column).
 

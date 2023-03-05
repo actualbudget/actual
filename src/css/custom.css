@@ -58,3 +58,7 @@
 .menu__list-item-collapsible:has(.menu__link:not([aria-expanded])) {
   pointer-events: none;
 }
+
+img {
+  height: auto;
+}
