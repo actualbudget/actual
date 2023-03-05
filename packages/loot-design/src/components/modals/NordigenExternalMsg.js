@@ -14,6 +14,10 @@ const availableBanks = BANKS.map(({ id, name, country }) => ({
   id,
   name: country ? `${name} (${country})` : name,
 }));
+availableBanks.unshift({
+  id: 'SANDBOXFINANCE_SFIN0000',
+  name: 'DEMO BANK - test bank-sync integration with a fake bank account',
+});
 function useAvailableBanks() {
   return availableBanks;
 }
@@ -39,6 +43,7 @@ export default function NordigenExternalMsg({
   let [institutionId, setInstitutionId] = useState();
   let [error, setError] = useState(null);
   let data = useRef(null);
+  const [bankFieldFocused, setbankFieldFocused] = useState(true);
 
   const bankOptions = useAvailableBanks();
 
@@ -76,10 +81,23 @@ export default function NordigenExternalMsg({
           <FormLabel title="Choose your bank:" htmlFor="bank-field" />
           <Autocomplete
             strict
+            focused={bankFieldFocused}
             suggestions={bankOptions}
             onSelect={setInstitutionId}
             value={institutionId}
-            inputProps={{ id: 'bank-field', placeholder: '(please select)' }}
+            inputProps={{
+              id: 'bank-field',
+              placeholder: '(please select)',
+              onBlur: () => setbankFieldFocused(false),
+              onFocus: () => setbankFieldFocused(true),
+            }}
+            renderItems={(items, getItemProps, highlightedIndex) => (
+              <BankList
+                items={items}
+                getItemProps={getItemProps}
+                highlightedIndex={highlightedIndex}
+              />
+            )}
           />
         </FormField>
 
@@ -152,5 +170,38 @@ export default function NordigenExternalMsg({
         </View>
       )}
     </Modal>
+  );
+}
+
+export function BankList({ items, getItemProps, highlightedIndex }) {
+  return (
+    <View
+      style={[
+        {
+          overflow: 'auto',
+          padding: '5px 0',
+          maxHeight: 175,
+        },
+      ]}
+    >
+      {items.map((item, idx) => (
+        <div
+          key={item.id}
+          {...(getItemProps ? getItemProps({ item }) : null)}
+          style={{
+            backgroundColor:
+              highlightedIndex === idx ? colors.n4 : 'transparent',
+            padding: 4,
+            paddingLeft: 20,
+            borderRadius: 0,
+          }}
+          data-testid={
+            'bank-item' + (highlightedIndex === idx ? '-highlighted' : '')
+          }
+        >
+          {item.name}
+        </div>
+      ))}
+    </View>
   );
 }
