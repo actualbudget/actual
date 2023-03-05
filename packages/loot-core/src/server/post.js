@@ -1,4 +1,4 @@
-import Platform from './platform';
+import * as Platform from './platform';
 
 const { fetch } = require('../platform/server/fetch');
 

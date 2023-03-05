@@ -1,4 +1,4 @@
-export default {
+const logger = {
   info: (...args) => {
     console.log(...args);
   },
@@ -6,3 +6,4 @@ export default {
     console.warn(...args);
   },
 };
+export default logger;

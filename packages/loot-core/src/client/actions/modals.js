@@ -1,4 +1,4 @@
-import constants from '../constants';
+import * as constants from '../constants';
 
 export function pushModal(name, options) {
   return { type: constants.PUSH_MODAL, name, options };

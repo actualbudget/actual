@@ -182,7 +182,7 @@ export function Value({
         {numHidden > 0 && (
           <Text style={{ color: colors.p4 }}>
             &nbsp;&nbsp;
-            {/* eslint-disable-next-line */}
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a
               href="#"
               onClick={onExpand}

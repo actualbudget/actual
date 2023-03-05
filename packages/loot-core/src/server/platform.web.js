@@ -1,5 +1,3 @@
-export default {
-  isMobile: false,
-  isWeb: true,
-  isDesktop: false,
-};
+export const isMobile = false;
+export const isWeb = true;
+export const isDesktop = false;

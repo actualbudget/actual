@@ -5,7 +5,7 @@ import { Switch, Route, withRouter } from 'react-router-dom';
 import { css, media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
-import Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import {
@@ -230,7 +230,8 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                 </ButtonWithLoading>
               </P>
               <P isLast={true}>
-                <a // eslint-disable-line
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                <a
                   href="#"
                   style={{
                     color: colors.n4,

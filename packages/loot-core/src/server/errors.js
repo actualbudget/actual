@@ -25,7 +25,7 @@ export class SyncError extends Error {
 }
 
 export class TransactionError extends Error {
-  // eslint-disable-next-line
+  // eslint-disable-next-line no-useless-constructor
   constructor(message) {
     super(message);
   }

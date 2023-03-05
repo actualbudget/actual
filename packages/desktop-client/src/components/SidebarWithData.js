@@ -7,7 +7,7 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
-import Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {

@@ -1,6 +1,7 @@
 module.exports = {
   plugins: ['prettier', 'import'],
   extends: ['react-app'],
+  reportUnusedDisableDirectives: true,
   rules: {
     'prettier/prettier': 'error',
     'no-unused-vars': [
@@ -11,12 +12,16 @@ module.exports = {
         ignoreRestSiblings: true,
       },
     ],
+
+    'no-restricted-globals': ['error'].concat(
+      require('confusing-browser-globals').filter(g => g !== 'self'),
+    ),
+
+    // https://github.com/eslint/eslint/issues/16954
+    // https://github.com/eslint/eslint/issues/16953
     'no-loop-func': 'off',
-    'no-restricted-globals': 'off',
 
     // TODO: re-enable these rules
-    'import/no-anonymous-default-export': 'off',
-    'react/destructuring-assignment': 'off',
     'react-hooks/exhaustive-deps': 'off',
 
     'import/no-useless-path-segments': 'error',
