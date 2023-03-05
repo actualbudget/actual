@@ -25,13 +25,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-          cache: npm
+          cache: yarn
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
       - name: Build with Docusaurus
-        run: npm run build
+        run: yarn build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:

@@ -3,3 +3,16 @@
 /node_modules
 
 .DS_Store
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
