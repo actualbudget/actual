@@ -3,15 +3,20 @@ import React, { useState, useRef } from 'react';
 import { colors } from '../../style';
 import AnimatedLoading from '../../svg/AnimatedLoading';
 import { Error } from '../alerts';
-import {
-  CustomSelect,
-  View,
-  Modal,
-  Button,
-  P,
-  ModalButtons,
-  Strong,
-} from '../common';
+import Autocomplete from '../Autocomplete';
+import { View, Modal, Button, P } from '../common';
+import { FormField, FormLabel } from '../forms';
+
+import BANKS from './banks.json';
+
+// TODO: replace with an async call to retrieve the supported bank list
+const availableBanks = BANKS.map(({ id, name, country }) => ({
+  id,
+  name: `${name} (${country})`,
+}));
+function useAvailableBanks() {
+  return availableBanks;
+}
 
 function renderError(error) {
   return (
@@ -31,9 +36,11 @@ export default function NordigenExternalMsg({
 }) {
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
-  let [institutionId, setInstitutionId] = useState('default');
+  let [institutionId, setInstitutionId] = useState();
   let [error, setError] = useState(null);
   let data = useRef(null);
+
+  const bankOptions = useAvailableBanks();
 
   async function onJump() {
     setError(null);
@@ -65,20 +72,17 @@ export default function NordigenExternalMsg({
   const renderLinkButton = () => {
     return (
       <View>
-        <Strong>Choose your banks:</Strong>
-        <CustomSelect
-          options={[
-            ['default', 'Choose your bank'],
-            ['ING_PL_INGBPLPW', 'ING PL'],
-            ['MBANK_RETAIL_BREXPLPW', 'MBANK'],
-            ['SANDBOXFINANCE_SFIN0000', 'DEMO - TEST'],
-          ]}
-          disabledKeys={['default']}
-          onChange={val => {
-            setInstitutionId(val);
-          }}
-          value={institutionId || 'default'}
-        />
+        <FormField>
+          <FormLabel title="Choose your bank:" htmlFor="bank-field" />
+          <Autocomplete
+            strict
+            suggestions={bankOptions}
+            onSelect={setInstitutionId}
+            value={institutionId}
+            inputProps={{ id: 'bank-field', placeholder: '(please select)' }}
+          />
+        </FormField>
+
         <Button
           primary
           style={{
@@ -88,7 +92,7 @@ export default function NordigenExternalMsg({
             marginTop: 10,
           }}
           onClick={onJump}
-          disabled={institutionId === 'default'}
+          disabled={!institutionId}
         >
           Link bank in browser &rarr;
         </Button>
@@ -145,10 +149,6 @@ export default function NordigenExternalMsg({
           ) : (
             renderLinkButton()
           )}
-
-          <ModalButtons style={{ marginTop: 10 }}>
-            <Button onClick={() => modalProps.onBack()}>Back</Button>
-          </ModalButtons>
         </View>
       )}
     </Modal>
