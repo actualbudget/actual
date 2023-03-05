@@ -32,7 +32,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
                 if (href[0] === '#') {
                   let actionName = href.slice(1);
                   return (
-                    // eslint-disable-next-line
+                    // eslint-disable-next-line jsx-a11y/anchor-is-valid
                     <a
                       href="#"
                       onClick={async e => {

@@ -1,4 +1,4 @@
-import constants from '../constants';
+import * as constants from '../constants';
 
 const uuid = require('../../platform/uuid');
 

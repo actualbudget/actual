@@ -3,7 +3,7 @@ import fc from 'fast-check';
 import { schema } from '../server/aql';
 import { addDays } from '../shared/months';
 
-function typeArbitrary(typeDesc, name) {
+export function typeArbitrary(typeDesc, name) {
   let arb;
   switch (typeDesc.type) {
     case 'id':
@@ -51,7 +51,7 @@ function typeArbitrary(typeDesc, name) {
   return arb;
 }
 
-function flattenSortTransactions(arr) {
+export function flattenSortTransactions(arr) {
   let flattened = arr.reduce((list, trans) => {
     let { subtransactions, ...fields } = trans;
 
@@ -117,7 +117,7 @@ function tableArbitrary(tableSchema, extraArbs, requiredKeys = []) {
   return arb;
 }
 
-function makeTransaction({ splitFreq = 1, payeeIds } = {}) {
+export function makeTransaction({ splitFreq = 1, payeeIds } = {}) {
   let payeeField = payeeIds
     ? { payee: fc.oneof(...payeeIds.map(id => fc.constant(id))) }
     : null;
@@ -137,18 +137,13 @@ function makeTransaction({ splitFreq = 1, payeeIds } = {}) {
   );
 }
 
-export default {
-  typeArbitrary,
-  flattenSortTransactions,
-  makeTransaction: makeTransaction,
-  makeTransactionArray: (options = {}) => {
-    let { minLength, maxLength, ...transOpts } = options;
-    return fc
-      .array(makeTransaction(transOpts), { minLength, maxLength })
-      .map(arr => flattenSortTransactions(arr));
-  },
-  payee: tableArbitrary(schema.payees),
-  account: tableArbitrary(schema.accounts),
-  category: tableArbitrary(schema.categories),
-  category_group: tableArbitrary(schema.category_groups),
+export const makeTransactionArray = (options = {}) => {
+  let { minLength, maxLength, ...transOpts } = options;
+  return fc
+    .array(makeTransaction(transOpts), { minLength, maxLength })
+    .map(arr => flattenSortTransactions(arr));
 };
+export const payee = tableArbitrary(schema.payees);
+export const account = tableArbitrary(schema.accounts);
+export const category = tableArbitrary(schema.categories);
+export const category_group = tableArbitrary(schema.category_groups);

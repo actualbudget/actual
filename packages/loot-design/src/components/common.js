@@ -185,7 +185,6 @@ function ButtonLink_({
   );
 }
 
-// eslint-disable-next-line
 export const ButtonLink = withRouter(ButtonLink_);
 
 export const Button = React.forwardRef(

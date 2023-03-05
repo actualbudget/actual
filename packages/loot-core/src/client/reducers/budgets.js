@@ -1,4 +1,4 @@
-import constants from '../constants';
+import * as constants from '../constants';
 
 function sortFiles(arr) {
   arr.sort((x, y) => {

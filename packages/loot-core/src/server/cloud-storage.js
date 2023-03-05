@@ -4,7 +4,7 @@ import fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
 import * as monthUtils from '../shared/months';
 
-import encryption from './encryption';
+import * as encryption from './encryption';
 import {
   HTTPError,
   PostError,
@@ -54,11 +54,11 @@ export async function checkKey() {
     return { error: { reason: 'network' } };
   }
 
-  // This == comparison is important, they could be null or undefined
-  // eslint-disable-next-line
   return {
     valid:
-      res.id == encryptKeyId && // eslint-disable-line
+      // This == comparison is important, they could be null or undefined
+      // eslint-disable-next-line eqeqeq
+      res.id == encryptKeyId &&
       (encryptKeyId == null || encryption.hasKey(encryptKeyId)),
   };
 }
