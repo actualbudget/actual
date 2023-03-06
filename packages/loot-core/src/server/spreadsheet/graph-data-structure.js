@@ -104,16 +104,11 @@ function Graph(serialized) {
 
   function* newTopologicalSortUntil(name, visited, sorted) {
     visited.add(name);
-
-    let iter = adjacent(name).values();
-    let cur = iter.next();
-    while (!cur.done) {
-      if (!visited.has(cur.value)) {
-        yield newTopologicalSortUntil(cur.value, visited, sorted);
+    for (let child of adjacent(name).values()) {
+      if (!visited.has(child)) {
+        yield newTopologicalSortUntil(child, visited, sorted);
       }
-      cur = iter.next();
     }
-
     sorted.unshift(name);
   }
 
@@ -136,13 +131,11 @@ function Graph(serialized) {
   function newTopologicalSort(sourceNodes) {
     const visited = new Set();
     const sorted = [];
-
-    sourceNodes.forEach(name => {
+    for (const name of sourceNodes) {
       if (!visited.has(name)) {
         run(newTopologicalSortUntil(name, visited, sorted));
       }
-    });
-
+    }
     return sorted;
   }
 
