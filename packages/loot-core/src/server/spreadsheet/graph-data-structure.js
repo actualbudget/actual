@@ -1,14 +1,9 @@
-function Graph(serialized) {
+function Graph() {
   var graph = {
-    addNode,
-    removeNode,
-    adjacent,
-    adjacentIncoming,
     addEdge,
     removeEdge,
     removeIncomingEdges,
     topologicalSort,
-    generateDOT,
     getEdges,
   };
 
@@ -35,12 +30,6 @@ function Graph(serialized) {
       removeEdge(cur.value, node);
       cur = iter.next();
     }
-  }
-
-  function removeNode(node) {
-    removeIncomingEdges(node);
-    edges.delete(node);
-    incomingEdges.delete(node);
   }
 
   function adjacent(node) {
@@ -167,21 +156,6 @@ function Graph(serialized) {
     }
 
     return legacyResult || newResult;
-  }
-
-  function generateDOT() {
-    let edgeStrings = [];
-    edges.forEach(function (adj, edge) {
-      if (adj.length !== 0) {
-        edgeStrings.push(`${edge} -> {${adj.join(',')}}`);
-      }
-    });
-
-    return `
-      digraph G {
-       ${edgeStrings.join('\n').replace(/!/g, '_')}
-      }
-    `;
   }
 
   return graph;
