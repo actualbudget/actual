@@ -74,14 +74,14 @@ function Graph(serialized) {
     return graph;
   }
 
-  function topologicalSortUntil(name, visited, sorted) {
+  function legacyTopologicalSortUntil(name, visited, sorted) {
     visited.add(name);
 
     let iter = adjacent(name).values();
     let cur = iter.next();
     while (!cur.done) {
       if (!visited.has(cur.value)) {
-        topologicalSortUntil(cur.value, visited, sorted);
+        legacyTopologicalSortUntil(cur.value, visited, sorted);
       }
       cur = iter.next();
     }
@@ -89,20 +89,91 @@ function Graph(serialized) {
     sorted.unshift(name);
   }
 
-  function topologicalSort(sourceNodes) {
-    console.log('topologicalSort source node count: ', sourceNodes.length);
-    console.log('total node count: ', edges.size);
-    console.log(new Error().stack);
+  function legacyTopologicalSort(sourceNodes) {
     const visited = new Set();
     const sorted = [];
 
     sourceNodes.forEach(name => {
       if (!visited.has(name)) {
-        topologicalSortUntil(name, visited, sorted);
+        legacyTopologicalSortUntil(name, visited, sorted);
       }
     });
 
     return sorted;
+  }
+
+  function* newTopologicalSortUntil(name, visited, sorted) {
+    visited.add(name);
+
+    let iter = adjacent(name).values();
+    let cur = iter.next();
+    while (!cur.done) {
+      if (!visited.has(cur.value)) {
+        yield newTopologicalSortUntil(cur.value, visited, sorted);
+      }
+      cur = iter.next();
+    }
+
+    sorted.unshift(name);
+  }
+
+  // Runs the above generator’s iterator to completion. It simulates calling
+  // a function recursively, but without using the call stack (which would
+  // overflow for large graphs).
+  function run(iterator) {
+    const stack = [iterator];
+    while (stack.length > 0) {
+      const cur = stack[stack.length - 1];
+      const next = cur.next();
+      if (next.done) {
+        stack.pop();
+      } else {
+        stack.push(next.value);
+      }
+    }
+  }
+
+  function newTopologicalSort(sourceNodes) {
+    const visited = new Set();
+    const sorted = [];
+
+    sourceNodes.forEach(name => {
+      if (!visited.has(name)) {
+        run(newTopologicalSortUntil(name, visited, sorted));
+      }
+    });
+
+    return sorted;
+  }
+
+  function topologicalSort(sourceNodes) {
+    let newResult = newTopologicalSort(sourceNodes);
+    let legacyResult;
+    try {
+      legacyResult = legacyTopologicalSort(sourceNodes);
+
+      if (newResult.length !== legacyResult.length) {
+        console.log('new result: ', newResult);
+        console.log('legacy result: ', legacyResult);
+        throw new Error('topological sort results differ');
+      }
+
+      for (let i = 0; i < newResult.length; i++) {
+        if (newResult[i] !== legacyResult[i]) {
+          console.log('new result: ', newResult);
+          console.log('legacy result: ', legacyResult);
+          throw new Error('topological sort results differ');
+        }
+      }
+    } catch (e) {
+      console.log('legacy topological sort failed');
+      console.log(e);
+      if (process.env.NODE_ENV === 'test') {
+        throw e;
+      }
+    }
+
+    return legacyResult || newResult;
   }
 
   function generateDOT() {
