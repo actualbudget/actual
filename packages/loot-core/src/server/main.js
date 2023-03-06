@@ -1240,7 +1240,7 @@ handlers['nordigen-poll-web-token'] = async function ({
   return null;
 };
 
-handlers['nordigen-get-banks'] = async function () {
+handlers['nordigen-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1249,7 +1249,7 @@ handlers['nordigen-get-banks'] = async function () {
 
   return post(
     getServer().NORDIGEN_SERVER + '/get-banks',
-    {},
+    { country },
     {
       'X-ACTUAL-TOKEN': userToken,
     },

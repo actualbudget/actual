@@ -9,25 +9,30 @@ import Autocomplete from '../Autocomplete';
 import { View, Modal, Button, P } from '../common';
 import { FormField, FormLabel } from '../forms';
 
-function useAvailableBanks() {
+import { COUNTRY_OPTIONS } from './countries';
+
+function useAvailableBanks(country) {
   const [banks, setBanks] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetch() {
-      const results = await send('nordigen-get-banks');
+      if (!country) {
+        setBanks([]);
+        setIsLoading(false);
+        return;
+      }
 
-      setBanks(
-        results.map(({ id, name, country }) => ({
-          id,
-          name: country ? `${name} (${country})` : name,
-        })),
-      );
+      setIsLoading(true);
+
+      const results = await send('nordigen-get-banks', country);
+
+      setBanks(results);
       setIsLoading(false);
     }
 
     fetch();
-  }, [setBanks, setIsLoading]);
+  }, [setBanks, setIsLoading, country]);
 
   return {
     data: banks,
@@ -54,12 +59,12 @@ export default function NordigenExternalMsg({
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
   let [institutionId, setInstitutionId] = useState();
+  let [country, setCountry] = useState();
   let [error, setError] = useState(null);
   let data = useRef(null);
-  const [bankFieldFocused, setbankFieldFocused] = useState(true);
 
   const { data: bankOptions, isLoading: isBankOptionsLoading } =
-    useAvailableBanks();
+    useAvailableBanks(country);
 
   async function onJump() {
     setError(null);
@@ -91,22 +96,19 @@ export default function NordigenExternalMsg({
   const renderLinkButton = () => {
     return (
       <View>
-        <FormField>
-          <FormLabel title="Choose your bank:" htmlFor="bank-field" />
+        <FormField style={{ marginBottom: 10 }}>
+          <FormLabel title="Choose your country:" htmlFor="country-field" />
           <Autocomplete
             strict
-            focused={bankFieldFocused}
-            suggestions={bankOptions}
-            onSelect={setInstitutionId}
-            value={institutionId}
+            suggestions={COUNTRY_OPTIONS}
+            onSelect={setCountry}
+            value={country}
             inputProps={{
-              id: 'bank-field',
+              id: 'country-field',
               placeholder: '(please select)',
-              onBlur: () => setbankFieldFocused(false),
-              onFocus: () => setbankFieldFocused(true),
             }}
             renderItems={(items, getItemProps, highlightedIndex) => (
-              <BankList
+              <ItemList
                 items={items}
                 getItemProps={getItemProps}
                 highlightedIndex={highlightedIndex}
@@ -114,6 +116,33 @@ export default function NordigenExternalMsg({
             )}
           />
         </FormField>
+
+        {country &&
+          (isBankOptionsLoading ? (
+            'Loading banks...'
+          ) : (
+            <FormField>
+              <FormLabel title="Choose your bank:" htmlFor="bank-field" />
+              <Autocomplete
+                strict
+                focused
+                suggestions={bankOptions}
+                onSelect={setInstitutionId}
+                value={institutionId}
+                inputProps={{
+                  id: 'bank-field',
+                  placeholder: '(please select)',
+                }}
+                renderItems={(items, getItemProps, highlightedIndex) => (
+                  <ItemList
+                    items={items}
+                    getItemProps={getItemProps}
+                    highlightedIndex={highlightedIndex}
+                  />
+                )}
+              />
+            </FormField>
+          ))}
 
         <Button
           primary
@@ -124,7 +153,7 @@ export default function NordigenExternalMsg({
             marginTop: 10,
           }}
           onClick={onJump}
-          disabled={!institutionId}
+          disabled={!institutionId || !country}
         >
           Link bank in browser &rarr;
         </Button>
@@ -149,7 +178,7 @@ export default function NordigenExternalMsg({
 
           {error && renderError(error)}
 
-          {waiting || isBankOptionsLoading ? (
+          {waiting ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
                 color={colors.n1}
@@ -160,8 +189,6 @@ export default function NordigenExternalMsg({
                   ? 'Waiting on Nordigen...'
                   : waiting === 'accounts'
                   ? 'Loading accounts...'
-                  : isBankOptionsLoading
-                  ? 'Loading available banks...'
                   : null}
               </View>
             </View>
@@ -189,7 +216,7 @@ export default function NordigenExternalMsg({
   );
 }
 
-export function BankList({ items, getItemProps, highlightedIndex }) {
+export function ItemList({ items, getItemProps, highlightedIndex }) {
   return (
     <View
       style={[
@@ -212,7 +239,7 @@ export function BankList({ items, getItemProps, highlightedIndex }) {
             borderRadius: 0,
           }}
           data-testid={
-            'bank-item' + (highlightedIndex === idx ? '-highlighted' : '')
+            'item' + (highlightedIndex === idx ? '-highlighted' : '')
           }
         >
           {item.name}
