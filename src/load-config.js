@@ -2,9 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const projectRoot = path.dirname(
-  path.dirname(fileURLToPath(import.meta.url))
-);
+const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+export const sqlDir = path.join(projectRoot, 'src', 'sql');
 let defaultDataDir = fs.existsSync('/data') ? '/data' : projectRoot;
 
 function parseJSON(path) {

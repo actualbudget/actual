@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import openDatabase from './db.js';
 import { getPathForGroupFile } from './util/paths.js';
 
-import { projectRoot } from './load-config.js';
+import { sqlDir } from './load-config.js';
 
 import actual from '@actual-app/api';
 let merkle = actual.internal.merkle;
@@ -17,7 +17,7 @@ function getGroupDb(groupId) {
   let db = openDatabase(path);
 
   if (needsInit) {
-    let sql = readFileSync(join(projectRoot, 'sql/messages.sql'), 'utf8');
+    let sql = readFileSync(join(sqlDir, 'messages.sql'), 'utf8');
     db.exec(sql);
   }
 

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { join } from 'node:path';
 import openDatabase from './db.js';
-import config, { projectRoot } from './load-config.js';
+import config, { sqlDir } from './load-config.js';
 let accountDb = null;
 
 export default function getAccountDb() {
@@ -17,10 +17,7 @@ export default function getAccountDb() {
     accountDb = openDatabase(dbPath);
 
     if (needsInit) {
-      let initSql = fs.readFileSync(
-        join(projectRoot, 'sql/account.sql'),
-        'utf8'
-      );
+      let initSql = fs.readFileSync(join(sqlDir, 'account.sql'), 'utf8');
       accountDb.exec(initSql);
     }
   }
