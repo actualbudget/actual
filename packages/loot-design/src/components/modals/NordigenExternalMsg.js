@@ -1,17 +1,44 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+
+import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../style';
 import AnimatedLoading from '../../svg/AnimatedLoading';
 import { Error } from '../alerts';
-import {
-  CustomSelect,
-  View,
-  Modal,
-  Button,
-  P,
-  ModalButtons,
-  Strong,
-} from '../common';
+import Autocomplete from '../Autocomplete';
+import { View, Modal, Button, P } from '../common';
+import { FormField, FormLabel } from '../forms';
+
+import { COUNTRY_OPTIONS } from './countries';
+
+function useAvailableBanks(country) {
+  const [banks, setBanks] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetch() {
+      if (!country) {
+        setBanks([]);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+
+      const results = await send('nordigen-get-banks', country);
+
+      setBanks(results);
+      setIsLoading(false);
+    }
+
+    fetch();
+  }, [setBanks, setIsLoading, country]);
+
+  return {
+    data: banks,
+    isLoading,
+  };
+}
 
 function renderError(error) {
   return (
@@ -31,9 +58,13 @@ export default function NordigenExternalMsg({
 }) {
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
-  let [institutionId, setInstitutionId] = useState('default');
+  let [institutionId, setInstitutionId] = useState();
+  let [country, setCountry] = useState();
   let [error, setError] = useState(null);
   let data = useRef(null);
+
+  const { data: bankOptions, isLoading: isBankOptionsLoading } =
+    useAvailableBanks(country);
 
   async function onJump() {
     setError(null);
@@ -65,20 +96,54 @@ export default function NordigenExternalMsg({
   const renderLinkButton = () => {
     return (
       <View>
-        <Strong>Choose your banks:</Strong>
-        <CustomSelect
-          options={[
-            ['default', 'Choose your bank'],
-            ['ING_PL_INGBPLPW', 'ING PL'],
-            ['MBANK_RETAIL_BREXPLPW', 'MBANK'],
-            ['SANDBOXFINANCE_SFIN0000', 'DEMO - TEST'],
-          ]}
-          disabledKeys={['default']}
-          onChange={val => {
-            setInstitutionId(val);
-          }}
-          value={institutionId || 'default'}
-        />
+        <FormField style={{ marginBottom: 10 }}>
+          <FormLabel title="Choose your country:" htmlFor="country-field" />
+          <Autocomplete
+            strict
+            suggestions={COUNTRY_OPTIONS}
+            onSelect={setCountry}
+            value={country}
+            inputProps={{
+              id: 'country-field',
+              placeholder: '(please select)',
+            }}
+            renderItems={(items, getItemProps, highlightedIndex) => (
+              <ItemList
+                items={items}
+                getItemProps={getItemProps}
+                highlightedIndex={highlightedIndex}
+              />
+            )}
+          />
+        </FormField>
+
+        {country &&
+          (isBankOptionsLoading ? (
+            'Loading banks...'
+          ) : (
+            <FormField>
+              <FormLabel title="Choose your bank:" htmlFor="bank-field" />
+              <Autocomplete
+                strict
+                focused
+                suggestions={bankOptions}
+                onSelect={setInstitutionId}
+                value={institutionId}
+                inputProps={{
+                  id: 'bank-field',
+                  placeholder: '(please select)',
+                }}
+                renderItems={(items, getItemProps, highlightedIndex) => (
+                  <ItemList
+                    items={items}
+                    getItemProps={getItemProps}
+                    highlightedIndex={highlightedIndex}
+                  />
+                )}
+              />
+            </FormField>
+          ))}
+
         <Button
           primary
           style={{
@@ -88,7 +153,7 @@ export default function NordigenExternalMsg({
             marginTop: 10,
           }}
           onClick={onJump}
-          disabled={institutionId === 'default'}
+          disabled={!institutionId || !country}
         >
           Link bank in browser &rarr;
         </Button>
@@ -145,12 +210,41 @@ export default function NordigenExternalMsg({
           ) : (
             renderLinkButton()
           )}
-
-          <ModalButtons style={{ marginTop: 10 }}>
-            <Button onClick={() => modalProps.onBack()}>Back</Button>
-          </ModalButtons>
         </View>
       )}
     </Modal>
+  );
+}
+
+export function ItemList({ items, getItemProps, highlightedIndex }) {
+  return (
+    <View
+      style={[
+        {
+          overflow: 'auto',
+          padding: '5px 0',
+          maxHeight: 175,
+        },
+      ]}
+    >
+      {items.map((item, idx) => (
+        <div
+          key={item.id}
+          {...(getItemProps ? getItemProps({ item }) : null)}
+          style={{
+            backgroundColor:
+              highlightedIndex === idx ? colors.n4 : 'transparent',
+            padding: 4,
+            paddingLeft: 20,
+            borderRadius: 0,
+          }}
+          data-testid={
+            'item' + (highlightedIndex === idx ? '-highlighted' : '')
+          }
+        >
+          {item.name}
+        </div>
+      ))}
+    </View>
   );
 }
