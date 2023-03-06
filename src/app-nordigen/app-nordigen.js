@@ -72,6 +72,33 @@ app.post(
 );
 
 app.post(
+  '/get-banks',
+  handleError(async (req, res) => {
+    res.send({
+      status: 'ok',
+      // TODO: enable all banks
+      data: [
+        {
+          id: 'ING_PL_INGBPLPW',
+          name: 'ING PL',
+          country: ''
+        },
+        {
+          id: 'MBANK_RETAIL_BREXPLPW',
+          name: 'MBANK',
+          country: ''
+        },
+        {
+          id: 'SANDBOXFINANCE_SFIN0000',
+          name: 'DEMO - TEST',
+          country: ''
+        }
+      ]
+    });
+  })
+);
+
+app.post(
   '/remove-account',
   handleError(async (req, res) => {
     let { requisitionId } = req.body;
