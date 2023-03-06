@@ -33,7 +33,7 @@ jobs:
       - name: Build Web
         run: ./bin/package-browser
       - name: Upload Build
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: actual-web
           path: packages/desktop-client/build
