@@ -1240,6 +1240,22 @@ handlers['nordigen-poll-web-token'] = async function ({
   return null;
 };
 
+handlers['nordigen-get-banks'] = async function (country) {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return Promise.reject({ error: 'unauthorized' });
+  }
+
+  return post(
+    getServer().NORDIGEN_SERVER + '/get-banks',
+    { country },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+};
+
 handlers['nordigen-poll-web-token-stop'] = async function () {
   stopPolling = true;
   return 'ok';
