@@ -574,7 +574,7 @@ handlers['api/payee-rule-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-delete-rule']({ id });
 });
 
-export default function (serverHandlers) {
+export default function installAPI(serverHandlers) {
   handlers = Object.assign({}, serverHandlers, handlers);
   return handlers;
 }

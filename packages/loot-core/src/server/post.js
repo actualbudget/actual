@@ -1,4 +1,4 @@
-import Platform from './platform';
+import * as Platform from './platform';
 
 const { fetch } = require('../platform/server/fetch');
 
@@ -19,7 +19,7 @@ function throwIfNot200(res, text) {
   }
 }
 
-export async function post(url, data) {
+export async function post(url, data, headers = {}) {
   let text;
   let res;
 
@@ -28,6 +28,7 @@ export async function post(url, data) {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
+        ...headers,
         'Content-Type': 'application/json',
       },
     });

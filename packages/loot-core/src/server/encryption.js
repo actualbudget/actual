@@ -7,7 +7,7 @@ let uuid = require('../platform/uuid/index.electron.js');
 let keys = {};
 
 class Key {
-  constructor({ id, value }) {
+  constructor({ id }) {
     this.id = id || uuid.v4Sync();
   }
 
@@ -35,30 +35,30 @@ class Key {
   }
 }
 
-function getKey(keyId) {
+export function getKey(keyId) {
   if (keyId == null || keys[keyId] == null) {
     throw new Error('missing-key');
   }
   return keys[keyId];
 }
 
-function hasKey(keyId) {
+export function hasKey(keyId) {
   return keyId in keys;
 }
 
-function encrypt(value, keyId) {
+export function encrypt(value, keyId) {
   return internals.encrypt(getKey(keyId), value);
 }
 
-function decrypt(encrypted, meta) {
+export function decrypt(encrypted, meta) {
   return internals.decrypt(getKey(meta.keyId), encrypted, meta);
 }
 
-function randomBytes(n) {
+export function randomBytes(n) {
   return internals.randomBytes(n);
 }
 
-async function loadKey(key) {
+export async function loadKey(key) {
   let keyInstance;
   if (!(key instanceof Key)) {
     keyInstance = new Key({ id: key.id });
@@ -70,28 +70,16 @@ async function loadKey(key) {
   keys[keyInstance.getId()] = keyInstance;
 }
 
-function unloadKey(key) {
+export function unloadKey(key) {
   delete keys[key.getId()];
 }
 
-function unloadAllKeys() {
+export function unloadAllKeys() {
   keys = {};
 }
 
-async function createKey({ id, password, salt }) {
+export async function createKey({ id, password, salt }) {
   let key = new Key({ id });
   await key.createFromPassword({ password, salt });
   return key;
 }
-
-export default {
-  decrypt,
-  encrypt,
-  randomBytes,
-  createKey,
-  loadKey,
-  getKey,
-  hasKey,
-  unloadKey,
-  unloadAllKeys,
-};

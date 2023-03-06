@@ -41,7 +41,7 @@ const axisBaseStyles = {
   tickLabels: baseLabelStyles,
 };
 
-export default {
+const theme = {
   colors: {
     ...colorFades,
     red: colors.r7,
@@ -111,3 +111,4 @@ export default {
     },
   },
 };
+export default theme;

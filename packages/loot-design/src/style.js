@@ -1,4 +1,4 @@
-import Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from './tokens';
 

@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 
-import arbs from '../../../mocks/arbitrary-schema';
+import * as arbs from '../../../mocks/arbitrary-schema';
 import query from '../../../shared/query';
 import { groupById } from '../../../shared/util';
 import { setClock } from '../../crdt';

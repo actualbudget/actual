@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 
+import { FocusScope } from '@react-aria/focus';
 import {
   parse as parseDate,
   format as formatDate,
   isValid as isDateValid,
 } from 'date-fns';
-import scopeTab from 'react-modal/lib/helpers/scopeTab';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
@@ -89,26 +89,6 @@ function subfieldToOptions(field, subfield) {
   }
 }
 
-function ScopeTab({ children }) {
-  let contentRef = useRef();
-
-  function onKeyDown(e) {
-    if (e.keyCode === 9) {
-      scopeTab(contentRef.current, e);
-    }
-  }
-
-  useEffect(() => {
-    contentRef.current.focus();
-  }, []);
-
-  return (
-    <div ref={contentRef} tabIndex={-1} onKeyDown={onKeyDown}>
-      {children}
-    </div>
-  );
-}
-
 function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
@@ -186,7 +166,7 @@ function ConfigureField({
       width={300}
       onClose={() => dispatch({ type: 'close' })}
     >
-      <ScopeTab>
+      <FocusScope contain>
         <View style={{ marginBottom: 10 }}>
           {field === 'amount' || field === 'date' ? (
             <CustomSelect
@@ -289,7 +269,7 @@ function ConfigureField({
             </Button>
           </View>
         </form>
-      </ScopeTab>
+      </FocusScope>
     </Tooltip>
   );
 }

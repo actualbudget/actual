@@ -80,7 +80,6 @@ __metadata:
     react-app-rewired: ^2.2.1
     react-dnd: ^10.0.2
     react-dom: 16.13.1
-    react-modal: 3.4.4
     react-redux: 7.2.1
     react-router: 5.2.0
     react-router-dom: 5.2.0
@@ -13829,7 +13828,7 @@ __metadata:
     react-dnd-html5-backend: ^10.0.2
     react-dom: 16.13.1
     react-merge-refs: ^1.1.0
-    react-modal: 3.4.4
+    react-modal: 3.16.1
     react-spring: ^8.0.27
     react-virtualized-auto-sizer: ^1.0.2
     wobble: ^1.5.0
@@ -17339,18 +17338,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-modal@npm:3.4.4":
-  version: 3.4.4
-  resolution: "react-modal@npm:3.4.4"
+"react-modal@npm:3.16.1":
+  version: 3.16.1
+  resolution: "react-modal@npm:3.16.1"
   dependencies:
     exenv: ^1.2.0
-    prop-types: ^15.5.10
+    prop-types: ^15.7.2
     react-lifecycles-compat: ^3.0.0
-    warning: ^3.0.0
+    warning: ^4.0.3
   peerDependencies:
-    react: ^0.14.0 || ^15.0.0 || ^16
-    react-dom: ^0.14.0 || ^15.0.0 || ^16
-  checksum: d01d83e7081fcfaea9556bf0aaa460c4ae2f7c371df2ce4e7bac7d4eac884970d57ec89d27c04b4adeb56488801558e0784925c996488747a592ce700f059be9
+    react: ^0.14.0 || ^15.0.0 || ^16 || ^17 || ^18
+    react-dom: ^0.14.0 || ^15.0.0 || ^16 || ^17 || ^18
+  checksum: 978936e9320fad839c039b9ee4de55d40888156cb40e093615d6fbc2ff07139d5db06f14782cb7767f780bd5fb57956778669426c535ebc0068a7a03882c7e75
   languageName: node
   linkType: hard
 
