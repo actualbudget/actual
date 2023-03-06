@@ -35,7 +35,7 @@ jobs:
       - name: Upload Build
         uses: actions/upload-artifact@v2
         with:
-          name: desktop-client
+          name: actual-web
           path: packages/desktop-client/build
 
   # TODO: re-enable after solving https://github.com/actualbudget/actual/issues/468
