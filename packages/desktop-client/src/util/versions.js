@@ -19,7 +19,6 @@ export async function getLatestVersion() {
   let json = await response.json();
   let tags = json.map(t => t.name).concat([`v${window.Actual.ACTUAL_VERSION}`]);
   tags.sort(cmpSemanticVersion);
-  console.log(tags);
 
   return tags[tags.length - 1];
 }
