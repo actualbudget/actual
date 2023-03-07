@@ -14,7 +14,6 @@ import {
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
 import config from '../../load-config.js';
-import { sortByBookingDate } from '../utils.js';
 
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
@@ -303,6 +302,27 @@ export const nordigenService = {
   },
 
   /**
+   * Retrieve details about all Institutions in a specific country
+   * @param country
+   * @throws {InvalidInputDataError}
+   * @throws {InvalidNordigenTokenError}
+   * @throws {AccessDeniedError}
+   * @throws {NotFoundError}
+   * @throws {ResourceSuspended}
+   * @throws {RateLimitError}
+   * @throws {UnknownError}
+   * @throws {ServiceError}
+   * @returns {Promise<Array<import('../nordigen-node.types.js').Institution>>}
+   */
+  getInstitutions: async (country) => {
+    const response = await client.getInstitutions(country);
+
+    handleNordigenError(response);
+
+    return response;
+  },
+
+  /**
    * Retrieve details about a specific Institution
    * @param institutionId
    * @throws {InvalidInputDataError}
@@ -404,6 +424,8 @@ export const client = {
       dateTo,
       country: undefined
     }),
+  getInstitutions: async (country) =>
+    await nordigenClient.institution.getInstitutions({ country }),
   getInstitutionById: async (institutionId) =>
     await nordigenClient.institution.getInstitutionById(institutionId),
   getDetails: async (accountId) =>

@@ -74,26 +74,14 @@ app.post(
 app.post(
   '/get-banks',
   handleError(async (req, res) => {
+    let { country } = req.body;
+
+    await nordigenService.setToken();
+    const data = await nordigenService.getInstitutions(country);
+
     res.send({
       status: 'ok',
-      // TODO: enable all banks
-      data: [
-        {
-          id: 'ING_PL_INGBPLPW',
-          name: 'ING PL',
-          country: ''
-        },
-        {
-          id: 'MBANK_RETAIL_BREXPLPW',
-          name: 'MBANK',
-          country: ''
-        },
-        {
-          id: 'SANDBOXFINANCE_SFIN0000',
-          name: 'DEMO - TEST',
-          country: ''
-        }
-      ]
+      data
     });
   })
 );

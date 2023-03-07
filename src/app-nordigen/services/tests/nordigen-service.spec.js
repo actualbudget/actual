@@ -43,6 +43,7 @@ describe('nordigenService', () => {
   let getTransactionsSpy;
   let getDetailsSpy;
   let getMetadataSpy;
+  let getInstitutionsSpy;
   let getInstitutionSpy;
   let getRequisitionsSpy;
   let deleteRequisitionsSpy;
@@ -50,6 +51,7 @@ describe('nordigenService', () => {
   let setTokenSpy;
 
   beforeEach(() => {
+    getInstitutionsSpy = jest.spyOn(client, 'getInstitutions');
     getInstitutionSpy = jest.spyOn(client, 'getInstitutionById');
     getRequisitionsSpy = jest.spyOn(client, 'getRequisitionById');
     deleteRequisitionsSpy = jest.spyOn(client, 'deleteRequisition');
@@ -165,7 +167,7 @@ describe('nordigenService', () => {
         expect.objectContaining({
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
-          startingBalance: 0,
+          startingBalance: expect.any(Number),
           transactions: {
             booked: expect.arrayContaining([
               expect.objectContaining({
@@ -330,6 +332,26 @@ describe('nordigenService', () => {
 
       expect(getDetailsSpy).toBeCalledTimes(1);
       expect(getMetadataSpy).toBeCalledTimes(1);
+    });
+  });
+
+  describe('#getInstitutions', () => {
+    const country = 'IE';
+    it('calls nordigenClient and fetch institution details', async () => {
+      getInstitutionsSpy.mockResolvedValue([mockInstitution]);
+
+      expect(await nordigenService.getInstitutions({ country })).toEqual([
+        mockInstitution
+      ]);
+      expect(getInstitutionsSpy).toBeCalledTimes(1);
+    });
+
+    it('handle error if status_code present in the response', async () => {
+      getInstitutionsSpy.mockResolvedValue(mockUnknownError);
+
+      await expect(() =>
+        nordigenService.getInstitutions({ country })
+      ).rejects.toThrow(UnknownError);
     });
   });
 

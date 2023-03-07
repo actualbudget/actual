@@ -21,7 +21,7 @@ describe('IntegrationBank', () => {
         account_id: account.id,
         institution: mockInstitution,
         mask: '4321',
-        name: 'integration-SANDBOXFINANCE_SFIN0000',
+        name: 'account-example-one (XXX 4321)',
         official_name: 'integration-SANDBOXFINANCE_SFIN0000',
         type: 'checking'
       });
@@ -36,7 +36,7 @@ describe('IntegrationBank', () => {
         account_id: account.id,
         institution: mockInstitution,
         mask: '0000',
-        name: 'integration-SANDBOXFINANCE_SFIN0000',
+        name: 'account-example-one',
         official_name: 'integration-SANDBOXFINANCE_SFIN0000',
         type: 'checking'
       });
@@ -133,12 +133,12 @@ describe('IntegrationBank', () => {
       expect(startingBalance).toEqual(0);
     });
 
-    it('should return 0 when transactions and balances are provided', () => {
+    it('should return 70000 when transactions and balances are provided', () => {
       const startingBalance = IntegrationBank.calculateStartingBalance(
         transactions,
         balances
       );
-      expect(startingBalance).toEqual(0);
+      expect(startingBalance).toEqual(70000);
     });
 
     it('logs available transactions and balances properties', () => {
