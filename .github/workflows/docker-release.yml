@@ -21,7 +21,6 @@ env:
   # - actual-server:sha-90dd603
   TAGS: |
     type=semver,pattern={{version}}
-    type=sha
 
 jobs:
   build:

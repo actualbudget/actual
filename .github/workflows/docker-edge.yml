@@ -27,6 +27,7 @@ env:
   # - actual-server:edge
   TAGS: |
     type=edge,value=edge
+    type=sha
 
 jobs:
   build:
@@ -50,7 +51,7 @@ jobs:
         with:
           # Push to both Docker Hub and Github Container Registry
           images: ${{ env.IMAGES }}
-          flavor: ${{ matrix.os == 'ubuntu' && '' || format('suffix={0}', matrix.os) }}
+          flavor: ${{ matrix.os != 'ubuntu' && format('suffix=-{0}', matrix.os) || '' }}
           tags: ${{ env.TAGS }}
 
       - name: Login to Docker Hub
