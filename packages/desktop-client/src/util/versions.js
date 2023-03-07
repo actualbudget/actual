@@ -20,7 +20,7 @@ export async function getLatestVersion() {
   let tags = json.map(t => t.name).concat([`v${window.Actual.ACTUAL_VERSION}`]);
   tags.sort(cmpSemanticVersion);
 
-  return tags[0];
+  return tags[tags.length - 1];
 }
 
 export async function getIsOutdated() {
