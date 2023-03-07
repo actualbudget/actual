@@ -21,7 +21,7 @@ export async function getLatestVersion() {
   tags.sort(cmpSemanticVersion);
   console.log(tags);
 
-  return tags[0];
+  return tags[tags.length - 1];
 }
 
 export async function getIsOutdated(latestVersion) {
