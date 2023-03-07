@@ -3,7 +3,7 @@ import {
   NordigenAccountDetails,
   Institution,
   Transactions,
-  Balance
+  Balance,
 } from './nordigen-node.types.js';
 
 export type DetailedAccount = Omit<NordigenAccountDetails, 'status'> &

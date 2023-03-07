@@ -30,7 +30,7 @@ app.get('/needs-bootstrap', (req, res) => {
 
   res.send({
     status: 'ok',
-    data: { bootstrapped: rows.length > 0 }
+    data: { bootstrapped: rows.length > 0 },
   });
 });
 
@@ -42,7 +42,7 @@ app.post('/bootstrap', (req, res) => {
   if (rows.length !== 0) {
     res.status(400).send({
       status: 'error',
-      reason: 'already-bootstrapped'
+      reason: 'already-bootstrapped',
     });
     return;
   }

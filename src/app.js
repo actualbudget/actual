@@ -64,7 +64,7 @@ export default async function run() {
     const httpsOptions = {
       ...config.https,
       key: parseHTTPSConfig(config.https.key),
-      cert: parseHTTPSConfig(config.https.cert)
+      cert: parseHTTPSConfig(config.https.cert),
     };
     https.createServer(httpsOptions, app).listen(config.port, config.hostname);
   } else {

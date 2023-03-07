@@ -13,7 +13,7 @@ describe('IngPlIngbplpw', () => {
       bic: 'INGBPLPW',
       ownerAddressUnstructured: [
         'UL. EXAMPLE STREET 10 M.1',
-        '00-000 WARSZAWA'
+        '00-000 WARSZAWA',
       ],
       id: 'd3eccc94-9536-48d3-98be-813f79199ee3',
       created: '2022-07-24T20:45:47.929582Z',
@@ -35,9 +35,9 @@ describe('IngPlIngbplpw', () => {
           'card_accounts',
           'corporate_accounts',
           'pending_transactions',
-          'private_accounts'
-        ]
-      }
+          'private_accounts',
+        ],
+      },
     };
 
     it('returns normalized account data returned to Frontend', () => {
@@ -78,47 +78,47 @@ describe('IngPlIngbplpw', () => {
       const transactions = [
         {
           transactionId: 'D202301180000003',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           transactionId: 'D202301180000004',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           transactionId: 'D202301230000001',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           transactionId: 'D202301180000002',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           transactionId: 'D202301200000001',
-          transactionAmount: mockTransactionAmount
-        }
+          transactionAmount: mockTransactionAmount,
+        },
       ];
       const sortedTransactions = IngPlIngbplpw.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([
         {
           transactionId: 'D202301230000001',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           transactionId: 'D202301200000001',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           transactionId: 'D202301180000004',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           transactionId: 'D202301180000003',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           transactionId: 'D202301180000002',
-          transactionAmount: mockTransactionAmount
-        }
+          transactionAmount: mockTransactionAmount,
+        },
       ]);
     });
 
@@ -142,40 +142,40 @@ describe('IngPlIngbplpw', () => {
           transactionAmount: { amount: '-100.00', currency: 'USD' },
           balanceAfterTransaction: {
             balanceAmount: { amount: '400.00', currency: 'USD' },
-            balanceType: 'interimBooked'
-          }
+            balanceType: 'interimBooked',
+          },
         },
         {
           transactionAmount: { amount: '50.00', currency: 'USD' },
           balanceAfterTransaction: {
             balanceAmount: { amount: '450.00', currency: 'USD' },
-            balanceType: 'interimBooked'
-          }
+            balanceType: 'interimBooked',
+          },
         },
         {
           transactionAmount: { amount: '-25.00', currency: 'USD' },
           balanceAfterTransaction: {
             balanceAmount: { amount: '475.00', currency: 'USD' },
-            balanceType: 'interimBooked'
-          }
-        }
+            balanceType: 'interimBooked',
+          },
+        },
       ];
 
       /** @type {import('../../nordigen-node.types.js').Balance[]} */
       const balances = [
         {
           balanceType: 'interimBooked',
-          balanceAmount: { amount: '500.00', currency: 'USD' }
+          balanceAmount: { amount: '500.00', currency: 'USD' },
         },
         {
           balanceType: 'closingBooked',
-          balanceAmount: { amount: '600.00', currency: 'USD' }
-        }
+          balanceAmount: { amount: '600.00', currency: 'USD' },
+        },
       ];
 
       const startingBalance = IngPlIngbplpw.calculateStartingBalance(
         sortedTransactions,
-        balances
+        balances,
       );
 
       expect(startingBalance).toEqual(50000);
@@ -188,11 +188,11 @@ describe('IngPlIngbplpw', () => {
       const balances = [
         {
           balanceType: 'interimBooked',
-          balanceAmount: { amount: '500.00', currency: 'USD' }
-        }
+          balanceAmount: { amount: '500.00', currency: 'USD' },
+        },
       ];
       expect(
-        IngPlIngbplpw.calculateStartingBalance(transactions, balances)
+        IngPlIngbplpw.calculateStartingBalance(transactions, balances),
       ).toEqual(50000);
     });
   });

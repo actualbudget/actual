@@ -13,7 +13,7 @@ describe('/download-user-file', () => {
       expect(res.body).toEqual({
         details: 'token-not-found',
         reason: 'unauthorized',
-        status: 'error'
+        status: 'error',
       });
     });
 
@@ -26,7 +26,7 @@ describe('/download-user-file', () => {
       expect(res.body).toEqual({
         details: 'token-not-found',
         reason: 'unauthorized',
-        status: 'error'
+        status: 'error',
       });
     });
 
@@ -42,7 +42,7 @@ describe('/download-user-file', () => {
     it('returns 500 error if the file does not exist on the filesystem', async () => {
       getAccountDb().mutate(
         'INSERT INTO files (id, deleted) VALUES (?, FALSE)',
-        ['missing-fs-file']
+        ['missing-fs-file'],
       );
 
       const res = await request(app)
@@ -57,7 +57,7 @@ describe('/download-user-file', () => {
       fs.writeFileSync(getPathForUserFile('file-id'), 'content');
       getAccountDb().mutate(
         'INSERT INTO files (id, deleted) VALUES (?, FALSE)',
-        ['file-id']
+        ['file-id'],
       );
 
       const res = await request(app)
@@ -69,8 +69,8 @@ describe('/download-user-file', () => {
       expect(res.headers).toEqual(
         expect.objectContaining({
           'content-disposition': 'attachment;filename=file-id',
-          'content-type': 'application/octet-stream'
-        })
+          'content-type': 'application/octet-stream',
+        }),
       );
     });
   });

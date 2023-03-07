@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node app",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "build": "tsc",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest  --coverage",
     "types": "tsc --noEmit --incremental",

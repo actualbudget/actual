@@ -11,13 +11,13 @@ export default {
       mask: account.iban.slice(-4),
       name: [account.displayName, printIban(account)].join(' '),
       official_name: account.product,
-      type: 'checking'
+      type: 'checking',
     };
   },
 
   sortTransactions(transactions = []) {
     return transactions.sort(
-      (a, b) => Number(b.transactionId) - Number(a.transactionId)
+      (a, b) => Number(b.transactionId) - Number(a.transactionId),
     );
   },
 
@@ -31,11 +31,11 @@ export default {
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
-      (balance) => 'interimBooked' === balance.balanceType
+      (balance) => 'interimBooked' === balance.balanceType,
     );
 
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
     }, amountToInteger(currentBalance.balanceAmount.amount));
-  }
+  },
 };

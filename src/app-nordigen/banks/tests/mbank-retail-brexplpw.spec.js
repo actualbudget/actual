@@ -13,7 +13,7 @@ describe('MbankRetailBrexplpw', () => {
       ownerAddressUnstructured: [
         'POL',
         'UL. EXAMPLE STREET 10 M.1',
-        '00-000 WARSZAWA'
+        '00-000 WARSZAWA',
       ],
       id: 'd3eccc94-9536-48d3-98be-813f79199ee3',
       created: '2023-01-18T13:24:55.879512Z',
@@ -35,9 +35,9 @@ describe('MbankRetailBrexplpw', () => {
           'card_accounts',
           'corporate_accounts',
           'pending_transactions',
-          'private_accounts'
-        ]
-      }
+          'private_accounts',
+        ],
+      },
     };
     it('returns normalized account data returned to Frontend', () => {
       expect(MbankRetailBrexplpw.normalizeAccount(accountRaw))
@@ -77,47 +77,47 @@ describe('MbankRetailBrexplpw', () => {
       const sortedTransactions = MbankRetailBrexplpw.sortTransactions([
         {
           transactionId: '202212300001',
-          transactionAmount: { amount: '100', currency: 'EUR' }
+          transactionAmount: { amount: '100', currency: 'EUR' },
         },
         {
           transactionId: '202212300003',
-          transactionAmount: { amount: '100', currency: 'EUR' }
+          transactionAmount: { amount: '100', currency: 'EUR' },
         },
         {
           transactionId: '202212300002',
-          transactionAmount: { amount: '100', currency: 'EUR' }
+          transactionAmount: { amount: '100', currency: 'EUR' },
         },
         {
           transactionId: '202212300000',
-          transactionAmount: { amount: '100', currency: 'EUR' }
+          transactionAmount: { amount: '100', currency: 'EUR' },
         },
         {
           transactionId: '202112300001',
-          transactionAmount: { amount: '100', currency: 'EUR' }
-        }
+          transactionAmount: { amount: '100', currency: 'EUR' },
+        },
       ]);
 
       expect(sortedTransactions).toEqual([
         {
           transactionId: '202212300003',
-          transactionAmount: { amount: '100', currency: 'EUR' }
+          transactionAmount: { amount: '100', currency: 'EUR' },
         },
         {
           transactionId: '202212300002',
-          transactionAmount: { amount: '100', currency: 'EUR' }
+          transactionAmount: { amount: '100', currency: 'EUR' },
         },
         {
           transactionId: '202212300001',
-          transactionAmount: { amount: '100', currency: 'EUR' }
+          transactionAmount: { amount: '100', currency: 'EUR' },
         },
         {
           transactionId: '202212300000',
-          transactionAmount: { amount: '100', currency: 'EUR' }
+          transactionAmount: { amount: '100', currency: 'EUR' },
         },
         {
           transactionId: '202112300001',
-          transactionAmount: { amount: '100', currency: 'EUR' }
-        }
+          transactionAmount: { amount: '100', currency: 'EUR' },
+        },
       ]);
     });
 
@@ -138,30 +138,30 @@ describe('MbankRetailBrexplpw', () => {
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'PLN' },
-        balanceType: 'interimBooked'
-      }
+        balanceType: 'interimBooked',
+      },
     ];
 
     it('returns the same balance amount when no transactions', () => {
       const transactions = [];
 
       expect(
-        MbankRetailBrexplpw.calculateStartingBalance(transactions, balances)
+        MbankRetailBrexplpw.calculateStartingBalance(transactions, balances),
       ).toEqual(100000);
     });
 
     it('returns the balance minus the available transactions', () => {
       const transactions = [
         {
-          transactionAmount: { amount: '200.00', currency: 'PLN' }
+          transactionAmount: { amount: '200.00', currency: 'PLN' },
         },
         {
-          transactionAmount: { amount: '300.50', currency: 'PLN' }
-        }
+          transactionAmount: { amount: '300.50', currency: 'PLN' },
+        },
       ];
 
       expect(
-        MbankRetailBrexplpw.calculateStartingBalance(transactions, balances)
+        MbankRetailBrexplpw.calculateStartingBalance(transactions, balances),
       ).toEqual(49950);
     });
   });

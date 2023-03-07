@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import IntegrationBank from '../integration-bank.js';
 import {
   mockExtendAccountsAboutInstitutions,
-  mockInstitution
+  mockInstitution,
 } from '../../services/tests/fixtures.js';
 
 describe('IntegrationBank', () => {
@@ -23,14 +23,14 @@ describe('IntegrationBank', () => {
         mask: '4321',
         name: 'account-example-one (XXX 4321)',
         official_name: 'integration-SANDBOXFINANCE_SFIN0000',
-        type: 'checking'
+        type: 'checking',
       });
     });
 
     it('should return a normalized account object with masked value "0000" when no iban property is provided', () => {
       const normalizedAccount = IntegrationBank.normalizeAccount({
         ...account,
-        iban: undefined
+        iban: undefined,
       });
       expect(normalizedAccount).toEqual({
         account_id: account.id,
@@ -38,7 +38,7 @@ describe('IntegrationBank', () => {
         mask: '0000',
         name: 'account-example-one',
         official_name: 'integration-SANDBOXFINANCE_SFIN0000',
-        type: 'checking'
+        type: 'checking',
       });
     });
 
@@ -47,8 +47,8 @@ describe('IntegrationBank', () => {
       expect(consoleSpy).toHaveBeenCalledWith(
         'Available account properties for new institution integration',
         {
-          account: JSON.stringify(account)
-        }
+          account: JSON.stringify(account),
+        },
       );
     });
   });
@@ -58,35 +58,35 @@ describe('IntegrationBank', () => {
       {
         date: '2022-01-01',
         bookingDate: '2022-01-01',
-        transactionAmount: { amount: '100', currency: 'EUR' }
+        transactionAmount: { amount: '100', currency: 'EUR' },
       },
       {
         date: '2022-01-03',
         bookingDate: '2022-01-03',
-        transactionAmount: { amount: '100', currency: 'EUR' }
+        transactionAmount: { amount: '100', currency: 'EUR' },
       },
       {
         date: '2022-01-02',
         bookingDate: '2022-01-02',
-        transactionAmount: { amount: '100', currency: 'EUR' }
-      }
+        transactionAmount: { amount: '100', currency: 'EUR' },
+      },
     ];
     const sortedTransactions = [
       {
         date: '2022-01-03',
         bookingDate: '2022-01-03',
-        transactionAmount: { amount: '100', currency: 'EUR' }
+        transactionAmount: { amount: '100', currency: 'EUR' },
       },
       {
         date: '2022-01-02',
         bookingDate: '2022-01-02',
-        transactionAmount: { amount: '100', currency: 'EUR' }
+        transactionAmount: { amount: '100', currency: 'EUR' },
       },
       {
         date: '2022-01-01',
         bookingDate: '2022-01-01',
-        transactionAmount: { amount: '100', currency: 'EUR' }
-      }
+        transactionAmount: { amount: '100', currency: 'EUR' },
+      },
     ];
 
     it('should return transactions sorted by bookingDate', () => {
@@ -98,7 +98,7 @@ describe('IntegrationBank', () => {
       IntegrationBank.sortTransactions(transactions);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-        { top10Transactions: JSON.stringify(sortedTransactions.slice(0, 10)) }
+        { top10Transactions: JSON.stringify(sortedTransactions.slice(0, 10)) },
       );
     });
   });
@@ -108,24 +108,24 @@ describe('IntegrationBank', () => {
     const transactions = [
       {
         bookingDate: '2022-01-01',
-        transactionAmount: { amount: '100', currency: 'EUR' }
+        transactionAmount: { amount: '100', currency: 'EUR' },
       },
       {
         bookingDate: '2022-02-01',
-        transactionAmount: { amount: '100', currency: 'EUR' }
+        transactionAmount: { amount: '100', currency: 'EUR' },
       },
       {
         bookingDate: '2022-03-01',
-        transactionAmount: { amount: '100', currency: 'EUR' }
-      }
+        transactionAmount: { amount: '100', currency: 'EUR' },
+      },
     ];
 
     /** @type {import('../../nordigen-node.types.js').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'EUR' },
-        balanceType: 'interimBooked'
-      }
+        balanceType: 'interimBooked',
+      },
     ];
 
     it('should return 0 when no transactions or balances are provided', () => {
@@ -136,7 +136,7 @@ describe('IntegrationBank', () => {
     it('should return 70000 when transactions and balances are provided', () => {
       const startingBalance = IntegrationBank.calculateStartingBalance(
         transactions,
-        balances
+        balances,
       );
       expect(startingBalance).toEqual(70000);
     });
@@ -147,8 +147,8 @@ describe('IntegrationBank', () => {
         'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
         {
           balances: JSON.stringify(balances),
-          top10SortedTransactions: JSON.stringify(transactions.slice(0, 10))
-        }
+          top10SortedTransactions: JSON.stringify(transactions.slice(0, 10)),
+        },
       );
     });
   });

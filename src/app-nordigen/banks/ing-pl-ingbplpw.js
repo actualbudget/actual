@@ -11,7 +11,7 @@ export default {
       mask: account.iban.slice(-4),
       name: [account.product, printIban(account)].join(' ').trim(),
       official_name: account.product,
-      type: 'checking'
+      type: 'checking',
     };
   },
 
@@ -28,18 +28,18 @@ export default {
       const oldestTransaction =
         sortedTransactions[sortedTransactions.length - 1];
       const oldestKnownBalance = amountToInteger(
-        oldestTransaction.balanceAfterTransaction.balanceAmount.amount
+        oldestTransaction.balanceAfterTransaction.balanceAmount.amount,
       );
       const oldestTransactionAmount = amountToInteger(
-        oldestTransaction.transactionAmount.amount
+        oldestTransaction.transactionAmount.amount,
       );
 
       return oldestKnownBalance - oldestTransactionAmount;
     } else {
       return amountToInteger(
         balances.find((balance) => 'interimBooked' === balance.balanceType)
-          .balanceAmount.amount
+          .balanceAmount.amount,
       );
     }
-  }
+  },
 };

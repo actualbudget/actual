@@ -4,7 +4,7 @@ import { nordigenService } from './services/nordigen-service.js';
 import {
   RequisitionNotLinked,
   AccountNotLinedToRequisition,
-  GenericNordigenError
+  GenericNordigenError,
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import validateUser from '../util/validate-user.js';
@@ -29,17 +29,17 @@ app.post(
     const { link, requisitionId } = await nordigenService.createRequisition({
       accessValidForDays,
       institutionId,
-      host: origin
+      host: origin,
     });
 
     res.send({
       status: 'ok',
       data: {
         link,
-        requisitionId
-      }
+        requisitionId,
+      },
     });
-  })
+  }),
 );
 
 app.post(
@@ -55,20 +55,20 @@ app.post(
         status: 'ok',
         data: {
           ...requisition,
-          accounts
-        }
+          accounts,
+        },
       });
     } catch (error) {
       if (error instanceof RequisitionNotLinked) {
         res.send({
           status: 'ok',
-          requisitionStatus: error.details.requisitionStatus
+          requisitionStatus: error.details.requisitionStatus,
         });
       } else {
         throw error;
       }
     }
-  })
+  }),
 );
 
 app.post(
@@ -81,9 +81,9 @@ app.post(
 
     res.send({
       status: 'ok',
-      data
+      data,
     });
-  })
+  }),
 );
 
 app.post(
@@ -95,18 +95,18 @@ app.post(
     if (data.summary === 'Requisition deleted') {
       res.send({
         status: 'ok',
-        data
+        data,
       });
     } else {
       res.send({
         status: 'error',
         data: {
           data,
-          reason: 'Can not delete requisition'
-        }
+          reason: 'Can not delete requisition',
+        },
       });
     }
-  })
+  }),
 );
 
 app.post(
@@ -119,12 +119,12 @@ app.post(
         balances,
         institutionId,
         startingBalance,
-        transactions: { booked, pending }
+        transactions: { booked, pending },
       } = await nordigenService.getTransactionsWithBalance(
         requisitionId,
         accountId,
         startDate,
-        endDate
+        endDate,
       );
 
       res.send({
@@ -135,9 +135,9 @@ app.post(
           startingBalance,
           transactions: {
             booked,
-            pending
-          }
-        }
+            pending,
+          },
+        },
       });
     } catch (error) {
       const sendErrorResponse = (data) =>
@@ -149,7 +149,8 @@ app.post(
             error_type: 'ITEM_ERROR',
             error_code: 'ITEM_LOGIN_REQUIRED',
             status: 'expired',
-            reason: 'Access to account has expired as set in End User Agreement'
+            reason:
+              'Access to account has expired as set in End User Agreement',
           });
           break;
         case error instanceof AccountNotLinedToRequisition:
@@ -157,14 +158,14 @@ app.post(
             error_type: 'INVALID_INPUT',
             error_code: 'INVALID_ACCESS_TOKEN',
             status: 'rejected',
-            reason: 'Account not linked with this requisition'
+            reason: 'Account not linked with this requisition',
           });
           break;
         case error instanceof GenericNordigenError:
           console.log({ message: 'Something went wrong', error });
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
-            error_code: 'NORDIGEN_ERROR'
+            error_code: 'NORDIGEN_ERROR',
           });
           break;
         default:
@@ -172,10 +173,10 @@ app.post(
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',
-            reason: 'Something went wrong'
+            reason: 'Something went wrong',
           });
           break;
       }
     }
-  })
+  }),
 );

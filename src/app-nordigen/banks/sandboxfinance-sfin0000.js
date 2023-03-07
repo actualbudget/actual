@@ -11,7 +11,7 @@ export default {
       mask: account.iban.slice(-4),
       name: [account.name, printIban(account)].join(' '),
       official_name: account.product,
-      type: 'checking'
+      type: 'checking',
     };
   },
 
@@ -34,11 +34,11 @@ export default {
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
-      (balance) => 'interimAvailable' === balance.balanceType
+      (balance) => 'interimAvailable' === balance.balanceType,
     );
 
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
     }, amountToInteger(currentBalance.balanceAmount.amount));
-  }
+  },
 };

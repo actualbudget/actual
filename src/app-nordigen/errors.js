@@ -10,7 +10,7 @@ export class AccountNotLinedToRequisition extends Error {
     super('Provided account id is not linked to given requisition');
     this.details = {
       accountId,
-      requisitionId
+      requisitionId,
     };
   }
 }
@@ -57,7 +57,7 @@ export class ResourceSuspended extends NordigenClientError {
   constructor(response) {
     super(
       'Resource was suspended due to numerous errors that occurred while accessing it',
-      response
+      response,
     );
   }
 }
@@ -66,7 +66,7 @@ export class RateLimitError extends NordigenClientError {
   constructor(response) {
     super(
       'Daily request limit set by the Institution has been exceeded',
-      response
+      response,
     );
   }
 }

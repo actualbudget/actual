@@ -19,7 +19,7 @@ export default function validateUser(req, res) {
     res.send({
       status: 'error',
       reason: 'unauthorized',
-      details: 'token-not-found'
+      details: 'token-not-found',
     });
     return null;
   }

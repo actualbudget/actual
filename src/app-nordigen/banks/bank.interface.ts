@@ -1,6 +1,6 @@
 import {
   DetailedAccountWithInstitution,
-  NormalizedAccountDetails
+  NormalizedAccountDetails,
 } from '../nordigen.types.js';
 import { Transaction, Balance } from '../nordigen-node.types.js';
 
@@ -10,7 +10,7 @@ export interface IBank {
    * Returns normalized object with required data for the frontend
    */
   normalizeAccount: (
-    account: DetailedAccountWithInstitution
+    account: DetailedAccountWithInstitution,
   ) => NormalizedAccountDetails;
 
   /**
@@ -23,6 +23,6 @@ export interface IBank {
    */
   calculateStartingBalance: (
     sortedTransactions: Transaction[],
-    balances: Balance[]
+    balances: Balance[],
   ) => number;
 }

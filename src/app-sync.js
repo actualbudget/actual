@@ -53,7 +53,7 @@ app.post('/sync', async (req, res) => {
 
   let currentFiles = accountDb.all(
     'SELECT group_id, encrypt_keyid, encrypt_meta, sync_version FROM files WHERE id = ?',
-    [file_id]
+    [file_id],
   );
 
   if (currentFiles.length === 0) {
@@ -135,7 +135,7 @@ app.post('/user-get-key', (req, res) => {
 
   let rows = accountDb.all(
     'SELECT encrypt_salt, encrypt_keyid, encrypt_test FROM files WHERE id = ?',
-    [fileId]
+    [fileId],
   );
   if (rows.length === 0) {
     res.status(400).send('file-not-found');
@@ -146,8 +146,8 @@ app.post('/user-get-key', (req, res) => {
   res.send(
     JSON.stringify({
       status: 'ok',
-      data: { id: encrypt_keyid, salt: encrypt_salt, test: encrypt_test }
-    })
+      data: { id: encrypt_keyid, salt: encrypt_salt, test: encrypt_test },
+    }),
   );
 });
 
@@ -161,7 +161,7 @@ app.post('/user-create-key', (req, res) => {
 
   accountDb.mutate(
     'UPDATE files SET encrypt_salt = ?, encrypt_keyid = ?, encrypt_test = ? WHERE id = ?',
-    [keySalt, keyId, testContent, fileId]
+    [keySalt, keyId, testContent, fileId],
   );
 
   res.send(JSON.stringify({ status: 'ok' }));
@@ -176,7 +176,7 @@ app.post('/reset-user-file', async (req, res) => {
   let { fileId } = req.body;
 
   let files = accountDb.all('SELECT group_id FROM files WHERE id = ?', [
-    fileId
+    fileId,
   ]);
   if (files.length === 0) {
     res.status(400).send('User or file not found');
@@ -225,7 +225,7 @@ app.post('/upload-user-file', async (req, res) => {
 
   let currentFiles = accountDb.all(
     'SELECT group_id, encrypt_keyid, encrypt_meta FROM files WHERE id = ?',
-    [fileId]
+    [fileId],
   );
   if (currentFiles.length) {
     let currentFile = currentFiles[0];
@@ -268,7 +268,7 @@ app.post('/upload-user-file', async (req, res) => {
     groupId = uuid.v4();
     accountDb.mutate(
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta) VALUES (?, ?, ?, ?, ?)',
-      [fileId, groupId, syncFormatVersion, name, encryptMeta]
+      [fileId, groupId, syncFormatVersion, name, encryptMeta],
     );
     res.send(JSON.stringify({ status: 'ok', groupId }));
   } else {
@@ -277,14 +277,14 @@ app.post('/upload-user-file', async (req, res) => {
       groupId = uuid.v4();
       accountDb.mutate('UPDATE files SET group_id = ? WHERE id = ?', [
         groupId,
-        fileId
+        fileId,
       ]);
     }
 
     // Regardless, update some properties
     accountDb.mutate(
       'UPDATE files SET sync_version = ?, encrypt_meta = ?, name = ? WHERE id = ?',
-      [syncFormatVersion, encryptMeta, name, fileId]
+      [syncFormatVersion, encryptMeta, name, fileId],
     );
 
     res.send(JSON.stringify({ status: 'ok', groupId }));
@@ -306,7 +306,7 @@ app.get('/download-user-file', async (req, res) => {
   // Do some authentication
   let rows = accountDb.all(
     'SELECT id FROM files WHERE id = ? AND deleted = FALSE',
-    [fileId]
+    [fileId],
   );
   if (rows.length === 0) {
     res.status(400).send('User or file not found');
@@ -337,7 +337,7 @@ app.post('/update-user-filename', (req, res) => {
   // Do some authentication
   let rows = accountDb.all(
     'SELECT id FROM files WHERE id = ? AND deleted = FALSE',
-    [fileId]
+    [fileId],
   );
   if (rows.length === 0) {
     res.status(500).send('User or file not found');
@@ -366,9 +366,9 @@ app.get('/list-user-files', (req, res) => {
         fileId: row.id,
         groupId: row.group_id,
         name: row.name,
-        encryptKeyId: row.encrypt_keyid
-      }))
-    })
+        encryptKeyId: row.encrypt_keyid,
+      })),
+    }),
   );
 });
 
@@ -382,7 +382,7 @@ app.get('/get-user-file-info', (req, res) => {
 
   let rows = accountDb.all(
     'SELECT * FROM files WHERE id = ? AND deleted = FALSE',
-    [fileId]
+    [fileId],
   );
   if (rows.length === 0) {
     res.send(JSON.stringify({ status: 'error' }));
@@ -398,9 +398,9 @@ app.get('/get-user-file-info', (req, res) => {
         fileId: row.id,
         groupId: row.group_id,
         name: row.name,
-        encryptMeta: row.encrypt_meta ? JSON.parse(row.encrypt_meta) : null
-      }
-    })
+        encryptMeta: row.encrypt_meta ? JSON.parse(row.encrypt_meta) : null,
+      },
+    }),
   );
 });
 

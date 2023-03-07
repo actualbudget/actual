@@ -34,12 +34,12 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
   let budget = db.runQuery(
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'budget%!budget-%'`,
     [],
-    true
+    true,
   );
   db.transaction(() => {
     budget.map((monthBudget) => {
       let match = monthBudget.name.match(
-        /^(budget-report|budget)(\d+)!budget-(.+)$/
+        /^(budget-report|budget)(\d+)!budget-(.+)$/,
       );
       if (match == null) {
         console.log('Warning: invalid budget month name', monthBudget.name);
@@ -60,7 +60,7 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
       let carryover = db.runQuery(
         'SELECT * FROM spreadsheet_cells WHERE name = ?',
         [`${sheetName}!carryover-${cat}`],
-        true
+        true,
       );
 
       let table = type === 'budget-report' ? 'reflect_budgets' : 'zero_budgets';
@@ -71,8 +71,8 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
           dbmonth,
           cat,
           amount,
-          carryover.length > 0 && getValue(carryover[0]) === 'true' ? 1 : 0
-        ]
+          carryover.length > 0 && getValue(carryover[0]) === 'true' ? 1 : 0,
+        ],
       );
     });
   });
@@ -81,7 +81,7 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
   let buffers = db.runQuery(
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'budget%!buffered'`,
     [],
-    true
+    true,
   );
   db.transaction(() => {
     buffers.map((buffer) => {
@@ -95,7 +95,7 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
 
         db.runQuery(
           `INSERT INTO zero_budget_months (id, buffered) VALUES (?, ?)`,
-          [month, amount]
+          [month, amount],
         );
       }
     });
@@ -105,7 +105,7 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
   let notes = db.runQuery(
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'notes!%'`,
     [],
-    true
+    true,
   );
 
   let parseNote = (str) => {

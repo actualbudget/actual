@@ -8,7 +8,7 @@ export const printIban = (account) => {
 
 export const sortByBookingDate = (transactions = []) =>
   transactions.sort(
-    (a, b) => +new Date(b.bookingDate) - +new Date(a.bookingDate)
+    (a, b) => +new Date(b.bookingDate) - +new Date(a.bookingDate),
   );
 
 export const amountToInteger = (n) => Math.round(n * 100);

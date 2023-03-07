@@ -9,7 +9,7 @@ import {
   UnknownError,
   ServiceError,
   RequisitionNotLinked,
-  AccountNotLinedToRequisition
+  AccountNotLinedToRequisition,
 } from '../../errors.js';
 
 import {
@@ -26,13 +26,13 @@ import {
   mockRequisitionWithExampleAccounts,
   mockDetailedAccountExample1,
   mockDetailedAccountExample2,
-  mockExtendAccountsAboutInstitutions
+  mockExtendAccountsAboutInstitutions,
 } from './fixtures.js';
 
 import {
   nordigenService,
   handleNordigenError,
-  client
+  client,
 } from '../nordigen-service.js';
 
 describe('nordigenService', () => {
@@ -76,7 +76,7 @@ describe('nordigenService', () => {
         .mockResolvedValue(mockRequisition);
 
       expect(await nordigenService.getLinkedRequisition(requisitionId)).toEqual(
-        mockRequisition
+        mockRequisition,
       );
     });
 
@@ -88,7 +88,7 @@ describe('nordigenService', () => {
         .mockResolvedValue({ ...mockRequisition, status: 'ER' });
 
       await expect(() =>
-        nordigenService.getLinkedRequisition(requisitionId)
+        nordigenService.getLinkedRequisition(requisitionId),
       ).rejects.toThrow(RequisitionNotLinked);
     });
   });
@@ -112,16 +112,16 @@ describe('nordigenService', () => {
         .mockResolvedValue([
           {
             ...mockExtendAccountsAboutInstitutions[0],
-            institution_id: 'NEWONE'
+            institution_id: 'NEWONE',
           },
           {
             ...mockExtendAccountsAboutInstitutions[1],
-            institution_id: 'NEWONE'
-          }
+            institution_id: 'NEWONE',
+          },
         ]);
 
       const response = await nordigenService.getRequisitionWithAccounts(
-        mockRequisitionWithExampleAccounts.id
+        mockRequisitionWithExampleAccounts.id,
       );
 
       expect(response.accounts.length).toEqual(2);
@@ -130,14 +130,14 @@ describe('nordigenService', () => {
           expect.objectContaining({
             account_id: mockDetailedAccountExample1.id,
             institution: mockInstitution,
-            official_name: expect.stringContaining('integration-') // It comes from IntegrationBank
+            official_name: expect.stringContaining('integration-'), // It comes from IntegrationBank
           }),
           expect.objectContaining({
             account_id: mockDetailedAccountExample2.id,
             institution: mockInstitution,
-            official_name: expect.stringContaining('integration-') // It comes from IntegrationBank
-          })
-        ])
+            official_name: expect.stringContaining('integration-'), // It comes from IntegrationBank
+          }),
+        ]),
       );
       expect(response.requisition).toEqual(mockRequisitionWithExampleAccounts);
     });
@@ -161,8 +161,8 @@ describe('nordigenService', () => {
           requisitionId,
           accountId,
           undefined,
-          undefined
-        )
+          undefined,
+        ),
       ).toEqual(
         expect.objectContaining({
           balances: mockedBalances.balances,
@@ -174,23 +174,23 @@ describe('nordigenService', () => {
                 bookingDate: expect.any(String),
                 transactionAmount: {
                   amount: expect.any(String),
-                  currency: 'EUR'
+                  currency: 'EUR',
                 },
                 transactionId: expect.any(String),
-                valueDate: expect.any(String)
-              })
+                valueDate: expect.any(String),
+              }),
             ]),
             pending: expect.arrayContaining([
               expect.objectContaining({
                 transactionAmount: {
                   amount: expect.any(String),
-                  currency: 'EUR'
+                  currency: 'EUR',
                 },
-                valueDate: expect.any(String)
-              })
-            ])
-          }
-        })
+                valueDate: expect.any(String),
+              }),
+            ]),
+          },
+        }),
       );
     });
 
@@ -204,8 +204,8 @@ describe('nordigenService', () => {
           requisitionId,
           accountId: 'some-unknown-account-id',
           startDate: undefined,
-          endDate: undefined
-        })
+          endDate: undefined,
+        }),
       ).rejects.toThrow(AccountNotLinedToRequisition);
     });
   });
@@ -215,7 +215,7 @@ describe('nordigenService', () => {
     const params = {
       host: 'https://exemple.com',
       institutionId,
-      accessValidForDays: 90
+      accessValidForDays: 90,
     };
 
     it('calls nordigenClient and delete requisition', async () => {
@@ -225,7 +225,7 @@ describe('nordigenService', () => {
 
       expect(await nordigenService.createRequisition(params)).toEqual({
         link: expect.any(String),
-        requisitionId: expect.any(String)
+        requisitionId: expect.any(String),
       });
 
       expect(createRequisitionSpy).toBeCalledTimes(1);
@@ -237,7 +237,7 @@ describe('nordigenService', () => {
       createRequisitionSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.createRequisition(params)
+        nordigenService.createRequisition(params),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -252,7 +252,7 @@ describe('nordigenService', () => {
       deleteRequisitionsSpy.mockResolvedValue(mockDeleteRequisition);
 
       expect(await nordigenService.deleteRequisition(requisitionId)).toEqual(
-        mockDeleteRequisition
+        mockDeleteRequisition,
       );
 
       expect(getRequisitionsSpy).toBeCalledTimes(1);
@@ -266,7 +266,7 @@ describe('nordigenService', () => {
       deleteRequisitionsSpy.mockReturnValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.deleteRequisition(requisitionId)
+        nordigenService.deleteRequisition(requisitionId),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -279,7 +279,7 @@ describe('nordigenService', () => {
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
 
       expect(await nordigenService.getRequisition(requisitionId)).toEqual(
-        mockRequisition
+        mockRequisition,
       );
 
       expect(setTokenSpy).toBeCalledTimes(1);
@@ -292,7 +292,7 @@ describe('nordigenService', () => {
       getRequisitionsSpy.mockReturnValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getRequisition(requisitionId)
+        nordigenService.getRequisition(requisitionId),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -304,7 +304,7 @@ describe('nordigenService', () => {
 
       expect(await nordigenService.getDetailedAccount(accountId)).toEqual({
         ...mockAccountMetaData,
-        ...mockAccountDetails.account
+        ...mockAccountDetails.account,
       });
       expect(getDetailsSpy).toBeCalledTimes(1);
       expect(getMetadataSpy).toBeCalledTimes(1);
@@ -315,7 +315,7 @@ describe('nordigenService', () => {
       getMetadataSpy.mockResolvedValue(mockAccountMetaData);
 
       await expect(() =>
-        nordigenService.getDetailedAccount(accountId)
+        nordigenService.getDetailedAccount(accountId),
       ).rejects.toThrow(UnknownError);
 
       expect(getDetailsSpy).toBeCalledTimes(1);
@@ -327,7 +327,7 @@ describe('nordigenService', () => {
       getMetadataSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getDetailedAccount(accountId)
+        nordigenService.getDetailedAccount(accountId),
       ).rejects.toThrow(UnknownError);
 
       expect(getDetailsSpy).toBeCalledTimes(1);
@@ -341,7 +341,7 @@ describe('nordigenService', () => {
       getInstitutionsSpy.mockResolvedValue([mockInstitution]);
 
       expect(await nordigenService.getInstitutions({ country })).toEqual([
-        mockInstitution
+        mockInstitution,
       ]);
       expect(getInstitutionsSpy).toBeCalledTimes(1);
     });
@@ -350,7 +350,7 @@ describe('nordigenService', () => {
       getInstitutionsSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getInstitutions({ country })
+        nordigenService.getInstitutions({ country }),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -361,7 +361,7 @@ describe('nordigenService', () => {
       getInstitutionSpy.mockResolvedValue(mockInstitution);
 
       expect(await nordigenService.getInstitution(institutionId)).toEqual(
-        mockInstitution
+        mockInstitution,
       );
       expect(getInstitutionSpy).toBeCalledTimes(1);
     });
@@ -370,7 +370,7 @@ describe('nordigenService', () => {
       getInstitutionSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getInstitution(institutionId)
+        nordigenService.getInstitution(institutionId),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -382,12 +382,12 @@ describe('nordigenService', () => {
       const accountAA = {
         ...mockDetailedAccount,
         id: 'AA',
-        institution_id: 'INSTITUTION_A'
+        institution_id: 'INSTITUTION_A',
       };
       const accountBB = {
         ...mockDetailedAccount,
         id: 'BB',
-        institution_id: 'INSTITUTION_B'
+        institution_id: 'INSTITUTION_B',
       };
 
       const accounts = [accountAA, accountBB];
@@ -396,17 +396,17 @@ describe('nordigenService', () => {
       const expected = [
         {
           ...accountAA,
-          institution: institutionA
+          institution: institutionA,
         },
         {
           ...accountBB,
-          institution: institutionB
-        }
+          institution: institutionB,
+        },
       ];
 
       const result = await nordigenService.extendAccountsAboutInstitutions({
         accounts,
-        institutions
+        institutions,
       });
 
       expect(result).toEqual(expected);
@@ -416,12 +416,12 @@ describe('nordigenService', () => {
       const accountAA = {
         ...mockDetailedAccount,
         id: 'AA',
-        institution_id: 'INSTITUTION_A'
+        institution_id: 'INSTITUTION_A',
       };
       const accountBB = {
         ...mockDetailedAccount,
         id: 'BB',
-        institution_id: 'INSTITUTION_B'
+        institution_id: 'INSTITUTION_B',
       };
 
       const accounts = [accountAA, accountBB];
@@ -432,17 +432,17 @@ describe('nordigenService', () => {
       const expected = [
         {
           ...accountAA,
-          institution: institutionA
+          institution: institutionA,
         },
         {
           ...accountBB,
-          institution: null
-        }
+          institution: null,
+        },
       ];
 
       const result = await nordigenService.extendAccountsAboutInstitutions({
         accounts,
-        institutions
+        institutions,
       });
 
       expect(result).toEqual(expected);
@@ -457,8 +457,8 @@ describe('nordigenService', () => {
         await nordigenService.getTransactions({
           accountId,
           startDate: '',
-          endDate: ''
-        })
+          endDate: '',
+        }),
       ).toMatchInlineSnapshot(`
         {
           "transactions": {
@@ -510,8 +510,8 @@ describe('nordigenService', () => {
         nordigenService.getTransactions({
           accountId,
           startDate: '',
-          endDate: ''
-        })
+          endDate: '',
+        }),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -521,7 +521,7 @@ describe('nordigenService', () => {
       getBalancesSpy.mockResolvedValue(mockedBalances);
 
       expect(await nordigenService.getBalances(accountId)).toEqual(
-        mockedBalances
+        mockedBalances,
       );
       expect(getBalancesSpy).toBeCalledTimes(1);
     });
@@ -530,7 +530,7 @@ describe('nordigenService', () => {
       getBalancesSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getBalances(accountId)
+        nordigenService.getBalances(accountId),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -545,7 +545,7 @@ describe('#handleNordigenError', () => {
   it('throws InvalidNordigenTokenError for status code 401', () => {
     const response = { status_code: 401 };
     expect(() => handleNordigenError(response)).toThrow(
-      InvalidNordigenTokenError
+      InvalidNordigenTokenError,
     );
   });
 

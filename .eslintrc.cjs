@@ -12,12 +12,10 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     '@typescript-eslint/no-unused-vars': [
-      'warn',
+      'error',
       {
         argsIgnorePattern: '^_'
       }
-    ],
-
-    '@typescript-eslint/no-var-requires': 'off'
+    ]
   }
 };

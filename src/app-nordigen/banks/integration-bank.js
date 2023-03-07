@@ -7,7 +7,7 @@ const SORTED_BALANCE_TYPE_LIST = [
   'interimAvailable',
   'interimBooked',
   'nonInvoiced',
-  'openingBooked'
+  'openingBooked',
 ];
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -16,7 +16,7 @@ export default {
   normalizeAccount(account) {
     console.log(
       'Available account properties for new institution integration',
-      { account: JSON.stringify(account) }
+      { account: JSON.stringify(account) },
     );
 
     return {
@@ -25,13 +25,13 @@ export default {
       mask: (account?.iban || '0000').slice(-4),
       name: [account.name, printIban(account)].filter(Boolean).join(' '),
       official_name: `integration-${account.institution_id}`,
-      type: 'checking'
+      type: 'checking',
     };
   },
   sortTransactions(transactions = []) {
     console.log(
       'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-      { top10Transactions: JSON.stringify(transactions.slice(0, 10)) }
+      { top10Transactions: JSON.stringify(transactions.slice(0, 10)) },
     );
     return sortByBookingDate(transactions);
   },
@@ -40,8 +40,10 @@ export default {
       'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
       {
         balances: JSON.stringify(balances),
-        top10SortedTransactions: JSON.stringify(sortedTransactions.slice(0, 10))
-      }
+        top10SortedTransactions: JSON.stringify(
+          sortedTransactions.slice(0, 10),
+        ),
+      },
     );
 
     const currentBalance = balances
@@ -49,10 +51,10 @@ export default {
       .sort(
         (a, b) =>
           SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
-          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType)
+          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
       )[0];
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
     }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
-  }
+  },
 };

@@ -7,30 +7,30 @@ describe('utils', () => {
       const transactions = [
         {
           bookingDate: '2023-01-01',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           bookingDate: '2023-01-20',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           bookingDate: '2023-01-10',
-          transactionAmount: mockTransactionAmount
-        }
+          transactionAmount: mockTransactionAmount,
+        },
       ];
       expect(sortByBookingDate(transactions)).toEqual([
         {
           bookingDate: '2023-01-20',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           bookingDate: '2023-01-10',
-          transactionAmount: mockTransactionAmount
+          transactionAmount: mockTransactionAmount,
         },
         {
           bookingDate: '2023-01-01',
-          transactionAmount: mockTransactionAmount
-        }
+          transactionAmount: mockTransactionAmount,
+        },
       ]);
     });
   });
