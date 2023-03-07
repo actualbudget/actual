@@ -8,7 +8,7 @@ function useIsOutdated() {
 
   useEffect(() => {
     (async () => {
-      setIsOutdated(await getIsOutdated());
+      setIsOutdated(await getIsOutdated(latestVersion));
     })();
   }, [latestVersion]);
 

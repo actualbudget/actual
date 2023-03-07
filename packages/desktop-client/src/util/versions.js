@@ -19,12 +19,12 @@ export async function getLatestVersion() {
   let json = await response.json();
   let tags = json.map(t => t.name).concat([`v${window.Actual.ACTUAL_VERSION}`]);
   tags.sort(cmpSemanticVersion);
+  console.log(tags);
 
   return tags[0];
 }
 
-export async function getIsOutdated() {
-  let latestVersion = await getLatestVersion();
+export async function getIsOutdated(latestVersion) {
   let clientVersion = window.Actual.ACTUAL_VERSION;
   return cmpSemanticVersion(clientVersion, latestVersion) < 0;
 }
