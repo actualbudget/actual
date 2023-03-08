@@ -1,14 +1,25 @@
 import React from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
-import {
-  View,
-  Select,
-  Button,
-  ButtonLink,
-} from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
-import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
+import { View, Select, Button } from 'loot-design/src/components/common';
+import { ChartItem } from 'loot-design/src/components/sidebar';
+import { colors, styles } from 'loot-design/src/style';
+
+import { FilterButton, AppliedFilters } from '../accounts/Filters';
+
+const selectionBoxHeader = {
+  SquareShapeView: {
+    height: 5,
+    backgroundColor: colors.n3,
+  },
+};
+
+const selectionBoxSmall = {
+  SquareShapeView: {
+    height: 2,
+    backgroundColor: colors.n3,
+  },
+};
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
@@ -49,22 +60,27 @@ function getFullRange(allMonths) {
   return [start, end];
 }
 
-function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
+function Header({
+  title,
+  start,
+  end,
+  filters,
+  show1Month,
+  allMonths,
+  onChangeDates,
+  onApplyFilter,
+  onDeleteFilter,
+  disableFilter,
+  showAllTime,
+}) {
   return (
     <View
       style={{
-        padding: 20,
+        padding: 15,
         paddingTop: 0,
         flexShrink: 0,
       }}
     >
-      <ButtonLink
-        to="/reports"
-        bare
-        style={{ marginBottom: '15', alignSelf: 'flex-start' }}
-      >
-        <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
-      </ButtonLink>
       <View style={styles.veryLargeText}>{title}</View>
 
       <View
@@ -129,18 +145,112 @@ function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
         <Button
           bare
           style={{ marginLeft: 15 }}
-          onClick={() => onChangeDates(...getLatestRange(12))}
+          onClick={() => onChangeDates(...getLatestRange(11))}
         >
           1 Year
         </Button>
         <Button
           bare
-          style={{ marginLeft: 15 }}
+          style={{
+            marginLeft: 15,
+            display: !showAllTime ? 'inherit' : 'none',
+          }}
           onClick={() => onChangeDates(...getFullRange(allMonths))}
         >
           All Time
         </Button>
       </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          paddingTop: 15,
+        }}
+      >
+        <View style={{ marginRight: 10, marginTop: 2, marginBottom: 5 }}>
+          <FilterButton onApply={onApplyFilter} disableFilter={disableFilter} />
+        </View>
+
+        {filters && filters.length > 0 && (
+          <AppliedFilters filters={filters} onDelete={onDeleteFilter} />
+        )}
+      </View>
+    </View>
+  );
+}
+
+export function TotalsTrends({ title, isElement, Chart, id, OnClick }) {
+  return (
+    <View
+      style={{
+        color: colors.n3,
+        marginLeft: 20,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          height: 16,
+          marginBottom: 2,
+        }}
+      >
+        <ChartItem
+          isElement={isElement}
+          id={id}
+          handleClick={OnClick}
+          Icon={Chart}
+          title={title}
+        />
+      </View>
+      <View
+        style={[
+          selectionBoxSmall.SquareShapeView,
+          { display: isElement ? 'inherit' : 'none' },
+        ]}
+      />
+    </View>
+  );
+}
+
+export function HeaderReport({
+  title,
+  id,
+  handleMouseHover,
+  handleMouseLeaveHeader,
+  onHeaderClick,
+  isElement,
+  isDefault,
+}) {
+  return (
+    <View
+      style={{
+        marginLeft: 20,
+        flexShrink: 0,
+        color: isDefault ? colors.n3 : colors.n7,
+      }}
+    >
+      <View
+        onMouseOver={handleMouseHover}
+        onMouseOut={handleMouseLeaveHeader}
+        onClick={onHeaderClick}
+        id={id}
+        style={[
+          styles.largeText,
+          {
+            alignItems: 'center',
+            marginBottom: 2,
+          },
+        ]}
+      >
+        {title}
+      </View>
+      <View
+        style={[
+          selectionBoxHeader.SquareShapeView,
+          { display: isElement ? 'inherit' : 'none' },
+        ]}
+      />
     </View>
   );
 }

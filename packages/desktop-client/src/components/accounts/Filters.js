@@ -114,7 +114,7 @@ function OpButton({ op, selected, style, onClick }) {
     <Button
       bare
       style={[
-        { backgroundColor: colors.n10, marginBottom: 5 },
+        { backgroundColor: colors.n9, marginBottom: 5 },
         style,
         selected && {
           color: 'white',
@@ -187,7 +187,7 @@ function ConfigureField({
       onClose={() => dispatch({ type: 'close' })}
     >
       <ScopeTab>
-        <View style={{ marginBottom: 10 }}>
+        <View style={{ marginBottom: 5 }}>
           {field === 'amount' || field === 'date' ? (
             <CustomSelect
               options={
@@ -294,7 +294,7 @@ function ConfigureField({
   );
 }
 
-export function FilterButton({ onApply }) {
+export function FilterButton({ onApply, disableFilter }) {
   let { dateFormat } = useSelector(state => {
     return {
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
@@ -371,7 +371,11 @@ export function FilterButton({ onApply }) {
 
   return (
     <View>
-      <Button bare onClick={() => dispatch({ type: 'select-field' })}>
+      <Button
+        disabled={disableFilter}
+        bare
+        onClick={() => dispatch({ type: 'select-field' })}
+      >
         <SettingsSliderAlternate
           style={{
             width: 16,
@@ -461,7 +465,7 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colors.n10,
+          backgroundColor: colors.n9,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
@@ -530,8 +534,6 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
-        marginTop: 10,
-        marginBottom: -5,
       }}
     >
       {filters.map((filter, i) => (

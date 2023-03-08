@@ -319,7 +319,7 @@ function DetailedBalance({ name, balance }) {
     <Text
       style={{
         marginLeft: 15,
-        backgroundColor: colors.n10,
+        backgroundColor: colors.n9,
         borderRadius: 4,
         padding: '4px 6px',
         color: colors.n5,
@@ -1747,7 +1747,7 @@ class AccountInternal extends React.PureComponent {
               fetchAllIds={this.fetchAllIds}
               registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
             >
-              <View style={[styles.page, { backgroundColor: colors.n11 }]}>
+              <View style={[styles.page]}>
                 <AccountHeader
                   tableRef={this.table}
                   editingName={editingName}

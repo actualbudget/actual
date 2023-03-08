@@ -12,9 +12,9 @@ import { View, P } from 'loot-design/src/components/common';
 import { styles } from 'loot-design/src/style';
 
 import Change from './Change';
-import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
 import Header from './Header';
+import { netWorthSpreadsheet } from './spreadsheets/net-worth-spreadsheet';
 import useReport from './useReport';
 import { fromDateRepr, useArgsMemo } from './util';
 

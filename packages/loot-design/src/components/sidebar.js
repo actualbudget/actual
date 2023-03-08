@@ -106,7 +106,7 @@ function Item({
   );
 }
 
-function SecondaryItem({
+export function SecondaryItem({
   Icon,
   title,
   style,
@@ -166,6 +166,56 @@ function SecondaryItem({
           {content}
         </AnchorLink>
       )}
+    </View>
+  );
+}
+
+export function ChartItem({
+  Icon,
+  title,
+  style,
+  handleClick,
+  bold,
+  id,
+  isElement,
+}) {
+  const hoverStyle = {
+    color: colors.b4,
+    cursor: 'pointer',
+  };
+  const linkStyle = [
+    {
+      color: colors.n7,
+      fontWeight: bold ? fontWeight : null,
+    },
+    { ':hover': hoverStyle },
+  ];
+
+  const content = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 16,
+        color: isElement ? colors.n3 : 'inherit',
+      }}
+    >
+      {Icon && (
+        <Icon id={id} width={12} height={12} style={{ color: 'inherit' }} />
+      )}
+      <Block id={id} style={{ marginLeft: Icon ? 4 : 0, color: 'inherit' }}>
+        {title}
+      </Block>
+    </View>
+  );
+
+  return (
+    <View style={[{ flexShrink: 0 }, style]}>
+      <RectButton>
+        <View style={linkStyle} onClick={handleClick}>
+          {content}
+        </View>
+      </RectButton>
     </View>
   );
 }

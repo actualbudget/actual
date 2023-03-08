@@ -13,7 +13,7 @@ import { AlignedText } from 'loot-design/src/components/common';
 
 import { index } from '../util';
 
-export default function createSpreadsheet(start, end, accounts) {
+export function netWorthSpreadsheet(start, end, accounts) {
   return async (spreadsheet, setData) => {
     if (accounts.length === 0) {
       return null;

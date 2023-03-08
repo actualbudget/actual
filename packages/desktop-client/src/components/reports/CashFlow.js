@@ -15,9 +15,9 @@ import {
 import { colors, styles } from 'loot-design/src/style';
 
 import Change from './Change';
-import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
 import CashFlowGraph from './graphs/CashFlowGraph';
 import Header from './Header';
+import { cashFlowByDate } from './spreadsheets/cash-flow-spreadsheet';
 import useReport from './useReport';
 import { useArgsMemo } from './util';
 
