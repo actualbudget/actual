@@ -113,7 +113,7 @@ function LineGraph({ style, start, end, graphData, isConcise, hasNegative }) {
               style={{ data: { fill: 'none', stroke: 'none' } }}
             />
             <VictoryAxis
-              //tickFormat={x => d.format(x, "MMM ''yy")}
+              tickFormat={x => d.format(x, "MMM ''yy")}
               tickValues={graphData.balances.map(item => item.x)}
               tickCount={Math.min(5, graphData.balances.length)}
               offsetY={50}

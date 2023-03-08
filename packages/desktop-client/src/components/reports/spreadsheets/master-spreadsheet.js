@@ -24,9 +24,42 @@ export function masterDataSpreadsheet(
   isNetWorth,
   isIE,
   filt,
+  categories,
 ) {
   return async (spreadsheet, setData) => {
-    function makeQuery(where) {
+    function makeCategoryQuery(where) {
+      let query = q('transactions').filter({
+        $and: [
+          { date: { $transform: '$month', $gte: start } },
+          { date: { $transform: '$month', $lte: endDay } },
+          isIE &&
+            selectList !== 'All' && {
+              'category.is_income': selectList === 'Income' ? true : false,
+            },
+          !isNetWorth && { 'account.offbudget': false },
+        ],
+        $or: [
+          {
+            'payee.transfer_acct.offbudget': true,
+            'payee.transfer_acct': null,
+          },
+        ],
+      });
+
+      if (filt.length > 0) {
+        query = query.filter({
+          $and: [...filt],
+        });
+      }
+      return query
+        .groupBy('category.name')
+        .select([
+          { category: 'category.name' },
+          { amount: { $sum: '$amount' } },
+        ]);
+    }
+
+    function makeDateQuery(where) {
       let query = q('transactions').filter({
         $and: [
           { date: { $transform: '$month', $gte: start } },
@@ -52,21 +85,12 @@ export function masterDataSpreadsheet(
       }
 
       if (isConcise) {
-        if (isTotals) {
-          return query
-            .groupBy('category.name')
-            .select([
-              { category: 'category.name' },
-              { amount: { $sum: '$amount' } },
-            ]);
-        } else {
-          return query
-            .groupBy({ $month: '$date' })
-            .select([
-              { date: { $month: '$date' } },
-              { amount: { $sum: '$amount' } },
-            ]);
-        }
+        return query
+          .groupBy({ $month: '$date' })
+          .select([
+            { date: { $month: '$date' } },
+            { amount: { $sum: '$amount' } },
+          ]);
       }
 
       return query
@@ -84,8 +108,8 @@ export function masterDataSpreadsheet(
             ],
           })
           .calculate({ $sum: '$amount' }),
-        makeQuery('amount > 0').filter({ amount: { $gt: 0 } }),
-        makeQuery('amount < 0').filter({ amount: { $lt: 0 } }),
+        makeDateQuery('amount > 0').filter({ amount: { $gt: 0 } }),
+        makeDateQuery('amount < 0').filter({ amount: { $lt: 0 } }),
         q('transactions')
           .filter({
             $and: [
@@ -104,21 +128,22 @@ export function masterDataSpreadsheet(
             ],
           })
           .calculate({ $sum: '$amount' }),
+        makeCategoryQuery('amount > 0').filter({ amount: { $gt: 0 } }),
+        makeCategoryQuery('amount < 0').filter({ amount: { $lt: 0 } }),
       ],
       data => {
         setData(
-          !isTotals
-            ? recalculateDate(
-                data,
-                start,
-                end,
-                isConcise,
-                isCashFlow,
-                isNetWorth,
-                isIE,
-                selectList,
-              )
-            : recalculateCategory(data, start, end),
+          recalculateDate(
+            data,
+            start,
+            end,
+            isConcise,
+            isCashFlow,
+            isNetWorth,
+            isIE,
+            selectList,
+            categories,
+          ),
         );
       },
     );
@@ -134,8 +159,54 @@ function recalculateDate(
   isNetWorth,
   isIE,
   selectList,
+  categories,
 ) {
-  let [startingBalance, income, expense, startingAssets, startingDebts] = data;
+  let [
+    startingBalance,
+    incomeDate,
+    expenseDate,
+    startingAssets,
+    startingDebts,
+    incomeCategory,
+    expenseCategory,
+  ] = data;
+
+  const incomeCat = index(incomeCategory, 'category');
+
+  const expenseCat = index(expenseCategory, 'category');
+
+  const category = categories.list.map(q => {
+    return q.name;
+  });
+
+  let totalExpensesCat = 0;
+  let totalIncomeCat = 0;
+
+  const catData = category.reduce(
+    (res, elem) => {
+      let expensez = 0;
+      let incomez = 0;
+
+      incomez = incomeCat[elem] ? incomeCat[elem].amount : 0;
+      expensez = expenseCat[elem]
+        ? expenseCat[elem].amount * (isIE && selectList === 'Expense' ? -1 : 1)
+        : 0;
+
+      totalExpensesCat += expensez;
+      totalIncomeCat += incomez;
+
+      const x = elem;
+
+      res.income.push({ x, y: integerToAmount(incomez) });
+      res.expenses.push({ x, y: integerToAmount(expensez) });
+
+      return res;
+    },
+    { expenses: [], income: [] },
+  );
+
+  console.log(totalExpensesCat);
+  console.log(totalIncomeCat);
 
   const dates = isConcise
     ? monthUtils.rangeInclusive(
@@ -145,13 +216,13 @@ function recalculateDate(
     : monthUtils.dayRangeInclusive(start, end);
 
   const incomes = index(
-    income,
+    incomeDate,
     'date',
     isConcise ? fromDateRepr : fromDateReprToDay,
   );
 
   const expenses = index(
-    expense,
+    expenseDate,
     'date',
     isConcise ? fromDateRepr : fromDateReprToDay,
   );
@@ -239,114 +310,13 @@ function recalculateDate(
 
   return {
     graphData,
+    catData,
     totalExpenses,
     totalIncome,
     hasNegative,
     netWorth: endNetWorth,
     totalChanges: endNetWorth - startNetWorth,
     startNetWorth,
-  };
-}
-
-function recalculateCategory(data, start, end) {
-  let [startingBalance, income, expense] = data;
-
-  //const incomes = index(income, 'category');
-
-  //const expenses = index(expense, 'category');
-
-  let totalExpenses = 0;
-  let totalIncome = 0;
-
-  let res = { expenses: [], income: [], change: [], balances: [] };
-
-  expense.forEach(elem => {
-    let expensez = 0;
-
-    if (elem.amount) {
-      expensez = elem.amount;
-    }
-
-    totalExpenses += expensez;
-
-    const x = elem.category;
-
-    const label = (
-      <div>
-        <div style={{ marginBottom: 10 }}>
-          <strong>{x}</strong>
-        </div>
-        <div style={{ lineHeight: 1.5 }}>
-          <AlignedText left="Exp:" right={integerToCurrency(expensez)} />
-        </div>
-      </div>
-    );
-
-    res.expenses.push({
-      x,
-      y: Math.abs(integerToAmount(elem.amount)),
-      premadeLabel: label,
-    });
-  });
-
-  income.forEach(elem => {
-    let incom = 0;
-
-    if (elem.amount) {
-      incom = elem.amount;
-    }
-
-    totalIncome += incom;
-
-    const x = elem.category;
-
-    const label = (
-      <div>
-        <div style={{ marginBottom: 10 }}>
-          <strong>{x}</strong>
-        </div>
-        <div style={{ lineHeight: 1.5 }}>
-          <AlignedText left="Exp:" right={integerToCurrency(incom)} />
-        </div>
-      </div>
-    );
-
-    res.income.push({
-      x,
-      y: Math.abs(integerToAmount(elem.amount)),
-      premadeLabel: label,
-    });
-  });
-
-  let myDataExp = res.expenses
-    .sort((a, b) => (a.x > b.x ? 1 : -1))
-    .map((item, i) => (
-      <div key={i}>
-        {' '}
-        {item.x} {item.y}
-      </div>
-    ));
-
-  let myDataInc = res.income
-    .sort((a, b) => (a.x > b.x ? 1 : -1))
-    .map((item, i) => (
-      <div key={i}>
-        {' '}
-        {item.x} {item.y}
-      </div>
-    ));
-
-  console.log(startingBalance);
-  console.log(myDataExp);
-  console.log(myDataInc);
-
-  return {
-    graphData: {
-      expenses: res.expenses,
-      income: res.income,
-    },
-    totalExpenses,
-    totalIncome,
   };
 }
 

@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { connect } from 'react-redux';
 
 import * as d from 'date-fns';
+import { bindActionCreators } from 'redux';
 
+import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { View, P } from 'loot-design/src/components/common';
@@ -13,7 +16,7 @@ import { HeaderReport } from './Header';
 import { masterDataSpreadsheet } from './spreadsheets/master-spreadsheet';
 import useReport from './useReport';
 
-function AllReports() {
+function AllReports({ categories }) {
   const [filterz, setFilterz] = useState([]);
   const [filt, setFilt] = useState([]);
   const [disableFilter, setDisableFilter] = useState(true);
@@ -121,6 +124,7 @@ function AllReports() {
         isNetWorth,
         isIE,
         filt,
+        categories,
       ),
     [
       start,
@@ -133,6 +137,7 @@ function AllReports() {
       isNetWorth,
       isIE,
       filt,
+      categories,
     ],
   );
   const data = useReport(spreadSheet, params);
@@ -288,8 +293,14 @@ function AllReports() {
     e.target.id === 'iEHeader' ? setIsIE(true) : setIsIE(false);
   };
 
-  const { graphData, totalExpenses, totalIncome, netWorth, totalChanges } =
-    data;
+  const {
+    graphData,
+    catData,
+    totalExpenses,
+    totalIncome,
+    netWorth,
+    totalChanges,
+  } = data;
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
@@ -405,6 +416,7 @@ function AllReports() {
               end={end}
               endDay={endDay}
               graphData={graphData}
+              catData={catData}
               isConcise={isConcise}
               selectList={selectList}
               isNetWorth={isNetWorth}
@@ -434,4 +446,7 @@ function AllReports() {
   );
 }
 
-export default AllReports;
+export default connect(
+  state => ({ categories: state.queries.categories }),
+  dispatch => bindActionCreators(actions, dispatch),
+)(AllReports);

@@ -129,6 +129,7 @@ export function ChooseChart({
   end,
   endDay,
   graphData,
+  catData,
   isConcise,
   selectList,
   isNetWorth,
@@ -162,7 +163,7 @@ export function ChooseChart({
             start={monthUtils.getMonth(start)}
             end={end}
             graphData={
-              selectList === 'Expense' ? graphData.expenses : graphData.income
+              selectList === 'Expense' ? catData.expenses : catData.income
             }
           />
         </View>
