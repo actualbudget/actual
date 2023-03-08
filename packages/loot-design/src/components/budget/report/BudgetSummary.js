@@ -239,7 +239,7 @@ function Saved({ projected, style }) {
   );
 }
 
-export default React.memo(function BudgetSummary({ month }) {
+export const BudgetSummary = React.memo(function BudgetSummary({ month }) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,

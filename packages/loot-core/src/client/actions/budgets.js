@@ -1,6 +1,6 @@
 import { send } from '../../platform/client/fetch';
-import { getDownloadError } from '../../shared/errors';
-import constants from '../constants';
+import { getDownloadError, getSyncError } from '../../shared/errors';
+import * as constants from '../constants';
 
 import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
@@ -65,33 +65,23 @@ export function loadBudget(id, loadingText = '', options = {}) {
     let { error } = await send('load-budget', { id, ...options });
 
     if (error) {
+      let message = getSyncError(error, id);
       if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
         // confirm is not available on iOS
-        // eslint-disable-next-line
-        if (typeof confirm !== 'undefined') {
-          // eslint-disable-next-line
-          let showBackups = confirm(
-            'This budget cannot be loaded with this version of the app. ' +
-              'Make sure the app is up-to-date. Do you want to load a backup?',
+        if (typeof window.confirm !== 'undefined') {
+          let showBackups = window.confirm(
+            message +
+              ' Make sure the app is up-to-date. Do you want to load a backup?',
           );
 
           if (showBackups) {
             dispatch(pushModal('load-backup', { budgetId: id }));
           }
         } else {
-          alert(
-            'This budget cannot be loaded with this version of the app. ' +
-              'Make sure the app is up-to-date.',
-          );
+          alert(message + ' Make sure the app is up-to-date.');
         }
-      } else if (error === 'budget-not-found') {
-        alert(
-          'Budget file could not be found. If you changed something manually, please restart the app.',
-        );
       } else {
-        alert(
-          'Error loading budget. Please open a issue on GitHub for support.',
-        );
+        alert(message);
       }
 
       dispatch(setAppState({ loadingText: null }));
@@ -120,7 +110,7 @@ export function closeBudget() {
       await send('close-budget');
       dispatch(setAppState({ loadingText: null }));
       if (localStorage.getItem('SharedArrayBufferOverride')) {
-        location.reload();
+        window.location.reload();
       }
     }
   };

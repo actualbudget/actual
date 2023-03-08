@@ -215,6 +215,6 @@ async function execTransactionsBasic(
   return execQuery(queryState, state, s, params, outputTypes);
 }
 
-export default {
+export const schemaExecutors = {
   transactions: execTransactions,
 };

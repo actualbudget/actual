@@ -1,7 +1,7 @@
 import memoizeOne from 'memoize-one';
 
 import { groupById } from '../../shared/util';
-import constants from '../constants';
+import * as constants from '../constants';
 
 const initialState = {
   newTransactions: [],

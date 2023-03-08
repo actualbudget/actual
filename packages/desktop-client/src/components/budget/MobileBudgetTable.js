@@ -845,14 +845,6 @@ export class BudgetTable extends React.Component {
   //   onKeyboardDone = () => {
   //     Keyboard.dismiss();
 
-  //     if (Platform.isReactNativeWeb) {
-  //       // TODO: If we are running tests, they can't rely on the
-  //       // keyboard events, so manually reset the state here. Hopefully
-  //       // we can find a better solution for this in the future.
-  //       this.onEditCategory(null);
-  //     }
-  //   };
-
   // onMoveUp = () => {
   //   const { categories } = this.props;
   //   const { editingCategory } = this.state;

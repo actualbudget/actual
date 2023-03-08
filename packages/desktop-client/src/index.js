@@ -20,7 +20,7 @@ import {
 import thunk from 'redux-thunk';
 
 import * as actions from 'loot-core/src/client/actions';
-import constants from 'loot-core/src/client/constants';
+import * as constants from 'loot-core/src/client/constants';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import reducers from 'loot-core/src/client/reducers';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';

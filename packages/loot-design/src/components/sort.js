@@ -38,7 +38,7 @@ export function useDraggable({
 }) {
   let _onDragChange = useRef(onDragChange);
 
-  //eslint-disable-next-line
+  //eslint-disable-next-line no-unused-vars
   const [{ isDragging }, dragRef] = useDrag({
     item: { type, item },
     collect: monitor => ({ isDragging: monitor.isDragging() }),
@@ -71,7 +71,6 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
   let ref = useRef(null);
   let [dropPos, setDropPos] = useState(null);
 
-  // eslint-disable-next-line
   let [{ isOver }, dropRef] = useDrop({
     accept: types,
     drop({ item }, monitor) {
@@ -109,11 +108,12 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
 export const DropHighlightPosContext = React.createContext(null);
 
 export function DropHighlight({ pos, offset = {} }) {
+  let itemPos = useContext(DropHighlightPosContext);
+
   if (pos == null) {
     return null;
   }
 
-  let itemPos = useContext(DropHighlightPosContext);
   let topOffset = (itemPos === 'first' ? 2 : 0) + (offset.top || 0);
   let bottomOffset = (itemPos === 'last' ? 2 : 0) + (offset.bottom || 0);
 

@@ -178,7 +178,8 @@ function CloseAccount({
                 {!canDelete && (
                   <View style={{ marginBottom: 15 }}>
                     <Text style={{ fontSize: 12 }}>
-                      You can also {/* eslint-disable-next-line */}
+                      You can also{' '}
+                      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                       <a
                         href="#"
                         onClick={e => {

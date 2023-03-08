@@ -1,0 +1,161 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Learning categories updates rules correctly even if multiple rules exist 1`] = `
+Array [
+  Rule {
+    "actions": Array [
+      Action {
+        "field": "category",
+        "op": "set",
+        "options": undefined,
+        "rawValue": "food",
+        "type": "id",
+        "value": "food",
+      },
+    ],
+    "conditions": Array [
+      Condition {
+        "field": "payee",
+        "op": "is",
+        "options": undefined,
+        "rawValue": "foo",
+        "type": "id",
+        "unparsedValue": "foo",
+        "value": "foo",
+      },
+    ],
+    "id": "id2",
+    "stage": null,
+  },
+  Rule {
+    "actions": Array [
+      Action {
+        "field": "category",
+        "op": "set",
+        "options": undefined,
+        "rawValue": "food",
+        "type": "id",
+        "value": "food",
+      },
+    ],
+    "conditions": Array [
+      Condition {
+        "field": "payee",
+        "op": "is",
+        "options": undefined,
+        "rawValue": "foo",
+        "type": "id",
+        "unparsedValue": "foo",
+        "value": "foo",
+      },
+    ],
+    "id": "id3",
+    "stage": null,
+  },
+  Rule {
+    "actions": Array [
+      Action {
+        "field": "category",
+        "op": "set",
+        "options": undefined,
+        "rawValue": "beer",
+        "type": "id",
+        "value": "beer",
+      },
+    ],
+    "conditions": Array [
+      Condition {
+        "field": "payee",
+        "op": "is",
+        "options": undefined,
+        "rawValue": null,
+        "type": "id",
+        "unparsedValue": null,
+        "value": null,
+      },
+    ],
+    "id": "id4",
+    "stage": null,
+  },
+]
+`;
+
+exports[`Learning categories updates rules correctly even if multiple rules exist 2`] = `
+Array [
+  Rule {
+    "actions": Array [
+      Action {
+        "field": "category",
+        "op": "set",
+        "options": undefined,
+        "rawValue": "beer",
+        "type": "id",
+        "value": "beer",
+      },
+    ],
+    "conditions": Array [
+      Condition {
+        "field": "payee",
+        "op": "is",
+        "options": undefined,
+        "rawValue": "foo",
+        "type": "id",
+        "unparsedValue": "foo",
+        "value": "foo",
+      },
+    ],
+    "id": "id2",
+    "stage": null,
+  },
+  Rule {
+    "actions": Array [
+      Action {
+        "field": "category",
+        "op": "set",
+        "options": undefined,
+        "rawValue": "beer",
+        "type": "id",
+        "value": "beer",
+      },
+    ],
+    "conditions": Array [
+      Condition {
+        "field": "payee",
+        "op": "is",
+        "options": undefined,
+        "rawValue": "foo",
+        "type": "id",
+        "unparsedValue": "foo",
+        "value": "foo",
+      },
+    ],
+    "id": "id3",
+    "stage": null,
+  },
+  Rule {
+    "actions": Array [
+      Action {
+        "field": "category",
+        "op": "set",
+        "options": undefined,
+        "rawValue": "beer",
+        "type": "id",
+        "value": "beer",
+      },
+    ],
+    "conditions": Array [
+      Condition {
+        "field": "payee",
+        "op": "is",
+        "options": undefined,
+        "rawValue": null,
+        "type": "id",
+        "unparsedValue": null,
+        "value": null,
+      },
+    ],
+    "id": "id4",
+    "stage": null,
+  },
+]
+`;

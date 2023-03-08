@@ -18,6 +18,7 @@ import {
   Stack,
   Modal,
   Select,
+  Input,
   Button,
   ButtonWithLoading,
 } from '../common';
@@ -43,6 +44,14 @@ export function parseDate(str, order) {
   }
 
   const dateGroups = (a, b) => str => {
+    const parts = str
+      .replace(/^[^\d]+/, '')
+      .replace(/[^\d]+$/, '')
+      .split(/[^\d]+/);
+    if (parts.length >= 3) {
+      return parts.slice(0, 3);
+    }
+
     const digits = str.replace(/[^\d]/g, '');
     return [digits.slice(0, a), digits.slice(a, a + b), digits.slice(a + b)];
   };
@@ -210,13 +219,17 @@ function parseAmount(amount, mapper) {
   return value;
 }
 
-function parseAmountFields(trans, splitMode, flipAmount) {
+function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
+  const multiplier = parseFloat(multiplierAmount) || 1.0;
+
   if (splitMode) {
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    let outflow = parseAmount(trans.outflow, n => -Math.abs(n));
-    let inflow = outflow ? 0 : parseAmount(trans.inflow, n => Math.abs(n));
+    let outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * multiplier;
+    let inflow = outflow
+      ? 0
+      : parseAmount(trans.inflow, n => Math.abs(n)) * multiplier;
 
     return {
       amount: outflow || inflow,
@@ -225,7 +238,8 @@ function parseAmountFields(trans, splitMode, flipAmount) {
     };
   }
   return {
-    amount: parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)),
+    amount:
+      parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * multiplier,
     outflow: null,
     inflow: null,
   };
@@ -239,6 +253,7 @@ function Transaction({
   dateFormat,
   splitMode,
   flipAmount,
+  multiplierAmount,
 }) {
   let transaction = useMemo(
     () =>
@@ -252,6 +267,7 @@ function Transaction({
     transaction,
     splitMode,
     flipAmount,
+    multiplierAmount,
   );
   amount = amountToCurrency(amount);
   outflow = amountToCurrency(outflow);
@@ -368,6 +384,22 @@ function DateFormatSelect({
           </option>
         ))}
       </Select>
+    </View>
+  );
+}
+
+function MultipliersOption({ value, onChange }) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        userSelect: 'none',
+      }}
+    >
+      <Checkbox id="add_multiplier" checked={value} onChange={onChange} />
+      <label htmlFor="add_multiplier">Add Multiplier</label>
     </View>
   );
 }
@@ -500,6 +532,20 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
   );
 }
 
+function MultipliersField({ multiplierCB, value, onChange }) {
+  const styl = multiplierCB ? 'inherit' : 'none';
+
+  return (
+    <Input
+      type="text"
+      style={{ display: styl }}
+      value={value}
+      placeholder="Optional"
+      onUpdate={onChange}
+    />
+  );
+}
+
 export function ImportTransactions({
   modalProps,
   options,
@@ -510,6 +556,7 @@ export function ImportTransactions({
   getPayees,
   savePrefs,
 }) {
+  let [multiplierAmount, setMultiplierAmount] = useState('');
   let [loadingState, setLoadingState] = useState('parsing');
   let [error, setError] = useState(null);
   let [filename, setFilename] = useState(options.filename);
@@ -518,6 +565,7 @@ export function ImportTransactions({
   let [fieldMappings, setFieldMappings] = useState(null);
   let [splitMode, setSplitMode] = useState(false);
   let [flipAmount, setFlipAmount] = useState(false);
+  let [multiplierEnabled, setMultiplierEnabled] = useState(false);
   let { accountId, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -586,6 +634,13 @@ export function ImportTransactions({
     }
   }
 
+  function onMultiplierChange(e) {
+    const amt = e;
+    if (!amt || amt.match(/^\d{1,}(\.\d{0,4})?$/)) {
+      setMultiplierAmount(amt);
+    }
+  }
+
   useEffect(() => {
     parse(
       options.filename,
@@ -598,6 +653,10 @@ export function ImportTransactions({
   function onSplitMode() {
     if (fieldMappings == null) {
       return;
+    }
+
+    if (flipAmount === true) {
+      setFlipAmount(!flipAmount);
     }
 
     let isSplit = !splitMode;
@@ -658,7 +717,12 @@ export function ImportTransactions({
         break;
       }
 
-      let { amount } = parseAmountFields(trans, splitMode, flipAmount);
+      let { amount } = parseAmountFields(
+        trans,
+        splitMode,
+        flipAmount,
+        multiplierAmount,
+      );
       if (amount == null) {
         errorMessage = `Transaction on ${trans.date} has no amount`;
         break;
@@ -774,6 +838,7 @@ export function ImportTransactions({
                   fieldMappings={fieldMappings}
                   splitMode={splitMode}
                   flipAmount={flipAmount}
+                  multiplierAmount={multiplierAmount}
                 />
               </View>
             )}
@@ -808,54 +873,89 @@ export function ImportTransactions({
         </View>
       )}
 
+      {/*Import Options */}
       {(filetype === 'qif' || filetype === 'csv') && (
         <View style={{ marginTop: 25 }}>
-          <SectionLabel title="IMPORT OPTIONS" />
-          <View style={{ marginTop: 5 }}>
-            <FlipAmountOption
-              value={flipAmount}
-              disabled={splitMode}
-              onChange={() => {
-                setFlipAmount(!flipAmount);
-              }}
-            />
-          </View>
-          {filetype === 'csv' && (
-            <View style={{ marginTop: 10 }}>
-              <SplitOption value={splitMode} onChange={onSplitMode} />
+          <Stack
+            direction="row"
+            align="flex-start"
+            spacing={1}
+            style={{ marginTop: 5 }}
+          >
+            {/*Date Format */}
+            <View>
+              {(filetype === 'qif' || filetype === 'csv') && (
+                <DateFormatSelect
+                  transactions={transactions}
+                  fieldMappings={fieldMappings}
+                  parseDateFormat={parseDateFormat}
+                  onChange={setParseDateFormat}
+                />
+              )}
             </View>
-          )}
+
+            {/*csv Delimiter */}
+            <View>
+              {filetype === 'csv' && (
+                <View style={{ marginLeft: 25 }}>
+                  <SectionLabel title="CSV DELIMITER" />
+                  <Select
+                    value={csvDelimiter}
+                    onChange={e => {
+                      setCsvDelimiter(e.target.value);
+                      parse(filename, { delimiter: e.target.value });
+                    }}
+                  >
+                    <option value=",">,</option>
+                    <option value=";">;</option>
+                  </Select>
+                </View>
+              )}
+            </View>
+
+            <View style={{ flex: 1 }} />
+
+            <View style={{ marginRight: 25 }}>
+              <SectionLabel title="IMPORT OPTIONS" />
+              <View style={{ marginTop: 5 }}>
+                <FlipAmountOption
+                  value={flipAmount}
+                  disabled={splitMode}
+                  onChange={() => {
+                    setFlipAmount(!flipAmount);
+                  }}
+                />
+              </View>
+              {filetype === 'csv' && (
+                <View style={{ marginTop: 10 }}>
+                  <SplitOption value={splitMode} onChange={onSplitMode} />
+                </View>
+              )}
+              <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                <View style={{ marginRight: 30 }}>
+                  <MultipliersOption
+                    value={multiplierEnabled}
+                    onChange={() => {
+                      setMultiplierEnabled(!multiplierEnabled);
+                      setMultiplierAmount('');
+                    }}
+                  />
+                </View>
+                <View style={{ width: 75 }}>
+                  <MultipliersField
+                    multiplierCB={multiplierEnabled}
+                    value={multiplierAmount}
+                    onChange={onMultiplierChange}
+                  />
+                </View>
+              </View>
+            </View>
+          </Stack>
         </View>
       )}
 
-      <View style={{ flexDirection: 'row', marginTop: 25 }}>
-        {(filetype === 'qif' || filetype === 'csv') && (
-          <DateFormatSelect
-            transactions={transactions}
-            fieldMappings={fieldMappings}
-            parseDateFormat={parseDateFormat}
-            onChange={setParseDateFormat}
-          />
-        )}
-
-        {filetype === 'csv' && (
-          <View style={{ marginLeft: 25 }}>
-            <SectionLabel title="CSV DELIMITER" />
-            <Select
-              value={csvDelimiter}
-              onChange={e => {
-                setCsvDelimiter(e.target.value);
-                parse(filename, { delimiter: e.target.value });
-              }}
-            >
-              <option value=",">,</option>
-              <option value=";">;</option>
-            </Select>
-          </View>
-        )}
-
-        <View style={{ flex: 1 }} />
-
+      <View style={{ flexDirection: 'row', marginTop: 5 }}>
+        {/*Submit Button */}
         <View
           style={{
             alignSelf: 'flex-end',

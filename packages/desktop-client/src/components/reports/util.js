@@ -1,12 +1,4 @@
-import { useMemo } from 'react';
-
 import { runQuery } from 'loot-core/src/client/query-helpers';
-
-export function useArgsMemo(func) {
-  return (...args) => {
-    return useMemo(() => func(...args), args);
-  };
-}
 
 export function fromDateRepr(date) {
   return date.slice(0, 7);

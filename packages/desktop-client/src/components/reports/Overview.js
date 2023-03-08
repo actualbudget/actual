@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect } from 'react-redux';
 
 import { bindActionCreators } from 'redux';
@@ -19,7 +19,6 @@ import { simpleCashFlow } from './spreadsheets/cash-flow-spreadsheet';
 import { netWorthSpreadsheet } from './spreadsheets/net-worth-spreadsheet';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
-import { useArgsMemo } from './util';
 
 function Card({ flex, to, style, children }) {
   const containerProps = { flex, margin: 15 };
@@ -63,10 +62,11 @@ function NetWorthCard({ accounts }) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
 
-  const data = useReport(
-    'net_worth',
-    useArgsMemo(netWorthSpreadsheet)(start, end, accounts),
+  const params = useMemo(
+    () => netWorthSpreadsheet(start, end, accounts),
+    [start, end, accounts],
   );
+  const data = useReport('net_worth', params);
 
   if (!data) {
     return null;
@@ -79,6 +79,7 @@ function NetWorthCard({ accounts }) {
           <View style={{ flex: 1 }}>
             <Block
               style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              role="heading"
             >
               Net Worth
             </Block>
@@ -113,10 +114,8 @@ function CashFlowCard() {
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
 
-  const data = useReport(
-    'cash_flow_simple',
-    useArgsMemo(simpleCashFlow)(start, end),
-  );
+  const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
+  const data = useReport('cash_flow_simple', params);
   if (!data) {
     return null;
   }
@@ -132,6 +131,7 @@ function CashFlowCard() {
           <View style={{ flex: 1 }}>
             <Block
               style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              role="heading"
             >
               Cash Flow
             </Block>

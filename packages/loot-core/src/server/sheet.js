@@ -2,7 +2,7 @@ import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 
-import Platform from './platform';
+import * as Platform from './platform';
 import * as prefs from './prefs';
 import Spreadsheet from './spreadsheet/spreadsheet';
 
@@ -86,7 +86,7 @@ function isCacheDirty(mainDb, cacheDb) {
 }
 
 export async function loadSpreadsheet(db, onSheetChange) {
-  let cacheEnabled = !global.__TESTING__;
+  let cacheEnabled = process.env.NODE_ENV !== 'test';
   let mainDb = db.getDatabase();
   let cacheDb;
 

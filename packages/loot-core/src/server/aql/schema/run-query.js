@@ -4,7 +4,7 @@ import {
   runCompiledQuery as _runCompiledQuery,
 } from '../exec';
 
-import schemaExecutors from './executors';
+import { schemaExecutors } from './executors';
 
 import { schema, schemaConfig } from './index';
 

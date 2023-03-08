@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { css, media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
-import Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import { View, Text, Button, Input } from 'loot-design/src/components/common';
 import { FormField, FormLabel } from 'loot-design/src/components/forms';
