@@ -239,11 +239,11 @@ export function ChartItem({
 
   return (
     <View style={[{ flexShrink: 0 }, style]}>
-      <RectButton>
+      <Button>
         <View style={linkStyle} onClick={handleClick}>
           {content}
         </View>
-      </RectButton>
+      </Button>
     </View>
   );
 }

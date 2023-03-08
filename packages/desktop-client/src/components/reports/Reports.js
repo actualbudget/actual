@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import * as d from 'date-fns';
 
@@ -12,7 +12,6 @@ import Header from './Header';
 import { HeaderReport } from './Header';
 import { masterDataSpreadsheet } from './spreadsheets/master-spreadsheet';
 import useReport from './useReport';
-import { useArgsMemo } from './util';
 
 function AllReports() {
   const [filterz, setFilterz] = useState([]);
@@ -109,9 +108,21 @@ function AllReports() {
       : isIE && 'ie-sheet';
   })();
 
-  const data = useReport(
-    spreadSheet,
-    useArgsMemo(masterDataSpreadsheet)(
+  const params = useMemo(
+    () =>
+      masterDataSpreadsheet(
+        start,
+        end,
+        endDay,
+        isTotals,
+        isConcise,
+        selectList,
+        isCashFlow,
+        isNetWorth,
+        isIE,
+        filt,
+      ),
+    [
       start,
       end,
       endDay,
@@ -122,8 +133,9 @@ function AllReports() {
       isNetWorth,
       isIE,
       filt,
-    ),
+    ],
   );
+  const data = useReport(spreadSheet, params);
 
   useEffect(() => {
     async function run() {
