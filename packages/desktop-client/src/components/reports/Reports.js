@@ -29,7 +29,7 @@ function AllReports({ categories }) {
 
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 30),
+    monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const end = monthUtils.currentMonth();
   const [endDay, setEndDay] = useState(monthUtils.currentDay());
@@ -224,6 +224,7 @@ function AllReports({ categories }) {
 
   const handleClick = e => {
     if (
+      e.target.textContent === 'Totals' ||
       e.target.id === 'TotalsChoice' ||
       e.target.parentElement.id === 'TotalsChoice'
     ) {
@@ -233,6 +234,7 @@ function AllReports({ categories }) {
       setIsTotals(false);
     }
 
+    e.target.textContent === 'Trends' ||
     e.target.id === 'TrendsChoice' ||
     e.target.parentElement.id === 'TrendsChoice'
       ? setIsTrends(true)
