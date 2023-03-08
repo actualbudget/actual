@@ -249,7 +249,7 @@ function recalculateDate(
 }
 
 function recalculateCategory(data, start, end) {
-  let [income, expense] = data;
+  let [startingBalance, income, expense] = data;
 
   //const incomes = index(income, 'category');
 
@@ -336,6 +336,7 @@ function recalculateCategory(data, start, end) {
       </div>
     ));
 
+  console.log(startingBalance);
   console.log(myDataExp);
   console.log(myDataInc);
 
