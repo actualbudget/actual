@@ -24,7 +24,7 @@
     "@rschedule/json-tools": "^1.2.0",
     "@rschedule/standard-date-adapter": "^1.2.0",
     "absurd-sql": "0.0.53",
-    "better-sqlite3": "^8.1.0",
+    "better-sqlite3": "^8.2.0",
     "core-js": "^3.8.3",
     "csv-parse": "^4.10.1",
     "csv-stringify": "^5.3.6",
