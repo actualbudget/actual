@@ -1,59 +1,52 @@
 import React from 'react';
 
-import { VictoryPie, VictoryTooltip } from 'victory';
+import { VictoryLabel, VictoryPie, VictoryTooltip } from 'victory';
 
 //import theme from '../chart-theme';
-import Container from '../Container';
 
 function DonutGraph({ style, start, end, graphData }) {
   return (
-    <Container style={{ height: 500 }}>
-      {(width, height, portalHost) =>
-        graphData && (
-          <svg viewBox="0 0 400 400">
-            <VictoryPie
-              standalone={false}
-              data={graphData}
-              //theme={theme}
-              colorScale="qualitative"
-              innerRadius={100}
-              style={{
-                data: { fillOpacity: 1.0 },
-                parent: { border: '0px solid #ccc' },
-              }}
-            />
-            <VictoryPie
-              standalone={false}
-              data={graphData}
-              //theme={theme}
-              colorScale="qualitative"
-              labelComponent={
-                <VictoryTooltip
-                  x={200}
-                  y={250}
-                  orientation="top"
-                  pointerLength={0}
-                  cornerRadius={50}
-                  flyoutWidth={100}
-                  flyoutHeight={100}
-                  flyoutStyle={{
-                    stroke: 'none',
-                    //fill: props.color,
-                  }}
-                />
+    graphData && (
+      <svg viewBox="0 0 500 325">
+        <VictoryPie
+          standalone={false}
+          width={350}
+          height={350}
+          labelPosition="centroid"
+          labelPlacement="parallel"
+          labelRadius={100}
+          //padding={50}
+          data={graphData}
+          //theme={theme}
+          colorScale="qualitative"
+          innerRadius={80}
+          labelComponent={<VictoryLabel textAnchor="middle" />}
+          labels={({ datum }) => `${datum.x}`}
+        />
+        <VictoryPie
+          standalone={false}
+          width={350}
+          height={350}
+          data={graphData}
+          //theme={theme}
+          labelComponent={
+            <VictoryTooltip
+              cornerRadius={2}
+              orientation="right"
+              flyoutPadding={({ text }) =>
+                text.length > 1 ? { top: 0, bottom: 0, left: 10, right: 10 } : 7
               }
-              labels={({ datum }) => `${datum.y}`}
-              innerRadius={100}
-              labelRadius={110}
-              style={{
-                data: { fillOpacity: 0.0 },
-                parent: { border: '0px solid #ccc' },
-              }}
             />
-          </svg>
-        )
-      }
-    </Container>
+          }
+          labels={({ datum }) => `${datum.x}: ${datum.q}`}
+          innerRadius={80}
+          style={{
+            data: { fillOpacity: 0.0 },
+            parent: { border: '0px solid #ccc' },
+          }}
+        />
+      </svg>
+    )
   );
 }
 

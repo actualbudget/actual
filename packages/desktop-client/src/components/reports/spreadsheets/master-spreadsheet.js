@@ -184,21 +184,58 @@ function recalculateDate(
 
   const catData = category.reduce(
     (res, elem) => {
-      let expensez = 0;
-      let incomez = 0;
+      let expense = 0;
+      let income = 0;
 
-      incomez = incomeCat[elem] ? incomeCat[elem].amount : 0;
-      expensez = expenseCat[elem]
+      income = incomeCat[elem] ? incomeCat[elem].amount : 0;
+      expense = expenseCat[elem]
         ? expenseCat[elem].amount * (isIE && selectList === 'Expense' ? -1 : 1)
         : 0;
 
-      totalExpensesCat += expensez;
-      totalIncomeCat += incomez;
+      totalExpensesCat += expense;
+      totalIncomeCat += income;
 
       const x = elem;
 
-      res.income.push({ x, y: integerToAmount(incomez) });
-      res.expenses.push({ x, y: integerToAmount(expensez) });
+      const label = (
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{x}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            {income ? (
+              <AlignedText left="Income:" right={integerToCurrency(income)} />
+            ) : (
+              ''
+            )}
+            {expense ? (
+              <AlignedText
+                left="Expenses:"
+                right={integerToCurrency(expense)}
+              />
+            ) : (
+              ''
+            )}
+          </div>
+        </div>
+      );
+
+      if (income !== 0) {
+        res.income.push({
+          x,
+          y: integerToAmount(income),
+          q: integerToCurrency(income),
+          premadeLabel: label,
+        });
+      }
+      if (expense !== 0) {
+        res.expenses.push({
+          x,
+          y: integerToAmount(expense),
+          q: integerToCurrency(expense),
+          premadeLabel: label,
+        });
+      }
 
       return res;
     },

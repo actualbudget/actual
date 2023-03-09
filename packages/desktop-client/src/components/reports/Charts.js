@@ -158,7 +158,7 @@ export function ChooseChart({
   } else if (isIE) {
     if (isTotals) {
       return (
-        <View>
+        <View style={{ alignItems: 'center' }}>
           <DonutGraph
             start={monthUtils.getMonth(start)}
             end={end}
