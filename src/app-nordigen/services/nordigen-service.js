@@ -17,8 +17,8 @@ import config from '../../load-config.js';
 
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
-  secretId: config.nordigen_secret_id,
-  secretKey: config.nordigen_secret_key,
+  secretId: config.nordigen?.secretId,
+  secretKey: config.nordigen?.secretKey,
 });
 
 export const handleNordigenError = (response) => {
