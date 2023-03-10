@@ -17,7 +17,7 @@ function DonutGraph({ style, start, end, graphData }) {
           labelRadius={100}
           data={graphData}
           theme={theme}
-          colorScale="qualitative"
+          colorScale={theme.pie.colorScale}
           innerRadius={80}
           labelComponent={<VictoryLabel textAnchor="middle" />}
           labels={({ datum }) => `${datum.x}`}

@@ -58,6 +58,12 @@ const theme = {
       },
     },
   },
+  pie: {
+    style: {
+      labels: baseLabelStyles,
+    },
+    colorScale: [colors.y7, colors.r7, colors.b7, colors.n7, colors.g7],
+  },
   axis: {
     style: axisBaseStyles,
   },
