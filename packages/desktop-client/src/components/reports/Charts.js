@@ -70,7 +70,7 @@ export function ChartItem({
       <Button
         id={title + 'Button'}
         style={linkStyle}
-        onClick={handleClick}
+        onClick={() => handleClick(id)}
         bare
       >
         {content}
@@ -168,7 +168,7 @@ export function ChooseChartHeader({
           <Select
             style={{ flex: 0, backgroundColor: 'white' }}
             value={selectList}
-            onChange={handleChange}
+            onChange={e => handleChange(e.target.value)}
           >
             <option value="Expense">Expense</option>
             <option value="Income">Income</option>

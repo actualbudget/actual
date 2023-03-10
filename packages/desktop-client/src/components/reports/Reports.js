@@ -187,23 +187,14 @@ function AllReports({ categories }) {
     return null;
   }
 
-  const handleChange = e => {
-    setSelectList(e.target.value);
-  };
+  function handleChange(value) {
+    setSelectList(value);
+  }
 
-  const onSecondaryClick = e => {
-    if (
-      e.target.textContent === 'Totals' ||
-      e.target.parentElement.id === 'Totals'
-    ) {
-      setSecondaryReport('Totals');
-      setSelectList('Expense');
-    }
-
-    (e.target.textContent === 'Trends' ||
-      e.target.parentElement.id === 'Trends') &&
-      setSecondaryReport('Trends');
-  };
+  function onSecondaryClick(id) {
+    setSecondaryReport(id);
+    id === 'Totals' && setSelectList('Expense');
+  }
 
   const {
     graphData,
