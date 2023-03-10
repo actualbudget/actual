@@ -25,8 +25,7 @@ function AllReports({ categories }) {
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
-  const end = monthUtils.currentMonth();
-  const [endDay, setEndDay] = useState(monthUtils.currentDay());
+  const [end, setEnd] = useState(monthUtils.currentDay());
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -93,7 +92,6 @@ function AllReports({ categories }) {
       masterDataSpreadsheet(
         start,
         end,
-        endDay,
         isConcise,
         selectList,
         filters.filters,
@@ -103,7 +101,6 @@ function AllReports({ categories }) {
     [
       start,
       end,
-      endDay,
       isConcise,
       selectList,
       filters.filters,
@@ -179,7 +176,7 @@ function AllReports({ categories }) {
     }
 
     setStart(start + '-01');
-    setEndDay(endDay);
+    setEnd(endDay);
     setIsConcise(reportPage === 'CashFlow' ? isConcise : true);
   }
 
@@ -279,7 +276,7 @@ function AllReports({ categories }) {
           >
             <ChooseChartHeader
               start={start}
-              end={end}
+              end={monthUtils.getMonth(end)}
               reportPage={reportPage}
               secondaryReport={secondaryReport}
               totalIncome={totalIncome}
@@ -294,7 +291,6 @@ function AllReports({ categories }) {
             <ChooseChart
               start={start}
               end={end}
-              endDay={endDay}
               graphData={graphData}
               catData={catData}
               isConcise={isConcise}
@@ -306,7 +302,7 @@ function AllReports({ categories }) {
           {reportPage === 'IE' && (
             <ChartExtraColumn
               start={start}
-              end={end}
+              end={monthUtils.getMonth(end)}
               reportPage={reportPage}
               totalIncome={totalIncome}
               totalExpenses={totalExpenses}

@@ -16,7 +16,6 @@ import { fromDateRepr, fromDateReprToDay, runAll, index } from '../util';
 export function masterDataSpreadsheet(
   start,
   end,
-  endDay,
   isConcise,
   selectList,
   filt,
@@ -28,7 +27,7 @@ export function masterDataSpreadsheet(
       let query = q('transactions').filter({
         $and: [
           { date: { $transform: '$month', $gte: start } },
-          { date: { $transform: '$month', $lte: endDay } },
+          { date: { $transform: '$month', $lte: end } },
           reportPage === 'IE' &&
             selectList !== 'All' && {
               'category.is_income': selectList === 'Income' ? true : false,
@@ -60,7 +59,7 @@ export function masterDataSpreadsheet(
       let query = q('transactions').filter({
         $and: [
           { date: { $transform: '$month', $gte: start } },
-          { date: { $transform: '$month', $lte: endDay } },
+          { date: { $transform: '$month', $lte: end } },
           reportPage === 'IE' &&
             selectList !== 'All' && {
               'category.is_income': selectList === 'Income' ? true : false,

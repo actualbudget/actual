@@ -183,7 +183,6 @@ export function ChooseChartHeader({
 export function ChooseChart({
   start,
   end,
-  endDay,
   graphData,
   catData,
   isConcise,
@@ -191,11 +190,12 @@ export function ChooseChart({
   reportPage,
   secondaryReport,
 }) {
+  let endMo = monthUtils.getMonth(end);
   if (reportPage === 'CashFlow') {
     return (
       <BarLineGraph
         start={start}
-        end={endDay}
+        end={end}
         graphData={graphData}
         isConcise={isConcise}
       />
@@ -204,7 +204,7 @@ export function ChooseChart({
     return (
       <LineGraph
         start={monthUtils.getMonth(start)}
-        end={end}
+        end={endMo}
         graphData={graphData}
       />
     );
@@ -214,22 +214,10 @@ export function ChooseChart({
         <View style={{ alignItems: 'center' }}>
           <DonutGraph
             start={monthUtils.getMonth(start)}
-            end={end}
+            end={endMo}
             graphData={
               selectList === 'Expense' ? catData.expenses : catData.income
             }
-          />
-        </View>
-      );
-    } else if (selectList === 'All') {
-      return (
-        <View>
-          <BarGraph
-            start={start}
-            end={end}
-            graphDataExp={graphData.expenses}
-            graphDataInc={graphData.income}
-            selectList={selectList}
           />
         </View>
       );
@@ -238,8 +226,11 @@ export function ChooseChart({
         <View>
           <BarGraph
             start={start}
-            end={end}
-            graphDataExp={graphData.change}
+            end={endMo}
+            graphDataExp={
+              selectList === 'All' ? graphData.expenses : graphData.change
+            }
+            graphDataInc={selectList === 'All' && graphData.income}
             selectList={selectList}
           />
         </View>
