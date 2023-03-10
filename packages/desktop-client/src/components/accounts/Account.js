@@ -1238,7 +1238,10 @@ class AccountInternal extends React.PureComponent {
     if (account) {
       const res = await window.Actual.openFileDialog({
         filters: [
-          { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] }
+          {
+            name: 'Financial Files',
+            extensions: ['qif', 'ofx', 'qfx', 'csv', 'xml']
+          }
         ]
       });
 

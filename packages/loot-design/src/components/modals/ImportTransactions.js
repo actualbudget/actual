@@ -624,7 +624,7 @@ export function ImportTransactions({
   function onNewFile() {
     const res = window.Actual.openFileDialog({
       filters: [
-        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] }
+        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv', 'xml'] }
       ]
     });
 
@@ -648,7 +648,7 @@ export function ImportTransactions({
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
       let date =
-        filetype === 'qfx' || filetype === 'ofx'
+        filetype === 'qfx' || filetype === 'ofx' || filetype === 'xml'
           ? trans.date
           : parseDate(trans.date, parseDateFormat);
       if (date == null) {
