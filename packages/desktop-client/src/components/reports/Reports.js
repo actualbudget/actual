@@ -37,32 +37,53 @@ function AllReports({ categories }) {
   });
 
   function reportDescription() {
+    const title = (() => {
+      if (reportPage === 'NetWorth') {
+        return <strong>How is net worth calculated?</strong>;
+      }
+      if (reportPage === 'CashFlow') {
+        return <strong>How is cash flow calculated?</strong>;
+      }
+      if (reportPage === 'IE') {
+        return <strong>How are income and expenses calculated?</strong>;
+      }
+    })();
+    const description = (() => {
+      if (reportPage === 'NetWorth') {
+        return (
+          <P>
+            Net worth shows the balance of all accounts over time, including all
+            of your investments. Your "net worth" is considered to be the amount
+            you'd have if you sold all your assets and paid off as much debt as
+            possible. If you hover over the graph, you can also see the amount
+            of assets and debt individually.
+          </P>
+        );
+      }
+      if (reportPage === 'CashFlow') {
+        return (
+          <P>
+            Cash flow shows the balance of your budgeted accounts over time, and
+            the amount of expenses/income each day or month. Your budgeted
+            accounts are considered to be &quot;cash on hand&quot;, so this
+            gives you a picture of how available money fluctuates.
+          </P>
+        );
+      }
+      if (reportPage === 'IE') {
+        return (
+          <P>
+            These charts show your income/expenses as a total or over time and
+            is based on your filters. This allows you to look at accounts or
+            payees or categories and track money spent in any way you like.
+          </P>
+        );
+      }
+    })();
     return (
       <View style={{ marginTop: 30 }}>
-        <P>
-          {reportPage === 'NetWorth'} &&
-          <strong>How is net worth calculated?</strong>
-          {reportPage === 'CashFlow'} &&
-          <strong>How is cash flow calculated?</strong>
-          {reportPage === 'IE'} &&
-          <strong>How are income and expenses calculated?</strong>
-        </P>
-        <P>
-          {reportPage === 'NetWorth'} && Cash flow shows the balance of your
-          budgeted accounts over time, and the amount of expenses/income each
-          day or month. Your budgeted accounts are considered to be &quot;cash
-          on hand&quot;, so this gives you a picture of how available money
-          fluctuates.
-          {reportPage === 'CashFlow'} && Net worth shows the balance of all
-          accounts over time, including all of your investments. Your "net
-          worth" is considered to be the amount you'd have if you sold all your
-          assets and paid off as much debt as possible. If you hover over the
-          graph, you can also see the amount of assets and debt individually.
-          {reportPage === 'IE'} && These charts show your income/expenses as a
-          total or over time and is based on your filters. This allows you to
-          look at accounts or payees or categories and track money spent in any
-          way you like.
-        </P>
+        <P>{title}</P>
+        {description}
       </View>
     );
   }
@@ -302,7 +323,7 @@ function AllReports({ categories }) {
             />
           )}
         </View>
-        {reportDescription}
+        {reportDescription()}
       </View>
     </View>
   );

@@ -408,14 +408,10 @@ function ChangeLabel(
         <div style={{ lineHeight: 1.5 }}>
           {income ? (
             <AlignedText left="Income:" right={integerToCurrency(income)} />
-          ) : (
-            ''
-          )}
+          ) : null}
           {expense ? (
             <AlignedText left="Expenses:" right={integerToCurrency(expense)} />
-          ) : (
-            ''
-          )}
+          ) : null}
         </div>
       </div>
     );

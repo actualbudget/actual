@@ -170,9 +170,9 @@ export function ChooseChartHeader({
             value={selectList}
             onChange={handleChange}
           >
-            <option value={'Expense'}>Expense</option>
-            <option value={'Income'}>Income</option>
-            {secondaryReport === 'Trends' && <option value={'All'}>All</option>}
+            <option value="Expense">Expense</option>
+            <option value="Income">Income</option>
+            {secondaryReport === 'Trends' && <option value="All">All</option>}
           </Select>
         </View>
       </View>

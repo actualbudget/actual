@@ -2,7 +2,7 @@ import React from 'react';
 
 import { VictoryLabel, VictoryPie, VictoryTooltip } from 'victory';
 
-//import theme from '../chart-theme';
+import theme from '../chart-theme';
 
 function DonutGraph({ style, start, end, graphData }) {
   return (
@@ -15,9 +15,8 @@ function DonutGraph({ style, start, end, graphData }) {
           labelPosition="centroid"
           labelPlacement="parallel"
           labelRadius={100}
-          //padding={50}
           data={graphData}
-          //theme={theme}
+          theme={theme}
           colorScale="qualitative"
           innerRadius={80}
           labelComponent={<VictoryLabel textAnchor="middle" />}
@@ -28,7 +27,7 @@ function DonutGraph({ style, start, end, graphData }) {
           width={350}
           height={350}
           data={graphData}
-          //theme={theme}
+          theme={theme}
           labelComponent={
             <VictoryTooltip
               cornerRadius={2}
