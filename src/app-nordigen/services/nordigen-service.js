@@ -14,6 +14,7 @@ import {
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
 import config from '../../load-config.js';
+import jwt from 'jws';
 
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
@@ -50,10 +51,21 @@ export const nordigenService = {
    * @returns {Promise<void>}
    */
   setToken: async () => {
-    if (!nordigenClient.token) {
+    const isExpiredJwtToken = (token) => {
+      const decodedToken = jwt.decode(token);
+      if (!decodedToken) {
+        return true;
+      }
+      const payload = decodedToken.payload;
+      const clockTimestamp = Math.floor(Date.now() / 1000);
+      return clockTimestamp >= payload.exp;
+    };
+
+    if (isExpiredJwtToken(nordigenClient.token)) {
+      // Generate new access token. Token is valid for 24 hours
+      // Note: access_token is automatically injected to other requests after you successfully obtain it
       const tokenData = await client.generateToken();
       handleNordigenError(tokenData);
-      nordigenClient.token = tokenData.access;
     }
   },
 
@@ -459,4 +471,6 @@ export const client = {
       accountSelection,
     }),
   generateToken: async () => await nordigenClient.generateToken(),
+  exchangeToken: async ({ refreshToken }) =>
+    await nordigenClient.exchangeToken({ refreshToken }),
 };

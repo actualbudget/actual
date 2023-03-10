@@ -22,6 +22,7 @@
     "express": "4.18.2",
     "express-actuator": "1.8.4",
     "express-response-size": "^0.0.3",
+    "jws": "^4.0.0",
     "nordigen-node": "^1.2.3",
     "uuid": "^9.0.0"
   },
