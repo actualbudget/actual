@@ -11,22 +11,16 @@ import { View, P } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 
 import { ChooseChart, ChooseChartHeader, ChartExtraColumn } from './Charts';
-import Header from './Header';
-import { HeaderReport } from './Header';
+import { HeaderReports, HeaderFilters } from './Header';
 import { masterDataSpreadsheet } from './spreadsheets/master-spreadsheet';
 import useReport from './useReport';
 
 function AllReports({ categories }) {
-  const [filterz, setFilterz] = useState([]);
-  const [filt, setFilt] = useState([]);
+  const [filters, setFilters] = useState({ filters: [], conditions: [] });
   const [disableFilter, setDisableFilter] = useState(true);
-  const [isCashFlow, setIsCashFlow] = useState(true);
-  const [isIE, setIsIE] = useState(false);
-  const [isTotals, setIsTotals] = useState(false);
-  const [isTrends, setIsTrends] = useState(false);
-  const [isNetWorth, setIsNetWorth] = useState(false);
+  const [secondaryReport, setSecondaryReport] = useState('Trends');
+  const [reportPage, setReportPage] = useState('CashFlow');
   const [selectList, setSelectList] = useState('Expense');
-
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
@@ -42,74 +36,36 @@ function AllReports({ categories }) {
     return numDays > 31 * 3;
   });
 
-  const reportDescription = (() => {
-    if (isNetWorth) {
-      return (
+  function reportDescription() {
+    return (
+      <View style={{ marginTop: 30 }}>
         <P>
-          Net worth shows the balance of all accounts over time, including all
-          of your investments. Your "net worth" is considered to be the amount
-          you'd have if you sold all your assets and paid off as much debt as
-          possible. If you hover over the graph, you can also see the amount of
-          assets and debt individually.
-        </P>
-      );
-    }
-
-    if (isCashFlow) {
-      return (
-        <P>
-          Cash flow shows the balance of your budgeted accounts over time, and
-          the amount of expenses/income each day or month. Your budgeted
-          accounts are considered to be &quot;cash on hand&quot;, so this gives
-          you a picture of how available money fluctuates.
-        </P>
-      );
-    }
-
-    if (isIE) {
-      return (
-        <P>
-          These charts show your income/expenses as a total or over time and is
-          based on your filters. This allows you to look at accounts or payees
-          or categories and track money spent in any way you like.
-        </P>
-      );
-    }
-  })();
-
-  const reportDescriptionTitle = (() => {
-    if (isNetWorth) {
-      return (
-        <P>
+          {reportPage === 'NetWorth'} &&
           <strong>How is net worth calculated?</strong>
-        </P>
-      );
-    }
-
-    if (isCashFlow) {
-      return (
-        <P>
+          {reportPage === 'CashFlow'} &&
           <strong>How is cash flow calculated?</strong>
-        </P>
-      );
-    }
-
-    if (isIE) {
-      return (
-        <P>
+          {reportPage === 'IE'} &&
           <strong>How are income and expenses calculated?</strong>
         </P>
-      );
-    }
-  })();
-
-  const spreadSheet = (() => {
-    return isCashFlow
-      ? 'cash-flow'
-      : isNetWorth
-      ? 'net-worth'
-      : isIE && 'ie-sheet';
-  })();
+        <P>
+          {reportPage === 'NetWorth'} && Cash flow shows the balance of your
+          budgeted accounts over time, and the amount of expenses/income each
+          day or month. Your budgeted accounts are considered to be &quot;cash
+          on hand&quot;, so this gives you a picture of how available money
+          fluctuates.
+          {reportPage === 'CashFlow'} && Net worth shows the balance of all
+          accounts over time, including all of your investments. Your "net
+          worth" is considered to be the amount you'd have if you sold all your
+          assets and paid off as much debt as possible. If you hover over the
+          graph, you can also see the amount of assets and debt individually.
+          {reportPage === 'IE'} && These charts show your income/expenses as a
+          total or over time and is based on your filters. This allows you to
+          look at accounts or payees or categories and track money spent in any
+          way you like.
+        </P>
+      </View>
+    );
+  }
 
   const params = useMemo(
     () =>
@@ -117,30 +73,24 @@ function AllReports({ categories }) {
         start,
         end,
         endDay,
-        isTotals,
         isConcise,
         selectList,
-        isCashFlow,
-        isNetWorth,
-        isIE,
-        filt,
+        filters.filters,
         categories,
+        reportPage,
       ),
     [
       start,
       end,
       endDay,
-      isTotals,
       isConcise,
       selectList,
-      isCashFlow,
-      isNetWorth,
-      isIE,
-      filt,
+      filters.filters,
       categories,
+      reportPage,
     ],
   );
-  const data = useReport(spreadSheet, params);
+  const data = useReport('master-sheet', params);
 
   useEffect(() => {
     async function run() {
@@ -162,15 +112,15 @@ function AllReports({ categories }) {
     run();
   }, []);
 
-  function onSelection(onSelection) {
-    setIsCashFlow(false);
-    setIsNetWorth(false);
-    setIsIE(false);
-    onSelection(true);
+  function onReportClick(onSelection, disable) {
+    setReportPage(onSelection);
+    setDisableFilter(disable);
+    setSecondaryReport('Trends');
+    disable && deleteAllFilters();
   }
 
   function onDeleteFilter(filter) {
-    applyFilters(filterz.filter(f => f !== filter));
+    applyFilters(filters.conditions.filter(f => f !== filter));
   }
 
   function deleteAllFilters() {
@@ -178,8 +128,8 @@ function AllReports({ categories }) {
   }
 
   async function onApplyFilter(cond) {
-    let filters = filterz;
-    applyFilters([...filters, cond]);
+    let filter = filters.conditions;
+    applyFilters([...filter, cond]);
   }
 
   async function applyFilters(conditions) {
@@ -189,11 +139,9 @@ function AllReports({ categories }) {
       });
 
       let filte = [...filters];
-      setFilt(filte);
-      setFilterz(conditions);
+      setFilters({ filters: filte, conditions: conditions });
     } else {
-      setFilt([]);
-      setFilterz(conditions);
+      setFilters({ filters: [], conditions: conditions });
     }
   }
 
@@ -211,7 +159,7 @@ function AllReports({ categories }) {
 
     setStart(start + '-01');
     setEndDay(endDay);
-    setIsConcise(isNetWorth || isIE ? true : isConcise);
+    setIsConcise(reportPage === 'CashFlow' ? isConcise : true);
   }
 
   if (!allMonths || !data) {
@@ -222,77 +170,18 @@ function AllReports({ categories }) {
     setSelectList(e.target.value);
   };
 
-  const handleClick = e => {
+  const onSecondaryClick = e => {
     if (
       e.target.textContent === 'Totals' ||
-      e.target.id === 'TotalsChoice' ||
-      e.target.parentElement.id === 'TotalsChoice'
+      e.target.parentElement.id === 'Totals'
     ) {
-      setIsTotals(true);
+      setSecondaryReport('Totals');
       setSelectList('Expense');
-    } else {
-      setIsTotals(false);
     }
 
-    e.target.textContent === 'Trends' ||
-    e.target.id === 'TrendsChoice' ||
-    e.target.parentElement.id === 'TrendsChoice'
-      ? setIsTrends(true)
-      : setIsTrends(false);
-  };
-
-  const handleMouseHoverHeader = e => {
-    if (isNetWorth && e.target.id !== 'netWorthHeader') {
-      e.target.style.color = colors.b4;
-      e.target.style.cursor = 'pointer';
-    }
-    if (isCashFlow && e.target.id !== 'cashFlowHeader') {
-      e.target.style.color = colors.b4;
-      e.target.style.cursor = 'pointer';
-    }
-    if (isIE && e.target.id !== 'iEHeader') {
-      e.target.style.color = colors.b4;
-      e.target.style.cursor = 'pointer';
-    }
-  };
-
-  const handleMouseLeaveHeader = e => {
-    if (isNetWorth && e.target.id !== 'netWorthHeader') {
-      e.target.style.color = colors.n7;
-      e.target.style.cursor = 'inherit';
-    }
-    if (isCashFlow && e.target.id !== 'cashFlowHeader') {
-      e.target.style.color = colors.n7;
-      e.target.style.cursor = 'inherit';
-    }
-    if (isIE && e.target.id !== 'iEHeader') {
-      e.target.style.color = colors.n7;
-      e.target.style.cursor = 'inherit';
-    }
-  };
-
-  const onHeaderClick = (e, disable) => {
-    //setIsTrends(false);
-
-    e.target.style.cursor = 'inherit';
-
-    document.getElementById('netWorthHeader').style.color = colors.n7;
-    document.getElementById('cashFlowHeader').style.color = colors.n7;
-    document.getElementById('iEHeader').style.color = colors.n7;
-
-    document.getElementById(e.target.id).style.color = colors.n3;
-
-    setDisableFilter(disable);
-
-    e.target.id === 'netWorthHeader'
-      ? setIsNetWorth(true)
-      : setIsNetWorth(false);
-
-    e.target.id === 'cashFlowHeader'
-      ? setIsCashFlow(true)
-      : setIsCashFlow(false);
-
-    e.target.id === 'iEHeader' ? setIsIE(true) : setIsIE(false);
+    (e.target.textContent === 'Trends' ||
+      e.target.parentElement.id === 'Trends') &&
+      setSecondaryReport('Trends');
   };
 
   const {
@@ -314,63 +203,43 @@ function AllReports({ categories }) {
           color: colors.n7,
         }}
       >
-        <HeaderReport
+        <HeaderReports
           title="Net Worth"
-          id="netWorthHeader"
-          handleMouseHover={handleMouseHoverHeader}
-          handleMouseLeaveHeader={handleMouseLeaveHeader}
-          onHeaderClick={e => {
-            setIsTrends(true);
-            onHeaderClick(e, true);
-            deleteAllFilters();
-            onSelection(setIsNetWorth);
-            setIsTotals(false);
+          id="NetWorth"
+          onReportClick={() => {
+            onReportClick('NetWorth', true);
           }}
-          isElement={isNetWorth}
-          isDefault={false}
+          reportPage={reportPage}
         />
-        <HeaderReport
+        <HeaderReports
           title="Cash Flow"
-          id="cashFlowHeader"
-          handleMouseHover={handleMouseHoverHeader}
-          handleMouseLeaveHeader={handleMouseLeaveHeader}
-          onHeaderClick={e => {
-            setIsTrends(true);
-            onHeaderClick(e, true);
-            deleteAllFilters();
-            onSelection(setIsCashFlow);
-            setIsTotals(false);
+          id="CashFlow"
+          onReportClick={() => {
+            onReportClick('CashFlow', true);
           }}
-          isElement={isCashFlow}
-          isDefault={true}
+          reportPage={reportPage}
         />
-        <HeaderReport
+        <HeaderReports
           title="Income & Expense"
-          id="iEHeader"
-          handleMouseHover={handleMouseHoverHeader}
-          handleMouseLeaveHeader={handleMouseLeaveHeader}
-          onHeaderClick={e => {
-            setIsTrends(true);
-            onHeaderClick(e, false);
-            onSelection(setIsIE);
-            setIsTotals(false);
+          id="IE"
+          onReportClick={() => {
+            onReportClick('IE', false);
           }}
-          isElement={isIE}
-          isDefault={false}
+          reportPage={reportPage}
         />
       </View>
 
-      <Header
+      <HeaderFilters
         allMonths={allMonths}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
-        show1Month={!isNetWorth}
-        showAllTime={isIE}
+        show1Month={reportPage === 'NetWorth' ? false : true}
+        showAllTime={reportPage === 'IE' ? false : true}
         onChangeDates={onChangeDates}
         onApplyFilter={onApplyFilter}
         onDeleteFilter={onDeleteFilter}
         disableFilter={disableFilter}
-        filters={filterz}
+        filters={filters.conditions}
       />
       <View
         style={{
@@ -399,16 +268,13 @@ function AllReports({ categories }) {
             <ChooseChartHeader
               start={start}
               end={end}
-              isNetWorth={isNetWorth}
-              isCashFlow={isCashFlow}
-              isIE={isIE}
-              isTotals={isTotals}
-              isTrends={isTrends}
+              reportPage={reportPage}
+              secondaryReport={secondaryReport}
               totalIncome={totalIncome}
               totalExpenses={totalExpenses}
               totalChanges={totalChanges}
               netWorth={netWorth}
-              handleClick={handleClick}
+              onSecondaryClick={onSecondaryClick}
               selectList={selectList}
               handleChange={handleChange}
             />
@@ -421,28 +287,22 @@ function AllReports({ categories }) {
               catData={catData}
               isConcise={isConcise}
               selectList={selectList}
-              isNetWorth={isNetWorth}
-              isCashFlow={isCashFlow}
-              isIE={isIE}
-              isTotals={isTotals}
-              isTrends={isTrends}
+              reportPage={reportPage}
+              secondaryReport={secondaryReport}
             />
           </View>
-          {isIE && (
+          {reportPage === 'IE' && (
             <ChartExtraColumn
               start={start}
               end={end}
-              isIE={isIE}
+              reportPage={reportPage}
               totalIncome={totalIncome}
               totalExpenses={totalExpenses}
               selectList={selectList}
             />
           )}
         </View>
-        <View style={{ marginTop: 30 }}>
-          {reportDescriptionTitle}
-          {reportDescription}
-        </View>
+        {reportDescription}
       </View>
     </View>
   );

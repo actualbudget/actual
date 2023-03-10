@@ -2,10 +2,11 @@ import React from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { View, Select, Button } from 'loot-design/src/components/common';
-import { ChartItem } from 'loot-design/src/components/sidebar';
 import { colors, styles } from 'loot-design/src/style';
 
 import { FilterButton, AppliedFilters } from '../accounts/Filters';
+
+import { ChartItem } from './Charts';
 
 const selectionBoxHeader = {
   SquareShapeView: {
@@ -60,7 +61,7 @@ function getFullRange(allMonths) {
   return [start, end];
 }
 
-function Header({
+export function HeaderFilters({
   title,
   start,
   end,
@@ -153,7 +154,7 @@ function Header({
           bare
           style={{
             marginLeft: 15,
-            display: !showAllTime ? 'inherit' : 'none',
+            display: showAllTime ? 'inherit' : 'none',
           }}
           onClick={() => onChangeDates(...getFullRange(allMonths))}
         >
@@ -179,11 +180,17 @@ function Header({
   );
 }
 
-export function TotalsTrends({ title, isElement, Chart, id, OnClick }) {
+export function TotalsTrends({
+  title,
+  id,
+  secondaryReport,
+  Chart,
+  onSecondaryClick,
+}) {
   return (
     <View
       style={{
-        color: colors.n3,
+        color: colors.n7,
         marginLeft: 20,
       }}
     >
@@ -196,9 +203,9 @@ export function TotalsTrends({ title, isElement, Chart, id, OnClick }) {
         }}
       >
         <ChartItem
-          isElement={isElement}
+          reportPage={secondaryReport}
           id={id}
-          handleClick={OnClick}
+          handleClick={onSecondaryClick}
           Icon={Chart}
           title={title}
         />
@@ -206,53 +213,42 @@ export function TotalsTrends({ title, isElement, Chart, id, OnClick }) {
       <View
         style={[
           selectionBoxSmall.SquareShapeView,
-          { display: isElement ? 'inherit' : 'none' },
+          { display: secondaryReport === id ? 'inherit' : 'none' },
         ]}
       />
     </View>
   );
 }
 
-export function HeaderReport({
-  title,
-  id,
-  handleMouseHover,
-  handleMouseLeaveHeader,
-  onHeaderClick,
-  isElement,
-  isDefault,
-}) {
+export function HeaderReports({ title, id, onReportClick, reportPage }) {
   return (
     <View
       style={{
         marginLeft: 20,
         flexShrink: 0,
-        color: isDefault ? colors.n3 : colors.n7,
+        color: colors.n7,
       }}
     >
       <View
-        onMouseOver={handleMouseHover}
-        onMouseOut={handleMouseLeaveHeader}
-        onClick={onHeaderClick}
-        id={id}
-        style={[
-          styles.largeText,
-          {
-            alignItems: 'center',
-            marginBottom: 2,
-          },
-        ]}
+        style={{
+          alignItems: 'center',
+          marginBottom: 2,
+        }}
       >
-        {title}
+        <ChartItem
+          reportPage={reportPage}
+          id={id}
+          handleClick={onReportClick}
+          title={title}
+          header={true}
+        />
       </View>
       <View
         style={[
           selectionBoxHeader.SquareShapeView,
-          { display: isElement ? 'inherit' : 'none' },
+          { display: reportPage === id ? 'inherit' : 'none' },
         ]}
       />
     </View>
   );
 }
-
-export default Header;

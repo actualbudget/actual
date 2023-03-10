@@ -8,6 +8,7 @@ import {
   Block,
   AlignedText,
   Select,
+  Button,
 } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 import ChartBar from 'loot-design/src/svg/v1/ChartBar';
@@ -20,23 +21,78 @@ import DonutGraph from './graphs/DonutGraph';
 import LineGraph from './graphs/LineGraph';
 import { TotalsTrends } from './Header';
 
+const fontWeight = 600;
+
+export function ChartItem({
+  Icon,
+  title,
+  style,
+  handleClick,
+  bold,
+  header,
+  id,
+  reportPage,
+}) {
+  const hoverStyle = {
+    color: colors.b4,
+    cursor: 'pointer',
+    backgroundColor: 'inherit',
+  };
+  const linkStyle = [
+    header && styles.largeText,
+    {
+      color: colors.n7,
+      fontWeight: bold ? fontWeight : null,
+    },
+    { ':hover': hoverStyle },
+  ];
+
+  const content = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 16,
+        color: reportPage === id ? colors.n3 : 'inherit',
+      }}
+    >
+      {Icon && (
+        <Icon id={id} width={12} height={12} style={{ color: 'inherit' }} />
+      )}
+      <Block id={id} style={{ marginLeft: Icon ? 3 : 0, color: 'inherit' }}>
+        {title}
+      </Block>
+    </View>
+  );
+
+  return (
+    <View style={[{ flexShrink: 0 }, style]}>
+      <Button
+        id={title + 'Button'}
+        style={linkStyle}
+        onClick={handleClick}
+        bare
+      >
+        {content}
+      </Button>
+    </View>
+  );
+}
+
 export function ChooseChartHeader({
   start,
   end,
-  isNetWorth,
-  isCashFlow,
-  isIE,
-  isTotals,
-  isTrends,
+  reportPage,
+  secondaryReport,
   totalIncome,
   totalExpenses,
   totalChanges,
   netWorth,
-  handleClick,
+  onSecondaryClick,
   selectList,
   handleChange,
 }) {
-  if (isCashFlow) {
+  if (reportPage === 'CashFlow') {
     return (
       <View
         style={{
@@ -70,7 +126,7 @@ export function ChooseChartHeader({
         </Text>
       </View>
     );
-  } else if (isNetWorth) {
+  } else if (reportPage === 'NetWorth') {
     return (
       <View style={{ textAlign: 'right', paddingRight: 20, flexShrink: 0 }}>
         <View style={[styles.largeText, { fontWeight: 400, marginBottom: 5 }]}>
@@ -79,7 +135,7 @@ export function ChooseChartHeader({
         <Change amount={totalChanges} />
       </View>
     );
-  } else if (isIE) {
+  } else if (reportPage === 'IE') {
     return (
       <View
         style={{
@@ -88,17 +144,17 @@ export function ChooseChartHeader({
       >
         <TotalsTrends
           title="Totals"
-          id="TotalsChoice"
-          isElement={isTotals}
+          id="Totals"
+          secondaryReport={secondaryReport}
           Chart={ChartPie}
-          OnClick={handleClick}
+          onSecondaryClick={onSecondaryClick}
         />
         <TotalsTrends
           title="Trends"
-          id="TrendsChoice"
-          isElement={isTrends}
+          id="Trends"
+          secondaryReport={secondaryReport}
           Chart={ChartBar}
-          OnClick={handleClick}
+          onSecondaryClick={onSecondaryClick}
         />
         <View
           style={{
@@ -116,7 +172,7 @@ export function ChooseChartHeader({
           >
             <option value={'Expense'}>Expense</option>
             <option value={'Income'}>Income</option>
-            {!isTotals && <option value={'All'}>All</option>}
+            {secondaryReport === 'Trends' && <option value={'All'}>All</option>}
           </Select>
         </View>
       </View>
@@ -132,13 +188,10 @@ export function ChooseChart({
   catData,
   isConcise,
   selectList,
-  isNetWorth,
-  isCashFlow,
-  isIE,
-  isTotals,
-  isTrends,
+  reportPage,
+  secondaryReport,
 }) {
-  if (isCashFlow) {
+  if (reportPage === 'CashFlow') {
     return (
       <BarLineGraph
         start={start}
@@ -147,7 +200,7 @@ export function ChooseChart({
         isConcise={isConcise}
       />
     );
-  } else if (isNetWorth) {
+  } else if (reportPage === 'NetWorth') {
     return (
       <LineGraph
         start={monthUtils.getMonth(start)}
@@ -155,8 +208,8 @@ export function ChooseChart({
         graphData={graphData}
       />
     );
-  } else if (isIE) {
-    if (isTotals) {
+  } else if (reportPage === 'IE') {
+    if (secondaryReport === 'Totals') {
       return (
         <View style={{ alignItems: 'center' }}>
           <DonutGraph
@@ -200,7 +253,7 @@ export function ChartExtraColumn({
   end,
   totalExpenses,
   totalIncome,
-  isIE,
+  reportPage,
   selectList,
 }) {
   let amt =
@@ -210,7 +263,7 @@ export function ChartExtraColumn({
       ? totalIncome
       : totalExpenses + totalIncome;
   let net = totalExpenses > totalIncome ? 'EXPENSE' : 'INCOME';
-  if (isIE) {
+  if (reportPage === 'IE') {
     return (
       <View
         style={{

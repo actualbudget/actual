@@ -16,7 +16,7 @@ import { colors, styles } from 'loot-design/src/style';
 
 import Change from './Change';
 import CashFlowGraph from './graphs/CashFlowGraph';
-import Header from './Header';
+import { HeaderFilters } from './Header';
 import { cashFlowByDate } from './spreadsheets/cash-flow-spreadsheet';
 import useReport from './useReport';
 
@@ -86,7 +86,7 @@ function CashFlow() {
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
-      <Header
+      <HeaderFilters
         title="Cash Flow"
         allMonths={allMonths}
         start={monthUtils.getMonth(start)}

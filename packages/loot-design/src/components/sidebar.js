@@ -198,59 +198,6 @@ export function SecondaryItem({
   );
 }
 
-export function ChartItem({
-  Icon,
-  title,
-  style,
-  handleClick,
-  bold,
-  id,
-  isElement,
-}) {
-  const hoverStyle = {
-    color: colors.b4,
-    cursor: 'pointer',
-  };
-  const linkStyle = [
-    {
-      color: colors.n7,
-      fontWeight: bold ? fontWeight : null,
-    },
-    { ':hover': hoverStyle },
-  ];
-
-  const content = (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 16,
-        color: isElement ? colors.n3 : 'inherit',
-      }}
-    >
-      {Icon && (
-        <Icon id={id} width={12} height={12} style={{ color: 'inherit' }} />
-      )}
-      <Block id={id} style={{ marginLeft: Icon ? 3 : 0, color: 'inherit' }}>
-        {title}
-      </Block>
-    </View>
-  );
-
-  return (
-    <View style={[{ flexShrink: 0 }, style]}>
-      <Button
-        id={title + 'Button'}
-        style={linkStyle}
-        onClick={handleClick}
-        bare
-      >
-        {content}
-      </Button>
-    </View>
-  );
-}
-
 let accountNameStyle = [
   {
     marginTop: -2,

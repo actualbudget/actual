@@ -13,7 +13,7 @@ import { styles } from 'loot-design/src/style';
 
 import Change from './Change';
 import NetWorthGraph from './graphs/NetWorthGraph';
-import Header from './Header';
+import { HeaderFilters } from './Header';
 import { netWorthSpreadsheet } from './spreadsheets/net-worth-spreadsheet';
 import useReport from './useReport';
 import { fromDateRepr } from './util';
@@ -71,7 +71,7 @@ function NetWorth({ accounts }) {
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
-      <Header
+      <HeaderFilters
         title="Net Worth"
         allMonths={allMonths}
         start={start}

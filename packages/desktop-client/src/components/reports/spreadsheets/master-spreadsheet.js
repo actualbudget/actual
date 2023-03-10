@@ -17,14 +17,11 @@ export function masterDataSpreadsheet(
   start,
   end,
   endDay,
-  isTotals,
   isConcise,
   selectList,
-  isCashFlow,
-  isNetWorth,
-  isIE,
   filt,
   categories,
+  reportPage,
 ) {
   return async (spreadsheet, setData) => {
     function makeCategoryQuery(where) {
@@ -32,11 +29,11 @@ export function masterDataSpreadsheet(
         $and: [
           { date: { $transform: '$month', $gte: start } },
           { date: { $transform: '$month', $lte: endDay } },
-          isIE &&
+          reportPage === 'IE' &&
             selectList !== 'All' && {
               'category.is_income': selectList === 'Income' ? true : false,
             },
-          !isNetWorth && { 'account.offbudget': false },
+          reportPage !== 'NetWorth' && { 'account.offbudget': false },
         ],
         $or: [
           {
@@ -64,11 +61,11 @@ export function masterDataSpreadsheet(
         $and: [
           { date: { $transform: '$month', $gte: start } },
           { date: { $transform: '$month', $lte: endDay } },
-          isIE &&
+          reportPage === 'IE' &&
             selectList !== 'All' && {
               'category.is_income': selectList === 'Income' ? true : false,
             },
-          !isNetWorth && { 'account.offbudget': false },
+          reportPage !== 'NetWorth' && { 'account.offbudget': false },
         ],
         $or: [
           {
@@ -104,7 +101,7 @@ export function masterDataSpreadsheet(
           .filter({
             $and: [
               { date: { $transform: '$month', $lt: start } },
-              !isNetWorth && { 'account.offbudget': false },
+              reportPage !== 'NetWorth' && { 'account.offbudget': false },
             ],
           })
           .calculate({ $sum: '$amount' }),
@@ -115,7 +112,7 @@ export function masterDataSpreadsheet(
             $and: [
               { date: { $transform: '$month', $lte: start } },
               { amount: { $gt: 0 } },
-              !isNetWorth && { 'account.offbudget': false },
+              reportPage !== 'NetWorth' && { 'account.offbudget': false },
             ],
           })
           .calculate({ $sum: '$amount' }),
@@ -124,7 +121,7 @@ export function masterDataSpreadsheet(
             $and: [
               { date: { $transform: '$month', $lte: start } },
               { amount: { $lt: 0 } },
-              !isNetWorth && { 'account.offbudget': false },
+              reportPage !== 'NetWorth' && { 'account.offbudget': false },
             ],
           })
           .calculate({ $sum: '$amount' }),
@@ -138,11 +135,9 @@ export function masterDataSpreadsheet(
             start,
             end,
             isConcise,
-            isCashFlow,
-            isNetWorth,
-            isIE,
             selectList,
             categories,
+            reportPage,
           ),
         );
       },
@@ -155,11 +150,9 @@ function recalculateDate(
   start,
   end,
   isConcise,
-  isCashFlow,
-  isNetWorth,
-  isIE,
   selectList,
   categories,
+  reportPage,
 ) {
   let [
     startingBalance,
@@ -189,7 +182,8 @@ function recalculateDate(
 
       income = incomeCat[elem] ? incomeCat[elem].amount : 0;
       expense = expenseCat[elem]
-        ? expenseCat[elem].amount * (isIE && selectList === 'Expense' ? -1 : 1)
+        ? expenseCat[elem].amount *
+          (reportPage === 'IE' && selectList === 'Expense' ? -1 : 1)
         : 0;
 
       totalExpensesCat += expense;
@@ -264,7 +258,7 @@ function recalculateDate(
     isConcise ? fromDateRepr : fromDateReprToDay,
   );
 
-  let balance = !(isCashFlow || isNetWorth) ? 0 : startingBalance;
+  let balance = reportPage === 'IE' ? 0 : startingBalance;
   let totalExpenses = 0;
   let totalIncome = 0;
   let debt = startingDebts;
@@ -285,7 +279,8 @@ function recalculateDate(
 
       income = incomes[date] ? incomes[date].amount : 0;
       expense = expenses[date]
-        ? expenses[date].amount * (isIE && selectList === 'Expense' ? -1 : 1)
+        ? expenses[date].amount *
+          (reportPage === 'IE' && selectList === 'Expense' ? -1 : 1)
         : 0;
 
       totalExpenses += expense;
@@ -317,11 +312,9 @@ function recalculateDate(
         change,
         totalExpenses,
         totalIncome,
-        isCashFlow,
-        isNetWorth,
-        isIE,
         isConcise,
         x,
+        reportPage,
       );
 
       res.income.push({ x, y: integerToAmount(income), premadeLabel: label });
@@ -366,13 +359,11 @@ function ChangeLabel(
   change,
   totalExpenses,
   totalIncome,
-  isCashFlow,
-  isNetWorth,
-  isIE,
   isConcise,
   x,
+  reportPage,
 ) {
-  if (isNetWorth) {
+  if (reportPage === 'NetWorth') {
     return (
       <div>
         <div style={{ marginBottom: 10 }}>
@@ -389,7 +380,7 @@ function ChangeLabel(
         </div>
       </div>
     );
-  } else if (isCashFlow) {
+  } else if (reportPage === 'CashFlow') {
     return (
       <div>
         <div style={{ marginBottom: 10 }}>
@@ -408,7 +399,7 @@ function ChangeLabel(
         </div>
       </div>
     );
-  } else if (isIE) {
+  } else if (reportPage === 'IE') {
     return (
       <div>
         <div style={{ marginBottom: 10 }}>
