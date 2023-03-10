@@ -19,6 +19,7 @@ import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
+import checkForUpdateNotification from 'loot-core/src/client/update-notification';
 import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/BudgetMonthCountContext';
@@ -30,6 +31,7 @@ import Wallet from 'loot-design/src/svg/v1/Wallet';
 
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
+import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
@@ -269,6 +271,17 @@ class FinancesApp extends React.Component {
         this.props.addNotification,
         this.props.resetSync,
         this.history,
+      );
+    }, 100);
+
+    setTimeout(async () => {
+      await this.props.sync();
+      await checkForUpdateNotification(
+        this.props.addNotification,
+        getIsOutdated,
+        getLatestVersion,
+        this.props.loadPrefs,
+        this.props.savePrefs,
       );
     }, 100);
 
