@@ -51,5 +51,8 @@
     "@babel/helper-plugin-utils": "^7.14.5",
     "react-error-overlay": "6.0.9"
   },
-  "packageManager": "yarn@3.2.0"
+  "packageManager": "yarn@3.2.0",
+  "dependencies": {
+    "xml-js": "^1.6.11"
+  }
 }
