@@ -352,6 +352,22 @@ describe('Transaction rules', () => {
     });
   });
 
+  test('runRules runs regexp rules', async () => {
+    await loadRules();
+    await insertRule({
+      stage: null,
+      conditions: [
+        { op: 'matches', field: 'imported_payee', value: '123.*' },
+      ],
+      actions: [{ op: 'set', field: 'payee', value: 'kroger4' }],
+    });
+
+    expect(runRules({ payee: null, imported_payee: '123 lowes' })).toEqual({
+      imported_payee: '123 lowes',
+      payee: 'kroger4',
+    });
+  });
+
   test('migrating from the old payee rules works', async () => {
     await loadRules();
     let categoryGroupId = await db.insertCategoryGroup({ name: 'general' });

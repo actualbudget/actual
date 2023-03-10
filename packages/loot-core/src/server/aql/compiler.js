@@ -681,6 +681,10 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       let [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `${left} LIKE ${right}`;
     }
+    case '$regex': {
+      let [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
+      return `${left} REGEXP ${right}`;
+    }
     default:
       throw new CompileError(`Unknown operator: ${op}`);
   }

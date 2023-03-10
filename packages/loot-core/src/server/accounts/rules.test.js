@@ -45,6 +45,9 @@ describe('Condition', () => {
     let cond = new Condition('contains', 'name', 'foo', null, fieldTypes);
     expect(cond.eval({ name: null })).toBe(false);
 
+    cond = new Condition('matches', 'name', 'foo', null, fieldTypes);
+    expect(cond.eval({ name: null })).toBe(false);
+
     cond = new Condition('oneOf', 'name', ['foo'], null, fieldTypes);
     expect(cond.eval({ name: null })).toBe(false);
 
@@ -65,6 +68,9 @@ describe('Condition', () => {
     expect(cond.eval({ name: 'James' })).toBe(false);
 
     cond = new Condition('contains', 'name', 'foo', null, fieldTypes);
+    expect(cond.eval({ date: '2020-01-01' })).toBe(false);
+
+    cond = new Condition('matches', 'name', 'foo', null, fieldTypes);
     expect(cond.eval({ date: '2020-01-01' })).toBe(false);
 
     spy.mockRestore();
@@ -221,6 +227,30 @@ describe('Condition', () => {
     expect(cond.eval({ name: 'bfoo' })).toBe(true);
     expect(cond.eval({ name: 'bfo' })).toBe(false);
     expect(cond.eval({ name: 'f o o' })).toBe(false);
+
+    cond = new Condition('matches', 'name', '(foo|bar)', null, fieldTypes);
+    expect(cond.eval({ name: 'item foo 123' })).toBe(true);
+    expect(cond.eval({ name: 'item FOO 123' })).toBe(true);
+    expect(cond.eval({ name: 'item bar 123' })).toBe(true);
+    expect(cond.eval({ name: 'item BAR 123' })).toBe(true);
+    expect(cond.eval({ name: 'item foo bar 123' })).toBe(true);
+    expect(cond.eval({ name: 'foo 123' })).toBe(true);
+    expect(cond.eval({ name: 'item foo' })).toBe(true);
+    expect(cond.eval({ name: 'foo123' })).toBe(true);
+    expect(cond.eval({ name: 'itemfoo' })).toBe(true);
+    expect(cond.eval({ name: 'item cat 123' })).toBe(false);
+
+    cond = new Condition('matches', 'name', '^(foo|bar)', null, fieldTypes);
+    expect(cond.eval({ name: 'foo 123' })).toBe(true);
+    expect(cond.eval({ name: 'bar 123' })).toBe(true);
+    expect(cond.eval({ name: 'item foo 123' })).toBe(false);
+    expect(cond.eval({ name: 'item bar 123' })).toBe(false);
+
+    cond = new Condition('matches', 'name', '^(foo|bar)$', null, fieldTypes);
+    expect(cond.eval({ name: 'foo' })).toBe(true);
+    expect(cond.eval({ name: 'bar' })).toBe(true);
+    expect(cond.eval({ name: 'foo 123' })).toBe(false);
+    expect(cond.eval({ name: 'item bar' })).toBe(false);
   });
 
   test('number validates value', () => {

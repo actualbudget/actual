@@ -12,7 +12,7 @@ export const TYPE_INFO = {
     nullable: true,
   },
   string: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'matches'],
     nullable: false,
   },
   number: {
@@ -74,6 +74,8 @@ export function friendlyOp(op, type) {
       return 'is between';
     case 'contains':
       return 'contains';
+    case 'matches':
+      return 'matches';
     case 'gt':
       if (type === 'date') {
         return 'is after';

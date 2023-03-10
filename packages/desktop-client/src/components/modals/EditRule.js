@@ -104,7 +104,7 @@ export function OpSelect({
   // We don't support the `contains` operator for the id type for
   // rules yet
   if (type === 'id') {
-    ops = ops.filter(op => op !== 'contains');
+    ops = ops.filter(op => op !== 'contains' && op !== 'matches');
   }
 
   return (

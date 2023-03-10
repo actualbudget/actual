@@ -124,7 +124,7 @@ let CONDITION_TYPES = {
     },
   },
   string: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'matches'],
     nullable: false,
     parse(op, value, fieldName) {
       if (op === 'oneOf') {
@@ -144,6 +144,29 @@ let CONDITION_TYPES = {
           'no-empty-string',
           `contains must have non-empty string (field: ${fieldName})`,
         );
+      }
+
+      if (op === 'matches') {
+        assert(
+          typeof value === 'string' && value.length > 0,
+          'no-empty-string',
+          `matches must have non-empty string (field: ${fieldName})`,
+        );
+        console.log(`the regex is ${value}`);
+        var isValidRegexp = true;
+        try {
+            new RegExp(value);
+        } catch(e) {
+          isValidRegexp = false;
+        }
+
+        assert(
+          isValidRegexp,
+          'invalid-regex',
+          'matches must have valid regular expression',
+        );
+
+        return value;
       }
 
       return value.toLowerCase();
@@ -328,6 +351,13 @@ export class Condition {
           return false;
         }
         return fieldValue.indexOf(this.value) !== -1;
+      case 'matches':
+        if (fieldValue === null) {
+          return false;
+        }
+        console.log(`regexp value on matches ${this.value}`);
+        const regex = new RegExp(this.value);
+        return regex.test(this.value);
       case 'oneOf':
         if (fieldValue === null) {
           return false;

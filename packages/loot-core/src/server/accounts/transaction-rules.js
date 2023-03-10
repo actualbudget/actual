@@ -422,6 +422,12 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           '$like',
           '%' + value + '%',
         );
+      case 'matches':
+        return apply(
+          type === 'id' ? field + '.name' : field,
+          '$regex',
+          value,
+        );
       case 'oneOf':
         let values = value;
         if (values.length === 0) {
