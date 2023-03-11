@@ -442,6 +442,7 @@ export default function ScheduleDetails() {
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
             }
+            isCreatable
           />
         </FormField>
 

@@ -106,6 +106,7 @@ function EditField({
 
             onSelect(value);
           }}
+          isCreatable
           {...autocompleteProps}
         />
       );

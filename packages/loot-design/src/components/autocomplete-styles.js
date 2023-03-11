@@ -45,6 +45,7 @@ const colourStyles = {
     padding: 'none',
     '> svg': { height: 15, width: 15 },
   }),
+  multiValue: styles => ({ ...styles, backgroundColor: colors.b9 }),
 };
 
 export default colourStyles;

@@ -51,6 +51,7 @@ export default function PayeeAutocomplete({
   defaultFocusTransferPayees = false,
   embedded = false,
   multi = false,
+  isCreatable = false,
   onSelect,
   onManagePayees,
   ...props
@@ -99,6 +100,12 @@ export default function PayeeAutocomplete({
       return;
     }
 
+    // Multi-select has multiple selections
+    if (Array.isArray(selected)) {
+      onSelect(selected.map(option => option.value));
+      return;
+    }
+
     onSelect(selected.value);
   };
 
@@ -109,8 +116,8 @@ export default function PayeeAutocomplete({
     );
   };
 
-  const isCreatable = focusTransferPayees === false;
-  const Component = isCreatable ? Creatable : Select;
+  const useCreatableComponent = isCreatable && focusTransferPayees === false;
+  const Component = useCreatableComponent ? Creatable : Select;
 
   return (
     <Component
@@ -118,7 +125,11 @@ export default function PayeeAutocomplete({
       menuIsOpen={isOpen || embedded}
       autoFocus={embedded}
       options={options}
-      value={allOptions.find(item => item.value === value)}
+      value={
+        multi
+          ? allOptions.filter(item => value.includes(item.value))
+          : allOptions.find(item => item.value === value)
+      }
       inputValue={inputValue}
       placeholder="(none)"
       onChange={onChange}
