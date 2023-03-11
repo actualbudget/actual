@@ -24,6 +24,14 @@ const colourStyles = {
     zIndex: 5000,
     position: selectProps.embedded ? 'relative' : styles.position,
   }),
+  menuList: styles => ({
+    ...styles,
+    padding: 0,
+  }),
+  group: styles => ({
+    ...styles,
+    padding: '5px 0 0',
+  }),
   groupHeading: styles => ({
     ...styles,
     color: colors.y9,

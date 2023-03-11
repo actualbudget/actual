@@ -176,7 +176,7 @@ export default function PayeeAutocomplete({
       embedded={embedded}
       isMulti={multi}
       footer={
-        <AutocompleteFooter>
+        <AutocompleteFooter show={showMakeTransfer || showManagePayees}>
           {showMakeTransfer && (
             <AutocompleteFooterButton
               title="Make Transfer"
