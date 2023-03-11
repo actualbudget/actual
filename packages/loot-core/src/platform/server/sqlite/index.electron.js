@@ -86,7 +86,7 @@ export async function asyncTransaction(db, fn) {
 export function openDatabase(pathOrBuffer) {
   var db =  new Database(pathOrBuffer);
   db.function('regexp', { deterministic: true }, (regex, text) => {
-    return new RegExp(regex).test(text) ? 1 : 0;
+    return new RegExp(regex, 'ui').test(text) ? 1 : 0;
   });
 
   return db;

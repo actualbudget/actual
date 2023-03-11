@@ -152,10 +152,9 @@ let CONDITION_TYPES = {
           'no-empty-string',
           `matches must have non-empty string (field: ${fieldName})`,
         );
-        console.log(`the regex is ${value}`);
         var isValidRegexp = true;
         try {
-            new RegExp(value);
+            new RegExp(value, 'ui');
         } catch(e) {
           isValidRegexp = false;
         }
@@ -355,8 +354,7 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        console.log(`regexp value on matches ${this.value}`);
-        const regex = new RegExp(this.value);
+        const regex = new RegExp(this.value, 'ui');
         return regex.test(this.value);
       case 'oneOf':
         if (fieldValue === null) {
