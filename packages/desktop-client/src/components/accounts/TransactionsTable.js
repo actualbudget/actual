@@ -40,7 +40,8 @@ import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete'
 import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
 import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
+import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import {
   Cell,
   Field,
@@ -66,6 +67,7 @@ import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
 import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { getStatusProps } from '../schedules/StatusBadge';
 
 function getDisplayValue(obj, name) {
@@ -406,6 +408,7 @@ function PayeeCell({
   onCreatePayee,
   onManagePayees,
 }) {
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
   let isCreatingPayee = useRef(false);
 
   return (
@@ -436,6 +439,9 @@ function PayeeCell({
         shouldSaveFromKey,
         inputStyle,
       }) => {
+        const PayeeAutocomplete = isNewAutocompleteEnabled
+          ? NewPayeeAutocomplete
+          : LegacyPayeeAutocomplete;
         return (
           <>
             <PayeeAutocomplete

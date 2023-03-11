@@ -33,6 +33,7 @@
     "react-dnd": "^10.0.2",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.16.1",
+    "react-select": "^5.7.0",
     "react-spring": "^8.0.27",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
