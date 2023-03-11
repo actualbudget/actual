@@ -38,7 +38,7 @@ function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
         ]),
     {
       label: 'Transfer To/From',
-      options: formatOptions(activePayees.filter(p => !!p.transfer_acct)),
+      options: formatOptions(activePayees.filter(p => p.transfer_acct)),
     },
   ];
 }
