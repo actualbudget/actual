@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 
 import { nordigenService } from './services/nordigen-service.js';
 import {
@@ -10,6 +11,10 @@ import { handleError } from './util/handle-error.js';
 import validateUser from '../util/validate-user.js';
 
 const app = express();
+app.get('/link', function (req, res) {
+  res.sendFile('link.html', { root: path.resolve('./src/app-nordigen') });
+});
+
 export { app as handlers };
 app.use(express.json());
 app.use(async (req, res, next) => {
