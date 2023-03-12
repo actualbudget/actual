@@ -312,7 +312,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
     }
 
     let payee_name;
-    if (trans.amount >= 0) {
+    if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
       const nameParts = [];
       nameParts.push(
         title(
