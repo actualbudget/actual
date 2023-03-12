@@ -371,7 +371,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
         account: trans.account,
         date: trans.date,
         notes: trans.remittanceInformationUnstructured
-          || (trans.remittanceInformationUnstructured || []).join(', '),
+          || (trans.remittanceInformationUnstructuredArray || []).join(', '),
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
       },
