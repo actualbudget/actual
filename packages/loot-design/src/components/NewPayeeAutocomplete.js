@@ -116,6 +116,19 @@ export default function PayeeAutocomplete({
     );
   };
 
+  const onKeyDown = event => {
+    const ESC = 27;
+
+    if (event.keyCode === ESC) {
+      setIsOpen(false);
+      return;
+    }
+
+    if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
+
   const useCreatableComponent = isCreatable && focusTransferPayees === false;
   const Component = useCreatableComponent ? Creatable : Select;
 
@@ -133,6 +146,7 @@ export default function PayeeAutocomplete({
       inputValue={inputValue}
       placeholder="(none)"
       onChange={onChange}
+      onKeyDown={onKeyDown}
       onBlur={() => setIsOpen(false)}
       onFocus={() => setIsOpen(true)}
       onInputChange={setInputValue}
