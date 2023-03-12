@@ -47,6 +47,14 @@ export const handleNordigenError = (response) => {
 
 export const nordigenService = {
   /**
+   * Check if the Nordigen service is configured to be used.
+   * @returns {boolean}
+   */
+  isConfigured: () => {
+    return !!(nordigenClient.secretId && nordigenClient.secretKey);
+  },
+
+  /**
    *
    * @returns {Promise<void>}
    */

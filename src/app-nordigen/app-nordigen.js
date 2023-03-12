@@ -25,6 +25,15 @@ app.use(async (req, res, next) => {
   next();
 });
 
+app.post('/status', async (req, res) => {
+  res.send({
+    status: 'ok',
+    data: {
+      configured: nordigenService.isConfigured(),
+    },
+  });
+});
+
 app.post(
   '/create-web-token',
   handleError(async (req, res) => {
