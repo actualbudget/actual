@@ -289,13 +289,18 @@ function AccountMenu({
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
-          syncServerStatus === 'online' &&
-            syncEnabled &&
+          syncEnabled &&
             account &&
             !account.closed &&
             (canSync
-              ? { name: 'unlink', text: 'Unlink Account' }
-              : { name: 'link', text: 'Link Account' }),
+              ? {
+                  name: 'unlink',
+                  text: 'Unlink Account',
+                }
+              : syncServerStatus === 'online' && {
+                  name: 'link',
+                  text: 'Link Account',
+                }),
           account.closed
             ? { name: 'reopen', text: 'Reopen Account' }
             : { name: 'close', text: 'Close Account' },
