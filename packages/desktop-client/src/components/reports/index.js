@@ -3,10 +3,10 @@ import { Route } from 'react-router-dom';
 
 import { View } from 'loot-design/src/components/common';
 
+import AllReports from './AllReports';
 import CashFlow from './CashFlow';
 import NetWorth from './NetWorth';
 import Overview from './Overview';
-import AllReports from './Reports';
 
 class Reports extends React.Component {
   render() {

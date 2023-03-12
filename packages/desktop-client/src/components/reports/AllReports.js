@@ -7,11 +7,13 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { View, P } from 'loot-design/src/components/common';
+import { View } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 
-import { ChooseChart, ChooseChartHeader, ChartExtraColumn } from './Charts';
+import CashFlowReport from './CashFlowReport';
 import { HeaderReports, HeaderFilters } from './Header';
+import IncomeExpenseReport from './IncomeExpenseReport';
+import NetWorthReport from './NetWorthReport';
 import { masterDataSpreadsheet } from './spreadsheets/master-spreadsheet';
 import useReport from './useReport';
 
@@ -34,58 +36,6 @@ function AllReports({ categories }) {
     );
     return numDays > 31 * 3;
   });
-
-  function reportDescription() {
-    const title = (() => {
-      if (reportPage === 'NetWorth') {
-        return <strong>How is net worth calculated?</strong>;
-      }
-      if (reportPage === 'CashFlow') {
-        return <strong>How is cash flow calculated?</strong>;
-      }
-      if (reportPage === 'IE') {
-        return <strong>How are income and expenses calculated?</strong>;
-      }
-    })();
-    const description = (() => {
-      if (reportPage === 'NetWorth') {
-        return (
-          <P>
-            Net worth shows the balance of all accounts over time, including all
-            of your investments. Your "net worth" is considered to be the amount
-            you'd have if you sold all your assets and paid off as much debt as
-            possible. If you hover over the graph, you can also see the amount
-            of assets and debt individually.
-          </P>
-        );
-      }
-      if (reportPage === 'CashFlow') {
-        return (
-          <P>
-            Cash flow shows the balance of your budgeted accounts over time, and
-            the amount of expenses/income each day or month. Your budgeted
-            accounts are considered to be &quot;cash on hand&quot;, so this
-            gives you a picture of how available money fluctuates.
-          </P>
-        );
-      }
-      if (reportPage === 'IE') {
-        return (
-          <P>
-            These charts show your income/expenses as a total or over time and
-            is based on your filters. This allows you to look at accounts or
-            payees or categories and track money spent in any way you like.
-          </P>
-        );
-      }
-    })();
-    return (
-      <View style={{ marginTop: 30 }}>
-        <P>{title}</P>
-        {description}
-      </View>
-    );
-  }
 
   const params = useMemo(
     () =>
@@ -133,8 +83,13 @@ function AllReports({ categories }) {
   function onReportClick(onSelection, disable) {
     setReportPage(onSelection);
     setDisableFilter(disable);
-    setSecondaryReport('Trends');
     disable && deleteAllFilters();
+  }
+
+  function onUpdateFilter(oldFilter, updatedFilter) {
+    applyFilters(
+      filters.conditions.map(f => (f === oldFilter ? updatedFilter : f)),
+    );
   }
 
   function onDeleteFilter(filter) {
@@ -247,71 +202,43 @@ function AllReports({ categories }) {
         onChangeDates={onChangeDates}
         onApplyFilter={onApplyFilter}
         onDeleteFilter={onDeleteFilter}
+        onUpdateFilter={onUpdateFilter}
         disableFilter={disableFilter}
         filters={filters.conditions}
       />
-      <View
-        style={{
-          backgroundColor: 'white',
-          paddingLeft: 30,
-          paddingRight: 30,
-          overflow: 'auto',
-        }}
-      >
-        <View
-          style={{
-            flexShrink: 0,
-            flexDirection: 'row',
-            alignItems: 'flex-start',
-            paddingTop: 0,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: 'white',
-              overflow: 'auto',
-              flexGrow: 1,
-              padding: 10,
-            }}
-          >
-            <ChooseChartHeader
-              start={start}
-              end={monthUtils.getMonth(end)}
-              reportPage={reportPage}
-              secondaryReport={secondaryReport}
-              totalIncome={totalIncome}
-              totalExpenses={totalExpenses}
-              totalChanges={totalChanges}
-              netWorth={netWorth}
-              onSecondaryClick={onSecondaryClick}
-              selectList={selectList}
-              handleChange={handleChange}
-            />
-
-            <ChooseChart
-              start={start}
-              end={end}
-              graphData={graphData}
-              catData={catData}
-              isConcise={isConcise}
-              selectList={selectList}
-              reportPage={reportPage}
-              secondaryReport={secondaryReport}
-            />
-          </View>
-          {reportPage === 'IE' && (
-            <ChartExtraColumn
-              start={start}
-              end={monthUtils.getMonth(end)}
-              reportPage={reportPage}
-              totalIncome={totalIncome}
-              totalExpenses={totalExpenses}
-              selectList={selectList}
-            />
-          )}
-        </View>
-        {reportDescription()}
-      </View>
+      {reportPage === 'CashFlow' && (
+        <CashFlowReport
+          start={start}
+          end={end}
+          totalIncome={totalIncome}
+          totalExpenses={totalExpenses}
+          graphData={graphData}
+          isConcise={isConcise}
+        />
+      )}
+      {reportPage === 'NetWorth' && (
+        <NetWorthReport
+          start={start}
+          end={end}
+          totalChanges={totalChanges}
+          netWorth={netWorth}
+          graphData={graphData}
+        />
+      )}
+      {reportPage === 'IE' && (
+        <IncomeExpenseReport
+          start={start}
+          end={end}
+          totalIncome={totalIncome}
+          totalExpenses={totalExpenses}
+          graphData={graphData}
+          catData={catData}
+          secondaryReport={secondaryReport}
+          selectList={selectList}
+          onSecondaryClick={onSecondaryClick}
+          handleChange={handleChange}
+        />
+      )}
     </View>
   );
 }

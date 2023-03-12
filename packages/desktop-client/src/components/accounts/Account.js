@@ -768,7 +768,7 @@ const AccountHeader = React.memo(
             spacing={2}
             direction="row"
             align="center"
-            style={{ marginTop: 12 }}
+            style={{ marginTop: 12, marginBottom: 10 }}
           >
             {((account && !account.closed) || canSync) && (
               <Button bare onClick={canSync ? onSync : onImport}>

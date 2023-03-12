@@ -71,6 +71,7 @@ export function HeaderFilters({
   onChangeDates,
   onApplyFilter,
   onDeleteFilter,
+  onUpdateFilter,
   disableFilter,
   showAllTime,
 }) {
@@ -173,7 +174,11 @@ export function HeaderFilters({
         </View>
 
         {filters && filters.length > 0 && (
-          <AppliedFilters filters={filters} onDelete={onDeleteFilter} />
+          <AppliedFilters
+            filters={filters}
+            onUpdate={onUpdateFilter}
+            onDelete={onDeleteFilter}
+          />
         )}
       </View>
     </View>
