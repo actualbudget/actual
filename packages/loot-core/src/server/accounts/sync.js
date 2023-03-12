@@ -316,7 +316,9 @@ async function normalizeNordigenTransactions(transactions, acctId) {
       const nameParts = [];
       nameParts.push(
         title(
-          trans.debtorName || trans.remittanceInformationUnstructured || '',
+          trans.debtorName
+          || trans.remittanceInformationUnstructured
+          || (trans.remittanceInformationUnstructuredArray || []).join(', '),
         ),
       );
       if (trans.debtorAccount && trans.debtorAccount.iban) {
@@ -333,7 +335,9 @@ async function normalizeNordigenTransactions(transactions, acctId) {
       const nameParts = [];
       nameParts.push(
         title(
-          trans.creditorName || trans.remittanceInformationUnstructured || '',
+          trans.creditorName
+          || trans.remittanceInformationUnstructured
+          || (trans.remittanceInformationUnstructuredArray || []).join(', '),
         ),
       );
       if (trans.creditorAccount && trans.creditorAccount.iban) {
