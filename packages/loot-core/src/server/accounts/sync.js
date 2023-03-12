@@ -312,7 +312,10 @@ async function normalizeNordigenTransactions(transactions, acctId) {
     }
 
     let payee_name;
-    if (trans.amount >= 0) {
+    // When the amount is equal to 0, we need to determine
+    // if this is a "Credited" or "Debited" transaction. This means
+    // that it matters whether the amount is a positive or negative zero.
+    if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
       const nameParts = [];
       nameParts.push(
         title(
