@@ -582,6 +582,10 @@ export function ImportTransactions({
   async function parse(filename, options) {
     setLoadingState('parsing');
 
+    let filetype = getFileType(filename);
+    setFilename(filename);
+    setFileType(filetype);
+
     let { errors, transactions } = await parseTransactions(filename, options);
 
     setLoadingState(null);
@@ -593,10 +597,6 @@ export function ImportTransactions({
         message: errors[0].message || 'Internal error',
       });
     } else {
-      let filetype = getFileType(filename);
-      setFilename(filename);
-      setFileType(filetype);
-
       if (filetype === 'csv' || filetype === 'qif') {
         setFlipAmount(prefs[`flip-amount-${accountId}-${filetype}`] || false);
       }
