@@ -298,7 +298,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
   let normalized = [];
   for (let trans of transactions) {
     if (!trans.date) {
-      trans.date = trans.valueDate;
+      trans.date = trans.valueDate || trans.bookingDate;
     }
 
     if (!trans.amount) {
