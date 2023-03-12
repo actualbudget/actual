@@ -207,7 +207,7 @@ describe('transaction executors', () => {
 
             let { data } = await runQuery(aggQuery.serialize());
 
-            let sum = arr.reduce((sum, trans) => {
+            let sum = aliveTransactions(arr).reduce((sum, trans) => {
               let amount = trans.amount || 0;
               let matched = (amount < -5 || amount > -2) && trans.payee != null;
               if (!trans.tombstone && !trans.is_parent && matched) {
