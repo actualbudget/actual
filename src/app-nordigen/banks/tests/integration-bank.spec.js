@@ -21,7 +21,7 @@ describe('IntegrationBank', () => {
         account_id: account.id,
         institution: mockInstitution,
         mask: '4321',
-        name: 'account-example-one (XXX 4321)',
+        name: 'account-example-one (XXX 4321) PLN',
         official_name: 'integration-SANDBOXFINANCE_SFIN0000',
         type: 'checking',
       });
@@ -36,7 +36,7 @@ describe('IntegrationBank', () => {
         account_id: account.id,
         institution: mockInstitution,
         mask: '0000',
-        name: 'account-example-one',
+        name: 'account-example-one PLN',
         official_name: 'integration-SANDBOXFINANCE_SFIN0000',
         type: 'checking',
       });
