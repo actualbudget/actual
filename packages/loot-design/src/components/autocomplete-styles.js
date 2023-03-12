@@ -23,6 +23,7 @@ const colourStyles = {
     marginTop: 2,
     zIndex: 5000,
     position: selectProps.embedded ? 'relative' : styles.position,
+    overflow: 'hidden',
   }),
   menuList: styles => ({
     ...styles,
