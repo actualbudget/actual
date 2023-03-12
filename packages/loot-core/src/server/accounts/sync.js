@@ -319,7 +319,9 @@ async function normalizeNordigenTransactions(transactions, acctId) {
       const nameParts = [];
       nameParts.push(
         title(
-          trans.debtorName || trans.remittanceInformationUnstructured || '',
+          trans.debtorName ||
+            trans.remittanceInformationUnstructured ||
+            (trans.remittanceInformationUnstructuredArray || []).join(', '),
         ),
       );
       if (trans.debtorAccount && trans.debtorAccount.iban) {
@@ -336,7 +338,9 @@ async function normalizeNordigenTransactions(transactions, acctId) {
       const nameParts = [];
       nameParts.push(
         title(
-          trans.creditorName || trans.remittanceInformationUnstructured || '',
+          trans.creditorName ||
+            trans.remittanceInformationUnstructured ||
+            (trans.remittanceInformationUnstructuredArray || []).join(', '),
         ),
       );
       if (trans.creditorAccount && trans.creditorAccount.iban) {
@@ -369,7 +373,9 @@ async function normalizeNordigenTransactions(transactions, acctId) {
         payee: trans.payee,
         account: trans.account,
         date: trans.date,
-        notes: trans.remittanceInformationUnstructured,
+        notes:
+          trans.remittanceInformationUnstructured ||
+          (trans.remittanceInformationUnstructuredArray || []).join(', '),
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
       },
