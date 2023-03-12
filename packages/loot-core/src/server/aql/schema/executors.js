@@ -85,18 +85,28 @@ async function execTransactionsGrouped(
   let { withDead } = queryState;
   let whereDead = withDead ? '' : `AND ${sql.from}.tombstone = 0`;
 
+  // Aggregate queries don't make sense for a grouped transactions
+  // query. We never should include both parent and children
+  // transactions as it would duplicate amounts and the final number
+  // would never make sense. In this case, switch back to the "inline"
+  // type where only non-parent transactions are considered
   if (isAggregateQuery(queryState)) {
-    let allSql = `
-      SELECT ${sql.select}
-      FROM ${sql.from}
-      ${sql.joins}
-      ${sql.where} AND is_parent = 0 ${whereDead}
-      ${sql.groupBy}
-      ${sql.orderBy}
-      ${sql.limit != null ? `LIMIT ${sql.limit}` : ''}
-      ${sql.offset != null ? `OFFSET ${sql.offset}` : ''}
-    `;
-    return db.all(allSql);
+    let s = { ...sql };
+
+    // Modify the where to only include non-parents
+    s.where = `${s.where} AND ${s.from}.is_parent = 0`;
+
+    // We also want to exclude deleted transactions. Normally we
+    // handle this manually down below, but now that we are doing a
+    // normal query we want to rely on the view. Unfortunately, SQL
+    // has already been generated so we can't easily change the view
+    // name here; instead, we change it and map it back to the name
+    // used elsewhere in the query. Ideally we'd improve this
+    if (!withDead) {
+      s.from = 'v_transactions_internal_alive v_transactions_internal';
+    }
+
+    return execQuery(queryState, state, s, params, outputTypes);
   }
 
   let rows;
