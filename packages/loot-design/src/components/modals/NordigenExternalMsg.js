@@ -40,6 +40,29 @@ function useAvailableBanks(country) {
   };
 }
 
+function useNordigenStatus() {
+  const [configured, setConfigured] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetch() {
+      setIsLoading(true);
+
+      const results = await send('nordigen-status');
+
+      setConfigured(results.configured || false);
+      setIsLoading(false);
+    }
+
+    fetch();
+  }, [setConfigured, setIsLoading]);
+
+  return {
+    configured,
+    isLoading,
+  };
+}
+
 function renderError(error) {
   return (
     <Error style={{ alignSelf: 'center' }}>
@@ -65,6 +88,8 @@ export default function NordigenExternalMsg({
 
   const { data: bankOptions, isLoading: isBankOptionsLoading } =
     useAvailableBanks(country);
+  const { configured: isConfigured, isLoading: isConfigurationLoading } =
+    useNordigenStatus();
 
   async function onJump() {
     setError(null);
@@ -100,6 +125,7 @@ export default function NordigenExternalMsg({
           <FormLabel title="Choose your country:" htmlFor="country-field" />
           <Autocomplete
             strict
+            disabled={isConfigurationLoading}
             suggestions={COUNTRY_OPTIONS}
             onSelect={setCountry}
             value={country}
@@ -178,14 +204,16 @@ export default function NordigenExternalMsg({
 
           {error && renderError(error)}
 
-          {waiting ? (
+          {waiting || isConfigurationLoading ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
                 color={colors.n1}
                 style={{ width: 20, height: 20 }}
               />
               <View style={{ marginTop: 10, color: colors.n4 }}>
-                {waiting === 'browser'
+                {isConfigurationLoading
+                  ? 'Checking Nordigen configuration..'
+                  : waiting === 'browser'
                   ? 'Waiting on Nordigen...'
                   : waiting === 'accounts'
                   ? 'Loading accounts...'
@@ -207,8 +235,20 @@ export default function NordigenExternalMsg({
             >
               Success! Click to continue &rarr;
             </Button>
-          ) : (
+          ) : isConfigured ? (
             renderLinkButton()
+          ) : (
+            <P style={{ color: colors.r5 }}>
+              Nordigen integration has not been configured so linking accounts
+              is not available.{' '}
+              <a
+                href="https://actualbudget.github.io/docs/Accounts/connecting-your-bank/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Learn more.
+              </a>
+            </P>
           )}
         </View>
       )}
