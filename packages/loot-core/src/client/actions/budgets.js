@@ -5,7 +5,6 @@ import * as constants from '../constants';
 import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
-import { startTutorialFirstTime } from './tutorial';
 
 export function updateStatusText(text) {
   return (dispatch, getState) => {
@@ -95,7 +94,6 @@ export function loadBudget(id, loadingText = '', options = {}) {
     const prefs = getState().prefs.local;
     dispatch(setAppState({ loadingText: null }));
     dispatch(setAppState({ maxMonths: prefs.maxMonths }));
-    dispatch(startTutorialFirstTime());
   };
 }
 
@@ -150,7 +148,6 @@ export function createBudget({ testMode, demoMode } = {}) {
 
     await dispatch(loadAllFiles());
     await dispatch(loadPrefs());
-    dispatch(startTutorialFirstTime());
 
     // Set the loadingText to null after we've loaded the budget prefs
     // so that the existing manager page doesn't flash
@@ -168,7 +165,6 @@ export function importBudget(filepath, type) {
     dispatch(closeModal());
 
     await dispatch(loadPrefs());
-    dispatch(startTutorialFirstTime());
   };
 }
 

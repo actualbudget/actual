@@ -4,15 +4,24 @@ import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
 import {
   View,
+  Button,
   Modal,
   P,
   ExternalLink,
 } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 
-function WelcomeScreen({ modalProps, actions }) {
+function WelcomeScreen({ modalProps, createBudget, pushModal }) {
   return (
-    <Modal title="Welcome to Actual" {...modalProps}>
+    <Modal
+      title="Welcome to Actual!"
+      noAnimation={true}
+      showClose={false}
+      showOverlay={false}
+      padding={0}
+      style={{ boxShadow: 'none', backgroundColor: 'transparent' }}
+      {...modalProps}
+    >
       {() => (
         <View style={{ maxWidth: 500, fontSize: 15 }}>
           <P>
@@ -63,6 +72,24 @@ function WelcomeScreen({ modalProps, actions }) {
             </ExternalLink>{' '}
             and more.
           </P>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+            }}
+          >
+            <Button
+              onClick={() => {
+                pushModal('import');
+              }}
+            >
+              Import your data
+            </Button>
+            <Button primary onClick={createBudget}>
+              Start fresh
+            </Button>
+          </View>
         </View>
       )}
     </Modal>

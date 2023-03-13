@@ -54,7 +54,6 @@ function Import({ modalProps, actions }) {
   return (
     <Modal
       {...modalProps}
-      noAnimation={true}
       showHeader={false}
       showOverlay={false}
       style={{ width: 400 }}

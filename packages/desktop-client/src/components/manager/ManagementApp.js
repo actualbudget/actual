@@ -108,11 +108,9 @@ class ManagementApp extends React.Component {
             replaceModal('select-budget');
           }
         } else {
-          // If the user is logged in and there's no existing files,
-          // automatically create one. This will load the budget and
-          // swap out the manager with the new budget, so there's
-          // nothing else we need to do
-          this.props.createBudget();
+          if (!currentModals.includes('delete-budget')) {
+            replaceModal('welcome');
+          }
         }
       }
     }
@@ -126,7 +124,8 @@ class ManagementApp extends React.Component {
     if (
       this.props.managerHasInitialized !== prevProps.managerHasInitialized ||
       this.props.files !== prevProps.files ||
-      this.props.userData !== prevProps.userData
+      this.props.userData !== prevProps.userData ||
+      this.props.currentModals !== prevProps.currentModals
     ) {
       this.showModal();
     }
