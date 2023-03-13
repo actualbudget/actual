@@ -2,6 +2,64 @@
 title: Release Notes
 ---
 
+## 23.3.2
+
+**Docker tag: 23.3.2*
+
+The release has the following notable features:
+
+- Docker fix: don't make symlink
+- Various Nordigen bank-sync bugfixes
+
+### Actual
+
+Version: 23.3.2
+
+#### Bugfix
+
+- [#738](https://github.com/actualbudget/actual/pull/738) Set the filename/filetype before attempting to parse — thanks [j-f1]
+- [#744](https://github.com/actualbudget/actual/pull/744) (nordigen) fix detection of -0.00 "debited" transactions — thanks [Jackenmen]
+- [#745](https://github.com/actualbudget/actual/pull/745) (nordigen) fallback to array version of remittanceInformationUnstructured if necessary — thanks [Jackenmen]
+- [#247](https://github.com/actualbudget/actual/pull/247) Route aggregate queries in transaction grouped mode through the correct layer to remove deleted transactions — thanks [jlongster]
+- [#743](https://github.com/actualbudget/actual/pull/743) (nordigen) fallback to bookingDate if valueDate is not set — thanks [MatissJanis]
+- [#742](https://github.com/actualbudget/actual/pull/742) (nordigen) check server status before linking accs — thanks [MatissJanis]
+
+#### Maintenance
+
+- [#665](https://github.com/actualbudget/actual/pull/665) Remove year from the LICENSE — thanks [MatissJanis]
+
+### Actual Server
+
+Version: 23.3.2
+
+#### Features
+
+- [#162](https://github.com/actualbudget/actual-server/pull/162)  (nordigen) add status endpoint for checking status — thanks [MatissJanis]
+
+#### Bugfix
+
+- [#156](https://github.com/actualbudget/actual-server/pull/156) Re-generate nordigen token — thanks [fstybel]
+- [#157](https://github.com/actualbudget/actual-server/pull/157) Don’t make Dockerfile a symlink — thanks [j-f1]
+- [#160](https://github.com/actualbudget/actual-server/pull/160) (nordigen) close window when opening /nordigen/link path — thanks [MatissJanis]
+- [#163](https://github.com/actualbudget/actual-server/pull/163) (nordigen) add currency to account name — thanks [MatissJanis]
+
+#### Maintenance
+
+- [#161](https://github.com/actualbudget/actual-server/pull/161) Update README.md — thanks [suryaatevellore]
+- [#140](https://github.com/actualbudget/actual-server/pull/140) Remove year from the LICENSE — thanks [MatissJanis]
+
+## 23.3.1
+
+**Docker tag: 23.3.1*
+
+### Actual Server
+
+Version: 23.3.1
+
+#### Bugfix
+
+- [#155](https://github.com/actualbudget/actual-server/pull/155) fix nordigen usage in fly.io — thanks [MatissJanis]
+
 ## 23.3.0
 
 **Docker tag: 23.3.0**
@@ -470,6 +528,7 @@ Version: 22.10.25
 [gsumpster]: https://github.com/gsumpster
 [heilerich]: https://github.com/heilerich
 [iurynogueira]: https://github.com/iurynogueira
+[Jackenmen]: https://github.com/Jackenmen
 [j-f1]: https://github.com/j-f1
 [JazzaG]: https://github.com/JazzaG
 [jlongster]: https://github.com/jlongster
@@ -488,6 +547,7 @@ Version: 22.10.25
 [S3B4S]: https://github.com/S3B4S
 [shall0pass]: https://github.com/shall0pass
 [Silvenga]: https://github.com/Silvenga
+[suryaatevellore]: https://github.com/suryaatevellore
 [TomAFrench]: https://github.com/TomAFrench
 [trevdor]: https://github.com/trevdor
 [UnexomWid]: https://github.com/UnexomWid
