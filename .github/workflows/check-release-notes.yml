@@ -1,0 +1,19 @@
+name: Check release notes
+
+on:
+  pull_request:
+    branches: '*'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.15.0
+      - name: Check release notes
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: curl -s https://raw.githubusercontent.com/actualbudget/docs/jed/generate-release-notes/scripts/check-release-notes.js | node
