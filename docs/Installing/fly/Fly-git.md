@@ -16,56 +16,56 @@ Download git for Windows from here: [https://git-scm.com/download/win](https://g
    wmic os get OSArchitecture
    ```
 
-   ![](/img/cmd-arch.png)
+   ![](/img/fly/cmd-arch.png)
 
 1. Download the setup file that is right for your system:
 
-   ![](/img/git-download.png)
+   ![](/img/fly/git-download.png)
 
    It should then start downloading:
 
-   ![](/img/git-download-progress.png)
+   ![](/img/fly/git-download-progress.png)
 
 1. Once it is done, open it up - if asked click yes that you are happy for it to make changes to
    your device.
 
-   ![](/img/git-install-1.png)
+   ![](/img/fly/git-install-1.png)
 
 1. Copy the settings as they are below and click next, next...
 
-   ![](/img/git-install-2.png)
+   ![](/img/fly/git-install-2.png)
 
-   ![](/img/git-install-3.png)
+   ![](/img/fly/git-install-3.png)
 
-   ![](/img/git-install-4.png)
+   ![](/img/fly/git-install-4.png)
 
-   ![](/img/git-install-5.png)
+   ![](/img/fly/git-install-5.png)
 
-   ![](/img/git-install-6.png)
+   ![](/img/fly/git-install-6.png)
 
-   ![](/img/git-install-7.png)
+   ![](/img/fly/git-install-7.png)
 
-   ![](/img/git-install-8.png)
+   ![](/img/fly/git-install-8.png)
 
-   ![](/img/git-install-9.png)
+   ![](/img/fly/git-install-9.png)
 
-   ![](/img/git-install-10.png)
+   ![](/img/fly/git-install-10.png)
 
-   ![](/img/git-install-11.png)
+   ![](/img/fly/git-install-11.png)
 
-   ![](/img/git-install-12.png)
+   ![](/img/fly/git-install-12.png)
 
-   ![](/img/git-install-13.png)
+   ![](/img/fly/git-install-13.png)
 
-   ![](/img/git-install-14.png)
+   ![](/img/fly/git-install-14.png)
 
-   ![](/img/git-install-15.png)
+   ![](/img/fly/git-install-15.png)
 
-   ![](/img/git-install-16.png)
+   ![](/img/fly/git-install-16.png)
 
 1. Then git should begin installing:
 
-   ![](/img/git-install-17.png)
+   ![](/img/fly/git-install-17.png)
 
 1. Open up a command prompt and type
 
@@ -75,7 +75,7 @@ Download git for Windows from here: [https://git-scm.com/download/win](https://g
 
    to make sure it has installed correctly. If it has, you should see a version number as below:
 
-   ![](/img/git-install-18.png)
+   ![](/img/fly/git-install-18.png)
 
 That is it, Git is now installed.
 
@@ -86,34 +86,34 @@ these are for Windows only but should work (with a few tweaks) for MacOSX & Linu
 
 1. Press start (or hit the windows key on your keyboard), type **cmd**
 
-   ![](/img/windows-start-1.png)
+   ![](/img/fly/windows-start-1.png)
 
    when CMD appears in the search results, **right click** it and run it as **Administrator**
 
-   ![](/img/windows-start-2.png)
+   ![](/img/fly/windows-start-2.png)
 
 1. Navigate to the C:\ drive
    ```cmd
    cd C:\
    ```
-   ![](/img/cmd-1.png)
+   ![](/img/fly/cmd-1.png)
 1. Create a folder called GitHub. (`mkdir` is a command to *m*a*k*e a *dir*ectory)
    ```cmd
    mkdir github
    ```
-   ![](/img/cmd-2.png)
+   ![](/img/fly/cmd-2.png)
 1. Once that is complete run this command
 
    ```cmd
    flyctl auth login
    ```
 
-   ![](/img/cmd-9.png)
+   ![](/img/fly/cmd-9.png)
 
    This should open a web browser and ask you to login - you will need to provide credit card
    details to proceed but actual shouldn't cost much if anything at all.
 
-   ![](/img/cmd-10.png)
+   ![](/img/fly/cmd-10.png)
 
 1. Now we need to move into the GitHub directory we just created on the C:\ drive, to do that we can
    use this command
@@ -122,7 +122,7 @@ these are for Windows only but should work (with a few tweaks) for MacOSX & Linu
    cd C:\github
    ```
 
-   ![](/img/cmd-3.png)
+   ![](/img/fly/cmd-3.png)
 
    **Note:** CD means *c*hange *d*irectory
 
@@ -132,7 +132,7 @@ these are for Windows only but should work (with a few tweaks) for MacOSX & Linu
    git clone https://github.com/actualbudget/actual-server.git
    ```
 
-   ![](/img/git-install-19.png)
+   ![](/img/fly/git-install-19.png)
 
    This will pull down the latest files for actual-server from the git hub repository to our local
    machine.
@@ -143,7 +143,7 @@ these are for Windows only but should work (with a few tweaks) for MacOSX & Linu
    cd actual-server
    ```
 
-   ![](/img/cmd-4.png)
+   ![](/img/fly/cmd-4.png)
 
    Let's check to make sure we are in the correct place
 
@@ -151,7 +151,7 @@ these are for Windows only but should work (with a few tweaks) for MacOSX & Linu
    dir
    ```
 
-   ![](/img/cmd-5.png)
+   ![](/img/fly/cmd-5.png)
 
    You should see a list of files, one of them being `fly.template.toml`. If you don't see them
    go back to step 6
@@ -161,19 +161,19 @@ these are for Windows only but should work (with a few tweaks) for MacOSX & Linu
    ```cmd
    copy fly.template.toml fly.toml
    ```
-   ![](/img/cmd-6.png)
+   ![](/img/fly/cmd-6.png)
 1. Open the fly.toml file in notepad or a text editor of your choice like Visual Studio Code
 
    ```cmd
    notepad fly.toml
    ```
 
-   ![](/img/cmd-7.png)
+   ![](/img/fly/cmd-7.png)
 
    On line 1 change `app = "%NAME%"` to something of your choosing like `app = "Actual"` and save
    the file
 
-   ![](/img/cmd-8.png)
+   ![](/img/fly/cmd-8.png)
 
 1. Go back to the command prompt and run
    ```cmd
@@ -184,40 +184,40 @@ Would you like to copy its configuration to the new app? (y/N)`
 
    Type Y and hit enter
 
-   ![](/img/cmd-11.png)
+   ![](/img/fly/cmd-11.png)
 
 1. It asked me to give my application a name, I just left it blank and it picked one for me. I did
    this because no matter what I typed it errored.
 
-   ![](/img/cmd-12.png)
+   ![](/img/fly/cmd-12.png)
 
 1. Select your location using the up/down arrow keys when prompted:
 
-   ![](/img/cmd-13.png)
+   ![](/img/fly/cmd-13.png)
 
 1. When prompted with `? Would you like to setup a Postgresql database now? (y/N)`
 
    Type N and press enter:
 
-   ![](/img/cmd-14.png)
+   ![](/img/fly/cmd-14.png)
 
 1. When prompted with `? Would you like to deploy now? (y/N)`
 
    Type Y and press enter:
 
-   ![](/img/cmd-15.png)
+   ![](/img/fly/cmd-15.png)
 
    The application should begin deploying.
 
-   ![](/img/cmd-17.png)
+   ![](/img/fly/cmd-17.png)
 
 1. If you get a message about Windows Firewall, click 'Allow Access'
 
-   ![](/img/cmd-16.png)
+   ![](/img/fly/cmd-16.png)
 
 When complete you should see something like this:
 
-![](/img/cmd-18.png)
+![](/img/fly/cmd-18.png)
 
 ## Configuring Actual
 
@@ -228,12 +228,12 @@ provided by Fly in the dashboard.
     application you created, in my case **myfirstbudget**, it might have a really random name if you
     left it blank a few steps ago
 
-    ![](/img/fly-dash.png)
+    ![](/img/fly/fly-dash.png)
 
 1.  Once you are in there, you should see Hostname section under Application Information - click the
     link
 
-    ![](/img/fly-dash-2.png)
+    ![](/img/fly/fly-dash-2.png)
 
         https://myfirstbudget.fly.dev
 
@@ -241,18 +241,18 @@ provided by Fly in the dashboard.
 
 1.  You should then see this screen
 
-    ![](/img/actual-config-1.png)
+    ![](/img/fly/actual-config-1.png)
 
     Click the 'Use this domain' link
 
-    ![](/img/actual-config-2.png)
+    ![](/img/fly/actual-config-2.png)
 
 1.  Set a password - remember this, you will need it in the future.
 
-    ![](/img/actual-config-3.png)
+    ![](/img/fly/actual-config-3.png)
 
 1.  If everything went well you should then be taken to your very first budget.
 
-    ![](/img/actual-register.png)
+    ![](/img/fly/actual-register.png)
 
 Actual is now up and running. Congratulations!

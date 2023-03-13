@@ -1,5 +1,5 @@
 ---
-title: 'Bank accounts'
+title: 'Bank Accounts'
 ---
 
 This page explains how to manage Bank Accounts within your Actual instance.
@@ -8,7 +8,7 @@ This page explains how to manage Bank Accounts within your Actual instance.
 
 You can add an account to your budget at any time, however when you first install Actual you can use the `Add Account` button in the middle of the screen. 
 
-![](/img/accounts/AddAccount.png)
+![](/img/add-account/AddAccount.png)
 
 You can also add an account using the `+ Add account` button in the sidebar.
 
@@ -23,11 +23,11 @@ A box will appear asking you to fill in a few options
 Off budget means that the balance is not reflected when you assign money to categories in your budget register
 :::
 
-![](/img/accounts/CreateAccount.png)
+![](/img/add-account/CreateAccount.png)
 
 Here you can see how that looks when the options are completed.
 
-![](/img/accounts/NewBudget.png)
+![](/img/add-account/NewBudget.png)
 
 You can now see the account in the sidebar of Actual
 
@@ -35,11 +35,11 @@ You can now see the account in the sidebar of Actual
 
 Click the account name in the sidebar of Actual
 
-![](/img/accounts/SidebarAccountList@2x.png)
+![](/img/add-account/SidebarAccountList@2x.png)
 
 Hovering your cursor close to the account name at the top will reveal two icons.   
 The page icon allows you to write a note about this account, and the pencil icon allows you to rename the account.
 
 After editing a note for the account or its name, hit 'Enter' to save your changes.
 
-![](/img/accounts/AccountNameEdit.png)
+![](/img/add-account/AccountNameEdit.png)

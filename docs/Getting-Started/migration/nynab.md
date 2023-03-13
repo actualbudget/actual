@@ -12,11 +12,11 @@ While we don't maintain this tool, you can also use https://json-exporter-for-yn
 - Select the drop down menu and **Close File**
 - Select **Import file**
 
-![](/img/actual-config-10.png)
+![](/img/migrating/actual-config-10.png)
 
 - Select **nYnab**
 
-![](/img/actual-config-12.png)
+![](/img/migrating/actual-config-12.png)
 
 - Choose the exported json file
 

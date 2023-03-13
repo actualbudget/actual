@@ -24,7 +24,7 @@ There are various components of a transaction that can be changed through bulk e
 
 To Access this drop down first go to “All accounts” so that you can see all transactions.
 
-![](/img/bulk-edit/sidebar-accounts@2x.png)
+![](/img/elements/sidebar/sidebar-all-accounts@2x.png)
 
 Then Search or Filter to identify the transactions that you wish to change and select the tick box in the left hand column (by the date column).
 
@@ -52,4 +52,4 @@ Here is another example. This time to bulk change a Category.
 
 To duplicate transactions (one or more), simply navigate to the Accounts page as described above, and select the tick box in the left hand column. Once selected, go to the drop down menu on the top right of the page, above the table header. Open the menu and select “Duplicate”. Your newly duplicated transactions will appear in the transactions table!
 
-![](/img/duplicate-transactions.png)
+![](/img/bulk-edit/duplicate-transactions.png)

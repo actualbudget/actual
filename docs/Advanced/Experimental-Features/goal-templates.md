@@ -8,7 +8,7 @@ This is an **experimental feature**. That means we’re still working on finishi
 
 Create a template by adding a note to a category and adding a line that begins with `#template`.
 
-![](/img/goal-template-1.png)
+![](/img/goal-template/goal-template-1.png)
 
 You are welcome to have other lines in your note, but the #template line must match the syntax.
 
@@ -69,7 +69,7 @@ For examples:
 
 To apply the goal templates you create, enable the feature in the Settings experimental section. When the feature is on, two new options will appear in the monthly budget actions list.
 
-![](/img/goal-template-2.png)
+![](/img/goal-template/goal-template-2.png)
 
 **Apply budget template** will only fill empty cells using the templates.
 

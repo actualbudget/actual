@@ -32,27 +32,27 @@ A powerful feature is merging payees. You may already have months worth of data 
 
 1. Click the three dots next to your budget name
 
-![](/img/BudgetOptionButton.png)
+![](/img/payees/BudgetOptionButton.png)
 
 2. Click Manage Payees
 
-![](/img/ManagingPayees.png)
+![](/img/payees/ManagingPayees.png)
 
 3. Type "Morrisons" into the filter to only show those payees.
 
-![](/img/Payees.png)
+![](/img/payees/Payees.png)
 
 4. Click the checkbox in the table header next to the **Name** column to select all of the different variations of "Morrisons"
 
-![](/img/PayeesSelected.png)
+![](/img/payees/PayeesSelected.png)
 
 5. Click the button in the top-left to open the menu, and select **Merge**
 
-![](/img/MergePayeesOption.png)
+![](/img/payees/MergePayeesOption.png)
 
 6. All of the payees will merge into one and the name will be editable. Type in a name for the final payee.
 
-![](/img/PayeesMerged.png)
+![](/img/payees/PayeesMerged.png)
 
 You can individually select payees and merge them if you like, but filtering & merging is a powerful way to quickly clean up your payees.
 

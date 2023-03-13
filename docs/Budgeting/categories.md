@@ -8,17 +8,17 @@ You can manage your categories in the budget page. Actual supports both expense 
 
 1. Hover over the category group and press the down arrow
 
-![](/img/CategoryGroupRename.png)
+![](/img/categories/CategoryGroupRename.png)
 
 2. Select **Add category**
 
-![](/img/CategoryGroupAddCategory.png)
+![](/img/categories/CategoryGroupAddCategory.png)
 
 ## Adding a category group
 
 Scroll to the bottom of the budget sheet and select add group
 
-![](/img/AddCategoryGroup.png)
+![](/img/categories/AddCategoryGroup.png)
 
 Only one income group can ever exist and it cannot be deleted.
 
@@ -26,11 +26,11 @@ Only one income group can ever exist and it cannot be deleted.
 
 1. Hover over the category and press the down arrow
 
-![](/img/RenameCategoryDropDown.png)
+![](/img/categories/RenameCategoryDropDown.png)
 
 2. Select **Rename** or **Delete** from the menu
 
-![](/img/RenameCategoryOptions.png)
+![](/img/categories/RenameCategoryOptions.png)
 
 Categories are organized into groups and same actions can be performed on groups.
 
@@ -38,23 +38,23 @@ Categories are organized into groups and same actions can be performed on groups
 
 Let's say you have two categories that are the same but you want to delete one.
 
-![](/img/DuplicatedCategories.png)
+![](/img/categories/DuplicatedCategories.png)
 
 Hover over the category and select the drop down that appears and select `Delete`
 
-![](/img/RenameCategoryOptions.png)
+![](/img/categories/RenameCategoryOptions.png)
 
 If the category your deleting has a positive balance **OR** has been used for existing transactions you will be presented with a box to select which category the balance and or transactions should be moved to.
 
-![](/img/CategoryDeleteConfirmation.png)
+![](/img/categories/CategoryDeleteConfirmation.png)
 
 In our example, we want to use `Food` which will take over from `Foods` once you are happy, click `Delete`
 
-![](/img/CategoryDeleteConfirmationNewCat.png)
+![](/img/categories/CategoryDeleteConfirmationNewCat.png)
 
 You can see in the budget that our categories have now been successfully merged and the positive balance moved to the new category.
 
-![](/img/CategoriesMerged.png)
+![](/img/categories/CategoriesMerged.png)
 
 ## Tips for new users
 

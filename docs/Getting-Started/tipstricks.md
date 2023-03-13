@@ -31,7 +31,7 @@ A few global shortcuts:
 
 In the top left of the budget, you will see this control:
 
-![](/img/months-selector.png)
+![](/img/tips-tricks/months-selector.png)
 
 This sets the maximum amount of months to render at once, and defaults to 1. If you want to view multiple months on the same page, click the boxes to increase the number.
 
@@ -51,4 +51,4 @@ To enable this:
 
 A new column should appear which shows the balance of the account after each transaction:
 
-![](/img/running-balance.png)
+![](/img/tips-tricks/running-balance.png)

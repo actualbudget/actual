@@ -15,11 +15,11 @@ When we update Actual, if we don't persist the data it will be erased each time 
    This will create a volume in the london region. Replace `lhr` with another region code if
    desired.
 
-   ![](/img/cmd-19.png)
+   ![](/img/fly/cmd-19.png)
 
 1. You should then get a message to say it was successful
 
-   ![](/img/cmd-20.png)
+   ![](/img/fly/cmd-20.png)
 
 1. Open up `fly.toml` in notepad - you can do this from the command line
    ```cmd
@@ -35,7 +35,7 @@ When we update Actual, if we don't persist the data it will be erased each time 
 
    If you created a volume with a different name, put that in the source. Save the file.
 
-   ![](/img/cmd-21.png)
+   ![](/img/fly/cmd-21.png)
 
 1. Now from the command prompt run
 
@@ -43,12 +43,12 @@ When we update Actual, if we don't persist the data it will be erased each time 
    flyctl deploy
    ```
 
-   ![](/img/cmd-22.png)
+   ![](/img/fly/cmd-22.png)
 
    Your application should be re-deployed with the updated configuration
 
-   ![](/img/cmd-23.png)
+   ![](/img/fly/cmd-23.png)
 
 If all went well, you should now be able to see your volume from the fly.io dashboard.
 
-![](/img/fly-dash-3.png)
+![](/img/fly/fly-dash-3.png)

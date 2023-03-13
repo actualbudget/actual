@@ -12,7 +12,7 @@ When you reconcile, you will be comparing your bank statement, print or online, 
 
 By clicking on the green balance in the header of the account view, two more category balances will come into view. The **cleared total** only includes transactions that have been cleared while the **uncleared total** will represent the transactions you have entered but may not have entered the bank statement yet.
 
-![](/img/reconcile-1.png)
+![](/img/reconcile/reconcile-1.png)
 
 ## Starting the Reconciliation tool
 
@@ -20,30 +20,30 @@ Press the icon that has 3 horizontally spaced dots in the right hand corner of t
 
 Let's imagine that we have just checked our account balance for our Ally Savings account and the current balance is $1229.18. We enter the balance we want to match into the Reconciliation tool and press **Reconcile**.
 
-![](/img/reconcile-2.png)
+![](/img/reconcile/reconcile-2.png)
 
 The tool will tell us exactly how much is different than the budget ledger. Now we can check the Actual ledger against the bank ledger and watch the difference come closer to 0. In this case, we're looking for transactions that add up to 262.72. This is much easier by looking at the Actual ledger and bank statement side by side to match the transactions.
 
-![](/img/reconcile-3.png)
+![](/img/reconcile/reconcile-3.png)
 
 When the cleared amount of the Actual account ledger and the value you entered into the Reconciliation tool are the same, the tool will let you know that you are reconciled and you can press done.
 
-![](/img/reconcile-4.png)
+![](/img/reconcile/reconcile-4.png)
 
 ## Using the Reconciliation tool for Off-Budget Asset tracking
 
 Some use off-budget accounts to track values of assets such as vehicles, real estate, retirement accounts, or other investment accounts or property. The reconciliation tool is useful to update these values as well. Let's say we have a house that was valued at 358,700 but with current changes in the market it is now valued at 385,000. We go to the ledger for the house, choose the reconciliation tool, and enter 385,000 as the new value into the tool.
 
-![](/img/reconcile-5.png)
+![](/img/reconcile/reconcile-5.png)
 
 The tool tells us that we have a gain of 26,400.
 
-![](/img/reconcile-6.png)
+![](/img/reconcile/reconcile-6.png)
 
 We can enter this difference into the ledger. We used **Reconciliation** as the payee, but you can use whatever payee you'd like. By using a payee that is not used anywhere else you can find these adjustment transactions using the search features more easily.
 
-![](/img/reconcile-7.png)
+![](/img/reconcile/reconcile-7.png)
 
 When you finish entering the transaction, make sure you **clear** it by clicking on the grey checkmark on the right hand side. You should now have a reconciliation tool that is reporting that it is finished and you can enjoy a new higher net worth.
 
-![](/img/reconcile-8.png)
+![](/img/reconcile/reconcile-8.png)

@@ -9,24 +9,24 @@ To do this,
 
 1. login to your budget, then in the top right corner click 'Server'
 
-   ![](/img/actual-config-7.png)
+   ![](/img/restore/actual-config-7.png)
 
 1. Then select Logout
 
-   ![](/img/actual-config-8.png)
+   ![](/img/restore/actual-config-8.png)
 
 1. Log back into your instance of Actual
 
-   ![](/img/actual-config-9.png)
+   ![](/img/restore/actual-config-9.png)
 
 1. From the next screen select Import File
 
-   ![](/img/actual-config-10.png)
+   ![](/img/restore/actual-config-10.png)
 
 1. Select Actual and then locate your Zip file, this will then import what you previously exported into
    Actual.
 
-   ![](/img/actual-config-11.png)
+   ![](/img/restore/actual-config-11.png)
 
 That is it. A fresh budget will show in your budget list. If the imported data is a copy of your current budget, you may want to rename the new budget by clicking on it's name so you can tell them apart. Once you verify the new imported budget is correct, you can navigate back to the budget selection screen by closing the current budget and deleting the old copy.
 

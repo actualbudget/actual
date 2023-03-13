@@ -46,7 +46,7 @@ Most likely, a common workflow will be to "hold" income you make this month for 
 1.  Click the **To Budget** amount.
 2.  Select **Hold for next month** in the menu.
 
-![](/img/buffer-1.png)
+![](/img/how-it-works/buffer-1.png)
 
 3.  Press `Enter` to hold all available money, or enter a custom amount to hold.
 
