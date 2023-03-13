@@ -4,7 +4,7 @@ title: 'Reconciliation'
 
 # Reconciliation
 
-Keeping your Actual account ledgers consistent with your band ledgers is important to maintain a healthy budget and know exactly how much currency is available to spend. Some choose to reconcile monthly, weekly, or even daily. Actual provides the Reconciliation tool to help manage this process.
+Keeping your Actual account ledgers consistent with your bank ledgers is important to maintain a healthy budget and know exactly how much currency is available to spend. Some choose to reconcile monthly, weekly, or even daily. Actual provides the Reconciliation tool to help manage this process.
 
 ## Work flow
 
