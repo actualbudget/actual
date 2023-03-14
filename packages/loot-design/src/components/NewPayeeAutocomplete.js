@@ -77,12 +77,15 @@ export default function PayeeAutocomplete({
   const dispatch = useDispatch();
 
   const onChange = async selected => {
-    setIsOpen(false);
-
     // Clear button clicked
     if (!selected) {
       onSelect(null);
       return;
+    }
+
+    // Close the menu when making a successful selection
+    if (!Array.isArray(selected)) {
+      setIsOpen(false);
     }
 
     const existingOption = allOptions.find(option =>
