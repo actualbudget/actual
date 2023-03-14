@@ -1,5 +1,4 @@
 import initSqlJS from '@jlongster/sql.js';
-import * as perf from 'perf-deets';
 
 let SQL = null;
 
@@ -41,7 +40,6 @@ export function prepare(db, sql) {
 }
 
 export function runQuery(db, sql, params = [], fetchAll) {
-  perf.count('runQuery');
   if (params) {
     verifyParamTypes(sql, params);
   }
