@@ -1,11 +1,12 @@
-name: Check release notes
+name: Generate Release Notes
 
 on:
-  pull_request:
-    branches: '*'
+  push:
+    branches:
+      - release/*
 
 jobs:
-  check:
+  generate:
     runs-on: ubuntu-latest
     steps:
       - name: Generate release notes
