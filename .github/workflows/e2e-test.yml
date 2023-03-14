@@ -15,20 +15,18 @@ jobs:
         uses: ./.github/actions/setup
       - name: Setup Playwright
         run: npx playwright install chromium --with-deps
-      - name: Wait for Pages changed to neutral
+      - name: Wait for Netlify build to finish
         uses: fountainhead/action-wait-for-check@v1.1.0
-        id: wait-for-Netlify
+        id: netlify
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: 'Pages changed - actualbudget'
-      - name: Waiting for Netlify Preview
-        if: steps.wait-for-Netlify.outputs.conclusion == 'neutral'
-        uses: jakepartusch/wait-for-netlify-action@v1.4
-        id: waitFor200
-        with:
-          site_name: 'actualbudget'
-          max_timeout: 240
+          checkName: 'netlify/actualbudget/deploy-preview'
+      - name: Fail if Netlify build failed
+        if: ${{ steps.netlify.outputs.conclusion != 'success' }}
+        run: |
+          echo "Netlify build failed, so E2E tests cannot run."
+          exit 1
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
