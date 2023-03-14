@@ -2,10 +2,10 @@
 
 current_commit=$(git rev-parse HEAD)
 
-echo "Running on commit $current_commit"
+echo "Running on commit $COMMIT_SHA"
 
 function get_status() {
-  curl "https://api.github.com/repos/actualbudget/actual/commits//statuses" > /tmp/status.json
+  curl "https://api.github.com/repos/actualbudget/actual/commits/$COMMIT_SHA/statuses" > /tmp/status.json
   echo "::group::API Response"
   cat /tmp/status.json
   echo "::endgroup::"
