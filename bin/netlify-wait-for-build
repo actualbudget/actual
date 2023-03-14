@@ -1,13 +1,15 @@
 #!/bin/bash
 
-echo "Running on commit $GITHUB_SHA"
+current_commit=$(git rev-parse HEAD)
+
+echo "Running on commit $current_commit"
 
 function get_status() {
-  curl "https://api.github.com/repos/actualbudget/actual/commits/$GITHUB_SHA/statuses" > /tmp/status.json
+  curl "https://api.github.com/repos/actualbudget/actual/commits//statuses" > /tmp/status.json
   echo "::group::API Response"
   cat /tmp/status.json
   echo "::endgroup::"
-  netlify=$(jq '.statuses | select(context == "netlify/actualbudget/deploy-preview")' /tmp/status.json)
+  netlify=$(jq '[.[] | select(context == "netlify/actualbudget/deploy-preview")][0]' /tmp/status.json)
   state=$(jq -r '.state' <<< "$netlify")
   echo "::group::Netlify Status"
   echo "$netlify"
