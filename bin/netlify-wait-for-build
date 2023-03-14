@@ -25,10 +25,10 @@ while [ "$state" == "pending" ]; do
 done
 
 if [ "$state" == "success" ]; then
-  echo "\033[0;32mNetlify build succeeded!\033[0m"
+  echo -e "\033[0;32mNetlify build succeeded!\033[0m"
   jq -r '"url=" + .target_url' <<< "$netlify" > $GITHUB_OUTPUT
   exit 0
 else
-  echo "\033[0;31mNetlify build failed. Cancelling end-to-end tests.\033[0m"
+  echo -e "\033[0;31mNetlify build failed. Cancelling end-to-end tests.\033[0m"
   exit 1
 fi
