@@ -1,0 +1,32 @@
+#!/bin/bash
+
+echo "Running on commit $GITHUB_SHA"
+
+function get_status() {
+  curl "https://api.github.com/repos/actualbudget/actual/commits/$GITHUB_SHA/statuses" > /tmp/status.json
+  echo "::group::API Response"
+  cat /tmp/status.json
+  echo "::endgroup::"
+  netlify=$(jq '.statuses | select(context == "netlify/actualbudget/deploy-preview")' /tmp/status.json)
+  state=$(jq -r '.state' <<< "$netlify")
+  echo "::group::Netlify Status"
+  echo "$netlify"
+  echo "::endgroup::"
+}
+
+get_status
+
+while [ "$state" == "pending" ]; do
+  echo "Waiting for Netlify to finish building..."
+  sleep 10
+  get_status
+done
+
+if [ "$state" == "success" ]; then
+  echo "\033[0;32mNetlify build succeeded!\033[0m"
+  jq -r '"url=" + .target_url' <<< "$netlify" > $GITHUB_OUTPUT
+  exit 0
+else
+  echo "\033[0;31mNetlify build failed. Cancelling end-to-end tests.\033[0m"
+  exit 1
+fi
