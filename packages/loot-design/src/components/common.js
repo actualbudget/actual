@@ -1184,5 +1184,7 @@ export function Label({ title, style }) {
   );
 }
 
+export const NullComponent = () => null;
+
 export * from './tooltips';
 export { useTooltip } from './tooltips';

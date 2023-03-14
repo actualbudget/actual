@@ -14,7 +14,7 @@ import Add from '../svg/v1/Add';
 
 import { AutocompleteFooter, AutocompleteFooterButton } from './Autocomplete';
 import styles from './autocomplete-styles';
-import { View } from './common';
+import { View, NullComponent } from './common';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
   let activePayees =
@@ -41,6 +41,15 @@ function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
       options: formatOptions(activePayees.filter(p => p.transfer_acct)),
     },
   ];
+}
+
+function MenuListWithFooter(props) {
+  return (
+    <>
+      <SelectComponents.MenuList {...props} />
+      {props.selectProps.footer}
+    </>
+  );
 }
 
 export default function PayeeAutocomplete({
@@ -179,14 +188,9 @@ export default function PayeeAutocomplete({
       isClearable
       filterOption={filterOption}
       components={{
-        MenuList: props => (
-          <>
-            <SelectComponents.MenuList {...props} />
-            {props.selectProps.footer}
-          </>
-        ),
-        IndicatorSeparator: () => null,
-        DropdownIndicator: () => null,
+        MenuList: MenuListWithFooter,
+        IndicatorSeparator: NullComponent,
+        DropdownIndicator: NullComponent,
       }}
       maxMenuHeight={200}
       styles={styles}
