@@ -60,8 +60,5 @@
       "<rootDir>/src/setupTests.js",
       "<rootDir>/../loot-design/src/setupTests.js"
     ]
-  },
-  "browserslist": [
-    "electron 3.0"
-  ]
+  }
 }
