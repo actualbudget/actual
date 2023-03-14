@@ -13,19 +13,13 @@ Releasing @actual-app/api
 ### This generates a bundle for the API:
 
 ```bash
-cd packages/loot-core
 yarn build:api
-```
-
-The built files live in `lib-dist`, so we need to copy them to the API package:
-
-```bash
-cp lib-dist/bundle.api* ../api/app
 ```
 
 Next, bump the version on package.json. Finally, publish it:
 
 ```bash
+cd packages/loot-core
 npm publish
 ```
 
