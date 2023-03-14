@@ -77,7 +77,7 @@ export default function PayeeAutocomplete({
   const dispatch = useDispatch();
 
   const onChange = async selected => {
-    selectRef.current.blur();
+    setIsOpen(false);
 
     // Clear button clicked
     if (!selected) {
