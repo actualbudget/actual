@@ -270,7 +270,8 @@ const sidebars = {
           collapsed: true,
           items: [
             'Advanced/Experimental-Features/goal-templates',
-            unavailable('Report Budget'),
+            'Advanced/Experimental-Features/report-budget',
+            //unavailable('Report Budget'),
             unavailable('Account syncing'),
           ],
         },
