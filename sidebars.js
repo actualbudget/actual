@@ -271,8 +271,7 @@ const sidebars = {
           items: [
             'Advanced/Experimental-Features/goal-templates',
             'Advanced/Experimental-Features/report-budget',
-            //unavailable('Report Budget'),
-            unavailable('Account syncing'),
+            'Accounts/connecting-your-bank',
           ],
         },
       ],
