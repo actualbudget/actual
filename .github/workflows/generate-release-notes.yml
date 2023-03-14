@@ -3,7 +3,7 @@ name: Generate Release Notes
 on:
   push:
     branches:
-      - '*'
+      - jed/*
       # - release/*
 
 jobs:
