@@ -18,6 +18,12 @@ function get_status() {
 
 get_status
 
+while [ "$netlify" == "null" ]; do
+  echo "Waiting for Netlify to start building..."
+  sleep 10
+  get_status
+done
+
 while [ "$state" == "pending" ]; do
   echo "Waiting for Netlify to finish building..."
   sleep 10
