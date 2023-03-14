@@ -8,7 +8,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate release notes
+      - name: Check release notes
         uses: actualbudget/actions/release-notes/check@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
