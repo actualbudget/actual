@@ -226,7 +226,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             limit = amountToInteger(template.limit);
           }
         }
-        if (template.monthly) {
+        if (template.monthly != null) {
           let monthly = amountToInteger(template.monthly);
           to_budget += monthly;
         } else {
