@@ -19,10 +19,10 @@ expr
     { return { type: 'simple', limit } }
 
 repeat 'repeat interval'
-  = 'month' { return { annual: false } }
-  / months: d _ 'months' { return { annual: false, repeat: +months } }
-  / 'year' { return { annual: true } }
-  / years: d _ 'years' { return { annual: true, repeat: +years } }
+  = 'month'i { return { annual: false } }
+  / months: d _ 'months'i { return { annual: false, repeat: +months } }
+  / 'year'i { return { annual: true } }
+  / years: d _ 'years'i { return { annual: true, repeat: +years } }
 
 limit = _ upTo? _ amount: amount { return amount }
 
@@ -30,15 +30,15 @@ weekCount
   = week { return null }
   / n: number _ weeks { return +n }
 
-spendFrom = _ 'spend' _ 'from' _ month: month { return month }
+spendFrom = _ 'spend'i _ 'from'i _ month: month { return month }
 
-week = 'week'
-weeks = 'weeks'
-by = 'by'
-of = 'of'
-repeatEvery = 'repeat' _ 'every'
-starting = 'starting'
-upTo = 'up' _ 'to'
+week = 'week'i
+weeks = 'weeks'i
+by = 'by'i
+of = 'of'i
+repeatEvery = 'repeat'i _ 'every'i
+starting = 'starting'i
+upTo = 'up'i _ 'to'i
 
 _ 'space' = ' '+
 d 'digit' = [0-9]
