@@ -196,6 +196,8 @@ export default function PayeeAutocomplete({
       styles={styles}
       embedded={embedded}
       isMulti={multi}
+      menuPlacement="auto"
+      menuPortalTarget={embedded ? undefined : document.body}
       footer={
         <AutocompleteFooter show={showMakeTransfer || showManagePayees}>
           {showMakeTransfer && (

@@ -1,6 +1,7 @@
-import { colors } from '../style';
+import { styles as actualStyles, colors } from '../style';
 
 const colourStyles = {
+  ...actualStyles.lightScrollbar,
   control: styles => ({
     ...styles,
     backgroundColor: 'white',
@@ -17,17 +18,30 @@ const colourStyles = {
     padding: 0,
     margin: 0,
   }),
+  menuPortal: styles => ({
+    ...styles,
+    zIndex: 5000,
+  }),
   menu: (styles, { selectProps }) => ({
     ...styles,
     backgroundColor: colors.n1,
     marginTop: 2,
-    zIndex: 5000,
+    marginBottom: 2,
     position: selectProps.embedded ? 'relative' : styles.position,
     overflow: 'hidden',
   }),
   menuList: styles => ({
     ...styles,
     padding: 0,
+
+    // Custom scrollbar styling
+    ...Object.entries(actualStyles.lightScrollbar).reduce(
+      (carry, [key, value]) => ({
+        ...carry,
+        [key.replace('& ', '')]: value,
+      }),
+      {},
+    ),
   }),
   group: styles => ({
     ...styles,

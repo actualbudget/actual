@@ -857,7 +857,7 @@ export const Table = React.forwardRef(
           style={[
             rowStyle,
             {
-              zIndex: editing ? 102 : selected ? 101 : 'auto',
+              zIndex: editing || selected ? 101 : 'auto',
               transform: 'translateY(var(--pos))',
             },
           ]}
