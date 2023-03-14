@@ -816,7 +816,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
 
     const oldestDate =
       transactions.length > 0
-        ? oldestTransaction.valueDate
+        ? oldestTransaction.valueDate || oldestTransaction.bookingDate
         : monthUtils.currentDay();
 
     const payee = await getStartingBalancePayee();
