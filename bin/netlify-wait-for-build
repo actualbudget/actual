@@ -9,7 +9,7 @@ function get_status() {
   echo "::group::API Response"
   cat /tmp/status.json
   echo "::endgroup::"
-  netlify=$(jq '[.[] | select(context == "netlify/actualbudget/deploy-preview")][0]' /tmp/status.json)
+  netlify=$(jq '[.[] | select(.context == "netlify/actualbudget/deploy-preview")][0]' /tmp/status.json)
   state=$(jq -r '.state' <<< "$netlify")
   echo "::group::Netlify Status"
   echo "$netlify"
