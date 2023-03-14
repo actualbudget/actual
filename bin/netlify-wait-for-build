@@ -6,7 +6,7 @@ echo "Running on commit $COMMIT_SHA"
 
 function get_status() {
   echo "::group::API Response"
-  curl "https://api.github.com/repos/actualbudget/actual/commits/$COMMIT_SHA/statuses" > /tmp/status.json
+  curl --header "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/actualbudget/actual/commits/$COMMIT_SHA/statuses" > /tmp/status.json
   cat /tmp/status.json
   echo "::endgroup::"
   netlify=$(jq '[.[] | select(.context == "netlify/actualbudget/deploy-preview")][0]' /tmp/status.json)
