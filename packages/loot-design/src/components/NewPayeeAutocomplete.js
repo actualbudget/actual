@@ -157,6 +157,7 @@ export default function PayeeAutocomplete({
       }
       inputValue={inputValue}
       placeholder="(none)"
+      captureMenuScroll={false}
       onChange={onChange}
       onKeyDown={onKeyDown}
       onBlur={() => setIsOpen(false)}
