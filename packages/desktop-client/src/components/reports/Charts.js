@@ -37,9 +37,7 @@ export function ChartItem({
         height: 16,
       }}
     >
-      {Icon && (
-        <Icon width={12} height={12} style={{ color: 'inherit' }} />
-      )}
+      {Icon && <Icon width={12} height={12} style={{ color: 'inherit' }} />}
       <Block style={{ marginLeft: Icon ? 3 : 0, color: 'inherit' }}>
         {title}
       </Block>
@@ -48,11 +46,7 @@ export function ChartItem({
 
   return (
     <View style={[{ flexShrink: 0 }, style]}>
-      <Button
-        style={linkStyle}
-        onClick={() => handleClick(id)}
-        bare
-      >
+      <Button style={linkStyle} onClick={() => handleClick(id)} bare>
         {content}
       </Button>
     </View>
