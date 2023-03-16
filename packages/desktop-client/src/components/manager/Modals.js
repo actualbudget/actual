@@ -17,8 +17,6 @@ import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
 
-import WelcomeScreen from './WelcomeScreen';
-
 function Modals({
   modalStack,
   isHidden,
@@ -39,8 +37,6 @@ function Modals({
     };
 
     switch (name) {
-      case 'welcome':
-        return <WelcomeScreen key={name} modalProps={modalProps} />;
       case 'delete-budget':
         return (
           <DeleteFile

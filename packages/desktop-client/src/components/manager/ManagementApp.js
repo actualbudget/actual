@@ -21,6 +21,7 @@ import Bootstrap from './subscribe/Bootstrap';
 import ChangePassword from './subscribe/ChangePassword';
 import Error from './subscribe/Error';
 import Login from './subscribe/Login';
+import WelcomeScreen from './WelcomeScreen';
 
 function Version() {
   const version = useServerVersion();
@@ -93,48 +94,12 @@ class ManagementApp extends React.Component {
     });
   }
 
-  async showModal() {
-    // This runs when `files` has changed, and we need to perform
-    // actions based on whether or not files is empty or not
-    if (this.props.managerHasInitialized) {
-      let { currentModals, userData, files, replaceModal } = this.props;
-
-      // We want to decide where to take the user if they have logged
-      // in and we've tried to load their files
-      if (files && userData) {
-        if (files.length === 0) {
-          if (
-            !currentModals.includes('delete-budget') &&
-            !currentModals.includes('welcome')
-          ) {
-            replaceModal('welcome');
-          }
-        }
-      }
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (!this.mounted) {
-      return;
-    }
-
-    if (
-      this.props.managerHasInitialized !== prevProps.managerHasInitialized ||
-      this.props.files !== prevProps.files ||
-      this.props.userData !== prevProps.userData ||
-      this.props.currentModals !== prevProps.currentModals
-    ) {
-      this.showModal();
-    }
-  }
-
   componentWillUnmount() {
     this.mounted = false;
   }
 
   render() {
-    let { userData, managerHasInitialized, loadingText } = this.props;
+    let { files, userData, managerHasInitialized, loadingText } = this.props;
 
     if (!managerHasInitialized) {
       return null;
@@ -197,7 +162,11 @@ class ManagementApp extends React.Component {
                       path="/change-password"
                       component={ChangePassword}
                     />
-                    <Route exact path="/" component={BudgetList} />
+                    {files && files.length > 0 ? (
+                      <Route exact path="/" component={BudgetList} />
+                    ) : (
+                      <Route exact path="/" component={WelcomeScreen} />
+                    )}
                     {/* Redirect all other pages to this route */}
                     <Route path="/" render={() => <Redirect to="/" />} />
                   </Switch>
