@@ -19,6 +19,7 @@ import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
+import checkForUpdateNotification from 'loot-core/src/client/update-notification';
 import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/BudgetMonthCountContext';
@@ -30,6 +31,7 @@ import Wallet from 'loot-design/src/svg/v1/Wallet';
 
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
+import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
@@ -42,6 +44,7 @@ import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
+import NordigenLink from './nordigen/NordigenLink';
 import Notifications from './Notifications';
 import { PageTypeProvider } from './Page';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
@@ -53,7 +56,6 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
-// import Debugger from './Debugger';
 
 function PageRoute({ path, component: Component }) {
   return (
@@ -100,6 +102,7 @@ function Routes({ isMobile, location }) {
         <Route path="/payees" exact component={ManagePayeesPage} />
         <Route path="/rules" exact component={ManageRulesPage} />
         <Route path="/settings" component={Settings} />
+        <Route path="/nordigen/link" exact component={NordigenLink} />
 
         <Route
           path="/accounts/:id"
@@ -270,6 +273,17 @@ class FinancesApp extends React.Component {
       );
     }, 100);
 
+    setTimeout(async () => {
+      await this.props.sync();
+      await checkForUpdateNotification(
+        this.props.addNotification,
+        getIsOutdated,
+        getLatestVersion,
+        this.props.loadPrefs,
+        this.props.savePrefs,
+      );
+    }, 100);
+
     window.addEventListener('resize', this.handleWindowResize);
   }
 
@@ -321,7 +335,6 @@ class FinancesApp extends React.Component {
                   <Notifications />
                   <BankSyncStatus />
                   <StackedRoutes isMobile={this.state.isMobile} />
-                  {/*window.Actual.IS_DEV && <Debugger />*/}
                   <Modals history={this.history} />
                 </div>
                 {this.state.isMobile && (

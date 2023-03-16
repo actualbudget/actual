@@ -6,7 +6,7 @@ import { View, Button, Tooltip } from 'loot-design/src/components/common';
 import { colors } from 'loot-design/src/style';
 import ExclamationOutline from 'loot-design/src/svg/v1/ExclamationOutline';
 
-import { reauthorizeBank } from '../../plaid';
+import { authorizeBank } from '../../nordigen';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
@@ -88,21 +88,7 @@ function AccountSyncCheck({
   function reauth() {
     setOpen(false);
 
-    let modalOpened = reauthorizeBank(pushModal, account.bankId, () => {
-      closeModal();
-
-      // Re-sync accounts. If there are multiple failed account, that
-      // means all accounts were synced to resync all of them.
-      // Multiple accounts can be tied to the same bank id.
-      syncAndDownload(failedAccounts.size > 1 ? null : account.id);
-    });
-
-    if (!modalOpened) {
-      addNotification({
-        type: 'error',
-        message: 'Unable to process this item, sorry!',
-      });
-    }
+    authorizeBank(pushModal, { upgradingAccountId: account.account_id });
   }
 
   async function unlink() {

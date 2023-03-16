@@ -185,7 +185,6 @@ function ButtonLink_({
   );
 }
 
-// eslint-disable-next-line
 export const ButtonLink = withRouter(ButtonLink_);
 
 export const Button = React.forwardRef(
@@ -349,7 +348,7 @@ export function Input({
       )}
       {...nativeProps}
       onKeyDown={e => {
-        if (e.keyCode === 13 && onEnter) {
+        if (e.code === 'Enter' && onEnter) {
           onEnter(e);
         }
 
@@ -508,7 +507,13 @@ export const Select = React.forwardRef(
   },
 );
 
-export function CustomSelect({ options, value, onChange, style }) {
+export function CustomSelect({
+  options,
+  value,
+  onChange,
+  style,
+  disabledKeys = [],
+}) {
   return (
     <ListboxInput
       value={value}
@@ -522,7 +527,11 @@ export function CustomSelect({ options, value, onChange, style }) {
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
         <ListboxList>
           {options.map(([value, label]) => (
-            <ListboxOption key={value} value={value}>
+            <ListboxOption
+              key={value}
+              value={value}
+              disabled={disabledKeys.includes(value)}
+            >
               {label}
             </ListboxOption>
           ))}
@@ -545,10 +554,6 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
     el.current.focus();
 
     let onKeyDown = e => {
-      const UP = 38;
-      const DOWN = 40;
-      const ENTER = 13;
-
       let filteredItems = items.filter(
         item => item && item !== Menu.line && item.type !== Menu.label,
       );
@@ -556,8 +561,8 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
 
       let transformIndex = idx => items.indexOf(filteredItems[idx]);
 
-      switch (e.keyCode) {
-        case UP:
+      switch (e.code) {
+        case 'ArrowUp':
           e.preventDefault();
           setHoveredIndex(
             hoveredIndex === null
@@ -565,7 +570,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
               : transformIndex(Math.max(currentIndex - 1, 0)),
           );
           break;
-        case DOWN:
+        case 'ArrowDown':
           e.preventDefault();
           setHoveredIndex(
             hoveredIndex === null
@@ -575,7 +580,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
                 ),
           );
           break;
-        case ENTER:
+        case 'Enter':
           e.preventDefault();
           if (hoveredIndex !== null) {
             onMenuSelect && onMenuSelect(items[hoveredIndex].name);

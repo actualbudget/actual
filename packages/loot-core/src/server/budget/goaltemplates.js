@@ -133,8 +133,6 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   // remove lines for past dates, calculate repeating dates
   let got_by = false;
   template_lines = template_lines.filter(template => {
-    //debugger;
-
     switch (template.type) {
       case 'by':
       case 'spend':
@@ -226,7 +224,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             limit = amountToInteger(template.limit);
           }
         }
-        if (template.monthly) {
+        if (template.monthly != null) {
           let monthly = amountToInteger(template.monthly);
           to_budget += monthly;
         } else {

@@ -1157,7 +1157,7 @@ function NewTransaction({
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
-        if (e.keyCode === 27) {
+        if (e.code === 'Escape') {
           onClose();
         }
       }}
@@ -1526,7 +1526,6 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   let latestState = useRef({ newTransactions, newNavigator, tableNavigator });
   let savePending = useRef(false);
   let afterSaveFunc = useRef(false);
-  // eslint-disable-next-line
   let [_, forceRerender] = useState({});
 
   let selectedItems = useSelectedItems();
@@ -1620,9 +1619,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   }
 
   function onCheckNewEnter(e) {
-    const ENTER = 13;
-
-    if (e.keyCode === ENTER) {
+    if (e.code === 'Enter') {
       if (e.metaKey) {
         e.stopPropagation();
         onAddTemporary();
@@ -1666,9 +1663,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   }
 
   function onCheckEnter(e) {
-    const ENTER = 13;
-
-    if (e.keyCode === ENTER && !e.shiftKey) {
+    if (e.code === 'Enter' && !e.shiftKey) {
       let { editingId: id, focusedField } = tableNavigator;
 
       afterSave(props => {
@@ -1799,7 +1794,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   );
 
   return (
-    // eslint-disable-next-line
+    // eslint-disable-next-line react/jsx-pascal-case
     <TransactionTable_
       tableRef={mergedRef}
       {...props}

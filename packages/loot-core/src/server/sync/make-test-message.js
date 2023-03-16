@@ -1,4 +1,4 @@
-import encryption from '../encryption';
+import * as encryption from '../encryption';
 
 let SyncPb = require('./proto/sync_pb');
 

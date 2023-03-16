@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { css, media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
-import Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import { View, Text, Button, Input } from 'loot-design/src/components/common';
 import { FormField, FormLabel } from 'loot-design/src/components/forms';
@@ -12,6 +12,7 @@ import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
 import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
+import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { isMobile } from '../../util';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
@@ -27,10 +28,22 @@ import { Section, AdvancedToggle } from './UI';
 
 function About() {
   const version = useServerVersion();
+  const latestVersion = useLatestVersion();
+  const isOutdated = useIsOutdated();
 
   return (
     <Section title="About" style={{ gap: 5 }}>
-      <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
+      <Text>
+        Client version: v{window.Actual.ACTUAL_VERSION} (
+        {isOutdated ? (
+          <a href="https://actualbudget.github.io/docs/Release-Notes">
+            new version available: {latestVersion}
+          </a>
+        ) : (
+          <span>latest</span>
+        )}
+        )
+      </Text>
       <Text>Server version: {version}</Text>
     </Section>
   );

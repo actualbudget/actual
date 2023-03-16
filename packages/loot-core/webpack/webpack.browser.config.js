@@ -18,11 +18,6 @@ module.exports = {
     alias: {
       fs: 'memfs',
       path: 'path-browserify',
-
-      'perf-deets':
-        process.env.NODE_ENV === 'development' || process.env.PERF_BUILD
-          ? 'perf-deets'
-          : require.resolve('perf-deets/noop'),
     },
   },
   resolveLoader: {

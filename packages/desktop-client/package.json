@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "23.2.9",
+  "version": "23.3.2",
   "license": "MIT",
   "files": [
     "build"
@@ -15,8 +15,8 @@
     "@react-stately/collections": "^3.4.3",
     "@react-stately/list": "^3.5.3",
     "@reactions/component": "^2.0.2",
+    "@testing-library/user-event": "14.4.3",
     "chalk": "2.4.1",
-    "codemirror": "^5.37.0",
     "cross-env": "^7.0.3",
     "customize-cra": "^1.0.0",
     "date-fns": "2.0.0-alpha.27",
@@ -28,13 +28,11 @@
     "inter-ui": "^3.19.3",
     "jest-watch-typeahead": "^2.2.2",
     "mitt": "^3.0.0",
-    "perf-deets": "^1.0.15",
     "prop-types": "15.6.0",
     "react": "18.2.0",
     "react-app-rewired": "^2.2.1",
     "react-dnd": "^10.0.2",
-    "react-dom": "16.13.1",
-    "react-modal": "3.4.4",
+    "react-dom": "18.2.0",
     "react-redux": "7.2.1",
     "react-router": "5.2.0",
     "react-router-dom": "5.2.0",
@@ -61,8 +59,5 @@
       "<rootDir>/src/setupTests.js",
       "<rootDir>/../loot-design/src/setupTests.js"
     ]
-  },
-  "browserslist": [
-    "electron 3.0"
-  ]
+  }
 }

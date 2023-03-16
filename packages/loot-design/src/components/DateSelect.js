@@ -75,20 +75,20 @@ export let DatePicker = React.forwardRef(
       () => ({
         handleInputKeyDown(e) {
           let newDate = null;
-          switch (e.keyCode) {
-            case 37:
+          switch (e.code) {
+            case 'ArrowLeft':
               e.preventDefault();
               newDate = d.subDays(picker.current.getDate(), 1);
               break;
-            case 38:
+            case 'ArrowUp':
               e.preventDefault();
               newDate = d.subDays(picker.current.getDate(), 7);
               break;
-            case 39:
+            case 'ArrowRight':
               e.preventDefault();
               newDate = d.addDays(picker.current.getDate(), 1);
               break;
-            case 40:
+            case 'ArrowDown':
               e.preventDefault();
               newDate = d.addDays(picker.current.getDate(), 7);
               break;
@@ -140,8 +140,7 @@ export let DatePicker = React.forwardRef(
 );
 
 function defaultShouldSaveFromKey(e) {
-  // Enter
-  return e.keyCode === 13;
+  return e.code === 'Enter';
 }
 
 export default function DateSelect({
@@ -224,18 +223,15 @@ export default function DateSelect({
   }, [value]);
 
   function onKeyDown(e) {
-    let ESC = 27;
-
     if (
-      e.keyCode >= 37 &&
-      e.keyCode <= 40 &&
+      ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.code) &&
       !e.shiftKey &&
       !e.metaKey &&
       !e.altKey &&
       open
     ) {
       picker.current.handleInputKeyDown(e);
-    } else if (e.keyCode === ESC) {
+    } else if (e.code === 'Escape') {
       setValue(parsedDefaultValue);
       setSelectedValue(parsedDefaultValue);
 

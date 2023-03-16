@@ -342,7 +342,7 @@ export const ManagePayees = React.forwardRef(
       payees,
       ruleCounts,
       categoryGroups,
-      tableNavigatorOpts,
+      tableNavigatorOpts, // TODO: remove as it's unused
       initialSelectedIds,
       ruleActions,
       onBatchChange,
