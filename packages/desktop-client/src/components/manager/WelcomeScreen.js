@@ -14,12 +14,7 @@ import { colors, styles } from 'loot-design/src/style';
 function WelcomeScreen({ createBudget, pushModal }) {
   return (
     <View style={{ maxWidth: 500, fontSize: 15 }}>
-      <Text
-        style={[
-          styles.veryLargeText,
-          { marginBottom: 20, textAlign: 'center' },
-        ]}
-      >
+      <Text style={[styles.veryLargeText, { marginBottom: 20 }]}>
         Let’s get started!
       </Text>
       <P>
@@ -84,7 +79,7 @@ function WelcomeScreen({ createBudget, pushModal }) {
             pushModal('import');
           }}
         >
-          Import your data
+          Import my budget
         </Button>
         <Button primary onClick={createBudget}>
           Start fresh
