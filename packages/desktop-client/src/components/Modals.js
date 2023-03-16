@@ -19,6 +19,8 @@ import NordigenExternalMsg from 'loot-design/src/components/modals/NordigenExter
 import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
 import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 
+import useSyncServerStatus from '../hooks/useSyncServerStatus';
+
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
@@ -39,6 +41,8 @@ function Modals({
   budgetId,
   actions,
 }) {
+  const syncServerStatus = useSyncServerStatus();
+
   return modalStack.map(({ name, options = {} }, idx) => {
     const modalProps = {
       onClose: actions.popModal,
@@ -57,7 +61,11 @@ function Modals({
         </Route>
 
         <Route path="/add-account">
-          <CreateAccount modalProps={modalProps} actions={actions} />
+          <CreateAccount
+            modalProps={modalProps}
+            actions={actions}
+            syncServerStatus={syncServerStatus}
+          />
         </Route>
 
         <Route path="/add-local-account">

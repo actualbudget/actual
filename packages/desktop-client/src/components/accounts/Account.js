@@ -60,6 +60,7 @@ import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
 import SvgRemove from 'loot-design/src/svg/v2/Remove';
 import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 
+import useSyncServerStatus from '../../hooks/useSyncServerStatus';
 import { authorizeBank } from '../../nordigen';
 import { useActiveLocation } from '../ActiveLocation';
 import AnimatedRefresh from '../AnimatedRefresh';
@@ -259,6 +260,7 @@ function AccountMenu({
   onMenuSelect,
 }) {
   let [tooltip, setTooltip] = useState('default');
+  const syncServerStatus = useSyncServerStatus();
 
   return tooltip === 'reconcile' ? (
     <ReconcileTooltip
@@ -291,8 +293,14 @@ function AccountMenu({
             account &&
             !account.closed &&
             (canSync
-              ? { name: 'unlink', text: 'Unlink Account' }
-              : { name: 'link', text: 'Link Account' }),
+              ? {
+                  name: 'unlink',
+                  text: 'Unlink Account',
+                }
+              : syncServerStatus === 'online' && {
+                  name: 'link',
+                  text: 'Link Account',
+                }),
           account.closed
             ? { name: 'reopen', text: 'Reopen Account' }
             : { name: 'close', text: 'Close Account' },

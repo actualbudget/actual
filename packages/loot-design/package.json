@@ -45,8 +45,5 @@
   "manifest": "manifest.json",
   "pathAliases": {
     "react-art": "../../node_modules/node-noop"
-  },
-  "browserslist": [
-    "electron 3.0"
-  ]
+  }
 }
