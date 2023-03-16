@@ -111,8 +111,7 @@ function AllReports({ categories }) {
         conditions,
       });
 
-      let filte = [...filters];
-      setFilters({ filters: filte, conditions: conditions });
+      setFilters({ filters, conditions });
     } else {
       setFilters({ filters: [], conditions: conditions });
     }
