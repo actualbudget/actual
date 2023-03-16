@@ -108,7 +108,10 @@ class ManagementApp extends React.Component {
             replaceModal('select-budget');
           }
         } else {
-          if (!currentModals.includes('delete-budget')) {
+          if (
+            !currentModals.includes('delete-budget') &&
+            !currentModals.includes('welcome')
+          ) {
             replaceModal('welcome');
           }
         }
