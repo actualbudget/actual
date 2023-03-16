@@ -95,7 +95,7 @@ export default function ConfigServer() {
   return (
     <>
       <View style={{ maxWidth: 500, marginTop: -30 }}>
-        <Title text="Where's the server?" />
+        <Title text="Where’s the server?" />
 
         <Text
           style={{

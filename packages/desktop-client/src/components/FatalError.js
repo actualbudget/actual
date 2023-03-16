@@ -22,10 +22,10 @@ class FatalError extends React.Component {
       // IndexedDB wasn't able to open the database
       msg = (
         <Text>
-          Your browser doesn{"'"}t support IndexedDB in this environment, a
-          feature that Actual requires to run. This might happen if you are in
-          private browsing mode. Please try a different browser or turn off
-          private browsing.
+          Your browser doesn’t support IndexedDB in this environment, a feature
+          that Actual requires to run. This might happen if you are in private
+          browsing mode. Please try a different browser or turn off private
+          browsing.
         </Text>
       );
     } else if (error.SharedArrayBufferMissing) {

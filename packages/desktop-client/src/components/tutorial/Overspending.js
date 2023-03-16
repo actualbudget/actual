@@ -48,8 +48,7 @@ function Overspending({ navigationProps, stepTwo }) {
                 ) : (
                   <View>
                     <P>
-                      What happens when you overspend? Let
-                      {"'"}s find out.
+                      What happens when you overspend? Let’s find out.
                       {spentTotal === 0 && (
                         <Text>
                           You haven't spent any money yet so add some expenses

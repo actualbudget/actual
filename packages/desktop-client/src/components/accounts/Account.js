@@ -166,7 +166,7 @@ function ReconcilingMessage({
                 {(targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial')}
               </strong>{' '}
               to match
-              <br /> your bank{"'"}s balance of{' '}
+              <br /> your bank’s balance of{' '}
               <Text style={{ fontWeight: 700 }}>
                 {format(targetBalance, 'financial')}
               </Text>
