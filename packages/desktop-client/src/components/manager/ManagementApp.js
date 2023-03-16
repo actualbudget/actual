@@ -101,13 +101,7 @@ class ManagementApp extends React.Component {
       // We want to decide where to take the user if they have logged
       // in and we've tried to load their files
       if (files && userData) {
-        if (files.length > 0) {
-          // If the user is logged in and files exist, show the budget
-          // list screen
-          if (!currentModals.includes('select-budget')) {
-            replaceModal('select-budget');
-          }
-        } else {
+        if (files.length === 0) {
           if (
             !currentModals.includes('delete-budget') &&
             !currentModals.includes('welcome')
