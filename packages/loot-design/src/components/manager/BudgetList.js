@@ -195,32 +195,28 @@ function File({ file, onSelect, onDelete }) {
   );
 }
 
-class BudgetTable extends React.Component {
-  render() {
-    const { files, onSelect, onDelete } = this.props;
-
-    return (
-      <View
-        style={{
-          flex: 1,
-          [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
-            maxHeight: 310,
-          },
-          overflow: 'auto',
-          '& *': { userSelect: 'none' },
-        }}
-      >
-        {files.map((file, idx) => (
-          <File
-            key={file.id || file.cloudFileId}
-            file={file}
-            onSelect={onSelect}
-            onDelete={onDelete}
-          />
-        ))}
-      </View>
-    );
-  }
+function BudgetTable({ files, onSelect, onDelete }) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
+          maxHeight: 310,
+        },
+        overflow: 'auto',
+        '& *': { userSelect: 'none' },
+      }}
+    >
+      {files.map(file => (
+        <File
+          key={file.id || file.cloudFileId}
+          file={file}
+          onSelect={onSelect}
+          onDelete={onDelete}
+        />
+      ))}
+    </View>
+  );
 }
 
 function RefreshButton({ onRefresh }) {
