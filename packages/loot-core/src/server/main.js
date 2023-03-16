@@ -2507,21 +2507,3 @@ export const lib = {
   },
   SyncProtoBuf: SyncPb,
 };
-
-if (process.env.NODE_ENV === 'development' && Platform.isWeb) {
-  // Support reloading the backend
-  self.addEventListener('message', async e => {
-    if (e.data.type === '__actual:shutdown') {
-      await sheet.waitOnSpreadsheet();
-      await app.stopServices();
-      await db.closeDatabase();
-      asyncStorage.shutdown();
-      fs.shutdown();
-
-      setTimeout(() => {
-        // Give everything else some time to process shutdown events
-        self.close();
-      }, 100);
-    }
-  });
-}

@@ -1,10 +1,6 @@
-let { getDatabase, closeDatabase } = require('../indexeddb');
+let { getDatabase } = require('../indexeddb');
 
 function init() {}
-
-function shutdown() {
-  closeDatabase();
-}
 
 function commit(trans) {
   if (trans.commit) {
@@ -116,7 +112,6 @@ async function multiRemove(keys) {
 
 module.exports = {
   init,
-  shutdown,
   getItem,
   setItem,
   removeItem,
