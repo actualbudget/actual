@@ -35,19 +35,16 @@ function WelcomeScreen({ modalProps, createBudget, pushModal }) {
             Currently Actual implements budgeting based on a{' '}
             <ExternalLink
               asAnchor
+              style={{ color: colors.p5 }}
               href="https://actualbudget.github.io/docs/Budgeting/howitworks"
             >
               monthly envelope system
             </ExternalLink>
-            .
-          </P>
-          <P>
-            In the future, we{"'"}ll support multiple ways to do budgeting. We
-            {"'"}re also working hard on custom reports and a lot more things.
+            . In the future, we’ll support multiple ways to do budgeting. We’re
+            also working hard on custom reports and a lot more things.
           </P>
           <P
             style={{
-              color: colors.p5,
               fontWeight: 600,
               '& a, & a:visited': { color: colors.p5 },
             }}
