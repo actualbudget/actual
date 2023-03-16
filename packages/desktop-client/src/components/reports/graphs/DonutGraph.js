@@ -7,7 +7,7 @@ import theme from '../chart-theme';
 function DonutGraph({ style, start, end, graphData }) {
   return (
     graphData && (
-      <svg viewBox="0 0 500 325">
+      <svg viewBox="0 0 600 325">
         <VictoryPie
           standalone={false}
           width={350}

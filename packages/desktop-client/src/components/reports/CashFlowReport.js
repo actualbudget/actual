@@ -85,7 +85,7 @@ function CashFlowReport({
           />
         </View>
       </View>
-      <View style={{ marginTop: 10 }}>
+      <View style={{ maxWidth: 800, marginTop: 10 }}>
         <P>
           <strong>How is cash flow calculated?</strong>
         </P>

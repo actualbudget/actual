@@ -171,9 +171,6 @@ function recalculateDate(
     return q.name;
   });
 
-  let totalExpensesCat = 0;
-  let totalIncomeCat = 0;
-
   const catData = category.reduce(
     (res, elem) => {
       let expense = 0;
@@ -184,9 +181,6 @@ function recalculateDate(
         ? expenseCat[elem].amount *
           (reportPage === 'IE' && selectList === 'Expense' ? -1 : 1)
         : 0;
-
-      totalExpensesCat += expense;
-      totalIncomeCat += income;
 
       const x = elem;
 
@@ -235,9 +229,6 @@ function recalculateDate(
     { expenses: [], income: [] },
   );
 
-  console.log(totalExpensesCat);
-  console.log(totalIncomeCat);
-
   const dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),
@@ -277,10 +268,7 @@ function recalculateDate(
           : res.balances[res.balances.length - 1];
 
       income = incomes[date] ? incomes[date].amount : 0;
-      expense = expenses[date]
-        ? expenses[date].amount *
-          (reportPage === 'IE' && selectList === 'Expense' ? -1 : 1)
-        : 0;
+      expense = expenses[date] ? expenses[date].amount : 0;
 
       totalExpenses += expense;
       totalIncome += income;

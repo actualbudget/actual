@@ -19,7 +19,6 @@ import useReport from './useReport';
 
 function AllReports({ categories }) {
   const [filters, setFilters] = useState({ filters: [], conditions: [] });
-  const [disableFilter, setDisableFilter] = useState(true);
   const [secondaryReport, setSecondaryReport] = useState('Trends');
   const [reportPage, setReportPage] = useState('CashFlow');
   const [selectList, setSelectList] = useState('Expense');
@@ -82,7 +81,6 @@ function AllReports({ categories }) {
 
   function onReportClick(onSelection, disable) {
     setReportPage(onSelection);
-    setDisableFilter(disable);
     disable && deleteAllFilters();
   }
 
@@ -134,10 +132,6 @@ function AllReports({ categories }) {
     setIsConcise(reportPage === 'CashFlow' ? isConcise : true);
   }
 
-  if (!allMonths || !data) {
-    return null;
-  }
-
   function handleChange(value) {
     setSelectList(value);
   }
@@ -145,6 +139,10 @@ function AllReports({ categories }) {
   function onSecondaryClick(id) {
     setSecondaryReport(id);
     id === 'Totals' && setSelectList('Expense');
+  }
+
+  if (!allMonths || !data) {
+    return null;
   }
 
   const {
@@ -163,7 +161,7 @@ function AllReports({ categories }) {
           paddingTop: 0,
           flexShrink: 0,
           flexDirection: 'row',
-          color: colors.n7,
+          color: colors.n3,
         }}
       >
         <HeaderReports
@@ -199,11 +197,6 @@ function AllReports({ categories }) {
         show1Month={reportPage === 'NetWorth' ? false : true}
         showAllTime={reportPage === 'IE' ? false : true}
         onChangeDates={onChangeDates}
-        onApplyFilter={onApplyFilter}
-        onDeleteFilter={onDeleteFilter}
-        onUpdateFilter={onUpdateFilter}
-        disableFilter={disableFilter}
-        filters={filters.conditions}
       />
       {reportPage === 'CashFlow' && (
         <CashFlowReport
@@ -236,6 +229,10 @@ function AllReports({ categories }) {
           selectList={selectList}
           onSecondaryClick={onSecondaryClick}
           handleChange={handleChange}
+          onApplyFilter={onApplyFilter}
+          onDeleteFilter={onDeleteFilter}
+          onUpdateFilter={onUpdateFilter}
+          filters={filters.conditions}
         />
       )}
     </View>

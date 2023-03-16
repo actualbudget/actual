@@ -4,8 +4,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { View, Select, Button } from 'loot-design/src/components/common';
 import { colors, styles } from 'loot-design/src/style';
 
-import { FilterButton, AppliedFilters } from '../accounts/Filters';
-
 import { ChartItem } from './Charts';
 
 const selectionBoxHeader = {
@@ -65,14 +63,9 @@ export function HeaderFilters({
   title,
   start,
   end,
-  filters,
   show1Month,
   allMonths,
   onChangeDates,
-  onApplyFilter,
-  onDeleteFilter,
-  onUpdateFilter,
-  disableFilter,
   showAllTime,
 }) {
   return (
@@ -162,25 +155,6 @@ export function HeaderFilters({
           All Time
         </Button>
       </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          paddingTop: 15,
-        }}
-      >
-        <View style={{ marginRight: 10, marginTop: 2, marginBottom: 5 }}>
-          <FilterButton onApply={onApplyFilter} disableFilter={disableFilter} />
-        </View>
-
-        {filters && filters.length > 0 && (
-          <AppliedFilters
-            filters={filters}
-            onUpdate={onUpdateFilter}
-            onDelete={onDeleteFilter}
-          />
-        )}
-      </View>
     </View>
   );
 }
@@ -195,7 +169,7 @@ export function TotalsTrends({
   return (
     <View
       style={{
-        color: colors.n7,
+        color: colors.n3,
         marginLeft: 20,
       }}
     >
@@ -231,7 +205,7 @@ export function HeaderReports({ title, id, onReportClick, reportPage }) {
       style={{
         marginLeft: 20,
         flexShrink: 0,
-        color: colors.n7,
+        color: colors.n3,
       }}
     >
       <View

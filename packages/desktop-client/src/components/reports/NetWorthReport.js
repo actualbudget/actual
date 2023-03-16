@@ -51,7 +51,7 @@ function NetWorthReport({ start, end, graphData, totalChanges, netWorth }) {
           />
         </View>
       </View>
-      <View style={{ marginTop: 10 }}>
+      <View style={{ maxWidth: 800, marginTop: 10 }}>
         <P>
           <strong>How is net worth calculated?</strong>
         </P>

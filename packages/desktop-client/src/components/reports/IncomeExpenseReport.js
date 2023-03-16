@@ -6,6 +6,8 @@ import { colors } from 'loot-design/src/style';
 import ChartBar from 'loot-design/src/svg/v1/ChartBar';
 import ChartPie from 'loot-design/src/svg/v1/ChartPie';
 
+import { FilterButton, AppliedFilters } from '../accounts/Filters';
+
 import { ChartExtraColumn } from './Charts';
 import BarGraph from './graphs/BarGraph';
 import DonutGraph from './graphs/DonutGraph';
@@ -22,6 +24,10 @@ function IncomeExpenseReport({
   selectList,
   onSecondaryClick,
   handleChange,
+  filters,
+  onApplyFilter,
+  onDeleteFilter,
+  onUpdateFilter,
 }) {
   let endMo = monthUtils.getMonth(end);
 
@@ -35,7 +41,7 @@ function IncomeExpenseReport({
   }) {
     if (secondaryReport === 'Totals') {
       return (
-        <View style={{ alignItems: 'center' }}>
+        <View>
           <DonutGraph
             start={monthUtils.getMonth(start)}
             end={endMo}
@@ -71,6 +77,26 @@ function IncomeExpenseReport({
         overflow: 'auto',
       }}
     >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          paddingTop: 10,
+          marginLeft: 10,
+        }}
+      >
+        <View style={{ marginRight: 10, marginTop: 2, marginBottom: 5 }}>
+          <FilterButton onApply={onApplyFilter} />
+        </View>
+
+        {filters && filters.length > 0 && (
+          <AppliedFilters
+            filters={filters}
+            onUpdate={onUpdateFilter}
+            onDelete={onDeleteFilter}
+          />
+        )}
+      </View>
       <View
         style={{
           flexShrink: 0,
@@ -112,7 +138,6 @@ function IncomeExpenseReport({
                 alignItems: 'center',
                 height: 16,
                 marginLeft: 20,
-                marginTop: -2,
               }}
             >
               <Select
@@ -146,7 +171,7 @@ function IncomeExpenseReport({
           selectList={selectList}
         />
       </View>
-      <View style={{ marginTop: 10 }}>
+      <View style={{ maxWidth: 800, marginTop: 10 }}>
         <P>
           <strong>How are income and expenses calculated?</strong>
         </P>
