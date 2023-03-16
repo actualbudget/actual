@@ -199,8 +199,9 @@ function BudgetTable({ files, onSelect, onDelete }) {
   return (
     <View
       style={{
-        flex: 1,
+        flexGrow: 1,
         [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
+          flexGrow: 0,
           maxHeight: 310,
         },
         overflow: 'auto',
