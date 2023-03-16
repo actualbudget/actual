@@ -328,14 +328,12 @@ function onKeyDown(
   },
   e,
 ) {
-  let ENTER = 13;
-  let ESC = 27;
   let { onKeyDown } = inputProps || {};
 
   // If the dropdown is open, an item is highlighted, and the user
   // pressed enter, always capture that and handle it ourselves
   if (isOpen) {
-    if (e.keyCode === ENTER) {
+    if (e.code === 'Enter') {
       if (highlightedIndex != null) {
         if (inst.lastChangeType === Downshift.stateChangeTypes.itemMouseEnter) {
           // If the last thing the user did was hover an item, intentionally
@@ -365,7 +363,7 @@ function onKeyDown(
   }
 
   // Handle escape ourselves
-  if (e.keyCode === ESC) {
+  if (e.code === 'Escape') {
     e.preventDefault();
 
     if (!embedded) {
@@ -414,8 +412,7 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
 }
 
 function defaultShouldSaveFromKey(e) {
-  // Enter
-  return e.keyCode === 13;
+  return e.code === 'Enter';
 }
 
 function onFocus({ inst, props: { inputProps = {}, openOnFocus = true } }, e) {

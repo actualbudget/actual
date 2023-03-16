@@ -119,12 +119,12 @@ global.Actual = {
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey) {
     // Cmd/Ctrl+o
-    if (e.keyCode === 79) {
+    if (e.code === 'KeyO') {
       e.preventDefault();
       window.__actionsForMenu.closeBudget();
     }
     // Cmd/Ctrl+z
-    else if (e.keyCode === 90) {
+    else if (e.code === 'KeyZ') {
       if (
         e.target.tagName === 'INPUT' ||
         e.target.tagName === 'TEXTAREA' ||
