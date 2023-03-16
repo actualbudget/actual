@@ -69,6 +69,11 @@ function WelcomeScreen({ modalProps, createBudget, pushModal }) {
             </ExternalLink>{' '}
             and more.
           </P>
+          <P style={{ color: colors.n5 }}>
+            Get started by importing an existing budget file from Actual or
+            another budgeting app, or start fresh with an empty budget. You can
+            always create or import another budget later.
+          </P>
           <View
             style={{
               flexDirection: 'row',
