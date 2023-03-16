@@ -240,13 +240,21 @@ function RefreshButton({ onRefresh }) {
   );
 }
 
-function BudgetList({ files = [], actions, onDownload }) {
+function BudgetList({
+  files = [],
+  getUserData,
+  loadAllFiles,
+  pushModal,
+  loadBudget,
+  createBudget,
+  onDownload,
+}) {
   const [creating, setCreating] = useState(false);
 
   const onCreate = ({ testMode } = {}) => {
     if (!creating) {
       setCreating(true);
-      actions.createBudget({ testMode });
+      createBudget({ testMode });
     }
   };
 
@@ -278,8 +286,8 @@ function BudgetList({ files = [], actions, onDownload }) {
         >
           <RefreshButton
             onRefresh={() => {
-              actions.getUserData();
-              actions.loadAllFiles();
+              getUserData();
+              loadAllFiles();
             }}
           />
         </View>
@@ -291,10 +299,10 @@ function BudgetList({ files = [], actions, onDownload }) {
           if (file.state === 'remote') {
             onDownload(file.cloudFileId);
           } else {
-            actions.loadBudget(file.id);
+            loadBudget(file.id);
           }
         }}
-        onDelete={file => actions.pushModal('delete-budget', { file })}
+        onDelete={file => pushModal('delete-budget', { file })}
       />
       <View
         style={{
@@ -312,7 +320,7 @@ function BudgetList({ files = [], actions, onDownload }) {
           }}
           onClick={e => {
             e.preventDefault();
-            actions.pushModal('import');
+            pushModal('import');
           }}
         >
           Import file
