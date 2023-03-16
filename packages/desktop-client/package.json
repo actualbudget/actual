@@ -15,6 +15,7 @@
     "@react-stately/collections": "^3.4.3",
     "@react-stately/list": "^3.5.3",
     "@reactions/component": "^2.0.2",
+    "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "chalk": "2.4.1",
     "cross-env": "^7.0.3",
