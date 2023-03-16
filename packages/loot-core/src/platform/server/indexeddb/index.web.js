@@ -138,14 +138,6 @@ function closeDatabase() {
   }
 }
 
-if (process.env.NODE_ENV === 'development') {
-  self.addEventListener('message', e => {
-    if (e.data.type === '__actual:shutdown') {
-      closeDatabase();
-    }
-  });
-}
-
 module.exports = {
   getDatabase,
   openDatabase,
