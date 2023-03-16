@@ -15,6 +15,7 @@ import Notifications from '../Notifications';
 import { useServerVersion } from '../ServerContext';
 
 import ConfigServer from './ConfigServer';
+import Modals from './Modals';
 import ServerURL from './ServerURL';
 import Bootstrap from './subscribe/Bootstrap';
 import ChangePassword from './subscribe/ChangePassword';
@@ -241,6 +242,7 @@ class ManagementApp extends React.Component {
           </Switch>
           <Version />
         </View>
+        <Modals history={this.history} />
       </Router>
     );
   }
