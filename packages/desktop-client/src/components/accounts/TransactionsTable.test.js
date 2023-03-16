@@ -785,7 +785,6 @@ describe('Transactions', () => {
     expect(getTransactions()[1].amount).toBe(-4500);
     expect(getTransactions()[2].is_child).toBe(true);
     expect(getTransactions()[2].amount).toBe(-1000);
-    expect(getTransactions().slice(0, 3)).toMatchSnapshot();
   });
 
   test('escape closes the new transaction rows', () => {
@@ -922,7 +921,48 @@ describe('Transactions', () => {
 
     // This snapshot makes sure the data is as we expect. It also
     // shows the sort order and makes sure that is correct
-    expect(getTransactions().slice(0, 3)).toMatchSnapshot();
+    const parentId = getTransactions()[0].id;
+    expect(getTransactions().slice(0, 3)).toEqual([
+      {
+        account: accounts[0].id,
+        amount: -2777,
+        category: null,
+        cleared: false,
+        date: '2017-01-01',
+        error: null,
+        id: expect.any(String),
+        is_parent: true,
+        notes: 'Notes',
+        payee: 'payed-to',
+        sort_order: 0,
+      },
+      {
+        account: accounts[0].id,
+        amount: -1000,
+        cleared: false,
+        date: '2017-01-01',
+        error: null,
+        id: expect.any(String),
+        is_child: true,
+        parent_id: parentId,
+        payee: 'payed-to',
+        sort_order: -1,
+        starting_balance_flag: null,
+      },
+      {
+        account: accounts[0].id,
+        amount: -1777,
+        cleared: false,
+        date: '2017-01-01',
+        error: null,
+        id: expect.any(String),
+        is_child: true,
+        parent_id: parentId,
+        payee: 'payed-to',
+        sort_order: -2,
+        starting_balance_flag: null,
+      },
+    ]);
 
     // Make sure deleting a split transaction updates the state again,
     // and deleting all split transactions turns it into a normal
