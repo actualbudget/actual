@@ -1,7 +1,5 @@
 import { resetStore } from 'loot-core/src/mocks/redux';
 
-const uuid = require('loot-core/src/platform/uuid');
-
 global.IS_TESTING = true;
 global.Actual = {};
 
@@ -21,14 +19,6 @@ Math.random = function random() {
 };
 
 global.Date.now = () => 123456789;
-
-uuid.v4 = function () {
-  return Promise.resolve('testing-uuid-' + Math.floor(Math.random() * 1000000));
-};
-
-uuid.v4Sync = function () {
-  return 'testing-uuid-' + Math.floor(Math.random() * 1000000);
-};
 
 global.__resetWorld = () => {
   seed = 2;
