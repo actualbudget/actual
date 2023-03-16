@@ -14,12 +14,12 @@ Actual Budget can be installed on many different platforms, however at this time
 
 - Local Installation (on your own machine)
 - Fly.io
-- PikaPods 
+- PikaPods
 - Docker
 
 If you would like to write documentation for another installation variant, please feel free to continue to do this and host it on your own personal blog, medium, Tumblr or any other short form publication service and we will be more than happy to add a link to that from our documentation, open a [PR](https://github.com/actualbudget/docs/pulls) and add it to the list in the [installation overview](https://github.com/actualbudget/docs/blob/master/docs/Installing/overview.md).
 
-However, in doing so you would become responsible for these instructions, if they become out of date or people want in-depth help with them we will point them to you for assistance if the community is unable to help and if lots of people report issues with them we may have to remove the link altogether. 
+However, in doing so you would become responsible for these instructions, if they become out of date or people want in-depth help with them we will point them to you for assistance if the community is unable to help and if lots of people report issues with them we may have to remove the link altogether.
 
 ## Document Standards
 
@@ -210,3 +210,27 @@ $ GIT_USER=<Your GitHub username> yarn deploy
 ```
 
 If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+
+### Writing Good Release Notes
+
+Create a Markdown file in the `changelog-unreleased` directory of the repository you’re contributing to named after the PR number. The file should contain front matter with a `category` key (defining which header to put the entry under) and an `authors` key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is “Maintenance”). Copy-paste the template below to get started!
+
+```markdown
+---
+category: Features
+authors: [YourGitHubUsername]
+---
+
+Add option to include exchange rate multiplier during import
+```
+
+Valid categories:
+
+- `Features`: New features
+- `Enhancements`: Improvements to existing features
+- `Bugfix`: Bug fixes
+- `Maintenance`: Internal changes that don’t directly affect users
+
+The `authors` key should be an array with the GitHub usernames of the people who contributed to the PR. In most cases, this should just be you but you can add multiple people if needed.
+
+Try to phrase your message as a command, e.g. “Add option to include exchange rate multiplier during import” rather than “Added option to include exchange rate multiplier during import” or “Adds option to include exchange rate multiplier during import.” Generally your message should match the PR title, but you can change it if you think it’s more clear.

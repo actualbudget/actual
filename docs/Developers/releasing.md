@@ -10,7 +10,7 @@ In the open-source version of Actual, all updates go through npm. There are two 
 Both the API and web libraries are versioned together. This may change in the future, but because the web library also brings along its own backend it's easier to maintain a single version for now. That makes it clear which version the backend is regardless of library.
 Releasing @actual-app/api
 
-### This generates a bundle for the API:
+### Releasing @actual-app/api
 
 ```bash
 yarn build:api
@@ -31,7 +31,7 @@ In the root of actual (not just desktop-client), run this:
 ./bin/package-browser
 ```
 
-This will compile both the backend and the frontend into a single directory in packages/desktop-client/build. This directory is all the files that need to be published. After bumping the version, publish desktop-client:
+This will compile both the backend and the frontend into a single directory in `packages/desktop-client/build`. This directory is all the files that need to be published. After bumping the version, publish desktop-client:
 
 ```bash
 cd packages/desktop-client
@@ -50,3 +50,9 @@ For example:
 - `v23.3.1` - critical bugfix launched on the same date;
 - `v23.3.2` - another bugfix launched later in the month of March;
 - `v23.4.0` - first release launched on 9th of April, 2023;
+
+### Release PRs
+
+When cutting a release, create a PR to each of the `actual` and `actual-server` repositories. Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number. This will trigger the release notes tooling, which will comment on your PR with the generated release notes. You can then copy-paste the release notes into the `Release-Notes.md` file in the `docs ` repository.
+
+This automation will also delete all the outdated release note files from the `upcoming-release-notes` directory. Make sure you have merged the latest `master` into the release branch and allowed the automation to run before you merge the release PR so all of the files get properly cleaned up.
