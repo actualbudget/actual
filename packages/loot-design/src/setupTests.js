@@ -10,18 +10,9 @@ jest.mock(
       children({ height: 1000, width: 600 }),
 );
 
-// Why 2? There were already tests written assuming a specific
-// transaction is negative, and 1 doesn't give me that data.
-let seed = 2;
-Math.random = function random() {
-  var x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-};
-
 global.Date.now = () => 123456789;
 
 global.__resetWorld = () => {
-  seed = 2;
   resetStore();
 };
 
