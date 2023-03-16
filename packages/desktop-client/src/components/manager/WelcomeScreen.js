@@ -15,9 +15,12 @@ function WelcomeScreen({ createBudget, pushModal }) {
   return (
     <View style={{ maxWidth: 500, fontSize: 15 }}>
       <Text
-        style={[styles.veryLargeText, { marginBlock: 20, textAlign: 'center' }]}
+        style={[
+          styles.veryLargeText,
+          { marginBottom: 20, textAlign: 'center' },
+        ]}
       >
-        Welcome to Actual!
+        Let’s get started!
       </Text>
       <P>
         Actual is a personal finance tool that focuses on beautiful design and a
