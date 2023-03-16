@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
+import { connect } from 'react-redux';
 
+import * as actions from 'loot-core/src/client/actions';
 import Loading from 'loot-design/src/svg/AnimatedLoading';
 import Key from 'loot-design/src/svg/v2/Key';
 import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
@@ -10,11 +12,12 @@ import CloudDownload from '../../svg/v1/CloudDownload';
 import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
 import FileDouble from '../../svg/v1/FileDouble';
 import CloudUnknown from '../../svg/v2/CloudUnknown';
+import tokens from '../../tokens';
 import {
   isDevelopmentEnvironment,
   isPreviewEnvironment,
 } from '../../util/environment';
-import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
+import { View, Text, Button, Tooltip, Menu } from '../common';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -200,7 +203,9 @@ class BudgetTable extends React.Component {
       <View
         style={{
           flex: 1,
-          maxHeight: 310,
+          [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
+            maxHeight: 310,
+          },
           overflow: 'auto',
           '& *': { userSelect: 'none' },
         }}
@@ -250,96 +255,103 @@ class BudgetList extends React.Component {
   };
 
   render() {
-    let { modalProps, files = [], actions, onDownload } = this.props;
+    let { files = [], actions, onDownload } = this.props;
 
     return (
-      <Modal
-        {...modalProps}
-        noAnimation={true}
-        showHeader={false}
-        showOverlay={false}
-        padding={0}
-        style={{ boxShadow: 'none', backgroundColor: 'transparent' }}
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          minWidth: tokens.breakpoint_narrow,
+          [`@media (max-width: ${tokens.breakpoint_narrow})`]: {
+            width: '100vw',
+            minWidth: '100vw',
+            marginInline: -20,
+            marginTop: 20,
+          },
+        }}
       >
-        {() => (
-          <View style={{ flex: 1 }}>
-            <View>
-              <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
-              <View
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  justifyContent: 'center',
-                  marginRight: 5,
-                }}
-              >
-                <RefreshButton
-                  onRefresh={() => {
-                    actions.getUserData();
-                    actions.loadAllFiles();
-                  }}
-                />
-              </View>
-            </View>
-            <BudgetTable
-              files={files}
-              actions={actions}
-              onSelect={file => {
-                if (file.state === 'remote') {
-                  onDownload(file.cloudFileId);
-                } else {
-                  actions.loadBudget(file.id);
-                }
+        <View>
+          <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
+          <View
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              marginRight: 5,
+            }}
+          >
+            <RefreshButton
+              onRefresh={() => {
+                actions.getUserData();
+                actions.loadAllFiles();
               }}
-              onDelete={file => actions.pushModal('delete-budget', { file })}
             />
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                padding: 25,
-                paddingLeft: 5,
-              }}
-            >
-              <Button
-                bare
-                style={{
-                  marginLeft: 10,
-                  color: colors.n4,
-                }}
-                onClick={e => {
-                  e.preventDefault();
-                  actions.pushModal('import');
-                }}
-              >
-                Import file
-              </Button>
-
-              <Button
-                primary
-                onClick={() => this.onCreate()}
-                style={{ marginLeft: 15 }}
-              >
-                Create new file
-              </Button>
-
-              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
-                <Button
-                  primary
-                  onClick={() => this.onCreate({ testMode: true })}
-                  style={{ marginLeft: 15 }}
-                >
-                  Create test file
-                </Button>
-              )}
-            </View>
           </View>
-        )}
-      </Modal>
+        </View>
+        <BudgetTable
+          files={files}
+          actions={actions}
+          onSelect={file => {
+            if (file.state === 'remote') {
+              onDownload(file.cloudFileId);
+            } else {
+              actions.loadBudget(file.id);
+            }
+          }}
+          onDelete={file => actions.pushModal('delete-budget', { file })}
+        />
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            padding: 25,
+            paddingLeft: 5,
+          }}
+        >
+          <Button
+            bare
+            style={{
+              marginLeft: 10,
+              color: colors.n4,
+            }}
+            onClick={e => {
+              e.preventDefault();
+              actions.pushModal('import');
+            }}
+          >
+            Import file
+          </Button>
+
+          <Button
+            primary
+            onClick={() => this.onCreate()}
+            style={{ marginLeft: 15 }}
+          >
+            Create new file
+          </Button>
+
+          {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
+            <Button
+              primary
+              onClick={() => this.onCreate({ testMode: true })}
+              style={{ marginLeft: 15 }}
+            >
+              Create test file
+            </Button>
+          )}
+        </View>
+      </View>
     );
   }
 }
 
-export default BudgetList;
+export default connect(
+  state => ({
+    files: state.budgets.allFiles,
+    isLoggedIn: !!state.user.data,
+  }),
+  actions,
+)(BudgetList);

@@ -6,6 +6,7 @@ import { createBrowserHistory } from 'history';
 
 import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
+import BudgetList from 'loot-design/src/components/manager/BudgetList';
 import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
 
@@ -14,7 +15,6 @@ import Notifications from '../Notifications';
 import { useServerVersion } from '../ServerContext';
 
 import ConfigServer from './ConfigServer';
-import Modals from './Modals';
 import ServerURL from './ServerURL';
 import Bootstrap from './subscribe/Bootstrap';
 import ChangePassword from './subscribe/ChangePassword';
@@ -202,7 +202,7 @@ class ManagementApp extends React.Component {
                       path="/change-password"
                       component={ChangePassword}
                     />
-                    <Route exact path="/" component={Modals} />
+                    <Route exact path="/" component={BudgetList} />
                     {/* Redirect all other pages to this route */}
                     <Route path="/" render={() => <Redirect to="/" />} />
                   </Switch>
