@@ -109,7 +109,7 @@ class ManagementApp extends React.Component {
 
     return (
       <Router history={this.history}>
-        <View style={{ height: '100%', minHeight: 500 }}>
+        <View style={{ height: '100%' }}>
           <View
             style={{
               position: 'absolute',
