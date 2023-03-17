@@ -9,7 +9,6 @@ import {
   Block,
   Modal,
   ButtonWithLoading,
-  Button,
   P,
   ExternalLink,
 } from '../common';
