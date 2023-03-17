@@ -12,19 +12,6 @@ function getErrorMessage(error) {
   }
 }
 
-// const res = await window.Actual.openFileDialog({
-//   // Windows treats the ynab4 file as a directroy, while Mac
-//   // treats it like a normal file
-//   properties: ['openDirectory', 'openFile'],
-//   filters: [{ name: 'ynab', extensions: ['ynab4'] }]
-// });
-// if (res) {
-//   this.doImport(res[0]);
-// }
-// this.props.actions.importBudget(filepath).catch(err => {
-//   this.setState({ error: err.message, importing: false });
-// });
-
 function Import({ modalProps, actions }) {
   const [error] = useState(false);
 
