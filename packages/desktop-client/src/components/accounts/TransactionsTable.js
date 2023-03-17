@@ -1616,7 +1616,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
     if (e.code === 'Enter' && !e.shiftKey) {
       let { editingId: id, focusedField } = tableNavigator;
 
-      afterSave(props => {
+      afterSave(() => {
         let transactions = latestState.current.transactions;
         let idx = transactions.findIndex(t => t.id === id);
         let parent = transactionMap.get(transactions[idx]?.parent_id);
