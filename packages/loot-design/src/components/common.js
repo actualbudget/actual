@@ -199,6 +199,7 @@ export const Button = React.forwardRef(
       disabled,
       hoveredStyle,
       activeStyle,
+      bounce = true,
       as = 'button',
       ...nativeProps
     },
@@ -214,7 +215,7 @@ export const Button = React.forwardRef(
       bare
         ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
         : {
-            transform: 'translateY(1px)',
+            transform: bounce && 'translateY(1px)',
             boxShadow:
               !bare &&
               (primary
