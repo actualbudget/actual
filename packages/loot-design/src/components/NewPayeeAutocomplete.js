@@ -169,9 +169,10 @@ export default function PayeeAutocomplete({
           style={{
             display: 'block',
             color: colors.g8,
-            borderRadius: 4,
             fontSize: 11,
             fontWeight: 500,
+            marginLeft: -10,
+            padding: '4px 0',
           }}
         >
           <Add
