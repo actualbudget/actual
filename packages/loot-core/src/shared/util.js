@@ -249,9 +249,9 @@ export function titleFirst(str) {
 }
 
 export let numberFormats = [
-  { value: 'comma-dot', label: '1,000.33' },
-  { value: 'dot-comma', label: '1.000,33' },
-  { value: 'space-comma', label: '1 000,33' },
+  { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
+  { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
+  { value: 'space-comma', label: '1 000,33', labelNoFraction: '1 000' },
 ];
 
 let numberFormat = {

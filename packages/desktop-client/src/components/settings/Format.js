@@ -72,9 +72,13 @@ export default function FormatSettings({ prefs, savePrefs }) {
             <Column title="Numbers">
               <Button bounce={false} style={{ padding: 0 }}>
                 <CustomSelect
+                  key={prefs.hideFraction} // needed because label does not update
                   value={numberFormat}
                   onChange={onNumberFormat}
-                  options={numberFormats.map(f => [f.value, f.label])}
+                  options={numberFormats.map(f => [
+                    f.value,
+                    prefs.hideFraction ? f.labelNoFraction : f.label,
+                  ])}
                   style={{ padding: '5px 10px', fontSize: 15 }}
                 />
               </Button>
