@@ -14,7 +14,6 @@ CREATE TABLE banks
 CREATE TABLE accounts
    (id TEXT PRIMARY KEY,
     account_id TEXT,
-    iban TEXT,
     name TEXT,
     balance_current INTEGER,
     balance_available INTEGER,
