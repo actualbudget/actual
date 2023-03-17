@@ -593,7 +593,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
     el.current.addEventListener('keydown', onKeyDown);
 
     return () => {
-      el.current.removeEventListener('keydown', onKeyDown);
+      el.current && el.current.removeEventListener('keydown', onKeyDown);
     };
   }, [hoveredIndex]);
 
