@@ -247,7 +247,7 @@ async function _editField(field, container) {
     element = field.querySelector(':focus');
     expect(element).toBeTruthy();
   } else {
-    await userEvent.click(field.querySelector('div'));
+    await userEvent.click(field.querySelector('span'));
     element = field.querySelector('input');
     expect(element).toBeTruthy();
     expect(container.ownerDocument.activeElement).toBe(element);
