@@ -318,7 +318,7 @@ describe('Transactions', () => {
     });
   });
 
-  test.only('keybindings enter/tab/alt should move around', async () => {
+  test('keybindings enter/tab/alt should move around', async () => {
     const { container } = renderTransactions();
 
     // Enter/tab goes down/right
