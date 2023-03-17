@@ -16,7 +16,8 @@ import {
   FormLabel,
   Checkbox,
 } from 'loot-design/src/components/forms';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
+import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
 import { SelectedItemsButton } from 'loot-design/src/components/table';
 import useSelected, {
@@ -24,6 +25,7 @@ import useSelected, {
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { OpSelect } from '../modals/EditRule';
 import { Page } from '../Page';
@@ -83,6 +85,8 @@ function updateScheduleConditions(schedule, fields) {
 }
 
 export default function ScheduleDetails() {
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+
   let { id, initialFields } = useParams();
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
@@ -420,6 +424,10 @@ export default function ScheduleDetails() {
   // This is derived from the date
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
 
+  const PayeeAutocomplete = isNewAutocompleteEnabled
+    ? NewPayeeAutocomplete
+    : LegacyPayeeAutocomplete;
+
   return (
     <Page
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
@@ -434,6 +442,7 @@ export default function ScheduleDetails() {
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
             }
+            isCreatable
           />
         </FormField>
 
