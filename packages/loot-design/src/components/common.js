@@ -546,12 +546,13 @@ export function Keybinding({ keyName }) {
 }
 
 export function Menu({ header, footer, items: allItems, onMenuSelect }) {
-  let el = useRef(null);
+  let elRef = useRef(null);
   let items = allItems.filter(x => x);
   let [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
-    el.current.focus();
+    const el = elRef.current;
+    el.focus();
 
     let onKeyDown = e => {
       let filteredItems = items.filter(
@@ -590,10 +591,10 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
       }
     };
 
-    el.current.addEventListener('keydown', onKeyDown);
+    el.addEventListener('keydown', onKeyDown);
 
     return () => {
-      el.current && el.current.removeEventListener('keydown', onKeyDown);
+      el.removeEventListener('keydown', onKeyDown);
     };
   }, [hoveredIndex]);
 
@@ -601,7 +602,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
     <View
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
       tabIndex={1}
-      innerRef={el}
+      innerRef={elRef}
     >
       {header}
       {items.map((item, idx) => {
