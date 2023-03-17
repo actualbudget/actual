@@ -61,7 +61,7 @@ export function getCreateKeyError(error) {
 export function getTestKeyError({ reason }) {
   switch (reason) {
     case 'network':
-      return 'Unable to connect to the server. We need to access our server to get some information about your keys.';
+      return 'Unable to connect to the server. We need to access the server to get some information about your keys.';
     case 'old-key-style':
       return (
         'This file is encrypted with an old unsupported key style. Recreate the key ' +

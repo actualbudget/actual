@@ -48,9 +48,10 @@ export default function DeleteMenu({ modalProps, actions, file }) {
           {isRemote && (
             <>
               <Text>
-                This is a <strong>hosted file</strong> which we store to make it
-                available for download on any device. You can delete it from our
-                servers which will remove it from all of your devices.
+                This is a <strong>hosted file</strong> which means it is stored
+                on your server to make it available for download on any device.
+                You can delete it from the server, which will also remove it
+                from all of your devices.
               </Text>
 
               <ButtonWithLoading
@@ -91,10 +92,10 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                     ) : (
                       <Text>
                         This a <strong>local file</strong> which is not stored
-                        on our servers.
+                        on a server.
                       </Text>
                     )}{' '}
-                    Deleting it will remove it and all of its backup
+                    Deleting it will remove it and all of its backups
                     permanently.
                   </Text>
                 )}

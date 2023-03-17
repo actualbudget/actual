@@ -28,14 +28,6 @@ function getErrorMessage(type, code) {
       }
       break;
 
-    case 'API_ERROR':
-      switch (code.toUpperCase()) {
-        case 'PLANNED_MAINTENANCE':
-          return 'Our servers are currently undergoing maintenance and will be available again soon.';
-        default:
-      }
-      break;
-
     case 'RATE_LIMIT_EXCEEDED':
       return 'Rate limit exceeded for this item. Please try again later.';
 

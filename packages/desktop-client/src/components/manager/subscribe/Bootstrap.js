@@ -25,7 +25,7 @@ export default function Bootstrap() {
       case 'network-failure':
         return 'Unable to contact the server';
       default:
-        return "Whoops, an error occurred on our side! We'll try to get it fixed soon.";
+        return `An unknown error occurred: ${error}`;
     }
   }
 
