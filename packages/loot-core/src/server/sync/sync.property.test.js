@@ -32,6 +32,7 @@ let schema = {
   },
   accounts: {
     account_id: 'text',
+    iban: 'text',
     name: 'text',
     balance_current: 'integer',
     balance_available: 'integer',

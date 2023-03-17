@@ -126,6 +126,7 @@ export async function addNordigenAccounts(
       let id = await runMutator(async () => {
         let id = await db.insertAccount({
           account_id: acct.account_id,
+          iban: acct.iban,
           name: acct.name,
           official_name: acct.official_name,
           type: fromPlaidAccountType(acct.type),
