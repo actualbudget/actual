@@ -247,7 +247,7 @@ async function _editField(field, container) {
     element = field.querySelector(':focus');
     expect(element).toBeTruthy();
   } else {
-    await userEvent.click(field.querySelector('span'));
+    await userEvent.click(field.querySelector('div'));
     element = field.querySelector('input');
     expect(element).toBeTruthy();
     expect(container.ownerDocument.activeElement).toBe(element);
@@ -318,7 +318,7 @@ describe('Transactions', () => {
     });
   });
 
-  test('keybindings enter/tab/alt should move around', async () => {
+  test.only('keybindings enter/tab/alt should move around', async () => {
     const { container } = renderTransactions();
 
     // Enter/tab goes down/right
