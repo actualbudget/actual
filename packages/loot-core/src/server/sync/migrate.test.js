@@ -46,9 +46,9 @@ let messageArb = fc
       dataset: fc.constant('transactions'),
       column: fc.constant(toInternalField(field) || field),
       row: fc.oneof(
-        fc.integer(0, 5).map(i => `id${i}`),
-        fc.integer(0, 5).chain(i => {
-          return fc.integer(0, 5).map(j => `id${i}/child${j}`);
+        fc.integer({ min: 0, max: 5 }).map(i => `id${i}`),
+        fc.integer({ min: 0, max: 5 }).chain(i => {
+          return fc.integer({ min: 0, max: 5 }).map(j => `id${i}/child${j}`);
         }),
       ),
       value: value,
