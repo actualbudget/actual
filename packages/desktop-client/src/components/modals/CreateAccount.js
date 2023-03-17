@@ -31,8 +31,8 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
         <View style={{ maxWidth: 500 }}>
           <Text style={{ marginBottom: 10, lineHeight: '1.4em', fontSize: 15 }}>
             <strong>Link your bank accounts</strong> to automatically download
-            transactions. We offer hundreds of banks to sync with, and our
-            service will provide reliable, up-to-date information.
+            transactions. We offer hundreds of banks to sync with, and Nordigen
+            will provide reliable, up-to-date information.
           </Text>
 
           <ButtonWithLoading
