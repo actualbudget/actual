@@ -52,7 +52,7 @@ export function ResetSync({ resetSync }) {
     >
       <Text>
         <strong>Reset sync</strong> will remove all local data used to track
-        changes for syncing, and create a fresh sync ID on our server. This file
+        changes for syncing, and create a fresh sync ID on the server. This file
         on other devices will have to be re-downloaded to use the new sync ID.
         Use this if there is a problem with syncing and you want to start fresh.
       </Text>
