@@ -66,6 +66,18 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
               />{' '}
               <View>Enable Goal Templates</View>
             </label>
+            <label style={{ display: 'flex' }}>
+              <Checkbox
+                id="new-autocomplete-flag"
+                checked={flags.newAutocomplete}
+                onChange={() => {
+                  savePrefs({
+                    'flags.newAutocomplete': !flags.newAutocomplete,
+                  });
+                }}
+              />{' '}
+              <View>Enable new Autocomplete component</View>
+            </label>
           </View>
         ) : (
           <Link
