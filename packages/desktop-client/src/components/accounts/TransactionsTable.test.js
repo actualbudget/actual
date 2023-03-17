@@ -249,6 +249,11 @@ async function _editField(field, container) {
   } else {
     await userEvent.click(field.querySelector('div'));
     element = field.querySelector('input');
+    // TODO: remove
+    if (!element) {
+      screen.debug(element);
+      screen.debug(field);
+    }
     expect(element).toBeTruthy();
     expect(container.ownerDocument.activeElement).toBe(element);
   }

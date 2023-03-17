@@ -1226,7 +1226,7 @@ function NewTransaction({
   );
 }
 
-function TransactionTable_({
+function TransactionTableInner({
   tableNavigator,
   tableRef,
   dateFormat = 'MM/dd/yyyy',
@@ -1763,8 +1763,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   );
 
   return (
-    // eslint-disable-next-line react/jsx-pascal-case
-    <TransactionTable_
+    <TransactionTableInner
       tableRef={mergedRef}
       {...props}
       transactions={transactions}
