@@ -66,6 +66,7 @@ export default function PayeeAutocomplete({
   ...props
 }) {
   const selectRef = useRef();
+  const [initialValue] = useState(value);
   const [isOpen, setIsOpen] = useState(focused);
   const [inputValue, setInputValue] = useState();
   const payees = useCachedPayees();
@@ -132,6 +133,7 @@ export default function PayeeAutocomplete({
     const ESC = 27;
 
     if (event.keyCode === ESC) {
+      onSelect(initialValue);
       setIsOpen(false);
       return;
     }
