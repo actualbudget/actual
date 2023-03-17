@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -76,99 +76,66 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
   return transactions;
 }
 
-class LiveTransactionTable extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { transactions: props.transactions };
-  }
+function LiveTransactionTable(props) {
+  const [transactions, setTransactions] = useState(props.transactions);
 
-  componentWillReceiveProps(nextProps) {
-    if (this.state.transactions !== nextProps.transactions) {
-      this.setState({ transactions: nextProps.transactions });
-    }
-  }
+  useEffect(() => {
+    if (transactions === props.transactions) return;
+    props.onTransactionsChange && props.onTransactionsChange(transactions);
+  }, [transactions]);
 
-  notifyChange = () => {
-    const { onTransactionsChange } = this.props;
-    onTransactionsChange && onTransactionsChange(this.state.transactions);
-  };
-
-  onSplit = id => {
-    let { state } = this;
-    let { data, diff } = splitTransaction(state.transactions, id);
-    this.setState({ transactions: data }, this.notifyChange);
+  const onSplit = id => {
+    let { data, diff } = splitTransaction(transactions, id);
+    setTransactions(data);
     return diff.added[0].id;
   };
 
-  // onDelete = id => {
-  //   let { state } = this;
-  //   this.setState(
-  //     {
-  //       transactions: applyChanges(
-  //         deleteTransaction(state.transactions, id),
-  //         state.transactions
-  //       )
-  //     },
-  //     this.notifyChange
-  //   );
-  // };
-
-  onSave = transaction => {
-    let { state } = this;
-    let { data } = updateTransaction(state.transactions, transaction);
-    this.setState({ transactions: data }, this.notifyChange);
+  const onSave = transaction => {
+    let { data } = updateTransaction(transactions, transaction);
+    setTransactions(data);
   };
 
-  onAdd = newTransactions => {
-    let { state } = this;
+  const onAdd = newTransactions => {
     newTransactions = realizeTempTransactions(newTransactions);
-    this.setState(
-      { transactions: [...newTransactions, ...state.transactions] },
-      this.notifyChange,
-    );
+    setTransactions(trans => [...newTransactions, ...trans]);
   };
 
-  onAddSplit = id => {
-    let { state } = this;
-    let { data, diff } = addSplitTransaction(state.transactions, id);
-    this.setState({ transactions: data }, this.notifyChange);
+  const onAddSplit = id => {
+    let { data, diff } = addSplitTransaction(transactions, id);
+    setTransactions(data);
     return diff.added[0].id;
   };
 
-  onCreatePayee = name => 'id';
+  const onCreatePayee = () => 'id';
 
-  render() {
-    const { state } = this;
-
-    // It's important that these functions are they same instances
-    // across renders. Doing so tests that the transaction table
-    // implementation properly uses the right latest state even if the
-    // hook dependencies haven't changed
-    return (
-      <TestProvider>
-        <SelectedProviderWithItems
-          name="transactions"
-          items={state.transactions}
-          fetchAllIds={() => state.transactions.map(t => t.id)}
-        >
-          <SplitsExpandedProvider>
-            <TransactionTable
-              {...this.props}
-              transactions={state.transactions}
-              loadMoreTransactions={() => {}}
-              payees={payees}
-              addNotification={n => console.log(n)}
-              onSave={this.onSave}
-              onSplit={this.onSplit}
-              onAdd={this.onAdd}
-              onAddSplit={this.onAddSplit}
-              onCreatePayee={this.onCreatePayee}
-            />
-          </SplitsExpandedProvider>
-        </SelectedProviderWithItems>
-      </TestProvider>
-    );
-  }
+  // It's important that these functions are they same instances
+  // across renders. Doing so tests that the transaction table
+  // implementation properly uses the right latest state even if the
+  // hook dependencies haven't changed
+  return (
+    <TestProvider>
+      <SelectedProviderWithItems
+        name="transactions"
+        items={transactions}
+        fetchAllIds={() => transactions.map(t => t.id)}
+      >
+        <SplitsExpandedProvider>
+          <TransactionTable
+            {...props}
+            transactions={transactions}
+            loadMoreTransactions={() => {}}
+            payees={payees}
+            addNotification={n => console.log(n)}
+            onSave={onSave}
+            onSplit={onSplit}
+            onAdd={onAdd}
+            onAddSplit={onAddSplit}
+            onCreatePayee={onCreatePayee}
+          />
+        </SplitsExpandedProvider>
+      </SelectedProviderWithItems>
+    </TestProvider>
+  );
 }
 
 function initBasicServer() {
