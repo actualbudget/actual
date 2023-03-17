@@ -31,7 +31,7 @@ function getErrorMessage(type, code) {
     case 'API_ERROR':
       switch (code.toUpperCase()) {
         case 'PLANNED_MAINTENANCE':
-          return 'Our servers are currently undergoing maintenance and will be available again soon.';
+          return 'The server is currently undergoing maintenance and will be available again soon.';
         default:
       }
       break;
