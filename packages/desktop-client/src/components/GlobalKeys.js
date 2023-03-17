@@ -12,17 +12,17 @@ class GlobalKeys extends React.Component {
 
       if (e.metaKey) {
         const { history } = this.props;
-        switch (e.keyCode) {
-          case 49:
+        switch (e.code) {
+          case 'Digit1':
             history.push('/budget');
             break;
-          case 50:
+          case 'Digit2':
             history.push('/reports');
             break;
-          case 51:
+          case 'Digit3':
             history.push('/accounts');
             break;
-          case 188: // ,
+          case 'Comma':
             if (Platform.OS === 'mac') {
               history.push('/settings');
             }

@@ -56,7 +56,6 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
-// import Debugger from './Debugger';
 
 function PageRoute({ path, component: Component }) {
   return (
@@ -336,7 +335,6 @@ class FinancesApp extends React.Component {
                   <Notifications />
                   <BankSyncStatus />
                   <StackedRoutes isMobile={this.state.isMobile} />
-                  {/*window.Actual.IS_DEV && <Debugger />*/}
                   <Modals history={this.history} />
                 </div>
                 {this.state.isMobile && (

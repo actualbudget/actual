@@ -4,10 +4,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   testPathIgnorePatterns: ['/node_modules/', '/lib/'].filter(Boolean),
   testMatch: ['**/*.web.test.js'],
-  transformIgnorePatterns: [
-    '__mocks__',
-    '/node_modules/(?!perf-deets|absurd-sql)',
-  ],
+  transformIgnorePatterns: ['__mocks__', '/node_modules/(?!absurd-sql)'],
   transform: {
     '\\.pegjs$': 'pegjs-jest-transformer',
   },

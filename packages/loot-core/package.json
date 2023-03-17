@@ -61,7 +61,6 @@
     "pegjs": "^0.10.0",
     "pegjs-jest-transformer": "^1.2.3",
     "pegjs-loader": "^0.5.6",
-    "perf-deets": "^1.0.15",
     "snapshot-diff": "^0.10.0",
     "source-map": "^0.7.3",
     "throttleit": "^1.0.0",
