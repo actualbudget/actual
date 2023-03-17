@@ -89,7 +89,7 @@ ipcRenderer.on('update-error', (event, msg) => {
 
 document.addEventListener('keydown', e => {
   // Disable zoom with keys + and -
-  if (e.keyCode === 187 || e.keyCode === 189) {
+  if (e.key === '+' || e.key === '-') {
     e.preventDefault();
   }
 });
