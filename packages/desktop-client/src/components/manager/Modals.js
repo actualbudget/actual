@@ -28,7 +28,7 @@ function Modals({
 }) {
   let stack = modalStack.map(({ name, options }, idx) => {
     const modalProps = {
-      onClose: actions.closeModal,
+      onClose: actions.popModal,
       onPush: actions.pushModal,
       onBack: actions.popModal,
       isCurrent: idx === modalStack.length - 1,
