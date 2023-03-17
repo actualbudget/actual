@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { styles, colors } from '../../style';
-import { View, Block, Modal, Button } from '../common';
+import { View, Block, Modal, Button, Text } from '../common';
 
 function getErrorMessage(error) {
   switch (error) {
@@ -54,12 +54,17 @@ function Import({ modalProps, actions }) {
   return (
     <Modal {...modalProps} title="Import From" style={{ width: 400 }}>
       {() => (
-        <View style={[styles.smallText, { lineHeight: 1.5, marginTop: 20 }]}>
+        <View style={[styles.smallText, { lineHeight: 1.5 }]}>
           {error && (
             <Block style={{ color: colors.r4, marginBottom: 15 }}>
               {getErrorMessage(error)}
             </Block>
           )}
+
+          <Text style={{ marginBottom: 15 }}>
+            Select an app to import from, and we'll guide you through the
+            process.
+          </Text>
 
           <Button style={itemStyle} onClick={() => onSelectType('ynab4')}>
             <span style={{ fontWeight: 700 }}>YNAB4</span>
