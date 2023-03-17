@@ -69,6 +69,13 @@ extern "C" {
 
     // Transaction accessors
 
+    char *transaction_acct_name(OfxTransactionData *trans) {
+      if (trans->account_ptr && trans->account_ptr->account_id_valid) {
+        return trans->account_ptr->account_id;
+      }
+      return "";
+    }
+
     double transaction_amount(OfxTransactionData *trans) {
         return trans->amount;
     }
