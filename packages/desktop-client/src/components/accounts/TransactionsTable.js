@@ -129,20 +129,6 @@ function deserializeTransaction(transaction, originalTransaction) {
   return { ...realTransaction, date, amount };
 }
 
-function getParentTransaction(transactions, fromIndex) {
-  let trans = transactions[fromIndex];
-  let parentIdx = fromIndex;
-  while (parentIdx >= 0) {
-    if (transactions[parentIdx].id === trans.parent_id) {
-      // Found the parent
-      return transactions[parentIdx];
-    }
-    parentIdx--;
-  }
-
-  return null;
-}
-
 function isLastChild(transactions, index) {
   let trans = transactions[index];
   return (
@@ -1245,14 +1231,6 @@ function TransactionTableInner({
     }
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
-  function getParent(trans, index) {
-    if (trans.parent_id) {
-      return getParentTransaction(props.transactions, index);
-    }
-
-    return null;
-  }
-
   const renderRow = ({ item, index, position, editing }) => {
     const {
       transactions,
@@ -1274,7 +1252,7 @@ function TransactionTableInner({
     let hovered = hoveredTransaction === trans.id;
     let selected = selectedItems.has(trans.id);
 
-    let parent = getParent(trans, index);
+    let parent = props.transactionMap.get(trans.parent_id);
     let isChildDeposit = parent && parent.amount > 0;
     let expanded = isExpanded && isExpanded((parent || trans).id);
 
@@ -1478,6 +1456,9 @@ export let TransactionTable = React.forwardRef((props, ref) => {
     prevSplitsExpanded.current = splitsExpanded;
     return result;
   }, [props.transactions, splitsExpanded]);
+  const transactionMap = useMemo(() => {
+    return new Map(transactions.map(trans => [trans.id, trans]));
+  }, [transactions]);
 
   useEffect(() => {
     // If it's anchored that means we've also disabled animations. To
@@ -1638,7 +1619,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
       afterSave(props => {
         let transactions = latestState.current.transactions;
         let idx = transactions.findIndex(t => t.id === id);
-        let parent = getParentTransaction(transactions, idx);
+        let parent = transactionMap.get(transactions[idx]?.parent_id);
 
         if (
           isLastChild(transactions, idx) &&
@@ -1767,6 +1748,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
       tableRef={mergedRef}
       {...props}
       transactions={transactions}
+      transactionMap={transactionMap}
       selectedItems={selectedItems}
       hoveredTransaction={hoveredTransaction}
       isExpanded={splitsExpanded.expanded}
