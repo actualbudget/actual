@@ -9395,12 +9395,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:2.13.0":
-  version: 2.13.0
-  resolution: "fast-check@npm:2.13.0"
+"fast-check@npm:3.7.1":
+  version: 3.7.1
+  resolution: "fast-check@npm:3.7.1"
   dependencies:
-    pure-rand: ^4.1.1
-  checksum: d892d5275afae17cfccb2062207ccd1f03cdb08b80ea6bba48722cc0b58f085eeefde6d5130b2238c62cec6eb75db6834b80aff472beae89dd427f7b5d6b3cc2
+    pure-rand: ^6.0.0
+  checksum: 8bab983cc2a6449ea69c25ec1b048e910b661da2a85c4336e1c993514cbd4a555674194c9191266b96fbb29de1538fceddfde0a00c056a7226021fcd3ed523b9
   languageName: node
   linkType: hard
 
@@ -13296,7 +13296,7 @@ __metadata:
     deep-equal: ^2.0.5
     eslint: 8.35.0
     fake-indexeddb: ^3.1.3
-    fast-check: 2.13.0
+    fast-check: 3.7.1
     google-protobuf: ^3.12.0-rc.1
     jest: ^27.0.0
     jsverify: ^0.8.4
@@ -16562,10 +16562,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pure-rand@npm:^4.1.1":
-  version: 4.2.1
-  resolution: "pure-rand@npm:4.2.1"
-  checksum: 436122e60d3ac309d415d7969377bf22ca11f4da414703989341831accc5d09202e9271707bd85cb89d272b46d8e5f2e02e11a363156f010ea37394a4c646486
+"pure-rand@npm:^6.0.0":
+  version: 6.0.1
+  resolution: "pure-rand@npm:6.0.1"
+  checksum: 4bb565399993b815658a72e359f574ce4f04827a42a905105d61163ae86f456d91595a0e4241e7bce04328fae0638ae70ac0428d93ecb55971c465bd084f8648
   languageName: node
   linkType: hard
 
