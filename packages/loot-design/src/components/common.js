@@ -348,7 +348,7 @@ export function Input({
       )}
       {...nativeProps}
       onKeyDown={e => {
-        if (e.keyCode === 13 && onEnter) {
+        if (e.code === 'Enter' && onEnter) {
           onEnter(e);
         }
 
@@ -546,18 +546,15 @@ export function Keybinding({ keyName }) {
 }
 
 export function Menu({ header, footer, items: allItems, onMenuSelect }) {
-  let el = useRef(null);
+  let elRef = useRef(null);
   let items = allItems.filter(x => x);
   let [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
-    el.current.focus();
+    const el = elRef.current;
+    el.focus();
 
     let onKeyDown = e => {
-      const UP = 38;
-      const DOWN = 40;
-      const ENTER = 13;
-
       let filteredItems = items.filter(
         item => item && item !== Menu.line && item.type !== Menu.label,
       );
@@ -565,8 +562,8 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
 
       let transformIndex = idx => items.indexOf(filteredItems[idx]);
 
-      switch (e.keyCode) {
-        case UP:
+      switch (e.code) {
+        case 'ArrowUp':
           e.preventDefault();
           setHoveredIndex(
             hoveredIndex === null
@@ -574,7 +571,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
               : transformIndex(Math.max(currentIndex - 1, 0)),
           );
           break;
-        case DOWN:
+        case 'ArrowDown':
           e.preventDefault();
           setHoveredIndex(
             hoveredIndex === null
@@ -584,7 +581,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
                 ),
           );
           break;
-        case ENTER:
+        case 'Enter':
           e.preventDefault();
           if (hoveredIndex !== null) {
             onMenuSelect && onMenuSelect(items[hoveredIndex].name);
@@ -594,10 +591,10 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
       }
     };
 
-    el.current.addEventListener('keydown', onKeyDown);
+    el.addEventListener('keydown', onKeyDown);
 
     return () => {
-      el.current.removeEventListener('keydown', onKeyDown);
+      el.removeEventListener('keydown', onKeyDown);
     };
   }, [hoveredIndex]);
 
@@ -605,7 +602,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
     <View
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
       tabIndex={1}
-      innerRef={el}
+      innerRef={elRef}
     >
       {header}
       {items.map((item, idx) => {
