@@ -55,10 +55,10 @@ If you’re providing a custom frontend, make sure you provide an `index.html` i
 - For all other installs you need to add your Nordigen SECRET KEY and ID to a config.json file in actual-server.
 *If you don't already have this file, you will need to create it and add the following lines replacing xxxxx with your SECRET ID and KEY.*
      
-    `{  
-        "nordigen": {  
-        "secretId": "xxxx",  
-        "secretKey": "xxxxx"  
-        }  
-    }` 
+    {
+        "nordigen": {
+            "secretId": "xxxx",
+            "secretKey": "xxxxx"
+        }
+    }
     
