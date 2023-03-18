@@ -25,7 +25,7 @@ function Import({ modalProps, availableImports }) {
   async function onImport() {
     const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
-      filters: [{ name: 'actual', extensions: ['zip'] }],
+      filters: [{ name: 'actual', extensions: ['zip', 'blob'] }],
     });
     if (res) {
       setImporting(true);
