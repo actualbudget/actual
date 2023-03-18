@@ -19,18 +19,6 @@ import { TransactionList } from './MobileTransaction';
 function TransactionSearchInput({ accountName, onSearch }) {
   const [text, setText] = useState('');
 
-  const performSearch = useCallback(() => {
-    onSearch(text);
-  }, [text, onSearch]);
-
-  const onChange = useCallback(
-    text => {
-      setText(text);
-      performSearch();
-    },
-    [performSearch],
-  );
-
   return (
     <View
       style={{
@@ -57,7 +45,10 @@ function TransactionSearchInput({ accountName, onSearch }) {
           />
         }
         value={text}
-        onUpdate={onChange}
+        onUpdate={text => {
+          setText(text);
+          onSearch(text);
+        }}
         placeholder={`Search ${accountName}`}
         style={{
           backgroundColor: colors.n11,
