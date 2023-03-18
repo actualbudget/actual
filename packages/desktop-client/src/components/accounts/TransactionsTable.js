@@ -529,6 +529,9 @@ export const Transaction = React.memo(function Transaction(props) {
   } = props;
 
   const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+  const AccountAutocomplete = isNewAutocompleteEnabled
+    ? NewAccountAutocomplete
+    : LegacyAccountAutocomplete;
 
   let dispatchSelected = useSelectedDispatch();
 
@@ -760,23 +763,18 @@ export const Transaction = React.memo(function Transaction(props) {
             onSave,
             shouldSaveFromKey,
             inputStyle,
-          }) => {
-            const AccountAutocomplete = isNewAutocompleteEnabled
-              ? NewAccountAutocomplete
-              : LegacyAccountAutocomplete;
-            return (
-              <AccountAutocomplete
-                value={accountId}
-                accounts={accounts}
-                shouldSaveFromKey={shouldSaveFromKey}
-                tableBehavior={true}
-                focused={true}
-                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-                onUpdate={onUpdate}
-                onSelect={onSave}
-              />
-            );
-          }}
+          }) => (
+            <AccountAutocomplete
+              value={accountId}
+              accounts={accounts}
+              shouldSaveFromKey={shouldSaveFromKey}
+              tableBehavior={true}
+              focused={true}
+              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+              onUpdate={onUpdate}
+              onSelect={onSave}
+            />
+          )}
         </CustomCell>
       )}
       {(() => {
