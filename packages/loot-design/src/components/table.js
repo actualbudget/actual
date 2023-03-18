@@ -1010,13 +1010,10 @@ export function useTableNavigator(data, fields) {
   let modalStackLength = useRef(0);
 
   // onEdit is passed to children, so make sure it maintains identity
-  let onEdit = useCallback(
-    (id, field) => {
-      setEditingId(id);
-      setFocusedField(id ? field : null);
-    },
-    [setEditingId, setFocusedField],
-  );
+  let onEdit = useCallback((id, field) => {
+    setEditingId(id);
+    setFocusedField(id ? field : null);
+  }, []);
 
   useEffect(() => {
     modalStackLength.current = store.getState().modals.modalStack.length;
