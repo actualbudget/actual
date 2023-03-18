@@ -10,12 +10,21 @@ export default function update(state = initialState, action) {
   switch (action.type) {
     case constants.SET_PREFS:
       if (action.prefs) {
-        setNumberFormat(action.prefs.numberFormat || 'comma-dot');
+        setNumberFormat({
+          format: action.prefs.numberFormat || 'comma-dot',
+          hideFraction: action.prefs.hideFraction,
+        });
       }
       return { local: action.prefs, global: action.globalPrefs };
     case constants.MERGE_LOCAL_PREFS:
-      if (action.prefs.numberFormat) {
-        setNumberFormat(action.prefs.numberFormat);
+      if (action.prefs.numberFormat || action.prefs.hideFraction != null) {
+        setNumberFormat({
+          format: action.prefs.numberFormat || state.local.numberFormat,
+          hideFraction:
+            action.prefs.hideFraction != null
+              ? action.prefs.hideFraction
+              : state.local.hideFraction,
+        });
       }
 
       return {
