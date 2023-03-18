@@ -36,10 +36,11 @@ import {
   amountToInteger,
   titleFirst,
 } from 'loot-core/src/shared/util';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
+import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
 import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
 import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
+import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
 import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
 import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import {
@@ -527,6 +528,8 @@ export const Transaction = React.memo(function Transaction(props) {
     onToggleSplit,
   } = props;
 
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+
   let dispatchSelected = useSelectedDispatch();
 
   let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
@@ -757,18 +760,23 @@ export const Transaction = React.memo(function Transaction(props) {
             onSave,
             shouldSaveFromKey,
             inputStyle,
-          }) => (
-            <AccountAutocomplete
-              value={accountId}
-              accounts={accounts}
-              shouldSaveFromKey={shouldSaveFromKey}
-              tableBehavior={true}
-              focused={true}
-              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-              onUpdate={onUpdate}
-              onSelect={onSave}
-            />
-          )}
+          }) => {
+            const AccountAutocomplete = isNewAutocompleteEnabled
+              ? NewAccountAutocomplete
+              : LegacyAccountAutocomplete;
+            return (
+              <AccountAutocomplete
+                value={accountId}
+                accounts={accounts}
+                shouldSaveFromKey={shouldSaveFromKey}
+                tableBehavior={true}
+                focused={true}
+                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                onUpdate={onUpdate}
+                onSelect={onSave}
+              />
+            );
+          }}
         </CustomCell>
       )}
       {(() => {
