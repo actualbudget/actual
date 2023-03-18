@@ -999,11 +999,10 @@ export const Table = React.forwardRef(
   },
 );
 
-export function useTableNavigator(data, fields, opts = {}) {
+export function useTableNavigator(data, fields) {
   let getFields = typeof fields !== 'function' ? () => fields : fields;
-  let { initialEditingId, initialFocusedField, moveKeys } = opts;
-  let [editingId, setEditingId] = useState(initialEditingId || null);
-  let [focusedField, setFocusedField] = useState(initialFocusedField || null);
+  let [editingId, setEditingId] = useState(null);
+  let [focusedField, setFocusedField] = useState(null);
   let containerRef = useRef();
 
   // See `onBlur` for why we need this
@@ -1128,47 +1127,37 @@ export function useTableNavigator(data, fields, opts = {}) {
           return;
         }
 
-        let fieldKeys =
-          moveKeys && moveKeys[focusedField] && moveKeys[focusedField];
+        switch (e.code) {
+          case 'ArrowUp':
+          case 'KeyK':
+            if (e.target.tagName !== 'INPUT') {
+              onMove('up');
+            }
+            break;
 
-        if (fieldKeys && fieldKeys[e.keyCode]) {
-          e.preventDefault();
-          e.stopPropagation();
+          case 'ArrowDown':
+          case 'KeyJ':
+            if (e.target.tagName !== 'INPUT') {
+              onMove('down');
+            }
+            break;
 
-          onMove(fieldKeys[e.keyCode]);
-        } else {
-          switch (e.code) {
-            case 'ArrowUp':
-            case 'KeyK':
-              if (e.target.tagName !== 'INPUT') {
-                onMove('up');
-              }
-              break;
+          case 'Enter':
+          case 'Tab':
+            e.preventDefault();
+            e.stopPropagation();
 
-            case 'ArrowDown':
-            case 'KeyJ':
-              if (e.target.tagName !== 'INPUT') {
-                onMove('down');
-              }
-              break;
-
-            case 'Enter':
-            case 'Tab':
-              e.preventDefault();
-              e.stopPropagation();
-
-              onMove(
-                e.code === 'Enter'
-                  ? e.shiftKey
-                    ? 'up'
-                    : 'down'
-                  : e.shiftKey
-                  ? 'left'
-                  : 'right',
-              );
-              break;
-            default:
-          }
+            onMove(
+              e.code === 'Enter'
+                ? e.shiftKey
+                  ? 'up'
+                  : 'down'
+                : e.shiftKey
+                ? 'left'
+                : 'right',
+            );
+            break;
+          default:
         }
       },
 

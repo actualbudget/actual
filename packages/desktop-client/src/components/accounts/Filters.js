@@ -166,7 +166,7 @@ function ConfigureField({
       width={300}
       onClose={() => dispatch({ type: 'close' })}
     >
-      <FocusScope contain>
+      <FocusScope>
         <View style={{ marginBottom: 10 }}>
           {field === 'amount' || field === 'date' ? (
             <CustomSelect
