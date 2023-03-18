@@ -136,7 +136,13 @@ function TotalsList({ prevMonthName, collapsed }) {
   );
 }
 
-function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
+function ToBudget({
+  month,
+  prevMonthName,
+  collapsed,
+  onBudgetAction,
+  isNewAutocompleteEnabled,
+}) {
   return (
     <SheetValue binding={rolloverBudget.toBudget} initialValue={0}>
       {node => {
@@ -233,6 +239,7 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                           category,
                         });
                       }}
+                      isNewAutocompleteEnabled={isNewAutocompleteEnabled}
                     />
                   )}
                 </View>
@@ -267,6 +274,7 @@ function BudgetSummaryComponent({ month, localPrefs }) {
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
 
   let goalTemplatesEnabled = localPrefs['flags.goalTemplatesEnabled'];
+  let isNewAutocompleteEnabled = localPrefs['flags.newAutocomplete'];
 
   return (
     <View
@@ -409,13 +417,18 @@ function BudgetSummaryComponent({ month, localPrefs }) {
               prevMonthName={prevMonthName}
               month={month}
               onBudgetAction={onBudgetAction}
+              isNewAutocompleteEnabled={isNewAutocompleteEnabled}
             />
           </View>
         ) : (
           <>
             <TotalsList prevMonthName={prevMonthName} />
             <View style={{ margin: '23px 0' }}>
-              <ToBudget month={month} onBudgetAction={onBudgetAction} />
+              <ToBudget
+                month={month}
+                onBudgetAction={onBudgetAction}
+                isNewAutocompleteEnabled={isNewAutocompleteEnabled}
+              />
             </View>
           </>
         )}

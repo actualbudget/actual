@@ -37,7 +37,8 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
+import NewCategoryAutocomplete from 'loot-design/src/components/CategoryAutocomplete';
+import LegacyCategoryAutocomplete from 'loot-design/src/components/CategorySelect';
 import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
 import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
@@ -533,6 +534,9 @@ export const Transaction = React.memo(function Transaction(props) {
   const AccountAutocomplete = isNewAutocompleteEnabled
     ? NewAccountAutocomplete
     : LegacyAccountAutocomplete;
+  const CategoryAutocomplete = isNewAutocompleteEnabled
+    ? NewCategoryAutocomplete
+    : LegacyCategoryAutocomplete;
 
   let dispatchSelected = useSelectedDispatch();
 
