@@ -37,7 +37,7 @@ function getFileDescription(file) {
   return null;
 }
 
-function FileMenu({ state, onDelete, onUpload, onClose, onDownload }) {
+function FileMenu({ onDelete, onClose }) {
   function onMenuSelect(type) {
     onClose();
 
@@ -248,7 +248,7 @@ function BudgetList({
   pushModal,
   loadBudget,
   createBudget,
-  onDownload,
+  downloadBudget,
 }) {
   const [creating, setCreating] = useState(false);
 
@@ -298,7 +298,7 @@ function BudgetList({
         actions={actions}
         onSelect={file => {
           if (file.state === 'remote') {
-            onDownload(file.cloudFileId);
+            downloadBudget(file.cloudFileId);
           } else {
             loadBudget(file.id);
           }
