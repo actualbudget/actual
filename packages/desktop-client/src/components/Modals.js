@@ -19,6 +19,7 @@ import NordigenExternalMsg from 'loot-design/src/components/modals/NordigenExter
 import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
 import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 
+import useFeatureFlag from '../hooks/useFeatureFlag';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
@@ -40,6 +41,9 @@ function Modals({
   budgetId,
   actions,
 }) {
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
   const syncServerStatus = useSyncServerStatus();
 
   return modalStack.map(({ name, options = {} }, idx) => {
@@ -272,6 +276,7 @@ function Modals({
                 actions={actions}
                 name={options.name}
                 onSubmit={options.onSubmit}
+                isNewAutocompleteEnabled={isNewAutocompleteEnabled}
               />
             );
           }}
@@ -283,6 +288,7 @@ function Modals({
             modalProps={modalProps}
             month={options.month}
             actions={actions}
+            isGoalTemplatesEnabled={isGoalTemplatesEnabled}
           />
         </Route>
       </Switch>
