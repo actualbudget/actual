@@ -1,17 +1,17 @@
-import React from 'react';
-import { withRouter } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
 
-class GlobalKeys extends React.Component {
-  componentDidMount() {
+export default function GlobalKeys() {
+  let history = useHistory();
+  useEffect(() => {
     const handleKeys = e => {
       if (Platform.isBrowser) {
         return;
       }
 
       if (e.metaKey) {
-        const { history } = this.props;
         switch (e.code) {
           case 'Digit1':
             history.push('/budget');
@@ -34,18 +34,8 @@ class GlobalKeys extends React.Component {
 
     document.addEventListener('keydown', handleKeys);
 
-    this.cleanupListeners = () => {
-      document.removeEventListener('keydown', handleKeys);
-    };
-  }
+    return () => document.removeEventListener('keydown', handleKeys);
+  }, []);
 
-  componentWillUnmount() {
-    this.cleanupListeners();
-  }
-
-  render() {
-    return null;
-  }
+  return null;
 }
-
-export default withRouter(GlobalKeys);
