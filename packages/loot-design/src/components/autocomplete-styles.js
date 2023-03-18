@@ -62,13 +62,22 @@ const colourStyles = {
     padding: '3px 20px',
     fontSize: 13,
   }),
-  valueContainer: styles => ({ ...styles, padding: 'none' }),
+  valueContainer: styles => ({
+    ...styles,
+    padding: 'none',
+    overflow: 'visible',
+  }),
   clearIndicator: styles => ({
     ...styles,
     padding: 'none',
     '> svg': { height: 15, width: 15 },
   }),
-  multiValue: styles => ({ ...styles, backgroundColor: colors.b9 }),
+  multiValue: styles => ({
+    ...styles,
+    backgroundColor: colors.b9,
+    marginTop: -4,
+    marginBottom: -4,
+  }),
 };
 
 export default colourStyles;
