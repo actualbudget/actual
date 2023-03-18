@@ -22,6 +22,8 @@ import { Sidebar } from 'loot-design/src/components/sidebar';
 import { styles, colors } from 'loot-design/src/style';
 import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 
+import useFeatureFlag from '../hooks/useFeatureFlag';
+
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
   let history = useHistory();
@@ -123,6 +125,8 @@ function SidebarWithData({
   saveGlobalPrefs,
   getAccounts,
 }) {
+  const syncAccount = useFeatureFlag('syncAccount');
+
   useEffect(() => void getAccounts(), [getAccounts]);
 
   async function onReorder(id, dropPos, targetId) {
@@ -149,9 +153,7 @@ function SidebarWithData({
       onFloat={() => saveGlobalPrefs({ floatingSidebar: !floatingSidebar })}
       onReorder={onReorder}
       onAddAccount={() =>
-        replaceModal(
-          prefs['flags.syncAccount'] ? 'add-account' : 'add-local-account',
-        )
+        replaceModal(syncAccount ? 'add-account' : 'add-local-account')
       }
       showClosedAccounts={prefs['ui.showClosedAccounts']}
       onToggleClosedAccounts={() =>
