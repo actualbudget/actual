@@ -79,6 +79,7 @@ export default function PayeeAutocomplete({
   const dispatch = useDispatch();
 
   const useCreatableComponent = isCreatable && focusTransferPayees === false;
+  const [inputValue, setInputValue] = useState();
 
   return (
     <Autocomplete
@@ -89,6 +90,8 @@ export default function PayeeAutocomplete({
           : allOptions.find(item => item.value === value)
       }
       isMulti={multi}
+      inputValue={inputValue}
+      onInputChange={setInputValue}
       onSelect={onSelect}
       onCreateOption={async selected => {
         const existingOption = allOptions.find(option =>
@@ -152,6 +155,7 @@ export default function PayeeAutocomplete({
                 }
               }
               onClick={() => {
+                setInputValue('');
                 setFocusTransferPayees(!focusTransferPayees);
               }}
             />

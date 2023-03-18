@@ -23,7 +23,6 @@ const Autocomplete = React.forwardRef(
   ) => {
     const [initialValue] = useState(value);
     const [isOpen, setIsOpen] = useState(focused);
-    const [inputValue, setInputValue] = useState();
 
     const filterOption = (option, input) => {
       return (
@@ -80,7 +79,6 @@ const Autocomplete = React.forwardRef(
         menuIsOpen={isOpen || embedded}
         autoFocus={embedded}
         options={options}
-        inputValue={inputValue}
         placeholder="(none)"
         captureMenuScroll={false}
         onChange={onChange}
@@ -88,7 +86,6 @@ const Autocomplete = React.forwardRef(
         onCreateOption={onCreateOption}
         onBlur={() => setIsOpen(false)}
         onFocus={() => setIsOpen(true)}
-        onInputChange={setInputValue}
         isClearable
         filterOption={filterOption}
         components={{
