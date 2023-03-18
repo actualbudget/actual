@@ -56,63 +56,59 @@ export default function FormatSettings({ prefs, savePrefs }) {
   let numberFormat = prefs.numberFormat || 'comma-dot';
 
   return (
-    <>
-      <Setting
-        primaryAction={
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: '1em',
-              width: '100%',
-              [`@media (max-width: ${tokens.breakpoint_xs})`]: {
-                flexDirection: 'column',
-              },
-            }}
-          >
-            <Column title="Numbers">
-              <Button bounce={false} style={{ padding: 0 }}>
-                <CustomSelect
-                  key={prefs.hideFraction} // needed because label does not update
-                  value={numberFormat}
-                  onChange={onNumberFormat}
-                  options={numberFormats.map(f => [
-                    f.value,
-                    prefs.hideFraction ? f.labelNoFraction : f.label,
-                  ])}
-                  style={{ padding: '5px 10px', fontSize: 15 }}
-                />
-              </Button>
+    <Setting
+      primaryAction={
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: '1em',
+            width: '100%',
+            [`@media (max-width: ${tokens.breakpoint_xs})`]: {
+              flexDirection: 'column',
+            },
+          }}
+        >
+          <Column title="Numbers">
+            <Button bounce={false} style={{ padding: 0 }}>
+              <CustomSelect
+                key={prefs.hideFraction} // needed because label does not update
+                value={numberFormat}
+                onChange={onNumberFormat}
+                options={numberFormats.map(f => [
+                  f.value,
+                  prefs.hideFraction ? f.labelNoFraction : f.label,
+                ])}
+                style={{ padding: '5px 10px', fontSize: 15 }}
+              />
+            </Button>
 
-              <Text style={{ display: 'flex' }}>
-                <Checkbox
-                  id="settings-textDecimal"
-                  checked={prefs.hideFraction}
-                  onChange={onHideFraction}
-                />
-                <label htmlFor="settings-textDecimal">
-                  Hide decimal places
-                </label>
-              </Text>
-            </Column>
+            <Text style={{ display: 'flex' }}>
+              <Checkbox
+                id="settings-textDecimal"
+                checked={prefs.hideFraction}
+                onChange={onHideFraction}
+              />
+              <label htmlFor="settings-textDecimal">Hide decimal places</label>
+            </Text>
+          </Column>
 
-            <Column title="Dates">
-              <Button bounce={false} style={{ padding: 0 }}>
-                <CustomSelect
-                  value={dateFormat}
-                  onChange={onDateFormat}
-                  options={dateFormats.map(f => [f.value, f.label])}
-                  style={{ padding: '5px 10px', fontSize: 15 }}
-                />
-              </Button>
-            </Column>
-          </View>
-        }
-      >
-        <Text>
-          <strong>Formatting</strong> does not affect how budget data is stored,
-          and can be changed at any time.
-        </Text>
-      </Setting>
-    </>
+          <Column title="Dates">
+            <Button bounce={false} style={{ padding: 0 }}>
+              <CustomSelect
+                value={dateFormat}
+                onChange={onDateFormat}
+                options={dateFormats.map(f => [f.value, f.label])}
+                style={{ padding: '5px 10px', fontSize: 15 }}
+              />
+            </Button>
+          </Column>
+        </View>
+      }
+    >
+      <Text>
+        <strong>Formatting</strong> does not affect how budget data is stored,
+        and can be changed at any time.
+      </Text>
+    </Setting>
   );
 }
