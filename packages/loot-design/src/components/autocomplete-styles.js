@@ -62,10 +62,12 @@ const colourStyles = {
     padding: '3px 20px',
     fontSize: 13,
   }),
-  valueContainer: styles => ({
+  valueContainer: (styles, { isMulti, selectProps }) => ({
     ...styles,
     padding: 'none',
     overflow: 'visible',
+    marginTop: isMulti && selectProps.value?.length ? -4 : undefined,
+    marginBottom: isMulti && selectProps.value?.length ? -4 : undefined,
   }),
   clearIndicator: styles => ({
     ...styles,
@@ -75,8 +77,6 @@ const colourStyles = {
   multiValue: styles => ({
     ...styles,
     backgroundColor: colors.b9,
-    marginTop: -4,
-    marginBottom: -4,
   }),
 };
 
