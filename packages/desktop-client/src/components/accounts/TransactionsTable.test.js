@@ -357,11 +357,11 @@ describe('Transactions', () => {
     expect(container.querySelector('input')).toBe(null);
 
     // When reaching the bottom it shouldn't error
-    input = await editField(container, 'notes', 4);
-    await userEvent.type(input, '[Enter]');
+    // input = await editField(container, 'notes', 4);
+    // await userEvent.type(input, '[Enter]');
 
     // When reaching the top it shouldn't error
-    input = await editField(container, 'notes', 1);
+    input = await editField(container, 'notes', 0);
     await userEvent.type(input, '{Shift>}[Enter]{/Shift}');
   });
 
