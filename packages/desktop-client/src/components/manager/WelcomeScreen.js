@@ -23,11 +23,7 @@ function WelcomeScreen({ createBudget, pushModal }) {
       }}
     >
       <Text style={styles.veryLargeText}>Let’s get started!</Text>
-      <View
-        style={{
-          overflowY: 'auto',
-        }}
-      >
+      <View style={{ overflowY: 'auto' }}>
         <P>
           Actual is a personal finance tool that focuses on beautiful design and
           a slick user experience.{' '}
@@ -68,13 +64,7 @@ function WelcomeScreen({ createBudget, pushModal }) {
           flexShrink: 0,
         }}
       >
-        <Button
-          onClick={() => {
-            pushModal('import');
-          }}
-        >
-          Import my budget
-        </Button>
+        <Button onClick={() => pushModal('import')}>Import my budget</Button>
         <Button primary onClick={createBudget}>
           Start fresh
         </Button>
