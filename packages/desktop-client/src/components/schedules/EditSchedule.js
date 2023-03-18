@@ -442,6 +442,7 @@ export default function ScheduleDetails() {
           <FormLabel title="Payee" htmlFor="payee-field" />
           <PayeeAutocomplete
             value={state.fields.payee}
+            inputId="payee-field"
             inputProps={{ id: 'payee-field', placeholder: '(none)' }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
@@ -455,6 +456,7 @@ export default function ScheduleDetails() {
           <AccountAutocomplete
             includeClosedAccounts={false}
             value={state.fields.account}
+            inputId="account-field"
             inputProps={{ id: 'account-field', placeholder: '(none)' }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'account', value: id })
