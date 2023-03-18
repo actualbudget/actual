@@ -23,18 +23,3 @@ process.on('unhandledRejection', reason => {
 global.afterEach(() => {
   global.__resetWorld();
 });
-
-// https://github.com/testing-library/react-testing-library#suppressing-unnecessary-warnings-on-react-dom-168
-const originalError = console.error;
-global.beforeAll(() => {
-  console.error = (...args) => {
-    if (/Warning.*not wrapped in act/.test(args[0])) {
-      return;
-    }
-    originalError.call(console, ...args);
-  };
-});
-
-global.afterAll(() => {
-  console.error = originalError;
-});

@@ -13,8 +13,8 @@ import CategoryAutocomplete from '../CategorySelect';
 import { View, Modal, Input } from '../common';
 import DateSelect from '../DateSelect';
 import { SectionLabel } from '../forms';
-import PayeeAutocomplete from '../PayeeAutocomplete';
-// import { colors } from '../../style';
+import NewPayeeAutocomplete from '../NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from '../PayeeAutocomplete';
 
 function EditField({
   actions,
@@ -26,6 +26,7 @@ function EditField({
   onSubmit,
   dateFormat,
   createPayee,
+  isNewAutocompleteEnabled,
 }) {
   function onSelect(value) {
     if (value != null) {
@@ -45,6 +46,10 @@ function EditField({
     inputProps: { style: inputStyle },
     containerProps: { style: { height: 275 } },
   };
+
+  const PayeeAutocomplete = isNewAutocompleteEnabled
+    ? NewPayeeAutocomplete
+    : LegacyPayeeAutocomplete;
 
   switch (name) {
     case 'date': {
@@ -101,6 +106,7 @@ function EditField({
 
             onSelect(value);
           }}
+          isCreatable
           {...autocompleteProps}
         />
       );
@@ -189,6 +195,7 @@ export default connect(
     categoryGroups: state.queries.categories.grouped,
     accounts: state.queries.accounts,
     payees: state.queries.payees,
+    isNewAutocompleteEnabled: state.prefs.local['flags.newAutocomplete'],
   }),
   actions,
 )(EditField);
