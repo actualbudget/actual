@@ -9,11 +9,11 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
 import LegacyAccountAutocomplete from '../AccountAutocomplete';
-import NewAccountAutocomplete from '../NewAccountAutocomplete';
 import CategoryAutocomplete from '../CategorySelect';
 import { View, Modal, Input } from '../common';
 import DateSelect from '../DateSelect';
 import { SectionLabel } from '../forms';
+import NewAccountAutocomplete from '../NewAccountAutocomplete';
 import NewPayeeAutocomplete from '../NewPayeeAutocomplete';
 import LegacyPayeeAutocomplete from '../PayeeAutocomplete';
 

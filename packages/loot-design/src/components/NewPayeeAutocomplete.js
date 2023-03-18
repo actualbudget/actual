@@ -11,8 +11,8 @@ import { colors } from '../style';
 import Add from '../svg/v1/Add';
 
 import { AutocompleteFooter, AutocompleteFooterButton } from './Autocomplete';
-import Autocomplete from './NewAutocomplete';
 import { View } from './common';
+import Autocomplete from './NewAutocomplete';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
   let activePayees =
@@ -152,7 +152,6 @@ export default function PayeeAutocomplete({
                 }
               }
               onClick={() => {
-                setInputValue('');
                 setFocusTransferPayees(!focusTransferPayees);
               }}
             />

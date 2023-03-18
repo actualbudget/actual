@@ -9,6 +9,7 @@ import { NullComponent } from './common';
 const Autocomplete = React.forwardRef(
   (
     {
+      value,
       options = [],
       focused = false,
       embedded = false,
@@ -20,6 +21,7 @@ const Autocomplete = React.forwardRef(
     },
     ref,
   ) => {
+    const [initialValue] = useState(value);
     const [isOpen, setIsOpen] = useState(focused);
     const [inputValue, setInputValue] = useState();
 
@@ -74,6 +76,7 @@ const Autocomplete = React.forwardRef(
     return (
       <Component
         ref={ref}
+        value={value}
         menuIsOpen={isOpen || embedded}
         autoFocus={embedded}
         options={options}
