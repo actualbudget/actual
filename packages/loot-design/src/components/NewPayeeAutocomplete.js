@@ -1,8 +1,6 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import Select, { components as SelectComponents } from 'react-select';
-
-import Creatable from 'react-select/creatable';
+import { components as SelectComponents } from 'react-select';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
@@ -13,8 +11,8 @@ import { colors } from '../style';
 import Add from '../svg/v1/Add';
 
 import { AutocompleteFooter, AutocompleteFooterButton } from './Autocomplete';
-import styles from './autocomplete-styles';
-import { View, NullComponent } from './common';
+import { View } from './common';
+import Autocomplete from './NewAutocomplete';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
   let activePayees =
@@ -54,21 +52,15 @@ function MenuListWithFooter(props) {
 
 export default function PayeeAutocomplete({
   value,
-  focused = false,
+  multi = false,
   showMakeTransfer = true,
   showManagePayees = false,
   defaultFocusTransferPayees = false,
-  embedded = false,
-  multi = false,
   isCreatable = false,
   onSelect,
   onManagePayees,
   ...props
 }) {
-  const selectRef = useRef();
-  const [initialValue] = useState(value);
-  const [isOpen, setIsOpen] = useState(focused);
-  const [inputValue, setInputValue] = useState();
   const payees = useCachedPayees();
   const accounts = useCachedAccounts();
 
@@ -86,85 +78,36 @@ export default function PayeeAutocomplete({
 
   const dispatch = useDispatch();
 
-  const onChange = async selected => {
-    // Clear button clicked
-    if (!selected) {
-      onSelect(null);
-      return;
-    }
-
-    // Close the menu when making a successful selection
-    if (!Array.isArray(selected)) {
-      setIsOpen(false);
-    }
-
-    const existingOption = allOptions.find(option =>
-      filterOption(option, selected.label),
-    );
-    if (selected.__isNew__) {
-      // Prevent creating duplicates
-      if (existingOption) {
-        onSelect(existingOption.value);
-        return;
-      }
-
-      // This is actually a new payee, so create it
-      onSelect(await dispatch(createPayee(selected.value)));
-      return;
-    }
-
-    // Multi-select has multiple selections
-    if (Array.isArray(selected)) {
-      onSelect(selected.map(option => option.value));
-      return;
-    }
-
-    onSelect(selected.value);
-  };
-
-  const filterOption = (option, input) => {
-    return (
-      option.data?.__isNew__ ||
-      option.label.toLowerCase().includes(input?.toLowerCase())
-    );
-  };
-
-  const onKeyDown = event => {
-    const ESC = 27;
-
-    if (event.keyCode === ESC) {
-      onSelect(initialValue);
-      setIsOpen(false);
-      return;
-    }
-
-    if (!isOpen) {
-      setIsOpen(true);
-    }
-  };
-
   const useCreatableComponent = isCreatable && focusTransferPayees === false;
-  const Component = useCreatableComponent ? Creatable : Select;
+  const [inputValue, setInputValue] = useState();
 
   return (
-    <Component
-      ref={selectRef}
-      menuIsOpen={isOpen || embedded}
-      autoFocus={embedded}
+    <Autocomplete
       options={options}
       value={
         multi
           ? allOptions.filter(item => value.includes(item.value))
           : allOptions.find(item => item.value === value)
       }
+      isMulti={multi}
       inputValue={inputValue}
-      placeholder="(none)"
-      captureMenuScroll={false}
-      onChange={onChange}
-      onKeyDown={onKeyDown}
-      onBlur={() => setIsOpen(false)}
-      onFocus={() => setIsOpen(true)}
       onInputChange={setInputValue}
+      onSelect={onSelect}
+      onCreateOption={async selected => {
+        const existingOption = allOptions.find(option =>
+          option.label.toLowerCase().includes(selected.label?.toLowerCase()),
+        );
+
+        // Prevent creating duplicates
+        if (existingOption) {
+          onSelect(existingOption.value);
+          return;
+        }
+
+        // This is actually a new option, so create it
+        onSelect(await dispatch(createPayee(selected.value)));
+      }}
+      isCreatable={useCreatableComponent}
       createOptionPosition="first"
       formatCreateLabel={inputValue => (
         <View
@@ -189,19 +132,9 @@ export default function PayeeAutocomplete({
           Create Payee "{inputValue}"
         </View>
       )}
-      isClearable
-      filterOption={filterOption}
       components={{
         MenuList: MenuListWithFooter,
-        IndicatorSeparator: NullComponent,
-        DropdownIndicator: NullComponent,
       }}
-      maxMenuHeight={200}
-      styles={styles}
-      embedded={embedded}
-      isMulti={multi}
-      menuPlacement="auto"
-      menuPortalTarget={embedded ? undefined : document.body}
       footer={
         <AutocompleteFooter show={showMakeTransfer || showManagePayees}>
           {showMakeTransfer && (
