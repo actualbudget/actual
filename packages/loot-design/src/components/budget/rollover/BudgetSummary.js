@@ -250,7 +250,11 @@ function ToBudget({
   );
 }
 
-export function BudgetSummary({ month, isGoalTemplatesEnabled }) {
+export function BudgetSummary({
+  month,
+  isGoalTemplatesEnabled,
+  isNewAutocompleteEnabled,
+}) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -270,9 +274,6 @@ export function BudgetSummary({ month, isGoalTemplatesEnabled }) {
   let prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
-
-  let goalTemplatesEnabled = localPrefs['flags.goalTemplatesEnabled'];
-  let isNewAutocompleteEnabled = localPrefs['flags.newAutocomplete'];
 
   return (
     <View
