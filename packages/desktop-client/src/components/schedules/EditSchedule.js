@@ -8,7 +8,7 @@ import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
+import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
 import { Stack, View, Text, Button } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
 import {
@@ -16,6 +16,7 @@ import {
   FormLabel,
   Checkbox,
 } from 'loot-design/src/components/forms';
+import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
 import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
 import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
@@ -427,6 +428,9 @@ export default function ScheduleDetails() {
   const PayeeAutocomplete = isNewAutocompleteEnabled
     ? NewPayeeAutocomplete
     : LegacyPayeeAutocomplete;
+  const AccountAutocomplete = isNewAutocompleteEnabled
+    ? NewAccountAutocomplete
+    : LegacyAccountAutocomplete;
 
   return (
     <Page
