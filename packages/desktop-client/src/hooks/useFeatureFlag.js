@@ -1,7 +1,12 @@
 import { useSelector } from 'react-redux';
 
+import {
+  isDevelopmentEnvironment,
+  isPreviewEnvironment,
+} from 'loot-design/src/util/environment';
+
 const DEFAULT_FEATURE_FLAG_STATE = {
-  newAutocomplete: false,
+  newAutocomplete: isDevelopmentEnvironment() || isPreviewEnvironment(),
   syncAccount: false,
   goalTemplatesEnabled: false,
 };

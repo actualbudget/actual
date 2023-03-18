@@ -93,9 +93,9 @@ export default function PayeeAutocomplete({
       inputValue={inputValue}
       onInputChange={setInputValue}
       onSelect={onSelect}
-      onCreateOption={async selected => {
+      onCreateOption={async selectedValue => {
         const existingOption = allOptions.find(option =>
-          option.label.toLowerCase().includes(selected.label?.toLowerCase()),
+          option.label.toLowerCase().includes(selectedValue?.toLowerCase()),
         );
 
         // Prevent creating duplicates
@@ -105,7 +105,7 @@ export default function PayeeAutocomplete({
         }
 
         // This is actually a new option, so create it
-        onSelect(await dispatch(createPayee(selected.value)));
+        onSelect(await dispatch(createPayee(selectedValue)));
       }}
       isCreatable={useCreatableComponent}
       createOptionPosition="first"
