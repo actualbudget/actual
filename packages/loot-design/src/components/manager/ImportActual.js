@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, colors } from '../../style';
-import { View, Block, Modal, ButtonWithLoading, Button, P } from '../common';
+import { View, Block, Modal, ButtonWithLoading, P } from '../common';
 
 function getErrorMessage(error) {
   switch (error) {
@@ -43,9 +43,7 @@ function Import({ modalProps, availableImports }) {
   return (
     <Modal
       {...modalProps}
-      showHeader={false}
-      showOverlay={false}
-      noAnimation={true}
+      title="Import from Actual export"
       style={{ width: 400 }}
     >
       {() => (
@@ -71,22 +69,6 @@ function Import({ modalProps, availableImports }) {
                 Select file...
               </ButtonWithLoading>
             </View>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 20,
-              alignItems: 'center',
-            }}
-          >
-            <View style={{ flex: 1 }} />
-            <Button
-              style={{ marginRight: 10 }}
-              onClick={() => modalProps.onBack()}
-            >
-              Back
-            </Button>
           </View>
         </View>
       )}

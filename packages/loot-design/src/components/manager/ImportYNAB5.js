@@ -9,7 +9,6 @@ import {
   Block,
   Modal,
   ButtonWithLoading,
-  Button,
   P,
   ExternalLink,
 } from '../common';
@@ -49,13 +48,7 @@ function Import({ modalProps, availableImports }) {
   }
 
   return (
-    <Modal
-      {...modalProps}
-      showHeader={false}
-      showOverlay={false}
-      noAnimation={true}
-      style={{ width: 400 }}
-    >
+    <Modal {...modalProps} title="Import from nYNAB" style={{ width: 400 }}>
       {() => (
         <View style={[styles.smallText, { lineHeight: 1.5, marginTop: 20 }]}>
           {error && (
@@ -90,22 +83,6 @@ function Import({ modalProps, availableImports }) {
                 Select file...
               </ButtonWithLoading>
             </View>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 20,
-              alignItems: 'center',
-            }}
-          >
-            <View style={{ flex: 1 }} />
-            <Button
-              style={{ marginRight: 10 }}
-              onClick={() => modalProps.onBack()}
-            >
-              Back
-            </Button>
           </View>
         </View>
       )}
