@@ -1352,7 +1352,6 @@ function TransactionTableInner({
               hoveredTransaction={props.hoveredTransaction}
               focusedField={newNavigator.focusedField}
               accounts={props.accounts}
-              currentAccountId={props.currentAccountId}
               categoryGroups={props.categoryGroups}
               payees={props.payees || []}
               showAccount={props.showAccount}
