@@ -1105,62 +1105,45 @@ export function InitialFocus({ children }) {
   return React.cloneElement(children, { inputRef: node });
 }
 
-export class HoverTarget extends React.Component {
-  state = { hovered: false };
+export function HoverTarget({
+  style,
+  contentStyle,
+  children,
+  renderContent,
+  disabled,
+}) {
+  let [hovered, setHovered] = useState(false);
 
-  onMouseEnter = () => {
-    if (!this.props.disabled) {
-      this.setState({ hovered: true });
+  const onMouseEnter = useCallback(() => {
+    if (!disabled) {
+      setHovered(true);
     }
-  };
+  }, [disabled]);
 
-  onMouseLeave = () => {
-    if (!this.props.disabled) {
-      this.setState({ hovered: false });
+  const onMouseLeave = useCallback(() => {
+    if (!disabled) {
+      setHovered(false);
     }
-  };
+  }, [disabled]);
 
-  componentDidUpdate(prevProps) {
-    let { disabled } = this.props;
-    if (disabled && this.state.hovered) {
-      this.setState({ hovered: false });
+  useEffect(() => {
+    if (disabled && hovered) {
+      setHovered(false);
     }
-  }
+  }, [disabled, hovered]);
 
-  render() {
-    let { style, contentStyle, children, renderContent } = this.props;
-    return (
-      <View style={style}>
-        <View
-          onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}
-          style={contentStyle}
-        >
-          {children}
-        </View>
-        {this.state.hovered && renderContent()}
+  return (
+    <View style={style}>
+      <View
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        style={contentStyle}
+      >
+        {children}
       </View>
-    );
-  }
-}
-
-export class TooltipTarget extends React.Component {
-  state = { clicked: false };
-
-  render() {
-    return (
-      <View style={[{ position: 'relative' }, this.props.style]}>
-        <View
-          style={{ flex: 1 }}
-          onClick={() => this.setState({ clicked: true })}
-        >
-          {this.props.children}
-        </View>
-        {this.state.clicked &&
-          this.props.renderContent(() => this.setState({ clicked: false }))}
-      </View>
-    );
-  }
+      {hovered && renderContent()}
+    </View>
+  );
 }
 
 export function Label({ title, style }) {
