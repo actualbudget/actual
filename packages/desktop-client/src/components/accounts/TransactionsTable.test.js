@@ -361,7 +361,7 @@ describe('Transactions', () => {
     await userEvent.type(input, '[Enter]');
 
     // When reaching the top it shouldn't error
-    input = await editField(container, 'notes', 0);
+    input = await editField(container, 'notes', 1);
     await userEvent.type(input, '{Shift>}[Enter]{/Shift}');
   });
 
