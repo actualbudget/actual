@@ -7,7 +7,6 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { View } from 'loot-design/src/components/common';
-import BudgetList from 'loot-design/src/components/manager/BudgetList';
 import DeleteFile from 'loot-design/src/components/manager/DeleteFile';
 import Import from 'loot-design/src/components/manager/Import';
 import ImportActual from 'loot-design/src/components/manager/ImportActual';
@@ -29,7 +28,7 @@ function Modals({
 }) {
   let stack = modalStack.map(({ name, options }, idx) => {
     const modalProps = {
-      onClose: actions.closeModal,
+      onClose: actions.popModal,
       onPush: actions.pushModal,
       onBack: actions.popModal,
       isCurrent: idx === modalStack.length - 1,
@@ -38,17 +37,6 @@ function Modals({
     };
 
     switch (name) {
-      case 'select-budget':
-        return (
-          <BudgetList
-            key={name}
-            modalProps={modalProps}
-            files={allFiles}
-            actions={actions}
-            isLoggedIn={isLoggedIn}
-            onDownload={cloudFileId => actions.downloadBudget(cloudFileId)}
-          />
-        );
       case 'delete-budget':
         return (
           <DeleteFile

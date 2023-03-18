@@ -6,6 +6,7 @@ import { createBrowserHistory } from 'history';
 
 import * as actions from 'loot-core/src/client/actions';
 import { View, Text } from 'loot-design/src/components/common';
+import BudgetList from 'loot-design/src/components/manager/BudgetList';
 import { colors } from 'loot-design/src/style';
 import tokens from 'loot-design/src/tokens';
 
@@ -20,6 +21,7 @@ import Bootstrap from './subscribe/Bootstrap';
 import ChangePassword from './subscribe/ChangePassword';
 import Error from './subscribe/Error';
 import Login from './subscribe/Login';
+import WelcomeScreen from './WelcomeScreen';
 
 function Version() {
   const version = useServerVersion();
@@ -92,62 +94,20 @@ class ManagementApp extends React.Component {
     });
   }
 
-  async showModal() {
-    // This runs when `files` has changed, and we need to perform
-    // actions based on whether or not files is empty or not
-    if (this.props.managerHasInitialized) {
-      let { currentModals, userData, files, replaceModal } = this.props;
-
-      // We want to decide where to take the user if they have logged
-      // in and we've tried to load their files
-      if (files && userData) {
-        if (files.length > 0) {
-          // If the user is logged in and files exist, show the budget
-          // list screen
-          if (!currentModals.includes('select-budget')) {
-            replaceModal('select-budget');
-          }
-        } else {
-          // If the user is logged in and there's no existing files,
-          // automatically create one. This will load the budget and
-          // swap out the manager with the new budget, so there's
-          // nothing else we need to do
-          this.props.createBudget();
-        }
-      }
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (!this.mounted) {
-      return;
-    }
-
-    if (
-      this.props.managerHasInitialized !== prevProps.managerHasInitialized ||
-      this.props.files !== prevProps.files ||
-      this.props.userData !== prevProps.userData
-    ) {
-      this.showModal();
-    }
-  }
-
   componentWillUnmount() {
     this.mounted = false;
   }
 
   render() {
-    let { userData, managerHasInitialized, loadingText } = this.props;
+    let { files, userData, managerHasInitialized } = this.props;
 
     if (!managerHasInitialized) {
       return null;
     }
 
-    let isHidden = loadingText != null;
-
     return (
       <Router history={this.history}>
-        <View style={{ height: '100%', minHeight: 500 }}>
+        <View style={{ height: '100%' }}>
           <View
             style={{
               position: 'absolute',
@@ -174,7 +134,7 @@ class ManagementApp extends React.Component {
             />
           </View>
 
-          {!isHidden && (
+          {managerHasInitialized && (
             <View
               style={{
                 alignItems: 'center',
@@ -187,7 +147,7 @@ class ManagementApp extends React.Component {
                 top: 0,
               }}
             >
-              {userData ? (
+              {userData && files ? (
                 <>
                   <Switch>
                     <Route
@@ -200,7 +160,11 @@ class ManagementApp extends React.Component {
                       path="/change-password"
                       component={ChangePassword}
                     />
-                    <Route exact path="/" component={Modals} />
+                    {files && files.length > 0 ? (
+                      <Route exact path="/" component={BudgetList} />
+                    ) : (
+                      <Route exact path="/" component={WelcomeScreen} />
+                    )}
                     {/* Redirect all other pages to this route */}
                     <Route path="/" render={() => <Redirect to="/" />} />
                   </Switch>
@@ -245,6 +209,7 @@ class ManagementApp extends React.Component {
           </Switch>
           <Version />
         </View>
+        <Modals history={this.history} />
       </Router>
     );
   }

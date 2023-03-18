@@ -28,7 +28,6 @@ import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import WelcomeScreen from './modals/WelcomeScreen';
 
 function Modals({
   history,
@@ -277,10 +276,6 @@ function Modals({
             );
           }}
         />
-
-        <Route path="/welcome-screen">
-          <WelcomeScreen modalProps={modalProps} actions={actions} />
-        </Route>
 
         <Route path="/budget-summary">
           <BudgetSummary

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 
@@ -359,6 +359,9 @@ describe('Transactions', () => {
     // When reaching the bottom it shouldn't error
     input = await editField(container, 'notes', 4);
     await userEvent.type(input, '[Enter]');
+    await waitFor(() => {
+      expect(container.querySelector('input')).toBeNull();
+    });
 
     // When reaching the top it shouldn't error
     input = await editField(container, 'notes', 0);
