@@ -13,8 +13,6 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
   const flags = useAllFeatureFlags();
   let disabled = prefs.budgetType === 'report' && flags.reportBudget;
 
-  console.log('flags', flags);
-
   return (
     <Setting
       primaryAction={
