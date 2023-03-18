@@ -25,6 +25,8 @@ import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
 import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
 import tokens from 'loot-design/src/tokens';
 
+import useFeatureFlag from '../hooks/useFeatureFlag';
+
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
@@ -163,7 +165,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
   let [loading, setLoading] = useState(false);
   let [showTooltip, setShowTooltip] = useState(false);
 
-  let reportBudgetEnabled = localPrefs['flags.reportBudget'];
+  const reportBudgetEnabled = useFeatureFlag('reportBudget');
 
   function onSwitchType() {
     setLoading(true);

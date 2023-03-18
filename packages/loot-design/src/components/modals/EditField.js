@@ -200,7 +200,6 @@ export default connect(
     categoryGroups: state.queries.categories.grouped,
     accounts: state.queries.accounts,
     payees: state.queries.payees,
-    isNewAutocompleteEnabled: state.prefs.local['flags.newAutocomplete'],
   }),
   actions,
 )(EditField);

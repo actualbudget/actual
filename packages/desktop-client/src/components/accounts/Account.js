@@ -60,6 +60,7 @@ import Pencil1 from 'loot-design/src/svg/v2/Pencil1';
 import SvgRemove from 'loot-design/src/svg/v2/Remove';
 import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useSyncServerStatus from '../../hooks/useSyncServerStatus';
 import { authorizeBank } from '../../nordigen';
 import { useActiveLocation } from '../ActiveLocation';
@@ -1914,13 +1915,13 @@ function AccountHack(props) {
 }
 
 export default function Account(props) {
+  const syncEnabled = useFeatureFlag('syncAccount');
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
     matchedTransactions: state.queries.matchedTransactions,
     accounts: state.queries.accounts,
     failedAccounts: state.account.failedAccounts,
     categoryGroups: state.queries.categories.grouped,
-    syncEnabled: state.prefs.local['flags.syncAccount'],
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     hideFraction: state.prefs.local.hideFraction || false,
     expandSplits: props.match && state.prefs.local['expand-splits'],
@@ -1975,6 +1976,7 @@ export default function Account(props) {
         <AccountHack
           {...state}
           {...actionCreators}
+          syncEnabled={syncEnabled}
           modalShowing={
             state.modalShowing ||
             !!(activeLocation.state && activeLocation.state.locationPtr)
