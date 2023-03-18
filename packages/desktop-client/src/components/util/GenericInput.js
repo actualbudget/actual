@@ -4,7 +4,8 @@ import { useSelector } from 'react-redux';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
 import LegacyAutocomplete from 'loot-design/src/components/Autocomplete';
-import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
+import NewCategoryAutocomplete from 'loot-design/src/components/CategoryAutocomplete';
+import LegacyCategoryAutocomplete from 'loot-design/src/components/CategorySelect';
 import { View, Input } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
 import { Checkbox } from 'loot-design/src/components/forms';
@@ -33,6 +34,9 @@ export default function GenericInput({
   const AccountAutocomplete = isNewAutocompleteEnabled
     ? NewAccountAutocomplete
     : LegacyAccountAutocomplete;
+  const CategoryAutocomplete = isNewAutocompleteEnabled
+    ? NewCategoryAutocomplete
+    : LegacyCategoryAutocomplete;
 
   let { payees, accounts, categoryGroups, dateFormat } = useSelector(state => {
     return {

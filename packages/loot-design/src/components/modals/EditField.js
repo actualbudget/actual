@@ -9,7 +9,8 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
 import LegacyAccountAutocomplete from '../AccountAutocomplete';
-import CategoryAutocomplete from '../CategorySelect';
+import NewCategoryAutocomplete from '../CategoryAutocomplete';
+import LegacyCategoryAutocomplete from '../CategorySelect';
 import { View, Modal, Input } from '../common';
 import DateSelect from '../DateSelect';
 import { SectionLabel } from '../forms';
@@ -55,6 +56,10 @@ function EditField({
   const AccountAutocomplete = isNewAutocompleteEnabled
     ? NewAccountAutocomplete
     : LegacyAccountAutocomplete;
+
+  const CategoryAutocomplete = isNewAutocompleteEnabled
+    ? NewCategoryAutocomplete
+    : LegacyCategoryAutocomplete;
 
   switch (name) {
     case 'date': {

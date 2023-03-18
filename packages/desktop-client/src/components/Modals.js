@@ -288,6 +288,7 @@ function Modals({
             modalProps={modalProps}
             month={options.month}
             actions={actions}
+            isNewAutocompleteEnabled={isNewAutocompleteEnabled}
             isGoalTemplatesEnabled={isGoalTemplatesEnabled}
           />
         </Route>
