@@ -1143,25 +1143,6 @@ export class HoverTarget extends React.Component {
   }
 }
 
-export class TooltipTarget extends React.Component {
-  state = { clicked: false };
-
-  render() {
-    return (
-      <View style={[{ position: 'relative' }, this.props.style]}>
-        <View
-          style={{ flex: 1 }}
-          onClick={() => this.setState({ clicked: true })}
-        >
-          {this.props.children}
-        </View>
-        {this.state.clicked &&
-          this.props.renderContent(() => this.setState({ clicked: false }))}
-      </View>
-    );
-  }
-}
-
 export function Label({ title, style }) {
   return (
     <Text
