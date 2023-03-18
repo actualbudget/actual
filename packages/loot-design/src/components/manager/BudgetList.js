@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
+import { connect } from 'react-redux';
 
+import * as actions from 'loot-core/src/client/actions';
 import Loading from 'loot-design/src/svg/AnimatedLoading';
 import Key from 'loot-design/src/svg/v2/Key';
 import RefreshArrow from 'loot-design/src/svg/v2/RefreshArrow';
@@ -10,11 +12,12 @@ import CloudDownload from '../../svg/v1/CloudDownload';
 import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
 import FileDouble from '../../svg/v1/FileDouble';
 import CloudUnknown from '../../svg/v2/CloudUnknown';
+import tokens from '../../tokens';
 import {
   isDevelopmentEnvironment,
   isPreviewEnvironment,
 } from '../../util/environment';
-import { View, Text, Modal, Button, Tooltip, Menu } from '../common';
+import { View, Text, Button, Tooltip, Menu } from '../common';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -34,7 +37,7 @@ function getFileDescription(file) {
   return null;
 }
 
-function FileMenu({ state, onDelete, onUpload, onClose, onDownload }) {
+function FileMenu({ onDelete, onClose }) {
   function onMenuSelect(type) {
     onClose();
 
@@ -192,30 +195,29 @@ function File({ file, onSelect, onDelete }) {
   );
 }
 
-class BudgetTable extends React.Component {
-  render() {
-    const { files, onSelect, onDelete } = this.props;
-
-    return (
-      <View
-        style={{
-          flex: 1,
+function BudgetTable({ files, onSelect, onDelete }) {
+  return (
+    <View
+      style={{
+        flexGrow: 1,
+        [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
+          flexGrow: 0,
           maxHeight: 310,
-          overflow: 'auto',
-          '& *': { userSelect: 'none' },
-        }}
-      >
-        {files.map((file, idx) => (
-          <File
-            key={file.id || file.cloudFileId}
-            file={file}
-            onSelect={onSelect}
-            onDelete={onDelete}
-          />
-        ))}
-      </View>
-    );
-  }
+        },
+        overflow: 'auto',
+        '& *': { userSelect: 'none' },
+      }}
+    >
+      {files.map(file => (
+        <File
+          key={file.id || file.cloudFileId}
+          file={file}
+          onSelect={onSelect}
+          onDelete={onDelete}
+        />
+      ))}
+    </View>
+  );
 }
 
 function RefreshButton({ onRefresh }) {
@@ -239,107 +241,114 @@ function RefreshButton({ onRefresh }) {
   );
 }
 
-class BudgetList extends React.Component {
-  creating = false;
+function BudgetList({
+  files = [],
+  getUserData,
+  loadAllFiles,
+  pushModal,
+  loadBudget,
+  createBudget,
+  downloadBudget,
+}) {
+  const [creating, setCreating] = useState(false);
 
-  onCreate = ({ testMode } = {}) => {
-    if (!this.creating) {
-      this.creating = true;
-      this.props.actions.createBudget({ testMode });
+  const onCreate = ({ testMode } = {}) => {
+    if (!creating) {
+      setCreating(true);
+      createBudget({ testMode });
     }
   };
 
-  render() {
-    let { modalProps, files = [], actions, onDownload } = this.props;
-
-    return (
-      <Modal
-        {...modalProps}
-        noAnimation={true}
-        showHeader={false}
-        showOverlay={false}
-        padding={0}
-        style={{ boxShadow: 'none', backgroundColor: 'transparent' }}
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        minWidth: tokens.breakpoint_narrow,
+        [`@media (max-width: ${tokens.breakpoint_narrow})`]: {
+          width: '100vw',
+          minWidth: '100vw',
+          marginInline: -20,
+          marginTop: 20,
+        },
+      }}
+    >
+      <View>
+        <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
+        <View
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            marginRight: 5,
+          }}
+        >
+          <RefreshButton
+            onRefresh={() => {
+              getUserData();
+              loadAllFiles();
+            }}
+          />
+        </View>
+      </View>
+      <BudgetTable
+        files={files}
+        actions={actions}
+        onSelect={file => {
+          if (file.state === 'remote') {
+            downloadBudget(file.cloudFileId);
+          } else {
+            loadBudget(file.id);
+          }
+        }}
+        onDelete={file => pushModal('delete-budget', { file })}
+      />
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          padding: 25,
+          paddingLeft: 5,
+        }}
       >
-        {() => (
-          <View style={{ flex: 1 }}>
-            <View>
-              <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
-              <View
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  justifyContent: 'center',
-                  marginRight: 5,
-                }}
-              >
-                <RefreshButton
-                  onRefresh={() => {
-                    actions.getUserData();
-                    actions.loadAllFiles();
-                  }}
-                />
-              </View>
-            </View>
-            <BudgetTable
-              files={files}
-              actions={actions}
-              onSelect={file => {
-                if (file.state === 'remote') {
-                  onDownload(file.cloudFileId);
-                } else {
-                  actions.loadBudget(file.id);
-                }
-              }}
-              onDelete={file => actions.pushModal('delete-budget', { file })}
-            />
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                padding: 25,
-                paddingLeft: 5,
-              }}
-            >
-              <Button
-                bare
-                style={{
-                  marginLeft: 10,
-                  color: colors.n4,
-                }}
-                onClick={e => {
-                  e.preventDefault();
-                  actions.pushModal('import');
-                }}
-              >
-                Import file
-              </Button>
+        <Button
+          bare
+          style={{
+            marginLeft: 10,
+            color: colors.n4,
+          }}
+          onClick={e => {
+            e.preventDefault();
+            pushModal('import');
+          }}
+        >
+          Import file
+        </Button>
 
-              <Button
-                primary
-                onClick={() => this.onCreate()}
-                style={{ marginLeft: 15 }}
-              >
-                Create new file
-              </Button>
+        <Button primary onClick={onCreate} style={{ marginLeft: 15 }}>
+          Create new file
+        </Button>
 
-              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
-                <Button
-                  primary
-                  onClick={() => this.onCreate({ testMode: true })}
-                  style={{ marginLeft: 15 }}
-                >
-                  Create test file
-                </Button>
-              )}
-            </View>
-          </View>
+        {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
+          <Button
+            primary
+            onClick={() => onCreate({ testMode: true })}
+            style={{ marginLeft: 15 }}
+          >
+            Create test file
+          </Button>
         )}
-      </Modal>
-    );
-  }
+      </View>
+    </View>
+  );
 }
 
-export default BudgetList;
+export default connect(
+  state => ({
+    files: state.budgets.allFiles,
+    isLoggedIn: !!state.user.data,
+  }),
+  actions,
+)(BudgetList);
