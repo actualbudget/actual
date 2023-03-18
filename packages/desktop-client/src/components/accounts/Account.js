@@ -1915,7 +1915,7 @@ function AccountHack(props) {
 }
 
 export default function Account(props) {
-  const syncEnabled = useFeatureFlag('syncEnabled');
+  const syncEnabled = useFeatureFlag('syncAccount');
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
     matchedTransactions: state.queries.matchedTransactions,
