@@ -250,6 +250,12 @@ async function _editField(field, container) {
   } else {
     await userEvent.click(field.querySelector('div'));
     element = field.querySelector('input');
+
+    if (element == null) {
+      console.log(field);
+      console.log('INPUT', container.querySelector('input').parentNode);
+    }
+
     expect(element).toBeTruthy();
     expect(container.ownerDocument.activeElement).toBe(element);
   }
