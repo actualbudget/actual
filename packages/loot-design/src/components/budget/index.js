@@ -1,4 +1,5 @@
 import React, { useContext, useState, useMemo } from 'react';
+import { connect } from 'react-redux';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -729,7 +730,11 @@ function ExpenseGroup({
   );
 }
 
-function ExpenseCategory({
+const ExpenseCategory = connect(state => ({
+  isNewAutocompleteEnabled: state.prefs.local['flags.newAutocomplete'],
+}))(ExpenseCategoryInternal);
+
+function ExpenseCategoryInternal({
   cat,
   budgetArray,
   editingCell,
@@ -743,6 +748,7 @@ function ExpenseCategory({
   onShowActivity,
   onDragChange,
   onReorder,
+  isNewAutocompleteEnabled,
 }) {
   let dragging = dragState && dragState.item === cat;
 
@@ -801,6 +807,7 @@ function ExpenseCategory({
             onEdit: onEditMonth,
             onBudgetAction,
             onShowActivity,
+            isNewAutocompleteEnabled,
           }}
         />
       </View>
