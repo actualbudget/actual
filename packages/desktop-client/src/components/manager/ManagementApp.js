@@ -99,13 +99,11 @@ class ManagementApp extends React.Component {
   }
 
   render() {
-    let { files, userData, managerHasInitialized, loadingText } = this.props;
+    let { files, userData, managerHasInitialized } = this.props;
 
     if (!managerHasInitialized) {
       return null;
     }
-
-    let isHidden = loadingText != null;
 
     return (
       <Router history={this.history}>
@@ -136,7 +134,7 @@ class ManagementApp extends React.Component {
             />
           </View>
 
-          {!isHidden && (
+          {managerHasInitialized && (
             <View
               style={{
                 alignItems: 'center',
@@ -149,7 +147,7 @@ class ManagementApp extends React.Component {
                 top: 0,
               }}
             >
-              {userData ? (
+              {userData && files ? (
                 <>
                   <Switch>
                     <Route
