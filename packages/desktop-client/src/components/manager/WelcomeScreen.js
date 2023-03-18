@@ -33,8 +33,10 @@ function WelcomeScreen({ createBudget, pushModal }) {
           a slick user experience.{' '}
           <strong>Editing your data should be as fast as possible.</strong> On
           top of that, we want to provide powerful tools to allow you to do
-          whatever you want with your data. Currently, Actual implements
-          budgeting based on a{' '}
+          whatever you want with your data.
+        </P>
+        <P style={{ '& a, & a:visited': { color: colors.p5 } }}>
+          Currently, Actual implements budgeting based on a{' '}
           <ExternalLink
             asAnchor
             style={{ color: colors.p5 }}
@@ -42,28 +44,15 @@ function WelcomeScreen({ createBudget, pushModal }) {
           >
             monthly envelope system
           </ExternalLink>
-          .
-        </P>
-        <P style={{ '& a, & a:visited': { color: colors.p5 } }}>
-          Read the{' '}
-          <ExternalLink asAnchor href="https://actualbudget.github.io/docs/">
-            documentation
-          </ExternalLink>{' '}
-          to get started and learn about{' '}
+          . Consider taking our{' '}
           <ExternalLink
             asAnchor
-            href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+            href="https://actualbudget.github.io/docs/Getting-Started/using-actual/"
           >
-            budgeting
-          </ExternalLink>
-          ,{' '}
-          <ExternalLink
-            asAnchor
-            href="https://actualbudget.github.io/docs/Accounts/overview"
-          >
-            accounts
+            guided tour
           </ExternalLink>{' '}
-          and more.
+          to help you get your bearings, and check out the rest of the
+          documentation while you’re there to learn more about advanced topics.
         </P>
         <P style={{ color: colors.n5 }}>
           Get started by importing an existing budget file from Actual or
