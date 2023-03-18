@@ -40,7 +40,7 @@ const Autocomplete = React.forwardRef(
 
       // Create a new option
       if (selected.__isNew__) {
-        onCreateOption(selected);
+        onCreateOption(selected.value);
         return;
       }
 
