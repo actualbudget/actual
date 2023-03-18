@@ -1114,7 +1114,6 @@ export function isPreviewId(id) {
 function NewTransaction({
   transactions,
   accounts,
-  currentAccountId,
   categoryGroups,
   payees,
   editingTransaction,
@@ -1314,7 +1313,7 @@ function TransactionTableInner({
               : new Set()
           }
           dateFormat={dateFormat}
-          onHover={props.onHover}
+          onHover={onHover}
           onEdit={tableNavigator.onEdit}
           onSave={props.onSave}
           onDelete={props.onDelete}
@@ -1353,7 +1352,6 @@ function TransactionTableInner({
               hoveredTransaction={props.hoveredTransaction}
               focusedField={newNavigator.focusedField}
               accounts={props.accounts}
-              currentAccountId={props.currentAccountId}
               categoryGroups={props.categoryGroups}
               payees={props.payees || []}
               showAccount={props.showAccount}
@@ -1368,7 +1366,7 @@ function TransactionTableInner({
               onEdit={newNavigator.onEdit}
               onSave={props.onSave}
               onDelete={props.onDelete}
-              onHover={props.onHover}
+              onHover={onHover}
               onManagePayees={props.onManagePayees}
               onCreatePayee={props.onCreatePayee}
             />
