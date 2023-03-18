@@ -33,10 +33,8 @@ function WelcomeScreen({ createBudget, pushModal }) {
           a slick user experience.{' '}
           <strong>Editing your data should be as fast as possible.</strong> On
           top of that, we want to provide powerful tools to allow you to do
-          whatever you want with your data.
-        </P>
-        <P>
-          Currently Actual implements budgeting based on a{' '}
+          whatever you want with your data. Currently, Actual implements
+          budgeting based on a{' '}
           <ExternalLink
             asAnchor
             style={{ color: colors.p5 }}
@@ -44,15 +42,9 @@ function WelcomeScreen({ createBudget, pushModal }) {
           >
             monthly envelope system
           </ExternalLink>
-          . In the future, we’ll support multiple ways to do budgeting. We’re
-          also working hard on custom reports and a lot more things.
+          .
         </P>
-        <P
-          style={{
-            fontWeight: 600,
-            '& a, & a:visited': { color: colors.p5 },
-          }}
-        >
+        <P style={{ '& a, & a:visited': { color: colors.p5 } }}>
           Read the{' '}
           <ExternalLink asAnchor href="https://actualbudget.github.io/docs/">
             documentation
