@@ -12,10 +12,7 @@ import {
 } from 'loot-design/src/components/common';
 import { useSetThemeColor } from 'loot-design/src/components/hooks';
 import { colors } from 'loot-design/src/style';
-import {
-  isDevelopmentEnvironment,
-  isPreviewEnvironment,
-} from 'loot-design/src/util/environment';
+import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
 
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
@@ -193,7 +190,7 @@ export default function ConfigServer() {
                 Don't use a server
               </Button>
 
-              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
+              {isNonProductionEnvironment() && (
                 <Button
                   primary
                   style={{ marginLeft: 15 }}

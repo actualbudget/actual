@@ -2,17 +2,14 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom-v5-compat';
 
 import { Modal } from 'loot-design/src/components/common';
-import {
-  isDevelopmentEnvironment,
-  isPreviewEnvironment,
-} from 'loot-design/src/util/environment';
+import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
 
 import ManageRules from '../ManageRules';
 
 export default function ManageRulesModal({ modalProps, payeeId }) {
   let [loading, setLoading] = useState(true);
   let location = useLocation();
-  if (isDevelopmentEnvironment() || isPreviewEnvironment()) {
+  if (isNonProductionEnvironment()) {
     if (location.pathname !== '/payees') {
       throw new Error(
         `Possibly invalid use of ManageRulesModal, add the current url '${location.pathname}' to the allowlist if you're confident the modal can never appear on top of the '/rules' page.`,

@@ -13,10 +13,7 @@ import DotsHorizontalTriple from '../../svg/v1/DotsHorizontalTriple';
 import FileDouble from '../../svg/v1/FileDouble';
 import CloudUnknown from '../../svg/v2/CloudUnknown';
 import tokens from '../../tokens';
-import {
-  isDevelopmentEnvironment,
-  isPreviewEnvironment,
-} from '../../util/environment';
+import { isNonProductionEnvironment } from '../../util/environment';
 import { View, Text, Button, Tooltip, Menu } from '../common';
 
 function getFileDescription(file) {
@@ -331,7 +328,7 @@ function BudgetList({
           Create new file
         </Button>
 
-        {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
+        {isNonProductionEnvironment() && (
           <Button
             primary
             onClick={() => onCreate({ testMode: true })}
