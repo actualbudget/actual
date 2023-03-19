@@ -16,6 +16,7 @@ import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { isMobile } from '../../util';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
+import { ExternalLink } from '../tutorial/common';
 
 import EncryptionSettings from './Encryption';
 import ExperimentalFeatures from './Experimental';
@@ -39,25 +40,26 @@ function About() {
       </Text>
       <View
         style={[
-          { flexDirection: 'column', gap: '1em' },
+          { flexDirection: 'column', gap: 10 },
           media(`(min-width: ${tokens.breakpoint_medium})`, {
-            flexDirection: 'row',
-            gap: '2em',
+            display: 'grid',
+            gridTemplateRows: '1fr 1fr',
+            columnGap: '2em',
+            gridAutoFlow: 'column',
           }),
         ]}
       >
-        <Text>
-          Client version: v{window.Actual.ACTUAL_VERSION} (
-          {isOutdated ? (
-            <a href="https://actualbudget.github.io/docs/Release-Notes">
-              new version available: {latestVersion}
-            </a>
-          ) : (
-            <span>latest</span>
-          )}
-          )
-        </Text>
+        <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>
+        {isOutdated ? (
+          <ExternalLink href="https://actualbudget.github.io/docs/Release-Notes">
+            New version available: {latestVersion}
+          </ExternalLink>
+        ) : (
+          <Text style={{ color: colors.g2, fontWeight: 600 }}>
+            You’re up to date!
+          </Text>
+        )}
         <Text>
           <a href="https://actualbudget.github.io/docs/Release-Notes">
             Release Notes
