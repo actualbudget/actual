@@ -73,14 +73,33 @@ function About() {
   );
 }
 
+function IDName({ children }) {
+  return <Text style={{ fontWeight: 500 }}>{children}</Text>;
+}
+
 function AdvancedAbout({ prefs }) {
   return (
-    <>
-      <Text>Budget ID: {prefs.id}</Text>
-      <Text style={{ color: colors.n6 }}>
-        Sync ID: {prefs.groupId || '(none)'}
+    <Setting>
+      <Text>
+        <strong>IDs</strong> are the names Actual uses to identify your budget
+        internally. There are several different IDs associated with your budget.
+        The Budget ID is used to identify your budget file. The Sync ID is used
+        to access the budget on the server.
       </Text>
-    </>
+      <Text>
+        <IDName>Budget ID:</IDName> {prefs.id}
+      </Text>
+      <Text style={{ color: colors.n5 }}>
+        <IDName>Sync ID:</IDName> {prefs.groupId || '(none)'}
+      </Text>
+      {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
+      {/* <Text>
+        <IDName>Cloud File ID:</IDName> {prefs.cloudFileId || '(none)'}
+      </Text>
+      <Text>
+        <IDName>User ID:</IDName> {prefs.userId || '(none)'}
+      </Text> */}
+    </Setting>
   );
 }
 
