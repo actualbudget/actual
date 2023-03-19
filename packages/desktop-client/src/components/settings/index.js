@@ -16,7 +16,6 @@ import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { isMobile } from '../../util';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
-import { ExternalLink } from '../tutorial/common';
 
 import EncryptionSettings from './Encryption';
 import ExperimentalFeatures from './Experimental';
@@ -44,6 +43,7 @@ function About() {
           media(`(min-width: ${tokens.breakpoint_medium})`, {
             display: 'grid',
             gridTemplateRows: '1fr 1fr',
+            gridTemplateColumns: '50% 50%',
             columnGap: '2em',
             gridAutoFlow: 'column',
           }),
@@ -52,9 +52,12 @@ function About() {
         <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>
         {isOutdated ? (
-          <ExternalLink href="https://actualbudget.github.io/docs/Release-Notes">
+          <a
+            style={{ color: colors.p4 }}
+            href="https://actualbudget.github.io/docs/Release-Notes"
+          >
             New version available: {latestVersion}
-          </ExternalLink>
+          </a>
         ) : (
           <Text style={{ color: colors.g2, fontWeight: 600 }}>
             You’re up to date!
