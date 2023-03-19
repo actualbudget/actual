@@ -4,6 +4,7 @@ import { Formik } from 'formik';
 
 import { determineOffBudget } from 'loot-core/src/shared/accounts';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
+import { colors } from 'loot-design/src/style';
 
 import {
   View,
@@ -15,6 +16,7 @@ import {
   InlineField,
   FormError,
   InitialFocus,
+  Text,
 } from '../common';
 
 function CreateLocalAccount({ modalProps, actions, history }) {
@@ -117,16 +119,53 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                     justifyContent: 'flex-end',
                   }}
                 >
-                  <label style={{ userSelect: 'none' }}>
-                    <input
-                      name="offbudget"
-                      type="checkbox"
-                      checked={!!values.offbudget}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                    />{' '}
-                    Off-budget
-                  </label>
+                  <View style={{ flexDirection: 'column' }}>
+                    <label
+                      style={{
+                        userSelect: 'none',
+                        textAlign: 'right',
+                        width: '100%',
+                        display: 'flex',
+                        verticalAlign: 'center',
+                        justifyContent: 'flex-end',
+                      }}
+                      htmlFor="offbudget"
+                    >
+                      <input
+                        id="offbudget"
+                        name="offbudget"
+                        type="checkbox"
+                        checked={!!values.offbudget}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                      />
+                      Off-budget
+                    </label>
+                    <div
+                      style={{
+                        textAlign: 'right',
+                        fontSize: '0.7em',
+                        color: colors.n5,
+                        marginTop: 3,
+                      }}
+                    >
+                      <Text>
+                        This cannot be changed later. <br /> {'\n'}
+                        See{' '}
+                        <a
+                          href="https://actualbudget.github.io/docs/Accounts/overview/#off-budget-accounts"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: colors.n5,
+                          }}
+                        >
+                          Accounts Overview
+                        </a>{' '}
+                        for more information.
+                      </Text>
+                    </div>
+                  </View>
                 </View>
 
                 <InlineField label="Balance" width="75%">
