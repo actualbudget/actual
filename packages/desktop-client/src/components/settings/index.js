@@ -111,20 +111,22 @@ function Settings({
     >
       <Page title="Settings">
         <View style={{ flexShrink: 0, gap: 30 }}>
-          <View
-            style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
-          >
-            {/* The only spot to close a budget on mobile */}
-            <FormField>
-              <FormLabel title="Budget Name" />
-              <Input
-                value={prefs.budgetName}
-                disabled
-                style={{ color: '#999' }}
-              />
-            </FormField>
-            <Button onClick={closeBudget}>Close Budget</Button>
-          </View>
+          {isMobile() && (
+            <View
+              style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
+            >
+              {/* The only spot to close a budget on mobile */}
+              <FormField>
+                <FormLabel title="Budget Name" />
+                <Input
+                  value={prefs.budgetName}
+                  disabled
+                  style={{ color: '#999' }}
+                />
+              </FormField>
+              <Button onClick={closeBudget}>Close Budget</Button>
+            </View>
+          )}
 
           <About />
 
