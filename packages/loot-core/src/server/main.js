@@ -1,6 +1,11 @@
 import './polyfills';
 import injectAPI from '@actual-app/api/injected';
 
+import {
+  isDevelopmentEnvironment,
+  isPreviewEnvironment,
+} from 'loot-design/src/util/environment';
+
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import asyncStorage from '../platform/server/asyncStorage';
@@ -1265,7 +1270,7 @@ handlers['nordigen-get-banks'] = async function (country) {
 
   return post(
     getServer().NORDIGEN_SERVER + '/get-banks',
-    { country },
+    { country, showDemo: isDevelopmentEnvironment() || isPreviewEnvironment() },
     {
       'X-ACTUAL-TOKEN': userToken,
     },
