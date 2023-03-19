@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { css, media } from 'glamor';
+import { media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
@@ -82,6 +82,7 @@ function AdvancedAbout({ prefs }) {
 function Settings({
   loadPrefs,
   savePrefs,
+  saveGlobalPrefs,
   prefs,
   globalPrefs,
   pushModal,
@@ -125,7 +126,7 @@ function Settings({
           {!Platform.isBrowser && (
             <GlobalSettings
               globalPrefs={globalPrefs}
-              saveGlobalPrefs={this.props.saveGlobalPrefs}
+              saveGlobalPrefs={saveGlobalPrefs}
             />
           )}
 
