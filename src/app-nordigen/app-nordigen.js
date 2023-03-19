@@ -88,14 +88,22 @@ app.post(
 app.post(
   '/get-banks',
   handleError(async (req, res) => {
-    let { country } = req.body;
+    let { country, showDemo = false } = req.body;
 
     await nordigenService.setToken();
     const data = await nordigenService.getInstitutions(country);
 
     res.send({
       status: 'ok',
-      data,
+      data: showDemo
+        ? [
+            {
+              id: 'SANDBOXFINANCE_SFIN0000',
+              name: 'DEMO bank (used for testing bank-sync)',
+            },
+            ...data,
+          ]
+        : data,
     });
   }),
 );
