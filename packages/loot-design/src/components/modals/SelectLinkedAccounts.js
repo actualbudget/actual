@@ -1,254 +1,200 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { View, Modal, P, Button, Strong, CustomSelect } from '../common';
+import { colors } from '../../style';
+import { View, Modal, Button, Text } from '../common';
+import Autocomplete from '../NewAutocomplete';
+import { TableHeader, Table, Row, Field } from '../table';
 
-function EmptyMessage() {
-  return null;
-}
+const addAccountOption = { value: 'new', label: 'Create new account' };
 
 export default function SelectLinkedAccounts({
-  upgradingAccountId,
   modalProps,
   requisitionId,
-  accounts: importedAccounts,
-  actualAccounts,
+  accounts: externalAccounts,
+  actualAccounts: localAccounts,
   actions,
 }) {
-  let [chosenAccounts, setChosenAccounts] = useState([]);
-
-  const addAccountOption = { id: 'new', name: 'Create new account' };
-
-  const importedAccountsToSelect = importedAccounts.filter(
-    account =>
-      !chosenAccounts
-        .map(acc => acc.chosenImportedAccountId)
-        .includes(account.account_id),
-  );
-
-  const actualAccountsToSelect = [
-    addAccountOption,
-    ...actualAccounts.filter(
-      account =>
-        !chosenAccounts
-          .map(acc => acc.chosenActualAccountId)
-          .includes(account.id),
-    ),
-  ];
-
-  useEffect(() => {
-    const chosenAccountsToAdd = [];
-    importedAccountsToSelect.forEach(importedAccount => {
-      // Try to auto-match accounts based on account_id or mask
-      // Add matched accounts to list of selected accounts
-      const matchedActualAccount = actualAccountsToSelect.find(
-        actualAccount => {
-          return (
-            actualAccount.account_id === importedAccount.account_id ||
-            actualAccount.mask === importedAccount.mask
-          );
-        },
-      );
-
-      if (matchedActualAccount) {
-        chosenAccountsToAdd.push({
-          chosenImportedAccountId: importedAccount.account_id,
-          chosenActualAccountId: matchedActualAccount.id,
-        });
-      }
-    });
-
-    setChosenAccounts([...chosenAccounts, ...chosenAccountsToAdd]);
-  }, []);
-
-  let [selectedImportAccountId, setSelectedImportAccountId] = useState(
-    importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id,
-  );
-  let [selectedAccountId, setSelectedAccountId] = useState(
-    actualAccountsToSelect[0] && actualAccountsToSelect[0].id,
-  );
+  const [chosenAccounts, setChosenAccounts] = useState({});
 
   async function onNext() {
-    chosenAccounts.forEach(chosenAccount => {
-      const importedAccount = importedAccounts.find(
-        account => account.account_id === chosenAccount.chosenImportedAccountId,
-      );
+    Object.entries(chosenAccounts).forEach(
+      ([chosenExternalAccountId, chosenLocalAccountId]) => {
+        const externalAccount = externalAccounts.find(
+          account => account.account_id === chosenExternalAccountId,
+        );
 
-      actions.linkAccount(
-        requisitionId,
-        importedAccount,
-        chosenAccount.chosenActualAccountId !== addAccountOption.id
-          ? chosenAccount.chosenActualAccountId
-          : undefined,
-      );
-    });
+        actions.linkAccount(
+          requisitionId,
+          externalAccount,
+          chosenLocalAccountId !== addAccountOption.value
+            ? chosenLocalAccountId
+            : undefined,
+        );
+      },
+    );
 
     actions.closeModal();
   }
 
-  function addToChosenAccounts() {
-    setChosenAccounts([
-      ...chosenAccounts,
-      {
-        chosenImportedAccountId: selectedImportAccountId,
-        chosenActualAccountId: selectedAccountId,
-      },
-    ]);
+  const unlinkedAccounts = localAccounts.filter(
+    account =>
+      !account.account_id &&
+      !Object.values(chosenAccounts).includes(account.id),
+  );
+
+  function onSetLinkedAccount(externalAccount, localAccountId) {
+    setChosenAccounts(accounts => {
+      const updatedAccounts = { ...accounts };
+
+      if (localAccountId) {
+        updatedAccounts[externalAccount.account_id] = localAccountId;
+      } else {
+        delete updatedAccounts[externalAccount.account_id];
+      }
+
+      return updatedAccounts;
+    });
   }
 
-  // Update dropbox with available accounts to select
-  useEffect(() => {
-    const newSelectedImportAccountId =
-      importedAccountsToSelect[0] && importedAccountsToSelect[0].account_id;
-    const newSelectedAccountId =
-      actualAccountsToSelect[0] && actualAccountsToSelect[0].id;
-    setSelectedImportAccountId(newSelectedImportAccountId);
-    setSelectedAccountId(newSelectedAccountId);
-  }, [chosenAccounts]);
-
-  const removeChoose = chosenAccount => {
-    setChosenAccounts([...chosenAccounts.filter(acc => acc !== chosenAccount)]);
-  };
-
   return (
-    <Modal title={'Link Accounts'} {...modalProps}>
+    <Modal title="Link Accounts" {...modalProps} style={{ width: 800 }}>
       {() => (
-        <View style={{ maxWidth: 500 }}>
-          {upgradingAccountId ? (
-            <P>
-              You allowed access to the following accounts. Select the one you
-              want to link with:
-            </P>
-          ) : (
-            <P>
-              We found the following accounts. Select which ones you want to
-              add:
-            </P>
-          )}
-
+        <>
+          <Text style={{ marginBottom: 10 }}>
+            We found the following accounts. Select which ones you want to add:
+          </Text>
           <View
             style={{
-              maxHeight: 300,
-              overflow: 'auto',
-              // Allow the shadow to appear on left/right edge
-              paddingLeft: 5,
-              paddingRight: 5,
-              marginLeft: -5,
-              marginRight: -5,
+              flex: 'unset',
+              height: 300,
+              border: '1px solid ' + colors.border,
             }}
           >
-            <View>
-              {importedAccounts.length === 0 ? (
-                <EmptyMessage />
-              ) : (
-                <View>
-                  {importedAccountsToSelect.length ? (
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'flex-center',
-                        margin: '30px 0',
-                        borderBottom: 'solid 1px',
-                      }}
-                    >
-                      <View>
-                        <Strong>Imported Account:</Strong>
-                        <CustomSelect
-                          options={importedAccountsToSelect.map(account => [
-                            account.account_id,
-                            account.name,
-                          ])}
-                          onChange={val => {
-                            setSelectedImportAccountId(val);
-                          }}
-                          value={selectedImportAccountId}
-                        />
-                      </View>
+            <TableHeader
+              headers={[
+                { name: 'External account name', width: 200 },
+                { name: 'Local account name', width: 'flex' },
+                { name: 'Actions', width: 'flex' },
+              ]}
+            />
 
-                      <View>
-                        <Strong>Actual Budget Account:</Strong>
-                        <CustomSelect
-                          options={actualAccountsToSelect.map(account => [
-                            account.id,
-                            account.name,
-                          ])}
-                          onChange={val => {
-                            setSelectedAccountId(val);
-                          }}
-                          value={selectedAccountId}
-                        />
-                      </View>
-
-                      <Button
-                        primary
-                        style={{
-                          padding: '10px',
-                          fontSize: 15,
-                          margin: 10,
-                        }}
-                        onClick={addToChosenAccounts}
-                      >
-                        Link account &rarr;
-                      </Button>
-                    </View>
-                  ) : (
-                    ''
-                  )}
-                  {chosenAccounts.map(chosenAccount => {
-                    const { chosenImportedAccountId, chosenActualAccountId } =
-                      chosenAccount;
-                    const importedAccount = importedAccounts.find(
-                      acc => acc.account_id === chosenImportedAccountId,
-                    );
-                    const actualAccount = [
-                      addAccountOption,
-                      ...actualAccounts,
-                    ].find(acc => acc.id === chosenActualAccountId);
-
-                    return (
-                      <View
-                        key={chosenImportedAccountId}
-                        style={{
-                          flexDirection: 'row',
-                          justifyContent: 'flex-center',
-                          marginTop: 30,
-                        }}
-                      >
-                        {importedAccount.name} &rarr; {actualAccount.name}
-                        <Button
-                          primary
-                          style={{
-                            padding: '10px',
-                            fontSize: 15,
-                            margin: 10,
-                          }}
-                          onClick={() => removeChoose(chosenAccount)}
-                        >
-                          Remove &rarr;
-                        </Button>
-                      </View>
-                    );
-                  })}
+            <Table
+              items={externalAccounts}
+              style={{ backgroundColor: colors.n11 }}
+              getItemKey={index => index}
+              renderItem={({ key, item }) => (
+                <View key={key}>
+                  <TableRow
+                    externalAccount={item}
+                    linkedAccount={localAccounts.find(
+                      acc => acc.account_id === item.account_id,
+                    )}
+                    chosenAccount={
+                      chosenAccounts[item.account_id] === addAccountOption.value
+                        ? {
+                            id: addAccountOption.value,
+                            name: addAccountOption.label,
+                          }
+                        : localAccounts.find(
+                            acc => chosenAccounts[item.account_id] === acc.id,
+                          )
+                    }
+                    unlinkedAccounts={unlinkedAccounts}
+                    onSetLinkedAccount={onSetLinkedAccount}
+                  />
                 </View>
               )}
-            </View>
+            />
           </View>
-
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'flex-end',
-              marginTop: 30,
+              marginTop: 10,
             }}
           >
-            <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
-              Cancel
-            </Button>
-            <Button primary onClick={onNext} disabled={!chosenAccounts.length}>
+            <Button
+              primary
+              onClick={onNext}
+              disabled={!Object.keys(chosenAccounts).length}
+            >
               Link accounts
             </Button>
           </View>
-        </View>
+        </>
       )}
     </Modal>
+  );
+}
+
+function TableRow({
+  externalAccount,
+  linkedAccount,
+  chosenAccount,
+  unlinkedAccounts,
+  onSetLinkedAccount,
+}) {
+  const [focusedField, setFocusedField] = useState(null);
+
+  const chosenAccountOption = chosenAccount && {
+    value: chosenAccount.id,
+    label: chosenAccount.name,
+  };
+
+  const availableAccountOptions = [
+    ...unlinkedAccounts.map(acct => ({
+      value: acct.id,
+      label: acct.name,
+    })),
+    chosenAccount?.id !== addAccountOption.value && chosenAccountOption,
+    addAccountOption,
+  ].filter(Boolean);
+
+  return (
+    <Row style={{ backgroundColor: 'white' }}>
+      <Field width={200}>{externalAccount.name}</Field>
+      <Field
+        width="flex"
+        truncate={focusedField !== 'account'}
+        onClick={() => !linkedAccount && setFocusedField('account')}
+      >
+        {focusedField === 'account' ? (
+          <Autocomplete
+            autoFocus
+            options={availableAccountOptions}
+            onSelect={value => {
+              onSetLinkedAccount(externalAccount, value);
+            }}
+            onBlur={() => setFocusedField(null)}
+            value={chosenAccountOption}
+          />
+        ) : (
+          linkedAccount?.name || chosenAccount?.name
+        )}
+      </Field>
+      <Field width="flex">
+        {!linkedAccount &&
+          (chosenAccount ? (
+            <Button
+              onClick={() => {
+                onSetLinkedAccount(externalAccount, null);
+              }}
+              style={{ float: 'right' }}
+            >
+              Remove bank-sync
+            </Button>
+          ) : (
+            <Button
+              primary
+              onClick={() => {
+                setFocusedField('account');
+              }}
+              style={{ float: 'right' }}
+            >
+              Setup bank-sync
+            </Button>
+          ))}
+      </Field>
+    </Row>
   );
 }
