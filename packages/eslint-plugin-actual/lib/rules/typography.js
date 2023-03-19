@@ -27,10 +27,21 @@ module.exports = {
     // Helpers
     //----------------------------------------------------------------------
 
-    function check(node, value = node.value) {
-      // eslint-disable-next-line rulesdir/typography
-      if (value.includes('"') || value.includes("'")) {
-        context.report({ node, messageId: 'quote' });
+    function check(node, { value = node.value, strip = false } = {}) {
+      if (!value.includes("'") && !value.includes('"')) return;
+
+      let rawText = context.getSourceCode().getText(node);
+      if (strip) rawText = rawText.slice(1, -1);
+      for (const match of rawText.matchAll(/['"]/g)) {
+        let index = node.start + match.index + (strip ? 1 : 0);
+        context.report({
+          node,
+          loc: {
+            start: context.getSourceCode().getLocFromIndex(index),
+            end: context.getSourceCode().getLocFromIndex(index + 1),
+          },
+          messageId: 'quote',
+        });
       }
     }
 
@@ -53,14 +64,14 @@ module.exports = {
         if (isQuerySelectorCall(node)) return;
 
         if (typeof node.value === 'string') {
-          check(node);
+          check(node, { strip: true });
         }
       },
       JSXText(node) {
         check(node);
       },
       TemplateElement(node) {
-        check(node, node.value.cooked);
+        check(node, { value: node.value.cooked });
       },
     };
   },
