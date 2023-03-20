@@ -5,9 +5,9 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { colors } from '../../style';
 import AnimatedLoading from '../../svg/AnimatedLoading';
 import { Error } from '../alerts';
-import Autocomplete from '../Autocomplete';
 import { View, Modal, Button, P } from '../common';
 import { FormField, FormLabel } from '../forms';
+import Autocomplete from '../NewAutocomplete';
 
 import { COUNTRY_OPTIONS } from './countries';
 
@@ -27,7 +27,7 @@ function useAvailableBanks(country) {
 
       const results = await send('nordigen-get-banks', country);
 
-      setBanks(results);
+      setBanks(results.map(bank => ({ value: bank.id, label: bank.name })));
       setIsLoading(false);
     }
 
@@ -124,22 +124,12 @@ export default function NordigenExternalMsg({
         <FormField style={{ marginBottom: 10 }}>
           <FormLabel title="Choose your country:" htmlFor="country-field" />
           <Autocomplete
-            strict
             disabled={isConfigurationLoading}
-            suggestions={COUNTRY_OPTIONS}
+            options={COUNTRY_OPTIONS}
             onSelect={setCountry}
-            value={country}
-            inputProps={{
-              id: 'country-field',
-              placeholder: '(please select)',
-            }}
-            renderItems={(items, getItemProps, highlightedIndex) => (
-              <ItemList
-                items={items}
-                getItemProps={getItemProps}
-                highlightedIndex={highlightedIndex}
-              />
-            )}
+            value={COUNTRY_OPTIONS.find(({ value }) => value === country)}
+            inputId="country-field"
+            placeholder="(please select)"
           />
         </FormField>
 
@@ -150,22 +140,12 @@ export default function NordigenExternalMsg({
             <FormField>
               <FormLabel title="Choose your bank:" htmlFor="bank-field" />
               <Autocomplete
-                strict
                 focused
-                suggestions={bankOptions}
+                options={bankOptions}
                 onSelect={setInstitutionId}
-                value={institutionId}
-                inputProps={{
-                  id: 'bank-field',
-                  placeholder: '(please select)',
-                }}
-                renderItems={(items, getItemProps, highlightedIndex) => (
-                  <ItemList
-                    items={items}
-                    getItemProps={getItemProps}
-                    highlightedIndex={highlightedIndex}
-                  />
-                )}
+                value={bankOptions.find(({ value }) => value === institutionId)}
+                inputId="bank-field"
+                placeholder="(please select)"
               />
             </FormField>
           ))}
@@ -253,38 +233,5 @@ export default function NordigenExternalMsg({
         </View>
       )}
     </Modal>
-  );
-}
-
-export function ItemList({ items, getItemProps, highlightedIndex }) {
-  return (
-    <View
-      style={[
-        {
-          overflow: 'auto',
-          padding: '5px 0',
-          maxHeight: 175,
-        },
-      ]}
-    >
-      {items.map((item, idx) => (
-        <div
-          key={item.id}
-          {...(getItemProps ? getItemProps({ item }) : null)}
-          style={{
-            backgroundColor:
-              highlightedIndex === idx ? colors.n4 : 'transparent',
-            padding: 4,
-            paddingLeft: 20,
-            borderRadius: 0,
-          }}
-          data-testid={
-            'item' + (highlightedIndex === idx ? '-highlighted' : '')
-          }
-        >
-          {item.name}
-        </div>
-      ))}
-    </View>
   );
 }

@@ -342,7 +342,6 @@ export const ManagePayees = React.forwardRef(
       payees,
       ruleCounts,
       categoryGroups,
-      tableNavigatorOpts,
       initialSelectedIds,
       ruleActions,
       onBatchChange,
@@ -455,18 +454,15 @@ export const ManagePayees = React.forwardRef(
 
     let buttonsDisabled = selected.items.size === 0;
 
-    let tableNavigator = useTableNavigator(
-      filteredPayees,
-      item =>
-        ['select', 'name', 'rule-count'].filter(name => {
-          switch (name) {
-            case 'select':
-              return item.transfer_acct == null;
-            default:
-              return true;
-          }
-        }),
-      tableNavigatorOpts,
+    let tableNavigator = useTableNavigator(filteredPayees, item =>
+      ['select', 'name', 'rule-count'].filter(name => {
+        switch (name) {
+          case 'select':
+            return item.transfer_acct == null;
+          default:
+            return true;
+        }
+      }),
     );
 
     let payeesById = getPayeesById(payees);

@@ -199,6 +199,7 @@ export const Button = React.forwardRef(
       disabled,
       hoveredStyle,
       activeStyle,
+      bounce = true,
       as = 'button',
       ...nativeProps
     },
@@ -214,7 +215,7 @@ export const Button = React.forwardRef(
       bare
         ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
         : {
-            transform: 'translateY(1px)',
+            transform: bounce && 'translateY(1px)',
             boxShadow:
               !bare &&
               (primary
@@ -348,7 +349,7 @@ export function Input({
       )}
       {...nativeProps}
       onKeyDown={e => {
-        if (e.keyCode === 13 && onEnter) {
+        if (e.code === 'Enter' && onEnter) {
           onEnter(e);
         }
 
@@ -546,18 +547,15 @@ export function Keybinding({ keyName }) {
 }
 
 export function Menu({ header, footer, items: allItems, onMenuSelect }) {
-  let el = useRef(null);
+  let elRef = useRef(null);
   let items = allItems.filter(x => x);
   let [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
-    el.current.focus();
+    const el = elRef.current;
+    el.focus();
 
     let onKeyDown = e => {
-      const UP = 38;
-      const DOWN = 40;
-      const ENTER = 13;
-
       let filteredItems = items.filter(
         item => item && item !== Menu.line && item.type !== Menu.label,
       );
@@ -565,8 +563,8 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
 
       let transformIndex = idx => items.indexOf(filteredItems[idx]);
 
-      switch (e.keyCode) {
-        case UP:
+      switch (e.code) {
+        case 'ArrowUp':
           e.preventDefault();
           setHoveredIndex(
             hoveredIndex === null
@@ -574,7 +572,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
               : transformIndex(Math.max(currentIndex - 1, 0)),
           );
           break;
-        case DOWN:
+        case 'ArrowDown':
           e.preventDefault();
           setHoveredIndex(
             hoveredIndex === null
@@ -584,7 +582,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
                 ),
           );
           break;
-        case ENTER:
+        case 'Enter':
           e.preventDefault();
           if (hoveredIndex !== null) {
             onMenuSelect && onMenuSelect(items[hoveredIndex].name);
@@ -594,10 +592,10 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
       }
     };
 
-    el.current.addEventListener('keydown', onKeyDown);
+    el.addEventListener('keydown', onKeyDown);
 
     return () => {
-      el.current.removeEventListener('keydown', onKeyDown);
+      el.removeEventListener('keydown', onKeyDown);
     };
   }, [hoveredIndex]);
 
@@ -605,7 +603,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
     <View
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
       tabIndex={1}
-      innerRef={el}
+      innerRef={elRef}
     >
       {header}
       {items.map((item, idx) => {
@@ -1107,62 +1105,45 @@ export function InitialFocus({ children }) {
   return React.cloneElement(children, { inputRef: node });
 }
 
-export class HoverTarget extends React.Component {
-  state = { hovered: false };
+export function HoverTarget({
+  style,
+  contentStyle,
+  children,
+  renderContent,
+  disabled,
+}) {
+  let [hovered, setHovered] = useState(false);
 
-  onMouseEnter = () => {
-    if (!this.props.disabled) {
-      this.setState({ hovered: true });
+  const onMouseEnter = useCallback(() => {
+    if (!disabled) {
+      setHovered(true);
     }
-  };
+  }, [disabled]);
 
-  onMouseLeave = () => {
-    if (!this.props.disabled) {
-      this.setState({ hovered: false });
+  const onMouseLeave = useCallback(() => {
+    if (!disabled) {
+      setHovered(false);
     }
-  };
+  }, [disabled]);
 
-  componentDidUpdate(prevProps) {
-    let { disabled } = this.props;
-    if (disabled && this.state.hovered) {
-      this.setState({ hovered: false });
+  useEffect(() => {
+    if (disabled && hovered) {
+      setHovered(false);
     }
-  }
+  }, [disabled, hovered]);
 
-  render() {
-    let { style, contentStyle, children, renderContent } = this.props;
-    return (
-      <View style={style}>
-        <View
-          onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}
-          style={contentStyle}
-        >
-          {children}
-        </View>
-        {this.state.hovered && renderContent()}
+  return (
+    <View style={style}>
+      <View
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        style={contentStyle}
+      >
+        {children}
       </View>
-    );
-  }
-}
-
-export class TooltipTarget extends React.Component {
-  state = { clicked: false };
-
-  render() {
-    return (
-      <View style={[{ position: 'relative' }, this.props.style]}>
-        <View
-          style={{ flex: 1 }}
-          onClick={() => this.setState({ clicked: true })}
-        >
-          {this.props.children}
-        </View>
-        {this.state.clicked &&
-          this.props.renderContent(() => this.setState({ clicked: false }))}
-      </View>
-    );
-  }
+      {hovered && renderContent()}
+    </View>
+  );
 }
 
 export function Label({ title, style }) {
@@ -1183,6 +1164,8 @@ export function Label({ title, style }) {
     </Text>
   );
 }
+
+export const NullComponent = () => null;
 
 export * from './tooltips';
 export { useTooltip } from './tooltips';

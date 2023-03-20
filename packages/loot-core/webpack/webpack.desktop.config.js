@@ -17,9 +17,6 @@ module.exports = {
   },
   resolve: {
     extensions: ['.electron.js', '.js', '.json'],
-    alias: {
-      'perf-deets': require.resolve('perf-deets/noop'),
-    },
   },
   externals: [
     'better-sqlite3',

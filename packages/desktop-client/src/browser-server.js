@@ -21,24 +21,16 @@ self.addEventListener('message', e => {
 
       importScripts(`${msg.publicUrl}/kcab/kcab.worker.${hash}.js`);
 
-      backend.initApp(version, isDev, self).then(
-        () => {
-          if (isDev) {
-            console.log('Backend running!');
-            self.postMessage({ type: '__actual:backend-running' });
-          }
-        },
-        err => {
-          console.log(err);
-          let msg = {
-            type: 'app-init-failure',
-            IDBFailure: err.message.includes('indexeddb-failure'),
-          };
-          self.postMessage(msg);
+      backend.initApp(version, isDev, self).catch(err => {
+        console.log(err);
+        let msg = {
+          type: 'app-init-failure',
+          IDBFailure: err.message.includes('indexeddb-failure'),
+        };
+        self.postMessage(msg);
 
-          throw err;
-        },
-      );
+        throw err;
+      });
     }
   }
 });

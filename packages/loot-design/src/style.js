@@ -112,8 +112,10 @@ export const styles = {
   page: {
     // This is the height of the titlebar
     paddingTop: 8,
-    minWidth: 360,
     flex: 1,
+    [`@media (min-width: ${tokens.breakpoint_xs})`]: {
+      minWidth: 360,
+    },
     [`@media (min-width: ${tokens.breakpoint_medium})`]: {
       minWidth: 500,
       paddingTop: 36,

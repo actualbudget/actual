@@ -5,7 +5,8 @@ import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { styles, colors } from '../../../style';
-import CategoryAutocomplete from '../../CategorySelect';
+import NewCategoryAutocomplete from '../../CategoryAutocomplete';
+import LegacyCategoryAutocomplete from '../../CategorySelect';
 import {
   View,
   Text,
@@ -37,6 +38,7 @@ function CoverTooltip({
   tooltipProps,
   onSubmit,
   onClose,
+  isNewAutocompleteEnabled,
 }) {
   let categoryGroups = useContext(CategoryGroupsContext);
   categoryGroups = addToBeBudgetedGroup(
@@ -50,6 +52,10 @@ function CoverTooltip({
       onClose();
     }
   }
+
+  const CategoryAutocomplete = isNewAutocompleteEnabled
+    ? NewCategoryAutocomplete
+    : LegacyCategoryAutocomplete;
 
   return (
     <Tooltip
@@ -72,7 +78,7 @@ function CoverTooltip({
             inputProps={{
               inputRef: node,
               onKeyDown: e => {
-                if (e.keyCode === 13) {
+                if (e.code === 'Enter') {
                   submit();
                 }
               },
@@ -102,7 +108,13 @@ function CoverTooltip({
   );
 }
 
-function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
+function BalanceTooltip({
+  categoryId,
+  tooltip,
+  monthIndex,
+  onBudgetAction,
+  isNewAutocompleteEnabled,
+}) {
   let carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
   let balance = useSheetValue(rolloverBudget.catBalance(categoryId));
   let [menu, setMenu] = useState('menu');
@@ -160,6 +172,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
               to: toCategory,
             });
           }}
+          isNewAutocompleteEnabled={isNewAutocompleteEnabled}
         />
       )}
 
@@ -173,6 +186,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
               from: fromCategory,
             });
           }}
+          isNewAutocompleteEnabled={isNewAutocompleteEnabled}
         />
       )}
     </>
@@ -292,6 +306,7 @@ export const ExpenseCategoryMonth = React.memo(function ExpenseCategoryMonth({
   onEdit,
   onBudgetAction,
   onShowActivity,
+  isNewAutocompleteEnabled,
 }) {
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
@@ -385,6 +400,7 @@ export const ExpenseCategoryMonth = React.memo(function ExpenseCategoryMonth({
             tooltip={balanceTooltip}
             monthIndex={monthIndex}
             onBudgetAction={onBudgetAction}
+            isNewAutocompleteEnabled={isNewAutocompleteEnabled}
           />
         )}
       </Field>

@@ -2,14 +2,20 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import Autocomplete from 'loot-design/src/components/Autocomplete';
-import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
+import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
+import LegacyAutocomplete from 'loot-design/src/components/Autocomplete';
+import NewCategoryAutocomplete from 'loot-design/src/components/CategoryAutocomplete';
+import LegacyCategoryAutocomplete from 'loot-design/src/components/CategorySelect';
 import { View, Input } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
 import { Checkbox } from 'loot-design/src/components/forms';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
+import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
+import NewAutocomplete from 'loot-design/src/components/NewAutocomplete';
+import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
+
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 
 export default function GenericInput({
   field,
@@ -21,6 +27,17 @@ export default function GenericInput({
   style,
   onChange,
 }) {
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+  const PayeeAutocomplete = isNewAutocompleteEnabled
+    ? NewPayeeAutocomplete
+    : LegacyPayeeAutocomplete;
+  const AccountAutocomplete = isNewAutocompleteEnabled
+    ? NewAccountAutocomplete
+    : LegacyAccountAutocomplete;
+  const CategoryAutocomplete = isNewAutocompleteEnabled
+    ? NewCategoryAutocomplete
+    : LegacyCategoryAutocomplete;
+
   let { payees, accounts, categoryGroups, dateFormat } = useSelector(state => {
     return {
       payees: state.queries.payees,
@@ -155,15 +172,26 @@ export default function GenericInput({
         <Checkbox
           checked={value}
           value={value}
-          onChange={e => onChange(!value)}
+          onChange={() => onChange(!value)}
         />
       );
       break;
 
     default:
       if (multi) {
-        content = (
-          <Autocomplete
+        content = isNewAutocompleteEnabled ? (
+          <NewAutocomplete
+            ref={inputRef}
+            isMulti
+            isCreatable
+            formatCreateLabel={inputValue => `Add "${inputValue}"`}
+            noOptionsMessage={() => null}
+            value={value.map(v => ({ value: v, label: v }))}
+            onSelect={onChange}
+            onCreateOption={selected => onChange([...value, selected])}
+          />
+        ) : (
+          <LegacyAutocomplete
             multi={true}
             suggestions={[]}
             value={value}

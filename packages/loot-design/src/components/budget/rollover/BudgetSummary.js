@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
 
 import Component from '@reactions/component';
 import { css } from 'glamor';
@@ -7,7 +6,6 @@ import { css } from 'glamor';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import * as actions from '../../../../../loot-core/src/client/actions';
 import { colors, styles } from '../../../style';
 import DotsHorizontalTriple from '../../../svg/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../svg/v2/ArrowButtonDown1';
@@ -136,7 +134,13 @@ function TotalsList({ prevMonthName, collapsed }) {
   );
 }
 
-function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
+function ToBudget({
+  month,
+  prevMonthName,
+  collapsed,
+  onBudgetAction,
+  isNewAutocompleteEnabled,
+}) {
   return (
     <SheetValue binding={rolloverBudget.toBudget} initialValue={0}>
       {node => {
@@ -233,6 +237,7 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                           category,
                         });
                       }}
+                      isNewAutocompleteEnabled={isNewAutocompleteEnabled}
                     />
                   )}
                 </View>
@@ -245,7 +250,11 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
   );
 }
 
-function BudgetSummaryComponent({ month, localPrefs }) {
+export function BudgetSummary({
+  month,
+  isGoalTemplatesEnabled,
+  isNewAutocompleteEnabled,
+}) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -265,8 +274,6 @@ function BudgetSummaryComponent({ month, localPrefs }) {
   let prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
-
-  let goalTemplatesEnabled = localPrefs['flags.goalTemplatesEnabled'];
 
   return (
     <View
@@ -378,11 +385,11 @@ function BudgetSummaryComponent({ month, localPrefs }) {
                         name: 'set-3-avg',
                         text: 'Set budgets to 3 month avg',
                       },
-                      goalTemplatesEnabled && {
+                      isGoalTemplatesEnabled && {
                         name: 'apply-goal-template',
                         text: 'Apply budget template',
                       },
-                      goalTemplatesEnabled && {
+                      isGoalTemplatesEnabled && {
                         name: 'overwrite-goal-template',
                         text: 'Overwrite with budget template',
                       },
@@ -409,13 +416,18 @@ function BudgetSummaryComponent({ month, localPrefs }) {
               prevMonthName={prevMonthName}
               month={month}
               onBudgetAction={onBudgetAction}
+              isNewAutocompleteEnabled={isNewAutocompleteEnabled}
             />
           </View>
         ) : (
           <>
             <TotalsList prevMonthName={prevMonthName} />
             <View style={{ margin: '23px 0' }}>
-              <ToBudget month={month} onBudgetAction={onBudgetAction} />
+              <ToBudget
+                month={month}
+                onBudgetAction={onBudgetAction}
+                isNewAutocompleteEnabled={isNewAutocompleteEnabled}
+              />
             </View>
           </>
         )}
@@ -423,8 +435,3 @@ function BudgetSummaryComponent({ month, localPrefs }) {
     </View>
   );
 }
-
-export const BudgetSummary = connect(
-  state => ({ localPrefs: state.prefs.local }),
-  actions,
-)(BudgetSummaryComponent);

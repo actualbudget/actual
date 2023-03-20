@@ -36,11 +36,14 @@ import {
   amountToInteger,
   titleFirst,
 } from 'loot-core/src/shared/util';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import CategoryAutocomplete from 'loot-design/src/components/CategorySelect';
+import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
+import NewCategoryAutocomplete from 'loot-design/src/components/CategoryAutocomplete';
+import LegacyCategoryAutocomplete from 'loot-design/src/components/CategorySelect';
 import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
+import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
+import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import {
   Cell,
   Field,
@@ -66,13 +69,15 @@ import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
 import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
+import usePrevious from '../../hooks/usePrevious';
 import { getStatusProps } from '../schedules/StatusBadge';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
 }
 
-function serializeTransaction(transaction, showZeroInDeposit, dateFormat) {
+function serializeTransaction(transaction, showZeroInDeposit) {
   let { amount, date } = transaction;
 
   if (isPreviewId(transaction.id)) {
@@ -107,7 +112,7 @@ function serializeTransaction(transaction, showZeroInDeposit, dateFormat) {
   };
 }
 
-function deserializeTransaction(transaction, originalTransaction, dateFormat) {
+function deserializeTransaction(transaction, originalTransaction) {
   let { debit, credit, date, ...realTransaction } = transaction;
 
   let amount;
@@ -126,20 +131,6 @@ function deserializeTransaction(transaction, originalTransaction, dateFormat) {
   }
 
   return { ...realTransaction, date, amount };
-}
-
-function getParentTransaction(transactions, fromIndex) {
-  let trans = transactions[fromIndex];
-  let parentIdx = fromIndex;
-  while (parentIdx >= 0) {
-    if (transactions[parentIdx].id === trans.parent_id) {
-      // Found the parent
-      return transactions[parentIdx];
-    }
-    parentIdx--;
-  }
-
-  return null;
 }
 
 function isLastChild(transactions, index) {
@@ -275,7 +266,7 @@ export const TransactionHeader = React.memo(
         {showCategory && <Cell value="Category" width="flex" />}
         <Cell value="Payment" width={80} textAlign="right" />
         <Cell value="Deposit" width={80} textAlign="right" />
-        {showBalance && <Cell value="Balance" width={85} textAlign="right" />}
+        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
         {showCleared && <Field width={21} truncate={false} />}
         <Cell value="" width={15 + styles.scrollbarWidth} />
       </Row>
@@ -406,6 +397,7 @@ function PayeeCell({
   onCreatePayee,
   onManagePayees,
 }) {
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
   let isCreatingPayee = useRef(false);
 
   return (
@@ -436,6 +428,9 @@ function PayeeCell({
         shouldSaveFromKey,
         inputStyle,
       }) => {
+        const PayeeAutocomplete = isNewAutocompleteEnabled
+          ? NewPayeeAutocomplete
+          : LegacyPayeeAutocomplete;
         return (
           <>
             <PayeeAutocomplete
@@ -455,6 +450,7 @@ function PayeeCell({
               onUpdate={onUpdate}
               onSelect={onSave}
               onManagePayees={() => onManagePayees(payeeId)}
+              isCreatable
             />
           </>
         );
@@ -523,6 +519,7 @@ export const Transaction = React.memo(function Transaction(props) {
     accounts,
     balance,
     dateFormat = 'MM/dd/yyyy',
+    hideFraction,
     onSave,
     onEdit,
     onHover,
@@ -533,12 +530,20 @@ export const Transaction = React.memo(function Transaction(props) {
     onToggleSplit,
   } = props;
 
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+  const AccountAutocomplete = isNewAutocompleteEnabled
+    ? NewAccountAutocomplete
+    : LegacyAccountAutocomplete;
+  const CategoryAutocomplete = isNewAutocompleteEnabled
+    ? NewCategoryAutocomplete
+    : LegacyCategoryAutocomplete;
+
   let dispatchSelected = useSelectedDispatch();
 
   let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
   let [transaction, setTransaction] = useState(
-    serializeTransaction(originalTransaction, showZeroInDeposit, dateFormat),
+    serializeTransaction(originalTransaction, showZeroInDeposit),
   );
   let isPreview = isPreviewId(transaction.id);
 
@@ -547,7 +552,7 @@ export const Transaction = React.memo(function Transaction(props) {
     showZeroInDeposit !== prevShowZero
   ) {
     setTransaction(
-      serializeTransaction(originalTransaction, showZeroInDeposit, dateFormat),
+      serializeTransaction(originalTransaction, showZeroInDeposit),
     );
     setPrevTransaction(originalTransaction);
     setPrevShowZero(showZeroInDeposit);
@@ -588,13 +593,10 @@ export const Transaction = React.memo(function Transaction(props) {
         let deserialized = deserializeTransaction(
           newTransaction,
           originalTransaction,
-          dateFormat,
         );
         // Run the transaction through the formatting so that we know
         // it's always showing the formatted result
-        setTransaction(
-          serializeTransaction(deserialized, showZeroInDeposit, dateFormat),
-        );
+        setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
         onSave(deserialized);
       }
     }
@@ -630,6 +632,7 @@ export const Transaction = React.memo(function Transaction(props) {
 
   let valueStyle = added ? { fontWeight: 600 } : null;
   let backgroundFocus = hovered || focusedField === 'select';
+  let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
   return (
     <Row
@@ -1001,7 +1004,7 @@ export const Transaction = React.memo(function Transaction(props) {
         textAlign="right"
         title={debit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum]}
+        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: debit,
           onUpdate: onUpdate.bind(null, 'debit'),
@@ -1019,7 +1022,7 @@ export const Transaction = React.memo(function Transaction(props) {
         textAlign="right"
         title={credit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum]}
+        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
@@ -1035,8 +1038,8 @@ export const Transaction = React.memo(function Transaction(props) {
               : integerToCurrency(balance)
           }
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
-          style={styles.tnum}
-          width={85}
+          style={[styles.tnum, amountStyle]}
+          width={88}
           textAlign="right"
         />
       )}
@@ -1123,7 +1126,6 @@ export function isPreviewId(id) {
 function NewTransaction({
   transactions,
   accounts,
-  currentAccountId,
   categoryGroups,
   payees,
   editingTransaction,
@@ -1134,6 +1136,7 @@ function NewTransaction({
   showBalance,
   showCleared,
   dateFormat,
+  hideFraction,
   onHover,
   onClose,
   onSplit,
@@ -1157,7 +1160,7 @@ function NewTransaction({
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
-        if (e.keyCode === 27) {
+        if (e.code === 'Escape') {
           onClose();
         }
       }}
@@ -1179,6 +1182,7 @@ function NewTransaction({
           categoryGroups={categoryGroups}
           payees={payees}
           dateFormat={dateFormat}
+          hideFraction={hideFraction}
           expanded={true}
           onHover={onHover}
           onEdit={onEdit}
@@ -1228,46 +1232,26 @@ function NewTransaction({
   );
 }
 
-class TransactionTable_ extends React.Component {
-  container = React.createRef();
-  state = { highlightedRows: null };
+function TransactionTableInner({
+  tableNavigator,
+  tableRef,
+  dateFormat = 'MM/dd/yyyy',
+  newNavigator,
+  renderEmpty,
+  onHover,
+  onScroll,
+  ...props
+}) {
+  const containerRef = React.createRef();
+  const isAddingPrev = usePrevious(props.isAdding);
 
-  componentDidMount() {
-    this.highlight = ids => {
-      this.setState({ highlightedRows: new Set(ids) }, () => {
-        this.setState({ highlightedRows: null });
-      });
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { isAdding } = this.props;
-    if (!isAdding && nextProps.isAdding) {
-      this.props.newNavigator.onEdit('temp', 'date');
+  useEffect(() => {
+    if (!isAddingPrev && props.isAdding) {
+      newNavigator.onEdit('temp', 'date');
     }
-  }
+  }, [isAddingPrev, props.isAdding, newNavigator]);
 
-  componentDidUpdate() {
-    this._cachedParent = null;
-  }
-
-  getParent(trans, index) {
-    let { transactions } = this.props;
-
-    if (this._cachedParent && this._cachedParent.id === trans.parent_id) {
-      return this._cachedParent;
-    }
-
-    if (trans.parent_id) {
-      this._cachedParent = getParentTransaction(transactions, index);
-      return this._cachedParent;
-    }
-
-    return null;
-  }
-
-  renderRow = ({ item, index, position, editing, focusedFied, onEdit }) => {
-    const { highlightedRows } = this.state;
+  const renderRow = ({ item, index, position, editing }) => {
     const {
       transactions,
       selectedItems,
@@ -1279,20 +1263,17 @@ class TransactionTable_ extends React.Component {
       showAccount,
       showCategory,
       balances,
-      dateFormat = 'MM/dd/yyyy',
-      tableNavigator,
+      hideFraction,
       isNew,
       isMatched,
       isExpanded,
-    } = this.props;
+    } = props;
 
     let trans = item;
     let hovered = hoveredTransaction === trans.id;
     let selected = selectedItems.has(trans.id);
-    let highlighted =
-      !selected && (highlightedRows ? highlightedRows.has(trans.id) : false);
 
-    let parent = this.getParent(trans, index);
+    let parent = props.transactionMap.get(trans.parent_id);
     let isChildDeposit = parent && parent.amount > 0;
     let expanded = isExpanded && isExpanded((parent || trans).id);
 
@@ -1318,7 +1299,7 @@ class TransactionTable_ extends React.Component {
               <TransactionError
                 error={error}
                 isDeposit={isChildDeposit}
-                onAddSplit={() => this.props.onAddSplit(trans.id)}
+                onAddSplit={() => props.onAddSplit(trans.id)}
               />
             </Tooltip>
           )}
@@ -1331,7 +1312,7 @@ class TransactionTable_ extends React.Component {
           showCleared={showCleared}
           hovered={hovered}
           selected={selected}
-          highlighted={highlighted}
+          highlighted={false}
           added={isNew && isNew(trans.id)}
           expanded={isExpanded && isExpanded(trans.id)}
           matched={isMatched && isMatched(trans.id)}
@@ -1347,117 +1328,105 @@ class TransactionTable_ extends React.Component {
               : new Set()
           }
           dateFormat={dateFormat}
-          onHover={this.props.onHover}
+          hideFraction={hideFraction}
+          onHover={props.onHover}
           onEdit={tableNavigator.onEdit}
-          onSave={this.props.onSave}
-          onDelete={this.props.onDelete}
-          onSplit={this.props.onSplit}
-          onManagePayees={this.props.onManagePayees}
-          onCreatePayee={this.props.onCreatePayee}
-          onToggleSplit={this.props.onToggleSplit}
+          onSave={props.onSave}
+          onDelete={props.onDelete}
+          onSplit={props.onSplit}
+          onManagePayees={props.onManagePayees}
+          onCreatePayee={props.onCreatePayee}
+          onToggleSplit={props.onToggleSplit}
         />
       </>
     );
   };
 
-  render() {
-    let { props } = this;
-    let {
-      tableNavigator,
-      tableRef,
-      dateFormat = 'MM/dd/yyyy',
-      newNavigator,
-      renderEmpty,
-      onHover,
-      onScroll,
-    } = props;
+  return (
+    <View
+      innerRef={containerRef}
+      style={[{ flex: 1, cursor: 'default' }, props.style]}
+    >
+      <View>
+        <TransactionHeader
+          hasSelected={props.selectedItems.size > 0}
+          showAccount={props.showAccount}
+          showCategory={props.showCategory}
+          showBalance={!!props.balances}
+          showCleared={props.showCleared}
+        />
 
-    return (
-      <View
-        innerRef={this.container}
-        style={[{ flex: 1, cursor: 'default' }, props.style]}
-      >
-        <View>
-          <TransactionHeader
-            hasSelected={props.selectedItems.size > 0}
-            showAccount={props.showAccount}
-            showCategory={props.showCategory}
-            showBalance={!!props.balances}
-            showCleared={props.showCleared}
-          />
-
-          {props.isAdding && (
-            <View
-              {...newNavigator.getNavigatorProps({
-                onKeyDown: e => props.onCheckNewEnter(e),
-              })}
-            >
-              <NewTransaction
-                transactions={props.newTransactions}
-                editingTransaction={newNavigator.editingId}
-                hoveredTransaction={props.hoveredTransaction}
-                focusedField={newNavigator.focusedField}
-                accounts={props.accounts}
-                currentAccountId={props.currentAccountId}
-                categoryGroups={props.categoryGroups}
-                payees={this.props.payees || []}
-                showAccount={props.showAccount}
-                showCategory={props.showCategory}
-                showBalance={!!props.balances}
-                showCleared={props.showCleared}
-                dateFormat={dateFormat}
-                onClose={props.onCloseAddTransaction}
-                onAdd={this.props.onAddTemporary}
-                onAddSplit={this.props.onAddSplit}
-                onSplit={this.props.onSplit}
-                onEdit={newNavigator.onEdit}
-                onSave={this.props.onSave}
-                onDelete={this.props.onDelete}
-                onHover={this.props.onHover}
-                onManagePayees={this.props.onManagePayees}
-                onCreatePayee={this.props.onCreatePayee}
-              />
-            </View>
-          )}
-        </View>
-        {/*// * On Windows, makes the scrollbar always appear
+        {props.isAdding && (
+          <View
+            {...newNavigator.getNavigatorProps({
+              onKeyDown: e => props.onCheckNewEnter(e),
+            })}
+          >
+            <NewTransaction
+              transactions={props.newTransactions}
+              editingTransaction={newNavigator.editingId}
+              hoveredTransaction={props.hoveredTransaction}
+              focusedField={newNavigator.focusedField}
+              accounts={props.accounts}
+              categoryGroups={props.categoryGroups}
+              payees={props.payees || []}
+              showAccount={props.showAccount}
+              showCategory={props.showCategory}
+              showBalance={!!props.balances}
+              showCleared={props.showCleared}
+              dateFormat={dateFormat}
+              hideFraction={props.hideFraction}
+              onClose={props.onCloseAddTransaction}
+              onAdd={props.onAddTemporary}
+              onAddSplit={props.onAddSplit}
+              onSplit={props.onSplit}
+              onEdit={newNavigator.onEdit}
+              onSave={props.onSave}
+              onDelete={props.onDelete}
+              onHover={onHover}
+              onManagePayees={props.onManagePayees}
+              onCreatePayee={props.onCreatePayee}
+            />
+          </View>
+        )}
+      </View>
+      {/*// * On Windows, makes the scrollbar always appear
          //   the full height of the container ??? */}
 
-        <View
-          style={[{ flex: 1, overflow: 'hidden' }]}
-          data-testid="transaction-table"
-          onMouseLeave={() => onHover(null)}
-        >
-          <Table
-            navigator={tableNavigator}
-            ref={tableRef}
-            items={props.transactions}
-            renderItem={this.renderRow}
-            renderEmpty={renderEmpty}
-            loadMore={props.loadMoreTransactions}
-            isSelected={id => props.selectedItems.has(id)}
-            onKeyDown={e => props.onCheckEnter(e)}
-            onScroll={onScroll}
-          />
+      <View
+        style={[{ flex: 1, overflow: 'hidden' }]}
+        data-testid="transaction-table"
+        onMouseLeave={() => onHover(null)}
+      >
+        <Table
+          navigator={tableNavigator}
+          ref={tableRef}
+          items={props.transactions}
+          renderItem={renderRow}
+          renderEmpty={renderEmpty}
+          loadMore={props.loadMoreTransactions}
+          isSelected={id => props.selectedItems.has(id)}
+          onKeyDown={e => props.onCheckEnter(e)}
+          onScroll={onScroll}
+        />
 
-          {props.isAdding && (
-            <div
-              key="shadow"
-              style={{
-                position: 'absolute',
-                top: -20,
-                left: 0,
-                right: 0,
-                height: 20,
-                backgroundColor: 'red',
-                boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
-              }}
-            />
-          )}
-        </View>
+        {props.isAdding && (
+          <div
+            key="shadow"
+            style={{
+              position: 'absolute',
+              top: -20,
+              left: 0,
+              right: 0,
+              height: 20,
+              backgroundColor: 'red',
+              boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
+            }}
+          />
+        )}
       </View>
-    );
-  }
+    </View>
+  );
 }
 
 export let TransactionTable = React.forwardRef((props, ref) => {
@@ -1509,6 +1478,9 @@ export let TransactionTable = React.forwardRef((props, ref) => {
     prevSplitsExpanded.current = splitsExpanded;
     return result;
   }, [props.transactions, splitsExpanded]);
+  const transactionMap = useMemo(() => {
+    return new Map(transactions.map(trans => [trans.id, trans]));
+  }, [transactions]);
 
   useEffect(() => {
     // If it's anchored that means we've also disabled animations. To
@@ -1619,9 +1591,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   }
 
   function onCheckNewEnter(e) {
-    const ENTER = 13;
-
-    if (e.keyCode === ENTER) {
+    if (e.code === 'Enter') {
       if (e.metaKey) {
         e.stopPropagation();
         onAddTemporary();
@@ -1665,15 +1635,13 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   }
 
   function onCheckEnter(e) {
-    const ENTER = 13;
-
-    if (e.keyCode === ENTER && !e.shiftKey) {
+    if (e.code === 'Enter' && !e.shiftKey) {
       let { editingId: id, focusedField } = tableNavigator;
 
-      afterSave(props => {
+      afterSave(() => {
         let transactions = latestState.current.transactions;
         let idx = transactions.findIndex(t => t.id === id);
-        let parent = getParentTransaction(transactions, idx);
+        let parent = transactionMap.get(transactions[idx]?.parent_id);
 
         if (
           isLastChild(transactions, idx) &&
@@ -1798,11 +1766,11 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   );
 
   return (
-    // eslint-disable-next-line react/jsx-pascal-case
-    <TransactionTable_
+    <TransactionTableInner
       tableRef={mergedRef}
       {...props}
       transactions={transactions}
+      transactionMap={transactionMap}
       selectedItems={selectedItems}
       hoveredTransaction={hoveredTransaction}
       isExpanded={splitsExpanded.expanded}

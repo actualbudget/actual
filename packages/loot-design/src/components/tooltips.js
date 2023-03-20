@@ -45,7 +45,8 @@ export class Tooltip extends React.Component {
         // kind of things can be click that shouldn't close a tooltip?
         if (
           node.dataset.testid === 'tooltip' ||
-          node.dataset.reachPopover != null
+          node.dataset.reachPopover != null ||
+          node.id.startsWith('react-select')
         ) {
           break;
         }
@@ -59,7 +60,7 @@ export class Tooltip extends React.Component {
     };
 
     let escHandler = e => {
-      if (e.keyCode === 27) {
+      if (e.code === 'Escape') {
         this.props.onClose && this.props.onClose();
       }
     };

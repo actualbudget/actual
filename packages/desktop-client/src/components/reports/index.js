@@ -20,5 +20,3 @@ class Reports extends React.Component {
     );
   }
 }
-
-export default Reports;

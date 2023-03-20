@@ -1,4 +1,5 @@
 import React, { useContext, useState, useMemo } from 'react';
+import { connect } from 'react-redux';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -133,14 +134,11 @@ export class BudgetTable extends React.Component {
   };
 
   onKeyDown = e => {
-    const TAB = 9;
-    const ENTER = 13;
-
     if (!this.state.editing) {
       return null;
     }
 
-    if (e.keyCode === ENTER || e.keyCode === TAB) {
+    if (e.code === 'Enter' || e.code === 'Tab') {
       e.preventDefault();
       this.moveVertically(e.shiftKey ? -1 : 1);
     }
@@ -392,8 +390,7 @@ export function SidebarCategory({
         style,
       ]}
       onKeyDown={e => {
-        const ENTER = 13;
-        if (e.keyCode === ENTER) {
+        if (e.code === 'Enter') {
           onEditName(null);
           e.stopPropagation();
         }
@@ -548,8 +545,7 @@ export function SidebarGroup({
         },
       ]}
       onKeyDown={e => {
-        const ENTER = 13;
-        if (e.keyCode === ENTER) {
+        if (e.code === 'Enter') {
           onEdit(null);
           e.stopPropagation();
         }
@@ -734,7 +730,11 @@ function ExpenseGroup({
   );
 }
 
-function ExpenseCategory({
+const ExpenseCategory = connect(state => ({
+  isNewAutocompleteEnabled: state.prefs.local['flags.newAutocomplete'],
+}))(ExpenseCategoryInternal);
+
+function ExpenseCategoryInternal({
   cat,
   budgetArray,
   editingCell,
@@ -748,6 +748,7 @@ function ExpenseCategory({
   onShowActivity,
   onDragChange,
   onReorder,
+  isNewAutocompleteEnabled,
 }) {
   let dragging = dragState && dragState.item === cat;
 
@@ -806,6 +807,7 @@ function ExpenseCategory({
             onEdit: onEditMonth,
             onBudgetAction,
             onShowActivity,
+            isNewAutocompleteEnabled,
           }}
         />
       </View>

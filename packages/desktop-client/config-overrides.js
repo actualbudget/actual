@@ -1,5 +1,6 @@
 const {
   addWebpackResolve,
+  disableEsLint,
   override,
   overrideDevServer,
   babelInclude,
@@ -13,6 +14,7 @@ module.exports = {
       path.resolve('../loot-core'),
       path.resolve('../loot-design'),
     ]),
+    process.env.CI && disableEsLint(),
     addWebpackResolve({
       extensions: [
         ...(process.env.IS_GENERIC_BROWSER ? ['.browser.js'] : []),

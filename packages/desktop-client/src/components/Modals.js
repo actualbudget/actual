@@ -19,6 +19,7 @@ import NordigenExternalMsg from 'loot-design/src/components/modals/NordigenExter
 import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
 import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 
+import useFeatureFlag from '../hooks/useFeatureFlag';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
@@ -28,7 +29,6 @@ import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import WelcomeScreen from './modals/WelcomeScreen';
 
 function Modals({
   history,
@@ -41,6 +41,9 @@ function Modals({
   budgetId,
   actions,
 }) {
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
   const syncServerStatus = useSyncServerStatus();
 
   return modalStack.map(({ name, options = {} }, idx) => {
@@ -273,14 +276,11 @@ function Modals({
                 actions={actions}
                 name={options.name}
                 onSubmit={options.onSubmit}
+                isNewAutocompleteEnabled={isNewAutocompleteEnabled}
               />
             );
           }}
         />
-
-        <Route path="/welcome-screen">
-          <WelcomeScreen modalProps={modalProps} actions={actions} />
-        </Route>
 
         <Route path="/budget-summary">
           <BudgetSummary
@@ -288,6 +288,8 @@ function Modals({
             modalProps={modalProps}
             month={options.month}
             actions={actions}
+            isNewAutocompleteEnabled={isNewAutocompleteEnabled}
+            isGoalTemplatesEnabled={isGoalTemplatesEnabled}
           />
         </Route>
       </Switch>

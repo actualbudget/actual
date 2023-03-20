@@ -8,7 +8,7 @@ import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
-import AccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
+import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
 import { Stack, View, Text, Button } from 'loot-design/src/components/common';
 import DateSelect from 'loot-design/src/components/DateSelect';
 import {
@@ -16,7 +16,9 @@ import {
   FormLabel,
   Checkbox,
 } from 'loot-design/src/components/forms';
-import PayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
+import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
+import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
 import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
 import { SelectedItemsButton } from 'loot-design/src/components/table';
 import useSelected, {
@@ -24,6 +26,7 @@ import useSelected, {
 } from 'loot-design/src/components/useSelected';
 import { colors } from 'loot-design/src/style';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { OpSelect } from '../modals/EditRule';
 import { Page } from '../Page';
@@ -83,6 +86,8 @@ function updateScheduleConditions(schedule, fields) {
 }
 
 export default function ScheduleDetails() {
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+
   let { id, initialFields } = useParams();
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
@@ -420,6 +425,13 @@ export default function ScheduleDetails() {
   // This is derived from the date
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
 
+  const PayeeAutocomplete = isNewAutocompleteEnabled
+    ? NewPayeeAutocomplete
+    : LegacyPayeeAutocomplete;
+  const AccountAutocomplete = isNewAutocompleteEnabled
+    ? NewAccountAutocomplete
+    : LegacyAccountAutocomplete;
+
   return (
     <Page
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
@@ -430,10 +442,12 @@ export default function ScheduleDetails() {
           <FormLabel title="Payee" htmlFor="payee-field" />
           <PayeeAutocomplete
             value={state.fields.payee}
+            inputId="payee-field"
             inputProps={{ id: 'payee-field', placeholder: '(none)' }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
             }
+            isCreatable
           />
         </FormField>
 
@@ -442,6 +456,7 @@ export default function ScheduleDetails() {
           <AccountAutocomplete
             includeClosedAccounts={false}
             value={state.fields.account}
+            inputId="account-field"
             inputProps={{ id: 'account-field', placeholder: '(none)' }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'account', value: id })

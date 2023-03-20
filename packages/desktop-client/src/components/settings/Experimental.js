@@ -4,15 +4,13 @@ import { Link, Text, View } from 'loot-design/src/components/common';
 import { Checkbox } from 'loot-design/src/components/forms';
 import { colors } from 'loot-design/src/style';
 
+import { useAllFeatureFlags } from '../../hooks/useFeatureFlag';
+
 import { Setting } from './UI';
 
 export default function ExperimentalFeatures({ prefs, savePrefs }) {
   let [expanded, setExpanded] = React.useState(false);
-  let flags = Object.fromEntries(
-    Object.entries(prefs)
-      .filter(([key]) => key.startsWith('flags.'))
-      .map(([key, value]) => [key.replace('flags.', ''), value]),
-  );
+  const flags = useAllFeatureFlags();
   let disabled = prefs.budgetType === 'report' && flags.reportBudget;
 
   return (
@@ -65,6 +63,18 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                 }}
               />{' '}
               <View>Enable Goal Templates</View>
+            </label>
+            <label style={{ display: 'flex' }}>
+              <Checkbox
+                id="new-autocomplete-flag"
+                checked={flags.newAutocomplete}
+                onChange={() => {
+                  savePrefs({
+                    'flags.newAutocomplete': !flags.newAutocomplete,
+                  });
+                }}
+              />{' '}
+              <View>Enable new Autocomplete component</View>
             </label>
           </View>
         ) : (

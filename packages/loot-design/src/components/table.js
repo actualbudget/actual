@@ -16,7 +16,6 @@ import AnimatedLoading from '../svg/AnimatedLoading';
 import DeleteIcon from '../svg/v0/Delete';
 import ExpandArrow from '../svg/v0/ExpandArrow';
 import Checkmark from '../svg/v1/Checkmark';
-import { keys } from '../util/keys';
 
 import {
   View,
@@ -322,11 +321,11 @@ function InputValue({ value: defaultValue, onUpdate, onBlur, ...props }) {
   function onKeyDown(e) {
     // Only enter and tab to escape (which allows the user to move
     // around)
-    if (e.keyCode !== keys.ENTER && e.keyCode !== keys.TAB) {
+    if (e.code !== 'Enter' && e.code !== 'Tab') {
       e.stopPropagation();
     }
 
-    if (e.keyCode === keys.ESC) {
+    if (e.code === 'Escape') {
       if (value !== defaultValue) {
         setValue(defaultValue);
       }
@@ -387,9 +386,9 @@ export function InputCell({
 }
 
 export function shouldSaveFromKey(e) {
-  switch (e.keyCode) {
-    case keys.TAB:
-    case keys.ENTER:
+  switch (e.code) {
+    case 'Tab':
+    case 'Enter':
       e.preventDefault();
       return true;
     default:
@@ -484,7 +483,7 @@ export const CellButton = React.forwardRef(
         className="cell-button"
         tabIndex="0"
         onKeyDown={e => {
-          if (e.keyCode === keys.X || e.keyCode === keys.SPACE) {
+          if (e.code === 'KeyX' || e.code === 'Space') {
             e.preventDefault();
             if (!disabled) {
               onSelect && onSelect();
@@ -1000,11 +999,10 @@ export const Table = React.forwardRef(
   },
 );
 
-export function useTableNavigator(data, fields, opts = {}) {
+export function useTableNavigator(data, fields) {
   let getFields = typeof fields !== 'function' ? () => fields : fields;
-  let { initialEditingId, initialFocusedField, moveKeys } = opts;
-  let [editingId, setEditingId] = useState(initialEditingId || null);
-  let [focusedField, setFocusedField] = useState(initialFocusedField || null);
+  let [editingId, setEditingId] = useState(null);
+  let [focusedField, setFocusedField] = useState(null);
   let containerRef = useRef();
 
   // See `onBlur` for why we need this
@@ -1126,47 +1124,37 @@ export function useTableNavigator(data, fields, opts = {}) {
           return;
         }
 
-        let fieldKeys =
-          moveKeys && moveKeys[focusedField] && moveKeys[focusedField];
+        switch (e.code) {
+          case 'ArrowUp':
+          case 'KeyK':
+            if (e.target.tagName !== 'INPUT') {
+              onMove('up');
+            }
+            break;
 
-        if (fieldKeys && fieldKeys[e.keyCode]) {
-          e.preventDefault();
-          e.stopPropagation();
+          case 'ArrowDown':
+          case 'KeyJ':
+            if (e.target.tagName !== 'INPUT') {
+              onMove('down');
+            }
+            break;
 
-          onMove(fieldKeys[e.keyCode]);
-        } else {
-          switch (e.keyCode) {
-            case keys.UP:
-            case keys.K:
-              if (e.target.tagName !== 'INPUT') {
-                onMove('up');
-              }
-              break;
+          case 'Enter':
+          case 'Tab':
+            e.preventDefault();
+            e.stopPropagation();
 
-            case keys.DOWN:
-            case keys.J:
-              if (e.target.tagName !== 'INPUT') {
-                onMove('down');
-              }
-              break;
-
-            case keys.ENTER:
-            case keys.TAB:
-              e.preventDefault();
-              e.stopPropagation();
-
-              onMove(
-                e.keyCode === keys.ENTER
-                  ? e.shiftKey
-                    ? 'up'
-                    : 'down'
-                  : e.shiftKey
-                  ? 'left'
-                  : 'right',
-              );
-              break;
-            default:
-          }
+            onMove(
+              e.code === 'Enter'
+                ? e.shiftKey
+                  ? 'up'
+                  : 'down'
+                : e.shiftKey
+                ? 'left'
+                : 'right',
+            );
+            break;
+          default:
         }
       },
 

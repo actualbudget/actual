@@ -231,6 +231,7 @@ function Account(props) {
 
   let balance = queries.accountBalance(account);
   let numberFormat = state.prefs.numberFormat || 'comma-dot';
+  let hideFraction = state.prefs.hideFraction || false;
 
   return (
     <SyncRefresh onSync={onRefresh}>
@@ -246,7 +247,7 @@ function Account(props) {
                   // format changes
                   {...state}
                   {...actionCreators}
-                  key={numberFormat}
+                  key={numberFormat + hideFraction}
                   account={account}
                   accounts={props.accounts}
                   categories={state.categories}

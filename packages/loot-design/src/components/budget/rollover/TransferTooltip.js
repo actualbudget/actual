@@ -3,7 +3,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import CategoryAutocomplete from '../../CategorySelect';
+import NewCategoryAutocomplete from '../../CategoryAutocomplete';
+import LegacyCategoryAutocomplete from '../../CategorySelect';
 import { View, Button, Tooltip, InitialFocus, Input } from '../../common';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import SpreadsheetContext from '../../spreadsheet/SpreadsheetContext';
@@ -16,7 +17,12 @@ export default function TransferTooltip({
   tooltipProps,
   onSubmit,
   onClose,
+  isNewAutocompleteEnabled,
 }) {
+  const CategoryAutocomplete = isNewAutocompleteEnabled
+    ? NewCategoryAutocomplete
+    : LegacyCategoryAutocomplete;
+
   let spreadsheet = useContext(SpreadsheetContext);
   let sheetName = useContext(NamespaceContext);
   let categoryGroups = useContext(CategoryGroupsContext);
