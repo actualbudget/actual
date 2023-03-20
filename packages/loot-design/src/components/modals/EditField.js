@@ -8,11 +8,13 @@ import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
-import AccountAutocomplete from '../AccountAutocomplete';
-import CategoryAutocomplete from '../CategorySelect';
+import LegacyAccountAutocomplete from '../AccountAutocomplete';
+import NewCategoryAutocomplete from '../CategoryAutocomplete';
+import LegacyCategoryAutocomplete from '../CategorySelect';
 import { View, Modal, Input } from '../common';
 import DateSelect from '../DateSelect';
 import { SectionLabel } from '../forms';
+import NewAccountAutocomplete from '../NewAccountAutocomplete';
 import NewPayeeAutocomplete from '../NewPayeeAutocomplete';
 import LegacyPayeeAutocomplete from '../PayeeAutocomplete';
 
@@ -50,6 +52,14 @@ function EditField({
   const PayeeAutocomplete = isNewAutocompleteEnabled
     ? NewPayeeAutocomplete
     : LegacyPayeeAutocomplete;
+
+  const AccountAutocomplete = isNewAutocompleteEnabled
+    ? NewAccountAutocomplete
+    : LegacyAccountAutocomplete;
+
+  const CategoryAutocomplete = isNewAutocompleteEnabled
+    ? NewCategoryAutocomplete
+    : LegacyCategoryAutocomplete;
 
   switch (name) {
     case 'date': {
@@ -195,7 +205,6 @@ export default connect(
     categoryGroups: state.queries.categories.grouped,
     accounts: state.queries.accounts,
     payees: state.queries.payees,
-    isNewAutocompleteEnabled: state.prefs.local['flags.newAutocomplete'],
   }),
   actions,
 )(EditField);

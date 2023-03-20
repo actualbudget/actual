@@ -249,9 +249,9 @@ export function titleFirst(str) {
 }
 
 export let numberFormats = [
-  { value: 'comma-dot', label: '1,000.33' },
-  { value: 'dot-comma', label: '1.000,33' },
-  { value: 'space-comma', label: '1 000,33' },
+  { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
+  { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
+  { value: 'space-comma', label: '1 000,33', labelNoFraction: '1 000' },
 ];
 
 let numberFormat = {
@@ -260,7 +260,7 @@ let numberFormat = {
   regex: null,
 };
 
-export function setNumberFormat(format) {
+export function setNumberFormat({ format, hideFraction }) {
   let locale, regex, separator;
 
   switch (format) {
@@ -285,8 +285,8 @@ export function setNumberFormat(format) {
     value: format,
     separator,
     formatter: new Intl.NumberFormat(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: hideFraction ? 0 : 2,
+      maximumFractionDigits: hideFraction ? 0 : 2,
     }),
     regex,
   };
@@ -296,7 +296,7 @@ export function getNumberFormat() {
   return numberFormat;
 }
 
-setNumberFormat('comma-dot');
+setNumberFormat({ format: 'comma-dot', hideFraction: false });
 
 // Number utilities
 

@@ -241,6 +241,7 @@ class Budget extends React.Component {
       applyBudgetAction,
     } = this.props;
     let numberFormat = prefs.numberFormat || 'comma-dot';
+    let hideFraction = prefs.hideFraction || false;
 
     if (!categoryGroups || !initialized) {
       return (
@@ -264,7 +265,7 @@ class Budget extends React.Component {
           <BudgetTable
             // This key forces the whole table rerender when the number
             // format changes
-            key={numberFormat}
+            key={numberFormat + hideFraction}
             categories={categories}
             categoryGroups={categoryGroups}
             type={budgetType}
