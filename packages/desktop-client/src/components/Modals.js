@@ -94,9 +94,9 @@ function Modals({
         <Route path="/select-linked-accounts">
           <SelectLinkedAccounts
             modalProps={modalProps}
-            accounts={options.accounts}
+            externalAccounts={options.accounts}
             requisitionId={options.requisitionId}
-            actualAccounts={accounts.filter(acct => acct.closed === 0)}
+            localAccounts={accounts.filter(acct => acct.closed === 0)}
             upgradingAccountId={options.upgradingAccountId}
             actions={actions}
           />

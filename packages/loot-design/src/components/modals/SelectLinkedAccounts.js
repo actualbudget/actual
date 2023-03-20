@@ -10,8 +10,8 @@ const addAccountOption = { value: 'new', label: 'Create new account' };
 export default function SelectLinkedAccounts({
   modalProps,
   requisitionId,
-  accounts: externalAccounts,
-  actualAccounts: localAccounts,
+  externalAccounts,
+  localAccounts,
   actions,
 }) {
   const [chosenAccounts, setChosenAccounts] = useState({});
