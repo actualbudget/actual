@@ -16,7 +16,7 @@ module.exports = {
     schema: [],
     messages: {
       // eslint-disable-next-line rulesdir/typography
-      quote: `Avoid using straight quotes (' or "). Use curly quotes (‘ ’ or “ ”) instead.`,
+      quote: `Avoid using straight quotes (' or ") in user-visible text. Use curly quotes (‘ ’ or “ ”) instead.`,
     },
   },
 
