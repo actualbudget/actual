@@ -28,6 +28,7 @@ module.exports = {
     //----------------------------------------------------------------------
 
     function check(node, { value = node.value, strip = false } = {}) {
+      // eslint-disable-next-line rulesdir/typography
       if (!value.includes("'") && !value.includes('"')) return;
 
       let rawText = context.getSourceCode().getText(node);
@@ -45,23 +46,66 @@ module.exports = {
       }
     }
 
-    function isQuerySelectorCall(node) {
+    function isMemberCall(node, object, properties) {
       return (
-        node.parent.type === 'CallExpression' &&
-        node.parent.arguments[0] === node &&
-        node.parent.callee.type === 'MemberExpression' &&
-        node.parent.callee.property.type === 'Identifier' &&
-        (node.parent.callee.property.name === 'querySelector' ||
-          node.parent.callee.property.name === 'querySelectorAll')
+        node.type === 'CallExpression' &&
+        node.callee.type === 'MemberExpression' &&
+        node.callee.property.type === 'Identifier' &&
+        properties.includes(node.callee.property.name) &&
+        (object
+          ? node.callee.object.type === 'Identifier' &&
+            node.callee.object.name === object
+          : true)
       );
     }
+
+    function isIdentifierCall(node, name) {
+      return (
+        node.type === 'CallExpression' &&
+        node.callee.type === 'Identifier' &&
+        node.callee.name === name
+      );
+    }
+
+    function isNewRegExp(node) {
+      return (
+        node.type === 'NewExpression' &&
+        node.callee.type === 'Identifier' &&
+        node.callee.name === 'RegExp'
+      );
+    }
+
+    function isExpectingSQLToMatch(node) {
+      if (isIdentifierCall(node, 'sqlLines')) {
+        node = node.parent;
+      }
+
+      return (
+        isMemberCall(node, null, ['toEqual', 'toMatch']) &&
+        isIdentifierCall(node.callee.object, 'expect')
+      );
+    }
+
+    function isIgnored(node) {
+      return (
+        isExpectingSQLToMatch(node) ||
+        isNewRegExp(node) ||
+        isIdentifierCall(node, 'runQuery') ||
+        isIdentifierCall(node, 'compile') ||
+        isMemberCall(node, null, ['querySelector', 'querySelectorAll']) ||
+        isMemberCall(node, null, ['runQuery', 'first', 'all']) ||
+        isMemberCall(node, 'db', ['first', 'all']) ||
+        isMemberCall(node, 'spreadsheet', ['set'])
+      );
+    }
+
     //----------------------------------------------------------------------
     // Public
     //----------------------------------------------------------------------
 
     return {
       Literal(node) {
-        if (isQuerySelectorCall(node)) return;
+        if (isIgnored(node.parent)) return;
 
         if (typeof node.value === 'string') {
           check(node, { strip: true });
@@ -71,6 +115,8 @@ module.exports = {
         check(node);
       },
       TemplateElement(node) {
+        if (isIgnored(node.parent.parent)) return;
+
         check(node, { value: node.value.cooked });
       },
     };
