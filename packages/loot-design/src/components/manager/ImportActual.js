@@ -12,6 +12,12 @@ function getErrorMessage(error) {
       return 'Unable to parse file. Please select a JSON file exported from nYNAB.';
     case 'not-ynab5':
       return 'This file is not valid. Please select a JSON file exported from nYNAB.';
+    case 'not-zip-file':
+      return 'This file is not valid. Please select an unencrypted archive of Actual data.';
+    case 'invalid-zip-file':
+      return 'This archive is not a valid Actual export file.';
+    case 'invalid-metadata-file':
+      return 'The metadata file in the given archive is corrupted.';
     default:
       return 'An unknown error occurred while importing. Sorry! We have been notified of this issue.';
   }
