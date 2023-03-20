@@ -890,7 +890,7 @@ describe('Type conversions', () => {
         query('transactions').filter({ id: 5 }).select(['id']).serialize(),
         schemaWithRefs,
       );
-    }).toThrow(/Can't convert/);
+    }).toThrow(/Can’t convert/);
   });
 
   it('allows conversions from integers to floats', () => {
@@ -913,7 +913,7 @@ describe('Type conversions', () => {
           .serialize(),
         basicSchema,
       );
-    }).toThrow(/Can't convert/);
+    }).toThrow(/Can’t convert/);
   });
 
   it('allows fields to be nullable', () => {

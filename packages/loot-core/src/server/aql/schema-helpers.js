@@ -119,7 +119,7 @@ export function conform(schema, schemaConfig, table, obj, { skipNull } = {}) {
 
         if (isRequired(field, fieldDesc) && obj[field] == null) {
           throw new Error(
-            `”${field}” is required for table “${table}”: ${JSON.stringify(
+            `“${field}” is required for table “${table}”: ${JSON.stringify(
               obj,
             )}`,
           );
