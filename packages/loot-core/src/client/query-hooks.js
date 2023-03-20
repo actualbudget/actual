@@ -44,7 +44,7 @@ function makeContext(queryState, opts, QueryClass) {
     let queryData = useContext(Context);
     if (queryData == null) {
       throw new Error(
-        "`useQuery` tried to access a query that hasn't been run. You need to put its `Provider` in a parent component",
+        '`useQuery` tried to access a query that hasn’t been run. You need to put its `Provider` in a parent component',
       );
     }
     return queryData;

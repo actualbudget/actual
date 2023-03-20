@@ -36,7 +36,7 @@ export function execTracer() {
 
       if (ended) {
         throw new Error(
-          `Tracer received event but didn't expect it: ${name} with data: ${JSON.stringify(
+          `Tracer received event but didn’t expect it: ${name} with data: ${JSON.stringify(
             data,
           )}`,
         );
@@ -44,7 +44,7 @@ export function execTracer() {
         if (waitingFor.name !== name) {
           waitingFor.reject(
             new Error(
-              `Event traced "${name}" but expected "${waitingFor.name}"`,
+              `Event traced “${name}” but expected “${waitingFor.name}”`,
             ),
           );
         } else {
@@ -70,7 +70,7 @@ export function execTracer() {
 
     expectWait(name, data) {
       if (!hasStarted) {
-        throw new Error(`Expected "${name}" but tracer hasn't started yet`);
+        throw new Error(`Expected “${name}” but tracer hasn’t started yet`);
       } else if (log) {
         console.log(`--- expectWait(${name}) ---`);
       }
@@ -98,14 +98,14 @@ export function execTracer() {
 
     expectNow(name, data) {
       if (!hasStarted) {
-        throw new Error(`Expected "${name}" but tracer hasn't started yet`);
+        throw new Error(`Expected “${name}” but tracer hasn’t started yet`);
       } else if (log) {
         console.log(`--- expectNow(${name}) ---`);
       }
 
       if (queue.length === 0) {
         throw new Error(
-          `Expected event "${name}" but none found - has it happened yet?`,
+          `Expected event “${name}” but none found - has it happened yet?`,
         );
       } else if (queue[0].name === name) {
         let entry = queue.shift();
@@ -117,7 +117,7 @@ export function execTracer() {
         }
       } else {
         throw new Error(
-          `Event traced "${queue[0].name}" but expected "${name}"`,
+          `Event traced “${queue[0].name}” but expected “${name}”`,
         );
       }
     },

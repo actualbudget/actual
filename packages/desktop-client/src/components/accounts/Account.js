@@ -285,7 +285,7 @@ function AccountMenu({
           },
           {
             name: 'toggle-cleared',
-            text: (showCleared ? 'Hide' : 'Show') + ' "Cleared" Checkboxes',
+            text: (showCleared ? 'Hide' : 'Show') + ' “Cleared” Checkboxes',
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },

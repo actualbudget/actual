@@ -190,7 +190,7 @@ export default function ConfigServer() {
                 style={{ color: colors.n4, margin: 5 }}
                 onClick={onSkip}
               >
-                Don't use a server
+                Don’t use a server
               </Button>
 
               {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (

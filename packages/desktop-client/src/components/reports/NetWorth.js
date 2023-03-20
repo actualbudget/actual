@@ -102,8 +102,8 @@ function NetWorth({ accounts }) {
           </P>
           <P>
             Net worth shows the balance of all accounts over time, including all
-            of your investments. Your "net worth" is considered to be the amount
-            you'd have if you sold all your assets and paid off as much debt as
+            of your investments. Your “net worth” is considered to be the amount
+            you’d have if you sold all your assets and paid off as much debt as
             possible. If you hover over the graph, you can also see the amount
             of assets and debt individually.
           </P>

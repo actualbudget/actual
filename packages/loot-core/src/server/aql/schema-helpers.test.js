@@ -207,6 +207,6 @@ describe('schema-helpers', () => {
         id: 'id',
         amount: 45.5,
       });
-    }).toThrow("Can't convert to integer");
+    }).toThrow('Can’t convert to integer');
   });
 });

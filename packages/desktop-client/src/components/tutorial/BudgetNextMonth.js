@@ -32,14 +32,14 @@ function BudgetNextMonth({ stepTwo, navigationProps }) {
         ) : (
           <View>
             <P>
-              It's easier this time though! Just hover over the new month and
-              click 3 dots menu and select "Copy last month's budget" to use the
+              It’s easier this time though! Just hover over the new month and
+              click 3 dots menu and select “Copy last month’s budget” to use the
               same budget as last month.
             </P>
 
             <P isLast={true}>
               You likely need to tweak the budget for the new month, depending
-              on overspending and other factors. That's ok! Adjusting your
+              on overspending and other factors. That’s ok! Adjusting your
               budget as life happens is crucial to a realistic budget.
             </P>
           </View>

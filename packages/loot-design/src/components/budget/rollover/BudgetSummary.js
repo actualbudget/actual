@@ -209,7 +209,7 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
                           },
                           {
                             name: 'reset-buffer',
-                            text: "Reset next month's buffer",
+                            text: 'Reset next month’s buffer',
                           },
                         ]}
                       />
@@ -372,7 +372,7 @@ function BudgetSummaryComponent({ month, localPrefs }) {
                       onBudgetAction(month, type);
                     }}
                     items={[
-                      { name: 'copy-last', text: "Copy last month's budget" },
+                      { name: 'copy-last', text: 'Copy last month’s budget' },
                       { name: 'set-zero', text: 'Set budgets to zero' },
                       {
                         name: 'set-3-avg',

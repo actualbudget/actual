@@ -93,7 +93,7 @@ let CONDITION_TYPES = {
         assert(
           parsed.type === 'date' || parsed.type === 'recur',
           'date-format',
-          `Invalid date value for "isapprox" (field: ${fieldName})`,
+          `Invalid date value for “isapprox” (field: ${fieldName})`,
         );
       }
       // These only work with exact dates
@@ -101,7 +101,7 @@ let CONDITION_TYPES = {
         assert(
           parsed.type === 'date',
           'date-format',
-          `Invalid date value for "${op}" (field: ${fieldName})`,
+          `Invalid date value for “${op}” (field: ${fieldName})`,
         );
       }
 
@@ -170,13 +170,13 @@ let CONDITION_TYPES = {
         assert(
           parsed.type === 'between',
           'number-format',
-          `Invalid between value for "${op}" (field: ${fieldName})`,
+          `Invalid between value for “${op}” (field: ${fieldName})`,
         );
       } else {
         assert(
           parsed.type === 'literal',
           'number-format',
-          `Invalid number value for "${op}" (field: ${fieldName})`,
+          `Invalid number value for “${op}” (field: ${fieldName})`,
         );
       }
 

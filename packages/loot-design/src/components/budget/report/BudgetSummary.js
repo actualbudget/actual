@@ -364,7 +364,7 @@ export const BudgetSummary = React.memo(function BudgetSummary({ month }) {
                       onBudgetAction(month, type);
                     }}
                     items={[
-                      { name: 'copy-last', text: "Copy last month's budget" },
+                      { name: 'copy-last', text: 'Copy last month’s budget' },
                       { name: 'set-zero', text: 'Set budgets to zero' },
                       {
                         name: 'set-3-avg',
