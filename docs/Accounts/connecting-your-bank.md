@@ -97,3 +97,11 @@ Follow the steps provided in the [Configuring the server section](https://actual
 7. The final step is to select the account you want to sync and click Link account
 
 ![](/static/img/connecting-your-bank/connecting-your-bank-10.png)
+
+
+### Frequently Asked Questions
+**Automatic Bank Sync**
+
+At this moment, it is not yet possible for Actual to automatically sync with your bank. You need to do this manually by going to "All Acounts" and pressing "Sync". 
+
+![](/static/img/connecting-your-bank/syncing-with-your-bank.png)
