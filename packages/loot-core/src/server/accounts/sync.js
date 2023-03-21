@@ -227,7 +227,7 @@ async function downloadNordigenTransactions(
 }
 
 async function resolvePayeeFromIban(trans, payeeIban) {
-  let payee = await db.getPayeeByIban(payeeIban).id;
+  let payee = await db.getPayeeByIban(payeeIban);
   return payee?.id;
 }
 
