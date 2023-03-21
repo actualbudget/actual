@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
+import { Warning } from 'loot-design/src/components/alerts';
 
 import { colors } from '../../style';
 import AnimatedLoading from '../../svg/AnimatedLoading';
@@ -149,6 +150,12 @@ export default function NordigenExternalMsg({
               />
             </FormField>
           ))}
+
+        <Warning>
+          By setting up bank-sync you will be giving read-only permissions to a
+          3rd party (Nordigen). This company will be able to read all your
+          transaction history. They do not get permissions to withdraw funds.
+        </Warning>
 
         <Button
           primary
