@@ -30,7 +30,7 @@ describe('Import transactions', function () {
     ];
 
     it.each(invalidInputs)(
-      'should not parse string "$str" with order "$order"',
+      'should not parse string `$str` with order `$order`',
       ({ str, order }) => {
         expect(parseDate(str, order)).toBe(null);
       },
@@ -128,7 +128,7 @@ describe('Import transactions', function () {
     ];
 
     describe.each(validInputs)(
-      'should parse with order "$order"',
+      'should parse with order `$order`',
       ({ order, cases }) => {
         it.each(cases)('given input %j expects output %j', (input, output) => {
           const parsed = parseDate(input, order);

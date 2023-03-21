@@ -65,7 +65,7 @@ export default function PlaidExternalMsg({
           <P style={{ fontSize: 15 }}>
             To link your bank account, you will be moved to your browser for
             enhanced security. Click below and Actual will automatically resume
-            when you have given your bank{"'"}s credentials.
+            when you have given your bank’s credentials.
           </P>
           {error && renderError(error)}
 
@@ -127,7 +127,7 @@ export default function PlaidExternalMsg({
               },
             }}
           >
-            Typing your bank{"'"}s username and password is one of the most
+            Typing your bank’s username and password is one of the most
             security-sensitive things you can do, and the browser is the most
             secure app in the world. Why not use it to make sure your
             information is safe? [TODO: Link to docs article]

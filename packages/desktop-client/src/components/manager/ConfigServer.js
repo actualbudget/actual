@@ -92,7 +92,7 @@ export default function ConfigServer() {
   return (
     <>
       <View style={{ maxWidth: 500, marginTop: -30 }}>
-        <Title text="Where's the server?" />
+        <Title text="Where’s the server?" />
 
         <Text
           style={{
@@ -187,7 +187,7 @@ export default function ConfigServer() {
                 style={{ color: colors.n4, margin: 5 }}
                 onClick={onSkip}
               >
-                Don't use a server
+                Don’t use a server
               </Button>
 
               {isNonProductionEnvironment() && (

@@ -44,7 +44,7 @@ describe('schedule app', () => {
       expect(updated[0].value).toBe('bar');
     });
 
-    it("conditions are added if they don't exist", () => {
+    it('conditions are added if they don’t exist', () => {
       let conds = [
         { op: 'contains', field: 'payee', value: 'FOO' },
         { op: 'contains', field: 'notes', value: 'dflksjdflskdjf' },

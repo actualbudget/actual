@@ -103,7 +103,7 @@ export function PayeeList({
                   display: 'inline-block',
                 }}
               />
-              Create Payee "{inputValue}"
+              Create Payee “{inputValue}”
             </View>
           </View>
         )}

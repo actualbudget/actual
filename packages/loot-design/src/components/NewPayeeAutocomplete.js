@@ -129,7 +129,7 @@ export default function PayeeAutocomplete({
               display: 'inline-block',
             }}
           />
-          Create Payee "{inputValue}"
+          Create Payee “{inputValue}”
         </View>
       )}
       components={{

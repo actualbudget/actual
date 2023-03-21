@@ -61,7 +61,7 @@ export default function PostsOfflineNotification() {
       </P>
       <P>
         You can always manually post a transaction later for a due schedule by
-        selecting the schedule and clicking "Post transaction" in the action
+        selecting the schedule and clicking “Post transaction” in the action
         menu.
       </P>
       <Stack

@@ -78,8 +78,8 @@ export default function FixEncryptionKey({
             </P>
           ) : (
             <P>
-              We don{"'"}t have a key that encrypts or decrypts this file. Enter
-              the password for this file to create the key for encryption.{' '}
+              We don’t have a key that encrypts or decrypts this file. Enter the
+              password for this file to create the key for encryption.{' '}
               <ExternalLink
                 asAnchor
                 href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"

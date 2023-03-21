@@ -192,7 +192,7 @@ class Budget extends React.Component {
 
     let options = [
       'Edit Categories',
-      "Copy last month's budget",
+      'Copy last month’s budget',
       'Set budgets to zero',
       'Set budgets to 3 month average',
       budgetType === 'report' && 'Apply to all future budgets',

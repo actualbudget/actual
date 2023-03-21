@@ -99,7 +99,7 @@ export default function MobileWebMessage() {
               userSelect: 'none',
             }}
           >
-            Don't remind me again
+            Don’t remind me again
           </label>
         </View>
       </View>

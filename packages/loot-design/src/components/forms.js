@@ -68,6 +68,7 @@ export function Checkbox(props) {
                 display: 'block',
                 background:
                   colors.b6 +
+                  // eslint-disable-next-line rulesdir/typography
                   ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
                 width: 9,
                 height: 9,

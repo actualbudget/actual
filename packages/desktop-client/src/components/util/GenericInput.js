@@ -184,7 +184,7 @@ export default function GenericInput({
             ref={inputRef}
             isMulti
             isCreatable
-            formatCreateLabel={inputValue => `Add "${inputValue}"`}
+            formatCreateLabel={inputValue => `Add “${inputValue}”`}
             noOptionsMessage={() => null}
             value={value.map(v => ({ value: v, label: v }))}
             onSelect={onChange}
