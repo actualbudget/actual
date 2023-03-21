@@ -480,6 +480,7 @@ function SelectedTransactionsButton({
   onDelete,
   onEdit,
   onUnlink,
+  onCreateRule,
   onScheduleAction,
 }) {
   let selectedItems = useSelectedItems();
@@ -552,6 +553,10 @@ function SelectedTransactionsButton({
                       name: 'link-schedule',
                       text: 'Link schedule',
                     },
+                    {
+                      name: 'create-rule',
+                      text: 'Create rule',
+                    },
                   ]),
               Menu.line,
               { type: Menu.label, name: 'Edit field' },
@@ -605,6 +610,9 @@ function SelectedTransactionsButton({
           case 'unlink-schedule':
             onUnlink([...selectedItems]);
             break;
+          case 'create-rule':
+            onCreateRule([...selectedItems]);
+            break;
           default:
             onEdit(name, [...selectedItems]);
         }
@@ -651,6 +659,7 @@ const AccountHeader = React.memo(
     onBatchDuplicate,
     onBatchEdit,
     onBatchUnlink,
+    onCreateRule,
     onApplyFilter,
     onUpdateFilter,
     onDeleteFilter,
@@ -884,6 +893,7 @@ const AccountHeader = React.memo(
                 onDelete={onBatchDelete}
                 onEdit={onBatchEdit}
                 onUnlink={onBatchUnlink}
+                onCreateRule={onCreateRule}
                 onScheduleAction={onScheduleAction}
               />
             )}
@@ -1664,6 +1674,54 @@ class AccountInternal extends React.PureComponent {
     await this.refetchTransactions();
   };
 
+  onCreateRule = async ids => {
+    let { data } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+
+    let transactions = ungroupTransactions(data);
+    console.log(transactions);
+
+    let rule = {
+      stage: null,
+      conditions: [
+        {
+          field: 'imported_payee',
+          op: 'is',
+          value: transactions[0].imported_payee || null,
+          type: 'string',
+        },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: null,
+          type: 'id',
+        },
+      ],
+    };
+
+    this.props.pushModal('edit-rule', {
+      rule,
+      // onSave: async newRule => {
+      //   let newRules = await loadRules();
+
+      //   navigator.onEdit(newRule.id, 'edit');
+
+      //   setRules(rules => {
+      //     let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
+      //     return newRules.slice(0, newIdx + 75);
+      //   });
+
+      //   setLoading(false);
+      // },
+    });
+  };
+
   onUpdateFilter = (oldFilter, updatedFilter) => {
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
@@ -1820,6 +1878,7 @@ class AccountInternal extends React.PureComponent {
                   onBatchDuplicate={this.onBatchDuplicate}
                   onBatchEdit={this.onBatchEdit}
                   onBatchUnlink={this.onBatchUnlink}
+                  onCreateRule={this.onCreateRule}
                   onUpdateFilter={this.onUpdateFilter}
                   onDeleteFilter={this.onDeleteFilter}
                   onApplyFilter={this.onApplyFilter}
