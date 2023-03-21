@@ -152,10 +152,10 @@ export default function NordigenExternalMsg({
           ))}
 
         <Warning>
-          If you choose to enable bank sync, you will be granting read-only
-          access to your entire bank transaction history to Nordigen, a
-          third-party entity not affiliated with Actual. Make sure you’ve read
-          and understand Nordigen’s{' '}
+          By enabling bank-sync, you will be granting Nordigen (a third party
+          service) read-only access to your entire account's transaction
+          history. This service is not affiliated with Actual in any way. Make
+          sure you’ve read and understand Nordigen’s{' '}
           <a
             href="https://nordigen.com/en/company/privacy-policy/"
             target="_blank"
@@ -170,8 +170,8 @@ export default function NordigenExternalMsg({
             rel="noopener noreferrer"
           >
             End User Privacy Policy
-          </a>
-          .
+          </a>{' '}
+          before proceeding.
         </Warning>
 
         <Button
