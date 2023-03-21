@@ -153,7 +153,7 @@ export default function NordigenExternalMsg({
 
         <Warning>
           By enabling bank-sync, you will be granting Nordigen (a third party
-          service) read-only access to your entire account's transaction
+          service) read-only access to your entire account’s transaction
           history. This service is not affiliated with Actual in any way. Make
           sure you’ve read and understand Nordigen’s{' '}
           <a
