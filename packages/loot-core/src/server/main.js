@@ -2108,10 +2108,18 @@ handlers['import-budget'] = async function ({ filepath, type }) {
         // duplicate some of the workflow
         await handlers['close-budget']();
 
-        let { id } = await cloudStorage.importBuffer(
-          { cloudFileId: null, groupId: null },
-          buffer,
-        );
+        let id;
+        try {
+          ({ id } = await cloudStorage.importBuffer(
+            { cloudFileId: null, groupId: null },
+            buffer,
+          ));
+        } catch (e) {
+          if (e.type === 'FileDownloadError') {
+            return { error: e.reason };
+          }
+          throw e;
+        }
 
         // We never want to load cached data from imported files, so
         // delete the cache
