@@ -200,7 +200,7 @@ Array [
 ]
 `;
 
-exports[`Database transactions don't show orphaned child transactions 1`] = `
+exports[`Database transactions don’t show orphaned child transactions 1`] = `
 Array [
   Object {
     "amount": -23,

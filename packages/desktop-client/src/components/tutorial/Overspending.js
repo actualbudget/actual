@@ -31,28 +31,27 @@ function Overspending({ navigationProps, stepTwo }) {
                   <View>
                     <P>
                       The category balance becomes negative. Next month will
-                      reset this balance to zero, and you'll see it in
-                      "Overspent in {month}" in next month's summary, which in
-                      turn takes it out of next month's "To Budget" amount.{' '}
+                      reset this balance to zero, and you’ll see it in
+                      “Overspent in {month}” in next month’s summary, which in
+                      turn takes it out of next month’s “To Budget” amount.{' '}
                     </P>
 
                     <P isLast={true}>
                       <strong>
-                        When you overspend, it's taken out of next month's
+                        When you overspend, it’s taken out of next month’s
                         available budget.
                       </strong>{' '}
                       A simple workflow would be to just take it out of next
-                      month's savings, or whatever you like.
+                      month’s savings, or whatever you like.
                     </P>
                   </View>
                 ) : (
                   <View>
                     <P>
-                      What happens when you overspend? Let
-                      {"'"}s find out.
+                      What happens when you overspend? Let’s find out.
                       {spentTotal === 0 && (
                         <Text>
-                          You haven't spent any money yet so add some expenses
+                          You haven’t spent any money yet so add some expenses
                           in your account to see it in action.
                         </Text>
                       )}
@@ -61,7 +60,7 @@ function Overspending({ navigationProps, stepTwo }) {
                     <P isLast={true}>
                       {spentTotal !== 0 && (
                         <Text>
-                          You've spent{' '}
+                          You’ve spent{' '}
                           <strong>
                             ${integerToCurrency(Math.abs(spentTotal))}
                           </strong>
@@ -69,7 +68,7 @@ function Overspending({ navigationProps, stepTwo }) {
                         </Text>
                       )}{' '}
                       Try zeroing out a budget for a category that already has
-                      spent money in it. You'll see how overspending works.
+                      spent money in it. You’ll see how overspending works.
                     </P>
                   </View>
                 ))}

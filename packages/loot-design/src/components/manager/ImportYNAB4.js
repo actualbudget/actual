@@ -52,14 +52,14 @@ function Import({ modalProps, availableImports }) {
             <P>
               To import data from YNAB4, locate where your YNAB4 data is stored.
               It is usually in your Documents folder under YNAB. Your data is a
-              directory inside that with the ".ynab4" suffix.
+              directory inside that with the <code>.ynab4</code> suffix.
             </P>
             <P>
-              When you've located your data,{' '}
+              When you’ve located your data,{' '}
               <strong>compress it into a zip file</strong>. On macOS,
-              right-click the folder and select "Compress". On Windows,
-              right-click and select "Send to > Compressed (zipped) folder".
-              Upload the zipped folder for importing.
+              right-click the folder and select “Compress”. On Windows,
+              right-click and select “Send to &rarr; Compressed (zipped)
+              folder”. Upload the zipped folder for importing.
             </P>
             <View>
               <ButtonWithLoading loading={importing} primary onClick={onImport}>

@@ -19,7 +19,7 @@ import { View, Text, Button, Tooltip, Menu } from '../common';
 function getFileDescription(file) {
   if (file.state === 'unknown') {
     return (
-      "This is a cloud-based file but it's state is unknown because you " +
+      'This is a cloud-based file but its state is unknown because you ' +
       'are offline.'
     );
   }

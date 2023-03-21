@@ -45,7 +45,7 @@ export function convertInputType(value, type) {
       if (typeof value === 'number' && Number.isInteger(value)) {
         return value;
       } else {
-        throw new Error("Can't convert to integer: " + JSON.stringify(value));
+        throw new Error('Can’t convert to integer: ' + JSON.stringify(value));
       }
     case 'json':
       return JSON.stringify(value);
@@ -87,7 +87,7 @@ export function convertOutputType(value, type) {
 export function conform(schema, schemaConfig, table, obj, { skipNull } = {}) {
   let tableSchema = schema[table];
   if (tableSchema == null) {
-    throw new Error(`Table "${table}" does not exist`);
+    throw new Error(`Table “${table}” does not exist`);
   }
 
   let views = schemaConfig.views || {};
@@ -111,7 +111,7 @@ export function conform(schema, schemaConfig, table, obj, { skipNull } = {}) {
         let fieldDesc = tableSchema[field];
         if (fieldDesc == null) {
           throw new Error(
-            `Field "${field}" does not exist on table ${table}: ${JSON.stringify(
+            `Field “${field}” does not exist on table ${table}: ${JSON.stringify(
               obj,
             )}`,
           );
@@ -119,7 +119,7 @@ export function conform(schema, schemaConfig, table, obj, { skipNull } = {}) {
 
         if (isRequired(field, fieldDesc) && obj[field] == null) {
           throw new Error(
-            `"${field}" is required for table "${table}": ${JSON.stringify(
+            `“${field}” is required for table “${table}”: ${JSON.stringify(
               obj,
             )}`,
           );
@@ -141,7 +141,7 @@ export function convertForInsert(schema, schemaConfig, table, rawObj) {
 
   let tableSchema = schema[table];
   if (tableSchema == null) {
-    throw new Error(`Error inserting: table "${table}" does not exist`);
+    throw new Error(`Error inserting: table “${table}” does not exist`);
   }
 
   // Inserting checks all the fields in the table and adds any default
@@ -160,7 +160,7 @@ export function convertForInsert(schema, schemaConfig, table, rawObj) {
         // checks the fields in `obj`. For insert, we need to do it
         // here to check that all required fields in the table exist
         throw new Error(
-          `"${field}" is required for table "${table}": ${JSON.stringify(obj)}`,
+          `“${field}” is required for table “${table}”: ${JSON.stringify(obj)}`,
         );
       }
     }
@@ -177,7 +177,7 @@ export function convertForUpdate(schema, schemaConfig, table, rawObj) {
 
   let tableSchema = schema[table];
   if (tableSchema == null) {
-    throw new Error(`Error updating: table "${table}" does not exist`);
+    throw new Error(`Error updating: table “${table}” does not exist`);
   }
 
   return conform(schema, schemaConfig, table, obj);
@@ -186,7 +186,7 @@ export function convertForUpdate(schema, schemaConfig, table, rawObj) {
 export function convertFromSelect(schema, schemaConfig, table, obj) {
   let tableSchema = schema[table];
   if (tableSchema == null) {
-    throw new Error(`Table "${table}" does not exist`);
+    throw new Error(`Table “${table}” does not exist`);
   }
 
   let fields = Object.keys(tableSchema);

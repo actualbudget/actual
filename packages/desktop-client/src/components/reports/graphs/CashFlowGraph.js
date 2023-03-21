@@ -47,6 +47,7 @@ function CashFlowGraph({ style, start, end, graphData, isConcise, compact }) {
               }}
             />
             <VictoryAxis
+              // eslint-disable-next-line rulesdir/typography
               tickFormat={x => d.format(x, isConcise ? "MMM ''yy" : 'MMM d')}
               tickValues={graphData.balances.map(item => item.x)}
               tickCount={Math.min(5, graphData.balances.length)}

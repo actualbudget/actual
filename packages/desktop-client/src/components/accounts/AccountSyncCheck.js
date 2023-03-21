@@ -110,7 +110,7 @@ function AccountSyncCheck({
             color: 'currentColor',
           }}
         />{' '}
-        This account is experiencing connection problems. Let{"'"}s fix it.
+        This account is experiencing connection problems. Let’s fix it.
       </Button>
 
       {open && (

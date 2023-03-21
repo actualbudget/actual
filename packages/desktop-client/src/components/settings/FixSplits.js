@@ -30,7 +30,7 @@ function renderResults(results) {
       if (result !== '') {
         result += '\n';
       }
-      result += `Fixed ${numDeleted} splits that weren't properly deleted.`;
+      result += `Fixed ${numDeleted} splits that weren’t properly deleted.`;
     }
   }
 
@@ -98,8 +98,8 @@ export default function FixSplitsTool() {
             </li>
             <li>
               Sync the payee and cleared flag of a split transaction to the main
-              or "parent" transaction, if appropriate. The payee will only be
-              set if it currently doesn't have one.
+              or “parent” transaction, if appropriate. The payee will only be
+              set if it currently doesn’t have one.
             </li>
           </ul>
         </P>

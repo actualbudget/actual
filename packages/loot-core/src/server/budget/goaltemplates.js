@@ -215,9 +215,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         if (template.limit != null) {
           if (limit != null) {
             console.log(
-              `${category.name}: ${`More than one 'up to' limit found.`} ${
-                template.line
-              }`,
+              `${category.name}: More than one “up to” limit found. ${template.line}`,
             );
             return null;
           } else {
@@ -261,9 +259,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         if (template.limit != null) {
           if (limit != null) {
             console.log(
-              `${category.name}: ${`More than one 'up to' limit found.`} ${
-                template.line
-              }`,
+              `${category.name}: More than one “up to” limit found. ${template.line}`,
             );
             return null;
           } else {

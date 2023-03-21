@@ -1151,14 +1151,14 @@ handlers['accounts-sync'] = async function ({ id }) {
           errors.push({
             type: 'SyncError',
             accountId: acct.id,
-            message: 'Failed syncing account "' + acct.name + '".',
+            message: 'Failed syncing account “' + acct.name + '.”',
             category: err.category,
             code: err.code,
           });
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account "${acct.name}" is not linked properly. Please link it again`,
+            message: `Account “${acct.name}” is not linked properly. Please link it again`,
           });
         } else {
           errors.push({
@@ -1353,14 +1353,14 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
           errors.push({
             type: 'SyncError',
             accountId: acct.id,
-            message: 'Failed syncing account "' + acct.name + '".',
+            message: 'Failed syncing account “' + acct.name + '.”',
             category: err.category,
             code: err.code,
           });
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account "${acct.name}" is not linked properly. Please link it again`,
+            message: `Account “${acct.name}” is not linked properly. Please link it again`,
           });
         } else {
           errors.push({

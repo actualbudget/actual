@@ -29,14 +29,14 @@ function BudgetSummary({ targetRect, navigationProps }) {
       >
         <Title>More money!</Title>
         <P>
-          If you added any deposit transactions, you'll see that you have more
+          If you added any deposit transactions, you’ll see that you have more
           money to budget. Any income becomes{' '}
           <strong>immediately available</strong> to budget. Hooray!
         </P>
 
         <P isLast={true}>
-          If you've already budgeted all you need this month, you can click the
-          "To Budget" amount and select "Hold for next month". This puts the
+          If you’ve already budgeted all you need this month, you can click the
+          “To Budget” amount and select “Hold for next month.” This puts the
           money away for next month.
         </P>
         <Navigation {...navigationProps} showBack={false} />

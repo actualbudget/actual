@@ -18,12 +18,12 @@ function BudgetInitial({ accounts, navigationProps }) {
       {!minimized && (
         <React.Fragment>
           <P>
-            You should see all of your current accounts' balance available to
+            You should see all of your current accounts’ balance available to
             budget. Click on the budgeted column for a category create a budget.
-            Keep doing this until your "To Budget" amount is zero.
+            Keep doing this until your “To Budget” amount is zero.
           </P>
           <P>
-            Don't worry too much about your initial budget. Just guess. You'll
+            Don’t worry too much about your initial budget. Just guess. You’ll
             learn more about your spending in the first couple months.
           </P>
         </React.Fragment>
