@@ -61,7 +61,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
     >
       <Text>
         <strong>End-to-end encryption</strong> is not enabled. Any data on the
-        server is still protected by the server password, but it's not
+        server is still protected by the server password, but it’s not
         end-to-end encrypted which means the server owners have the ability to
         read it. If you want, you can use an additional password to encrypt your
         data on the server.{' '}

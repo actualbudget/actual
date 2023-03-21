@@ -1,6 +1,8 @@
 import './polyfills';
 import injectAPI from '@actual-app/api/injected';
 
+import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
+
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import asyncStorage from '../platform/server/asyncStorage';
@@ -1149,14 +1151,14 @@ handlers['accounts-sync'] = async function ({ id }) {
           errors.push({
             type: 'SyncError',
             accountId: acct.id,
-            message: 'Failed syncing account "' + acct.name + '".',
+            message: 'Failed syncing account “' + acct.name + '.”',
             category: err.category,
             code: err.code,
           });
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account "${acct.name}" is not linked properly. Please link it again`,
+            message: `Account “${acct.name}” is not linked properly. Please link it again`,
           });
         } else {
           errors.push({
@@ -1265,7 +1267,7 @@ handlers['nordigen-get-banks'] = async function (country) {
 
   return post(
     getServer().NORDIGEN_SERVER + '/get-banks',
-    { country },
+    { country, showDemo: isNonProductionEnvironment() },
     {
       'X-ACTUAL-TOKEN': userToken,
     },
@@ -1351,14 +1353,14 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
           errors.push({
             type: 'SyncError',
             accountId: acct.id,
-            message: 'Failed syncing account "' + acct.name + '".',
+            message: 'Failed syncing account “' + acct.name + '.”',
             category: err.category,
             code: err.code,
           });
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account "${acct.name}" is not linked properly. Please link it again`,
+            message: `Account “${acct.name}” is not linked properly. Please link it again`,
           });
         } else {
           errors.push({
@@ -2106,10 +2108,18 @@ handlers['import-budget'] = async function ({ filepath, type }) {
         // duplicate some of the workflow
         await handlers['close-budget']();
 
-        let { id } = await cloudStorage.importBuffer(
-          { cloudFileId: null, groupId: null },
-          buffer,
-        );
+        let id;
+        try {
+          ({ id } = await cloudStorage.importBuffer(
+            { cloudFileId: null, groupId: null },
+            buffer,
+          ));
+        } catch (e) {
+          if (e.type === 'FileDownloadError') {
+            return { error: e.reason };
+          }
+          throw e;
+        }
 
         // We never want to load cached data from imported files, so
         // delete the cache

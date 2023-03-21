@@ -10,8 +10,8 @@ function DeleteTransactions({ targetRect, navigationProps }) {
     <Standalone width={500}>
       <Title>Deleting transactions</Title>
       <P isLast={true}>
-        Let's cleanup the fake transactions we added. You can delete
-        transactions by hovering over them and clicking the "X" beside them.
+        Let’s cleanup the fake transactions we added. You can delete
+        transactions by hovering over them and clicking the “X” beside them.
       </P>
       <Navigation {...navigationProps} showBack={false} />
     </Standalone>

@@ -161,8 +161,13 @@ export async function exportBuffer() {
 }
 
 export async function importBuffer(fileData, buffer) {
-  let zipped = new AdmZip(buffer);
-  let entries = zipped.getEntries();
+  let zipped, entries;
+  try {
+    zipped = new AdmZip(buffer);
+    entries = zipped.getEntries();
+  } catch (err) {
+    throw FileDownloadError('not-zip-file');
+  }
   let dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
   let metaEntry = entries.find(e => e.entryName.includes('metadata.json'));
 

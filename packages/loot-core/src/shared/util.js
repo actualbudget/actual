@@ -318,7 +318,7 @@ export function safeNumber(value) {
   }
   if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
     throw new Error(
-      "safeNumber: can't safely perform arithmetic with number: " + value,
+      'safeNumber: can’t safely perform arithmetic with number: ' + value,
     );
   }
   return value;

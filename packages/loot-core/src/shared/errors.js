@@ -28,6 +28,7 @@ export function getDownloadError({ reason, meta, fileName }) {
     case 'network':
     case 'download-failure':
       return 'Downloading the file failed. Check your network connection.';
+    case 'not-zip-file':
     case 'invalid-zip-file':
     case 'invalid-meta-file':
       return 'Downloaded file is invalid, sorry! Contact help@actualbudget.com for support.';
@@ -92,12 +93,8 @@ export function getSyncError(error, id) {
   if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
     return 'This budget cannot be loaded with this version of the app.';
   } else if (error === 'budget-not-found') {
-    return (
-      'Budget "' +
-      id +
-      '" not found. Check the id of your budget in the "Advanced" section of the settings page.'
-    );
+    return `Budget “${id}” not found. Check the id of your budget in the Advanced section of the settings page.`;
   } else {
-    return 'We had an unknown problem opening "' + id + '".';
+    return `We had an unknown problem opening “${id}”.`;
   }
 }

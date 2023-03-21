@@ -26,7 +26,7 @@ export function ResetCache() {
         <strong>Reset budget cache</strong> will clear all cached values for the
         budget and recalculate the entire budget. All values in the budget are
         cached for performance reasons, and if there is a bug in the cache you
-        won't see correct values. There is no danger in resetting the cache.
+        won’t see correct values. There is no danger in resetting the cache.
         Hopefully you never have to do this.
       </Text>
     </Setting>

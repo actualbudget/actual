@@ -151,7 +151,7 @@ describe('Database', () => {
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
   });
 
-  test("transactions don't show orphaned child transactions", async () => {
+  test('transactions don’t show orphaned child transactions', async () => {
     await insertTransactions([
       { date: '2018-01-05', account: 'foo', amount: -23, sort_order: 5 },
       {

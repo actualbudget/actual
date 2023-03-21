@@ -12,10 +12,7 @@ import {
 } from 'loot-design/src/components/common';
 import { useSetThemeColor } from 'loot-design/src/components/hooks';
 import { colors } from 'loot-design/src/style';
-import {
-  isDevelopmentEnvironment,
-  isPreviewEnvironment,
-} from 'loot-design/src/util/environment';
+import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
 
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
@@ -95,7 +92,7 @@ export default function ConfigServer() {
   return (
     <>
       <View style={{ maxWidth: 500, marginTop: -30 }}>
-        <Title text="Where's the server?" />
+        <Title text="Where’s the server?" />
 
         <Text
           style={{
@@ -190,10 +187,10 @@ export default function ConfigServer() {
                 style={{ color: colors.n4, margin: 5 }}
                 onClick={onSkip}
               >
-                Don't use a server
+                Don’t use a server
               </Button>
 
-              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
+              {isNonProductionEnvironment() && (
                 <Button
                   primary
                   style={{ marginLeft: 15 }}

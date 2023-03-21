@@ -31,11 +31,11 @@ function BudgetInitial({ targetRect, navigationProps }) {
 
         <P>
           As money comes in, you put it in categories. As money is spent, you
-          can see each categories' balance.
+          can see each categories’ balance.
         </P>
 
         <P isLast={true}>
-          Don't overthink categories. If you haven't budgeted before, start with
+          Don’t overthink categories. If you haven’t budgeted before, start with
           just a few.
         </P>
         <Navigation {...navigationProps} />

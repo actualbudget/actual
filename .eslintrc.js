@@ -1,5 +1,16 @@
+const path = require('path');
+
+const rulesDirPlugin = require('eslint-plugin-rulesdir');
+rulesDirPlugin.RULES_DIR = path.join(
+  __dirname,
+  'packages',
+  'eslint-plugin-actual',
+  'lib',
+  'rules',
+);
+
 module.exports = {
-  plugins: ['prettier', 'import'],
+  plugins: ['prettier', 'import', 'rulesdir'],
   extends: ['react-app'],
   reportUnusedDisableDirectives: true,
   rules: {
@@ -16,6 +27,8 @@ module.exports = {
     'no-restricted-globals': ['error'].concat(
       require('confusing-browser-globals').filter(g => g !== 'self'),
     ),
+
+    'rulesdir/typography': 'error',
 
     // https://github.com/eslint/eslint/issues/16954
     // https://github.com/eslint/eslint/issues/16953

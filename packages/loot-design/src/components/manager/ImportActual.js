@@ -12,6 +12,12 @@ function getErrorMessage(error) {
       return 'Unable to parse file. Please select a JSON file exported from nYNAB.';
     case 'not-ynab5':
       return 'This file is not valid. Please select a JSON file exported from nYNAB.';
+    case 'not-zip-file':
+      return 'This file is not valid. Please select an unencrypted archive of Actual data.';
+    case 'invalid-zip-file':
+      return 'This archive is not a valid Actual export file.';
+    case 'invalid-metadata-file':
+      return 'The metadata file in the given archive is corrupted.';
     default:
       return 'An unknown error occurred while importing. Sorry! We have been notified of this issue.';
   }
@@ -25,7 +31,7 @@ function Import({ modalProps, availableImports }) {
   async function onImport() {
     const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
-      filters: [{ name: 'actual', extensions: ['zip'] }],
+      filters: [{ name: 'actual', extensions: ['zip', 'blob'] }],
     });
     if (res) {
       setImporting(true);
@@ -58,8 +64,8 @@ function Import({ modalProps, availableImports }) {
             <P>
               You can import data from another Actual account or instance. First
               export your data from a different account, and it will give you a
-              compressed file. This file is simple zip file that contains the
-              "db.sqlite" and "metadata.json" files.
+              compressed file. This file is a simple zip file that contains the
+              <code>db.sqlite</code> and <code>metadata.json</code> files.
             </P>
 
             <P>Select one of these compressed files and import it here.</P>

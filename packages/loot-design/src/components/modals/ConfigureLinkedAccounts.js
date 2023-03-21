@@ -119,8 +119,8 @@ export default function ConfigureLinkedAccounts({
           <Text style={{ fontSize: 15, marginBottom: 15, lineHeight: '1.4em' }}>
             A <strong>budgeted account</strong> is one where expenses and income
             affect the budget. Usually things like investments are off budget.
-            We{"'"}ve chosen some defaults here, but you can change the status
-            if you like.
+            We’ve chosen some defaults here, but you can change the status if
+            you like.
           </Text>
 
           <View

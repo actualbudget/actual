@@ -17,6 +17,9 @@ const snapshotDiff = require('snapshot-diff');
 const { post } = require('../post');
 const mockSyncServer = require('../tests/mockSyncServer');
 
+const papaJohns = 'Papa Johns east side';
+const lowes = 'Lowe’s Store';
+
 beforeEach(async () => {
   mockSyncServer.reset();
   await global.emptyDatabase()();
@@ -176,9 +179,9 @@ describe('Account sync', () => {
     // the same amount are imported first, i.e. high fidelity matches
     // always win
     let mocked = mockTransactions.filter(t => t.date === '2017-10-17');
-    mocked[0].name = 'Papa Johns east side';
+    mocked[0].name = papaJohns;
     mocked[0].amount = 29.47;
-    mocked[1].name = "Lowe's Store";
+    mocked[1].name = 'Lowe’s Store';
     mocked[1].amount = 29.47;
     mocked[2].name = 'macy';
     mocked[2].amount = 29.47;
@@ -236,9 +239,9 @@ describe('Account sync', () => {
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
 
     let mocked = mockTransactions.filter(t => t.date === '2017-10-17');
-    mocked[0].name = 'Papa Johns east side';
+    mocked[0].name = papaJohns;
     mocked[0].amount = 29.47;
-    mocked[1].name = "Lowe's Store";
+    mocked[1].name = lowes;
     mocked[1].amount = 29.47;
     mocked[1].transaction_id = 'imported1';
 
@@ -271,9 +274,7 @@ describe('Account sync', () => {
 
     // Make sure lowes, which has the imported_id, is the one that
     // got matched with the same imported_id
-    expect(transactions.find(t => t.id === 'one').imported_payee).toBe(
-      "Lowe's Store",
-    );
+    expect(transactions.find(t => t.id === 'one').imported_payee).toBe(lowes);
   });
 
   test('import never matches existing with financial ids', async () => {
@@ -333,7 +334,7 @@ describe('Account sync', () => {
     let differ = expectSnapshotWithDiffer(await getAllTransactions());
 
     const mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
-    mockTransaction.name = "#001 fenn st Macy's 33333 EMX";
+    mockTransaction.name = '#001 fenn st Macy’s 33333 EMX';
     mockTransaction.amount = 29.48;
 
     const transactionId = await db.insertTransaction({

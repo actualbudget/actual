@@ -66,8 +66,7 @@ function CloseAccount({
               </span>
             ) : (
               <span>
-                This account has transactions so we can
-                {"'"}t permanently delete it.
+                This account has transactions so we can’t permanently delete it.
               </span>
             )}
           </P>
