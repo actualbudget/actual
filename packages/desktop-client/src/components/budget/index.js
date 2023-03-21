@@ -496,11 +496,21 @@ class Budget extends React.PureComponent {
   }
 }
 
+const RolloverBudgetSummary = React.memo(props => {
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+  return (
+    <rollover.BudgetSummary
+      {...props}
+      isGoalTemplatesEnabled={isGoalTemplatesEnabled}
+      isNewAutocompleteEnabled={isNewAutocompleteEnabled}
+    />
+  );
+});
+
 function BudgetWrapper(props) {
   let spreadsheet = useContext(SpreadsheetContext);
   let titlebar = useContext(TitlebarContext);
-  let isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  let isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
 
   let reportComponents = useMemo(
     () => ({
@@ -517,13 +527,7 @@ function BudgetWrapper(props) {
 
   let rolloverComponents = useMemo(
     () => ({
-      SummaryComponent: props => (
-        <rollover.BudgetSummary
-          {...props}
-          isGoalTemplatesEnabled={isGoalTemplatesEnabled}
-          isNewAutocompleteEnabled={isNewAutocompleteEnabled}
-        />
-      ),
+      SummaryComponent: RolloverBudgetSummary,
       ExpenseCategoryComponent: rollover.ExpenseCategoryMonth,
       ExpenseGroupComponent: rollover.ExpenseGroupMonth,
       IncomeCategoryComponent: rollover.IncomeCategoryMonth,
