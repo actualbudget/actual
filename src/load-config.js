@@ -6,19 +6,24 @@ const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 export const sqlDir = path.join(projectRoot, 'src', 'sql');
 let defaultDataDir = fs.existsSync('/data') ? '/data' : projectRoot;
 
-function parseJSON(path) {
-  return JSON.parse(fs.readFileSync(path, 'utf8'));
+function parseJSON(path, allowMissing = false) {
+  let text;
+  try {
+    text = fs.readFileSync(path, 'utf8');
+  } catch (e) {
+    if (allowMissing) {
+      return {};
+    }
+    throw e;
+  }
+  return JSON.parse(text);
 }
 
 let userConfig;
 if (process.env.ACTUAL_CONFIG_PATH) {
   userConfig = parseJSON(process.env.ACTUAL_CONFIG_PATH);
 } else {
-  try {
-    userConfig = parseJSON(path.join(defaultDataDir, 'config.json'));
-  } catch (e) {
-    // do nothing
-  }
+  userConfig = parseJSON(path.join(defaultDataDir, 'config.json'), true);
 }
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'serverFiles' | 'userFiles'>} */
