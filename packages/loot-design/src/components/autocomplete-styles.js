@@ -10,12 +10,12 @@ const colourStyles = {
     outline: 0,
     marginLeft: -1,
     marginRight: 1,
-    padding: '5px 3px',
+    padding: '6px 2px',
     minHeight: 'auto',
   }),
   input: styles => ({
     ...styles,
-    padding: 0,
+    padding: '0 2px',
     margin: 0,
   }),
   menuPortal: styles => ({

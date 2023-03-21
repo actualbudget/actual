@@ -28,6 +28,7 @@ export function getDownloadError({ reason, meta, fileName }) {
     case 'network':
     case 'download-failure':
       return 'Downloading the file failed. Check your network connection.';
+    case 'not-zip-file':
     case 'invalid-zip-file':
     case 'invalid-meta-file':
       return 'Downloaded file is invalid, sorry! Contact help@actualbudget.com for support.';
