@@ -227,8 +227,12 @@ async function downloadNordigenTransactions(
 }
 
 async function resolvePayeeFromIban(trans, payeeIban) {
-  let payee = await db.getPayeeByIban(payeeIban);
-  return payee?.id;
+  if (trans.payee == null) {
+    let payee = await db.getPayeeByIban(payeeIban);
+    return payee?.id;
+  }
+
+  return trans.payee;
 }
 
 async function resolvePayee(trans, payeeName, payeesToCreate) {
@@ -342,10 +346,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
             trans.debtorAccount.iban.slice(-4) +
             ')',
         );
-        let transferPayee = resolvePayeeFromIban(trans.debtorAccount.iban);
-        if (transferPayee != null) {
-          trans.payee = transferPayee;
-        }
+        trans.payee = resolvePayeeFromIban(trans, trans.debtorAccount.iban);
       }
       payee_name = nameParts.join(' ');
     } else {
@@ -365,10 +366,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
             trans.creditorAccount.iban.slice(-4) +
             ')',
         );
-        let transferPayee = resolvePayeeFromIban(trans.creditorAccount.iban);
-        if (transferPayee != null) {
-          trans.payee = transferPayee;
-        }
+        trans.payee = resolvePayeeFromIban(trans, trans.creditorAccount.iban);
       }
       payee_name = nameParts.join(' ');
     }
