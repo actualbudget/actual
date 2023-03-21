@@ -24,6 +24,7 @@ import { View } from 'loot-design/src/components/common';
 import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
 import { styles } from 'loot-design/src/style';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { TitlebarContext } from '../Titlebar';
 
 let _initialBudgetMonth = null;
@@ -498,6 +499,8 @@ class Budget extends React.PureComponent {
 function BudgetWrapper(props) {
   let spreadsheet = useContext(SpreadsheetContext);
   let titlebar = useContext(TitlebarContext);
+  let isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  let isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
 
   let reportComponents = useMemo(
     () => ({
@@ -514,7 +517,13 @@ function BudgetWrapper(props) {
 
   let rolloverComponents = useMemo(
     () => ({
-      SummaryComponent: rollover.BudgetSummary,
+      SummaryComponent: props => (
+        <rollover.BudgetSummary
+          {...props}
+          isGoalTemplatesEnabled={isGoalTemplatesEnabled}
+          isNewAutocompleteEnabled={isNewAutocompleteEnabled}
+        />
+      ),
       ExpenseCategoryComponent: rollover.ExpenseCategoryMonth,
       ExpenseGroupComponent: rollover.ExpenseGroupMonth,
       IncomeCategoryComponent: rollover.IncomeCategoryMonth,
