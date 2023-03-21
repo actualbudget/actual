@@ -152,9 +152,26 @@ export default function NordigenExternalMsg({
           ))}
 
         <Warning>
-          By setting up bank-sync you will be giving read-only permissions to a
-          3rd party (Nordigen). This company will be able to read all your
-          transaction history. They do not get permissions to withdraw funds.
+          If you choose to enable bank sync, you will be granting read-only
+          access to your entire bank transaction history to Nordigen, a
+          third-party entity not affiliated with Actual. Make sure you’ve read
+          and understand Nordigen’s{' '}
+          <a
+            href="https://nordigen.com/en/company/privacy-policy/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy Policy
+          </a>{' '}
+          and{' '}
+          <a
+            href="https://nordigen.com/en/company/privacy-policy-end-user/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            End User Privacy Policy
+          </a>
+          .
         </Warning>
 
         <Button
@@ -184,9 +201,9 @@ export default function NordigenExternalMsg({
       {() => (
         <View>
           <P style={{ fontSize: 15 }}>
-            To link your bank account, you will be redirected to a new tab where
-            you will have the possibility to grant access to your bank for
-            Nordigen.
+            To link your bank account, you will be redirected to a new page
+            where Nordigen will ask to connect to your bank. Nordigen will not
+            be able to withdraw funds from your accounts.
           </P>
 
           {error && renderError(error)}
