@@ -1,7 +1,7 @@
 BEGIN TRANSACTION;
 
-ALTER TABLE accounts ADD COLUMN iban TEXT;
+ALTER TABLE accounts ADD COLUMN account_number TEXT;
 
-CREATE INDEX account_iban ON accounts(iban);
+CREATE INDEX accounts_account_number ON accounts(account_number);
 
 COMMIT;
