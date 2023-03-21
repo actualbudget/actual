@@ -4,6 +4,8 @@ import { css } from 'glamor';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
+
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -14,8 +16,7 @@ import {
   ModalButtons,
   Input,
   InitialFocus,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+} from '../common';
 
 export default function CreateEncryptionKey({
   modalProps,

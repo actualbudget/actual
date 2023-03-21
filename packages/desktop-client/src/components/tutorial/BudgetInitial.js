@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { P, Button } from 'loot-design/src/components/common';
+
+import { P, Button } from '../common';
 
 import { Title, Standalone, useMinimized } from './common';
 import Navigation from './Navigation';

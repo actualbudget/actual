@@ -1,14 +1,10 @@
 import React from 'react';
 
 import { numberFormats } from 'loot-core/src/shared/util';
-import {
-  Button,
-  CustomSelect,
-  Text,
-  View,
-} from 'loot-design/src/components/common';
-import { Checkbox } from 'loot-design/src/components/forms';
-import tokens from 'loot-design/src/tokens';
+
+import tokens from '../../tokens';
+import { Button, CustomSelect, Text, View } from '../common';
+import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
 

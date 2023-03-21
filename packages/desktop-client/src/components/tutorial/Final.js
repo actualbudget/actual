@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { P, ModalButtons, Button } from 'loot-design/src/components/common';
+import { P, ModalButtons, Button } from '../common';
 
 import { Standalone, Title, ExternalLink } from './common';
 

@@ -36,14 +36,27 @@ import {
   amountToInteger,
   titleFirst,
 } from 'loot-core/src/shared/util';
-import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import NewCategoryAutocomplete from 'loot-design/src/components/CategoryAutocomplete';
-import LegacyCategoryAutocomplete from 'loot-design/src/components/CategorySelect';
-import { View, Text, Tooltip, Button } from 'loot-design/src/components/common';
-import DateSelect from 'loot-design/src/components/DateSelect';
-import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
-import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
-import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
+
+import useFeatureFlag from '../../hooks/useFeatureFlag';
+import { useMergedRefs } from '../../hooks/useMergedRefs';
+import usePrevious from '../../hooks/usePrevious';
+import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
+import LeftArrow2 from '../../icons/v0/LeftArrow2';
+import RightArrow2 from '../../icons/v0/RightArrow2';
+import CheveronDown from '../../icons/v1/CheveronDown';
+import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
+import CalendarIcon from '../../icons/v2/Calendar';
+import Hyperlink2 from '../../icons/v2/Hyperlink2';
+import { styles, colors } from '../../style';
+import LegacyAccountAutocomplete from '../autocomplete/AccountAutocomplete';
+import NewCategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
+import LegacyCategoryAutocomplete from '../autocomplete/CategorySelect';
+import NewAccountAutocomplete from '../autocomplete/NewAccountAutocomplete';
+import NewPayeeAutocomplete from '../autocomplete/NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import { View, Text, Tooltip, Button } from '../common';
+import { getStatusProps } from '../schedules/StatusBadge';
+import DateSelect from '../select/DateSelect';
 import {
   Cell,
   Field,
@@ -55,23 +68,7 @@ import {
   CellButton,
   useTableNavigator,
   Table,
-} from 'loot-design/src/components/table';
-import { useMergedRefs } from 'loot-design/src/components/useMergedRefs';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from 'loot-design/src/components/useSelected';
-import { styles, colors } from 'loot-design/src/style';
-import LeftArrow2 from 'loot-design/src/svg/v0/LeftArrow2';
-import RightArrow2 from 'loot-design/src/svg/v0/RightArrow2';
-import CheveronDown from 'loot-design/src/svg/v1/CheveronDown';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
-import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
-import Hyperlink2 from 'loot-design/src/svg/v2/Hyperlink2';
-
-import useFeatureFlag from '../../hooks/useFeatureFlag';
-import usePrevious from '../../hooks/usePrevious';
-import { getStatusProps } from '../schedules/StatusBadge';
+} from '../table';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';

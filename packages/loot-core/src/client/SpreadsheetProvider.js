@@ -1,10 +1,14 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useContext } from 'react';
 
 import LRU from 'lru-cache';
 
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
-
 import { listen, send } from '../platform/client/fetch';
+
+const SpreadsheetContext = React.createContext(undefined);
+
+export function useSpreadsheet() {
+  return useContext(SpreadsheetContext);
+}
 
 function makeSpreadsheet() {
   const cellObservers = {};

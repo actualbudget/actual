@@ -1,8 +1,6 @@
 import './polyfills';
 import injectAPI from '@actual-app/api/injected';
 
-import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
-
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import asyncStorage from '../platform/server/asyncStorage';
@@ -74,6 +72,7 @@ import toolsApp from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
+import { isNonProductionEnvironment } from './util/environment';
 
 const YNAB4 = require('@actual-app/import-ynab4/importer');
 const YNAB5 = require('@actual-app/import-ynab5/importer');

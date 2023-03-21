@@ -11,10 +11,11 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { titleFirst } from 'loot-core/src/shared/util';
 import { integerToCurrency, groupById } from 'loot-core/src/shared/util';
-import { Text, TextOneLine, View } from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
-import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
+
+import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
+import CheckCircle1 from '../../icons/v2/CheckCircle1';
+import { styles, colors } from '../../style';
+import { Text, TextOneLine, View } from '../common';
 
 const zIndices = { SECTION_HEADING: 10 };
 

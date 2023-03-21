@@ -1,4 +1,4 @@
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
 
 let colorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',

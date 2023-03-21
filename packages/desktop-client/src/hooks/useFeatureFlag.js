@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 
-import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
+import { isNonProductionEnvironment } from '../util/environment';
 
 const DEFAULT_FEATURE_FLAG_STATE = {
   newAutocomplete: isNonProductionEnvironment(),
