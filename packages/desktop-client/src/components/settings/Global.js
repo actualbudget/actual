@@ -7,7 +7,7 @@ import { colors } from 'loot-design/src/style';
 import { Setting } from './UI';
 
 export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
-  let [documentDirChanged, setDirChanged] = useState(true);
+  let [documentDirChanged, setDirChanged] = useState(false);
   let dirScrolled = useRef(null);
 
   useEffect(() => {
