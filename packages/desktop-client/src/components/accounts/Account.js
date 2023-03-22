@@ -1681,20 +1681,24 @@ class AccountInternal extends React.PureComponent {
         .select('*')
         .options({ splits: 'grouped' }),
     );
-
     let transactions = ungroupTransactions(data);
-    console.log(transactions);
+    let payeeCondition = transactions[0].imported_payee
+      ? {
+          field: 'imported_payee',
+          op: 'is',
+          value: transactions[0].imported_payee,
+          type: 'string',
+        }
+      : {
+          field: 'payee',
+          op: 'is',
+          value: transactions[0].payee,
+          type: 'id',
+        };
 
     let rule = {
       stage: null,
-      conditions: [
-        {
-          field: 'imported_payee',
-          op: 'is',
-          value: transactions[0].imported_payee || null,
-          type: 'string',
-        },
-      ],
+      conditions: [payeeCondition],
       actions: [
         {
           op: 'set',
@@ -1705,21 +1709,7 @@ class AccountInternal extends React.PureComponent {
       ],
     };
 
-    this.props.pushModal('edit-rule', {
-      rule,
-      // onSave: async newRule => {
-      //   let newRules = await loadRules();
-
-      //   navigator.onEdit(newRule.id, 'edit');
-
-      //   setRules(rules => {
-      //     let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
-      //     return newRules.slice(0, newIdx + 75);
-      //   });
-
-      //   setLoading(false);
-      // },
-    });
+    this.props.pushModal('edit-rule', { rule });
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
