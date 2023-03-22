@@ -13,6 +13,7 @@ import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
+import { sha256String } from '../util/hash';
 
 import { getStartingBalancePayee } from './payees';
 import title from './title';
@@ -359,7 +360,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
         trans.payee = resolvePayeeFromAccountNumber(
           trans,
           'iban',
-          trans.debtorAccount.iban,
+          sha256String(trans.debtorAccount.iban),
         );
       }
       payee_name = nameParts.join(' ');
@@ -383,7 +384,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
         trans.payee = resolvePayeeFromAccountNumber(
           trans,
           'iban',
-          trans.creditorAccount.iban,
+          sha256String(trans.creditorAccount.iban),
         );
       }
       payee_name = nameParts.join(' ');
