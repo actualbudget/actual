@@ -51,10 +51,7 @@ function BarGraph({
               />
               {selectList === 'All' && <VictoryBar data={graphDataInc} />}
             </VictoryGroup>
-            <VictoryAxis
-              tickFormat={x => d.format(x, "MMM ''yy")}
-              offsetY={50}
-            />
+            <VictoryAxis tickFormat={x => d.format(x, 'MMM yy')} offsetY={50} />
             <VictoryAxis dependentAxis crossAxis={false} />
           </VictoryChart>
         )

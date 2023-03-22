@@ -47,7 +47,7 @@ function BarLineGraph({ style, start, end, graphData, isConcise, compact }) {
               }}
             />
             <VictoryAxis
-              tickFormat={x => d.format(x, isConcise ? "MMM ''yy" : 'MMM d')}
+              tickFormat={x => d.format(x, isConcise ? 'MMM yy' : 'MMM d')}
               tickValues={graphData.balances.map(item => item.x)}
               tickCount={Math.min(5, graphData.balances.length)}
               offsetY={50}
