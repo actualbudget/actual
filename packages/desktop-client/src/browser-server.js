@@ -17,7 +17,9 @@ const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
     if (maxRetries <= 0) {
       throw e;
     } else {
-      console.groupCollapsed(`Failed to load backend, will retry ${maxRetries} more time(s)`);
+      console.groupCollapsed(
+        `Failed to load backend, will retry ${maxRetries} more time(s)`,
+      );
       console.log(e);
       console.groupEnd();
     }
