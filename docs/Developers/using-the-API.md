@@ -35,7 +35,7 @@ await api.init({
   // Budget data will be cached locally here, in subdirectories for each file.
   dataDir: '/some/path',
   // This is the URL of your running server
-  serverUrl: 'http://localhost:5006',
+  serverURL: 'http://localhost:5006',
   // This is the password you use to log into the server
   password: 'hunter2',
 });
