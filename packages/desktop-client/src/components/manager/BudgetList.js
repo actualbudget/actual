@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/util/environment';
 
 import Loading from '../../icons/AnimatedLoading';
 import CloudCheck from '../../icons/v1/CloudCheck';
@@ -13,7 +14,6 @@ import Key from '../../icons/v2/Key';
 import RefreshArrow from '../../icons/v2/RefreshArrow';
 import { styles, colors } from '../../style';
 import tokens from '../../tokens';
-import { isNonProductionEnvironment } from '../../util/environment';
 import { View, Text, Button, Tooltip, Menu } from '../common';
 
 function getFileDescription(file) {
