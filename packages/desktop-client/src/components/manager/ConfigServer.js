@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/util/environment';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { useSetThemeColor } from '../../hooks';
 import { colors } from '../../style';

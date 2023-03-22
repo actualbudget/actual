@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/util/environment';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import Loading from '../../icons/AnimatedLoading';
 import CloudCheck from '../../icons/v1/CloudCheck';

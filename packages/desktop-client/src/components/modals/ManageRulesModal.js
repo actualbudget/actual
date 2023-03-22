@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom-v5-compat';
 
-import { isNonProductionEnvironment } from 'loot-core/src/shared/util/environment';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { Modal } from '../common';
 import ManageRules from '../ManageRules';
