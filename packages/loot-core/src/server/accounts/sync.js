@@ -54,10 +54,12 @@ function getAccountBalance(account) {
 }
 
 async function updateAccountNumber(id, type, number) {
-  await db.runQuery('UPDATE accounts SET account_number = ? WHERE id = ?', [
-    `${type}_${number}`,
-    id,
-  ]);
+  if (number) {
+    await db.runQuery('UPDATE accounts SET account_number = ? WHERE id = ?', [
+      `${type}_${number}`,
+      id,
+    ]);
+  }
 }
 
 async function updateAccountBalance(id, balance) {
