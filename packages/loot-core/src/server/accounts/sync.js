@@ -357,10 +357,10 @@ async function normalizeNordigenTransactions(transactions, acctId) {
             trans.debtorAccount.iban.slice(-4) +
             ')',
         );
-        trans.payee = resolvePayeeFromAccountNumber(
+        trans.payee = await resolvePayeeFromAccountNumber(
           trans,
           'iban',
-          sha256String(trans.debtorAccount.iban),
+          await sha256String(trans.debtorAccount.iban),
         );
       }
       payee_name = nameParts.join(' ');
@@ -381,10 +381,10 @@ async function normalizeNordigenTransactions(transactions, acctId) {
             trans.creditorAccount.iban.slice(-4) +
             ')',
         );
-        trans.payee = resolvePayeeFromAccountNumber(
+        trans.payee = await resolvePayeeFromAccountNumber(
           trans,
           'iban',
-          sha256String(trans.creditorAccount.iban),
+          await sha256String(trans.creditorAccount.iban),
         );
       }
       payee_name = nameParts.join(' ');
