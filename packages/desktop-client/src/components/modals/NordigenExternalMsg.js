@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Warning } from 'loot-design/src/components/alerts';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
-import { Error } from '../alerts';
+import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/NewAutocomplete';
 import { View, Modal, Button, P } from '../common';
 import { FormField, FormLabel } from '../forms';
