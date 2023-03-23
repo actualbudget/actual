@@ -121,8 +121,8 @@ export default function NordigenExternalMsg({
 
   const renderLinkButton = () => {
     return (
-      <View>
-        <FormField style={{ marginBottom: 10 }}>
+      <View style={{ gap: 10 }}>
+        <FormField>
           <FormLabel title="Choose your country:" htmlFor="country-field" />
           <Autocomplete
             disabled={isConfigurationLoading}
@@ -180,7 +180,6 @@ export default function NordigenExternalMsg({
             padding: '10px 0',
             fontSize: 15,
             fontWeight: 600,
-            marginTop: 10,
           }}
           onClick={onJump}
           disabled={!institutionId || !country}
