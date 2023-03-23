@@ -118,7 +118,7 @@ export default function MergeUnusedPayees({
                     }}
                   >
                     {payees.map(p => (
-                      <li>
+                      <li key={p.id}>
                         <Text style={highlightStyle}>{p.name}</Text>
                       </li>
                     ))}
