@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
+import { Warning } from 'loot-design/src/components/alerts';
 
 import { colors } from '../../style';
 import AnimatedLoading from '../../svg/AnimatedLoading';
@@ -120,8 +121,8 @@ export default function NordigenExternalMsg({
 
   const renderLinkButton = () => {
     return (
-      <View>
-        <FormField style={{ marginBottom: 10 }}>
+      <View style={{ gap: 10 }}>
+        <FormField>
           <FormLabel title="Choose your country:" htmlFor="country-field" />
           <Autocomplete
             disabled={isConfigurationLoading}
@@ -150,13 +151,35 @@ export default function NordigenExternalMsg({
             </FormField>
           ))}
 
+        <Warning>
+          By enabling bank-sync, you will be granting Nordigen (a third party
+          service) read-only access to your entire account’s transaction
+          history. This service is not affiliated with Actual in any way. Make
+          sure you’ve read and understand Nordigen’s{' '}
+          <a
+            href="https://nordigen.com/en/company/privacy-policy/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy Policy
+          </a>{' '}
+          and{' '}
+          <a
+            href="https://nordigen.com/en/company/privacy-policy-end-user/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            End User Privacy Policy
+          </a>{' '}
+          before proceeding.
+        </Warning>
+
         <Button
           primary
           style={{
             padding: '10px 0',
             fontSize: 15,
             fontWeight: 600,
-            marginTop: 10,
           }}
           onClick={onJump}
           disabled={!institutionId || !country}
@@ -177,9 +200,9 @@ export default function NordigenExternalMsg({
       {() => (
         <View>
           <P style={{ fontSize: 15 }}>
-            To link your bank account, you will be redirected to a new tab where
-            you will have the possibility to grant access to your bank for
-            Nordigen.
+            To link your bank account, you will be redirected to a new page
+            where Nordigen will ask to connect to your bank. Nordigen will not
+            be able to withdraw funds from your accounts.
           </P>
 
           {error && renderError(error)}
