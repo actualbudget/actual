@@ -616,6 +616,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
         } else if (item.type === Menu.label) {
           return (
             <Text
+              key={item.name}
               style={{
                 color: colors.n6,
                 fontSize: 11,
