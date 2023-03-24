@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 
-import { View } from 'loot-design/src/components/common';
+import { View } from '../common';
 
 import CashFlow from './CashFlow';
 import NetWorth from './NetWorth';

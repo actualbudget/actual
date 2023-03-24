@@ -10,8 +10,7 @@ import {
   VictoryGroup,
 } from 'victory';
 
-import { colors } from 'loot-design/src/style';
-
+import { colors } from '../../../style';
 import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';

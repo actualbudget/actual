@@ -1,8 +1,7 @@
 import React from 'react';
 
-import { Text, Button } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-
+import { colors } from '../../style';
+import { Text, Button } from '../common';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';

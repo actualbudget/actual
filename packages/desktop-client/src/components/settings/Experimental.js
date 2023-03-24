@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { Link, Text, View } from 'loot-design/src/components/common';
-import { Checkbox } from 'loot-design/src/components/forms';
-import { colors } from 'loot-design/src/style';
-
 import { useAllFeatureFlags } from '../../hooks/useFeatureFlag';
+import { colors } from '../../style';
+import { Link, Text, View } from '../common';
+import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
 

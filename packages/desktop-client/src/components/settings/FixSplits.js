@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
-import {
-  View,
-  Text,
-  P,
-  ButtonWithLoading,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+
+import { colors } from '../../style';
+import { View, Text, P, ButtonWithLoading } from '../common';
 
 import { Setting } from './UI';
 

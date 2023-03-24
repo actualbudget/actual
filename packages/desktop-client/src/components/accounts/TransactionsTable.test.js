@@ -18,7 +18,8 @@ import {
   updateTransaction,
 } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { SelectedProviderWithItems } from 'loot-design/src/components/useSelected';
+
+import { SelectedProviderWithItems } from '../../hooks/useSelected';
 
 import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 

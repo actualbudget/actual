@@ -7,8 +7,9 @@ import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
 import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { View, Block, AnchorLink } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+
+import { colors, styles } from '../../style';
+import { View, Block, AnchorLink } from '../common';
 
 import Change from './Change';
 import theme from './chart-theme';

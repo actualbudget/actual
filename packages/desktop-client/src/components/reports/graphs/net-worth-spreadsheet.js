@@ -9,8 +9,8 @@ import {
   integerToAmount,
   amountToInteger,
 } from 'loot-core/src/shared/util';
-import { AlignedText } from 'loot-design/src/components/common';
 
+import { AlignedText } from '../../common';
 import { index } from '../util';
 
 export default function createSpreadsheet(start, end, accounts) {

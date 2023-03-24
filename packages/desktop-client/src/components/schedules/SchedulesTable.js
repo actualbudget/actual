@@ -6,24 +6,12 @@ import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu,
-} from 'loot-design/src/components/common';
-import {
-  Table,
-  TableHeader,
-  Row,
-  Field,
-  Cell,
-} from 'loot-design/src/components/table';
-import { colors } from 'loot-design/src/style';
-import DotsHorizontalTriple from 'loot-design/src/svg/v1/DotsHorizontalTriple';
-import Check from 'loot-design/src/svg/v2/Check';
 
+import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import Check from '../../icons/v2/Check';
+import { colors } from '../../style';
+import { View, Text, Button, Tooltip, Menu } from '../common';
+import { Table, TableHeader, Row, Field, Cell } from '../table';
 import DisplayId from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';

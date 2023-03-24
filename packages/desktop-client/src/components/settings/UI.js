@@ -3,9 +3,9 @@ import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
 
-import { View, Link } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import tokens from 'loot-design/src/tokens';
+import { colors } from '../../style';
+import tokens from '../../tokens';
+import { View, Link } from '../common';
 
 export function Setting({ primaryAction, style, children }) {
   return (

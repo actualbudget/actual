@@ -5,8 +5,8 @@ import * as d from 'date-fns';
 import q from 'loot-core/src/client/query-helpers';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
-import { AlignedText } from 'loot-design/src/components/common';
 
+import { AlignedText } from '../../common';
 import { fromDateRepr, fromDateReprToDay, runAll, index } from '../util';
 
 export function simpleCashFlow(start, end) {
