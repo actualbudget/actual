@@ -8,28 +8,22 @@ import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
-import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import { Stack, View, Text, Button } from 'loot-design/src/components/common';
-import DateSelect from 'loot-design/src/components/DateSelect';
-import {
-  FormField,
-  FormLabel,
-  Checkbox,
-} from 'loot-design/src/components/forms';
-import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
-import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
-import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
-import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
-import { SelectedItemsButton } from 'loot-design/src/components/table';
-import useSelected, {
-  SelectedProvider,
-} from 'loot-design/src/components/useSelected';
-import { colors } from 'loot-design/src/style';
 
 import useFeatureFlag from '../../hooks/useFeatureFlag';
+import useSelected, { SelectedProvider } from '../../hooks/useSelected';
+import { colors } from '../../style';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
+import LegacyAccountAutocomplete from '../autocomplete/AccountAutocomplete';
+import NewAccountAutocomplete from '../autocomplete/NewAccountAutocomplete';
+import NewPayeeAutocomplete from '../autocomplete/NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import { Stack, View, Text, Button } from '../common';
+import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRule';
 import { Page } from '../Page';
+import DateSelect from '../select/DateSelect';
+import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
+import { SelectedItemsButton } from '../table';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 
 function mergeFields(defaults, initial) {

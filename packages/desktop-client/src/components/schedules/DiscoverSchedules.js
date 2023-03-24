@@ -4,27 +4,16 @@ import { useHistory } from 'react-router-dom';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import {
-  View,
-  Stack,
-  ButtonWithLoading,
-  P,
-} from 'loot-design/src/components/common';
-import {
-  Table,
-  TableHeader,
-  Row,
-  Field,
-  SelectCell,
-} from 'loot-design/src/components/table';
+
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
   SelectedProvider,
-} from 'loot-design/src/components/useSelected';
-import { colors } from 'loot-design/src/style';
-
+} from '../../hooks/useSelected';
+import { colors } from '../../style';
+import { View, Stack, ButtonWithLoading, P } from '../common';
 import { Page, usePageType } from '../Page';
+import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';

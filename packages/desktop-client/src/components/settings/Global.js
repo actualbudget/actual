@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Information } from 'loot-design/src/components/alerts';
-import { View, Text, Button } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { Information } from '../alerts';
+import { View, Text, Button } from '../common';
 
 import { Setting } from './UI';
 

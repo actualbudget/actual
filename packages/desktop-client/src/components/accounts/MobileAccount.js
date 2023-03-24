@@ -19,9 +19,9 @@ import {
   isPreviewId,
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
-import { colors } from 'loot-design/src/style';
-import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
+import { colors } from '../../style';
+import { withThemeColor } from '../../util/withThemeColor';
 import SyncRefresh from '../SyncRefresh';
 
 import { default as AccountDetails } from './MobileAccountDetails';

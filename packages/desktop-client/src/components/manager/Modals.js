@@ -6,16 +6,17 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View } from 'loot-design/src/components/common';
-import DeleteFile from 'loot-design/src/components/manager/DeleteFile';
-import Import from 'loot-design/src/components/manager/Import';
-import ImportActual from 'loot-design/src/components/manager/ImportActual';
-import ImportYNAB4 from 'loot-design/src/components/manager/ImportYNAB4';
-import ImportYNAB5 from 'loot-design/src/components/manager/ImportYNAB5';
-import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
 
+import { View } from '../common';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
+import LoadBackup from '../modals/LoadBackup';
+
+import DeleteFile from './DeleteFile';
+import Import from './Import';
+import ImportActual from './ImportActual';
+import ImportYNAB4 from './ImportYNAB4';
+import ImportYNAB5 from './ImportYNAB5';
 
 function Modals({
   modalStack,

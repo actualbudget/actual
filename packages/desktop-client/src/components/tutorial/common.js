@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { View, AnchorLink } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { View, AnchorLink } from '../common';
 
 import AnimateIn from './AnimateIn';
 

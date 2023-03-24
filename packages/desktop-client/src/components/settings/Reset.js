@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Text, ButtonWithLoading } from 'loot-design/src/components/common';
+
+import { Text, ButtonWithLoading } from '../common';
 
 import { Setting } from './UI';
 

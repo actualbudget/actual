@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Modal, P, View } from 'loot-design/src/components/common';
+import { Modal, P, View } from '../common';
 
 export default function NordigenLink() {
   window.close();

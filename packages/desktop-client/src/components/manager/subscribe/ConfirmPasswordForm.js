@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { View, ButtonWithLoading } from 'loot-design/src/components/common';
+import { View, ButtonWithLoading } from '../../common';
 
 import { Input } from './common';
 

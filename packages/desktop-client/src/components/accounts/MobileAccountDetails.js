@@ -1,18 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
-import {
-  Button,
-  InputWithContent,
-  Label,
-  View,
-} from 'loot-design/src/components/common';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import Text from 'loot-design/src/components/Text';
-import { colors, styles } from 'loot-design/src/style';
-import Add from 'loot-design/src/svg/v1/Add';
-import CheveronLeft from 'loot-design/src/svg/v1/CheveronLeft';
-import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
+import Add from '../../icons/v1/Add';
+import CheveronLeft from '../../icons/v1/CheveronLeft';
+import SearchAlternate from '../../icons/v2/SearchAlternate';
+import { colors, styles } from '../../style';
+import { Button, InputWithContent, Label, View } from '../common';
+import CellValue from '../spreadsheet/CellValue';
+import Text from '../Text';
 
 import { TransactionList } from './MobileTransaction';
 

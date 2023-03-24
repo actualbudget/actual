@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { View, Button, Tooltip } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import ExclamationOutline from 'loot-design/src/svg/v1/ExclamationOutline';
 
+import ExclamationOutline from '../../icons/v1/ExclamationOutline';
 import { authorizeBank } from '../../nordigen';
+import { colors } from '../../style';
+import { View, Button, Tooltip } from '../common';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
