@@ -150,6 +150,9 @@ describe('nordigenService', () => {
         .spyOn(nordigenService, 'getLinkedRequisition')
         .mockResolvedValue(mockRequisition);
       jest
+        .spyOn(nordigenService, 'getAccountMetadata')
+        .mockResolvedValue(mockAccountMetaData);
+      jest
         .spyOn(nordigenService, 'getTransactions')
         .mockResolvedValue(mockTransactions);
       jest
@@ -165,6 +168,7 @@ describe('nordigenService', () => {
         ),
       ).toEqual(
         expect.objectContaining({
+          iban: mockAccountMetaData.iban,
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
           startingBalance: expect.any(Number),

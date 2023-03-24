@@ -29,6 +29,11 @@ export type NormalizedAccountDetails = {
   mask: string;
 
   /**
+   * the account iban
+   */
+  iban: string;
+
+  /**
    * Name displayed on the UI of Actual app
    */
   name: string;

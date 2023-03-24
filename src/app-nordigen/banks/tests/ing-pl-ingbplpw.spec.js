@@ -45,6 +45,7 @@ describe('IngPlIngbplpw', () => {
       expect(normalizedAccount).toMatchInlineSnapshot(`
           {
             "account_id": "d3eccc94-9536-48d3-98be-813f79199ee3",
+            "iban": "PL00000000000000000987654321",
             "institution": {
               "bic": "INGBPLPW",
               "countries": [

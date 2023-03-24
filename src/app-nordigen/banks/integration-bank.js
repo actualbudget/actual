@@ -23,6 +23,7 @@ export default {
       account_id: account.id,
       institution: account.institution,
       mask: (account?.iban || '0000').slice(-4),
+      iban: account?.iban || null,
       name: [account.name, printIban(account), account.currency]
         .filter(Boolean)
         .join(' '),

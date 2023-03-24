@@ -170,7 +170,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{balances: Array<import('../nordigen-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types.js').Transaction>, pending: Array<import('../nordigen-node.types.js').Transaction>}, startingBalance: number}>}
+   * @returns {Promise<{iban: string, balances: Array<import('../nordigen-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types.js').Transaction>, pending: Array<import('../nordigen-node.types.js').Transaction>}, startingBalance: number}>}
    */
   getTransactionsWithBalance: async (
     requisitionId,
@@ -185,7 +185,8 @@ export const nordigenService = {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
     }
 
-    const [transactions, accountBalance] = await Promise.all([
+    const [accountMetadata, transactions, accountBalance] = await Promise.all([
+      nordigenService.getAccountMetadata(accountId),
       nordigenService.getTransactions({
         accountId,
         startDate,
@@ -208,6 +209,7 @@ export const nordigenService = {
     );
 
     return {
+      iban: accountMetadata.iban,
       balances: accountBalance.balances,
       institutionId: institution_id,
       startingBalance,
@@ -319,6 +321,22 @@ export const nordigenService = {
       ...detailedAccount.account,
       ...metadataAccount,
     };
+  },
+
+  /**
+   * Retrieve account metadata by account id
+   *
+   * Unlike getDetailedAccount, this method is not affected by institution rate-limits.
+   *
+   * @param accountId
+   * @returns {Promise<import('../nordigen-node.types.js').NordigenAccountMetadata>}
+   */
+  getAccountMetadata: async (accountId) => {
+    const response = await client.getMetadata(accountId);
+
+    handleNordigenError(response);
+
+    return response;
   },
 
   /**
