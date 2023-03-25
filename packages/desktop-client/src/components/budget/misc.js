@@ -186,6 +186,7 @@ export class BudgetTable extends React.Component {
 
     return (
       <View
+        data-testid="budget-table"
         style={[
           { flex: 1 },
           styles.lightScrollbar && {
