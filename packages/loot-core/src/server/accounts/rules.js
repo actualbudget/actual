@@ -440,9 +440,10 @@ export class Action {
 }
 
 export class Rule {
-  constructor({ id, stage, conditions, actions, fieldTypes }) {
+  constructor({ id, stage, conditionsOp, conditions, actions, fieldTypes }) {
     this.id = id;
     this.stage = stage;
+    this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
       c => new Condition(c.op, c.field, c.value, c.options, fieldTypes),
     );
@@ -456,7 +457,8 @@ export class Rule {
       return false;
     }
 
-    return this.conditions.every(condition => {
+    const method = this.conditionsOp === 'or' ? 'some' : 'every';
+    return this.conditions[method](condition => {
       return condition.eval(object);
     });
   }
@@ -488,6 +490,7 @@ export class Rule {
     return {
       id: this.id,
       stage: this.stage,
+      conditionsOp: this.conditionsOp,
       conditions: this.conditions.map(c => c.serialize()),
       actions: this.actions.map(a => a.serialize()),
     };

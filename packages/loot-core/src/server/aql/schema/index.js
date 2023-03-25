@@ -104,6 +104,7 @@ export const schema = {
   rules: {
     id: f('id'),
     stage: f('string'),
+    conditionsOp: f('string'),
     conditions: f('json'),
     actions: f('json'),
     tombstone: f('boolean'),

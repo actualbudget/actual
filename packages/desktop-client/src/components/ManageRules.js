@@ -218,7 +218,7 @@ export function ConditionExpression({
   op,
   value,
   options,
-  stage,
+  prefix,
   style,
 }) {
   return (
@@ -237,6 +237,7 @@ export function ConditionExpression({
         style,
       ]}
     >
+      {prefix && <Text style={{ color: colors.n3 }}>{prefix} </Text>}
       <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
       <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
       <Value value={value} field={field} />
@@ -368,7 +369,7 @@ let Rule = React.memo(
                   op={cond.op}
                   value={cond.value}
                   options={cond.options}
-                  stage={rule.stage}
+                  prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
                   style={i !== 0 && { marginTop: 3 }}
                 />
               ))}
@@ -692,6 +693,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
   function onCreateRule() {
     let rule = {
       stage: null,
+      conditionsOp: 'and',
       conditions: [
         {
           field: 'payee',
