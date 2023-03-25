@@ -310,6 +310,7 @@ export function SidebarCategory({
       }}
     >
       <div
+        data-testid="category-name"
         style={{
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -608,6 +609,7 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
 const BudgetTotals = React.memo(function BudgetTotals({ MonthComponent }) {
   return (
     <View
+      data-testid="budget-totals"
       style={{
         backgroundColor: 'white',
         flexDirection: 'row',

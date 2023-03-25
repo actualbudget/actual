@@ -24,12 +24,12 @@ test.describe('Onboarding', () => {
 
   test('creates a new budget file by importing YNAB4 budget', async () => {
     await configurationPage.clickOnNoServer();
-    await configurationPage.importBudget(
+    const budgetPage = await configurationPage.importBudget(
       'YNAB4',
       path.resolve(__dirname, 'data/ynab4-demo-budget.zip'),
     );
 
-    await expect(page.getByTestId('budget-table')).toBeVisible();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     const accountPage = await navigation.goToAccountPage(
       'Account1 with Starting Balance',
@@ -45,12 +45,12 @@ test.describe('Onboarding', () => {
 
   test('creates a new budget file by importing Actual budget', async () => {
     await configurationPage.clickOnNoServer();
-    await configurationPage.importBudget(
+    const budgetPage = await configurationPage.importBudget(
       'Actual',
       path.resolve(__dirname, 'data/actual-demo-budget.zip'),
     );
 
-    await expect(page.getByTestId('budget-table')).toBeVisible();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     const accountPage = await navigation.goToAccountPage('Ally Savings');
     await expect(accountPage.accountBalance).toHaveText('1,772.80');

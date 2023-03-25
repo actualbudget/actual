@@ -1,3 +1,5 @@
+import { BudgetPage } from './budget-page';
+
 export class ConfigurationPage {
   constructor(page) {
     this.page = page;
@@ -5,6 +7,7 @@ export class ConfigurationPage {
 
   async createTestFile() {
     await this.page.getByRole('button', { name: 'Create test file' }).click();
+    return new BudgetPage(this.page);
   }
 
   async clickOnNoServer() {
@@ -53,5 +56,7 @@ export class ConfigurationPage {
 
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(file);
+
+    return new BudgetPage(this.page);
   }
 }
