@@ -66,19 +66,43 @@ export async function addTransfer(transaction, transferredAccount) {
       // transfer logic
       return null;
     }
+  } 
+
+  console.log(JSON.stringify(transaction));
+
+  const matched = await db.first(
+    'SELECT id, account, date FROM v_transactions WHERE account = ? AND amount = ? AND date = ?',
+    [transferredAccount, -transaction.amount, transaction.date.replaceAll('-','')]
+  ); 
+
+  console.log(JSON.stringify(matched));
+  let id;
+
+  if(matched){
+
+    await db.updateTransaction({
+      id: matched.id,
+      payee: fromPayee,
+      transfer_id: transaction.id
+    });
+
+    await clearCategory(matched, transaction.account);
+
+  } else {
+    id = await db.insertTransaction({
+      account: transferredAccount,
+      amount: -transaction.amount,
+      payee: fromPayee,
+      date: transaction.date,
+      transfer_id: transaction.id,
+      notes: transaction.notes || null,
+      cleared: false,
+    });
   }
 
-  const id = await db.insertTransaction({
-    account: transferredAccount,
-    amount: -transaction.amount,
-    payee: fromPayee,
-    date: transaction.date,
-    transfer_id: transaction.id,
-    notes: transaction.notes || null,
-    cleared: false,
-  });
+  
 
-  await db.updateTransaction({ id: transaction.id, transfer_id: id });
+  await db.updateTransaction({ id: transaction.id, transfer_id: id || matched.id });
   const categoryCleared = await clearCategory(transaction, transferredAccount);
 
   return {
@@ -107,10 +131,17 @@ export async function removeTransfer(transaction) {
       });
     } else if(transferTrans.cleared) {
       // do not delete related transaction if cleared just null the transfer_id and reset payee
+      console.log(JSON.stringify(transferTrans));
+
+      let { id: fromPayee } = await db.first(
+        'SELECT id FROM payees WHERE name = ?',
+        [transaction.imported_payee],
+      );
+
       await db.updateTransaction({ 
         id: transferTrans.id, 
         transfer_id: null,  
-        payee: transferTrans.imported_payee || null
+        payee: fromPayee || null
       });  
     } else {
       await db.deleteTransaction({ id: transferTrans.id });
