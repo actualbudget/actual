@@ -68,7 +68,6 @@ export async function addTransfer(transaction, transferredAccount) {
     }
   }
 
-  // Create opposite transaction to the transfer being created
   const id = await db.insertTransaction({
     account: transferredAccount,
     amount: -transaction.amount,
@@ -79,7 +78,6 @@ export async function addTransfer(transaction, transferredAccount) {
     cleared: false,
   });
 
-  // updates source transaction with the newly create transaction reference
   await db.updateTransaction({ id: transaction.id, transfer_id: id });
   const categoryCleared = await clearCategory(transaction, transferredAccount);
 
@@ -92,6 +90,7 @@ export async function addTransfer(transaction, transferredAccount) {
 
 export async function removeTransfer(transaction) {
   let transferTrans = await db.getTransaction(transaction.transfer_id);
+  
   // Perform operations on the transfer transaction only
   // if it is found. For example: when users delete both
   // (in & out) transfer transactions at the same time -
