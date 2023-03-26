@@ -90,7 +90,7 @@ export async function addTransfer(transaction, transferredAccount) {
 
 export async function removeTransfer(transaction) {
   let transferTrans = await db.getTransaction(transaction.transfer_id);
-  
+
   // Perform operations on the transfer transaction only
   // if it is found. For example: when users delete both
   // (in & out) transfer transactions at the same time -
