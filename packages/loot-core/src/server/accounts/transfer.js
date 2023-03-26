@@ -102,7 +102,7 @@ export async function removeTransfer(transaction) {
       // would invalidate the whole split transaction. Instead of turn
       // it into a normal transaction
       await db.updateTransaction({
-        id: transaction.transfer_id,
+        id: transferTrans.id,
         transfer_id: null,
         payee: null
       });
@@ -114,7 +114,7 @@ export async function removeTransfer(transaction) {
         payee: transferTrans.imported_payee || null
       });  
     } else {
-      await db.deleteTransaction({ id: transaction.transfer_id });
+      await db.deleteTransaction({ id: transferTrans.id });
     }
   }
   await db.updateTransaction({ id: transaction.id, transfer_id: null });
