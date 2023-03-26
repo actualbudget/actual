@@ -160,8 +160,8 @@ export async function updateTransfer(transaction, transferredAccount) {
     // Make sure to update the payee on the other side in case the
     // user moved this transaction into another account
     payee: payee.id,
-    date: transaction.date,
-    notes: transaction.notes,
+    // date: transaction.date,
+    // notes: transaction.notes,
     amount: -transaction.amount,
   });
 
