@@ -66,28 +66,30 @@ export async function addTransfer(transaction, transferredAccount) {
       // transfer logic
       return null;
     }
-  } 
+  }
 
   console.log(JSON.stringify(transaction));
 
   const matched = await db.first(
     'SELECT id, account, date FROM v_transactions WHERE account = ? AND amount = ? AND date = ?',
-    [transferredAccount, -transaction.amount, transaction.date.replaceAll('-','')]
-  ); 
+    [
+      transferredAccount,
+      -transaction.amount,
+      transaction.date.replaceAll('-', ''),
+    ],
+  );
 
   console.log(JSON.stringify(matched));
   let id;
 
-  if(matched){
-
+  if (matched) {
     await db.updateTransaction({
       id: matched.id,
       payee: fromPayee,
-      transfer_id: transaction.id
+      transfer_id: transaction.id,
     });
 
     await clearCategory(matched, transaction.account);
-
   } else {
     id = await db.insertTransaction({
       account: transferredAccount,
@@ -100,9 +102,10 @@ export async function addTransfer(transaction, transferredAccount) {
     });
   }
 
-  
-
-  await db.updateTransaction({ id: transaction.id, transfer_id: id || matched.id });
+  await db.updateTransaction({
+    id: transaction.id,
+    transfer_id: id || matched.id,
+  });
   const categoryCleared = await clearCategory(transaction, transferredAccount);
 
   return {
@@ -127,9 +130,9 @@ export async function removeTransfer(transaction) {
       await db.updateTransaction({
         id: transferTrans.id,
         transfer_id: null,
-        payee: null
+        payee: null,
       });
-    } else if(transferTrans.cleared) {
+    } else if (transferTrans.cleared) {
       // do not delete related transaction if cleared just null the transfer_id and reset payee
       console.log(JSON.stringify(transferTrans));
 
@@ -138,11 +141,11 @@ export async function removeTransfer(transaction) {
         [transaction.imported_payee],
       );
 
-      await db.updateTransaction({ 
-        id: transferTrans.id, 
-        transfer_id: null,  
-        payee: fromPayee || null
-      });  
+      await db.updateTransaction({
+        id: transferTrans.id,
+        transfer_id: null,
+        payee: fromPayee || null,
+      });
     } else {
       await db.deleteTransaction({ id: transferTrans.id });
     }
@@ -160,8 +163,6 @@ export async function updateTransfer(transaction, transferredAccount) {
     // Make sure to update the payee on the other side in case the
     // user moved this transaction into another account
     payee: payee.id,
-    // date: transaction.date,
-    // notes: transaction.notes,
     amount: -transaction.amount,
   });
 
