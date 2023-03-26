@@ -807,6 +807,7 @@ export default function EditRule({
                 <Text style={{ color: colors.n4, marginBottom: 15 }}>
                   If
                   <FieldSelect
+                    data-testid="conditions-op"
                     style={{ display: 'inline-flex' }}
                     fields={[
                       ['and', 'all'],

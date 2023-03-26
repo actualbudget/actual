@@ -65,9 +65,9 @@ test.describe('Schedules', () => {
       ],
       conditions: [
         'payee is Home Depot',
-        'account is HSBC',
-        expect.stringMatching(/^date is approx Every month on the/),
-        'amount is approx -25.00',
+        'and account is HSBC',
+        expect.stringMatching(/^and date is approx Every month on the/),
+        'and amount is approx -25.00',
       ],
     });
 

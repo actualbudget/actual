@@ -411,7 +411,9 @@ describe('Rule', () => {
     expect(rule.exec({ name: 'James', date: '2018-01-12' })).toEqual({
       name: 'Sarah',
     });
-    expect(rule.exec({ name: 'James2', date: '2018-01-12' })).toEqual(null);
+    expect(rule.exec({ name: 'James2', date: '2018-01-12' })).toEqual({
+      name: 'Sarah',
+    });
     expect(rule.exec({ name: 'James', date: '2018-01-10' })).toEqual({
       name: 'Sarah',
     });
