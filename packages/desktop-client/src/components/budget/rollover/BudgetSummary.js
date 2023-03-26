@@ -277,6 +277,7 @@ export function BudgetSummary({
 
   return (
     <View
+      data-testid="budget-summary"
       style={{
         backgroundColor: 'white',
         boxShadow: MONTH_BOX_SHADOW,
