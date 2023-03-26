@@ -23,7 +23,7 @@ The `latest` tag points to the most recent official release of Actual. This is t
 
 ### `edge` Tag
 
-The `edge` tag is updated every time a commit is pushed to the `master` branch. This is the recommended tag to use for users who want to get the latest changes. Note that `actual-server` will still use the latest official release of the web UI even when deploying from `edge`
+The `edge` tag is updated every time a commit is pushed to the `master` branch. This is the recommended tag to use for users who want to get the latest changes.
 
 - `edge`
 - `edge-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
