@@ -3,16 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Information } from 'loot-design/src/components/alerts';
-import {
-  View,
-  Text,
-  Modal,
-  ModalButtons,
-  Button,
-  P
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+
+import { colors } from '../../style';
+import { Information } from '../alerts';
+import { View, Text, Modal, ModalButtons, Button, P } from '../common';
 
 let highlightStyle = { color: colors.p5 };
 
@@ -20,11 +14,11 @@ export default function MergeUnusedPayees({
   history,
   modalProps,
   payeeIds,
-  targetPayeeId
+  targetPayeeId,
 }) {
   let { payees: allPayees, modalStack } = useSelector(state => ({
     payees: state.queries.payees,
-    modalStack: state.modals.modalStack
+    modalStack: state.modals.modalStack,
   }));
   let isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
   let dispatch = useDispatch();
@@ -48,7 +42,7 @@ export default function MergeUnusedPayees({
   // TODO: I think a custom `useSelector` hook that doesn't bind would
   // be nice
   let [payees] = useState(() =>
-    payeeIds.map(id => allPayees.find(p => p.id === id))
+    payeeIds.map(id => allPayees.find(p => p.id === id)),
   );
   let targetPayee = allPayees.find(p => p.id === targetPayeeId);
 
@@ -59,14 +53,14 @@ export default function MergeUnusedPayees({
   async function onMerge() {
     await send('payees-merge', {
       targetId: targetPayee.id,
-      mergeIds: payees.map(p => p.id)
+      mergeIds: payees.map(p => p.id),
     });
 
     let ruleId;
     if (shouldCreateRule && !isEditingRule) {
       let id = await send('rule-add-payee-rename', {
         fromNames: payees.map(p => p.name),
-        to: targetPayee.id
+        to: targetPayee.id,
       });
       ruleId = id;
     }
@@ -114,11 +108,11 @@ export default function MergeUnusedPayees({
                       margin: 0,
                       marginTop: 10,
                       maxHeight: 140,
-                      overflow: 'auto'
+                      overflow: 'auto',
                     }}
                   >
                     {payees.map(p => (
-                      <li>
+                      <li key={p.id}>
                         <Text style={highlightStyle}>{p.name}</Text>
                       </li>
                     ))}
@@ -142,7 +136,7 @@ export default function MergeUnusedPayees({
                   userSelect: 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
                 }}
               >
                 <input

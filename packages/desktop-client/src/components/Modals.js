@@ -8,24 +8,27 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import BudgetSummary from 'loot-design/src/components/modals/BudgetSummary';
-import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
-import ConfigureLinkedAccounts from 'loot-design/src/components/modals/ConfigureLinkedAccounts';
-import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
-import EditField from 'loot-design/src/components/modals/EditField';
-import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
-import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
-import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
-import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 
+import useFeatureFlag from '../hooks/useFeatureFlag';
+import useSyncServerStatus from '../hooks/useSyncServerStatus';
+
+import BudgetSummary from './modals/BudgetSummary';
+import CloseAccount from './modals/CloseAccount';
+import ConfigureLinkedAccounts from './modals/ConfigureLinkedAccounts';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
+import CreateLocalAccount from './modals/CreateLocalAccount';
+import EditField from './modals/EditField';
 import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
+import ImportTransactions from './modals/ImportTransactions';
+import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import WelcomeScreen from './modals/WelcomeScreen';
+import NordigenExternalMsg from './modals/NordigenExternalMsg';
+import PlaidExternalMsg from './modals/PlaidExternalMsg';
+import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 
 function Modals({
   history,
@@ -36,8 +39,13 @@ function Modals({
   categories,
   payees,
   budgetId,
-  actions
+  actions,
 }) {
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
+  const syncServerStatus = useSyncServerStatus();
+
   return modalStack.map(({ name, options = {} }, idx) => {
     const modalProps = {
       onClose: actions.popModal,
@@ -45,7 +53,7 @@ function Modals({
       showBack: idx > 0,
       isCurrent: idx === modalStack.length - 1,
       isHidden,
-      stackIndex: idx
+      stackIndex: idx,
     };
 
     let location = createLocation('/' + name);
@@ -56,7 +64,11 @@ function Modals({
         </Route>
 
         <Route path="/add-account">
-          <CreateAccount modalProps={modalProps} actions={actions} />
+          <CreateAccount
+            modalProps={modalProps}
+            actions={actions}
+            syncServerStatus={syncServerStatus}
+          />
         </Route>
 
         <Route path="/add-local-account">
@@ -82,10 +94,10 @@ function Modals({
         <Route path="/select-linked-accounts">
           <SelectLinkedAccounts
             modalProps={modalProps}
-            institution={options.institution}
-            publicToken={options.publicToken}
             accounts={options.accounts}
-            upgradingId={options.upgradingId}
+            requisitionId={options.requisitionId}
+            actualAccounts={accounts.filter(acct => acct.closed === 0)}
+            upgradingAccountId={options.upgradingAccountId}
             actions={actions}
           />
         </Route>
@@ -126,7 +138,7 @@ function Modals({
                 initialState={{ backups: [] }}
                 didMount={async ({ setState }) => {
                   setState({
-                    backups: await send('backups-get', { id: budgetId })
+                    backups: await send('backups-get', { id: budgetId }),
                   });
 
                   listen('backups-updated', backups => {
@@ -208,6 +220,23 @@ function Modals({
             );
           }}
         />
+        <Route
+          path="/nordigen-external-msg"
+          render={() => {
+            return (
+              <NordigenExternalMsg
+                modalProps={modalProps}
+                actions={actions}
+                onMoveExternal={options.onMoveExternal}
+                onClose={() => {
+                  options.onClose && options.onClose();
+                  send('nordigen-poll-web-token-stop');
+                }}
+                onSuccess={options.onSuccess}
+              />
+            );
+          }}
+        />
 
         <Route
           path="/create-encryption-key"
@@ -247,14 +276,11 @@ function Modals({
                 actions={actions}
                 name={options.name}
                 onSubmit={options.onSubmit}
+                isNewAutocompleteEnabled={isNewAutocompleteEnabled}
               />
             );
           }}
         />
-
-        <Route path="/welcome-screen">
-          <WelcomeScreen modalProps={modalProps} actions={actions} />
-        </Route>
 
         <Route path="/budget-summary">
           <BudgetSummary
@@ -262,6 +288,8 @@ function Modals({
             modalProps={modalProps}
             month={options.month}
             actions={actions}
+            isNewAutocompleteEnabled={isNewAutocompleteEnabled}
+            isGoalTemplatesEnabled={isGoalTemplatesEnabled}
           />
         </Route>
       </Switch>
@@ -277,7 +305,7 @@ export default connect(
     categoryGroups: state.queries.categories.grouped,
     categories: state.queries.categories.list,
     payees: state.queries.payees,
-    budgetId: state.prefs.local && state.prefs.local.id
+    budgetId: state.prefs.local && state.prefs.local.id,
   }),
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) })
+  dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
 )(Modals);

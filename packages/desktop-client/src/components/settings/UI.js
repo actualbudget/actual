@@ -3,31 +3,14 @@ import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
 
-import { View, Link } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import tokens from 'loot-design/src/tokens';
+import { colors } from '../../style';
+import tokens from '../../tokens';
+import { View, Link } from '../common';
 
-export function Section({ title, children, style, titleProps, ...props }) {
-  return (
-    <View style={[{ gap: 20, alignItems: 'flex-start' }, style]} {...props}>
-      <View
-        style={[
-          { fontSize: 20, fontWeight: 500, flexShrink: 0 },
-          titleProps && titleProps.style
-        ]}
-        {...titleProps}
-      >
-        {title}
-      </View>
-      {children}
-    </View>
-  );
-}
-
-export function Setting({ primaryAction, children }) {
+export function Setting({ primaryAction, style, children }) {
   return (
     <View
-      {...css(
+      {...css([
         {
           backgroundColor: colors.n9,
           alignSelf: 'flex-start',
@@ -35,19 +18,17 @@ export function Setting({ primaryAction, children }) {
           padding: 15,
           borderRadius: 4,
           border: '1px solid ' + colors.n8,
-          width: '100%'
+          width: '100%',
         },
-        media(`(min-width: ${tokens.breakpoint_medium})`, {
-          width: 'auto'
-        })
-      )}
+        style,
+      ])}
     >
       <View
         style={{
           marginBottom: primaryAction ? 10 : 0,
           maxWidth: 500,
           lineHeight: 1.5,
-          gap: 10
+          gap: 10,
         }}
       >
         {children}
@@ -62,26 +43,30 @@ export function AdvancedToggle({ children }) {
   let [expanded, setExpanded] = useState(location.hash === '#advanced');
 
   return expanded ? (
-    <Section
+    <View
+      id="advanced"
+      style={[
+        {
+          gap: 20,
+          alignItems: 'flex-start',
+          marginBottom: 25,
+          width: '100%',
+        },
+        media(`(min-width: ${tokens.breakpoint_medium})`, {
+          width: 'auto',
+        }),
+      ]}
       innerRef={el => {
         if (el && location.hash === '#advanced') {
           el.scrollIntoView(true);
         }
       }}
-      id="advanced"
-      title="Advanced Settings"
-      {...css(
-        {
-          marginBottom: 25,
-          width: '100%'
-        },
-        media(`(min-width: ${tokens.breakpoint_medium})`, {
-          width: 'auto'
-        })
-      )}
     >
+      <View style={{ fontSize: 20, fontWeight: 500, flexShrink: 0 }}>
+        Advanced Settings
+      </View>
       {children}
-    </Section>
+    </View>
   ) : (
     <Link
       id="advanced"
@@ -90,7 +75,7 @@ export function AdvancedToggle({ children }) {
         flexShrink: 0,
         alignSelf: 'flex-start',
         color: colors.p4,
-        marginBottom: 25
+        marginBottom: 25,
       }}
     >
       Show advanced settings

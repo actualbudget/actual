@@ -1,9 +1,10 @@
 import fc from 'fast-check';
 
-import arbs from '../../mocks/arbitrary-schema';
+import * as arbs from '../../mocks/arbitrary-schema';
 import { execTracer } from '../../shared/test-helpers';
 import { convertInputType, schema, schemaConfig } from '../aql';
 import * as db from '../db';
+
 import { listen, unlisten } from './migrate';
 
 import { addSyncListener, sendMessages } from './index';
@@ -34,7 +35,7 @@ let messageArb = fc
     let timestamp = fc
       .date({
         min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2020-05-01T00:00:00.000Z')
+        max: new Date('2020-05-01T00:00:00.000Z'),
       })
       .noBias()
       .noShrink()
@@ -45,12 +46,12 @@ let messageArb = fc
       dataset: fc.constant('transactions'),
       column: fc.constant(toInternalField(field) || field),
       row: fc.oneof(
-        fc.integer(0, 5).map(i => `id${i}`),
-        fc.integer(0, 5).chain(i => {
-          return fc.integer(0, 5).map(j => `id${i}/child${j}`);
-        })
+        fc.integer({ min: 0, max: 5 }).map(i => `id${i}`),
+        fc.integer({ min: 0, max: 5 }).chain(i => {
+          return fc.integer({ min: 0, max: 5 }).map(j => `id${i}/child${j}`);
+        }),
       ),
-      value: value
+      value: value,
     });
   });
 
@@ -66,7 +67,7 @@ describe('sync migrations', () => {
     await db.insert('transactions', {
       id: 'trans1/child1',
       isChild: 1,
-      amount: 4500
+      amount: 4500,
     });
     tracer.expectNow('applied', ['trans1/child1']);
     await tracer.expectWait('applied', ['trans1/child1']);
@@ -91,7 +92,7 @@ describe('sync migrations', () => {
               ts &&
               [...ts.values()].find(
                 t =>
-                  t.isChild === 1 && t.parent_id == null && t.id.includes('/')
+                  t.isChild === 1 && t.parent_id == null && t.id.includes('/'),
               )
             ) {
             } else {
@@ -105,7 +106,7 @@ describe('sync migrations', () => {
           let transactions = await db.all(
             'SELECT * FROM transactions',
             [],
-            true
+            true,
           );
           for (let trans of transactions) {
             let transMsgs = msgs
@@ -147,7 +148,7 @@ describe('sync migrations', () => {
         })
         .beforeEach(() => {
           return db.execQuery(`DELETE FROM transactions`);
-        })
+        }),
     );
   });
 });

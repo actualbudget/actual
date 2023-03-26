@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Information } from 'loot-design/src/components/alerts';
-import { View, Text, Button } from 'loot-design/src/components/common';
+import { colors } from '../../style';
+import { Information } from '../alerts';
+import { View, Text, Button } from '../common';
 
-import { Section } from './UI';
+import { Setting } from './UI';
 
 export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
   let [documentDirChanged, setDirChanged] = useState(false);
@@ -17,7 +18,7 @@ export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
 
   async function onChooseDocumentDir() {
     let res = await window.Actual.openFileDialog({
-      properties: ['openDirectory']
+      properties: ['openDirectory'],
     });
     if (res) {
       saveGlobalPrefs({ documentDir: res[0] });
@@ -26,50 +27,38 @@ export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
   }
 
   return (
-    <Section title="General">
-      <View
+    <Setting
+      primaryAction={
+        <View style={{ flexDirection: 'row' }}>
+          <Button onClick={onChooseDocumentDir}>Change location</Button>
+          {documentDirChanged && (
+            <Information>
+              A restart is required for this change to take effect
+            </Information>
+          )}
+        </View>
+      }
+    >
+      <Text>
+        <strong>Actual’s files</strong> are stored in a folder on your computer.
+        Currently, that’s:
+      </Text>
+      <Text
+        innerRef={dirScrolled}
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          overflow: 'hidden'
+          backgroundColor: colors.n10,
+          padding: '7px 10px',
+          borderRadius: 4,
+          overflow: 'auto',
+          whiteSpace: 'nowrap',
+          // TODO: When we update electron, we should be able to
+          // remove this. In previous versions of Chrome, once the
+          // scrollbar appears it never goes away
+          '::-webkit-scrollbar': { display: 'none' },
         }}
       >
-        <Text style={{ flexShrink: 0 }}>Store files here: </Text>
-        <Text
-          innerRef={dirScrolled}
-          style={{
-            backgroundColor: 'white',
-            padding: '7px 10px',
-            borderRadius: 4,
-            marginLeft: 5,
-            overflow: 'auto',
-            whiteSpace: 'nowrap',
-            // TODO: When we update electron, we should be able to
-            // remove this. In previous versions of Chrome, once the
-            // scrollbar appears it never goes away
-            '::-webkit-scrollbar': { display: 'none' }
-          }}
-        >
-          {globalPrefs.documentDir}
-        </Text>
-        <Button
-          primary
-          onClick={onChooseDocumentDir}
-          style={{
-            fontSize: 14,
-            marginLeft: 5,
-            flexShrink: 0,
-            alignSelf: 'flex-start'
-          }}
-        >
-          Change location
-        </Button>
-      </View>
-      {documentDirChanged && (
-        <Information style={{ marginTop: 10 }}>
-          A restart is required for this change to take effect
-        </Information>
-      )}
-    </Section>
+        {globalPrefs.documentDir}
+      </Text>
+    </Setting>
   );
 }

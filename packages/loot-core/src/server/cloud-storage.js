@@ -3,12 +3,13 @@ import { fetch } from '../platform/server/fetch';
 import fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
 import * as monthUtils from '../shared/months';
-import encryption from './encryption';
+
+import * as encryption from './encryption';
 import {
   HTTPError,
   PostError,
   FileDownloadError,
-  FileUploadError
+  FileUploadError,
 } from './errors';
 import { runMutator } from './mutators';
 import { post } from './post';
@@ -46,19 +47,19 @@ export async function checkKey() {
   try {
     res = await post(getServer().SYNC_SERVER + '/user-get-key', {
       token: userToken,
-      fileId: cloudFileId
+      fileId: cloudFileId,
     });
   } catch (e) {
     console.log(e);
     return { error: { reason: 'network' } };
   }
 
-  // This == comparison is important, they could be null or undefined
-  // eslint-disable-next-line
   return {
     valid:
-      res.id == encryptKeyId && // eslint-disable-line
-      (encryptKeyId == null || encryption.hasKey(encryptKeyId))
+      // This == comparison is important, they could be null or undefined
+      // eslint-disable-next-line eqeqeq
+      res.id == encryptKeyId &&
+      (encryptKeyId == null || encryption.hasKey(encryptKeyId)),
   };
 }
 
@@ -74,14 +75,14 @@ export async function resetSyncState(newKeyState) {
   try {
     await post(getServer().SYNC_SERVER + '/reset-user-file', {
       token: userToken,
-      fileId: cloudFileId
+      fileId: cloudFileId,
     });
   } catch (e) {
     if (e instanceof PostError) {
       return {
         error: {
-          reason: e.reason === 'unauthorized' ? 'unauthorized' : 'network'
-        }
+          reason: e.reason === 'unauthorized' ? 'unauthorized' : 'network',
+        },
       };
     }
     return { error: { reason: 'internal' } };
@@ -94,7 +95,7 @@ export async function resetSyncState(newKeyState) {
         fileId: cloudFileId,
         keyId: newKeyState.key.getId(),
         keySalt: newKeyState.salt,
-        testContent: newKeyState.testContent
+        testContent: newKeyState.testContent,
       });
     } catch (e) {
       if (e instanceof PostError) {
@@ -125,7 +126,7 @@ export async function exportBuffer() {
   await runMutator(async () => {
     let rawDbContent = await fs.readFile(
       fs.join(budgetDir, 'db.sqlite'),
-      'binary'
+      'binary',
     );
 
     // Do some post-processing of the database. We NEVER upload the cache with
@@ -137,7 +138,7 @@ export async function exportBuffer() {
       `
         DELETE FROM kvcache;
         DELETE FROM kvcache_key;
-      `
+      `,
     );
 
     let dbContent = sqlite.exportDatabase(memDb);
@@ -146,7 +147,7 @@ export async function exportBuffer() {
     // mark it as a file that needs a new clock so when a new client
     // downloads it, it'll get set to a unique node
     let meta = JSON.parse(
-      await fs.readFile(fs.join(budgetDir, 'metadata.json'))
+      await fs.readFile(fs.join(budgetDir, 'metadata.json')),
     );
 
     meta.resetClock = true;
@@ -160,8 +161,13 @@ export async function exportBuffer() {
 }
 
 export async function importBuffer(fileData, buffer) {
-  let zipped = new AdmZip(buffer);
-  let entries = zipped.getEntries();
+  let zipped, entries;
+  try {
+    zipped = new AdmZip(buffer);
+    entries = zipped.getEntries();
+  } catch (err) {
+    throw FileDownloadError('not-zip-file');
+  }
   let dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
   let metaEntry = entries.find(e => e.entryName.includes('metadata.json'));
 
@@ -186,7 +192,7 @@ export async function importBuffer(fileData, buffer) {
     cloudFileId: fileData.fileId,
     groupId: fileData.groupId,
     lastUploaded: monthUtils.currentDay(),
-    encryptKeyId: fileData.encryptMeta ? fileData.encryptMeta.keyId : null
+    encryptKeyId: fileData.encryptMeta ? fileData.encryptMeta.keyId : null,
   };
 
   let budgetDir = fs.getBudgetDir(meta.id);
@@ -241,7 +247,7 @@ export async function upload() {
       encrypted = await encryption.encrypt(zipContent, encryptKeyId);
     } catch (e) {
       throw FileUploadError('encrypt-failure', {
-        isMissingKey: e.message === 'missing-key'
+        isMissingKey: e.message === 'missing-key',
       });
     }
     uploadContent = encrypted.value;
@@ -266,16 +272,18 @@ export async function upload() {
         ...(uploadMeta
           ? { 'X-ACTUAL-ENCRYPT-META': JSON.stringify(uploadMeta) }
           : null),
-        ...(groupId ? { 'X-ACTUAL-GROUP-ID': groupId } : null)
+        ...(groupId ? { 'X-ACTUAL-GROUP-ID': groupId } : null),
       },
-      body: uploadContent
+      body: uploadContent,
     });
   } catch (err) {
     console.log('Upload failure', err);
 
     if (err instanceof PostError) {
       throw new FileUploadError(
-        err.reason === 'unauthorized' ? 'unauthorized' : err.reason || 'network'
+        err.reason === 'unauthorized'
+          ? 'unauthorized'
+          : err.reason || 'network',
       );
     }
 
@@ -288,7 +296,7 @@ export async function upload() {
       await prefs.savePrefs({
         lastUploaded: monthUtils.currentDay(),
         cloudFileId,
-        groupId: res.groupId
+        groupId: res.groupId,
       });
     }
   } else {
@@ -323,7 +331,7 @@ export async function removeFile(fileId) {
 
   await post(getServer().SYNC_SERVER + '/delete-user-file', {
     token: userToken,
-    fileId
+    fileId,
   });
 }
 
@@ -337,8 +345,8 @@ export async function listRemoteFiles() {
   try {
     res = await fetchJSON(getServer().SYNC_SERVER + '/list-user-files', {
       headers: {
-        'X-ACTUAL-TOKEN': userToken
-      }
+        'X-ACTUAL-TOKEN': userToken,
+      },
     });
   } catch (e) {
     console.log('Error', e);
@@ -351,7 +359,7 @@ export async function listRemoteFiles() {
 
   return res.data.map(file => ({
     ...file,
-    hasKey: encryption.hasKey(file.encryptKeyId)
+    hasKey: encryption.hasKey(file.encryptKeyId),
   }));
 }
 
@@ -363,8 +371,8 @@ export async function download(fileId, replace) {
     buffer = await fetch(getServer().SYNC_SERVER + '/download-user-file', {
       headers: {
         'X-ACTUAL-TOKEN': userToken,
-        'X-ACTUAL-FILE-ID': fileId
-      }
+        'X-ACTUAL-FILE-ID': fileId,
+      },
     })
       .then(checkHTTPStatus)
       .then(res => {
@@ -383,8 +391,8 @@ export async function download(fileId, replace) {
     res = await fetchJSON(getServer().SYNC_SERVER + '/get-user-file-info', {
       headers: {
         'X-ACTUAL-TOKEN': userToken,
-        'X-ACTUAL-FILE-ID': fileId
-      }
+        'X-ACTUAL-FILE-ID': fileId,
+      },
     });
   } catch (err) {
     throw FileDownloadError('internal', { fileId });
@@ -403,7 +411,7 @@ export async function download(fileId, replace) {
       buffer = await encryption.decrypt(buffer, fileData.encryptMeta);
     } catch (e) {
       throw FileDownloadError('decrypt-failure', {
-        isMissingKey: e.message === 'missing-key'
+        isMissingKey: e.message === 'missing-key',
       });
     }
   }

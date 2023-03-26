@@ -12,7 +12,7 @@ export function generateAccount(name, isConnected, type, offbudget) {
     bankName: isConnected ? 'boa' : null,
     type: type || 'checking',
     offbudget: offbudget ? 1 : 0,
-    closed: 0
+    closed: 0,
   };
 }
 
@@ -23,7 +23,7 @@ export function generateCategory(name, group, isIncome = false) {
     name: name,
     cat_group: group,
     is_income: isIncome ? 1 : 0,
-    sort_order: sortOrder++
+    sort_order: sortOrder++,
   };
 }
 
@@ -33,7 +33,7 @@ export function generateCategoryGroup(name, isIncome = false) {
     id: uuid.v4Sync(),
     name: name,
     is_income: isIncome ? 1 : 0,
-    sort_order: groupSortOrder++
+    sort_order: groupSortOrder++,
   };
 }
 
@@ -44,8 +44,8 @@ export function generateCategoryGroups(definition) {
     return {
       ...g,
       categories: group.categories.map(cat =>
-        generateCategory(cat.name, g.id, cat.is_income)
-      )
+        generateCategory(cat.name, g.id, cat.is_income),
+      ),
     };
   });
 }
@@ -55,15 +55,14 @@ function _generateTransaction(data) {
   return {
     id: id,
     amount: data.amount || Math.floor(Math.random() * 10000 - 7000),
-    payee: data.payee || (Math.random() < 0.9 ? 'payed-to' : 'guy'),
-    notes:
-      Math.random() < 0.1 ? 'A really long note that should overflow' : 'Notes',
+    payee: data.payee || 'payed-to',
+    notes: 'Notes',
     account: data.account,
     date: data.date || monthUtils.currentDay(),
     category: data.category,
     sort_order: data.sort_order != null ? data.sort_order : 1,
     cleared: false,
-    error: null
+    error: null,
   };
 }
 
@@ -85,7 +84,7 @@ export function generateTransaction(data, splitAmount, showError = false) {
         date: parent.date,
         notes: null,
         category: null,
-        isChild: true
+        isChild: true,
       },
       {
         id: parent.id + '/' + uuid.v4Sync(),
@@ -94,8 +93,8 @@ export function generateTransaction(data, splitAmount, showError = false) {
         date: parent.date,
         notes: null,
         category: null,
-        isChild: true
-      }
+        isChild: true,
+      },
     );
 
     if (showError) {
@@ -104,7 +103,7 @@ export function generateTransaction(data, splitAmount, showError = false) {
       last.error = {
         type: 'SplitTransactionError',
         version: 1,
-        difference: 500
+        difference: 500,
       };
     }
   }
@@ -117,7 +116,7 @@ export function generateTransactions(
   accountId,
   groupId,
   splitAtIndexes = [],
-  showError = false
+  showError = false,
 ) {
   const transactions = [];
 
@@ -131,11 +130,11 @@ export function generateTransactions(
           account: accountId,
           category: groupId,
           amount: isSplit ? 50 : undefined,
-          sort_order: i
+          sort_order: i,
         },
         isSplit ? 30 : undefined,
-        showError
-      )
+        showError,
+      ),
     );
   }
 

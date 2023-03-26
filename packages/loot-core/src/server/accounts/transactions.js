@@ -1,6 +1,7 @@
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import { batchMessages } from '../sync';
+
 import * as rules from './transaction-rules';
 import * as transfer from './transfer';
 
@@ -9,7 +10,7 @@ const connection = require('../../platform/server/connection');
 async function idsWithChildren(ids) {
   let whereIds = whereIn(ids, 'parent_id');
   let rows = await db.all(
-    `SELECT id FROM v_transactions_internal WHERE ${whereIds}`
+    `SELECT id FROM v_transactions_internal WHERE ${whereIds}`,
   );
   let set = new Set(ids);
   for (let row of rows) {
@@ -25,8 +26,9 @@ async function getTransactionsByIds(ids) {
   return incrFetch(
     (query, params) => db.selectWithSchema('transactions', query, params),
     ids,
+    // eslint-disable-next-line rulesdir/typography
     id => `id = '${id}'`,
-    where => `SELECT * FROM v_transactions_internal WHERE ${where}`
+    where => `SELECT * FROM v_transactions_internal WHERE ${where}`,
   );
 }
 
@@ -35,7 +37,7 @@ export async function batchUpdateTransactions({
   deleted,
   updated,
   learnCategories = false,
-  detectOrphanPayees = true
+  detectOrphanPayees = true,
 }) {
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
@@ -64,7 +66,7 @@ export async function batchUpdateTransactions({
   await batchMessages(async () => {
     if (added) {
       addedIds = await Promise.all(
-        added.map(async t => db.insertTransaction(t))
+        added.map(async t => db.insertTransaction(t)),
       );
     }
 
@@ -76,7 +78,7 @@ export async function batchUpdateTransactions({
         // be fixed (it should only take an id)
         deletedIds.map(async id => {
           await db.deleteTransaction({ id });
-        })
+        }),
       );
     }
 
@@ -93,7 +95,7 @@ export async function batchUpdateTransactions({
           }
 
           await db.updateTransaction(t);
-        })
+        }),
       );
     }
   });
@@ -131,10 +133,10 @@ export async function batchUpdateTransactions({
       ...(added ? added.filter(add => add.category).map(add => add.id) : []),
       ...(updated
         ? updated.filter(update => update.category).map(update => update.id)
-        : [])
+        : []),
     ]);
     await rules.updateCategoryRules(
-      allAdded.concat(allUpdated).filter(trans => ids.has(trans.id))
+      allAdded.concat(allUpdated).filter(trans => ids.has(trans.id)),
     );
   }
 
@@ -152,7 +154,7 @@ export async function batchUpdateTransactions({
         if (orphanedIds.length > 0) {
           connection.send('orphaned-payees', {
             orphanedIds,
-            updatedPayeeIds: newPayeeIds
+            updatedPayeeIds: newPayeeIds,
           });
         }
       }
@@ -161,6 +163,6 @@ export async function batchUpdateTransactions({
 
   return {
     added: resultAdded,
-    updated: resultUpdated
+    updated: resultUpdated,
   };
 }

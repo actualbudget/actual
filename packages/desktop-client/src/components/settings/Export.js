@@ -1,14 +1,21 @@
 import React from 'react';
 
+import { format } from 'date-fns';
+
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Text, Button } from 'loot-design/src/components/common';
+
+import { Text, Button } from '../common';
 
 import { Setting } from './UI';
 
 export default function ExportBudget({ prefs }) {
   async function onExport() {
     let data = await send('export-budget');
-    window.Actual.saveFile(data, `${prefs.id}.zip`, 'Export budget');
+    window.Actual.saveFile(
+      data,
+      `${format(new Date(), 'yyyy-MM-dd')}-${prefs.id}.zip`,
+      'Export budget',
+    );
   }
 
   return (
@@ -16,8 +23,8 @@ export default function ExportBudget({ prefs }) {
       <Text>
         <strong>Export</strong> your data as a zip file containing{' '}
         <code>db.sqlite</code> and <code>metadata.json</code> files. It can be
-        imported into another Actual instance by clicking the “Import file”
-        button and then choosing “Actual” on the Files page.
+        imported into another Actual instance by closing an open file (if any),
+        then clicking the “Import file” button, then choosing “Actual.”
       </Text>
       {prefs.encryptKeyId ? (
         <Text>

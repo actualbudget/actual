@@ -1,16 +1,17 @@
 import { Query } from '../../../shared/query';
 import {
   runQuery as _runQuery,
-  runCompiledQuery as _runCompiledQuery
+  runCompiledQuery as _runCompiledQuery,
 } from '../exec';
-import schemaExecutors from './executors';
+
+import { schemaExecutors } from './executors';
 
 import { schema, schemaConfig } from './index';
 
 export function runCompiledQuery(query, sqlPieces, state, params) {
   return _runCompiledQuery(query, sqlPieces, state, {
     params,
-    executors: schemaExecutors
+    executors: schemaExecutors,
   });
 }
 
@@ -21,6 +22,6 @@ export function runQuery(query, params) {
 
   return _runQuery(schema, schemaConfig, query, {
     params,
-    executors: schemaExecutors
+    executors: schemaExecutors,
   });
 }

@@ -1,13 +1,14 @@
 import React from 'react';
 
-import { Text, Button } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { Text, Button } from '../common';
+import { useServerURL } from '../ServerContext';
 
-import { useServerURL } from '../../hooks/useServerURL';
 import { Setting } from './UI';
 
 export default function EncryptionSettings({ prefs, pushModal }) {
   const serverURL = useServerURL();
+  const missingCryptoAPI = !(window.crypto && crypto.subtle);
 
   function onChangeKey() {
     pushModal('create-encryption-key', { recreate: true });
@@ -33,9 +34,25 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         </a>
       </Text>
     </Setting>
+  ) : missingCryptoAPI ? (
+    <Setting primaryAction={<Button disabled>Enable encryption…</Button>}>
+      <Text>
+        <strong>End-to-end encryption</strong> is not available when making an
+        unencrypted connection to a remote server. You’ll need to enable HTTPS
+        on your server to use end-to-end encryption. This problem may also occur
+        if your browser is too old to work with Actual.{' '}
+        <a
+          href="https://actualbudget.github.io/docs/Installing/HTTPS"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn more…
+        </a>
+      </Text>
+    </Setting>
   ) : serverURL ? (
     <Setting
-      button={
+      primaryAction={
         <Button onClick={() => pushModal('create-encryption-key')}>
           Enable encryption…
         </Button>
@@ -43,7 +60,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
     >
       <Text>
         <strong>End-to-end encryption</strong> is not enabled. Any data on the
-        server is still protected by the server password, but it's not
+        server is still protected by the server password, but it’s not
         end-to-end encrypted which means the server owners have the ability to
         read it. If you want, you can use an additional password to encrypt your
         data on the server.{' '}
@@ -57,7 +74,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
       </Text>
     </Setting>
   ) : (
-    <Setting button={<Button disabled>Enable encryption…</Button>}>
+    <Setting primaryAction={<Button disabled>Enable encryption…</Button>}>
       <Text>
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and

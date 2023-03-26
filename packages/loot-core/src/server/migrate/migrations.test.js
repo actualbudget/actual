@@ -1,10 +1,11 @@
 import * as db from '../db';
+
 import {
   migrate,
   withMigrationsDir,
   getAppliedMigrations,
   getMigrationList,
-  getPending
+  getPending,
 } from './migrations';
 
 beforeEach(global.emptyDatabase(true));
@@ -13,7 +14,7 @@ describe('Migrations', () => {
   test('gets the latest migrations', async () => {
     let applied = await getAppliedMigrations(db.getDatabase());
     let available = await getMigrationList(
-      __dirname + '/../../mocks/migrations'
+      __dirname + '/../../mocks/migrations',
     );
 
     expect(applied.length).toBe(0);
@@ -34,7 +35,7 @@ describe('Migrations', () => {
             throw new Error('Found older migration out of order');
           }
         }
-      }
+      },
     );
   });
 
@@ -52,7 +53,7 @@ describe('Migrations', () => {
           return;
         }
         expect('should never reach here').toBe(null);
-      }
+      },
     );
   });
 
@@ -61,19 +62,19 @@ describe('Migrations', () => {
       __dirname + '/../../mocks/migrations',
       async () => {
         let desc = await db.first(
-          "SELECT * FROM sqlite_master WHERE name = 'poop'"
+          "SELECT * FROM sqlite_master WHERE name = 'poop'",
         );
         expect(desc).toBe(null);
 
         await migrate(db.getDatabase());
 
         desc = await db.first(
-          "SELECT * FROM sqlite_master WHERE name = 'poop'"
+          "SELECT * FROM sqlite_master WHERE name = 'poop'",
         );
         expect(desc).toBeDefined();
         expect(desc.sql.indexOf('is_income')).toBe(-1);
         expect(desc.sql.indexOf('is_expense')).not.toBe(-1);
-      }
+      },
     );
   });
 });

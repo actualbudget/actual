@@ -3,7 +3,7 @@ export async function incrFetch(
   terms,
   compare,
   makeQuery,
-  params = []
+  params = [],
 ) {
   let pageCount = 500;
   let results = [];
@@ -27,6 +27,7 @@ export async function incrFetch(
 
 export function whereIn(ids, field) {
   let ids2 = [...new Set(ids)];
+  // eslint-disable-next-line rulesdir/typography
   let filter = `${field} IN (` + ids2.map(id => `'${id}'`).join(',') + ')';
   return filter;
 }

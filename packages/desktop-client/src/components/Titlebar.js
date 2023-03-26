@@ -5,9 +5,21 @@ import { Switch, Route, withRouter } from 'react-router-dom';
 import { css, media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
-import Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
+
+import useFeatureFlag from '../hooks/useFeatureFlag';
+import ArrowLeft from '../icons/v1/ArrowLeft';
+import AlertTriangle from '../icons/v2/AlertTriangle';
+import ArrowButtonRight1 from '../icons/v2/ArrowButtonRight1';
+import NavigationMenu from '../icons/v2/NavigationMenu';
+import { colors } from '../style';
+import tokens from '../tokens';
+
+import AccountSyncCheck from './accounts/AccountSyncCheck';
+import AnimatedRefresh from './AnimatedRefresh';
+import { MonthCountSelector } from './budget/MonthCountSelector';
 import {
   View,
   Text,
@@ -15,22 +27,12 @@ import {
   Button,
   ButtonWithLoading,
   Tooltip,
-  P
-} from 'loot-design/src/components/common';
-import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import { colors } from 'loot-design/src/style';
-import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
-import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
-import ArrowButtonRight1 from 'loot-design/src/svg/v2/ArrowButtonRight1';
-import NavigationMenu from 'loot-design/src/svg/v2/NavigationMenu';
-import tokens from 'loot-design/src/tokens';
-
-import { useServerURL } from '../hooks/useServerURL';
-import AccountSyncCheck from './accounts/AccountSyncCheck';
-import AnimatedRefresh from './AnimatedRefresh';
-import { MonthCountSelector } from './budget/MonthCountSelector';
+  P,
+} from './common';
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
+import { useServerURL } from './ServerContext';
+import SheetValue from './spreadsheet/SheetValue';
 
 export let TitlebarContext = React.createContext();
 
@@ -127,7 +129,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
                 syncState === 'offline' ||
                 syncState === 'local'
               ? colors.n9
-              : null
+              : null,
         },
         media(`(min-width: ${tokens.breakpoint_medium})`, {
           color:
@@ -137,8 +139,8 @@ export function SyncButton({ localPrefs, style, onSync }) {
                 syncState === 'offline' ||
                 syncState === 'local'
               ? colors.n6
-              : null
-        })
+              : null,
+        }),
       )}
       onClick={onSync}
     >
@@ -163,7 +165,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
   let [loading, setLoading] = useState(false);
   let [showTooltip, setShowTooltip] = useState(false);
 
-  let reportBudgetEnabled = localPrefs['flags.reportBudget'];
+  const reportBudgetEnabled = useFeatureFlag('reportBudget');
 
   function onSwitchType() {
     setLoading(true);
@@ -191,7 +193,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
             loading={loading}
             style={{
               alignSelf: 'flex-start',
-              padding: '4px 7px'
+              padding: '4px 7px',
             }}
             title="Learn more about budgeting"
             onClick={() => setShowTooltip(true)}
@@ -204,7 +206,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
               onClose={() => setShowTooltip(false)}
               style={{
                 padding: 10,
-                maxWidth: 400
+                maxWidth: 400,
               }}
             >
               <P>
@@ -230,11 +232,12 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                 </ButtonWithLoading>
               </P>
               <P isLast={true}>
-                <a // eslint-disable-line
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                <a
                   href="#"
                   style={{
                     color: colors.n4,
-                    fontStyle: 'italic'
+                    fontStyle: 'italic',
                   }}
                 >
                   How do these types of budgeting work?
@@ -258,7 +261,7 @@ function Titlebar({
   syncError,
   setAppState,
   style,
-  sync
+  sync,
 }) {
   let sidebar = useSidebar();
   const serverURL = useServerURL();
@@ -273,13 +276,13 @@ function Titlebar({
           height: 36,
           pointerEvents: 'none',
           '& *': {
-            pointerEvents: 'auto'
-          }
+            pointerEvents: 'auto',
+          },
         },
         !Platform.isBrowser &&
           Platform.OS === 'mac' &&
           floatingSidebar && { paddingLeft: 80 },
-        style
+        style,
       ]}
     >
       {floatingSidebar && (
@@ -290,7 +293,7 @@ function Titlebar({
             '& .arrow-right': { opacity: 0, transition: 'opacity .3s' },
             '& .menu': { opacity: 1, transition: 'opacity .3s' },
             '&:hover .arrow-right': { opacity: 1 },
-            '&:hover .menu': { opacity: 0 }
+            '&:hover .menu': { opacity: 0 },
           }}
           onMouseEnter={() => sidebar.show()}
           onMouseLeave={() => sidebar.hide()}
@@ -307,7 +310,7 @@ function Titlebar({
                 color: colors.n5,
                 position: 'absolute',
                 top: 1,
-                left: 1
+                left: 1,
               }}
             />
             <NavigationMenu
@@ -318,7 +321,7 @@ function Titlebar({
                 color: colors.n5,
                 position: 'absolute',
                 top: 0,
-                left: 0
+                left: 0,
               }}
             />
           </View>
@@ -386,8 +389,8 @@ export default withRouter(
       globalPrefs: state.prefs.global,
       localPrefs: state.prefs.local,
       userData: state.user.data,
-      floatingSidebar: state.prefs.global.floatingSidebar
+      floatingSidebar: state.prefs.global.floatingSidebar,
     }),
-    actions
-  )(Titlebar)
+    actions,
+  )(Titlebar),
 );

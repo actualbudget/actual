@@ -1,15 +1,15 @@
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
 
 let colorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',
   blueFadeEnd: 'rgba(229, 245, 255, 0)',
   redFadeStart: 'rgba(255, 243, 242, 1)',
-  redFadeEnd: 'rgba(255, 243, 242, 0)'
+  redFadeEnd: 'rgba(255, 243, 242, 0)',
 };
 
 // Typography
 const sansSerif =
-  '"Inter var", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif';
+  'Inter var, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, Helvetica, Arial, sans-serif';
 const letterSpacing = 'normal';
 const fontSize = 13;
 
@@ -19,33 +19,33 @@ const baseLabelStyles = {
   fontSize,
   letterSpacing,
   fill: colors.n1,
-  stroke: 'transparent'
+  stroke: 'transparent',
 };
 
 const axisBaseStyles = {
   axis: {
     fill: 'transparent',
-    stroke: 'none'
+    stroke: 'none',
   },
   grid: {
     fill: 'none',
     stroke: 'none',
-    pointerEvents: 'none'
+    pointerEvents: 'none',
   },
   ticks: {
     fill: 'transparent',
     size: 1,
-    stroke: 'none'
+    stroke: 'none',
   },
   axisLabel: baseLabelStyles,
-  tickLabels: baseLabelStyles
+  tickLabels: baseLabelStyles,
 };
 
-export default {
+const theme = {
   colors: {
     ...colorFades,
     red: colors.r7,
-    blue: colors.b6
+    blue: colors.b6,
   },
   area: {
     style: {
@@ -54,12 +54,12 @@ export default {
         stroke: colors.b6,
         strokeWidth: 2,
         strokeLinejoin: 'round',
-        strokeLinecap: 'round'
-      }
-    }
+        strokeLinecap: 'round',
+      },
+    },
   },
   axis: {
-    style: axisBaseStyles
+    style: axisBaseStyles,
   },
   dependentAxis: {
     style: {
@@ -67,23 +67,23 @@ export default {
       grid: {
         ...axisBaseStyles.grid,
         stroke: 'rgba(0,0,0,.2)',
-        strokeDasharray: '1,1'
+        strokeDasharray: '1,1',
       },
-      tickLabels: { ...baseLabelStyles, padding: 5 }
-    }
+      tickLabels: { ...baseLabelStyles, padding: 5 },
+    },
   },
   independentAxis: {
     style: {
       ...axisBaseStyles,
       axis: { ...axisBaseStyles.axis, stroke: 'rgba(0,0,0,.2)' },
-      tickLabels: { ...baseLabelStyles, padding: 10 }
-    }
+      tickLabels: { ...baseLabelStyles, padding: 10 },
+    },
   },
   bar: {
     style: {
       labels: baseLabelStyles,
-      data: { fill: colors.b6, stroke: 'none' }
-    }
+      data: { fill: colors.b6, stroke: 'none' },
+    },
   },
   line: {
     style: {
@@ -93,21 +93,22 @@ export default {
         stroke: colors.b6,
         strokeWidth: 2,
         strokeLinejoin: 'round',
-        strokeLinecap: 'round'
-      }
-    }
+        strokeLinecap: 'round',
+      },
+    },
   },
   voronoi: {
     style: {
-      labels: baseLabelStyles
-    }
+      labels: baseLabelStyles,
+    },
   },
   chart: {
     padding: {
       top: 20,
       left: 65,
       right: 20,
-      bottom: 50
-    }
-  }
+      bottom: 50,
+    },
+  },
 };
+export default theme;

@@ -1,12 +1,4 @@
-import { useMemo } from 'react';
-
 import { runQuery } from 'loot-core/src/client/query-helpers';
-
-export function useArgsMemo(func) {
-  return (...args) => {
-    return useMemo(() => func(...args), args);
-  };
-}
 
 export function fromDateRepr(date) {
   return date.slice(0, 7);
@@ -24,7 +16,7 @@ export async function runAll(queries, cb) {
   let data = await Promise.all(
     queries.map(q => {
       return runQuery(q).then(({ data }) => data);
-    })
+    }),
   );
   cb(data);
 }

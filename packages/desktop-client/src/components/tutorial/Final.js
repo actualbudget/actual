@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { P, ModalButtons, Button } from 'loot-design/src/components/common';
+import { P, ModalButtons, Button } from '../common';
 
 import { Standalone, Title, ExternalLink } from './common';
 
 function Final({ targetRect, navigationProps }) {
   return (
     <Standalone width={500}>
-      <Title>That's it!</Title>
+      <Title>That’s it!</Title>
       <P>
         With that workflow you can have peace of mind that what you are looking
         at reflects reality.{' '}
@@ -20,10 +20,14 @@ function Final({ targetRect, navigationProps }) {
 
       <P>
         You probably want to delete the transactions you added and clean up your
-        budget. If you have any questions or feedback, email{' '}
-        <ExternalLink asAnchor href="mailto:help@actualbudget.com">
-          help@actualbudget.com
-        </ExternalLink>
+        budget. If you have any questions or feedback, please get{' '}
+        <a
+          href="https://actualbudget.github.io/docs/Contact/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          in touch
+        </a>
         .
       </P>
 

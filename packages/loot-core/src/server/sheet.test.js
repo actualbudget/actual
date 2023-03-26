@@ -1,4 +1,5 @@
 import { generateTransaction } from '../mocks';
+
 import * as db from './db';
 import * as sheet from './sheet';
 
@@ -15,8 +16,8 @@ async function insertTransactions() {
       amount: -3200,
       account: '1',
       category: 'cat1',
-      date: '2017-01-08'
-    })[0]
+      date: '2017-01-08',
+    })[0],
   );
   await db.insertTransaction(
     generateTransaction({
@@ -24,8 +25,8 @@ async function insertTransactions() {
       amount: -2800,
       account: '1',
       category: 'cat2',
-      date: '2017-01-10'
-    })[0]
+      date: '2017-01-10',
+    })[0],
   );
   await db.insertTransaction(
     generateTransaction({
@@ -33,8 +34,8 @@ async function insertTransactions() {
       amount: -9832,
       account: '1',
       category: 'cat2',
-      date: '2017-01-15'
-    })[0]
+      date: '2017-01-15',
+    })[0],
   );
 }
 
@@ -46,7 +47,7 @@ describe('Spreadsheet', () => {
     spreadsheet.startTransaction();
     spreadsheet.set(
       'g!foo',
-      `=from transactions where category = "cat2" calculate { sum(amount) }`
+      `=from transactions where category = "cat2" calculate { sum(amount) }`,
     );
     spreadsheet.endTransaction();
 
@@ -76,7 +77,7 @@ describe('Spreadsheet', () => {
     spreadsheet.startTransaction();
     spreadsheet.set(
       'g!foo',
-      `=from transactions where category = "cat2" calculate { sum(amount) }`
+      `=from transactions where category = "cat2" calculate { sum(amount) }`,
     );
     spreadsheet.endTransaction();
 

@@ -11,7 +11,7 @@ export function toGroup(parents, children, mapper = x => x) {
     let childs = children.get(parent.id) || [];
     list.push({
       ...mapper(parent),
-      subtransactions: childs.map(mapper)
+      subtransactions: childs.map(mapper),
     });
     return list;
   }, []);
@@ -31,7 +31,7 @@ function execTransactions(state, query, sql, params, outputTypes) {
   let splitType = tableOptions.splits || 'inline';
 
   if (['all', 'inline', 'none', 'grouped'].indexOf(splitType) === -1) {
-    throw new Error(`Invalid "splits" option for transactions: "${splitType}"`);
+    throw new Error(`Invalid “splits” option for transactions: “${splitType}”`);
   }
 
   if (splitType === 'all' || splitType === 'inline' || splitType === 'none') {
@@ -41,7 +41,7 @@ function execTransactions(state, query, sql, params, outputTypes) {
       sql,
       params,
       splitType,
-      outputTypes
+      outputTypes,
     );
   } else if (splitType === 'grouped') {
     return execTransactionsGrouped(
@@ -50,7 +50,7 @@ function execTransactions(state, query, sql, params, outputTypes) {
       sql,
       params,
       splitType,
-      outputTypes
+      outputTypes,
     );
   }
 }
@@ -80,23 +80,33 @@ async function execTransactionsGrouped(
   sql,
   params,
   splitType,
-  outputTypes
+  outputTypes,
 ) {
   let { withDead } = queryState;
   let whereDead = withDead ? '' : `AND ${sql.from}.tombstone = 0`;
 
+  // Aggregate queries don't make sense for a grouped transactions
+  // query. We never should include both parent and children
+  // transactions as it would duplicate amounts and the final number
+  // would never make sense. In this case, switch back to the "inline"
+  // type where only non-parent transactions are considered
   if (isAggregateQuery(queryState)) {
-    let allSql = `
-      SELECT ${sql.select}
-      FROM ${sql.from}
-      ${sql.joins}
-      ${sql.where} AND is_parent = 0 ${whereDead}
-      ${sql.groupBy}
-      ${sql.orderBy}
-      ${sql.limit != null ? `LIMIT ${sql.limit}` : ''}
-      ${sql.offset != null ? `OFFSET ${sql.offset}` : ''}
-    `;
-    return db.all(allSql);
+    let s = { ...sql };
+
+    // Modify the where to only include non-parents
+    s.where = `${s.where} AND ${s.from}.is_parent = 0`;
+
+    // We also want to exclude deleted transactions. Normally we
+    // handle this manually down below, but now that we are doing a
+    // normal query we want to rely on the view. Unfortunately, SQL
+    // has already been generated so we can't easily change the view
+    // name here; instead, we change it and map it back to the name
+    // used elsewhere in the query. Ideally we'd improve this
+    if (!withDead) {
+      s.from = 'v_transactions_internal_alive v_transactions_internal';
+    }
+
+    return execQuery(queryState, state, s, params, outputTypes);
   }
 
   let rows;
@@ -144,14 +154,14 @@ async function execTransactionsGrouped(
     matched = new Set(
       [].concat.apply(
         [],
-        rows.map(row => row.matched.split(','))
-      )
+        rows.map(row => row.matched.split(',')),
+      ),
     );
   }
 
   let where = whereIn(
     rows.map(row => row.group_id),
-    `IFNULL(${sql.from}.parent_id, ${sql.from}.id)`
+    `IFNULL(${sql.from}.parent_id, ${sql.from}.id)`,
   );
   let finalSql = `
     SELECT ${sql.select}, parent_id AS _parent_id FROM ${sql.from}
@@ -177,7 +187,7 @@ async function execTransactionsGrouped(
       }
       return acc;
     },
-    { parents: [], children: new Map() }
+    { parents: [], children: new Map() },
   );
 
   let mapper = trans => {
@@ -200,7 +210,7 @@ async function execTransactionsBasic(
   sql,
   params,
   splitType,
-  outputTypes
+  outputTypes,
 ) {
   let s = { ...sql };
 
@@ -215,6 +225,6 @@ async function execTransactionsBasic(
   return execQuery(queryState, state, s, params, outputTypes);
 }
 
-export default {
-  transactions: execTransactions
+export const schemaExecutors = {
+  transactions: execTransactions,
 };

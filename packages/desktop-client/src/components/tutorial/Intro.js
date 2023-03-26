@@ -1,19 +1,13 @@
 import React from 'react';
 
-import {
-  View,
-  Text,
-  P,
-  ModalButtons,
-  Button
-} from 'loot-design/src/components/common';
+import { View, Text, P, ModalButtons, Button } from '../common';
 
 import { Standalone, Title, ExternalLink } from './common';
 
 function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {
   return (
     <Standalone width={500}>
-      <Title>Let's get started</Title>
+      <Title>Let’s get started</Title>
       <P>
         Welcome to Actual!{' '}
         <span role="img" aria-label="Party" aria-hidden="true">

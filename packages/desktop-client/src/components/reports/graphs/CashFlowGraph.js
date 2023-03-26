@@ -7,11 +7,10 @@ import {
   VictoryLine,
   VictoryAxis,
   VictoryVoronoiContainer,
-  VictoryGroup
+  VictoryGroup,
 } from 'victory';
 
-import { colors } from 'loot-design/src/style';
-
+import { colors } from '../../../style';
 import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
@@ -43,10 +42,11 @@ function CashFlowGraph({ style, start, end, graphData, isConcise, compact }) {
               labelComponent={<Tooltip portalHost={portalHost} />}
               labels={x => x.premadeLabel}
               style={{
-                data: { stroke: colors.n5 }
+                data: { stroke: colors.n5 },
               }}
             />
             <VictoryAxis
+              // eslint-disable-next-line rulesdir/typography
               tickFormat={x => d.format(x, isConcise ? "MMM ''yy" : 'MMM d')}
               tickValues={graphData.balances.map(item => item.x)}
               tickCount={Math.min(5, graphData.balances.length)}

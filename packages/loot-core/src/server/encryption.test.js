@@ -1,4 +1,4 @@
-import encryption from './encryption';
+import * as encryption from './encryption';
 
 afterEach(() => encryption.unloadAllKeys());
 
@@ -7,7 +7,7 @@ describe('Encryption', () => {
     let key = await encryption.createKey({
       id: 'foo',
       password: 'mypassword',
-      salt: 'salt'
+      salt: 'salt',
     });
     await encryption.loadKey(key);
 

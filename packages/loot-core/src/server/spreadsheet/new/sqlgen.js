@@ -18,7 +18,8 @@ function fail(node, message) {
 
 function generateExpression(expr) {
   if (typeof expr === 'string') {
-    return '"' + expr + '"';
+    // eslint-disable-next-line rulesdir/typography
+    return `"${expr}"`;
   } else if (typeof expr === 'number') {
     return expr;
   }
@@ -65,7 +66,8 @@ function generateExpression(expr) {
       return '(' + str + ')';
     case 'Literal':
       if (typeof expr.value === 'string') {
-        return '"' + expr.value + '"';
+        // eslint-disable-next-line rulesdir/typography
+        return `"${expr.value}"`;
       }
       return expr.value;
     case 'Symbol':
@@ -123,7 +125,7 @@ function transformLookups(node, implicitTable) {
       lookups = lookups.map((lookup, idx) => {
         return {
           field: lookup.field,
-          tableId: uid()
+          tableId: uid(),
         };
       });
 
@@ -136,14 +138,14 @@ function transformLookups(node, implicitTable) {
 
         if (!SCHEMA_PATHS[table]) {
           const err = new Error(
-            `Table "${table}" not joinable for field "${lookup}"`
+            `Table “${table}” not joinable for field “${lookup}”`,
           );
           err.node = node;
           throw err;
         }
         if (!SCHEMA_PATHS[table][lookup.field]) {
           const err = new Error(
-            `Unknown field "${lookup}" on table "${table}"`
+            `Unknown field “${lookup}” on table “${table}”`,
           );
           err.node = node;
           throw err;
@@ -161,7 +163,7 @@ function transformLookups(node, implicitTable) {
         node.lineno,
         node.colno,
         new nodes.Symbol(node.lineno, node.colno, tableId),
-        new nodes.Symbol(node.lineno, node.colno, field)
+        new nodes.Symbol(node.lineno, node.colno, field),
       );
     }
   });
@@ -237,7 +239,7 @@ export default function generate(table, where, groupby, select, deps) {
         joins.push(meta.sql(lookup.tableId));
       } else {
         joins.push(
-          `LEFT JOIN ${meta.table} ${lookup.tableId} ON ${lookup.tableId}.id = ${currentTable.id}.${lookup.field}`
+          `LEFT JOIN ${meta.table} ${lookup.tableId} ON ${lookup.tableId}.id = ${currentTable.id}.${lookup.field}`,
         );
       }
 
@@ -255,7 +257,7 @@ export default function generate(table, where, groupby, select, deps) {
   return {
     sql,
     where: whereTransformed,
-    dependencies
+    dependencies,
   };
 }
 
@@ -264,17 +266,17 @@ export const SCHEMA_PATHS = {
     category: {
       table: 'categories',
       sql: id => `LEFT JOIN categories ${id} ON __cm.transferId = ${id}.id`,
-      field: '__cm.transferId'
+      field: '__cm.transferId',
     },
     acct: { table: 'accounts' },
-    description: { table: 'payees' }
+    description: { table: 'payees' },
   },
   payees: {
-    transfer_acct: { table: 'accounts' }
+    transfer_acct: { table: 'accounts' },
   },
   accounts: {
-    bank: { table: 'banks' }
-  }
+    bank: { table: 'banks' },
+  },
 };
 
 const tables = {
@@ -290,5 +292,5 @@ const tables = {
       ${join}
       ${whereStr}
     `;
-  }
+  },
 };

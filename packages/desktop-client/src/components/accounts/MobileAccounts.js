@@ -5,16 +5,12 @@ import { useNavigate } from 'react-router-dom-v5-compat';
 import * as actions from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 import { prettyAccountType } from 'loot-core/src/shared/accounts';
-import {
-  Button,
-  Text,
-  TextOneLine,
-  View
-} from 'loot-design/src/components/common';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import { colors, styles } from 'loot-design/src/style';
-import Wallet from 'loot-design/src/svg/v1/Wallet';
-import { withThemeColor } from 'loot-design/src/util/withThemeColor';
+
+import Wallet from '../../icons/v1/Wallet';
+import { colors, styles } from '../../style';
+import { withThemeColor } from '../../util/withThemeColor';
+import { Button, Text, TextOneLine, View } from '../common';
+import CellValue from '../spreadsheet/CellValue';
 
 export function AccountHeader({ name, amount }) {
   return (
@@ -22,14 +18,14 @@ export function AccountHeader({ name, amount }) {
       style={{
         flexDirection: 'row',
         marginTop: 28,
-        marginBottom: 10
+        marginBottom: 10,
       }}
     >
       <View style={{ flex: 1 }}>
         <Text
           style={[
             styles.text,
-            { textTransform: 'uppercase', color: colors.n5, fontSize: 13 }
+            { textTransform: 'uppercase', color: colors.n5, fontSize: 13 },
           ]}
           data-testid="name"
         >
@@ -54,7 +50,7 @@ export function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         backgroundColor: 'white',
         boxShadow: `0 1px 1px ${colors.n7}`,
         borderRadius: 6,
-        marginTop: 10
+        marginTop: 10,
       }}
     >
       <Button
@@ -65,21 +61,21 @@ export function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
           alignItems: 'center',
           borderRadius: 6,
           '&:active': {
-            opacity: 0.1
-          }
+            opacity: 0.1,
+          },
         }}
       >
         <View
           style={{
             flex: '1 auto',
             height: 52,
-            marginTop: 10
+            marginTop: 10,
           }}
         >
           <View
             style={{
               flexDirection: 'row',
-              alignItems: 'center'
+              alignItems: 'center',
             }}
           >
             <TextOneLine
@@ -89,8 +85,8 @@ export function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
                   fontSize: 17,
                   fontWeight: 600,
                   color: updated ? colors.b2 : colors.n2,
-                  paddingRight: 30
-                }
+                  paddingRight: 30,
+                },
               ]}
             >
               {account.name}
@@ -102,7 +98,7 @@ export function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
                   marginLeft: '-23px',
                   width: 8,
                   height: 8,
-                  borderRadius: 8
+                  borderRadius: 8,
                 }}
               />
             )}
@@ -111,7 +107,7 @@ export function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              marginTop: '4px'
+              marginTop: '4px',
             }}
           >
             <Text style={[styles.smallText, { color: colors.n5 }]}>
@@ -123,7 +119,7 @@ export function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
                 height: 15,
                 color: colors.n9,
                 marginLeft: 8,
-                marginBottom: 2
+                marginBottom: 2,
               }}
             />
           </View>
@@ -153,7 +149,7 @@ function EmptyMessage({ onAdd }) {
         style={{ marginTop: 20, alignSelf: 'center' }}
         onClick={() =>
           alert(
-            'Account creation is not supported on mobile on the self-hosted service yet'
+            'Account creation is not supported on mobile on the self-hosted service yet',
           )
         }
       >
@@ -182,15 +178,15 @@ export class AccountList extends React.Component {
       getOnBudgetBalance,
       getOffBudgetBalance,
       onAddAccount,
-      onSelectAccount
+      onSelectAccount,
       // onSelectTransaction,
       // refreshControl
     } = this.props;
     const budgetedAccounts = accounts.filter(
-      account => account.offbudget === 0
+      account => account.offbudget === 0,
     );
     const offbudgetAccounts = accounts.filter(
-      account => account.offbudget === 1
+      account => account.offbudget === 1,
     );
 
     // If there are no accounts, show a helpful message
@@ -211,7 +207,7 @@ export class AccountList extends React.Component {
             fontWeight: 500,
             height: 50,
             justifyContent: 'center',
-            overflowY: 'auto'
+            overflowY: 'auto',
           }}
         >
           Accounts
@@ -220,7 +216,7 @@ export class AccountList extends React.Component {
           style={{
             backgroundColor: colors.n10,
             overflowY: 'auto',
-            padding: 10
+            padding: 10,
           }}
         >
           <AccountHeader name="Budgeted" amount={getOnBudgetBalance()} />
@@ -306,13 +302,14 @@ function Accounts(props) {
 
   let { accounts, categories, newTransactions, updatedAccounts, prefs } = props;
   let numberFormat = prefs.numberFormat || 'comma-dot';
+  let hideFraction = prefs.hideFraction || false;
 
   return (
     <View style={{ flex: 1 }}>
       <AccountList
         // This key forces the whole table rerender when the number
         // format changes
-        key={numberFormat}
+        key={numberFormat + hideFraction}
         accounts={accounts.filter(account => !account.closed)}
         categories={categories}
         transactions={transactions || []}
@@ -338,7 +335,7 @@ export default connect(
     newTransactions: state.queries.newTransactions,
     updatedAccounts: state.queries.updatedAccounts,
     categories: state.queries.categories.list,
-    prefs: state.prefs.local
+    prefs: state.prefs.local,
   }),
-  actions
+  actions,
 )(withThemeColor(colors.b2)(Accounts));

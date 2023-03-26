@@ -1,10 +1,6 @@
-let { getDatabase, closeDatabase } = require('../indexeddb');
+let { getDatabase } = require('../indexeddb');
 
 function init() {}
-
-function shutdown() {
-  closeDatabase();
-}
 
 function commit(trans) {
   if (trans.commit) {
@@ -67,7 +63,7 @@ async function multiGet(keys) {
         req.onerror = e => reject(e);
         req.onsuccess = e => resolve([key, e.target.result]);
       });
-    })
+    }),
   );
 
   commit(transaction);
@@ -87,7 +83,7 @@ async function multiSet(keyValues) {
         req.onerror = e => reject(e);
         req.onsuccess = e => resolve();
       });
-    })
+    }),
   );
 
   commit(transaction);
@@ -107,7 +103,7 @@ async function multiRemove(keys) {
         req.onerror = e => reject(e);
         req.onsuccess = e => resolve();
       });
-    })
+    }),
   );
 
   commit(transaction);
@@ -116,11 +112,10 @@ async function multiRemove(keys) {
 
 module.exports = {
   init,
-  shutdown,
   getItem,
   setItem,
   removeItem,
   multiGet,
   multiSet,
-  multiRemove
+  multiRemove,
 };

@@ -1,4 +1,4 @@
-import constants from '../constants';
+import * as constants from '../constants';
 
 const initialState = {};
 
@@ -7,7 +7,7 @@ export default function update(state = initialState, action) {
     case constants.SET_PROFILE:
       return {
         ...state,
-        ...action.profile
+        ...action.profile,
       };
     default:
   }

@@ -1,7 +1,8 @@
-import encryption from '../encryption';
+import * as encryption from '../encryption';
 import * as prefs from '../prefs';
 
 let { SyncError } = require('../errors');
+
 let SyncPb = require('./proto/sync_pb');
 
 function coerceBuffer(value) {
@@ -39,7 +40,7 @@ export async function encode(groupId, fileId, since, messages) {
         result = await encryption.encrypt(binaryMsg, encryptKeyId);
       } catch (e) {
         throw new SyncError('encrypt-failure', {
-          isMissingKey: e.message === 'missing-key'
+          isMissingKey: e.message === 'missing-key',
         });
       }
 
@@ -80,7 +81,7 @@ export async function decode(data) {
 
     if (encrypted) {
       let binary = SyncPb.EncryptedData.deserializeBinary(
-        envelopePb.getContent()
+        envelopePb.getContent(),
       );
 
       let decrypted;
@@ -89,12 +90,12 @@ export async function decode(data) {
           keyId: encryptKeyId,
           algorithm: 'aes-256-gcm',
           iv: coerceBuffer(binary.getIv()),
-          authTag: coerceBuffer(binary.getAuthtag())
+          authTag: coerceBuffer(binary.getAuthtag()),
         });
       } catch (e) {
         console.log(e);
         throw new SyncError('decrypt-failure', {
-          isMissingKey: e.message === 'missing-key'
+          isMissingKey: e.message === 'missing-key',
         });
       }
 
@@ -108,7 +109,7 @@ export async function decode(data) {
       dataset: msg.getDataset(),
       row: msg.getRow(),
       column: msg.getColumn(),
-      value: msg.getValue()
+      value: msg.getValue(),
     });
   }
 

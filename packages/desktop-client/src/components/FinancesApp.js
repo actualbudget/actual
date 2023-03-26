@@ -8,7 +8,7 @@ import {
   Redirect,
   Switch,
   useLocation,
-  NavLink
+  NavLink,
 } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 
@@ -19,28 +19,32 @@ import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
+import checkForUpdateNotification from 'loot-core/src/client/update-notification';
 import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
 import * as undo from 'loot-core/src/platform/client/undo';
-import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/BudgetMonthCountContext';
-import { View } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import Cog from 'loot-design/src/svg/v1/Cog';
-import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
-import Wallet from 'loot-design/src/svg/v1/Wallet';
 
+import Cog from '../icons/v1/Cog';
+import PiggyBank from '../icons/v1/PiggyBank';
+import Wallet from '../icons/v1/Wallet';
+import { colors, styles } from '../style';
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
+import { getIsOutdated, getLatestVersion } from '../util/versions';
+
 import Account from './accounts/Account';
 import { default as MobileAccount } from './accounts/MobileAccount';
 import { default as MobileAccounts } from './accounts/MobileAccounts';
 import { ActiveLocationProvider } from './ActiveLocation';
 import BankSyncStatus from './BankSyncStatus';
 import Budget from './budget';
+import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { default as MobileBudget } from './budget/MobileBudget';
+import { View } from './common';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
+import NordigenLink from './nordigen/NordigenLink';
 import Notifications from './Notifications';
 import { PageTypeProvider } from './Page';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
@@ -52,7 +56,6 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
-// import Debugger from './Debugger';
 
 function PageRoute({ path, component: Component }) {
   return (
@@ -63,7 +66,7 @@ function PageRoute({ path, component: Component }) {
           <View
             style={{
               flex: 1,
-              display: props.match ? 'flex' : 'none'
+              display: props.match ? 'flex' : 'none',
             }}
           >
             <Component {...props} />
@@ -99,6 +102,7 @@ function Routes({ isMobile, location }) {
         <Route path="/payees" exact component={ManagePayeesPage} />
         <Route path="/rules" exact component={ManageRulesPage} />
         <Route path="/settings" component={Settings} />
+        <Route path="/nordigen/link" exact component={NordigenLink} />
 
         <Route
           path="/accounts/:id"
@@ -158,7 +162,7 @@ function NavTab({ icon: TabIcon, name, path }) {
         color: '#8E8E8F',
         display: 'flex',
         flexDirection: 'column',
-        textDecoration: 'none'
+        textDecoration: 'none',
       }}
       activeStyle={{ color: colors.p5 }}
     >
@@ -184,7 +188,7 @@ function MobileNavTabs() {
         height: '80px',
         justifyContent: 'space-around',
         paddingTop: 10,
-        width: '100%'
+        width: '100%',
       }}
     >
       <NavTab name="Budget" path="/budget" icon={Wallet} isActive={false} />
@@ -202,7 +206,7 @@ function MobileNavTabs() {
 class FinancesApp extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isMobile: isMobile(window.innerWidth) };
+    this.state = { isMobile: isMobile() };
     this.history = createBrowserHistory();
 
     let oldPush = this.history.push;
@@ -231,8 +235,8 @@ class FinancesApp extends React.Component {
 
   handleWindowResize() {
     this.setState({
-      isMobile: isMobile(window.innerWidth),
-      windowWidth: window.innerWidth
+      isMobile: isMobile(),
+      windowWidth: window.innerWidth,
     });
   }
 
@@ -265,7 +269,18 @@ class FinancesApp extends React.Component {
       checkForUpgradeNotifications(
         this.props.addNotification,
         this.props.resetSync,
-        this.history
+        this.history,
+      );
+    }, 100);
+
+    setTimeout(async () => {
+      await this.props.sync();
+      await checkForUpdateNotification(
+        this.props.addNotification,
+        getIsOutdated,
+        getLatestVersion,
+        this.props.loadPrefs,
+        this.props.savePrefs,
       );
     }, 100);
 
@@ -294,7 +309,7 @@ class FinancesApp extends React.Component {
                   flexDirection: 'column',
                   overflow: 'hidden',
                   position: 'relative',
-                  width: '100%'
+                  width: '100%',
                 }}
               >
                 {!this.state.isMobile && (
@@ -305,7 +320,7 @@ class FinancesApp extends React.Component {
                       top: 0,
                       left: 0,
                       right: 0,
-                      zIndex: 1000
+                      zIndex: 1000,
                     }}
                   />
                 )}
@@ -314,13 +329,12 @@ class FinancesApp extends React.Component {
                     flex: 1,
                     display: 'flex',
                     overflow: 'auto',
-                    position: 'relative'
+                    position: 'relative',
                   }}
                 >
                   <Notifications />
                   <BankSyncStatus />
                   <StackedRoutes isMobile={this.state.isMobile} />
-                  {/*window.Actual.IS_DEV && <Debugger />*/}
                   <Modals history={this.history} />
                 </div>
                 {this.state.isMobile && (

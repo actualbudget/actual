@@ -37,7 +37,7 @@ export default function parse(qif, options) {
         break;
       case 'A':
         transaction.address = (transaction.address || []).concat(
-          line.substring(1)
+          line.substring(1),
         );
         break;
       case 'P':

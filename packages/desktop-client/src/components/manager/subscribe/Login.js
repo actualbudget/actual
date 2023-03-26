@@ -4,13 +4,9 @@ import { useDispatch } from 'react-redux';
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
-import {
-  View,
-  Text,
-  Button,
-  ButtonWithLoading
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+
+import { colors } from '../../../style';
+import { View, Text, Button, ButtonWithLoading } from '../../common';
 
 import { useBootstrapped, Title, Input } from './common';
 
@@ -29,7 +25,7 @@ export default function Login() {
       case 'network-failure':
         return 'Unable to contact the server';
       default:
-        return "Whoops, an error occurred on our side! We'll try to get it fixed soon.";
+        return `An unknown error occurred: ${error}`;
     }
   }
 
@@ -67,7 +63,7 @@ export default function Login() {
           style={{
             fontSize: 16,
             color: colors.n2,
-            lineHeight: 1.4
+            lineHeight: 1.4,
           }}
         >
           If you lost your password, you likely still have access to your server
@@ -80,7 +76,7 @@ export default function Login() {
               marginTop: 20,
               color: colors.r4,
               borderRadius: 4,
-              fontSize: 15
+              fontSize: 15,
             }}
           >
             {getErrorMessage(error)}
@@ -106,7 +102,7 @@ export default function Login() {
           style={{
             flexDirection: 'row',
             justifyContent: 'center',
-            marginTop: 15
+            marginTop: 15,
           }}
         >
           <Button

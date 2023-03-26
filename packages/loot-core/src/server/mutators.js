@@ -66,13 +66,13 @@ export async function runHandler(handler, args, { undoTag, name } = {}) {
 
 // These are useful for tests. Only use them in tests.
 export function enableGlobalMutations() {
-  if (global.__TESTING__) {
+  if (process.env.NODE_ENV === 'test') {
     globalMutationsEnabled = true;
   }
 }
 
 export function disableGlobalMutations() {
-  if (global.__TESTING__) {
+  if (process.env.NODE_ENV === 'test') {
     globalMutationsEnabled = false;
   }
 }
@@ -105,7 +105,7 @@ export function getMutatorContext() {
   if (currentContext == null) {
     captureBreadcrumb({
       category: 'server',
-      message: 'Recent methods: ' + _latestHandlerNames.join(', ')
+      message: 'Recent methods: ' + _latestHandlerNames.join(', '),
     });
     // captureException(new Error('getMutatorContext: mutator not running'));
 

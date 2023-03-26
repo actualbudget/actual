@@ -5,24 +5,24 @@ import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 export const TYPE_INFO = {
   date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
-    nullable: false
+    nullable: false,
   },
   id: {
     ops: ['is', 'contains', 'oneOf'],
-    nullable: true
+    nullable: true,
   },
   string: {
     ops: ['is', 'contains', 'oneOf'],
-    nullable: false
+    nullable: false,
   },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
-    nullable: false
+    nullable: false,
   },
   boolean: {
     ops: ['is'],
-    nullable: false
-  }
+    nullable: false,
+  },
 };
 
 export const FIELD_TYPES = new Map(
@@ -36,8 +36,8 @@ export const FIELD_TYPES = new Map(
     amountOutfow: 'number',
     category: 'id',
     account: 'id',
-    cleared: 'boolean'
-  })
+    cleared: 'boolean',
+  }),
 );
 
 export function mapField(field, opts) {
@@ -130,7 +130,7 @@ export function getFieldError(type) {
     case 'invalid-field':
       return 'Please choose a valid field for this type of rule';
     default:
-      return 'Internal error, sorry! Contact help@actualbudget.com';
+      return 'Internal error, sorry! Please get in touch https://actualbudget.github.io/docs/Contact/ for support';
   }
 }
 
@@ -145,13 +145,21 @@ export function parse(item) {
   switch (item.type) {
     case 'number': {
       let parsed = item.value;
-      if (item.field === 'amount' && item.op !== 'isbetween') {
+      if (
+        item.field === 'amount' &&
+        item.op !== 'isbetween' &&
+        parsed != null
+      ) {
         parsed = integerToAmount(parsed);
       }
       return { ...item, value: parsed };
     }
     case 'string': {
       let parsed = item.value == null ? '' : item.value;
+      return { ...item, value: parsed };
+    }
+    case 'boolean': {
+      let parsed = item.value;
       return { ...item, value: parsed };
     }
     default:
@@ -174,6 +182,10 @@ export function unparse({ error, inputKey, ...item }) {
       let unparsed = item.value == null ? '' : item.value;
       return { ...item, value: unparsed };
     }
+    case 'boolean': {
+      let unparsed = item.value == null ? false : item.value;
+      return { ...item, value: unparsed };
+    }
     default:
   }
 
@@ -187,7 +199,7 @@ export function makeValue(value, cond) {
         return {
           ...cond,
           error: null,
-          value: value ? currencyToAmount(value) || 0 : 0
+          value: value ? currencyToAmount(String(value)) || 0 : 0,
         };
       }
       break;

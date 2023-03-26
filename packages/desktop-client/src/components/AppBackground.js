@@ -2,11 +2,11 @@ import React from 'react';
 
 import { css } from 'glamor';
 
-import { View, Block } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import AnimatedLoading from 'loot-design/src/svg/AnimatedLoading';
+import AnimatedLoading from '../icons/AnimatedLoading';
+import { colors } from '../style';
 
 import Background from './Background';
+import { View, Block } from './common';
 
 function AppBackground({ initializing, loadingText }) {
   return (
@@ -23,7 +23,7 @@ function AppBackground({ initializing, loadingText }) {
             padding: 50,
             paddingTop: 200,
             color: colors.n1,
-            alignItems: 'center'
+            alignItems: 'center',
           })}
         >
           <Block style={{ marginBottom: 20, fontSize: 18 }}>

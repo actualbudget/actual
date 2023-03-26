@@ -1,5 +1,4 @@
 import initSqlJS from '@jlongster/sql.js';
-import * as perf from 'perf-deets';
 
 let SQL = null;
 
@@ -8,7 +7,7 @@ export async function init() {
   // we're returning a real one for correct semantics
   return new Promise((resolve, reject) => {
     initSqlJS({
-      locateFile: file => process.env.PUBLIC_URL + file
+      locateFile: file => process.env.PUBLIC_URL + file,
     }).then(
       sql => {
         SQL = sql;
@@ -16,7 +15,7 @@ export async function init() {
       },
       err => {
         reject(err);
-      }
+      },
     );
   });
 }
@@ -41,7 +40,6 @@ export function prepare(db, sql) {
 }
 
 export function runQuery(db, sql, params = [], fetchAll) {
-  perf.count('runQuery');
   if (params) {
     verifyParamTypes(sql, params);
   }
@@ -156,7 +154,7 @@ export async function openDatabase(pathOrBuffer) {
 
       let db = new SQL.Database(
         path.includes('/blocked') ? path : SQL.FS.readlink(path),
-        { filename: true }
+        { filename: true },
       );
       db.exec(`
       PRAGMA journal_mode=MEMORY;

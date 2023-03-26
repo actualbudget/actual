@@ -23,7 +23,7 @@ export function makeViews(schema, schemaConfig) {
     let { fields: fieldMappings = {}, ...tableViews } = views[table];
 
     let publicFields = Object.fromEntries(
-      Object.keys(schema[table]).map(name => [name, name])
+      Object.keys(schema[table]).map(name => [name, name]),
     );
     let internalFields = { ...publicFields, ...fieldMappings };
 

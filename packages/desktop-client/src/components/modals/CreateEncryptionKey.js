@@ -4,6 +4,8 @@ import { css } from 'glamor';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
+
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -13,14 +15,13 @@ import {
   P,
   ModalButtons,
   Input,
-  InitialFocus
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+  InitialFocus,
+} from '../common';
 
 export default function CreateEncryptionKey({
   modalProps,
   actions,
-  options = {}
+  options = {},
 }) {
   let [password, setPassword] = useState('');
   let [loading, setLoading] = useState(false);
@@ -77,7 +78,7 @@ export default function CreateEncryptionKey({
                 <ul {...css({ marginTop: 0, '& li': { marginBottom: 8 } })}>
                   <li>
                     <strong>Important:</strong> if you forget this password{' '}
-                    <em>and</em> you don't have any local copies of your data,
+                    <em>and</em> you don’t have any local copies of your data,
                     you will lose access to all your data. The data cannot be
                     decrypted without the password.
                   </li>
@@ -86,7 +87,7 @@ export default function CreateEncryptionKey({
                     generate a new key for each file you want to encrypt.
                   </li>
                   <li>
-                    If you've already downloaded your data on other devices, you
+                    If you’ve already downloaded your data on other devices, you
                     will need to reset them. Actual will automatically take you
                     through this process.
                   </li>
@@ -134,7 +135,7 @@ export default function CreateEncryptionKey({
                     color: colors.r4,
                     textAlign: 'center',
                     fontSize: 13,
-                    marginBottom: 3
+                    marginBottom: 3,
                   }}
                 >
                   {error}

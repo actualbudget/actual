@@ -5,7 +5,7 @@ const { unresolveName } = require('../util');
 const db = {
   runQuery: sql => {
     return Promise.resolve([{ 'sum(t.amount)': 1000 }]);
-  }
+  },
 };
 
 function makeScopes(vars) {
@@ -19,14 +19,14 @@ function makeScopes(vars) {
         return vars[name];
       }
 
-      throw new Error(`"${resolvedName} is not defined`);
+      throw new Error(`“${resolvedName}” is not defined`);
     },
 
     setVariable: (name, value) => {
       vars[name] = value;
     },
 
-    getAll: () => vars
+    getAll: () => vars,
   };
 }
 
@@ -49,7 +49,7 @@ test('vm basic', async () => {
     },
     firstValue: arr => {
       return arr[0]['sum(t.amount)'];
-    }
+    },
   });
 });
 

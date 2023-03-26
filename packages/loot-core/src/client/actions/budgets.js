@@ -1,10 +1,10 @@
 import { send } from '../../platform/client/fetch';
-import { getDownloadError } from '../../shared/errors';
-import constants from '../constants';
+import { getDownloadError, getSyncError } from '../../shared/errors';
+import * as constants from '../constants';
+
 import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
-import { startTutorialFirstTime } from './tutorial';
 
 export function updateStatusText(text) {
   return (dispatch, getState) => {
@@ -25,7 +25,7 @@ export function loadBudgets() {
 
     dispatch({
       type: constants.SET_BUDGETS,
-      budgets
+      budgets,
     });
   };
 }
@@ -36,7 +36,7 @@ export function loadRemoteFiles() {
 
     dispatch({
       type: constants.SET_REMOTE_FILES,
-      files
+      files,
     });
   };
 }
@@ -49,7 +49,7 @@ export function loadAllFiles() {
     dispatch({
       type: constants.SET_ALL_FILES,
       budgets,
-      remoteFiles: files
+      remoteFiles: files,
     });
 
     return getState().budgets.allFiles;
@@ -64,33 +64,23 @@ export function loadBudget(id, loadingText = '', options = {}) {
     let { error } = await send('load-budget', { id, ...options });
 
     if (error) {
+      let message = getSyncError(error, id);
       if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
         // confirm is not available on iOS
-        // eslint-disable-next-line
-        if (typeof confirm !== 'undefined') {
-          // eslint-disable-next-line
-          let showBackups = confirm(
-            'This budget cannot be loaded with this version of the app. ' +
-              'Make sure the app is up-to-date. Do you want to load a backup?'
+        if (typeof window.confirm !== 'undefined') {
+          let showBackups = window.confirm(
+            message +
+              ' Make sure the app is up-to-date. Do you want to load a backup?',
           );
 
           if (showBackups) {
             dispatch(pushModal('load-backup', { budgetId: id }));
           }
         } else {
-          alert(
-            'This budget cannot be loaded with this version of the app. ' +
-              'Make sure the app is up-to-date.'
-          );
+          alert(message + ' Make sure the app is up-to-date.');
         }
-      } else if (error === 'budget-not-found') {
-        alert(
-          'Budget file could not be found. If you changed something manually, please restart the app.'
-        );
       } else {
-        alert(
-          'Error loading budget. Please contact help@actualbudget.com for support.'
-        );
+        alert(message);
       }
 
       dispatch(setAppState({ loadingText: null }));
@@ -104,7 +94,6 @@ export function loadBudget(id, loadingText = '', options = {}) {
     const prefs = getState().prefs.local;
     dispatch(setAppState({ loadingText: null }));
     dispatch(setAppState({ maxMonths: prefs.maxMonths }));
-    dispatch(startTutorialFirstTime());
   };
 }
 
@@ -118,6 +107,9 @@ export function closeBudget() {
       dispatch(setAppState({ loadingText: 'Closing...' }));
       await send('close-budget');
       dispatch(setAppState({ loadingText: null }));
+      if (localStorage.getItem('SharedArrayBufferOverride')) {
+        window.location.reload();
+      }
     }
   };
 }
@@ -141,7 +133,9 @@ export function deleteBudget(id, cloudFileId) {
 export function createBudget({ testMode, demoMode } = {}) {
   return async (dispatch, getState) => {
     dispatch(
-      setAppState({ loadingText: testMode || demoMode ? 'Making demo...' : '' })
+      setAppState({
+        loadingText: testMode || demoMode ? 'Making demo...' : '',
+      }),
     );
 
     if (demoMode) {
@@ -154,7 +148,6 @@ export function createBudget({ testMode, demoMode } = {}) {
 
     await dispatch(loadAllFiles());
     await dispatch(loadPrefs());
-    dispatch(startTutorialFirstTime());
 
     // Set the loadingText to null after we've loaded the budget prefs
     // so that the existing manager page doesn't flash
@@ -172,7 +165,6 @@ export function importBudget(filepath, type) {
     dispatch(closeModal());
 
     await dispatch(loadPrefs());
-    dispatch(startTutorialFirstTime());
   };
 }
 
@@ -206,7 +198,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
 
     let { id, error } = await send('download-budget', {
       fileId: cloudFileId,
-      replace
+      replace,
     });
 
     if (error) {
@@ -216,16 +208,16 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
           cloudFileId,
           onSuccess: () => {
             dispatch(downloadBudget(cloudFileId, { replace }));
-          }
+          },
         };
 
         dispatch(pushModal('fix-encryption-key', opts));
         dispatch(setAppState({ loadingText: null }));
       } else if (error.reason === 'file-exists') {
         alert(
-          `A file with id "${error.meta.id}" already exists with the name "${error.meta.name}". ` +
+          `A file with id “${error.meta.id}” already exists with the name “${error.meta.name}.” ` +
             'This file will be replaced. This probably happened because files were manually ' +
-            'moved around outside of Actual.'
+            'moved around outside of Actual.',
         );
 
         return dispatch(downloadBudget(cloudFileId, { replace: true }));
@@ -238,7 +230,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
       await Promise.all([
         dispatch(loadGlobalPrefs()),
         dispatch(loadAllFiles()),
-        dispatch(loadBudget(id))
+        dispatch(loadBudget(id)),
       ]);
       dispatch(setAppState({ loadingText: null }));
     }
@@ -252,7 +244,7 @@ export function getYNAB4Imports() {
     let imports = await send('get-ynab4-files');
     dispatch({
       type: 'SET_AVAILABLE_IMPORTS',
-      imports
+      imports,
     });
     return imports;
   };

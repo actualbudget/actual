@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, ModalButtons } from 'loot-design/src/components/common';
+import { Button, ModalButtons } from '../common';
 
 function Navigation({
   nextTutorialStage,
@@ -9,7 +9,7 @@ function Navigation({
   showBack = true,
   showNext = true,
   leftContent,
-  disableNext
+  disableNext,
 }) {
   return (
     <ModalButtons leftContent={leftContent} style={{ marginTop: 20 }}>

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
+
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -12,14 +14,13 @@ import {
   ModalButtons,
   Input,
   InitialFocus,
-  ExternalLink
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+  ExternalLink,
+} from '../common';
 
 export default function FixEncryptionKey({
   modalProps,
   actions,
-  options = {}
+  options = {},
 }) {
   let { hasExistingKey, cloudFileId, onSuccess } = options;
 
@@ -35,7 +36,7 @@ export default function FixEncryptionKey({
 
       let { error } = await send('key-test', {
         password,
-        fileId: cloudFileId
+        fileId: cloudFileId,
       });
       if (error) {
         setError(getTestKeyError(error));
@@ -57,7 +58,7 @@ export default function FixEncryptionKey({
               fontSize: 25,
               fontWeight: 700,
               color: colors.n2,
-              margin: '20px 0'
+              margin: '20px 0',
             }}
           >
             {hasExistingKey
@@ -78,8 +79,8 @@ export default function FixEncryptionKey({
             </P>
           ) : (
             <P>
-              We don{"'"}t have a key that encrypts or decrypts this file. Enter
-              the password for this file to create the key for encryption.{' '}
+              We don’t have a key that encrypts or decrypts this file. Enter the
+              password for this file to create the key for encryption.{' '}
               <ExternalLink
                 asAnchor
                 href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
@@ -98,7 +99,7 @@ export default function FixEncryptionKey({
               style={{
                 marginTop: 15,
                 flexDirection: 'column',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <Text style={{ fontWeight: 600, marginBottom: 5 }}>Password</Text>{' '}
@@ -108,7 +109,7 @@ export default function FixEncryptionKey({
                     color: colors.r4,
                     textAlign: 'center',
                     fontSize: 13,
-                    marginBottom: 3
+                    marginBottom: 3,
                   }}
                 >
                   {error}

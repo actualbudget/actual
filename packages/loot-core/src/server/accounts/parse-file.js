@@ -3,6 +3,7 @@ import csv2json from 'csv-parse/lib/sync';
 import fs from '../../platform/server/fs';
 import { dayFromDate } from '../../shared/months';
 import { looselyParseAmount } from '../../shared/util';
+
 import qif2json from './qif2json';
 
 export function parseFile(filepath, options) {
@@ -26,7 +27,7 @@ export function parseFile(filepath, options) {
 
   errors.push({
     message: 'Invalid file type',
-    internal: ''
+    internal: '',
   });
   return { errors };
 }
@@ -41,14 +42,15 @@ async function parseCSV(filepath, options = {}) {
       columns: true,
       bom: true,
       delimiter: options.delimiter || ',',
+      // eslint-disable-next-line rulesdir/typography
       quote: '"',
       trim: true,
-      relax_column_count: true
+      relax_column_count: true,
     });
   } catch (err) {
     errors.push({
       message: 'Failed parsing: ' + err.message,
-      internal: err.message
+      internal: err.message,
     });
     return { errors, transactions: [] };
   }
@@ -65,8 +67,8 @@ async function parseQIF(filepath) {
     data = qif2json(contents);
   } catch (err) {
     errors.push({
-      message: "Failed parsing: doesn't look like a valid QIF file.",
-      internal: err.stack
+      message: 'Failed parsing: doesn’t look like a valid QIF file.',
+      internal: err.stack,
     });
     return { errors, transactions: [] };
   }
@@ -78,8 +80,8 @@ async function parseQIF(filepath) {
       date: trans.date,
       payee_name: trans.payee,
       imported_payee: trans.payee,
-      notes: trans.memo || null
-    }))
+      notes: trans.memo || null,
+    })),
   };
 }
 
@@ -90,7 +92,7 @@ async function parseOFX(filepath) {
   await initModule();
 
   let errors = [];
-  let contents = await fs.readFile(filepath);
+  let contents = await fs.readFile(filepath, 'binary');
 
   let data;
   try {
@@ -98,7 +100,7 @@ async function parseOFX(filepath) {
   } catch (err) {
     errors.push({
       message: 'Failed importing file',
-      internal: err.stack
+      internal: err.stack,
     });
     return { errors };
   }
@@ -111,7 +113,7 @@ async function parseOFX(filepath) {
       date: trans.date ? dayFromDate(trans.date * 1000) : null,
       payee_name: trans.name,
       imported_payee: trans.name,
-      notes: trans.memo || null
-    }))
+      notes: trans.memo || null,
+    })),
   };
 }

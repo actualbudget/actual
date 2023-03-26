@@ -10,4 +10,4 @@ export PORT=3001
 export REACT_APP_BACKEND_WORKER_HASH="dev"
 export REACT_APP_ACTUAL_VERSION="$VERSION"
 
-node scripts/start.js
+yarn start

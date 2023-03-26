@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Tooltip, Pointer, P } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { Tooltip, Pointer, P } from '../common';
 
 import { Title } from './common';
 import Navigation from './Navigation';
@@ -18,7 +18,7 @@ function BudgetSummary({ fromYNAB, targetRect, navigationProps }) {
         color: colors.n1,
         boxShadow: 'none',
         marginTop: 5,
-        fontSize: 14
+        fontSize: 14,
       }}
     >
       <Pointer
@@ -35,14 +35,14 @@ function BudgetSummary({ fromYNAB, targetRect, navigationProps }) {
 
         <P isLast={!fromYNAB}>
           This is a summary of what money you have to budget and how Actual
-          calculated it. It's your current income (including anything leftover
+          calculated it. It’s your current income (including anything leftover
           from last month) minus any overspending from last month and any
           already budgeted amount.
         </P>
 
         {fromYNAB && (
           <P isLast={true}>
-            Since you're coming from YNAB 4, an important distinction is that
+            Since you’re coming from YNAB 4, an important distinction is that
             money is always immediately available.
           </P>
         )}

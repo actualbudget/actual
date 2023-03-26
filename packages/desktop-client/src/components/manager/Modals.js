@@ -6,17 +6,17 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View } from 'loot-design/src/components/common';
-import BudgetList from 'loot-design/src/components/manager/BudgetList';
-import DeleteFile from 'loot-design/src/components/manager/DeleteFile';
-import Import from 'loot-design/src/components/manager/Import';
-import ImportActual from 'loot-design/src/components/manager/ImportActual';
-import ImportYNAB4 from 'loot-design/src/components/manager/ImportYNAB4';
-import ImportYNAB5 from 'loot-design/src/components/manager/ImportYNAB5';
-import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
 
+import { View } from '../common';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
+import LoadBackup from '../modals/LoadBackup';
+
+import DeleteFile from './DeleteFile';
+import Import from './Import';
+import ImportActual from './ImportActual';
+import ImportYNAB4 from './ImportYNAB4';
+import ImportYNAB5 from './ImportYNAB5';
 
 function Modals({
   modalStack,
@@ -25,30 +25,19 @@ function Modals({
   availableImports,
   globalPrefs,
   isLoggedIn,
-  actions
+  actions,
 }) {
   let stack = modalStack.map(({ name, options }, idx) => {
     const modalProps = {
-      onClose: actions.closeModal,
+      onClose: actions.popModal,
       onPush: actions.pushModal,
       onBack: actions.popModal,
       isCurrent: idx === modalStack.length - 1,
       isHidden,
-      stackIndex: idx
+      stackIndex: idx,
     };
 
     switch (name) {
-      case 'select-budget':
-        return (
-          <BudgetList
-            key={name}
-            modalProps={modalProps}
-            files={allFiles}
-            actions={actions}
-            isLoggedIn={isLoggedIn}
-            onDownload={cloudFileId => actions.downloadBudget(cloudFileId)}
-          />
-        );
       case 'delete-budget':
         return (
           <DeleteFile
@@ -86,7 +75,7 @@ function Modals({
             initialState={{ backups: [] }}
             didMount={async ({ setState }) => {
               setState({
-                backups: await send('backups-get', { id: options.budgetId })
+                backups: await send('backups-get', { id: options.budgetId }),
               });
             }}
           >
@@ -95,7 +84,7 @@ function Modals({
                 budgetId={options.budgetId}
                 modalProps={{
                   ...modalProps,
-                  onClose: actions.popModal
+                  onClose: actions.popModal,
                 }}
                 backupDisabled={true}
                 actions={actions}
@@ -139,7 +128,7 @@ export default connect(
     availableImports: state.budgets.availableImports,
     globalPrefs: state.prefs.global,
     allFiles: state.budgets.allFiles,
-    isLoggedIn: !!state.user.data
+    isLoggedIn: !!state.user.data,
   }),
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) })
+  dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
 )(Modals);

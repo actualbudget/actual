@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from 'react-redux';
 
 import * as d from 'date-fns';
@@ -8,27 +8,29 @@ import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { View, P } from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
+
+import { styles } from '../../style';
+import { View, P } from '../common';
 
 import Change from './Change';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
 import Header from './Header';
 import useReport from './useReport';
-import { fromDateRepr, useArgsMemo } from './util';
+import { fromDateRepr } from './util';
 
 function NetWorth({ accounts }) {
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 5)
+    monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
-  const data = useReport(
-    'net_worth',
-    useArgsMemo(netWorthSpreadsheet)(start, end, accounts)
+  const params = useMemo(
+    () => netWorthSpreadsheet(start, end, accounts),
+    [start, end, accounts],
   );
+  const data = useReport('net_worth', params);
 
   useEffect(() => {
     async function run() {
@@ -50,7 +52,7 @@ function NetWorth({ accounts }) {
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy')
+          pretty: monthUtils.format(month, 'MMMM, yyyy'),
         }))
         .reverse();
 
@@ -81,7 +83,7 @@ function NetWorth({ accounts }) {
         style={{
           backgroundColor: 'white',
           padding: '30px',
-          overflow: 'auto'
+          overflow: 'auto',
         }}
       >
         <View style={{ textAlign: 'right', paddingRight: 20, flexShrink: 0 }}>
@@ -101,8 +103,8 @@ function NetWorth({ accounts }) {
           </P>
           <P>
             Net worth shows the balance of all accounts over time, including all
-            of your investments. Your "net worth" is considered to be the amount
-            you'd have if you sold all your assets and paid off as much debt as
+            of your investments. Your “net worth” is considered to be the amount
+            you’d have if you sold all your assets and paid off as much debt as
             possible. If you hover over the graph, you can also see the amount
             of assets and debt individually.
           </P>
@@ -114,5 +116,5 @@ function NetWorth({ accounts }) {
 
 export default connect(
   state => ({ accounts: state.queries.accounts }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(NetWorth);

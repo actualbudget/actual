@@ -1,6 +1,7 @@
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
-import constants from '../constants';
+import * as constants from '../constants';
+
 import { syncAccounts } from './account';
 import { pushModal } from './modals';
 import { loadPrefs } from './prefs';
@@ -10,7 +11,7 @@ export function unregister() {
     const profile = await send('unregister');
     dispatch({
       type: constants.SET_PROFILE,
-      profile
+      profile,
     });
   };
 }
@@ -31,8 +32,8 @@ export function resetSync() {
             onSuccess: () => {
               // TODO: There won't be a loading indicator for this
               dispatch(resetSync());
-            }
-          })
+            },
+          }),
         );
       } else if (error.reason === 'encrypt-failure') {
         dispatch(pushModal('create-encryption-key', { recreate: true }));

@@ -27,7 +27,6 @@ function coerceError(error) {
 function init(serverChannel, handlers) {
   getGlobalObject().__globalServerChannel = serverChannel;
 
-  // eslint-disable-next-line
   serverChannel.addEventListener(
     'message',
     e => {
@@ -52,7 +51,7 @@ function init(serverChannel, handlers) {
               id,
               result,
               mutated: isMutating(handlers[name]),
-              undoTag
+              undoTag,
             });
           },
           nativeError => {
@@ -66,7 +65,7 @@ function init(serverChannel, handlers) {
               serverChannel.postMessage({
                 type: 'reply',
                 id,
-                result: { error, data: null }
+                result: { error, data: null },
               });
             } else {
               serverChannel.postMessage({ type: 'error', id });
@@ -81,7 +80,7 @@ function init(serverChannel, handlers) {
               // Notify the frontend that something bad happend
               send('server-error');
             }
-          }
+          },
         );
       } else {
         console.warn('Unknown method: ' + name);
@@ -89,11 +88,11 @@ function init(serverChannel, handlers) {
           type: 'reply',
           id,
           result: null,
-          error: { type: 'APIError', message: 'Unknown method: ' + name }
+          error: { type: 'APIError', message: 'Unknown method: ' + name },
         });
       }
     },
-    false
+    false,
   );
 
   serverChannel.postMessage({ type: 'connect' });
@@ -104,7 +103,7 @@ function send(name, args) {
     getGlobalObject().__globalServerChannel.postMessage({
       type: 'push',
       name,
-      args
+      args,
     });
   }
 }

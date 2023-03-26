@@ -1,10 +1,10 @@
 import { send } from '../../platform/client/fetch';
-import constants from '../constants';
+import * as constants from '../constants';
 
 export function setAppState(state) {
   return {
     type: constants.SET_APP_STATE,
-    state
+    state,
   };
 }
 
@@ -18,7 +18,7 @@ export function updateApp() {
 export function setLastUndoState(undoState) {
   return {
     type: constants.SET_LAST_UNDO_STATE,
-    undoState
+    undoState,
   };
 }
 

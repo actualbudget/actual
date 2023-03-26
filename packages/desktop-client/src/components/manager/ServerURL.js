@@ -1,8 +1,7 @@
 import React from 'react';
 
-import { View, Text, AnchorLink } from 'loot-design/src/components/common';
-
-import { useServerURL } from '../../hooks/useServerURL';
+import { View, Text, AnchorLink } from '../common';
+import { useServerURL } from '../ServerContext';
 
 export default function ServerURL() {
   const url = useServerURL();
@@ -17,7 +16,7 @@ export default function ServerURL() {
         justifyContent: 'center',
         flexDirection: 'row',
         marginBottom: 15,
-        zIndex: 5000
+        zIndex: 5000,
       }}
     >
       <Text>

@@ -4,28 +4,19 @@ import { useSelector } from 'react-redux';
 import {
   format as formatDate,
   parseISO,
-  isValid as isDateValid
+  isValid as isDateValid,
 } from 'date-fns';
 
 import {
   getAccountsById,
-  getCategoriesById
+  getCategoriesById,
 } from 'loot-core/src/client/reducers/queries';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import {
-  Table,
-  Row,
-  Field,
-  Cell,
-  SelectCell
-} from 'loot-design/src/components/table';
-import {
-  useSelectedItems,
-  useSelectedDispatch
-} from 'loot-design/src/components/useSelected';
-import { styles } from 'loot-design/src/style';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 
+import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
+import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
+import { styles } from '../../style';
+import { Table, Row, Field, Cell, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {
@@ -37,7 +28,7 @@ function serializeTransaction(transaction, dateFormat) {
 
   return {
     ...transaction,
-    date: date ? formatDate(parseISO(date), dateFormat) : null
+    date: date ? formatDate(parseISO(date), dateFormat) : null,
   };
 }
 
@@ -47,7 +38,7 @@ const TransactionRow = React.memo(function TransactionRow({
   payees,
   categories,
   accounts,
-  selected
+  selected,
 }) {
   // TODO: Convert these to use fetched queries
   let c = getCategoriesById(categories)[transaction.category];
@@ -88,7 +79,7 @@ const TransactionRow = React.memo(function TransactionRow({
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: 'flex-start'
+                  justifyContent: 'flex-start',
                 }}
               >
                 {() => (
@@ -98,7 +89,7 @@ const TransactionRow = React.memo(function TransactionRow({
                         style={{
                           width: 13,
                           height: 13,
-                          margin: '0 5px'
+                          margin: '0 5px',
                         }}
                       />
                     )}
@@ -146,15 +137,16 @@ const TransactionRow = React.memo(function TransactionRow({
 export default function SimpleTransactionsTable({
   transactions,
   schedules,
+  renderEmpty,
   fields = ['date', 'payee', 'amount'],
-  style
+  style,
 }) {
   let { payees, categories, accounts, dateFormat } = useSelector(state => {
     return {
       payees: state.queries.payees,
       accounts: state.queries.accounts,
       categories: state.queries.categories.grouped,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy'
+      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
   let selectedItems = useSelectedItems();
@@ -178,13 +170,14 @@ export default function SimpleTransactionsTable({
         />
       );
     },
-    [payees, categories, memoFields, selectedItems]
+    [payees, categories, memoFields, selectedItems],
   );
 
   return (
     <Table
       style={style}
       items={serializedTransactions}
+      renderEmpty={renderEmpty}
       headers={
         <>
           <SelectCell

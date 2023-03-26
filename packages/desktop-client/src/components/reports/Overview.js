@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect } from 'react-redux';
 
 import { bindActionCreators } from 'redux';
@@ -7,8 +7,9 @@ import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
 import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { View, Block, AnchorLink } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+
+import { colors, styles } from '../../style';
+import { View, Block, AnchorLink } from '../common';
 
 import Change from './Change';
 import theme from './chart-theme';
@@ -19,7 +20,6 @@ import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
-import { useArgsMemo } from './util';
 
 function Card({ flex, to, style, children }) {
   const containerProps = { flex, margin: 15 };
@@ -34,11 +34,11 @@ function Card({ flex, to, style, children }) {
           boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
           transition: 'box-shadow .25s',
           ':hover': to && {
-            boxShadow: '0 4px 6px rgba(0, 0, 0, .15)'
-          }
+            boxShadow: '0 4px 6px rgba(0, 0, 0, .15)',
+          },
         },
         to ? null : containerProps,
-        style
+        style,
       ]}
     >
       {children}
@@ -63,10 +63,11 @@ function NetWorthCard({ accounts }) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
 
-  const data = useReport(
-    'net_worth',
-    useArgsMemo(netWorthSpreadsheet)(start, end, accounts)
+  const params = useMemo(
+    () => netWorthSpreadsheet(start, end, accounts),
+    [start, end, accounts],
   );
+  const data = useReport('net_worth', params);
 
   if (!data) {
     return null;
@@ -79,6 +80,7 @@ function NetWorthCard({ accounts }) {
           <View style={{ flex: 1 }}>
             <Block
               style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              role="heading"
             >
               Net Worth
             </Block>
@@ -113,10 +115,8 @@ function CashFlowCard() {
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
 
-  const data = useReport(
-    'cash_flow_simple',
-    useArgsMemo(simpleCashFlow)(start, end)
-  );
+  const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
+  const data = useReport('cash_flow_simple', params);
   if (!data) {
     return null;
   }
@@ -132,6 +132,7 @@ function CashFlowCard() {
           <View style={{ flex: 1 }}>
             <Block
               style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              role="heading"
             >
               Cash Flow
             </Block>
@@ -154,7 +155,7 @@ function CashFlowCard() {
               theme={theme}
               domain={{
                 x: [0, 100],
-                y: [0, Math.max(income, expense, 100)]
+                y: [0, Math.max(income, expense, 100)],
               }}
               containerComponent={
                 <VictoryVoronoiContainer voronoiDimension="x" />
@@ -167,7 +168,7 @@ function CashFlowCard() {
                   light={true}
                   forceActive={true}
                   style={{
-                    padding: 0
+                    padding: 0,
                   }}
                 />
               }
@@ -175,7 +176,7 @@ function CashFlowCard() {
                 top: 0,
                 bottom: 0,
                 left: 0,
-                right: 0
+                right: 0,
               }}
             >
               <VictoryBar
@@ -190,8 +191,8 @@ function CashFlowCard() {
                         <div>{integerToCurrency(income)}</div>
                       </div>
                     ),
-                    labelPosition: 'left'
-                  }
+                    labelPosition: 'left',
+                  },
                 ]}
                 labels={d => d.premadeLabel}
               />
@@ -208,8 +209,8 @@ function CashFlowCard() {
                       </div>
                     ),
                     labelPosition: 'right',
-                    fill: theme.colors.red
-                  }
+                    fill: theme.colors.red,
+                  },
                 ]}
                 labels={d => d.premadeLabel}
               />
@@ -226,13 +227,13 @@ function Overview({ accounts }) {
     <View
       style={[
         styles.page,
-        { paddingLeft: 40, paddingRight: 40, minWidth: 700 }
+        { paddingLeft: 40, paddingRight: 40, minWidth: 700 },
       ]}
     >
       <View
         style={{
           flexDirection: 'row',
-          flex: '0 0 auto'
+          flex: '0 0 auto',
         }}
       >
         <NetWorthCard accounts={accounts} />
@@ -242,7 +243,7 @@ function Overview({ accounts }) {
       <View
         style={{
           flex: '0 0 auto',
-          flexDirection: 'row'
+          flexDirection: 'row',
         }}
       >
         <Card
@@ -251,9 +252,9 @@ function Overview({ accounts }) {
               color: '#a0a0a0',
               justifyContent: 'center',
               alignItems: 'center',
-              width: 200
+              width: 200,
             },
-            styles.mediumText
+            styles.mediumText,
           ]}
         >
           More reports
@@ -266,5 +267,5 @@ function Overview({ accounts }) {
 
 export default connect(
   state => ({ accounts: state.queries.accounts }),
-  dispatch => bindActionCreators(actions, dispatch)
+  dispatch => bindActionCreators(actions, dispatch),
 )(Overview);

@@ -7,20 +7,16 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
-import Platform from 'loot-core/src/client/platform';
+import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
-import {
-  Button,
-  Input,
-  InitialFocus,
-  Text,
-  Tooltip,
-  Menu
-} from 'loot-design/src/components/common';
-import { Sidebar } from 'loot-design/src/components/sidebar';
-import { styles, colors } from 'loot-design/src/style';
-import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
+
+import useFeatureFlag from '../hooks/useFeatureFlag';
+import ExpandArrow from '../icons/v0/ExpandArrow';
+import { styles, colors } from '../style';
+
+import { Button, Input, InitialFocus, Text, Tooltip, Menu } from './common';
+import { Sidebar } from './sidebar';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
@@ -49,9 +45,10 @@ function EditableBudgetName({ prefs, savePrefs }) {
   }
 
   let items = [
-    { name: 'rename', text: 'Rename Budget' },
+    { name: 'rename', text: 'Rename budget' },
+    { name: 'settings', text: 'Settings' },
     ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
-    { name: 'close', text: 'Close File' }
+    { name: 'close', text: 'Close file' },
   ];
 
   if (editing) {
@@ -61,14 +58,14 @@ function EditableBudgetName({ prefs, savePrefs }) {
           style={{
             width: 160,
             fontSize: 16,
-            fontWeight: 500
+            fontWeight: 500,
           }}
           defaultValue={prefs.budgetName}
           onEnter={async e => {
             const newBudgetName = e.target.value;
             if (newBudgetName.trim() !== '') {
               await savePrefs({
-                budgetName: e.target.value
+                budgetName: e.target.value,
               });
               setEditing(false);
             }
@@ -86,7 +83,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,
-          flex: '0 auto'
+          flex: '0 auto',
         }}
         onClick={() => setMenuOpen(true)}
       >
@@ -121,8 +118,10 @@ function SidebarWithData({
   floatingSidebar,
   savePrefs,
   saveGlobalPrefs,
-  getAccounts
+  getAccounts,
 }) {
+  const syncAccount = useFeatureFlag('syncAccount');
+
   useEffect(() => void getAccounts(), [getAccounts]);
 
   async function onReorder(id, dropPos, targetId) {
@@ -149,14 +148,12 @@ function SidebarWithData({
       onFloat={() => saveGlobalPrefs({ floatingSidebar: !floatingSidebar })}
       onReorder={onReorder}
       onAddAccount={() =>
-        replaceModal(
-          prefs['flags.syncAccount'] ? 'add-account' : 'add-local-account'
-        )
+        replaceModal(syncAccount ? 'add-account' : 'add-local-account')
       }
       showClosedAccounts={prefs['ui.showClosedAccounts']}
       onToggleClosedAccounts={() =>
         savePrefs({
-          'ui.showClosedAccounts': !prefs['ui.showClosedAccounts']
+          'ui.showClosedAccounts': !prefs['ui.showClosedAccounts'],
         })
       }
       style={[{ flex: 1 }, styles.darkScrollbar]}
@@ -171,8 +168,8 @@ export default withRouter(
       failedAccounts: state.account.failedAccounts,
       updatedAccounts: state.queries.updatedAccounts,
       prefs: state.prefs.local,
-      floatingSidebar: state.prefs.global.floatingSidebar
+      floatingSidebar: state.prefs.global.floatingSidebar,
     }),
-    dispatch => bindActionCreators(actions, dispatch)
-  )(SidebarWithData)
+    dispatch => bindActionCreators(actions, dispatch),
+  )(SidebarWithData),
 );

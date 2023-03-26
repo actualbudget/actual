@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { View, Button, Tooltip } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import ExclamationOutline from 'loot-design/src/svg/v1/ExclamationOutline';
 
-import { reauthorizeBank } from '../../plaid';
+import ExclamationOutline from '../../icons/v1/ExclamationOutline';
+import { authorizeBank } from '../../nordigen';
+import { colors } from '../../style';
+import { View, Button, Tooltip } from '../common';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
@@ -28,21 +28,25 @@ function getErrorMessage(type, code) {
       }
       break;
 
-    case 'API_ERROR':
-      switch (code.toUpperCase()) {
-        case 'PLANNED_MAINTENANCE':
-          return 'Our servers are currently undergoing maintenance and will be available again soon.';
-        default:
-      }
-      break;
-
     case 'RATE_LIMIT_EXCEEDED':
       return 'Rate limit exceeded for this item. Please try again later.';
 
     default:
   }
 
-  return 'An internal error occurred. Try to login again, or contact help@actualbudget.com for support.';
+  return (
+    <>
+      An internal error occurred. Try to login again, or get{' '}
+      <a
+        href="https://actualbudget.github.io/docs/Contact/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        in touch
+      </a>{' '}
+      for support.
+    </>
+  );
 }
 
 function AccountSyncCheck({
@@ -55,8 +59,9 @@ function AccountSyncCheck({
   pushModal,
   closeModal,
   getAccounts,
-  addNotification
+  addNotification,
 }) {
+  let [open, setOpen] = useState(false);
   if (!failedAccounts) {
     return null;
   }
@@ -65,8 +70,6 @@ function AccountSyncCheck({
   if (!error) {
     return null;
   }
-
-  let [open, setOpen] = useState(false);
 
   let account = accounts.find(account => account.id === id);
   let { type, code } = error;
@@ -77,21 +80,7 @@ function AccountSyncCheck({
   function reauth() {
     setOpen(false);
 
-    let modalOpened = reauthorizeBank(pushModal, account.bankId, () => {
-      closeModal();
-
-      // Re-sync accounts. If there are multiple failed account, that
-      // means all accounts were synced to resync all of them.
-      // Multiple accounts can be tied to the same bank id.
-      syncAndDownload(failedAccounts.size > 1 ? null : account.id);
-    });
-
-    if (!modalOpened) {
-      addNotification({
-        type: 'error',
-        message: 'Unable to process this item, sorry!'
-      });
-    }
+    authorizeBank(pushModal, { upgradingAccountId: account.account_id });
   }
 
   async function unlink() {
@@ -109,7 +98,7 @@ function AccountSyncCheck({
           color: colors.r5,
           backgroundColor: colors.r10,
           padding: '4px 8px',
-          borderRadius: 4
+          borderRadius: 4,
         }}
         onClick={() => setOpen(true)}
       >
@@ -118,10 +107,10 @@ function AccountSyncCheck({
             width: 14,
             height: 14,
             marginRight: 5,
-            color: 'currentColor'
+            color: 'currentColor',
           }}
         />{' '}
-        This account is experiencing connection problems. Let{"'"}s fix it.
+        This account is experiencing connection problems. Let’s fix it.
       </Button>
 
       {open && (
@@ -159,7 +148,7 @@ function AccountSyncCheck({
 export default connect(
   state => ({
     accounts: state.queries.accounts,
-    failedAccounts: state.account.failedAccounts
+    failedAccounts: state.account.failedAccounts,
   }),
-  actions
+  actions,
 )(AccountSyncCheck);

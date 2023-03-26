@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { View } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { View } from '../common';
 
 export const ROW_HEIGHT = 50;
 
@@ -17,9 +17,9 @@ export const ListItem = ({ children, style, ...props }) => {
           alignItems: 'center',
           paddingLeft: 10,
           paddingRight: 10,
-          zIndex: 1
+          zIndex: 1,
         },
-        style
+        style,
       ]}
       {...props}
     >

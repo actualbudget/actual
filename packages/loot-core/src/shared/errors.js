@@ -28,6 +28,7 @@ export function getDownloadError({ reason, meta, fileName }) {
     case 'network':
     case 'download-failure':
       return 'Downloading the file failed. Check your network connection.';
+    case 'not-zip-file':
     case 'invalid-zip-file':
     case 'invalid-meta-file':
       return 'Downloaded file is invalid, sorry! Contact help@actualbudget.com for support.';
@@ -61,7 +62,7 @@ export function getCreateKeyError(error) {
 export function getTestKeyError({ reason }) {
   switch (reason) {
     case 'network':
-      return 'Unable to connect to the server. We need to access our server to get some information about your keys.';
+      return 'Unable to connect to the server. We need to access the server to get some information about your keys.';
     case 'old-key-style':
       return (
         'This file is encrypted with an old unsupported key style. Recreate the key ' +
@@ -85,5 +86,15 @@ export function getSubscribeError({ reason }) {
       return 'Invalid email';
     default:
       return 'An error occurred. Please try again later.';
+  }
+}
+
+export function getSyncError(error, id) {
+  if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
+    return 'This budget cannot be loaded with this version of the app.';
+  } else if (error === 'budget-not-found') {
+    return `Budget “${id}” not found. Check the id of your budget in the Advanced section of the settings page.`;
+  } else {
+    return `We had an unknown problem opening “${id}”.`;
   }
 }

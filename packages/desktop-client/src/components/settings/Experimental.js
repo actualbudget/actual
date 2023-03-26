@@ -1,19 +1,17 @@
 import React from 'react';
 
-import { Link, Text, View } from 'loot-design/src/components/common';
-import { Checkbox } from 'loot-design/src/components/forms';
-import { colors } from 'loot-design/src/style';
+import { useAllFeatureFlags } from '../../hooks/useFeatureFlag';
+import { colors } from '../../style';
+import { Link, Text, View } from '../common';
+import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
 
 export default function ExperimentalFeatures({ prefs, savePrefs }) {
   let [expanded, setExpanded] = React.useState(false);
-  let flags = Object.fromEntries(
-    Object.entries(prefs)
-      .filter(([key]) => key.startsWith('flags.'))
-      .map(([key, value]) => [key.replace('flags.', ''), value])
-  );
+  const flags = useAllFeatureFlags();
   let disabled = prefs.budgetType === 'report' && flags.reportBudget;
+
   return (
     <Setting
       primaryAction={
@@ -22,7 +20,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             <label
               style={{
                 display: 'flex',
-                color: disabled ? colors.n5 : 'inherit'
+                color: disabled ? colors.n5 : 'inherit',
               }}
             >
               <Checkbox
@@ -34,7 +32,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                 disabled={disabled}
               />{' '}
               <View>
-                Enable budget mode toggle
+                Budget mode toggle
                 {disabled && (
                   <Text style={{ color: colors.r3, fontWeight: 500 }}>
                     Switch to a rollover budget before turning off this feature
@@ -45,13 +43,37 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
 
             <label style={{ display: 'flex' }}>
               <Checkbox
-                id="report-budget-flag"
+                id="sync-account-flag"
                 checked={flags.syncAccount}
                 onChange={() => {
                   savePrefs({ 'flags.syncAccount': !flags.syncAccount });
                 }}
               />{' '}
-              <View>Enable account syncing</View>
+              <View>Account syncing via Nordigen</View>
+            </label>
+            <label style={{ display: 'flex' }}>
+              <Checkbox
+                id="goal-templates-flag"
+                checked={flags.goalTemplatesEnabled}
+                onChange={() => {
+                  savePrefs({
+                    'flags.goalTemplatesEnabled': !flags.goalTemplatesEnabled,
+                  });
+                }}
+              />{' '}
+              <View>Goal templates</View>
+            </label>
+            <label style={{ display: 'flex' }}>
+              <Checkbox
+                id="new-autocomplete-flag"
+                checked={flags.newAutocomplete}
+                onChange={() => {
+                  savePrefs({
+                    'flags.newAutocomplete': !flags.newAutocomplete,
+                  });
+                }}
+              />{' '}
+              <View>New autocomplete component</View>
             </label>
           </View>
         ) : (
@@ -60,7 +82,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             style={{
               flexShrink: 0,
               alignSelf: 'flex-start',
-              color: colors.p4
+              color: colors.p4,
             }}
           >
             I understand the risks, show experimental features

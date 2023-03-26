@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Tooltip, Pointer, P } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { Tooltip, Pointer, P } from '../common';
 
 import { Title } from './common';
 import Navigation from './Navigation';
@@ -17,7 +17,7 @@ function BudgetInitial({ targetRect, navigationProps }) {
         backgroundColor: 'transparent',
         boxShadow: 'none',
         transform: 'translateX(-5px)',
-        fontSize: 14
+        fontSize: 14,
       }}
     >
       <Pointer
@@ -31,11 +31,11 @@ function BudgetInitial({ targetRect, navigationProps }) {
 
         <P>
           As money comes in, you put it in categories. As money is spent, you
-          can see each categories' balance.
+          can see each categories’ balance.
         </P>
 
         <P isLast={true}>
-          Don't overthink categories. If you haven't budgeted before, start with
+          Don’t overthink categories. If you haven’t budgeted before, start with
           just a few.
         </P>
         <Navigation {...navigationProps} />

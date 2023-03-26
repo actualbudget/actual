@@ -5,7 +5,7 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
-async function getSheetValue(sheetName, cell) {
+export async function getSheetValue(sheetName, cell) {
   const node = await sheet.getCell(sheetName, cell);
   return safeNumber(typeof node.value === 'number' ? node.value : 0);
 }
@@ -40,7 +40,7 @@ function getBudgetData(table, month) {
     LEFT JOIN ${table} b ON b.category = c.id
     WHERE c.tombstone = 0 AND b.month = ?
   `,
-    [month]
+    [month],
   );
 }
 
@@ -61,7 +61,7 @@ export function getBudget({ category, month }) {
   let table = getBudgetTable();
   let existing = db.firstSync(
     `SELECT * FROM ${table} WHERE month = ? AND category = ?`,
-    [dbMonth(month), category]
+    [dbMonth(month), category],
   );
   return existing ? existing.amount || 0 : 0;
 }
@@ -72,7 +72,7 @@ export function setBudget({ category, month, amount }) {
 
   let existing = db.firstSync(
     `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
-    [dbMonth(month), category]
+    [dbMonth(month), category],
   );
   if (existing) {
     return db.update(table, { id: existing.id, amount });
@@ -81,19 +81,19 @@ export function setBudget({ category, month, amount }) {
     id: `${dbMonth(month)}-${category}`,
     month: dbMonth(month),
     category,
-    amount
+    amount,
   });
 }
 
 export function setBuffer(month, amount) {
   let existing = db.firstSync(
     `SELECT id FROM zero_budget_months WHERE id = ?`,
-    [month]
+    [month],
   );
   if (existing) {
     return db.update('zero_budget_months', {
       id: existing.id,
-      buffered: amount
+      buffered: amount,
     });
   }
   return db.insert('zero_budget_months', { id: month, buffered: amount });
@@ -102,7 +102,7 @@ export function setBuffer(month, amount) {
 function setCarryover(table, category, month, flag) {
   let existing = db.firstSync(
     `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
-    [month, category]
+    [month, category],
   );
   if (existing) {
     return db.update(table, { id: existing.id, carryover: flag ? 1 : 0 });
@@ -111,7 +111,7 @@ function setCarryover(table, category, month, flag) {
     id: `${month}-${category}`,
     month,
     category,
-    carryover: flag ? 1 : 0
+    carryover: flag ? 1 : 0,
   });
 }
 
@@ -130,7 +130,7 @@ export async function copyPreviousMonth({ month }) {
       setBudget({
         category: prevBudget.category,
         month,
-        amount: prevBudget.amount
+        amount: prevBudget.amount,
       });
     });
   });
@@ -138,7 +138,7 @@ export async function copyPreviousMonth({ month }) {
 
 export async function setZero({ month }) {
   let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0'
+    'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
   await batchMessages(() => {
@@ -153,7 +153,7 @@ export async function setZero({ month }) {
 
 export async function set3MonthAvg({ month }) {
   let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0'
+    'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
   let prevMonth1 = monthUtils.prevMonth(month);
@@ -168,15 +168,15 @@ export async function set3MonthAvg({ month }) {
 
       let spent1 = await getSheetValue(
         monthUtils.sheetForMonth(prevMonth1),
-        'sum-amount-' + cat.id
+        'sum-amount-' + cat.id,
       );
       let spent2 = await getSheetValue(
         monthUtils.sheetForMonth(prevMonth2),
-        'sum-amount-' + cat.id
+        'sum-amount-' + cat.id,
       );
       let spent3 = await getSheetValue(
         monthUtils.sheetForMonth(prevMonth3),
-        'sum-amount-' + cat.id
+        'sum-amount-' + cat.id,
       );
 
       const avg = Math.round((spent1 + spent2 + spent3) / 3);
@@ -188,7 +188,7 @@ export async function set3MonthAvg({ month }) {
 export async function holdForNextMonth({ month, amount }) {
   let row = await db.first(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
-    [month]
+    [month],
   );
 
   let sheetName = monthUtils.sheetForMonth(month);
@@ -198,7 +198,7 @@ export async function holdForNextMonth({ month, amount }) {
     let bufferedAmount = calcBufferedAmount(
       toBudget,
       (row && row.buffered) || 0,
-      amount
+      amount,
     );
 
     await setBuffer(month, bufferedAmount);
@@ -217,7 +217,7 @@ export async function coverOverspending({ month, to, from }) {
   let leftover = await getSheetValue(sheetName, 'leftover-' + to);
   let leftoverFrom = await getSheetValue(
     sheetName,
-    from === 'to-be-budgeted' ? 'to-budget' : 'leftover-' + from
+    from === 'to-be-budgeted' ? 'to-budget' : 'leftover-' + from,
   );
 
   if (leftover >= 0 || leftoverFrom <= 0) {
@@ -232,7 +232,7 @@ export async function coverOverspending({ month, to, from }) {
     await setBudget({
       category: from,
       month,
-      amount: fromBudgeted - amountCovered
+      amount: fromBudgeted - amountCovered,
     });
   }
 

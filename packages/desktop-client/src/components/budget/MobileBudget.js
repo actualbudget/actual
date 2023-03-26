@@ -1,21 +1,22 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   addCategory,
   moveCategory,
-  moveCategoryGroup
+  moveCategoryGroup,
 } from 'loot-core/src/shared/categories.js';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { View } from 'loot-design/src/components/common';
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
-import { colors } from 'loot-design/src/style';
-import AnimatedLoading from 'loot-design/src/svg/AnimatedLoading';
-import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
+import AnimatedLoading from '../../icons/AnimatedLoading';
+import { colors } from '../../style';
+import { withThemeColor } from '../../util/withThemeColor';
+import { View } from '../common';
 import SyncRefresh from '../SyncRefresh';
+
 import { BudgetTable } from './MobileBudgetTable';
 
 class Budget extends React.Component {
@@ -30,7 +31,7 @@ class Budget extends React.Component {
       currentMonth: currentMonth,
       initialized: false,
       editMode: false,
-      categoryGroups: null
+      categoryGroups: null,
     };
   }
 
@@ -111,10 +112,10 @@ class Budget extends React.Component {
             name,
             cat_group: groupId,
             is_income: 0,
-            id
-          })
+            id,
+          }),
         });
-      }
+      },
     });
   };
 
@@ -128,7 +129,7 @@ class Budget extends React.Component {
       let { id: catId, position } = aroundCategory;
 
       let group = categoryGroups.find(group =>
-        group.categories.find(cat => cat.id === catId)
+        group.categories.find(cat => cat.id === catId),
       );
 
       if (position === 'bottom') {
@@ -144,7 +145,7 @@ class Budget extends React.Component {
     this.props.moveCategory(id, groupId, targetId);
 
     this.setState({
-      categoryGroups: moveCategory(categoryGroups, id, groupId, targetId)
+      categoryGroups: moveCategory(categoryGroups, id, groupId, targetId),
     });
   };
 
@@ -160,7 +161,7 @@ class Budget extends React.Component {
     this.props.moveCategoryGroup(id, targetId);
 
     this.setState({
-      categoryGroups: moveCategoryGroup(categoryGroups, id, targetId)
+      categoryGroups: moveCategoryGroup(categoryGroups, id, targetId),
     });
   };
 
@@ -191,18 +192,18 @@ class Budget extends React.Component {
 
     let options = [
       'Edit Categories',
-      "Copy last month's budget",
+      'Copy last month’s budget',
       'Set budgets to zero',
       'Set budgets to 3 month average',
       budgetType === 'report' && 'Apply to all future budgets',
-      'Cancel'
+      'Cancel',
     ].filter(Boolean);
 
     this.props.showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex: options.length - 1,
-        title: 'Actions'
+        title: 'Actions',
       },
       idx => {
         switch (idx) {
@@ -225,7 +226,7 @@ class Budget extends React.Component {
             break;
           default:
         }
-      }
+      },
     );
   };
 
@@ -237,9 +238,10 @@ class Budget extends React.Component {
       prefs,
       budgetType,
       navigation,
-      applyBudgetAction
+      applyBudgetAction,
     } = this.props;
     let numberFormat = prefs.numberFormat || 'comma-dot';
+    let hideFraction = prefs.hideFraction || false;
 
     if (!categoryGroups || !initialized) {
       return (
@@ -249,7 +251,7 @@ class Budget extends React.Component {
             backgroundColor: 'white',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: 25
+            marginBottom: 25,
           }}
         >
           <AnimatedLoading width={25} height={25} />
@@ -263,7 +265,7 @@ class Budget extends React.Component {
           <BudgetTable
             // This key forces the whole table rerender when the number
             // format changes
-            key={numberFormat}
+            key={numberFormat + hideFraction}
             categories={categories}
             categoryGroups={categoryGroups}
             type={budgetType}
@@ -291,7 +293,7 @@ class Budget extends React.Component {
 }
 
 function BudgetWrapper(props) {
-  let spreadsheet = useContext(SpreadsheetContext);
+  let spreadsheet = useSpreadsheet();
   return <Budget {...props} spreadsheet={spreadsheet} />;
 }
 
@@ -301,7 +303,7 @@ export default connect(
     categories: state.queries.categories.list,
     budgetType: state.prefs.local.budgetType || 'rollover',
     prefs: state.prefs.local,
-    initialBudgetMonth: state.app.budgetMonth
+    initialBudgetMonth: state.app.budgetMonth,
   }),
-  actions
+  actions,
 )(withThemeColor(colors.p5)(BudgetWrapper));

@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { applyChanges } from 'loot-core/src/shared/util';
-import { ManagePayees } from 'loot-design/src/components/payees';
+
+import { ManagePayees } from '.';
 
 function ManagePayeesWithData({
   modalProps,
@@ -15,7 +16,7 @@ function ManagePayeesWithData({
   initiallyLoadPayees,
   getPayees,
   setLastUndoState,
-  pushModal
+  pushModal,
 }) {
   let [payees, setPayees] = useState(initialPayees);
   let [ruleCounts, setRuleCounts] = useState({ value: new Map() });
@@ -97,17 +98,17 @@ function ManagePayeesWithData({
           field: 'payee',
           op: 'is',
           value: id,
-          type: 'id'
-        }
+          type: 'id',
+        },
       ],
       actions: [
         {
           op: 'set',
           field: 'category',
           value: null,
-          type: 'id'
-        }
-      ]
+          type: 'id',
+        },
+      ],
     };
     pushModal('edit-rule', { rule });
   }
@@ -133,7 +134,7 @@ function ManagePayeesWithData({
           let count = ruleCounts.value.get(id) || 0;
           ruleCounts.value.set(
             targetId,
-            (ruleCounts.value.get(targetId) || 0) + count
+            (ruleCounts.value.get(targetId) || 0) + count,
           );
         });
 
@@ -150,7 +151,7 @@ export default connect(
   state => ({
     initialPayees: state.queries.payees,
     lastUndoState: state.app.lastUndoState,
-    categoryGroups: state.queries.categories.grouped
+    categoryGroups: state.queries.categories.grouped,
   }),
-  actions
+  actions,
 )(ManagePayeesWithData);

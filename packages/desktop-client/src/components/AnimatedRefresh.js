@@ -2,12 +2,13 @@ import React from 'react';
 
 import { css } from 'glamor';
 
-import { View } from 'loot-design/src/components/common';
-import Refresh from 'loot-design/src/svg/v1/Refresh';
+import Refresh from '../icons/v1/Refresh';
+
+import View from './View';
 
 let spin = css.keyframes({
   '0%': { transform: 'rotateZ(0deg)' },
-  '100%': { transform: 'rotateZ(360deg)' }
+  '100%': { transform: 'rotateZ(360deg)' },
 });
 
 export default function AnimatedRefresh({ animating, iconStyle }) {

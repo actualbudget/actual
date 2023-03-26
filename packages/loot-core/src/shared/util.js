@@ -90,7 +90,7 @@ export function applyChanges(changes, items) {
       const idx = items.findIndex(t => t.id === id);
       items[idx] = {
         ...items[idx],
-        ...fields
+        ...fields,
       };
     });
   }
@@ -249,18 +249,18 @@ export function titleFirst(str) {
 }
 
 export let numberFormats = [
-  { value: 'comma-dot', label: '1,000.33' },
-  { value: 'dot-comma', label: '1.000,33' },
-  { value: 'space-comma', label: '1 000,33' }
+  { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
+  { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
+  { value: 'space-comma', label: '1 000,33', labelNoFraction: '1 000' },
 ];
 
 let numberFormat = {
   value: null,
   formatter: null,
-  regex: null
+  regex: null,
 };
 
-export function setNumberFormat(format) {
+export function setNumberFormat({ format, hideFraction }) {
   let locale, regex, separator;
 
   switch (format) {
@@ -285,10 +285,10 @@ export function setNumberFormat(format) {
     value: format,
     separator,
     formatter: new Intl.NumberFormat(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: hideFraction ? 0 : 2,
+      maximumFractionDigits: hideFraction ? 0 : 2,
     }),
-    regex
+    regex,
   };
 }
 
@@ -296,7 +296,7 @@ export function getNumberFormat() {
   return numberFormat;
 }
 
-setNumberFormat('comma-dot');
+setNumberFormat({ format: 'comma-dot', hideFraction: false });
 
 // Number utilities
 
@@ -313,12 +313,12 @@ const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 export function safeNumber(value) {
   if (!Number.isInteger(value)) {
     throw new Error(
-      'safeNumber: number is not an integer: ' + JSON.stringify(value)
+      'safeNumber: number is not an integer: ' + JSON.stringify(value),
     );
   }
   if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
     throw new Error(
-      "safeNumber: can't safely perform arithmetic with number: " + value
+      'safeNumber: can’t safely perform arithmetic with number: ' + value,
     );
   }
   return value;
@@ -342,7 +342,7 @@ export function amountToCurrency(n) {
 
 export function currencyToAmount(str) {
   let amount = parseFloat(
-    str.replace(numberFormat.regex, '').replace(numberFormat.separator, '.')
+    str.replace(numberFormat.regex, '').replace(numberFormat.separator, '.'),
   );
   return isNaN(amount) ? null : amount;
 }
@@ -377,15 +377,23 @@ export function looselyParseAmount(amount) {
     return isNaN(v) ? null : v;
   }
 
-  let m = amount.match(/[.,][^.,]*$/);
-  if (!m || m.index === 0) {
-    return safeNumber(parseFloat(amount));
+  function extractNumbers(v) {
+    return v.replace(/[^0-9-]/g, '');
   }
 
-  let left = amount.slice(0, m.index);
-  let right = amount.slice(m.index + 1);
+  if (amount.startsWith('(') && amount.endsWith(')')) {
+    amount = amount.replace('(', '-').replace(')', '');
+  }
 
-  return safeNumber(parseFloat(left.replace(/[^0-9-]/g, '') + '.' + right));
+  let m = amount.match(/[.,][^.,]*$/);
+  if (!m || m.index === 0) {
+    return safeNumber(parseFloat(extractNumbers(amount)));
+  }
+
+  let left = extractNumbers(amount.slice(0, m.index));
+  let right = extractNumbers(amount.slice(m.index + 1));
+
+  return safeNumber(parseFloat(left + '.' + right));
 }
 
 export function semverToNumber(str) {
@@ -396,6 +404,6 @@ export function semverToNumber(str) {
         .map(x => {
           return ('000' + x.replace(/[^0-9]/g, '')).slice(-3);
         })
-        .join('')
+        .join(''),
   );
 }

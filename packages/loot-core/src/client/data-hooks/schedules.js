@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import q, { liveQuery } from 'loot-core/src/client/query-helpers';
 import {
   getStatus,
-  getHasTransactionsQuery
+  getHasTransactionsQuery,
 } from 'loot-core/src/shared/schedules';
 
 function loadStatuses(schedules, onData) {
@@ -14,10 +14,10 @@ function loadStatuses(schedules, onData) {
       return new Map(
         schedules.map(s => [
           s.id,
-          getStatus(s.next_date, s.completed, hasTrans.has(s.id))
-        ])
+          getStatus(s.next_date, s.completed, hasTrans.has(s.id)),
+        ]),
       );
-    }
+    },
   });
 }
 
@@ -37,10 +37,10 @@ export function useSchedules({ transform } = {}) {
           }
 
           statusQuery = loadStatuses(schedules, statuses =>
-            setData({ schedules, statuses })
+            setData({ schedules, statuses }),
           );
         }
-      }
+      },
     );
 
     return () => {

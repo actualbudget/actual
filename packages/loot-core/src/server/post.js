@@ -1,6 +1,7 @@
-import Platform from './platform';
+import * as Platform from './platform';
 
 const { fetch } = require('../platform/server/fetch');
+
 const { PostError } = require('./errors');
 
 function throwIfNot200(res, text) {
@@ -18,7 +19,7 @@ function throwIfNot200(res, text) {
   }
 }
 
-export async function post(url, data) {
+export async function post(url, data, headers = {}) {
   let text;
   let res;
 
@@ -27,8 +28,9 @@ export async function post(url, data) {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
-        'Content-Type': 'application/json'
-      }
+        ...headers,
+        'Content-Type': 'application/json',
+      },
     });
     text = await res.text();
   } catch (err) {
@@ -51,7 +53,7 @@ export async function post(url, data) {
         '\nData: ' +
         JSON.stringify(data, null, 2) +
         '\nResponse: ' +
-        JSON.stringify(res, null, 2)
+        JSON.stringify(res, null, 2),
     );
 
     throw new PostError(res.description || res.reason || 'unknown');
@@ -69,8 +71,8 @@ export async function postBinary(url, data, headers) {
       headers: {
         'Content-Length': data.length,
         'Content-Type': 'application/actual-sync',
-        ...headers
-      }
+        ...headers,
+      },
     });
   } catch (err) {
     throw new PostError('network-failure');

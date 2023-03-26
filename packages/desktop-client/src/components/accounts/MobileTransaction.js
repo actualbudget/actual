@@ -11,10 +11,11 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { titleFirst } from 'loot-core/src/shared/util';
 import { integerToCurrency, groupById } from 'loot-core/src/shared/util';
-import { Text, TextOneLine, View } from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
-import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
+
+import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
+import CheckCircle1 from '../../icons/v2/CheckCircle1';
+import { styles, colors } from '../../style';
+import { Text, TextOneLine, View } from '../common';
 
 const zIndices = { SECTION_HEADING: 10 };
 
@@ -48,7 +49,7 @@ export function DateHeader({ date }) {
         height: 25,
         backgroundColor: colors.n10,
         borderColor: colors.n9,
-        justifyContent: 'center'
+        justifyContent: 'center',
       }}
     >
       <Text style={[styles.text, { fontSize: 13, color: colors.n4 }]}>
@@ -79,7 +80,7 @@ function Status({ status }) {
       style={{
         fontSize: 11,
         color,
-        fontStyle: 'italic'
+        fontStyle: 'italic',
       }}
     >
       {titleFirst(status)}
@@ -97,7 +98,7 @@ export class Transaction extends React.PureComponent {
       showCategory,
       added,
       // onSelect,
-      style
+      style,
     } = this.props;
     let {
       id,
@@ -107,7 +108,7 @@ export class Transaction extends React.PureComponent {
       cleared,
       is_parent,
       notes,
-      schedule
+      schedule,
     } = transaction;
 
     if (isPreviewId(id)) {
@@ -125,7 +126,7 @@ export class Transaction extends React.PureComponent {
     let prettyDescription = getDescriptionPretty(
       transaction,
       payee,
-      transferAcct
+      transferAcct,
     );
     let prettyCategory = transferAcct
       ? 'Transfer'
@@ -136,7 +137,7 @@ export class Transaction extends React.PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: colors.n5
+      color: colors.n5,
     };
 
     return (
@@ -153,7 +154,7 @@ export class Transaction extends React.PureComponent {
         style={[
           { flex: 1, height: 60, padding: '5px 10px' }, // remove padding when Button is back
           isPreview && { backgroundColor: colors.n11 },
-          style
+          style,
         ]}
       >
         <View style={[{ flex: 1 }]}>
@@ -164,7 +165,7 @@ export class Transaction extends React.PureComponent {
                   width: 12,
                   height: 12,
                   marginRight: 5,
-                  color: textStyle.color || colors.n1
+                  color: textStyle.color || colors.n1,
                 }}
               />
             )}
@@ -175,8 +176,8 @@ export class Transaction extends React.PureComponent {
                 { fontSize: 14, fontWeight: added ? '600' : '400' },
                 prettyDescription === '' && {
                   color: colors.n6,
-                  fontStyle: 'italic'
-                }
+                  fontStyle: 'italic',
+                },
               ]}
             >
               {prettyDescription || 'Empty'}
@@ -189,7 +190,7 @@ export class Transaction extends React.PureComponent {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                marginTop: 3
+                marginTop: 3,
               }}
             >
               <CheckCircle1
@@ -197,7 +198,7 @@ export class Transaction extends React.PureComponent {
                   width: 11,
                   height: 11,
                   color: cleared ? colors.g6 : colors.n8,
-                  marginRight: 5
+                  marginRight: 5,
                 }}
               />
               {showCategory && (
@@ -208,7 +209,7 @@ export class Transaction extends React.PureComponent {
                     fontWeight: '400',
                     color: prettyCategory ? colors.n3 : colors.p7,
                     fontStyle: prettyCategory ? null : 'italic',
-                    textAlign: 'left'
+                    textAlign: 'left',
                   }}
                 >
                   {prettyCategory || 'Uncategorized'}
@@ -221,7 +222,7 @@ export class Transaction extends React.PureComponent {
           style={[
             styles.text,
             textStyle,
-            { marginLeft: 25, marginRight: 5, fontSize: 14 }
+            { marginLeft: 25, marginRight: 5, fontSize: 14 },
           ]}
         >
           {integerToCurrency(amount)}
@@ -252,7 +253,7 @@ export class TransactionList extends React.Component {
         sections.push({
           id: transaction.date,
           date: transaction.date,
-          data: []
+          data: [],
         });
       }
 
@@ -267,7 +268,7 @@ export class TransactionList extends React.Component {
     const {
       transactions,
       scrollProps = {},
-      onLoadMore
+      onLoadMore,
       // refreshControl
     } = this.props;
 
@@ -291,7 +292,7 @@ export class TransactionList extends React.Component {
                   style={{
                     display: 'flex',
                     justifyContent: 'center',
-                    width: '100%'
+                    width: '100%',
                   }}
                 >
                   <Text style={{ fontSize: 15 }}>No transactions</Text>
@@ -311,7 +312,7 @@ export class TransactionList extends React.Component {
                       key={transaction.id}
                       style={{
                         fontSize:
-                          index === transactions.length - 1 ? 98 : 'inherit'
+                          index === transactions.length - 1 ? 98 : 'inherit',
                       }}
                       textValue={transaction.id}
                     >
@@ -347,7 +348,7 @@ function ListBox(props) {
         Math.abs(
           listBoxRef.current.scrollHeight -
             listBoxRef.current.clientHeight -
-            listBoxRef.current.scrollTop
+            listBoxRef.current.scrollTop,
         ) < listBoxRef.current.clientHeight // load more when we're one screen height from the end
       ) {
         props.loadMore();
@@ -373,7 +374,7 @@ function ListBox(props) {
           listStyle: 'none',
           margin: 0,
           overflowY: 'auto',
-          width: '100%'
+          width: '100%',
         }}
       >
         {[...state.collection].map(item => (
@@ -387,7 +388,7 @@ function ListBox(props) {
 function ListBoxSection({ section, state }) {
   let { itemProps, headingProps, groupProps } = useListBoxSection({
     heading: section.rendered,
-    'aria-label': section['aria-label']
+    'aria-label': section['aria-label'],
   });
 
   // The heading is rendered inside an <li> element, which contains
@@ -411,7 +412,7 @@ function ListBoxSection({ section, state }) {
               position: 'sticky',
               top: '0',
               width: '100%',
-              zIndex: zIndices.SECTION_HEADING
+              zIndex: zIndices.SECTION_HEADING,
             }}
           >
             {section.rendered}
@@ -421,7 +422,7 @@ function ListBoxSection({ section, state }) {
           {...groupProps}
           style={{
             padding: 0,
-            listStyle: 'none'
+            listStyle: 'none',
           }}
         >
           {[...section.childNodes].map((node, index, nodes) => (
@@ -455,7 +456,7 @@ function Option({ isLast, item, state }) {
         background: isSelected ? 'blueviolet' : 'transparent',
         color: isSelected ? 'white' : null,
         outline: isFocusVisible ? '2px solid orange' : 'none',
-        ...(!isLast && { borderBottom: `1px solid ${colors.border}` })
+        ...(!isLast && { borderBottom: `1px solid ${colors.border}` }),
       }}
     >
       {item.rendered}
@@ -475,9 +476,9 @@ export const ListItem = React.forwardRef(
             flexDirection: 'row',
             alignItems: 'center',
             paddingLeft: 10,
-            paddingRight: 10
+            paddingRight: 10,
           },
-          style
+          style,
         ]}
         ref={ref}
         {...props}
@@ -485,5 +486,5 @@ export const ListItem = React.forwardRef(
         {children}
       </View>
     );
-  }
+  },
 );
