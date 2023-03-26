@@ -68,8 +68,6 @@ export async function addTransfer(transaction, transferredAccount) {
     }
   }
 
-  console.log(JSON.stringify(transaction));
-
   const matched = await db.first(
     'SELECT id, account, date FROM v_transactions WHERE account = ? AND amount = ? AND date = ?',
     [
@@ -79,7 +77,6 @@ export async function addTransfer(transaction, transferredAccount) {
     ],
   );
 
-  console.log(JSON.stringify(matched));
   let id;
 
   if (matched) {
@@ -134,8 +131,6 @@ export async function removeTransfer(transaction) {
       });
     } else if (transferTrans.cleared) {
       // do not delete related transaction if cleared just null the transfer_id and reset payee
-      console.log(JSON.stringify(transferTrans));
-
       let { id: fromPayee } = await db.first(
         'SELECT id FROM payees WHERE name = ?',
         [transaction.imported_payee],
