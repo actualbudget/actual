@@ -68,6 +68,7 @@ export async function addTransfer(transaction, transferredAccount) {
     }
   }
 
+  // Create opposite transaction to the transfer being created
   const id = await db.insertTransaction({
     account: transferredAccount,
     amount: -transaction.amount,
@@ -78,6 +79,7 @@ export async function addTransfer(transaction, transferredAccount) {
     cleared: false
   });
 
+  // updates source transaction with the newly create transaction reference
   await db.updateTransaction({ id: transaction.id, transfer_id: id });
   const categoryCleared = await clearCategory(transaction, transferredAccount);
 
@@ -89,16 +91,23 @@ export async function addTransfer(transaction, transferredAccount) {
 }
 
 export async function removeTransfer(transaction) {
-  let transferTrans = await db.getTransaction(transaction.transfer_id);
+  let transferTrans = await db.getTransaction(transaction.transfer_id);  
   if (transferTrans.is_child) {
     // If it's a child transaction, we don't delete it because that
     // would invalidate the whole split transaction. Instead of turn
     // it into a normal transaction
     await db.updateTransaction({
-      id: transaction.transfer_id,
+      id: transferTrans.id,
       transfer_id: null,
       payee: null
     });
+  } else if(transferTrans.cleared) {
+    // do not delete related transaction if cleared just null the transfer_id and reset payee
+    await db.updateTransaction({ 
+      id: transferTrans.id, 
+      transfer_id: null,  
+      payee: transferTrans.imported_payee || null
+    });  
   } else {
     await db.deleteTransaction({ id: transaction.transfer_id });
   }
