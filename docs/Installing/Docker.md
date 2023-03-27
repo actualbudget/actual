@@ -5,10 +5,7 @@ sidebar_position: 2
 
 ## Hosting Actual on a home server with Docker
 
-Actual is also available as a Docker image ready to be run in your own custom environment.
-
-- [Docker Hub](https://hub.docker.com/r/jlongster/actual-server)
-- [GitHub Registry](https://ghcr.io/actualbudget/actual-server)
+Actual is also available as a Docker image ready to be run in your own custom environment. We publish the image both to [Docker Hub](https://hub.docker.com/r/jlongster/actual-server) (as `jlongster/actual-server`) and [GitHub’s container registry](https://ghcr.io/actualbudget/actual-server) (as `ghcr.io/actualbudget/actual-server`). Actual should function the same when pulled from either registry, so you can choose whichever one you prefer.
 
 ## Docker Tags
 
@@ -23,7 +20,7 @@ The `latest` tag points to the most recent official release of Actual. This is t
 
 ### `edge` Tag
 
-The `edge` tag is updated every time a commit is pushed to the `master` branch. This is the recommended tag to use for users who want to get the latest changes.
+The `edge` tag is updated every time a commit is pushed to the `master` branch. While we welcome people to try it out, there may be more bugs than the official release (please report any you find!). If you choose to give this tag a try, make sure you keep backups of your budget in case something goes wrong.
 
 - `edge`
 - `edge-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
@@ -32,17 +29,22 @@ The `edge` tag is updated every time a commit is pushed to the `master` branch. 
 
 Pre-requisites: Docker
 
-A [docker-compose file](https://github.com/actualbudget/actual-server/raw/master/docker-compose.yml) is provided together with a [.env
-file](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env).
-These are you need to deploy Actual in your server with docker and you **only** need to edit the
-[.env
-file](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env).
-The options for port assignments and persisting your budget on a volume mounted on your filesystem are all contained in the env file. This method will build and launch the most current build available from GitHub.
+You can use the [`docker-compose.yml` file included in the `actual-server` repository](https://github.com/actualbudget/actual-server/blob/master/docker-compose.yml) to run the latest stable version of the server.
 
 To create and run the container:
 
 ```bash
-$ docker-compose --env-file actual_server.env up -d
+$ docker-compose up --detach
+```
+
+You can optionally configure the container using environment variables — see the [configuration section](/Installing/Configuration) for more details.
+
+To update your container:
+
+```bash
+$ docker-compose down
+$ docker-compose pull
+$ docker-compose up --detach
 ```
 
 ## Launch container using docker command
@@ -65,7 +67,7 @@ $ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH
 
 `-v YOUR/PATH/TO/DATA:/data` -- tells the container where to store your budget data. This persists the data on your hard disk so it isn't lost if you remove the container. Change the current value to a folder on your host computer. The server will create `server-files` and `user-files` subfolders at this location.
 
-`--name my_actual_budget` -- gives your new docker container a name
+`--name my_actual_budget` -- gives your new docker container a name (change this to whatever you want)
 
 `jlongster/actual-server:latest` -- defines which image you want to pull and launch.
 
@@ -93,55 +95,11 @@ $ docker stop my_actual_budget && docker container rm my_actual_budget && docker
 
 On another PC within the local network connect to http://_serverIP_:_chosenPort_
 
-## Expose to internet with NGINX
+## Expose to the Internet with NGINX
 
-Use the [sample nginx conf file provided](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual.subdomain.conf.sample) and if needed change the
-line with:
+<details><summary>Example NGINX config</summary>
 
-```text
-set $upstream_port 5006;
-```
-
-to the chosen port (found [here](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env)).
-
-Using nginx web UI:
-
-- Scheme -> http
-- Forward Hostname/IP -> actual_budget
-- Forward Port -> _The chosen port (found [here](https://github.com/actualbudget/actual-server/raw/14eb9e969ac3aa878aa098736c34d7761d3c88f7/actual_server.env))_
-
-## Configuring the server URL
-
-The Actual app is totally separate from the server. In this project, they happen to both be served
-by the same server, but the app doesn't know where the server lives.
-
-The server could live on a completely different domain. You might setup Actual so that the app and
-server are running in completely separate places.
-
-Since Actual doesn't know what server to use, the first thing it does is asks you for the server
-URL. If you are running this project, simply click "Use this domain" and it will automatically fill
-it in with the current domain. This works because we are serving the app and server in the same
-place.
-
-## Sample Files
-
-Below you will find a selection of sample files for Actual Budget that work with Docker
-
-### actual_server.env
-
-```bash
-# This files contains all the variables you may need to change to set up Actual budget.
-
-# Server data location of Actual
-dataPath=./data
-
-# Actual web app port
-externalPort=5006
-```
-
-### actual.subdomain.conf.sample
-
-```json
+```nginx
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
@@ -181,20 +139,10 @@ server {
 }
 ```
 
-### docker-compose.yml
+</details>
 
-```yml
-version: '3'
-services:
-  actual_server:
-    container_name: actual_server
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    ports:
-      - '5006:5006'
-    volumes:
-      - ./server-files:/app/server-files
-      - ./user-files:/app/user-files
-    restart: unless-stopped
-```
+Using nginx web UI:
+
+- Scheme: `http`
+- Forward Hostname/IP: `actual_budget`
+- Forward Port: `5006`
