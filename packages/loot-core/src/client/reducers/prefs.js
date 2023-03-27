@@ -1,4 +1,4 @@
-import { setNumberFormat } from '../../shared/util.js';
+import { setNumberFormat } from '../../shared/util';
 import * as constants from '../constants';
 
 const initialState = {

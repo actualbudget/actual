@@ -254,7 +254,12 @@ export let numberFormats = [
   { value: 'space-comma', label: '1 000,33', labelNoFraction: '1 000' },
 ];
 
-let numberFormat = {
+let numberFormat: {
+  value: string;
+  formatter: Intl.NumberFormat;
+  regex: RegExp;
+  separator?: string;
+} = {
   value: null,
   formatter: null,
   regex: null,
