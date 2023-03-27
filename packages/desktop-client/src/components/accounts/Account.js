@@ -401,6 +401,7 @@ function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
       }}
     >
       <Button
+        data-testid="account-balance"
         bare
         onClick={onToggleExtraBalances}
         style={{
@@ -767,6 +768,7 @@ const AccountHeader = React.memo(
               ) : (
                 <View
                   style={{ fontSize: 25, fontWeight: 500, marginBottom: 5 }}
+                  data-testid="account-name"
                 >
                   {account && account.closed
                     ? 'Closed: ' + accountName
