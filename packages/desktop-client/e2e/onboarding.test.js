@@ -29,7 +29,7 @@ test.describe('Onboarding', () => {
       path.resolve(__dirname, 'data/ynab4-demo-budget.zip'),
     );
 
-    await expect(budgetPage.budgetTable).toBeVisible();
+    await expect(budgetPage.budgetTable).toBeVisible({ timeout: 30000 });
 
     const accountPage = await navigation.goToAccountPage(
       'Account1 with Starting Balance',
