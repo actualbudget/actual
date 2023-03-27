@@ -11,6 +11,24 @@ A quick way to import transactions is to login to your bank's website and downlo
 1. Open the account you want to import transactions into.
 2. Press the **Import** button and select the file.
 
+## Import CSV files
+
+If your bank doesn’t support downloading financial files, you can import a CSV file instead.
+
+1. Open the account you want to import transactions into.
+2. Press the **Import** button and select the file.
+3. Select the **CSV** option.
+4. Set up the fields to match the CSV file.
+   - For the “CSV Fields” dropdowns, leave them as “Choose field…” to leave the related field blank. Otherwise select the column from your CSV that corresponds to each field.
+   - If the date is not being imported correctly (the green date is how Actual interprets the date), you can change the date format to match your CSV file.
+   - If the file can’t be imported at all, try changing the CSV delimiter to match your file. (Let us know if your file uses a different delimiter that isn’t listed!)
+   - You can optionally toggle on “Flip amount” if you want to negate all of the amounts in the CSV file.
+   - You can optionally toggle on “Split amount into separate inflow/outflow columns” if your CSV file has separate columns for inflow and outflow amounts (also known as debit and credit).
+   - You can toggle on “Add Multiplier” to add a multiplier to all of the amounts in the CSV file. This can be useful if you want to make an approximate currency conversion.
+5. Once you’re happy with the settings, press **Import**.
+
+![CSV Import](/static/img/importing-trans/import-csv@2x.png)
+
 ## Manually add transactions
 
 If desired, you can manually add transactions. This is the most work but allows you manage accounts that may not work with any other importing mechanism.
