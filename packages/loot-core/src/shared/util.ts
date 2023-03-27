@@ -255,9 +255,9 @@ export let numberFormats = [
 ];
 
 let numberFormat: {
-  value: string;
-  formatter: Intl.NumberFormat;
-  regex: RegExp;
+  value: string | null;
+  formatter: Intl.NumberFormat | null;
+  regex: RegExp | null;
   separator?: string;
 } = {
   value: null,
