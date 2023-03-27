@@ -2,7 +2,6 @@
   "setupFiles": ["./jest.setup.js"],
   "testPathIgnorePatterns": ["dist", "/node_modules/", "/build/"],
   "roots": ["<rootDir>"],
-  "testMatch": ["<rootDir>/**/*.spec.js"],
   "moduleFileExtensions": ["ts", "js", "json"],
   "testEnvironment": "node",
   "collectCoverage": true,
