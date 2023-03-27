@@ -17,6 +17,13 @@ Once you’ve set up your server, you can [configure it](Configuration.md) to ch
 If you're coming from the original, managed Actual subscription service, you may want to [migrate your data](../Getting-Started/migration/migration-intro.md).
 
 ## Additional Installation Options
+
 In addition to our officially supported options listed above, some community members have written guides for using other platforms or tools:
 
-[warning!] Content contained on external links is not managed or maintained by the Actual Budget team, if you run into issues with instructions on a third party site, please contact the author in the first instance or ask in discord where a member of the community may be able to help.
+:::caution
+
+Content contained on external links is not managed or maintained by the Actual Budget team, if you run into issues with instructions on a third party site, please contact the author in the first instance or ask in discord where a member of the community may be able to help.
+
+:::
+
+- [Synology NAS](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)

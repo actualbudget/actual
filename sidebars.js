@@ -57,13 +57,7 @@ const sidebars = {
               type: 'category',
               label: 'On Your Own Machine',
               collapsible: false,
-              items: ['Installing/Local/your-own-machine'],
-            },
-            {
-              type: 'category',
-              label: 'On Your Own Server',
-              collapsible: false,
-              items: ['Installing/Docker'],
+              items: ['Installing/Local/your-own-machine', 'Installing/Docker'],
             },
             {
               type: 'category',
