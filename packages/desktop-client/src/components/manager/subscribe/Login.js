@@ -4,13 +4,9 @@ import { useDispatch } from 'react-redux';
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
-import {
-  View,
-  Text,
-  Button,
-  ButtonWithLoading,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+
+import { colors } from '../../../style';
+import { View, Text, Button, ButtonWithLoading } from '../../common';
 
 import { useBootstrapped, Title, Input } from './common';
 

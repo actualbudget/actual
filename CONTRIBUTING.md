@@ -21,8 +21,13 @@ Here are some initial guidelines for how contributions will be treated:
 - @j-f1
 - @jlongster
 - @MatissJanis
-- @rich-howell
 - @trevdor
+
+## Alumni
+
+(sorted alphabetically)
+
+- @rich-howell
 
 ## Project ideas
 

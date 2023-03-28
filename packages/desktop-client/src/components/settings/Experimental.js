@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { Link, Text, View } from 'loot-design/src/components/common';
-import { Checkbox } from 'loot-design/src/components/forms';
-import { colors } from 'loot-design/src/style';
-
 import { useAllFeatureFlags } from '../../hooks/useFeatureFlag';
+import { colors } from '../../style';
+import { Link, Text, View } from '../common';
+import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
 
@@ -33,7 +32,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                 disabled={disabled}
               />{' '}
               <View>
-                Enable budget mode toggle
+                Budget mode toggle
                 {disabled && (
                   <Text style={{ color: colors.r3, fontWeight: 500 }}>
                     Switch to a rollover budget before turning off this feature
@@ -50,7 +49,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                   savePrefs({ 'flags.syncAccount': !flags.syncAccount });
                 }}
               />{' '}
-              <View>Enable account syncing</View>
+              <View>Account syncing via Nordigen</View>
             </label>
             <label style={{ display: 'flex' }}>
               <Checkbox
@@ -62,7 +61,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                   });
                 }}
               />{' '}
-              <View>Enable Goal Templates</View>
+              <View>Goal templates</View>
             </label>
             <label style={{ display: 'flex' }}>
               <Checkbox
@@ -74,7 +73,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                   });
                 }}
               />{' '}
-              <View>Enable new Autocomplete component</View>
+              <View>New autocomplete component</View>
             </label>
           </View>
         ) : (

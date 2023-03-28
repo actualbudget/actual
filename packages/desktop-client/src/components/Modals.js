@@ -8,27 +8,27 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
-import BudgetSummary from 'loot-design/src/components/modals/BudgetSummary';
-import CloseAccount from 'loot-design/src/components/modals/CloseAccount';
-import ConfigureLinkedAccounts from 'loot-design/src/components/modals/ConfigureLinkedAccounts';
-import CreateLocalAccount from 'loot-design/src/components/modals/CreateLocalAccount';
-import EditField from 'loot-design/src/components/modals/EditField';
-import ImportTransactions from 'loot-design/src/components/modals/ImportTransactions';
-import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
-import NordigenExternalMsg from 'loot-design/src/components/modals/NordigenExternalMsg';
-import PlaidExternalMsg from 'loot-design/src/components/modals/PlaidExternalMsg';
-import SelectLinkedAccounts from 'loot-design/src/components/modals/SelectLinkedAccounts';
 
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 
+import BudgetSummary from './modals/BudgetSummary';
+import CloseAccount from './modals/CloseAccount';
+import ConfigureLinkedAccounts from './modals/ConfigureLinkedAccounts';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
+import CreateLocalAccount from './modals/CreateLocalAccount';
+import EditField from './modals/EditField';
 import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
+import ImportTransactions from './modals/ImportTransactions';
+import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
+import NordigenExternalMsg from './modals/NordigenExternalMsg';
+import PlaidExternalMsg from './modals/PlaidExternalMsg';
+import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 
 function Modals({
   history,

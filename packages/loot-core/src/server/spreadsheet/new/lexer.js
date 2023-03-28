@@ -63,6 +63,7 @@ class Tokenizer {
         this.index = this.str.length;
         return token(TOKEN_STRING, this.str, lineno, colno);
       }
+      // eslint-disable-next-line rulesdir/typography
     } else if (cur === '"' || cur === "'") {
       // We've hit a string
       return token(TOKEN_STRING, this.parseString(cur), lineno, colno);

@@ -1,19 +1,19 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { css, media } from 'glamor';
+import { media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
-import { View, Text, Button, Input } from 'loot-design/src/components/common';
-import { FormField, FormLabel } from 'loot-design/src/components/forms';
-import { colors } from 'loot-design/src/style';
-import tokens from 'loot-design/src/tokens';
-import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
+import { colors } from '../../style';
+import tokens from '../../tokens';
 import { isMobile } from '../../util';
+import { withThemeColor } from '../../util/withThemeColor';
+import { View, Text, Button, Input } from '../common';
+import { FormField, FormLabel } from '../forms';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
@@ -24,7 +24,7 @@ import FixSplitsTool from './FixSplits';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
-import { Section, AdvancedToggle } from './UI';
+import { AdvancedToggle, Setting } from './UI';
 
 function About() {
   const version = useServerVersion();
@@ -32,37 +32,81 @@ function About() {
   const isOutdated = useIsOutdated();
 
   return (
-    <Section title="About" style={{ gap: 5 }}>
+    <Setting>
       <Text>
-        Client version: v{window.Actual.ACTUAL_VERSION} (
+        <strong>Actual</strong> is a super fast privacy-focused app for managing
+        your finances.
+      </Text>
+      <View
+        style={[
+          { flexDirection: 'column', gap: 10 },
+          media(`(min-width: ${tokens.breakpoint_medium})`, {
+            display: 'grid',
+            gridTemplateRows: '1fr 1fr',
+            gridTemplateColumns: '50% 50%',
+            columnGap: '2em',
+            gridAutoFlow: 'column',
+          }),
+        ]}
+      >
+        <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
+        <Text>Server version: {version}</Text>
         {isOutdated ? (
-          <a href="https://actualbudget.github.io/docs/Release-Notes">
-            new version available: {latestVersion}
+          <a
+            style={{ color: colors.p4 }}
+            href="https://actualbudget.github.io/docs/Release-Notes"
+          >
+            New version available: {latestVersion}
           </a>
         ) : (
-          <span>latest</span>
+          <Text style={{ color: colors.g2, fontWeight: 600 }}>
+            You’re up to date!
+          </Text>
         )}
-        )
-      </Text>
-      <Text>Server version: {version}</Text>
-    </Section>
+        <Text>
+          <a href="https://actualbudget.github.io/docs/Release-Notes">
+            Release Notes
+          </a>
+        </Text>
+      </View>
+    </Setting>
   );
+}
+
+function IDName({ children }) {
+  return <Text style={{ fontWeight: 500 }}>{children}</Text>;
 }
 
 function AdvancedAbout({ prefs }) {
   return (
-    <>
-      <Text>Budget ID: {prefs.id}</Text>
-      <Text style={{ color: colors.n6 }}>
-        Sync ID: {prefs.groupId || '(none)'}
+    <Setting>
+      <Text>
+        <strong>IDs</strong> are the names Actual uses to identify your budget
+        internally. There are several different IDs associated with your budget.
+        The Budget ID is used to identify your budget file. The Sync ID is used
+        to access the budget on the server.
       </Text>
-    </>
+      <Text>
+        <IDName>Budget ID:</IDName> {prefs.id}
+      </Text>
+      <Text style={{ color: colors.n5 }}>
+        <IDName>Sync ID:</IDName> {prefs.groupId || '(none)'}
+      </Text>
+      {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
+      {/* <Text>
+        <IDName>Cloud File ID:</IDName> {prefs.cloudFileId || '(none)'}
+      </Text>
+      <Text>
+        <IDName>User ID:</IDName> {prefs.userId || '(none)'}
+      </Text> */}
+    </Setting>
   );
 }
 
 function Settings({
   loadPrefs,
   savePrefs,
+  saveGlobalPrefs,
   prefs,
   globalPrefs,
   pushModal,
@@ -86,32 +130,29 @@ function Settings({
     >
       <Page title="Settings">
         <View style={{ flexShrink: 0, gap: 30 }}>
-          {/* The only spot to close a budget on mobile */}
-          <Section
-            title="Budget"
-            style={css(
-              media(`(min-width: ${tokens.breakpoint_medium})`, {
-                display: 'none',
-              }),
-            )}
-          >
-            <FormField>
-              <FormLabel title="Name" />
-              <Input
-                value={prefs.budgetName}
-                disabled
-                style={{ color: '#999' }}
-              />
-            </FormField>
-            <Button onClick={closeBudget}>Close Budget</Button>
-          </Section>
+          {isMobile() && (
+            <View
+              style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
+            >
+              {/* The only spot to close a budget on mobile */}
+              <FormField>
+                <FormLabel title="Budget Name" />
+                <Input
+                  value={prefs.budgetName}
+                  disabled
+                  style={{ color: '#999' }}
+                />
+              </FormField>
+              <Button onClick={closeBudget}>Close Budget</Button>
+            </View>
+          )}
 
           <About />
 
           {!Platform.isBrowser && (
             <GlobalSettings
               globalPrefs={globalPrefs}
-              saveGlobalPrefs={this.props.saveGlobalPrefs}
+              saveGlobalPrefs={saveGlobalPrefs}
             />
           )}
 

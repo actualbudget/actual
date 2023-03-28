@@ -14,32 +14,25 @@ import * as actions from 'loot-core/src/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
-import {
-  Button,
-  Card,
-  Label,
-  Text,
-  View,
-} from 'loot-design/src/components/common';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import format from 'loot-design/src/components/spreadsheet/format';
-import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
-import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
-import useSheetValue from 'loot-design/src/components/spreadsheet/useSheetValue';
-import { colors, styles } from 'loot-design/src/style';
-import Add from 'loot-design/src/svg/v1/Add';
-import ArrowThinLeft from 'loot-design/src/svg/v1/ArrowThinLeft';
-import ArrowThinRight from 'loot-design/src/svg/v1/ArrowThinRight';
+
+import Add from '../../icons/v1/Add';
+import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
+import ArrowThinRight from '../../icons/v1/ArrowThinRight';
+import { colors, styles } from '../../style';
+import { Button, Card, Label, Text, View } from '../common';
+import CellValue from '../spreadsheet/CellValue';
+import format from '../spreadsheet/format';
+import NamespaceContext from '../spreadsheet/NamespaceContext';
+import SheetValue from '../spreadsheet/SheetValue';
+import useSheetValue from '../spreadsheet/useSheetValue';
+import { SyncButton } from '../Titlebar';
+import { AmountInput } from '../util/AmountInput';
 // import {
 //   AmountAccessoryContext,
 //   MathOperations
-// } from 'loot-design/src/components/mobile/AmountInput';
+// } from '../mobile/AmountInput';
 
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
-
-import { SyncButton } from '../Titlebar';
-import { AmountInput } from '../util/AmountInput';
-
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 export function ToBudget({ toBudget, onClick }) {
@@ -1086,6 +1079,7 @@ function UnconnectedBudgetHeader({
           },
         ]}
       >
+        {/* eslint-disable-next-line rulesdir/typography */}
         {monthUtils.format(currentMonth, "MMMM ''yy")}
       </Text>
       {editMode ? (

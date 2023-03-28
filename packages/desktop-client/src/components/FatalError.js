@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
 
-import {
-  View,
-  Stack,
-  Text,
-  Block,
-  Modal,
-  P,
-  Link,
-  Button,
-} from 'loot-design/src/components/common';
-import { Checkbox } from 'loot-design/src/components/forms';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../style';
+
+import { View, Stack, Text, Block, Modal, P, Link, Button } from './common';
+import { Checkbox } from './forms';
 
 class FatalError extends React.Component {
   state = { showError: false };
@@ -22,10 +14,10 @@ class FatalError extends React.Component {
       // IndexedDB wasn't able to open the database
       msg = (
         <Text>
-          Your browser doesn{"'"}t support IndexedDB in this environment, a
-          feature that Actual requires to run. This might happen if you are in
-          private browsing mode. Please try a different browser or turn off
-          private browsing.
+          Your browser doesn’t support IndexedDB in this environment, a feature
+          that Actual requires to run. This might happen if you are in private
+          browsing mode. Please try a different browser or turn off private
+          browsing.
         </Text>
       );
     } else if (error.SharedArrayBufferMissing) {

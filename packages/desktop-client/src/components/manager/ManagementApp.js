@@ -5,15 +5,15 @@ import { Switch, Redirect, Router, Route } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 
 import * as actions from 'loot-core/src/client/actions';
-import { View, Text } from 'loot-design/src/components/common';
-import BudgetList from 'loot-design/src/components/manager/BudgetList';
-import { colors } from 'loot-design/src/style';
-import tokens from 'loot-design/src/tokens';
 
+import { colors } from '../../style';
+import tokens from '../../tokens';
+import { View, Text } from '../common';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
 import { useServerVersion } from '../ServerContext';
 
+import BudgetList from './BudgetList';
 import ConfigServer from './ConfigServer';
 import Modals from './Modals';
 import ServerURL from './ServerURL';

@@ -10,19 +10,13 @@ import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
-import {
-  Button,
-  Input,
-  InitialFocus,
-  Text,
-  Tooltip,
-  Menu,
-} from 'loot-design/src/components/common';
-import { Sidebar } from 'loot-design/src/components/sidebar';
-import { styles, colors } from 'loot-design/src/style';
-import ExpandArrow from 'loot-design/src/svg/v0/ExpandArrow';
 
 import useFeatureFlag from '../hooks/useFeatureFlag';
+import ExpandArrow from '../icons/v0/ExpandArrow';
+import { styles, colors } from '../style';
+
+import { Button, Input, InitialFocus, Text, Tooltip, Menu } from './common';
+import { Sidebar } from './sidebar';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
@@ -51,9 +45,10 @@ function EditableBudgetName({ prefs, savePrefs }) {
   }
 
   let items = [
-    { name: 'rename', text: 'Rename Budget' },
+    { name: 'rename', text: 'Rename budget' },
+    { name: 'settings', text: 'Settings' },
     ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
-    { name: 'close', text: 'Close File' },
+    { name: 'close', text: 'Close file' },
   ];
 
   if (editing) {

@@ -2,9 +2,9 @@ import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Text, P, Button, Stack } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
 
+import { colors } from '../../style';
+import { Text, P, Button, Stack } from '../common';
 import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
 
@@ -61,7 +61,7 @@ export default function PostsOfflineNotification() {
       </P>
       <P>
         You can always manually post a transaction later for a due schedule by
-        selecting the schedule and clicking "Post transaction" in the action
+        selecting the schedule and clicking “Post transaction” in the action
         menu.
       </P>
       <Stack

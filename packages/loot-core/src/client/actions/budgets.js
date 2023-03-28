@@ -165,6 +165,7 @@ export function importBudget(filepath, type) {
     dispatch(closeModal());
 
     await dispatch(loadPrefs());
+    window.__history.push('/budget');
   };
 }
 
@@ -215,7 +216,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
         dispatch(setAppState({ loadingText: null }));
       } else if (error.reason === 'file-exists') {
         alert(
-          `A file with id "${error.meta.id}" already exists with the name "${error.meta.name}". ` +
+          `A file with id “${error.meta.id}” already exists with the name “${error.meta.name}.” ` +
             'This file will be replaced. This probably happened because files were manually ' +
             'moved around outside of Actual.',
         );

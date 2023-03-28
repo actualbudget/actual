@@ -318,7 +318,7 @@ export function safeNumber(value) {
   }
   if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
     throw new Error(
-      "safeNumber: can't safely perform arithmetic with number: " + value,
+      'safeNumber: can’t safely perform arithmetic with number: ' + value,
     );
   }
   return value;
@@ -377,15 +377,23 @@ export function looselyParseAmount(amount) {
     return isNaN(v) ? null : v;
   }
 
-  let m = amount.match(/[.,][^.,]*$/);
-  if (!m || m.index === 0) {
-    return safeNumber(parseFloat(amount));
+  function extractNumbers(v) {
+    return v.replace(/[^0-9-]/g, '');
   }
 
-  let left = amount.slice(0, m.index);
-  let right = amount.slice(m.index + 1);
+  if (amount.startsWith('(') && amount.endsWith(')')) {
+    amount = amount.replace('(', '-').replace(')', '');
+  }
 
-  return safeNumber(parseFloat(left.replace(/[^0-9-]/g, '') + '.' + right));
+  let m = amount.match(/[.,][^.,]*$/);
+  if (!m || m.index === 0) {
+    return safeNumber(parseFloat(extractNumbers(amount)));
+  }
+
+  let left = extractNumbers(amount.slice(0, m.index));
+  let right = extractNumbers(amount.slice(m.index + 1));
+
+  return safeNumber(parseFloat(left + '.' + right));
 }
 
 export function semverToNumber(str) {

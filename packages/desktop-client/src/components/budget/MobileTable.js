@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { View } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { View } from '../common';
 
 export const ROW_HEIGHT = 50;
 

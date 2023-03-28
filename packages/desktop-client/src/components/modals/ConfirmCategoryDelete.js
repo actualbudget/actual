@@ -1,14 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { NativeCategorySelect } from 'loot-design/src/components/CategorySelect';
-import {
-  View,
-  Text,
-  Block,
-  Modal,
-  Button,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { NativeCategorySelect } from '../autocomplete/CategorySelect';
+import { View, Text, Block, Modal, Button } from '../common';
 
 export default function ConfirmCategoryDelete({
   modalProps,

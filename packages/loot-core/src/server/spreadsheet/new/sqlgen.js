@@ -18,7 +18,8 @@ function fail(node, message) {
 
 function generateExpression(expr) {
   if (typeof expr === 'string') {
-    return '"' + expr + '"';
+    // eslint-disable-next-line rulesdir/typography
+    return `"${expr}"`;
   } else if (typeof expr === 'number') {
     return expr;
   }
@@ -65,7 +66,8 @@ function generateExpression(expr) {
       return '(' + str + ')';
     case 'Literal':
       if (typeof expr.value === 'string') {
-        return '"' + expr.value + '"';
+        // eslint-disable-next-line rulesdir/typography
+        return `"${expr.value}"`;
       }
       return expr.value;
     case 'Symbol':
@@ -136,14 +138,14 @@ function transformLookups(node, implicitTable) {
 
         if (!SCHEMA_PATHS[table]) {
           const err = new Error(
-            `Table "${table}" not joinable for field "${lookup}"`,
+            `Table “${table}” not joinable for field “${lookup}”`,
           );
           err.node = node;
           throw err;
         }
         if (!SCHEMA_PATHS[table][lookup.field]) {
           const err = new Error(
-            `Unknown field "${lookup}" on table "${table}"`,
+            `Unknown field “${lookup}” on table “${table}”`,
           );
           err.node = node;
           throw err;

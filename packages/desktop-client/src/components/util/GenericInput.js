@@ -2,20 +2,20 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
-import LegacyAccountAutocomplete from 'loot-design/src/components/AccountAutocomplete';
-import LegacyAutocomplete from 'loot-design/src/components/Autocomplete';
-import NewCategoryAutocomplete from 'loot-design/src/components/CategoryAutocomplete';
-import LegacyCategoryAutocomplete from 'loot-design/src/components/CategorySelect';
-import { View, Input } from 'loot-design/src/components/common';
-import DateSelect from 'loot-design/src/components/DateSelect';
-import { Checkbox } from 'loot-design/src/components/forms';
-import NewAccountAutocomplete from 'loot-design/src/components/NewAccountAutocomplete';
-import NewAutocomplete from 'loot-design/src/components/NewAutocomplete';
-import NewPayeeAutocomplete from 'loot-design/src/components/NewPayeeAutocomplete';
-import LegacyPayeeAutocomplete from 'loot-design/src/components/PayeeAutocomplete';
-import RecurringSchedulePicker from 'loot-design/src/components/RecurringSchedulePicker';
 
 import useFeatureFlag from '../../hooks/useFeatureFlag';
+import LegacyAccountAutocomplete from '../autocomplete/AccountAutocomplete';
+import LegacyAutocomplete from '../autocomplete/Autocomplete';
+import NewCategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
+import LegacyCategoryAutocomplete from '../autocomplete/CategorySelect';
+import NewAccountAutocomplete from '../autocomplete/NewAccountAutocomplete';
+import NewAutocomplete from '../autocomplete/NewAutocomplete';
+import NewPayeeAutocomplete from '../autocomplete/NewPayeeAutocomplete';
+import LegacyPayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import { View, Input } from '../common';
+import { Checkbox } from '../forms';
+import DateSelect from '../select/DateSelect';
+import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
 
 export default function GenericInput({
   field,
@@ -184,7 +184,7 @@ export default function GenericInput({
             ref={inputRef}
             isMulti
             isCreatable
-            formatCreateLabel={inputValue => `Add "${inputValue}"`}
+            formatCreateLabel={inputValue => `Add “${inputValue}”`}
             noOptionsMessage={() => null}
             value={value.map(v => ({ value: v, label: v }))}
             onSelect={onChange}

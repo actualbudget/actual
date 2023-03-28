@@ -231,7 +231,7 @@ export function listenForSyncEvent(actions, store) {
           notif = {
             title: 'Update required',
             message:
-              "We couldn't apply changes from the server. This probably means you " +
+              'We couldn’t apply changes from the server. This probably means you ' +
               'need to update the app to support the latest database.',
             type: 'warning',
           };
@@ -239,7 +239,7 @@ export function listenForSyncEvent(actions, store) {
         case 'apply-failure':
           console.trace('apply-failure', meta);
           notif = {
-            message: `We couldn't apply that change to the database. Please report this as a bug by [opening a Github issue](${githubIssueLink}).`,
+            message: `We couldn’t apply that change to the database. Please report this as a bug by [opening a Github issue](${githubIssueLink}).`,
           };
           break;
         case 'beta-version':

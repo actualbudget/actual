@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { css, before } from 'glamor';
 import { VictoryTooltip } from 'victory';
 
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
 
 class Tooltip extends React.Component {
   static defaultEvents = VictoryTooltip.defaultEvents;
@@ -71,6 +71,7 @@ class Tooltip extends React.Component {
                 '7px solid ' + colors.n1,
               [position === 'right' ? 'left' : 'right']: -6,
               top: 'calc(50% - 7px)',
+              // eslint-disable-next-line rulesdir/typography
               content: '" "',
             }),
           style,
