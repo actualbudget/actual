@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 import { colors } from '../../style';
+import Autocomplete from '../autocomplete/NewAutocomplete';
 import { View, Modal, Button, Text } from '../common';
-import Autocomplete from '../NewAutocomplete';
 import { TableHeader, Table, Row, Field } from '../table';
 
 const addAccountOption = { value: 'new', label: 'Create new account' };
