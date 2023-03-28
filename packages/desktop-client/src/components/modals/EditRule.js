@@ -582,6 +582,7 @@ export default function EditRule({
   let [conditions, setConditions] = useState(defaultRule.conditions.map(parse));
   let [actions, setActions] = useState(defaultRule.actions.map(parse));
   let [stage, setStage] = useState(defaultRule.stage);
+  let [inc, setInc] = useState('ALL');
   let [transactions, setTransactions] = useState([]);
   let dispatch = useDispatch();
   let scrollableEl = useRef();
@@ -613,7 +614,9 @@ export default function EditRule({
 
       if (filters.length > 0) {
         let { data: transactions } = await runQuery(
-          q('transactions').filter({ $and: filters }).select('*'),
+          q('transactions')
+            .filter(inc === 'ALL' ? { $and: filters } : { $or: filters })
+            .select('*'),
         );
         setTransactions(transactions);
       } else {
@@ -665,6 +668,10 @@ export default function EditRule({
         return a;
       }),
     );
+  }
+
+  function onChangeFilter(inc) {
+    setInc(inc);
   }
 
   function onChangeStage(stage) {
@@ -776,6 +783,34 @@ export default function EditRule({
           </View>
 
           <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 15,
+              padding: '0 20px',
+            }}
+          >
+            <Text style={{ color: colors.n4, marginRight: 15 }}>
+              Include all or any rule:
+            </Text>
+
+            <Stack direction="row" align="center" spacing={1}>
+              <StageButton
+                selected={inc === 'ALL'}
+                onSelect={() => onChangeFilter('ALL')}
+              >
+                All
+              </StageButton>
+              <StageButton
+                selected={inc === 'ANY'}
+                onSelect={() => onChangeFilter('ANY')}
+              >
+                Any
+              </StageButton>
+            </Stack>
+          </View>
+
+          <View
             innerRef={scrollableEl}
             style={{
               borderBottom: '1px solid ' + colors.border,
@@ -786,9 +821,15 @@ export default function EditRule({
           >
             <View style={{ flexShrink: 0 }}>
               <View style={{ marginBottom: 30 }}>
-                <Text style={{ color: colors.n4, marginBottom: 15 }}>
-                  If all these conditions match:
-                </Text>
+                {inc === 'ALL' ? (
+                  <Text style={{ color: colors.n4, marginBottom: 15 }}>
+                    If all of these conditions match:
+                  </Text>
+                ) : (
+                  <Text style={{ color: colors.n4, marginBottom: 15 }}>
+                    If any of these conditions match:
+                  </Text>
+                )}
 
                 <ConditionsList
                   conditions={conditions}
