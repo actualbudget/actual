@@ -106,6 +106,7 @@ export default function SelectLinkedAccounts({
               )}
             />
           </View>
+
           <View
             style={{
               flexDirection: 'row',
