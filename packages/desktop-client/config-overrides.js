@@ -1,3 +1,5 @@
+const path = require('path');
+
 const {
   addWebpackResolve,
   disableEsLint,
@@ -5,21 +7,22 @@ const {
   overrideDevServer,
   babelInclude,
 } = require('customize-cra');
-const path = require('path');
 
 module.exports = {
   webpack: override(
-    babelInclude([
-      path.resolve('src'),
-      path.resolve('../loot-core'),
-      path.resolve('../loot-design'),
-    ]),
+    babelInclude([path.resolve('src'), path.resolve('../loot-core')]),
     process.env.CI && disableEsLint(),
     addWebpackResolve({
       extensions: [
-        ...(process.env.IS_GENERIC_BROWSER ? ['.browser.js'] : []),
+        ...(process.env.IS_GENERIC_BROWSER
+          ? ['.browser.js', '.browser.ts', '.browser.tsx']
+          : []),
         '.web.js',
+        '.web.ts',
+        '.web.tsx',
         '.js',
+        '.ts',
+        '.tsx',
       ],
     }),
     config => {
