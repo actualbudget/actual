@@ -313,17 +313,8 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
-  let buffer;
-  try {
-    buffer = await fs.readFile(getPathForUserFile(fileId));
-  } catch (e) {
-    console.log(`Error: file does not exist: ${getPathForUserFile(fileId)}`);
-    res.status(500).send('File does not exist on server');
-    return;
-  }
-
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
-  res.send(buffer);
+  res.sendFile(getPathForUserFile(fileId));
 });
 
 app.post('/update-user-filename', (req, res) => {

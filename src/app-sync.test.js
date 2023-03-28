@@ -50,7 +50,7 @@ describe('/download-user-file', () => {
         .set('x-actual-token', 'valid-token')
         .set('x-actual-file-id', 'missing-fs-file');
 
-      expect(res.statusCode).toEqual(500);
+      expect(res.statusCode).toEqual(404);
     });
 
     it('returns an attachment file', async () => {
