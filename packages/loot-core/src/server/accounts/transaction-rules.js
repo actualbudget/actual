@@ -91,7 +91,7 @@ export const ruleModel = {
       }
     }
     if (!update || 'conditionsOp' in rule) {
-      if (rule.conditionsOp !== 'and' && rule.conditionsOp !== 'or') {
+      if (!['and', 'or'].includes(rule.conditionsOp)) {
         throw new Error('Invalid rule conditionsOp: ' + rule.conditionsOp);
       }
     }
