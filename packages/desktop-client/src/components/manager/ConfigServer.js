@@ -4,16 +4,11 @@ import { useHistory } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
-import {
-  View,
-  Text,
-  Button,
-  ButtonWithLoading,
-} from 'loot-design/src/components/common';
-import { useSetThemeColor } from 'loot-design/src/components/hooks';
-import { colors } from 'loot-design/src/style';
-import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
+import { useSetThemeColor } from '../../hooks';
+import { colors } from '../../style';
+import { View, Text, Button, ButtonWithLoading } from '../common';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title, Input } from './subscribe/common';

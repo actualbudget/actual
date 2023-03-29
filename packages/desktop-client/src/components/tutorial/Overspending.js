@@ -6,9 +6,10 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { P, View, Text, Button } from 'loot-design/src/components/common';
-import NamespaceContext from 'loot-design/src/components/spreadsheet/NamespaceContext';
-import SheetValue from 'loot-design/src/components/spreadsheet/SheetValue';
+
+import { P, View, Text, Button } from '../common';
+import NamespaceContext from '../spreadsheet/NamespaceContext';
+import SheetValue from '../spreadsheet/SheetValue';
 
 import { Standalone, Title, useMinimized } from './common';
 import Navigation from './Navigation';

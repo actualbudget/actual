@@ -21,6 +21,10 @@ import {
   TYPE_INFO,
 } from 'loot-core/src/shared/rules';
 import { titleFirst } from 'loot-core/src/shared/util';
+
+import DeleteIcon from '../../icons/v0/Delete';
+import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -29,11 +33,7 @@ import {
   Button,
   Menu,
   CustomSelect,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import DeleteIcon from 'loot-design/src/svg/v0/Delete';
-import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
-
+} from '../common';
 import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 

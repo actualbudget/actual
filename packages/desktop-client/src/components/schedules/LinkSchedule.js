@@ -3,8 +3,8 @@ import { useLocation, useHistory } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Search, Text, View } from 'loot-design/src/components/common';
 
+import { Search, Text, View } from '../common';
 import { Page } from '../Page';
 
 import { SchedulesTable } from './SchedulesTable';

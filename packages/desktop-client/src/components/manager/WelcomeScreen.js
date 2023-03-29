@@ -2,14 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import {
-  View,
-  Button,
-  Text,
-  P,
-  ExternalLink,
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+
+import { colors, styles } from '../../style';
+import { View, Button, Text, P, ExternalLink } from '../common';
 
 function WelcomeScreen({ createBudget, pushModal }) {
   return (

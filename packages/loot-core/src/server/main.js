@@ -1,8 +1,6 @@
 import './polyfills';
 import injectAPI from '@actual-app/api/injected';
 
-import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
-
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import asyncStorage from '../platform/server/asyncStorage';
@@ -10,6 +8,7 @@ import fs from '../platform/server/fs';
 import logger from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { fromPlaidAccountType } from '../shared/accounts';
+import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';

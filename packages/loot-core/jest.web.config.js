@@ -1,6 +1,14 @@
 module.exports = {
   preset: 'ts-jest/presets/js-with-ts-esm',
-  moduleFileExtensions: ['testing.js', 'web.js', 'mjs', 'js', 'ts', 'json'],
+  moduleFileExtensions: [
+    'testing.js',
+    'web.js',
+    'mjs',
+    'js',
+    'ts',
+    'tsx',
+    'json',
+  ],
   testEnvironment: 'jsdom',
   testPathIgnorePatterns: ['/node_modules/', '/lib/'].filter(Boolean),
   testMatch: ['**/*.web.test.js'],

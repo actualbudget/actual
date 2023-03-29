@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Tooltip, Pointer, P } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../style';
+import { Tooltip, Pointer, P } from '../common';
 
 import { Title } from './common';
 import Navigation from './Navigation';

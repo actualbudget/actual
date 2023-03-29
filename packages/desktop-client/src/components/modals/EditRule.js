@@ -24,6 +24,13 @@ import {
   integerToAmount,
   amountToInteger,
 } from 'loot-core/src/shared/util';
+
+import useSelected, { SelectedProvider } from '../../hooks/useSelected';
+import AddIcon from '../../icons/v0/Add';
+import SubtractIcon from '../../icons/v0/Subtract';
+import InformationOutline from '../../icons/v1/InformationOutline';
+import { colors } from '../../style';
+import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import {
   View,
   Text,
@@ -32,16 +39,7 @@ import {
   Stack,
   CustomSelect,
   Tooltip,
-} from 'loot-design/src/components/common';
-import useSelected, {
-  SelectedProvider,
-} from 'loot-design/src/components/useSelected';
-import { colors } from 'loot-design/src/style';
-import AddIcon from 'loot-design/src/svg/v0/Add';
-import SubtractIcon from 'loot-design/src/svg/v0/Subtract';
-import InformationOutline from 'loot-design/src/svg/v1/InformationOutline';
-
-import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
+} from '../common';
 import { StatusBadge } from '../schedules/StatusBadge';
 import { BetweenAmountInput } from '../util/AmountInput';
 import DisplayId from '../util/DisplayId';

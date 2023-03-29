@@ -8,8 +8,9 @@ import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { View, P } from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
+
+import { styles } from '../../style';
+import { View, P } from '../common';
 
 import Change from './Change';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';

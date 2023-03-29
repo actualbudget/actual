@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, ModalButtons } from 'loot-design/src/components/common';
+import { Button, ModalButtons } from '../common';
 
 function Navigation({
   nextTutorialStage,

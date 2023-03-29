@@ -8,9 +8,9 @@ import {
   init as initConnection,
   send,
 } from 'loot-core/src/platform/client/fetch';
-import { styles, hasHiddenScrollbars } from 'loot-design/src/style';
 
 import installPolyfills from '../polyfills';
+import { styles, hasHiddenScrollbars } from '../style';
 
 import AppBackground from './AppBackground';
 import FatalError from './FatalError';

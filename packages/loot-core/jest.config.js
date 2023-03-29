@@ -4,6 +4,7 @@ module.exports = {
     'mjs',
     'js',
     'ts',
+    'tsx',
     'json',
   ]),
   setupFilesAfterEnv: ['<rootDir>/src/mocks/setup.js'],

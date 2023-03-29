@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import * as actions from 'loot-core/src/client/actions';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { applyChanges } from 'loot-core/src/shared/util';
-import { ManagePayees } from 'loot-design/src/components/payees';
+
+import { ManagePayees } from '.';
 
 function ManagePayeesWithData({
   modalProps,

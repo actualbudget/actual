@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom-v5-compat';
 
-import { Modal } from 'loot-design/src/components/common';
-import { isNonProductionEnvironment } from 'loot-design/src/util/environment';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
+import { Modal } from '../common';
 import ManageRules from '../ManageRules';
 
 export default function ManageRulesModal({ modalProps, payeeId }) {

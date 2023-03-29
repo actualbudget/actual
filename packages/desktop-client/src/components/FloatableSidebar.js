@@ -5,10 +5,11 @@ import { withRouter } from 'react-router-dom';
 import mitt from 'mitt';
 
 import * as actions from 'loot-core/src/client/actions';
-import { View } from 'loot-design/src/components/common';
-import { SIDEBAR_WIDTH } from 'loot-design/src/components/sidebar';
-import { colors } from 'loot-design/src/style';
 
+import { colors } from '../style';
+
+import { View } from './common';
+import { SIDEBAR_WIDTH } from './sidebar';
 import SidebarWithData from './SidebarWithData';
 
 const SidebarContext = React.createContext(null);

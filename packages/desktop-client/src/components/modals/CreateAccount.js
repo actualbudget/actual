@@ -2,17 +2,10 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
-import {
-  View,
-  Text,
-  Modal,
-  P,
-  Button,
-  ButtonWithLoading,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
 
 import { authorizeBank } from '../../nordigen';
+import { colors } from '../../style';
+import { View, Text, Modal, P, Button, ButtonWithLoading } from '../common';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
   const dispatch = useDispatch();

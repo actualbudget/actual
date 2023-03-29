@@ -16,7 +16,15 @@ module.exports = {
     libraryTarget: 'commonjs2',
   },
   resolve: {
-    extensions: ['.electron.js', '.js', '.json'],
+    extensions: [
+      '.electron.js',
+      '.electron.ts',
+      '.electron.tsx',
+      '.js',
+      '.ts',
+      '.tsx',
+      '.json',
+    ],
   },
   externals: [
     'better-sqlite3',
