@@ -1,5 +1,5 @@
 BEGIN TRANSACTION;
 
-ALTER TABLE rules ADD COLUMN conditionsOp TEXT DEFAULT 'and';
+ALTER TABLE rules ADD COLUMN conditions_op TEXT DEFAULT 'and';
 
 COMMIT;

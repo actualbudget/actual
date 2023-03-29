@@ -943,7 +943,7 @@ describe('Learning categories', () => {
   test('rules with public field names are loaded correctly', async () => {
     await db.insertWithUUID('rules', {
       stage: null,
-      conditionsOp: 'and',
+      conditions_op: 'and',
       conditions: JSON.stringify([
         { op: 'is', field: 'imported_payee', value: 'foo' },
       ]),

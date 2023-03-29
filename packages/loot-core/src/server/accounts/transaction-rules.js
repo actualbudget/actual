@@ -114,25 +114,31 @@ export const ruleModel = {
       return value;
     }
 
-    let rule = { ...row };
-    rule.conditions = rule.conditions
-      ? parseArray(rule.conditions).map(cond => fromInternalField(cond))
-      : [];
-    rule.actions = rule.actions
-      ? parseArray(rule.actions).map(action => fromInternalField(action))
-      : [];
-    return rule;
+    let { conditions, conditions_op, actions, ...fields } = row;
+    return {
+      ...fields,
+      conditionsOp: conditions_op,
+      conditions: conditions
+        ? parseArray(conditions).map(cond => fromInternalField(cond))
+        : [],
+      actions: actions
+        ? parseArray(actions).map(action => fromInternalField(action))
+        : [],
+    };
   },
 
   fromJS(rule) {
-    let row = { ...rule };
-    if ('conditions' in row) {
-      let conditions = row.conditions.map(cond => toInternalField(cond));
-      row.conditions = JSON.stringify(conditions);
+    let { conditions, conditionsOp, actions, ...row } = rule;
+    if (conditionsOp) {
+      row.conditions_op = conditionsOp;
     }
-    if ('actions' in row) {
-      let actions = row.actions.map(action => toInternalField(action));
-      row.actions = JSON.stringify(actions);
+    if (Array.isArray(conditions)) {
+      let value = conditions.map(cond => toInternalField(cond));
+      row.conditions = JSON.stringify(value);
+    }
+    if (Array.isArray(actions)) {
+      let value = actions.map(action => toInternalField(action));
+      row.actions = JSON.stringify(value);
     }
     return row;
   },
