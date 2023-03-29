@@ -811,12 +811,12 @@ export default function EditRule({
                     style={{ display: 'inline-flex' }}
                     fields={[
                       ['and', 'all'],
-                      ['or', 'any of'],
+                      ['or', 'any'],
                     ]}
                     value={conditionsOp}
                     onChange={onChangeConditionsOp}
                   />
-                  these conditions match:
+                  of these conditions match:
                 </Text>
 
                 <ConditionsList
