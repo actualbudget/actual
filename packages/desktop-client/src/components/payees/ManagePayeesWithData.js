@@ -93,6 +93,7 @@ function ManagePayeesWithData({
   function onCreateRule(id) {
     let rule = {
       stage: null,
+      conditionsOp: 'and',
       conditions: [
         {
           field: 'payee',

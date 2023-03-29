@@ -400,6 +400,7 @@ describe('Account sync', () => {
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: payeeId }],
       actions: [{ op: 'set', field: 'category', value: catId }],
     });
@@ -450,6 +451,7 @@ describe('Account sync', () => {
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
       actions: [{ op: 'set', field: 'payee', value: payeeId }],
     });
@@ -496,6 +498,7 @@ describe('Account sync', () => {
       // Unless they sync in a rule...
       await insertRule({
         stage: null,
+        conditionsOp: 'and',
         conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
         actions: [{ op: 'set', field: 'payee', value: payeeId2 }],
       });
@@ -558,6 +561,7 @@ describe('Account sync', () => {
     // Make sure it still runs rules
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
       actions: [{ op: 'set', field: 'payee', value: payeeId }],
     });
