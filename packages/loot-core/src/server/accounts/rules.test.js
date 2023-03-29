@@ -326,6 +326,7 @@ describe('Action', () => {
 describe('Rule', () => {
   test('executing a rule works', () => {
     let rule = new Rule({
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
@@ -342,6 +343,7 @@ describe('Rule', () => {
     expect(rule.apply({ name: 'James2' })).toEqual({ name: 'James2' });
 
     rule = new Rule({
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
       actions: [
         { op: 'set', field: 'name', value: 'Sarah' },
@@ -358,8 +360,9 @@ describe('Rule', () => {
     expect(rule.apply({ name: 'James2' })).toEqual({ name: 'James2' });
   });
 
-  test('rule evaluates conditions as AND', () => {
+  test('rule with `and` conditionsOp evaluates conditions as AND', () => {
     let rule = new Rule({
+      conditionsOp: 'and',
       conditions: [
         { op: 'is', field: 'name', value: 'James' },
         {
@@ -386,9 +389,48 @@ describe('Rule', () => {
     expect(rule.exec({ name: 'James', date: '2018-01-15' })).toEqual(null);
   });
 
+  test('rule with `or` conditionsOp evaluates conditions as OR', () => {
+    let rule = new Rule({
+      conditionsOp: 'or',
+      conditions: [
+        { op: 'is', field: 'name', value: 'James' },
+        {
+          op: 'isapprox',
+          field: 'date',
+          value: {
+            start: '2018-01-12',
+            frequency: 'monthly',
+            interval: 3,
+          },
+        },
+      ],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
+      fieldTypes,
+    });
+
+    expect(rule.exec({ name: 'James', date: '2018-01-12' })).toEqual({
+      name: 'Sarah',
+    });
+    expect(rule.exec({ name: 'James2', date: '2018-01-12' })).toEqual({
+      name: 'Sarah',
+    });
+    expect(rule.exec({ name: 'James', date: '2018-01-10' })).toEqual({
+      name: 'Sarah',
+    });
+    expect(rule.exec({ name: 'James', date: '2018-01-15' })).toEqual({
+      name: 'Sarah',
+    });
+  });
+
   test('rules are deterministically ranked', () => {
     let rule = (id, conditions) =>
-      new Rule({ id, conditions, actions: [], fieldTypes });
+      new Rule({
+        id,
+        conditionsOp: 'and',
+        conditions,
+        actions: [],
+        fieldTypes,
+      });
     let expectOrder = (rules, ids) =>
       expect(rules.map(r => r.getId())).toEqual(ids);
 
@@ -419,7 +461,7 @@ describe('Rule', () => {
 
   test('iterateIds finds all the ids', () => {
     let rule = (id, conditions, actions = []) =>
-      new Rule({ id, conditions, actions, fieldTypes });
+      new Rule({ id, conditionsOp: 'and', conditions, actions, fieldTypes });
 
     let rules = [
       rule(
@@ -459,6 +501,7 @@ describe('RuleIndexer', () => {
     let indexer = new RuleIndexer({ field: 'name' });
 
     let rule = new Rule({
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
@@ -466,6 +509,7 @@ describe('RuleIndexer', () => {
     indexer.index(rule);
 
     let rule2 = new Rule({
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'foo' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
@@ -489,6 +533,7 @@ describe('RuleIndexer', () => {
     // A condition that references both of the fields
     let indexer = new RuleIndexer({ field: 'category', method: 'firstchar' });
     let rule = new Rule({
+      conditionsOp: 'and',
       conditions: [
         { op: 'is', field: 'name', value: 'James' },
         { op: 'is', field: 'category', value: 'food' },
@@ -499,6 +544,7 @@ describe('RuleIndexer', () => {
     indexer.index(rule);
 
     let rule2 = new Rule({
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'bars' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
@@ -506,6 +552,7 @@ describe('RuleIndexer', () => {
     indexer.index(rule2);
 
     let rule3 = new Rule({
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'date', value: '2020-01-20' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
@@ -539,6 +586,7 @@ describe('RuleIndexer', () => {
 
     let rule = new Rule({
       id: 'id1',
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'food' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
@@ -557,6 +605,7 @@ describe('RuleIndexer', () => {
     expect(indexer.getApplicableRules({ category: 'food' }).size).toBe(0);
 
     rule = new Rule({
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'alcohol' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
@@ -573,6 +622,7 @@ describe('RuleIndexer', () => {
     let indexer = new RuleIndexer({ field: 'name', method: 'firstchar' });
 
     let rule = new Rule({
+      conditionsOp: 'and',
       conditions: [
         { op: 'oneOf', field: 'name', value: ['James', 'Sarah', 'Evy'] },
       ],
@@ -582,6 +632,7 @@ describe('RuleIndexer', () => {
     indexer.index(rule);
 
     let rule2 = new Rule({
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'Georgia' }],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
       fieldTypes,

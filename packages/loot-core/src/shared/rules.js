@@ -102,6 +102,10 @@ export function friendlyOp(op, type) {
       return 'set';
     case 'link-schedule':
       return 'link schedule';
+    case 'and':
+      return 'and';
+    case 'or':
+      return 'or';
     default:
       return '';
   }
