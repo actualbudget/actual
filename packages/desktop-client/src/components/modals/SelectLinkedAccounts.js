@@ -14,15 +14,38 @@ export default function SelectLinkedAccounts({
   localAccounts,
   actions,
 }) {
-  const [chosenAccounts, setChosenAccounts] = useState({});
+  const [chosenAccounts, setChosenAccounts] = useState(() => {
+    return Object.fromEntries(
+      localAccounts
+        .filter(acc => acc.account_id)
+        .map(acc => [acc.account_id, acc.id]),
+    );
+  });
 
   async function onNext() {
+    const chosenLocalAccountIds = Object.values(chosenAccounts);
+
+    // Unlink accounts that were previously linked, but the user
+    // chose to remove the bank-sync
+    localAccounts
+      .filter(acc => acc.account_id)
+      .filter(acc => !chosenLocalAccountIds.includes(acc.id))
+      .forEach(acc => actions.unlinkAccount(acc.id));
+
+    // Link new accounts
     Object.entries(chosenAccounts).forEach(
       ([chosenExternalAccountId, chosenLocalAccountId]) => {
         const externalAccount = externalAccounts.find(
           account => account.account_id === chosenExternalAccountId,
         );
 
+        // Skip linking accounts that were previously linked with
+        // a different bank.
+        if (!externalAccount) {
+          return;
+        }
+
+        // Finally link the matched account
         actions.linkAccount(
           requisitionId,
           externalAccount,
@@ -37,9 +60,7 @@ export default function SelectLinkedAccounts({
   }
 
   const unlinkedAccounts = localAccounts.filter(
-    account =>
-      !account.account_id &&
-      !Object.values(chosenAccounts).includes(account.id),
+    account => !Object.values(chosenAccounts).includes(account.id),
   );
 
   function onSetLinkedAccount(externalAccount, localAccountId) {
@@ -86,9 +107,6 @@ export default function SelectLinkedAccounts({
                 <View key={key}>
                   <TableRow
                     externalAccount={item}
-                    linkedAccount={localAccounts.find(
-                      acc => acc.account_id === item.account_id,
-                    )}
                     chosenAccount={
                       chosenAccounts[item.account_id] === addAccountOption.value
                         ? {
@@ -130,7 +148,6 @@ export default function SelectLinkedAccounts({
 
 function TableRow({
   externalAccount,
-  linkedAccount,
   chosenAccount,
   unlinkedAccounts,
   onSetLinkedAccount,
@@ -157,7 +174,7 @@ function TableRow({
       <Field
         width="flex"
         truncate={focusedField !== 'account'}
-        onClick={() => !linkedAccount && setFocusedField('account')}
+        onClick={() => setFocusedField('account')}
       >
         {focusedField === 'account' ? (
           <Autocomplete
@@ -170,31 +187,30 @@ function TableRow({
             value={chosenAccountOption}
           />
         ) : (
-          linkedAccount?.name || chosenAccount?.name
+          chosenAccount?.name
         )}
       </Field>
       <Field width="flex">
-        {!linkedAccount &&
-          (chosenAccount ? (
-            <Button
-              onClick={() => {
-                onSetLinkedAccount(externalAccount, null);
-              }}
-              style={{ float: 'right' }}
-            >
-              Remove bank-sync
-            </Button>
-          ) : (
-            <Button
-              primary
-              onClick={() => {
-                setFocusedField('account');
-              }}
-              style={{ float: 'right' }}
-            >
-              Setup bank-sync
-            </Button>
-          ))}
+        {chosenAccount ? (
+          <Button
+            onClick={() => {
+              onSetLinkedAccount(externalAccount, null);
+            }}
+            style={{ float: 'right' }}
+          >
+            Remove bank-sync
+          </Button>
+        ) : (
+          <Button
+            primary
+            onClick={() => {
+              setFocusedField('account');
+            }}
+            style={{ float: 'right' }}
+          >
+            Setup bank-sync
+          </Button>
+        )}
       </Field>
     </Row>
   );
