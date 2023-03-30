@@ -75,7 +75,7 @@ jobs:
           context: .
           push: true
           file: docker/stable-ubuntu.Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build and push Alpine image
@@ -84,5 +84,5 @@ jobs:
           context: .
           push: true
           file: docker/stable-alpine.Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: ${{ steps.alpine-meta.outputs.tags }}

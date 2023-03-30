@@ -29,6 +29,9 @@ docker build -t actual-server .
 docker run -p 5006:5006 actual-server
 ```
 
+The multi-arch Docker container image runs on amd64, arm64, and armv7 platforms. Please be warned that Actual may be sluggish on armv7, but users report that it does work.
+
+
 ## Deploying
 
 You should deploy your server so it's always running. We recommend [fly.io](https://fly.io) which makes it incredibly easy and provides a free plan.

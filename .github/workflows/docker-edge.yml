@@ -75,7 +75,7 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           file: docker/edge-${{ matrix.os }}.Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
