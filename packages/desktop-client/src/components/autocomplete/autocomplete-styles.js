@@ -27,7 +27,7 @@ const colourStyles = {
     backgroundColor: colors.n1,
     marginTop: 2,
     marginBottom: 2,
-    position: selectProps.embedded ? 'relative' : styles.position,
+    position: selectProps.menuPortalTarget ? styles.position : 'relative',
     overflow: 'hidden',
   }),
   menuList: styles => ({

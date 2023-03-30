@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import Select from 'react-select';
+import Select, {
+  Props as SelectProps,
+  PropsValue,
+  SingleValue,
+} from 'react-select';
 
 import CreatableSelect from 'react-select/creatable';
 
@@ -7,7 +11,17 @@ import { NullComponent } from '../common';
 
 import styles from './autocomplete-styles';
 
-const Autocomplete = React.forwardRef(
+type OptionValue = string;
+
+interface AutocompleteProps extends SelectProps<OptionValue> {
+  focused: boolean;
+  embedded: boolean;
+  onSelect: (value: PropsValue<OptionValue>) => void;
+  onCreateOption: (value: SingleValue<OptionValue>) => void;
+  isCreatable: boolean;
+}
+
+const Autocomplete: React.VFC<AutocompleteProps> = React.forwardRef(
   (
     {
       value,
@@ -75,7 +89,7 @@ const Autocomplete = React.forwardRef(
 
     return (
       <Component
-        ref={ref}
+        ref={ref as any}
         value={value}
         menuIsOpen={isOpen || embedded}
         autoFocus={embedded}
@@ -96,7 +110,6 @@ const Autocomplete = React.forwardRef(
         }}
         maxMenuHeight={200}
         styles={styles}
-        embedded={embedded}
         menuPlacement="auto"
         menuPortalTarget={embedded ? undefined : document.body}
         {...props}
