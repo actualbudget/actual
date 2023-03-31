@@ -87,6 +87,7 @@ export default function PayeeAutocomplete({
           ? allOptions.filter(item => value.includes(item.value))
           : allOptions.find(item => item.value === value)
       }
+      isValidNewOption={input => input && !focusTransferPayees}
       isMulti={multi}
       inputValue={inputValue}
       onInputChange={setInputValue}
