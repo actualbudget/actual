@@ -213,7 +213,7 @@ If you are using GitHub pages for hosting, this command is a convenient way to b
 
 ### Writing Good Release Notes
 
-Create a Markdown file in the `changelog-unreleased` directory of the repository you’re contributing to named after the PR number. The file should contain front matter with a `category` key (defining which header to put the entry under) and an `authors` key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is “Maintenance”). Copy-paste the template below to get started!
+Create a Markdown file in the `upcoming-release-notes` directory of the repository you’re contributing to named after the PR number. The file should contain front matter with a `category` key (defining which header to put the entry under) and an `authors` key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is “Maintenance”). Copy-paste the template below to get started!
 
 ```markdown
 ---
