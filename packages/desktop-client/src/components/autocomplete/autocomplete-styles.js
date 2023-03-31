@@ -21,6 +21,7 @@ const colourStyles = {
   menuPortal: styles => ({
     ...styles,
     zIndex: 5000,
+    minWidth: 200,
   }),
   menu: (styles, { selectProps }) => ({
     ...styles,
