@@ -56,7 +56,6 @@ export default function PayeeAutocomplete({
   showMakeTransfer = true,
   showManagePayees = false,
   defaultFocusTransferPayees = false,
-  isCreatable = false,
   onSelect,
   onManagePayees,
   ...props
@@ -78,7 +77,6 @@ export default function PayeeAutocomplete({
 
   const dispatch = useDispatch();
 
-  const useCreatableComponent = isCreatable && focusTransferPayees === false;
   const [inputValue, setInputValue] = useState();
 
   return (
@@ -107,7 +105,6 @@ export default function PayeeAutocomplete({
         // This is actually a new option, so create it
         onSelect(await dispatch(createPayee(selectedValue)));
       }}
-      isCreatable={useCreatableComponent}
       createOptionPosition="first"
       formatCreateLabel={inputValue => (
         <View
