@@ -20,6 +20,7 @@ yarn start
 Go to https://localhost:5006 in your browser and you'll see Actual.
 
 ## Running via Docker
+
 To run using a Docker container you can use following commands;
 
 ```
@@ -30,7 +31,6 @@ docker run -p 5006:5006 actual-server
 ```
 
 The multi-arch Docker container image runs on amd64, arm64, and armv7 platforms. Please be warned that Actual may be sluggish on armv7, but users report that it does work.
-
 
 ## Deploying
 
@@ -46,13 +46,13 @@ Copy `fly.template.toml` to `fly.toml`. Open `fly.toml` and customize the app na
 
 Now, run `flyctl launch` from `actual-server`. You should have a running app now! To get to the Actual UI, simply run `flyctl open`
 
-Whenever you want to update Actual, update the versions of `@actual-app/api` and `@actual-app/web` in `package.json` and run `flyctl  deploy`.
+Whenever you want to update Actual, update the versions of `@actual-app/api` and `@actual-app/web` in `package.json` and run `flyctl deploy`.
 
 ### Using a custom Docker setup
 
 Actual is also available as a Docker image ready to be run in your own custom environment.
 
-- Docker Hub: `jlongster/actual-server`
+- Docker Hub: `actualbudget/actual-server`
 - Github Registry: `ghcr.io/actualbudget/actual-server`
 
 ### Persisting server data
@@ -75,12 +75,11 @@ Now we need to tell Actual to use this volume. Add this in `fly.toml`:
 
 That's it! Actual will automatically check if the `/data` directory exists and use it automatically.
 
-
 ### One-click hosting solutions
 
 These are non-official methods of one-click solutions for running Actual. If you provide a service like this, feel free to open a PR and add it to this list. These run Actual via a Docker image.
 
-* PikaPods: [Run on PikaPods](https://www.pikapods.com/pods?run=actual)
+- PikaPods: [Run on PikaPods](https://www.pikapods.com/pods?run=actual)
 
 ## Configuring the server
 
@@ -93,4 +92,3 @@ The Actual app is totally separate from the server. In this project, they happen
 The server could live on a completely different domain. You might setup Actual so that the app and server are running in completely separate places.
 
 Since Actual doesn't know what server to use, the first thing it does is asks you for the server URL. If you are running this project, simply click "Use this domain" and it will automatically fill it in with the current domain. This works because we are serving the app and server in the same place.
-
