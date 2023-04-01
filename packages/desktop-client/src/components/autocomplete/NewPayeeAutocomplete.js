@@ -133,6 +133,7 @@ export default function PayeeAutocomplete({
       components={{
         MenuList: MenuListWithFooter,
       }}
+      minMenuHeight={300}
       footer={
         <AutocompleteFooter show={showMakeTransfer || showManagePayees}>
           {showMakeTransfer && (
