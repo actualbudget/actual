@@ -5,7 +5,7 @@ sidebar_position: 2
 
 ## Hosting Actual on a home server with Docker
 
-Actual is also available as a Docker image ready to be run in your own custom environment. We publish the image both to [Docker Hub](https://hub.docker.com/r/jlongster/actual-server) (as `jlongster/actual-server`) and [GitHub’s container registry](https://ghcr.io/actualbudget/actual-server) (as `ghcr.io/actualbudget/actual-server`). Actual should function the same when pulled from either registry, so you can choose whichever one you prefer.
+Actual is also available as a Docker image ready to be run in your own custom environment. We publish the image both to [Docker Hub](https://hub.docker.com/r/actualbudget/actual-server) (as `actualbudget/actual-server`) and [GitHub’s container registry](https://ghcr.io/actualbudget/actual-server) (as `ghcr.io/actualbudget/actual-server`). Actual should function the same when pulled from either registry, so you can choose whichever one you prefer.
 
 ## Docker Tags
 
@@ -54,7 +54,7 @@ Pre-requisites: Docker
 Alternatively to using docker compose, you may also launch docker using this command. This command, as shown, will launch the latest stable build of Actual.
 
 ```bash
-$ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
+$ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget actualbudget/actual-server:latest
 ```
 
 `--pull=always` -- always pulls the latest image
@@ -69,7 +69,7 @@ $ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH
 
 `--name my_actual_budget` -- gives your new docker container a name (change this to whatever you want)
 
-`jlongster/actual-server:latest` -- defines which image you want to pull and launch.
+`actualbudget/actual-server:latest` -- defines which image you want to pull and launch.
 
 To update the container from a new image, use these commands.
 
@@ -82,13 +82,13 @@ $ docker container rm my_actual_budget
 ```
 
 ```bash
-$ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
+$ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget actualbudget/actual-server:latest
 ```
 
 You can place all of these in a batch script for a 1 click or single command update.
 
 ```bash
-$ docker stop my_actual_budget && docker container rm my_actual_budget && docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget jlongster/actual-server:latest
+$ docker stop my_actual_budget && docker container rm my_actual_budget && docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget actualbudget/actual-server:latest
 ```
 
 ## Test connection within local network

@@ -46,7 +46,7 @@ should be comfortable with using the command line to set it up though.
 
 1. Create your app using the following command:
    ```sh
-   fly launch --image jlongster/actual-server:latest
+   fly launch --image actualbudget/actual-server:latest
    ```
    1. Select `Yes` when prompted to copy existing configuration.
       ```sh
@@ -137,5 +137,5 @@ variable._
 
 These images are published based on the `master` branch of the [actual-server repo][upstream].
 
-- Docker hub: [jlongster/actual-server](https://hub.docker.com/r/jlongster/actual-server)
+- Docker hub: [actualbudget/actual-server](https://hub.docker.com/r/actualbudget/actual-server)
 - Github Container Registry: [ghcr.io/actualbudget/actual-server](https://ghcr.io/actualbudget/actual-server)
