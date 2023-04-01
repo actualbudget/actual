@@ -25,6 +25,7 @@ const colourStyles = {
   }),
   menu: (styles, { selectProps }) => ({
     ...styles,
+    minWidth: 200,
     backgroundColor: colors.n1,
     marginTop: 2,
     marginBottom: 2,

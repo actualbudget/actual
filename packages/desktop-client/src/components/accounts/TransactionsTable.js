@@ -387,7 +387,6 @@ function PayeeCell({
   transaction,
   payee,
   transferAcct,
-  importedPayee,
   isPreview,
   onEdit,
   onUpdate,
@@ -403,7 +402,7 @@ function PayeeCell({
       name="payee"
       value={payeeId}
       valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
-      formatter={value => getPayeePretty(transaction, payee, transferAcct)}
+      formatter={() => getPayeePretty(transaction, payee, transferAcct)}
       exposed={focused}
       onExpose={!isPreview && (name => onEdit(id, name))}
       onUpdate={async value => {
@@ -448,6 +447,7 @@ function PayeeCell({
               onSelect={onSave}
               onManagePayees={() => onManagePayees(payeeId)}
               isCreatable
+              menuPortalTarget={undefined}
             />
           </>
         );
@@ -776,6 +776,7 @@ export const Transaction = React.memo(function Transaction(props) {
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               onUpdate={onUpdate}
               onSelect={onSave}
+              menuPortalTarget={undefined}
             />
           )}
         </CustomCell>
@@ -985,6 +986,7 @@ export const Transaction = React.memo(function Transaction(props) {
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               onUpdate={onUpdate}
               onSelect={onSave}
+              menuPortalTarget={undefined}
             />
           )}
         </CustomCell>
