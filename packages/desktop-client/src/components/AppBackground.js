@@ -8,12 +8,14 @@ import { colors } from '../style';
 import Background from './Background';
 import { View, Block } from './common';
 
-function AppBackground({ initializing, loadingText }) {
+function AppBackground({ initializing, loadingText, children }) {
+  const isLoading = loadingText != null || initializing;
+
   return (
     <React.Fragment>
       <Background />
 
-      {(loadingText != null || initializing) && (
+      {isLoading && (
         <View
           {...css({
             position: 'absolute',
@@ -32,6 +34,8 @@ function AppBackground({ initializing, loadingText }) {
           <AnimatedLoading width={25} color={colors.n1} />
         </View>
       )}
+
+      {isLoading ? <div style={{ display: 'none' }}>{children}</div> : children}
     </React.Fragment>
   );
 }

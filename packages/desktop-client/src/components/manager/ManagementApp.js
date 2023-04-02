@@ -132,70 +132,68 @@ function ManagementApp({
           />
         </View>
 
-        {managerHasInitialized && (
-          <View
-            style={{
-              alignItems: 'center',
-              bottom: 0,
-              justifyContent: 'center',
-              left: 0,
-              padding: 20,
-              position: 'absolute',
-              right: 0,
-              top: 0,
-            }}
-          >
-            {userData && files ? (
-              <>
+        <View
+          style={{
+            alignItems: 'center',
+            bottom: 0,
+            justifyContent: 'center',
+            left: 0,
+            padding: 20,
+            position: 'absolute',
+            right: 0,
+            top: 0,
+          }}
+        >
+          {userData && files ? (
+            <>
+              <Switch>
+                <Route exact path="/config-server" component={ConfigServer} />
+                <Route
+                  exact
+                  path="/change-password"
+                  component={ChangePassword}
+                />
+                {files && files.length > 0 ? (
+                  <Route exact path="/" component={BudgetList} />
+                ) : (
+                  <Route exact path="/" component={WelcomeScreen} />
+                )}
+                {/* Redirect all other pages to this route */}
+                <Route path="/" render={() => <Redirect to="/" />} />
+              </Switch>
+
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  padding: '6px 10px',
+                  zIndex: 4000,
+                }}
+              >
                 <Switch>
-                  <Route exact path="/config-server" component={ConfigServer} />
+                  <Route exact path="/config-server" component={null} />
                   <Route
                     exact
-                    path="/change-password"
-                    component={ChangePassword}
+                    path="/"
+                    render={() => (
+                      <LoggedInUser style={{ padding: '4px 7px' }} />
+                    )}
                   />
-                  {files && files.length > 0 ? (
-                    <Route exact path="/" component={BudgetList} />
-                  ) : (
-                    <Route exact path="/" component={WelcomeScreen} />
-                  )}
-                  {/* Redirect all other pages to this route */}
-                  <Route path="/" render={() => <Redirect to="/" />} />
                 </Switch>
-
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    padding: '6px 10px',
-                    zIndex: 4000,
-                  }}
-                >
-                  <Switch>
-                    <Route exact path="/config-server" component={null} />
-                    <Route
-                      exact
-                      path="/"
-                      render={() => (
-                        <LoggedInUser style={{ padding: '4px 7px' }} />
-                      )}
-                    />
-                  </Switch>
-                </View>
-              </>
-            ) : (
-              <Switch>
-                <Route exact path="/login" component={Login} />
-                <Route exact path="/error" component={Error} />
-                <Route exact path="/config-server" component={ConfigServer} />
-                <Route exact path="/bootstrap" component={Bootstrap} />
-                {/* Redirect all other pages to this route */}
-                <Route path="/" render={() => <Redirect to="/bootstrap" />} />
-              </Switch>
-            )}
-          </View>
-        )}
+              </View>
+            </>
+          ) : (
+            <Switch>
+              <Route exact path="/login" component={Login} />
+              <Route exact path="/error" component={Error} />
+              <Route exact path="/config-server" component={ConfigServer} />
+              <Route exact path="/bootstrap" component={Bootstrap} />
+              {/* Redirect all other pages to this route */}
+              <Route path="/" render={() => <Redirect to="/bootstrap" />} />
+            </Switch>
+          )}
+        </View>
 
         <Switch>
           <Route exact path="/config-server" component={null} />

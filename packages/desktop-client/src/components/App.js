@@ -101,27 +101,15 @@ class App extends React.Component {
           styles.lightScrollbar,
         ])}
       >
-        {fatalError ? (
-          <React.Fragment>
-            <AppBackground />
+        <AppBackground initializing={initializing} loadingText={loadingText}>
+          {fatalError ? (
             <FatalError error={fatalError} buttonText="Restart app" />
-          </React.Fragment>
-        ) : initializing ? (
-          <AppBackground
-            initializing={initializing}
-            loadingText={loadingText}
-          />
-        ) : budgetId ? (
-          <FinancesApp />
-        ) : (
-          <React.Fragment>
-            <AppBackground
-              initializing={initializing}
-              loadingText={loadingText}
-            />
+          ) : budgetId ? (
+            <FinancesApp />
+          ) : (
             <ManagementApp />
-          </React.Fragment>
-        )}
+          )}
+        </AppBackground>
 
         <UpdateNotification />
         <MobileWebMessage />
