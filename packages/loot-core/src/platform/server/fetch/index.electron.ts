@@ -2,7 +2,7 @@ let fs = require('fs');
 
 const _fetch = require('node-fetch');
 
-async function fetchBinary(url, filepath) {
+async function _fetchBinary(url, filepath) {
   const res = await _fetch(url);
   return new Promise((resolve, reject) => {
     const fileStream = fs.createWriteStream(filepath);
@@ -16,4 +16,4 @@ async function fetchBinary(url, filepath) {
   });
 }
 
-module.exports = { fetch: _fetch, fetchBinary };
+module.exports = { fetch: _fetch, fetchBinary: _fetchBinary };

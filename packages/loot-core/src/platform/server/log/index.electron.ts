@@ -1,4 +1,6 @@
-const logger = require('electron-log');
+import type Logger from '.';
+
+const logger: Logger = require('electron-log');
 
 if (logger.transports) {
   logger.transports.file.appName = 'Actual';

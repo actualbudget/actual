@@ -16,7 +16,7 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/lib/',
-    '.+/index.web.test.[tj]sx?',
+    '.+/index\\.web\\.test\\.(js|ts|tsx)',
   ],
   transformIgnorePatterns: ['/node_modules/', '__mocks__'],
   transform: {

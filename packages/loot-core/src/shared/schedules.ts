@@ -151,13 +151,15 @@ export function getRecurringDescription(config) {
   }
 }
 
+type RecurringSchedule = {
+  start: Date;
+  frequency: string;
+  byHourOfDay: number[];
+  interval?: unknown;
+};
+
 export function recurConfigToRSchedule(config) {
-  let base: {
-    start: Date;
-    frequency: string;
-    byHourOfDay: number[];
-    interval?: unknown;
-  } = {
+  let base: RecurringSchedule = {
     start: monthUtils.parseDate(config.start),
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],

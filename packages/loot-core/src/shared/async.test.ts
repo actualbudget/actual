@@ -59,7 +59,7 @@ describe('async', () => {
   test('sequential fn should still flush queue when error is thrown', async () => {
     const test = async fn => {
       fn(1);
-      fn(2, { throwError: true }).catch(err => undefined);
+      fn(2, { throwError: true }).catch(err => {});
       await fn(3);
     };
 

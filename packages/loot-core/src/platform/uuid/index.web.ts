@@ -1,4 +1,4 @@
-import uuid from 'uuid';
+const uuid = require('uuid');
 
 module.exports = {
   v4: function () {
