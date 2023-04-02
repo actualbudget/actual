@@ -67,7 +67,7 @@ export function getStatusProps(status) {
 }
 
 export function StatusIcon({ status }) {
-  let { color } = getStatusProps(status);
+  let { color, Icon } = getStatusProps(status);
 
   return <Icon style={{ width: 13, height: 13, color }} />;
 }

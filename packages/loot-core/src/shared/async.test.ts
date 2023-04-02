@@ -5,7 +5,7 @@ function timeout(n) {
 }
 
 function makeFunction(data) {
-  return async function fn(n, { throwError } = {}) {
+  return async function fn(n, { throwError = false } = {}) {
     data.push(n);
     await timeout(10);
 
@@ -59,7 +59,7 @@ describe('async', () => {
   test('sequential fn should still flush queue when error is thrown', async () => {
     const test = async fn => {
       fn(1);
-      fn(2, { throwError: true }).catch(err => {});
+      fn(2, { throwError: true }).catch(err => undefined);
       await fn(3);
     };
 

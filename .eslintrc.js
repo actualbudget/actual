@@ -10,8 +10,8 @@ rulesDirPlugin.RULES_DIR = path.join(
 );
 
 module.exports = {
-  plugins: ['prettier', 'import', 'rulesdir'],
-  extends: ['react-app'],
+  plugins: ['prettier', 'import', 'rulesdir', '@typescript-eslint'],
+  extends: ['react-app', 'plugin:@typescript-eslint/recommended'],
   reportUnusedDisableDirectives: true,
   rules: {
     'prettier/prettier': 'error',
@@ -66,5 +66,11 @@ module.exports = {
         pathGroupsExcludedImportTypes: ['react'],
       },
     ],
+
+    // Rules disable during TS migration
+    '@typescript-eslint/no-var-requires': 'off',
+    'prefer-const': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
   },
 };

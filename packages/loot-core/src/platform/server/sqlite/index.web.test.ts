@@ -25,6 +25,7 @@ describe('Web sqlite', () => {
 
     let rows = runQuery(db, 'SELECT * FROM numbers', null, true);
     expect(rows.length).toBe(1);
+    // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[0].number).toBe(4);
 
     let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -41,6 +42,7 @@ describe('Web sqlite', () => {
     // Nothing should have changed in the db
     rows = runQuery(db, 'SELECT * FROM numbers', null, true);
     expect(rows.length).toBe(1);
+    // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[0].number).toBe(4);
   });
 
@@ -52,6 +54,7 @@ describe('Web sqlite', () => {
 
     let rows = runQuery(db, 'SELECT * FROM numbers', null, true);
     expect(rows.length).toBe(1);
+    // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[0].number).toBe(4);
 
     transaction(db, () => {
@@ -73,8 +76,11 @@ describe('Web sqlite', () => {
     // Nothing should have changed in the db
     rows = runQuery(db, 'SELECT * FROM numbers', null, true);
     expect(rows.length).toBe(3);
+    // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[0].number).toBe(4);
+    // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[1].number).toBe(5);
+    // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[2].number).toBe(6);
   });
 });
