@@ -1,6 +1,6 @@
-import type Logger from '.';
+import logger from 'electron-log';
 
-const logger: Logger = require('electron-log');
+import type Logger from '.';
 
 if (logger.transports) {
   logger.transports.file.appName = 'Actual';
@@ -9,4 +9,4 @@ if (logger.transports) {
   logger.transports.console.level = false;
 }
 
-export default logger;
+export default logger as Logger;
