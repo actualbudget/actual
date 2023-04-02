@@ -35,11 +35,13 @@ export class BudgetPage {
   async getBalanceForRow(idx) {
     return Math.round(
       parseFloat(
-        await this.budgetTable
-          .getByTestId('row')
-          .nth(idx)
-          .getByTestId('balance')
-          .textContent(),
+        (
+          await this.budgetTable
+            .getByTestId('row')
+            .nth(idx)
+            .getByTestId('balance')
+            .textContent()
+        ).replace(/,/g, ''),
       ) * 100,
     );
   }
