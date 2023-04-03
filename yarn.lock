@@ -3871,6 +3871,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/emscripten@npm:*":
+  version: 1.39.6
+  resolution: "@types/emscripten@npm:1.39.6"
+  checksum: 437f2f9cdfd9057255662508fa9a415fe704ba484c6198f3549c5b05feebcdcd612b1ec7b10026d2566935d05d3c36f9366087cb42bc90bd25772a88fcfc9343
+  languageName: node
+  linkType: hard
+
 "@types/eslint-scope@npm:^3.7.3":
   version: 3.7.4
   resolution: "@types/eslint-scope@npm:3.7.4"
@@ -4028,6 +4035,16 @@ __metadata:
     jest-matcher-utils: ^27.0.0
     pretty-format: ^27.0.0
   checksum: 7e11c6826aa429ad990dc262e4e4b54aa36573287fddf15773e4137f07d11d3105f0dd9f1baff73252160a057df23f5529bb83b1bf83cd3f45f9460a5ca5c22e
+  languageName: node
+  linkType: hard
+
+"@types/jlongster__sql.js@npm:@types/sql.js@latest":
+  version: 1.4.4
+  resolution: "@types/sql.js@npm:1.4.4"
+  dependencies:
+    "@types/emscripten": "*"
+    "@types/node": "*"
+  checksum: c71928d76b59e4899da4b137a4f1bbf8cc0cf198928efa183bba90880ae69331da23a99175b88a7f5eaa34ce9ebef8f94dd1dcca8e4abdac2abb560d860e6636
   languageName: node
   linkType: hard
 
@@ -13654,6 +13671,7 @@ __metadata:
     "@rschedule/json-tools": ^1.2.0
     "@rschedule/standard-date-adapter": ^1.2.0
     "@types/jest": ^27.5.0
+    "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/webpack": ^5.28.0
     absurd-sql: 0.0.53
     adm-zip: ^0.5.9

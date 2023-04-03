@@ -1,4 +1,19 @@
+type QueryState = {
+  filterExpressions: Array<unknown>;
+  selectExpressions: Array<unknown>;
+  groupExpressions: Array<unknown>;
+  orderExpressions: Array<unknown>;
+  calculation: boolean;
+  rawMode: boolean;
+  withDead: boolean;
+  validateRefs: boolean;
+  limit: number | null;
+  offset: number | null;
+};
+
 export class Query {
+  state: QueryState;
+
   constructor(state) {
     this.state = {
       filterExpressions: state.filterExpressions || [],
@@ -32,7 +47,7 @@ export class Query {
     });
   }
 
-  select(exprs = []) {
+  select(exprs: Array<unknown> | unknown = []) {
     if (!Array.isArray(exprs)) {
       exprs = [exprs];
     }

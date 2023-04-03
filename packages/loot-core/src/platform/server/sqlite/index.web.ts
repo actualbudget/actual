@@ -1,6 +1,6 @@
-import initSqlJS from '@jlongster/sql.js';
+import initSqlJS, { type SqlJsStatic } from '@jlongster/sql.js';
 
-let SQL = null;
+let SQL: SqlJsStatic | null = null;
 
 export async function init() {
   // `initSqlJS` doesn't actually return a real promise, so make sure
@@ -11,7 +11,7 @@ export async function init() {
     }).then(
       sql => {
         SQL = sql;
-        resolve();
+        resolve(undefined);
       },
       err => {
         reject(err);
@@ -39,7 +39,19 @@ export function prepare(db, sql) {
   return db.prepare(sql);
 }
 
-export function runQuery(db, sql, params = [], fetchAll) {
+export function runQuery(
+  db: unknown,
+  sql: string,
+  params?: string[],
+  fetchAll?: false,
+): { changes: unknown };
+export function runQuery(
+  db: unknown,
+  sql: string,
+  params: string[],
+  fetchAll: true,
+): unknown[];
+export function runQuery(db, sql, params = [], fetchAll = false) {
   if (params) {
     verifyParamTypes(sql, params);
   }
@@ -138,7 +150,7 @@ export async function asyncTransaction(db, fn) {
   }
 }
 
-export async function openDatabase(pathOrBuffer) {
+export async function openDatabase(pathOrBuffer?: string | Buffer) {
   if (pathOrBuffer) {
     if (typeof pathOrBuffer !== 'string') {
       return new SQL.Database(pathOrBuffer);
@@ -147,13 +159,17 @@ export async function openDatabase(pathOrBuffer) {
     let path = pathOrBuffer;
     if (path !== ':memory:') {
       if (typeof SharedArrayBuffer === 'undefined') {
+        // @ts-expect-error FS missing in sql.js types
         let stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
         await stream.node.contents.readIfFallback();
+        // @ts-expect-error FS missing in sql.js types
         SQL.FS.close(stream);
       }
 
       let db = new SQL.Database(
+        // @ts-expect-error FS missing in sql.js types
         path.includes('/blocked') ? path : SQL.FS.readlink(path),
+        // @ts-expect-error 2nd argument missed in sql.js types
         { filename: true },
       );
       db.exec(`
