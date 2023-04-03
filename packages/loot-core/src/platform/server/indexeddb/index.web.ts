@@ -7,13 +7,16 @@ function _openDatabase() {
     let openRequest = indexedDB.open('actual', dbVersion);
 
     openRequest.onupgradeneeded = function (e) {
-      let db = e.target.result;
+      // @ts-expect-error EventTarget needs refinement
+      let db: IDBDatabase = e.target.result;
 
       // Remove old stores
       if (db.objectStoreNames.contains('filesystem')) {
+        // @ts-expect-error deleteObjectStore does not seem to accept options
         db.deleteObjectStore('filesystem', { keyPath: 'filepath' });
       }
       if (db.objectStoreNames.contains('messages')) {
+        // @ts-expect-error deleteObjectStore does not seem to accept options
         db.deleteObjectStore('messages', { keyPath: 'filepath' });
       }
 
@@ -34,6 +37,7 @@ function _openDatabase() {
     };
 
     openRequest.onsuccess = function (e) {
+      // @ts-expect-error EventTarget needs refinement
       let db = e.target.result;
 
       db.onversionchange = () => {
@@ -87,12 +91,12 @@ function _openDatabase() {
   });
 }
 
-function getStore(db, name) {
+function getStore(db: IDBDatabase, name: string) {
   let trans = db.transaction([name], 'readwrite');
   return { trans, store: trans.objectStore(name) };
 }
 
-async function get(store, key, mapper = x => x) {
+async function get(store: IDBObjectStore, key, mapper = x => x) {
   return new Promise((resolve, reject) => {
     let req = store.get(key);
     req.onsuccess = e => {
@@ -102,10 +106,10 @@ async function get(store, key, mapper = x => x) {
   });
 }
 
-async function set(store, item) {
+async function set(store: IDBObjectStore, item) {
   return new Promise((resolve, reject) => {
     let req = store.put(item);
-    req.onsuccess = e => resolve();
+    req.onsuccess = e => resolve(undefined);
     req.onerror = e => reject(e);
   });
 }
@@ -113,7 +117,7 @@ async function set(store, item) {
 async function del(store, key) {
   return new Promise((resolve, reject) => {
     let req = store.delete(key);
-    req.onsuccess = e => resolve();
+    req.onsuccess = e => resolve(undefined);
     req.onerror = e => reject(e);
   });
 }
@@ -132,6 +136,7 @@ function openDatabase() {
 function closeDatabase() {
   if (openedDb) {
     openedDb.then(db => {
+      // @ts-expect-error db type needs refinement
       db.close();
     });
     openedDb = null;
