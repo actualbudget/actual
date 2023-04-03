@@ -111,6 +111,7 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
         }}
         maxMenuHeight={200}
         styles={styles}
+        data-embedded={embedded}
         menuPlacement="auto"
         menuPortalTarget={embedded ? undefined : document.body}
         {...props}
