@@ -28,7 +28,7 @@ __metadata:
   dependencies:
     "@actual-app/api": "*"
     adm-zip: ^0.5.9
-    date-fns: 2.0.0-alpha.27
+    date-fns: ^2.29.3
     slash: 3.0.0
     uuid: 3.3.2
   bin:
@@ -41,7 +41,7 @@ __metadata:
   resolution: "@actual-app/import-ynab5@workspace:packages/import-ynab5"
   dependencies:
     "@actual-app/api": "*"
-    date-fns: 2.0.0-alpha.27
+    date-fns: ^2.29.3
     uuid: 3.3.2
   bin:
     import-ynab5: ./index.js
@@ -69,7 +69,7 @@ __metadata:
     chroma-js: ^1.3.3
     cross-env: ^7.0.3
     customize-cra: ^1.0.0
-    date-fns: 2.0.0-alpha.27
+    date-fns: ^2.29.3
     debounce: ^1.2.0
     downshift: 1.31.16
     eslint: ^8.35.0
@@ -7816,10 +7816,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:2.0.0-alpha.27":
-  version: 2.0.0-alpha.27
-  resolution: "date-fns@npm:2.0.0-alpha.27"
-  checksum: 56228240ae558a0d0a5c19b59a748216837966fd231a5d736aac3eba6527954e2cb5579cae05a48a43f5b1361bbbd7008c515697792bcdfb714122882ff73298
+"date-fns@npm:^2.29.3":
+  version: 2.29.3
+  resolution: "date-fns@npm:2.29.3"
+  checksum: e01cf5b62af04e05dfff921bb9c9933310ed0e1ae9a81eb8653452e64dc841acf7f6e01e1a5ae5644d0337e9a7f936175fd2cb6819dc122fdd9c5e86c56be484
   languageName: node
   linkType: hard
 
@@ -13682,7 +13682,7 @@ __metadata:
     cross-env: ^7.0.3
     csv-parse: ^4.10.1
     csv-stringify: ^5.3.6
-    date-fns: 2.0.0-alpha.27
+    date-fns: ^2.29.3
     deep-equal: ^2.0.5
     eslint: 8.35.0
     fake-indexeddb: ^3.1.3
