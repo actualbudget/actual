@@ -3,6 +3,7 @@ import Select, {
   Props as SelectProps,
   PropsValue,
   SingleValue,
+  SelectInstance,
 } from 'react-select';
 
 import CreatableSelect from 'react-select/creatable';
@@ -21,7 +22,7 @@ interface AutocompleteProps extends SelectProps<OptionValue> {
   isCreatable: boolean;
 }
 
-const Autocomplete: React.VFC<AutocompleteProps> = React.forwardRef(
+const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
   (
     {
       value,
@@ -89,7 +90,7 @@ const Autocomplete: React.VFC<AutocompleteProps> = React.forwardRef(
 
     return (
       <Component
-        ref={ref as any}
+        ref={ref}
         value={value}
         menuIsOpen={isOpen || embedded}
         autoFocus={embedded}
