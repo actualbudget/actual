@@ -58,7 +58,7 @@ function ManagementApp({
   getUserData,
   loadAllFiles,
 }) {
-  const history = useMemo(createBrowserHistory, []);
+  const [history] = useState(createBrowserHistory);
   window.__history = history;
 
   // runs on mount only
