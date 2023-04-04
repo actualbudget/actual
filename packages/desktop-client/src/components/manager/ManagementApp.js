@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Switch, Redirect, Router, Route } from 'react-router-dom';
 
@@ -58,7 +58,7 @@ function ManagementApp({
   getUserData,
   loadAllFiles,
 }) {
-  const history = createBrowserHistory();
+  const [history] = useState(createBrowserHistory);
   window.__history = history;
 
   // runs on mount only
