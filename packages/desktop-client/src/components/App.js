@@ -114,13 +114,13 @@ class App extends React.Component {
         ) : budgetId ? (
           <FinancesApp />
         ) : (
-          <React.Fragment>
+          <>
             <AppBackground
               initializing={initializing}
               loadingText={loadingText}
             />
-            <ManagementApp />
-          </React.Fragment>
+            <ManagementApp isLoading={loadingText != null} />
+          </>
         )}
 
         <UpdateNotification />
