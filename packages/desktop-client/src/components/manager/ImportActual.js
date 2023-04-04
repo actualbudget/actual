@@ -64,7 +64,7 @@ function Import({ modalProps, availableImports }) {
             <P>
               You can import data from another Actual account or instance. First
               export your data from a different account, and it will give you a
-              compressed file. This file is a simple zip file that contains the
+              compressed file. This file is a simple zip file that contains the{' '}
               <code>db.sqlite</code> and <code>metadata.json</code> files.
             </P>
 
