@@ -15,9 +15,6 @@ export default async function checkForUpdateNotification(
     return;
   }
 
-  await savePrefs({
-    'flags.updateNotificationShownForVersion': latestVersion,
-  });
   addNotification({
     type: 'message',
     title: 'A new version of Actual is available!',
@@ -29,6 +26,11 @@ export default async function checkForUpdateNotification(
       action: () => {
         window.open('https://actualbudget.github.io/docs/Release-Notes');
       },
+    },
+    onClose: async () => {
+      await savePrefs({
+        'flags.updateNotificationShownForVersion': latestVersion,
+      });
     },
   });
 }
