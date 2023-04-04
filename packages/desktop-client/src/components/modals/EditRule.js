@@ -24,6 +24,13 @@ import {
   integerToAmount,
   amountToInteger,
 } from 'loot-core/src/shared/util';
+
+import useSelected, { SelectedProvider } from '../../hooks/useSelected';
+import AddIcon from '../../icons/v0/Add';
+import SubtractIcon from '../../icons/v0/Subtract';
+import InformationOutline from '../../icons/v1/InformationOutline';
+import { colors } from '../../style';
+import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import {
   View,
   Text,
@@ -32,16 +39,7 @@ import {
   Stack,
   CustomSelect,
   Tooltip,
-} from 'loot-design/src/components/common';
-import useSelected, {
-  SelectedProvider,
-} from 'loot-design/src/components/useSelected';
-import { colors } from 'loot-design/src/style';
-import AddIcon from 'loot-design/src/svg/v0/Add';
-import SubtractIcon from 'loot-design/src/svg/v0/Subtract';
-import InformationOutline from 'loot-design/src/svg/v1/InformationOutline';
-
-import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
+} from '../common';
 import { StatusBadge } from '../schedules/StatusBadge';
 import { BetweenAmountInput } from '../util/AmountInput';
 import DisplayId from '../util/DisplayId';
@@ -405,6 +403,7 @@ function newInput(item) {
 }
 
 export function ConditionsList({
+  conditionsOp,
   conditions,
   editorStyle,
   isSchedule,
@@ -415,8 +414,14 @@ export function ConditionsList({
     let fields = conditionFields
       .map(f => f[0])
       .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');
-    for (let cond of conditions) {
-      fields = fields.filter(f => f !== cond.field);
+
+    // suggest a sensible next field: the same if 'or' or different if 'and'
+    if (conditions.length && conditionsOp === 'or') {
+      fields = [conditions[0].field];
+    } else {
+      fields = fields.filter(
+        f => !conditions.some(c => c.field.includes(f) || f.includes(c.field)),
+      );
     }
     let field = fields[0] || 'payee';
 
@@ -584,6 +589,7 @@ export default function EditRule({
   let [conditions, setConditions] = useState(defaultRule.conditions.map(parse));
   let [actions, setActions] = useState(defaultRule.actions.map(parse));
   let [stage, setStage] = useState(defaultRule.stage);
+  let [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
   let [transactions, setTransactions] = useState([]);
   let dispatch = useDispatch();
   let scrollableEl = useRef();
@@ -614,8 +620,11 @@ export default function EditRule({
       });
 
       if (filters.length > 0) {
+        const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
         let { data: transactions } = await runQuery(
-          q('transactions').filter({ $and: filters }).select('*'),
+          q('transactions')
+            .filter({ [conditionsOpKey]: filters })
+            .select('*'),
         );
         setTransactions(transactions);
       } else {
@@ -623,7 +632,7 @@ export default function EditRule({
       }
     }
     run();
-  }, [actions, conditions]);
+  }, [actions, conditions, conditionsOp]);
 
   let selectedInst = useSelected('transactions', transactions, []);
 
@@ -673,6 +682,10 @@ export default function EditRule({
     setStage(stage);
   }
 
+  function onChangeConditionsOp(name, value) {
+    setConditionsOp(value);
+  }
+
   function onRemoveAction(action) {
     setActions(actions.filter(a => a !== action));
   }
@@ -691,6 +704,7 @@ export default function EditRule({
     let rule = {
       ...defaultRule,
       stage,
+      conditionsOp,
       conditions: conditions.map(unparse),
       actions: actions.map(unparse),
     };
@@ -789,10 +803,22 @@ export default function EditRule({
             <View style={{ flexShrink: 0 }}>
               <View style={{ marginBottom: 30 }}>
                 <Text style={{ color: colors.n4, marginBottom: 15 }}>
-                  If all these conditions match:
+                  If
+                  <FieldSelect
+                    data-testid="conditions-op"
+                    style={{ display: 'inline-flex' }}
+                    fields={[
+                      ['and', 'all'],
+                      ['or', 'any'],
+                    ]}
+                    value={conditionsOp}
+                    onChange={onChangeConditionsOp}
+                  />
+                  of these conditions match:
                 </Text>
 
                 <ConditionsList
+                  conditionsOp={conditionsOp}
                   conditions={conditions}
                   editorStyle={editorStyle}
                   isSchedule={isSchedule}

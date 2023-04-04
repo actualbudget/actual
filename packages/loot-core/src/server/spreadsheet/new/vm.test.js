@@ -19,7 +19,7 @@ function makeScopes(vars) {
         return vars[name];
       }
 
-      throw new Error(`"${resolvedName} is not defined`);
+      throw new Error(`“${resolvedName}” is not defined`);
     },
 
     setVariable: (name, value) => {

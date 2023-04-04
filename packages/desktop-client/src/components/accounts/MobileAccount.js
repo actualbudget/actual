@@ -19,9 +19,9 @@ import {
   isPreviewId,
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
-import { colors } from 'loot-design/src/style';
-import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
+import { colors } from '../../style';
+import { withThemeColor } from '../../util/withThemeColor';
 import SyncRefresh from '../SyncRefresh';
 
 import { default as AccountDetails } from './MobileAccountDetails';
@@ -231,6 +231,7 @@ function Account(props) {
 
   let balance = queries.accountBalance(account);
   let numberFormat = state.prefs.numberFormat || 'comma-dot';
+  let hideFraction = state.prefs.hideFraction || false;
 
   return (
     <SyncRefresh onSync={onRefresh}>
@@ -246,7 +247,7 @@ function Account(props) {
                   // format changes
                   {...state}
                   {...actionCreators}
-                  key={numberFormat}
+                  key={numberFormat + hideFraction}
                   account={account}
                   accounts={props.accounts}
                   categories={state.categories}

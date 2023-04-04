@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
+
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -13,8 +15,7 @@ import {
   Input,
   InitialFocus,
   ExternalLink,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+} from '../common';
 
 export default function FixEncryptionKey({
   modalProps,
@@ -78,8 +79,8 @@ export default function FixEncryptionKey({
             </P>
           ) : (
             <P>
-              We don{"'"}t have a key that encrypts or decrypts this file. Enter
-              the password for this file to create the key for encryption.{' '}
+              We don’t have a key that encrypts or decrypts this file. Enter the
+              password for this file to create the key for encryption.{' '}
               <ExternalLink
                 asAnchor
                 href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"

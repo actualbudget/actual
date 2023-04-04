@@ -4,27 +4,16 @@ import { useHistory } from 'react-router-dom';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import {
-  View,
-  Stack,
-  ButtonWithLoading,
-  P,
-} from 'loot-design/src/components/common';
-import {
-  Table,
-  TableHeader,
-  Row,
-  Field,
-  SelectCell,
-} from 'loot-design/src/components/table';
+
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
   SelectedProvider,
-} from 'loot-design/src/components/useSelected';
-import { colors } from 'loot-design/src/style';
-
+} from '../../hooks/useSelected';
+import { colors } from '../../style';
+import { View, Stack, ButtonWithLoading, P } from '../common';
 import { Page, usePageType } from '../Page';
+import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
@@ -170,8 +159,8 @@ export default function DiscoverSchedules() {
         the ones you want to create.
       </P>
       <P>
-        If you expected a schedule here and don't see it, it might be because
-        the payees of the transactions don't match. Make sure you rename payees
+        If you expected a schedule here and don’t see it, it might be because
+        the payees of the transactions don’t match. Make sure you rename payees
         on all transactions for a schedule to be the same payee.
       </P>
       <P>

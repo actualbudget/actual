@@ -6,17 +6,17 @@ import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View } from 'loot-design/src/components/common';
-import BudgetList from 'loot-design/src/components/manager/BudgetList';
-import DeleteFile from 'loot-design/src/components/manager/DeleteFile';
-import Import from 'loot-design/src/components/manager/Import';
-import ImportActual from 'loot-design/src/components/manager/ImportActual';
-import ImportYNAB4 from 'loot-design/src/components/manager/ImportYNAB4';
-import ImportYNAB5 from 'loot-design/src/components/manager/ImportYNAB5';
-import LoadBackup from 'loot-design/src/components/modals/LoadBackup';
 
+import { View } from '../common';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
+import LoadBackup from '../modals/LoadBackup';
+
+import DeleteFile from './DeleteFile';
+import Import from './Import';
+import ImportActual from './ImportActual';
+import ImportYNAB4 from './ImportYNAB4';
+import ImportYNAB5 from './ImportYNAB5';
 
 function Modals({
   modalStack,
@@ -29,7 +29,7 @@ function Modals({
 }) {
   let stack = modalStack.map(({ name, options }, idx) => {
     const modalProps = {
-      onClose: actions.closeModal,
+      onClose: actions.popModal,
       onPush: actions.pushModal,
       onBack: actions.popModal,
       isCurrent: idx === modalStack.length - 1,
@@ -38,17 +38,6 @@ function Modals({
     };
 
     switch (name) {
-      case 'select-budget':
-        return (
-          <BudgetList
-            key={name}
-            modalProps={modalProps}
-            files={allFiles}
-            actions={actions}
-            isLoggedIn={isLoggedIn}
-            onDownload={cloudFileId => actions.downloadBudget(cloudFileId)}
-          />
-        );
       case 'delete-budget':
         return (
           <DeleteFile

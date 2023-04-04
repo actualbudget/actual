@@ -71,6 +71,7 @@ export default function TransactionList({
   isMatched,
   isFiltered,
   dateFormat,
+  hideFraction,
   addNotification,
   renderEmpty,
   onChange,
@@ -170,6 +171,7 @@ export default function TransactionList({
       isMatched={isMatched}
       isFiltered={isFiltered}
       dateFormat={dateFormat}
+      hideFraction={hideFraction}
       addNotification={addNotification}
       headerContent={headerContent}
       renderEmpty={renderEmpty}

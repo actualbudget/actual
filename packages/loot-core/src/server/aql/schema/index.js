@@ -104,6 +104,7 @@ export const schema = {
   rules: {
     id: f('id'),
     stage: f('string'),
+    conditions_op: f('string'),
     conditions: f('json'),
     actions: f('json'),
     tombstone: f('boolean'),
@@ -203,7 +204,7 @@ export const schemaConfig = {
           SELECT ${fields} FROM payees _
           LEFT JOIN accounts __accounts ON (_.transfer_acct = __accounts.id AND __accounts.tombstone = 0)
           -- We never want to show transfer payees that are pointing to deleted accounts.
-          -- Either this isn't a transfer payee, if the account exists
+          -- Either this is not a transfer payee, if the account exists
           WHERE _.transfer_acct IS NULL OR __accounts.id IS NOT NULL
         `;
       },
@@ -222,6 +223,7 @@ export const schemaConfig = {
 
     schedules: {
       v_schedules: internalFields => {
+        /* eslint-disable rulesdir/typography */
         let fields = internalFields({
           next_date: `
             CASE
@@ -239,12 +241,13 @@ export const schemaConfig = {
         });
 
         return `
-          SELECT ${fields} FROM schedules _
-          LEFT JOIN schedules_next_date _nd ON _nd.schedule_id = _.id
-          LEFT JOIN schedules_json_paths _paths ON _paths.schedule_id = _.id
-          LEFT JOIN rules _rules ON _rules.id = _.rule
-          LEFT JOIN payee_mapping pm ON pm.id = json_extract(_rules.conditions, _paths.payee || '.value')
+        SELECT ${fields} FROM schedules _
+        LEFT JOIN schedules_next_date _nd ON _nd.schedule_id = _.id
+        LEFT JOIN schedules_json_paths _paths ON _paths.schedule_id = _.id
+        LEFT JOIN rules _rules ON _rules.id = _.rule
+        LEFT JOIN payee_mapping pm ON pm.id = json_extract(_rules.conditions, _paths.payee || '.value')
         `;
+        /* eslint-enable rulesdir/typography */
       },
     },
 

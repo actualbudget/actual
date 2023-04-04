@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { savePrefs } from 'loot-core/src/client/actions';
-import { View, Text, Button } from 'loot-design/src/components/common';
-import { Checkbox } from 'loot-design/src/components/forms';
-import { colors, styles } from 'loot-design/src/style';
 
+import { colors, styles } from '../style';
 import { isMobile } from '../util';
+
+import { View, Text, Button } from './common';
+import { Checkbox } from './forms';
 
 let buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
@@ -99,7 +100,7 @@ export default function MobileWebMessage() {
               userSelect: 'none',
             }}
           >
-            Don't remind me again
+            Don’t remind me again
           </label>
         </View>
       </View>

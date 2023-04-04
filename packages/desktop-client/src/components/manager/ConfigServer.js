@@ -4,19 +4,11 @@ import { useHistory } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
-import {
-  View,
-  Text,
-  Button,
-  ButtonWithLoading,
-} from 'loot-design/src/components/common';
-import { useSetThemeColor } from 'loot-design/src/components/hooks';
-import { colors } from 'loot-design/src/style';
-import {
-  isDevelopmentEnvironment,
-  isPreviewEnvironment,
-} from 'loot-design/src/util/environment';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
+import { useSetThemeColor } from '../../hooks';
+import { colors } from '../../style';
+import { View, Text, Button, ButtonWithLoading } from '../common';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title, Input } from './subscribe/common';
@@ -95,7 +87,7 @@ export default function ConfigServer() {
   return (
     <>
       <View style={{ maxWidth: 500, marginTop: -30 }}>
-        <Title text="Where's the server?" />
+        <Title text="Where’s the server?" />
 
         <Text
           style={{
@@ -190,10 +182,10 @@ export default function ConfigServer() {
                 style={{ color: colors.n4, margin: 5 }}
                 onClick={onSkip}
               >
-                Don't use a server
+                Don’t use a server
               </Button>
 
-              {(isDevelopmentEnvironment() || isPreviewEnvironment()) && (
+              {isNonProductionEnvironment() && (
                 <Button
                   primary
                   style={{ marginLeft: 15 }}

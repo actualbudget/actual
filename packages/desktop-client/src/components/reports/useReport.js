@@ -1,9 +1,9 @@
-import { useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
+import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 function useReport(sheetName, getData) {
-  const spreadsheet = useContext(SpreadsheetContext);
+  const spreadsheet = useSpreadsheet();
   const [results, setResults] = useState(null);
 
   useEffect(() => {

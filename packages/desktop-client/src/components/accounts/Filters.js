@@ -21,6 +21,10 @@ import {
   TYPE_INFO,
 } from 'loot-core/src/shared/rules';
 import { titleFirst } from 'loot-core/src/shared/util';
+
+import DeleteIcon from '../../icons/v0/Delete';
+import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -29,11 +33,7 @@ import {
   Button,
   Menu,
   CustomSelect,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import DeleteIcon from 'loot-design/src/svg/v0/Delete';
-import SettingsSliderAlternate from 'loot-design/src/svg/v2/SettingsSliderAlternate';
-
+} from '../common';
 import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 
@@ -166,7 +166,7 @@ function ConfigureField({
       width={300}
       onClose={() => dispatch({ type: 'close' })}
     >
-      <FocusScope contain>
+      <FocusScope>
         <View style={{ marginBottom: 10 }}>
           {field === 'amount' || field === 'date' ? (
             <CustomSelect
@@ -244,7 +244,7 @@ function ConfigureField({
               field={field}
               subfield={subfield}
               type={type === 'id' && op === 'contains' ? 'string' : type}
-              value={value}
+              value={normalizeValue(value, op === 'oneOf')}
               multi={op === 'oneOf'}
               style={{ marginTop: 10 }}
               onChange={v => dispatch({ type: 'set-value', value: v })}
@@ -529,4 +529,19 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
       ))}
     </View>
   );
+}
+
+function normalizeValue(value, isMulti) {
+  if (isMulti) {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    return value.split(', ');
+  }
+
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+
+  return value;
 }

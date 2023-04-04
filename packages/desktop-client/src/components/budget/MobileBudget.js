@@ -1,20 +1,20 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   addCategory,
   moveCategory,
   moveCategoryGroup,
-} from 'loot-core/src/shared/categories.js';
+} from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { View } from 'loot-design/src/components/common';
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
-import { colors } from 'loot-design/src/style';
-import AnimatedLoading from 'loot-design/src/svg/AnimatedLoading';
-import { withThemeColor } from 'loot-design/src/util/withThemeColor';
 
+import AnimatedLoading from '../../icons/AnimatedLoading';
+import { colors } from '../../style';
+import { withThemeColor } from '../../util/withThemeColor';
+import { View } from '../common';
 import SyncRefresh from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';
@@ -192,7 +192,7 @@ class Budget extends React.Component {
 
     let options = [
       'Edit Categories',
-      "Copy last month's budget",
+      'Copy last month’s budget',
       'Set budgets to zero',
       'Set budgets to 3 month average',
       budgetType === 'report' && 'Apply to all future budgets',
@@ -241,6 +241,7 @@ class Budget extends React.Component {
       applyBudgetAction,
     } = this.props;
     let numberFormat = prefs.numberFormat || 'comma-dot';
+    let hideFraction = prefs.hideFraction || false;
 
     if (!categoryGroups || !initialized) {
       return (
@@ -264,7 +265,7 @@ class Budget extends React.Component {
           <BudgetTable
             // This key forces the whole table rerender when the number
             // format changes
-            key={numberFormat}
+            key={numberFormat + hideFraction}
             categories={categories}
             categoryGroups={categoryGroups}
             type={budgetType}
@@ -292,7 +293,7 @@ class Budget extends React.Component {
 }
 
 function BudgetWrapper(props) {
-  let spreadsheet = useContext(SpreadsheetContext);
+  let spreadsheet = useSpreadsheet();
   return <Budget {...props} spreadsheet={spreadsheet} />;
 }
 

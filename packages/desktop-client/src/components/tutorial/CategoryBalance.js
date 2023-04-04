@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { P, Button } from 'loot-design/src/components/common';
+import { P, Button } from '../common';
 
 import { Standalone, Title, useMinimized } from './common';
 import Navigation from './Navigation';

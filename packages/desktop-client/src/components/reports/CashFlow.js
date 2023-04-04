@@ -5,14 +5,9 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import {
-  View,
-  Text,
-  Block,
-  P,
-  AlignedText,
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+
+import { colors, styles } from '../../style';
+import { View, Text, Block, P, AlignedText } from '../common';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
@@ -149,7 +144,7 @@ function CashFlow() {
           <P>
             Cash flow shows the balance of your budgeted accounts over time, and
             the amount of expenses/income each day or month. Your budgeted
-            accounts are considered to be "cash on hand", so this gives you a
+            accounts are considered to be “cash on hand,” so this gives you a
             picture of how available money fluctuates.
           </P>
         </View>

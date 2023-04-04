@@ -1,77 +1,62 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
-import {
-  Button,
-  InputWithContent,
-  Label,
-  View,
-} from 'loot-design/src/components/common';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import Text from 'loot-design/src/components/Text';
-import { colors, styles } from 'loot-design/src/style';
-import Add from 'loot-design/src/svg/v1/Add';
-import CheveronLeft from 'loot-design/src/svg/v1/CheveronLeft';
-import SearchAlternate from 'loot-design/src/svg/v2/SearchAlternate';
+import Add from '../../icons/v1/Add';
+import CheveronLeft from '../../icons/v1/CheveronLeft';
+import SearchAlternate from '../../icons/v2/SearchAlternate';
+import { colors, styles } from '../../style';
+import { Button, InputWithContent, Label, View } from '../common';
+import CellValue from '../spreadsheet/CellValue';
+import Text from '../Text';
 
 import { TransactionList } from './MobileTransaction';
 
-class TransactionSearchInput extends React.Component {
-  state = { text: '' };
+function TransactionSearchInput({ accountName, onSearch }) {
+  const [text, setText] = useState('');
 
-  performSearch = () => {
-    this.props.onSearch(this.state.text);
-  };
-
-  onChange = text => {
-    this.setState({ text }, this.performSearch);
-  };
-
-  render() {
-    const { accountName } = this.props;
-    const { text } = this.state;
-
-    return (
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: colors.n11,
-          margin: '11px auto 4px',
-          borderRadius: 4,
-          padding: 10,
-          width: '100%',
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.n11,
+        margin: '11px auto 4px',
+        borderRadius: 4,
+        padding: 10,
+        width: '100%',
+      }}
+    >
+      <InputWithContent
+        leftContent={
+          <SearchAlternate
+            style={{
+              width: 13,
+              height: 13,
+              flexShrink: 0,
+              color: text ? colors.p7 : 'inherit',
+              margin: 5,
+              marginRight: 0,
+            }}
+          />
+        }
+        value={text}
+        onUpdate={text => {
+          setText(text);
+          onSearch(text);
         }}
-      >
-        <InputWithContent
-          leftContent={
-            <SearchAlternate
-              style={{
-                width: 13,
-                height: 13,
-                flexShrink: 0,
-                color: text ? colors.p7 : 'inherit',
-                margin: 5,
-                marginRight: 0,
-              }}
-            />
-          }
-          value={text}
-          onUpdate={this.onChange}
-          placeholder={`Search ${accountName}`}
-          style={{
-            backgroundColor: colors.n11,
-            border: `1px solid ${colors.n9}`,
-            fontSize: 15,
-            flex: 1,
-            height: 32,
-            marginLeft: 4,
-            padding: 8,
-          }}
-        />
-      </View>
-    );
-  }
+        placeholder={`Search ${accountName}`}
+        style={{
+          backgroundColor: colors.n11,
+          border: `1px solid ${colors.n9}`,
+          fontSize: 15,
+          flex: 1,
+          height: 32,
+          marginLeft: 4,
+          padding: 8,
+        }}
+      />
+    </View>
+  );
 }
 
 const LEFT_RIGHT_FLEX_WIDTH = 70;
@@ -149,8 +134,8 @@ export default function AccountDetails({
           >
             {account.name}
           </View>
-          {/* 
-              TODO: connect to an add transaction modal 
+          {/*
+              TODO: connect to an add transaction modal
               Only left here but hidden for flex centering of the account name.
           */}
           <Link to="transaction/new" style={{ visibility: 'hidden' }}>

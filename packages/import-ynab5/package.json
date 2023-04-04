@@ -17,7 +17,7 @@
   "homepage": "https://github.com/actualbudget/actual/tree/master/packages/import-ynab5#readme",
   "dependencies": {
     "@actual-app/api": "*",
-    "date-fns": "2.0.0-alpha.27",
+    "date-fns": "^2.29.3",
     "uuid": "3.3.2"
   }
 }

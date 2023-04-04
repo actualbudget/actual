@@ -4,8 +4,9 @@ import { useDispatch } from 'react-redux';
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { View, Text, Button, P } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+
+import { colors } from '../../../style';
+import { View, Text, Button, P } from '../../common';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -25,7 +26,7 @@ export default function Bootstrap() {
       case 'network-failure':
         return 'Unable to contact the server';
       default:
-        return "Whoops, an error occurred on our side! We'll try to get it fixed soon.";
+        return `An unknown error occurred: ${error}`;
     }
   }
 

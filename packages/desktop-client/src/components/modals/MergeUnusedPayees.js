@@ -3,16 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { Information } from 'loot-design/src/components/alerts';
-import {
-  View,
-  Text,
-  Modal,
-  ModalButtons,
-  Button,
-  P,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+
+import { colors } from '../../style';
+import { Information } from '../alerts';
+import { View, Text, Modal, ModalButtons, Button, P } from '../common';
 
 let highlightStyle = { color: colors.p5 };
 
@@ -118,7 +112,7 @@ export default function MergeUnusedPayees({
                     }}
                   >
                     {payees.map(p => (
-                      <li>
+                      <li key={p.id}>
                         <Text style={highlightStyle}>{p.name}</Text>
                       </li>
                     ))}

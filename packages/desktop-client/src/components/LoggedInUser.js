@@ -3,15 +3,10 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
 import * as actions from 'loot-core/src/client/actions';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu,
-} from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
 
+import { colors } from '../style';
+
+import { View, Text, Button, Tooltip, Menu } from './common';
 import { useServerURL } from './ServerContext';
 
 function LoggedInUser({

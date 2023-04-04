@@ -8,8 +8,9 @@ import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { View, P } from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
+
+import { styles } from '../../style';
+import { View, P } from '../common';
 
 import Change from './Change';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
@@ -102,8 +103,8 @@ function NetWorth({ accounts }) {
           </P>
           <P>
             Net worth shows the balance of all accounts over time, including all
-            of your investments. Your "net worth" is considered to be the amount
-            you'd have if you sold all your assets and paid off as much debt as
+            of your investments. Your “net worth” is considered to be the amount
+            you’d have if you sold all your assets and paid off as much debt as
             possible. If you hover over the graph, you can also see the amount
             of assets and debt individually.
           </P>

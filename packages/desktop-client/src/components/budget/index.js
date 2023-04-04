@@ -2,6 +2,7 @@ import React, { useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   addCategory,
@@ -12,19 +13,20 @@ import {
   addGroup,
   updateGroup,
   deleteGroup,
-} from 'loot-core/src/shared/categories.js';
+} from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
-import DynamicBudgetTable from 'loot-design/src/components/budget/DynamicBudgetTable';
-import { getValidMonthBounds } from 'loot-design/src/components/budget/MonthsContext';
-import * as report from 'loot-design/src/components/budget/report/components';
-import { ReportProvider } from 'loot-design/src/components/budget/report/ReportContext';
-import * as rollover from 'loot-design/src/components/budget/rollover/rollover-components';
-import { RolloverContext } from 'loot-design/src/components/budget/rollover/RolloverContext';
-import { View } from 'loot-design/src/components/common';
-import SpreadsheetContext from 'loot-design/src/components/spreadsheet/SpreadsheetContext';
-import { styles } from 'loot-design/src/style';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
+import { styles } from '../../style';
+import { View } from '../common';
 import { TitlebarContext } from '../Titlebar';
+
+import DynamicBudgetTable from './DynamicBudgetTable';
+import { getValidMonthBounds } from './MonthsContext';
+import * as report from './report/components';
+import { ReportProvider } from './report/ReportContext';
+import * as rollover from './rollover/rollover-components';
+import { RolloverContext } from './rollover/RolloverContext';
 
 let _initialBudgetMonth = null;
 
@@ -495,8 +497,20 @@ class Budget extends React.PureComponent {
   }
 }
 
+const RolloverBudgetSummary = React.memo(props => {
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
+  return (
+    <rollover.BudgetSummary
+      {...props}
+      isGoalTemplatesEnabled={isGoalTemplatesEnabled}
+      isNewAutocompleteEnabled={isNewAutocompleteEnabled}
+    />
+  );
+});
+
 function BudgetWrapper(props) {
-  let spreadsheet = useContext(SpreadsheetContext);
+  let spreadsheet = useSpreadsheet();
   let titlebar = useContext(TitlebarContext);
 
   let reportComponents = useMemo(
@@ -514,7 +528,7 @@ function BudgetWrapper(props) {
 
   let rolloverComponents = useMemo(
     () => ({
-      SummaryComponent: rollover.BudgetSummary,
+      SummaryComponent: RolloverBudgetSummary,
       ExpenseCategoryComponent: rollover.ExpenseCategoryMonth,
       ExpenseGroupComponent: rollover.ExpenseGroupMonth,
       IncomeCategoryComponent: rollover.IncomeCategoryMonth,

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { View, Text, Button } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
+import { colors } from '../../../style';
+import { View, Text, Button } from '../../common';
 
 function getErrorMessage(reason) {
   switch (reason) {

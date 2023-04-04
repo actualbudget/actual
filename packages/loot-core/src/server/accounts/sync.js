@@ -298,7 +298,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
   let normalized = [];
   for (let trans of transactions) {
     if (!trans.date) {
-      trans.date = trans.valueDate;
+      trans.date = trans.valueDate || trans.bookingDate;
     }
 
     if (!trans.amount) {
@@ -312,11 +312,16 @@ async function normalizeNordigenTransactions(transactions, acctId) {
     }
 
     let payee_name;
-    if (trans.amount >= 0) {
+    // When the amount is equal to 0, we need to determine
+    // if this is a "Credited" or "Debited" transaction. This means
+    // that it matters whether the amount is a positive or negative zero.
+    if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
       const nameParts = [];
       nameParts.push(
         title(
-          trans.debtorName || trans.remittanceInformationUnstructured || '',
+          trans.debtorName ||
+            trans.remittanceInformationUnstructured ||
+            (trans.remittanceInformationUnstructuredArray || []).join(', '),
         ),
       );
       if (trans.debtorAccount && trans.debtorAccount.iban) {
@@ -333,7 +338,9 @@ async function normalizeNordigenTransactions(transactions, acctId) {
       const nameParts = [];
       nameParts.push(
         title(
-          trans.creditorName || trans.remittanceInformationUnstructured || '',
+          trans.creditorName ||
+            trans.remittanceInformationUnstructured ||
+            (trans.remittanceInformationUnstructuredArray || []).join(', '),
         ),
       );
       if (trans.creditorAccount && trans.creditorAccount.iban) {
@@ -366,7 +373,9 @@ async function normalizeNordigenTransactions(transactions, acctId) {
         payee: trans.payee,
         account: trans.account,
         date: trans.date,
-        notes: trans.remittanceInformationUnstructured,
+        notes:
+          trans.remittanceInformationUnstructured ||
+          (trans.remittanceInformationUnstructuredArray || []).join(', '),
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
       },
@@ -807,7 +816,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
 
     const oldestDate =
       transactions.length > 0
-        ? oldestTransaction.valueDate
+        ? oldestTransaction.valueDate || oldestTransaction.bookingDate
         : monthUtils.currentDay();
 
     const payee = await getStartingBalancePayee();

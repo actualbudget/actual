@@ -2,13 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
-import {
-  Text,
-  Button,
-  Input as BaseInput,
-} from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
 
+import { colors, styles } from '../../../style';
+import { Text, Button, Input as BaseInput } from '../../common';
 import { useSetServerURL } from '../../ServerContext';
 
 // There are two URLs that dance with each other: `/login` and
@@ -84,7 +80,7 @@ export function getEmail(location) {
 
 export function Title({ text }) {
   return (
-    <Text
+    <h1
       style={{
         fontSize: 40,
         fontWeight: 700,
@@ -93,7 +89,7 @@ export function Title({ text }) {
       }}
     >
       {text}
-    </Text>
+    </h1>
   );
 }
 
