@@ -419,6 +419,18 @@ export class Action {
   exec(object) {
     switch (this.op) {
       case 'set':
+        if (typeof this.value == "string") {
+          let components = this.value.split("|")
+          if (components.length === 4 && components[0] === "regexp") {
+            debugger;
+            let regex = new RegExp(components[2]);
+            let field = object[components[1]];
+            let result = regex.exec(field)
+            let val = result[+components[3]];
+            object[this.field] = new RegExp(components[2]).exec(object[components[1]])[+components[3]];
+            break;
+          }
+        }
         object[this.field] = this.value;
         break;
       case 'link-schedule':

@@ -21,6 +21,7 @@ import { getStartingBalancePayee } from './accounts/payees';
 import { Condition, Action, rankRules } from './accounts/rules';
 import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
+import * as transactions from './accounts/transactions';
 import { batchUpdateTransactions } from './accounts/transactions';
 import installAPI from './api';
 import { runQuery as aqlQuery } from './aql';
@@ -658,7 +659,7 @@ handlers['rule-apply-actions'] = mutator(async function ({
   transactionIds,
   actions,
 }) {
-  return rules.applyActions(transactionIds, actions, handlers);
+  return rules.applyActions(await transactions.getTransactionsByIds(transactionIds), actions, handlers);
 });
 
 handlers['rule-add-payee-rename'] = mutator(async function ({ fromNames, to }) {
