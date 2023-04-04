@@ -80,7 +80,7 @@ export function getEmail(location) {
 
 export function Title({ text }) {
   return (
-    <Text
+    <h1
       style={{
         fontSize: 40,
         fontWeight: 700,
@@ -89,7 +89,7 @@ export function Title({ text }) {
       }}
     >
       {text}
-    </Text>
+    </h1>
   );
 }
 

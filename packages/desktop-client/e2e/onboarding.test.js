@@ -68,4 +68,13 @@ test.describe('Onboarding', () => {
     await expect(accountPage.accountName).toHaveText('All Accounts');
     await expect(accountPage.accountBalance).toHaveText('0.00');
   });
+
+  test('navigates back to start page by clicking on "no server" in an empty budget file', async () => {
+    await configurationPage.clickOnNoServer();
+    await configurationPage.startFresh();
+
+    await navigation.clickOnNoServer();
+
+    expect(await configurationPage.heading).toHaveText('Where’s the server?');
+  });
 });
