@@ -305,7 +305,7 @@ function Titlebar({
             if (windowWidth >= breakpoints.medium) {
               saveGlobalPrefs({ floatingSidebar: !floatingSidebar });
             } else {
-              sidebar.show();
+              sidebar.toggle();
             }
           }}
         >

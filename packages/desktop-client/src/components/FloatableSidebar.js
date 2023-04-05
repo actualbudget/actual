@@ -23,6 +23,7 @@ export function SidebarProvider({ children }) {
       value={{
         show: () => emitter.emit('show'),
         hide: () => emitter.emit('hide'),
+        toggle: () => emitter.emit('toggle'),
         on: (name, listener) => {
           emitter.on(name, listener);
           return () => emitter.off(name, listener);
@@ -53,6 +54,7 @@ function Sidebar({ floatingSidebar }) {
     let cleanups = [
       sidebar.on('show', () => setHidden(false)),
       sidebar.on('hide', () => setHidden(true)),
+      sidebar.on('toggle', () => setHidden(hidden => !hidden)),
     ];
     return () => {
       cleanups.forEach(fn => fn());
