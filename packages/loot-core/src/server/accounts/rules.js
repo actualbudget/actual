@@ -154,8 +154,8 @@ let CONDITION_TYPES = {
         );
         var isValidRegexp = true;
         try {
-            new RegExp(value, 'ui');
-        } catch(e) {
+          new RegExp(value, 'ui');
+        } catch (e) {
           isValidRegexp = false;
         }
 
@@ -355,7 +355,7 @@ export class Condition {
           return false;
         }
         const regex = new RegExp(this.value, 'ui');
-        return regex.test(this.value);
+        return regex.test(fieldValue);
       case 'oneOf':
         if (fieldValue === null) {
           return false;
