@@ -9,7 +9,7 @@ import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 
-import { setBudget, getSheetValue, getBudget } from './actions';
+import { setBudget, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export function applyTemplate({ month }) {
@@ -329,37 +329,25 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       }
       case 'percentage': {
-        /*expected behavior:  
-          By using the string '#template 10% of Income' , the following code should calculate 10% of the 'Income' category and budget the appropriate amount.
-          By using the string '#template 10% of IncomeGroup', the keyword 'IncomeGroup' should sum all available income within the 'Income' category group, 
-        */
         let percent = template.percent;
         let monthlyIncome = 0;
-        if (template.category == 'IncomeGroup') {  //adds a keyword 'IncomeGroup' to use all income for the month for the calculation
+        if (template.category === 'all income') {
           monthlyIncome = await getSheetValue(sheetName, `total-income`);
-        }
-        else { 
-          let income_category = (await db.getCategories()).filter(c => c.is_income == true && c.name == template.category);
+        } else {
+          let income_category = (await db.getCategories()).filter(
+            c => c.is_income == true && c.name == template.category,
+          );
+          if (!income_category) {
+            throw new Error(`Could not find category “${template.category}”`);
+          }
           monthlyIncome = await getSheetValue(
             sheetName,
             `sum-amount-${income_category[0].id}`,
           );
         }
-        to_budget = Math.round(monthlyIncome * (percent / 100));
-        
-        /*
-          let income_category = (await actual.getCategories()).filter(c => c.is_income == true && c.name == template.category);
-          let func = (getBudgetMonthTestFunc || getBudgetMonth);
-          let budget = await func(month);
-          for (var g = 0; g < budget.categoryGroups.length; g++) {
-            if (income_category.group_id == budget.categoryGroups[g].id) {
-              for (var c = 0; c < budget.categoryGroups[g].categories.length; c++)
-                if (income_category.id == budget.categoryGroups[g].categories[c].id) {
-                  let month_category = budget.categoryGroups[g].categories[c];
-                }
-            }
-          }
-          */
+        if (monthlyIncome > 0) {
+          to_budget = Math.round(monthlyIncome * (percent / 100));
+        } else to_budget = 0;
         break;
       }
       case 'error':
