@@ -1,6 +1,6 @@
 import * as internals from './encryption-internals';
 
-let uuid = require('../platform/uuid/index.electron.js');
+let uuid = require('../platform/uuid');
 
 // A map of all possible master encryption keys to use, keyed by
 // unique id

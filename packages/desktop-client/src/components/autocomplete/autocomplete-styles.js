@@ -21,13 +21,15 @@ const colourStyles = {
   menuPortal: styles => ({
     ...styles,
     zIndex: 5000,
+    minWidth: 200,
   }),
   menu: (styles, { selectProps }) => ({
     ...styles,
+    minWidth: 200,
     backgroundColor: colors.n1,
     marginTop: 2,
     marginBottom: 2,
-    position: selectProps.embedded ? 'relative' : styles.position,
+    position: selectProps['data-embedded'] ? 'relative' : styles.position,
     overflow: 'hidden',
   }),
   menuList: styles => ({

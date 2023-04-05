@@ -8,7 +8,7 @@ import {
   addCategory,
   moveCategory,
   moveCategoryGroup,
-} from 'loot-core/src/shared/categories.js';
+} from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
