@@ -335,13 +335,12 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         */
         let percent = template.percent;
         let monthlyIncome = 0;
-        let next_month = new Date(`${month}-31`);
         if (template.category == 'IncomeGroup') {  //adds a keyword 'IncomeGroup' to use all income for the month for the calculation
-          let monthlyIncome = await getSheetValue(sheetName, `total-income`);
+          monthlyIncome = await getSheetValue(sheetName, `total-income`);
         }
         else { 
           let income_category = (await db.getCategories()).filter(c => c.is_income == true && c.name == template.category);
-          let monthlyIncome = await getSheetValue(
+          monthlyIncome = await getSheetValue(
             sheetName,
             `sum-amount-${income_category[0].id}`,
           );
