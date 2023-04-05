@@ -17,6 +17,7 @@ const colourStyles = {
     ...styles,
     padding: '0 2px',
     margin: 0,
+    overflow: 'hidden',
   }),
   menuPortal: styles => ({
     ...styles,
@@ -29,7 +30,7 @@ const colourStyles = {
     backgroundColor: colors.n1,
     marginTop: 2,
     marginBottom: 2,
-    position: selectProps.embedded ? 'relative' : styles.position,
+    position: selectProps['data-embedded'] ? 'relative' : styles.position,
     overflow: 'hidden',
   }),
   menuList: styles => ({

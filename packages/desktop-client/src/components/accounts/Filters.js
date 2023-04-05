@@ -244,7 +244,7 @@ function ConfigureField({
               field={field}
               subfield={subfield}
               type={type === 'id' && op === 'contains' ? 'string' : type}
-              value={value}
+              value={normalizeValue(value, op === 'oneOf')}
               multi={op === 'oneOf'}
               style={{ marginTop: 10 }}
               onChange={v => dispatch({ type: 'set-value', value: v })}
@@ -529,4 +529,19 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
       ))}
     </View>
   );
+}
+
+function normalizeValue(value, isMulti) {
+  if (isMulti) {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    return value.split(', ');
+  }
+
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+
+  return value;
 }
