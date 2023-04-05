@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { P, ModalButtons, Button } from 'loot-design/src/components/common';
+import { P, ModalButtons, Button } from '../common';
 
 import { Standalone, Title, ExternalLink } from './common';
 
 function Final({ targetRect, navigationProps }) {
   return (
     <Standalone width={500}>
-      <Title>That's it!</Title>
+      <Title>That’s it!</Title>
       <P>
         With that workflow you can have peace of mind that what you are looking
         at reflects reality.{' '}

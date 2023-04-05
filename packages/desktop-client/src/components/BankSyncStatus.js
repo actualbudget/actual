@@ -3,10 +3,11 @@ import { connect } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
 import * as actions from 'loot-core/src/client/actions';
-import { View, Text } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
+
+import { colors, styles } from '../style';
 
 import AnimatedRefresh from './AnimatedRefresh';
+import { View, Text } from './common';
 
 function BankSyncStatus({ accountsSyncing }) {
   let name = accountsSyncing

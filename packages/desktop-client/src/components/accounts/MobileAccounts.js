@@ -5,16 +5,12 @@ import { useNavigate } from 'react-router-dom-v5-compat';
 import * as actions from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 import { prettyAccountType } from 'loot-core/src/shared/accounts';
-import {
-  Button,
-  Text,
-  TextOneLine,
-  View,
-} from 'loot-design/src/components/common';
-import CellValue from 'loot-design/src/components/spreadsheet/CellValue';
-import { colors, styles } from 'loot-design/src/style';
-import Wallet from 'loot-design/src/svg/v1/Wallet';
-import { withThemeColor } from 'loot-design/src/util/withThemeColor';
+
+import Wallet from '../../icons/v1/Wallet';
+import { colors, styles } from '../../style';
+import { withThemeColor } from '../../util/withThemeColor';
+import { Button, Text, TextOneLine, View } from '../common';
+import CellValue from '../spreadsheet/CellValue';
 
 export function AccountHeader({ name, amount }) {
   return (
@@ -306,13 +302,14 @@ function Accounts(props) {
 
   let { accounts, categories, newTransactions, updatedAccounts, prefs } = props;
   let numberFormat = prefs.numberFormat || 'comma-dot';
+  let hideFraction = prefs.hideFraction || false;
 
   return (
     <View style={{ flex: 1 }}>
       <AccountList
         // This key forces the whole table rerender when the number
         // format changes
-        key={numberFormat}
+        key={numberFormat + hideFraction}
         accounts={accounts.filter(account => !account.closed)}
         categories={categories}
         transactions={transactions || []}

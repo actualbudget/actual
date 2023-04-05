@@ -12,20 +12,11 @@ import {
   getCategoriesById,
 } from 'loot-core/src/client/reducers/queries';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import {
-  Table,
-  Row,
-  Field,
-  Cell,
-  SelectCell,
-} from 'loot-design/src/components/table';
-import {
-  useSelectedItems,
-  useSelectedDispatch,
-} from 'loot-design/src/components/useSelected';
-import { styles } from 'loot-design/src/style';
-import ArrowsSynchronize from 'loot-design/src/svg/v2/ArrowsSynchronize';
 
+import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
+import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
+import { styles } from '../../style';
+import { Table, Row, Field, Cell, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {

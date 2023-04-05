@@ -14,15 +14,18 @@ module.exports = {
     publicPath: '/kcab/',
   },
   resolve: {
-    extensions: ['.web.js', '.js', '.json'],
+    extensions: [
+      '.web.js',
+      '.web.ts',
+      '.web.tsx',
+      '.js',
+      '.ts',
+      '.tsx',
+      '.json',
+    ],
     alias: {
       fs: 'memfs',
       path: 'path-browserify',
-
-      'perf-deets':
-        process.env.NODE_ENV === 'development' || process.env.PERF_BUILD
-          ? 'perf-deets'
-          : require.resolve('perf-deets/noop'),
     },
   },
   resolveLoader: {
@@ -33,11 +36,11 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.m?js$/,
+        test: /\.m?[tj]sx?$/,
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env'],
+            presets: ['@babel/preset-env', '@babel/preset-typescript'],
           },
         },
       },

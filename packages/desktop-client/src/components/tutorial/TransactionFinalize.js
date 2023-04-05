@@ -2,7 +2,7 @@ import React from 'react';
 
 import { css } from 'glamor';
 
-import { P } from 'loot-design/src/components/common';
+import { P } from '../common';
 
 import { Standalone } from './common';
 import Navigation from './Navigation';

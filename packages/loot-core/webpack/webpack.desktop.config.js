@@ -16,10 +16,15 @@ module.exports = {
     libraryTarget: 'commonjs2',
   },
   resolve: {
-    extensions: ['.electron.js', '.js', '.json'],
-    alias: {
-      'perf-deets': require.resolve('perf-deets/noop'),
-    },
+    extensions: [
+      '.electron.js',
+      '.electron.ts',
+      '.electron.tsx',
+      '.js',
+      '.ts',
+      '.tsx',
+      '.json',
+    ],
   },
   externals: [
     'better-sqlite3',

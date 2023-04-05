@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { View, Button, Tooltip } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import ExclamationOutline from 'loot-design/src/svg/v1/ExclamationOutline';
 
+import ExclamationOutline from '../../icons/v1/ExclamationOutline';
 import { authorizeBank } from '../../nordigen';
+import { colors } from '../../style';
+import { View, Button, Tooltip } from '../common';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
@@ -24,14 +24,6 @@ function getErrorMessage(type, code) {
       switch (code.toUpperCase()) {
         case 'INVALID_ACCESS_TOKEN':
           return 'Item is no longer authorized. You need to login again.';
-        default:
-      }
-      break;
-
-    case 'API_ERROR':
-      switch (code.toUpperCase()) {
-        case 'PLANNED_MAINTENANCE':
-          return 'Our servers are currently undergoing maintenance and will be available again soon.';
         default:
       }
       break;
@@ -118,7 +110,7 @@ function AccountSyncCheck({
             color: 'currentColor',
           }}
         />{' '}
-        This account is experiencing connection problems. Let{"'"}s fix it.
+        This account is experiencing connection problems. Let’s fix it.
       </Button>
 
       {open && (

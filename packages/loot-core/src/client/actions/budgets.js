@@ -5,7 +5,6 @@ import * as constants from '../constants';
 import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
-import { startTutorialFirstTime } from './tutorial';
 
 export function updateStatusText(text) {
   return (dispatch, getState) => {
@@ -95,7 +94,6 @@ export function loadBudget(id, loadingText = '', options = {}) {
     const prefs = getState().prefs.local;
     dispatch(setAppState({ loadingText: null }));
     dispatch(setAppState({ maxMonths: prefs.maxMonths }));
-    dispatch(startTutorialFirstTime());
   };
 }
 
@@ -150,7 +148,6 @@ export function createBudget({ testMode, demoMode } = {}) {
 
     await dispatch(loadAllFiles());
     await dispatch(loadPrefs());
-    dispatch(startTutorialFirstTime());
 
     // Set the loadingText to null after we've loaded the budget prefs
     // so that the existing manager page doesn't flash
@@ -168,7 +165,7 @@ export function importBudget(filepath, type) {
     dispatch(closeModal());
 
     await dispatch(loadPrefs());
-    dispatch(startTutorialFirstTime());
+    window.__history.push('/budget');
   };
 }
 
@@ -219,7 +216,7 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
         dispatch(setAppState({ loadingText: null }));
       } else if (error.reason === 'file-exists') {
         alert(
-          `A file with id "${error.meta.id}" already exists with the name "${error.meta.name}". ` +
+          `A file with id “${error.meta.id}” already exists with the name “${error.meta.name}.” ` +
             'This file will be replaced. This probably happened because files were manually ' +
             'moved around outside of Actual.',
         );

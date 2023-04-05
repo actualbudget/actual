@@ -1,15 +1,16 @@
 import React from 'react';
 
 import { titleFirst } from 'loot-core/src/shared/util';
-import { View, Text } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import AlertTriangle from 'loot-design/src/svg/v2/AlertTriangle';
-import CalendarIcon from 'loot-design/src/svg/v2/Calendar';
-import CheckCircle1 from 'loot-design/src/svg/v2/CheckCircle1';
-import CheckCircleHollow from 'loot-design/src/svg/v2/CheckCircleHollow';
-import EditSkull1 from 'loot-design/src/svg/v2/EditSkull1';
-import FavoriteStar from 'loot-design/src/svg/v2/FavoriteStar';
-import ValidationCheck from 'loot-design/src/svg/v2/ValidationCheck';
+
+import AlertTriangle from '../../icons/v2/AlertTriangle';
+import CalendarIcon from '../../icons/v2/Calendar';
+import CheckCircle1 from '../../icons/v2/CheckCircle1';
+import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
+import EditSkull1 from '../../icons/v2/EditSkull1';
+import FavoriteStar from '../../icons/v2/FavoriteStar';
+import ValidationCheck from '../../icons/v2/ValidationCheck';
+import { colors } from '../../style';
+import { View, Text } from '../common';
 
 export function getStatusProps(status) {
   let color, backgroundColor, Icon;
@@ -66,7 +67,7 @@ export function getStatusProps(status) {
 }
 
 export function StatusIcon({ status }) {
-  let { color } = getStatusProps(status);
+  let { color, Icon } = getStatusProps(status);
 
   return <Icon style={{ width: 13, height: 13, color }} />;
 }

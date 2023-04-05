@@ -4,9 +4,11 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { View, Text, Link, Button } from 'loot-design/src/components/common';
-import { colors } from 'loot-design/src/style';
-import Close from 'loot-design/src/svg/v1/Close';
+
+import Close from '../icons/v1/Close';
+import { colors } from '../style';
+
+import { View, Text, Link, Button } from './common';
 
 function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session

@@ -1,6 +1,17 @@
+const path = require('path');
+
+const rulesDirPlugin = require('eslint-plugin-rulesdir');
+rulesDirPlugin.RULES_DIR = path.join(
+  __dirname,
+  'packages',
+  'eslint-plugin-actual',
+  'lib',
+  'rules',
+);
+
 module.exports = {
-  plugins: ['prettier', 'import'],
-  extends: ['react-app'],
+  plugins: ['prettier', 'import', 'rulesdir', '@typescript-eslint'],
+  extends: ['react-app', 'plugin:@typescript-eslint/recommended'],
   reportUnusedDisableDirectives: true,
   rules: {
     'prettier/prettier': 'error',
@@ -16,6 +27,8 @@ module.exports = {
     'no-restricted-globals': ['error'].concat(
       require('confusing-browser-globals').filter(g => g !== 'self'),
     ),
+
+    'rulesdir/typography': 'error',
 
     // https://github.com/eslint/eslint/issues/16954
     // https://github.com/eslint/eslint/issues/16953
@@ -53,5 +66,11 @@ module.exports = {
         pathGroupsExcludedImportTypes: ['react'],
       },
     ],
+
+    // Rules disable during TS migration
+    '@typescript-eslint/no-var-requires': 'off',
+    'prefer-const': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
   },
 };

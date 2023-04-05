@@ -15,3 +15,4 @@ migrations/1615745967948_meta.sql
 migrations/1616167010796_accounts_order.sql
 migrations/1618975177358_schedules.sql
 migrations/1632571489012_remove_cache.js
+migrations/1679728867040_rules_conditions.sql

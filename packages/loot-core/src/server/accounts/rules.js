@@ -93,7 +93,7 @@ let CONDITION_TYPES = {
         assert(
           parsed.type === 'date' || parsed.type === 'recur',
           'date-format',
-          `Invalid date value for "isapprox" (field: ${fieldName})`,
+          `Invalid date value for “isapprox” (field: ${fieldName})`,
         );
       }
       // These only work with exact dates
@@ -101,7 +101,7 @@ let CONDITION_TYPES = {
         assert(
           parsed.type === 'date',
           'date-format',
-          `Invalid date value for "${op}" (field: ${fieldName})`,
+          `Invalid date value for “${op}” (field: ${fieldName})`,
         );
       }
 
@@ -192,13 +192,13 @@ let CONDITION_TYPES = {
         assert(
           parsed.type === 'between',
           'number-format',
-          `Invalid between value for "${op}" (field: ${fieldName})`,
+          `Invalid between value for “${op}” (field: ${fieldName})`,
         );
       } else {
         assert(
           parsed.type === 'literal',
           'number-format',
-          `Invalid number value for "${op}" (field: ${fieldName})`,
+          `Invalid number value for “${op}” (field: ${fieldName})`,
         );
       }
 
@@ -468,9 +468,10 @@ export class Action {
 }
 
 export class Rule {
-  constructor({ id, stage, conditions, actions, fieldTypes }) {
+  constructor({ id, stage, conditionsOp, conditions, actions, fieldTypes }) {
     this.id = id;
     this.stage = stage;
+    this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
       c => new Condition(c.op, c.field, c.value, c.options, fieldTypes),
     );
@@ -484,7 +485,8 @@ export class Rule {
       return false;
     }
 
-    return this.conditions.every(condition => {
+    const method = this.conditionsOp === 'or' ? 'some' : 'every';
+    return this.conditions[method](condition => {
       return condition.eval(object);
     });
   }
@@ -516,6 +518,7 @@ export class Rule {
     return {
       id: this.id,
       stage: this.stage,
+      conditionsOp: this.conditionsOp,
       conditions: this.conditions.map(c => c.serialize()),
       actions: this.actions.map(a => a.serialize()),
     };

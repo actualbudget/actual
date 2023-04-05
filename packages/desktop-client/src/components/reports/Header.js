@@ -1,14 +1,10 @@
 import React from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
-import {
-  View,
-  Select,
-  Button,
-  ButtonLink,
-} from 'loot-design/src/components/common';
-import { styles } from 'loot-design/src/style';
-import ArrowLeft from 'loot-design/src/svg/v1/ArrowLeft';
+
+import ArrowLeft from '../../icons/v1/ArrowLeft';
+import { styles } from '../../style';
+import { View, Select, Button, ButtonLink } from '../common';
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;

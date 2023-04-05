@@ -91,13 +91,19 @@ describe('Transaction rules', () => {
 
   test('insert a rule into the database', async () => {
     await loadRules();
-    await insertRule({ stage: 'pre', conditions: [], actions: [] });
+    await insertRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [],
+      actions: [],
+    });
     expect((await db.all('SELECT * FROM rules')).length).toBe(1);
     // Make sure it was projected
     expect(getRules().length).toBe(1);
 
     await insertRule({
       stage: 'pre',
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'date', value: '2019-05' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
@@ -134,6 +140,7 @@ describe('Transaction rules', () => {
     await loadRules();
     let id = await insertRule({
       stage: 'pre',
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'kroger' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
@@ -185,6 +192,7 @@ describe('Transaction rules', () => {
     await loadRules();
     let id = await insertRule({
       stage: 'pre',
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'kroger' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
@@ -216,12 +224,14 @@ describe('Transaction rules', () => {
     await loadRules();
     await insertRule({
       stage: 'pre',
+      conditionsOp: 'and',
       conditions: [{ op: 'contains', field: 'imported_payee', value: 'lowes' }],
       actions: [{ op: 'set', field: 'payee', value: 'lowes' }],
     });
 
     await insertRule({
       stage: 'post',
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'kroger' }],
       actions: [{ op: 'set', field: 'notes', value: 'Sarah' }],
     });
@@ -266,6 +276,7 @@ describe('Transaction rules', () => {
     await insertRule({
       id: 'one',
       stage: 'pre',
+      conditionsOp: 'and',
       conditions: [{ op: 'contains', field: 'imported_payee', value: 'lowes' }],
       actions: [{ op: 'set', field: 'payee', value: 'lowes_id' }],
     });
@@ -273,6 +284,7 @@ describe('Transaction rules', () => {
     await insertRule({
       id: 'two',
       stage: 'pre',
+      conditionsOp: 'and',
       conditions: [
         { op: 'is', field: 'payee', value: 'lowes_id' },
         { op: 'is', field: 'category', value: 'food_id' },
@@ -307,6 +319,7 @@ describe('Transaction rules', () => {
     await loadRules();
     await insertRule({
       stage: 'post',
+      conditionsOp: 'and',
       conditions: [
         {
           op: 'oneOf',
@@ -319,12 +332,14 @@ describe('Transaction rules', () => {
 
     await insertRule({
       stage: 'pre',
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: '123 kroger' }],
       actions: [{ op: 'set', field: 'payee', value: 'kroger3' }],
     });
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [
         { op: 'contains', field: 'imported_payee', value: 'kroger' },
       ],
@@ -333,6 +348,7 @@ describe('Transaction rules', () => {
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'kroger4' }],
       actions: [{ op: 'set', field: 'notes', value: 'got it' }],
     });
@@ -683,6 +699,7 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'fun' }],
     });
@@ -707,6 +724,7 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
@@ -751,6 +769,7 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
@@ -797,16 +816,19 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'unknown2' }],
     });
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: null }],
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
@@ -873,11 +895,13 @@ describe('Learning categories', () => {
 
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
       actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
@@ -905,6 +929,7 @@ describe('Learning categories', () => {
   test('rules are saved with internal field names', async () => {
     await insertRule({
       stage: null,
+      conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'foo' }],
       actions: [{ op: 'set', field: 'payee', value: 'unknown1' }],
     });
@@ -934,6 +959,7 @@ describe('Learning categories', () => {
   test('rules with public field names are loaded correctly', async () => {
     await db.insertWithUUID('rules', {
       stage: null,
+      conditions_op: 'and',
       conditions: JSON.stringify([
         { op: 'is', field: 'imported_payee', value: 'foo' },
       ]),

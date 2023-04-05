@@ -23,7 +23,7 @@ export function typeArbitrary(typeDesc, name) {
       arb = fc.string();
       break;
     case 'date':
-      arb = fc.integer(0, 365 * 4).map(n => {
+      arb = fc.integer({ min: 0, max: 365 * 4 }).map(n => {
         return addDays('2018-01-01', n);
       });
       break;
@@ -128,9 +128,9 @@ export function makeTransaction({ splitFreq = 1, payeeIds } = {}) {
     schema.transactions,
     {
       ...payeeField,
-      subtransactions: fc.frequency(
-        { arbitrary: fc.constant([]), weight: 1 },
-        { arbitrary: fc.array(subtrans), weight: splitFreq },
+      subtransactions: fc.oneof(
+        { arbitrary: fc.constant([]), weight: 100 },
+        { arbitrary: fc.array(subtrans), weight: splitFreq * 100 },
       ),
     },
     ['subtransactions'],

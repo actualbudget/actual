@@ -4,6 +4,11 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
+
+import Loading from '../icons/AnimatedLoading';
+import Delete from '../icons/v0/Delete';
+import { styles, colors } from '../style';
+
 import {
   View,
   Text,
@@ -11,10 +16,7 @@ import {
   ButtonWithLoading,
   Stack,
   ExternalLink,
-} from 'loot-design/src/components/common';
-import { styles, colors } from 'loot-design/src/style';
-import Loading from 'loot-design/src/svg/AnimatedLoading';
-import Delete from 'loot-design/src/svg/v0/Delete';
+} from './common';
 
 function compileMessage(message, actions, setLoading, onRemove) {
   return (

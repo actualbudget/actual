@@ -22,13 +22,11 @@ import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
 import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
 import * as undo from 'loot-core/src/platform/client/undo';
-import { BudgetMonthCountProvider } from 'loot-design/src/components/budget/BudgetMonthCountContext';
-import { View } from 'loot-design/src/components/common';
-import { colors, styles } from 'loot-design/src/style';
-import Cog from 'loot-design/src/svg/v1/Cog';
-import PiggyBank from 'loot-design/src/svg/v1/PiggyBank';
-import Wallet from 'loot-design/src/svg/v1/Wallet';
 
+import Cog from '../icons/v1/Cog';
+import PiggyBank from '../icons/v1/PiggyBank';
+import Wallet from '../icons/v1/Wallet';
+import { colors, styles } from '../style';
 import { isMobile } from '../util';
 import { getLocationState, makeLocationState } from '../util/location-state';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
@@ -39,7 +37,9 @@ import { default as MobileAccounts } from './accounts/MobileAccounts';
 import { ActiveLocationProvider } from './ActiveLocation';
 import BankSyncStatus from './BankSyncStatus';
 import Budget from './budget';
+import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { default as MobileBudget } from './budget/MobileBudget';
+import { View } from './common';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
@@ -56,7 +56,6 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
-// import Debugger from './Debugger';
 
 function PageRoute({ path, component: Component }) {
   return (
@@ -336,7 +335,6 @@ class FinancesApp extends React.Component {
                   <Notifications />
                   <BankSyncStatus />
                   <StackedRoutes isMobile={this.state.isMobile} />
-                  {/*window.Actual.IS_DEV && <Debugger />*/}
                   <Modals history={this.history} />
                 </div>
                 {this.state.isMobile && (

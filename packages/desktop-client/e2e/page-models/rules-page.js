@@ -36,6 +36,17 @@ export class RulesPage {
   }
 
   async _fillRuleFields(data) {
+    if (data.conditionsOp) {
+      await this.page
+        .getByTestId('conditions-op')
+        .getByRole('button')
+        .first()
+        .click();
+      await this.page
+        .getByRole('option', { exact: true, name: data.conditionsOp })
+        .click();
+    }
+
     if (data.conditions) {
       await this._fillEditorFields(
         data.conditions,

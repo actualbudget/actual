@@ -114,6 +114,7 @@ export async function fixRuleForSchedule(id) {
 
   let newId = await insertRule({
     stage: null,
+    conditionsOp: 'and',
     conditions: [
       { op: 'isapprox', field: 'date', value: currentDay() },
       { op: 'isapprox', field: 'amount', value: 0 },
@@ -194,6 +195,7 @@ export async function createSchedule({ schedule, conditions = [] } = {}) {
   let ruleId;
   ruleId = await insertRule({
     stage: null,
+    conditionsOp: 'and',
     conditions,
     actions: [{ op: 'link-schedule', value: scheduleId }],
   });

@@ -4,13 +4,10 @@ import {
   integerToCurrency,
   currencyToInteger,
 } from 'loot-core/src/shared/util';
-import {
-  View,
-  Button,
-  InputWithContent,
-} from 'loot-design/src/components/common';
-import Add from 'loot-design/src/svg/v1/Add';
-import Subtract from 'loot-design/src/svg/v1/Subtract';
+
+import Add from '../../icons/v1/Add';
+import Subtract from '../../icons/v1/Subtract';
+import { View, Button, InputWithContent } from '../common';
 
 export function AmountInput({ id, defaultValue = 0, onChange, style }) {
   let [negative, setNegative] = useState(defaultValue <= 0);

@@ -5,7 +5,7 @@ let connection = require('../connection');
 let idb = require('../indexeddb');
 let { _getModule } = require('../sqlite');
 
-let baseAPI = require('./index.electron.js');
+let baseAPI = require('./index.electron');
 let join = require('./path-join');
 
 let FS = null;
@@ -243,10 +243,6 @@ async function init() {
   await populateFileHeirarchy();
 }
 
-function shutdown() {
-  BFS.backend.shutdown();
-}
-
 function basename(filepath) {
   let parts = filepath.split('/');
   return parts.slice(0, -1).join('/');
@@ -321,7 +317,6 @@ module.exports = {
   pathToId,
   populateFileHeirarchy,
   init,
-  shutdown,
   bundledDatabasePath: '/default-db.sqlite',
   migrationsPath: '/migrations',
   demoBudgetPath: '/demo-budget',
