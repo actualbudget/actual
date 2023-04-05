@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router';
 
+import { useViewportSize } from '@react-aria/utils';
 import { css } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -16,6 +17,7 @@ import Wallet from '../icons/v1/Wallet';
 import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
 import { styles, colors } from '../style';
+import { breakpoints } from '../tokens';
 
 import {
   View,
@@ -537,6 +539,9 @@ export function Sidebar({
 }) {
   let hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
+  let windowWidth = useViewportSize().width;
+  let sidebarAlwaysFloats = windowWidth < breakpoints.medium;
+
   return (
     <View
       style={[
@@ -557,7 +562,7 @@ export function Sidebar({
         style,
       ]}
     >
-      {hasWindowButtons && (
+      {hasWindowButtons && !sidebarAlwaysFloats && (
         <ToggleButton
           style={[
             {
@@ -609,7 +614,9 @@ export function Sidebar({
 
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
-        {!hasWindowButtons && <ToggleButton onFloat={onFloat} />}
+        {!hasWindowButtons && !sidebarAlwaysFloats && (
+          <ToggleButton onFloat={onFloat} />
+        )}
       </View>
 
       <View style={{ overflow: 'auto' }}>

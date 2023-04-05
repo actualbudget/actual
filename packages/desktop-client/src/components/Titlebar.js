@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { connect } from 'react-redux';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
+import { useViewportSize } from '@react-aria/utils';
 import { css, media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
@@ -15,7 +16,7 @@ import AlertTriangle from '../icons/v2/AlertTriangle';
 import ArrowButtonRight1 from '../icons/v2/ArrowButtonRight1';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { colors } from '../style';
-import tokens from '../tokens';
+import tokens, { breakpoints } from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
@@ -266,6 +267,9 @@ function Titlebar({
   let sidebar = useSidebar();
   const serverURL = useServerURL();
 
+  let windowWidth = useViewportSize().width;
+  let sidebarAlwaysFloats = windowWidth < breakpoints.medium;
+
   return (
     <View
       style={[
@@ -285,20 +289,24 @@ function Titlebar({
         style,
       ]}
     >
-      {floatingSidebar && (
+      {(floatingSidebar || sidebarAlwaysFloats) && (
         <Button
           bare
           style={{
             marginRight: 8,
             '& .arrow-right': { opacity: 0, transition: 'opacity .3s' },
             '& .menu': { opacity: 1, transition: 'opacity .3s' },
-            '&:hover .arrow-right': { opacity: 1 },
-            '&:hover .menu': { opacity: 0 },
+            '&:hover .arrow-right': !sidebarAlwaysFloats && { opacity: 1 },
+            '&:hover .menu': !sidebarAlwaysFloats && { opacity: 0 },
           }}
           onMouseEnter={() => sidebar.show()}
           onMouseLeave={() => sidebar.hide()}
           onClick={() => {
-            saveGlobalPrefs({ floatingSidebar: !floatingSidebar });
+            if (windowWidth >= breakpoints.medium) {
+              saveGlobalPrefs({ floatingSidebar: !floatingSidebar });
+            } else {
+              sidebar.toggle();
+            }
           }}
         >
           <View style={{ width: 15, height: 15 }}>
