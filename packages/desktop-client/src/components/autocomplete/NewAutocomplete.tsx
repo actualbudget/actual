@@ -1,26 +1,47 @@
 import React, { useState } from 'react';
-import Select, {
+import Select from 'react-select';
+import type {
+  GroupBase,
   Props as SelectProps,
   PropsValue,
   SingleValue,
   SelectInstance,
 } from 'react-select';
 
+import type { CreatableProps } from 'react-select/creatable';
 import CreatableSelect from 'react-select/creatable';
 
 import { NullComponent } from '../common';
 
 import styles from './autocomplete-styles';
 
-type OptionValue = string;
+type OptionValue = {
+  __isNew__?: boolean;
+  label: string;
+  value: string;
+};
 
-interface AutocompleteProps extends SelectProps<OptionValue> {
-  focused: boolean;
-  embedded: boolean;
-  onSelect: (value: PropsValue<OptionValue>) => void;
-  onCreateOption: (value: SingleValue<OptionValue>) => void;
-  isCreatable: boolean;
+interface BaseAutocompleteProps {
+  focused?: boolean;
+  embedded?: boolean;
+  onSelect: (value: string | string[]) => void;
+  onCreateOption?: (value: string) => void;
+  isCreatable?: boolean;
 }
+
+type SimpleAutocompleteProps = BaseAutocompleteProps & SelectProps<OptionValue>;
+type CreatableAutocompleteProps = BaseAutocompleteProps &
+  CreatableProps<OptionValue, true, GroupBase<OptionValue>> & {
+    isCreatable: true;
+  };
+
+type AutocompleteProps = SimpleAutocompleteProps | CreatableAutocompleteProps;
+
+const isSingleValue = (
+  value: PropsValue<OptionValue>,
+): value is SingleValue<OptionValue> => {
+  return !Array.isArray(value);
+};
 
 const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
   (
@@ -38,16 +59,32 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
     ref,
   ) => {
     const [initialValue] = useState(value);
-    const [isOpen, setIsOpen] = useState(focused);
+    const [isOpen, setIsOpen] = useState(focused || embedded);
 
-    const filterOption = (option, input) => {
+    const [inputValue, setInputValue] = useState<
+      AutocompleteProps['inputValue']
+    >(() => (isSingleValue(value) ? value?.label : undefined));
+    const [isInitialInputValue, setInitialInputValue] = useState(true);
+
+    const onInputChange: AutocompleteProps['onInputChange'] = value => {
+      setInputValue(value);
+      setInitialInputValue(false);
+    };
+
+    const filterOption: AutocompleteProps['filterOption'] = (option, input) => {
+      if (isInitialInputValue) {
+        return true;
+      }
+
       return (
         option.data?.__isNew__ ||
         option.label.toLowerCase().includes(input?.toLowerCase())
       );
     };
 
-    const onChange = async selected => {
+    const onChange: AutocompleteProps['onChange'] = (
+      selected: PropsValue<OptionValue>,
+    ) => {
       // Clear button clicked
       if (!selected) {
         onSelect(null);
@@ -55,18 +92,18 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
       }
 
       // Create a new option
-      if (selected.__isNew__) {
+      if (isSingleValue(selected) && selected.__isNew__) {
         onCreateOption(selected.value);
         return;
       }
 
       // Close the menu when making a successful selection
-      if (!Array.isArray(selected)) {
+      if (isSingleValue(selected)) {
         setIsOpen(false);
       }
 
       // Multi-select has multiple selections
-      if (Array.isArray(selected)) {
+      if (!isSingleValue(selected)) {
         onSelect(selected.map(option => option.value));
         return;
       }
@@ -74,9 +111,13 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
       onSelect(selected.value);
     };
 
-    const onKeyDown = event => {
+    const onKeyDown: AutocompleteProps['onKeyDown'] = event => {
       if (event.code === 'Escape') {
-        onSelect(initialValue);
+        onSelect(
+          isSingleValue(initialValue)
+            ? initialValue?.value
+            : initialValue.map(val => val.value),
+        );
         setIsOpen(false);
         return;
       }
@@ -92,7 +133,7 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
       <Component
         ref={ref}
         value={value}
-        menuIsOpen={isOpen || embedded}
+        menuIsOpen={isOpen}
         autoFocus={embedded}
         options={options}
         placeholder="(none)"
@@ -114,6 +155,8 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
         data-embedded={embedded}
         menuPlacement="auto"
         menuPortalTarget={embedded ? undefined : document.body}
+        inputValue={inputValue}
+        onInputChange={onInputChange}
         {...props}
       />
     );
