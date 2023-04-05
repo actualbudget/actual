@@ -489,9 +489,11 @@ export function applyActions(transactions, actions, handlers) {
     return null;
   }
 
-  let updated = transactions.map(update => {
+  let updated = transactions.map(original => {
+    var id = original.id;
+    let update = { id };
     for (let action of parsedActions) {
-      action.exec(update);
+      action.exec(update, original);
     }
     return update;
   });
