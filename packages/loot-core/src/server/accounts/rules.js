@@ -152,17 +152,19 @@ let CONDITION_TYPES = {
           'no-empty-string',
           `matches must have non-empty string (field: ${fieldName})`,
         );
-        var isValidRegexp = true;
+        let isValidRegexp = true;
+        let regexpError = true;
         try {
           new RegExp(value, 'ui');
         } catch (e) {
           isValidRegexp = false;
+          regexpError = e;
         }
 
         assert(
           isValidRegexp,
           'invalid-regex',
-          'matches must have valid regular expression',
+          `matches must have valid regular expression (exception: ${regexpError})`,
         );
 
         return value;
