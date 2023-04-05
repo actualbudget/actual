@@ -176,9 +176,9 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
       PRAGMA journal_mode=MEMORY;
       PRAGMA cache_size=-10000;
     `);
-      db.create_function("regexp", function (regex, text) {
+      db.create_function('regexp', function (regex, text) {
         return new RegExp(regex, 'ui').test(text) ? 1 : 0;
-      })
+      });
       return db;
     }
   }

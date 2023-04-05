@@ -372,9 +372,8 @@ describe('Transaction rules', () => {
     await loadRules();
     await insertRule({
       stage: null,
-      conditions: [
-        { op: 'matches', field: 'imported_payee', value: '123.*' },
-      ],
+      conditionsOp: 'and',
+      conditions: [{ op: 'matches', field: 'imported_payee', value: '123.*' }],
       actions: [{ op: 'set', field: 'payee', value: 'kroger4' }],
     });
 

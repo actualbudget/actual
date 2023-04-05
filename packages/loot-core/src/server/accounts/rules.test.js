@@ -238,6 +238,7 @@ describe('Condition', () => {
     expect(cond.eval({ name: 'item foo' })).toBe(true);
     expect(cond.eval({ name: 'foo123' })).toBe(true);
     expect(cond.eval({ name: 'itemfoo' })).toBe(true);
+    expect(cond.eval({ name: '123' })).toBe(false);
     expect(cond.eval({ name: 'item cat 123' })).toBe(false);
 
     cond = new Condition('matches', 'name', '^(foo|bar)', null, fieldTypes);
