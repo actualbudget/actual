@@ -17,6 +17,7 @@ const colourStyles = {
     ...styles,
     padding: '0 2px',
     margin: 0,
+    overflow: 'hidden',
   }),
   menuPortal: styles => ({
     ...styles,
