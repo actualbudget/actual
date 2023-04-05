@@ -9,7 +9,7 @@ import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 
-import { setBudget, getSheetValue } from './actions';
+import { setBudget, getSheetValue, getBudget } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export function applyTemplate({ month }) {
@@ -329,6 +329,25 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       }
       case 'percentage': {
+        /*expected behavior:  
+          By using the string '#template 10% of Income' , the following code should calculate 10% of the 'Income' category and budget the appropriate amount.
+          By using the string '#template 10% of IncomeGroup', the keyword 'IncomeGroup' should sum all available income within the 'Income' category group, 
+        */
+        let percent = template.percent;
+        let monthlyIncome = 0;
+        let next_month = new Date(`${month}-31`);
+        if (template.category == 'IncomeGroup') {  //adds a keyword 'IncomeGroup' to use all income for the month for the calculation
+          let monthlyIncome = await getSheetValue(sheetName, `total-income`);
+        }
+        else { 
+          let income_category = (await db.getCategories()).filter(c => c.is_income == true && c.name == template.category);
+          let monthlyIncome = await getSheetValue(
+            sheetName,
+            `sum-amount-${income_category[0].id}`,
+          );
+        }
+        to_budget = Math.round(monthlyIncome * (percent / 100));
+        
         /*
           let income_category = (await actual.getCategories()).filter(c => c.is_income == true && c.name == template.category);
           let func = (getBudgetMonthTestFunc || getBudgetMonth);
