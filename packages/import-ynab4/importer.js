@@ -220,7 +220,7 @@ async function importTransactions(data, entityIdMap) {
               payee = entityIdMap.get(t.payeeId);
               imported_payee = data.payees.find(
                 p => p.entityId === t.payeeId
-              )?.name ?? null;
+              )?.name;
             }
             
             return { transfer_id: transferId, payee, imported_payee: imported_payee};
