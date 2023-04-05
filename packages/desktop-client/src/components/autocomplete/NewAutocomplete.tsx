@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import Select, {
+import Select from 'react-select';
+import type {
   GroupBase,
   Props as SelectProps,
   PropsValue,
@@ -17,13 +18,13 @@ import styles from './autocomplete-styles';
 type OptionValue = {
   __isNew__?: boolean;
   label: string;
-  value: true;
+  value: string;
 };
 
 interface BaseAutocompleteProps {
   focused?: boolean;
   embedded?: boolean;
-  onSelect: (value: PropsValue<OptionValue>) => void;
+  onSelect: (value: string | string[]) => void;
   onCreateOption?: (value: string) => void;
   isCreatable?: boolean;
 }
@@ -58,7 +59,7 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
     ref,
   ) => {
     const [initialValue] = useState(value);
-    const [isOpen, setIsOpen] = useState(focused);
+    const [isOpen, setIsOpen] = useState(focused || embedded);
 
     const [inputValue, setInputValue] = useState<
       AutocompleteProps['inputValue']
@@ -95,12 +96,12 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
       }
 
       // Close the menu when making a successful selection
-      if (!Array.isArray(selected)) {
+      if (isSingleValue(selected)) {
         setIsOpen(false);
       }
 
       // Multi-select has multiple selections
-      if (Array.isArray(selected)) {
+      if (!isSingleValue(selected)) {
         onSelect(selected.map(option => option.value));
         return;
       }
@@ -110,7 +111,11 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
 
     const onKeyDown: AutocompleteProps['onKeyDown'] = event => {
       if (event.code === 'Escape') {
-        onSelect(initialValue);
+        onSelect(
+          isSingleValue(initialValue)
+            ? initialValue?.value
+            : initialValue.map(val => val.value),
+        );
         setIsOpen(false);
         return;
       }
@@ -126,7 +131,7 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
       <Component
         ref={ref}
         value={value}
-        menuIsOpen={isOpen || embedded}
+        menuIsOpen={isOpen}
         autoFocus={embedded}
         options={options}
         placeholder="(none)"
