@@ -82,7 +82,9 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
       );
     };
 
-    const onChange: AutocompleteProps['onChange'] = selected => {
+    const onChange: AutocompleteProps['onChange'] = (
+      selected: PropsValue<OptionValue>,
+    ) => {
       // Clear button clicked
       if (!selected) {
         onSelect(null);
@@ -90,7 +92,7 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
       }
 
       // Create a new option
-      if (selected.__isNew__) {
+      if (isSingleValue(selected) && selected.__isNew__) {
         onCreateOption(selected.value);
         return;
       }
