@@ -19,7 +19,7 @@ async function idsWithChildren(ids) {
   return [...set];
 }
 
-async function getTransactionsByIds(ids) {
+export async function getTransactionsByIds(ids) {
   // TODO: convert to whereIn
   //
   // or better yet, use ActualQL

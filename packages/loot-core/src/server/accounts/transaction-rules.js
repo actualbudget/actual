@@ -462,7 +462,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
   return { filters, errors };
 }
 
-export function applyActions(transactionIds, actions, handlers) {
+export function applyActions(transactions, actions, handlers) {
   let parsedActions = actions
     .map(action => {
       if (action instanceof Action) {
@@ -489,8 +489,7 @@ export function applyActions(transactionIds, actions, handlers) {
     return null;
   }
 
-  let updated = transactionIds.map(id => {
-    let update = { id };
+  let updated = transactions.map(update => {
     for (let action of parsedActions) {
       action.exec(update);
     }
