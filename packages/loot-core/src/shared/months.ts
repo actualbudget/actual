@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-function _parse(value) {
+function _parse(value: string | Date) {
   if (typeof value === 'string') {
     // Dates are hard. We just want to deal with months in the format
     // 2020-01 and days in the format 2020-01-01, but life is never
@@ -140,7 +140,7 @@ export function bounds(month) {
   };
 }
 
-export function _range(start, end, inclusive) {
+export function _range(start, end, inclusive = false) {
   const months = [];
   let month = monthFromDate(start);
   while (d.isBefore(_parse(month), _parse(end))) {
@@ -163,7 +163,7 @@ export function rangeInclusive(start, end) {
   return _range(start, end, true);
 }
 
-export function _dayRange(start, end, inclusive) {
+export function _dayRange(start, end, inclusive = false) {
   const days = [];
   let day = start;
   while (d.isBefore(_parse(day), _parse(end))) {

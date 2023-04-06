@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Switch, Redirect, Router, Route } from 'react-router-dom';
 
@@ -50,15 +50,15 @@ function Version() {
 }
 
 function ManagementApp({
+  isLoading,
   files,
   userData,
-  loadingText,
   managerHasInitialized,
   setAppState,
   getUserData,
   loadAllFiles,
 }) {
-  const history = createBrowserHistory();
+  const [history] = useState(createBrowserHistory);
   window.__history = history;
 
   // runs on mount only
@@ -66,7 +66,6 @@ function ManagementApp({
     // An action may have been triggered from outside, and we don't
     // want to override its loading message so we only show the
     // initial loader if there isn't already a message
-    let alreadyLoading = loadingText != null;
 
     // Remember: this component is remounted every time the user
     // closes a budget. That's why we keep `managerHasInitialized` in
@@ -74,7 +73,7 @@ function ManagementApp({
     // loading spinner on first run, but never again since we'll have
     // a cached list of files and can show them
     if (!managerHasInitialized) {
-      if (!alreadyLoading) {
+      if (!isLoading) {
         setAppState({ loadingText: '' });
       }
     }
@@ -86,13 +85,13 @@ function ManagementApp({
       }
 
       // TODO: There is a race condition here. The user could perform an
-      // action that starts loading in between where `alreadyLoading`
+      // action that starts loading in between where `isLoading`
       // was captured and this would clear it. We really only want to
       // ever clear the initial loading screen, so we need a "loading
       // id" of some kind.
       setAppState({
         managerHasInitialized: true,
-        ...(!alreadyLoading ? { loadingText: null } : null),
+        ...(!isLoading ? { loadingText: null } : null),
       });
     }
 
@@ -100,6 +99,10 @@ function ManagementApp({
   }, []);
 
   if (!managerHasInitialized) {
+    return null;
+  }
+
+  if (isLoading) {
     return null;
   }
 
@@ -215,7 +218,6 @@ export default connect(state => {
     files: state.budgets.allFiles,
     userData: state.user.data,
     managerHasInitialized: state.app.managerHasInitialized,
-    loadingText: state.app.loadingText,
     currentModals: modalStack.map(modal => modal.name),
   };
 }, actions)(ManagementApp);

@@ -3,6 +3,8 @@ import { BudgetPage } from './budget-page';
 export class ConfigurationPage {
   constructor(page) {
     this.page = page;
+
+    this.heading = page.getByRole('heading');
   }
 
   async createTestFile() {

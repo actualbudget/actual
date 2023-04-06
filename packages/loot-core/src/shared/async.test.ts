@@ -5,7 +5,7 @@ function timeout(n) {
 }
 
 function makeFunction(data) {
-  return async function fn(n, { throwError } = {}) {
+  return async function fn(n, { throwError = false } = {}) {
     data.push(n);
     await timeout(10);
 

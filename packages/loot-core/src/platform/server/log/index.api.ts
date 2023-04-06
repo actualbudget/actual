@@ -1,4 +1,6 @@
-const logger = {
+import type Logger from '.';
+
+const logger: Logger = {
   info: (...args) => {
     console.log(...args);
   },

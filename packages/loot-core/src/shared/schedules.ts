@@ -100,7 +100,7 @@ export function getRecurringDescription(config) {
         let strs = [];
 
         let uniqueDays = new Set(patterns.map(p => p.type));
-        let isSameDay = uniqueDays.length === 1 && !uniqueDays.has('day');
+        let isSameDay = uniqueDays.size === 1 && !uniqueDays.has('day');
 
         for (let pattern of patterns) {
           if (pattern.type === 'day') {
@@ -151,8 +151,15 @@ export function getRecurringDescription(config) {
   }
 }
 
+type RecurringSchedule = {
+  start: Date;
+  frequency: string;
+  byHourOfDay: number[];
+  interval?: unknown;
+};
+
 export function recurConfigToRSchedule(config) {
-  let base = {
+  let base: RecurringSchedule = {
     start: monthUtils.parseDate(config.start),
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],

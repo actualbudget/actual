@@ -1,4 +1,4 @@
-const Database = require('better-sqlite3');
+import Database from 'better-sqlite3';
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {

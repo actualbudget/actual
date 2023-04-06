@@ -115,10 +115,10 @@ export const styles = {
     flex: 1,
     [`@media (min-width: ${tokens.breakpoint_xs})`]: {
       minWidth: 360,
+      paddingTop: 36,
     },
     [`@media (min-width: ${tokens.breakpoint_medium})`]: {
       minWidth: 500,
-      paddingTop: 36,
     },
   },
   pageHeader: {
