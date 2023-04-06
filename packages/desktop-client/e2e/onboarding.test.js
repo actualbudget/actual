@@ -1,4 +1,5 @@
 import path from 'path';
+
 import { test, expect } from '@playwright/test';
 
 import { AccountPage } from './page-models/account-page';

@@ -26,14 +26,14 @@ function getMenu(isDev, createWindow) {
             if (focusedWindow) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
-                  "__actionsForMenu.replaceModal('load-backup')"
+                  "__actionsForMenu.replaceModal('load-backup')",
                 );
               }
             }
-          }
+          },
         },
         {
-          type: 'separator'
+          type: 'separator',
         },
         {
           label: 'Manage files...',
@@ -42,7 +42,7 @@ function getMenu(isDev, createWindow) {
             if (focusedWindow) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
-                  '__actionsForMenu.closeBudget()'
+                  '__actionsForMenu.closeBudget()',
                 );
               } else {
                 focusedWindow.close();
@@ -51,9 +51,9 @@ function getMenu(isDev, createWindow) {
               // The default page is the budget list
               createWindow();
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     },
     {
       label: 'Edit',
@@ -62,42 +62,42 @@ function getMenu(isDev, createWindow) {
           label: 'Undo',
           enabled: false,
           accelerator: 'CmdOrCtrl+Z',
-          click: function(menuItem, focusedWin) {
+          click: function (menuItem, focusedWin) {
             // Undo
             focusedWin.webContents.executeJavaScript('__actionsForMenu.undo()');
-          }
+          },
         },
         {
           label: 'Redo',
           enabled: false,
           accelerator: 'Shift+CmdOrCtrl+Z',
-          click: function(menuItem, focusedWin) {
+          click: function (menuItem, focusedWin) {
             // Redo
             focusedWin.webContents.executeJavaScript('__actionsForMenu.redo()');
-          }
+          },
         },
         {
-          type: 'separator'
+          type: 'separator',
         },
         {
-          role: 'cut'
+          role: 'cut',
         },
         {
-          role: 'copy'
+          role: 'copy',
         },
         {
-          role: 'paste'
+          role: 'paste',
         },
         {
-          role: 'pasteandmatchstyle'
+          role: 'pasteandmatchstyle',
         },
         {
-          role: 'delete'
+          role: 'delete',
         },
         {
-          role: 'selectall'
-        }
-      ]
+          role: 'selectall',
+        },
+      ],
     },
     {
       label: 'View',
@@ -107,7 +107,7 @@ function getMenu(isDev, createWindow) {
           accelerator: 'CmdOrCtrl+R',
           click(item, focusedWindow) {
             if (focusedWindow) focusedWindow.reload();
-          }
+          },
         },
         {
           label: 'Toggle Developer Tools',
@@ -115,27 +115,27 @@ function getMenu(isDev, createWindow) {
             process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
           click(item, focusedWindow) {
             if (focusedWindow) focusedWindow.webContents.toggleDevTools();
-          }
+          },
         },
         isDev && {
-          type: 'separator'
+          type: 'separator',
         },
         {
-          role: 'resetzoom'
+          role: 'resetzoom',
         },
         {
-          role: 'zoomin'
+          role: 'zoomin',
         },
         {
-          role: 'zoomout'
+          role: 'zoomout',
         },
         {
-          type: 'separator'
+          type: 'separator',
         },
         {
-          role: 'togglefullscreen'
-        }
-      ].filter(x => x)
+          role: 'togglefullscreen',
+        },
+      ].filter(x => x),
     },
     {
       label: 'Tools',
@@ -143,30 +143,30 @@ function getMenu(isDev, createWindow) {
         {
           label: 'Find schedules',
           enabled: false,
-          click: function(menuItem, focusedWin) {
+          click: function (menuItem, focusedWin) {
             focusedWin.webContents.executeJavaScript(
-              '__history && __history.push("/schedule/discover", { locationPtr: __history.location })'
+              '__history && __history.push("/schedule/discover", { locationPtr: __history.location })',
             );
-          }
+          },
         },
         {
           label: 'Repair split transactions',
           enabled: false,
-          click: function(menuItem, focusedWin) {
+          click: function (menuItem, focusedWin) {
             focusedWin.webContents.executeJavaScript(
-              '__history && __history.push("/tools/fix-splits", { locationPtr: __history.location })'
+              '__history && __history.push("/tools/fix-splits", { locationPtr: __history.location })',
             );
-          }
-        }
-      ]
+          },
+        },
+      ],
     },
     {
       role: 'window',
       submenu: [
         {
-          role: 'minimize'
-        }
-      ]
+          role: 'minimize',
+        },
+      ],
     },
     {
       role: 'help',
@@ -175,10 +175,10 @@ function getMenu(isDev, createWindow) {
           label: 'Learn More',
           click() {
             shell.openExternal('https://actualbudget.github.io/docs/');
-          }
-        }
-      ]
-    }
+          },
+        },
+      ],
+    },
   ];
 
   if (process.platform === 'win32') {
@@ -187,7 +187,7 @@ function getMenu(isDev, createWindow) {
       label: 'About Actual',
       click() {
         ipcMain.emit('show-about');
-      }
+      },
     });
   } else if (process.platform === 'darwin') {
     const name = app.getName();
@@ -198,58 +198,58 @@ function getMenu(isDev, createWindow) {
           label: 'About Actual',
           click() {
             ipcMain.emit('show-about');
-          }
+          },
         },
         isDev && {
           label: 'Screenshot',
           click() {
             ipcMain.emit('screenshot');
-          }
+          },
         },
         {
-          type: 'separator'
+          type: 'separator',
         },
         {
           role: 'services',
-          submenu: []
+          submenu: [],
         },
         {
-          type: 'separator'
+          type: 'separator',
         },
         {
-          role: 'hide'
+          role: 'hide',
         },
         {
-          role: 'hideothers'
+          role: 'hideothers',
         },
         {
-          role: 'unhide'
+          role: 'unhide',
         },
         {
-          type: 'separator'
+          type: 'separator',
         },
         {
-          role: 'quit'
-        }
-      ].filter(x => x)
+          role: 'quit',
+        },
+      ].filter(x => x),
     });
     // Edit menu.
     let editIdx = template.findIndex(t => t.label === 'Edit');
     template[editIdx].submenu.push(
       {
-        type: 'separator'
+        type: 'separator',
       },
       {
         label: 'Speech',
         submenu: [
           {
-            role: 'startspeaking'
+            role: 'startspeaking',
           },
           {
-            role: 'stopspeaking'
-          }
-        ]
-      }
+            role: 'stopspeaking',
+          },
+        ],
+      },
     );
     // Window menu.
     let windowIdx = template.findIndex(t => t.role === 'window');
@@ -257,24 +257,24 @@ function getMenu(isDev, createWindow) {
       {
         label: 'Close',
         accelerator: 'CmdOrCtrl+W',
-        role: 'close'
+        role: 'close',
       },
       {
         label: 'Minimize',
         accelerator: 'CmdOrCtrl+M',
-        role: 'minimize'
+        role: 'minimize',
       },
       {
         label: 'Zoom',
-        role: 'zoom'
+        role: 'zoom',
       },
       {
-        type: 'separator'
+        type: 'separator',
       },
       {
         label: 'Bring All to Front',
-        role: 'front'
-      }
+        role: 'front',
+      },
     ];
   }
 

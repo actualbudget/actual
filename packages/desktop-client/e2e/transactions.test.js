@@ -31,7 +31,7 @@ test.describe('Transactions', () => {
       payee: 'Home Depot',
       notes: 'Notes field',
       category: 'Food',
-      debit: '12.34'
+      debit: '12.34',
     });
 
     expect(await accountPage.getNthTransaction(0)).toMatchObject({
@@ -39,7 +39,7 @@ test.describe('Transactions', () => {
       notes: 'Notes field',
       category: 'Food',
       debit: '12.34',
-      credit: ''
+      credit: '',
     });
   });
 
@@ -48,15 +48,15 @@ test.describe('Transactions', () => {
       {
         payee: 'Krogger',
         notes: 'Notes',
-        debit: '333.33'
+        debit: '333.33',
       },
       {
         category: 'General',
-        debit: '222.22'
+        debit: '222.22',
       },
       {
-        debit: '111.11'
-      }
+        debit: '111.11',
+      },
     ]);
 
     expect(await accountPage.getNthTransaction(0)).toMatchObject({
@@ -64,21 +64,21 @@ test.describe('Transactions', () => {
       notes: 'Notes',
       category: 'Split',
       debit: '333.33',
-      credit: ''
+      credit: '',
     });
     expect(await accountPage.getNthTransaction(1)).toMatchObject({
       payee: 'Krogger',
       notes: '',
       category: 'General',
       debit: '222.22',
-      credit: ''
+      credit: '',
     });
     expect(await accountPage.getNthTransaction(2)).toMatchObject({
       payee: 'Krogger',
       notes: '',
       category: 'Categorize',
       debit: '111.11',
-      credit: ''
+      credit: '',
     });
   });
 });

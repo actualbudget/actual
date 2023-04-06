@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 
 const {
   SIGN_TOOL_PATH = 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\x64\\signtool.exe',
-  TIMESTAMP_SERVER = 'http://timestamp.digicert.com'
+  TIMESTAMP_SERVER = 'http://timestamp.digicert.com',
 } = process.env;
 
 const SITE = 'https://actualbudget.com/';
@@ -12,7 +12,7 @@ const importPfx = (certPath, password) => {
     ['certutil'],
     ['-f'],
     ['-p', `"${password}"`],
-    ['-importPfx', 'My', `"${certPath}"`, 'NoRoot']
+    ['-importPfx', 'My', `"${certPath}"`, 'NoRoot'],
   ]
     .map(sub => sub.join(' '))
     .join(' ');
@@ -34,7 +34,7 @@ const signBinary = (path, name) => {
     ['/t', `"${TIMESTAMP_SERVER}"`],
     ['/d', `"${name}"`],
     ['/du', `"${SITE}"`],
-    [`"${path}"`]
+    [`"${path}"`],
   ]
     .map(sub => sub.join(' '))
     .join(' ');

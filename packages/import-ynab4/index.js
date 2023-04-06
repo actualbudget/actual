@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 const fs = require('fs');
+
 const { init, shutdown } = require('@actual-app/api');
+
 const { findBudgets, importBuffer } = require('./importer');
 
 async function run() {

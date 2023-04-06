@@ -20,15 +20,15 @@ protocol.registerSchemesAsPrivileged([
 
 global.fetch = require('node-fetch');
 
-const findOpenSocket = require('./findOpenSocket');
-const updater = require('./updater');
 const about = require('./about');
+const findOpenSocket = require('./findOpenSocket');
+const getMenu = require('./menu');
+const updater = require('./updater');
 
 require('./security');
 
 const { fork } = require('child_process');
 const path = require('path');
-const getMenu = require('./menu');
 
 require('./setRequireHook');
 
