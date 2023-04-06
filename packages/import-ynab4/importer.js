@@ -214,11 +214,15 @@ async function importTransactions(data, entityIdMap) {
             } else {
               payee = entityIdMap.get(t.payeeId);
               imported_payee = data.payees.find(
-                p => p.entityId === t.payeeId
+                p => p.entityId === t.payeeId,
               )?.name;
             }
-            
-            return { transfer_id: transferId, payee, imported_payee: imported_payee};
+
+            return {
+              transfer_id: transferId,
+              payee,
+              imported_payee: imported_payee,
+            };
           }
 
           let newTransaction = {

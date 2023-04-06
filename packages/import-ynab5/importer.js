@@ -232,8 +232,8 @@ async function importTransactions(data, entityIdMap) {
           } else {
             newTransaction.payee = entityIdMap.get(transaction.payee_id);
             newTransaction.imported_payee = data.payees.find(
-                p => !p.deleted && p.id === t.payeeId
-              )?.name;
+              p => !p.deleted && p.id === transaction.payee_id,
+            )?.name;
           }
 
           // Handle starting balances
