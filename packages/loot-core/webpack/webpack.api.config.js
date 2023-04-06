@@ -24,10 +24,4 @@ config.output.path = path.join(
   'app',
 );
 
-config.plugins.push(
-  new webpack.DefinePlugin({
-    ACTUAL_APP_VERSION: JSON.stringify('0.0.147'),
-  }),
-);
-
 module.exports = config;

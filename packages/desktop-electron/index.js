@@ -302,10 +302,6 @@ ipcMain.on('get-bootstrap-data', event => {
   };
 });
 
-ipcMain.handle('get-version', () => {
-  return app.getVersion();
-});
-
 ipcMain.handle('relaunch', () => {
   app.relaunch();
   app.exit();
