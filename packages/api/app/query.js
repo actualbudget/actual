@@ -99,24 +99,6 @@ class Query {
   }
 }
 
-function getPrimaryOrderBy(query, defaultOrderBy) {
-  let orderExprs = query.serialize().orderExpressions;
-  if (orderExprs.length === 0) {
-    if (defaultOrderBy) {
-      return { order: 'asc', ...defaultOrderBy };
-    }
-    return null;
-  }
-
-  let firstOrder = orderExprs[0];
-  if (typeof firstOrder === 'string') {
-    return { field: firstOrder, order: 'asc' };
-  }
-  // Handle this form: { field: 'desc' }
-  let [field] = Object.keys(firstOrder);
-  return { field, order: firstOrder[field] };
-}
-
 module.exports = function q(table) {
   return new Query({ table });
 };

@@ -73,10 +73,6 @@ function monthFromDate(date) {
   return d.format(_parse(date), 'yyyy-MM');
 }
 
-function getCurrentMonth() {
-  return d.format(new Date(), 'yyyy-MM');
-}
-
 // Importer
 
 async function importAccounts(data, entityIdMap) {
@@ -192,7 +188,6 @@ async function importTransactions(data, entityIdMap) {
     }
   }
 
-  let sortOrder = 1;
   let transactionsGrouped = groupBy(data.transactions, 'accountId');
 
   await Promise.all(

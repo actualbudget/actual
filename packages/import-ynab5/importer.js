@@ -3,7 +3,6 @@
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
 const actual = require('@actual-app/api/methods');
-const d = require('date-fns');
 const uuid = require('uuid');
 
 function amountFromYnab(amount) {

@@ -1,4 +1,3 @@
-const { app } = require('electron');
 const isDev = require('electron-is-dev');
 const { autoUpdater } = require('electron-updater');
 
