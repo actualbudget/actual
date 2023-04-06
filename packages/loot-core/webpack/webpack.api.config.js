@@ -26,7 +26,7 @@ config.output.path = path.join(
 
 config.plugins.push(
   new webpack.DefinePlugin({
-    ACTUAL_APP_VERSION: '"0.0.147"',
+    ACTUAL_APP_VERSION: JSON.stringify('0.0.147'),
   }),
 );
 
