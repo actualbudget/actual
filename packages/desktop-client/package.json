@@ -26,7 +26,6 @@
     "date-fns": "^2.29.3",
     "debounce": "^1.2.0",
     "downshift": "1.31.16",
-    "eslint": "^8.35.0",
     "focus-visible": "^4.1.1",
     "formik": "^0.11.10",
     "glamor": "^2.20.40",
@@ -68,7 +67,7 @@
     "build:browser": "cross-env ./bin/build-browser",
     "test": "react-app-rewired test",
     "e2e": "npx playwright test e2e --browser=chromium",
-    "lint": "eslint src"
+    "lint": "eslint ."
   },
   "jest": {
     "setupFilesAfterEnv": [

@@ -105,10 +105,6 @@ function deleteAccount(id) {
   return send('api/account-delete', { id });
 }
 
-function getCategoryGroups() {
-  return send('api/categories-get', { grouped: true });
-}
-
 function createCategoryGroup(group) {
   return send('api/category-group-create', { group });
 }

@@ -25,6 +25,7 @@
     "start:browser": "npm-run-all --parallel 'start:browser-*'",
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
+    "build:browser": "./bin/package-browser",
     "test": "yarn workspaces foreach --parallel --verbose run test",
     "test:debug": "yarn workspaces foreach --verbose run test",
     "e2e": "yarn workspaces foreach --parallel --verbose run e2e",
@@ -36,7 +37,7 @@
   },
   "devDependencies": {
     "cross-env": "^5.1.5",
-    "eslint": "8.35.0",
+    "eslint": "^8.37.0",
     "eslint-config-react-app": "7.0.1",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-rulesdir": "^0.2.2",

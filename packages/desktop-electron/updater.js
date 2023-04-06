@@ -1,5 +1,4 @@
 const isDev = require('electron-is-dev');
-const { app } = require('electron');
 const { autoUpdater } = require('electron-updater');
 
 // Every 5 minutes
@@ -22,7 +21,7 @@ autoUpdater.on('update-downloaded', info => {
   fireEvent('update-downloaded', {
     releaseNotes: info.releaseNotes,
     releaseName: info.releaseName,
-    version: info.version
+    version: info.version,
   });
 });
 
@@ -100,5 +99,5 @@ module.exports = {
   apply,
   check,
   isChecking,
-  getLastEvent
+  getLastEvent,
 };
