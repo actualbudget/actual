@@ -254,6 +254,7 @@ const sidebars = {
           label: 'Troubleshooting',
           collapsed: true,
           items: [
+            'Troubleshooting/Server',
             'Troubleshooting/SharedArrayBuffer',
             'Troubleshooting/Troubleshooting-Edge',
           ],
