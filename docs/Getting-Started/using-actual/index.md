@@ -29,7 +29,7 @@ Below is a list of useful links related to Actual Budget.
 - [GitHub for Actual Server](https://github.com/actualbudget/actual-server) - The syncing server with web client included . All you need to run Actual.
 - [GitHub repository of releases of Actual and Actual packages](https://github.com/actualbudget/releases)
 - The official Docker image:
-  [https://hub.docker.com/r/jlongster/actual-server](https://hub.docker.com/r/jlongster/actual-server)
+  [https://hub.docker.com/r/actualbudget/actual-server](https://hub.docker.com/r/actualbudget/actual-server)
 
 ### Guides
 
