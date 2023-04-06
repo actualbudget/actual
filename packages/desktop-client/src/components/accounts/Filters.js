@@ -536,7 +536,7 @@ function normalizeValue(value, isMulti) {
     if (Array.isArray(value)) {
       return value;
     }
-    return value.split(', ');
+    return String(value).split(', ');
   }
 
   if (Array.isArray(value)) {
