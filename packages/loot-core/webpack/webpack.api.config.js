@@ -1,7 +1,5 @@
 let path = require('path');
 
-let webpack = require('webpack');
-
 let config = require('./webpack.desktop.config');
 
 config.resolve.extensions = [
