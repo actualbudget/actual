@@ -86,10 +86,21 @@ module.exports = {
       );
     }
 
+    function isSetInnerHTML(node) {
+      return (
+        node.type === 'AssignmentExpression' &&
+        node.operator === '=' &&
+        node.left.type === 'MemberExpression' &&
+        node.left.property.type === 'Identifier' &&
+        node.left.property.name === 'innerHTML'
+      );
+    }
+
     function isIgnored(node) {
       return (
         isExpectingSQLToMatch(node) ||
         isNewRegExp(node) ||
+        isSetInnerHTML(node) ||
         isIdentifierCall(node, 'runQuery') ||
         isIdentifierCall(node, 'compile') ||
         isMemberCall(node, null, ['querySelector', 'querySelectorAll']) ||
