@@ -197,7 +197,7 @@ async function importTransactions(data, entityIdMap) {
       let toImport = transactions
         .map(transaction => {
           if (transaction.isTombstone) {
-            return;
+            return null;
           }
 
           let id = entityIdMap.get(transaction.entityId);

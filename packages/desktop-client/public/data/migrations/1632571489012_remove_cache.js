@@ -37,7 +37,7 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
     true,
   );
   db.transaction(() => {
-    budget.map(monthBudget => {
+    budget.forEach(monthBudget => {
       let match = monthBudget.name.match(
         /^(budget-report|budget)(\d+)!budget-(.+)$/,
       );
@@ -84,7 +84,7 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
     true,
   );
   db.transaction(() => {
-    buffers.map(buffer => {
+    buffers.forEach(buffer => {
       let match = buffer.name.match(/^budget(\d+)!buffered$/);
       if (match) {
         let month = match[1].slice(0, 4) + '-' + match[1].slice(4);
