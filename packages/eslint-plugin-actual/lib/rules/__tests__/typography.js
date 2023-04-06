@@ -27,6 +27,7 @@ ruleTester.run('typography', rule, {
     `let selected = document.querySelector('[data-test="foo"]');`,
     `let selected = document.querySelectorAll('[data-test="foo"]');`,
     `myNode.innerHTML = '<div data-test="foo">Hello, world!</div>';`,
+    `foo.bar.webContents.executeJavaScript('console.log("Hello, world!")');`,
   ],
 
   invalid: [

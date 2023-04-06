@@ -105,6 +105,7 @@ module.exports = {
         isIdentifierCall(node, 'compile') ||
         isMemberCall(node, null, ['querySelector', 'querySelectorAll']) ||
         isMemberCall(node, null, ['runQuery', 'first', 'all']) ||
+        isMemberCall(node, null, ['executeJavaScript']) ||
         isMemberCall(node, 'db', ['first', 'all']) ||
         isMemberCall(node, 'spreadsheet', ['set'])
       );
