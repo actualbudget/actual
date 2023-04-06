@@ -5,7 +5,7 @@ let connection = require('../connection');
 let idb = require('../indexeddb');
 let { _getModule } = require('../sqlite');
 
-let baseAPI = require('./index.electron.js');
+let baseAPI = require('./index.electron');
 let join = require('./path-join');
 
 let FS = null;

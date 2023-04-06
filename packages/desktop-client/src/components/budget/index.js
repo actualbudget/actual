@@ -13,7 +13,7 @@ import {
   addGroup,
   updateGroup,
   deleteGroup,
-} from 'loot-core/src/shared/categories.js';
+} from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useFeatureFlag from '../../hooks/useFeatureFlag';

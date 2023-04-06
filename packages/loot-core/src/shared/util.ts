@@ -30,7 +30,7 @@ export function shallowEqual(a, b) {
     return true;
   }
 
-  var numKeysA = 0,
+  let numKeysA = 0,
     numKeysB = 0,
     key;
   for (key in b) {
@@ -66,7 +66,7 @@ export function getChangedValues(obj1, obj2) {
 
 export function hasFieldsChanged(obj1, obj2, fields) {
   let changed = false;
-  for (var i = 0; i < fields.length; i++) {
+  for (let i = 0; i < fields.length; i++) {
     let field = fields[i];
     if (obj1[field] !== obj2[field]) {
       changed = true;

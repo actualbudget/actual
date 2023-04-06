@@ -70,4 +70,8 @@ export class Navigation {
     await this.page.getByRole('button', { name: 'Create' }).click();
     return new AccountPage(this.page);
   }
+
+  async clickOnNoServer() {
+    await this.page.getByRole('button', { name: 'No server' }).click();
+  }
 }
