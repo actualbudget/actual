@@ -10,7 +10,7 @@ const colourStyles = {
     outline: 0,
     marginLeft: -1,
     marginRight: 1,
-    padding: '6px 2px',
+    padding: '4px 2px',
     minHeight: 'auto',
   }),
   input: styles => ({
