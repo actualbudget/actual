@@ -15,6 +15,9 @@
   },
   "bin": "./index.js",
   "homepage": "https://github.com/actualbudget/actual/tree/master/packages/import-ynab5#readme",
+  "scripts": {
+    "lint": "eslint ."
+  },
   "dependencies": {
     "@actual-app/api": "*",
     "date-fns": "^2.29.3",

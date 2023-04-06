@@ -67,7 +67,7 @@
     "build:browser": "cross-env ./bin/build-browser",
     "test": "react-app-rewired test",
     "e2e": "npx playwright test e2e --browser=chromium",
-    "lint": "eslint src"
+    "lint": "eslint ."
   },
   "jest": {
     "setupFilesAfterEnv": [
