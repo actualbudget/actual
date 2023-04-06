@@ -4,7 +4,7 @@ title: 'Backing up your Actual budget'
 
 :::note
 
-This only applies to Actual Web
+If your budget is very old, you may have trouble restoring large backups. If you’re encountering this issue, click “Reset Sync” under 'Settings' > 'Show advanced settings' to reset sync, then make the export again. This should reduce the file size.
 
 :::
 
