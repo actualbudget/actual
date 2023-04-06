@@ -336,8 +336,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         } else {
           let income_category = (await db.getCategories()).find(
             c =>
-              c.is_income == true &&
-              c.name.toLowerCase() == template.category.toLowerCase(),
+              c.is_income === 1 &&
+              c.name.toLowerCase() === template.category.toLowerCase(),
           );
           if (!income_category) {
             throw new Error(`Could not find category “${template.category}”`);
