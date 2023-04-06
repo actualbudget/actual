@@ -211,15 +211,19 @@ async function importTransactions(data, entityIdMap) {
             let transferId = entityIdMap.get(t.transferTransactionId) || null;
 
             let payee = null;
+            let imported_payee = null;
             if (transferId) {
               payee = payees.find(
                 p => p.transfer_acct === entityIdMap.get(t.targetAccountId)
               ).id;
             } else {
               payee = entityIdMap.get(t.payeeId);
+              imported_payee = data.payees.find(
+                p => p.entityId === t.payeeId
+              )?.name;
             }
-
-            return { transfer_id: transferId, payee };
+            
+            return { transfer_id: transferId, payee, imported_payee: imported_payee};
           }
 
           let newTransaction = {
