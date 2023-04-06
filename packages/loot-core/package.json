@@ -9,7 +9,7 @@
     "build:api": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.api.config.js",
     "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
     "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
-    "lint": "eslint src",
+    "lint": "eslint .",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "jest -c jest.config.js",
     "test:web": "jest -c jest.web.config.js"
@@ -49,7 +49,6 @@
     "buffer": "^5.5.0",
     "cross-env": "^7.0.3",
     "date-fns": "^2.29.3",
-    "eslint": "8.35.0",
     "fake-indexeddb": "^3.1.3",
     "fast-check": "3.7.1",
     "jest": "^27.0.0",

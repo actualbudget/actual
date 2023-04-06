@@ -85,7 +85,6 @@ const SyncPb = require('./sync/proto/sync_pb');
 
 // let indexeddb = require('../platform/server/indexeddb');
 
-let VERSION;
 let DEMO_BUDGET_ID = '_demo-budget';
 let TEST_BUDGET_ID = '_test-budget';
 let UNCONFIGURED_SERVER = 'https://not-configured/';
@@ -1803,10 +1802,6 @@ handlers['sync'] = async function () {
   return fullSync();
 };
 
-handlers['get-version'] = async function () {
-  return { version: VERSION };
-};
-
 handlers['get-budgets'] = async function () {
   const paths = await fs.listDir(fs.getDocumentDir());
   const budgets = (
@@ -1938,7 +1933,7 @@ handlers['load-budget'] = async function ({ id }) {
     }
   }
 
-  let res = await loadBudget(id, VERSION, { showUpdate: true });
+  let res = await loadBudget(id, { showUpdate: true });
 
   return res;
 };
@@ -2036,7 +2031,7 @@ handlers['create-budget'] = async function ({
   );
 
   // Load it in
-  let { error } = await loadBudget(id, VERSION);
+  let { error } = await loadBudget(id);
   if (error) {
     console.log('Error creating budget: ' + error);
     return { error };
@@ -2157,7 +2152,7 @@ handlers['export-budget'] = async function () {
   return await cloudStorage.exportBuffer();
 };
 
-async function loadBudget(id, appVersion, { showUpdate } = {}) {
+async function loadBudget(id, { showUpdate } = {}) {
   let dir;
   try {
     dir = fs.getBudgetDir(id);
@@ -2396,9 +2391,7 @@ async function setupDocumentsDir() {
   fs._setDocumentDir(documentDir);
 }
 
-export async function initApp(version, isDev, socketName) {
-  VERSION = version;
-
+export async function initApp(isDev, socketName) {
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
   await setupDocumentsDir();
@@ -2423,7 +2416,7 @@ export async function initApp(version, isDev, socketName) {
   // if (isDev) {
   // const lastBudget = await asyncStorage.getItem('lastBudget');
   // if (lastBudget) {
-  //   loadBudget(lastBudget, VERSION);
+  //   loadBudget(lastBudget);
   // }
   // }
 
@@ -2453,8 +2446,6 @@ export async function initApp(version, isDev, socketName) {
 
 export async function init(config) {
   // Get from build
-  // eslint-disable-next-line no-undef
-  VERSION = ACTUAL_APP_VERSION;
 
   let dataDir, serverURL;
   if (config) {

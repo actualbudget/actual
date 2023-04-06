@@ -14,6 +14,7 @@
     "utils.js"
   ],
   "scripts": {
+    "lint": "eslint .",
     "build": "yarn workspace loot-core build:api"
   },
   "dependencies": {

@@ -11,14 +11,14 @@ class Query {
       validateRefs: true,
       limit: null,
       offset: null,
-      ...state
+      ...state,
     };
   }
 
   filter(expr) {
     return new Query({
       ...this.state,
-      filterExpressions: [...this.state.filterExpressions, expr]
+      filterExpressions: [...this.state.filterExpressions, expr],
     });
   }
 
@@ -27,8 +27,8 @@ class Query {
     return new Query({
       ...this.state,
       filterExpressions: this.state.filterExpressions.filter(
-        expr => !exprSet.has(Object.keys(expr)[0])
-      )
+        expr => !exprSet.has(Object.keys(expr)[0]),
+      ),
     });
   }
 
@@ -55,7 +55,7 @@ class Query {
 
     return new Query({
       ...this.state,
-      groupExpressions: [...this.state.groupExpressions, ...exprs]
+      groupExpressions: [...this.state.groupExpressions, ...exprs],
     });
   }
 
@@ -66,7 +66,7 @@ class Query {
 
     return new Query({
       ...this.state,
-      orderExpressions: [...this.state.orderExpressions, ...exprs]
+      orderExpressions: [...this.state.orderExpressions, ...exprs],
     });
   }
 
@@ -97,24 +97,6 @@ class Query {
   serialize() {
     return this.state;
   }
-}
-
-function getPrimaryOrderBy(query, defaultOrderBy) {
-  let orderExprs = query.serialize().orderExpressions;
-  if (orderExprs.length === 0) {
-    if (defaultOrderBy) {
-      return { order: 'asc', ...defaultOrderBy };
-    }
-    return null;
-  }
-
-  let firstOrder = orderExprs[0];
-  if (typeof firstOrder === 'string') {
-    return { field: firstOrder, order: 'asc' };
-  }
-  // Handle this form: { field: 'desc' }
-  let [field] = Object.keys(firstOrder);
-  return { field, order: firstOrder[field] };
 }
 
 module.exports = function q(table) {

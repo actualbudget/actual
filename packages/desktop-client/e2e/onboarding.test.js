@@ -1,4 +1,5 @@
 import path from 'path';
+
 import { test, expect } from '@playwright/test';
 
 import { AccountPage } from './page-models/account-page';
@@ -69,7 +70,7 @@ test.describe('Onboarding', () => {
     await expect(accountPage.accountBalance).toHaveText('0.00');
   });
 
-  test('navigates back to start page by clicking on "no server" in an empty budget file', async () => {
+  test('navigates back to start page by clicking on “no server” in an empty budget file', async () => {
     await configurationPage.clickOnNoServer();
     await configurationPage.startFresh();
 

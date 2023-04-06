@@ -43,7 +43,7 @@ self.addEventListener('message', async e => {
     if (msg.type === 'init') {
       hasInitialized = true;
       let isDev = !!msg.isDev;
-      let version = msg.version;
+      // let version = msg.version;
       let hash = msg.hash;
 
       if (!self.SharedArrayBuffer && !msg.isSharedArrayBufferOverrideEnabled) {
@@ -59,7 +59,7 @@ self.addEventListener('message', async e => {
         { maxRetries: isDev ? 5 : 0 },
       );
 
-      backend.initApp(version, isDev, self).catch(err => {
+      backend.initApp(isDev, self).catch(err => {
         console.log(err);
         let msg = {
           type: 'app-init-failure',

@@ -1,3 +1,5 @@
+/* eslint-disable import/order */
+// (I have no idea why the imports are like this. Not touching them.)
 const isDev = require('electron-is-dev');
 require('module').globalPaths.push(__dirname + '/..');
 
@@ -20,15 +22,15 @@ protocol.registerSchemesAsPrivileged([
 
 global.fetch = require('node-fetch');
 
-const findOpenSocket = require('./findOpenSocket');
-const updater = require('./updater');
 const about = require('./about');
+const findOpenSocket = require('./findOpenSocket');
+const getMenu = require('./menu');
+const updater = require('./updater');
 
 require('./security');
 
 const { fork } = require('child_process');
 const path = require('path');
-const getMenu = require('./menu');
 
 require('./setRequireHook');
 
@@ -45,7 +47,7 @@ const WindowState = require('./window-state.js');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin;
-let serverWin;
+let serverWin; // eslint-disable-line no-unused-vars
 let serverProcess;
 let serverSocket;
 let IS_QUITTING = false;
@@ -298,10 +300,6 @@ ipcMain.on('get-bootstrap-data', event => {
     version: app.getVersion(),
     isDev,
   };
-});
-
-ipcMain.handle('get-version', () => {
-  return app.getVersion();
 });
 
 ipcMain.handle('relaunch', () => {

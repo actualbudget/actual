@@ -1,5 +1,5 @@
-const isDev = require('electron-is-dev');
 const { BrowserWindow } = require('electron');
+const isDev = require('electron-is-dev');
 
 let window;
 
@@ -16,8 +16,8 @@ function openAboutWindow() {
     resizable: isDev,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
-    }
+      contextIsolation: false,
+    },
   });
   window.setBackgroundColor('white');
   window.setTitle('');

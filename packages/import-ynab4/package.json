@@ -15,6 +15,9 @@
   },
   "bin": "./index.js",
   "homepage": "https://github.com/actualbudget/actual/tree/master/packages/import-ynab4#readme",
+  "scripts": {
+    "lint": "eslint ."
+  },
   "dependencies": {
     "@actual-app/api": "*",
     "adm-zip": "^0.5.9",

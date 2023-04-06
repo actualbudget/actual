@@ -1,5 +1,5 @@
-const libofxWrapper = require('./libofx');
 const createFFI = require('./ffi');
+const libofxWrapper = require('./libofx');
 
 let _libofxPromise;
 let _libofx;
@@ -9,21 +9,21 @@ var parser = {
   ctx: null,
   transactions: [],
 
-  reset: function() {
+  reset: function () {
     // TODO: free all C objects
     parser.transactions = [];
   },
 
-  onTransaction: function(trans) {
+  onTransaction: function (trans) {
     parser.transactions.push({
       amount: ffi.transaction_amount(trans),
       fi_id: ffi.transaction_fi_id(trans),
       date: ffi.transaction_date(trans),
       payee: ffi.transaction_payee(trans),
       name: ffi.transaction_name(trans),
-      memo: ffi.transaction_memo(trans)
+      memo: ffi.transaction_memo(trans),
     });
-  }
+  },
 };
 
 async function initModule() {
@@ -37,7 +37,7 @@ async function initModule() {
             }
             return __dirname + '/' + path;
           }
-        }
+        },
       }).then(libofx => {
         ffi = createFFI(libofx);
 
@@ -47,7 +47,7 @@ async function initModule() {
 
         ffi.ofx_set_transaction_cb(
           parser.ctx,
-          libofx.addFunction(parser.onTransaction, 'vi')
+          libofx.addFunction(parser.onTransaction, 'vi'),
         );
         _libofx = libofx;
 
