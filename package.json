@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "23.3.2",
+  "version": "23.4.0",
   "license": "MIT",
   "description": "actual syncing server",
   "type": "module",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@actual-app/api": "5.1.0",
-    "@actual-app/web": "23.3.2",
+    "@actual-app/web": "23.4.0",
     "bcrypt": "^5.1.0",
     "better-sqlite3": "^8.2.0",
     "body-parser": "^1.20.1",
