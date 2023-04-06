@@ -68,6 +68,10 @@ should be comfortable with using the command line to set it up though.
       ```sh
       ? Would you like to setup a Postgresql database now? (y/N) n
       ```
+   1. Select `No` when prompted to create an Upsatsh Redis database.
+      ```sh
+      ? Would you like to set up an Upstash Redis database now? (y/N) n
+      ```
    1. Select `No` when prompted to deploy now.
       ```sh
       ? Would you like to deploy now? (y/N) n
