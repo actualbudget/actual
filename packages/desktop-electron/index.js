@@ -1,3 +1,5 @@
+/* eslint-disable import/order */
+// (I have no idea why the imports are like this. Not touching them.)
 const isDev = require('electron-is-dev');
 require('module').globalPaths.push(__dirname + '/..');
 
