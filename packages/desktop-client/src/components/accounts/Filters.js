@@ -533,14 +533,11 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
 
 function normalizeValue(value, isMulti) {
   if (isMulti) {
-    if (Array.isArray(value)) {
-      return value;
-    }
-    return String(value).split(', ');
+    return String(value).split(',');
   }
 
   if (Array.isArray(value)) {
-    return value.join(', ');
+    return value.join(',');
   }
 
   return value;
