@@ -8,7 +8,6 @@ import mitt from 'mitt';
 import * as actions from 'loot-core/src/client/actions';
 
 import { colors } from '../style';
-import { breakpoints } from '../tokens';
 
 import { View } from './common';
 import { SIDEBAR_WIDTH } from './sidebar';
@@ -37,7 +36,7 @@ export function SidebarProvider({ children }) {
 
 export function useSidebar() {
   let windowWidth = useViewportSize().width;
-  let alwaysFloats = windowWidth < breakpoints.narrow;
+  let alwaysFloats = windowWidth < 668;
 
   let context = useContext(SidebarContext);
   return { ...context, alwaysFloats };
