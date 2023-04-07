@@ -37,7 +37,7 @@ export function SidebarProvider({ children }) {
 
 export function useSidebar() {
   let windowWidth = useViewportSize().width;
-  let alwaysFloats = windowWidth < breakpoints.medium;
+  let alwaysFloats = windowWidth < breakpoints.narrow;
 
   let context = useContext(SidebarContext);
   return { context, alwaysFloats };
