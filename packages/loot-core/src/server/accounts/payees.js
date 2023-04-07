@@ -4,7 +4,7 @@ export async function createPayee(description) {
   // Check to make sure no payee already exists with exactly the same
   // name
   let row = await db.first(
-    `SELECT id FROM payees WHERE LOWER(name) = ? AND tombstone = 0`,
+    `SELECT id FROM payees WHERE UNICODE_LOWER(name) = ? AND tombstone = 0`,
     [description.toLowerCase()],
   );
 

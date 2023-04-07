@@ -516,9 +516,10 @@ export async function getOrphanedPayees() {
 }
 
 export async function getPayeeByName(name) {
-  return first(`SELECT * FROM payees WHERE LOWER(name) = ? AND tombstone = 0`, [
-    name.toLowerCase(),
-  ]);
+  return first(
+    `SELECT * FROM payees WHERE UNICODE_LOWER(name) = ? AND tombstone = 0`,
+    [name.toLowerCase()],
+  );
 }
 
 export function insertPayeeRule(rule) {
