@@ -151,36 +151,44 @@ export async function asyncTransaction(db, fn) {
 }
 
 export async function openDatabase(pathOrBuffer?: string | Buffer) {
+  let db = null;
   if (pathOrBuffer) {
     if (typeof pathOrBuffer !== 'string') {
-      return new SQL.Database(pathOrBuffer);
-    }
+      db = new SQL.Database(pathOrBuffer);
+    } else {
+      let path = pathOrBuffer;
+      if (path !== ':memory:') {
+        if (typeof SharedArrayBuffer === 'undefined') {
+          // @ts-expect-error FS missing in sql.js types
+          let stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
+          await stream.node.contents.readIfFallback();
+          // @ts-expect-error FS missing in sql.js types
+          SQL.FS.close(stream);
+        }
 
-    let path = pathOrBuffer;
-    if (path !== ':memory:') {
-      if (typeof SharedArrayBuffer === 'undefined') {
-        // @ts-expect-error FS missing in sql.js types
-        let stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
-        await stream.node.contents.readIfFallback();
-        // @ts-expect-error FS missing in sql.js types
-        SQL.FS.close(stream);
+        db = new SQL.Database(
+          // @ts-expect-error FS missing in sql.js types
+          path.includes('/blocked') ? path : SQL.FS.readlink(path),
+          // @ts-expect-error 2nd argument missed in sql.js types
+          { filename: true },
+        );
+        db.exec(`
+          PRAGMA journal_mode=MEMORY;
+          PRAGMA cache_size=-10000;
+        `);
       }
-
-      let db = new SQL.Database(
-        // @ts-expect-error FS missing in sql.js types
-        path.includes('/blocked') ? path : SQL.FS.readlink(path),
-        // @ts-expect-error 2nd argument missed in sql.js types
-        { filename: true },
-      );
-      db.exec(`
-      PRAGMA journal_mode=MEMORY;
-      PRAGMA cache_size=-10000;
-    `);
-      return db;
     }
   }
 
-  return new SQL.Database();
+  if (db === null) {
+    db = new SQL.Database();
+  }
+
+  // Redefine LOWER() and UPPER() with our own Unicode-aware implementation.
+  // This is necessary because sql.js uses SQLite build without ICU support.
+  db.create_function('LOWER', arg => arg?.toLowerCase());
+  db.create_function('UPPER', arg => arg?.toUpperCase());
+  return db;
 }
 
 export function closeDatabase(db) {
