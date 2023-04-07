@@ -49,10 +49,6 @@ function Sidebar({ floatingSidebar }) {
 
   let sidebarShouldFloat = floatingSidebar || sidebar.alwaysFloats;
 
-  if (!sidebarShouldFloat && hidden) {
-    setHidden(false);
-  }
-
   useEffect(() => {
     let cleanups = [
       sidebar.on('show', () => setHidden(false)),
@@ -104,7 +100,9 @@ function Sidebar({ floatingSidebar }) {
               ? 'none'
               : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
           transform: `translateY(${!sidebarShouldFloat ? -50 : 0}px)
-                      translateX(${hidden ? -SIDEBAR_WIDTH : 0}px)`,
+                      translateX(${
+                        sidebarShouldFloat && hidden ? -SIDEBAR_WIDTH : 0
+                      }px)`,
           transition: 'transform .5s, box-shadow .5s',
         }}
       >
