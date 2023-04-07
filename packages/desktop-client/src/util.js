@@ -4,7 +4,7 @@ export function getModalRoute(name) {
 }
 
 export function isMobile() {
-  let details = navigator.userAgent
-  let regexp = /Mobi|android|iphone|kindle|ipad/i
-  return regexp.test(details)
+  let details = navigator.userAgent;
+  let regexp = /Mobi|android|iphone|kindle|ipad/i;
+  return regexp.test(details);
 }
