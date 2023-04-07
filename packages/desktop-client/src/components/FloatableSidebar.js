@@ -40,7 +40,7 @@ export function useSidebar() {
   let alwaysFloats = windowWidth < breakpoints.narrow;
 
   let context = useContext(SidebarContext);
-  return { context, alwaysFloats };
+  return { ...context, alwaysFloats };
 }
 
 function Sidebar({ floatingSidebar }) {
