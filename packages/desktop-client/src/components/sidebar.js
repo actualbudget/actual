@@ -29,6 +29,7 @@ import {
 } from './common';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CellValue from './spreadsheet/CellValue';
+import { useSidebar } from './FloatableSidebar';
 
 export const SIDEBAR_WIDTH = 240;
 
@@ -539,8 +540,7 @@ export function Sidebar({
 }) {
   let hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
-  let windowWidth = useViewportSize().width;
-  let sidebarAlwaysFloats = windowWidth < breakpoints.medium;
+  const sidebar = useSidebar();
 
   return (
     <View
@@ -562,7 +562,7 @@ export function Sidebar({
         style,
       ]}
     >
-      {hasWindowButtons && !sidebarAlwaysFloats && (
+      {hasWindowButtons && !sidebar.alwaysFloats && (
         <ToggleButton
           style={[
             {
@@ -614,7 +614,7 @@ export function Sidebar({
 
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
-        {!hasWindowButtons && !sidebarAlwaysFloats && (
+        {!hasWindowButtons && !sidebar.alwaysFloats && (
           <ToggleButton onFloat={onFloat} />
         )}
       </View>

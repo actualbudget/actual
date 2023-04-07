@@ -267,9 +267,6 @@ function Titlebar({
   let sidebar = useSidebar();
   const serverURL = useServerURL();
 
-  let windowWidth = useViewportSize().width;
-  let sidebarAlwaysFloats = windowWidth < breakpoints.medium;
-
   return (
     <View
       style={[
@@ -289,23 +286,23 @@ function Titlebar({
         style,
       ]}
     >
-      {(floatingSidebar || sidebarAlwaysFloats) && (
+      {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
           bare
           style={{
             marginRight: 8,
             '& .arrow-right': { opacity: 0, transition: 'opacity .3s' },
             '& .menu': { opacity: 1, transition: 'opacity .3s' },
-            '&:hover .arrow-right': !sidebarAlwaysFloats && { opacity: 1 },
-            '&:hover .menu': !sidebarAlwaysFloats && { opacity: 0 },
+            '&:hover .arrow-right': !sidebar.alwaysFloats && { opacity: 1 },
+            '&:hover .menu': !sidebar.alwaysFloats && { opacity: 0 },
           }}
           onMouseEnter={() => sidebar.show()}
           onMouseLeave={() => sidebar.hide()}
           onClick={() => {
-            if (windowWidth >= breakpoints.medium) {
-              saveGlobalPrefs({ floatingSidebar: !floatingSidebar });
-            } else {
+            if (sidebar.alwaysFloats) {
               sidebar.toggle();
+            } else {
+              saveGlobalPrefs({ floatingSidebar: !floatingSidebar });
             }
           }}
         >

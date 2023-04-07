@@ -36,15 +36,18 @@ export function SidebarProvider({ children }) {
 }
 
 export function useSidebar() {
-  return useContext(SidebarContext);
+  let windowWidth = useViewportSize().width;
+  let alwaysFloats = windowWidth < breakpoints.medium;
+
+  let context = useContext(SidebarContext);
+  return { context, alwaysFloats };
 }
 
 function Sidebar({ floatingSidebar }) {
   let [hidden, setHidden] = useState(true);
   let sidebar = useSidebar();
 
-  let windowWidth = useViewportSize().width;
-  let sidebarShouldFloat = floatingSidebar || windowWidth < breakpoints.medium;
+  let sidebarShouldFloat = floatingSidebar || sidebar.alwaysFloats;
 
   if (!sidebarShouldFloat && hidden) {
     setHidden(false);
