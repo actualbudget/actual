@@ -184,10 +184,10 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
     db = new SQL.Database();
   }
 
-  // Redefine LOWER() and UPPER() with our own Unicode-aware implementation.
+  // Define Unicode-aware LOWER and UPPER implementation.
   // This is necessary because sql.js uses SQLite build without ICU support.
-  db.create_function('LOWER', arg => arg?.toLowerCase());
-  db.create_function('UPPER', arg => arg?.toUpperCase());
+  db.create_function('UNICODE_LOWER', arg => arg?.toLowerCase());
+  db.create_function('UNICODE_UPPER', arg => arg?.toUpperCase());
   return db;
 }
 
