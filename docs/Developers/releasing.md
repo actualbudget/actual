@@ -13,13 +13,9 @@ Releasing @actual-app/api
 ### Releasing @actual-app/api
 
 ```bash
-yarn build:api
-```
-
-Next, bump the version on package.json. Finally, publish it:
-
-```bash
-cd packages/loot-core
+cd packages/api
+vim package.json # bump the version
+yarn build
 npm publish
 ```
 
@@ -28,7 +24,7 @@ npm publish
 In the root of actual (not just desktop-client), run this:
 
 ```bash
-./bin/package-browser
+yarn build:browser
 ```
 
 This will compile both the backend and the frontend into a single directory in `packages/desktop-client/build`. This directory is all the files that need to be published. After bumping the version, publish desktop-client:
