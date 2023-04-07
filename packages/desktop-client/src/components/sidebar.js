@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router';
 
-import { useViewportSize } from '@react-aria/utils';
 import { css } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -17,7 +16,6 @@ import Wallet from '../icons/v1/Wallet';
 import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
 import { styles, colors } from '../style';
-import { breakpoints } from '../tokens';
 
 import {
   View,
@@ -27,9 +25,9 @@ import {
   ButtonLink,
   Button,
 } from './common';
+import { useSidebar } from './FloatableSidebar';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CellValue from './spreadsheet/CellValue';
-import { useSidebar } from './FloatableSidebar';
 
 export const SIDEBAR_WIDTH = 240;
 

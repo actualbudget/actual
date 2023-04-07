@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { connect } from 'react-redux';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
-import { useViewportSize } from '@react-aria/utils';
 import { css, media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
@@ -16,7 +15,7 @@ import AlertTriangle from '../icons/v2/AlertTriangle';
 import ArrowButtonRight1 from '../icons/v2/ArrowButtonRight1';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { colors } from '../style';
-import tokens, { breakpoints } from '../tokens';
+import tokens from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
