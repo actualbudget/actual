@@ -131,7 +131,6 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   let current_month = new Date(`${month}-01`);
 
   // remove lines for past dates, calculate repeating dates
-  let got_by = false;
   template_lines = template_lines.filter(template => {
     switch (template.type) {
       case 'by':
@@ -175,29 +174,16 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   });
 
   if (template_lines.length > 1) {
-    template_lines = template_lines
-      .sort((a, b) => {
-        if (a.type === 'by' && !a.annual) {
-          return differenceInCalendarMonths(
-            new Date(`${a.month}-01`),
-            new Date(`${b.month}-01`),
-          );
-        } else {
-          return a.type.localeCompare(b.type);
-        }
-      })
-      .filter(el => {
-        if (el.type === 'by') {
-          if (!got_by) {
-            got_by = true;
-            return el;
-          } else {
-            return null;
-          }
-        } else {
-          return el;
-        }
-      });
+    template_lines = template_lines.sort((a, b) => {
+      if (a.type === 'by' && !a.annual) {
+        return differenceInCalendarMonths(
+          new Date(`${a.month}-01`),
+          new Date(`${b.month}-01`),
+        );
+      } else {
+        return a.type.localeCompare(b.type);
+      }
+    });
   }
 
   let to_budget = 0;
