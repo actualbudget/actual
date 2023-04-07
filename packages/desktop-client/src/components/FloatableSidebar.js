@@ -35,7 +35,8 @@ export function SidebarProvider({ children }) {
 }
 
 export function useSidebar() {
-  let windowWidth = useViewportSize().width;
+  useViewportSize(); // Force re-render on window resize
+  let windowWidth = document.documentElement.clientWidth;
   let alwaysFloats = windowWidth < 668;
 
   let context = useContext(SidebarContext);
