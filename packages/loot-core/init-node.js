@@ -1,8 +1,11 @@
-let { dirname, basename } = require('path');
+import { dirname, basename } from 'path';
 
-require('source-map-support').install();
-global.fetch = require('node-fetch');
-let bundle = require('./lib-dist/bundle.desktop.js');
+import fetch from 'node-fetch';
+import 'source-map-support/register';
+
+import bundle from './lib-dist/bundle.desktop';
+
+global.fetch = fetch;
 
 async function init(budgetPath) {
   let dir = dirname(budgetPath);

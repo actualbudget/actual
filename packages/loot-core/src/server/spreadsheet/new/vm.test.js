@@ -1,6 +1,6 @@
-import VM from './vm';
+import { unresolveName } from '../util';
 
-const { unresolveName } = require('../util');
+import VM from './vm';
 
 const db = {
   runQuery: sql => {

@@ -1,7 +1,8 @@
 import LRU from 'lru-cache';
 
-import fs from '../../platform/server/fs';
+import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
+import * as uuid from '../../platform/uuid';
 import { groupById } from '../../shared/util';
 import {
   schema,
@@ -30,8 +31,6 @@ import { sendMessages, batchMessages } from '../sync';
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';
-
-const uuid = require('../../platform/uuid');
 
 let dbPath;
 let db;

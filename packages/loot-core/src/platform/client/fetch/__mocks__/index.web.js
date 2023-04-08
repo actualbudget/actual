@@ -1,7 +1,7 @@
 let listeners = new Map();
 let serverHandler = null;
 
-module.exports.initServer = handlers => {
+export const initServer = handlers => {
   serverHandler = msg => {
     let { name, args, catchErrors } = msg;
     if (handlers[name]) {
@@ -20,12 +20,12 @@ module.exports.initServer = handlers => {
   };
 };
 
-module.exports.clearServer = () => {
+export const clearServer = () => {
   serverHandler = null;
   listeners = new Map();
 };
 
-module.exports.serverPush = (name, args) => {
+export const serverPush = (name, args) => {
   Promise.resolve().then(() => {
     const listens = listeners.get(name);
     if (listens) {
@@ -36,11 +36,7 @@ module.exports.serverPush = (name, args) => {
   });
 };
 
-module.exports.send = async function (
-  name,
-  args,
-  { catchErrors = false } = {},
-) {
+export const send = async function (name, args, { catchErrors = false } = {}) {
   if (serverHandler) {
     return serverHandler({ name, args, catchErrors });
   } else {
@@ -48,11 +44,11 @@ module.exports.send = async function (
   }
 };
 
-module.exports.sendCatch = function send(name, args) {
-  return module.exports.send(name, args, { catchErrors: true });
+export const sendCatch = function send(name, args) {
+  return send(name, args, { catchErrors: true });
 };
 
-module.exports.listen = function listen(name, cb) {
+export const listen = function listen(name, cb) {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }

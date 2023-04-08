@@ -2,7 +2,7 @@
 import fs from 'fs';
 import os from 'os';
 
-import asyncStorage from '../src/platform/server/asyncStorage';
+import * as asyncStorage from '../src/platform/server/asyncStorage';
 import * as sqlite from '../src/platform/server/sqlite';
 import { runQuery } from '../src/server/aql';
 import * as db from '../src/server/db';

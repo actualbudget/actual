@@ -1,4 +1,5 @@
-import asyncStorage from '../../platform/server/asyncStorage';
+import * as asyncStorage from '../../platform/server/asyncStorage';
+import * as uuid from '../../platform/uuid';
 import { fromPlaidAccountType } from '../../shared/accounts';
 import { amountToInteger } from '../../shared/util';
 import * as db from '../db';
@@ -7,8 +8,6 @@ import { post } from '../post';
 import { getServer } from '../server-config';
 
 import * as bankSync from './sync';
-
-const uuid = require('../../platform/uuid');
 
 export async function handoffPublicToken(institution, publicToken) {
   let [[, userId], [, key]] = await asyncStorage.multiGet([

@@ -18,7 +18,7 @@ module.exports = {
     '/lib/',
     '.+/index\\.web\\.test\\.(js|ts|tsx)',
   ],
-  transformIgnorePatterns: ['/node_modules/', '__mocks__'],
+  transformIgnorePatterns: ['/node_modules/'],
   transform: {
     '\\.pegjs$': 'pegjs-jest-transformer',
   },

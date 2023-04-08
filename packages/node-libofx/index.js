@@ -1,8 +1,7 @@
-const createFFI = require('./ffi');
-const libofxWrapper = require('./libofx');
+import createFFI from './ffi';
+import libofxWrapper from './libofx';
 
 let _libofxPromise;
-let _libofx;
 let ffi;
 
 var parser = {
@@ -26,7 +25,7 @@ var parser = {
   },
 };
 
-async function initModule() {
+export async function initModule() {
   if (!_libofxPromise) {
     _libofxPromise = new Promise(resolve => {
       libofxWrapper({
@@ -59,11 +58,9 @@ async function initModule() {
   await _libofxPromise;
 }
 
-function getOFXTransactions(data) {
+export function getOFXTransactions(data) {
   ffi.parse_data(parser.ctx, data);
   let transactions = parser.transactions;
   parser.reset();
   return transactions;
 }
-
-module.exports = { initModule, getOFXTransactions };

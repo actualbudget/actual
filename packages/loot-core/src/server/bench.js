@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+import * as fs from 'fs';
+
 import * as db from './db';
 
-const fs = require('fs');
 const queries = fs
   .readFileSync(__dirname + '/../../src/server/slow-queries.txt', 'utf8')
   .split('___BOUNDARY')

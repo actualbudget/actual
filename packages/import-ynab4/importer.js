@@ -2,12 +2,12 @@
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
-const actual = require('@actual-app/api/methods');
-const { amountToInteger } = require('@actual-app/api/utils');
-const AdmZip = require('adm-zip');
-const d = require('date-fns');
-const normalizePathSep = require('slash');
-const uuid = require('uuid');
+import * as actual from '@actual-app/api/methods';
+import { amountToInteger } from '@actual-app/api/utils';
+import AdmZip from 'adm-zip';
+import * as d from 'date-fns';
+import normalizePathSep from 'slash';
+import uuid from 'uuid';
 
 // Utils
 
@@ -408,7 +408,7 @@ function join(...paths) {
   }, paths[0].replace(/\/$/, ''));
 }
 
-async function importBuffer(filepath, buffer) {
+export async function importBuffer(filepath, buffer) {
   let budgetName = getBudgetName(filepath);
 
   if (!budgetName) {
@@ -451,5 +451,3 @@ async function importBuffer(filepath, buffer) {
 
   return actual.runImport(budgetName, () => doImport(data));
 }
-
-module.exports = { importBuffer };

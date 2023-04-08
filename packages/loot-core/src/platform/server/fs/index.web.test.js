@@ -1,11 +1,10 @@
+import 'fake-indexeddb/auto';
+import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
+
+import * as idb from '../indexeddb';
 import * as sqlite from '../sqlite';
 
-require('fake-indexeddb/auto');
-let FDBFactory = require('fake-indexeddb/lib/FDBFactory');
-
-let idb = require('../indexeddb');
-
-let { init, readFile, writeFile, exists, pathToId, join } = require('./index');
+import { init, readFile, writeFile, exists, pathToId, join } from './index';
 
 beforeAll(() => {
   process.env.PUBLIC_URL =

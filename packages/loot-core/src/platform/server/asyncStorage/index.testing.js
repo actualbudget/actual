@@ -1,22 +1,22 @@
 const store = {};
 
-function init() {}
+export const init = function () {};
 
-function getItem(key) {
+export const getItem = function (key) {
   return new Promise(function (resolve) {
     return resolve(store[key]);
   });
-}
+};
 
-function setItem(key, value) {
+export const setItem = function (key, value) {
   store[key] = value;
-}
+};
 
-function removeItem(key) {
+export const removeItem = function (key) {
   delete store[key];
-}
+};
 
-function multiGet(keys) {
+export const multiGet = function (keys) {
   return new Promise(function (resolve) {
     return resolve(
       keys.map(function (key) {
@@ -24,26 +24,16 @@ function multiGet(keys) {
       }),
     );
   });
-}
+};
 
-function multiSet(keyValues) {
+export const multiSet = function (keyValues) {
   keyValues.forEach(function ([key, value]) {
     store[key] = value;
   });
-}
+};
 
-function multiRemove(keys) {
+export const multiRemove = function (keys) {
   keys.forEach(function (key) {
     delete store[key];
   });
-}
-
-module.exports = {
-  init,
-  getItem,
-  setItem,
-  removeItem,
-  multiGet,
-  multiSet,
-  multiRemove,
 };

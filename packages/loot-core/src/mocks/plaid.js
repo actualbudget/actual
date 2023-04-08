@@ -1,4 +1,4 @@
-const uuid = require('../platform/uuid');
+import * as uuid from '../platform/uuid';
 
 export function generateAccount(balance) {
   return {

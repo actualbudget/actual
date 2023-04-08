@@ -1,4 +1,4 @@
-let crypto = require('crypto');
+import crypto from 'crypto';
 
 let ENCRYPTION_ALGORITHM = 'aes-256-gcm';
 
