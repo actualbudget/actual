@@ -27,13 +27,6 @@ jobs:
   build:
     name: Build Docker image
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ubuntu, alpine]
-        arch: [amd64, arm64, arm/v7, arm/v6]
-        exclude:
-          - os: ubuntu
-            arch: arm/v6
     steps:
       - uses: actions/checkout@v3
 
@@ -77,11 +70,20 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push image
+      - name: Build and push ubuntu image
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          file: docker/stable-${{ matrix.os }}.Dockerfile
-          platforms: linux/${{ matrix.arch }}
+          file: docker/stable-ubuntu.Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Build and push alpine image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          file: docker/stable-alpine.Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
+          tags: ${{ steps.alpine-meta.outputs.tags }}
