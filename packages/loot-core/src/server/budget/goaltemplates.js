@@ -218,23 +218,39 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
       }
       case 'by': {
         // by has 'amount' and 'month' params
-        let target_month = new Date(`${template.month}-01`);
-        let target = amountToInteger(template.amount);
-        let num_months = differenceInCalendarMonths(
-          target_month,
-          current_month,
-        );
-        let repeat =
-          template.type === 'by'
-            ? template.repeat
-            : (template.repeat || 1) * 12;
-        while (num_months < 0 && repeat) {
-          target_month = addMonths(target_month, repeat);
-          num_months = differenceInCalendarMonths(target_month, current_month);
-        }
-        let diff = target - last_month_balance;
-        if (diff >= 0 && num_months > -1) {
-          to_budget += Math.round(diff / (num_months + 1));
+        if (l===0) {
+          let N = template_lines.length;
+          let totalTarget = 0;
+          let totalMonths = 0;
+          let skipMonths = 0;
+          for (let ll = 0; ll < N; ll++ ){
+              let target_month = new Date(`${template_lines[ll].month}-01`);
+              let num_months = differenceInCalendarMonths(
+                target_month,
+                current_month,
+              );
+              let repeat =
+              template.type === 'by'
+                ? template.repeat
+                : (template.repeat || 1) * 12;
+              while (num_months < 0 && repeat) {
+                target_month = addMonths(target_month, repeat);
+                num_months = differenceInCalendarMonths(template_lines[ll], current_month);
+              }
+              if (num_months < 0) {
+                skipMonths++;
+              }
+              else {
+                totalTarget += amountToInteger(template_lines[ll].amount);
+                totalMonths += (num_months + 1);
+              }
+              
+          }
+          
+          let diff = totalTarget - last_month_balance;
+          if (diff >= 0 && totalMonths > 0) {
+            to_budget = Math.round((totalTarget - last_month_balance) / totalMonths * (N - skipMonths));
+          }
         }
         break;
       }
