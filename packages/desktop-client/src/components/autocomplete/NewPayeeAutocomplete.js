@@ -91,7 +91,7 @@ export default function PayeeAutocomplete({
         }
 
         const lowercaseInput = input.toLowerCase();
-        const hasExistingOption = !!allOptions.find(
+        const hasExistingOption = allOptions.some(
           option => option.label.toLowerCase() === lowercaseInput,
         );
 
