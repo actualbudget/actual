@@ -19,7 +19,9 @@
   "dependencies": {
     "better-sqlite3": "^8.2.0",
     "node-fetch": "^2.6.9",
-    "typescript": "^5.0.2",
     "uuid": "3.3.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2"
   }
 }
