@@ -28,7 +28,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@babel/preset-flow": "^7.18.6",
+    "@babel/preset-typescript": "^7.20.2",
     "@types/bcrypt": "^5.0.0",
     "@types/better-sqlite3": "^7.6.3",
     "@types/cors": "^2.8.13",
