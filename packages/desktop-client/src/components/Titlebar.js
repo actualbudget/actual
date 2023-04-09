@@ -295,8 +295,16 @@ function Titlebar({
             '&:hover .arrow-right': !sidebar.alwaysFloats && { opacity: 1 },
             '&:hover .menu': !sidebar.alwaysFloats && { opacity: 0 },
           }}
-          onMouseEnter={() => sidebar.show()}
-          onMouseLeave={() => sidebar.hide()}
+          onPointerEnter={e => {
+            if (e.pointerType === 'mouse') {
+              sidebar.show();
+            }
+          }}
+          onPointerLeave={e => {
+            if (e.pointerType === 'mouse') {
+              sidebar.hide();
+            }
+          }}
           onClick={() => {
             if (sidebar.alwaysFloats) {
               sidebar.toggle();
