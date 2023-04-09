@@ -5,7 +5,8 @@ ROOT=`pwd -P`
 WEBPACK_ARGS=""
 
 DATA_DIR="$ROOT"/../../desktop-client/public/data
-"$ROOT"/copy-migrations $DATA_DIR
+mkdir -p "$DATA_DIR"
+"$ROOT"/copy-migrations "$DATA_DIR"
 
 cd "$DATA_DIR"
 find * -type f | sort > ../data-file-index.txt
