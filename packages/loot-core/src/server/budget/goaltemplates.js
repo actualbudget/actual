@@ -6,8 +6,13 @@ import {
 } from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
+import {
+  extractScheduleConds,
+  getScheduledAmount,
+} from '../../shared/schedules';
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
+import { getRuleForSchedule, getNextDate } from '../schedules/app';
 
 import { setBudget, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
@@ -167,6 +172,14 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         if (spend_from) {
           template.from = format(spend_from, 'yyyy-MM');
         }
+        break;
+      case 'schedule':
+        let schedule = db.selectFirstWithSchema(
+          'schedules',
+          'SELECT rule from schedules WHERE id = ?',
+          [template.id],
+        );
+        if (schedule === null) return null;
         break;
       default:
     }
@@ -333,6 +346,38 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
       case 'error':
         return null;
       default:
+      case 'schedule': {
+        let rule = await getRuleForSchedule(template.id);
+        let conditions = rule.serialize().conditions;
+        let { date: dateCond, amount: amountCond } =
+          extractScheduleConds(conditions);
+        let next_date_string = getNextDate(dateCond, current_month);
+        let num_months = differenceInCalendarMonths(
+          new Date(next_date_string),
+          current_month,
+        );
+        let target = -getScheduledAmount(amountCond.value);
+        let diff = target - last_month_balance;
+        if (num_months > 0) {
+          if (diff >= 0 && num_months > -1) {
+            to_budget += Math.round(diff / (num_months + 1));
+          }
+        } else {
+          let next_month = addMonths(current_month, 1);
+          let next_date = new Date(next_date_string);
+          let monthly_target = 0;
+          while (next_date.getTime() < next_month.getTime()) {
+            if (next_date.getTime() >= current_month.getTime()) {
+              monthly_target += target;
+            }
+            next_date = addWeeks(next_date, 1);
+            next_date_string = getNextDate(dateCond, next_date);
+            next_date = new Date(next_date_string);
+          }
+          to_budget = monthly_target - last_month_balance;
+        }
+        break;
+      }
     }
   }
 
