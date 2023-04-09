@@ -1,6 +1,8 @@
 #!/usr/bin/env ts-node
 import * as fs from 'fs';
+
 import { init, shutdown } from '@actual-app/api';
+
 import { importYNAB5 } from './importer';
 
 async function run() {
