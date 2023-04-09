@@ -85,21 +85,21 @@ export default function PayeeAutocomplete({
           ? allOptions.filter(item => value.includes(item.value))
           : allOptions.find(item => item.value === value)
       }
-      isValidNewOption={input => input && !focusTransferPayees}
+      isValidNewOption={input => {
+        if (focusTransferPayees || !input) {
+          return false;
+        }
+
+        const lowercaseInput = input.toLowerCase();
+        const hasExistingOption = allOptions.some(
+          option => option.label.toLowerCase() === lowercaseInput,
+        );
+
+        return !hasExistingOption;
+      }}
       isMulti={multi}
       onSelect={onSelect}
       onCreateOption={async selectedValue => {
-        const existingOption = allOptions.find(option =>
-          option.label.toLowerCase().includes(selectedValue?.toLowerCase()),
-        );
-
-        // Prevent creating duplicates
-        if (existingOption) {
-          onSelect(existingOption.value);
-          return;
-        }
-
-        // This is actually a new option, so create it
         onSelect(await dispatch(createPayee(selectedValue)));
       }}
       createOptionPosition="first"
