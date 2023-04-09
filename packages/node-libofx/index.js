@@ -2,6 +2,7 @@ import createFFI from './ffi';
 import libofxWrapper from './libofx';
 
 let _libofxPromise;
+let _libofx;
 let ffi;
 
 var parser = {
