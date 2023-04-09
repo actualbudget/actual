@@ -5,6 +5,7 @@ dest_dir=$(realpath "$1")
 ROOT=`dirname "$0"`
 cd "$ROOT"
 
-rm -rf "$dest_dir"/migrations;
-cp -r ../migrations "$dest_dir";
-cp ../default-db.sqlite "$dest_dir";
+rm -rf "$dest_dir"/migrations
+mkdir -p "$dest_dir"/migrations
+cp -r ../migrations/ "$dest_dir"/migrations
+cp ../default-db.sqlite "$dest_dir"
