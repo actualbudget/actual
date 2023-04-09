@@ -1700,6 +1700,7 @@ class AccountInternal extends React.PureComponent {
 
     let rule = {
       stage: null,
+      conditionsOp: 'and',
       conditions: [payeeCondition],
       actions: [
         {
