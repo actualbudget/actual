@@ -53,12 +53,13 @@ function Sidebar({ floatingSidebar }) {
     let cleanups = [
       sidebar.on('show', () => setHidden(false)),
       sidebar.on('hide', () => setHidden(true)),
-      sidebar.on('toggle', () => setHidden(hidden => !hidden)),
+      // using hidden => !hidden causes a bug bc the handler is called twice?!?!
+      sidebar.on('toggle', () => setHidden(!hidden)),
     ];
     return () => {
       cleanups.forEach(fn => fn());
     };
-  }, [sidebar]);
+  }, [sidebar, hidden]);
 
   return (
     <>
