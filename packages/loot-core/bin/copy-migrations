@@ -7,5 +7,5 @@ cd "$ROOT"
 
 rm -rf "$dest_dir"/migrations
 mkdir -p "$dest_dir"/migrations
-cp -r ../migrations/ "$dest_dir"/migrations
+cp -r ../migrations "$dest_dir"/migrations
 cp ../default-db.sqlite "$dest_dir"
