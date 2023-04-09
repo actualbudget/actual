@@ -4,7 +4,13 @@ cd `dirname "$0"`
 ROOT=`pwd -P`
 WEBPACK_ARGS=""
 
-"$ROOT"/copy-migrations
+DATA_DIR="$ROOT"/../../desktop-client/public/data
+mkdir -p "$DATA_DIR"
+"$ROOT"/copy-migrations "$DATA_DIR"
+
+cd "$DATA_DIR"
+find * -type f | sort > ../data-file-index.txt
+cd "$ROOT"
 
 OUTPUT_HASH="[hash]"
 if [ $NODE_ENV == 'development' ]; then

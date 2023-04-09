@@ -1,14 +1,11 @@
 #!/bin/sh -e
 
+dest_dir=$(realpath "$1")
+
 ROOT=`dirname "$0"`
 cd "$ROOT"
 
-# Copy them to the browser version
-$(
-  cd ../../desktop-client/public;
-  rm -rf ./data;
-  mkdir ./data;
-  cp -r ../../loot-core/migrations ./data;
-  cp ../../loot-core/default-db.sqlite ./data;
-  cd data && find * -type f | sort > ../data-file-index.txt;
-)
+rm -rf "$dest_dir"/migrations
+mkdir -p "$dest_dir"/migrations
+cp ../migrations/* "$dest_dir"/migrations/
+cp ../default-db.sqlite "$dest_dir"
