@@ -138,7 +138,7 @@ export class BudgetTable extends React.Component {
       return null;
     }
 
-    if (e.code === 'Enter' || e.code === 'Tab') {
+    if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       this.moveVertically(e.shiftKey ? -1 : 1);
     }
@@ -392,7 +392,7 @@ export function SidebarCategory({
         style,
       ]}
       onKeyDown={e => {
-        if (e.code === 'Enter') {
+        if (e.key === 'Enter') {
           onEditName(null);
           e.stopPropagation();
         }
@@ -547,7 +547,7 @@ export function SidebarGroup({
         },
       ]}
       onKeyDown={e => {
-        if (e.code === 'Enter') {
+        if (e.key === 'Enter') {
           onEdit(null);
           e.stopPropagation();
         }

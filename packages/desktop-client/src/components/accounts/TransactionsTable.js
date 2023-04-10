@@ -1159,7 +1159,7 @@ function NewTransaction({
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
-        if (e.code === 'Escape') {
+        if (e.key === 'Escape') {
           onClose();
         }
       }}
@@ -1590,7 +1590,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   }
 
   function onCheckNewEnter(e) {
-    if (e.code === 'Enter') {
+    if (e.key === 'Enter') {
       if (e.metaKey) {
         e.stopPropagation();
         onAddTemporary();
@@ -1634,7 +1634,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   }
 
   function onCheckEnter(e) {
-    if (e.code === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       let { editingId: id, focusedField } = tableNavigator;
 
       afterSave(() => {
