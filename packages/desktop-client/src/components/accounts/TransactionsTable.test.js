@@ -11,6 +11,7 @@ import {
 } from 'loot-core/src/mocks';
 import { TestProvider } from 'loot-core/src/mocks/redux';
 import { initServer } from 'loot-core/src/platform/client/fetch';
+import * as uuid from 'loot-core/src/platform/uuid';
 import {
   addSplitTransaction,
   realizeTempTransactions,
@@ -22,8 +23,6 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 
 import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
-
-const uuid = require('loot-core/src/platform/uuid');
 
 jest.mock('loot-core/src/platform/client/fetch');
 jest.mock('../../hooks/useFeatureFlag', () => jest.fn().mockReturnValue(false));

@@ -1,9 +1,9 @@
 // Unit tests for reactive-property.
-var assert = require('assert');
+import assert from 'assert';
 
 // If using from the NPM package, this line would be
-// var Graph = require("graph-data-structure");
-var Graph = require('../data-compute/graph-data-structure');
+// import Graph from "graph-data-structure";
+import Graph from '../data-compute/graph-data-structure';
 
 describe('Graph', function () {
   describe('Data structure', function () {

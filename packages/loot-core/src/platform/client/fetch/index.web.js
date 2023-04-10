@@ -1,5 +1,6 @@
-const uuid = require('../../uuid');
-const undo = require('../undo');
+import * as uuid from '../../uuid';
+import * as undo from '../undo';
+
 let replyHandlers = new Map();
 let listeners = new Map();
 let messageQueue = [];
@@ -74,11 +75,11 @@ function connectSocket(name, onOpen) {
   });
 }
 
-module.exports.init = async function init(socketName) {
+export const init = async function (socketName) {
   return new Promise(resolve => connectSocket(socketName, resolve));
 };
 
-module.exports.send = function send(name, args, { catchErrors = false } = {}) {
+export const send = function (name, args, { catchErrors = false } = {}) {
   return new Promise((resolve, reject) => {
     uuid.v4().then(id => {
       replyHandlers.set(id, { resolve, reject });
@@ -104,11 +105,11 @@ module.exports.send = function send(name, args, { catchErrors = false } = {}) {
   });
 };
 
-module.exports.sendCatch = function sendCatch(name, args) {
-  return module.exports.send(name, args, { catchErrors: true });
+export const sendCatch = function (name, args) {
+  return send(name, args, { catchErrors: true });
 };
 
-module.exports.listen = function listen(name, cb) {
+export const listen = function (name, cb) {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }
@@ -125,6 +126,6 @@ module.exports.listen = function listen(name, cb) {
   };
 };
 
-module.exports.unlisten = function unlisten(name) {
+export const unlisten = function (name) {
   listeners.set(name, []);
 };

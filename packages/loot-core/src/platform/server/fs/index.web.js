@@ -1,21 +1,31 @@
-let { SQLiteFS } = require('absurd-sql');
-let IndexedDBBackend = require('absurd-sql/dist/indexeddb-backend').default;
+import { SQLiteFS } from 'absurd-sql';
+import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
-let connection = require('../connection');
-let idb = require('../indexeddb');
-let { _getModule } = require('../sqlite');
+import * as connection from '../connection';
+import * as idb from '../indexeddb';
+import { _getModule } from '../sqlite';
 
-let baseAPI = require('./index.electron');
-let join = require('./path-join');
+import join from './path-join';
 
 let FS = null;
 let BFS = null;
 // let NO_PERSIST = process.env.IS_BETA === true;
 let NO_PERSIST = false;
 
-function pathToId(filepath) {
+export const bundledDatabasePath = '/default-db.sqlite';
+export const migrationsPath = '/migrations';
+export const demoBudgetPath = '/demo-budget';
+export { join };
+export {
+  getDataDir,
+  getDocumentDir,
+  getBudgetDir,
+  _setDocumentDir,
+} from './index.electron';
+
+export const pathToId = function (filepath) {
   return filepath.replace(/^\//, '').replace(/\//g, '-');
-}
+};
 
 function _exists(filepath) {
   try {
@@ -192,7 +202,7 @@ async function populateDefaultFilesystem() {
   );
 }
 
-async function populateFileHeirarchy() {
+export const populateFileHeirarchy = async function () {
   let { store } = idb.getStore(await idb.getDatabase(), 'files');
   let req = store.getAllKeys();
   let paths = await new Promise((resolve, reject) => {
@@ -204,9 +214,9 @@ async function populateFileHeirarchy() {
     _mkdirRecursively(basename(path));
     _createFile(path);
   }
-}
+};
 
-async function init() {
+export const init = async function () {
   let Module = _getModule();
   FS = Module.FS;
 
@@ -241,55 +251,55 @@ async function init() {
   }
 
   await populateFileHeirarchy();
-}
+};
 
-function basename(filepath) {
+export const basename = function (filepath) {
   let parts = filepath.split('/');
   return parts.slice(0, -1).join('/');
-}
+};
 
-async function listDir(filepath) {
+export const listDir = async function (filepath) {
   let paths = FS.readdir(filepath);
   return paths.filter(p => p !== '.' && p !== '..');
-}
+};
 
-async function exists(filepath) {
+export const exists = async function (filepath) {
   return _exists(filepath);
-}
+};
 
-async function mkdir(filepath) {
+export const mkdir = async function (filepath) {
   FS.mkdir(filepath);
-}
+};
 
-async function size(filepath) {
+export const size = async function (filepath) {
   let attrs = FS.stat(resolveLink(filepath));
   return attrs.size;
-}
+};
 
-async function copyFile(frompath, topath) {
+export const copyFile = async function (frompath, topath) {
   // TODO: This reads the whole file into memory, but that's probably
   // not a problem. This could be optimized
   let contents = await _readFile(frompath);
   return _writeFile(topath, contents);
-}
+};
 
-async function readFile(filepath, encoding = 'utf8') {
+export const readFile = async function (filepath, encoding = 'utf8') {
   return _readFile(filepath, { encoding });
-}
+};
 
-async function writeFile(filepath, contents) {
+export const writeFile = async function (filepath, contents) {
   return _writeFile(filepath, contents);
-}
+};
 
-async function removeFile(filepath) {
+export const removeFile = async function (filepath) {
   return _removeFile(filepath);
-}
+};
 
-async function removeDir(filepath) {
+export const removeDir = async function (filepath) {
   FS.rmdir(filepath);
-}
+};
 
-async function removeDirRecursively(dirpath) {
+export const removeDirRecursively = async function (dirpath) {
   if (await exists(dirpath)) {
     for (let file of await listDir(dirpath)) {
       let fullpath = join(dirpath, file);
@@ -305,36 +315,10 @@ async function removeDirRecursively(dirpath) {
 
     await removeDir(dirpath);
   }
-}
+};
 
-async function getModifiedTime(filepath) {
+export const getModifiedTime = async function (filepath) {
   throw new Error(
     'getModifiedTime not supported on the web (only used for backups)',
   );
-}
-
-module.exports = {
-  pathToId,
-  populateFileHeirarchy,
-  init,
-  bundledDatabasePath: '/default-db.sqlite',
-  migrationsPath: '/migrations',
-  demoBudgetPath: '/demo-budget',
-  getDataDir: baseAPI.getDataDir,
-  getDocumentDir: baseAPI.getDocumentDir,
-  getBudgetDir: baseAPI.getBudgetDir,
-  _setDocumentDir: baseAPI._setDocumentDir,
-  join,
-  basename,
-  listDir,
-  exists,
-  mkdir,
-  size,
-  copyFile,
-  readFile,
-  writeFile,
-  removeFile,
-  removeDir,
-  removeDirRecursively,
-  getModifiedTime,
 };

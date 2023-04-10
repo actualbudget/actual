@@ -1,5 +1,5 @@
-const { runHandler, isMutating } = require('../../../server/mutators');
-const { captureException } = require('../../exceptions');
+import { runHandler, isMutating } from '../../../server/mutators';
+import { captureException } from '../../exceptions';
 
 function getGlobalObject() {
   let obj =
@@ -24,7 +24,7 @@ function coerceError(error) {
   return { type: 'InternalError', message: error.message };
 }
 
-function init(serverChannel, handlers) {
+export const init = function (serverChannel, handlers) {
   getGlobalObject().__globalServerChannel = serverChannel;
 
   serverChannel.addEventListener(
@@ -96,9 +96,9 @@ function init(serverChannel, handlers) {
   );
 
   serverChannel.postMessage({ type: 'connect' });
-}
+};
 
-function send(name, args) {
+export const send = function (name, args) {
   if (getGlobalObject().__globalServerChannel) {
     getGlobalObject().__globalServerChannel.postMessage({
       type: 'push',
@@ -106,10 +106,8 @@ function send(name, args) {
       args,
     });
   }
-}
+};
 
-function getNumClients() {
+export const getNumClients = function () {
   return 1;
-}
-
-module.exports = { init, send, getNumClients };
+};

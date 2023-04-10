@@ -1,6 +1,6 @@
-import { last, diffItems, applyChanges } from './util';
+import * as uuid from '../platform/uuid';
 
-const uuid = require('../platform/uuid');
+import { last, diffItems, applyChanges } from './util';
 
 export function isPreviewId(id) {
   return id.indexOf('preview/') !== -1;

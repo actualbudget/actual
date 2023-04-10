@@ -1,5 +1,6 @@
 import * as d from 'date-fns';
 
+import * as uuid from '../../platform/uuid';
 import { dayFromDate, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
@@ -10,8 +11,6 @@ import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
 import { fromDateRepr } from '../models';
 import { Schedule as RSchedule } from '../util/rschedule';
-
-const uuid = require('../../platform/uuid');
 
 function takeDates(config) {
   let schedule = new RSchedule({ rrules: recurConfigToRSchedule(config) });

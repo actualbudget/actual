@@ -1,4 +1,4 @@
-const dateFns = require('date-fns');
+import * as dateFns from 'date-fns';
 
 const AlwaysTrue = Symbol('AlwaysTrue');
 let shouldLog = false;
@@ -184,4 +184,4 @@ function interpret(where, row, table) {
   return ret;
 }
 
-module.exports = interpret;
+export default interpret;

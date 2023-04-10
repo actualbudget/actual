@@ -1,9 +1,11 @@
-let fs = require('fs');
+import * as fs from 'fs';
 
-const _fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
-async function _fetchBinary(url, filepath) {
-  const res = await _fetch(url);
+export { fetch };
+
+export const fetchBinary = async function (url, filepath) {
+  const res = await fetch(url);
   return new Promise((resolve, reject) => {
     const fileStream = fs.createWriteStream(filepath);
     res.body.pipe(fileStream);
@@ -14,6 +16,4 @@ async function _fetchBinary(url, filepath) {
       resolve(undefined);
     });
   });
-}
-
-module.exports = { fetch: _fetch, fetchBinary: _fetchBinary };
+};

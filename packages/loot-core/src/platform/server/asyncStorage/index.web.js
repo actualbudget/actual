@@ -1,6 +1,6 @@
-let { getDatabase } = require('../indexeddb');
+import { getDatabase } from '../indexeddb';
 
-function init() {}
+export const init = function () {};
 
 function commit(trans) {
   if (trans.commit) {
@@ -8,7 +8,7 @@ function commit(trans) {
   }
 }
 
-async function getItem(key) {
+export const getItem = async function (key) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readonly');
@@ -20,9 +20,9 @@ async function getItem(key) {
     req.onsuccess = e => resolve(e.target.result);
     commit(transaction);
   });
-}
+};
 
-async function setItem(key, value) {
+export const setItem = async function (key, value) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -34,9 +34,9 @@ async function setItem(key, value) {
     req.onsuccess = e => resolve();
     commit(transaction);
   });
-}
+};
 
-async function removeItem(key) {
+export const removeItem = async function (key) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -48,9 +48,9 @@ async function removeItem(key) {
     req.onsuccess = e => resolve();
     commit(transaction);
   });
-}
+};
 
-async function multiGet(keys) {
+export const multiGet = async function (keys) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readonly');
@@ -68,9 +68,9 @@ async function multiGet(keys) {
 
   commit(transaction);
   return promise;
-}
+};
 
-async function multiSet(keyValues) {
+export const multiSet = async function (keyValues) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -88,9 +88,9 @@ async function multiSet(keyValues) {
 
   commit(transaction);
   return promise;
-}
+};
 
-async function multiRemove(keys) {
+export const multiRemove = async function (keys) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -108,14 +108,4 @@ async function multiRemove(keys) {
 
   commit(transaction);
   return promise;
-}
-
-module.exports = {
-  init,
-  getItem,
-  setItem,
-  removeItem,
-  multiGet,
-  multiSet,
-  multiRemove,
 };

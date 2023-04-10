@@ -1,7 +1,7 @@
-const ipc = require('node-ipc');
+import ipc from 'node-ipc';
 
-const { runHandler, isMutating } = require('../../../server/mutators');
-const { captureException } = require('../../exceptions');
+import { runHandler, isMutating } from '../../../server/mutators';
+import { captureException } from '../../exceptions';
 
 function coerceError(error) {
   if (error.type && error.type === 'APIError') {
@@ -11,7 +11,7 @@ function coerceError(error) {
   return { type: 'InternalError', message: error.message };
 }
 
-function init(socketName, handlers) {
+export const init = function (socketName, handlers) {
   ipc.config.id = socketName;
   ipc.config.silent = true;
 
@@ -79,16 +79,14 @@ function init(socketName, handlers) {
   });
 
   ipc.server.start();
-}
+};
 
-function getNumClients() {
+export const getNumClients = function () {
   return ipc.server.sockets.length;
-}
+};
 
-function send(name, args) {
+export const send = function (name, args) {
   if (ipc.server) {
     ipc.server.broadcast('message', { type: 'push', name, args });
   }
-}
-
-module.exports = { init, send, getNumClients };
+};

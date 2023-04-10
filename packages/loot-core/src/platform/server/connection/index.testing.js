@@ -1,13 +1,15 @@
-function init() {}
-
 let events = [];
 
-function send(type, args) {
+export const init = function () {};
+
+export const send = function (type, args) {
   events.push([type, args]);
-}
+};
 
-function resetEvents() {
+export const getEvents = function () {
+  return events;
+};
+
+export const resetEvents = function () {
   events = [];
-}
-
-module.exports = { init, send, resetEvents, getEvents: () => events };
+};
