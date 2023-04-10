@@ -134,6 +134,10 @@ async function getCategoryTemplates() {
 
 async function applyCategoryTemplate(category, template_lines, month, force) {
   let current_month = new Date(`${month}-01`);
+  let all_schedule_names = await db.all(
+    'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
+  );
+  all_schedule_names = all_schedule_names.map(v => v.name);
 
   // remove lines for past dates, calculate repeating dates
   template_lines = template_lines.filter(template => {
@@ -174,12 +178,12 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
         break;
       case 'schedule':
-        let schedule = db.selectFirstWithSchema(
-          'schedules',
-          'SELECT rule from schedules WHERE id = ?',
-          [template.id],
-        );
-        if (schedule === null) return null;
+        if (!all_schedule_names.includes(template.name)) {
+          console.log(
+            `${category.name}: Schedule ${template.name} does not exist`,
+          );
+          return null;
+        }
         break;
       default:
     }
@@ -347,7 +351,11 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         return null;
       default:
       case 'schedule': {
-        let rule = await getRuleForSchedule(template.id);
+        let { id: schedule_id } = await db.first(
+          'SELECT id FROM schedules WHERE name = ?',
+          [template.name],
+        );
+        let rule = await getRuleForSchedule(schedule_id);
         let conditions = rule.serialize().conditions;
         let { date: dateCond, amount: amountCond } =
           extractScheduleConds(conditions);

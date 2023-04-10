@@ -17,8 +17,8 @@ expr
     { return { type: 'simple', monthly, limit } }
   / upTo _ limit: amount
     { return { type: 'simple', limit } }
-  / schedule _ id: uuid
-  	{ return { type: 'schedule', id} }
+  / schedule _ name: name
+  	{ return { type: 'schedule', name} }
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
@@ -54,8 +54,4 @@ day 'day' = $(d d)
 date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
 
-hexd 'hex' = [0-9a-fA-F]
-hex4 = hexd hexd hexd hexd
-hex8 = hex4 hex4
-hex12 = hex8 hex4
-uuid 'UUID' = $(hex8 "-"i hex4 "-"i hex4 "-"i hex4 "-"i hex12)
+name 'Name' = $([^\r\n\t]+)
