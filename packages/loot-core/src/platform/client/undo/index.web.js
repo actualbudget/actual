@@ -1,4 +1,4 @@
-const uuid = require('../../uuid');
+import * as uuid from '../../uuid';
 
 // List of recently used states. We don't use a true MRU structure
 // because our needs are simple and we also do some custom reordering.
@@ -11,28 +11,26 @@ let currentUndoState = {
   selectedItems: null,
 };
 
-function setUndoState(name, value) {
+export const setUndoState = function (name, value) {
   currentUndoState[name] = value;
   currentUndoState.id = uuid.v4Sync();
-}
+};
 
-function getUndoState(name) {
+export const getUndoState = function (name) {
   return currentUndoState[name];
-}
+};
 
-function getTaggedState(id) {
+export const getTaggedState = function (id) {
   return UNDO_STATE_MRU.find(state => state.id === id);
-}
+};
 
-function snapshot() {
+export const snapshot = function () {
   let tagged = { ...currentUndoState, id: uuid.v4Sync() };
   UNDO_STATE_MRU.unshift(tagged);
   UNDO_STATE_MRU = UNDO_STATE_MRU.slice(0, HISTORY_SIZE);
   return tagged.id;
-}
+};
 
-function gc(id) {
+export const gc = function (id) {
   UNDO_STATE_MRU = UNDO_STATE_MRU.filter(state => state.id !== id);
-}
-
-module.exports = { setUndoState, getUndoState, getTaggedState, snapshot, gc };
+};

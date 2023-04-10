@@ -18,6 +18,7 @@ __metadata:
   dependencies:
     better-sqlite3: ^8.2.0
     node-fetch: ^2.6.9
+    typescript: ^5.0.2
     uuid: 3.3.2
   languageName: unknown
   linkType: soft
@@ -30,6 +31,7 @@ __metadata:
     adm-zip: ^0.5.9
     date-fns: ^2.29.3
     slash: 3.0.0
+    ts-node: ^10.9.1
     uuid: 3.3.2
   bin:
     import-ynab4: ./index.js
@@ -42,6 +44,7 @@ __metadata:
   dependencies:
     "@actual-app/api": "*"
     date-fns: ^2.29.3
+    ts-node: ^10.9.1
     uuid: 3.3.2
   bin:
     import-ynab5: ./index.js
@@ -19771,7 +19774,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.7.0":
+"ts-node@npm:^10.7.0, ts-node@npm:^10.9.1":
   version: 10.9.1
   resolution: "ts-node@npm:10.9.1"
   dependencies:

@@ -1,9 +1,8 @@
-const mockServer = require('../tests/mockSyncServer');
+export {
+  handleRequest as post,
+  handleRequestBinary as postBinary,
+} from '../tests/mockSyncServer';
 
-module.exports = {
-  post: mockServer.handleRequest,
-  postBinary: mockServer.handleRequestBinary,
-  get(url) {
-    throw new Error('get unimplemented');
-  },
+export const get = function (url) {
+  throw new Error('get unimplemented');
 };

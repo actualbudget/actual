@@ -1,34 +1,31 @@
-let bundle = require('./app/bundle.api.js');
-let injected = require('./injected');
-let methods = require('./methods');
-let utils = require('./utils');
-let actualApp;
+import fetch from 'node-fetch';
 
-async function init(config = {}) {
+import * as bundle from './app/bundle.api';
+import * as injected from './injected';
+
+let actualApp;
+export const internal = bundle.lib;
+
+export * as methods from './methods';
+export * as utils from './utils';
+
+export async function init(config = {}) {
   if (actualApp) {
     return;
   }
 
-  global.fetch = require('node-fetch');
+  global.fetch = fetch;
 
   await bundle.init(config);
   actualApp = bundle.lib;
 
-  injected.send = bundle.lib.send;
+  injected.override(bundle.lib.send);
   return bundle.lib;
 }
 
-async function shutdown() {
+export async function shutdown() {
   if (actualApp) {
     await actualApp.send('close-budget');
     actualApp = null;
   }
 }
-
-module.exports = {
-  init,
-  shutdown,
-  utils,
-  internal: bundle.lib,
-  ...methods,
-};

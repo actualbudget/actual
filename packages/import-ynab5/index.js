@@ -1,9 +1,9 @@
-#!/usr/bin/env node
-const fs = require('fs');
+#!/usr/bin/env ts-node
+import * as fs from 'fs';
 
-const { init, shutdown } = require('@actual-app/api');
+import { init, shutdown } from '@actual-app/api';
 
-const { importYNAB5 } = require('./importer');
+import { importYNAB5 } from './importer';
 
 async function run() {
   let filepath = process.argv[2];

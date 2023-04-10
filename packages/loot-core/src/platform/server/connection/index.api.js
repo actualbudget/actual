@@ -1,11 +1,9 @@
-function init() {}
+export const init = function () {};
 
-function send(type, args) {
+export const send = function (type, args) {
   // Nothing
-}
+};
 
-function getNumClients() {
+export const getNumClients = function () {
   return 1;
-}
-
-module.exports = { init, send, getNumClients };
+};

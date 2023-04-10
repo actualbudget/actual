@@ -1,11 +1,11 @@
-const _uuid = require('uuid');
+import uuid from 'uuid';
 
-module.exports = {
-  v4: function () {
-    return Promise.resolve(_uuid.v4());
-  },
+import type * as T from '.';
 
-  v4Sync: function () {
-    return _uuid.v4();
-  },
+export const v4: T.V4 = function () {
+  return Promise.resolve(uuid.v4());
+};
+
+export const v4Sync: T.V4Sync = function () {
+  return uuid.v4();
 };
