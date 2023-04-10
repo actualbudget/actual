@@ -348,7 +348,6 @@ export default function ScheduleDetails() {
       let { data: sameName } = await runQuery(
         q('schedules').filter({ name: state.fields.name }).select('id'),
       );
-      console.log('sameName: ' + JSON.stringify(sameName));
       if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
         dispatch({
           type: 'form-error',
