@@ -60,7 +60,7 @@ export class Tooltip extends React.Component {
     };
 
     let escHandler = e => {
-      if (e.code === 'Escape') {
+      if (e.key === 'Escape') {
         this.props.onClose && this.props.onClose();
       }
     };

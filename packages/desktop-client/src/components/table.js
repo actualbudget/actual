@@ -324,11 +324,11 @@ function InputValue({ value: defaultValue, onUpdate, onBlur, ...props }) {
   function onKeyDown(e) {
     // Only enter and tab to escape (which allows the user to move
     // around)
-    if (e.code !== 'Enter' && e.code !== 'Tab') {
+    if (e.key !== 'Enter' && e.key !== 'Tab') {
       e.stopPropagation();
     }
 
-    if (e.code === 'Escape') {
+    if (e.key === 'Escape') {
       if (value !== defaultValue) {
         setValue(defaultValue);
       }
@@ -389,7 +389,7 @@ export function InputCell({
 }
 
 export function shouldSaveFromKey(e) {
-  switch (e.code) {
+  switch (e.key) {
     case 'Tab':
     case 'Enter':
       e.preventDefault();
@@ -486,7 +486,7 @@ export const CellButton = React.forwardRef(
         className="cell-button"
         tabIndex="0"
         onKeyDown={e => {
-          if (e.code === 'KeyX' || e.code === 'Space') {
+          if (e.key === 'X' || e.key === ' ') {
             e.preventDefault();
             if (!disabled) {
               onSelect && onSelect();
@@ -1127,16 +1127,16 @@ export function useTableNavigator(data, fields) {
           return;
         }
 
-        switch (e.code) {
+        switch (e.key) {
           case 'ArrowUp':
-          case 'KeyK':
+          case 'K':
             if (e.target.tagName !== 'INPUT') {
               onMove('up');
             }
             break;
 
           case 'ArrowDown':
-          case 'KeyJ':
+          case 'J':
             if (e.target.tagName !== 'INPUT') {
               onMove('down');
             }
@@ -1148,7 +1148,7 @@ export function useTableNavigator(data, fields) {
             e.stopPropagation();
 
             onMove(
-              e.code === 'Enter'
+              e.key === 'Enter'
                 ? e.shiftKey
                   ? 'up'
                   : 'down'
