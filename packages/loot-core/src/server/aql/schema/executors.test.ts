@@ -33,7 +33,7 @@ function aliveTransactions(arr) {
   return arr.filter(t => isAlive(t, all));
 }
 
-async function insertTransactions(transactions, payeeIds) {
+async function insertTransactions(transactions, payeeIds?: string[]) {
   return batchMessages(async () => {
     for (let trans of transactions) {
       db.insertTransaction(trans);
@@ -50,8 +50,11 @@ async function insertTransactions(transactions, payeeIds) {
   });
 }
 
-function expectTransactionOrder(data, fields) {
-  fields = fields || [
+function expectTransactionOrder(
+  data,
+  fields?: Array<string | Record<string, string>>,
+) {
+  const expectedFields = fields || [
     { date: 'desc' },
     'starting_balance_flag',
     { sort_order: 'desc' },
@@ -59,7 +62,7 @@ function expectTransactionOrder(data, fields) {
   ];
 
   let sorted = [...data].sort((i1, i2) => {
-    for (let field of fields) {
+    for (let field of expectedFields) {
       let order = 'asc';
       if (!(typeof field === 'string')) {
         let entries = Object.entries(field)[0];

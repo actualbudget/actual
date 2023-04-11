@@ -43,6 +43,7 @@
     "@babel/preset-typescript": "^7.20.2",
     "@types/jest": "^27.5.0",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
+    "@types/node-ipc": "^9.2.0",
     "@types/webpack": "^5.28.0",
     "adm-zip": "^0.5.9",
     "babel-loader": "^8.0.6",

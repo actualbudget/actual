@@ -1,4 +1,4 @@
-import { Query } from '../../../shared/query';
+import { Query, type QueryState } from '../../../shared/query';
 import {
   runQuery as _runQuery,
   runCompiledQuery as _runCompiledQuery,
@@ -15,7 +15,7 @@ export function runCompiledQuery(query, sqlPieces, state, params) {
   });
 }
 
-export function runQuery(query, params) {
+export function runQuery(query: Query | QueryState, params?: unknown) {
   if (query instanceof Query) {
     query = query.serialize();
   }

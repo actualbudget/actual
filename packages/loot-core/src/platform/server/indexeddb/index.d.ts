@@ -13,7 +13,7 @@ export type GetStore = typeof getStore;
 export function get(
   store: IDBObjectStore,
   key: IDBValidKey | IDBKeyRange,
-  mapper: (v: unknown) => unknown,
+  mapper?: (v: unknown) => unknown,
 );
 export type Get = typeof get;
 

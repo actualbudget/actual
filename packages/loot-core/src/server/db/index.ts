@@ -93,7 +93,16 @@ export async function loadClock() {
 }
 
 // Functions
-
+export function runQuery(
+  sql: string,
+  params?: Array<string | number>,
+  fetchAll?: false,
+);
+export function runQuery(
+  sql: string,
+  params: Array<string | number> | undefined,
+  fetchAll: true,
+);
 export function runQuery(sql, params, fetchAll) {
   // const unrecord = perf.record('sqlite');
   const result = sqlite.runQuery(db, sql, params, fetchAll);
@@ -134,18 +143,18 @@ export function asyncTransaction(fn) {
 // This function is marked as async because `runQuery` is no longer
 // async. We return a promise here until we've audited all the code to
 // make sure nothing calls `.then` on this.
-export async function all(sql, params) {
+export async function all(sql, params?: string[]) {
   return runQuery(sql, params, true);
 }
 
-export async function first(sql, params) {
+export async function first(sql, params?: string[]) {
   const arr = await runQuery(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
 // The underlying sql system is now sync, but we can't update `first` yet
 // without auditing all uses of it
-export function firstSync(sql, params) {
+export function firstSync(sql, params?: string[]) {
   const arr = runQuery(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
@@ -153,7 +162,7 @@ export function firstSync(sql, params) {
 // This function is marked as async because `runQuery` is no longer
 // async. We return a promise here until we've audited all the code to
 // make sure nothing calls `.then` on this.
-export async function run(sql, params) {
+export async function run(sql, params?: string[]) {
   return runQuery(sql, params);
 }
 
@@ -329,7 +338,10 @@ export async function deleteCategoryGroup(group, transferId) {
   await delete_('category_groups', group.id);
 }
 
-export async function insertCategory(category, { atEnd } = {}) {
+export async function insertCategory(
+  category,
+  { atEnd } = { atEnd: undefined },
+) {
   let sort_order;
 
   let id_;

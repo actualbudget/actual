@@ -17,6 +17,13 @@ import parse from './parser';
 import generateSql from './sqlgen';
 
 class Compiler {
+  src;
+  scopeName;
+  binding;
+  ops;
+  dependencies;
+  sqlDependencies;
+
   constructor() {
     this.ops = [];
     this.dependencies = [];

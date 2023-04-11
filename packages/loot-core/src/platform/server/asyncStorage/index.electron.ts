@@ -28,8 +28,8 @@ function _saveStore() {
         getStorePath(),
         JSON.stringify(store),
         'utf8',
-        function (err, _) {
-          return err ? reject(err) : resolve();
+        function (err) {
+          return err ? reject(err) : resolve(undefined);
         },
       );
     });
