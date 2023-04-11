@@ -1,5 +1,7 @@
 // TODO: comment on why it works this way
 
-let send;
+export let send;
 
-module.exports = { send };
+export function override(sendImplementation) {
+  send = sendImplementation;
+}

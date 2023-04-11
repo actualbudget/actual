@@ -78,7 +78,7 @@ function CoverTooltip({
             inputProps={{
               inputRef: node,
               onKeyDown: e => {
-                if (e.code === 'Enter') {
+                if (e.key === 'Enter') {
                   submit();
                 }
               },

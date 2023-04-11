@@ -21,6 +21,7 @@
   "dependencies": {
     "@actual-app/api": "*",
     "date-fns": "^2.29.3",
+    "ts-node": "^10.9.1",
     "uuid": "3.3.2"
   }
 }

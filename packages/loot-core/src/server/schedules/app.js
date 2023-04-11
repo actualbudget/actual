@@ -2,6 +2,8 @@ import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
+import * as connection from '../../platform/server/connection';
+import * as uuid from '../../platform/uuid';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import {
@@ -30,9 +32,6 @@ import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
-
-const connection = require('../../platform/server/connection');
-const uuid = require('../../platform/uuid');
 
 // Utilities
 

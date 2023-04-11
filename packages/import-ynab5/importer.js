@@ -2,8 +2,8 @@
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
-const actual = require('@actual-app/api/methods');
-const uuid = require('uuid');
+import * as actual from '@actual-app/api/methods';
+import uuid from 'uuid';
 
 function amountFromYnab(amount) {
   // ynabs multiplies amount by 1000 and actual by 100
@@ -318,12 +318,10 @@ async function doImport(data) {
   console.log('Setting up...');
 }
 
-async function importYNAB5(data) {
+export async function importYNAB5(data) {
   if (data.data) {
     data = data.data;
   }
 
   return actual.runImport(data.budget.name, () => doImport(data.budget));
 }
-
-module.exports = { importYNAB5 };

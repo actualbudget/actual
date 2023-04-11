@@ -86,4 +86,5 @@ const prepositions = [
   'without',
 ];
 
-module.exports = new Set([...conjunctions, ...articles, ...prepositions]);
+const dictionary = new Set([...conjunctions, ...articles, ...prepositions]);
+export default dictionary;

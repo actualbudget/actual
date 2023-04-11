@@ -1,4 +1,7 @@
 #!/usr/bin/env node --trace-warnings
+import * as fs from 'fs';
+import * as path from 'path';
+
 import * as sqlite from '../../platform/server/sqlite';
 
 import {
@@ -10,9 +13,6 @@ import {
   getPending,
   migrate,
 } from './migrations';
-
-const fs = require('fs');
-const path = require('path');
 
 const argv = require('yargs').options({
   m: {

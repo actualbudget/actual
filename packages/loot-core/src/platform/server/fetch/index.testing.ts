@@ -1,9 +1,7 @@
-function fetch() {
+export const fetch = function () {
   throw new Error('fetch not implemented');
-}
+};
 
-function fetchBinary() {
+export const fetchBinary = function () {
   throw new Error('fetchBinary not implemented');
-}
-
-module.exports = { fetch, fetchBinary };
+};

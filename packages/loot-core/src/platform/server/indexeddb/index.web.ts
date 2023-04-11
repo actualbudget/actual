@@ -1,3 +1,5 @@
+import type * as T from '.';
+
 let openedDb = _openDatabase();
 
 // The web version uses IndexedDB to store data
@@ -91,12 +93,12 @@ function _openDatabase() {
   });
 }
 
-function getStore(db: IDBDatabase, name: string) {
+export const getStore: T.GetStore = function (db, name) {
   let trans = db.transaction([name], 'readwrite');
   return { trans, store: trans.objectStore(name) };
-}
+};
 
-async function get(store: IDBObjectStore, key, mapper = x => x) {
+export const get: T.Get = async function (store, key, mapper = x => x) {
   return new Promise((resolve, reject) => {
     let req = store.get(key);
     req.onsuccess = e => {
@@ -104,36 +106,36 @@ async function get(store: IDBObjectStore, key, mapper = x => x) {
     };
     req.onerror = e => reject(e);
   });
-}
+};
 
-async function set(store: IDBObjectStore, item) {
+export const set: T.Set = async function (store, item) {
   return new Promise((resolve, reject) => {
     let req = store.put(item);
     req.onsuccess = e => resolve(undefined);
     req.onerror = e => reject(e);
   });
-}
+};
 
-async function del(store, key) {
+export const del: T.Del = async function (store, key) {
   return new Promise((resolve, reject) => {
     let req = store.delete(key);
     req.onsuccess = e => resolve(undefined);
     req.onerror = e => reject(e);
   });
-}
+};
 
-function getDatabase() {
+export const getDatabase: T.GetDatabase = function () {
   return openedDb;
-}
+};
 
-function openDatabase() {
+export const openDatabase: T.OpenDatabase = function () {
   if (openedDb == null) {
     openedDb = _openDatabase();
   }
   return openedDb;
-}
+};
 
-function closeDatabase() {
+export const closeDatabase: T.CloseDatabase = function () {
   if (openedDb) {
     openedDb.then(db => {
       // @ts-expect-error db type needs refinement
@@ -141,14 +143,4 @@ function closeDatabase() {
     });
     openedDb = null;
   }
-}
-
-module.exports = {
-  getDatabase,
-  openDatabase,
-  closeDatabase,
-  getStore,
-  get,
-  set,
-  del,
 };

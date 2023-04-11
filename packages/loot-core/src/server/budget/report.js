@@ -1,9 +1,8 @@
 import { safeNumber } from '../../shared/util';
 import * as sheet from '../sheet';
+import { resolveName } from '../spreadsheet/util';
 
 import { number, sumAmounts } from './util';
-
-const { resolveName } = require('../spreadsheet/util');
 
 export async function createCategory(cat, sheetName, prevSheetName) {
   sheet.get().createStatic(sheetName, `budget-${cat.id}`, 0);

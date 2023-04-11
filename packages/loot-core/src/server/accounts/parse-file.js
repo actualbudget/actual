@@ -1,6 +1,6 @@
 import csv2json from 'csv-parse/lib/sync';
 
-import fs from '../../platform/server/fs';
+import * as fs from '../../platform/server/fs';
 import { dayFromDate } from '../../shared/months';
 import { looselyParseAmount } from '../../shared/util';
 

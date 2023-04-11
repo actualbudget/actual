@@ -1,7 +1,11 @@
+import snapshotDiff from 'snapshot-diff';
+
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
+import { post } from '../post';
 import { getServer } from '../server-config';
+import * as mockSyncServer from '../tests/mockSyncServer';
 
 import {
   syncAccount,
@@ -11,11 +15,6 @@ import {
 } from './sync';
 import { loadRules, insertRule } from './transaction-rules';
 import * as transfer from './transfer';
-
-const snapshotDiff = require('snapshot-diff');
-
-const { post } = require('../post');
-const mockSyncServer = require('../tests/mockSyncServer');
 
 const papaJohns = 'Papa Johns east side';
 const lowes = 'Lowe’s Store';

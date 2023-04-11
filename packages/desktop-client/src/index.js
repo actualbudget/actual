@@ -32,7 +32,7 @@ import { handleGlobalEvents } from './global-events';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
-require('focus-visible');
+import 'focus-visible';
 
 const appReducer = combineReducers(reducers);
 function rootReducer(state, action) {
