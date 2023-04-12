@@ -36,7 +36,7 @@ export const serverPush = (name, args) => {
   });
 };
 
-export const send = async function (name, args, { catchErrors = false } = {}) {
+export const send = async (name, args, { catchErrors = false } = {}) => {
   if (serverHandler) {
     return serverHandler({ name, args, catchErrors });
   } else {
@@ -44,11 +44,11 @@ export const send = async function (name, args, { catchErrors = false } = {}) {
   }
 };
 
-export const sendCatch = function send(name, args) {
+export const sendCatch = (name, args) => {
   return send(name, args, { catchErrors: true });
 };
 
-export const listen = function listen(name, cb) {
+export const listen = (name, cb) => {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }

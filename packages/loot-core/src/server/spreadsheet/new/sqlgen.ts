@@ -1,5 +1,7 @@
 import * as nodes from './nodes';
 
+type Lookup = { field: string; tableId?: string };
+
 let _uid = 0;
 function resetUid() {
   _uid = 0;
@@ -12,6 +14,7 @@ function uid() {
 
 function fail(node, message) {
   const err = new Error(message);
+  // @ts-expect-error We should use error.cause to pass node info
   err.node = node;
   throw err;
 }
@@ -100,13 +103,13 @@ function transformColumns(node, implicitTable) {
 }
 
 function transformLookups(node, implicitTable) {
-  let paths = [];
+  let paths: Lookup[][] = [];
 
   const transformed = node.traverse(n => {
     if (n instanceof nodes.Member) {
       let currentNode = n;
 
-      let lookups = [];
+      let lookups: Lookup[] = [];
       while (currentNode instanceof nodes.Member) {
         if (!(currentNode.property instanceof nodes.Value)) {
           fail(currentNode, 'Invalid syntax for SQL reference');
@@ -116,9 +119,11 @@ function transformLookups(node, implicitTable) {
         currentNode = currentNode.object;
       }
 
+      // @ts-expect-error Node refinement missing
       if (!(currentNode instanceof nodes.Symbol)) {
         fail(currentNode, 'Invalid syntax for SQL reference');
       }
+      // @ts-expect-error Node refinement missing
       lookups.push({ field: currentNode.value });
       lookups.reverse();
 
@@ -140,6 +145,7 @@ function transformLookups(node, implicitTable) {
           const err = new Error(
             `Table “${table}” not joinable for field “${lookup}”`,
           );
+          // @ts-expect-error We should use error.cause to pass node info
           err.node = node;
           throw err;
         }
@@ -147,6 +153,7 @@ function transformLookups(node, implicitTable) {
           const err = new Error(
             `Unknown field “${lookup}” on table “${table}”`,
           );
+          // @ts-expect-error We should use error.cause to pass node info
           err.node = node;
           throw err;
         }
@@ -171,10 +178,10 @@ function transformLookups(node, implicitTable) {
   return { paths, node: transformed || node };
 }
 
-export default function generate(table, where, groupby, select, deps) {
+export default function generate(table, where, groupby, select) {
   // Figure out the dep tables here. Return the SQL and dependent
   // tables
-  let allPaths = [];
+  let allPaths: Lookup[][] = [];
 
   resetUid();
 
@@ -226,12 +233,12 @@ export default function generate(table, where, groupby, select, deps) {
     groupByStr = ' GROUP BY ' + generateExpression(node);
   }
 
-  let dependencies = [];
-  let joins = [];
+  let dependencies: string[] = [];
+  let joins: string[] = [];
 
   allPaths.forEach(path => {
     let currentTable = { name: table, id: table };
-    for (var i = 0; i < path.length - 1; i++) {
+    for (let i = 0; i < path.length - 1; i++) {
       let lookup = path[i];
       let meta = SCHEMA_PATHS[currentTable.name][lookup.field];
 

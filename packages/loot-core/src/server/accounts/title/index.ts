@@ -28,7 +28,7 @@ function parseMatch(match) {
   return match;
 }
 
-export default function title(str, options = {}) {
+export default function title(str, options = { special: undefined }) {
   str = str
     .toLowerCase()
     .replace(regex, (m, lead = '', forced, lower, rest) => {

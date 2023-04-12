@@ -2,6 +2,15 @@ import { compile } from './compiler';
 import { MOV, CALL, QUERY, UOP, BOP, JUMPF, JUMPT } from './ops';
 
 export default class VM {
+  _onFinish;
+  db;
+  ops;
+  paused;
+  pc;
+  reg1;
+  scopes;
+  stack;
+
   constructor(db, scopes) {
     this.stack = new Array(1000);
     this.reg1 = null;

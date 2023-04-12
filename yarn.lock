@@ -4070,6 +4070,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node-ipc@npm:^9.2.0":
+  version: 9.2.0
+  resolution: "@types/node-ipc@npm:9.2.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: 05954414de9e3c1e5022338774b02ffd91d2be391157c0d2d9a3de5ffd5cbe0e2d1b9e0f1979232331e7338b2e089a7ea6b6dd2a188b9796614829f7b27cedcc
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:*":
   version: 17.0.23
   resolution: "@types/node@npm:17.0.23"
@@ -13595,6 +13604,7 @@ __metadata:
     "@rschedule/standard-date-adapter": ^1.2.0
     "@types/jest": ^27.5.0
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
+    "@types/node-ipc": ^9.2.0
     "@types/webpack": ^5.28.0
     absurd-sql: 0.0.53
     adm-zip: ^0.5.9

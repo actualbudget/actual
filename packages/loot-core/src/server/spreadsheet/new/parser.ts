@@ -1,8 +1,8 @@
 import lex, * as types from './lexer';
 import * as nodes from './nodes';
 
-function nextToken(state, withWhitespace) {
-  var tok;
+function nextToken(state, withWhitespace?: boolean) {
+  let tok;
   let { peeked, tokens } = state;
 
   if (peeked) {
@@ -38,10 +38,11 @@ function pushToken(state, tok) {
   state.peeked = tok;
 }
 
-function fail(state, msg, lineno, colno) {
+function fail(state, msg, lineno?: number, colno?: number) {
   if (!peekToken(state)) {
     throw new Error(msg + '\n\nSource:\n' + state.src + '\n');
-  } else if (lineno === undefined || colno === undefined) {
+  }
+  if (lineno === undefined || colno === undefined) {
     const tok = peekToken(state);
     lineno = tok.lineno;
     colno = tok.colno;
@@ -60,7 +61,7 @@ function fail(state, msg, lineno, colno) {
 }
 
 function skip(state, type) {
-  var tok = nextToken(state);
+  let tok = nextToken(state);
   if (!tok || tok.type !== type) {
     pushToken(state, tok);
     return false;
@@ -69,7 +70,7 @@ function skip(state, type) {
 }
 
 function expectValue(state, type, value) {
-  var tok = nextToken(state);
+  let tok = nextToken(state);
   if (tok.type !== type || tok.value !== value) {
     fail(
       state,
@@ -82,7 +83,7 @@ function expectValue(state, type, value) {
 }
 
 function expect(state, type) {
-  var tok = nextToken(state);
+  let tok = nextToken(state);
   if (tok.type !== type) {
     fail(
       state,
@@ -95,7 +96,7 @@ function expect(state, type) {
 }
 
 function skipValue(state, type, val) {
-  var tok = nextToken(state);
+  let tok = nextToken(state);
   if (!tok || tok.type !== type || tok.value !== val) {
     pushToken(state, tok);
     return false;
@@ -144,7 +145,7 @@ function parseCompare(state) {
   let node = parseAdd(state);
 
   while (1) {
-    var tok = nextToken(state);
+    let tok = nextToken(state);
 
     if (!tok) {
       break;
@@ -202,7 +203,7 @@ function parseDiv(state) {
 }
 
 function parseUnary(state) {
-  var tok = peekToken(state);
+  let tok = peekToken(state);
 
   if (skipValue(state, types.TOKEN_OPERATOR, '-')) {
     const nextTok = peekToken(state);
@@ -220,8 +221,8 @@ function parseUnary(state) {
 }
 
 function parsePrimary(state) {
-  var tok = nextToken(state);
-  var val = null;
+  let tok = nextToken(state);
+  let val: number | boolean | null = null;
 
   if (!tok) {
     fail(state, 'expected expression, got end of file');
@@ -295,7 +296,7 @@ function parseQueryExpression(state) {
     groupby = parseQuerySubExpression(state);
   }
 
-  let select = [];
+  let select: Array<{ expr: unknown; as?: unknown }> = [];
   let calculated;
 
   if (skipSymbol(state, 'select')) {

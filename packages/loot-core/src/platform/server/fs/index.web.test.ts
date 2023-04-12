@@ -33,7 +33,7 @@ describe('web filesystem', () => {
     let str = 'hello, world';
     let buf = new ArrayBuffer(str.length * 2);
     let view = new Uint16Array(buf);
-    for (var i = 0, strLen = str.length; i < strLen; i++) {
+    for (let i = 0, strLen = str.length; i < strLen; i++) {
       view[i] = str.charCodeAt(i);
     }
 

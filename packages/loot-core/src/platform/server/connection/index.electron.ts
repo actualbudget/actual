@@ -3,6 +3,8 @@ import ipc from 'node-ipc';
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
+import type * as T from '.';
+
 function coerceError(error) {
   if (error.type && error.type === 'APIError') {
     return error;
@@ -11,8 +13,8 @@ function coerceError(error) {
   return { type: 'InternalError', message: error.message };
 }
 
-export const init = function (socketName, handlers) {
-  ipc.config.id = socketName;
+export const init: T.Init = function (socketName, handlers) {
+  ipc.config.id = socketName as string;
   ipc.config.silent = true;
 
   ipc.serve(() => {
@@ -81,11 +83,12 @@ export const init = function (socketName, handlers) {
   ipc.server.start();
 };
 
-export const getNumClients = function () {
+export const getNumClients: T.GetNumClients = function () {
+  // @ts-expect-error server type does not have sockets
   return ipc.server.sockets.length;
 };
 
-export const send = function (name, args) {
+export const send: T.Send = function (name, args) {
   if (ipc.server) {
     ipc.server.broadcast('message', { type: 'push', name, args });
   }

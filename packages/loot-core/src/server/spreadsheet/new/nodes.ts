@@ -1,14 +1,12 @@
 class Node {
-  constructor(lineno, colno, fieldNames, ...fields) {
+  colno;
+  fieldNames;
+  lineno;
+
+  constructor(lineno, colno, fieldNames) {
     this.lineno = lineno;
     this.colno = colno;
     this.fieldNames = fieldNames;
-
-    for (var i = 0; i < fields.length; i++) {
-      const val = fields[i];
-      // Coerce undefined/null to null
-      this[fieldNames[i]] = val == null ? null : val;
-    }
   }
 
   getTypeName() {
@@ -17,7 +15,7 @@ class Node {
 
   traverseFields(onEnter, onExit) {
     const fieldNames = this.fieldNames;
-    for (var i = 0; i < fieldNames.length; i++) {
+    for (let i = 0; i < fieldNames.length; i++) {
       const val = this[fieldNames[i]];
 
       if (val instanceof Node) {
@@ -48,7 +46,7 @@ class Node {
       this,
     );
 
-    for (var i = 0; i < inst.fieldNames.length; i++) {
+    for (let i = 0; i < inst.fieldNames.length; i++) {
       const field = inst.fieldNames[i];
       if (inst[field] instanceof Node) {
         inst[field] = inst[field].copy();
@@ -60,8 +58,11 @@ class Node {
 }
 
 export class NodeList extends Node {
-  constructor(lineno, colno, nodes = []) {
-    super(lineno, colno, ['children'], nodes);
+  children;
+
+  constructor(lineno, colno, nodes: unknown[] = []) {
+    super(lineno, colno, ['children']);
+    this.children = nodes;
   }
 
   getTypeName() {
@@ -73,7 +74,7 @@ export class NodeList extends Node {
   }
 
   traverseFields(onEnter, onExit) {
-    for (var i = 0; i < this.children.length; i++) {
+    for (let i = 0; i < this.children.length; i++) {
       this.children[i].traverse(onEnter, onExit);
     }
   }
@@ -84,25 +85,41 @@ export class Root extends NodeList {
     return 'Root';
   }
 }
+
 export class Value extends Node {
+  value;
+
   constructor(lineno, colno, value) {
-    super(lineno, colno, ['value'], value);
+    super(lineno, colno, ['value']);
+    this.value = value ?? null;
   }
   getTypeName() {
     return 'Value';
   }
 }
 export class UnaryOp extends Node {
-  constructor(lineno, colno, op, value) {
-    super(lineno, colno, ['op', 'target'], op, value);
+  op;
+  target;
+
+  constructor(lineno, colno, op, target) {
+    super(lineno, colno, ['op', 'target']);
+    this.op = op ?? null;
+    this.target = target ?? null;
   }
   getTypeName() {
     return 'UnaryOp';
   }
 }
 export class BinOp extends Node {
+  op;
+  left;
+  right;
+
   constructor(lineno, colno, op, left, right) {
-    super(lineno, colno, ['op', 'left', 'right'], op, left, right);
+    super(lineno, colno, ['op', 'left', 'right']);
+    this.op = op ?? null;
+    this.left = left ?? null;
+    this.right = right ?? null;
   }
   getTypeName() {
     return 'BinOp';
@@ -120,8 +137,13 @@ export class Symbol extends Value {
   }
 }
 export class FunCall extends Node {
+  callee;
+  args;
+
   constructor(lineno, colno, callee, args) {
-    super(lineno, colno, ['callee', 'args'], callee, args);
+    super(lineno, colno, ['callee', 'args']);
+    this.callee = callee ?? null;
+    this.args = args ?? null;
   }
   getTypeName() {
     return 'FunCall';
@@ -129,8 +151,13 @@ export class FunCall extends Node {
 }
 
 export class Member extends Node {
+  object;
+  property;
+
   constructor(lineno, colno, object, property) {
-    super(lineno, colno, ['object', 'property'], object, property);
+    super(lineno, colno, ['object', 'property']);
+    this.object = object ?? null;
+    this.property = property ?? null;
   }
   getTypeName() {
     return 'Member';
@@ -138,17 +165,19 @@ export class Member extends Node {
 }
 
 export class Query extends Node {
+  table;
+  select;
+  where;
+  groupby;
+  calculated;
+
   constructor(lineno, colno, table, select, where, groupby, calculated) {
-    super(
-      lineno,
-      colno,
-      ['table', 'select', 'where', 'groupby', 'calculated'],
-      table,
-      select,
-      where,
-      groupby,
-      calculated,
-    );
+    super(lineno, colno, ['table', 'select', 'where', 'groupby', 'calculated']);
+    this.table = table ?? null;
+    this.select = select ?? null;
+    this.where = where ?? null;
+    this.groupby = groupby ?? null;
+    this.calculated = calculated ?? null;
   }
   getTypeName() {
     return 'Query';
@@ -156,8 +185,15 @@ export class Query extends Node {
 }
 
 export class If extends Node {
+  cond;
+  body;
+  else_;
+
   constructor(lineno, colno, cond, body, else_) {
-    super(lineno, colno, ['cond', 'body', 'else_'], cond, body, else_);
+    super(lineno, colno, ['cond', 'body', 'else_']);
+    this.cond = cond ?? null;
+    this.body = body ?? null;
+    this.else_ = else_ ?? null;
   }
   getTypeName() {
     return 'If';

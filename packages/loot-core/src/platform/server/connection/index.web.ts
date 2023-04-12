@@ -1,6 +1,8 @@
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
+import type * as T from '.';
+
 function getGlobalObject() {
   let obj =
     typeof window !== 'undefined'
@@ -11,7 +13,9 @@ function getGlobalObject() {
   if (!obj) {
     throw new Error('Cannot get global object');
   }
-  return obj;
+  return obj as unknown as typeof globalThis & {
+    __globalServerChannel: Window | null;
+  };
 }
 
 getGlobalObject().__globalServerChannel = null;
@@ -24,7 +28,8 @@ function coerceError(error) {
   return { type: 'InternalError', message: error.message };
 }
 
-export const init = function (serverChannel, handlers) {
+export const init: T.Init = function (serverChn, handlers) {
+  const serverChannel = serverChn as Window;
   getGlobalObject().__globalServerChannel = serverChannel;
 
   serverChannel.addEventListener(
@@ -98,9 +103,10 @@ export const init = function (serverChannel, handlers) {
   serverChannel.postMessage({ type: 'connect' });
 };
 
-export const send = function (name, args) {
-  if (getGlobalObject().__globalServerChannel) {
-    getGlobalObject().__globalServerChannel.postMessage({
+export const send: T.Send = function (name, args) {
+  const { __globalServerChannel } = getGlobalObject();
+  if (__globalServerChannel) {
+    __globalServerChannel.postMessage({
       type: 'push',
       name,
       args,

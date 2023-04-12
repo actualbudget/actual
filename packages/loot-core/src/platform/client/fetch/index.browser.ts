@@ -9,6 +9,10 @@ let messageQueue = [];
 let globalWorker = null;
 
 class ReconstructedError extends Error {
+  url: string;
+  line: string;
+  column: string;
+
   constructor(message, stack, url, line, column) {
     super(message);
     this.name = this.constructor.name;

@@ -32,6 +32,13 @@ function token(type, value, lineno, colno) {
 }
 
 class Tokenizer {
+  colno;
+  hasCheckedMode;
+  index;
+  len;
+  lineno;
+  str;
+
   constructor(str, opts = {}) {
     this.str = str;
     this.index = 0;
@@ -69,7 +76,7 @@ class Tokenizer {
       return token(TOKEN_STRING, this.parseString(cur), lineno, colno);
     } else if (delimChars.has(cur)) {
       // We've hit a delimiter (a special char like a bracket)
-      var type;
+      let type;
 
       if (complexOps.has(cur + this.next() + this.next(2))) {
         cur = cur + this.next() + this.next(2);
@@ -122,7 +129,7 @@ class Tokenizer {
       if (tok.match(/^[-+]?[0-9]+$/)) {
         if (this.current() === '.') {
           this.forward();
-          var dec = this._extract(intChars);
+          let dec = this._extract(intChars);
           return token(TOKEN_FLOAT, tok + '.' + dec, lineno, colno);
         } else {
           return token(TOKEN_INT, tok, lineno, colno);
@@ -142,10 +149,10 @@ class Tokenizer {
   parseString(delimiter) {
     this.forward();
 
-    var str = '';
+    let str = '';
 
     while (!this.is_finished() && this.current() !== delimiter) {
-      var cur = this.current();
+      let cur = this.current();
 
       if (cur === '\\') {
         this.forward();
@@ -178,7 +185,7 @@ class Tokenizer {
       return null;
     }
 
-    var m = this.str.slice(this.index, this.index + str.length);
+    let m = this.str.slice(this.index, this.index + str.length);
     return m === str;
   }
 
@@ -211,16 +218,16 @@ class Tokenizer {
       return null;
     }
 
-    var matches = chars.has(this.current());
+    let matches = chars.has(this.current());
 
     // Only proceed if the first character meets our condition
     if ((breakOnMatch && !matches) || (!breakOnMatch && matches)) {
-      var t = this.current();
+      let t = this.current();
       this.forward();
 
       // And pull out all the chars one at a time until we hit a
       // breaking char
-      var isMatch = chars.has(this.current());
+      let isMatch = chars.has(this.current());
 
       while (
         ((breakOnMatch && !isMatch) || (!breakOnMatch && isMatch)) &&
@@ -259,7 +266,7 @@ class Tokenizer {
     if (this.current() === '\n') {
       this.lineno--;
 
-      var idx = this.src.lastIndexOf('\n', this.index - 1);
+      let idx = this.str.lastIndexOf('\n', this.index - 1);
       if (idx === -1) {
         this.colno = this.index;
       } else {
@@ -298,6 +305,6 @@ class Tokenizer {
   }
 }
 
-export default function lex(src, opts) {
+export default function lex(src, opts?: Record<string, unknown>) {
   return new Tokenizer(src, opts);
 }

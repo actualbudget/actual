@@ -71,7 +71,7 @@ function _createFile(filepath) {
   return filepath;
 }
 
-async function _readFile(filepath, opts) {
+async function _readFile(filepath, opts?: { encoding?: string }) {
   // We persist stuff in /documents, but don't need to handle sqlite
   // file specifically because those are symlinked to a separate
   // filesystem and will be handled in the BlockedFS
@@ -205,7 +205,7 @@ async function populateDefaultFilesystem() {
 export const populateFileHeirarchy = async function () {
   let { store } = idb.getStore(await idb.getDatabase(), 'files');
   let req = store.getAllKeys();
-  let paths = await new Promise((resolve, reject) => {
+  let paths: string[] = await new Promise((resolve, reject) => {
     req.onsuccess = e => resolve(e.target.result);
     req.onerror = e => reject(e);
   });
