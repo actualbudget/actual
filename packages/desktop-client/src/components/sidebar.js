@@ -9,6 +9,7 @@ import Add from '../icons/v1/Add';
 import CheveronDown from '../icons/v1/CheveronDown';
 import CheveronRight from '../icons/v1/CheveronRight';
 import Cog from '../icons/v1/Cog';
+import Pin from '../icons/v1/Pin';
 import Reports from '../icons/v1/Reports';
 import StoreFrontIcon from '../icons/v1/StoreFront';
 import TuningIcon from '../icons/v1/Tuning';
@@ -459,11 +460,25 @@ function Accounts({
   );
 }
 
-function ToggleButton({ style, onFloat }) {
+function ToggleButton({ style, isFloating, onFloat }) {
   return (
     <View className="float" style={[style, { flexShrink: 0 }]}>
       <Button bare onClick={onFloat}>
-        <ArrowButtonLeft1 style={{ width: 13, height: 13, color: colors.n5 }} />
+        {isFloating ? (
+          <Pin
+            style={{
+              margin: -2,
+              width: 15,
+              height: 15,
+              color: colors.n5,
+              transform: 'rotate(45deg)',
+            }}
+          />
+        ) : (
+          <ArrowButtonLeft1
+            style={{ width: 13, height: 13, color: colors.n5 }}
+          />
+        )}
       </Button>
     </View>
   );
@@ -548,9 +563,9 @@ export function Sidebar({
           color: colors.n9,
           backgroundColor: colors.n1,
           '& .float': {
-            opacity: 0,
+            opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
-            width: hasWindowButtons ? null : 0,
+            width: hasWindowButtons || isFloating ? null : 0,
           },
           '&:hover .float': {
             opacity: 1,
@@ -572,6 +587,7 @@ export function Sidebar({
               paddingRight: 8,
             },
           ]}
+          isFloating={isFloating}
           onFloat={onFloat}
         />
       )}
@@ -613,7 +629,7 @@ export function Sidebar({
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
         {!hasWindowButtons && !sidebar.alwaysFloats && (
-          <ToggleButton onFloat={onFloat} />
+          <ToggleButton isFloating={isFloating} onFloat={onFloat} />
         )}
       </View>
 

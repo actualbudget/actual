@@ -12,7 +12,6 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
-import ArrowButtonRight1 from '../icons/v2/ArrowButtonRight1';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { colors } from '../style';
 import tokens from '../tokens';
@@ -288,13 +287,7 @@ function Titlebar({
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
           bare
-          style={{
-            marginRight: 8,
-            '& .arrow-right': { opacity: 0, transition: 'opacity .3s' },
-            '& .menu': { opacity: 1, transition: 'opacity .3s' },
-            '&:hover .arrow-right': !sidebar.alwaysFloats && { opacity: 1 },
-            '&:hover .menu': !sidebar.alwaysFloats && { opacity: 0 },
-          }}
+          style={{ marginRight: 8 }}
           onPointerEnter={e => {
             if (e.pointerType === 'mouse') {
               sidebar.show();
@@ -305,38 +298,16 @@ function Titlebar({
               sidebar.hide();
             }
           }}
-          onClick={() => {
-            if (sidebar.alwaysFloats) {
+          onPointerUp={e => {
+            if (e.pointerType !== 'mouse') {
               sidebar.toggle();
-            } else {
-              saveGlobalPrefs({ floatingSidebar: !floatingSidebar });
             }
           }}
         >
-          <View style={{ width: 15, height: 15 }}>
-            <ArrowButtonRight1
-              className="arrow-right"
-              style={{
-                width: 13,
-                height: 13,
-                color: colors.n5,
-                position: 'absolute',
-                top: 1,
-                left: 1,
-              }}
-            />
-            <NavigationMenu
-              className="menu"
-              style={{
-                width: 15,
-                height: 15,
-                color: colors.n5,
-                position: 'absolute',
-                top: 0,
-                left: 0,
-              }}
-            />
-          </View>
+          <NavigationMenu
+            className="menu"
+            style={{ width: 15, height: 15, color: colors.n5, left: 0 }}
+          />
         </Button>
       )}
 
