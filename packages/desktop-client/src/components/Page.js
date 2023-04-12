@@ -22,22 +22,25 @@ export function usePageType() {
   return React.useContext(PageTypeContext);
 }
 
-function PageTitle({ name }) {
+function PageTitle({ name, style }) {
   if (isMobile()) {
     return (
       <View
-        style={{
-          alignItems: 'center',
-          backgroundColor: colors.b2,
-          color: 'white',
-          flexDirection: 'row',
-          flex: '1 0 auto',
-          fontSize: 18,
-          fontWeight: 500,
-          height: 50,
-          justifyContent: 'center',
-          overflowY: 'auto',
-        }}
+        style={[
+          {
+            alignItems: 'center',
+            backgroundColor: colors.b2,
+            color: 'white',
+            flexDirection: 'row',
+            flex: '1 0 auto',
+            fontSize: 18,
+            fontWeight: 500,
+            height: 50,
+            justifyContent: 'center',
+            overflowY: 'auto',
+          },
+          style,
+        ]}
       >
         {name}
       </View>
@@ -46,20 +49,23 @@ function PageTitle({ name }) {
 
   return (
     <Text
-      style={{
-        fontSize: 25,
-        fontWeight: 500,
-        paddingLeft: HORIZONTAL_PADDING,
-        paddingRight: HORIZONTAL_PADDING,
-        marginBottom: 15,
-      }}
+      style={[
+        {
+          fontSize: 25,
+          fontWeight: 500,
+          paddingLeft: HORIZONTAL_PADDING,
+          paddingRight: HORIZONTAL_PADDING,
+          marginBottom: 15,
+        },
+        style,
+      ]}
     >
       {name}
     </Text>
   );
 }
 
-export function Page({ title, modalSize, children }) {
+export function Page({ title, modalSize, children, titleStyle }) {
   let { type, current } = usePageType();
   let history = useHistory();
 
@@ -84,7 +90,7 @@ export function Page({ title, modalSize, children }) {
 
   return (
     <View style={isMobile() ? undefined : styles.page}>
-      <PageTitle name={title} />
+      <PageTitle name={title} style={titleStyle} />
       <View
         style={
           isMobile()
