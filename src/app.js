@@ -4,6 +4,7 @@ import actuator from 'express-actuator';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import config from './load-config.js';
+import rateLimit from 'express-rate-limit';
 
 import * as accountApp from './app-account.js';
 import * as syncApp from './app-sync.js';
@@ -16,6 +17,14 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.use(cors());
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 500,
+    legacyHeaders: false,
+    standardHeaders: true,
+  }),
+);
 app.use(bodyParser.json({ limit: '20mb' }));
 app.use(bodyParser.raw({ type: 'application/actual-sync', limit: '20mb' }));
 app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
