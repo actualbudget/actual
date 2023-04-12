@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import type * as T from '.';
+
 let documentDir;
 
 let rootPath = path.join(__dirname, '..', '..', '..', '..');
@@ -62,7 +64,7 @@ export const join = path.join;
 
 export const basename = filepath => path.basename(filepath);
 
-export const listDir = filepath =>
+export const listDir: T.ListDir = filepath =>
   new Promise((resolve, reject) => {
     fs.readdir(filepath, (err, files) => {
       if (err) {
@@ -86,7 +88,7 @@ export const mkdir = filepath =>
       if (err) {
         reject(err);
       } else {
-        resolve();
+        resolve(undefined);
       }
     });
   });
@@ -115,7 +117,7 @@ export const copyFile = (frompath, topath) => {
   });
 };
 
-export const readFile = (filepath, encoding = 'utf8') => {
+export const readFile: T.ReadFile = (filepath, encoding = 'utf8') => {
   if (encoding === 'binary') {
     // `binary` is not actually a valid encoding, you pass `null` into node if
     // you want a buffer
@@ -132,10 +134,11 @@ export const readFile = (filepath, encoding = 'utf8') => {
   });
 };
 
-export const writeFile = (filepath, contents) => {
+export const writeFile: T.WriteFile = (filepath, contents) => {
   return new Promise(function (resolve, reject) {
-    fs.writeFile(filepath, contents, 'utf8', function (err, _) {
-      return err ? reject(err) : resolve();
+    // @ts-expect-error contents type needs refining
+    fs.writeFile(filepath, contents, 'utf8', function (err) {
+      return err ? reject(err) : resolve(undefined);
     });
   });
 };
@@ -143,7 +146,7 @@ export const writeFile = (filepath, contents) => {
 export const removeFile = filepath => {
   return new Promise(function (resolve, reject) {
     fs.unlink(filepath, err => {
-      return err ? reject(err) : resolve();
+      return err ? reject(err) : resolve(undefined);
     });
   });
 };
@@ -151,7 +154,7 @@ export const removeFile = filepath => {
 export const removeDir = dirpath => {
   return new Promise(function (resolve, reject) {
     fs.rmdir(dirpath, err => {
-      return err ? reject(err) : resolve();
+      return err ? reject(err) : resolve(undefined);
     });
   });
 };

@@ -41,6 +41,7 @@ function Graph(serialized) {
     removeIncomingEdges(node);
     edges.delete(node);
     incomingEdges.delete(node);
+    return graph;
   }
 
   function adjacent(node) {

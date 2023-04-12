@@ -30,7 +30,7 @@ function traverse(expr, fields) {
 }
 
 export default function getSqlFields(table, ast) {
-  let fields = [];
+  let fields: string[] = [];
   if (!ast) {
     return fields;
   }

@@ -1,14 +1,16 @@
+import type * as T from './path-join';
+
 // This code is pulled from
 // https://github.com/browserify/path-browserify/blob/master/index.js#L33
 
 // Resolves . and .. elements in a path with directory names
 function normalizeStringPosix(path, allowAboveRoot) {
-  var res = '';
-  var lastSegmentLength = 0;
-  var lastSlash = -1;
-  var dots = 0;
-  var code;
-  for (var i = 0; i <= path.length; ++i) {
+  let res = '';
+  let lastSegmentLength = 0;
+  let lastSlash = -1;
+  let dots = 0;
+  let code;
+  for (let i = 0; i <= path.length; ++i) {
     if (i < path.length) code = path.charCodeAt(i);
     else if (code === 47 /*/*/) break;
     else code = 47 /*/*/;
@@ -23,7 +25,7 @@ function normalizeStringPosix(path, allowAboveRoot) {
           res.charCodeAt(res.length - 2) !== 46 /*.*/
         ) {
           if (res.length > 2) {
-            var lastSlashIndex = res.lastIndexOf('/');
+            let lastSlashIndex = res.lastIndexOf('/');
             if (lastSlashIndex !== res.length - 1) {
               if (lastSlashIndex === -1) {
                 res = '';
@@ -68,8 +70,8 @@ function normalizeStringPosix(path, allowAboveRoot) {
 function normalizePath(path) {
   if (path.length === 0) return '.';
 
-  var isAbsolute = path.charCodeAt(0) === 47; /*/*/
-  var trailingSeparator = path.charCodeAt(path.length - 1) === 47; /*/*/
+  let isAbsolute = path.charCodeAt(0) === 47; /*/*/
+  let trailingSeparator = path.charCodeAt(path.length - 1) === 47; /*/*/
 
   // Normalize the path
   path = normalizeStringPosix(path, !isAbsolute);
@@ -81,11 +83,11 @@ function normalizePath(path) {
   return path;
 }
 
-export default function join(...args) {
+const join: T.Join = (...args) => {
   if (args.length === 0) return '.';
   let joined;
-  for (var i = 0; i < args.length; ++i) {
-    var arg = args[i];
+  for (let i = 0; i < args.length; ++i) {
+    let arg = args[i];
     if (arg.length > 0) {
       if (joined === undefined) joined = arg;
       else joined += '/' + arg;
@@ -93,4 +95,6 @@ export default function join(...args) {
   }
   if (joined === undefined) return '.';
   return normalizePath(joined);
-}
+};
+
+export default join;

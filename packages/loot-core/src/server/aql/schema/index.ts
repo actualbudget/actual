@@ -1,4 +1,4 @@
-function f(type, opts) {
+function f(type: string, opts?: Record<string, unknown>) {
   return { type, ...opts };
 }
 
@@ -119,7 +119,7 @@ export const schemaConfig = {
   // Note: these views *must* represent the underlying table that we
   // are mapping here. The compiler makes optimizations with this
   // assumption
-  tableViews(name, { isJoin, withDead, tableOptions = {} }) {
+  tableViews(name, { isJoin, withDead, tableOptions = { splits: undefined } }) {
     switch (name) {
       case 'transactions': {
         // If joining, we always only show alive transactions. There's

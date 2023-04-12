@@ -37,7 +37,7 @@ function run(src, vars = {}) {
   return new Promise(resolve => {
     vm.runSource(src, () => {
       expect(scopes.getAll()).toMatchSnapshot();
-      resolve();
+      resolve(undefined);
     });
   });
 }
