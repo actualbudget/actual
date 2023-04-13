@@ -358,7 +358,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let diff = target - balance + budgeted;
         if (num_months > 0) {
           if (diff >= 0 && num_months > -1) {
-            to_budget += Math.round(diff / (num_months + 1));
+            to_budget += Math.round(diff / num_months);
           }
         } else {
           let next_month = addMonths(current_month, 1);
