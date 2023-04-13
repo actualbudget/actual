@@ -183,7 +183,7 @@ function Settings({
   );
 }
 
-export default withThemeColor(colors.n10)(
+export default withThemeColor(colors.n11)(
   connect(
     state => ({
       prefs: state.prefs.local,
