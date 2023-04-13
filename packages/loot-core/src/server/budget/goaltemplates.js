@@ -162,7 +162,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           num_months = differenceInCalendarMonths(target_month, current_month);
         }
         if (num_months < 0) {
-          errors.push(`${`${template.month} is in the past.`}`);
+          errors.push(`${template.month} is in the past.`);
           return false;
         }
         template.month = format(target_month, 'yyyy-MM');
@@ -297,7 +297,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let num_months = differenceInCalendarMonths(to_month, current_month);
         let target = amountToInteger(template.amount);
         if (num_months < 0) {
-          errors.push(`${`${template.month} is in the past.`}`);
+          errors.push(`${template.month} is in the past.`);
           return { errors };
         } else if (num_months === 0) {
           to_budget = target - already_budgeted;
