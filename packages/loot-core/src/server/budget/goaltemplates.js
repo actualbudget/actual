@@ -54,12 +54,8 @@ async function processTemplate(month, force) {
               ].join('\n'),
             ),
         );
-        let { amount: to_budget, errors: applyErrors} = await applyCategoryTemplate(
-          category,
-          template,
-          month,
-          force,
-        );
+        let { amount: to_budget, errors: applyErrors } =
+          await applyCategoryTemplate(category, template, month, force);
         if (to_budget != null) {
           num_applied++;
           await setBudget({ category: category.id, month, amount: to_budget });
