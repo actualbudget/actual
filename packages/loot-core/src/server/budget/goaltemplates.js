@@ -54,7 +54,7 @@ async function processTemplate(month, force) {
               ].join('\n'),
             ),
         );
-        let { amount: to_budget, applyErrors} = await applyCategoryTemplate(
+        let { amount: to_budget, errors: applyErrors} = await applyCategoryTemplate(
           category,
           template,
           month,
@@ -162,6 +162,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           num_months = differenceInCalendarMonths(target_month, current_month);
         }
         if (num_months < 0) {
+          errors.push(`${`${template.month} is in the past.`}`);
           return false;
         }
         template.month = format(target_month, 'yyyy-MM');
@@ -201,7 +202,6 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         // simple has 'monthly' and/or 'limit' params
         if (template.limit != null) {
           if (limit != null) {
-            // errors.push(`More than one “up to” limit found.`);
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
@@ -244,8 +244,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let weeks = template.weeks != null ? Math.round(template.weeks) : 1;
         if (template.limit != null) {
           if (limit != null) {
-            // errors.push(`More than one “up to” limit found.`);
-            errors = (`More than one “up to” limit found.`);
+            errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
             limit = amountToInteger(template.limit);
@@ -298,8 +297,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let num_months = differenceInCalendarMonths(to_month, current_month);
         let target = amountToInteger(template.amount);
         if (num_months < 0) {
-          // errors.push(`${`${template.month} is in the past.`}`);
-          errors = (`${`${template.month} is in the past.`}`);
+          errors.push(`${`${template.month} is in the past.`}`);
           return { errors };
         } else if (num_months === 0) {
           to_budget = target - already_budgeted;
@@ -343,7 +341,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
       to_budget === 0) &&
     !force
   ) {
-    return null;
+    return { errors };
   } else if (category.budgeted === to_budget && force) {
     return null;
   } else {
