@@ -355,7 +355,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           current_month,
         );
         let target = -getScheduledAmount(amountCond.value);
-        let diff = target - last_month_balance;
+        let diff = target - balance + budgeted;
         if (num_months > 0) {
           if (diff >= 0 && num_months > -1) {
             to_budget += Math.round(diff / (num_months + 1));
@@ -372,7 +372,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             next_date_string = getNextDate(dateCond, next_date);
             next_date = new Date(next_date_string);
           }
-          to_budget = monthly_target - last_month_balance;
+          to_budget = monthly_target - balance + budgeted;
         }
         break;
       }
