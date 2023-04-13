@@ -64,11 +64,8 @@ async function processTemplate(month, force) {
           num_applied++;
           await setBudget({ category: category.id, month, amount: to_budget });
         }
-        if (applyErrors.length > -1) {
-          for (let i = 0; i<applyErrors.length; i++) {
-            errors.push(applyErrors[i]);
-          }
-        }
+        if (applyErrors.length > 0)
+          errors = errors.concat(`${category.name}: ` + applyErrors);
       }
     }
   }
@@ -162,8 +159,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           num_months = differenceInCalendarMonths(target_month, current_month);
         }
         if (num_months < 0) {
-          errors.push(`${category.name}: ${`${template.month} is in the past.`}`);
-          return [null,errors];
+          //errors.push(`${`${template.month} is in the past.`}`);
+          return [false, errors];
         }
         template.month = format(target_month, 'yyyy-MM');
         if (spend_from) {
@@ -172,7 +169,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       default:
     }
-    return [template, errors];
+    return true;
   });
 
   if (template_lines.length > 1) {
@@ -202,7 +199,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         // simple has 'monthly' and/or 'limit' params
         if (template.limit != null) {
           if (limit != null) {
-            errors.push( `${category.name}: More than one “up to” limit found.`);
+            errors.push(`More than one “up to” limit found.`);
             return [null, errors];
           } else {
             limit = amountToInteger(template.limit);
@@ -244,7 +241,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let weeks = template.weeks != null ? Math.round(template.weeks) : 1;
         if (template.limit != null) {
           if (limit != null) {
-            errors.push( `${category.name}: More than one “up to” limit found.`);
+            errors.push(`More than one “up to” limit found.`);
             return [null, errors];
           } else {
             limit = amountToInteger(template.limit);
@@ -297,7 +294,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let num_months = differenceInCalendarMonths(to_month, current_month);
         let target = amountToInteger(template.amount);
         if (num_months < 0) {
-          errors.push( `${category.name}: ${`${template.month} is in the past.`}`);
+          errors.push(`${`${template.month} is in the past.`}`);
           return [null, errors];
         } else if (num_months === 0) {
           to_budget = target - already_budgeted;
@@ -325,7 +322,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       }
       case 'error':
-        return [null,errors];
+        return [null, errors];
       default:
     }
   }
