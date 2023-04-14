@@ -84,7 +84,16 @@ export async function asyncTransaction(db, fn) {
 }
 
 export function openDatabase(pathOrBuffer) {
-  return new Database(pathOrBuffer);
+  let db = new Database(pathOrBuffer);
+  // Define Unicode-aware LOWER and UPPER implementation.
+  // This is necessary because better-sqlite3 uses SQLite build without ICU support.
+  db.function('UNICODE_LOWER', { deterministic: true }, arg =>
+    arg?.toLowerCase(),
+  );
+  db.function('UNICODE_UPPER', { deterministic: true }, arg =>
+    arg?.toUpperCase(),
+  );
+  return db;
 }
 
 export function closeDatabase(db) {

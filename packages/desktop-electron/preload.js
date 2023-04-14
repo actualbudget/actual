@@ -1,6 +1,7 @@
+const fs = require('fs');
+
 const { ipcRenderer, contextBridge } = require('electron');
 const ipc = require('node-ipc');
-const fs = require('fs');
 
 let { version: VERSION, isDev: IS_DEV } =
   ipcRenderer.sendSync('get-bootstrap-data');
@@ -32,7 +33,7 @@ contextBridge.exposeInMainWorld('Actual', {
         },
         emit(name, data) {
           return client.emit(name, data);
-        }
+        },
       });
     });
   },
@@ -48,7 +49,7 @@ contextBridge.exposeInMainWorld('Actual', {
   saveFile: async (contents, filename, dialogTitle) => {
     const fileLocation = await ipcRenderer.invoke('save-file-dialog', {
       title: dialogTitle,
-      defaultPath: filename
+      defaultPath: filename,
     });
 
     return new Promise((resolve, reject) => {
@@ -82,5 +83,5 @@ contextBridge.exposeInMainWorld('Actual', {
 
   getServerSocket: () => {
     return socketPromise;
-  }
+  },
 });

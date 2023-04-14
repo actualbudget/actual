@@ -2,8 +2,8 @@ import mitt from 'mitt';
 
 import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
 
-const Graph = require('./graph-data-structure');
-const { unresolveName, resolveName } = require('./util');
+import Graph from './graph-data-structure';
+import { unresolveName, resolveName } from './util';
 
 export default class Spreadsheet {
   constructor(saveCache, setCacheStatus) {

@@ -2,9 +2,8 @@
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
-const actual = require('@actual-app/api/methods');
-const d = require('date-fns');
-const uuid = require('uuid');
+import * as actual from '@actual-app/api/methods';
+import uuid from 'uuid';
 
 function amountFromYnab(amount) {
   // ynabs multiplies amount by 1000 and actual by 100
@@ -48,7 +47,7 @@ function sortByKey(arr, key) {
 }
 
 function groupBy(arr, keyName) {
-  return arr.reduce(function(obj, item) {
+  return arr.reduce(function (obj, item) {
     var key = item[keyName];
     if (!obj.hasOwnProperty(key)) {
       obj[key] = [];
@@ -66,11 +65,11 @@ function importAccounts(data, entityIdMap) {
           type: mapAccountType(account.type),
           name: account.name,
           offbudget: account.on_budget ? false : true,
-          closed: account.closed
+          closed: account.closed,
         });
         entityIdMap.set(account.id, id);
       }
-    })
+    }),
   );
 }
 
@@ -86,7 +85,7 @@ async function importCategories(data, entityIdMap) {
     if (
       cat.category_group_id ===
       data.category_groups.find(
-        group => group.name === 'Internal Master Category'
+        group => group.name === 'Internal Master Category',
       ).id
     ) {
       if (ynabIncomeCategories.includes(cat.name)) {
@@ -114,13 +113,13 @@ async function importCategories(data, entityIdMap) {
       ) {
         var groupId = await actual.createCategoryGroup({
           name: group.name,
-          is_income: false
+          is_income: false,
         });
         entityIdMap.set(group.id, groupId);
       }
 
       let cats = data.categories.filter(
-        cat => cat.category_group_id === group.id
+        cat => cat.category_group_id === group.id,
       );
 
       for (let cat of cats.reverse()) {
@@ -158,11 +157,11 @@ function importPayees(data, entityIdMap) {
     data.payees.map(async payee => {
       if (!payee.deleted) {
         let id = await actual.createPayee({
-          name: payee.name
+          name: payee.name,
         });
         entityIdMap.set(payee.id, id);
       }
-    })
+    }),
   );
 }
 
@@ -171,10 +170,10 @@ async function importTransactions(data, entityIdMap) {
   const categories = await actual.getCategories();
   const incomeCatId = categories.find(cat => cat.name === 'Income').id;
   const startingBalanceCatId = categories.find(
-    cat => cat.name === 'Starting Balances'
+    cat => cat.name === 'Starting Balances',
   ).id; //better way to do it?
   const startingPayeeYNAB = data.payees.find(
-    payee => payee.name === 'Starting Balance'
+    payee => payee.name === 'Starting Balance',
   ).id;
 
   let transactionsGrouped = groupBy(data.transactions, 'account_id');
@@ -203,7 +202,7 @@ async function importTransactions(data, entityIdMap) {
               return {
                 amount: amountFromYnab(subtrans.amount),
                 category: entityIdMap.get(subtrans.category_id) || null,
-                notes: subtrans.memo
+                notes: subtrans.memo,
               };
             });
           }
@@ -220,7 +219,7 @@ async function importTransactions(data, entityIdMap) {
             imported_id: transaction.import_id || null,
             transfer_id:
               entityIdMap.get(transaction.transfer_transaction_id) || null,
-            subtransactions: subtransactions
+            subtransactions: subtransactions,
           };
 
           // Handle transfer payee
@@ -228,10 +227,13 @@ async function importTransactions(data, entityIdMap) {
             newTransaction.payee = payees.find(
               p =>
                 p.transfer_acct ===
-                entityIdMap.get(transaction.transfer_account_id)
+                entityIdMap.get(transaction.transfer_account_id),
             ).id;
           } else {
             newTransaction.payee = entityIdMap.get(transaction.payee_id);
+            newTransaction.imported_payee = data.payees.find(
+              p => !p.deleted && p.id === transaction.payee_id,
+            )?.name;
           }
 
           // Handle starting balances
@@ -247,7 +249,7 @@ async function importTransactions(data, entityIdMap) {
         .filter(x => x);
 
       await actual.addTransactions(entityIdMap.get(accountId), toImport);
-    })
+    }),
   );
 }
 
@@ -263,10 +265,10 @@ async function importBudgets(data, entityIdMap) {
   let budgets = sortByKey(data.months, 'month');
 
   const internalCatIdYnab = data.category_groups.find(
-    group => group.name === 'Internal Master Category'
+    group => group.name === 'Internal Master Category',
   ).id;
   const creditcardCatIdYnab = data.category_groups.find(
-    group => group.name === 'Credit Card Payments'
+    group => group.name === 'Credit Card Payments',
   ).id;
 
   await actual.batchBudgetUpdates(async () => {
@@ -287,7 +289,7 @@ async function importBudgets(data, entityIdMap) {
           }
 
           await actual.setBudgetAmount(month, catId, amount);
-        })
+        }),
       );
     }
   });
@@ -316,12 +318,10 @@ async function doImport(data) {
   console.log('Setting up...');
 }
 
-async function importYNAB5(data) {
+export async function importYNAB5(data) {
   if (data.data) {
     data = data.data;
   }
 
   return actual.runImport(data.budget.name, () => doImport(data.budget));
 }
-
-module.exports = { importYNAB5 };

@@ -1,7 +1,7 @@
+import * as fs from '../platform/server/fs';
+
 import { Timestamp } from './crdt';
 import { sendMessages } from './sync';
-
-const fs = require('../platform/server/fs');
 
 let prefs = null;
 

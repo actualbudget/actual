@@ -1,7 +1,11 @@
-let { dirname, basename } = require('path');
-require('source-map-support').install();
-global.fetch = require('node-fetch');
-let bundle = require('./lib-dist/bundle.desktop.js');
+import { dirname, basename } from 'path';
+
+import fetch from 'node-fetch';
+import 'source-map-support/register';
+
+import bundle from './lib-dist/bundle.desktop';
+
+global.fetch = fetch;
 
 async function init(budgetPath) {
   let dir = dirname(budgetPath);
@@ -19,7 +23,7 @@ async function run() {
   await send('transaction-add', {
     date: '2022-03-20',
     account: accounts[0].id,
-    amount: 1000
+    amount: 1000,
   });
 
   await new Promise(resolve => {

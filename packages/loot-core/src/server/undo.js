@@ -1,10 +1,9 @@
+import * as connection from '../platform/server/connection';
 import { getIn } from '../shared/util';
 
 import { Timestamp } from './crdt';
 import { withMutatorContext, getMutatorContext } from './mutators';
 import { sendMessages } from './sync';
-
-const connection = require('../platform/server/connection');
 
 // A marker always sits as the first entry to simplify logic
 let MESSAGE_HISTORY = [{ type: 'marker' }];

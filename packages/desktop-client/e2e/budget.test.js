@@ -5,7 +5,7 @@ import { Navigation } from './page-models/navigation';
 
 test.describe('Budget', () => {
   let page;
-  let navigation;
+  let navigation; // eslint-disable-line no-unused-vars
   let configurationPage;
   let budgetPage;
 

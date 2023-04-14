@@ -112,7 +112,7 @@ const Autocomplete = React.forwardRef<SelectInstance, AutocompleteProps>(
     };
 
     const onKeyDown: AutocompleteProps['onKeyDown'] = event => {
-      if (event.code === 'Escape') {
+      if (event.key === 'Escape') {
         onSelect(
           isSingleValue(initialValue)
             ? initialValue?.value

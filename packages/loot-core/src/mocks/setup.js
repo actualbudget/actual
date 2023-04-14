@@ -1,3 +1,5 @@
+import * as nativeFs from 'fs';
+
 import * as fetchClient from '../platform/client/fetch';
 import * as sqlite from '../platform/server/sqlite';
 import * as rules from '../server/accounts/transaction-rules';
@@ -13,8 +15,6 @@ import { updateVersion } from '../server/update';
 import { resetTracer, tracer } from '../shared/test-helpers';
 
 jest.mock('../server/post');
-
-const nativeFs = require('fs');
 
 // By default, syncing is disabled
 setSyncingMode('disabled');

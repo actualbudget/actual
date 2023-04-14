@@ -1,5 +1,0 @@
-BEGIN TRANSACTION;
-
-ALTER TABLE accounts ADD COLUMN sort_order REAL;
-
-COMMIT;

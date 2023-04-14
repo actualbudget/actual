@@ -41,6 +41,7 @@ function Graph(serialized) {
     removeIncomingEdges(node);
     edges.delete(node);
     incomingEdges.delete(node);
+    return graph;
   }
 
   function adjacent(node) {
@@ -120,4 +121,4 @@ function Graph(serialized) {
   return graph;
 }
 
-module.exports = Graph;
+export default Graph;

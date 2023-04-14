@@ -220,7 +220,6 @@ if (Platform.env === 'web') {
   function testScrollbars() {
     let el = document.createElement('div');
     el.innerHTML =
-      // eslint-disable-next-line rulesdir/typography
       '<div style="width:100px;height:100px;overflow:scroll;position:absolute;top:-9999px;"/>';
     document.body.appendChild(el);
     let testNode = el.childNodes[0];

@@ -1,6 +1,6 @@
-import { updateBackups } from './backups';
+import * as dateFns from 'date-fns';
 
-const dateFns = require('date-fns');
+import { updateBackups } from './backups';
 
 describe('Backups', () => {
   test('backups work', async () => {

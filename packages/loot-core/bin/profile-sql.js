@@ -1,13 +1,14 @@
 #!/usr/bin/env actual-cli-runner.js
 import fs from 'fs';
 import os from 'os';
+
+import * as asyncStorage from '../src/platform/server/asyncStorage';
 import * as sqlite from '../src/platform/server/sqlite';
+import { runQuery } from '../src/server/aql';
 import * as db from '../src/server/db';
 import { batchMessages, setSyncingMode } from '../src/server/sync';
-import { runQuery } from '../src/server/aql';
-import asyncStorage from '../src/platform/server/asyncStorage';
-import { makeChild } from '../src/shared/transactions';
 import q from '../src/shared/query';
+import { makeChild } from '../src/shared/transactions';
 
 let dbPath = process.argv[3];
 
@@ -38,29 +39,29 @@ async function init() {
           date: '2020-01-' + pad(Math.floor(Math.random() * 30)),
           amount: Math.floor(Math.random() * 10000),
           account: accounts[0].id,
-          notes: 'foo'
+          notes: 'foo',
         };
         db.insertTransaction(parent);
         db.insertTransaction(
           makeChild(parent, {
-            amount: Math.floor(Math.random() * 1000) 
-          })
+            amount: Math.floor(Math.random() * 1000),
+          }),
         );
         db.insertTransaction(
           makeChild(parent, {
-            amount: Math.floor(Math.random() * 1000) 
-          })
+            amount: Math.floor(Math.random() * 1000),
+          }),
         );
         db.insertTransaction(
           makeChild(parent, {
-            amount: Math.floor(Math.random() * 1000) 
-          })
+            amount: Math.floor(Math.random() * 1000),
+          }),
         );
       } else {
         db.insertTransaction({
           date: '2020-01-' + pad(Math.floor(Math.random() * 30)),
           amount: Math.floor(Math.random() * 10000),
-          account: accounts[0].id
+          account: accounts[0].id,
         });
       }
     }
@@ -89,10 +90,7 @@ async function init() {
   console.log('starting');
   let s = Date.now();
   let { data } = await runQuery(
-    q('transactions')
-      .select('*')
-      .options({ splits: 'grouped' })
-      .serialize()
+    q('transactions').select('*').options({ splits: 'grouped' }).serialize(),
   );
   console.log('# items:', data.length);
   console.log('time:', Date.now() - s);

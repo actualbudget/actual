@@ -1,13 +1,13 @@
-function first(arr) {
+export function first(arr) {
   return arr[0];
 }
 
-function firstValue(arr) {
+export function firstValue(arr) {
   const keys = Object.keys(arr[0]);
   return arr[0][keys[0]];
 }
 
-function number(v) {
+export function number(v) {
   if (typeof v === 'number') {
     return v;
   } else if (typeof v === 'string') {
@@ -21,18 +21,10 @@ function number(v) {
   return 0;
 }
 
-function min(x, y) {
+export function min(x, y) {
   return Math.min(x, y);
 }
 
-function max(x, y) {
+export function max(x, y) {
   return Math.max(x, y);
 }
-
-module.exports = {
-  first,
-  firstValue,
-  number,
-  min,
-  max,
-};

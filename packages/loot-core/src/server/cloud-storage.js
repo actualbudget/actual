@@ -1,7 +1,10 @@
-import asyncStorage from '../platform/server/asyncStorage';
+import AdmZip from 'adm-zip';
+
+import * as asyncStorage from '../platform/server/asyncStorage';
 import { fetch } from '../platform/server/fetch';
-import fs from '../platform/server/fs';
+import * as fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
+import * as uuid from '../platform/uuid';
 import * as monthUtils from '../shared/months';
 
 import * as encryption from './encryption';
@@ -15,10 +18,6 @@ import { runMutator } from './mutators';
 import { post } from './post';
 import * as prefs from './prefs';
 import { getServer } from './server-config';
-
-let AdmZip = require('adm-zip');
-
-let uuid = require('../platform/uuid');
 
 let UPLOAD_FREQUENCY_IN_DAYS = 7;
 

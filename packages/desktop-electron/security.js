@@ -1,7 +1,7 @@
 const electron = require('electron');
 
-electron.app.on('web-contents-created', function(event, contents) {
-  contents.on('will-attach-webview', function(event, webPreferences, params) {
+electron.app.on('web-contents-created', function (event, contents) {
+  contents.on('will-attach-webview', function (event, webPreferences, params) {
     delete webPreferences.preloadURL;
     delete webPreferences.preload;
 
@@ -24,11 +24,11 @@ electron.app.on('web-contents-created', function(event, contents) {
   });
 });
 
-electron.app.on('ready', function() {
-  electron.session.defaultSession.setPermissionRequestHandler(function(
+electron.app.on('ready', function () {
+  electron.session.defaultSession.setPermissionRequestHandler(function (
     webContents,
     permission,
-    callback
+    callback,
   ) {
     var url = webContents.getURL();
     if (url.startsWith('file://')) {

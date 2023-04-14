@@ -349,7 +349,7 @@ export function Input({
       )}
       {...nativeProps}
       onKeyDown={e => {
-        if (e.code === 'Enter' && onEnter) {
+        if (e.key === 'Enter' && onEnter) {
           onEnter(e);
         }
 
@@ -563,7 +563,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
 
       let transformIndex = idx => items.indexOf(filteredItems[idx]);
 
-      switch (e.code) {
+      switch (e.key) {
         case 'ArrowUp':
           e.preventDefault();
           setHoveredIndex(

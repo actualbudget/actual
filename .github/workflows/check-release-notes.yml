@@ -2,7 +2,9 @@ name: Check release notes
 
 on:
   pull_request:
-    branches: '*'
+    branches:
+      - '*'
+      - '!release/*'
 
 jobs:
   check:

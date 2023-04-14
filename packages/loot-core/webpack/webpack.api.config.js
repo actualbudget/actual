@@ -1,7 +1,5 @@
 let path = require('path');
 
-let webpack = require('webpack');
-
 let config = require('./webpack.desktop.config');
 
 config.resolve.extensions = [
@@ -22,12 +20,6 @@ config.output.path = path.join(
   path.dirname(path.dirname(__dirname)),
   'api',
   'app',
-);
-
-config.plugins.push(
-  new webpack.DefinePlugin({
-    ACTUAL_APP_VERSION: '"0.0.147"',
-  }),
 );
 
 module.exports = config;

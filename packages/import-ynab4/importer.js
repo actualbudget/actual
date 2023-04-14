@@ -2,12 +2,12 @@
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
-const actual = require('@actual-app/api/methods');
-const { amountToInteger } = require('@actual-app/api/utils');
-const AdmZip = require('adm-zip');
-const d = require('date-fns');
-const normalizePathSep = require('slash');
-const uuid = require('uuid');
+import * as actual from '@actual-app/api/methods';
+import { amountToInteger } from '@actual-app/api/utils';
+import AdmZip from 'adm-zip';
+import * as d from 'date-fns';
+import normalizePathSep from 'slash';
+import uuid from 'uuid';
 
 // Utils
 
@@ -73,10 +73,6 @@ function monthFromDate(date) {
   return d.format(_parse(date), 'yyyy-MM');
 }
 
-function getCurrentMonth() {
-  return d.format(new Date(), 'yyyy-MM');
-}
-
 // Importer
 
 async function importAccounts(data, entityIdMap) {
@@ -89,11 +85,11 @@ async function importAccounts(data, entityIdMap) {
           type: mapAccountType(account.accountType),
           name: account.accountName,
           offbudget: account.onBudget ? false : true,
-          closed: account.hidden ? true : false
+          closed: account.hidden ? true : false,
         });
         entityIdMap.set(account.entityId, id);
       }
-    })
+    }),
   );
 }
 
@@ -110,14 +106,14 @@ async function importCategories(data, entityIdMap) {
       ) {
         const id = await actual.createCategoryGroup({
           name: masterCategory.name,
-          is_income: false
+          is_income: false,
         });
         entityIdMap.set(masterCategory.entityId, id);
 
         if (masterCategory.subCategories) {
           const subCategories = sortByKey(
             masterCategory.subCategories,
-            'sortableIndex'
+            'sortableIndex',
           );
           subCategories.reverse();
 
@@ -127,14 +123,14 @@ async function importCategories(data, entityIdMap) {
             if (!category.isTombstone) {
               const id = await actual.createCategory({
                 name: category.name,
-                group_id: entityIdMap.get(category.masterCategoryId)
+                group_id: entityIdMap.get(category.masterCategoryId),
               });
               entityIdMap.set(category.entityId, id);
             }
           }
         }
       }
-    })
+    }),
   );
 }
 
@@ -144,7 +140,7 @@ async function importPayees(data, entityIdMap) {
       let id = await actual.createPayee({
         name: payee.name,
         category: entityIdMap.get(payee.autoFillCategoryId) || null,
-        transfer_acct: entityIdMap.get(payee.targetAccountId) || null
+        transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
       });
 
       // TODO: import payee rules
@@ -192,7 +188,6 @@ async function importTransactions(data, entityIdMap) {
     }
   }
 
-  let sortOrder = 1;
   let transactionsGrouped = groupBy(data.transactions, 'accountId');
 
   await Promise.all(
@@ -202,7 +197,7 @@ async function importTransactions(data, entityIdMap) {
       let toImport = transactions
         .map(transaction => {
           if (transaction.isTombstone) {
-            return;
+            return null;
           }
 
           let id = entityIdMap.get(transaction.entityId);
@@ -211,15 +206,23 @@ async function importTransactions(data, entityIdMap) {
             let transferId = entityIdMap.get(t.transferTransactionId) || null;
 
             let payee = null;
+            let imported_payee = null;
             if (transferId) {
               payee = payees.find(
-                p => p.transfer_acct === entityIdMap.get(t.targetAccountId)
+                p => p.transfer_acct === entityIdMap.get(t.targetAccountId),
               ).id;
             } else {
               payee = entityIdMap.get(t.payeeId);
+              imported_payee = data.payees.find(
+                p => p.entityId === t.payeeId,
+              )?.name;
             }
 
-            return { transfer_id: transferId, payee };
+            return {
+              transfer_id: transferId,
+              payee,
+              imported_payee: imported_payee,
+            };
           }
 
           let newTransaction = {
@@ -231,7 +234,7 @@ async function importTransactions(data, entityIdMap) {
             date: transaction.date,
             notes: transaction.memo || null,
             cleared: transaction.cleared === 'Cleared',
-            ...transferProperties(transaction)
+            ...transferProperties(transaction),
           };
 
           newTransaction.subtransactions =
@@ -241,7 +244,7 @@ async function importTransactions(data, entityIdMap) {
                 amount: amountToInteger(t.amount),
                 category: getCategory(t.categoryId),
                 notes: t.memo || null,
-                ...transferProperties(t)
+                ...transferProperties(t),
               };
             });
 
@@ -250,7 +253,7 @@ async function importTransactions(data, entityIdMap) {
         .filter(x => x);
 
       await actual.addTransactions(entityIdMap.get(accountId), toImport);
-    })
+    }),
   );
 }
 
@@ -268,7 +271,7 @@ function fillInBudgets(data, categoryBudgets) {
         if (!budgets.find(b => b.categoryId === category.entityId)) {
           budgets.push({
             budgeted: 0,
-            categoryId: category.entityId
+            categoryId: category.entityId,
           });
         }
       });
@@ -284,7 +287,7 @@ async function importBudgets(data, entityIdMap) {
     for (let budget of budgets) {
       let filled = fillInBudgets(
         data,
-        budget.monthlySubCategoryBudgets.filter(b => !b.isTombstone)
+        budget.monthlySubCategoryBudgets.filter(b => !b.isTombstone),
       );
 
       await Promise.all(
@@ -303,7 +306,7 @@ async function importBudgets(data, entityIdMap) {
           } else if (catBudget.overspendingHandling === 'Confined') {
             await actual.setBudgetCarryover(month, catId, true);
           }
-        })
+        }),
       );
     }
   });
@@ -336,7 +339,7 @@ function findLatestDevice(zipped, entries) {
         return {
           deviceGUID: data.deviceGUID,
           shortName: data.shortDeviceId,
-          recentness: estimateRecentness(data.knowledge)
+          recentness: estimateRecentness(data.knowledge),
         };
       }
 
@@ -405,7 +408,7 @@ function join(...paths) {
   }, paths[0].replace(/\/$/, ''));
 }
 
-async function importBuffer(filepath, buffer) {
+export async function importBuffer(filepath, buffer) {
   let budgetName = getBudgetName(filepath);
 
   if (!budgetName) {
@@ -426,7 +429,7 @@ async function importBuffer(filepath, buffer) {
   let budgetPath = join(root, meta.relativeDataFolderName);
 
   let deviceFiles = entries.filter(e =>
-    e.entryName.startsWith(join(budgetPath, 'devices'))
+    e.entryName.startsWith(join(budgetPath, 'devices')),
   );
   let deviceGUID = findLatestDevice(zipped, deviceFiles);
 
@@ -448,5 +451,3 @@ async function importBuffer(filepath, buffer) {
 
   return actual.runImport(budgetName, () => doImport(data));
 }
-
-module.exports = { importBuffer };

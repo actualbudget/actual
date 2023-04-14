@@ -332,7 +332,7 @@ function onKeyDown(
   // If the dropdown is open, an item is highlighted, and the user
   // pressed enter, always capture that and handle it ourselves
   if (isOpen) {
-    if (e.code === 'Enter') {
+    if (e.key === 'Enter') {
       if (highlightedIndex != null) {
         if (inst.lastChangeType === Downshift.stateChangeTypes.itemMouseEnter) {
           // If the last thing the user did was hover an item, intentionally
@@ -362,7 +362,7 @@ function onKeyDown(
   }
 
   // Handle escape ourselves
-  if (e.code === 'Escape') {
+  if (e.key === 'Escape') {
     e.preventDefault();
 
     if (!embedded) {

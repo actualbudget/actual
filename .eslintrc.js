@@ -70,6 +70,7 @@ module.exports = {
     // Rules disable during TS migration
     '@typescript-eslint/no-var-requires': 'off',
     'prefer-const': 'off',
+    'prefer-spread': 'off',
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
   },

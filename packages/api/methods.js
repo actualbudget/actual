@@ -1,11 +1,12 @@
-const q = require('./app/query');
-const injected = require('./injected');
+import * as injected from './injected';
+
+export { default as q } from './app/query';
 
 function send(name, args) {
   return injected.send(name, args);
 }
 
-async function runImport(name, func) {
+export async function runImport(name, func) {
   await send('api/start-import', { budgetName: name });
   try {
     await func();
@@ -16,15 +17,15 @@ async function runImport(name, func) {
   await send('api/finish-import');
 }
 
-async function loadBudget(budgetId) {
+export async function loadBudget(budgetId) {
   return send('api/load-budget', { id: budgetId });
 }
 
-async function downloadBudget(syncId, { password } = {}) {
+export async function downloadBudget(syncId, { password } = {}) {
   return send('api/download-budget', { syncId, password });
 }
 
-async function batchBudgetUpdates(func) {
+export async function batchBudgetUpdates(func) {
   await send('api/batch-budget-start');
   try {
     await func();
@@ -33,63 +34,63 @@ async function batchBudgetUpdates(func) {
   }
 }
 
-function runQuery(query) {
+export function runQuery(query) {
   return send('api/query', { query: query.serialize() });
 }
 
-function getBudgetMonths() {
+export function getBudgetMonths() {
   return send('api/budget-months');
 }
 
-function getBudgetMonth(month) {
+export function getBudgetMonth(month) {
   return send('api/budget-month', { month });
 }
 
-function setBudgetAmount(month, categoryId, value) {
+export function setBudgetAmount(month, categoryId, value) {
   return send('api/budget-set-amount', { month, categoryId, amount: value });
 }
 
-function setBudgetCarryover(month, categoryId, flag) {
+export function setBudgetCarryover(month, categoryId, flag) {
   return send('api/budget-set-carryover', { month, categoryId, flag });
 }
 
-function addTransactions(accountId, transactions) {
+export function addTransactions(accountId, transactions) {
   return send('api/transactions-add', { accountId, transactions });
 }
 
-function importTransactions(accountId, transactions) {
+export function importTransactions(accountId, transactions) {
   return send('api/transactions-import', { accountId, transactions });
 }
 
-function getTransactions(accountId, startDate, endDate) {
+export function getTransactions(accountId, startDate, endDate) {
   return send('api/transactions-get', { accountId, startDate, endDate });
 }
 
-function filterTransactions(accountId, text) {
+export function filterTransactions(accountId, text) {
   return send('api/transactions-filter', { accountId, text });
 }
 
-function updateTransaction(id, fields) {
+export function updateTransaction(id, fields) {
   return send('api/transaction-update', { id, fields });
 }
 
-function deleteTransaction(id) {
+export function deleteTransaction(id) {
   return send('api/transaction-delete', { id });
 }
 
-function getAccounts() {
+export function getAccounts() {
   return send('api/accounts-get');
 }
 
-function createAccount(account, initialBalance) {
+export function createAccount(account, initialBalance) {
   return send('api/account-create', { account, initialBalance });
 }
 
-function updateAccount(id, fields) {
+export function updateAccount(id, fields) {
   return send('api/account-update', { id, fields });
 }
 
-function closeAccount(id, transferAccountId, transferCategoryId) {
+export function closeAccount(id, transferAccountId, transferCategoryId) {
   return send('api/account-close', {
     id,
     transferAccountId,
@@ -97,120 +98,70 @@ function closeAccount(id, transferAccountId, transferCategoryId) {
   });
 }
 
-function reopenAccount(id) {
+export function reopenAccount(id) {
   return send('api/account-reopen', { id });
 }
 
-function deleteAccount(id) {
+export function deleteAccount(id) {
   return send('api/account-delete', { id });
 }
 
-function getCategoryGroups() {
-  return send('api/categories-get', { grouped: true });
-}
-
-function createCategoryGroup(group) {
+export function createCategoryGroup(group) {
   return send('api/category-group-create', { group });
 }
 
-function updateCategoryGroup(id, fields) {
+export function updateCategoryGroup(id, fields) {
   return send('api/category-group-update', { id, fields });
 }
 
-function deleteCategoryGroup(id, transferCategoryId) {
+export function deleteCategoryGroup(id, transferCategoryId) {
   return send('api/category-group-delete', { id, transferCategoryId });
 }
 
-function getCategories() {
+export function getCategories() {
   return send('api/categories-get', { grouped: false });
 }
 
-function createCategory(category) {
+export function createCategory(category) {
   return send('api/category-create', { category });
 }
 
-function updateCategory(id, fields) {
+export function updateCategory(id, fields) {
   return send('api/category-update', { id, fields });
 }
 
-function deleteCategory(id, transferCategoryId) {
+export function deleteCategory(id, transferCategoryId) {
   return send('api/category-delete', { id, transferCategoryId });
 }
 
-function getPayees() {
+export function getPayees() {
   return send('api/payees-get');
 }
 
-function createPayee(payee) {
+export function createPayee(payee) {
   return send('api/payee-create', { payee });
 }
 
-function updatePayee(id, fields) {
+export function updatePayee(id, fields) {
   return send('api/payee-update', { id, fields });
 }
 
-function deletePayee(id) {
+export function deletePayee(id) {
   return send('api/payee-delete', { id });
 }
 
-function getPayeeRules(payeeId) {
+export function getPayeeRules(payeeId) {
   return send('api/payee-rules-get', { payeeId });
 }
 
-function createPayeeRule(payeeId, rule) {
+export function createPayeeRule(payeeId, rule) {
   return send('api/payee-rule-create', { payee_id: payeeId, rule });
 }
 
-function updatePayeeRule(id, fields) {
+export function updatePayeeRule(id, fields) {
   return send('api/payee-rule-update', { id, fields });
 }
 
-function deletePayeeRule(id) {
+export function deletePayeeRule(id) {
   return send('api/payee-rule-delete', { id });
 }
-
-module.exports = {
-  runImport,
-
-  runQuery,
-  q,
-
-  loadBudget,
-  downloadBudget,
-  batchBudgetUpdates,
-  getBudgetMonths,
-  getBudgetMonth,
-  setBudgetAmount,
-  setBudgetCarryover,
-
-  addTransactions,
-  importTransactions,
-  filterTransactions,
-  getTransactions,
-  updateTransaction,
-  deleteTransaction,
-
-  getAccounts,
-  createAccount,
-  updateAccount,
-  closeAccount,
-  reopenAccount,
-  deleteAccount,
-
-  getCategories,
-  createCategoryGroup,
-  updateCategoryGroup,
-  deleteCategoryGroup,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-
-  getPayees,
-  createPayee,
-  updatePayee,
-  deletePayee,
-  getPayeeRules,
-  createPayeeRule,
-  deletePayeeRule,
-  updatePayeeRule,
-};

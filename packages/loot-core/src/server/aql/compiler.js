@@ -564,7 +564,7 @@ const compileFunction = saveStack('function', (state, func) => {
     case '$lower': {
       validateArgLength(args, 1);
       let [arg1] = valArray(state, args, ['string']);
-      return typed(`LOWER(${arg1})`, 'string');
+      return typed(`UNICODE_LOWER(${arg1})`, 'string');
     }
 
     // integer/float functions

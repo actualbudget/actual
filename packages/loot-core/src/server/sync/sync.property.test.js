@@ -1,19 +1,19 @@
+import jsc from 'jsverify';
+
 import { merkle, getClock, Timestamp } from '../crdt';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
+import * as mockSyncServer from '../tests/mockSyncServer';
 
 import * as encoder from './encoder';
 
 import * as sync from './index';
 
-const jsc = require('jsverify');
 const uuidGenerator = jsc.integer({ min: 97, max: 122 }).smap(
   x => String.fromCharCode(x),
   x => x.charCodeAt(x),
 );
-
-const mockSyncServer = require('../tests/mockSyncServer');
 
 beforeEach(() => {
   sync.setSyncingMode('enabled');

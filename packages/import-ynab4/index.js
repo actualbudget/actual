@@ -1,7 +1,9 @@
-#!/usr/bin/env node
-const fs = require('fs');
-const { init, shutdown } = require('@actual-app/api');
-const { findBudgets, importBuffer } = require('./importer');
+#!/usr/bin/env ts-node
+import * as fs from 'fs';
+
+import { init, shutdown } from '@actual-app/api';
+
+import { importBuffer } from './importer';
 
 async function run() {
   let filepath = process.argv[2];

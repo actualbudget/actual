@@ -1,8 +1,7 @@
 import { makeClock, Timestamp, merkle } from '../crdt';
+import * as SyncPb from '../sync/proto/sync_pb';
 
-const SyncPb = require('../sync/proto/sync_pb');
-
-const defaultMockData = require('./mockData').basic;
+import { basic as defaultMockData } from './mockData';
 
 const handlers = {};
 let currentMockData = defaultMockData;
@@ -95,22 +94,22 @@ handlers['/plaid/transactions'] = ({
   };
 };
 
-module.exports.filterMockData = func => {
+export const filterMockData = func => {
   let copied = JSON.parse(JSON.stringify(defaultMockData));
   currentMockData = func(copied);
 };
 
-module.exports.reset = () => {
+export const reset = () => {
   currentMockData = defaultMockData;
   currentClock = makeClock(new Timestamp(0, 0, '0000000000000000'));
   currentMessages = [];
 };
 
-module.exports.getClock = () => {
+export const getClock = () => {
   return currentClock;
 };
 
-module.exports.getMessages = () => {
+export const getMessages = () => {
   return currentMessages.map(msg => {
     let { timestamp, content } = msg;
     let fields = SyncPb.Message.deserializeBinary(content);
@@ -125,15 +124,12 @@ module.exports.getMessages = () => {
   });
 };
 
-module.exports.handlers = handlers;
-
-function handleRequest(url, data) {
+export const handleRequest = (url, data) => {
   url = url.replace(/http(s)?:\/\/[^/]*/, '');
   if (!handlers[url]) {
     throw new Error('No url handler for ' + url);
   }
   return Promise.resolve(handlers[url](data));
-}
+};
 
-module.exports.handleRequest = handleRequest;
-module.exports.handleRequestBinary = handleRequest;
+export { handlers, handleRequest as handleRequestBinary };

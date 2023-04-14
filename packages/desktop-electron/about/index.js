@@ -76,8 +76,8 @@ ipcRenderer.on('update-error', (event, msg) => {
   let text;
   if (msg.domain === 'SQRLUpdaterErrorDomain' && msg.code === 8) {
     text = `
-      Error updating the app. It looks like it's running outside of the applications
-      folder and can't be written to. Please install the app before updating.
+      Error updating the app. It looks like it’s running outside of the applications
+      folder and can’t be written to. Please install the app before updating.
     `;
   } else {
     text = 'Error updating the app. Please try again later.';

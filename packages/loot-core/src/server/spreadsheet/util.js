@@ -1,4 +1,4 @@
-function unresolveName(name) {
+export function unresolveName(name) {
   let idx = name.indexOf('!');
   if (idx !== -1) {
     return {
@@ -9,11 +9,11 @@ function unresolveName(name) {
   return { sheet: null, name };
 }
 
-function resolveName(sheet, name) {
+export function resolveName(sheet, name) {
   return sheet + '!' + name;
 }
 
-function resolveNamesAsObjects(sheets) {
+export function resolveNamesAsObjects(sheets) {
   const cells = {};
   Object.keys(sheets).forEach(sheetName => {
     const sheet = sheets[sheetName];
@@ -26,7 +26,7 @@ function resolveNamesAsObjects(sheets) {
   return cells;
 }
 
-function resolveNamesAsArrays(sheets) {
+export function resolveNamesAsArrays(sheets) {
   const cells = [];
   Object.keys(sheets).forEach(sheetName => {
     const sheet = sheets[sheetName];
@@ -37,10 +37,3 @@ function resolveNamesAsArrays(sheets) {
   });
   return cells;
 }
-
-module.exports = {
-  unresolveName,
-  resolveName,
-  resolveNamesAsObjects,
-  resolveNamesAsArrays,
-};
