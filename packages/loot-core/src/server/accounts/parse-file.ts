@@ -230,9 +230,10 @@ async function parseOfxJavascript(filepath) {
 }
 
 async function parseOfxNodeLibofx(filepath) {
-  let { getOFXTransactions, initModule } = await import(
-    /* webpackChunkName: 'xfo' */ 'node-libofx'
-  );
+  // installs the global 'libofx' via this import.
+  importScripts('/kcab/node-libofx.js');
+
+  let { getOFXTransactions, initModule } = libofx;
   await initModule();
 
   let errors = [];

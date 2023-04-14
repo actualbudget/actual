@@ -3,7 +3,7 @@
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
 import * as actual from '@actual-app/api/methods';
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 
 function amountFromYnab(amount) {
   // ynabs multiplies amount by 1000 and actual by 100

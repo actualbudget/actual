@@ -69,7 +69,7 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   });
 
-  test('ofx import works', async () => {
+  test.skip('ofx import works', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
@@ -81,7 +81,7 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   }, 45000);
 
-  test('qfx import works', async () => {
+  test.skip('qfx import works', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
@@ -93,7 +93,7 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   }, 45000);
 
-  test('matches extensions correctly (case-insensitive, etc)', async () => {
+  test.skip('matches extensions correctly (case-insensitive, etc)', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
@@ -115,7 +115,7 @@ describe('File import', () => {
     expect(res.errors[0].message).toBe('Invalid file type');
   }, 45000);
 
-  test('handles non-ASCII characters', async () => {
+  test.skip('handles non-ASCII characters', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 

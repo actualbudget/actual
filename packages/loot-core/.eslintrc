@@ -1,0 +1,8 @@
+{
+  "globals": {
+    "libofx": true
+  },
+  "env": {
+    "worker": true
+  }
+}

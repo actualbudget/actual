@@ -40,6 +40,7 @@ export function useBootstrapped() {
           'subscribe-needs-bootstrap',
           { url: serverURL },
         );
+
         if (error || !hasServer) {
           console.log(error);
           history.push('/config-server');

@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 
 ROOT=`dirname $0`
 cd "$ROOT/.."

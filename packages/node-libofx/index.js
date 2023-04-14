@@ -1,5 +1,5 @@
 import createFFI from './ffi';
-import libofxWrapper from './libofx';
+import libofxWrapper from './libofx.web';
 
 let _libofxPromise;
 let _libofx;

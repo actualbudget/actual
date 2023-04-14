@@ -6,6 +6,12 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint --ignore-pattern=xfo.js .",
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.17.17",
+    "esbuild-plugin-polyfill-node": "0.2.0",
+    "eslint": "8.39.0"
   }
 }

@@ -7,7 +7,7 @@ import { amountToInteger } from '@actual-app/api/utils';
 import AdmZip from 'adm-zip';
 import * as d from 'date-fns';
 import normalizePathSep from 'slash';
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 
 // Utils
 

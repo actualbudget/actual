@@ -12,6 +12,9 @@ module.exports = {
     'tsx',
     'json',
   ],
+  moduleNameMapper: {
+    'node-libofx.js': './node-libofx.js',
+  },
   testEnvironment: 'jsdom',
   testPathIgnorePatterns: ['/node_modules/', '/lib/'].filter(Boolean),
   testMatch: ['**/*.web.test.(js|ts|tsx)'],
