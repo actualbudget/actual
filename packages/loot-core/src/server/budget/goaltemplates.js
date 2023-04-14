@@ -312,11 +312,12 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         } else {
           let income_category = (await db.getCategories()).find(
             c =>
-              c.is_income === 1 &&
+              c.is_income &&
               c.name.toLowerCase() === template.category.toLowerCase(),
           );
           if (!income_category) {
-            throw new Error(`Could not find category “${template.category}”`);
+            errors.push(`Could not find category “${template.category}”`);
+            return { errors };
           }
           monthlyIncome = await getSheetValue(
             sheetName,
