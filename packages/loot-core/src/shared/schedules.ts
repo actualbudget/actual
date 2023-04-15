@@ -65,6 +65,11 @@ export function getRecurringDescription(config) {
   let interval = config.interval || 1;
 
   switch (config.frequency) {
+    case 'daily': {
+      let desc = 'Every ';
+      desc += interval !== 1 ? `${interval} days` : 'day';
+      return desc;
+    }
     case 'weekly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} weeks` : 'week';
@@ -172,6 +177,9 @@ export function recurConfigToRSchedule(config) {
   let abbrevDay = name => name.slice(0, 2).toUpperCase();
 
   switch (config.frequency) {
+    case 'daily':
+      // Nothing to do
+      return [base];
     case 'weekly':
       // Nothing to do
       return [base];
