@@ -178,10 +178,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       case 'schedule':
         if (!all_schedule_names.includes(template.name)) {
-          console.log(
-            `${category.name}: Schedule ${template.name} does not exist`,
-          );
-          return null;
+          errors.push(`Schedule ${template.name} does not exist`);
+          return { errors };
         }
         break;
       default:
