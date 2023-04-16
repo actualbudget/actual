@@ -349,6 +349,9 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let conditions = rule.serialize().conditions;
         let { date: dateCond, amount: amountCond } =
           extractScheduleConds(conditions);
+        let isRepeating =
+          Object(dateCond.value) === dateCond.value &&
+          'frequency' in dateCond.value;
         let next_date_string = getNextDate(dateCond, current_month);
         let num_months = differenceInCalendarMonths(
           new Date(next_date_string),
@@ -357,19 +360,19 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         let target = -getScheduledAmount(amountCond.value);
         let diff = target - balance + budgeted;
         if (num_months < 0) {
-          console.log(
-            `Not applying schedule ${template.name} because it is non-repeating and date ${next_date_string} is not in current month`,
+          errors.push(
+            `Non-repeating schedule ${template.name} was due on ${next_date_string}, which is in the past.`,
           );
-          return { amount: 0 };
+          return { errors };
         } else if (num_months > 0) {
           if (diff >= 0 && num_months > -1) {
             to_budget += Math.round(diff / num_months);
           }
         } else {
           let monthly_target = 0;
-          if ('frequency' in dateCond.value) {
-            let next_month = addMonths(current_month, 1);
-            let next_date = new Date(next_date_string);
+          let next_month = addMonths(current_month, 1);
+          let next_date = new Date(next_date_string);
+          if (isRepeating) {
             while (next_date.getTime() < next_month.getTime()) {
               if (next_date.getTime() >= current_month.getTime()) {
                 monthly_target += target;
@@ -381,7 +384,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           } else {
             monthly_target = target;
           }
-          to_budget += monthly_target - balance + budgeted;
+          to_budget += monthly_target + budgeted;
         }
         break;
       }
