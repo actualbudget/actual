@@ -1706,7 +1706,7 @@ class AccountInternal extends React.PureComponent {
         {
           op: 'set',
           field: 'category',
-          value: null,
+          value: transactions[0].category,
           type: 'id',
         },
       ],
