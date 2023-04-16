@@ -379,6 +379,7 @@ function StatusCell({
 function PayeeCell({
   id,
   payeeId,
+  accountId,
   focused,
   inherited,
   payees,
@@ -395,6 +396,9 @@ function PayeeCell({
 }) {
   const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
   let isCreatingPayee = useRef(false);
+
+  // Filter out the account we're currently in as it is not a valid transfer
+  accounts = accounts.filter(account => account.id !== accountId);
 
   return (
     <CustomCell
@@ -786,6 +790,7 @@ export const Transaction = React.memo(function Transaction(props) {
           <PayeeCell
             id={id}
             payeeId={payeeId}
+            accountId={accountId}
             focused={focusedField === 'payee'}
             inherited={inheritedFields && inheritedFields.has('payee')}
             payees={payees}
