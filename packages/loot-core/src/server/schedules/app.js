@@ -198,12 +198,14 @@ export async function createSchedule({ schedule, conditions = [] } = {}) {
 
   let nextDate = getNextDate(dateCond);
   let nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
-  if (schedule.name) {
-    if (await checkIfScheduleExists(schedule.name, scheduleId)) {
-      throw new Error('Cannot create schedules with the same name');
+  if (schedule) {
+    if (schedule.name) {
+      if (await checkIfScheduleExists(schedule.name, scheduleId)) {
+        throw new Error('Cannot create schedules with the same name');
+      }
+    } else {
+      schedule.name = null;
     }
-  } else {
-    schedule.name = null;
   }
 
   // Create the rule here based on the info
