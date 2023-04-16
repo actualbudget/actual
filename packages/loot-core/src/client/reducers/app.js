@@ -2,8 +2,6 @@ import * as constants from '../constants';
 
 export const initialState = {
   loadingText: null,
-  updateInfo: null,
-  showUpdateNotification: true,
   managerHasInitialized: false,
   lastUndoState: { current: null },
   lastSplitState: { current: null },

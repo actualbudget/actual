@@ -8,13 +8,6 @@ export function setAppState(state) {
   };
 }
 
-export function updateApp() {
-  return async dispatch => {
-    global.Actual.applyAppUpdate();
-    dispatch(setAppState({ updateInfo: null }));
-  };
-}
-
 export function setLastUndoState(undoState) {
   return {
     type: constants.SET_LAST_UNDO_STATE,

@@ -3,8 +3,8 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 export function handleGlobalEvents(actions, store) {
-  global.Actual.onEventFromMain('update-downloaded', (event, info) => {
-    actions.setAppState({ updateInfo: info });
+  global.Actual.onEventFromMain('update-downloaded', (_event, _info) => {
+    // TODO: do we need to update the existing notification to handle reporting update download?
   });
 
   global.Actual.onEventFromMain('update-error', msg => {

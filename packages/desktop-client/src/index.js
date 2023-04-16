@@ -45,8 +45,6 @@ function rootReducer(state, action) {
       prefs: { local: null, global: state.prefs.global },
       app: {
         ...initialAppState,
-        updateInfo: state.app.updateInfo,
-        showUpdateNotification: state.app.showUpdateNotification,
         managerHasInitialized: state.app.managerHasInitialized,
         loadingText: state.app.loadingText,
       },
