@@ -60,7 +60,6 @@ export default function PayeeAutocomplete({
   onManagePayees,
   ...props
 }) {
-
   const [focusTransferPayees, setFocusTransferPayees] = useState(
     defaultFocusTransferPayees,
   );
