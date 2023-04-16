@@ -1,7 +1,7 @@
 // https://pegjs.org
 
 expr
-  = percent: percent _ of _ category: $([^\n] *)
+  = percent: percent _ of _ category: $([^\r\n\t]+)
     { return { type: 'percentage', percent: +percent, category } }
   / amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
     { return { type: 'week', amount, weeks, starting, limit } }
