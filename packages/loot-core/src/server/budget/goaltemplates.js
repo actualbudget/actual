@@ -179,7 +179,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
       case 'schedule':
         if (!all_schedule_names.includes(template.name)) {
           errors.push(`Schedule ${template.name} does not exist`);
-          return { errors };
+          return null;
         }
         break;
       default:
@@ -413,6 +413,6 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
       integerToAmount(last_month_balance + to_budget);
     str += ' ' + template_lines.map(x => x.line).join('\n');
     console.log(str);
-    return { amount: to_budget };
+    return { amount: to_budget, errors };
   }
 }
