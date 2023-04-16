@@ -381,7 +381,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           } else {
             monthly_target = target;
           }
-          to_budget = monthly_target - balance + budgeted;
+          to_budget += monthly_target - balance + budgeted;
         }
         break;
       }
