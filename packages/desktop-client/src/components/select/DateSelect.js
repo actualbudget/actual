@@ -194,7 +194,7 @@ export default function DateSelect({
   let userSelectedValue = useRef(selectedValue);
 
   const firstDayOfWeekIdx = useSelector(state =>
-    state.prefs.local.hasOwnProperty('firstDayOfWeekIdx')
+    state.prefs.local?.firstDayOfWeekIdx
       ? state.prefs.local.firstDayOfWeekIdx
       : '0',
   );
