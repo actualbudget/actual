@@ -195,6 +195,14 @@ export function SchedulesTable({
           ':hover': { backgroundColor: colors.hover },
         }}
       >
+        <Field width="flex" name="name">
+          <Text
+            style={item.name == null ? { color: colors.n8 } : null}
+            title={item.name ? item.name : ''}
+          >
+            {item.name ? item.name : 'None'}
+          </Text>
+        </Field>
         <Field width="flex" name="payee">
           <DisplayId type="payees" id={item._payee} />
         </Field>
@@ -263,6 +271,7 @@ export function SchedulesTable({
   return (
     <View style={[{ flex: 1 }, tableStyle]}>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+        <Field width="flex">Name</Field>
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
         <Field width={110}>Next date</Field>

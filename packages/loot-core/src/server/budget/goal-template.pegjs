@@ -1,7 +1,7 @@
 // https://pegjs.org
 
 expr
-  = percent: percent _ of _ category: $([^\n] *)
+  = percent: percent _ of _ category: $([^\r\n\t]+)
     { return { type: 'percentage', percent: +percent, category } }
   / amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
     { return { type: 'week', amount, weeks, starting, limit } }
@@ -17,6 +17,8 @@ expr
     { return { type: 'simple', monthly, limit } }
   / upTo _ limit: amount
     { return { type: 'simple', limit } }
+  / schedule _ name: name
+  	{ return { type: 'schedule', name} }
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
@@ -39,6 +41,7 @@ of = 'of'i
 repeatEvery = 'repeat'i _ 'every'i
 starting = 'starting'i
 upTo = 'up'i _ 'to'i
+schedule = 'schedule'i
 
 _ 'space' = ' '+
 d 'digit' = [0-9]
@@ -50,3 +53,5 @@ month 'month' = $(year '-' d d)
 day 'day' = $(d d)
 date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
+
+name 'Name' = $([^\r\n\t]+)
