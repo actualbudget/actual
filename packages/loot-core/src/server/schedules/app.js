@@ -180,9 +180,14 @@ export async function checkIfScheduleExists(name, scheduleId) {
   let idForName = await db.first('SELECT id from schedules WHERE name = ?', [
     name,
   ]);
-  return (
-    idForName !== null && (scheduleId ? idForName['id'] !== scheduleId : true)
-  );
+
+  if (idForName == null) {
+    return false;
+  }
+  if (scheduleId) {
+    return idForName['id'] !== scheduleId;
+  }
+  return true;
 }
 
 export async function createSchedule({ schedule, conditions = [] } = {}) {
