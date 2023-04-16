@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import lively from '@jlongster/lively';
 import Downshift from 'downshift';
 import { css } from 'glamor';
 
@@ -58,54 +57,6 @@ function getInitialState({
   };
 }
 
-function componentWillReceiveProps(bag, nextProps) {
-  let {
-    strict,
-    suggestions,
-    filterSuggestions = defaultFilterSuggestions,
-    initialFilterSuggestions,
-    value,
-    itemToString = defaultItemToString,
-  } = nextProps;
-  let { value: currValue } = bag.state;
-  let updates = null;
-
-  function updateValue() {
-    let selectedItem = findItem(strict, suggestions, value);
-    if (selectedItem) {
-      updates = updates || {};
-      updates.value = itemToString(selectedItem);
-      updates.selectedItem = selectedItem;
-    }
-  }
-
-  if (bag.props.value !== value) {
-    updateValue();
-  }
-
-  // TODO: Something is causing a rerender immediately after first
-  // render, and this condition is true, causing items to be filtered
-  // twice. This shouldn't effect functionality (I think), but look
-  // into this later
-  if (bag.props.suggestions !== suggestions) {
-    let filteredSuggestions = null;
-
-    if (bag.state.highlightedIndex != null) {
-      filteredSuggestions = filterSuggestions(suggestions, currValue);
-    } else {
-      filteredSuggestions = initialFilterSuggestions
-        ? initialFilterSuggestions(suggestions, currValue)
-        : null;
-    }
-
-    updates = updates || {};
-    updateValue();
-    updates.filteredSuggestions = filteredSuggestions;
-  }
-
-  return updates;
-}
-
 export function defaultFilterSuggestion(suggestion, value) {
   return getItemName(suggestion).toLowerCase().includes(value.toLowerCase());
 }
@@ -146,13 +97,11 @@ function onInputValueChange(
     props: {
       suggestions,
       onUpdate,
-      multi,
       highlightFirst,
       strict,
       filterSuggestions = defaultFilterSuggestions,
       getHighlightedIndex,
     },
-    state: { isOpen },
   },
   value,
   changes,
@@ -215,7 +164,7 @@ function onInputValueChange(
   }
 }
 
-function onStateChange({ props, state, inst }, changes, stateAndHelpers) {
+function onStateChange({ props, state, inst }, changes) {
   if (
     props.tableBehavior &&
     changes.type === Downshift.stateChangeTypes.mouseUp
@@ -314,15 +263,7 @@ function onKeyDown(
       shouldSaveFromKey = defaultShouldSaveFromKey,
       strict,
     },
-    state: {
-      selectedItem,
-      filteredSuggestions,
-      highlightedIndex,
-      originalItem,
-      isNulled,
-      isOpen,
-      value,
-    },
+    state: { highlightedIndex, originalItem, isOpen, value },
     inst,
   },
   e,
@@ -414,7 +355,7 @@ function defaultShouldSaveFromKey(e) {
   return e.code === 'Enter';
 }
 
-function onFocus({ inst, props: { inputProps = {}, openOnFocus = true } }, e) {
+function onFocus({ props: { inputProps = {}, openOnFocus = true } }, e) {
   inputProps.onFocus && inputProps.onFocus(e);
 
   if (openOnFocus) {
@@ -422,7 +363,7 @@ function onFocus({ inst, props: { inputProps = {}, openOnFocus = true } }, e) {
   }
 }
 
-function onBlur({ inst, props, state: { selectedItem } }, e) {
+function onBlur({ props, state: { selectedItem } }, e) {
   let { inputProps = {}, onSelect } = props;
 
   e.preventDownshiftDefault = true;
@@ -454,26 +395,33 @@ function defaultItemToString(item) {
   return item ? getItemName(item) : '';
 }
 
-function _SingleAutocomplete({
-  props: {
+function SingleAutocomplete(props) {
+  const [
+    { value, selectedItem, filteredSuggestions, highlightedIndex, isOpen },
+    setState,
+  ] = React.useState(() => getInitialState({ props }));
+
+  const updater =
+    operation =>
+    (...arg) => {
+      setState(state => ({
+        ...state,
+        ...(operation({ props, state, inst: {} }, ...arg) || {}),
+      }));
+    };
+
+  const {
     focused,
     embedded,
     containerProps,
     inputProps,
-    children,
     suggestions,
     tooltipStyle,
-    onItemClick,
-    strict,
     tooltipProps,
     renderInput = defaultRenderInput,
     renderItems = defaultRenderItems,
     itemToString = defaultItemToString,
-  },
-  state: { value, selectedItem, filteredSuggestions, highlightedIndex, isOpen },
-  updater,
-  inst,
-}) {
+  } = props;
   const filtered = filteredSuggestions || suggestions;
 
   return (
@@ -490,10 +438,8 @@ function _SingleAutocomplete({
       {({
         getInputProps,
         getItemProps,
-        getRootProps,
         isOpen,
         inputValue,
-        selectedItem,
         highlightedIndex,
       }) => (
         // Super annoying but it works best to return a div so we
@@ -550,11 +496,6 @@ function _SingleAutocomplete({
     </Downshift>
   );
 }
-
-const SingleAutocomplete = lively(_SingleAutocomplete, {
-  getInitialState,
-  componentWillReceiveProps,
-});
 
 function MultiItem({ name, onRemove }) {
   return (
