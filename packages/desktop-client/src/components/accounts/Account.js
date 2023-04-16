@@ -200,6 +200,8 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
     if (amount != null) {
       onReconcile(amount == null ? balance : amount);
       onClose();
+    } else {
+      input.select();
     }
   }
 
