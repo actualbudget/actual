@@ -1,4 +1,4 @@
-import getAccountDb from '../account-db.js';
+import { getSession } from '../account-db.js';
 
 /**
  * @param {import('express').Request} req
@@ -11,10 +11,9 @@ export default function validateUser(req, res) {
     token = req.headers['x-actual-token'];
   }
 
-  let db = getAccountDb();
-  let rows = db.all('SELECT * FROM sessions WHERE token = ?', [token]);
+  let session = getSession(token);
 
-  if (rows.length === 0) {
+  if (!session) {
     res.status(401);
     res.send({
       status: 'error',
@@ -24,5 +23,5 @@ export default function validateUser(req, res) {
     return null;
   }
 
-  return rows[0];
+  return session;
 }
