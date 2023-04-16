@@ -20,10 +20,11 @@ Many of the build scripts are bash scripts and not natively invokable in Windows
 3. If you get an error from electron, run `yarn rebuild-electron` and rerun `yarn start`;
 
 # Errors
+
 ## `rsync: command not found`
 
 If you run into this error, you will need to install the rsync binary to Git Bash. Follow the [directions here](https://prasaz.medium.com/add-rsync-to-windows-git-bash-f42736bae1b3).
 
 ## `ln: failed to create symbolic link '../../desktop-client/public/kcab': Operation not permitted`
- 
+
 Bash needs to be run as administrator.

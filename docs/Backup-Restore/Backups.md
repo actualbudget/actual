@@ -9,6 +9,7 @@ If your budget is very old, you may have trouble restoring large backups. If you
 :::
 
 You can export your data from Actual at any time. To do so,
+
 1. Login to your budget, click 'More' > 'Settings'
 
    ![](/img/backup-restore/sidebar-settings@2x.png)

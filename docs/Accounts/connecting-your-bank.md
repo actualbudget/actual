@@ -9,7 +9,7 @@ This is an **experimental feature**. That means we’re still working on finishi
 :::
 
 :::note
-Client Version 23.3.0 and 
+Client Version 23.3.0 and
 Server Version 23.3.1 or higher are required for this feature.
 :::
 
@@ -26,45 +26,50 @@ We are excited to offer this optional bank integration in Actual. Here are a cou
 - You will need to add a config file to your installation
 
 ### Supported Providers
+
 Nordigen
 
 ### Nordigen Setup
 
 **Create SECRET and KEY for Actual**
+
 1. Create an account with Nordigen - https://nordigen.com/
 2. Log into your account dashboard page and select **User secrets** from the left side menu - https://ob.nordigen.com/user-secrets/
 
 ![](/static/img/connecting-your-bank/connecting-your-bank-nordigen-01.png)
 
 3. Click on the '+ create new' button at the bottom left or click the 'Create new Secrets' button the top right
-    - Make sure you download your secrets file since the **key** will not be available to you again in the account dashboard
-    - These secrets will be used in Actual to make the bank sync connection
+   - Make sure you download your secrets file since the **key** will not be available to you again in the account dashboard
+   - These secrets will be used in Actual to make the bank sync connection
 
 ![](/static/img/connecting-your-bank/connecting-your-bank-nordigen-02.png)
 
-4. Enter a name for your secrets and click Create. 
-*This is only for you to easily identify them in the Nordigen User secrets overview*
+4. Enter a name for your secrets and click Create.
+   _This is only for you to easily identify them in the Nordigen User secrets overview_
 
 ![](/static/img/connecting-your-bank/connecting-your-bank-nordigen-03.png)
 
-5. Download this file and keep it on your computer. 
+5. Download this file and keep it on your computer.
 
 ![](/static/img/connecting-your-bank/connecting-your-bank-nordigen-04.png)
 
-### Setup Config files in Actual  
-*You need to setup env variables or a config.js file before Actual can use the Nordigen integration.*
+### Setup Config files in Actual
+
+_You need to setup env variables or a config.js file before Actual can use the Nordigen integration._
 
 Follow the steps provided in the [Configuring the server section](https://actualbudget.github.io/docs/Installing/Configuration)
 
-### Link Accounts with Nordigen 
-1. Add the link to your accounts in actual (Existing or New)  
-    - ***For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link Account***
+### Link Accounts with Nordigen
 
-    ![](/static/img/connecting-your-bank/connecting-your-bank-01.png)
+1. Add the link to your accounts in actual (Existing or New)
 
-    - ***To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom***
+   - **_For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link Account_**
 
-    ![](/static/img/connecting-your-bank/connecting-your-bank-02.png)
+   ![](/static/img/connecting-your-bank/connecting-your-bank-01.png)
+
+   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom_**
+
+   ![](/static/img/connecting-your-bank/connecting-your-bank-02.png)
 
 2. Select the Link your bank account button
 
@@ -98,10 +103,10 @@ Follow the steps provided in the [Configuring the server section](https://actual
 
 ![](/static/img/connecting-your-bank/connecting-your-bank-10.png)
 
-
 ### Frequently Asked Questions
+
 **Automatic Bank Sync**
 
-At this moment, it is not yet possible for Actual to automatically sync with your bank. You need to do this manually by going to "All Acounts" and pressing "Sync". 
+At this moment, it is not yet possible for Actual to automatically sync with your bank. You need to do this manually by going to "All Acounts" and pressing "Sync".
 
 ![](/static/img/connecting-your-bank/syncing-with-your-bank.png)

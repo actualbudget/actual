@@ -54,8 +54,8 @@ Ultimately this is a personal decision. If you are capable, there is less short 
 
 Once enabled, a little arrow will be shown next to the each row's 'Balance' sum in the Budget view. It signals that over spending will be carried over from month to month. Check out the [overspending](/budgeting/howitworks#overspending) section in "How Budgeting Works" for an explanation of this feature.
 
-![](/img/returns-reimbursements/reimbursement-2.png) 
+![](/img/returns-reimbursements/reimbursement-2.png)
 
 ### Adding the reimbursement transaction
 
-When you are reimbursed, you can use the same technique from the Returns section.  Add a new transaction to the account the reimbursement is being deposited and choose the category you used to track your spending.
+When you are reimbursed, you can use the same technique from the Returns section. Add a new transaction to the account the reimbursement is being deposited and choose the category you used to track your spending.

@@ -100,11 +100,11 @@ Each "chapter" can then be split into sub sections using three gate headings.
 ### When Using Images
 
 > Screenshots taken on a retina screen should be titled as such: image-name@2x.png
-> This allows Docusaurus to rescale the images where appropriate. 
+> This allows Docusaurus to rescale the images where appropriate.
 
 When using images, ensure that the image is large and clear, if the image contains multiple items and buttons, highlight the area you are talking about (as shown below) or create arrows on the image to point to the part you are discussing. Where possible images should be saved as `PNG` format.
 
-The clearest way to highlight areas on a screenshot is the 'transparency' box.   
+The clearest way to highlight areas on a screenshot is the 'transparency' box.
 
 ![](./static/img/repo/highlighting.png)
 
@@ -112,14 +112,14 @@ If a transparency box isn't available in your image editor, use an arrow or a co
 
 #### Generic Images and Directory Structures
 
-In order to minimize the workload for adding images and make updating images easier, there's a directory containing regularly used images.   
+In order to minimize the workload for adding images and make updating images easier, there's a directory containing regularly used images.
 
-For example, many feature instructions may first require the user to navigate to a standard menu, eg 
+For example, many feature instructions may first require the user to navigate to a standard menu, eg
 
-> "Click on 'Settings' in the sidebar"   
+> "Click on 'Settings' in the sidebar"  
 > [inserted image of the settings button in the sidebar]
 
-In this case the relavent screenshot is found at `/static/img/elements/sidebar/sidebar-settings@2x.png`, along with all other possible menu selections in the sidebar. 
+In this case the relavent screenshot is found at `/static/img/elements/sidebar/sidebar-settings@2x.png`, along with all other possible menu selections in the sidebar.
 
 If there's an image missing from any of the respective folders in `elements/`, feel free to add one yourself following the same naming scheme.
 
