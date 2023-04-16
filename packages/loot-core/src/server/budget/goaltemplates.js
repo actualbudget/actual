@@ -356,21 +356,30 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         );
         let target = -getScheduledAmount(amountCond.value);
         let diff = target - balance + budgeted;
-        if (num_months > 0) {
+        if (num_months < 0) {
+          console.log(
+            `Not applying schedule ${template.name} because it is non-repeating and date ${next_date_string} is not in current month`,
+          );
+          return { amount: 0 };
+        } else if (num_months > 0) {
           if (diff >= 0 && num_months > -1) {
             to_budget += Math.round(diff / num_months);
           }
         } else {
-          let next_month = addMonths(current_month, 1);
-          let next_date = new Date(next_date_string);
           let monthly_target = 0;
-          while (next_date.getTime() < next_month.getTime()) {
-            if (next_date.getTime() >= current_month.getTime()) {
-              monthly_target += target;
+          if ('frequency' in dateCond.value) {
+            let next_month = addMonths(current_month, 1);
+            let next_date = new Date(next_date_string);
+            while (next_date.getTime() < next_month.getTime()) {
+              if (next_date.getTime() >= current_month.getTime()) {
+                monthly_target += target;
+              }
+              next_date = addWeeks(next_date, 1);
+              next_date_string = getNextDate(dateCond, next_date);
+              next_date = new Date(next_date_string);
             }
-            next_date = addWeeks(next_date, 1);
-            next_date_string = getNextDate(dateCond, next_date);
-            next_date = new Date(next_date_string);
+          } else {
+            monthly_target = target;
           }
           to_budget = monthly_target - balance + budgeted;
         }
