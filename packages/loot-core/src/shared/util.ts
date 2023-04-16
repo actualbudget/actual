@@ -354,7 +354,7 @@ export function currencyToAmount(str) {
 
 export function currencyToInteger(str) {
   let amount = currencyToAmount(str);
-  return amount ? amountToInteger(amount) : null;
+  return amount == null ? null : amountToInteger(amount);
 }
 
 export function stringToInteger(str) {
