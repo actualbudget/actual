@@ -3,8 +3,6 @@ import { useDispatch } from 'react-redux';
 import { components as SelectComponents } from 'react-select';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
@@ -51,6 +49,8 @@ function MenuListWithFooter(props) {
 }
 
 export default function PayeeAutocomplete({
+  payees,
+  accounts,
   value,
   multi = false,
   showMakeTransfer = true,
@@ -60,9 +60,6 @@ export default function PayeeAutocomplete({
   onManagePayees,
   ...props
 }) {
-  const payees = useCachedPayees();
-  const accounts = useCachedAccounts();
-
   const [focusTransferPayees, setFocusTransferPayees] = useState(
     defaultFocusTransferPayees,
   );
