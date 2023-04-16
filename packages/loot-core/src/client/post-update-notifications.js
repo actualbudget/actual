@@ -2,14 +2,14 @@ import { send } from '../platform/client/fetch';
 
 import * as Platform from './platform';
 
-export default function checkForUpgradeNotifications(
+export default function checkForPostUpdateNotifications(
   addNotification,
   resetSync,
   // Note: history is only available on desktop
   history,
 ) {
   // TODO: Probably should only show one of these at at time?
-  send('get-upgrade-notifications').then(types => {
+  send('get-post-update-notifications').then(types => {
     types.forEach(type => {
       switch (type) {
         case 'schedules': {
@@ -40,7 +40,7 @@ export default function checkForUpgradeNotifications(
               },
             },
             onClose: () => {
-              send('seen-upgrade-notification', { type: 'schedules' });
+              send('seen-post-update-notification', { type: 'schedules' });
             },
           });
           break;
@@ -63,7 +63,9 @@ export default function checkForUpgradeNotifications(
                   }),
               },
               onClose: () => {
-                send('seen-upgrade-notification', { type: 'repair-splits' });
+                send('seen-post-update-notification', {
+                  type: 'repair-splits',
+                });
               },
             });
           }

@@ -2269,7 +2269,7 @@ async function loadBudget(id, { showUpdate } = {}) {
   return {};
 }
 
-handlers['get-upgrade-notifications'] = async function () {
+handlers['get-post-update-notifications'] = async function () {
   let { id } = prefs.getPrefs();
   if (id === TEST_BUDGET_ID || id === DEMO_BUDGET_ID) {
     return [];
@@ -2288,7 +2288,7 @@ handlers['get-upgrade-notifications'] = async function () {
   return unseen;
 };
 
-handlers['seen-upgrade-notification'] = async function ({ type }) {
+handlers['seen-post-update-notification'] = async function ({ type }) {
   let key = `notifications.${type}`;
   prefs.savePrefs({ [key]: true });
 };
