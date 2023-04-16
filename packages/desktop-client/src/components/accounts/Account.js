@@ -197,8 +197,10 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
   function onSubmit(e) {
     let input = e.target.elements[0];
     let amount = currencyToInteger(input.value);
-    onReconcile(amount == null ? balance : amount);
-    onClose();
+    if (amount != null) {
+      onReconcile(amount == null ? balance : amount);
+      onClose();
+    }
   }
 
   return (
