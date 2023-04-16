@@ -2,6 +2,7 @@ import {
   differenceInCalendarMonths,
   addMonths,
   addWeeks,
+  addDays,
   format,
 } from 'date-fns';
 
@@ -377,7 +378,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
               if (next_date.getTime() >= current_month.getTime()) {
                 monthly_target += target;
               }
-              next_date = addWeeks(next_date, 1);
+              next_date = addDays(next_date, 1);
               next_date_string = getNextDate(dateCond, next_date);
               next_date = new Date(next_date_string);
             }
