@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Downshift from 'downshift';
 import { css } from 'glamor';
 
+import usePrevious from '../../hooks/usePrevious';
 import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
@@ -55,6 +56,54 @@ function getInitialState({
     highlightedIndex: null,
     isOpen: embedded || isOpen,
   };
+}
+
+function componentWillReceiveProps(bag, nextProps) {
+  let {
+    strict,
+    suggestions,
+    filterSuggestions = defaultFilterSuggestions,
+    initialFilterSuggestions,
+    value,
+    itemToString = defaultItemToString,
+  } = nextProps;
+  let { value: currValue } = bag.state;
+  let updates = null;
+
+  function updateValue() {
+    let selectedItem = findItem(strict, suggestions, value);
+    if (selectedItem) {
+      updates = updates || {};
+      updates.value = itemToString(selectedItem);
+      updates.selectedItem = selectedItem;
+    }
+  }
+
+  if (bag.props.value !== value) {
+    updateValue();
+  }
+
+  // TODO: Something is causing a rerender immediately after first
+  // render, and this condition is true, causing items to be filtered
+  // twice. This shouldn't effect functionality (I think), but look
+  // into this later
+  if (bag.props.suggestions !== suggestions) {
+    let filteredSuggestions = null;
+
+    if (bag.state.highlightedIndex != null) {
+      filteredSuggestions = filterSuggestions(suggestions, currValue);
+    } else {
+      filteredSuggestions = initialFilterSuggestions
+        ? initialFilterSuggestions(suggestions, currValue)
+        : null;
+    }
+
+    updates = updates || {};
+    updateValue();
+    updates.filteredSuggestions = filteredSuggestions;
+  }
+
+  return updates;
 }
 
 export function defaultFilterSuggestion(suggestion, value) {
@@ -401,13 +450,34 @@ function SingleAutocomplete(props) {
     setState,
   ] = React.useState(() => getInitialState({ props }));
 
+  const prevProps = usePrevious(props);
+  React.useEffect(() => {
+    if (!prevProps) return;
+
+    setState(state => {
+      const newState = componentWillReceiveProps(
+        { props: prevProps, state },
+        props,
+      );
+
+      if (newState) {
+        return Object.assign({}, state, newState);
+      }
+
+      return state;
+    });
+  }, [props, prevProps]);
+
   const updater =
     operation =>
     (...arg) => {
-      setState(state => ({
-        ...state,
-        ...(operation({ props, state, inst: {} }, ...arg) || {}),
-      }));
+      setState(state =>
+        Object.assign(
+          {},
+          state,
+          operation({ props, state, inst: {} }, ...arg) || {},
+        ),
+      );
     };
 
   const {
