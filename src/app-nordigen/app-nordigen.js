@@ -1,5 +1,7 @@
+import { isAxiosError } from 'axios';
 import express from 'express';
 import path from 'path';
+import { inspect } from 'util';
 
 import { nordigenService } from './services/nordigen-service.js';
 import {
@@ -193,14 +195,24 @@ app.post(
           });
           break;
         case error instanceof GenericNordigenError:
-          console.log({ message: 'Something went wrong', error });
+          console.log('Something went wrong', inspect(error, { depth: null }));
+          sendErrorResponse({
+            error_type: 'SYNC_ERROR',
+            error_code: 'NORDIGEN_ERROR',
+          });
+          break;
+        case isAxiosError(error):
+          console.log(
+            'Something went wrong',
+            inspect(error.response.data, { depth: null }),
+          );
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
           });
           break;
         default:
-          console.log({ message: 'Something went wrong', error });
+          console.log('Something went wrong', inspect(error, { depth: null }));
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',
