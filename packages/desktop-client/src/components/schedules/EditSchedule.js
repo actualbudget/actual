@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
+import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
@@ -85,7 +86,8 @@ export default function ScheduleDetails() {
 
   let { id, initialFields } = useParams();
   let adding = id == null;
-  let payees = useCachedPayees({ idKey: true });
+  const accounts = useCachedAccounts();
+  const payees = useCachedPayees();
   let history = useHistory();
   let globalDispatch = useDispatch();
   let dateFormat = useSelector(state => {
@@ -465,6 +467,8 @@ export default function ScheduleDetails() {
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Payee" htmlFor="payee-field" />
           <PayeeAutocomplete
+            payees={payees}
+            accounts={accounts}
             value={state.fields.payee}
             inputId="payee-field"
             inputProps={{ id: 'payee-field', placeholder: '(none)' }}
