@@ -1,4 +1,3 @@
 {
-  "presets": ["@babel/preset-env", "@babel/preset-typescript"],
-  "ignore": ["**/__mocks__"]
+  "presets": ["@babel/preset-env", "@babel/preset-typescript"]
 }

@@ -1,4 +1,6 @@
-export function sequential(fn) {
+export function sequential<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+): (...args: Parameters<T>) => Promise<ReturnType<T>> {
   let sequenceState = {
     running: null,
     queue: [],
