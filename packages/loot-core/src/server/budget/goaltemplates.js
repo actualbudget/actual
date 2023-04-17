@@ -258,7 +258,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         }
 
         let diff = totalTarget - last_month_balance;
-        if (diff >= 0 && totalMonths > 0 && l == (N-1)) {
+        if (diff >= 0 && totalMonths > 0 && l === N - 1) {
           to_budget += Math.round(
             ((totalTarget - last_month_balance) / totalMonths) *
               (N - skipMonths),
