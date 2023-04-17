@@ -1,6 +1,5 @@
+import * as uuid from '../platform/uuid';
 import * as monthUtils from '../shared/months';
-
-const uuid = require('../platform/uuid');
 
 export function generateAccount(name, isConnected, type, offbudget) {
   return {

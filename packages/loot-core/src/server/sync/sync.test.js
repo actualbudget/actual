@@ -2,12 +2,11 @@ import { getClock, Timestamp } from '../crdt';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
+import * as mockSyncServer from '../tests/mockSyncServer';
 
 import * as encoder from './encoder';
 
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
-
-const mockSyncServer = require('../tests/mockSyncServer');
 
 beforeEach(() => {
   mockSyncServer.reset();

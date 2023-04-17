@@ -1,6 +1,6 @@
 import murmurhash from 'murmurhash';
 
-const uuid = require('../../platform/uuid');
+import * as uuid from '../../platform/uuid';
 
 /**
  * Hybrid Unique Logical Clock (HULC) timestamp generator

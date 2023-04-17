@@ -128,7 +128,17 @@ function Settings({
         marginInline: globalPrefs.floatingSidebar && !isMobile() ? 'auto' : 0,
       }}
     >
-      <Page title="Settings">
+      <Page
+        title="Settings"
+        titleStyle={
+          isMobile()
+            ? {
+                backgroundColor: colors.n11,
+                color: colors.n1,
+              }
+            : undefined
+        }
+      >
         <View style={{ flexShrink: 0, gap: 30 }}>
           {isMobile() && (
             <View
@@ -173,7 +183,7 @@ function Settings({
   );
 }
 
-export default withThemeColor(colors.n10)(
+export default withThemeColor(colors.n11)(
   connect(
     state => ({
       prefs: state.prefs.local,

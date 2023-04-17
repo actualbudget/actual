@@ -1,6 +1,6 @@
 import * as encryption from '../encryption';
 
-let SyncPb = require('./proto/sync_pb');
+import * as SyncPb from './proto/sync_pb';
 
 async function randomString() {
   return (await encryption.randomBytes(12)).toString();

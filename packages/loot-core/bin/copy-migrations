@@ -1,14 +1,9 @@
 #!/bin/sh -e
 
-ROOT=`dirname "$0"`
-cd "$ROOT"
+ROOT=`dirname $(dirname "$0")`
+DEST="$1"
 
-# Copy them to the browser version
-$(
-  cd ../../desktop-client/public;
-  rm -rf ./data;
-  mkdir ./data;
-  cp -r ../../loot-core/migrations ./data;
-  cp ../../loot-core/default-db.sqlite ./data;
-  cd data && find * -type f | sort > ../data-file-index.txt;
-)
+rm -rf "$DEST"/migrations
+mkdir -p "$DEST"/migrations
+cp "$ROOT"/migrations/* "$DEST"/migrations/
+cp "$ROOT"/default-db.sqlite "$DEST"

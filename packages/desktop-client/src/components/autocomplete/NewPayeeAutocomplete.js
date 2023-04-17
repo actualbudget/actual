@@ -3,8 +3,6 @@ import { useDispatch } from 'react-redux';
 import { components as SelectComponents } from 'react-select';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
@@ -51,6 +49,8 @@ function MenuListWithFooter(props) {
 }
 
 export default function PayeeAutocomplete({
+  payees,
+  accounts,
   value,
   multi = false,
   showMakeTransfer = true,
@@ -60,9 +60,6 @@ export default function PayeeAutocomplete({
   onManagePayees,
   ...props
 }) {
-  const payees = useCachedPayees();
-  const accounts = useCachedAccounts();
-
   const [focusTransferPayees, setFocusTransferPayees] = useState(
     defaultFocusTransferPayees,
   );
@@ -85,21 +82,21 @@ export default function PayeeAutocomplete({
           ? allOptions.filter(item => value.includes(item.value))
           : allOptions.find(item => item.value === value)
       }
-      isValidNewOption={input => input && !focusTransferPayees}
+      isValidNewOption={input => {
+        if (focusTransferPayees || !input) {
+          return false;
+        }
+
+        const lowercaseInput = input.toLowerCase();
+        const hasExistingOption = allOptions.some(
+          option => option.label.toLowerCase() === lowercaseInput,
+        );
+
+        return !hasExistingOption;
+      }}
       isMulti={multi}
       onSelect={onSelect}
       onCreateOption={async selectedValue => {
-        const existingOption = allOptions.find(option =>
-          option.label.toLowerCase().includes(selectedValue?.toLowerCase()),
-        );
-
-        // Prevent creating duplicates
-        if (existingOption) {
-          onSelect(existingOption.value);
-          return;
-        }
-
-        // This is actually a new option, so create it
         onSelect(await dispatch(createPayee(selectedValue)));
       }}
       createOptionPosition="first"

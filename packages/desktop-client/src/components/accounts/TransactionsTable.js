@@ -379,6 +379,7 @@ function StatusCell({
 function PayeeCell({
   id,
   payeeId,
+  accountId,
   focused,
   inherited,
   payees,
@@ -395,6 +396,9 @@ function PayeeCell({
 }) {
   const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
   let isCreatingPayee = useRef(false);
+
+  // Filter out the account we're currently in as it is not a valid transfer
+  accounts = accounts.filter(account => account.id !== accountId);
 
   return (
     <CustomCell
@@ -786,6 +790,7 @@ export const Transaction = React.memo(function Transaction(props) {
           <PayeeCell
             id={id}
             payeeId={payeeId}
+            accountId={accountId}
             focused={focusedField === 'payee'}
             inherited={inheritedFields && inheritedFields.has('payee')}
             payees={payees}
@@ -1159,7 +1164,7 @@ function NewTransaction({
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
-        if (e.code === 'Escape') {
+        if (e.key === 'Escape') {
           onClose();
         }
       }}
@@ -1590,7 +1595,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   }
 
   function onCheckNewEnter(e) {
-    if (e.code === 'Enter') {
+    if (e.key === 'Enter') {
       if (e.metaKey) {
         e.stopPropagation();
         onAddTemporary();
@@ -1634,7 +1639,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
   }
 
   function onCheckEnter(e) {
-    if (e.code === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       let { editingId: id, focusedField } = tableNavigator;
 
       afterSave(() => {

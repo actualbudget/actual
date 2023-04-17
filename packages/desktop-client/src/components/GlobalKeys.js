@@ -12,17 +12,17 @@ export default function GlobalKeys() {
       }
 
       if (e.metaKey) {
-        switch (e.code) {
-          case 'Digit1':
+        switch (e.key) {
+          case '1':
             history.push('/budget');
             break;
-          case 'Digit2':
+          case '2':
             history.push('/reports');
             break;
-          case 'Digit3':
+          case '3':
             history.push('/accounts');
             break;
-          case 'Comma':
+          case ',':
             if (Platform.OS === 'mac') {
               history.push('/settings');
             }

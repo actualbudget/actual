@@ -25,6 +25,7 @@ import DateSelect from '../select/DateSelect';
 import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '../table';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
+import GenericInput from '../util/GenericInput';
 
 function mergeFields(defaults, initial) {
   let res = { ...defaults };
@@ -115,6 +116,7 @@ export default function ScheduleDetails() {
               amountOp: schedule._amountOp || 'isapprox',
               date: schedule._date,
               posts_transaction: action.schedule.posts_transaction,
+              name: schedule.name,
             },
           };
         }
@@ -201,6 +203,7 @@ export default function ScheduleDetails() {
           amountOp: null,
           date: null,
           posts_transaction: false,
+          name: null,
         },
         initialFields,
       ),
@@ -341,6 +344,18 @@ export default function ScheduleDetails() {
 
   async function onSave() {
     dispatch({ type: 'form-error', error: null });
+    if (state.fields.name) {
+      let { data: sameName } = await runQuery(
+        q('schedules').filter({ name: state.fields.name }).select('id'),
+      );
+      if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
+        dispatch({
+          type: 'form-error',
+          error: 'There is already a schedule with this name',
+        });
+        return;
+      }
+    }
 
     let { error, conditions } = updateScheduleConditions(
       state.schedule,
@@ -356,6 +371,7 @@ export default function ScheduleDetails() {
       schedule: {
         id: state.schedule.id,
         posts_transaction: state.fields.posts_transaction,
+        name: state.fields.name,
       },
       conditions,
     });
@@ -431,6 +447,20 @@ export default function ScheduleDetails() {
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
       modalSize="medium"
     >
+      <Stack direction="row" style={{ marginTop: 10 }}>
+        <FormField style={{ flex: 1 }}>
+          <FormLabel title="Schedule Name" htmlFor="name-field" />
+          <GenericInput
+            field="string"
+            type="string"
+            value={state.fields.name}
+            multi={false}
+            onChange={e => {
+              dispatch({ type: 'set-field', field: 'name', value: e });
+            }}
+          />
+        </FormField>
+      </Stack>
       <Stack direction="row" style={{ marginTop: 20 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Payee" htmlFor="payee-field" />

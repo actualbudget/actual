@@ -1,6 +1,6 @@
-import { createApp } from './app';
+import * as connection from '../platform/server/connection';
 
-const connection = require('../platform/server/connection');
+import { createApp } from './app';
 
 // Main app
 const app = createApp();

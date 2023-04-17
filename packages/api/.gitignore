@@ -1,1 +1,3 @@
 app/bundle.api.js*
+migrations
+default-db.sqlite

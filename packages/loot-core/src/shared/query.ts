@@ -1,4 +1,4 @@
-type QueryState = {
+export type QueryState = {
   filterExpressions: Array<unknown>;
   selectExpressions: Array<unknown>;
   groupExpressions: Array<unknown>;

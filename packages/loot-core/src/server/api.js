@@ -1,3 +1,4 @@
+import * as connection from '../platform/server/connection';
 import {
   getDownloadError,
   getSyncError,
@@ -28,8 +29,6 @@ import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
-
-const connection = require('../platform/server/connection');
 
 let IMPORT_MODE = false;
 

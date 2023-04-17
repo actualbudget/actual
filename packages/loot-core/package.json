@@ -6,7 +6,7 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.desktop.config.js",
     "watch:node": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.desktop.config.js --watch",
-    "build:api": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.api.config.js",
+    "build:api": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.api.config.js; ./bin/copy-migrations ../api",
     "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
     "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
     "lint": "eslint .",
@@ -43,6 +43,7 @@
     "@babel/preset-typescript": "^7.20.2",
     "@types/jest": "^27.5.0",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
+    "@types/node-ipc": "^9.2.0",
     "@types/webpack": "^5.28.0",
     "adm-zip": "^0.5.9",
     "babel-loader": "^8.0.6",

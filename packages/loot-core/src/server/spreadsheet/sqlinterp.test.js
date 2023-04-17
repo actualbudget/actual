@@ -1,6 +1,5 @@
 import { compile } from './new/compiler';
-
-const sqlinterp = require('./sqlinterp');
+import sqlinterp from './sqlinterp';
 
 test('sql interpretation works', async () => {
   const transJan = {

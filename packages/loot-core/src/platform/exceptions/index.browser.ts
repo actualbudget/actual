@@ -1,5 +1,7 @@
-export function captureException(exc) {
-  console.log('[Exception]', exc);
-}
+import type * as T from '.';
 
-export function captureBreadcrumb(breadcrumb) {}
+export const captureException: T.CaptureException = function (exc) {
+  console.log('[Exception]', exc);
+};
+
+export const captureBreadcrumb: T.CaptureBreadcrumb = function (breadcrumb) {};
