@@ -52,3 +52,14 @@ For example:
 When cutting a release, create a PR to each of the `actual` and `actual-server` repositories. Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number. This will trigger the release notes tooling, which will comment on your PR with the generated release notes. You can then copy-paste the release notes into the `Release-Notes.md` file in the `docs ` repository.
 
 This automation will also delete all the outdated release note files from the `upcoming-release-notes` directory. Make sure you have merged the latest `master` into the release branch and allowed the automation to run before you merge the release PR so all of the files get properly cleaned up.
+
+### GitHub Releases
+
+Once you’ve merged and tagged the release, go to the releases page and publish a new release. Use this as the body of the release note:
+
+```markdown
+:link: [View release notes](https://actualbudget.github.io/docs/Release-Notes#2330)
+```
+
+Replace `2330` with the version number of the release you’re releasing, with all the periods removed.
+
