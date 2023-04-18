@@ -85,6 +85,7 @@ export const schema = {
   },
   schedules: {
     id: f('id'),
+    name: f('string'),
     rule: f('id', { ref: 'rules', required: true }),
     next_date: f('date'),
     completed: f('boolean'),
