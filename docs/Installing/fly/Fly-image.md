@@ -44,7 +44,7 @@ should be comfortable with using the command line to set it up though.
    destination="/data"
    ```
 
-1. Create your app using the following command:
+1. `cd` into the empty directory containing your new `fly.toml` file from above, and create your app using the following command:
    ```sh
    fly launch --image actualbudget/actual-server:latest
    ```
