@@ -8,6 +8,8 @@ import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
 
+const inst = {};
+
 function findItem(strict, suggestions, value) {
   if (strict) {
     let idx = suggestions.findIndex(item => item.id === value);
@@ -213,7 +215,7 @@ function onInputValueChange(
   }
 }
 
-function onStateChange({ props, state, inst }, changes) {
+function onStateChange({ props, state }, changes) {
   if (
     props.tableBehavior &&
     changes.type === Downshift.stateChangeTypes.mouseUp
@@ -257,7 +259,7 @@ function onStateChange({ props, state, inst }, changes) {
 }
 
 function onSelect(
-  { props: { onSelect, clearAfterSelect, suggestions }, inst },
+  { props: { onSelect, clearAfterSelect, suggestions } },
   item,
 ) {
   if (onSelect) {
@@ -278,10 +280,10 @@ function onSelect(
       onSelect(getItemId(item));
     }, 0);
   }
-  return onSelectAfter(suggestions, clearAfterSelect, inst);
+  return onSelectAfter(suggestions, clearAfterSelect);
 }
 
-function onSelectAfter(suggestions, clearAfterSelect, inst) {
+function onSelectAfter(suggestions, clearAfterSelect) {
   if (clearAfterSelect) {
     return {
       value: '',
@@ -289,9 +291,9 @@ function onSelectAfter(suggestions, clearAfterSelect, inst) {
       highlightedIndex: null,
       filteredSuggestions: suggestions,
     };
-  } else if (inst.input) {
-    inst.input.setSelectionRange(0, 10000);
   }
+
+  return { isOpen: false };
 }
 
 function onChange({ props: { inputProps } }, e) {
@@ -313,7 +315,6 @@ function onKeyDown(
       strict,
     },
     state: { highlightedIndex, originalItem, isOpen, value },
-    inst,
   },
   e,
 ) {
@@ -338,7 +339,7 @@ function onKeyDown(
         // Handle it ourselves
         e.stopPropagation();
         onSelect(value);
-        return onSelectAfter(suggestions, clearAfterSelect, inst);
+        return onSelectAfter(suggestions, clearAfterSelect);
       } else {
         // No highlighted item, still allow the table to save the item
         // as `null`, even though we're allowing the table to move
@@ -445,39 +446,33 @@ function defaultItemToString(item) {
 }
 
 function SingleAutocomplete(props) {
-  const [
-    { value, selectedItem, filteredSuggestions, highlightedIndex, isOpen },
-    setState,
-  ] = React.useState(() => getInitialState({ props }));
+  const [curState, setState] = React.useState(() => getInitialState({ props }));
+  const { value, selectedItem, filteredSuggestions, highlightedIndex, isOpen } =
+    curState;
 
   const prevProps = usePrevious(props);
   React.useEffect(() => {
     if (!prevProps) return;
 
-    setState(state => {
-      const newState = componentWillReceiveProps(
-        { props: prevProps, state },
-        props,
-      );
+    const newState = componentWillReceiveProps(
+      { props: prevProps, state: curState },
+      props,
+    );
 
-      if (newState) {
-        return Object.assign({}, state, newState);
-      }
-
-      return state;
-    });
+    if (newState) {
+      setState(Object.assign({}, curState, newState));
+    }
   }, [props, prevProps]);
 
   const updater =
     operation =>
     (...arg) => {
-      setState(state =>
-        Object.assign(
-          {},
-          state,
-          operation({ props, state, inst: {} }, ...arg) || {},
-        ),
+      const newState = Object.assign(
+        {},
+        curState,
+        operation({ props, state: curState }, ...arg) || {},
       );
+      setState(newState);
     };
 
   const {
