@@ -1,10 +1,28 @@
+import { CSSProperties } from 'glamor';
 import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from './tokens';
 
 export const debug = { borderWidth: 1, borderColor: 'red' };
 
-export const colors = {
+export const colorsn = {
+  primary: '#829AB1',
+  primaryText: '#131416',
+  primaryAccent: '#d48954',
+  primaryAccentText: '#D9E2EC',
+
+  secondary: '#102A43',
+  secondaryText: '#D9E2EC',
+  secondaryAccent: '#829AB1',
+  secondaryAccentText: '#131416',
+
+  notice: '#0C6B58',
+  noticeText: '#FFFFFF',
+
+  background: '#F7FAFC',
+};
+
+const _colors = {
   y1: '#733309',
   y2: '#87540d',
   y3: '#B88115',
@@ -72,12 +90,20 @@ export const colors = {
   p10: '#F2EBFE',
   p11: '#F9F6FE',
 
-  get border() {
-    return this.n10;
-  },
-  hover: '#fafafa',
-  get selected() {
-    return this.b9;
+  border: colorsn.primaryAccent,
+  hover: colorsn.primaryAccentText,
+  selected: colorsn.primaryAccentText,
+};
+
+export const colors = {
+  ..._colors,
+  resolve(name, offset) {
+    switch (name) {
+      case 'border':
+        return _colors['n' + (8 + offset)];
+      default:
+    }
+    throw new Error('Unknown color name: ' + name);
   },
 };
 
@@ -115,9 +141,11 @@ export const styles = {
   pageHeader: {
     fontSize: 25,
     borderBottomWidth: 5,
+    borderColor: colorsn.primaryAccent,
     borderStyle: 'solid',
     display: 'inline',
     flex: 0,
+    color: colorsn.primaryText,
     marginTop: 40,
     marginBottom: 20,
     paddingBottom: 5,
@@ -153,14 +181,14 @@ export const styles = {
   notFixed: { fontFeatureSettings: '' },
   header: {
     headerStyle: {
-      backgroundColor: 'white',
+      backgroundColor: colorsn.secondary,
       borderBottomWidth: 1,
-      borderBottomColor: colors.n9,
+      borderBottomColor: colorsn.secondaryAccent,
       elevation: 0,
     },
-    headerTintColor: colors.n1,
+    headerTintColor: colorsn.secondaryAccent,
     headerTitleStyle: {
-      color: colors.n1,
+      color: colorsn.secondaryText,
       fontSize: 15,
       fontWeight: 600,
     },
@@ -170,41 +198,45 @@ export const styles = {
     fontSize: 16,
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
-  textColor: colors.n1,
+  textColor: colorsn.primaryText,
   // Dynamically set
-  lightScrollbar: undefined,
-  darkScrollbar: undefined,
-  scrollbarWidth: undefined,
+  lightScrollbar: null as CSSProperties | null,
+  darkScrollbar: null as CSSProperties | null,
+  scrollbarWidth: null as number | null,
 };
 
 let hiddenScrollbars = false;
 
 function onScrollbarChange() {
-  styles.lightScrollbar = !hiddenScrollbars && {
-    '& ::-webkit-scrollbar': {
-      width: 11,
-      backgroundColor: 'rgba(200, 200, 200, .2)',
-    },
-    '& ::-webkit-scrollbar-thumb': {
-      width: 7,
-      borderRadius: 30,
-      backgroundClip: 'padding-box',
-      border: '2px solid rgba(0, 0, 0, 0)',
-    },
-    '& ::-webkit-scrollbar-thumb:vertical': {
-      backgroundColor: '#d0d0d0',
-    },
-  };
+  styles.lightScrollbar = hiddenScrollbars
+    ? null
+    : {
+        '& ::-webkit-scrollbar': {
+          width: 11,
+          backgroundColor: 'rgba(200, 200, 200, .2)',
+        },
+        '& ::-webkit-scrollbar-thumb': {
+          width: 7,
+          borderRadius: 30,
+          backgroundClip: 'padding-box',
+          border: '2px solid rgba(0, 0, 0, 0)',
+        },
+        '& ::-webkit-scrollbar-thumb:vertical': {
+          backgroundColor: '#d0d0d0',
+        },
+      };
 
-  styles.darkScrollbar = !hiddenScrollbars && {
-    '& ::-webkit-scrollbar': {
-      width: 7,
-      backgroundColor: 'rgba(0, 0, 0, 0)',
-    },
-    '& ::-webkit-scrollbar-thumb:vertical': {
-      backgroundColor: 'rgba(200, 200, 200, .5)',
-    },
-  };
+  styles.darkScrollbar = hiddenScrollbars
+    ? null
+    : {
+        '& ::-webkit-scrollbar': {
+          width: 7,
+          backgroundColor: 'rgba(0, 0, 0, 0)',
+        },
+        '& ::-webkit-scrollbar-thumb:vertical': {
+          backgroundColor: 'rgba(200, 200, 200, .5)',
+        },
+      };
 
   styles.scrollbarWidth = hiddenScrollbars ? 0 : 13;
 }
