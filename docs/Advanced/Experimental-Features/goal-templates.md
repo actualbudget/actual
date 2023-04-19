@@ -41,11 +41,11 @@ You are welcome to have other lines in your note, but the #template line must ma
 
 ### Multiple Template Lines
 
-You can add multiple `#template` lines for a single category note. Lines that don't have a 'by' keyword in them add together, where as lines that do have the 'by' keyword are run sequentially - only the next next due template line is applied.
+You can add multiple `#template` lines for a single category note.  Each line will be added together.
 
 For examples:
 
-**Budget $200/month for 3 months, then $400/month for the next 3 months**
+**Budget $200/month for 3 months and $400/month for the next 3 months**
 
     #template $600 by 2021-03 repeat every 6 months
 
