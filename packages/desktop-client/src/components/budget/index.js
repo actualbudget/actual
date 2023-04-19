@@ -499,12 +499,10 @@ class Budget extends React.PureComponent {
 
 const RolloverBudgetSummary = React.memo(props => {
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
   return (
     <rollover.BudgetSummary
       {...props}
       isGoalTemplatesEnabled={isGoalTemplatesEnabled}
-      isNewAutocompleteEnabled={isNewAutocompleteEnabled}
     />
   );
 });
