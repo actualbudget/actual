@@ -31,13 +31,15 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template $10 repeat every week starting 2022-01-03 up to 80|Budget $10 a week, up to a maximum of $80|
 |#template $10 repeat every 2 weeks starting 2022-01-04|Budget $10 fortnightly|
 |#template $10 repeat every 9 weeks starting 2022-01-04 up to 30|Budget $10 every 9 weeks, up to a maximum of $30|
+|#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions|
 
 ### Notes
 
 - $ sign is optional, `#template $50` and `#template 50` are the same.
 - Other currency symbols are not supported.
-- Number formats that use comma for the decimal seperator are not supported (eg, 123,45). You must use 123.45.
+- Number formats that use comma for the decimal separator are not supported (eg, 123,45). You must use 123.45.
 - Thousands separators are not supported (eg, 1,234). You must use 1234.
+- {SCHEDULE NAME} is defined in the **Schedules** editor.
 
 ### Multiple Template Lines
 
