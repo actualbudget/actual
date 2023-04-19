@@ -172,7 +172,6 @@ function TableRow({
             highlightFirst
             suggestions={availableAccountOptions}
             onSelect={value => {
-              console.log('select');
               onSetLinkedAccount(externalAccount, value);
             }}
             inputProps={{
