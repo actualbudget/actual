@@ -6,7 +6,6 @@
     "build"
   ],
   "devDependencies": {
-    "@jlongster/lively": "0.0.4",
     "@juggle/resize-observer": "^3.1.2",
     "@playwright/test": "^1.29.1",
     "@reach/listbox": "^0.11.2",

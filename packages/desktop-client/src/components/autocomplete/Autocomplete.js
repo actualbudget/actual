@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import lively from '@jlongster/lively';
 import Downshift from 'downshift';
 import { css } from 'glamor';
 
+import usePrevious from '../../hooks/usePrevious';
 import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
+
+const inst = {};
 
 function findItem(strict, suggestions, value) {
   if (strict) {
@@ -146,13 +148,11 @@ function onInputValueChange(
     props: {
       suggestions,
       onUpdate,
-      multi,
       highlightFirst,
       strict,
       filterSuggestions = defaultFilterSuggestions,
       getHighlightedIndex,
     },
-    state: { isOpen },
   },
   value,
   changes,
@@ -215,7 +215,7 @@ function onInputValueChange(
   }
 }
 
-function onStateChange({ props, state, inst }, changes, stateAndHelpers) {
+function onStateChange({ props, state }, changes) {
   if (
     props.tableBehavior &&
     changes.type === Downshift.stateChangeTypes.mouseUp
@@ -259,7 +259,7 @@ function onStateChange({ props, state, inst }, changes, stateAndHelpers) {
 }
 
 function onSelect(
-  { props: { onSelect, clearAfterSelect, suggestions }, inst },
+  { props: { onSelect, clearAfterSelect, suggestions } },
   item,
 ) {
   if (onSelect) {
@@ -280,10 +280,10 @@ function onSelect(
       onSelect(getItemId(item));
     }, 0);
   }
-  return onSelectAfter(suggestions, clearAfterSelect, inst);
+  return onSelectAfter(suggestions, clearAfterSelect);
 }
 
-function onSelectAfter(suggestions, clearAfterSelect, inst) {
+function onSelectAfter(suggestions, clearAfterSelect) {
   if (clearAfterSelect) {
     return {
       value: '',
@@ -291,9 +291,9 @@ function onSelectAfter(suggestions, clearAfterSelect, inst) {
       highlightedIndex: null,
       filteredSuggestions: suggestions,
     };
-  } else if (inst.input) {
-    inst.input.setSelectionRange(0, 10000);
   }
+
+  return { isOpen: false };
 }
 
 function onChange({ props: { inputProps } }, e) {
@@ -314,16 +314,7 @@ function onKeyDown(
       shouldSaveFromKey = defaultShouldSaveFromKey,
       strict,
     },
-    state: {
-      selectedItem,
-      filteredSuggestions,
-      highlightedIndex,
-      originalItem,
-      isNulled,
-      isOpen,
-      value,
-    },
-    inst,
+    state: { highlightedIndex, originalItem, isOpen, value },
   },
   e,
 ) {
@@ -348,7 +339,7 @@ function onKeyDown(
         // Handle it ourselves
         e.stopPropagation();
         onSelect(value);
-        return onSelectAfter(suggestions, clearAfterSelect, inst);
+        return onSelectAfter(suggestions, clearAfterSelect);
       } else {
         // No highlighted item, still allow the table to save the item
         // as `null`, even though we're allowing the table to move
@@ -414,7 +405,7 @@ function defaultShouldSaveFromKey(e) {
   return e.code === 'Enter';
 }
 
-function onFocus({ inst, props: { inputProps = {}, openOnFocus = true } }, e) {
+function onFocus({ props: { inputProps = {}, openOnFocus = true } }, e) {
   inputProps.onFocus && inputProps.onFocus(e);
 
   if (openOnFocus) {
@@ -422,7 +413,7 @@ function onFocus({ inst, props: { inputProps = {}, openOnFocus = true } }, e) {
   }
 }
 
-function onBlur({ inst, props, state: { selectedItem } }, e) {
+function onBlur({ props, state: { selectedItem } }, e) {
   let { inputProps = {}, onSelect } = props;
 
   e.preventDownshiftDefault = true;
@@ -454,26 +445,48 @@ function defaultItemToString(item) {
   return item ? getItemName(item) : '';
 }
 
-function _SingleAutocomplete({
-  props: {
+function SingleAutocomplete(props) {
+  const [curState, setState] = React.useState(() => getInitialState({ props }));
+  const { value, selectedItem, filteredSuggestions, highlightedIndex, isOpen } =
+    curState;
+
+  const prevProps = usePrevious(props);
+  React.useEffect(() => {
+    if (!prevProps) return;
+
+    const newState = componentWillReceiveProps(
+      { props: prevProps, state: curState },
+      props,
+    );
+
+    if (newState) {
+      setState(Object.assign({}, curState, newState));
+    }
+  }, [props, prevProps]);
+
+  const updater =
+    operation =>
+    (...arg) => {
+      const newState = Object.assign(
+        {},
+        curState,
+        operation({ props, state: curState }, ...arg) || {},
+      );
+      setState(newState);
+    };
+
+  const {
     focused,
     embedded,
     containerProps,
     inputProps,
-    children,
     suggestions,
     tooltipStyle,
-    onItemClick,
-    strict,
     tooltipProps,
     renderInput = defaultRenderInput,
     renderItems = defaultRenderItems,
     itemToString = defaultItemToString,
-  },
-  state: { value, selectedItem, filteredSuggestions, highlightedIndex, isOpen },
-  updater,
-  inst,
-}) {
+  } = props;
   const filtered = filteredSuggestions || suggestions;
 
   return (
@@ -490,10 +503,8 @@ function _SingleAutocomplete({
       {({
         getInputProps,
         getItemProps,
-        getRootProps,
         isOpen,
         inputValue,
-        selectedItem,
         highlightedIndex,
       }) => (
         // Super annoying but it works best to return a div so we
@@ -550,11 +561,6 @@ function _SingleAutocomplete({
     </Downshift>
   );
 }
-
-const SingleAutocomplete = lively(_SingleAutocomplete, {
-  getInitialState,
-  componentWillReceiveProps,
-});
 
 function MultiItem({ name, onRemove }) {
   return (
