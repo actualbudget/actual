@@ -6,10 +6,10 @@ import tokens from './tokens';
 export const debug = { borderWidth: 1, borderColor: 'red' };
 
 export const colorsn = {
-  primary: '#829AB1',
+  primary: '#E8ECF0',
   primaryText: '#131416',
-  primaryAccent: '#d48954',
-  primaryAccentText: '#D9E2EC',
+  primaryAccent: '#BCCCDC',
+  primaryAccentText: '#131416',
 
   secondary: '#102A43',
   secondaryText: '#D9E2EC',
@@ -17,9 +17,11 @@ export const colorsn = {
   secondaryAccentText: '#131416',
 
   notice: '#0C6B58',
-  noticeText: '#FFFFFF',
+  noticeText: '#F7FAFC',
+  noticeAccent: '#F7FAFC',
+  noticeAccentText: '#CF1124',
 
-  background: '#F7FAFC',
+  background: '#FFFFFF',
 };
 
 const _colors = {
