@@ -55,7 +55,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
-    "@jlongster/lively": 0.0.4
     "@juggle/resize-observer": ^3.1.2
     "@playwright/test": ^1.29.1
     "@reach/listbox": ^0.11.2
@@ -2520,15 +2519,6 @@ __metadata:
     "@types/yargs": ^17.0.8
     chalk: ^4.0.0
   checksum: 1756f4149d360f98567f56f434144f7af23ed49a2c42889261a314df6b6654c2de70af618fb2ee0ee39cadaf10835b885845557184509503646c9cb9dcc02bac
-  languageName: node
-  linkType: hard
-
-"@jlongster/lively@npm:0.0.4":
-  version: 0.0.4
-  resolution: "@jlongster/lively@npm:0.0.4"
-  dependencies:
-    prop-types: ^15.6.0
-  checksum: 1984cc66356da110cc7e6496c8b6c9bbfa0f20f94052e5131959a10ee63b2608f90a4e75549a27947c6f2a4ca580eaeb66d3eda5b7ca40b7c055ee76bb573b81
   languageName: node
   linkType: hard
 
