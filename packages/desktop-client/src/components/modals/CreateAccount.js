@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 
-import { authorizeBank } from '../../nordigen';
+import { authorizeBank } from '../../plaid';
 import { colors } from '../../style';
 import { View, Text, Modal, P, Button, ButtonWithLoading } from '../common';
 

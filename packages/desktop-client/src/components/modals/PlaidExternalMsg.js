@@ -1,4 +1,9 @@
 import React, { useState, useRef } from 'react';
+import { usePlaidLink } from 'react-plaid-link';
+
+// import { pl } from 'date-fns/locale';
+
+import { send } from 'loot-core/src/platform/client/fetch';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
@@ -25,21 +30,50 @@ export default function PlaidExternalMsg({
   let [success, setSuccess] = useState(false);
   let [error, setError] = useState(null);
   let data = useRef(null);
+  let plaidLinkToken = null;
+
+  const { open, ready } = usePlaidLink({
+    token: plaidLinkToken,
+    onSuccess: (public_token, metadata) => {
+      setWaiting(null);
+      setSuccess(true);
+    },
+    onExit: (err, metadata) => {
+      setWaiting(null);
+      if (err) {
+        setError(err);
+        return;
+      }
+    },
+  });
 
   async function onJump() {
     setError(null);
     setWaiting('browser');
 
-    let res = await onMoveExternal();
-    if (res.error) {
-      setError(res.error);
-      setWaiting(null);
-      return;
+    // let res = await onMoveExternal();
+
+    const res = await send('plaid-create-web-token', {});
+    if (res.status === 'ok') {
+      plaidLinkToken = res.data;
+
+      if (ready) {
+        open();
+      }
+    } else if (res.status === 'error') {
+      setError(res.reason);
     }
 
-    data.current = res.data;
-    setWaiting(null);
-    setSuccess(true);
+    // const res = { data };
+    // if (res.error) {
+    //   setError(res.error);
+    //   setWaiting(null);
+    //   return;
+    // }
+
+    // data.current = res.data;
+    // setWaiting(null);
+    // setSuccess(true);
   }
 
   function onClose() {

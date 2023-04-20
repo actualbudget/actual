@@ -780,124 +780,6 @@ handlers['account-properties'] = async function ({ id }) {
   return { balance: balance || 0, numTransactions: count };
 };
 
-handlers['accounts-link'] = async function ({
-  institution,
-  publicToken,
-  accountId,
-  upgradingId,
-}) {
-  let bankId = await link.handoffPublicToken(institution, publicToken);
-
-  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-
-  // Get all the available accounts and find the selected one
-  let accounts = await bankSync.getNordigenAccounts(userId, userKey, bankId);
-  let account = accounts.find(acct => acct.account_id === accountId);
-
-  await db.update('accounts', {
-    id: upgradingId,
-    account_id: account.account_id,
-    official_name: account.official_name,
-    type: fromPlaidAccountType(account.type),
-    balance_current: amountToInteger(account.balances.current),
-    balance_available: amountToInteger(account.balances.available),
-    balance_limit: amountToInteger(account.balances.limit),
-    mask: account.mask,
-    bank: bankId,
-  });
-
-  await bankSync.syncAccount(
-    userId,
-    userKey,
-    upgradingId,
-    account.account_id,
-    bankId,
-  );
-
-  connection.send('sync-event', {
-    type: 'success',
-    tables: ['transactions'],
-  });
-
-  return 'ok';
-};
-
-handlers['nordigen-accounts-link'] = async function ({
-  requisitionId,
-  account,
-  upgradingId,
-}) {
-  let id;
-  let bank = await link.findOrCreateBank(account.institution, requisitionId);
-
-  if (upgradingId) {
-    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
-      upgradingId,
-    ]);
-    id = accRow.id;
-    await db.update('accounts', {
-      id,
-      account_id: account.account_id,
-      bank: bank.id,
-    });
-  } else {
-    id = uuid.v4Sync();
-    await db.insertWithUUID('accounts', {
-      id,
-      account_id: account.account_id,
-      mask: account.mask,
-      name: account.name,
-      official_name: account.official_name,
-      type: account.type,
-      bank: bank.id,
-    });
-    await db.insertPayee({
-      name: '',
-      transfer_acct: id,
-    });
-  }
-
-  await bankSync.syncNordigenAccount(
-    undefined,
-    undefined,
-    id,
-    account.account_id,
-    bank.bank_id,
-  );
-
-  connection.send('sync-event', {
-    type: 'success',
-    tables: ['transactions'],
-  });
-
-  return 'ok';
-};
-
-handlers['accounts-connect'] = async function ({
-  institution,
-  publicToken,
-  accountIds,
-  offbudgetIds,
-}) {
-  let bankId = await link.handoffPublicToken(institution, publicToken);
-  let ids = await link.addAccounts(bankId, accountIds, offbudgetIds);
-  return ids;
-};
-
-handlers['nordigen-accounts-connect'] = async function ({
-  institution,
-  publicToken,
-  accountIds,
-  offbudgetIds,
-}) {
-  let bankId = await link.handoffPublicToken(institution, publicToken);
-  let ids = await link.addNordigenAccounts(bankId, accountIds, offbudgetIds);
-  return ids;
-};
-
 handlers['account-create'] = mutator(async function ({
   name,
   type,
@@ -1043,62 +925,13 @@ handlers['account-move'] = mutator(async function ({ id, targetId }) {
 
 let stopPolling = false;
 
-handlers['poll-web-token'] = async function ({ token }) {
-  let [[, userId], [, key]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-
-  let startTime = Date.now();
-  stopPolling = false;
-
-  async function getData(cb) {
-    if (stopPolling) {
-      return;
-    }
-
-    if (Date.now() - startTime >= 1000 * 60 * 10) {
-      cb('timeout');
-      return;
-    }
-
-    let data = await post(
-      getServer().PLAID_SERVER + '/get-web-token-contents',
-      {
-        userId,
-        key,
-        token,
-      },
-    );
-
-    if (data) {
-      if (data.error) {
-        cb('unknown');
-      } else {
-        cb(null, data);
-      }
-    } else {
-      setTimeout(() => getData(cb), 3000);
-    }
-  }
-
-  return new Promise(resolve => {
-    getData((error, data) => {
-      if (error) {
-        resolve({ error });
-      } else {
-        resolve({ data });
-      }
-    });
-  });
-};
-
-handlers['poll-web-token-stop'] = async function () {
+//PLAID SYNC METHODS
+handlers['plaid-poll-web-token-stop'] = async function () {
   stopPolling = true;
   return 'ok';
 };
 
-handlers['accounts-sync'] = async function ({ id }) {
+handlers['plaid-accounts-sync'] = async function ({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
@@ -1177,6 +1010,230 @@ handlers['accounts-sync'] = async function ({ id }) {
   }
 
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
+};
+
+handlers['plaid-accounts-link'] = async function ({
+  institution,
+  publicToken,
+  accountId,
+  upgradingId,
+}) {
+  let bankId = await link.handoffPublicToken(institution, publicToken);
+
+  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
+    'user-id',
+    'user-key',
+  ]);
+
+  // Get all the available accounts and find the selected one
+  let accounts = await bankSync.getAccounts(userId, userKey, bankId);
+  let account = accounts.find(acct => acct.account_id === accountId);
+
+  await db.update('accounts', {
+    id: upgradingId,
+    account_id: account.account_id,
+    official_name: account.official_name,
+    type: fromPlaidAccountType(account.type),
+    balance_current: amountToInteger(account.balances.current),
+    balance_available: amountToInteger(account.balances.available),
+    balance_limit: amountToInteger(account.balances.limit),
+    mask: account.mask,
+    bank: bankId,
+  });
+
+  await bankSync.syncAccount(
+    userId,
+    userKey,
+    upgradingId,
+    account.account_id,
+    bankId,
+  );
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+};
+
+handlers['plaid-accounts-connect'] = async function ({
+  institution,
+  publicToken,
+  accountIds,
+  offbudgetIds,
+}) {
+  let bankId = await link.handoffPublicToken(institution, publicToken);
+  let ids = await link.addAccounts(bankId, accountIds, offbudgetIds);
+  return ids;
+};
+
+handlers['plaid-create-link-token'] = async function ({}) {
+  try {
+    return await post(
+      getServer().PLAID_SERVER + 'create-link-token', {}, {},
+    );
+  } catch (error) {
+    console.error(error);
+    return { error: 'failed' };
+  }
+};
+
+handlers['plaid-create-web-token'] = async function ({
+  plaidToken,
+}) {
+  let userToken = await asyncStorage.getItem('user-token');
+
+  if (userToken) {
+    try {
+      return await post(
+        getServer().PLAID_SERVER + '/create-web-token',
+        {
+          plaidToken,
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
+    } catch (error) {
+      console.error(error);
+      return { error: 'failed' };
+    }
+  }
+  return { error: 'unauthorized' };
+};
+
+handlers['plaid-poll-web-token'] = async function ({ token }) {
+  let userToken = await asyncStorage.getItem('user-token');
+
+  if (userToken) {
+    let startTime = Date.now();
+    stopPolling = false;
+
+    async function getData(cb) {
+      if (stopPolling) {
+        return;
+      }
+
+      if (Date.now() - startTime >= 1000 * 60 * 10) {
+        cb('timeout');
+        return;
+      }
+
+      let data = await post(
+        getServer().PLAID_SERVER + '/accounts',
+        {
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
+
+      if (data) {
+        if (data.error) {
+          cb('unknown');
+        } else {
+          cb(null, data);
+        }
+      } else {
+        setTimeout(() => getData(cb), 3000);
+      }
+    }
+
+    return new Promise(resolve => {
+      getData((error, data) => {
+        if (error) {
+          resolve({ error });
+        } else {
+          resolve({ data });
+        }
+      });
+    });
+  }
+
+  return null;
+};
+
+handlers['plaid-renew-public-token'] = async function ({ bankId }) {
+  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
+    'user-id',
+    'user-key',
+  ]);
+
+  let data = await post(getServer().PLAID_SERVER + '/make-public-token', {
+    userId: userId,
+    key: userKey,
+    item_id: '' + bankId,
+  });
+
+  if (data.error_code) {
+    return { error: '', code: data.error_code, type: data.error_type };
+  }
+
+  return { linkToken: data.link_token };
+};
+
+//NORIDGEN SYNC METHODS
+handlers['nordigen-accounts-link'] = async function ({
+  requisitionId,
+  account,
+  upgradingId,
+}) {
+  let id;
+  let bank = await link.findOrCreateBank(account.institution, requisitionId);
+
+  if (upgradingId) {
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+      upgradingId,
+    ]);
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: account.account_id,
+      bank: bank.id,
+    });
+  } else {
+    id = uuid.v4Sync();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: account.account_id,
+      mask: account.mask,
+      name: account.name,
+      official_name: account.official_name,
+      type: account.type,
+      bank: bank.id,
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncNordigenAccount(
+    undefined,
+    undefined,
+    id,
+    account.account_id,
+    bank.bank_id,
+  );
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+};
+
+handlers['nordigen-accounts-connect'] = async function ({
+  institution,
+  publicToken,
+  accountIds,
+  offbudgetIds,
+}) {
+  let bankId = await link.handoffPublicToken(institution, publicToken);
+  let ids = await link.addNordigenAccounts(bankId, accountIds, offbudgetIds);
+  return ids;
 };
 
 handlers['nordigen-poll-web-token'] = async function ({
@@ -1452,25 +1509,6 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 
   return 'ok';
 });
-
-handlers['make-plaid-public-token'] = async function ({ bankId }) {
-  let [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-
-  let data = await post(getServer().PLAID_SERVER + '/make-public-token', {
-    userId: userId,
-    key: userKey,
-    item_id: '' + bankId,
-  });
-
-  if (data.error_code) {
-    return { error: '', code: data.error_code, type: data.error_type };
-  }
-
-  return { linkToken: data.link_token };
-};
 
 handlers['save-global-prefs'] = async function (prefs) {
   if ('maxMonths' in prefs) {

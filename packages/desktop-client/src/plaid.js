@@ -3,15 +3,17 @@ import { send } from 'loot-core/src/platform/client/fetch';
 function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
   pushModal('plaid-external-msg', {
     onMoveExternal: async () => {
-      let token = await send('create-web-token');
-      let url = 'http://link.actualbudget.com/?token=' + token;
-      // let url = 'http://localhost:8080/?token=' + token;
-      if (plaidToken) {
-        url = url + '&plaidToken=' + plaidToken;
-      }
-      window.Actual.openURLInBrowser(url);
+      const res = await send('plaid-create-web-token', {
+        plaidToken,
+      });
 
-      let { error, data } = await send('poll-web-token', { token });
+      if (res.error) return res;
+      // const { link, token } = res;
+      const { link } = res;
+
+      window.Actual.openURLInBrowser(link);
+
+      let { error, data } = await send('plaid-poll-web-token', {});
 
       return { error, data };
     },
@@ -24,7 +26,7 @@ function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
 export async function authorizeBank(pushModal, { upgradingId } = {}) {
   _authorize(pushModal, null, {
     onSuccess: async data => {
-      pushModal('select-linked-accounts', {
+      pushModal('plaid-select-linked-accounts', {
         institution: data.metadata.institution,
         publicToken: data.publicToken,
         accounts: data.metadata.accounts,
@@ -35,7 +37,7 @@ export async function authorizeBank(pushModal, { upgradingId } = {}) {
 }
 
 export async function reauthorizeBank(pushModal, bankId, onSuccess) {
-  let { linkToken } = await send('make-plaid-public-token', {
+  let { linkToken } = await send('plaid-renew-public-token', {
     bankId,
   });
 
