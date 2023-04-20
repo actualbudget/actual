@@ -124,7 +124,7 @@ document.addEventListener('keydown', e => {
       window.__actionsForMenu.closeBudget();
     }
     // Cmd/Ctrl+z
-    else if (e.key === 'z' || e.key === 'Z') {
+    else if (e.key.toLowerCase() === 'z') {
       if (
         e.target.tagName === 'INPUT' ||
         e.target.tagName === 'TEXTAREA' ||
@@ -133,8 +133,7 @@ document.addEventListener('keydown', e => {
         return;
       }
       e.preventDefault();
-      // shift+z
-      if (e.key === 'Z') {
+      if (e.shiftKey) {
         // Redo
         window.__actionsForMenu.redo();
       } else {
