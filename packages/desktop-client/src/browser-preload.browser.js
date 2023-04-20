@@ -119,12 +119,12 @@ global.Actual = {
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey) {
     // Cmd/Ctrl+o
-    if (e.key === 'O') {
+    if (e.key === 'o') {
       e.preventDefault();
       window.__actionsForMenu.closeBudget();
     }
     // Cmd/Ctrl+z
-    else if (e.key === 'Z') {
+    else if (e.key === 'z' || e.key === 'Z') {
       if (
         e.target.tagName === 'INPUT' ||
         e.target.tagName === 'TEXTAREA' ||
@@ -133,7 +133,8 @@ document.addEventListener('keydown', e => {
         return;
       }
       e.preventDefault();
-      if (e.shiftKey) {
+      // shift+z
+      if (e.key === 'Z') {
         // Redo
         window.__actionsForMenu.redo();
       } else {
