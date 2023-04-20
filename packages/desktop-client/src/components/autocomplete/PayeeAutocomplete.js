@@ -7,7 +7,7 @@ import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
-import { colors } from '../../style';
+import { colorsn } from '../../style';
 import { View } from '../common';
 
 import Autocomplete, {
@@ -81,14 +81,14 @@ export function PayeeList({
               flexShrink: 0,
               padding: '6px 9px',
               backgroundColor:
-                highlightedIndex === 0 ? colors.n4 : 'transparent',
+                highlightedIndex === 0 ? colorsn.primary : 'transparent',
               borderRadius: embedded ? 4 : 0,
             }}
           >
             <View
               style={{
                 display: 'block',
-                color: colors.g8,
+                color: colorsn.notice,
                 borderRadius: 4,
                 fontSize: 11,
                 fontWeight: 500,
@@ -98,7 +98,7 @@ export function PayeeList({
                 width={8}
                 height={8}
                 style={{
-                  color: colors.g8,
+                  color: colorsn.notice,
                   marginRight: 5,
                   display: 'inline-block',
                 }}
@@ -125,7 +125,7 @@ export function PayeeList({
                 <div
                   key={'title-' + idx}
                   style={{
-                    color: colors.y9,
+                    color: colorsn.notice,
                     padding: '4px 9px',
                   }}
                 >
@@ -139,7 +139,7 @@ export function PayeeList({
                 style={{
                   backgroundColor:
                     highlightedIndex === idx + offset
-                      ? colors.n4
+                      ? colorsn.primaryAccent
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   padding: 4,
@@ -154,7 +154,7 @@ export function PayeeList({
                   style={{
                     fontSize: 11,
                     padding: 5,
-                    color: colors.n5,
+                    color: colorsn.primaryAccent,
                     textAlign: 'center',
                   }}
                 >
@@ -336,15 +336,15 @@ export default function PayeeAutocomplete({
                   style={[
                     showManagePayees && { marginBottom: 5 },
                     focusTransferPayees && {
-                      backgroundColor: colors.y8,
-                      color: colors.g2,
-                      borderColor: colors.y8,
+                      backgroundColor: colorsn.secondary,
+                      color: colorsn.secondaryText,
+                      borderColor: colorsn.secondaryAccent,
                     },
                   ]}
                   hoveredStyle={
                     focusTransferPayees && {
-                      backgroundColor: colors.y8,
-                      colors: colors.y2,
+                      backgroundColor: colorsn.secondaryAccent,
+                      colors: colorsn.secondaryAccentText,
                     }
                   }
                   onClick={() => {

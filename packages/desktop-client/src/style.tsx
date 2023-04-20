@@ -16,10 +16,18 @@ export const colorsn = {
   secondaryAccent: '#829AB1',
   secondaryAccentText: '#131416',
 
-  notice: '#0C6B58',
-  noticeText: '#F7FAFC',
-  noticeAccent: '#F7FAFC',
-  noticeAccentText: '#CF1124',
+  error: '#FFE3E3',
+  errorText: '#EF4E4E',
+  errorAccent: '#CF1124',
+
+  warning: '#FFF7C4',
+  warningText: '#E6BB20',
+  warningAccent: '#B88115',
+
+  notice: '#C6F7E2',
+  noticeText: '#0C6B58',
+  noticeAccent: '#014D40',
+  noticeAccentText: '#FAFFFD',
 
   background: '#FFFFFF',
 };

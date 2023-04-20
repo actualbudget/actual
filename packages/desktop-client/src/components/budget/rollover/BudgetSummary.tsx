@@ -183,14 +183,14 @@ function ToBudget({
                       userSelect: 'none',
                       cursor: 'pointer',
                       color: isNegative
-                        ? colorsn.noticeAccentText
-                        : colorsn.secondary,
+                        ? colorsn.errorText
+                        : colorsn.noticeText,
                       marginBottom: -1,
                       borderBottom: '1px solid transparent',
                       ':hover': {
                         borderColor: isNegative
-                          ? colorsn.noticeAccentText
-                          : colorsn.secondary,
+                          ? colorsn.errorText
+                          : colorsn.noticeText,
                       },
                     },
                   ])}
