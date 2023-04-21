@@ -60,49 +60,38 @@ function Sidebar({ floatingSidebar }) {
   }, [sidebar, hidden]);
 
   return (
-    <>
-      <View
-        onMouseOver={
-          sidebarShouldFloat
-            ? e => {
-                e.stopPropagation();
-                setHidden(false);
-              }
-            : null
-        }
-        onMouseLeave={sidebarShouldFloat ? () => setHidden(true) : null}
-        style={{
-          position: 'absolute',
-          top: 12,
-          // If not floating, the -50 takes into account the transform below
-          bottom: sidebarShouldFloat ? 12 : -50,
-          zIndex: 1001,
-          borderRadius: sidebarShouldFloat ? '0 6px 6px 0' : 0,
-          overflow: 'hidden',
-          boxShadow:
-            !sidebarShouldFloat || hidden
-              ? 'none'
-              : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
-          transform: `translateY(${!sidebarShouldFloat ? -12 : 0}px)
+    <View
+      onMouseOver={
+        sidebarShouldFloat
+          ? e => {
+              e.stopPropagation();
+              setHidden(false);
+            }
+          : null
+      }
+      onMouseLeave={sidebarShouldFloat ? () => setHidden(true) : null}
+      style={{
+        position: sidebarShouldFloat ? 'absolute' : null,
+        top: 12,
+        // If not floating, the -50 takes into account the transform below
+        bottom: sidebarShouldFloat ? 12 : -50,
+        zIndex: 1001,
+        borderRadius: sidebarShouldFloat ? '0 6px 6px 0' : 0,
+        overflow: 'hidden',
+        boxShadow:
+          !sidebarShouldFloat || hidden
+            ? 'none'
+            : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
+        transform: `translateY(${!sidebarShouldFloat ? -12 : 0}px)
                       translateX(${
                         sidebarShouldFloat && hidden ? -SIDEBAR_WIDTH : 0
                       }px)`,
-          transition:
-            'transform .5s, box-shadow .5s, border-radius .5s, bottom .5s',
-        }}
-      >
-        <SidebarWithData />
-      </View>
-
-      <View
-        style={{
-          pointerEvents: 'none',
-          // transition does not feel very good
-          // transition: 'width .4s',
-          width: sidebarShouldFloat ? 0 : SIDEBAR_WIDTH,
-        }}
-      ></View>
-    </>
+        transition:
+          'transform .5s, box-shadow .5s, border-radius .5s, bottom .5s',
+      }}
+    >
+      <SidebarWithData />
+    </View>
   );
 }
 
