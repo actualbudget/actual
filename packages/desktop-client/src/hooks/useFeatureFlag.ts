@@ -1,7 +1,6 @@
 import { useSelector } from 'react-redux';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<string, boolean> = {
-  newAutocomplete: true,
   syncAccount: false,
   goalTemplatesEnabled: false,
 };

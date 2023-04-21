@@ -37,7 +37,6 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
-import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import usePrevious from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
@@ -48,12 +47,9 @@ import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
 import { styles, colors } from '../../style';
-import LegacyAccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import NewCategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import LegacyCategoryAutocomplete from '../autocomplete/CategorySelect';
-import NewAccountAutocomplete from '../autocomplete/NewAccountAutocomplete';
-import NewPayeeAutocomplete from '../autocomplete/NewPayeeAutocomplete';
-import LegacyPayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
+import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import { View, Text, Tooltip, Button } from '../common';
 import { getStatusProps } from '../schedules/StatusBadge';
 import DateSelect from '../select/DateSelect';
@@ -394,7 +390,6 @@ function PayeeCell({
   onCreatePayee,
   onManagePayees,
 }) {
-  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
   let isCreatingPayee = useRef(false);
 
   // Filter out the account we're currently in as it is not a valid transfer
@@ -428,32 +423,27 @@ function PayeeCell({
         shouldSaveFromKey,
         inputStyle,
       }) => {
-        const PayeeAutocomplete = isNewAutocompleteEnabled
-          ? NewPayeeAutocomplete
-          : LegacyPayeeAutocomplete;
         return (
-          <>
-            <PayeeAutocomplete
-              payees={payees}
-              accounts={accounts}
-              value={payeeId}
-              shouldSaveFromKey={shouldSaveFromKey}
-              inputProps={{
-                onBlur,
-                onKeyDown,
-                style: inputStyle,
-              }}
-              showManagePayees={true}
-              tableBehavior={true}
-              defaultFocusTransferPayees={transaction.is_child}
-              focused={true}
-              onUpdate={onUpdate}
-              onSelect={onSave}
-              onManagePayees={() => onManagePayees(payeeId)}
-              isCreatable
-              menuPortalTarget={undefined}
-            />
-          </>
+          <PayeeAutocomplete
+            payees={payees}
+            accounts={accounts}
+            value={payeeId}
+            shouldSaveFromKey={shouldSaveFromKey}
+            inputProps={{
+              onBlur,
+              onKeyDown,
+              style: inputStyle,
+            }}
+            showManagePayees={true}
+            tableBehavior={true}
+            defaultFocusTransferPayees={transaction.is_child}
+            focused={true}
+            onUpdate={onUpdate}
+            onSelect={onSave}
+            onManagePayees={() => onManagePayees(payeeId)}
+            isCreatable
+            menuPortalTarget={undefined}
+          />
         );
       }}
     </CustomCell>
@@ -530,14 +520,6 @@ export const Transaction = React.memo(function Transaction(props) {
     onCreatePayee,
     onToggleSplit,
   } = props;
-
-  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
-  const AccountAutocomplete = isNewAutocompleteEnabled
-    ? NewAccountAutocomplete
-    : LegacyAccountAutocomplete;
-  const CategoryAutocomplete = isNewAutocompleteEnabled
-    ? NewCategoryAutocomplete
-    : LegacyCategoryAutocomplete;
 
   let dispatchSelected = useSelectedDispatch();
 

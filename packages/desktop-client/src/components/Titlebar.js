@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { connect } from 'react-redux';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
-import { useViewportSize } from '@react-aria/utils';
 import { css, media } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
@@ -13,10 +12,9 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
-import ArrowButtonRight1 from '../icons/v2/ArrowButtonRight1';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { colors } from '../style';
-import tokens, { breakpoints } from '../tokens';
+import tokens from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
@@ -267,9 +265,6 @@ function Titlebar({
   let sidebar = useSidebar();
   const serverURL = useServerURL();
 
-  let windowWidth = useViewportSize().width;
-  let sidebarAlwaysFloats = windowWidth < breakpoints.medium;
-
   return (
     <View
       style={[
@@ -289,50 +284,30 @@ function Titlebar({
         style,
       ]}
     >
-      {(floatingSidebar || sidebarAlwaysFloats) && (
+      {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
           bare
-          style={{
-            marginRight: 8,
-            '& .arrow-right': { opacity: 0, transition: 'opacity .3s' },
-            '& .menu': { opacity: 1, transition: 'opacity .3s' },
-            '&:hover .arrow-right': !sidebarAlwaysFloats && { opacity: 1 },
-            '&:hover .menu': !sidebarAlwaysFloats && { opacity: 0 },
+          style={{ marginRight: 8 }}
+          onPointerEnter={e => {
+            if (e.pointerType === 'mouse') {
+              sidebar.setHidden(false);
+            }
           }}
-          onMouseEnter={() => sidebar.show()}
-          onMouseLeave={() => sidebar.hide()}
-          onClick={() => {
-            if (windowWidth >= breakpoints.medium) {
-              saveGlobalPrefs({ floatingSidebar: !floatingSidebar });
-            } else {
-              sidebar.toggle();
+          onPointerLeave={e => {
+            if (e.pointerType === 'mouse') {
+              sidebar.setHidden(true);
+            }
+          }}
+          onPointerUp={e => {
+            if (e.pointerType !== 'mouse') {
+              sidebar.setHidden(!sidebar.hidden);
             }
           }}
         >
-          <View style={{ width: 15, height: 15 }}>
-            <ArrowButtonRight1
-              className="arrow-right"
-              style={{
-                width: 13,
-                height: 13,
-                color: colors.n5,
-                position: 'absolute',
-                top: 1,
-                left: 1,
-              }}
-            />
-            <NavigationMenu
-              className="menu"
-              style={{
-                width: 15,
-                height: 15,
-                color: colors.n5,
-                position: 'absolute',
-                top: 0,
-                left: 0,
-              }}
-            />
-          </View>
+          <NavigationMenu
+            className="menu"
+            style={{ width: 15, height: 15, color: colors.n5, left: 0 }}
+          />
         </Button>
       )}
 

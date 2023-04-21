@@ -486,7 +486,7 @@ export const CellButton = React.forwardRef(
         className="cell-button"
         tabIndex="0"
         onKeyDown={e => {
-          if (e.key === 'X' || e.key === ' ') {
+          if (e.key === 'x' || e.key === ' ') {
             e.preventDefault();
             if (!disabled) {
               onSelect && onSelect();

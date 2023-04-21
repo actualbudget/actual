@@ -195,10 +195,15 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
   let balance = useSheetValue(queries.accountBalance(account));
 
   function onSubmit(e) {
+    e.preventDefault();
     let input = e.target.elements[0];
     let amount = currencyToInteger(input.value);
-    onReconcile(amount == null ? balance : amount);
-    onClose();
+    if (amount != null) {
+      onReconcile(amount == null ? balance : amount);
+      onClose();
+    } else {
+      input.select();
+    }
   }
 
   return (

@@ -41,7 +41,6 @@ function Modals({
   budgetId,
   actions,
 }) {
-  const isNewAutocompleteEnabled = useFeatureFlag('newAutocomplete');
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   const syncServerStatus = useSyncServerStatus();
@@ -276,7 +275,6 @@ function Modals({
                 actions={actions}
                 name={options.name}
                 onSubmit={options.onSubmit}
-                isNewAutocompleteEnabled={isNewAutocompleteEnabled}
               />
             );
           }}
@@ -288,7 +286,6 @@ function Modals({
             modalProps={modalProps}
             month={options.month}
             actions={actions}
-            isNewAutocompleteEnabled={isNewAutocompleteEnabled}
             isGoalTemplatesEnabled={isGoalTemplatesEnabled}
           />
         </Route>

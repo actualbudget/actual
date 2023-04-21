@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router';
 
-import { useViewportSize } from '@react-aria/utils';
 import { css } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -10,6 +9,7 @@ import Add from '../icons/v1/Add';
 import CheveronDown from '../icons/v1/CheveronDown';
 import CheveronRight from '../icons/v1/CheveronRight';
 import Cog from '../icons/v1/Cog';
+import Pin from '../icons/v1/Pin';
 import Reports from '../icons/v1/Reports';
 import StoreFrontIcon from '../icons/v1/StoreFront';
 import TuningIcon from '../icons/v1/Tuning';
@@ -17,7 +17,6 @@ import Wallet from '../icons/v1/Wallet';
 import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
 import { styles, colors } from '../style';
-import { breakpoints } from '../tokens';
 
 import {
   View,
@@ -27,6 +26,7 @@ import {
   ButtonLink,
   Button,
 } from './common';
+import { useSidebar } from './FloatableSidebar';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CellValue from './spreadsheet/CellValue';
 
@@ -460,11 +460,25 @@ function Accounts({
   );
 }
 
-function ToggleButton({ style, onFloat }) {
+function ToggleButton({ style, isFloating, onFloat }) {
   return (
     <View className="float" style={[style, { flexShrink: 0 }]}>
       <Button bare onClick={onFloat}>
-        <ArrowButtonLeft1 style={{ width: 13, height: 13, color: colors.n5 }} />
+        {isFloating ? (
+          <Pin
+            style={{
+              margin: -2,
+              width: 15,
+              height: 15,
+              color: colors.n5,
+              transform: 'rotate(45deg)',
+            }}
+          />
+        ) : (
+          <ArrowButtonLeft1
+            style={{ width: 13, height: 13, color: colors.n5 }}
+          />
+        )}
       </Button>
     </View>
   );
@@ -539,8 +553,7 @@ export function Sidebar({
 }) {
   let hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
-  let windowWidth = useViewportSize().width;
-  let sidebarAlwaysFloats = windowWidth < breakpoints.medium;
+  const sidebar = useSidebar();
 
   return (
     <View
@@ -550,9 +563,9 @@ export function Sidebar({
           color: colors.n9,
           backgroundColor: colors.n1,
           '& .float': {
-            opacity: 0,
+            opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
-            width: hasWindowButtons ? null : 0,
+            width: hasWindowButtons || isFloating ? null : 0,
           },
           '&:hover .float': {
             opacity: 1,
@@ -562,7 +575,7 @@ export function Sidebar({
         style,
       ]}
     >
-      {hasWindowButtons && !sidebarAlwaysFloats && (
+      {hasWindowButtons && !sidebar.alwaysFloats && (
         <ToggleButton
           style={[
             {
@@ -574,6 +587,7 @@ export function Sidebar({
               paddingRight: 8,
             },
           ]}
+          isFloating={isFloating}
           onFloat={onFloat}
         />
       )}
@@ -614,8 +628,8 @@ export function Sidebar({
 
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
-        {!hasWindowButtons && !sidebarAlwaysFloats && (
-          <ToggleButton onFloat={onFloat} />
+        {!hasWindowButtons && !sidebar.alwaysFloats && (
+          <ToggleButton isFloating={isFloating} onFloat={onFloat} />
         )}
       </View>
 
