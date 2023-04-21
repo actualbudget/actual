@@ -123,7 +123,6 @@ function SingleAutocomplete({
   onUpdate,
   strict,
   onSelect,
-  clearAfterSelect,
   tableBehavior,
   value: initialValue,
 }) {
@@ -154,16 +153,11 @@ function SingleAutocomplete({
     setIsChanged(false);
   }
 
-  function onSelectAfter(clearAfterSelect) {
-    if (clearAfterSelect) {
-      setValue('');
-      setSelectedItem(null);
-      setHighlightedIndex(null);
-      setIsChanged(false);
-      return;
-    }
-
-    setIsOpen(false);
+  function onSelectAfter() {
+    setValue('');
+    setSelectedItem(null);
+    setHighlightedIndex(null);
+    setIsChanged(false);
   }
 
   const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
@@ -189,7 +183,7 @@ function SingleAutocomplete({
             onSelect(getItemId(item));
           }, 0);
         }
-        return onSelectAfter(clearAfterSelect);
+        return onSelectAfter();
       }}
       highlightedIndex={highlightedIndex}
       selectedItem={selectedItem || null}
@@ -361,7 +355,7 @@ function SingleAutocomplete({
                       // Handle it ourselves
                       e.stopPropagation();
                       onSelect(value);
-                      return onSelectAfter(clearAfterSelect);
+                      return onSelectAfter();
                     } else {
                       // No highlighted item, still allow the table to save the item
                       // as `null`, even though we're allowing the table to move
@@ -502,7 +496,6 @@ export function MultiAutocomplete({
         item => !selectedItems.includes(getItemId(item)),
       )}
       onSelect={onAddItem}
-      clearAfterSelect
       highlightFirst
       strict={strict}
       tooltipProps={{
