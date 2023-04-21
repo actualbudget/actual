@@ -41,61 +41,59 @@ export default function ChangePassword() {
   }
 
   return (
-    <>
-      <View style={{ maxWidth: 500, marginTop: -30 }}>
-        <Title text="Change server password" />
+    <View style={{ maxWidth: 500, marginTop: -30 }}>
+      <Title text="Change server password" />
+      <Text
+        style={{
+          fontSize: 16,
+          color: colors.n2,
+          lineHeight: 1.4,
+        }}
+      >
+        This will change the password for this server instance. All existing
+        sessions will stay logged in.
+      </Text>
+
+      {error && (
         <Text
           style={{
-            fontSize: 16,
-            color: colors.n2,
-            lineHeight: 1.4,
+            marginTop: 20,
+            color: colors.r4,
+            borderRadius: 4,
+            fontSize: 15,
           }}
         >
-          This will change the password for this server instance. All existing
-          sessions will stay logged in.
+          {getErrorMessage(error)}
         </Text>
+      )}
 
-        {error && (
-          <Text
-            style={{
-              marginTop: 20,
-              color: colors.r4,
-              borderRadius: 4,
-              fontSize: 15,
-            }}
+      {msg && (
+        <Text
+          style={{
+            marginTop: 20,
+            color: colors.g4,
+            borderRadius: 4,
+            fontSize: 15,
+          }}
+        >
+          {msg}
+        </Text>
+      )}
+
+      <ConfirmPasswordForm
+        buttons={
+          <Button
+            bare
+            type="button"
+            style={{ fontSize: 15, marginRight: 10 }}
+            onClick={() => history.push('/')}
           >
-            {getErrorMessage(error)}
-          </Text>
-        )}
-
-        {msg && (
-          <Text
-            style={{
-              marginTop: 20,
-              color: colors.g4,
-              borderRadius: 4,
-              fontSize: 15,
-            }}
-          >
-            {msg}
-          </Text>
-        )}
-
-        <ConfirmPasswordForm
-          buttons={
-            <Button
-              bare
-              type="button"
-              style={{ fontSize: 15, marginRight: 10 }}
-              onClick={() => history.push('/')}
-            >
-              Cancel
-            </Button>
-          }
-          onSetPassword={onSetPassword}
-          onError={setError}
-        />
-      </View>
-    </>
+            Cancel
+          </Button>
+        }
+        onSetPassword={onSetPassword}
+        onError={setError}
+      />
+    </View>
   );
 }
