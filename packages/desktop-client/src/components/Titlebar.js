@@ -290,17 +290,17 @@ function Titlebar({
           style={{ marginRight: 8 }}
           onPointerEnter={e => {
             if (e.pointerType === 'mouse') {
-              sidebar.show();
+              sidebar.setHidden(false);
             }
           }}
           onPointerLeave={e => {
             if (e.pointerType === 'mouse') {
-              sidebar.hide();
+              sidebar.setHidden(true);
             }
           }}
           onPointerUp={e => {
             if (e.pointerType !== 'mouse') {
-              sidebar.toggle();
+              sidebar.setHidden(!sidebar.hidden);
             }
           }}
         >
