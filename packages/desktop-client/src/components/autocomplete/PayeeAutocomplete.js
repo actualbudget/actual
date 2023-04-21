@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
@@ -27,8 +27,8 @@ function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
 }
 
 function makeNew(value, rawPayee) {
-  if (value === 'new' && !rawPayee.current.startsWith('new:')) {
-    return 'new:' + rawPayee.current;
+  if (value === 'new' && !rawPayee.startsWith('new:')) {
+    return 'new:' + rawPayee;
   }
   return value;
 }
@@ -189,8 +189,8 @@ export default function PayeeAutocomplete({
   let [focusTransferPayees, setFocusTransferPayees] = useState(
     defaultFocusTransferPayees,
   );
-  let rawPayee = useRef('');
-  let hasPayeeInput = !!rawPayee.current;
+  let [rawPayee, setRawPayee] = useState('');
+  let hasPayeeInput = !!rawPayee;
   let payeeSuggestions = useMemo(() => {
     const suggestions = getPayeeSuggestions(
       payees,
@@ -210,7 +210,7 @@ export default function PayeeAutocomplete({
     if (tableBehavior) {
       onSelect && onSelect(makeNew(value, rawPayee));
     } else {
-      let create = () => dispatch(createPayee(rawPayee.current));
+      let create = () => dispatch(createPayee(rawPayee));
 
       if (Array.isArray(value)) {
         value = await Promise.all(value.map(v => (v === 'new' ? create() : v)));
@@ -237,16 +237,19 @@ export default function PayeeAutocomplete({
         if (!item) {
           return '';
         } else if (item.id === 'new') {
-          return rawPayee.current;
+          return rawPayee;
         }
         return item.name;
       }}
       focused={payeeFieldFocused}
       inputProps={{
         ...inputProps,
-        onBlur: () => setPayeeFieldFocused(false),
+        onBlur: () => {
+          setRawPayee('');
+          setPayeeFieldFocused(false);
+        },
         onFocus: () => setPayeeFieldFocused(true),
-        onChange: text => (rawPayee.current = text),
+        onChange: setRawPayee,
       }}
       onUpdate={value => onUpdate && onUpdate(makeNew(value, rawPayee))}
       onSelect={handleSelect}
