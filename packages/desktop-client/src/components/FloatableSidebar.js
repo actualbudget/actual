@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
 import { useViewportSize } from '@react-aria/utils';
-import mitt from 'mitt';
 
 import * as actions from 'loot-core/src/client/actions';
 
