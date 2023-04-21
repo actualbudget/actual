@@ -50,55 +50,53 @@ export default function Bootstrap() {
   }
 
   return (
-    <>
-      <View style={{ maxWidth: 450, marginTop: -30 }}>
-        <Title text="Welcome to Actual!" />
-        <P style={{ fontSize: 16, color: colors.n2 }}>
-          Actual is a super fast privacy-focused app for managing your finances.
-          To secure your data, you’ll need to set a password for your server.
-        </P>
+    <View style={{ maxWidth: 450, marginTop: -30 }}>
+      <Title text="Welcome to Actual!" />
+      <P style={{ fontSize: 16, color: colors.n2 }}>
+        Actual is a super fast privacy-focused app for managing your finances.
+        To secure your data, you’ll need to set a password for your server.
+      </P>
 
-        <P isLast style={{ fontSize: 16, color: colors.n2 }}>
-          Consider opening{' '}
-          <a
-            href="https://actualbudget.github.io/docs/Getting-Started/using-actual/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: colors.b4 }}
+      <P isLast style={{ fontSize: 16, color: colors.n2 }}>
+        Consider opening{' '}
+        <a
+          href="https://actualbudget.github.io/docs/Getting-Started/using-actual/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: colors.b4 }}
+        >
+          our tour
+        </a>{' '}
+        in a new tab for some guidance on what to do when you’ve set your
+        password.
+      </P>
+
+      {error && (
+        <Text
+          style={{
+            marginTop: 20,
+            color: colors.r4,
+            borderRadius: 4,
+            fontSize: 15,
+          }}
+        >
+          {getErrorMessage(error)}
+        </Text>
+      )}
+
+      <ConfirmPasswordForm
+        buttons={
+          <Button
+            bare
+            style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
+            onClick={onDemo}
           >
-            our tour
-          </a>{' '}
-          in a new tab for some guidance on what to do when you’ve set your
-          password.
-        </P>
-
-        {error && (
-          <Text
-            style={{
-              marginTop: 20,
-              color: colors.r4,
-              borderRadius: 4,
-              fontSize: 15,
-            }}
-          >
-            {getErrorMessage(error)}
-          </Text>
-        )}
-
-        <ConfirmPasswordForm
-          buttons={
-            <Button
-              bare
-              style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
-              onClick={onDemo}
-            >
-              Try Demo
-            </Button>
-          }
-          onSetPassword={onSetPassword}
-          onError={setError}
-        />
-      </View>
-    </>
+            Try Demo
+          </Button>
+        }
+        onSetPassword={onSetPassword}
+        onError={setError}
+      />
+    </View>
   );
 }

@@ -85,119 +85,117 @@ export default function ConfigServer() {
   }
 
   return (
-    <>
-      <View style={{ maxWidth: 500, marginTop: -30 }}>
-        <Title text="Where’s the server?" />
+    <View style={{ maxWidth: 500, marginTop: -30 }}>
+      <Title text="Where’s the server?" />
 
+      <Text
+        style={{
+          fontSize: 16,
+          color: colors.n2,
+          lineHeight: 1.5,
+        }}
+      >
+        {currentUrl ? (
+          <>
+            Existing sessions will be logged out and you will log in to this
+            server. We will validate that Actual is running at this URL.
+          </>
+        ) : (
+          <>
+            There is no server configured. After running the server, specify the
+            URL here to use the app. You can always change this later. We will
+            validate that Actual is running at this URL.
+          </>
+        )}
+      </Text>
+
+      {error && (
         <Text
           style={{
-            fontSize: 16,
-            color: colors.n2,
-            lineHeight: 1.5,
+            marginTop: 20,
+            color: colors.r4,
+            borderRadius: 4,
+            fontSize: 15,
           }}
         >
-          {currentUrl ? (
-            <>
-              Existing sessions will be logged out and you will log in to this
-              server. We will validate that Actual is running at this URL.
-            </>
-          ) : (
-            <>
-              There is no server configured. After running the server, specify
-              the URL here to use the app. You can always change this later. We
-              will validate that Actual is running at this URL.
-            </>
-          )}
+          {getErrorMessage(error)}
         </Text>
+      )}
 
-        {error && (
-          <Text
-            style={{
-              marginTop: 20,
-              color: colors.r4,
-              borderRadius: 4,
-              fontSize: 15,
-            }}
+      <form
+        style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
+        onSubmit={e => {
+          e.preventDefault();
+          onSubmit();
+        }}
+      >
+        <Input
+          autoFocus={true}
+          placeholder={'https://example.com'}
+          value={url}
+          onChange={e => setUrl(e.target.value)}
+          style={{ flex: 1, marginRight: 10 }}
+        />
+        <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
+          OK
+        </ButtonWithLoading>
+        {currentUrl && (
+          <Button
+            bare
+            type="button"
+            style={{ fontSize: 15, marginLeft: 10 }}
+            onClick={() => history.goBack()}
           >
-            {getErrorMessage(error)}
-          </Text>
+            Cancel
+          </Button>
         )}
+      </form>
 
-        <form
-          style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-          onSubmit={e => {
-            e.preventDefault();
-            onSubmit();
-          }}
-        >
-          <Input
-            autoFocus={true}
-            placeholder={'https://example.com'}
-            value={url}
-            onChange={e => setUrl(e.target.value)}
-            style={{ flex: 1, marginRight: 10 }}
-          />
-          <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
-            OK
-          </ButtonWithLoading>
-          {currentUrl && (
+      <View
+        style={{
+          flexDirection: 'row',
+          flexFlow: 'row wrap',
+          justifyContent: 'center',
+          marginTop: 15,
+        }}
+      >
+        {currentUrl ? (
+          <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
+            Stop using a server
+          </Button>
+        ) : (
+          <>
             <Button
               bare
-              type="button"
-              style={{ fontSize: 15, marginLeft: 10 }}
-              onClick={() => history.goBack()}
+              style={{
+                color: colors.n4,
+                margin: 5,
+                marginRight: 15,
+              }}
+              onClick={onSameDomain}
             >
-              Cancel
+              Use {window.location.origin.replace(/https?:\/\//, '')}
             </Button>
-          )}
-        </form>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            flexFlow: 'row wrap',
-            justifyContent: 'center',
-            marginTop: 15,
-          }}
-        >
-          {currentUrl ? (
-            <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
-              Stop using a server
+            <Button
+              bare
+              style={{ color: colors.n4, margin: 5 }}
+              onClick={onSkip}
+            >
+              Don’t use a server
             </Button>
-          ) : (
-            <>
-              <Button
-                bare
-                style={{
-                  color: colors.n4,
-                  margin: 5,
-                  marginRight: 15,
-                }}
-                onClick={onSameDomain}
-              >
-                Use {window.location.origin.replace(/https?:\/\//, '')}
-              </Button>
-              <Button
-                bare
-                style={{ color: colors.n4, margin: 5 }}
-                onClick={onSkip}
-              >
-                Don’t use a server
-              </Button>
 
-              {isNonProductionEnvironment() && (
-                <Button
-                  primary
-                  style={{ marginLeft: 15 }}
-                  onClick={onCreateTestFile}
-                >
-                  Create test file
-                </Button>
-              )}
-            </>
-          )}
-        </View>
+            {isNonProductionEnvironment() && (
+              <Button
+                primary
+                style={{ marginLeft: 15 }}
+                onClick={onCreateTestFile}
+              >
+                Create test file
+              </Button>
+            )}
+          </>
+        )}
       </View>
-    </>
+    </View>
   );
 }

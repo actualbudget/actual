@@ -234,10 +234,7 @@ class FinancesApp extends React.Component {
   }
 
   handleWindowResize() {
-    this.setState({
-      isMobile: isMobile(),
-      windowWidth: window.innerWidth,
-    });
+    this.setState({ isMobile: isMobile() });
   }
 
   componentDidMount() {

@@ -56,64 +56,62 @@ export default function Login() {
   }
 
   return (
-    <>
-      <View style={{ maxWidth: 450, marginTop: -30 }}>
-        <Title text="Sign in to this Actual instance" />
+    <View style={{ maxWidth: 450, marginTop: -30 }}>
+      <Title text="Sign in to this Actual instance" />
+      <Text
+        style={{
+          fontSize: 16,
+          color: colors.n2,
+          lineHeight: 1.4,
+        }}
+      >
+        If you lost your password, you likely still have access to your server
+        to manually reset it.
+      </Text>
+
+      {error && (
         <Text
           style={{
-            fontSize: 16,
-            color: colors.n2,
-            lineHeight: 1.4,
+            marginTop: 20,
+            color: colors.r4,
+            borderRadius: 4,
+            fontSize: 15,
           }}
         >
-          If you lost your password, you likely still have access to your server
-          to manually reset it.
+          {getErrorMessage(error)}
         </Text>
+      )}
 
-        {error && (
-          <Text
-            style={{
-              marginTop: 20,
-              color: colors.r4,
-              borderRadius: 4,
-              fontSize: 15,
-            }}
-          >
-            {getErrorMessage(error)}
-          </Text>
-        )}
-
-        <form
-          style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-          onSubmit={onSubmit}
+      <form
+        style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
+        onSubmit={onSubmit}
+      >
+        <Input
+          autoFocus={true}
+          placeholder="Password"
+          type="password"
+          onChange={e => setPassword(e.target.value)}
+          style={{ flex: 1, marginRight: 10 }}
+        />
+        <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
+          Sign in
+        </ButtonWithLoading>
+      </form>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          marginTop: 15,
+        }}
+      >
+        <Button
+          bare
+          style={{ fontSize: 15, color: colors.b4, marginLeft: 10 }}
+          onClick={onDemo}
         >
-          <Input
-            autoFocus={true}
-            placeholder="Password"
-            type="password"
-            onChange={e => setPassword(e.target.value)}
-            style={{ flex: 1, marginRight: 10 }}
-          />
-          <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
-            Sign in
-          </ButtonWithLoading>
-        </form>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: 15,
-          }}
-        >
-          <Button
-            bare
-            style={{ fontSize: 15, color: colors.b4, marginLeft: 10 }}
-            onClick={onDemo}
-          >
-            Try Demo &rarr;
-          </Button>
-        </View>
+          Try Demo &rarr;
+        </Button>
       </View>
-    </>
+    </View>
   );
 }
