@@ -162,15 +162,13 @@ function SchedulePreview({ previewDates }) {
   }
 
   return (
-    <>
-      <Stack
-        direction="column"
-        spacing={1}
-        style={{ marginTop: 15, color: colors.n4 }}
-      >
-        {content}
-      </Stack>
-    </>
+    <Stack
+      direction="column"
+      spacing={1}
+      style={{ marginTop: 15, color: colors.n4 }}
+    >
+      {content}
+    </Stack>
   );
 }
 

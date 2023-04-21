@@ -424,28 +424,26 @@ function PayeeCell({
         inputStyle,
       }) => {
         return (
-          <>
-            <PayeeAutocomplete
-              payees={payees}
-              accounts={accounts}
-              value={payeeId}
-              shouldSaveFromKey={shouldSaveFromKey}
-              inputProps={{
-                onBlur,
-                onKeyDown,
-                style: inputStyle,
-              }}
-              showManagePayees={true}
-              tableBehavior={true}
-              defaultFocusTransferPayees={transaction.is_child}
-              focused={true}
-              onUpdate={onUpdate}
-              onSelect={onSave}
-              onManagePayees={() => onManagePayees(payeeId)}
-              isCreatable
-              menuPortalTarget={undefined}
-            />
-          </>
+          <PayeeAutocomplete
+            payees={payees}
+            accounts={accounts}
+            value={payeeId}
+            shouldSaveFromKey={shouldSaveFromKey}
+            inputProps={{
+              onBlur,
+              onKeyDown,
+              style: inputStyle,
+            }}
+            showManagePayees={true}
+            tableBehavior={true}
+            defaultFocusTransferPayees={transaction.is_child}
+            focused={true}
+            onUpdate={onUpdate}
+            onSelect={onSave}
+            onManagePayees={() => onManagePayees(payeeId)}
+            isCreatable
+            menuPortalTarget={undefined}
+          />
         );
       }}
     </CustomCell>
