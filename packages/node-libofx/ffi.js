@@ -35,4 +35,4 @@ function create(libofx) {
   };
 }
 
-module.exports = create;
+export default create;

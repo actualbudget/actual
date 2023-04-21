@@ -239,14 +239,3 @@ export function downloadBudget(cloudFileId, { replace } = {}) {
     return id;
   };
 }
-
-export function getYNAB4Imports() {
-  return async dispatch => {
-    let imports = await send('get-ynab4-files');
-    dispatch({
-      type: 'SET_AVAILABLE_IMPORTS',
-      imports,
-    });
-    return imports;
-  };
-}

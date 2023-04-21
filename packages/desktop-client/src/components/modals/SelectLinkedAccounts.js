@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
 import { colors } from '../../style';
-import Autocomplete from '../autocomplete/NewAutocomplete';
+import Autocomplete from '../autocomplete/Autocomplete';
 import { View, Modal, Button, Text } from '../common';
 import { TableHeader, Table, Row, Field } from '../table';
 
-const addAccountOption = { value: 'new', label: 'Create new account' };
+const addAccountOption = { id: 'new', name: 'Create new account' };
 
 export default function SelectLinkedAccounts({
   modalProps,
@@ -49,7 +49,7 @@ export default function SelectLinkedAccounts({
         actions.linkAccount(
           requisitionId,
           externalAccount,
-          chosenLocalAccountId !== addAccountOption.value
+          chosenLocalAccountId !== addAccountOption.id
             ? chosenLocalAccountId
             : undefined,
         );
@@ -108,11 +108,8 @@ export default function SelectLinkedAccounts({
                   <TableRow
                     externalAccount={item}
                     chosenAccount={
-                      chosenAccounts[item.account_id] === addAccountOption.value
-                        ? {
-                            id: addAccountOption.value,
-                            name: addAccountOption.label,
-                          }
+                      chosenAccounts[item.account_id] === addAccountOption.id
+                        ? addAccountOption
                         : localAccounts.find(
                             acc => chosenAccounts[item.account_id] === acc.id,
                           )
@@ -154,17 +151,9 @@ function TableRow({
 }) {
   const [focusedField, setFocusedField] = useState(null);
 
-  const chosenAccountOption = chosenAccount && {
-    value: chosenAccount.id,
-    label: chosenAccount.name,
-  };
-
   const availableAccountOptions = [
-    ...unlinkedAccounts.map(acct => ({
-      value: acct.id,
-      label: acct.name,
-    })),
-    chosenAccount?.id !== addAccountOption.value && chosenAccountOption,
+    ...unlinkedAccounts,
+    chosenAccount?.id !== addAccountOption.id && chosenAccount,
     addAccountOption,
   ].filter(Boolean);
 
@@ -178,13 +167,17 @@ function TableRow({
       >
         {focusedField === 'account' ? (
           <Autocomplete
-            autoFocus
-            options={availableAccountOptions}
+            focused
+            strict
+            highlightFirst
+            suggestions={availableAccountOptions}
             onSelect={value => {
               onSetLinkedAccount(externalAccount, value);
             }}
-            onBlur={() => setFocusedField(null)}
-            value={chosenAccountOption}
+            inputProps={{
+              onBlur: () => setFocusedField(null),
+            }}
+            value={chosenAccount?.id}
           />
         ) : (
           chosenAccount?.name

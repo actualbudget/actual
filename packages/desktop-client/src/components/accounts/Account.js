@@ -195,10 +195,15 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
   let balance = useSheetValue(queries.accountBalance(account));
 
   function onSubmit(e) {
+    e.preventDefault();
     let input = e.target.elements[0];
     let amount = currencyToInteger(input.value);
-    onReconcile(amount == null ? balance : amount);
-    onClose();
+    if (amount != null) {
+      onReconcile(amount == null ? balance : amount);
+      onClose();
+    } else {
+      input.select();
+    }
   }
 
   return (
@@ -1700,12 +1705,13 @@ class AccountInternal extends React.PureComponent {
 
     let rule = {
       stage: null,
+      conditionsOp: 'and',
       conditions: [payeeCondition],
       actions: [
         {
           op: 'set',
           field: 'category',
-          value: null,
+          value: transactions[0].category,
           type: 'id',
         },
       ],

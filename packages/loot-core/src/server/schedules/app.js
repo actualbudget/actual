@@ -2,6 +2,8 @@ import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
+import * as connection from '../../platform/server/connection';
+import * as uuid from '../../platform/uuid';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import {
@@ -30,9 +32,6 @@ import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
-
-const connection = require('../../platform/server/connection');
-const uuid = require('../../platform/uuid');
 
 // Utilities
 
@@ -177,6 +176,20 @@ export async function setNextDate({ id, start, conditions, reset }) {
 
 // Methods
 
+export async function checkIfScheduleExists(name, scheduleId) {
+  let idForName = await db.first('SELECT id from schedules WHERE name = ?', [
+    name,
+  ]);
+
+  if (idForName == null) {
+    return false;
+  }
+  if (scheduleId) {
+    return idForName['id'] !== scheduleId;
+  }
+  return true;
+}
+
 export async function createSchedule({ schedule, conditions = [] } = {}) {
   let scheduleId = (schedule && schedule.id) || uuid.v4Sync();
 
@@ -190,6 +203,15 @@ export async function createSchedule({ schedule, conditions = [] } = {}) {
 
   let nextDate = getNextDate(dateCond);
   let nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
+  if (schedule) {
+    if (schedule.name) {
+      if (await checkIfScheduleExists(schedule.name, scheduleId)) {
+        throw new Error('Cannot create schedules with the same name');
+      }
+    } else {
+      schedule.name = null;
+    }
+  }
 
   // Create the rule here based on the info
   let ruleId;
@@ -225,6 +247,13 @@ export async function updateSchedule({ schedule, conditions, resetNextDate }) {
     throw new Error('You cannot change the rule of a schedule');
   }
 
+  if (schedule.name) {
+    if (await checkIfScheduleExists(schedule.name, schedule.id)) {
+      throw new Error('There is already a schedule with this name');
+    }
+  } else {
+    schedule.name = null;
+  }
   // We need the rule if there are conditions
   let rule;
 

@@ -4,8 +4,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import NewCategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
-import LegacyCategoryAutocomplete from '../../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../../autocomplete/CategorySelect';
 import { View, Button, Tooltip, InitialFocus, Input } from '../../common';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import { addToBeBudgetedGroup, CategoryGroupsContext } from '../util';
@@ -17,12 +16,7 @@ export default function TransferTooltip({
   tooltipProps,
   onSubmit,
   onClose,
-  isNewAutocompleteEnabled,
 }) {
-  const CategoryAutocomplete = isNewAutocompleteEnabled
-    ? NewCategoryAutocomplete
-    : LegacyCategoryAutocomplete;
-
   let spreadsheet = useSpreadsheet();
   let sheetName = useContext(NamespaceContext);
   let categoryGroups = useContext(CategoryGroupsContext);

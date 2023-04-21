@@ -5,7 +5,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
 import { Error, Warning } from '../alerts';
-import Autocomplete from '../autocomplete/NewAutocomplete';
+import Autocomplete from '../autocomplete/Autocomplete';
 import { View, Modal, Button, P } from '../common';
 import { FormField, FormLabel } from '../forms';
 
@@ -27,7 +27,7 @@ function useAvailableBanks(country) {
 
       const results = await send('nordigen-get-banks', country);
 
-      setBanks(results.map(bank => ({ value: bank.id, label: bank.name })));
+      setBanks(results);
       setIsLoading(false);
     }
 
@@ -124,12 +124,13 @@ export default function NordigenExternalMsg({
         <FormField>
           <FormLabel title="Choose your country:" htmlFor="country-field" />
           <Autocomplete
+            strict
+            highlightFirst
             disabled={isConfigurationLoading}
-            options={COUNTRY_OPTIONS}
+            suggestions={COUNTRY_OPTIONS}
             onSelect={setCountry}
-            value={COUNTRY_OPTIONS.find(({ value }) => value === country)}
-            inputId="country-field"
-            placeholder="(please select)"
+            value={country}
+            inputProps={{ id: 'country-field', placeholder: '(please select)' }}
           />
         </FormField>
 
@@ -141,11 +142,15 @@ export default function NordigenExternalMsg({
               <FormLabel title="Choose your bank:" htmlFor="bank-field" />
               <Autocomplete
                 focused
-                options={bankOptions}
+                strict
+                highlightFirst
+                suggestions={bankOptions}
                 onSelect={setInstitutionId}
-                value={bankOptions.find(({ value }) => value === institutionId)}
-                inputId="bank-field"
-                placeholder="(please select)"
+                value={institutionId}
+                inputProps={{
+                  id: 'bank-field',
+                  placeholder: '(please select)',
+                }}
               />
             </FormField>
           ))}

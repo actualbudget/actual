@@ -1,4 +1,4 @@
-let api = require('./index');
+import * as api from './index';
 
 async function run() {
   let app = await api.init({ config: { dataDir: '/tmp' } });

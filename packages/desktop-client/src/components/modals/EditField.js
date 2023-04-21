@@ -8,12 +8,9 @@ import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
-import LegacyAccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import NewCategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import LegacyCategoryAutocomplete from '../autocomplete/CategorySelect';
-import NewAccountAutocomplete from '../autocomplete/NewAccountAutocomplete';
-import NewPayeeAutocomplete from '../autocomplete/NewPayeeAutocomplete';
-import LegacyPayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
+import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import { View, Modal, Input } from '../common';
 import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
@@ -28,7 +25,6 @@ function EditField({
   onSubmit,
   dateFormat,
   createPayee,
-  isNewAutocompleteEnabled,
 }) {
   function onSelect(value) {
     if (value != null) {
@@ -48,18 +44,6 @@ function EditField({
     inputProps: { style: inputStyle },
     containerProps: { style: { height: 275 } },
   };
-
-  const PayeeAutocomplete = isNewAutocompleteEnabled
-    ? NewPayeeAutocomplete
-    : LegacyPayeeAutocomplete;
-
-  const AccountAutocomplete = isNewAutocompleteEnabled
-    ? NewAccountAutocomplete
-    : LegacyAccountAutocomplete;
-
-  const CategoryAutocomplete = isNewAutocompleteEnabled
-    ? NewCategoryAutocomplete
-    : LegacyCategoryAutocomplete;
 
   switch (name) {
     case 'date': {

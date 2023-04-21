@@ -1,11 +1,9 @@
 #!/bin/sh -e
 
-dest_dir=$(realpath "$1")
+ROOT=`dirname $(dirname "$0")`
+DEST="$1"
 
-ROOT=`dirname "$0"`
-cd "$ROOT"
-
-rm -rf "$dest_dir"/migrations
-mkdir -p "$dest_dir"/migrations
-cp ../migrations/* "$dest_dir"/migrations/
-cp ../default-db.sqlite "$dest_dir"
+rm -rf "$DEST"/migrations
+mkdir -p "$DEST"/migrations
+cp "$ROOT"/migrations/* "$DEST"/migrations/
+cp "$ROOT"/default-db.sqlite "$DEST"

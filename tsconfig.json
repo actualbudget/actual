@@ -29,5 +29,10 @@
     "noEmit": true
   },
   "include": ["packages/**/*"],
-  "exclude": ["**/node_modules/*", "**/build/*", "**/lib-dist/*"]
+  "exclude": ["**/node_modules/*", "**/build/*", "**/lib-dist/*"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
 }

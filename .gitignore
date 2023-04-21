@@ -1,6 +1,7 @@
 /data/*
 !data/.gitkeep
 /data2
+packages/api/dist
 packages/desktop-electron/client-build
 packages/desktop-electron/.electron-symbols
 packages/desktop-electron/dist

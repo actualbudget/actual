@@ -1,6 +1,5 @@
-import fs from '../../platform/server/fs';
-
-const uuid = require('../../platform/uuid');
+import * as fs from '../../platform/server/fs';
+import * as uuid from '../../platform/uuid';
 
 export async function uniqueFileName(existingFiles) {
   let initialName = 'My Finances';

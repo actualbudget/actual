@@ -2,10 +2,9 @@
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache.js';
-import fs from '../../platform/server/fs';
+import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
-
-const uuid = require('../../platform/uuid');
+import * as uuid from '../../platform/uuid';
 
 let MIGRATIONS_DIR = fs.migrationsPath;
 

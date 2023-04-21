@@ -1,3 +1,5 @@
+import * as uuid from '../platform/uuid';
+
 import {
   splitTransaction,
   updateTransaction,
@@ -5,8 +7,6 @@ import {
   addSplitTransaction,
   makeChild,
 } from './transactions';
-
-const uuid = require('../platform/uuid');
 
 // const data = {
 //   splitTransactions: generateTransaction({ amount: -5000, acct: 2 }, -2000)
