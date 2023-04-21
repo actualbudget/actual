@@ -61,21 +61,6 @@ function Sidebar({ floatingSidebar }) {
 
   return (
     <>
-      {sidebarShouldFloat && (
-        <View
-          onMouseOver={() => setHidden(false)}
-          onMouseLeave={() => setHidden(true)}
-          style={{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            width: hidden ? 0 : 160,
-            zIndex: 999,
-          }}
-        ></View>
-      )}
-
       <View
         onMouseOver={
           sidebarShouldFloat
