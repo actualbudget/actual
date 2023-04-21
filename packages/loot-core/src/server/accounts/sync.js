@@ -880,11 +880,11 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       bankId,
       date,
     );
-    if (transactions.all.length === 0) {
+    if (transactions.length === 0) {
       return { added: [], updated: [] };
     }
 
-    transactions = transactions.all.map(trans => ({ ...trans, account: id }));
+    transactions = transactions.map(trans => ({ ...trans, account: id }));
 
     return runMutator(async () => {
       const result = await reconcileTransactions(id, transactions);
@@ -916,13 +916,13 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     // imported transactions.
     let currentBalance = acctRow.balance_current;
 
-    const previousBalance = transactions.all.reduce((total, trans) => {
+    const previousBalance = transactions.reduce((total, trans) => {
       return total - trans.amount;
     }, currentBalance);
 
     const oldestDate =
-      transactions.all.length > 0
-        ? transactions.all[transactions.all.length - 1].date
+      transactions.length > 0
+        ? transactions[transactions.length - 1].date
         : monthUtils.currentDay();
 
     let payee = await getStartingBalancePayee();
@@ -938,7 +938,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
         starting_balance_flag: true,
       });
 
-      let result = await reconcileTransactions(id, transactions.all);
+      let result = await reconcileTransactions(id, transactions);
       return {
         ...result,
         added: [initialId, ...result.added],
