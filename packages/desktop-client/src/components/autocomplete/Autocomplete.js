@@ -128,20 +128,20 @@ function SingleAutocomplete({
   tableBehavior,
   value: initialValue,
 }) {
-  const [selectedItem, setSelectedItem] = React.useState(() =>
+  const [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
   );
-  const [value, setValue] = React.useState(
+  const [value, setValue] = useState(
     selectedItem ? getItemName(selectedItem) : '',
   );
-  const [originalItem, setOriginalItem] = React.useState(selectedItem);
-  const [filteredSuggestions, setFilteredSuggestions] = React.useState(() =>
+  const [originalItem, setOriginalItem] = useState(selectedItem);
+  const [filteredSuggestions, setFilteredSuggestions] = useState(() =>
     initialFilterSuggestions
       ? initialFilterSuggestions(suggestions, initialValue)
       : null,
   );
-  const [highlightedIndex, setHighlightedIndex] = React.useState(null);
-  const [isOpen, setIsOpen] = React.useState(embedded);
+  const [highlightedIndex, setHighlightedIndex] = useState(null);
+  const [isOpen, setIsOpen] = useState(embedded);
 
   function resetState(newValue) {
     const val = newValue === undefined ? initialValue : newValue;
