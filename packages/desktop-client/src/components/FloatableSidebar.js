@@ -90,9 +90,9 @@ function Sidebar({ floatingSidebar }) {
         onMouseLeave={sidebarShouldFloat ? () => setHidden(true) : null}
         style={{
           position: 'absolute',
-          top: 50,
+          top: 12,
           // If not floating, the -50 takes into account the transform below
-          bottom: sidebarShouldFloat ? 50 : -50,
+          bottom: sidebarShouldFloat ? 12 : -50,
           zIndex: 1001,
           borderRadius: '0 6px 6px 0',
           overflow: 'hidden',
@@ -100,7 +100,7 @@ function Sidebar({ floatingSidebar }) {
             !sidebarShouldFloat || hidden
               ? 'none'
               : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
-          transform: `translateY(${!sidebarShouldFloat ? -50 : 0}px)
+          transform: `translateY(${!sidebarShouldFloat ? -12 : 0}px)
                       translateX(${
                         sidebarShouldFloat && hidden ? -SIDEBAR_WIDTH : 0
                       }px)`,
