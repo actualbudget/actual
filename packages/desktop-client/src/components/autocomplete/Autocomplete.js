@@ -165,6 +165,10 @@ function SingleAutocomplete({
   return (
     <Downshift
       onSelect={item => {
+        setSelectedItem(item);
+        setHighlightedIndex(null);
+        setIsOpen(false);
+
         if (onSelect) {
           // I AM NOT PROUD OF THIS OK??
           // This WHOLE FILE is a mess anyway
@@ -183,7 +187,6 @@ function SingleAutocomplete({
             onSelect(getItemId(item));
           }, 0);
         }
-        return onSelectAfter();
       }}
       highlightedIndex={highlightedIndex}
       selectedItem={selectedItem || null}
