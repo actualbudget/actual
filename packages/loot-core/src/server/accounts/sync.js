@@ -206,13 +206,17 @@ async function downloadNordigenTransactions(
     }
 
     const {
-      transactions: { booked, pending },
+      transactions: { booked, pending, all },
       balances,
       startingBalance,
     } = res;
 
     return {
-      transactions: [...booked, ...pending],
+      transactions: {
+        booked,
+        pending,
+        all,
+      },
       accountBalances: balances,
       startingBalance,
     };
@@ -365,8 +369,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
 
-    // Transaction is pending if it does not have an entry reference
-    trans.cleared = Boolean(trans.entryReference);
+    trans.cleared = Boolean(trans.booked);
 
     normalized.push({
       payee_name,
@@ -781,11 +784,11 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
       date,
     );
 
-    if (transactions.length === 0) {
+    if (transactions.all.length === 0) {
       return { added: [], updated: [] };
     }
 
-    transactions = transactions.map(trans => ({ ...trans, account: id }));
+    transactions = transactions.all.map(trans => ({ ...trans, account: id }));
 
     return runMutator(async () => {
       const result = await reconcileNordigenTransactions(id, transactions);
@@ -811,10 +814,10 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
     // current balance from the accounts table and subtract all the
     // imported transactions.
 
-    const oldestTransaction = transactions[transactions.length - 1];
+    const oldestTransaction = transactions.all[transactions.all.length - 1];
 
     const oldestDate =
-      transactions.length > 0
+      transactions.all.length > 0
         ? oldestTransaction.valueDate || oldestTransaction.bookingDate
         : monthUtils.currentDay();
 
@@ -831,7 +834,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
         starting_balance_flag: true,
       });
 
-      let result = await reconcileNordigenTransactions(id, transactions);
+      let result = await reconcileNordigenTransactions(id, transactions.all);
       return {
         ...result,
         added: [initialId, ...result.added],
@@ -877,11 +880,11 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
       bankId,
       date,
     );
-    if (transactions.length === 0) {
+    if (transactions.all.length === 0) {
       return { added: [], updated: [] };
     }
 
-    transactions = transactions.map(trans => ({ ...trans, account: id }));
+    transactions = transactions.all.map(trans => ({ ...trans, account: id }));
 
     return runMutator(async () => {
       const result = await reconcileTransactions(id, transactions);
@@ -913,13 +916,13 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     // imported transactions.
     let currentBalance = acctRow.balance_current;
 
-    const previousBalance = transactions.reduce((total, trans) => {
+    const previousBalance = transactions.all.reduce((total, trans) => {
       return total - trans.amount;
     }, currentBalance);
 
     const oldestDate =
-      transactions.length > 0
-        ? transactions[transactions.length - 1].date
+      transactions.all.length > 0
+        ? transactions.all[transactions.all.length - 1].date
         : monthUtils.currentDay();
 
     let payee = await getStartingBalancePayee();
@@ -935,7 +938,7 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
         starting_balance_flag: true,
       });
 
-      let result = await reconcileTransactions(id, transactions);
+      let result = await reconcileTransactions(id, transactions.all);
       return {
         ...result,
         added: [initialId, ...result.added],
