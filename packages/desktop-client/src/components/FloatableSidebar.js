@@ -7,8 +7,6 @@ import mitt from 'mitt';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import { colors } from '../style';
-
 import { View } from './common';
 import { SIDEBAR_WIDTH } from './sidebar';
 import SidebarWithData from './SidebarWithData';
@@ -94,7 +92,7 @@ function Sidebar({ floatingSidebar }) {
           // If not floating, the -50 takes into account the transform below
           bottom: sidebarShouldFloat ? 12 : -50,
           zIndex: 1001,
-          borderRadius: '0 6px 6px 0',
+          borderRadius: sidebarShouldFloat ? '0 6px 6px 0' : 0,
           overflow: 'hidden',
           boxShadow:
             !sidebarShouldFloat || hidden
@@ -104,28 +102,20 @@ function Sidebar({ floatingSidebar }) {
                       translateX(${
                         sidebarShouldFloat && hidden ? -SIDEBAR_WIDTH : 0
                       }px)`,
-          transition: 'transform .5s, box-shadow .5s',
+          transition:
+            'transform .5s, box-shadow .5s, border-radius .5s, bottom .5s',
         }}
       >
         <SidebarWithData />
       </View>
 
       <View
-        style={[
-          {
-            backgroundColor: colors.n1,
-            opacity: sidebarShouldFloat ? 0 : 1,
-            transform: `translateX(${sidebarShouldFloat ? -50 : 0}px)`,
-            transition: 'transform .4s, opacity .2s',
-            width: SIDEBAR_WIDTH,
-          },
-          sidebarShouldFloat && {
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-          },
-        ]}
+        style={{
+          pointerEvents: 'none',
+          // transition does not feel very good
+          // transition: 'width .4s',
+          width: sidebarShouldFloat ? 0 : SIDEBAR_WIDTH,
+        }}
       ></View>
     </>
   );
