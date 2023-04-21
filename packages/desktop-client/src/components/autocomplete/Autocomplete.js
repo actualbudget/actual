@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 
 import Downshift from 'downshift';
 import { css } from 'glamor';
@@ -106,7 +106,7 @@ function defaultItemToString(item) {
 
 function SingleAutocomplete({
   focused,
-  embedded,
+  embedded = false,
   containerProps,
   inputProps = {},
   suggestions,
@@ -117,7 +117,6 @@ function SingleAutocomplete({
   itemToString = defaultItemToString,
   shouldSaveFromKey = defaultShouldSaveFromKey,
   filterSuggestions = defaultFilterSuggestions,
-  initialFilterSuggestions,
   openOnFocus = true,
   getHighlightedIndex,
   highlightFirst,
@@ -134,11 +133,11 @@ function SingleAutocomplete({
   const [value, setValue] = useState(
     selectedItem ? getItemName(selectedItem) : '',
   );
+  const [isChanged, setIsChanged] = useState(false);
   const [originalItem, setOriginalItem] = useState(selectedItem);
-  const [filteredSuggestions, setFilteredSuggestions] = useState(() =>
-    initialFilterSuggestions
-      ? initialFilterSuggestions(suggestions, initialValue)
-      : null,
+  const filteredSuggestions = useMemo(
+    () => filterSuggestions(suggestions, value),
+    [filterSuggestions, suggestions, value],
   );
   const [highlightedIndex, setHighlightedIndex] = useState(null);
   const [isOpen, setIsOpen] = useState(embedded);
@@ -146,31 +145,28 @@ function SingleAutocomplete({
   function resetState(newValue) {
     const val = newValue === undefined ? initialValue : newValue;
     let selectedItem = findItem(strict, suggestions, val);
-    let filteredSuggestions = initialFilterSuggestions
-      ? initialFilterSuggestions(suggestions, val)
-      : null;
 
     setSelectedItem(selectedItem);
     setValue(selectedItem ? getItemName(selectedItem) : '');
     setOriginalItem(selectedItem);
-    setFilteredSuggestions(filteredSuggestions);
     setHighlightedIndex(null);
     setIsOpen(embedded);
+    setIsChanged(false);
   }
 
-  function onSelectAfter(suggestions, clearAfterSelect) {
+  function onSelectAfter(clearAfterSelect) {
     if (clearAfterSelect) {
       setValue('');
       setSelectedItem(null);
       setHighlightedIndex(null);
-      setFilteredSuggestions(suggestions);
+      setIsChanged(false);
       return;
     }
 
     setIsOpen(false);
   }
 
-  const filtered = filteredSuggestions || suggestions;
+  const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
 
   return (
     <Downshift
@@ -193,7 +189,7 @@ function SingleAutocomplete({
             onSelect(getItemId(item));
           }, 0);
         }
-        return onSelectAfter(suggestions, clearAfterSelect);
+        return onSelectAfter(clearAfterSelect);
       }}
       highlightedIndex={highlightedIndex}
       selectedItem={selectedItem || null}
@@ -251,7 +247,7 @@ function SingleAutocomplete({
         }
 
         setValue(value);
-        setFilteredSuggestions(filteredSuggestions);
+        setIsChanged(true);
       }}
       onStateChange={changes => {
         if (
@@ -365,7 +361,7 @@ function SingleAutocomplete({
                       // Handle it ourselves
                       e.stopPropagation();
                       onSelect(value);
-                      return onSelectAfter(suggestions, clearAfterSelect);
+                      return onSelectAfter(clearAfterSelect);
                     } else {
                       // No highlighted item, still allow the table to save the item
                       // as `null`, even though we're allowing the table to move
@@ -386,12 +382,6 @@ function SingleAutocomplete({
                     e.stopPropagation();
                   }
 
-                  let filteredSuggestions = initialFilterSuggestions
-                    ? initialFilterSuggestions(
-                        suggestions,
-                        getItemName(originalItem),
-                      )
-                    : null;
                   fireUpdate(
                     onUpdate,
                     strict,
@@ -402,7 +392,6 @@ function SingleAutocomplete({
 
                   setValue(getItemName(originalItem));
                   setSelectedItem(findItem(strict, suggestions, originalItem));
-                  setFilteredSuggestions(filteredSuggestions);
                   setHighlightedIndex(null);
                   setIsOpen(embedded ? true : false);
                 }

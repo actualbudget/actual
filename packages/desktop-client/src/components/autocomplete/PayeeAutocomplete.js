@@ -189,15 +189,21 @@ export default function PayeeAutocomplete({
   let [focusTransferPayees, setFocusTransferPayees] = useState(
     defaultFocusTransferPayees,
   );
-  let payeeSuggestions = useMemo(
-    () => [
-      { id: 'new', name: '' },
-      ...getPayeeSuggestions(payees, focusTransferPayees, accounts),
-    ],
-    [payees, focusTransferPayees, accounts],
-  );
-
   let rawPayee = useRef('');
+  let hasPayeeInput = !!rawPayee.current;
+  let payeeSuggestions = useMemo(() => {
+    const suggestions = getPayeeSuggestions(
+      payees,
+      focusTransferPayees,
+      accounts,
+    );
+
+    if (!hasPayeeInput) {
+      return suggestions;
+    }
+    return [{ id: 'new', name: '' }, ...suggestions];
+  }, [payees, focusTransferPayees, accounts, hasPayeeInput]);
+
   let dispatch = useDispatch();
 
   async function handleSelect(value) {
@@ -251,7 +257,7 @@ export default function PayeeAutocomplete({
         return 0;
       }}
       filterSuggestions={(suggestions, value) => {
-        let filtered = suggestions.filter((suggestion, idx) => {
+        let filtered = suggestions.filter(suggestion => {
           if (suggestion.id === 'new') {
             return !value || value === '' || focusTransferPayees ? false : true;
           }
@@ -300,26 +306,6 @@ export default function PayeeAutocomplete({
           }
         }
         return filtered;
-      }}
-      initialFilterSuggestions={suggestions => {
-        let filtered = false;
-        let res = suggestions.filter((suggestion, idx) => {
-          if (suggestion.id === 'new') {
-            // Never show the "create new" initially
-            return false;
-          }
-
-          if (idx >= 100 && !suggestion.transfer_acct) {
-            filtered = true;
-            return false;
-          }
-          return true;
-        });
-
-        if (filtered) {
-          res.filtered = true;
-        }
-        return res;
       }}
       renderItems={(items, getItemProps, highlightedIndex, inputValue) => (
         <PayeeList
