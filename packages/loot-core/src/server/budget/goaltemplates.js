@@ -207,6 +207,9 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   let last_month_balance = balance - spent - budgeted;
+  let totalTarget = 0;
+  let totalMonths = 0;
+  let skipMonths = 0;
   for (let l = 0; l < template_lines.length; l++) {
     let template = template_lines[l];
     switch (template.type) {
@@ -230,8 +233,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
       }
       case 'by': {
         // by has 'amount' and 'month' params
-        let target_month = new Date(`${template.month}-01`);
-        let target = amountToInteger(template.amount);
+        let N = template_lines.length;
+        let target_month = new Date(`${template_lines[l].month}-01`);
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month,
@@ -242,11 +245,24 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             : (template.repeat || 1) * 12;
         while (num_months < 0 && repeat) {
           target_month = addMonths(target_month, repeat);
-          num_months = differenceInCalendarMonths(target_month, current_month);
+          num_months = differenceInCalendarMonths(
+            template_lines[l],
+            current_month,
+          );
         }
-        let diff = target - last_month_balance;
-        if (diff >= 0 && num_months > -1) {
-          to_budget += Math.round(diff / (num_months + 1));
+        if (num_months < 0) {
+          skipMonths++;
+        } else {
+          totalTarget += amountToInteger(template_lines[l].amount);
+          totalMonths += num_months + 1;
+        }
+
+        let diff = totalTarget - last_month_balance;
+        if (diff >= 0 && totalMonths > 0 && l === N - 1) {
+          to_budget += Math.round(
+            ((totalTarget - last_month_balance) / totalMonths) *
+              (N - skipMonths),
+          );
         }
         break;
       }
