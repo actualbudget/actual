@@ -337,19 +337,26 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         break;
       }
       case 'percentage': {
-        /*
-          let income_category = (await actual.getCategories()).filter(c => c.is_income == true && c.name == template.category);
-          let func = (getBudgetMonthTestFunc || getBudgetMonth);
-          let budget = await func(month);
-          for (var g = 0; g < budget.categoryGroups.length; g++) {
-            if (income_category.group_id == budget.categoryGroups[g].id) {
-              for (var c = 0; c < budget.categoryGroups[g].categories.length; c++)
-                if (income_category.id == budget.categoryGroups[g].categories[c].id) {
-                  let month_category = budget.categoryGroups[g].categories[c];
-                }
-            }
+        let percent = template.percent;
+        let monthlyIncome = 0;
+        if (template.category.toLowerCase() === 'all income') {
+          monthlyIncome = await getSheetValue(sheetName, `total-income`);
+        } else {
+          let income_category = (await db.getCategories()).find(
+            c =>
+              c.is_income &&
+              c.name.toLowerCase() === template.category.toLowerCase(),
+          );
+          if (!income_category) {
+            errors.push(`Could not find category “${template.category}”`);
+            return { errors };
           }
-          */
+          monthlyIncome = await getSheetValue(
+            sheetName,
+            `sum-amount-${income_category.id}`,
+          );
+        }
+        to_budget = Math.max(0, Math.round(monthlyIncome * (percent / 100)));
         break;
       }
       case 'error':
