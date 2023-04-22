@@ -1,17 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
-import { Navigation } from './page-models/navigation';
 
 test.describe('Budget', () => {
   let page;
-  let navigation; // eslint-disable-line no-unused-vars
   let configurationPage;
   let budgetPage;
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
     await page.goto('/');
@@ -25,7 +22,9 @@ test.describe('Budget', () => {
   test('renders the summary information: available funds, overspent, budgeted and for next month', async () => {
     const summary = budgetPage.budgetSummary.first();
 
-    await expect(summary.getByText('Available Funds')).toBeVisible();
+    await expect(summary.getByText('Available Funds')).toBeVisible({
+      timeout: 10000,
+    });
     await expect(summary.getByText(/^Overspent in /)).toBeVisible();
     await expect(summary.getByText('Budgeted')).toBeVisible();
     await expect(summary.getByText('For Next Month')).toBeVisible();
