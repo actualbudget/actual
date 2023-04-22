@@ -20,6 +20,6 @@ module.exports = {
   ],
   transformIgnorePatterns: ['/node_modules/'],
   transform: {
-    '\\.pegjs$': 'pegjs-jest-transformer',
+    '\\.pegjs$': '<rootDir>/peg-transform.mjs',
   },
 };

@@ -28,11 +28,6 @@ module.exports = {
       path: 'path-browserify',
     },
   },
-  resolveLoader: {
-    alias: {
-      'pegjs-loader': require.resolve('pegjs-loader'),
-    },
-  },
   module: {
     rules: [
       {
@@ -46,7 +41,7 @@ module.exports = {
       },
       {
         test: /\.pegjs$/,
-        use: { loader: 'pegjs-loader' },
+        use: { loader: path.resolve('../peg-loader.js') },
       },
     ],
   },
