@@ -1129,14 +1129,14 @@ export function useTableNavigator(data, fields) {
 
         switch (e.key) {
           case 'ArrowUp':
-          case 'K':
+          case 'k':
             if (e.target.tagName !== 'INPUT') {
               onMove('up');
             }
             break;
 
           case 'ArrowDown':
-          case 'J':
+          case 'j':
             if (e.target.tagName !== 'INPUT') {
               onMove('down');
             }
