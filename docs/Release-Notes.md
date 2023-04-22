@@ -2,6 +2,44 @@
 title: Release Notes
 ---
 
+## 23.4.2
+
+**Docker tag: 23.4.2**
+
+### Actual
+
+Version: 23.4.2
+
+#### Features
+
+- [#885](https://github.com/actualbudget/actual/pull/885) Add template keyword to budget according to named schedules — thanks [pole95]
+
+#### Enhancements
+
+- [#868](https://github.com/actualbudget/actual/pull/868) Improve sidebar auto-floating behavior — thanks [j-f1]
+
+#### Bugfix
+
+- [#915](https://github.com/actualbudget/actual/pull/915) Fix reconciling a budget with a zero value — thanks [j-f1]
+- [#926](https://github.com/actualbudget/actual/pull/926) Fix undo keyboard shortcut being ignored — thanks [j-f1]
+
+#### Maintenance
+
+- [#916](https://github.com/actualbudget/actual/pull/916) Remove `@jlongster/lively` dependency; refactor old autocomplete to not use it any more; disable new autocomplete — thanks [MatissJanis]
+- [#924](https://github.com/actualbudget/actual/pull/924) Remove `react-select` and the new autocomplete — thanks [MatissJanis]
+
+### Actual Server
+
+Version: 23.4.2
+
+#### Features
+
+- [#186](https://github.com/actualbudget/actual-server/pull/186) Add an `npm run reset-password` script to set or reset the server password. — thanks [j-f1]
+
+#### Enhancements
+
+- [#189](https://github.com/actualbudget/actual-server/pull/189) More clearly report the problem with Nordigen requests that fail with an unexpected status code — thanks [j-f1]
+
 ## 23.4.1
 
 **Docker tag: 23.4.1**
@@ -732,6 +770,7 @@ Version: 22.10.25
 [ostat]: https://github.com/ostat
 [PartyLich]: https://github.com/PartyLich
 [pmamberti]: https://github.com/pmamberti
+[pole95]: https://github.com/pole95
 [rianmcguire]: https://github.com/rianmcguire
 [rich-howell]: https://github.com/rich-howell
 [rickdoesdev]: https://github.com/rickdoesdev
