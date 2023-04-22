@@ -76,6 +76,6 @@ test.describe('Onboarding', () => {
 
     await navigation.clickOnNoServer();
 
-    expect(await configurationPage.heading).toHaveText('Where’s the server?');
+    await expect(configurationPage.heading).toHaveText('Where’s the server?');
   });
 });
