@@ -173,6 +173,24 @@ describe('nordigenService', () => {
           institutionId: mockRequisition.institution_id,
           startingBalance: expect.any(Number),
           transactions: {
+            all: expect.arrayContaining([
+              expect.objectContaining({
+                bookingDate: expect.any(String),
+                transactionAmount: {
+                  amount: expect.any(String),
+                  currency: 'EUR',
+                },
+                transactionId: expect.any(String),
+                valueDate: expect.any(String),
+              }),
+              expect.objectContaining({
+                transactionAmount: {
+                  amount: expect.any(String),
+                  currency: 'EUR',
+                },
+                valueDate: expect.any(String),
+              }),
+            ]),
             booked: expect.arrayContaining([
               expect.objectContaining({
                 bookingDate: expect.any(String),

@@ -4,6 +4,7 @@ import {
   Institution,
   Transactions,
   Balance,
+  Transaction,
 } from './nordigen-node.types.js';
 
 export type DetailedAccount = Omit<NordigenAccountDetails, 'status'> &
@@ -11,6 +12,7 @@ export type DetailedAccount = Omit<NordigenAccountDetails, 'status'> &
 export type DetailedAccountWithInstitution = DetailedAccount & {
   institution: Institution;
 };
+export type TransactionWithBookedStatus = Transaction & { booked: boolean };
 
 export type NormalizedAccountDetails = {
   /**

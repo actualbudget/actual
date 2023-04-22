@@ -16,7 +16,7 @@ export interface IBank {
   /**
    * Function sorts an array of transactions from newest to oldest
    */
-  sortTransactions: (transactions: Transaction[]) => Transaction[];
+  sortTransactions: <T extends Transaction>(transactions: T[]) => T[];
 
   /**
    * Calculates account balance before which was before transactions provided in sortedTransactions param

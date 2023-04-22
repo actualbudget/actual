@@ -170,7 +170,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{iban: string, balances: Array<import('../nordigen-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types.js').Transaction>, pending: Array<import('../nordigen-node.types.js').Transaction>}, startingBalance: number}>}
+   * @returns {Promise<{iban: string, balances: Array<import('../nordigen-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types.js').Transaction>, pending: Array<import('../nordigen-node.types.js').Transaction>, all: Array<import('../nordigen.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
    */
   getTransactionsWithBalance: async (
     requisitionId,
@@ -202,6 +202,13 @@ export const nordigenService = {
     const sortedPendingTransactions = bank.sortTransactions(
       transactions.transactions?.pending,
     );
+    const allTransactions = sortedBookedTransactions.map((t) => {
+      return { ...t, booked: true };
+    });
+    sortedPendingTransactions.forEach((t) =>
+      allTransactions.push({ ...t, booked: false }),
+    );
+    const sortedAllTransactions = bank.sortTransactions(allTransactions);
 
     const startingBalance = bank.calculateStartingBalance(
       sortedBookedTransactions,
@@ -216,6 +223,7 @@ export const nordigenService = {
       transactions: {
         booked: sortedBookedTransactions,
         pending: sortedPendingTransactions,
+        all: sortedAllTransactions,
       },
     };
   },
