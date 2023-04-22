@@ -45,23 +45,21 @@ export default function GenericInput({
     case 'id':
       switch (field) {
         case 'payee':
-          if (payees.length > 0) {
-            content = (
-              <PayeeAutocomplete
-                payees={payees}
-                accounts={accounts}
-                multi={multi}
-                showMakeTransfer={false}
-                openOnFocus={true}
-                value={value}
-                onSelect={onChange}
-                inputProps={{
-                  inputRef,
-                  ...(showPlaceholder ? { placeholder: 'nothing' } : null),
-                }}
-              />
-            );
-          }
+          content = (
+            <PayeeAutocomplete
+              payees={payees}
+              accounts={accounts}
+              multi={multi}
+              showMakeTransfer={false}
+              openOnFocus={true}
+              value={value}
+              onSelect={onChange}
+              inputProps={{
+                inputRef,
+                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+              }}
+            />
+          );
           break;
 
         case 'account':

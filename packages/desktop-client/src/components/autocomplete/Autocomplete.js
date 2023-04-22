@@ -141,6 +141,12 @@ function SingleAutocomplete({
   const [highlightedIndex, setHighlightedIndex] = useState(null);
   const [isOpen, setIsOpen] = useState(embedded);
 
+  // Update the selected item if the suggestion list or initial
+  // input value has changed
+  useEffect(() => {
+    setSelectedItem(findItem(strict, suggestions, initialValue));
+  }, [initialValue, suggestions, strict]);
+
   function resetState(newValue) {
     const val = newValue === undefined ? initialValue : newValue;
     let selectedItem = findItem(strict, suggestions, val);
