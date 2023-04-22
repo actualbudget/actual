@@ -47,6 +47,7 @@ async function parseCSV(filepath, options: { delimiter?: string } = {}) {
       quote: '"',
       trim: true,
       relax_column_count: true,
+      skip_empty_lines: true,
     });
   } catch (err) {
     errors.push({
