@@ -206,11 +206,11 @@ export default function PayeeAutocomplete({
 
   let dispatch = useDispatch();
 
-  async function handleSelect(value) {
+  async function handleSelect(value, rawInputValue) {
     if (tableBehavior) {
-      onSelect && onSelect(makeNew(value, rawPayee));
+      onSelect && onSelect(makeNew(value, rawInputValue));
     } else {
-      let create = () => dispatch(createPayee(rawPayee));
+      let create = () => dispatch(createPayee(rawInputValue));
 
       if (Array.isArray(value)) {
         value = await Promise.all(value.map(v => (v === 'new' ? create() : v)));
@@ -251,7 +251,9 @@ export default function PayeeAutocomplete({
         onFocus: () => setPayeeFieldFocused(true),
         onChange: setRawPayee,
       }}
-      onUpdate={value => onUpdate && onUpdate(makeNew(value, rawPayee))}
+      onUpdate={(value, inputValue) =>
+        onUpdate && onUpdate(makeNew(value, inputValue))
+      }
       onSelect={handleSelect}
       getHighlightedIndex={suggestions => {
         if (suggestions.length > 1 && suggestions[0].id === 'new') {

@@ -66,7 +66,7 @@ function fireUpdate(onUpdate, strict, suggestions, index, value) {
     }
   }
 
-  onUpdate && onUpdate(selected);
+  onUpdate && onUpdate(selected, value);
 }
 
 function defaultRenderInput(props) {
@@ -164,7 +164,7 @@ function SingleAutocomplete({
 
   return (
     <Downshift
-      onSelect={item => {
+      onSelect={(item, { inputValue }) => {
         setSelectedItem(item);
         setHighlightedIndex(null);
         setIsOpen(false);
@@ -184,7 +184,7 @@ function SingleAutocomplete({
           // us that we will clear out local state before cWRP runs.
           // YEAH THAT'S ALL OK I JUST WANT TO SHIP THIS
           setTimeout(() => {
-            onSelect(getItemId(item));
+            onSelect(getItemId(item), inputValue);
           }, 0);
         }
       }}
@@ -318,7 +318,7 @@ function SingleAutocomplete({
 
                 if (!tableBehavior) {
                   if (e.target.value === '') {
-                    onSelect && onSelect(null);
+                    onSelect && onSelect(null, e.target.value);
                     setSelectedItem(null);
                     setIsOpen(false);
                     return;
@@ -357,7 +357,7 @@ function SingleAutocomplete({
                     } else if (!strict) {
                       // Handle it ourselves
                       e.stopPropagation();
-                      onSelect(value);
+                      onSelect(value, e.target.value);
                       return onSelectAfter();
                     } else {
                       // No highlighted item, still allow the table to save the item
