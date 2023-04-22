@@ -28,6 +28,8 @@ module.exports = {
       require('confusing-browser-globals').filter(g => g !== 'self'),
     ),
 
+    'react/jsx-no-useless-fragment': 'error',
+
     'rulesdir/typography': 'error',
 
     // https://github.com/eslint/eslint/issues/16954
