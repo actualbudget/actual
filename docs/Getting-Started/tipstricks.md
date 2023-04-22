@@ -5,7 +5,7 @@ title: 'Tips & Tricks'
 
 ## Undo/redo
 
-If you ever make a mistake, pressing `CTRL & Z` will undo, and `CTRL, SHIFT & Z` will redo. This is an undo system that you can rely on; any change can be undone and the UI will walk back in time.
+If you ever make a mistake, pressing `Ctrl & z` will undo, and `Ctrl, Shift & z` will redo. This is an undo system that you can rely on; any change can be undone and the UI will walk back in time.
 
 ## Keyboard shortcuts
 
@@ -19,13 +19,29 @@ A few global shortcuts:
 ### Budget
 
 - `Enter` while editing a budget amount will move to the next category.
-- `shift & Enter` will move to the previous category.
+- `Shift & Enter` will move to the previous category.
 
-### Transactions
+### Transaction Editing ###
 
-- When editing, `Enter` and `shift & Enter` will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
+- When editing, `Enter` and `Shift & Enter` will move down and up. If a dropdown is open and you've typed a new value, this will instead save the value and close the dropdown.
 - When editing, `Tab` and `Shift & Tab` will move left and right
-- When adding a new transaction, `CTRL & Enter` will add it regardless of where you are editing. Pressing `Enter` in either the Payment or Deposit columns will add it as well.
+- When adding a new transaction, `Ctrl & Enter` will add it regardless of where you are editing. Pressing `Enter` in either the Payment or Deposit columns will add it as well.
+
+### Transaction Management ###
+- `f` Show only selected transactions.
+- `d` Delete selected transactions.
+- `a` Set account for selected transations.
+- `p` set payee for selected transactions.
+- `n` Set notes for selected transactions.
+- `c` Set category for selected transactions.
+- `l` Toggle cleared for current transaction.
+
+The following require a transaction to have been selected first:
+
+- `j/Down Arrow` Move to the next transaction down.
+- `k/Up Arrow` Move to the next transaction up.
+- `Space` Toggle selection of current transaction.
+- `Shift & Space` Add all transactions between current transaction and most recently selected transaction.
 
 ## View multiple months at once
 
