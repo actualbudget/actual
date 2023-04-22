@@ -23,6 +23,7 @@
     "@rschedule/ical-tools": "^1.2.0",
     "@rschedule/json-tools": "^1.2.0",
     "@rschedule/standard-date-adapter": "^1.2.0",
+    "@wademason/ofx": "1.0.1",
     "absurd-sql": "0.0.53",
     "better-sqlite3": "^8.2.0",
     "core-js": "^3.8.3",
