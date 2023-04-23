@@ -564,14 +564,14 @@ export async function createTestBudget(handlers) {
   await db.runQuery('DELETE FROM category_groups');
 
   let accounts: AccountEntity[] = [
-    { name: 'Bank of America', type: 'checking' },
-    { name: 'Ally Savings', type: 'savings' },
-    { name: 'Capital One Checking', type: 'checking' },
-    { name: 'HSBC', type: 'checking' },
-    { name: 'Vanguard 401k', type: 'investment', offBudget: 1 },
-    { name: 'Mortgage', type: 'mortgage', offBudget: 1 },
-    { name: 'House Asset', type: 'other', offBudget: 1 },
-    { name: 'Roth IRA', type: 'investment', offBudget: 1 },
+    { name: 'Bank of America' },
+    { name: 'Ally Savings' },
+    { name: 'Capital One Checking' },
+    { name: 'HSBC' },
+    { name: 'Vanguard 401k', offBudget: 1 },
+    { name: 'Mortgage', offBudget: 1 },
+    { name: 'House Asset', offBudget: 1 },
+    { name: 'Roth IRA', offBudget: 1 },
   ];
   await runMutator(() =>
     batchMessages(async () => {

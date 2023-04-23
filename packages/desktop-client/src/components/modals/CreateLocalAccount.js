@@ -2,7 +2,6 @@ import React from 'react';
 
 import { Formik } from 'formik';
 
-import { determineOffBudget } from 'loot-core/src/shared/accounts';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
@@ -12,7 +11,6 @@ import {
   ModalButtons,
   Button,
   Input,
-  Select,
   InlineField,
   FormError,
   InitialFocus,
@@ -26,11 +24,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
         <View>
           <Formik
             validateOnChange={false}
-            initialValues={{
-              name: '',
-              type: 'checking',
-              balance: '0',
-            }}
+            initialValues={{ name: '', balance: '0' }}
             validate={() => ({})}
             onSubmit={async (values, { setErrors }) => {
               const errors = {};
@@ -49,7 +43,6 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                 modalProps.onClose();
                 let id = await actions.createAccount(
                   values.name,
-                  values.type,
                   toRelaxedNumber(values.balance),
                   values.offbudget,
                 );
@@ -81,34 +74,6 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                 {errors.name && (
                   <FormError style={{ marginLeft: 75 }}>
                     Name is required
-                  </FormError>
-                )}
-
-                <InlineField label="Type" width="75%">
-                  <Select
-                    name="type"
-                    value={values.type}
-                    onChange={e => {
-                      setFieldValue(
-                        'offbudget',
-                        determineOffBudget(e.target.value),
-                      );
-                      handleChange(e);
-                    }}
-                    onBlur={handleBlur}
-                  >
-                    <option value="checking">Checking / Cash</option>
-                    <option value="savings">Savings</option>
-                    <option value="credit">Credit Card</option>
-                    <option value="investment">Investment</option>
-                    <option value="mortgage">Mortgage</option>
-                    <option value="debt">Debt</option>
-                    <option value="other">Other</option>
-                  </Select>
-                </InlineField>
-                {errors.type && (
-                  <FormError style={{ marginLeft: 75 }}>
-                    You must select a type
                   </FormError>
                 )}
 

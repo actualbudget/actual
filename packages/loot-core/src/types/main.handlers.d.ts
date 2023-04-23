@@ -156,7 +156,6 @@ export interface MainHandlers {
 
   'account-create': (arg: {
     name;
-    type;
     balance;
     offBudget;
     closed?;
