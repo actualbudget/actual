@@ -830,7 +830,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
         starting_balance_flag: true,
       });
 
-      let result = await reconcileNordigenTransactions(id, transactions.all);
+      let result = await reconcileNordigenTransactions(id, transactions);
       return {
         ...result,
         added: [initialId, ...result.added],
