@@ -205,13 +205,13 @@ async function downloadNordigenTransactions(
     }
 
     const {
-      transactions: { booked },
+      transactions: { all },
       balances,
       startingBalance,
     } = res;
 
     return {
-      transactions: booked,
+      transactions: all,
       accountBalance: balances,
       startingBalance,
     };
@@ -364,6 +364,8 @@ async function normalizeNordigenTransactions(transactions, acctId) {
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
 
+    trans.cleared = Boolean(trans.booked);
+
     normalized.push({
       payee_name,
       trans: {
@@ -376,6 +378,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
           (trans.remittanceInformationUnstructuredArray || []).join(', '),
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
+        cleared: trans.cleared,
       },
     });
   }
@@ -423,8 +426,6 @@ export async function reconcileNordigenTransactions(acctId, transactions) {
         'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
         [trans.imported_id, acctId],
       );
-
-      // TODO: Pending transactions
 
       if (match) {
         hasMatched.add(match.id);
@@ -570,8 +571,6 @@ export async function reconcileTransactions(acctId, transactions) {
         'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
         [trans.imported_id, acctId],
       );
-
-      // TODO: Pending transactions
 
       if (match) {
         hasMatched.add(match.id);
