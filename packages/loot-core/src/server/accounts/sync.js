@@ -206,17 +206,13 @@ async function downloadNordigenTransactions(
     }
 
     const {
-      transactions: { booked, pending, all },
+      transactions: { all },
       balances,
       startingBalance,
     } = res;
 
     return {
-      transactions: {
-        booked,
-        pending,
-        all,
-      },
+      transactions: all,
       accountBalances: balances,
       startingBalance,
     };
@@ -784,11 +780,11 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
       date,
     );
 
-    if (transactions.all.length === 0) {
+    if (transactions.length === 0) {
       return { added: [], updated: [] };
     }
 
-    transactions = transactions.all.map(trans => ({ ...trans, account: id }));
+    transactions = transactions.map(trans => ({ ...trans, account: id }));
 
     return runMutator(async () => {
       const result = await reconcileNordigenTransactions(id, transactions);
@@ -814,10 +810,10 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
     // current balance from the accounts table and subtract all the
     // imported transactions.
 
-    const oldestTransaction = transactions.all[transactions.all.length - 1];
+    const oldestTransaction = transactions[transactions.length - 1];
 
     const oldestDate =
-      transactions.all.length > 0
+      transactions.length > 0
         ? oldestTransaction.valueDate || oldestTransaction.bookingDate
         : monthUtils.currentDay();
 
