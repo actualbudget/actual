@@ -6,17 +6,20 @@ import React, {
   useImperativeHandle,
   useMemo,
 } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 import Pikaday from 'pikaday';
 
 import 'pikaday/css/pikaday.css';
+
 import {
   getDayMonthFormat,
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex,
 } from 'loot-core/src/shared/months';
+import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
 import { View, Input, Tooltip } from '../common';
@@ -66,7 +69,7 @@ let pickerStyles = {
 };
 
 export let DatePicker = React.forwardRef(
-  ({ value, dateFormat, onUpdate, onSelect }, ref) => {
+  ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
     let picker = useRef(null);
     let mountPoint = useRef(null);
 
@@ -107,6 +110,7 @@ export let DatePicker = React.forwardRef(
       picker.current = new Pikaday({
         theme: 'actual-date-picker',
         keyboardInput: false,
+        firstDay: stringToInteger(firstDayOfWeekIdx),
         defaultDate: value
           ? d.parse(value, dateFormat, new Date())
           : new Date(),
@@ -188,6 +192,12 @@ export default function DateSelect({
   // us to make various UX decisions
   let [selectedValue, setSelectedValue] = useState(value);
   let userSelectedValue = useRef(selectedValue);
+
+  const firstDayOfWeekIdx = useSelector(state =>
+    state.prefs.local?.firstDayOfWeekIdx
+      ? state.prefs.local.firstDayOfWeekIdx
+      : '0',
+  );
 
   useEffect(() => {
     userSelectedValue.current = value;
@@ -334,6 +344,7 @@ export default function DateSelect({
           <DatePicker
             ref={picker}
             value={selectedValue}
+            firstDayOfWeekIdx={firstDayOfWeekIdx}
             dateFormat={dateFormat}
             onUpdate={date => {
               setSelectedValue(d.format(date, dateFormat));
