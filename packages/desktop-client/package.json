@@ -24,7 +24,7 @@
     "customize-cra": "^1.0.0",
     "date-fns": "^2.29.3",
     "debounce": "^1.2.0",
-    "downshift": "1.31.16",
+    "downshift": "7.6.0",
     "focus-visible": "^4.1.1",
     "formik": "^0.11.10",
     "glamor": "^2.20.40",
@@ -64,7 +64,7 @@
     "build": "cross-env INLINE_RUNTIME_CHUNK=false react-app-rewired build",
     "build:browser": "cross-env ./bin/build-browser",
     "test": "react-app-rewired test",
-    "e2e": "npx playwright test e2e --browser=chromium",
+    "e2e": "npx playwright test --browser=chromium",
     "lint": "eslint ."
   },
   "jest": {

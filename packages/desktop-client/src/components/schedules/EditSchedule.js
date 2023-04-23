@@ -451,9 +451,10 @@ export default function ScheduleDetails() {
       </Stack>
       <Stack direction="row" style={{ marginTop: 20 }}>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Payee" htmlFor="payee-field" />
+          <FormLabel title="Payee" id="payee-label" htmlFor="payee-field" />
           <PayeeAutocomplete
             value={state.fields.payee}
+            labelProps={{ id: 'payee-label' }}
             inputProps={{ id: 'payee-field', placeholder: '(none)' }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
@@ -463,10 +464,15 @@ export default function ScheduleDetails() {
         </FormField>
 
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Account" htmlFor="account-field" />
+          <FormLabel
+            title="Account"
+            id="account-label"
+            htmlFor="account-field"
+          />
           <AccountAutocomplete
             includeClosedAccounts={false}
             value={state.fields.account}
+            labelProps={{ id: 'account-label' }}
             inputProps={{ id: 'account-field', placeholder: '(none)' }}
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'account', value: id })
