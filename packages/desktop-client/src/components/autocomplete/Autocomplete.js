@@ -214,10 +214,13 @@ function SingleAutocomplete({
           return;
         }
 
-        // Do nothing if it's simply updating the selected item
         if (
-          changes.type ===
-          Downshift.stateChangeTypes.controlledPropUpdatedSelectedItem
+          [
+            // Do nothing if it's simply updating the selected item
+            Downshift.stateChangeTypes.controlledPropUpdatedSelectedItem,
+            // Do nothing if it is a "touch" selection event
+            Downshift.stateChangeTypes.touchEnd,
+          ].includes(changes.type)
         ) {
           return;
         }
