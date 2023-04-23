@@ -292,8 +292,6 @@ export default function ScheduleDetails() {
         state.fields,
       );
 
-      dispatch({ type: 'set-transactions', transactions: [] });
-
       if (error) {
         dispatch({ type: 'form-error', error });
         return;
