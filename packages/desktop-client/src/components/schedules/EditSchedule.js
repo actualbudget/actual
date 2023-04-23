@@ -486,7 +486,7 @@ export default function ScheduleDetails() {
               style={{ margin: 0, flex: 1 }}
             />
             <OpSelect
-              ops={['is', 'isapprox', 'isbetween']}
+              ops={['isapprox', 'is', 'isbetween']}
               value={state.fields.amountOp}
               formatOp={op => {
                 switch (op) {
