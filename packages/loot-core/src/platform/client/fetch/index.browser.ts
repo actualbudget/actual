@@ -2,6 +2,8 @@ import { captureException, captureBreadcrumb } from '../../exceptions';
 import * as uuid from '../../uuid';
 import * as undo from '../undo';
 
+import type * as T from '.';
+
 let replyHandlers = new Map();
 let listeners = new Map();
 let messageQueue = [];
@@ -133,13 +135,17 @@ function connectWorker(worker, onOpen, onError) {
   }
 }
 
-export const init = async function (worker) {
+export const init: T.Init = async function (worker) {
   return new Promise((resolve, reject) =>
     connectWorker(worker, resolve, reject),
   );
 };
 
-export const send = function (name, args, { catchErrors = false } = {}) {
+export const send: T.Send = function (
+  name,
+  args,
+  { catchErrors = false } = {},
+) {
   return new Promise((resolve, reject) => {
     uuid.v4().then(id => {
       replyHandlers.set(id, { resolve, reject });
@@ -156,14 +162,15 @@ export const send = function (name, args, { catchErrors = false } = {}) {
         globalWorker.postMessage(message);
       }
     });
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }) as any;
 };
 
-export const sendCatch = function (name, args) {
+export const sendCatch: T.SendCatch = function (name, args) {
   return send(name, args, { catchErrors: true });
 };
 
-export const listen = function (name, cb) {
+export const listen: T.Listen = function (name, cb) {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }
@@ -178,6 +185,6 @@ export const listen = function (name, cb) {
   };
 };
 
-export const unlisten = function (name) {
+export const unlisten: T.Unlisten = function (name) {
   listeners.set(name, []);
 };

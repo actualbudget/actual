@@ -1,9 +1,10 @@
 import { type Transports } from 'electron-log';
 
-interface Logger {
+export interface Logger {
   info(...args: unknown[]): void;
   warn(...args: unknown[]): void;
   transports?: Transports;
 }
 
-export default Logger;
+const logger: Logger;
+export default logger;

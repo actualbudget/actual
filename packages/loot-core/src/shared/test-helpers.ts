@@ -27,7 +27,7 @@ export function execTracer() {
   let log = false;
 
   return {
-    event(name, data) {
+    event(name: string, data?: unknown) {
       if (!hasStarted) {
         return;
       } else if (log) {
@@ -122,7 +122,7 @@ export function execTracer() {
       }
     },
 
-    expect(name, data) {
+    expect(name: string, data?: unknown) {
       if (queue.length === 0) {
         return this.expectWait(name, data);
       }

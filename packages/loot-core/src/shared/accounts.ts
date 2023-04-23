@@ -1,4 +1,4 @@
-export function fromPlaidAccountType(type, subtype) {
+export function fromPlaidAccountType(type, subtype?: string) {
   switch (type) {
     case 'brokerage':
     case 'investment':

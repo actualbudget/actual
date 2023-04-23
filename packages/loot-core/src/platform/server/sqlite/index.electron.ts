@@ -87,10 +87,10 @@ export function openDatabase(pathOrBuffer) {
   let db = new Database(pathOrBuffer);
   // Define Unicode-aware LOWER and UPPER implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
-  db.function('UNICODE_LOWER', { deterministic: true }, arg =>
+  db.function('UNICODE_LOWER', { deterministic: true }, (arg: string | null) =>
     arg?.toLowerCase(),
   );
-  db.function('UNICODE_UPPER', { deterministic: true }, arg =>
+  db.function('UNICODE_UPPER', { deterministic: true }, (arg: string | null) =>
     arg?.toUpperCase(),
   );
   return db;

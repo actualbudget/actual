@@ -1,6 +1,8 @@
 import { getDatabase } from '../indexeddb';
 
-export const init = function () {};
+import * as T from '.';
+
+export const init: T.Init = function () {};
 
 function commit(trans) {
   if (trans.commit) {
@@ -8,7 +10,7 @@ function commit(trans) {
   }
 }
 
-export const getItem = async function (key) {
+export const getItem: T.GetItem = async function (key) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readonly');
@@ -22,7 +24,7 @@ export const getItem = async function (key) {
   });
 };
 
-export const setItem = async function (key, value) {
+export const setItem: T.SetItem = async function (key, value) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -36,7 +38,7 @@ export const setItem = async function (key, value) {
   });
 };
 
-export const removeItem = async function (key) {
+export const removeItem: T.RemoveItem = async function (key) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -50,7 +52,7 @@ export const removeItem = async function (key) {
   });
 };
 
-export const multiGet = async function (keys) {
+export const multiGet: T.MultiGet = async function (keys) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readonly');
@@ -58,7 +60,7 @@ export const multiGet = async function (keys) {
 
   let promise = Promise.all(
     keys.map(key => {
-      return new Promise((resolve, reject) => {
+      return new Promise<[string, unknown]>((resolve, reject) => {
         let req = objectStore.get(key);
         req.onerror = e => reject(e);
         req.onsuccess = e => resolve([key, e.target.result]);
@@ -70,7 +72,7 @@ export const multiGet = async function (keys) {
   return promise;
 };
 
-export const multiSet = async function (keyValues) {
+export const multiSet: T.MultiSet = async function (keyValues) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -90,7 +92,7 @@ export const multiSet = async function (keyValues) {
   return promise;
 };
 
-export const multiRemove = async function (keys) {
+export const multiRemove: T.MultiRemove = async function (keys) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');

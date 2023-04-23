@@ -8,7 +8,7 @@ import { schemaExecutors } from './executors';
 
 import { schema, schemaConfig } from './index';
 
-export function runCompiledQuery(query, sqlPieces, state, params) {
+export function runCompiledQuery(query, sqlPieces, state, params?: unknown) {
   return _runCompiledQuery(query, sqlPieces, state, {
     params,
     executors: schemaExecutors,
