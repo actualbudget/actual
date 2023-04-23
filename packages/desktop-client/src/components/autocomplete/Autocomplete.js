@@ -424,6 +424,7 @@ function SingleAutocomplete({
                   padding: 0,
                   backgroundColor: colors.n1,
                   color: 'white',
+                  minWidth: 200,
                   ...tooltipStyle,
                 }}
                 {...tooltipProps}
