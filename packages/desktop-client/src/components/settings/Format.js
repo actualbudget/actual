@@ -8,6 +8,18 @@ import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
 
+// Follows Pikaday 'firstDay' numbering
+// https://github.com/Pikaday/Pikaday
+let daysOfWeek = [
+  { value: '0', label: 'Sunday' },
+  { value: '1', label: 'Monday' },
+  { value: '2', label: 'Tuesday' },
+  { value: '3', label: 'Wednesday' },
+  { value: '4', label: 'Thursday' },
+  { value: '5', label: 'Friday' },
+  { value: '6', label: 'Saturday' },
+];
+
 let dateFormats = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
@@ -35,6 +47,10 @@ function Column({ title, children }) {
 }
 
 export default function FormatSettings({ prefs, savePrefs }) {
+  function onFirstDayOfWeek(idx) {
+    savePrefs({ firstDayOfWeekIdx: idx });
+  }
+
   function onDateFormat(format) {
     savePrefs({ dateFormat: format });
   }
@@ -48,6 +64,7 @@ export default function FormatSettings({ prefs, savePrefs }) {
     savePrefs({ hideFraction });
   }
 
+  let firstDayOfWeekIdx = prefs.firstDayOfWeekIdx || '0'; // Sunday
   let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
   let numberFormat = prefs.numberFormat || 'comma-dot';
 
@@ -94,6 +111,17 @@ export default function FormatSettings({ prefs, savePrefs }) {
                 value={dateFormat}
                 onChange={onDateFormat}
                 options={dateFormats.map(f => [f.value, f.label])}
+                style={{ padding: '5px 10px', fontSize: 15 }}
+              />
+            </Button>
+          </Column>
+
+          <Column title="First day of the week">
+            <Button bounce={false} style={{ padding: 0 }}>
+              <CustomSelect
+                value={firstDayOfWeekIdx}
+                onChange={onFirstDayOfWeek}
+                options={daysOfWeek.map(f => [f.value, f.label])}
                 style={{ padding: '5px 10px', fontSize: 15 }}
               />
             </Button>
