@@ -3577,6 +3577,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/better-sqlite3@npm:^7.6.4":
+  version: 7.6.4
+  resolution: "@types/better-sqlite3@npm:7.6.4"
+  dependencies:
+    "@types/node": "*"
+  checksum: 75ab00d31b56437cc65fe15ff673cf8d1609edca52628083921bcbab1cbd828d135a2859fb4e68af8ef5a4801705ba99d54b96499f997bce65dd306ade3dbe58
+  languageName: node
+  linkType: hard
+
 "@types/body-parser@npm:*":
   version: 1.19.2
   resolution: "@types/body-parser@npm:1.19.2"
@@ -3953,6 +3962,13 @@ __metadata:
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
   checksum: fd6bce2b674b6efc3db4c7c3d336bd70c90838e8439de639b909ce22f3720d21344f52427f1d9e57b265fcb7f6c018699b99e5e0c208a1a4823014269a6bf35b
+  languageName: node
+  linkType: hard
+
+"@types/pegjs@npm:^0.10.3":
+  version: 0.10.3
+  resolution: "@types/pegjs@npm:0.10.3"
+  checksum: b0301595d7d7da4de9f8edcc8a97ee55c959e74645dd49626bbaf344dd383e1491b43082d34c1f55048566fef21bf219a4b4743f770afbe80a390a3a33926b8a
   languageName: node
   linkType: hard
 
@@ -10489,6 +10505,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"google-protobuf@npm:^3.15.5":
+  version: 3.21.2
+  resolution: "google-protobuf@npm:3.21.2"
+  checksum: 3caa2e1e2654714cc1a201ac5e5faabcaa48f5fba3d8ff9b64ca66fe19e4e0506b94053f32eddc77bf3a7a47ac1660315c6744185c1e2bb27654fd76fe91b988
+  languageName: node
+  linkType: hard
+
 "gopd@npm:^1.0.1":
   version: 1.0.1
   resolution: "gopd@npm:1.0.1"
@@ -13406,9 +13429,11 @@ __metadata:
     "@rschedule/ical-tools": ^1.2.0
     "@rschedule/json-tools": ^1.2.0
     "@rschedule/standard-date-adapter": ^1.2.0
+    "@types/better-sqlite3": ^7.6.4
     "@types/jest": ^27.5.0
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node-ipc": ^9.2.0
+    "@types/pegjs": ^0.10.3
     "@types/webpack": ^5.28.0
     "@wademason/ofx": 1.0.1
     absurd-sql: 0.0.53
@@ -13443,6 +13468,7 @@ __metadata:
     throttleit: ^1.0.0
     ts-jest: ^27.0.0
     ts-node: ^10.7.0
+    ts-protoc-gen: ^0.15.0
     typescript: ^4.6.4
     uuid: 3.3.2
     webpack: ^4.41.2
@@ -19559,6 +19585,17 @@ __metadata:
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
   checksum: 090adff1302ab20bd3486e6b4799e90f97726ed39e02b39e566f8ab674fd5bd5f727f43615debbfc580d33c6d9d1c6b1b3ce7d8e3cca3e20530a145ffa232c35
+  languageName: node
+  linkType: hard
+
+"ts-protoc-gen@npm:^0.15.0":
+  version: 0.15.0
+  resolution: "ts-protoc-gen@npm:0.15.0"
+  dependencies:
+    google-protobuf: ^3.15.5
+  bin:
+    protoc-gen-ts: bin/protoc-gen-ts
+  checksum: 612799180832786ee28dfb3510015f840ff8acd480ec1159599535878cc77a4f6ad4d6993d1fa546bbb4523de5fb60f4987e1ea810c2e56d91be0448d30f29ad
   languageName: node
   linkType: hard
 
