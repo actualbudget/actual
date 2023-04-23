@@ -6,7 +6,7 @@ import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
-import { View, Modal, Button, P } from '../common';
+import { View, Modal, Button, P, Link } from '../common';
 import { FormField, FormLabel } from '../forms';
 
 import { COUNTRY_OPTIONS } from './countries';
@@ -226,6 +226,12 @@ export default function NordigenExternalMsg({
                   ? 'Loading accounts...'
                   : null}
               </View>
+
+              {waiting === 'browser' && (
+                <Link onClick={onJump} style={{ marginTop: 10 }}>
+                  (Account linking not opening in a new tab? Click here)
+                </Link>
+              )}
             </View>
           ) : success ? (
             <Button
