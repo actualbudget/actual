@@ -85,7 +85,7 @@ export class RulesPage {
       }
 
       if (value) {
-        await row.getByRole('combobox').fill(value);
+        await row.getByRole('textbox').fill(value);
         await this.page.keyboard.press('Enter');
       }
     }

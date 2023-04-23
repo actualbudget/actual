@@ -1,6 +1,7 @@
 module.exports = {
   timeout: 20000, // 20 seconds
   retries: 1,
+  testDir: 'e2e/',
   use: {
     screenshot: 'on',
     browserName: 'chromium',
