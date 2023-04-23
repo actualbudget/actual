@@ -126,6 +126,7 @@ function SingleAutocomplete({
   onSelect,
   tableBehavior,
   value: initialValue,
+  isMulti = false,
 }) {
   const [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
@@ -174,7 +175,12 @@ function SingleAutocomplete({
       onSelect={(item, { inputValue }) => {
         setSelectedItem(item);
         setHighlightedIndex(null);
-        setIsOpen(false);
+
+        if (isMulti) {
+          setValue('');
+        } else {
+          setIsOpen(false);
+        }
 
         if (onSelect) {
           // I AM NOT PROUD OF THIS OK??
@@ -266,9 +272,6 @@ function SingleAutocomplete({
           changes.type !== Downshift.stateChangeTypes.changeInput
         ) {
           setHighlightedIndex(changes.highlightedIndex);
-        }
-        if ('isOpen' in changes) {
-          setIsOpen(embedded ? true : changes.isOpen);
         }
         if ('selectedItem' in changes) {
           setSelectedItem(changes.selectedItem);
@@ -506,6 +509,7 @@ export function MultiAutocomplete({
   return (
     <Autocomplete
       {...props}
+      isMulti
       value={null}
       suggestions={suggestions.filter(
         item => !selectedItems.includes(getItemId(item)),
