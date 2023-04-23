@@ -148,6 +148,7 @@ async function parseOFX(filepath) {
       ofxParser: true,
       which: 'both',
       errors: {
+        length: oldErrors.length + newErrors.length,
         oldErrors,
         newErrors,
       },
@@ -157,6 +158,7 @@ async function parseOFX(filepath) {
       ofxParser: true,
       which: 'old',
       errors: {
+        length: oldErrors.length,
         oldErrors,
       },
       transactions: newTrans,
@@ -166,6 +168,7 @@ async function parseOFX(filepath) {
       ofxParser: true,
       which: 'new',
       errors: {
+        length: newErrors.length,
         newErrors,
       },
       transactions: oldTrans,
@@ -196,7 +199,7 @@ async function parseOfxJavascript(filepath) {
   // not sure about browser. We want latin1 and not utf8.
   // For some reason, utf8 does not parse ofx files correctly here.
   const contents = new TextDecoder('latin1').decode(
-    await fs.readFile(filepath, 'binary'),
+    (await fs.readFile(filepath, 'binary')) as Buffer,
   );
 
   let data;
