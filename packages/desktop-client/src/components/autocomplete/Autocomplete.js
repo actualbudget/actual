@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 
 import Downshift from 'downshift';
 import { css } from 'glamor';
 
-import usePrevious from '../../hooks/usePrevious';
 import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
@@ -33,79 +32,6 @@ function getItemId(item) {
     return item;
   }
   return item ? item.id : null;
-}
-
-function getInitialState({
-  props: {
-    value,
-    suggestions,
-    embedded,
-    isOpen = false,
-    strict,
-    initialFilterSuggestions,
-  },
-}) {
-  let selectedItem = findItem(strict, suggestions, value);
-  let filteredSuggestions = initialFilterSuggestions
-    ? initialFilterSuggestions(suggestions, value)
-    : null;
-
-  return {
-    selectedItem,
-    value: selectedItem ? getItemName(selectedItem) : '',
-    originalItem: selectedItem,
-    filteredSuggestions,
-    highlightedIndex: null,
-    isOpen: embedded || isOpen,
-  };
-}
-
-function componentWillReceiveProps(bag, nextProps) {
-  let {
-    strict,
-    suggestions,
-    filterSuggestions = defaultFilterSuggestions,
-    initialFilterSuggestions,
-    value,
-    itemToString = defaultItemToString,
-  } = nextProps;
-  let { value: currValue } = bag.state;
-  let updates = null;
-
-  function updateValue() {
-    let selectedItem = findItem(strict, suggestions, value);
-    if (selectedItem) {
-      updates = updates || {};
-      updates.value = itemToString(selectedItem);
-      updates.selectedItem = selectedItem;
-    }
-  }
-
-  if (bag.props.value !== value) {
-    updateValue();
-  }
-
-  // TODO: Something is causing a rerender immediately after first
-  // render, and this condition is true, causing items to be filtered
-  // twice. This shouldn't effect functionality (I think), but look
-  // into this later
-  if (bag.props.suggestions !== suggestions) {
-    let filteredSuggestions = null;
-
-    if (bag.state.highlightedIndex != null) {
-      filteredSuggestions = filterSuggestions(suggestions, currValue);
-    } else {
-      filteredSuggestions = initialFilterSuggestions
-        ? initialFilterSuggestions(suggestions, currValue)
-        : null;
-    }
-
-    updates = updates || {};
-    updateValue();
-    updates.filteredSuggestions = filteredSuggestions;
-  }
-
-  return updates;
 }
 
 export function defaultFilterSuggestion(suggestion, value) {
@@ -140,238 +66,7 @@ function fireUpdate(onUpdate, strict, suggestions, index, value) {
     }
   }
 
-  onUpdate && onUpdate(selected);
-}
-
-function onInputValueChange(
-  {
-    props: {
-      suggestions,
-      onUpdate,
-      highlightFirst,
-      strict,
-      filterSuggestions = defaultFilterSuggestions,
-      getHighlightedIndex,
-    },
-  },
-  value,
-  changes,
-) {
-  // OMG this is the dumbest thing ever. I need to remove Downshift
-  // and build my own component. For some reason this is fired on blur
-  // with an empty value which clears out the input when the app blurs
-  if (!document.hasFocus()) {
-    return;
-  }
-
-  // Do nothing if it's simply updating the selected item
-  if (
-    changes.type ===
-    Downshift.stateChangeTypes.controlledPropUpdatedSelectedItem
-  ) {
-    return;
-  }
-
-  // Otherwise, filter the items and always the first item if
-  // desired
-  const filteredSuggestions = filterSuggestions(suggestions, value);
-
-  if (value === '') {
-    // A blank value shouldn't highlight any item so that the field
-    // can be left blank if desired
-
-    if (changes.type !== Downshift.stateChangeTypes.clickItem) {
-      fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
-    }
-
-    return {
-      value,
-      filteredSuggestions,
-      highlightedIndex: null,
-    };
-  } else {
-    let defaultGetHighlightedIndex = filteredSuggestions => {
-      return highlightFirst && filteredSuggestions.length ? 0 : null;
-    };
-    let highlightedIndex = (getHighlightedIndex || defaultGetHighlightedIndex)(
-      filteredSuggestions,
-    );
-
-    if (changes.type !== Downshift.stateChangeTypes.clickItem) {
-      fireUpdate(
-        onUpdate,
-        strict,
-        filteredSuggestions,
-        highlightedIndex,
-        value,
-      );
-    }
-
-    return {
-      value,
-      filteredSuggestions,
-      highlightedIndex,
-    };
-  }
-}
-
-function onStateChange({ props, state }, changes) {
-  if (
-    props.tableBehavior &&
-    changes.type === Downshift.stateChangeTypes.mouseUp
-  ) {
-    return;
-  }
-
-  const newState = {};
-  if ('highlightedIndex' in changes) {
-    newState.highlightedIndex = changes.highlightedIndex;
-  }
-  if ('isOpen' in changes) {
-    newState.isOpen = props.embedded ? true : changes.isOpen;
-  }
-  if ('selectedItem' in changes) {
-    newState.selectedItem = changes.selectedItem;
-  }
-
-  // We only ever want to update the value if the user explicitly
-  // highlighted an item via the keyboard. It shouldn't change with
-  // mouseover; otherwise the user could accidentally hover over an
-  // item without realizing it and change the value.
-  if (
-    state.isOpen &&
-    (changes.type === Downshift.stateChangeTypes.keyDownArrowUp ||
-      changes.type === Downshift.stateChangeTypes.keyDownArrowDown)
-  ) {
-    fireUpdate(
-      props.onUpdate,
-      props.strict,
-      state.filteredSuggestions || props.suggestions,
-      newState.highlightedIndex != null
-        ? newState.highlightedIndex
-        : state.highlightedIndex,
-      state.value,
-    );
-  }
-
-  inst.lastChangeType = changes.type;
-  return newState;
-}
-
-function onSelect(
-  { props: { onSelect, clearAfterSelect, suggestions } },
-  item,
-) {
-  if (onSelect) {
-    // I AM NOT PROUD OF THIS OK??
-    // This WHOLE FILE is a mess anyway
-    // OK SIT DOWN AND I WILL EXPLAIN
-    // This component uses `componentWillReceiveProps` and in there
-    // it will re-filter suggestions if the suggestions change and
-    // a `highlightedIndex` exists. When we select something,
-    // we clear `highlightedIndex` so it should show all suggestions
-    // again. HOWEVER, in the case of a multi-autocomplete, it's
-    // changing the suggestions every time something is selected.
-    // In that case, cWRP is running *before* our state setting that
-    // cleared `highlightedIndex`. Forcing this to run later assures
-    // us that we will clear out local state before cWRP runs.
-    // YEAH THAT'S ALL OK I JUST WANT TO SHIP THIS
-    setTimeout(() => {
-      onSelect(getItemId(item));
-    }, 0);
-  }
-  return onSelectAfter(suggestions, clearAfterSelect);
-}
-
-function onSelectAfter(suggestions, clearAfterSelect) {
-  if (clearAfterSelect) {
-    return {
-      value: '',
-      selectedItem: null,
-      highlightedIndex: null,
-      filteredSuggestions: suggestions,
-    };
-  }
-
-  return { isOpen: false };
-}
-
-function onChange({ props: { inputProps } }, e) {
-  const { onChange } = inputProps || {};
-  onChange && onChange(e.target.value);
-}
-
-function onKeyDown(
-  {
-    props: {
-      suggestions,
-      clearAfterSelect,
-      initialFilterSuggestions,
-      embedded,
-      onUpdate,
-      onSelect,
-      inputProps,
-      shouldSaveFromKey = defaultShouldSaveFromKey,
-      strict,
-    },
-    state: { highlightedIndex, originalItem, isOpen, value },
-  },
-  e,
-) {
-  let { onKeyDown } = inputProps || {};
-
-  // If the dropdown is open, an item is highlighted, and the user
-  // pressed enter, always capture that and handle it ourselves
-  if (isOpen) {
-    if (e.key === 'Enter') {
-      if (highlightedIndex != null) {
-        if (inst.lastChangeType === Downshift.stateChangeTypes.itemMouseEnter) {
-          // If the last thing the user did was hover an item, intentionally
-          // ignore the default behavior of selecting the item. It's too
-          // common to accidentally hover an item and then save it
-          e.preventDefault();
-        } else {
-          // Otherwise, stop propagation so that the table navigator
-          // doesn't handle it
-          e.stopPropagation();
-        }
-      } else if (!strict) {
-        // Handle it ourselves
-        e.stopPropagation();
-        onSelect(value);
-        return onSelectAfter(suggestions, clearAfterSelect);
-      } else {
-        // No highlighted item, still allow the table to save the item
-        // as `null`, even though we're allowing the table to move
-        e.preventDefault();
-        onKeyDown && onKeyDown(e);
-      }
-    } else if (shouldSaveFromKey(e)) {
-      e.preventDefault();
-      onKeyDown && onKeyDown(e);
-    }
-  }
-
-  // Handle escape ourselves
-  if (e.key === 'Escape') {
-    e.preventDefault();
-
-    if (!embedded) {
-      e.stopPropagation();
-    }
-
-    let filteredSuggestions = initialFilterSuggestions
-      ? initialFilterSuggestions(suggestions, getItemName(originalItem))
-      : null;
-    fireUpdate(onUpdate, strict, suggestions, null, getItemId(originalItem));
-    return {
-      value: getItemName(originalItem),
-      selectedItem: findItem(strict, suggestions, originalItem),
-      filteredSuggestions,
-      highlightedIndex: null,
-      isOpen: embedded ? true : false,
-    };
-  }
+  onUpdate && onUpdate(selected, value);
 }
 
 function defaultRenderInput(props) {
@@ -405,100 +100,198 @@ function defaultShouldSaveFromKey(e) {
   return e.code === 'Enter';
 }
 
-function onFocus({ props: { inputProps = {}, openOnFocus = true } }, e) {
-  inputProps.onFocus && inputProps.onFocus(e);
-
-  if (openOnFocus) {
-    return { isOpen: true };
-  }
-}
-
-function onBlur({ props, state: { selectedItem } }, e) {
-  let { inputProps = {}, onSelect } = props;
-
-  e.preventDownshiftDefault = true;
-  inputProps.onBlur && inputProps.onBlur(e);
-
-  if (!props.tableBehavior) {
-    if (e.target.value === '') {
-      onSelect && onSelect(null);
-      return { selectedItem: null, originalValue: null, isOpen: false };
-    }
-
-    // If not using table behavior, reset the input on blur. Tables
-    // handle saving the value on blur.
-    let value = selectedItem ? getItemId(selectedItem) : null;
-
-    return getInitialState({
-      props: {
-        ...props,
-        value,
-        originalValue: value,
-      },
-    });
-  } else {
-    return { isOpen: false };
-  }
-}
-
 function defaultItemToString(item) {
   return item ? getItemName(item) : '';
 }
 
-function SingleAutocomplete(props) {
-  const [curState, setState] = React.useState(() => getInitialState({ props }));
-  const { value, selectedItem, filteredSuggestions, highlightedIndex, isOpen } =
-    curState;
+function SingleAutocomplete({
+  focused,
+  embedded = false,
+  containerProps,
+  inputProps = {},
+  suggestions,
+  tooltipStyle,
+  tooltipProps,
+  renderInput = defaultRenderInput,
+  renderItems = defaultRenderItems,
+  itemToString = defaultItemToString,
+  shouldSaveFromKey = defaultShouldSaveFromKey,
+  filterSuggestions = defaultFilterSuggestions,
+  openOnFocus = true,
+  getHighlightedIndex,
+  highlightFirst,
+  onUpdate,
+  strict,
+  onSelect,
+  tableBehavior,
+  value: initialValue,
+}) {
+  const [selectedItem, setSelectedItem] = useState(() =>
+    findItem(strict, suggestions, initialValue),
+  );
+  const [value, setValue] = useState(
+    selectedItem ? getItemName(selectedItem) : '',
+  );
+  const [isChanged, setIsChanged] = useState(false);
+  const [originalItem, setOriginalItem] = useState(selectedItem);
+  const filteredSuggestions = useMemo(
+    () => filterSuggestions(suggestions, value),
+    [filterSuggestions, suggestions, value],
+  );
+  const [highlightedIndex, setHighlightedIndex] = useState(null);
+  const [isOpen, setIsOpen] = useState(embedded);
 
-  const prevProps = usePrevious(props);
-  React.useEffect(() => {
-    if (!prevProps) return;
+  // Update the selected item if the suggestion list or initial
+  // input value has changed
+  useEffect(() => {
+    setSelectedItem(findItem(strict, suggestions, initialValue));
+  }, [initialValue, suggestions, strict]);
 
-    const newState = componentWillReceiveProps(
-      { props: prevProps, state: curState },
-      props,
-    );
+  function resetState(newValue) {
+    const val = newValue === undefined ? initialValue : newValue;
+    let selectedItem = findItem(strict, suggestions, val);
 
-    if (newState) {
-      setState(Object.assign({}, curState, newState));
-    }
-  }, [props, prevProps]);
+    setSelectedItem(selectedItem);
+    setValue(selectedItem ? getItemName(selectedItem) : '');
+    setOriginalItem(selectedItem);
+    setHighlightedIndex(null);
+    setIsOpen(embedded);
+    setIsChanged(false);
+  }
 
-  const updater =
-    operation =>
-    (...arg) => {
-      const newState = Object.assign(
-        {},
-        curState,
-        operation({ props, state: curState }, ...arg) || {},
-      );
-      setState(newState);
-    };
+  function onSelectAfter() {
+    setValue('');
+    setSelectedItem(null);
+    setHighlightedIndex(null);
+    setIsChanged(false);
+  }
 
-  const {
-    focused,
-    embedded,
-    containerProps,
-    inputProps,
-    suggestions,
-    tooltipStyle,
-    tooltipProps,
-    renderInput = defaultRenderInput,
-    renderItems = defaultRenderItems,
-    itemToString = defaultItemToString,
-  } = props;
-  const filtered = filteredSuggestions || suggestions;
+  const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
 
   return (
     <Downshift
-      onSelect={updater(onSelect)}
+      onSelect={(item, { inputValue }) => {
+        setSelectedItem(item);
+        setHighlightedIndex(null);
+        setIsOpen(false);
+
+        if (onSelect) {
+          // I AM NOT PROUD OF THIS OK??
+          // This WHOLE FILE is a mess anyway
+          // OK SIT DOWN AND I WILL EXPLAIN
+          // This component uses `componentWillReceiveProps` and in there
+          // it will re-filter suggestions if the suggestions change and
+          // a `highlightedIndex` exists. When we select something,
+          // we clear `highlightedIndex` so it should show all suggestions
+          // again. HOWEVER, in the case of a multi-autocomplete, it's
+          // changing the suggestions every time something is selected.
+          // In that case, cWRP is running *before* our state setting that
+          // cleared `highlightedIndex`. Forcing this to run later assures
+          // us that we will clear out local state before cWRP runs.
+          // YEAH THAT'S ALL OK I JUST WANT TO SHIP THIS
+          setTimeout(() => {
+            onSelect(getItemId(item), inputValue);
+          }, 0);
+        }
+      }}
       highlightedIndex={highlightedIndex}
       selectedItem={selectedItem || null}
       itemToString={itemToString}
       inputValue={value}
       isOpen={isOpen}
-      onInputValueChange={updater(onInputValueChange)}
-      onStateChange={updater(onStateChange)}
+      onInputValueChange={(value, changes) => {
+        // OMG this is the dumbest thing ever. I need to remove Downshift
+        // and build my own component. For some reason this is fired on blur
+        // with an empty value which clears out the input when the app blurs
+        if (!document.hasFocus()) {
+          return;
+        }
+
+        // Do nothing if it's simply updating the selected item
+        if (
+          changes.type ===
+          Downshift.stateChangeTypes.controlledPropUpdatedSelectedItem
+        ) {
+          return;
+        }
+
+        // Otherwise, filter the items and always the first item if
+        // desired
+        const filteredSuggestions = filterSuggestions(suggestions, value);
+
+        if (value === '') {
+          // A blank value shouldn't highlight any item so that the field
+          // can be left blank if desired
+
+          if (changes.type !== Downshift.stateChangeTypes.clickItem) {
+            fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
+          }
+
+          setHighlightedIndex(null);
+        } else {
+          let defaultGetHighlightedIndex = filteredSuggestions => {
+            return highlightFirst && filteredSuggestions.length ? 0 : null;
+          };
+          let highlightedIndex = (
+            getHighlightedIndex || defaultGetHighlightedIndex
+          )(filteredSuggestions);
+
+          if (changes.type !== Downshift.stateChangeTypes.clickItem) {
+            fireUpdate(
+              onUpdate,
+              strict,
+              filteredSuggestions,
+              highlightedIndex,
+              value,
+            );
+          }
+
+          setHighlightedIndex(highlightedIndex);
+        }
+
+        setValue(value);
+        setIsChanged(true);
+      }}
+      onStateChange={changes => {
+        if (
+          tableBehavior &&
+          changes.type === Downshift.stateChangeTypes.mouseUp
+        ) {
+          return;
+        }
+
+        if ('highlightedIndex' in changes) {
+          setHighlightedIndex(changes.highlightedIndex);
+        }
+        if ('isOpen' in changes) {
+          setIsOpen(embedded ? true : changes.isOpen);
+        }
+        if ('selectedItem' in changes) {
+          setSelectedItem(changes.selectedItem);
+        }
+
+        // We only ever want to update the value if the user explicitly
+        // highlighted an item via the keyboard. It shouldn't change with
+        // mouseover; otherwise the user could accidentally hover over an
+        // item without realizing it and change the value.
+        if (
+          isOpen &&
+          (changes.type === Downshift.stateChangeTypes.keyDownArrowUp ||
+            changes.type === Downshift.stateChangeTypes.keyDownArrowDown)
+        ) {
+          fireUpdate(
+            onUpdate,
+            strict,
+            filteredSuggestions || suggestions,
+            changes.highlightedIndex != null
+              ? changes.highlightedIndex
+              : highlightedIndex,
+            value,
+          );
+        }
+
+        inst.lastChangeType = changes.type;
+      }}
     >
       {({
         getInputProps,
@@ -518,10 +311,98 @@ function SingleAutocomplete(props) {
             getInputProps({
               focused,
               ...inputProps,
-              onFocus: updater(onFocus),
-              onBlur: updater(onBlur),
-              onKeyDown: updater(onKeyDown),
-              onChange: updater(onChange),
+              onFocus: e => {
+                inputProps.onFocus && inputProps.onFocus(e);
+
+                if (openOnFocus) {
+                  setIsOpen(true);
+                }
+              },
+              onBlur: e => {
+                e.preventDownshiftDefault = true;
+                inputProps.onBlur && inputProps.onBlur(e);
+
+                if (!tableBehavior) {
+                  if (e.target.value === '') {
+                    onSelect && onSelect(null, e.target.value);
+                    setSelectedItem(null);
+                    setIsOpen(false);
+                    return;
+                  }
+
+                  // If not using table behavior, reset the input on blur. Tables
+                  // handle saving the value on blur.
+                  let value = selectedItem ? getItemId(selectedItem) : null;
+
+                  resetState(value);
+                } else {
+                  setIsOpen(false);
+                }
+              },
+              onKeyDown: e => {
+                let { onKeyDown } = inputProps || {};
+
+                // If the dropdown is open, an item is highlighted, and the user
+                // pressed enter, always capture that and handle it ourselves
+                if (isOpen) {
+                  if (e.key === 'Enter') {
+                    if (highlightedIndex != null) {
+                      if (
+                        inst.lastChangeType ===
+                        Downshift.stateChangeTypes.itemMouseEnter
+                      ) {
+                        // If the last thing the user did was hover an item, intentionally
+                        // ignore the default behavior of selecting the item. It's too
+                        // common to accidentally hover an item and then save it
+                        e.preventDefault();
+                      } else {
+                        // Otherwise, stop propagation so that the table navigator
+                        // doesn't handle it
+                        e.stopPropagation();
+                      }
+                    } else if (!strict) {
+                      // Handle it ourselves
+                      e.stopPropagation();
+                      onSelect(value, e.target.value);
+                      return onSelectAfter();
+                    } else {
+                      // No highlighted item, still allow the table to save the item
+                      // as `null`, even though we're allowing the table to move
+                      e.preventDefault();
+                      onKeyDown && onKeyDown(e);
+                    }
+                  } else if (shouldSaveFromKey(e)) {
+                    e.preventDefault();
+                    onKeyDown && onKeyDown(e);
+                  }
+                }
+
+                // Handle escape ourselves
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+
+                  if (!embedded) {
+                    e.stopPropagation();
+                  }
+
+                  fireUpdate(
+                    onUpdate,
+                    strict,
+                    suggestions,
+                    null,
+                    getItemId(originalItem),
+                  );
+
+                  setValue(getItemName(originalItem));
+                  setSelectedItem(findItem(strict, suggestions, originalItem));
+                  setHighlightedIndex(null);
+                  setIsOpen(embedded ? true : false);
+                }
+              },
+              onChange: e => {
+                const { onChange } = inputProps || {};
+                onChange && onChange(e.target.value);
+              },
             }),
           )}
           {isOpen &&
@@ -624,7 +505,6 @@ export function MultiAutocomplete({
         item => !selectedItems.includes(getItemId(item)),
       )}
       onSelect={onAddItem}
-      clearAfterSelect
       highlightFirst
       strict={strict}
       tooltipProps={{
