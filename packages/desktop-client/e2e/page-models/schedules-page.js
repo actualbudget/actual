@@ -71,12 +71,14 @@ export class SchedulesPage {
 
   async _fillScheduleFields(data) {
     if (data.payee) {
-      await this.page.getByLabel('Payee').fill(data.payee);
+      await this.page.getByRole('textbox', { name: 'Payee' }).fill(data.payee);
       await this.page.keyboard.press('Enter');
     }
 
     if (data.account) {
-      await this.page.getByLabel('Account').fill(data.account);
+      await this.page
+        .getByRole('textbox', { name: 'Account' })
+        .fill(data.account);
       await this.page.keyboard.press('Enter');
     }
 

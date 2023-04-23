@@ -143,18 +143,18 @@ export function asyncTransaction(fn) {
 // This function is marked as async because `runQuery` is no longer
 // async. We return a promise here until we've audited all the code to
 // make sure nothing calls `.then` on this.
-export async function all(sql, params?: string[]) {
+export async function all(sql, params?: (string | number)[]) {
   return runQuery(sql, params, true);
 }
 
-export async function first(sql, params?: string[]) {
+export async function first(sql, params?: (string | number)[]) {
   const arr = await runQuery(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
 // The underlying sql system is now sync, but we can't update `first` yet
 // without auditing all uses of it
-export function firstSync(sql, params?: string[]) {
+export function firstSync(sql, params?: (string | number)[]) {
   const arr = runQuery(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
@@ -162,7 +162,7 @@ export function firstSync(sql, params?: string[]) {
 // This function is marked as async because `runQuery` is no longer
 // async. We return a promise here until we've audited all the code to
 // make sure nothing calls `.then` on this.
-export async function run(sql, params?: string[]) {
+export async function run(sql, params?: (string | number)[]) {
   return runQuery(sql, params);
 }
 
@@ -328,7 +328,7 @@ export async function moveCategoryGroup(id, targetId) {
   await update('category_groups', { id, sort_order });
 }
 
-export async function deleteCategoryGroup(group, transferId) {
+export async function deleteCategoryGroup(group, transferId?: string) {
   const categories = await all('SELECT * FROM categories WHERE cat_group = ?', [
     group.id,
   ]);
@@ -387,7 +387,7 @@ export function updateCategory(category) {
   return update('categories', category);
 }
 
-export async function moveCategory(id, groupId, targetId) {
+export async function moveCategory(id, groupId, targetId?: string) {
   if (!groupId) {
     throw new Error('moveCategory: groupId is required');
   }
@@ -404,7 +404,7 @@ export async function moveCategory(id, groupId, targetId) {
   await update('categories', { id, sort_order, cat_group: groupId });
 }
 
-export async function deleteCategory(category, transferId) {
+export async function deleteCategory(category, transferId?: string) {
   if (transferId) {
     // We need to update all the deleted categories that currently
     // point to the one we're about to delete so they all are
@@ -634,7 +634,7 @@ export async function getTransactionsByDate(
   throw new Error('`getTransactionsByDate` is deprecated');
 }
 
-export async function getTransactions(accountId, arg2) {
+export async function getTransactions(accountId, arg2?: unknown) {
   if (arg2 !== undefined) {
     throw new Error(
       '`getTransactions` was given a second argument, it now only takes a single argument `accountId`',

@@ -121,7 +121,7 @@ export function partitionByField(data, field) {
   return res;
 }
 
-export function groupBy(data, field, mapper) {
+export function groupBy(data, field, mapper?: (v: unknown) => unknown) {
   let res = new Map();
   for (let i = 0; i < data.length; i++) {
     let item = data[i];

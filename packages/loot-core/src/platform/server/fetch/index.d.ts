@@ -1,4 +1,7 @@
-export function fetch(input: RequestInfo | URL): Promise<unknown>;
+export function fetch(
+  input: RequestInfo | URL,
+  options?: unknown,
+): Promise<Response>;
 export function fetchBinary(
   input: RequestInfo | URL,
   filepath: string,

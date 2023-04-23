@@ -25,6 +25,19 @@ export const TYPE_INFO = {
   },
 };
 
+export type FieldTypes = {
+  imported_payee: string;
+  payee: string;
+  date: string;
+  notes: string;
+  amount: number;
+  amountInflow: number;
+  amountOutfow: number;
+  category: string;
+  account: string;
+  cleared: boolean;
+};
+
 export const FIELD_TYPES = new Map(
   Object.entries({
     imported_payee: 'string',

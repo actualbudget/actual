@@ -1,6 +1,6 @@
 import logger from 'electron-log';
 
-import type Logger from '.';
+import type * as T from '.';
 
 if (logger.transports) {
   logger.transports.file.appName = 'Actual';
@@ -9,4 +9,4 @@ if (logger.transports) {
   logger.transports.console.level = false;
 }
 
-export default logger as Logger;
+export default logger as T.Logger;
