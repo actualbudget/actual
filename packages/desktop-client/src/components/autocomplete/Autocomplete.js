@@ -108,6 +108,7 @@ function SingleAutocomplete({
   focused,
   embedded = false,
   containerProps,
+  labelProps = {},
   inputProps = {},
   suggestions,
   tooltipStyle,
@@ -260,7 +261,10 @@ function SingleAutocomplete({
           return;
         }
 
-        if ('highlightedIndex' in changes) {
+        if (
+          'highlightedIndex' in changes &&
+          changes.type !== Downshift.stateChangeTypes.changeInput
+        ) {
           setHighlightedIndex(changes.highlightedIndex);
         }
         if ('isOpen' in changes) {
@@ -292,6 +296,7 @@ function SingleAutocomplete({
 
         inst.lastChangeType = changes.type;
       }}
+      labelId={labelProps?.id}
     >
       {({
         getInputProps,
@@ -379,7 +384,7 @@ function SingleAutocomplete({
 
                 // Handle escape ourselves
                 if (e.key === 'Escape') {
-                  e.preventDefault();
+                  e.nativeEvent.preventDownshiftDefault = true;
 
                   if (!embedded) {
                     e.stopPropagation();
