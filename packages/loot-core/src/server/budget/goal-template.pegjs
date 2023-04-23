@@ -1,4 +1,4 @@
-// https://pegjs.org
+// https://peggyjs.org
 
 expr
   = percent: percent _ of _ category: $([^\r\n\t]+)

@@ -17,6 +17,6 @@ module.exports = {
   testMatch: ['**/*.web.test.(js|ts|tsx)'],
   transformIgnorePatterns: ['/node_modules/(?!absurd-sql)'],
   transform: {
-    '\\.pegjs$': 'pegjs-jest-transformer',
+    '\\.pegjs$': '<rootDir>/peg-transform.mjs',
   },
 };
