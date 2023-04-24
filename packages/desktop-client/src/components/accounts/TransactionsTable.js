@@ -74,7 +74,7 @@ function serializeTransaction(transaction, showZeroInDeposit) {
   let { amount, date } = transaction;
 
   if (isPreviewId(transaction.id)) {
-    amount = getScheduledAmount(amount);
+    amount = (transaction._inverse ? -1 : 1) * getScheduledAmount(amount);
   }
 
   let debit = amount < 0 ? -amount : null;
@@ -271,7 +271,11 @@ function getPayeePretty(transaction, payee, transferAcct) {
   let { payee: payeeId } = transaction;
 
   if (transferAcct) {
-    const Icon = transaction.amount > 0 ? LeftArrow2 : RightArrow2;
+    const Icon =
+      (transaction._inverse ? -1 : 1) * transaction.amount > 0
+        ? LeftArrow2
+        : RightArrow2;
+
     return (
       <View
         style={{
@@ -598,15 +602,23 @@ export const Transaction = React.memo(function Transaction(props) {
     cleared,
     is_parent: isParent,
     _unmatched = false,
+    _inverse = false,
   } = transaction;
 
   // Join in some data
   let payee = payees && payeeId && getPayeesById(payees)[payeeId];
   let account = accounts && accountId && getAccountsById(accounts)[accountId];
-  let transferAcct =
-    payee &&
-    payee.transfer_acct &&
-    getAccountsById(accounts)[payee.transfer_acct];
+  let transferAcct;
+
+  if (_inverse) {
+    transferAcct =
+      accounts && accountId && getAccountsById(accounts)[accountId];
+  } else {
+    transferAcct =
+      payee &&
+      payee.transfer_acct &&
+      getAccountsById(accounts)[payee.transfer_acct];
+  }
 
   let isChild = transaction.is_child;
   let borderColor = selected ? colors.b8 : colors.border;
