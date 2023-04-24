@@ -6,7 +6,7 @@ on:
 
 jobs:
   needs-votes:
-    if: github.event.label.name == 'feature'
+    if: contains(github.event.issue.labels.*.name, 'feature')
     runs-on: ubuntu-latest
     steps:
       - uses: actions-ecosystem/action-add-labels@v1
