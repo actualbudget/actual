@@ -992,7 +992,8 @@ const AccountHeader = React.memo(
   },
 );
 
-function AllTransactions({ transactions, filtered, children }) {
+function AllTransactions({ account = {}, transactions, filtered, children }) {
+  const { id: accountId } = account;
   let scheduleData = useCachedSchedules();
 
   let schedules = useMemo(
@@ -1018,8 +1019,9 @@ function AllTransactions({ transactions, filtered, children }) {
       date: schedule.next_date,
       notes: scheduleData.statuses.get(schedule.id),
       schedule: schedule.id,
+      _inverse: accountId !== schedule._account,
     }));
-  }, [schedules]);
+  }, [schedules, accountId]);
 
   let allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
@@ -1825,6 +1827,7 @@ class AccountInternal extends React.PureComponent {
 
     return (
       <AllTransactions
+        account={account}
         transactions={transactions}
         filtered={transactionsFiltered}
       >
@@ -2009,18 +2012,26 @@ export default function Account(props) {
   let activeLocation = useActiveLocation();
 
   let transform = useMemo(() => {
-    let filter = queries.getAccountFilter(params.id, '_account');
+    let filterByAccount = queries.getAccountFilter(params.id, '_account');
+    let filterByPayee = queries.getAccountFilter(
+      params.id,
+      '_payee.transfer_acct',
+    );
 
     // Never show schedules on these pages
     if (
       (location.state && location.state.filter) ||
       params.id === 'uncategorized'
     ) {
-      filter = { id: null };
+      filterByAccount = { id: null };
+      filterByPayee = { id: null };
     }
 
     return q => {
-      q = q.filter({ $and: [filter, { '_account.closed': false }] });
+      q = q.filter({
+        $and: [{ '_account.closed': false }],
+        $or: [filterByAccount, filterByPayee],
+      });
       return q.orderBy({ next_date: 'desc' });
     };
   }, [params.id]);
