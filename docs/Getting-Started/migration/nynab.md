@@ -64,6 +64,12 @@ The API key is only shown once, so make sure you copy it down somewhere! More in
 
 Now open a terminal window / command prompt, and enter:
 
+:::note
+
+If you receive an error message like: `Invoke-WebRequest : Cannot bind parameter 'Headers'`, this is because curl is probably aliased to the "Invoke-WebRequest" Powershell commandlet. Use `curl.exe` instead of just `curl` in the commands below to fix this.
+
+:::
+
 ```
 curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1/budgets
 ```
