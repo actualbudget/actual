@@ -554,7 +554,7 @@ function validateRule(rule) {
       } catch (e) {
         if (e instanceof RuleError) {
           console.warn('Invalid rule', e);
-          return e.name;
+          return e.type;
         }
         throw e;
       }

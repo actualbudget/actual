@@ -2,10 +2,11 @@
 export class PostError extends Error {
   meta;
   reason;
+  type;
 
   constructor(reason, meta?) {
     super('PostError: ' + reason);
-    this.name = 'PostError';
+    this.type = 'PostError';
     this.reason = reason;
     this.meta = meta;
   }
@@ -36,22 +37,24 @@ export class SyncError extends Error {
 export class TransactionError extends Error {}
 
 export class RuleError extends Error {
+  type;
+
   constructor(name, message) {
     super('RuleError: ' + message);
-    this.name = name;
+    this.type = name;
   }
 }
 
 export function APIError(msg, meta?) {
-  return { name: 'APIError', message: msg, meta };
+  return { type: 'APIError', message: msg, meta };
 }
 
 export function FileDownloadError(reason, meta?) {
-  return { name: 'FileDownloadError', reason, meta };
+  return { type: 'FileDownloadError', reason, meta };
 }
 
 export function FileUploadError(reason, meta?) {
-  return { name: 'FileUploadError', reason, meta };
+  return { type: 'FileUploadError', reason, meta };
 }
 
 export function isCodeError(err) {

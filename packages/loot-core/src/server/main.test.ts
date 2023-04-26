@@ -204,7 +204,7 @@ describe('Accounts', () => {
 });
 
 describe('Budget', () => {
-  test.only('new budgets should be created', async () => {
+  test('new budgets should be created', async () => {
     const spreadsheet = await sheet.loadSpreadsheet(db);
 
     await runMutator(async () => {

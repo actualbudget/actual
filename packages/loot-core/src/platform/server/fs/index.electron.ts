@@ -126,6 +126,7 @@ export const readFile: T.ReadFile = (
     // you want a buffer
     encoding = null;
   }
+  // `any` as cannot refine return with two function overrides
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new Promise<any>((resolve, reject) => {
     fs.readFile(filepath, encoding, (err, data) => {

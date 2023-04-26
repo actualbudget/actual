@@ -71,9 +71,9 @@ function createKeyBuffer({
   secret,
   salt,
 }: {
+  numBytes?: number;
   secret?: string;
   salt?: string;
-  numBytes?: number;
 }) {
   return crypto.pbkdf2Sync(
     secret || crypto.randomBytes(128).toString('base64'),
