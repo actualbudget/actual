@@ -56,6 +56,28 @@ You can see in the budget that our categories have now been successfully merged 
 
 ![](/img/categories/CategoriesMerged.png)
 
+## Category Notes
+
+It is possible to add notes to Categories, to do this hover over the category that you would like to add a note to, a paper icon will appear.
+
+![](/static/img/categories/CategoryGroupRename.png)
+
+Click the paper icon and type in your note. 
+
+![](/static/img/categories/CategoryAddNote.png)
+
+## Viewing Category Notes
+
+Once a Category has been given a note it is possible to view it in one of two way. 
+
+1. Hover over the paper icon on the category and the note contents will appear for you to view.
+
+![](/static/img/categories/CategoryViewNoteHover.png)
+
+2. Click the paper icon, this will open the edit box where you can see the note content and also edit the note should you wish.
+
+![](/static/img/categories/CategoryEditNote.png)
+
 ## Tips for new users
 
 If you don't have much experience tracking your finances yet, we recommend starting simple. For this reason, Actual only comes with a few basic categories by default. Don't worry about tracking things super closely. Tracking a few basic areas of your life will still give you profound insights on your spending.
