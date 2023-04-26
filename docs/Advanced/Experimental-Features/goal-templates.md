@@ -31,6 +31,8 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template $10 repeat every week starting 2022-01-03 up to 80|Budget $10 a week, up to a maximum of $80|
 |#template $10 repeat every 2 weeks starting 2022-01-04|Budget $10 fortnightly|
 |#template $10 repeat every 9 weeks starting 2022-01-04 up to 30|Budget $10 every 9 weeks, up to a maximum of $30|
+|#template 10% of Income|Budget 10% of the Income category|
+|#template 15% of all income|Budget 15% of all income categories|
 |#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions|
 
 ### Notes
