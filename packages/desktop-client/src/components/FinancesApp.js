@@ -80,46 +80,41 @@ function PageRoute({ path, component: Component }) {
 function Routes({ isMobile, location }) {
   return (
     <Switch location={location}>
-      <Route path="/">
-        <Route path="/" exact render={() => <Redirect to="/budget" />} />
+      <Route path="/" exact render={() => <Redirect to="/budget" />} />
 
-        <PageRoute path="/reports" component={Reports} />
-        <PageRoute
-          path="/budget"
-          component={isMobile ? MobileBudget : Budget}
-        />
+      <PageRoute path="/reports" component={Reports} />
+      <PageRoute path="/budget" component={isMobile ? MobileBudget : Budget} />
 
-        <Route path="/schedules" exact component={Schedules} />
-        <Route path="/schedule/edit" exact component={EditSchedule} />
-        <Route path="/schedule/edit/:id" component={EditSchedule} />
-        <Route path="/schedule/link" component={LinkSchedule} />
-        <Route path="/schedule/discover" component={DiscoverSchedules} />
-        <Route
-          path="/schedule/posts-offline-notification"
-          component={PostsOfflineNotification}
-        />
+      <Route path="/schedules" exact component={Schedules} />
+      <Route path="/schedule/edit" exact component={EditSchedule} />
+      <Route path="/schedule/edit/:id" component={EditSchedule} />
+      <Route path="/schedule/link" component={LinkSchedule} />
+      <Route path="/schedule/discover" component={DiscoverSchedules} />
+      <Route
+        path="/schedule/posts-offline-notification"
+        component={PostsOfflineNotification}
+      />
 
-        <Route path="/payees" exact component={ManagePayeesPage} />
-        <Route path="/rules" exact component={ManageRulesPage} />
-        <Route path="/settings" component={Settings} />
-        <Route path="/nordigen/link" exact component={NordigenLink} />
+      <Route path="/payees" exact component={ManagePayeesPage} />
+      <Route path="/rules" exact component={ManageRulesPage} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/nordigen/link" exact component={NordigenLink} />
 
-        <Route
-          path="/accounts/:id"
-          exact
-          children={props => {
-            const AcctCmp = isMobile ? MobileAccount : Account;
-            return (
-              props.match && <AcctCmp key={props.match.params.id} {...props} />
-            );
-          }}
-        />
-        <Route
-          path="/accounts"
-          exact
-          component={isMobile ? MobileAccounts : Account}
-        />
-      </Route>
+      <Route
+        path="/accounts/:id"
+        exact
+        children={props => {
+          const AcctCmp = isMobile ? MobileAccount : Account;
+          return (
+            props.match && <AcctCmp key={props.match.params.id} {...props} />
+          );
+        }}
+      />
+      <Route
+        path="/accounts"
+        exact
+        component={isMobile ? MobileAccounts : Account}
+      />
     </Switch>
   );
 }
