@@ -130,7 +130,7 @@ export interface MainHandlers {
 
   'create-query': (arg: { sheetName; name; query }) => Promise<unknown>;
 
-  query: (query) => Promise<unknown>;
+  query: (query) => Promise<{ data; dependencies }>;
 
   'bank-delete': (arg: { id }) => Promise<unknown>;
 
