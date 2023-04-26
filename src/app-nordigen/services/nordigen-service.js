@@ -13,13 +13,20 @@ import {
 } from '../errors.js';
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
-import config from '../../load-config.js';
 import jwt from 'jws';
+import { SecretName, secretsService } from '../../services/secrets-service.js';
 
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
-  secretId: config.nordigen?.secretId,
-  secretKey: config.nordigen?.secretKey,
+  secretId: secretsService.get(SecretName.nordigen_secretId),
+  secretKey: secretsService.get(SecretName.nordigen_secretKey),
+});
+
+secretsService.onUpdate(SecretName.nordigen_secretId, (newSecret) => {
+  nordigenClient.secretId = newSecret;
+});
+secretsService.onUpdate(SecretName.nordigen_secretKey, (newSecret) => {
+  nordigenClient.secretKey = newSecret;
 });
 
 export const handleNordigenError = (response) => {
