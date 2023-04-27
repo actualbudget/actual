@@ -4,7 +4,7 @@ import { css } from 'glamor';
 
 import Refresh from '../icons/v1/Refresh';
 
-import View from './View';
+import View from './common/View';
 
 let spin = css.keyframes({
   '0%': { transform: 'rotateZ(0deg)' },

@@ -7,7 +7,17 @@ import { colors } from '../../style';
 import tokens from '../../tokens';
 import { View, Link } from '../common';
 
-export function Setting({ primaryAction, style, children }) {
+interface SettingProps {
+  primaryAction: React.ReactNode;
+  style?: Parameters<typeof css>[0];
+  children: React.ReactNode;
+}
+
+export const Setting: React.FC<SettingProps> = ({
+  primaryAction,
+  style,
+  children,
+}) => {
   return (
     <View
       {...css([
@@ -36,9 +46,13 @@ export function Setting({ primaryAction, style, children }) {
       {primaryAction || null}
     </View>
   );
+};
+
+interface AdvancedToggleProps {
+  children: React.ReactNode;
 }
 
-export function AdvancedToggle({ children }) {
+export const AdvancedToggle: React.FC<AdvancedToggleProps> = ({ children }) => {
   let location = useLocation();
   let [expanded, setExpanded] = useState(location.hash === '#advanced');
 
@@ -81,4 +95,4 @@ export function AdvancedToggle({ children }) {
       Show advanced settings
     </Link>
   );
-}
+};
