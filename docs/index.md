@@ -10,4 +10,6 @@ Welcome to Actual’s documentation! Here you will find everything you need to k
 
 If you’re completely new to Actual, you’ll need to [install](/Installing/overview) it before you can use it. Once you’ve done that, check out the [Tour of Actual](/Getting-Started/using-actual) for a high-level overview of how Actual works. Then come back later to dive into the more detailed documentation in the “Using Actual” section.
 
+If you would just like to test things out, you can [download](/test-budget.zip) the test budget and [import](/Getting-Started/migration/actual-import) it into Actual
+
 If you ever get stuck, don’t hesitate to [reach out to the maintainers and community](/Contact) for help.

@@ -127,6 +127,7 @@ const sidebars = {
               label: 'Migrating From Other Apps',
               collapsible: false,
               items: [
+                'Getting-Started/migration/actual-import',
                 'Getting-Started/migration/ynab4',
                 'Getting-Started/migration/nynab',
               ],
