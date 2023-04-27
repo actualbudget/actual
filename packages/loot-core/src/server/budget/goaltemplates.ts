@@ -241,8 +241,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         if (to_budget + increment < budgetAvailable) {
           to_budget += increment;
         } else {
+          to_budget = budgetAvailable;
           errors.push(`Available funds are insufficient.`);
-          return { errors };
         }
         break;
       }
@@ -281,8 +281,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           if (to_budget + increment < budgetAvailable) {
             to_budget += increment;
           } else {
+            to_budget = budgetAvailable;
             errors.push(`Available funds are insufficient.`);
-            return { errors };
           }
         }
         break;
@@ -308,8 +308,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             if (to_budget + amount < budgetAvailable) {
               to_budget += amount;
             } else {
+              to_budget = budgetAvailable;
               errors.push(`Available funds are insufficient.`);
-              return { errors };
             }
             w = addWeeks(w, weeks);
           }
@@ -365,8 +365,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         if (increment < budgetAvailable) {
           to_budget = increment;
         } else {
+          to_budget = budgetAvailable;
           errors.push(`Available funds are insufficient.`);
-          return { errors };
         }
         break;
       }
@@ -397,8 +397,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
         if (increment < budgetAvailable) {
           to_budget = increment;
         } else {
+          to_budget = budgetAvailable;
           errors.push(`Available funds are insufficient.`);
-          return { errors };
         }
         break;
       }
@@ -453,8 +453,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           if (to_budget + increment < budgetAvailable) {
             to_budget += increment;
           } else {
+            to_budget = budgetAvailable;
             errors.push(`Available funds are insufficient.`);
-            return { errors };
           }
         }
         break;
