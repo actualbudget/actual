@@ -54,49 +54,44 @@ async function processTemplate(month, force) {
     }
   }
 
-  for (let priority = 0; priority < lowestPriority+1; priority++) {
+  for (let priority = 0; priority < lowestPriority + 1; priority++) {
     for (let c = 0; c < categories.length; c++) {
       let category = categories[c];
 
-      let budgeted = await getSheetValue(
-        monthUtils.sheetForMonth(month),
-        `budget-${category.id}`,
-      );
-
-        let template = category_templates[category.id];
-        if (template) {
-          template = template.filter(t => t.priority === priority);
-          if (template.length > 0) {
+      let template = category_templates[category.id];
+      if (template) {
+        template = template.filter(t => t.priority === priority);
+        if (template.length > 0) {
+          errors = errors.concat(
+            template
+              .filter(t => t.type === 'error')
+              .map(({ line, error }) =>
+                [
+                  category.name + ': ' + error.message,
+                  line,
+                  ' '.repeat(
+                    TEMPLATE_PREFIX.length + error.location.start.offset,
+                  ) + '^',
+                ].join('\n'),
+              ),
+          );
+          let { amount: to_budget, errors: applyErrors } =
+            await applyCategoryTemplate(category, template, month, force);
+          if (to_budget != null) {
+            num_applied++;
+            await setBudget({
+              category: category.id,
+              month,
+              amount: to_budget,
+            });
+          }
+          if (applyErrors != null) {
             errors = errors.concat(
-              template
-                .filter(t => t.type === 'error')
-                .map(({ line, error }) =>
-                  [
-                    category.name + ': ' + error.message,
-                    line,
-                    ' '.repeat(
-                      TEMPLATE_PREFIX.length + error.location.start.offset,
-                    ) + '^',
-                  ].join('\n'),
-                ),
+              applyErrors.map(error => `${category.name}: ${error}`),
             );
-            let { amount: to_budget, errors: applyErrors } =
-              await applyCategoryTemplate(category, template, month, force);
-            if (to_budget != null) {
-              num_applied++;
-              await setBudget({
-                category: category.id,
-                month,
-                amount: to_budget,
-              });
-            }
-            if (applyErrors != null) {
-              errors = errors.concat(
-                applyErrors.map(error => `${category.name}: ${error}`),
-              );
-            }
           }
         }
+      }
     }
   }
 
@@ -260,7 +255,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           to_budget += increment;
         } else {
           to_budget += budgetAvailable;
-          errors.push(`Available funds are insufficient.`);
+          errors.push(`Insufficient funds.`);
         }
         break;
       }
@@ -300,7 +295,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             to_budget += increment;
           } else {
             to_budget += budgetAvailable;
-            errors.push(`Available funds are insufficient.`);
+            errors.push(`Insufficient funds.`);
           }
         }
         break;
@@ -327,7 +322,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
               to_budget += amount;
             } else {
               to_budget += budgetAvailable;
-              errors.push(`Available funds are insufficient.`);
+              errors.push(`Insufficient funds.`);
             }
             w = addWeeks(w, weeks);
           }
@@ -384,7 +379,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           to_budget = increment;
         } else {
           to_budget = budgetAvailable;
-          errors.push(`Available funds are insufficient.`);
+          errors.push(`Insufficient funds.`);
         }
         break;
       }
@@ -416,7 +411,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
           to_budget = increment;
         } else {
           to_budget = budgetAvailable;
-          errors.push(`Available funds are insufficient.`);
+          errors.push(`Insufficient funds.`);
         }
         break;
       }
@@ -472,7 +467,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             to_budget += increment;
           } else {
             to_budget = budgetAvailable;
-            errors.push(`Available funds are insufficient.`);
+            errors.push(`Insufficient funds.`);
           }
         }
         break;
