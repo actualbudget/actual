@@ -379,10 +379,6 @@ export function BudgetSummary({ month, isGoalTemplatesEnabled }) {
                         name: 'apply-goal-template',
                         text: 'Apply budget template',
                       },
-                      isGoalTemplatesEnabled && {
-                        name: 'overwrite-goal-template',
-                        text: 'Overwrite with budget template',
-                      },
                     ]}
                   />
                 </Tooltip>

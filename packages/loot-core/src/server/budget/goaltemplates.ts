@@ -19,10 +19,6 @@ import { setBudget, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export function applyTemplate({ month }) {
-  return processTemplate(month, false);
-}
-
-export function overwriteTemplate({ month }) {
   return processTemplate(month, true);
 }
 
