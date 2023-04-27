@@ -29,58 +29,56 @@ export function overwriteTemplate({ month }) {
 async function processTemplate(month, force) {
   let num_applied = 0;
   let errors = [];
-  for (let priority = 0; priority < 3; priority++) {
-    let category_templates = await getCategoryTemplates(priority);
+  let category_templates = await getCategoryTemplates();
 
-    let categories = await db.all(
-      'SELECT * FROM v_categories WHERE tombstone = 0',
+  let categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  for (let c = 0; c < categories.length; c++) {
+    let category = categories[c];
+
+    let budgeted = await getSheetValue(
+      monthUtils.sheetForMonth(month),
+      `budget-${category.id}`,
     );
 
-    for (let c = 0; c < categories.length; c++) {
-      let category = categories[c];
+    if (budgeted === 0 || force) {
+      let template = category_templates[category.id];
 
-      let budgeted = await getSheetValue(
-        monthUtils.sheetForMonth(month),
-        `budget-${category.id}`,
-      );
-
-      if (budgeted === 0 || force) {
-        let template = category_templates[category.id];
-        
-        if (template) {
+      if (template) {
+        errors = errors.concat(
+          template
+            .filter(t => t.type === 'error')
+            .map(({ line, error }) =>
+              [
+                category.name + ': ' + error.message,
+                line,
+                ' '.repeat(
+                  TEMPLATE_PREFIX.length + error.location.start.offset,
+                ) + '^',
+              ].join('\n'),
+            ),
+        );
+        let { amount: to_budget, errors: applyErrors } =
+          await applyCategoryTemplate(category, template, month, force);
+        if (to_budget != null) {
+          num_applied++;
+          await setBudget({
+            category: category.id,
+            month,
+            amount: to_budget,
+          });
+        }
+        if (applyErrors != null) {
           errors = errors.concat(
-            template
-              .filter(t => t.type === 'error')
-              .map(({ line, error }) =>
-                [
-                  category.name + ': ' + error.message,
-                  line,
-                  ' '.repeat(
-                    TEMPLATE_PREFIX[priority].length +
-                      error.location.start.offset,
-                  ) + '^',
-                ].join('\n'),
-              ),
+            applyErrors.map(error => `${category.name}: ${error}`),
           );
-          let { amount: to_budget, errors: applyErrors } =
-            await applyCategoryTemplate(category, template, month, force);
-          if (to_budget != null) {
-            num_applied++;
-            await setBudget({
-              category: category.id,
-              month,
-              amount: to_budget,
-            });
-          }
-          if (applyErrors != null) {
-            errors = errors.concat(
-              applyErrors.map(error => `${category.name}: ${error}`),
-            );
-          }
         }
       }
     }
   }
+
   if (num_applied === 0) {
     if (errors.length) {
       return {
@@ -111,13 +109,12 @@ async function processTemplate(month, force) {
   }
 }
 
-// const TEMPLATE_PREFIX = '#template ';
-const TEMPLATE_PREFIX = ['#template-1', '#template-2', '#template-3'];
-async function getCategoryTemplates(priority) {
+const TEMPLATE_PREFIX = '#template';
+async function getCategoryTemplates() {
   let templates = {};
 
   let notes = await db.all(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX[priority]}%'`,
+    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
 
   for (let n = 0; n < notes.length; n++) {
@@ -125,8 +122,8 @@ async function getCategoryTemplates(priority) {
     let template_lines = [];
     for (let l = 0; l < lines.length; l++) {
       let line = lines[l].trim();
-      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX[priority])) continue;
-      let expression = line.slice(TEMPLATE_PREFIX[priority].length);
+      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
+      let expression = line.slice(TEMPLATE_PREFIX.length);
       try {
         let parsed = parse(expression);
         template_lines.push(parsed);
