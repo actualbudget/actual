@@ -1,12 +1,29 @@
 import React from 'react';
 
+import type { CSSProperties } from 'glamor';
+
 import ExclamationOutline from '../icons/v1/ExclamationOutline';
 import InformationOutline from '../icons/v1/InformationOutline';
 import { styles, colors } from '../style';
 
-import { View, Text } from './common';
+import Text from './common/Text';
+import View from './common/View';
 
-export function Alert({ icon: Icon, color, backgroundColor, style, children }) {
+interface AlertProps {
+  icon?: React.FC<{ width?: number; style?: CSSProperties }>;
+  color?: string;
+  backgroundColor?: string;
+  style?: CSSProperties;
+  children?: React.ReactNode;
+}
+
+export const Alert: React.FC<AlertProps> = ({
+  icon: Icon,
+  color,
+  backgroundColor,
+  style,
+  children,
+}) => {
   return (
     <View
       style={[
@@ -39,9 +56,17 @@ export function Alert({ icon: Icon, color, backgroundColor, style, children }) {
       <Text style={{ zIndex: 1, lineHeight: 1.5 }}>{children}</Text>
     </View>
   );
+};
+
+interface ScopedAlertProps {
+  style?: CSSProperties;
+  children?: React.ReactNode;
 }
 
-export function Information({ style, children }) {
+export const Information: React.FC<ScopedAlertProps> = ({
+  style,
+  children,
+}) => {
   return (
     <Alert
       icon={InformationOutline}
@@ -52,9 +77,9 @@ export function Information({ style, children }) {
       {children}
     </Alert>
   );
-}
+};
 
-export function Warning({ style, children }) {
+export const Warning: React.FC<ScopedAlertProps> = ({ style, children }) => {
   return (
     <Alert
       icon={ExclamationOutline}
@@ -65,9 +90,9 @@ export function Warning({ style, children }) {
       {children}
     </Alert>
   );
-}
+};
 
-export function Error({ style, children }) {
+export const Error: React.FC<ScopedAlertProps> = ({ style, children }) => {
   return (
     <Alert
       icon={ExclamationOutline}
@@ -78,4 +103,4 @@ export function Error({ style, children }) {
       {children}
     </Alert>
   );
-}
+};

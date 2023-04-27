@@ -199,6 +199,9 @@ export interface MainHandlers {
     updatedAccounts: unknown;
   }>;
 
+  'secret-set': (arg: { key: string; value: string }) => Promise<null>;
+  'secret-get': (arg: string) => Promise<null>;
+
   'nordigen-poll-web-token': (arg: {
     upgradingAccountId;
     requisitionId;
