@@ -1,6 +1,6 @@
 import React, { useState, useContext, useMemo, useEffect } from 'react';
 
-import { runQuery, liveQuery, LiveQuery, PagedQuery } from './query-helpers';
+import { liveQuery, LiveQuery, PagedQuery } from './query-helpers';
 
 function makeContext(queryState, opts, QueryClass) {
   let query = new QueryClass(queryState, null, opts);
@@ -48,34 +48,6 @@ function makeContext(queryState, opts, QueryClass) {
       );
     }
     return queryData;
-  }
-
-  return {
-    Provider,
-    useQuery,
-  };
-}
-
-export function queryContext(queryState) {
-  let Context = React.createContext(null);
-
-  function Provider({ children }) {
-    let [data, setData] = useState(null);
-    let value = useMemo(() => ({ data }), [data]);
-
-    useEffect(() => {
-      async function run() {
-        let { data } = await runQuery(queryState);
-        setData(data);
-      }
-      run();
-    }, []);
-
-    return <Context.Provider value={value} children={children} />;
-  }
-
-  function useQuery() {
-    return useContext(Context);
   }
 
   return {

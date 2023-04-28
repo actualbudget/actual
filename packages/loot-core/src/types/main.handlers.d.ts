@@ -20,15 +20,6 @@ export interface MainHandlers {
 
   'transaction-delete': (transaction) => Promise<Record<string, never>>;
 
-  'transactions-filter': (arg: {
-    term;
-    accountId;
-    latestDate;
-    count;
-    notPaged;
-    options;
-  }) => Promise<unknown>;
-
   'transactions-parse-file': (arg: { filepath; options }) => Promise<unknown>;
 
   'transactions-export': (arg: {

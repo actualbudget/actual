@@ -140,17 +140,6 @@ handlers['transaction-delete'] = mutator(async function (transaction) {
   return {};
 });
 
-handlers['transactions-filter'] = async function ({
-  term,
-  accountId,
-  latestDate,
-  count,
-  notPaged,
-  options = {},
-}) {
-  return db.getTransactions(accountId);
-};
-
 handlers['transactions-parse-file'] = async function ({ filepath, options }) {
   return parseFile(filepath, options);
 };
