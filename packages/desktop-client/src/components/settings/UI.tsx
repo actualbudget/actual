@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
+import type { CSSProperties } from 'glamor';
 
 import { colors } from '../../style';
 import tokens from '../../tokens';
@@ -9,7 +10,7 @@ import { View, Link } from '../common';
 
 interface SettingProps {
   primaryAction: React.ReactNode;
-  style?: Parameters<typeof css>[0];
+  style?: CSSProperties;
   children: React.ReactNode;
 }
 

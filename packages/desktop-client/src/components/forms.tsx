@@ -64,7 +64,10 @@ export const FormField: React.FC<FormFieldProps> = ({ style, children }) => {
 
 // Custom inputs
 
-type CheckboxProps = Omit<React.HTMLProps<HTMLInputElement>, 'type'>;
+type CheckboxProps = Omit<
+  React.HTMLProps<HTMLInputElement>,
+  'type' | 'styles'
+> & { styles?: CSSProperties };
 
 export const Checkbox: React.FC<CheckboxProps> = props => {
   return (
