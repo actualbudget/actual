@@ -5,7 +5,6 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import mergeRefs from 'react-merge-refs';
 import ReactModal from 'react-modal';
 import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
 
@@ -21,18 +20,21 @@ import hotkeys from 'hotkeys-js';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { useProperFocus } from '../hooks/useProperFocus';
 import Loading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import { styles, colors } from '../style';
 import tokens from '../tokens';
 
-import Text from './Text';
-import View from './View';
+import Button from './common/Button';
+import Input, { defaultInputStyle } from './common/Input';
+import Text from './common/Text';
+import View from './common/View';
 
-export { default as View } from './View';
-export { default as Text } from './Text';
+export { default as Button } from './common/Button';
+export { default as Input } from './common/Input';
+export { default as View } from './common/View';
+export { default as Text } from './common/Text';
 export { default as Stack } from './Stack';
 
 export function TextOneLine({ children, centered, ...props }) {
@@ -187,93 +189,6 @@ function ButtonLink_({
 
 export const ButtonLink = withRouter(ButtonLink_);
 
-export const Button = React.forwardRef(
-  (
-    {
-      children,
-      pressed,
-      primary,
-      hover,
-      bare,
-      style,
-      disabled,
-      hoveredStyle,
-      activeStyle,
-      bounce = true,
-      as = 'button',
-      ...nativeProps
-    },
-    ref,
-  ) => {
-    hoveredStyle = [
-      bare
-        ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
-        : { ...styles.shadow },
-      hoveredStyle,
-    ];
-    activeStyle = [
-      bare
-        ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
-        : {
-            transform: bounce && 'translateY(1px)',
-            boxShadow:
-              !bare &&
-              (primary
-                ? '0 1px 4px 0 rgba(0,0,0,0.3)'
-                : '0 1px 4px 0 rgba(0,0,0,0.2)'),
-            transition: 'none',
-          },
-      activeStyle,
-    ];
-
-    let Component = as;
-    let buttonStyle = [
-      {
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        padding: bare ? '5px' : '5px 10px',
-        margin: 0,
-        overflow: 'hidden',
-        display: 'flex',
-        borderRadius: 4,
-        backgroundColor: bare
-          ? 'transparent'
-          : primary
-          ? disabled
-            ? colors.n7
-            : colors.p5
-          : 'white',
-        border: bare
-          ? 'none'
-          : '1px solid ' +
-            (primary ? (disabled ? colors.n7 : colors.p5) : colors.n9),
-        color: primary ? 'white' : disabled ? colors.n6 : colors.n1,
-        transition: 'box-shadow .25s',
-        ...styles.smallText,
-      },
-      { ':hover': !disabled && hoveredStyle },
-      { ':active': !disabled && activeStyle },
-      hover && hoveredStyle,
-      pressed && activeStyle,
-      style,
-    ];
-
-    return (
-      <Component
-        ref={ref}
-        {...(typeof as === 'string'
-          ? css(buttonStyle)
-          : { style: buttonStyle })}
-        disabled={disabled}
-        {...nativeProps}
-      >
-        {children}
-      </Component>
-    );
-  },
-);
-
 export const ButtonWithLoading = React.forwardRef((props, ref) => {
   let { loading, children, ...buttonProps } = props;
   return (
@@ -311,59 +226,6 @@ export const ButtonWithLoading = React.forwardRef((props, ref) => {
     </Button>
   );
 });
-
-const defaultInputStyle = {
-  outline: 0,
-  backgroundColor: 'white',
-  margin: 0,
-  padding: 5,
-  borderRadius: 4,
-  border: '1px solid #d0d0d0',
-};
-
-export function Input({
-  style,
-  inputRef,
-  onEnter,
-  onUpdate,
-  focused,
-  ...nativeProps
-}) {
-  let ref = useRef();
-  useProperFocus(ref, focused);
-
-  return (
-    <input
-      ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
-      {...css(
-        defaultInputStyle,
-        {
-          ':focus': {
-            border: '1px solid ' + colors.b5,
-            boxShadow: '0 1px 1px ' + colors.b7,
-          },
-          '::placeholder': { color: colors.n7 },
-        },
-        styles.smallText,
-        style,
-      )}
-      {...nativeProps}
-      onKeyDown={e => {
-        if (e.key === 'Enter' && onEnter) {
-          onEnter(e);
-        }
-
-        nativeProps.onKeyDown && nativeProps.onKeyDown(e);
-      }}
-      onChange={e => {
-        if (onUpdate) {
-          onUpdate(e.target.value);
-        }
-        nativeProps.onChange && nativeProps.onChange(e);
-      }}
-    />
-  );
-}
 
 export function InputWithContent({
   leftContent,

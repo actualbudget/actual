@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { styles } from '../../style';
-import Text from '../Text';
+import Text from '../common/Text';
 
 import format from './format';
 import SheetValue from './SheetValue';

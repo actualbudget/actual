@@ -2,12 +2,23 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
+import type { CSSProperties } from 'glamor';
 
 import { colors } from '../../style';
 import tokens from '../../tokens';
 import { View, Link } from '../common';
 
-export function Setting({ primaryAction, style, children }) {
+interface SettingProps {
+  primaryAction: React.ReactNode;
+  style?: CSSProperties;
+  children: React.ReactNode;
+}
+
+export const Setting: React.FC<SettingProps> = ({
+  primaryAction,
+  style,
+  children,
+}) => {
   return (
     <View
       {...css([
@@ -36,9 +47,13 @@ export function Setting({ primaryAction, style, children }) {
       {primaryAction || null}
     </View>
   );
+};
+
+interface AdvancedToggleProps {
+  children: React.ReactNode;
 }
 
-export function AdvancedToggle({ children }) {
+export const AdvancedToggle: React.FC<AdvancedToggleProps> = ({ children }) => {
   let location = useLocation();
   let [expanded, setExpanded] = useState(location.hash === '#advanced');
 
@@ -81,4 +96,4 @@ export function AdvancedToggle({ children }) {
       Show advanced settings
     </Link>
   );
-}
+};

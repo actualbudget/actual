@@ -6,8 +6,8 @@ import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { colors, styles } from '../../style';
 import { Button, InputWithContent, Label, View } from '../common';
+import Text from '../common/Text';
 import CellValue from '../spreadsheet/CellValue';
-import Text from '../Text';
 
 import { TransactionList } from './MobileTransaction';
 

@@ -1,12 +1,18 @@
 import React from 'react';
 
 import { css } from 'glamor';
+import type { CSSProperties } from 'glamor';
 
 import { colors } from '../style';
 
 import { View, Text } from './common';
 
-export function SectionLabel({ title, style }) {
+interface SectionLabelProps {
+  title?: string;
+  style?: CSSProperties;
+}
+
+export const SectionLabel: React.FC<SectionLabelProps> = ({ title, style }) => {
   return (
     <View
       style={[
@@ -23,9 +29,21 @@ export function SectionLabel({ title, style }) {
       {title}
     </View>
   );
+};
+
+interface FormLabelProps {
+  title: string;
+  id?: string;
+  htmlFor?: string;
+  style?: CSSProperties;
 }
 
-export function FormLabel({ style, title, id, htmlFor }) {
+export const FormLabel: React.FC<FormLabelProps> = ({
+  style,
+  title,
+  id,
+  htmlFor,
+}) => {
   return (
     <Text style={[{ fontSize: 13, marginBottom: 3, color: colors.n3 }, style]}>
       <label htmlFor={htmlFor} id={id}>
@@ -33,15 +51,25 @@ export function FormLabel({ style, title, id, htmlFor }) {
       </label>
     </Text>
   );
+};
+
+interface FormFieldProps {
+  style?: CSSProperties;
+  children: React.ReactNode;
 }
 
-export function FormField({ style, children }) {
+export const FormField: React.FC<FormFieldProps> = ({ style, children }) => {
   return <View style={style}>{children}</View>;
-}
+};
 
 // Custom inputs
 
-export function Checkbox(props) {
+type CheckboxProps = Omit<
+  React.HTMLProps<HTMLInputElement>,
+  'type' | 'styles'
+> & { styles?: CSSProperties };
+
+export const Checkbox: React.FC<CheckboxProps> = props => {
   return (
     <input
       type="checkbox"
@@ -95,4 +123,4 @@ export function Checkbox(props) {
       )}
     />
   );
-}
+};
