@@ -16,7 +16,7 @@ export const Text: React.FC<TextProps> = props => {
     <span
       {...restProps}
       ref={innerRef}
-      className={`${props.className || ''} ${css(props.style)}`}
+      className={String(css([props.className, props.style]))}
     />
   );
 };

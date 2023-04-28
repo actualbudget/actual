@@ -22,7 +22,7 @@ const View: React.FC<ViewProps> = props => {
       {...restProps}
       ref={innerRef}
       style={nativeStyle}
-      className={`view ${props.className || ''} ${css(props.style)}`}
+      className={`view ${css([props.className, props.style])}`}
     />
   );
 };
