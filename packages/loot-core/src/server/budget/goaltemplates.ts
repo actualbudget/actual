@@ -19,10 +19,10 @@ import { setBudget, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export function applyTemplate({ month }) {
-  return processTemplate(month, true);
+  return processTemplate(month);
 }
 
-async function processTemplate(month, force) {
+async function processTemplate(month) {
   let num_applied = 0;
   let errors = [];
   let category_templates = await getCategoryTemplates();
@@ -72,7 +72,7 @@ async function processTemplate(month, force) {
               ),
           );
           let { amount: to_budget, errors: applyErrors } =
-            await applyCategoryTemplate(category, template, month, force);
+            await applyCategoryTemplate(category, template, month);
           if (to_budget != null) {
             num_applied++;
             await setBudget({
@@ -150,7 +150,7 @@ async function getCategoryTemplates() {
   return templates;
 }
 
-async function applyCategoryTemplate(category, template_lines, month, force) {
+async function applyCategoryTemplate(category, template_lines, month) {
   let current_month = new Date(`${month}-01`);
   let errors = [];
   let all_schedule_names = await db.all(
@@ -477,13 +477,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
     }
   }
 
-  if (
-    ((category.budgeted != null && category.budgeted !== 0) ||
-      to_budget === 0) &&
-    !force
-  ) {
-    return { errors };
-  } else if (category.budgeted === to_budget && force) {
+  if (category.budgeted === to_budget) {
     return null;
   } else {
     let str = category.name + ': ' + integerToAmount(last_month_balance);
