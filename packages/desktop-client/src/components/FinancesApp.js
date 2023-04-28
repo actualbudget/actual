@@ -129,11 +129,7 @@ function Routes({ location }) {
             path="/accounts/:id"
             exact
             children={props => {
-              return (
-                props.match && (
-                  <Account key={props.match.params.id} {...props} />
-                )
-              );
+              props.match && <Account key={props.match.params.id} {...props} />;
             }}
           />
           <Route path="/accounts" exact component={Account} />
