@@ -78,63 +78,47 @@ function PageRoute({ path, component: Component }) {
 }
 
 function Routes({ location }) {
-  const { isNarrowWidth } = useViewport();
+  const { atLeastMediumWidth } = useViewport();
   return (
     <Switch location={location}>
       <Route path="/" exact render={() => <Redirect to="/budget" />} />
 
-      {isNarrowWidth ? (
-        <Switch>
-          <PageRoute path="/budget" component={MobileBudget} />
+      <PageRoute path="/reports" component={Reports} />
+      <PageRoute
+        path="/budget"
+        component={atLeastMediumWidth ? Budget : MobileBudget}
+      />
 
-          <Route path="/payees" exact component={ManagePayeesPage} />
-          <Route path="/rules" exact component={ManageRulesPage} />
-          <Route path="/settings" component={Settings} />
+      <Route path="/schedules" exact component={Schedules} />
+      <Route path="/schedule/edit" exact component={EditSchedule} />
+      <Route path="/schedule/edit/:id" component={EditSchedule} />
+      <Route path="/schedule/link" component={LinkSchedule} />
+      <Route path="/schedule/discover" component={DiscoverSchedules} />
+      <Route
+        path="/schedule/posts-offline-notification"
+        component={PostsOfflineNotification}
+      />
 
-          <Route
-            path="/accounts/:id"
-            exact
-            children={props =>
-              props.match && (
-                <MobileAccount key={props.match.params.id} {...props} />
-              )
-            }
-          />
-          <Route path="/accounts" exact component={MobileAccounts} />
-          <Redirect to="/budget" />
-        </Switch>
-      ) : (
-        <>
-          <PageRoute path="/reports" component={Reports} />
-          <PageRoute path="/budget" component={Budget} />
+      <Route path="/payees" exact component={ManagePayeesPage} />
+      <Route path="/rules" exact component={ManageRulesPage} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/nordigen/link" exact component={NordigenLink} />
 
-          {/* schedules */}
-          <Route path="/schedules" exact component={Schedules} />
-          <Route path="/schedule/edit" exact component={EditSchedule} />
-          <Route path="/schedule/edit/:id" component={EditSchedule} />
-          <Route path="/schedule/link" component={LinkSchedule} />
-          <Route path="/schedule/discover" component={DiscoverSchedules} />
-          <Route
-            path="/schedule/posts-offline-notification"
-            component={PostsOfflineNotification}
-          />
-
-          <Route path="/payees" exact component={ManagePayeesPage} />
-          <Route path="/rules" exact component={ManageRulesPage} />
-          <Route path="/settings" component={Settings} />
-
-          <Route path="/nordigen/link" exact component={NordigenLink} />
-
-          <Route
-            path="/accounts/:id"
-            exact
-            children={props => {
-              props.match && <Account key={props.match.params.id} {...props} />;
-            }}
-          />
-          <Route path="/accounts" exact component={Account} />
-        </>
-      )}
+      <Route
+        path="/accounts/:id"
+        exact
+        children={props => {
+          const AcctCmp = atLeastMediumWidth ? Account : MobileAccount;
+          return (
+            props.match && <AcctCmp key={props.match.params.id} {...props} />
+          );
+        }}
+      />
+      <Route
+        path="/accounts"
+        exact
+        component={atLeastMediumWidth ? Account : MobileAccounts}
+      />
     </Switch>
   );
 }
@@ -192,6 +176,7 @@ function NavTab({ icon: TabIcon, name, path }) {
 }
 
 function MobileNavTabs() {
+  const { atLeastMediumWidth } = useViewport();
   return (
     <div
       style={{
@@ -199,7 +184,7 @@ function MobileNavTabs() {
         borderTop: `1px solid ${colors.n10}`,
         bottom: 0,
         ...styles.shadow,
-        display: 'flex',
+        display: atLeastMediumWidth ? 'none' : 'flex',
         height: '80px',
         justifyContent: 'space-around',
         paddingTop: 10,
@@ -216,7 +201,7 @@ function MobileNavTabs() {
 const patchedHistory = createBrowserHistory();
 
 function FinancesApp(props) {
-  const { isNarrowWidth } = useViewport();
+  const { atLeastMediumWidth } = useViewport();
 
   useEffect(() => {
     let oldPush = patchedHistory.push;
@@ -295,7 +280,7 @@ function FinancesApp(props) {
           <GlobalKeys />
 
           <View style={{ flexDirection: 'row', flex: 1 }}>
-            {!isNarrowWidth && <FloatableSidebar />}
+            {atLeastMediumWidth && <FloatableSidebar />}
 
             <div
               style={{
@@ -307,7 +292,7 @@ function FinancesApp(props) {
                 width: '100%',
               }}
             >
-              {!isNarrowWidth && (
+              {atLeastMediumWidth && (
                 <Titlebar
                   style={{
                     WebkitAppRegion: 'drag',
@@ -334,13 +319,11 @@ function FinancesApp(props) {
                 <Modals history={patchedHistory} />
               </div>
 
-              {isNarrowWidth && (
-                <Switch>
-                  <Route path="/budget" component={MobileNavTabs} />
-                  <Route path="/accounts" component={MobileNavTabs} />
-                  <Route path="/settings" component={MobileNavTabs} />
-                </Switch>
-              )}
+              <Switch>
+                <Route path="/budget" component={MobileNavTabs} />
+                <Route path="/accounts" component={MobileNavTabs} />
+                <Route path="/settings" component={MobileNavTabs} />
+              </Switch>
             </div>
           </View>
         </View>
