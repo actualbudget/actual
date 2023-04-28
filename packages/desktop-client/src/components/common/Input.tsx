@@ -20,7 +20,7 @@ interface InputProps extends Omit<React.HTMLProps<HTMLInputElement>, 'style'> {
   style?: CSSProperties;
   inputRef?: React.Ref<HTMLInputElement>;
   onEnter?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  onUpdate?: (event: string) => void;
+  onUpdate?: (newValue: string) => void;
   focused?: boolean;
 }
 
