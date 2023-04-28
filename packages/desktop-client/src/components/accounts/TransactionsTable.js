@@ -1327,7 +1327,7 @@ function TransactionTableInner({
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
-          onHover={props.onHover}
+          onHover={onHover}
           onEdit={tableNavigator.onEdit}
           onSave={props.onSave}
           onDelete={props.onDelete}
