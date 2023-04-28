@@ -94,8 +94,7 @@ export function Page({ title, modalSize, children, titleStyle }) {
         name={title}
         style={{
           ...titleStyle,
-          paddingLeft: HORIZONTAL_PADDING,
-          paddingRight: HORIZONTAL_PADDING,
+          paddingInline: HORIZONTAL_PADDING,
         }}
       />
       <View

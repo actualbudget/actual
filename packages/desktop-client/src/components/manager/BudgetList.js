@@ -195,7 +195,6 @@ function File({ file, onSelect, onDelete }) {
 function BudgetTable({ files, onSelect, onDelete }) {
   return (
     <View
-      className="rabbit"
       style={{
         flexGrow: 1,
         [`@media (min-width: ${tokens.breakpoint_medium})`]: {
