@@ -1,8 +1,16 @@
 import React from 'react';
 
 import { css } from 'glamor';
+import type { CSSProperties } from 'glamor';
 
-function View(props) {
+interface ViewProps extends Omit<React.HTMLProps<HTMLDivElement>, 'style'> {
+  className?: string;
+  style?: CSSProperties;
+  nativeStyle?: React.StyleHTMLAttributes<HTMLDivElement>;
+  innerRef?: React.Ref<HTMLDivElement>;
+}
+
+const View: React.FC<ViewProps> = props => {
   // The default styles are special-cased and pulled out into static
   // styles, and hardcode the class name here. View is used almost
   // everywhere and we can avoid any perf penalty that glamor would
@@ -14,9 +22,9 @@ function View(props) {
       {...restProps}
       ref={innerRef}
       style={nativeStyle}
-      className={`view ${props.className || ''} ${css(props.style)}`}
+      className={`view ${css([props.className, props.style])}`}
     />
   );
-}
+};
 
 export default View;
