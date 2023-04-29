@@ -5,8 +5,9 @@ import type { SchedulesHandlers } from '../server/schedules/types/handlers';
 import type { ApiHandlers } from './api.handlers';
 import type { MainHandlers } from './main.handlers';
 
-export type Handlers = MainHandlers &
-  ApiHandlers &
-  BudgetHandlers &
-  NotesHandlers &
-  SchedulesHandlers;
+export interface Handlers
+  extends MainHandlers,
+    ApiHandlers,
+    BudgetHandlers,
+    NotesHandlers,
+    SchedulesHandlers {}

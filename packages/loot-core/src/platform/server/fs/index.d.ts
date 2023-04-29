@@ -47,8 +47,9 @@ export type CopyFile = typeof copyFile;
 
 export function readFile(
   filepath: string,
-  encoding?: 'utf8' | 'binary' | null,
-): Promise<string | Buffer>;
+  encoding: 'binary' | null,
+): Promise<Buffer>;
+export function readFile(filepath: string, encoding?: 'utf8'): Promise<string>;
 export type ReadFile = typeof readFile;
 
 export function writeFile(
