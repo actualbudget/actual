@@ -104,7 +104,7 @@ function Routes({ location }) {
   const { isNarrowWidth } = useViewport();
   return (
     <Switch location={location}>
-      <NonPageRoute path="/" exact render={() => <Redirect to="/budget" />} />
+      <Redirect from="/" exact to="/budget" />
 
       <PageRoute path="/reports" component={Reports} worksInNarrow={false} />
 
