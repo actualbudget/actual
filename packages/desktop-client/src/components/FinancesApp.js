@@ -32,13 +32,13 @@ import { getLocationState, makeLocationState } from '../util/location-state';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import Account from './accounts/Account';
-import { default as MobileAccount } from './accounts/MobileAccount';
-import { default as MobileAccounts } from './accounts/MobileAccounts';
+import MobileAccount from './accounts/MobileAccount';
+import MobileAccounts from './accounts/MobileAccounts';
 import { ActiveLocationProvider } from './ActiveLocation';
 import BankSyncStatus from './BankSyncStatus';
 import Budget from './budget';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import { default as MobileBudget } from './budget/MobileBudget';
+import MobileBudget from './budget/MobileBudget';
 import { View } from './common';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
@@ -57,8 +57,14 @@ import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 
-function PageRoute({ path, component: Component }) {
-  return (
+function PageRoute({
+  path,
+  component: Component,
+  redirectTo = '/budget',
+  worksInNarrow = true,
+}) {
+  const { isNarrowWidth } = useViewport();
+  return worksInNarrow || !isNarrowWidth ? (
     <Route
       path={path}
       children={props => {
@@ -74,50 +80,95 @@ function PageRoute({ path, component: Component }) {
         );
       }}
     />
+  ) : (
+    <Redirect to={redirectTo} />
+  );
+}
+
+// For routes that do not work well in narrow view
+function NonPageRoute({
+  redirectTo = '/budget',
+  worksInNarrow = true,
+  ...routeProps
+}) {
+  const { isNarrowWidth } = useViewport();
+
+  return worksInNarrow || !isNarrowWidth ? (
+    <Route {...routeProps} />
+  ) : (
+    <Redirect to={redirectTo} />
   );
 }
 
 function Routes({ location }) {
-  const { atLeastMediumWidth } = useViewport();
+  const { isNarrowWidth } = useViewport();
   return (
     <Switch location={location}>
-      <Route path="/" exact render={() => <Redirect to="/budget" />} />
+      <NonPageRoute path="/" exact render={() => <Redirect to="/budget" />} />
 
-      <PageRoute path="/reports" component={Reports} />
+      <PageRoute path="/reports" component={Reports} worksInNarrow={false} />
+
       <PageRoute
         path="/budget"
-        component={atLeastMediumWidth ? Budget : MobileBudget}
+        component={isNarrowWidth ? MobileBudget : Budget}
       />
 
-      <Route path="/schedules" exact component={Schedules} />
-      <Route path="/schedule/edit" exact component={EditSchedule} />
-      <Route path="/schedule/edit/:id" component={EditSchedule} />
-      <Route path="/schedule/link" component={LinkSchedule} />
-      <Route path="/schedule/discover" component={DiscoverSchedules} />
-      <Route
+      <NonPageRoute
+        path="/schedules"
+        exact
+        component={Schedules}
+        worksInNarrow={false}
+      />
+      <NonPageRoute
+        path="/schedule/edit"
+        exact
+        component={EditSchedule}
+        worksInNarrow={false}
+      />
+      <NonPageRoute
+        path="/schedule/edit/:id"
+        component={EditSchedule}
+        worksInNarrow={false}
+      />
+      <NonPageRoute
+        path="/schedule/link"
+        component={LinkSchedule}
+        worksInNarrow={false}
+      />
+      <NonPageRoute
+        path="/schedule/discover"
+        component={DiscoverSchedules}
+        worksInNarrow={false}
+      />
+      <NonPageRoute
         path="/schedule/posts-offline-notification"
         component={PostsOfflineNotification}
       />
 
-      <Route path="/payees" exact component={ManagePayeesPage} />
-      <Route path="/rules" exact component={ManageRulesPage} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/nordigen/link" exact component={NordigenLink} />
+      <NonPageRoute path="/payees" exact component={ManagePayeesPage} />
+      <NonPageRoute path="/rules" exact component={ManageRulesPage} />
+      <NonPageRoute path="/settings" component={Settings} />
+      <NonPageRoute
+        path="/nordigen/link"
+        exact
+        component={NordigenLink}
+        worksInNarrow={false}
+      />
 
-      <Route
+      <NonPageRoute
         path="/accounts/:id"
         exact
         children={props => {
-          const AcctCmp = atLeastMediumWidth ? Account : MobileAccount;
+          const AcctCmp = isNarrowWidth ? MobileAccount : Account;
           return (
             props.match && <AcctCmp key={props.match.params.id} {...props} />
           );
         }}
       />
-      <Route
+      <NonPageRoute
         path="/accounts"
         exact
-        component={atLeastMediumWidth ? Account : MobileAccounts}
+        component={isNarrowWidth ? MobileAccounts : Account}
       />
     </Switch>
   );
