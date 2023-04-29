@@ -249,7 +249,8 @@ type Message = {
 
 export const applyMessages = sequential(async (messages: Message[]) => {
   if (checkSyncingMode('import')) {
-    return applyMessagesForImport(messages);
+    applyMessagesForImport(messages);
+    return undefined;
   } else if (checkSyncingMode('enabled')) {
     // Compare the messages with the existing crdt. This filters out
     // already applied messages and determines if a message is old or
@@ -671,7 +672,7 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
   let localTimeChanged = getClock().timestamp.toString() !== currentTime;
 
   // Apply the new messages
-  let receivedMessages: unknown[] = [];
+  let receivedMessages: Message[] = [];
   if (res.messages.length > 0) {
     receivedMessages = await receiveMessages(
       res.messages.map(msg => ({

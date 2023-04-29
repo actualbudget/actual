@@ -60,7 +60,7 @@ export const multiGet: T.MultiGet = async function (keys) {
 
   let promise = Promise.all(
     keys.map(key => {
-      return new Promise<[string, unknown]>((resolve, reject) => {
+      return new Promise<[string, string]>((resolve, reject) => {
         let req = objectStore.get(key);
         req.onerror = e => reject(e);
         req.onsuccess = e => resolve([key, e.target.result]);
