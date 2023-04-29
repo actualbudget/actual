@@ -37,9 +37,20 @@ export { default as View } from './common/View';
 export { default as Text } from './common/Text';
 export { default as Stack } from './Stack';
 
-export function TextOneLine({ children, centered, ...props }) {
+export function TextOneLine({ children, ...props }) {
   return (
-    <Text numberOfLines={1} {...props}>
+    <Text
+      {...props}
+      style={[
+        props.style,
+        {
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          display: 'block',
+        },
+      ]}
+    >
       {children}
     </Text>
   );
