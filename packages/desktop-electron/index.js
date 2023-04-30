@@ -47,7 +47,7 @@ const WindowState = require('./window-state.js');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin;
-let serverWin; // eslint-disable-line no-unused-vars
+let serverWin; // eslint-disable-line @typescript-eslint/no-unused-vars
 let serverProcess;
 let serverSocket;
 let IS_QUITTING = false;
