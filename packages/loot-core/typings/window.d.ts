@@ -1,7 +1,6 @@
 export {};
 
 declare global {
-  // eslint-disable-next-line no-unused-vars
   interface Window {
     Actual?: {
       IS_FAKE_WEB: boolean;
