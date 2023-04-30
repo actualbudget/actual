@@ -158,7 +158,7 @@ export class BudgetCell extends React.PureComponent {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function BudgetGroupPreview({ group, pending, style }) {
   //   let opacity = useMemo(() => new Animated.Value(0), []);
 
@@ -204,7 +204,7 @@ function BudgetGroupPreview({ group, pending, style }) {
   );
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function BudgetCategoryPreview({ name, pending, style }) {
   return (
     // <Animated.View
