@@ -130,7 +130,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
               ? colors.n9
               : null,
         },
-        media(`(min-width: ${tokens.breakpoint_medium})`, {
+        media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
             syncState === 'error'
               ? colors.r4

@@ -26,7 +26,7 @@ import * as undo from 'loot-core/src/platform/client/undo';
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
-import { useViewport } from '../ResponsiveProvider';
+import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
 import { getLocationState, makeLocationState } from '../util/location-state';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
@@ -63,7 +63,7 @@ function PageRoute({
   redirectTo = '/budget',
   worksInNarrow = true,
 }) {
-  const { isNarrowWidth } = useViewport();
+  const { isNarrowWidth } = useResponsive();
   return worksInNarrow || !isNarrowWidth ? (
     <Route
       path={path}
@@ -91,7 +91,7 @@ function NonPageRoute({
   worksInNarrow = true,
   ...routeProps
 }) {
-  const { isNarrowWidth } = useViewport();
+  const { isNarrowWidth } = useResponsive();
 
   return worksInNarrow || !isNarrowWidth ? (
     <Route {...routeProps} />
@@ -101,7 +101,7 @@ function NonPageRoute({
 }
 
 function Routes({ location }) {
-  const { isNarrowWidth } = useViewport();
+  const { isNarrowWidth } = useResponsive();
   return (
     <Switch location={location}>
       <Redirect from="/" exact to="/budget" />
@@ -227,7 +227,7 @@ function NavTab({ icon: TabIcon, name, path }) {
 }
 
 function MobileNavTabs() {
-  const { atLeastMediumWidth } = useViewport();
+  const { atLeastSmallWidth } = useResponsive();
   return (
     <div
       style={{
@@ -235,7 +235,7 @@ function MobileNavTabs() {
         borderTop: `1px solid ${colors.n10}`,
         bottom: 0,
         ...styles.shadow,
-        display: atLeastMediumWidth ? 'none' : 'flex',
+        display: atLeastSmallWidth ? 'none' : 'flex',
         height: '80px',
         justifyContent: 'space-around',
         paddingTop: 10,
@@ -252,7 +252,7 @@ function MobileNavTabs() {
 const patchedHistory = createBrowserHistory();
 
 function FinancesApp(props) {
-  const { atLeastMediumWidth } = useViewport();
+  const { atLeastSmallWidth } = useResponsive();
 
   useEffect(() => {
     let oldPush = patchedHistory.push;
@@ -331,7 +331,7 @@ function FinancesApp(props) {
           <GlobalKeys />
 
           <View style={{ flexDirection: 'row', flex: 1 }}>
-            {atLeastMediumWidth && <FloatableSidebar />}
+            {atLeastSmallWidth && <FloatableSidebar />}
 
             <div
               style={{
@@ -343,7 +343,7 @@ function FinancesApp(props) {
                 width: '100%',
               }}
             >
-              {atLeastMediumWidth && (
+              {atLeastSmallWidth && (
                 <Titlebar
                   style={{
                     WebkitAppRegion: 'drag',

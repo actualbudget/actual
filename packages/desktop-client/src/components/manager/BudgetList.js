@@ -197,7 +197,7 @@ function BudgetTable({ files, onSelect, onDelete }) {
     <View
       style={{
         flexGrow: 1,
-        [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+        [`@media (min-width: ${tokens.breakpoint_small})`]: {
           flexGrow: 0,
           maxHeight: 310,
         },
@@ -264,8 +264,8 @@ function BudgetList({
         marginInline: -20,
         marginTop: 20,
         width: '100vw',
-        [`@media (min-width: ${tokens.breakpoint_medium})`]: {
-          maxWidth: tokens.breakpoint_medium,
+        [`@media (min-width: ${tokens.breakpoint_small})`]: {
+          maxWidth: tokens.breakpoint_small,
           width: '100%',
         },
       }}

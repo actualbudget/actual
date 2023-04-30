@@ -1,48 +1,43 @@
-import React, { ReactNode, useContext } from 'react';
+import React, { ReactNode, useContext, useState } from 'react';
 
 import { useViewportSize } from '@react-aria/utils';
 
+import useResizeObserver from './hooks/useResizeObserver';
 import { breakpoints } from './tokens';
 
-/* eslint-disable no-unused-vars */
-enum VIEW_MODES {
-  NARROW = 'narrow',
-  MEDIUM = 'medium',
-  WIDE = 'wide',
-}
-/* eslint-enable no-unused-vars */
-
-function getWidthName(width: number): VIEW_MODES {
-  return width < breakpoints.medium
-    ? VIEW_MODES.NARROW
-    : width >= breakpoints.medium && width < breakpoints.wide
-    ? VIEW_MODES.MEDIUM
-    : VIEW_MODES.WIDE;
-}
-
 type TResponsiveContext = {
+  atLeastSmallWidth: boolean;
   atLeastMediumWidth: boolean;
   isNarrowWidth: boolean;
   isMediumWidth: boolean;
   isWideWidth: boolean;
   height: number;
-  width: number;
-  viewMode: VIEW_MODES;
+  mainContentRef: (el) => void;
+  mainContentWidth: number;
+  viewportWidth: number;
 };
 
 const ResponsiveContext = React.createContext<TResponsiveContext>(null);
 
 export function ResponsiveProvider(props: { children: ReactNode }) {
   const { height, width } = useViewportSize();
+  const [mainContentWidth, setMainContentWidth] = useState<number>(width - 240);
+  const mainContentRef = useResizeObserver(rect =>
+    setMainContentWidth(rect.width),
+  );
 
+  // Possible view modes: narrow, small, medium, wide
   const viewportInfo = {
+    atLeastSmallWidth: width >= breakpoints.small,
     atLeastMediumWidth: width >= breakpoints.medium,
-    isNarrowWidth: width < breakpoints.medium,
+    isNarrowWidth: width < breakpoints.small,
+    isSmallWidth: width >= breakpoints.small && width < breakpoints.medium,
     isMediumWidth: width >= breakpoints.medium && width < breakpoints.wide,
     isWideWidth: width >= breakpoints.wide,
     height: height,
-    width: width,
-    viewMode: getWidthName(width),
+    mainContentRef, // should only be placed on a single main content element in each screen
+    mainContentWidth, // width of the viewport excluding, unaffected by the sidebar
+    viewportWidth: width, // raw pixel width
   };
 
   return (
@@ -52,6 +47,6 @@ export function ResponsiveProvider(props: { children: ReactNode }) {
   );
 }
 
-export function useViewport() {
+export function useResponsive() {
   return useContext(ResponsiveContext);
 }

@@ -1,10 +1,10 @@
 import React, { useState, useContext, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import { useViewport } from '../ResponsiveProvider';
+import { useResponsive } from '../ResponsiveProvider';
 
 import { View } from './common';
 import { SIDEBAR_WIDTH } from './sidebar';
@@ -13,22 +13,30 @@ import SidebarWithData from './SidebarWithData';
 const SidebarContext = React.createContext(null);
 
 export function SidebarProvider({ children }) {
+  let floatingSidebar = useSelector(
+    state => state.prefs.global.floatingSidebar,
+  );
   let [hidden, setHidden] = useState(true);
+  let { viewportWidth } = useResponsive();
+  let alwaysFloats = viewportWidth < 668;
+  let floating = floatingSidebar || alwaysFloats;
+
   return (
-    <SidebarContext.Provider value={[hidden, setHidden]}>
+    <SidebarContext.Provider
+      value={{ hidden, setHidden, floating, alwaysFloats }}
+    >
       {children}
     </SidebarContext.Provider>
   );
 }
 
 export function useSidebar() {
-  let { width } = useViewport();
-  let alwaysFloats = width < 668;
+  let { hidden, setHidden, floating, alwaysFloats } =
+    useContext(SidebarContext);
 
-  let [hidden, setHidden] = useContext(SidebarContext);
   return useMemo(
-    () => ({ hidden, setHidden, alwaysFloats }),
-    [hidden, setHidden, alwaysFloats],
+    () => ({ hidden, setHidden, floating, alwaysFloats }),
+    [hidden, setHidden, floating, alwaysFloats],
   );
 }
 

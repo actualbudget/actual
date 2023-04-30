@@ -8,7 +8,7 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
-import { useViewport } from '../../ResponsiveProvider';
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import tokens from '../../tokens';
 import { withThemeColor } from '../../util/withThemeColor';
@@ -40,7 +40,7 @@ function About() {
       <View
         style={[
           { flexDirection: 'column', gap: 10 },
-          media(`(min-width: ${tokens.breakpoint_medium})`, {
+          media(`(min-width: ${tokens.breakpoint_small})`, {
             display: 'grid',
             gridTemplateRows: '1fr 1fr',
             gridTemplateColumns: '50% 50%',
@@ -122,18 +122,18 @@ function Settings({
     return () => unlisten();
   }, [loadPrefs]);
 
-  const { atLeastMediumWidth, isWideWidth } = useViewport();
+  const { atLeastSmallWidth, isNarrow } = useResponsive();
 
   return (
     <View
       style={{
-        marginInline: globalPrefs.floatingSidebar && isWideWidth ? 'auto' : 0,
+        marginInline: globalPrefs.floatingSidebar && !isNarrow ? 'auto' : 0,
       }}
     >
       <Page
         title="Settings"
         titleStyle={
-          atLeastMediumWidth
+          atLeastSmallWidth
             ? undefined
             : {
                 backgroundColor: colors.n11,
@@ -142,7 +142,7 @@ function Settings({
         }
       >
         <View style={{ flexShrink: 0, gap: 30 }}>
-          {atLeastMediumWidth ? null : (
+          {atLeastSmallWidth ? null : (
             <View
               style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
             >

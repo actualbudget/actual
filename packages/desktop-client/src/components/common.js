@@ -912,8 +912,8 @@ export function Modal({
             borderRadius: 4,
             backgroundColor: 'white',
             opacity: isHidden ? 0 : 1,
-            [`@media (min-width: ${tokens.breakpoint_medium})`]: {
-              minWidth: tokens.breakpoint_medium,
+            [`@media (min-width: ${tokens.breakpoint_small})`]: {
+              minWidth: tokens.breakpoint_small,
             },
           },
           styles.shadowLarge,

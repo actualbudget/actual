@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { useViewport } from '../ResponsiveProvider';
+import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
 
 import { Modal, View, Text } from './common';
@@ -21,7 +21,7 @@ export function usePageType() {
 }
 
 function PageTitle({ name, style }) {
-  const { isNarrowWidth } = useViewport();
+  const { isNarrowWidth } = useResponsive();
 
   if (isNarrowWidth) {
     return (
@@ -66,7 +66,7 @@ function PageTitle({ name, style }) {
 export function Page({ title, modalSize, children, titleStyle }) {
   let { type, current } = usePageType();
   let history = useHistory();
-  let { isNarrowWidth } = useViewport();
+  let { isNarrowWidth, mainContentRef } = useResponsive();
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 
   if (type === 'modal') {
@@ -89,7 +89,10 @@ export function Page({ title, modalSize, children, titleStyle }) {
   }
 
   return (
-    <View style={isNarrowWidth ? undefined : styles.page}>
+    <View
+      style={isNarrowWidth ? undefined : styles.page}
+      innerRef={mainContentRef}
+    >
       <PageTitle
         name={title}
         style={{
