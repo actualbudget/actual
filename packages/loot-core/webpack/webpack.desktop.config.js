@@ -24,6 +24,7 @@ module.exports = {
       '.ts',
       '.tsx',
       '.json',
+      'pegjs'
     ],
   },
   externals: [
