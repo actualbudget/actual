@@ -133,7 +133,7 @@ function parseAnd(state) {
 function parseNot(state) {
   let left = parseCompare(state);
   while (skipValue(state, types.TOKEN_OPERATOR, 'not')) {
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const right = parseCompare(state);
     left = new nodes.UnaryOp(left.lineno, left.colno, 'not', parseNot(state));
   }

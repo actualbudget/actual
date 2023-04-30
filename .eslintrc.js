@@ -15,14 +15,7 @@ module.exports = {
   reportUnusedDisableDirectives: true,
   rules: {
     'prettier/prettier': 'error',
-    'no-unused-vars': [
-      'error',
-      {
-        args: 'none',
-        varsIgnorePattern: '^_',
-        ignoreRestSiblings: true,
-      },
-    ],
+    'no-unused-vars': 'off',
 
     'no-restricted-globals': ['error'].concat(
       require('confusing-browser-globals').filter(g => g !== 'self'),
@@ -74,6 +67,13 @@ module.exports = {
     'prefer-const': 'off',
     'prefer-spread': 'off',
     '@typescript-eslint/no-empty-function': 'off',
-    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        args: 'none',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+      },
+    ],
   },
 };

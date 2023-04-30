@@ -38,7 +38,7 @@ export function useDraggable({
 }) {
   let _onDragChange = useRef(onDragChange);
 
-  //eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [{ isDragging }, dragRef] = useDrag({
     item: { type, item },
     collect: monitor => ({ isDragging: monitor.isDragging() }),
