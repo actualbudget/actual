@@ -41,7 +41,7 @@ export function getDatabasePath() {
   return dbPath;
 }
 
-export async function openDatabase(id) {
+export async function openDatabase(id?) {
   if (db) {
     await sqlite.closeDatabase(db);
   }
@@ -634,8 +634,8 @@ export async function getTransactionsByDate(
   throw new Error('`getTransactionsByDate` is deprecated');
 }
 
-export async function getTransactions(accountId, arg2?: unknown) {
-  if (arg2 !== undefined) {
+export async function getTransactions(accountId) {
+  if (arguments.length > 1) {
     throw new Error(
       '`getTransactions` was given a second argument, it now only takes a single argument `accountId`',
     );

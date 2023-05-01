@@ -89,6 +89,6 @@ export async function postBinary(url, data, headers) {
   return buffer;
 }
 
-export function get(url, opts) {
+export function get(url, opts?) {
   return fetch(url, opts).then(res => res.text());
 }

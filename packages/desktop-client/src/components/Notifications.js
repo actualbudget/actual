@@ -209,7 +209,7 @@ function Notifications({ notifications, removeNotification, style }) {
     <View
       style={[
         {
-          position: 'absolute',
+          position: 'fixed',
           bottom: 20,
           right: 13,
           zIndex: 10000,

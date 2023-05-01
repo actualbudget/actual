@@ -11,7 +11,7 @@ module.exports = {
     'tsx',
     'json',
   ],
-  setupFilesAfterEnv: ['<rootDir>/src/mocks/setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/src/mocks/setup.ts'],
   testEnvironment: 'node',
   testPathIgnorePatterns: [
     '/node_modules/',

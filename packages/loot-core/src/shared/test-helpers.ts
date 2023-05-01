@@ -14,7 +14,7 @@ function timeout(promise, n) {
   ]);
 }
 
-export function resetTracer(x) {
+export function resetTracer() {
   tracer = execTracer();
 }
 

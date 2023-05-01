@@ -86,7 +86,6 @@ __metadata:
     mitt: ^3.0.0
     node-noop: 1.0.0
     pikaday: 1.8.0
-    prop-types: 15.6.0
     react: 18.2.0
     react-app-rewired: ^2.2.1
     react-dnd: ^10.0.2
@@ -9638,7 +9637,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fbjs@npm:^0.8.12, fbjs@npm:^0.8.16":
+"fbjs@npm:^0.8.12":
   version: 0.8.18
   resolution: "fbjs@npm:0.8.18"
   dependencies:
@@ -16529,17 +16528,6 @@ __metadata:
     kleur: ^3.0.3
     sisteransi: ^1.0.5
   checksum: d8fd1fe63820be2412c13bfc5d0a01909acc1f0367e32396962e737cb2fc52d004f3302475d5ce7d18a1e8a79985f93ff04ee03007d091029c3f9104bffc007d
-  languageName: node
-  linkType: hard
-
-"prop-types@npm:15.6.0":
-  version: 15.6.0
-  resolution: "prop-types@npm:15.6.0"
-  dependencies:
-    fbjs: ^0.8.16
-    loose-envify: ^1.3.1
-    object-assign: ^4.1.1
-  checksum: 77c1f297fdd3b5eaba70aed24429a2d83881216626b6d244cf189256b6913217fc35bf38947f5b9e190a017d49f0d121d8f202f67cb9ec43c0c78b00039725c4
   languageName: node
   linkType: hard
 

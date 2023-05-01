@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 
 import useNordigenStatus from '../../hooks/useNordigenStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
@@ -15,9 +15,12 @@ import { COUNTRY_OPTIONS } from './countries';
 function useAvailableBanks(country) {
   const [banks, setBanks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     async function fetch() {
+      setIsError(false);
+
       if (!country) {
         setBanks([]);
         setIsLoading(false);
@@ -26,9 +29,15 @@ function useAvailableBanks(country) {
 
       setIsLoading(true);
 
-      const results = await send('nordigen-get-banks', country);
+      const { data, error } = await sendCatch('nordigen-get-banks', country);
 
-      setBanks(results);
+      if (error) {
+        setIsError(true);
+        setBanks([]);
+      } else {
+        setBanks(data);
+      }
+
       setIsLoading(false);
     }
 
@@ -38,6 +47,7 @@ function useAvailableBanks(country) {
   return {
     data: banks,
     isLoading,
+    isError,
   };
 }
 
@@ -64,8 +74,11 @@ export default function NordigenExternalMsg({
   let [error, setError] = useState(null);
   let data = useRef(null);
 
-  const { data: bankOptions, isLoading: isBankOptionsLoading } =
-    useAvailableBanks(country);
+  const {
+    data: bankOptions,
+    isLoading: isBankOptionsLoading,
+    isError: isBankOptionError,
+  } = useAvailableBanks(country);
   const { configured: isConfigured, isLoading: isConfigurationLoading } =
     useNordigenStatus();
 
@@ -112,7 +125,13 @@ export default function NordigenExternalMsg({
           />
         </FormField>
 
-        {country &&
+        {isBankOptionError ? (
+          <Error>
+            Failed loading available banks: Nordigen access credentials might be
+            misconfigured. Please set them up again.
+          </Error>
+        ) : (
+          country &&
           (isBankOptionsLoading ? (
             'Loading banks...'
           ) : (
@@ -131,7 +150,8 @@ export default function NordigenExternalMsg({
                 }}
               />
             </FormField>
-          ))}
+          ))
+        )}
 
         <Warning>
           By enabling bank-sync, you will be granting Nordigen (a third party

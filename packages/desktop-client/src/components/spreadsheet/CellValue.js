@@ -17,7 +17,6 @@ function CellValue({ binding, type, formatter, style, getStyle, debug }) {
               style,
               getStyle && getStyle(value),
             ]}
-            numberOfLines={1}
             data-testid={name}
             data-cellname={name}
           >

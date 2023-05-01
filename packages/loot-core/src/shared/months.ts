@@ -85,7 +85,7 @@ export function dayFromDate(date) {
 
 export function currentMonth() {
   if (global.IS_TESTING) {
-    return '2017-01';
+    return global.currentMonth || '2017-01';
   } else {
     return d.format(new Date(), 'yyyy-MM');
   }

@@ -117,13 +117,18 @@ export const copyFile = (frompath, topath) => {
   });
 };
 
-export const readFile: T.ReadFile = (filepath, encoding = 'utf8') => {
+export const readFile: T.ReadFile = (
+  filepath: string,
+  encoding: 'utf8' | 'binary' | null = 'utf8',
+) => {
   if (encoding === 'binary') {
     // `binary` is not actually a valid encoding, you pass `null` into node if
     // you want a buffer
     encoding = null;
   }
-  return new Promise((resolve, reject) => {
+  // `any` as cannot refine return with two function overrides
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new Promise<any>((resolve, reject) => {
     fs.readFile(filepath, encoding, (err, data) => {
       if (err) {
         reject(err);
