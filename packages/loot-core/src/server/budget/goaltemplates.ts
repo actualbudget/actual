@@ -22,6 +22,18 @@ export function applyTemplate({ month }) {
   return processTemplate(month);
 }
 
+function checkScheduleTemplates(template) {
+  let lowPriority = template[0].priority;
+  let errorNotice = false;
+  for (let l = 1; l < template.length; l++) {
+    if (template[l].priority !== lowPriority) {
+      lowPriority = Math.min(lowPriority, template[l].priority);
+      errorNotice = true;
+    }
+  }
+  return [lowPriority, errorNotice];
+}
+
 async function processTemplate(month) {
   let num_applied = 0;
   let errors = [];
@@ -57,21 +69,26 @@ async function processTemplate(month) {
       if (template) {
         //check that all schedule and by lines have the same priority level
         let skipSchedule = false;
-        if (template.filter(t => t.type === 'schedule' || t.type === 'by')) {
-          let priorityCheck = template[0].priority;
-          //this creates a lot of duplication per priority level.... need help
-          for (let l = 1; l < template.length; l++) {
-            if (template[l].priority !== priorityCheck) {
-              errors.push(
-                category.name +
-                  ': All `schedule` and `by` templates must have the same priority level.',
-              );
-            }
-            skipSchedule = priorityCheck === priority ? false : true;
-          }
+        let isScheduleOrBy = false;
+        let priorityCheck = 0;
+        if (
+          template.filter(t => t.type === 'schedule' || t.type === 'by')
+            .length > 0
+        ) {
+          let errorNotice = false;
+          [priorityCheck, errorNotice] = checkScheduleTemplates(template);
+          skipSchedule = priorityCheck !== priority ? true : false;
+          isScheduleOrBy = true;
+          if (!skipSchedule && errorNotice)
+            errors.push(
+              category.name +
+                ': Schedules and By templates should all have the same priority.  Using priority ' +
+                priorityCheck,
+            );
         }
         if (!skipSchedule) {
-          template = template.filter(t => t.priority === priority);
+          if (!isScheduleOrBy)
+            template = template.filter(t => t.priority === priority);
           if (template.length > 0) {
             errors = errors.concat(
               template
@@ -268,10 +285,10 @@ async function applyCategoryTemplate(
         } else {
           increment = limit;
         }
-        if (to_budget + increment < budgetAvailable) {
+        if (to_budget + increment < budgetAvailable || !priority) {
           to_budget += increment;
         } else {
-          to_budget += budgetAvailable;
+          if (budgetAvailable > 0) to_budget += budgetAvailable;
           errors.push(`Insufficient funds.`);
         }
         break;
@@ -311,7 +328,7 @@ async function applyCategoryTemplate(
           if (to_budget + increment < budgetAvailable || !priority) {
             to_budget += increment;
           } else {
-            to_budget += budgetAvailable;
+            if (budgetAvailable > 0) to_budget += budgetAvailable;
             errors.push(`Insufficient funds.`);
           }
         }
@@ -338,7 +355,7 @@ async function applyCategoryTemplate(
             if (to_budget + amount < budgetAvailable || !priority) {
               to_budget += amount;
             } else {
-              to_budget += budgetAvailable;
+              if (budgetAvailable > 0) to_budget += budgetAvailable;
               errors.push(`Insufficient funds.`);
             }
             w = addWeeks(w, weeks);
@@ -395,7 +412,7 @@ async function applyCategoryTemplate(
         if (increment < budgetAvailable || !priority) {
           to_budget = increment;
         } else {
-          to_budget = budgetAvailable;
+          if (budgetAvailable > 0) to_budget = budgetAvailable;
           errors.push(`Insufficient funds.`);
         }
         break;
@@ -427,7 +444,7 @@ async function applyCategoryTemplate(
         if (increment < budgetAvailable || !priority) {
           to_budget = increment;
         } else {
-          to_budget = budgetAvailable;
+          if (budgetAvailable > 0) to_budget = budgetAvailable;
           errors.push(`Insufficient funds.`);
         }
         break;
@@ -483,7 +500,7 @@ async function applyCategoryTemplate(
           if (to_budget + increment < budgetAvailable || !priority) {
             to_budget += increment;
           } else {
-            to_budget = budgetAvailable;
+            if (budgetAvailable > 0) to_budget = budgetAvailable;
             errors.push(`Insufficient funds.`);
           }
         }
