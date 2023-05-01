@@ -336,7 +336,7 @@ export async function removeFile(fileId) {
 
 export async function listRemoteFiles() {
   let userToken = await asyncStorage.getItem('user-token');
-  if (!userToken) {
+  if (!userToken || !getServer()) {
     return null;
   }
 
