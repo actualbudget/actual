@@ -1172,62 +1172,59 @@ handlers['nordigen-poll-web-token'] = async function ({
   requisitionId,
 }) {
   let userToken = await asyncStorage.getItem('user-token');
+  if (!userToken || !getServer()) return null;
 
-  if (userToken) {
-    let startTime = Date.now();
-    stopPolling = false;
+  let startTime = Date.now();
+  stopPolling = false;
 
-    async function getData(cb) {
-      if (stopPolling) {
-        return;
-      }
-
-      if (Date.now() - startTime >= 1000 * 60 * 10) {
-        cb('timeout');
-        return;
-      }
-
-      let data = await post(
-        getServer().NORDIGEN_SERVER + '/get-accounts',
-        {
-          upgradingAccountId,
-          requisitionId,
-        },
-        {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      );
-
-      if (data) {
-        if (data.error) {
-          cb('unknown');
-        } else {
-          cb(null, data);
-        }
-      } else {
-        setTimeout(() => getData(cb), 3000);
-      }
+  async function getData(cb) {
+    if (stopPolling) {
+      return;
     }
 
-    return new Promise(resolve => {
-      getData((error, data) => {
-        if (error) {
-          resolve({ error });
-        } else {
-          resolve({ data });
-        }
-      });
-    });
+    if (Date.now() - startTime >= 1000 * 60 * 10) {
+      cb('timeout');
+      return;
+    }
+
+    let data = await post(
+      getServer().NORDIGEN_SERVER + '/get-accounts',
+      {
+        upgradingAccountId,
+        requisitionId,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    if (data) {
+      if (data.error) {
+        cb('unknown');
+      } else {
+        cb(null, data);
+      }
+    } else {
+      setTimeout(() => getData(cb), 3000);
+    }
   }
 
-  return null;
+  return new Promise(resolve => {
+    getData((error, data) => {
+      if (error) {
+        resolve({ error });
+      } else {
+        resolve({ data });
+      }
+    });
+  });
 };
 
 handlers['nordigen-status'] = async function () {
   const userToken = await asyncStorage.getItem('user-token');
 
-  if (!userToken) {
-    return Promise.reject({ error: 'unauthorized' });
+  if (!userToken || !getServer()) {
+    return { error: 'unauthorized' };
   }
 
   return post(
@@ -1242,8 +1239,8 @@ handlers['nordigen-status'] = async function () {
 handlers['nordigen-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
-  if (!userToken) {
-    return Promise.reject({ error: 'unauthorized' });
+  if (!userToken || !getServer()) {
+    return { error: 'unauthorized' };
   }
 
   return post(
@@ -1267,25 +1264,26 @@ handlers['nordigen-create-web-token'] = async function ({
 }) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (userToken) {
-    try {
-      return await post(
-        getServer().NORDIGEN_SERVER + '/create-web-token',
-        {
-          upgradingAccountId,
-          institutionId,
-          accessValidForDays,
-        },
-        {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      );
-    } catch (error) {
-      console.error(error);
-      return { error: 'failed' };
-    }
+  if (!userToken || !getServer()) {
+    return { error: 'unauthorized' };
   }
-  return { error: 'unauthorized' };
+
+  try {
+    return await post(
+      getServer().NORDIGEN_SERVER + '/create-web-token',
+      {
+        upgradingAccountId,
+        institutionId,
+        accessValidForDays,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+  } catch (error) {
+    console.error(error);
+    return { error: 'failed' };
+  }
 };
 
 handlers['nordigen-accounts-sync'] = async function ({ id }) {
@@ -1417,8 +1415,11 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   // No more accounts are associated with this bank. We can remove
   // it from Nordigen.
   let userToken = await asyncStorage.getItem('user-token');
+  if (!userToken || !getServer()) {
+    return 'ok';
+  }
 
-  if (userToken && count === 0) {
+  if (count === 0) {
     let { bank_id: requisitionId } = await db.first(
       'SELECT bank_id FROM banks WHERE id = ?',
       [bankId],

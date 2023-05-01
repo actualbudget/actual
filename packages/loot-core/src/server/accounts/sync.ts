@@ -77,27 +77,29 @@ export async function getAccounts(userId, userKey, id) {
 
 export async function getNordigenAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
-  if (userToken) {
-    let res = await post(
-      getServer().NORDIGEN_SERVER + '/accounts',
-      {
-        userId,
-        key: userKey,
-        item_id: id,
-      },
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
-    );
-
-    let { accounts } = res;
-
-    accounts.forEach(acct => {
-      acct.balances.current = getAccountBalance(acct);
-    });
-
-    return accounts;
+  if (!userToken || !getServer()) {
+    return;
   }
+
+  let res = await post(
+    getServer().NORDIGEN_SERVER + '/accounts',
+    {
+      userId,
+      key: userKey,
+      item_id: id,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+
+  let { accounts } = res;
+
+  accounts.forEach(acct => {
+    acct.balances.current = getAccountBalance(acct);
+  });
+
+  return accounts;
 }
 
 export function fromPlaid(trans) {
@@ -182,41 +184,42 @@ async function downloadNordigenTransactions(
   since,
 ) {
   let userToken = await asyncStorage.getItem('user-token');
-  if (userToken) {
-    const endDate = new Date().toISOString().split('T')[0];
-
-    const res = await post(
-      getServer().NORDIGEN_SERVER + '/transactions',
-      {
-        userId: userId,
-        key: userKey,
-        requisitionId: bankId,
-        accountId: acctId,
-        startDate: since,
-        endDate,
-      },
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
-    );
-
-    if (res.error_code) {
-      throw BankSyncError(res.error_type, res.error_code);
-    }
-
-    const {
-      transactions: { all },
-      balances,
-      startingBalance,
-    } = res;
-
-    return {
-      transactions: all,
-      accountBalance: balances,
-      startingBalance,
-    };
+  if (!userToken || !getServer()) {
+    return;
   }
-  return;
+
+  const endDate = new Date().toISOString().split('T')[0];
+
+  const res = await post(
+    getServer().NORDIGEN_SERVER + '/transactions',
+    {
+      userId: userId,
+      key: userKey,
+      requisitionId: bankId,
+      accountId: acctId,
+      startDate: since,
+      endDate,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  }
+
+  const {
+    transactions: { all },
+    balances,
+    startingBalance,
+  } = res;
+
+  return {
+    transactions: all,
+    accountBalance: balances,
+    startingBalance,
+  };
 }
 
 async function resolvePayee(trans, payeeName, payeesToCreate) {
