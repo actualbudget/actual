@@ -1,22 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 
+import useNordigenStatus from '../../hooks/useNordigenStatus';
 import { authorizeBank } from '../../nordigen';
 import { colors } from '../../style';
 import { View, Text, Modal, P, Button, ButtonWithLoading } from '../common';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
   const dispatch = useDispatch();
+  const [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
 
   const onConnect = () => {
+    if (!isNordigenSetupComplete) {
+      onNordigenInit();
+      return;
+    }
+
     authorizeBank((modal, params) => dispatch(pushModal(modal, params)));
+  };
+
+  const onNordigenInit = () => {
+    dispatch(
+      pushModal('nordigen-init', {
+        onSuccess: () => setIsNordigenSetupComplete(true),
+      }),
+    );
   };
 
   const onCreateLocalAccount = () => {
     dispatch(pushModal('add-local-account'));
   };
+
+  const { configured } = useNordigenStatus();
+  useEffect(() => {
+    setIsNordigenSetupComplete(configured);
+  }, [configured]);
 
   return (
     <Modal title="Add Account" {...modalProps}>
@@ -39,8 +59,15 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
             }}
             onClick={onConnect}
           >
-            Link bank account
+            {isNordigenSetupComplete
+              ? 'Link bank account'
+              : 'Set-up Nordigen for bank-sync'}
           </ButtonWithLoading>
+          {isNordigenSetupComplete && (
+            <Button bare onClick={onNordigenInit}>
+              set new API secrets
+            </Button>
+          )}
 
           {syncServerStatus !== 'online' && (
             <P style={{ color: colors.r5, marginTop: 5 }}>

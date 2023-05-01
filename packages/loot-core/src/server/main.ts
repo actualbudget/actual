@@ -1162,6 +1162,45 @@ handlers['accounts-sync'] = async function ({ id }) {
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
 };
 
+handlers['secret-set'] = async function ({ name, value }) {
+  let userToken = await asyncStorage.getItem('user-token');
+
+  if (userToken) {
+    try {
+      return await post(
+        getServer().BASE_SERVER + '/secret',
+        {
+          name,
+          value,
+        },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+        },
+      );
+    } catch (error) {
+      console.error(error);
+      return { error: 'failed' };
+    }
+  }
+  return { error: 'unauthorized' };
+};
+
+handlers['secret-check'] = async function (name) {
+  let userToken = await asyncStorage.getItem('user-token');
+
+  if (userToken) {
+    try {
+      return await get(getServer().BASE_SERVER + '/secret/' + name, {
+        'X-ACTUAL-TOKEN': userToken,
+      });
+    } catch (error) {
+      console.error(error);
+      return { error: 'failed' };
+    }
+  }
+  return { error: 'unauthorized' };
+};
+
 handlers['nordigen-poll-web-token'] = async function ({
   upgradingAccountId,
   requisitionId,
