@@ -190,7 +190,7 @@ export interface MainHandlers {
     updatedAccounts: unknown;
   }>;
 
-  'secret-set': (arg: { key: string; value: string }) => Promise<null>;
+  'secret-set': (arg: { name: string; value: string }) => Promise<null>;
   'secret-get': (arg: string) => Promise<null>;
 
   'nordigen-poll-web-token': (arg: {
@@ -198,7 +198,7 @@ export interface MainHandlers {
     requisitionId;
   }) => Promise<null>;
 
-  'nordigen-status': () => Promise<unknown>;
+  'nordigen-status': () => Promise<{ configured: boolean }>;
 
   'nordigen-get-banks': (country) => Promise<unknown>;
 
