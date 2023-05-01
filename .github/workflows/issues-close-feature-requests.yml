@@ -2,9 +2,7 @@ name: Close feature requests with automated message
 
 on:
   issues:
-    types:
-      - opened
-      - labeled
+    types: [labeled]
 
 jobs:
   needs-votes:
