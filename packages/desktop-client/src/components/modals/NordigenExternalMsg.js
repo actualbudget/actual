@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
+import { sendCatch } from 'loot-core/src/platform/client/fetch';
 
 import useNordigenStatus from '../../hooks/useNordigenStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
