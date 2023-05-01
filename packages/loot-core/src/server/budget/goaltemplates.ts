@@ -50,41 +50,57 @@ async function processTemplate(month) {
     }
   }
 
-  for (let priority = 0; priority < lowestPriority + 1; priority++) {
+  for (let priority = 0; priority <= lowestPriority; priority++) {
     for (let c = 0; c < categories.length; c++) {
       let category = categories[c];
-
       let template = category_templates[category.id];
       if (template) {
-        template = template.filter(t => t.priority === priority);
-        if (template.length > 0) {
-          errors = errors.concat(
-            template
-              .filter(t => t.type === 'error')
-              .map(({ line, error }) =>
-                [
-                  category.name + ': ' + error.message,
-                  line,
-                  ' '.repeat(
-                    TEMPLATE_PREFIX.length + error.location.start.offset,
-                  ) + '^',
-                ].join('\n'),
-              ),
-          );
-          let { amount: to_budget, errors: applyErrors } =
-            await applyCategoryTemplate(category, template, month);
-          if (to_budget != null) {
-            num_applied++;
-            await setBudget({
-              category: category.id,
-              month,
-              amount: to_budget,
-            });
+        //check that all schedule and by lines have the same priority level
+        let skipSchedule = false;
+        if (template.filter(t => t.type === 'schedule' || t.type === 'by')) {
+          let priorityCheck = template[0].priority;
+          //this creates a lot of duplication per priority level.... need help
+          for (let l = 1; l < template.length; l++) {
+            if (template[l].priority !== priorityCheck) {
+              errors.push(
+                category.name +
+                  ': All `schedule` and `by` templates must have the same priority level.',
+              );
+            }
+            skipSchedule = priorityCheck === priority ? false : true;
           }
-          if (applyErrors != null) {
+        }
+        if (!skipSchedule) {
+          template = template.filter(t => t.priority === priority);
+          if (template.length > 0) {
             errors = errors.concat(
-              applyErrors.map(error => `${category.name}: ${error}`),
+              template
+                .filter(t => t.type === 'error')
+                .map(({ line, error }) =>
+                  [
+                    category.name + ': ' + error.message,
+                    line,
+                    ' '.repeat(
+                      TEMPLATE_PREFIX.length + error.location.start.offset,
+                    ) + '^',
+                  ].join('\n'),
+                ),
             );
+            let { amount: to_budget, errors: applyErrors } =
+              await applyCategoryTemplate(category, template, month, priority);
+            if (to_budget != null) {
+              num_applied++;
+              await setBudget({
+                category: category.id,
+                month,
+                amount: to_budget,
+              });
+            }
+            if (applyErrors != null) {
+              errors = errors.concat(
+                applyErrors.map(error => `${category.name}: ${error}`),
+              );
+            }
           }
         }
       }
@@ -150,7 +166,12 @@ async function getCategoryTemplates() {
   return templates;
 }
 
-async function applyCategoryTemplate(category, template_lines, month) {
+async function applyCategoryTemplate(
+  category,
+  template_lines,
+  month,
+  priority,
+) {
   let current_month = new Date(`${month}-01`);
   let errors = [];
   let all_schedule_names = await db.all(
@@ -287,7 +308,7 @@ async function applyCategoryTemplate(category, template_lines, month) {
             ((totalTarget - last_month_balance) / totalMonths) *
               (N - skipMonths),
           );
-          if (to_budget + increment < budgetAvailable) {
+          if (to_budget + increment < budgetAvailable || !priority) {
             to_budget += increment;
           } else {
             to_budget += budgetAvailable;
@@ -314,7 +335,7 @@ async function applyCategoryTemplate(category, template_lines, month) {
 
         while (w.getTime() < next_month.getTime()) {
           if (w.getTime() >= current_month.getTime()) {
-            if (to_budget + amount < budgetAvailable) {
+            if (to_budget + amount < budgetAvailable || !priority) {
               to_budget += amount;
             } else {
               to_budget += budgetAvailable;
@@ -371,7 +392,7 @@ async function applyCategoryTemplate(category, template_lines, month) {
             (target - already_budgeted) / (num_months + 1),
           );
         }
-        if (increment < budgetAvailable) {
+        if (increment < budgetAvailable || !priority) {
           to_budget = increment;
         } else {
           to_budget = budgetAvailable;
@@ -403,7 +424,7 @@ async function applyCategoryTemplate(category, template_lines, month) {
           0,
           Math.round(monthlyIncome * (percent / 100)),
         );
-        if (increment < budgetAvailable) {
+        if (increment < budgetAvailable || !priority) {
           to_budget = increment;
         } else {
           to_budget = budgetAvailable;
@@ -459,7 +480,7 @@ async function applyCategoryTemplate(category, template_lines, month) {
             monthly_target = target;
           }
           let increment = monthly_target - balance + budgeted;
-          if (to_budget + increment < budgetAvailable) {
+          if (to_budget + increment < budgetAvailable || !priority) {
             to_budget += increment;
           } else {
             to_budget = budgetAvailable;
