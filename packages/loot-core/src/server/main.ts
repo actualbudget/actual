@@ -1674,6 +1674,9 @@ handlers['subscribe-set-user'] = async function ({ token }) {
 
 handlers['subscribe-get-user'] = async function () {
   if (!getServer()) {
+    if (await asyncStorage.getItem('did-bootstrap')) {
+      return null;
+    }
     return { offline: false };
   }
 
@@ -1782,7 +1785,8 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
     }
   }
 
-  asyncStorage.setItem('server-url', url);
+  await asyncStorage.setItem('server-url', url);
+  await asyncStorage.setItem('did-bootstrap', true);
   setServer(url);
   return {};
 };
@@ -2413,6 +2417,7 @@ export async function initApp(isDev, socketName) {
   const url = await asyncStorage.getItem('server-url');
   if (url === 'https://not-configured/') {
     await asyncStorage.setItem('server-url', null);
+    await asyncStorage.setItem('did-bootstrap', true);
   } else if (url) {
     setServer(url);
   }
