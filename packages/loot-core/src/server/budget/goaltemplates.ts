@@ -31,7 +31,7 @@ function checkScheduleTemplates(template) {
       errorNotice = true;
     }
   }
-  return [lowPriority, errorNotice];
+  return { lowPriority, errorNotice };
 }
 
 async function processTemplate(month) {
@@ -75,8 +75,10 @@ async function processTemplate(month) {
           template.filter(t => t.type === 'schedule' || t.type === 'by')
             .length > 0
         ) {
-          let errorNotice = false;
-          [priorityCheck, errorNotice] = checkScheduleTemplates(template);
+          let { lowPriority, errorNotice } = await checkScheduleTemplates(
+            template,
+          );
+          priorityCheck = lowPriority;
           skipSchedule = priorityCheck !== priority ? true : false;
           isScheduleOrBy = true;
           if (!skipSchedule && errorNotice)
