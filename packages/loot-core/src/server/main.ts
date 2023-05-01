@@ -1131,40 +1131,42 @@ handlers['accounts-sync'] = async function ({ id }) {
 handlers['secret-set'] = async function ({ name, value }) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (userToken) {
-    try {
-      return await post(
-        getServer().BASE_SERVER + '/secret',
-        {
-          name,
-          value,
-        },
-        {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      );
-    } catch (error) {
-      console.error(error);
-      return { error: 'failed' };
-    }
+  if (!userToken || !getServer()) {
+    return { error: 'unauthorized' };
   }
-  return { error: 'unauthorized' };
+
+  try {
+    return await post(
+      getServer().BASE_SERVER + '/secret',
+      {
+        name,
+        value,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+  } catch (error) {
+    console.error(error);
+    return { error: 'failed' };
+  }
 };
 
 handlers['secret-check'] = async function (name) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (userToken) {
-    try {
-      return await get(getServer().BASE_SERVER + '/secret/' + name, {
-        'X-ACTUAL-TOKEN': userToken,
-      });
-    } catch (error) {
-      console.error(error);
-      return { error: 'failed' };
-    }
+  if (!userToken || !getServer()) {
+    return { error: 'unauthorized' };
   }
-  return { error: 'unauthorized' };
+
+  try {
+    return await get(getServer().BASE_SERVER + '/secret/' + name, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+  } catch (error) {
+    console.error(error);
+    return { error: 'failed' };
+  }
 };
 
 handlers['nordigen-poll-web-token'] = async function ({
@@ -1677,34 +1679,38 @@ handlers['subscribe-get-user'] = async function () {
 
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (userToken) {
-    try {
-      const res = await get(getServer().SIGNUP_SERVER + '/validate', {
-        headers: {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      });
-      const { status, reason } = JSON.parse(res);
-
-      if (status === 'error') {
-        if (reason === 'unauthorized') {
-          return null;
-        }
-        return { offline: true };
-      }
-
-      return { offline: false };
-    } catch (e) {
-      console.log(e);
-      return { offline: true };
-    }
+  if (!userToken) {
+    return null;
   }
 
-  return null;
+  try {
+    const res = await get(getServer().SIGNUP_SERVER + '/validate', {
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    });
+    const { status, reason } = JSON.parse(res);
+
+    if (status === 'error') {
+      if (reason === 'unauthorized') {
+        return null;
+      }
+      return { offline: true };
+    }
+
+    return { offline: false };
+  } catch (e) {
+    console.log(e);
+    return { offline: true };
+  }
 };
 
 handlers['subscribe-change-password'] = async function ({ password }) {
   let userToken = await asyncStorage.getItem('user-token');
+  if (!userToken || !getServer()) {
+    return { error: 'not-logged-in' };
+  }
+
   try {
     await post(getServer().SIGNUP_SERVER + '/change-password', {
       token: userToken,
