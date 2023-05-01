@@ -1185,7 +1185,7 @@ handlers['secret-set'] = async function ({ name, value }) {
   return { error: 'unauthorized' };
 };
 
-handlers['secret-get'] = async function (name) {
+handlers['secret-check'] = async function (name) {
   let userToken = await asyncStorage.getItem('user-token');
 
   if (userToken) {

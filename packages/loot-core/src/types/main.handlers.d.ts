@@ -191,7 +191,7 @@ export interface MainHandlers {
   }>;
 
   'secret-set': (arg: { name: string; value: string }) => Promise<null>;
-  'secret-get': (arg: string) => Promise<null>;
+  'secret-check': (arg: string) => Promise<null>;
 
   'nordigen-poll-web-token': (arg: {
     upgradingAccountId;
