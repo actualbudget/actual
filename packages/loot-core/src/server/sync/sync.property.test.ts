@@ -84,12 +84,6 @@ let schema = {
     category: 'text',
     tombstone: 'integer',
   },
-  payee_rules: {
-    payee_id: 'text',
-    type: 'text',
-    value: 'text',
-    tombstone: 'integer',
-  },
   payee_mapping: { targetId: 'text' },
 };
 
