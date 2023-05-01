@@ -6,7 +6,7 @@ on:
 
 jobs:
   needs-votes:
-    if: contains(github.event.issue.labels.*.name, 'feature')
+    if: ${{ github.event.label.name == 'feature' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,7 +28,7 @@ jobs:
 
             This repository is now using lodash style issue management for enhancements. This means enhancement issues will now be closed instead of leaving them open. This doesn’t mean we don’t accept feature requests, though! We will consider implementing ones that receive many upvotes, and we welcome contributions for any feature requests marked as needing votes (just post a comment first so we can help you make a successful contribution).
 
-            The enhancement backlog can be found here: https://github.com/actualbudget/actual/issues?utf8=%E2%9C%93&q=label%3Aneeds-votes+sort%3Areactions-%2B1-desc+
+            The enhancement backlog can be found here: https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+
 
             Don’t forget to upvote the top comment with 👍!
       - name: Close Issue
