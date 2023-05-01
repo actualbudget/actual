@@ -3,14 +3,19 @@ import React from 'react';
 import { css } from 'glamor';
 import type { CSSProperties } from 'glamor';
 
+import Loading from '../../icons/AnimatedLoading';
 import { styles, colors } from '../../style';
 
-interface ButtonProps extends React.HTMLProps<HTMLButtonElement> {
+import View from './View';
+
+interface ButtonProps
+  extends Omit<React.HTMLProps<HTMLButtonElement>, 'style'> {
   pressed?: boolean;
   primary?: boolean;
   hover?: boolean;
   bare?: boolean;
   disabled?: boolean;
+  style?: CSSProperties;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
   bounce?: boolean;
@@ -109,5 +114,48 @@ const Button: React.FC<ButtonProps> = React.forwardRef<
     );
   },
 );
+
+interface ButtonWithLoadingProps extends ButtonProps {
+  loading?: boolean;
+}
+
+export const ButtonWithLoading: React.FC<ButtonWithLoadingProps> =
+  React.forwardRef((props, ref) => {
+    let { loading, children, ...buttonProps } = props;
+    return (
+      <Button
+        {...buttonProps}
+        style={[{ position: 'relative' }, buttonProps.style]}
+      >
+        {loading && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Loading
+              color="currentColor"
+              style={{ width: 20, height: 20, color: 'currentColor' }}
+            />
+          </View>
+        )}
+        <View
+          style={{
+            opacity: loading ? 0 : 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          {children}
+        </View>
+      </Button>
+    );
+  });
 
 export default Button;

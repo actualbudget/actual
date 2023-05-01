@@ -27,6 +27,7 @@ import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import NordigenExternalMsg from './modals/NordigenExternalMsg';
+import NordigenInitialise from './modals/NordigenInitialise';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 
@@ -214,6 +215,17 @@ function Modals({
                   options.onClose && options.onClose();
                   send('poll-web-token-stop');
                 }}
+                onSuccess={options.onSuccess}
+              />
+            );
+          }}
+        />
+        <Route
+          path="/nordigen-init"
+          render={() => {
+            return (
+              <NordigenInitialise
+                modalProps={modalProps}
                 onSuccess={options.onSuccess}
               />
             );

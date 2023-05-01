@@ -190,12 +190,15 @@ export interface MainHandlers {
     updatedAccounts: unknown;
   }>;
 
+  'secret-set': (arg: { name: string; value: string }) => Promise<null>;
+  'secret-check': (arg: string) => Promise<null>;
+
   'nordigen-poll-web-token': (arg: {
     upgradingAccountId;
     requisitionId;
   }) => Promise<null>;
 
-  'nordigen-status': () => Promise<unknown>;
+  'nordigen-status': () => Promise<{ configured: boolean }>;
 
   'nordigen-get-banks': (country) => Promise<unknown>;
 

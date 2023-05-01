@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
+import { sendCatch } from 'loot-core/src/platform/client/fetch';
 
+import useNordigenStatus from '../../hooks/useNordigenStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
 import { Error, Warning } from '../alerts';
@@ -47,29 +48,6 @@ function useAvailableBanks(country) {
     data: banks,
     isLoading,
     isError,
-  };
-}
-
-function useNordigenStatus() {
-  const [configured, setConfigured] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    async function fetch() {
-      setIsLoading(true);
-
-      const results = await send('nordigen-status');
-
-      setConfigured(results.configured || false);
-      setIsLoading(false);
-    }
-
-    fetch();
-  }, [setConfigured, setIsLoading]);
-
-  return {
-    configured,
-    isLoading,
   };
 }
 

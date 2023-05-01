@@ -5,7 +5,6 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import ReactModal from 'react-modal';
 import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
 
 import {
@@ -16,22 +15,19 @@ import {
   ListboxOption,
 } from '@reach/listbox';
 import { css } from 'glamor';
-import hotkeys from 'hotkeys-js';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import Loading from '../icons/AnimatedLoading';
-import Delete from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import { styles, colors } from '../style';
-import tokens from '../tokens';
 
 import Button from './common/Button';
 import Input, { defaultInputStyle } from './common/Input';
 import Text from './common/Text';
 import View from './common/View';
 
-export { default as Button } from './common/Button';
+export { default as Modal, ModalButtons } from './common/Modal';
+export { default as Button, ButtonWithLoading } from './common/Button';
 export { default as Input } from './common/Input';
 export { default as View } from './common/View';
 export { default as Text } from './common/Text';
@@ -199,44 +195,6 @@ function ButtonLink_({
 }
 
 export const ButtonLink = withRouter(ButtonLink_);
-
-export const ButtonWithLoading = React.forwardRef((props, ref) => {
-  let { loading, children, ...buttonProps } = props;
-  return (
-    <Button
-      {...buttonProps}
-      style={[{ position: 'relative' }, buttonProps.style]}
-    >
-      {loading && (
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Loading
-            color="currentColor"
-            style={{ width: 20, height: 20, color: 'currentColor' }}
-          />
-        </View>
-      )}
-      <View
-        style={{
-          opacity: loading ? 0 : 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
-        {children}
-      </View>
-    </Button>
-  );
-});
 
 export function InputWithContent({
   leftContent,
@@ -625,300 +583,6 @@ export function Strong({ style, children, ...props }) {
     <span {...props} {...css(style, { fontWeight: 500 })}>
       {children}
     </span>
-  );
-}
-
-function ModalContent({
-  style,
-  size,
-  noAnimation,
-  isCurrent,
-  stackIndex,
-  children,
-}) {
-  let contentRef = useRef(null);
-  let mounted = useRef(false);
-  let rotateFactor = useRef(Math.random() * 10 - 5);
-
-  useLayoutEffect(() => {
-    if (contentRef.current == null) {
-      return;
-    }
-
-    function setProps() {
-      if (isCurrent) {
-        contentRef.current.style.transform = 'translateY(0px) scale(1)';
-        contentRef.current.style.pointerEvents = 'auto';
-      } else {
-        contentRef.current.style.transform = `translateY(-40px) scale(.95) rotate(${rotateFactor.current}deg)`;
-        contentRef.current.style.pointerEvents = 'none';
-      }
-    }
-
-    if (!mounted.current) {
-      if (noAnimation) {
-        contentRef.current.style.opacity = 1;
-        contentRef.current.style.transform = 'translateY(0px) scale(1)';
-
-        setTimeout(() => {
-          if (contentRef.current) {
-            contentRef.current.style.transition =
-              'opacity .1s, transform .1s cubic-bezier(.42, 0, .58, 1)';
-          }
-        }, 0);
-      } else {
-        contentRef.current.style.opacity = 0;
-        contentRef.current.style.transform = 'translateY(10px) scale(1)';
-
-        setTimeout(() => {
-          if (contentRef.current) {
-            mounted.current = true;
-            contentRef.current.style.transition =
-              'opacity .1s, transform .1s cubic-bezier(.42, 0, .58, 1)';
-            contentRef.current.style.opacity = 1;
-            setProps();
-          }
-        }, 0);
-      }
-    } else {
-      setProps();
-    }
-  }, [noAnimation, isCurrent, stackIndex]);
-
-  return (
-    <View
-      innerRef={contentRef}
-      style={[
-        style,
-        size && { width: size.width, height: size.height },
-        noAnimation && !isCurrent && { display: 'none' },
-      ]}
-    >
-      {children}
-    </View>
-  );
-}
-
-export function Modal({
-  title,
-  isCurrent,
-  isHidden,
-  size,
-  padding = 20,
-  showHeader = true,
-  showTitle = true,
-  showClose = true,
-  showOverlay = true,
-  loading = false,
-  noAnimation = false,
-  focusAfterClose = true,
-  stackIndex,
-  parent,
-  style,
-  contentStyle,
-  overlayStyle,
-  children,
-  onClose,
-}) {
-  useEffect(() => {
-    // This deactivates any key handlers in the "app" scope. Ideally
-    // each modal would have a name so they could each have their own
-    // key handlers, but we'll do that later
-    let prevScope = hotkeys.getScope();
-    hotkeys.setScope('modal');
-    return () => hotkeys.setScope(prevScope);
-  }, []);
-
-  return (
-    <ReactModal
-      isOpen={true}
-      onRequestClose={onClose}
-      shouldCloseOnOverlayClick={false}
-      shouldFocusAfterRender={!global.IS_DESIGN_MODE}
-      shouldReturnFocusAfterClose={focusAfterClose}
-      appElement={document.querySelector('#root')}
-      parentSelector={parent && (() => parent)}
-      style={{
-        content: {
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          overflow: 'visible',
-          border: 0,
-          fontSize: 14,
-          backgroundColor: 'transparent',
-          padding: 0,
-          pointerEvents: 'auto',
-          ...contentStyle,
-        },
-        overlay: {
-          zIndex: 3000,
-          backgroundColor:
-            showOverlay && stackIndex === 0 ? 'rgba(0, 0, 0, .1)' : 'none',
-          pointerEvents: showOverlay ? 'auto' : 'none',
-          ...overlayStyle,
-          ...(parent
-            ? {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }
-            : {}),
-        },
-      }}
-    >
-      <ModalContent
-        noAnimation={noAnimation}
-        isCurrent={isCurrent}
-        size={size}
-        style={[
-          {
-            willChange: 'opacity, transform',
-            minWidth: '100%',
-            minHeight: 0,
-            borderRadius: 4,
-            backgroundColor: 'white',
-            opacity: isHidden ? 0 : 1,
-            [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
-              minWidth: tokens.breakpoint_narrow,
-            },
-          },
-          styles.shadowLarge,
-          style,
-          styles.lightScrollbar,
-        ]}
-      >
-        {showHeader && (
-          <View
-            style={{
-              padding: 20,
-              position: 'relative',
-              flexShrink: 0,
-            }}
-          >
-            {showTitle && (
-              <View
-                style={{
-                  color: colors.n2,
-                  flex: 1,
-                  alignSelf: 'center',
-                  textAlign: 'center',
-                  // We need to force a width for the text-overflow
-                  // ellipses to work because we are aligning center.
-                  // This effectively gives it a padding of 20px
-                  width: 'calc(100% - 40px)',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 25,
-                    fontWeight: 700,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {title}
-                </Text>
-              </View>
-            )}
-
-            <View
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                bottom: 0,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  marginRight: 15,
-                }}
-              >
-                {showClose && (
-                  <Button
-                    bare
-                    onClick={e => onClose()}
-                    style={{ padding: '10px 10px' }}
-                    aria-label="Close"
-                  >
-                    <Delete width={10} />
-                  </Button>
-                )}
-              </View>
-            </View>
-          </View>
-        )}
-        <View style={{ padding, paddingTop: 0, flex: 1 }}>
-          {typeof children === 'function' ? children() : children}
-        </View>
-        {loading && (
-          <View
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(255, 255, 255, .6)',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000,
-            }}
-          >
-            <Loading style={{ width: 20, height: 20 }} color={colors.n1} />
-          </View>
-        )}
-      </ModalContent>
-    </ReactModal>
-  );
-}
-
-export function ModalButtons({
-  style,
-  leftContent,
-  focusButton = false,
-  children,
-}) {
-  let containerRef = useRef(null);
-
-  useEffect(() => {
-    if (focusButton && containerRef.current) {
-      let button = containerRef.current.querySelector(
-        'button:not([data-hidden])',
-      );
-
-      if (button) {
-        button.focus();
-      }
-    }
-  }, [focusButton]);
-
-  return (
-    <View
-      innerRef={containerRef}
-      style={[
-        {
-          flexDirection: 'row',
-          marginTop: 30,
-        },
-        style,
-      ]}
-    >
-      {leftContent}
-      <View style={{ flex: 1 }} />
-      {children}
-    </View>
   );
 }
 
