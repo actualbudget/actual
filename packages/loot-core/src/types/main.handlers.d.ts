@@ -81,12 +81,6 @@ export interface MainHandlers {
 
   'payees-get-rules': (arg: { id }) => Promise<unknown>;
 
-  'payees-delete-rule': (arg: { id; payee_id }) => Promise<unknown>;
-
-  'payees-update-rule': (rule) => Promise<unknown>;
-
-  'payees-add-rule': (rule) => Promise<unknown>;
-
   'rule-validate': (rule) => Promise<{ error: unknown }>;
 
   'rule-add': (rule) => Promise<{ error: unknown } | { id: string }>;
@@ -106,8 +100,6 @@ export interface MainHandlers {
   'rule-get': (arg: { id }) => Promise<unknown>;
 
   'rules-run': (arg: { transaction }) => Promise<unknown>;
-
-  'rules-migrate': () => Promise<unknown>;
 
   'make-filters-from-conditions': (arg: { conditions }) => Promise<unknown>;
 

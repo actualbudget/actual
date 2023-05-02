@@ -58,11 +58,7 @@ function ManagePayeesWithData({
   }, []);
 
   async function onUndo({ tables, messages, meta, url }, scroll = false) {
-    if (
-      !tables.includes('payees') &&
-      !tables.includes('payee_mapping') &&
-      !tables.includes('payee_rules')
-    ) {
+    if (!tables.includes('payees') && !tables.includes('payee_mapping')) {
       return;
     }
 

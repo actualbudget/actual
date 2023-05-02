@@ -19,7 +19,6 @@ import {
   categoryModel,
   categoryGroupModel,
   payeeModel,
-  payeeRuleModel,
 } from './api-models';
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -543,36 +542,6 @@ handlers['api/payee-update'] = withMutation(async function ({ id, fields }) {
 
 handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-batch-change']({ deleted: [{ id }] });
-});
-
-handlers['api/payee-rules-get'] = async function ({ payeeId }) {
-  let rules = await handlers['payees-get-rules']({ id: payeeId });
-  return rules.map(payeeRuleModel.toExternal);
-};
-
-handlers['api/payee-rule-create'] = withMutation(async function ({
-  payee_id,
-  rule,
-}) {
-  return handlers['payees-add-rule']({
-    payee_id,
-    type: rule.type,
-    value: rule.value || null,
-  });
-});
-
-handlers['api/payee-rule-update'] = withMutation(async function ({
-  id,
-  fields,
-}) {
-  return handlers['payees-update-rule']({
-    id,
-    ...payeeRuleModel.fromExternal(fields),
-  });
-});
-
-handlers['api/payee-rule-delete'] = withMutation(async function ({ id }) {
-  return handlers['payees-delete-rule']({ id });
 });
 
 export default function installAPI(serverHandlers) {

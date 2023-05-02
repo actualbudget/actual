@@ -505,34 +505,6 @@ handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
-handlers['payees-delete-rule'] = mutator(async function ({ id, payee_id }) {
-  return withUndo(
-    async () => {
-      return await db.deletePayeeRule({ id });
-    },
-    { payeeId: payee_id },
-  );
-});
-
-handlers['payees-update-rule'] = mutator(async function (rule) {
-  return withUndo(
-    async () => {
-      return await db.updatePayeeRule(rule);
-    },
-    { payeeId: rule.payee_id },
-  );
-});
-
-handlers['payees-add-rule'] = mutator(async function (rule) {
-  return withUndo(
-    async () => {
-      let id = await db.insertPayeeRule(rule);
-      return { ...rule, id };
-    },
-    { payeeId: rule.payee_id },
-  );
-});
-
 function validateRule(rule) {
   // Returns an array of errors, the array is the same link as the
   // passed-in `array`, or null if there are no errors
@@ -653,10 +625,6 @@ handlers['rule-get'] = async function ({ id }) {
 
 handlers['rules-run'] = async function ({ transaction }) {
   return rules.runRules(transaction);
-};
-
-handlers['rules-migrate'] = async function () {
-  await rules.migrateOldRules();
 };
 
 handlers['make-filters-from-conditions'] = async function ({ conditions }) {
