@@ -43,88 +43,114 @@ async function processTemplate(month, force) {
   let errors = [];
   let category_templates = await getCategoryTemplates();
   let lowestPriority = 0;
+  let originalCategoryBalance = [];
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
+  //clears templated categories
+  for (let c = 0; c < categories.length; c++) {
+    let category = categories[c];
+    let budgeted = await getSheetValue(
+      monthUtils.sheetForMonth(month),
+      `budget-${category.id}`,
+    );
+    if (budgeted) originalCategoryBalance.push({ cat: category, amount: budgeted });
+    let template = category_templates[category.id];
+    if (template) {
+      for (let l = 0; l < template.length; l++)
+        lowestPriority =
+          template[l].priority > lowestPriority
+            ? template[l].priority
+            : lowestPriority;
+      await setBudget({
+        category: category.id,
+        month,
+        amount: 0,
+      });
+    }
+  }
+
   for (let priority = 0; priority <= lowestPriority; priority++) {
     for (let c = 0; c < categories.length; c++) {
       let category = categories[c];
-
-      let budgeted = await getSheetValue(
-        monthUtils.sheetForMonth(month),
-        `budget-${category.id}`,
-      );
-
-      if (budgeted === 0 || force) {
-        let template = category_templates[category.id];
-        if (template) {
-          //check that all schedule and by lines have the same priority level
-          let skipSchedule = false;
-          let isScheduleOrBy = false;
-          let priorityCheck = 0;
-          if (
-            template.filter(t => t.type === 'schedule' || t.type === 'by')
-              .length > 0
-          ) {
-            let { lowPriority, errorNotice } = await checkScheduleTemplates(
-              template,
+      let template = category_templates[category.id];
+      if (template) {
+        //check that all schedule and by lines have the same priority level
+        let skipSchedule = false;
+        let isScheduleOrBy = false;
+        let priorityCheck = 0;
+        if (
+          template.filter(t => t.type === 'schedule' || t.type === 'by')
+            .length > 0
+        ) {
+          let { lowPriority, errorNotice } = await checkScheduleTemplates(
+            template,
+          );
+          priorityCheck = lowPriority;
+          skipSchedule = priorityCheck !== priority ? true : false;
+          isScheduleOrBy = true;
+          if (!skipSchedule && errorNotice)
+            errors.push(
+              category.name +
+                ': Schedules and By templates should all have the same priority.  Using priority ' +
+                priorityCheck,
             );
-            priorityCheck = lowPriority;
-            skipSchedule = priorityCheck !== priority ? true : false;
-            isScheduleOrBy = true;
-            if (!skipSchedule && errorNotice)
-              errors.push(
-                category.name +
-                  ': Schedules and By templates should all have the same priority.  Using priority ' +
-                  priorityCheck,
+        }
+        if (!skipSchedule) {
+          if (!isScheduleOrBy)
+            template = template.filter(t => t.priority === priority);
+          if (template.length > 0) {
+            errors = errors.concat(
+              template
+                .filter(t => t.type === 'error')
+                .map(({ line, error }) =>
+                  [
+                    category.name + ': ' + error.message,
+                    line,
+                    ' '.repeat(
+                      TEMPLATE_PREFIX.length + error.location.start.offset,
+                    ) + '^',
+                  ].join('\n'),
+                ),
+            );
+            let { amount: to_budget, errors: applyErrors } =
+              await applyCategoryTemplate(
+                category,
+                template,
+                month,
+                priority,
+                force,
               );
-          }
-          if (!skipSchedule) {
-            if (!isScheduleOrBy)
-              template = template.filter(t => t.priority === priority);
-            if (template.length > 0) {
+            if (to_budget != null) {
+              num_applied++;
+              await setBudget({
+                category: category.id,
+                month,
+                amount: to_budget,
+              });
+            }
+            if (applyErrors != null) {
               errors = errors.concat(
-                template
-                  .filter(t => t.type === 'error')
-                  .map(({ line, error }) =>
-                    [
-                      category.name + ': ' + error.message,
-                      line,
-                      ' '.repeat(
-                        TEMPLATE_PREFIX.length + error.location.start.offset,
-                      ) + '^',
-                    ].join('\n'),
-                  ),
+                applyErrors.map(error => `${category.name}: ${error}`),
               );
-              let { amount: to_budget, errors: applyErrors } =
-                await applyCategoryTemplate(
-                  category,
-                  template,
-                  month,
-                  priority,
-                  force,
-                );
-              if (to_budget != null) {
-                num_applied++;
-                await setBudget({
-                  category: category.id,
-                  month,
-                  amount: to_budget,
-                });
-              }
-              if (applyErrors != null) {
-                errors = errors.concat(
-                  applyErrors.map(error => `${category.name}: ${error}`),
-                );
-              }
             }
           }
         }
       }
     }
   }
+  if (!force) {
+    for (let l=0; l<originalCategoryBalance.length; l++) {
+      await setBudget({
+        category: originalCategoryBalance[l].cat.id,
+        month,
+        amount: originalCategoryBalance[l].amount,
+      });
+    }
+  }
+
   if (num_applied === 0) {
     if (errors.length) {
       return {
@@ -261,7 +287,7 @@ async function applyCategoryTemplate(
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
-  let to_budget = 0;
+  let to_budget = budgeted;
   let limit;
   let last_month_balance = balance - spent - budgeted;
   let totalTarget = 0;
