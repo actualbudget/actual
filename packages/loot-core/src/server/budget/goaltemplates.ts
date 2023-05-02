@@ -261,7 +261,6 @@ async function applyCategoryTemplate(
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
-  //let to_budget = force ? budgeted : 0;
   let to_budget = 0;
   let limit;
   let last_month_balance = balance - spent - budgeted;
