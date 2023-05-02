@@ -19,6 +19,10 @@ app.method(
   mutator(undoable(goalActions.applyTemplate)),
 );
 app.method(
+  'budget/overwrite-goal-template',
+  mutator(undoable(goalActions.overwriteTemplate)),
+);
+app.method(
   'budget/hold-for-next-month',
   mutator(undoable(actions.holdForNextMonth)),
 );
