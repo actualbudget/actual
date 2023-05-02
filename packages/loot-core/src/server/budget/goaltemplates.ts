@@ -143,12 +143,21 @@ async function processTemplate(month, force) {
     }
   }
   if (!force) {
+    //if overwrite is not preferred, set cell to original value
     for (let l = 0; l < originalCategoryBalance.length; l++) {
       await setBudget({
         category: originalCategoryBalance[l].cat.id,
         month,
         amount: originalCategoryBalance[l].amount,
       });
+      //if overwrite is not preferred, remove template errors for category
+      let j = errors.length;
+      for (let k = 0; k < j; k++) {
+        if (errors[k].includes(originalCategoryBalance[l].cat.name)) {
+          errors.splice(k, 1);
+          j--;
+        }
+      }
     }
   }
 
