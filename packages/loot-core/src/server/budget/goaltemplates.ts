@@ -56,7 +56,8 @@ async function processTemplate(month, force) {
       monthUtils.sheetForMonth(month),
       `budget-${category.id}`,
     );
-    if (budgeted) originalCategoryBalance.push({ cat: category, amount: budgeted });
+    if (budgeted)
+      originalCategoryBalance.push({ cat: category, amount: budgeted });
     let template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++)
@@ -142,7 +143,7 @@ async function processTemplate(month, force) {
     }
   }
   if (!force) {
-    for (let l=0; l<originalCategoryBalance.length; l++) {
+    for (let l = 0; l < originalCategoryBalance.length; l++) {
       await setBudget({
         category: originalCategoryBalance[l].cat.id,
         month,
