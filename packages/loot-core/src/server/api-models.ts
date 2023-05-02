@@ -167,16 +167,3 @@ export const payeeModel = {
     return payee;
   },
 };
-
-export const payeeRuleModel = {
-  ...models.payeeRuleModel,
-
-  toExternal(rule) {
-    let { tombstone, ...result } = rule;
-    return result;
-  },
-
-  fromExternal(rule) {
-    return rule;
-  },
-};

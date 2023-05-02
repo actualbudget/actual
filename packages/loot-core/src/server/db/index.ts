@@ -24,7 +24,6 @@ import {
   categoryModel,
   categoryGroupModel,
   payeeModel,
-  payeeRuleModel,
 } from '../models';
 import { sendMessages, batchMessages } from '../sync';
 
@@ -454,10 +453,6 @@ export async function deletePayee(payee) {
   //   mappings.map(m => update('payee_mapping', { id: m.id, targetId: null }))
   // );
 
-  let rules = await all('SELECT * FROM payee_rules WHERE payee_id = ?', [
-    payee.id,
-  ]);
-  await Promise.all(rules.map(rule => deletePayeeRule({ id: rule.id })));
   return delete_('payees', payee.id);
 }
 
@@ -530,29 +525,6 @@ export async function getPayeeByName(name) {
   return first(
     `SELECT * FROM payees WHERE UNICODE_LOWER(name) = ? AND tombstone = 0`,
     [name.toLowerCase()],
-  );
-}
-
-export function insertPayeeRule(rule) {
-  rule = payeeRuleModel.validate(rule);
-  return insertWithUUID('payee_rules', rule);
-}
-
-export function deletePayeeRule(rule) {
-  return delete_('payee_rules', rule.id);
-}
-
-export function updatePayeeRule(rule) {
-  rule = payeeModel.validate(rule, { update: true });
-  return update('payee_rules', rule);
-}
-
-export function getPayeeRules(id) {
-  return all(
-    `SELECT pr.* FROM payee_rules pr
-     LEFT JOIN payee_mapping pm ON pm.id = pr.payee_id
-     WHERE pm.targetId = ? AND pr.tombstone = 0`,
-    [id],
   );
 }
 

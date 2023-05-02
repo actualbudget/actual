@@ -102,24 +102,6 @@ export const payeeModel = {
   },
 };
 
-export const payeeRuleModel = {
-  validateType(rule) {
-    const { type } = rule;
-    if (type !== 'equals' && type !== 'contains') {
-      throw new Error('Invalid rule type: ' + type);
-    }
-  },
-
-  validate(rule, { update }: { update?: boolean } = {}) {
-    if (!update || 'type' in rule) {
-      payeeRuleModel.validateType(rule);
-    }
-
-    requiredFields('payee_rules', rule, ['payee_id', 'type'], update);
-    return rule;
-  },
-};
-
 export const transactionModel = {
   validate(trans, { update }: { update?: boolean } = {}) {
     requiredFields('transaction', trans, ['date', 'acct'], update);
