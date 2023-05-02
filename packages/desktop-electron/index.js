@@ -126,7 +126,9 @@ async function createWindow() {
     title: 'Actual',
     titleBarStyle: 'hiddenInset',
     webPreferences: {
-      nodeIntegration: false,
+      // TODO: this should be changed back to `false`;
+      // we need to figure out a way to make the app work while keeping it as "false"
+      nodeIntegration: true,
       contextIsolation: true,
       preload: __dirname + '/preload.js',
     },

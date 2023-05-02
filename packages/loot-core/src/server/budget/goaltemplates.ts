@@ -16,7 +16,10 @@ import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
 
 import { setBudget, getSheetValue } from './actions';
-import { parse } from './goal-template.pegjs';
+
+// TODO: make the pegjs import work
+// import { parse } from './goal-template.pegjs';
+function parse(_in) {}
 
 export function applyTemplate({ month }) {
   return processTemplate(month, false);
