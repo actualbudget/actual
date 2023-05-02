@@ -20,7 +20,7 @@ app.post('/', async (req, res) => {
 
   secretsService.set(name, value);
 
-  res.status(200).send('secret set');
+  res.status(200).send({ status: 'ok' });
 });
 
 app.get('/:name', async (req, res) => {

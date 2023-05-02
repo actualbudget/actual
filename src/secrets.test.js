@@ -74,6 +74,9 @@ describe('secretsService', () => {
         .send({ name: testSecretName, value: testSecretValue });
 
       expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        status: 'ok',
+      });
     });
   });
 });
