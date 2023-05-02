@@ -29,6 +29,35 @@ Array [
 ]
 `;
 
+exports[`File import ofx import works (credit card) 1`] = `
+Array [
+  Object {
+    "acct": "one",
+    "amount": -600,
+    "category": null,
+    "cleared": 1,
+    "date": 20230330,
+    "description": "id2",
+    "error": null,
+    "financial_id": "57f91dca-0460-4692-be90-84165b7002",
+    "id": "id3",
+    "imported_description": "LOUISIANA STATE MUSEUM751 PLACE JOHN PAUL NEW ORLEANS 70116-3205LA USA",
+    "isChild": 0,
+    "isParent": 0,
+    "location": null,
+    "notes": null,
+    "parent_id": null,
+    "pending": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transferred_id": null,
+    "type": null,
+  },
+]
+`;
+
 exports[`File import ofx import works 1`] = `
 Array [
   Object {
