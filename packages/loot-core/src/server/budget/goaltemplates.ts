@@ -4,6 +4,8 @@ import {
   addWeeks,
   addDays,
   format,
+  addHours,
+  addMinutes,
 } from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
@@ -528,11 +530,9 @@ async function applyCategoryTemplate(
                 monthly_target += target;
               }
               next_date = addDays(next_date, 1);
+              next_date = addMinutes(next_date,next_date.getTimezoneOffset());
               next_date_string = getNextDate(dateCond, next_date);
-              let new_next_date = new Date(next_date_string);
-              new_next_date = addDays(new_next_date, 1);
-              if (next_date === new_next_date) break;
-              next_date = new_next_date;
+              next_date = new Date(next_date_string);
             }
           } else {
             monthly_target = target;
