@@ -529,7 +529,10 @@ async function applyCategoryTemplate(
               }
               next_date = addDays(next_date, 1);
               next_date_string = getNextDate(dateCond, next_date);
-              next_date = new Date(next_date_string);
+              let new_next_date = new Date(next_date_string);
+              new_next_date = addDays(new_next_date, 1);
+              if (next_date === new_next_date) break;
+              next_date = new_next_date;
             }
           } else {
             monthly_target = target;
