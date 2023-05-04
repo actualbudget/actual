@@ -643,7 +643,7 @@ describe('Transactions', () => {
 
     input = await editNewField(container, 'notes');
     await userEvent.clear(input);
-    await userEvent.type(input, 'a transaction[Enter]');
+    await userEvent.type(input, 'a transaction');
 
     input = await editNewField(container, 'debit');
     expect(input.value).toBe('0.00');
