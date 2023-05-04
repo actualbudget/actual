@@ -7,6 +7,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { colors, styles } from '../../style';
+import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, Text, Block, P, AlignedText } from '../common';
 
 import Change from './Change';
@@ -16,6 +17,8 @@ import Header from './Header';
 import useReport from './useReport';
 
 function CashFlow() {
+  const [filters, setFilters] = useState([]);
+
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 30),
@@ -31,8 +34,8 @@ function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise),
-    [start, end, isConcise],
+    () => cashFlowByDate(start, end, isConcise, filters),
+    [start, end, isConcise, filters],
   );
   const data = useReport('cash_flow', params);
 
@@ -79,6 +82,16 @@ function CashFlow() {
 
   const { graphData, totalExpenses, totalIncome } = data;
 
+  const onApplyFilter = newFilter => {
+    setFilters(state => [...state, newFilter]);
+  };
+  const onUpdateFilter = (oldFilter, updatedFilter) => {
+    setFilters(state => state.map(f => (f === oldFilter ? updatedFilter : f)));
+  };
+  const onDeleteFilter = deletedFilter => {
+    setFilters(state => state.filter(f => f !== deletedFilter));
+  };
+
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
       <Header
@@ -86,9 +99,28 @@ function CashFlow() {
         allMonths={allMonths}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
-        show1Month={true}
+        show1Month
         onChangeDates={onChangeDates}
+        extraButtons={<FilterButton onApply={onApplyFilter} />}
       />
+
+      <View
+        style={{
+          marginTop: -10,
+          paddingLeft: 20,
+          paddingRight: 20,
+          backgroundColor: 'white',
+        }}
+      >
+        {filters.length > 0 && (
+          <AppliedFilters
+            filters={filters}
+            onUpdate={onUpdateFilter}
+            onDelete={onDeleteFilter}
+          />
+        )}
+      </View>
+
       <View
         style={{
           backgroundColor: 'white',

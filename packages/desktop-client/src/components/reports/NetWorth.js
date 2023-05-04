@@ -10,6 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { styles } from '../../style';
+import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, P } from '../common';
 
 import Change from './Change';
@@ -20,6 +21,8 @@ import useReport from './useReport';
 import { fromDateRepr } from './util';
 
 function NetWorth({ accounts }) {
+  const [filters, setFilters] = useState([]);
+
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
@@ -27,8 +30,8 @@ function NetWorth({ accounts }) {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts),
-    [start, end, accounts],
+    () => netWorthSpreadsheet(start, end, accounts, filters),
+    [start, end, accounts, filters],
   );
   const data = useReport('net_worth', params);
 
@@ -66,6 +69,16 @@ function NetWorth({ accounts }) {
     setEnd(end);
   }
 
+  const onApplyFilter = newFilter => {
+    setFilters(state => [...state, newFilter]);
+  };
+  const onUpdateFilter = (oldFilter, updatedFilter) => {
+    setFilters(state => state.map(f => (f === oldFilter ? updatedFilter : f)));
+  };
+  const onDeleteFilter = deletedFilter => {
+    setFilters(state => state.filter(f => f !== deletedFilter));
+  };
+
   if (!allMonths || !data) {
     return null;
   }
@@ -78,7 +91,26 @@ function NetWorth({ accounts }) {
         start={start}
         end={end}
         onChangeDates={onChangeDates}
+        extraButtons={<FilterButton onApply={onApplyFilter} />}
       />
+
+      <View
+        style={{
+          marginTop: -10,
+          paddingLeft: 20,
+          paddingRight: 20,
+          backgroundColor: 'white',
+        }}
+      >
+        {filters.length > 0 && (
+          <AppliedFilters
+            filters={filters}
+            onUpdate={onUpdateFilter}
+            onDelete={onDeleteFilter}
+          />
+        )}
+      </View>
+
       <View
         style={{
           backgroundColor: 'white',
