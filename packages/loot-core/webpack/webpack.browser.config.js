@@ -41,7 +41,7 @@ module.exports = {
       },
       {
         test: /\.pegjs$/,
-        use: { loader: path.resolve('../peg-loader.js') },
+        use: { loader: path.resolve(__dirname, '../peg-loader.js') },
       },
     ],
   },
