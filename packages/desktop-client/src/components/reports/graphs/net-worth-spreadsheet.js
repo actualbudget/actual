@@ -14,7 +14,12 @@ import {
 import { AlignedText } from '../../common';
 import { index } from '../util';
 
-export default function createSpreadsheet(start, end, accounts, conditions) {
+export default function createSpreadsheet(
+  start,
+  end,
+  accounts,
+  conditions = [],
+) {
   return async (spreadsheet, setData) => {
     if (accounts.length === 0) {
       return null;

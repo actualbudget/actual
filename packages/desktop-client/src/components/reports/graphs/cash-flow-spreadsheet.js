@@ -44,7 +44,7 @@ export function simpleCashFlow(start, end) {
   };
 }
 
-export function cashFlowByDate(start, end, isConcise, conditions) {
+export function cashFlowByDate(start, end, isConcise, conditions = []) {
   return async (spreadsheet, setData) => {
     let { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
