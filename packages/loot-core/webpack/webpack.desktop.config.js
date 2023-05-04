@@ -29,7 +29,6 @@ module.exports = {
   },
   externals: [
     'better-sqlite3',
-    'node-ipc',
     'electron-log',
     'node-fetch',
     'node-libofx',
