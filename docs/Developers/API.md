@@ -315,7 +315,7 @@ let accounts = await getAccounts();
 
 #### `getCategories`
 
-<Method name="getCategories" args={[]} returns="Promise<Categories[]>" />
+<Method name="getCategories" args={[]} returns="Promise<Category[]>" />
 
 Get all categories.
 

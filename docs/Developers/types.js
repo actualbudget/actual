@@ -147,7 +147,7 @@ export let objects = {
   category: [
     { name: 'id', type: types.id },
     { name: 'name', type: 'string', required: true },
-    { name: 'group_id', type: 'bool', required: true },
+    { name: 'group_id', type: types.id, required: true },
     {
       name: 'is_income',
       type: 'bool',
