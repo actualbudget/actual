@@ -29,6 +29,8 @@ jobs:
             The enhancement backlog can be found here: https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+
 
             Don’t forget to upvote the top comment with 👍!
+
+            <!-- feature-auto-close-comment -->
       - name: Close Issue
         run: gh issue close "https://github.com/actualbudget/actual/issues/${{ github.event.issue.number }}"
         env:
