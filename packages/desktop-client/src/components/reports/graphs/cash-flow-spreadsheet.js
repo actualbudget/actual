@@ -3,6 +3,7 @@ import React from 'react';
 import * as d from 'date-fns';
 
 import q from 'loot-core/src/client/query-helpers';
+import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
 
@@ -43,11 +44,16 @@ export function simpleCashFlow(start, end) {
   };
 }
 
-export function cashFlowByDate(start, end, isConcise) {
+export function cashFlowByDate(start, end, isConcise, conditions = []) {
   return async (spreadsheet, setData) => {
+    let { filters } = await send('make-filters-from-conditions', {
+      conditions: conditions.filter(cond => !cond.customName),
+    });
+
     function makeQuery(where) {
       let query = q('transactions').filter({
         $and: [
+          ...filters,
           { date: { $transform: '$month', $gte: start } },
           { date: { $transform: '$month', $lte: end } },
         ],
@@ -78,6 +84,7 @@ export function cashFlowByDate(start, end, isConcise) {
       [
         q('transactions')
           .filter({
+            $and: filters,
             date: { $transform: '$month', $lt: start },
             'account.offbudget': false,
           })
