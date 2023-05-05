@@ -3,6 +3,11 @@
 const isDev = require('electron-is-dev');
 require('module').globalPaths.push(__dirname + '/..');
 
+// Allow unsecure in dev
+if( isDev ){
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+}
+
 const {
   app,
   ipcMain,
