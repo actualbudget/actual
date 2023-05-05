@@ -14,7 +14,7 @@
     "build:node": "tsc --p tsconfig.dist.json",
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
-    "build": "rm -r dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db"
+    "build": "rm -rf dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db"
   },
   "dependencies": {
     "better-sqlite3": "^8.2.0",
