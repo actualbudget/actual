@@ -252,6 +252,7 @@ export let numberFormats = [
   { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
   { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
   { value: 'space-comma', label: '1 000,33', labelNoFraction: '1 000' },
+  { value: 'space-dot', label: '1 000.33', labelNoFraction: '1 000' },
 ];
 
 let numberFormat: {
@@ -278,6 +279,11 @@ export function setNumberFormat({ format, hideFraction }) {
       locale = 'de-DE';
       regex = /[^-0-9,]/g;
       separator = ',';
+      break;
+    case 'space-dot':
+      locale = 'dje';
+      regex = /[^-0-9,]/g;
+      separator = '.';
       break;
     case 'comma-dot':
     default:
