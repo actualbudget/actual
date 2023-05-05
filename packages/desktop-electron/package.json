@@ -50,7 +50,8 @@
     "electron-updater": "4.3.8",
     "loot-core": "*",
     "node-fetch": "^2.6.9",
-    "promise-retry": "^2.0.1"
+    "promise-retry": "^2.0.1",
+    "ws": "8.13.0"
   },
   "devDependencies": {
     "@electron/notarize": "1.2.3",

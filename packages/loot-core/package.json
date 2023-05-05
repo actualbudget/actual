@@ -34,7 +34,8 @@
     "md5": "^2.3.0",
     "mitt": "^3.0.0",
     "node-fetch": "^2.6.9",
-    "node-libofx": "*"
+    "node-libofx": "*",
+    "ws": "8.13.0"
   },
   "devDependencies": {
     "@actual-app/api": "*",
