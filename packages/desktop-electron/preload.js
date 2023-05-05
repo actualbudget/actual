@@ -1,5 +1,3 @@
-const fs = require('fs');
-
 const { ipcRenderer, contextBridge } = require('electron');
 const ipc = require('node-ipc');
 
@@ -53,15 +51,11 @@ contextBridge.exposeInMainWorld('Actual', {
     });
 
     return new Promise((resolve, reject) => {
-      if (fileLocation) {
-        fs.writeFile(fileLocation, contents, error => {
-          if (error) {
-            return reject(error);
-          }
-
-          resolve();
-        });
+      let error = await ipcRenderer.invoke( 'save-file', fileLocation );
+      if (error) {
+        return reject(error);
       }
+      resolve();
     });
   },
 

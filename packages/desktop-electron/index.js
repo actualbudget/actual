@@ -1,6 +1,7 @@
 /* eslint-disable import/order */
 // (I have no idea why the imports are like this. Not touching them.)
 const isDev = require('electron-is-dev');
+const fs = require( 'fs' );
 require('module').globalPaths.push(__dirname + '/..');
 
 // Allow unsecure in dev
@@ -337,4 +338,12 @@ ipcMain.on('apply-update', () => {
 
 ipcMain.on('update-menu', (event, isBudgetOpen) => {
   updateMenu(isBudgetOpen);
+});
+
+ipcMain.handle('save-file', (event, {fileLocation}) => {
+  if (fileLocation) {
+    fs.writeFile(fileLocation, contents, error => {
+      return error;
+    });
+  }
 });
