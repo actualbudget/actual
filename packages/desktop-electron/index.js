@@ -92,28 +92,6 @@ function createBackgroundProcess(socketName) {
   });
 }
 
-function createBackgroundWindow(socketName) {
-  const win = new BrowserWindow({
-    show: true,
-    title: 'Actual Server',
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
-  });
-  win.loadURL(`file://${__dirname}/server.html`);
-
-  win.webContents.on('did-finish-load', () => {
-    win.webContents.send('set-socket', { name: socketName });
-  });
-
-  win.on('closed', () => {
-    serverWin = null;
-  });
-
-  serverWin = win;
-}
-
 async function createWindow() {
   const windowState = await WindowState.get();
 
@@ -127,7 +105,10 @@ async function createWindow() {
     titleBarStyle: 'hiddenInset',
     webPreferences: {
       nodeIntegration: false,
+      nodeIntegrationInWorker: false,
+      nodeIntegrationInSubFrames: false,
       contextIsolation: true,
+      enableRemoteModule: false,
       preload: __dirname + '/preload.js',
     },
   });
@@ -267,11 +248,7 @@ app.on('ready', async () => {
     console.log('Suspending', new Date());
   });
 
-  if (isDev) {
-    createBackgroundWindow(serverSocket);
-  } else {
-    createBackgroundProcess(serverSocket);
-  }
+  createBackgroundProcess(serverSocket);
 });
 
 app.on('window-all-closed', () => {
