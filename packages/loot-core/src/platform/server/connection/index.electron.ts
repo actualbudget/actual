@@ -1,9 +1,11 @@
-import ipc from 'node-ipc';
-
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
+import WebSocket, { WebSocketServer } from 'ws';
 
 import type * as T from '.';
+
+// the websocket server
+let wss = null;
 
 function coerceError(error) {
   if (error.type && error.type === 'APIError') {
@@ -13,13 +15,14 @@ function coerceError(error) {
   return { type: 'InternalError', message: error.message };
 }
 
-export const init: T.Init = function (socketName, handlers) {
-  ipc.config.id = socketName as string;
-  ipc.config.silent = true;
+export const init: T.Init = function (socketName, handlers) { 
+  wss = new WebSocketServer( { port: socketName } );
 
-  ipc.serve(() => {
-    ipc.server.on('message', (data, socket) => {
-      let msg = data;
+  // websockets doesn't support sending objects so parse/stringify needed
+  wss.on( 'connection', function connection( ws )  {
+    ws.on( 'message', (data) => {
+
+      let msg = JSON.parse(data); 
       let { id, name, args, undoTag, catchErrors } = msg;
 
       if (handlers[name]) {
@@ -29,7 +32,7 @@ export const init: T.Init = function (socketName, handlers) {
               result = { data: result, error: null };
             }
 
-            ipc.server.emit(socket, 'message', {
+            ws.send(JSON.stringify({
               type: 'reply',
               id,
               result,
@@ -38,7 +41,7 @@ export const init: T.Init = function (socketName, handlers) {
                 name !== 'undo' &&
                 name !== 'redo',
               undoTag,
-            });
+            }));
           },
           nativeError => {
             let error = coerceError(nativeError);
@@ -46,15 +49,15 @@ export const init: T.Init = function (socketName, handlers) {
             if (name.startsWith('api/')) {
               // The API is newer and does automatically forward
               // errors
-              ipc.server.emit(socket, 'message', { type: 'reply', id, error });
+              ws.send(JSON.stringify({ type: 'reply', id, error }));
             } else if (catchErrors) {
-              ipc.server.emit(socket, 'message', {
+              ws.send(JSON.stringify({
                 type: 'reply',
                 id,
                 result: { error, data: null },
-              });
+              }));
             } else {
-              ipc.server.emit(socket, 'message', { type: 'error', id });
+              ws.send(JSON.stringify({ type: 'error', id }));
             }
 
             if (error.type === 'InternalError' && name !== 'api/load-budget') {
@@ -70,26 +73,28 @@ export const init: T.Init = function (socketName, handlers) {
       } else {
         console.warn('Unknown method: ' + name);
         captureException(new Error('Unknown server method: ' + name));
-        ipc.server.emit(socket, 'message', {
+        ws.send( JSON.stringify({
           type: 'reply',
           id,
           result: null,
           error: { type: 'APIError', message: 'Unknown method: ' + name },
-        });
+        }));
       }
     });
   });
-
-  ipc.server.start();
 };
 
 export const getNumClients: T.GetNumClients = function () {
   // @ts-expect-error server type does not have sockets
-  return ipc.server.sockets.length;
+  if (wss) {
+    return wss.clients.length;
+  }
+
+  return 0;
 };
 
 export const send: T.Send = function (name, args) {
-  if (ipc.server) {
-    ipc.server.broadcast('message', { type: 'push', name, args });
+  if (wss) {
+    wss.clients.forEach( client => client.send(JSON.stringify({ type: 'push', name, args })) );
   }
 };

@@ -1,5 +1,4 @@
 const { ipcRenderer, contextBridge } = require('electron');
-const ipc = require('node-ipc');
 
 let { version: VERSION, isDev: IS_DEV } =
   ipcRenderer.sendSync('get-bootstrap-data');
@@ -21,19 +20,7 @@ contextBridge.exposeInMainWorld('Actual', {
   },
 
   ipcConnect: (id, func) => {
-    ipc.config.silent = true;
-    ipc.connectTo(id, () => {
-      let client = ipc.of[id];
-
-      func({
-        on(name, handler) {
-          return client.on(name, handler);
-        },
-        emit(name, data) {
-          return client.emit(name, data);
-        },
-      });
-    });
+    func( null );
   },
 
   relaunch: () => {

@@ -1,5 +1,6 @@
 import * as uuid from '../../uuid';
 import * as undo from '../undo';
+import WebSocket from 'ws'
 
 import type * as T from '.';
 
@@ -9,9 +10,11 @@ let messageQueue = [];
 let socketClient = null;
 
 function connectSocket(name, onOpen) {
-  global.Actual.ipcConnect(name, function (client) {
-    client.on('message', data => {
-      const msg = data;
+  global.Actual.ipcConnect( name, function(temp) {
+    let client = new WebSocket( 'ws:\\localhost:' + name );
+
+    client.onmessage = (event) =>  {
+      const msg = JSON.parse(event.data);
 
       if (msg.type === 'error') {
         // An error happened while handling a message so cleanup the
@@ -57,23 +60,24 @@ function connectSocket(name, onOpen) {
       } else {
         throw new Error('Unknown message type: ' + JSON.stringify(msg));
       }
-    });
+    };
 
-    client.on('connect', () => {
+    client.onopen = (event) => {
       socketClient = client;
-
       // Send any messages that were queued while closed
       if (messageQueue.length > 0) {
-        messageQueue.forEach(msg => client.emit('message', msg));
+        messageQueue.forEach(msg => {
+           socketClient.send(msg); 
+        });
         messageQueue = [];
       }
 
       onOpen();
-    });
+    };
 
-    client.on('disconnect', () => {
+    client.onclose = (event) => {
       socketClient = null;
-    });
+    };
   });
 }
 
@@ -91,21 +95,21 @@ export const send: T.Send = function (
       replyHandlers.set(id, { resolve, reject });
 
       if (socketClient) {
-        socketClient.emit('message', {
+        socketClient.send(JSON.stringify({
           id,
           name,
           args,
           undoTag: undo.snapshot(),
           catchErrors: !!catchErrors,
-        });
+        }));
       } else {
-        messageQueue.push({
+        messageQueue.push( JSON.stringify({
           id,
           name,
           args,
           undoTag: undo.snapshot(),
           catchErrors,
-        });
+        }));
       }
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

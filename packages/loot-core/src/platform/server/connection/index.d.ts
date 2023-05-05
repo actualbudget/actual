@@ -1,7 +1,7 @@
 import type { ServerEvents } from '../../../types/server-events';
 
 export function init(
-  channel: Window | string,
+  channel: Window | string | int,
   handlers: Record<string, () => void>,
 ): void;
 export type Init = typeof init;
