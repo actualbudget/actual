@@ -23,7 +23,7 @@ jobs:
         uses: ./.github/actions/setup
       - name: Build API
         run: cd packages/api && yarn build
-      - name: Create pacakge tgz
+      - name: Create package tgz
         run: cd packages/api && yarn pack
       - name: Upload Build
         uses: actions/upload-artifact@v3
