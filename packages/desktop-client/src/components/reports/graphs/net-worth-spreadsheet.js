@@ -3,6 +3,7 @@ import React from 'react';
 import * as d from 'date-fns';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   integerToCurrency,
@@ -13,18 +14,31 @@ import {
 import { AlignedText } from '../../common';
 import { index } from '../util';
 
-export default function createSpreadsheet(start, end, accounts) {
+export default function createSpreadsheet(
+  start,
+  end,
+  accounts,
+  conditions = [],
+) {
   return async (spreadsheet, setData) => {
     if (accounts.length === 0) {
       return null;
     }
+
+    let { filters } = await send('make-filters-from-conditions', {
+      conditions: conditions.filter(cond => !cond.customName),
+    });
 
     const data = await Promise.all(
       accounts.map(async acct => {
         let [starting, balances] = await Promise.all([
           runQuery(
             q('transactions')
-              .filter({ account: acct.id, date: { $lt: start + '-01' } })
+              .filter({
+                $and: filters,
+                account: acct.id,
+                date: { $lt: start + '-01' },
+              })
               .calculate({ $sum: '$amount' }),
           ).then(({ data }) => data),
 
@@ -33,6 +47,7 @@ export default function createSpreadsheet(start, end, accounts) {
               .filter({
                 account: acct.id,
                 $and: [
+                  ...filters,
                   { date: { $gte: start + '-01' } },
                   { date: { $lte: end + '-31' } },
                 ],
