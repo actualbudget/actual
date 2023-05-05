@@ -122,7 +122,7 @@ function Header({
         <Button bare onClick={() => onChangeDates(...getLatestRange(5))}>
           6 months
         </Button>
-        <Button bare onClick={() => onChangeDates(...getLatestRange(12))}>
+        <Button bare onClick={() => onChangeDates(...getLatestRange(11))}>
           1 Year
         </Button>
         <Button bare onClick={() => onChangeDates(...getFullRange(allMonths))}>
