@@ -6,6 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import useFilters from '../../hooks/useFilters';
 import { colors, styles } from '../../style';
 import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, Text, Block, P, AlignedText } from '../common';
@@ -17,7 +18,12 @@ import Header from './Header';
 import useReport from './useReport';
 
 function CashFlow() {
-  const [filters, setFilters] = useState([]);
+  const {
+    filters,
+    onApply: onApplyFilter,
+    onDelete: onDeleteFilter,
+    onUpdate: onUpdateFilter,
+  } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
@@ -81,16 +87,6 @@ function CashFlow() {
   }
 
   const { graphData, totalExpenses, totalIncome } = data;
-
-  const onApplyFilter = newFilter => {
-    setFilters(state => [...state, newFilter]);
-  };
-  const onUpdateFilter = (oldFilter, updatedFilter) => {
-    setFilters(state => state.map(f => (f === oldFilter ? updatedFilter : f)));
-  };
-  const onDeleteFilter = deletedFilter => {
-    setFilters(state => state.filter(f => f !== deletedFilter));
-  };
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
