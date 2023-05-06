@@ -25,13 +25,15 @@ module.exports = {
       '.tsx',
       '.json',
       'pegjs'
-    ],
+    ]
   },
   externals: [
     'better-sqlite3',
     'electron-log',
     'node-fetch',
     'node-libofx',
+    'ws',
+    'fs'
   ],
   plugins: [
     new webpack.IgnorePlugin({

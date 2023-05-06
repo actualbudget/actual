@@ -1,6 +1,5 @@
 import * as uuid from '../../uuid';
 import * as undo from '../undo';
-import WebSocket from 'ws'
 
 import type * as T from '.';
 

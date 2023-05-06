@@ -1,8 +1,10 @@
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
-import WebSocket, { WebSocketServer } from 'ws';
 
 import type * as T from '.';
+
+// for some reason import doesn't work
+const WebSocketServer = require('ws').Server
 
 // the websocket server
 let wss = null;
