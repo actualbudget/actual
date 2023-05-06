@@ -299,6 +299,7 @@ async function applyCategoryTemplate(
   let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   let to_budget = budgeted;
   let limit;
+  let hold;
   let last_month_balance = balance - spent - budgeted;
   let totalTarget = 0;
   let totalMonths = 0;
@@ -313,7 +314,8 @@ async function applyCategoryTemplate(
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
-            limit = amountToInteger(template.limit);
+            limit = amountToInteger(template.limit.amount);
+            hold = amountToInteger(template.limit.hold);
           }
         }
         let increment = 0;
@@ -323,7 +325,9 @@ async function applyCategoryTemplate(
         } else {
           increment = limit;
         }
-        if (to_budget + increment < budgetAvailable || !priority) {
+        if (to_budget>= limit && hold) {
+            to_budget=0;
+        } else if{ (to_budget + increment < budgetAvailable || !priority) {
           to_budget += increment;
         } else {
           if (budgetAvailable > 0) to_budget += budgetAvailable;
