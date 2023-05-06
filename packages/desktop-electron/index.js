@@ -30,7 +30,7 @@ protocol.registerSchemesAsPrivileged([
 global.fetch = require('node-fetch');
 
 const about = require('./about');
-const findOpenSocket = require('./findOpenSocket');
+const { getRandomPort } = require('get-port-please');
 const getMenu = require('./menu');
 const updater = require('./updater');
 
@@ -210,7 +210,7 @@ function updateMenu(isBudgetOpen) {
 app.setAppUserModelId('com.shiftreset.actual');
 
 app.on('ready', async () => {
-  serverSocket = await findOpenSocket();
+  serverSocket = await getRandomPort();
 
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
