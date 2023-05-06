@@ -340,9 +340,9 @@ ipcMain.on('update-menu', (event, isBudgetOpen) => {
   updateMenu(isBudgetOpen);
 });
 
-ipcMain.handle('save-file', (event, {fileLocation}) => {
-  if (fileLocation) {
-    fs.writeFile(fileLocation, contents, error => {
+ipcMain.handle('save-file', (event, { data }) => {
+  if (data && data.fileLocation) {
+    fs.writeFile(data.fileLocation, data.contents, error => {
       return error;
     });
   }

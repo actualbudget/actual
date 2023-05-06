@@ -20,7 +20,7 @@ contextBridge.exposeInMainWorld('Actual', {
   },
 
   ipcConnect: (id, func) => {
-    func( null );
+    func(null);
   },
 
   relaunch: () => {
@@ -38,7 +38,7 @@ contextBridge.exposeInMainWorld('Actual', {
     });
 
     return new Promise((resolve, reject) => {
-      let error = ipcRenderer.invoke( 'save-file', fileLocation );
+      let error = ipcRenderer.invoke('save-file', { fileLocation, contents });
       if (error) {
         return reject(error);
       }
