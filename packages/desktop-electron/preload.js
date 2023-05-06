@@ -19,10 +19,6 @@ contextBridge.exposeInMainWorld('Actual', {
     require('console').log(...args);
   },
 
-  ipcConnect: (id, func) => {
-    func(null);
-  },
-
   relaunch: () => {
     ipcRenderer.invoke('relaunch');
   },
