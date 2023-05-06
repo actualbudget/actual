@@ -1,0 +1,14 @@
+name: Remove 'help wanted' label from closed issues
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  remove-help-wanted:
+    if: ${{ !contains(github.event.issue.labels.*.name, 'feature') && contains(github.event.issue.labels.*.name, 'help wanted') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions-ecosystem/action-remove-labels@v1
+        with:
+          labels: help wanted
