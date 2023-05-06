@@ -56,8 +56,5 @@
   "browserslist": [
     "electron 12.0",
     "defaults"
-  ],
-  "dependencies": {
-    "get-port-please": "^3.0.1"
-  }
+  ]
 }
