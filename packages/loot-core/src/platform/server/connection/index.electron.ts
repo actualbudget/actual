@@ -4,7 +4,7 @@ import { captureException } from '../../exceptions';
 import type * as T from '.';
 
 // for some reason import doesn't work
-const WebSocketServer = require('ws').Server
+const WebSocketServer = require('ws').Server;
 
 // the websocket server
 let wss = null;
@@ -17,14 +17,13 @@ function coerceError(error) {
   return { type: 'InternalError', message: error.message };
 }
 
-export const init: T.Init = function (socketName, handlers) { 
-  wss = new WebSocketServer( { port: socketName } );
+export const init: T.Init = function (socketName, handlers) {
+  wss = new WebSocketServer({ port: socketName });
 
   // websockets doesn't support sending objects so parse/stringify needed
-  wss.on( 'connection', function connection( ws )  {
-    ws.on( 'message', (data) => {
-
-      let msg = JSON.parse(data); 
+  wss.on('connection', function connection(ws) {
+    ws.on('message', data => {
+      let msg = JSON.parse(data);
       let { id, name, args, undoTag, catchErrors } = msg;
 
       if (handlers[name]) {
@@ -34,16 +33,18 @@ export const init: T.Init = function (socketName, handlers) {
               result = { data: result, error: null };
             }
 
-            ws.send(JSON.stringify({
-              type: 'reply',
-              id,
-              result,
-              mutated:
-                isMutating(handlers[name]) &&
-                name !== 'undo' &&
-                name !== 'redo',
-              undoTag,
-            }));
+            ws.send(
+              JSON.stringify({
+                type: 'reply',
+                id,
+                result,
+                mutated:
+                  isMutating(handlers[name]) &&
+                  name !== 'undo' &&
+                  name !== 'redo',
+                undoTag,
+              }),
+            );
           },
           nativeError => {
             let error = coerceError(nativeError);
@@ -53,11 +54,13 @@ export const init: T.Init = function (socketName, handlers) {
               // errors
               ws.send(JSON.stringify({ type: 'reply', id, error }));
             } else if (catchErrors) {
-              ws.send(JSON.stringify({
-                type: 'reply',
-                id,
-                result: { error, data: null },
-              }));
+              ws.send(
+                JSON.stringify({
+                  type: 'reply',
+                  id,
+                  result: { error, data: null },
+                }),
+              );
             } else {
               ws.send(JSON.stringify({ type: 'error', id }));
             }
@@ -75,12 +78,14 @@ export const init: T.Init = function (socketName, handlers) {
       } else {
         console.warn('Unknown method: ' + name);
         captureException(new Error('Unknown server method: ' + name));
-        ws.send( JSON.stringify({
-          type: 'reply',
-          id,
-          result: null,
-          error: { type: 'APIError', message: 'Unknown method: ' + name },
-        }));
+        ws.send(
+          JSON.stringify({
+            type: 'reply',
+            id,
+            result: null,
+            error: { type: 'APIError', message: 'Unknown method: ' + name },
+          }),
+        );
       }
     });
   });
@@ -97,6 +102,8 @@ export const getNumClients: T.GetNumClients = function () {
 
 export const send: T.Send = function (name, args) {
   if (wss) {
-    wss.clients.forEach( client => client.send(JSON.stringify({ type: 'push', name, args })) );
+    wss.clients.forEach(client =>
+      client.send(JSON.stringify({ type: 'push', name, args })),
+    );
   }
 };

@@ -35,7 +35,7 @@ contextBridge.exposeInMainWorld('Actual', {
     await ipcRenderer.invoke('save-file-dialog', {
       title: dialogTitle,
       defaultPath: filename,
-      fileContents: contents
+      fileContents: contents,
     });
   },
 

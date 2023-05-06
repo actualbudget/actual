@@ -1,4 +1,4 @@
-const { getPort, checkPort, getRandomPort, waitForPort } = require('get-port-please')
+const { getRandomPort } = require('get-port-please');
 
 async function findOpenSocket() {
   return getRandomPort();

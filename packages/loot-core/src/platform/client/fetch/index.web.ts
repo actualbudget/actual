@@ -9,10 +9,10 @@ let messageQueue = [];
 let socketClient = null;
 
 function connectSocket(name, onOpen) {
-  global.Actual.ipcConnect( name, function(temp) {
-    let client = new WebSocket( 'ws:\\localhost:' + name );
+  global.Actual.ipcConnect(name, function (temp) {
+    let client = new WebSocket('ws:\\localhost:' + name);
 
-    client.onmessage = (event) =>  {
+    client.onmessage = event => {
       const msg = JSON.parse(event.data);
 
       if (msg.type === 'error') {
@@ -61,12 +61,12 @@ function connectSocket(name, onOpen) {
       }
     };
 
-    client.onopen = (event) => {
+    client.onopen = event => {
       socketClient = client;
       // Send any messages that were queued while closed
       if (messageQueue.length > 0) {
         messageQueue.forEach(msg => {
-           socketClient.send(msg); 
+          socketClient.send(msg);
         });
         messageQueue = [];
       }
@@ -74,7 +74,7 @@ function connectSocket(name, onOpen) {
       onOpen();
     };
 
-    client.onclose = (event) => {
+    client.onclose = event => {
       socketClient = null;
     };
   });
@@ -94,21 +94,25 @@ export const send: T.Send = function (
       replyHandlers.set(id, { resolve, reject });
 
       if (socketClient) {
-        socketClient.send(JSON.stringify({
-          id,
-          name,
-          args,
-          undoTag: undo.snapshot(),
-          catchErrors: !!catchErrors,
-        }));
+        socketClient.send(
+          JSON.stringify({
+            id,
+            name,
+            args,
+            undoTag: undo.snapshot(),
+            catchErrors: !!catchErrors,
+          }),
+        );
       } else {
-        messageQueue.push( JSON.stringify({
-          id,
-          name,
-          args,
-          undoTag: undo.snapshot(),
-          catchErrors,
-        }));
+        messageQueue.push(
+          JSON.stringify({
+            id,
+            name,
+            args,
+            undoTag: undo.snapshot(),
+            catchErrors,
+          }),
+        );
       }
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

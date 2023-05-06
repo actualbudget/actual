@@ -1,11 +1,12 @@
 /* eslint-disable import/order */
 // (I have no idea why the imports are like this. Not touching them.)
 const isDev = require('electron-is-dev');
-const fs = require( 'fs' );
+const fs = require('fs');
+
 require('module').globalPaths.push(__dirname + '/..');
 
 // Allow unsecure in dev
-if( isDev ){
+if (isDev) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 }
 
@@ -297,18 +298,21 @@ ipcMain.handle('open-file-dialog', (event, { filters, properties }) => {
   });
 });
 
-ipcMain.handle('save-file-dialog', (event, { title, defaultPath, fileContents }) => {
-  let fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
+ipcMain.handle(
+  'save-file-dialog',
+  (event, { title, defaultPath, fileContents }) => {
+    let fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
 
-  return new Promise((resolve, reject) => {
-    if (fileLocation) {
-      fs.writeFile(fileLocation, fileContents, error => {
-        return reject(error);
-      });
-    }
-    resolve();
-  });
-});
+    return new Promise((resolve, reject) => {
+      if (fileLocation) {
+        fs.writeFile(fileLocation, fileContents, error => {
+          return reject(error);
+        });
+      }
+      resolve();
+    });
+  },
+);
 
 ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);

@@ -24,8 +24,8 @@ module.exports = {
       '.ts',
       '.tsx',
       '.json',
-      'pegjs'
-    ]
+      'pegjs',
+    ],
   },
   externals: [
     'better-sqlite3',
@@ -33,7 +33,7 @@ module.exports = {
     'node-fetch',
     'node-libofx',
     'ws',
-    'fs'
+    'fs',
   ],
   plugins: [
     new webpack.IgnorePlugin({
@@ -42,6 +42,6 @@ module.exports = {
   ],
   node: {
     __dirname: false,
-    __filename: false
+    __filename: false,
   },
 };
