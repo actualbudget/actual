@@ -297,8 +297,17 @@ ipcMain.handle('open-file-dialog', (event, { filters, properties }) => {
   });
 });
 
-ipcMain.handle('save-file-dialog', (event, { title, defaultPath }) => {
-  return dialog.showSaveDialogSync({ title, defaultPath });
+ipcMain.handle('save-file-dialog', (event, { title, defaultPath, fileContents }) => {
+  let fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
+
+  return new Promise((resolve, reject) => {
+    if (fileLocation) {
+      fs.writeFile(fileLocation, fileContents, error => {
+        return reject(error);
+      });
+    }
+    resolve();
+  });
 });
 
 ipcMain.handle('open-external-url', (event, url) => {
@@ -338,12 +347,4 @@ ipcMain.on('apply-update', () => {
 
 ipcMain.on('update-menu', (event, isBudgetOpen) => {
   updateMenu(isBudgetOpen);
-});
-
-ipcMain.handle('save-file', (event, { data }) => {
-  if (data && data.fileLocation) {
-    fs.writeFile(data.fileLocation, data.contents, error => {
-      return error;
-    });
-  }
 });

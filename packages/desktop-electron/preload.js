@@ -32,17 +32,10 @@ contextBridge.exposeInMainWorld('Actual', {
   },
 
   saveFile: async (contents, filename, dialogTitle) => {
-    const fileLocation = await ipcRenderer.invoke('save-file-dialog', {
+    await ipcRenderer.invoke('save-file-dialog', {
       title: dialogTitle,
       defaultPath: filename,
-    });
-
-    return new Promise((resolve, reject) => {
-      let error = ipcRenderer.invoke('save-file', { fileLocation, contents });
-      if (error) {
-        return reject(error);
-      }
-      resolve();
+      fileContents: contents
     });
   },
 
