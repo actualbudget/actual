@@ -6,7 +6,9 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import useFilters from '../../hooks/useFilters';
 import { colors, styles } from '../../style';
+import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, Text, Block, P, AlignedText } from '../common';
 
 import Change from './Change';
@@ -16,6 +18,13 @@ import Header from './Header';
 import useReport from './useReport';
 
 function CashFlow() {
+  const {
+    filters,
+    onApply: onApplyFilter,
+    onDelete: onDeleteFilter,
+    onUpdate: onUpdateFilter,
+  } = useFilters();
+
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 30),
@@ -31,8 +40,8 @@ function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise),
-    [start, end, isConcise],
+    () => cashFlowByDate(start, end, isConcise, filters),
+    [start, end, isConcise, filters],
   );
   const data = useReport('cash_flow', params);
 
@@ -86,9 +95,28 @@ function CashFlow() {
         allMonths={allMonths}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
-        show1Month={true}
+        show1Month
         onChangeDates={onChangeDates}
+        extraButtons={<FilterButton onApply={onApplyFilter} />}
       />
+
+      <View
+        style={{
+          marginTop: -10,
+          paddingLeft: 20,
+          paddingRight: 20,
+          backgroundColor: 'white',
+        }}
+      >
+        {filters.length > 0 && (
+          <AppliedFilters
+            filters={filters}
+            onUpdate={onUpdateFilter}
+            onDelete={onDeleteFilter}
+          />
+        )}
+      </View>
+
       <View
         style={{
           backgroundColor: 'white',
