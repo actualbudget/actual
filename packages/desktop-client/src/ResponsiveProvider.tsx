@@ -1,8 +1,7 @@
-import React, { ReactNode, useContext, useState } from 'react';
+import React, { ReactNode, useContext } from 'react';
 
 import { useViewportSize } from '@react-aria/utils';
 
-import useResizeObserver from './hooks/useResizeObserver';
 import { breakpoints } from './tokens';
 
 type TResponsiveContext = {
@@ -12,8 +11,6 @@ type TResponsiveContext = {
   isMediumWidth: boolean;
   isWideWidth: boolean;
   height: number;
-  mainContentRef: (el) => void;
-  mainContentWidth: number;
   viewportWidth: number;
 };
 
@@ -21,10 +18,6 @@ const ResponsiveContext = React.createContext<TResponsiveContext>(null);
 
 export function ResponsiveProvider(props: { children: ReactNode }) {
   const { height, width } = useViewportSize();
-  const [mainContentWidth, setMainContentWidth] = useState<number>(width - 240);
-  const mainContentRef = useResizeObserver(rect =>
-    setMainContentWidth(rect.width),
-  );
 
   // Possible view modes: narrow, small, medium, wide
   const viewportInfo = {
@@ -35,8 +28,6 @@ export function ResponsiveProvider(props: { children: ReactNode }) {
     isMediumWidth: width >= breakpoints.medium && width < breakpoints.wide,
     isWideWidth: width >= breakpoints.wide,
     height: height,
-    mainContentRef, // should only be placed on a single main content element in each screen
-    mainContentWidth, // width of the viewport excluding, unaffected by the sidebar
     viewportWidth: width, // raw pixel width
   };
 

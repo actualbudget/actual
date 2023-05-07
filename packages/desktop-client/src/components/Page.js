@@ -66,7 +66,7 @@ function PageTitle({ name, style }) {
 export function Page({ title, modalSize, children, titleStyle }) {
   let { type, current } = usePageType();
   let history = useHistory();
-  let { isNarrowWidth, mainContentRef } = useResponsive();
+  let { isNarrowWidth } = useResponsive();
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 
   if (type === 'modal') {
@@ -89,10 +89,7 @@ export function Page({ title, modalSize, children, titleStyle }) {
   }
 
   return (
-    <View
-      style={isNarrowWidth ? undefined : styles.page}
-      innerRef={mainContentRef}
-    >
+    <View style={isNarrowWidth ? undefined : styles.page}>
       <PageTitle
         name={title}
         style={{
