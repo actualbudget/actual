@@ -20,7 +20,13 @@ function ManagePayeesWithData({
 }) {
   let [payees, setPayees] = useState(initialPayees);
   let [ruleCounts, setRuleCounts] = useState({ value: new Map() });
+  let [orphans, setOrphans] = useState({ value: new Map() });
   let payeesRef = useRef();
+
+  async function refetchOrphanedPayees() {
+    let orphs = await send('payees-get-orphaned');
+    setOrphans(orphs);
+  }
 
   async function refetchRuleCounts() {
     let counts = await send('payees-get-rule-counts');
@@ -41,6 +47,7 @@ function ManagePayeesWithData({
       }
 
       refetchRuleCounts();
+      refetchOrphanedPayees();
     }
     loadData();
 
@@ -63,6 +70,7 @@ function ManagePayeesWithData({
     }
 
     setPayees(await getPayees());
+    refetchOrphanedPayees();
 
     if (
       (meta && meta.targetId) ||
@@ -116,6 +124,7 @@ function ManagePayeesWithData({
       modalProps={modalProps}
       payees={payees}
       ruleCounts={ruleCounts.value}
+      orphanedPayees={orphans}
       categoryGroups={categoryGroups}
       initialSelectedIds={initialSelectedIds}
       lastUndoState={lastUndoState}

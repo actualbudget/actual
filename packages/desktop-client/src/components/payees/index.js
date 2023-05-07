@@ -342,6 +342,7 @@ export const ManagePayees = forwardRef(
       modalProps,
       payees,
       ruleCounts,
+      orphanedPayees,
       categoryGroups,
       initialSelectedIds,
       ruleActions,
@@ -359,16 +360,27 @@ export const ManagePayees = forwardRef(
     let resetAnimation = useRef(false);
     const [orphanedOnly, setOrphanedOnly] = useState(false);
 
-    let filteredPayees = useMemo(
-      // TODO modify this to consider orphanedOnly
-      () =>
-        filter === ''
-          ? payees
-          : payees.filter(p =>
-              p.name.toLowerCase().includes(filter.toLowerCase()),
-            ),
-      [payees, filter],
-    );
+    let filteredPayees = useMemo(() => {
+      if ((filter === '') & !orphanedOnly) {
+        // no filters
+        return payees;
+      } else if ((filter === '') & orphanedOnly) {
+        // just orphans
+        return payees.filter(p => orphanedPayees.map(o => o.id).includes(p.id));
+      } else if ((filter !== '') & !orphanedOnly) {
+        // just filter
+        return payees.filter(p =>
+          p.name.toLowerCase().includes(filter.toLowerCase()),
+        );
+      } else {
+        // filter plus orphans
+        return payees.filter(
+          p =>
+            p.name.toLowerCase().includes(filter.toLowerCase()) &&
+            orphanedPayees.map(o => o.id).includes(p.id),
+        );
+      }
+    }, [payees, filter]);
 
     let selected = useSelected('payees', filteredPayees, initialSelectedIds);
 
@@ -516,7 +528,12 @@ export const ManagePayees = forwardRef(
                   style={{
                     marginRight: '10px',
                   }}
-                  onClick={() => setOrphanedOnly(!orphanedOnly)}
+                  onClick={() => {
+                    setOrphanedOnly(!orphanedOnly);
+                    const filterInput = document.getElementById('filter-input');
+                    applyFilter(filterInput.value);
+                    tableNavigator.onEdit(null);
+                  }}
                 >
                   <label
                     htmlFor="orphan-button"
@@ -535,7 +552,8 @@ export const ManagePayees = forwardRef(
                         marginLeft: '5px',
                       }}
                       selected={orphanedOnly}
-                      onClick={() => setOrphanedOnly(!orphanedOnly)}
+                      // FIXME - need to make the checkbox respond in the same way as the underlying button
+                      // onClick={() => setOrphanedOnly(!orphanedOnly)}
                       exposed={true}
                     ></SelectCell>
                   </label>
@@ -545,6 +563,7 @@ export const ManagePayees = forwardRef(
           </Component>
           <View style={{ flex: 1 }} />
           <Input
+            id="filter-input"
             placeholder="Filter payees..."
             value={filter}
             onChange={e => {
