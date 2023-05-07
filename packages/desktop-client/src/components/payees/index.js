@@ -381,7 +381,7 @@ export const ManagePayees = forwardRef(
             orphanedPayees.map(o => o.id).includes(p.id),
         );
       }
-    }, [payees, filter]);
+    }, [payees, filter, orphanedOnly]);
 
     let selected = useSelected('payees', filteredPayees, initialSelectedIds);
 
@@ -549,17 +549,7 @@ export const ManagePayees = forwardRef(
                       margin: 0,
                     }}
                   >
-                    Orphaned payees{' '}
-                    <SelectCell
-                      style={{
-                        backgroundColor: 'transparent',
-                        marginLeft: '5px',
-                      }}
-                      selected={orphanedOnly}
-                      // FIXME - need to make the checkbox respond in the same way as the underlying button
-                      // onClick={() => setOrphanedOnly(!orphanedOnly)}
-                      exposed={true}
-                    ></SelectCell>
+                    {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
                   </label>
                 </Button>
               </View>
