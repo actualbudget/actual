@@ -357,8 +357,10 @@ export const ManagePayees = forwardRef(
     let table = useRef(null);
     let scrollTo = useRef(null);
     let resetAnimation = useRef(false);
+    const [orphanedOnly, setOrphanedOnly] = useState(false);
 
     let filteredPayees = useMemo(
+      // TODO modify this to consider orphanedOnly
       () =>
         filter === ''
           ? payees
@@ -502,6 +504,20 @@ export const ManagePayees = forwardRef(
                     onMerge={onMerge}
                   />
                 )}
+              </View>
+            )}
+          </Component>
+          <Component initialState={{ orphanedOnly: false }}>
+            {({ state, setState }) => (
+              <View>
+                <Button bare onClick={() => setOrphanedOnly(!orphanedOnly)}>
+                  Orphaned payees{' '}
+                  <SelectCell
+                    style={{ backgroundColor: 'transparent' }}
+                    selected={orphanedOnly}
+                    exposed={true}
+                  ></SelectCell>
+                </Button>
               </View>
             )}
           </Component>
