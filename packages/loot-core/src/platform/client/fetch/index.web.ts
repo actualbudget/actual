@@ -9,7 +9,7 @@ let messageQueue = [];
 let socketClient = null;
 
 function connectSocket(port, onOpen) {
-  let client = new WebSocket('ws:\\localhost:' + port);
+  let client = new WebSocket('ws://localhost:' + port);
 
   client.onmessage = event => {
     const msg = JSON.parse(event.data);
