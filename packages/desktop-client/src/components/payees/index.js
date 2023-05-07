@@ -355,6 +355,7 @@ export const ManagePayees = forwardRef(
   ) => {
     let [highlightedRows, setHighlightedRows] = useState(null);
     let [filter, setFilter] = useState('');
+    let [pendingOrphans, setPendingOrphans] = useState(false);
     let table = useRef(null);
     let scrollTo = useRef(null);
     let resetAnimation = useRef(false);
@@ -385,10 +386,12 @@ export const ManagePayees = forwardRef(
     let selected = useSelected('payees', filteredPayees, initialSelectedIds);
 
     function applyFilter(f) {
-      if (filter !== f) {
+      // FIXME - added pendingOrphans in an attempt to get the filter to apply when toggling the Orphaned payees button
+      if (filter !== f || pendingOrphans) {
         table.current && table.current.setRowAnimation(false);
         setFilter(f);
         resetAnimation.current = true;
+        setPendingOrphans(false);
       }
     }
 
@@ -533,6 +536,7 @@ export const ManagePayees = forwardRef(
                     const filterInput = document.getElementById('filter-input');
                     applyFilter(filterInput.value);
                     tableNavigator.onEdit(null);
+                    setPendingOrphans(true);
                   }}
                 >
                   <label
