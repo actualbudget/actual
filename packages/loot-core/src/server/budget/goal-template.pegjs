@@ -27,7 +27,7 @@ repeat 'repeat interval'
   / 'year'i { return { annual: true } }
   / years: d _ 'years'i { return { annual: true, repeat: +years } }
 
-limit =  _? upTo _ amount: amount '+' { return {amount: amount, hold: true } }
+limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
 		/ _? upTo _ amount: amount { return {amount: amount, hold: false } }
 
 

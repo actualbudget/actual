@@ -551,7 +551,7 @@ async function applyCategoryTemplate(
   }
 
   if (limit != null) {
-    if ( hold && balance > limit ) {
+    if (hold && balance > limit) {
       to_budget = 0;
     } else if (to_budget + last_month_balance > limit) {
       to_budget = limit - last_month_balance;
