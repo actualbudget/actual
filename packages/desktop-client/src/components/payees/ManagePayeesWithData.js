@@ -131,6 +131,7 @@ function ManagePayeesWithData({
       onBatchChange={changes => {
         send('payees-batch-change', changes);
         setPayees(applyChanges(changes, payees));
+        setOrphans(applyChanges(changes, orphans));
       }}
       onMerge={async ([targetId, ...mergeIds]) => {
         await send('payees-merge', { targetId, mergeIds });
