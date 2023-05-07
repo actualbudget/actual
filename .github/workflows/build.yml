@@ -52,4 +52,4 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron
-        run: ./bin/package
+        run: ./bin/package-electron
