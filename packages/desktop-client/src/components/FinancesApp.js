@@ -85,7 +85,6 @@ function PageRoute({
   );
 }
 
-// For routes that do not work well in narrow view
 function NonPageRoute({
   redirectTo = '/budget',
   worksInNarrow = true,
