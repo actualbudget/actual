@@ -196,16 +196,24 @@ async function parseOFX(filepath) {
 
 async function parseOfxJavascript(filepath) {
   let errors = [];
-  // 'binary' should be equal to latin1 in node.js
-  // not sure about browser. We want latin1 and not utf8.
-  // For some reason, utf8 does not parse ofx files correctly here.
-  const contents = new TextDecoder('latin1').decode(
-    (await fs.readFile(filepath, 'binary')) as Buffer,
-  );
 
   let data;
+  let transactions;
   try {
+    // 'binary' should be equal to latin1 in node.js
+    // not sure about browser. We want latin1 and not utf8.
+    // For some reason, utf8 does not parse ofx files correctly here.
+    const contents = new TextDecoder('latin1').decode(
+      (await fs.readFile(filepath, 'binary')) as Buffer,
+    );
     data = ofx.parse(contents);
+    // .STMTTRN may be a list or a single object.
+    transactions = [
+      (
+        data.body.OFX.BANKMSGSRSV1?.STMTTRNRS.STMTRS ||
+        data.body.OFX.CREDITCARDMSGSRSV1?.CCSTMTTRNRS.CCSTMTRS
+      ).BANKTRANLIST.STMTTRN,
+    ].flat();
   } catch (err) {
     errors.push({
       message: 'Failed importing file',
@@ -213,13 +221,6 @@ async function parseOfxJavascript(filepath) {
     });
     return { errors };
   }
-  // .STMTTRN may be a list or a single object.
-  const transactions = [
-    (
-      data.body.OFX.BANKMSGSRSV1?.STMTTRNRS.STMTRS ||
-      data.body.OFX.CREDITCARDMSGSRSV1?.CCSTMTTRNRS.CCSTMTRS
-    ).BANKTRANLIST.STMTTRN,
-  ].flat();
   return {
     errors,
     transactions: transactions.map(trans => ({
