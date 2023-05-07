@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
+import { isElectron } from 'loot-core/src/shared/environment';
 
 import { useSetThemeColor } from '../../hooks';
 import { colors } from '../../style';
@@ -165,17 +166,19 @@ export default function ConfigServer() {
           </Button>
         ) : (
           <>
-            <Button
-              bare
-              style={{
-                color: colors.n4,
-                margin: 5,
-                marginRight: 15,
-              }}
-              onClick={onSameDomain}
-            >
-              Use {window.location.origin.replace(/https?:\/\//, '')}
-            </Button>
+            {!isElectron() && (
+              <Button
+                bare
+                style={{
+                  color: colors.n4,
+                  margin: 5,
+                  marginRight: 15,
+                }}
+                onClick={onSameDomain}
+              >
+                Use {window.location.origin.replace(/https?:\/\//, '')}
+              </Button>
+            )}
             <Button
               bare
               style={{ color: colors.n4, margin: 5 }}
