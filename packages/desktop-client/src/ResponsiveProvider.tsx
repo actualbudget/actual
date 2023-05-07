@@ -11,7 +11,7 @@ type TResponsiveContext = {
   isMediumWidth: boolean;
   isWideWidth: boolean;
   height: number;
-  viewportWidth: number;
+  clientWidth: number;
 };
 
 const ResponsiveContext = React.createContext<TResponsiveContext>(null);
@@ -28,7 +28,7 @@ export function ResponsiveProvider(props: { children: ReactNode }) {
     isMediumWidth: width >= breakpoints.medium && width < breakpoints.wide,
     isWideWidth: width >= breakpoints.wide,
     height: height,
-    viewportWidth: document.documentElement.clientWidth, // raw pixel width
+    clientWidth: document.documentElement.clientWidth, // raw pixel width
   };
 
   return (
