@@ -4738,25 +4738,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"Actual@workspace:packages/desktop-electron":
-  version: 0.0.0-use.local
-  resolution: "Actual@workspace:packages/desktop-electron"
-  dependencies:
-    "@electron/notarize": 1.2.3
-    "@electron/rebuild": 3.2.13
-    electron: 24.1.3
-    electron-builder: 23.6.0
-    electron-is-dev: 2.0.0
-    electron-log: 4.3.2
-    electron-updater: 4.3.8
-    get-port-please: 3.0.1
-    loot-core: "*"
-    node-fetch: ^2.6.9
-    promise-retry: ^2.0.1
-    ws: 8.13.0
-  languageName: unknown
-  linkType: soft
-
 "abab@npm:^2.0.3, abab@npm:^2.0.5":
   version: 2.0.6
   resolution: "abab@npm:2.0.6"
@@ -7919,6 +7900,25 @@ __metadata:
   checksum: 1ec2eedd7ed6bd61dd5e0519fd4c96124e93bb22de8a9d211b02d63e5dd152824853d919bb2090f965cc0e3eb9c515950a9836b332020d810f9c71feb0fd7df4
   languageName: node
   linkType: hard
+
+"desktop-electron@workspace:packages/desktop-electron":
+  version: 0.0.0-use.local
+  resolution: "desktop-electron@workspace:packages/desktop-electron"
+  dependencies:
+    "@electron/notarize": 1.2.3
+    "@electron/rebuild": 3.2.13
+    electron: 24.1.3
+    electron-builder: 23.6.0
+    electron-is-dev: 2.0.0
+    electron-log: 4.3.2
+    electron-updater: 4.3.8
+    get-port-please: 3.0.1
+    loot-core: "*"
+    node-fetch: ^2.6.9
+    promise-retry: ^2.0.1
+    ws: 8.13.0
+  languageName: unknown
+  linkType: soft
 
 "destroy@npm:1.2.0":
   version: 1.2.0

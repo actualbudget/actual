@@ -80,7 +80,7 @@ yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build
 
-yarn workspace Actual update-client
+yarn workspace desktop-electron update-client
 
 (
     cd packages/desktop-electron;
