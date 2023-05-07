@@ -122,27 +122,28 @@ function Settings({
     return () => unlisten();
   }, [loadPrefs]);
 
-  const { atLeastSmallWidth, isNarrow } = useResponsive();
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <View
       style={{
-        marginInline: globalPrefs.floatingSidebar && !isNarrow ? 'auto' : 0,
+        marginInline:
+          globalPrefs.floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
       <Page
         title="Settings"
         titleStyle={
-          atLeastSmallWidth
-            ? undefined
-            : {
+          isNarrowWidth
+            ? {
                 backgroundColor: colors.n11,
                 color: colors.n1,
               }
+            : undefined
         }
       >
         <View style={{ flexShrink: 0, gap: 30 }}>
-          {atLeastSmallWidth ? null : (
+          {isNarrowWidth && (
             <View
               style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
             >
