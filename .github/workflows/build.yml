@@ -53,3 +53,11 @@ jobs:
         uses: ./.github/actions/setup
       - name: Build Electron
         run: ./bin/package-electron
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: actual-electron-${{ matrix.os }}
+          path: |
+            packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/*.exe
+            packages/desktop-electron/dist/*.AppImage
