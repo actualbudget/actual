@@ -4866,7 +4866,6 @@ __metadata:
     eslint-config-react-app: 7.0.1
     eslint-plugin-prettier: 4.2.1
     eslint-plugin-rulesdir: ^0.2.2
-    get-port-please: ^3.0.1
     npm-run-all: ^4.1.3
     patch-package: ^6.1.2
     prettier: 2.8.2
@@ -10087,7 +10086,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-port-please@npm:3.0.1, get-port-please@npm:^3.0.1":
+"get-port-please@npm:3.0.1":
   version: 3.0.1
   resolution: "get-port-please@npm:3.0.1"
   checksum: a5de771314986e45872354a72e24f27c13884c14be9e00b7332bc53de971c50787d2ae61dd81ef6d1eb2df5c35b1e3528906de29ac4a5127769f7ebee6e8f100
