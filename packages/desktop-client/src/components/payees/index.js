@@ -510,13 +510,35 @@ export const ManagePayees = forwardRef(
           <Component initialState={{ orphanedOnly: false }}>
             {({ state, setState }) => (
               <View>
-                <Button bare onClick={() => setOrphanedOnly(!orphanedOnly)}>
-                  Orphaned payees{' '}
-                  <SelectCell
-                    style={{ backgroundColor: 'transparent' }}
-                    selected={orphanedOnly}
-                    exposed={true}
-                  ></SelectCell>
+                <Button
+                  id="orphan-button"
+                  bare
+                  style={{
+                    marginRight: '10px',
+                  }}
+                  onClick={() => setOrphanedOnly(!orphanedOnly)}
+                >
+                  <label
+                    htmlFor="orphan-button"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      width: '100%',
+                      height: '100%',
+                      margin: 0,
+                    }}
+                  >
+                    Orphaned payees{' '}
+                    <SelectCell
+                      style={{
+                        backgroundColor: 'transparent',
+                        marginLeft: '5px',
+                      }}
+                      selected={orphanedOnly}
+                      onClick={() => setOrphanedOnly(!orphanedOnly)}
+                      exposed={true}
+                    ></SelectCell>
+                  </label>
                 </Button>
               </View>
             )}
