@@ -6,7 +6,7 @@ import * as db from '../db';
 import { runMutator } from '../mutators';
 import * as prefs from '../prefs';
 
-export default async function resetSync(keyState) {
+export default async function resetSync(keyState?) {
   if (!keyState) {
     // If we aren't resetting the key, make sure our key is up-to-date
     // so we don't accidentally upload a file encrypted with the wrong

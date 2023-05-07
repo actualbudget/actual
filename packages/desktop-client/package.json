@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "23.4.2",
+  "version": "23.5.0",
   "license": "MIT",
   "files": [
     "build"
@@ -37,7 +37,6 @@
     "mitt": "^3.0.0",
     "node-noop": "1.0.0",
     "pikaday": "1.8.0",
-    "prop-types": "15.6.0",
     "react": "18.2.0",
     "react-app-rewired": "^2.2.1",
     "react-dnd": "^10.0.2",

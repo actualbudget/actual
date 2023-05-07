@@ -1327,7 +1327,7 @@ function TransactionTableInner({
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
-          onHover={props.onHover}
+          onHover={onHover}
           onEdit={tableNavigator.onEdit}
           onSave={props.onSave}
           onDelete={props.onDelete}
@@ -1619,9 +1619,6 @@ export let TransactionTable = React.forwardRef((props, ref) => {
             // add split
             onAddSplit(lastTransaction.id);
           } else if (
-            (newNavigator.focusedField === 'debit' ||
-              newNavigator.focusedField === 'credit' ||
-              newNavigator.focusedField === 'cleared') &&
             newNavigator.editingId === lastTransaction.id &&
             (!isSplit || !lastTransaction.error)
           ) {

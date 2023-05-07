@@ -1,24 +1,25 @@
 // https://peggyjs.org
 
 expr
-  = percent: percent _ of _ category: $([^\r\n\t]+)
-    { return { type: 'percentage', percent: +percent, category } }
-  / amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
-    { return { type: 'week', amount, weeks, starting, limit } }
-  / amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
+  = priority: priority? _? percent: percent _ of _ category: name
+    { return { type: 'percentage', percent: +percent, category, priority: +priority }}
+  / priority: priority? _? amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
+    { return { type: 'week', amount, weeks, starting, limit, priority: +priority }}
+  / priority: priority? _? amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
     { return {
       type: from ? 'spend' : 'by',
       amount,
       month,
       ...(repeat ? repeat[3] : {}),
-      from
+      from,
+      priority: +priority
     } }
-  / monthly: amount limit: limit?
-    { return { type: 'simple', monthly, limit } }
-  / upTo _ limit: amount
-    { return { type: 'simple', limit } }
-  / schedule _ name: name
-  	{ return { type: 'schedule', name} }
+  / priority: priority? _? monthly: amount limit: limit?
+    { return { type: 'simple', monthly, limit, priority: +priority  } }
+  / priority: priority? _? upTo _ limit: amount
+    { return { type: 'simple', limit , priority: +priority } }
+  / priority: priority? _? schedule _ name: name
+    { return { type: 'schedule', name, priority: +priority } }
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
@@ -42,6 +43,7 @@ repeatEvery = 'repeat'i _ 'every'i
 starting = 'starting'i
 upTo = 'up'i _ 'to'i
 schedule = 'schedule'i
+priority = '-'i number: number _ {return number}
 
 _ 'space' = ' '+
 d 'digit' = [0-9]

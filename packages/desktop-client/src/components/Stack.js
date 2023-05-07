@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Text from './Text';
-import View from './View';
+import Text from './common/Text';
+import View from './common/View';
 
 function getChildren(key, children) {
   return React.Children.toArray(children).reduce((list, child) => {

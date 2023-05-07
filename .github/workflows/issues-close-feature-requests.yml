@@ -1,0 +1,37 @@
+name: Close feature requests with automated message
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  needs-votes:
+    if: ${{ github.event.label.name == 'feature' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: needs votes
+      - name: Add reactions
+        uses: aidan-mundy/react-to-issue@v1.1.1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          reactions: '+1'
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            :sparkles: Thanks for sharing your idea! :sparkles:
+
+            This repository is now using lodash style issue management for enhancements. This means enhancement issues will now be closed instead of leaving them open. This doesn’t mean we don’t accept feature requests, though! We will consider implementing ones that receive many upvotes, and we welcome contributions for any feature requests marked as needing votes (just post a comment first so we can help you make a successful contribution).
+
+            The enhancement backlog can be found here: https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+
+
+            Don’t forget to upvote the top comment with 👍!
+
+            <!-- feature-auto-close-comment -->
+      - name: Close Issue
+        run: gh issue close "https://github.com/actualbudget/actual/issues/${{ github.event.issue.number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

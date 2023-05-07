@@ -1,7 +1,9 @@
+import type * as T from '..';
+
 let listeners = new Map();
 let serverHandler = null;
 
-export const initServer = handlers => {
+export const initServer: T.InitServer = handlers => {
   serverHandler = msg => {
     let { name, args, catchErrors } = msg;
     if (handlers[name]) {
@@ -20,12 +22,12 @@ export const initServer = handlers => {
   };
 };
 
-export const clearServer = () => {
+export const clearServer: T.ClearServer = () => {
   serverHandler = null;
   listeners = new Map();
 };
 
-export const serverPush = (name, args) => {
+export const serverPush: T.ServerPush = (name, args) => {
   Promise.resolve().then(() => {
     const listens = listeners.get(name);
     if (listens) {

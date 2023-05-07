@@ -18,16 +18,12 @@ Here are some initial guidelines for how contributions will be treated:
 
 (sorted alphabetically)
 
+- @albertogasparin
 - @j-f1
 - @jlongster
 - @MatissJanis
-- @trevdor
-
-## Alumni
-
-(sorted alphabetically)
-
 - @rich-howell
+- @trevdor
 
 ## Project ideas
 

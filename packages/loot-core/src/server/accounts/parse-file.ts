@@ -215,7 +215,10 @@ async function parseOfxJavascript(filepath) {
   }
   // .STMTTRN may be a list or a single object.
   const transactions = [
-    data.body.OFX.BANKMSGSRSV1.STMTTRNRS.STMTRS.BANKTRANLIST.STMTTRN,
+    (
+      data.body.OFX.BANKMSGSRSV1?.STMTTRNRS.STMTRS ||
+      data.body.OFX.CREDITCARDMSGSRSV1?.CCSTMTTRNRS.CCSTMTRS
+    ).BANKTRANLIST.STMTTRN,
   ].flat();
   return {
     errors,

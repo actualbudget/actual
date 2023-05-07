@@ -5,7 +5,7 @@ let webpack = require('webpack');
 /** @type {webpack.Configuration} */
 module.exports = {
   mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
-  entry: path.join(__dirname, '../src/server/main.js'),
+  entry: path.join(__dirname, '../src/server/main.ts'),
   context: path.resolve(__dirname, '../../..'),
   devtool: false,
   output: {
@@ -41,7 +41,7 @@ module.exports = {
       },
       {
         test: /\.pegjs$/,
-        use: { loader: path.resolve('../peg-loader.js') },
+        use: { loader: path.resolve(__dirname, '../peg-loader.js') },
       },
     ],
   },

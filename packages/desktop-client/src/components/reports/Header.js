@@ -45,7 +45,15 @@ function getFullRange(allMonths) {
   return [start, end];
 }
 
-function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
+function Header({
+  title,
+  start,
+  end,
+  show1Month,
+  allMonths,
+  onChangeDates,
+  extraButtons,
+}) {
   return (
     <View
       style={{
@@ -68,6 +76,7 @@ function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
           flexDirection: 'row',
           alignItems: 'center',
           marginTop: 15,
+          gap: 15,
         }}
       >
         <div>
@@ -99,41 +108,24 @@ function Header({ title, start, end, show1Month, allMonths, onChangeDates }) {
             ))}
           </Select>
         </div>
+
+        {extraButtons}
+
         {show1Month && (
-          <Button
-            bare
-            style={{ marginLeft: 15 }}
-            onClick={() => onChangeDates(...getLatestRange(1))}
-          >
+          <Button bare onClick={() => onChangeDates(...getLatestRange(1))}>
             1 month
           </Button>
         )}
-        <Button
-          bare
-          style={{ marginLeft: 15 }}
-          onClick={() => onChangeDates(...getLatestRange(2))}
-        >
+        <Button bare onClick={() => onChangeDates(...getLatestRange(2))}>
           3 months
         </Button>
-        <Button
-          bare
-          style={{ marginLeft: 15 }}
-          onClick={() => onChangeDates(...getLatestRange(5))}
-        >
+        <Button bare onClick={() => onChangeDates(...getLatestRange(5))}>
           6 months
         </Button>
-        <Button
-          bare
-          style={{ marginLeft: 15 }}
-          onClick={() => onChangeDates(...getLatestRange(12))}
-        >
+        <Button bare onClick={() => onChangeDates(...getLatestRange(11))}>
           1 Year
         </Button>
-        <Button
-          bare
-          style={{ marginLeft: 15 }}
-          onClick={() => onChangeDates(...getFullRange(allMonths))}
-        >
+        <Button bare onClick={() => onChangeDates(...getFullRange(allMonths))}>
           All Time
         </Button>
       </View>

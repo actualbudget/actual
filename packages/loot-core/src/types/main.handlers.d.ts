@@ -20,15 +20,6 @@ export interface MainHandlers {
 
   'transaction-delete': (transaction) => Promise<Record<string, never>>;
 
-  'transactions-filter': (arg: {
-    term;
-    accountId;
-    latestDate;
-    count;
-    notPaged;
-    options;
-  }) => Promise<unknown>;
-
   'transactions-parse-file': (arg: { filepath; options }) => Promise<unknown>;
 
   'transactions-export': (arg: {
@@ -90,12 +81,6 @@ export interface MainHandlers {
 
   'payees-get-rules': (arg: { id }) => Promise<unknown>;
 
-  'payees-delete-rule': (arg: { id; payee_id }) => Promise<unknown>;
-
-  'payees-update-rule': (rule) => Promise<unknown>;
-
-  'payees-add-rule': (rule) => Promise<unknown>;
-
   'rule-validate': (rule) => Promise<{ error: unknown }>;
 
   'rule-add': (rule) => Promise<{ error: unknown } | { id: string }>;
@@ -116,8 +101,6 @@ export interface MainHandlers {
 
   'rules-run': (arg: { transaction }) => Promise<unknown>;
 
-  'rules-migrate': () => Promise<unknown>;
-
   'make-filters-from-conditions': (arg: { conditions }) => Promise<unknown>;
 
   getCell: (arg: { sheetName; name }) => Promise<unknown>;
@@ -130,7 +113,7 @@ export interface MainHandlers {
 
   'create-query': (arg: { sheetName; name; query }) => Promise<unknown>;
 
-  query: (query) => Promise<unknown>;
+  query: (query) => Promise<{ data; dependencies }>;
 
   'bank-delete': (arg: { id }) => Promise<unknown>;
 
@@ -199,12 +182,15 @@ export interface MainHandlers {
     updatedAccounts: unknown;
   }>;
 
+  'secret-set': (arg: { name: string; value: string }) => Promise<null>;
+  'secret-check': (arg: string) => Promise<null>;
+
   'nordigen-poll-web-token': (arg: {
     upgradingAccountId;
     requisitionId;
   }) => Promise<null>;
 
-  'nordigen-status': () => Promise<unknown>;
+  'nordigen-status': () => Promise<{ configured: boolean }>;
 
   'nordigen-get-banks': (country) => Promise<unknown>;
 

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { styles } from '../../style';
-import Text from '../Text';
+import Text from '../common/Text';
 
 import format from './format';
 import SheetValue from './SheetValue';
@@ -17,7 +17,6 @@ function CellValue({ binding, type, formatter, style, getStyle, debug }) {
               style,
               getStyle && getStyle(value),
             ]}
-            numberOfLines={1}
             data-testid={name}
             data-cellname={name}
           >

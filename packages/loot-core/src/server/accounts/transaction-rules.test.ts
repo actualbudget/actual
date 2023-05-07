@@ -15,7 +15,6 @@ import {
   resetState,
   getProbableCategory,
   updateCategoryRules,
-  migrateOldRules,
 } from './transaction-rules';
 
 // TODO: write tests to make sure payee renaming is "pre" and category
@@ -365,64 +364,6 @@ describe('Transaction rules', () => {
       payee: 'kroger4',
       amount: 50,
       notes: 'got it2',
-    });
-  });
-
-  test('migrating from the old payee rules works', async () => {
-    await loadRules();
-    let categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
-    let categoryId = await db.insertCategory({
-      name: 'food',
-      cat_group: categoryGroupId,
-    });
-    let krogerId = await db.insertPayee({ name: 'kroger' });
-    let lowesId = await db.insertPayee({ name: 'lowes', category: categoryId });
-
-    await db.insertPayeeRule({
-      payee_id: krogerId,
-      type: 'contains',
-      value: 'kroger',
-    });
-    await db.insertPayeeRule({
-      payee_id: lowesId,
-      type: 'equals',
-      value: '123 lowes',
-    });
-    await db.insertPayeeRule({
-      payee_id: lowesId,
-      type: 'equals',
-      value: 'lowes 456',
-    });
-
-    // Migrate!
-    await migrateOldRules();
-
-    expect(getRules().length).toBe(3);
-
-    expect(runRules({ payee: null, imported_payee: '123 lowes' })).toEqual({
-      category: categoryId,
-      imported_payee: '123 lowes',
-      payee: lowesId,
-    });
-    expect(runRules({ payee: null, imported_payee: 'lowes 456' })).toEqual({
-      category: categoryId,
-      imported_payee: 'lowes 456',
-      payee: lowesId,
-    });
-    expect(runRules({ payee: null, imported_payee: '1 lowes 2' })).toEqual({
-      imported_payee: '1 lowes 2',
-      payee: null,
-    });
-    expect(
-      runRules({
-        payee: null,
-        imported_payee: 'blah blah kroger bla',
-        category: null,
-      }),
-    ).toEqual({
-      imported_payee: 'blah blah kroger bla',
-      payee: krogerId,
-      category: null,
     });
   });
 

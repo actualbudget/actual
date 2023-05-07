@@ -165,7 +165,6 @@ export function importBudget(filepath, type) {
     dispatch(closeModal());
 
     await dispatch(loadPrefs());
-    // @ts-expect-error __history needs refinement
     window.__history.push('/budget');
   };
 }

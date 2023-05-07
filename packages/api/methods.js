@@ -149,19 +149,3 @@ export function updatePayee(id, fields) {
 export function deletePayee(id) {
   return send('api/payee-delete', { id });
 }
-
-export function getPayeeRules(payeeId) {
-  return send('api/payee-rules-get', { payeeId });
-}
-
-export function createPayeeRule(payeeId, rule) {
-  return send('api/payee-rule-create', { payee_id: payeeId, rule });
-}
-
-export function updatePayeeRule(id, fields) {
-  return send('api/payee-rule-update', { id, fields });
-}
-
-export function deletePayeeRule(id) {
-  return send('api/payee-rule-delete', { id });
-}
