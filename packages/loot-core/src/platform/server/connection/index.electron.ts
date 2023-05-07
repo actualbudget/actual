@@ -92,7 +92,6 @@ export const init: T.Init = function (socketName, handlers) {
 };
 
 export const getNumClients: T.GetNumClients = function () {
-  // @ts-expect-error server type does not have sockets
   if (wss) {
     return wss.clients.length;
   }

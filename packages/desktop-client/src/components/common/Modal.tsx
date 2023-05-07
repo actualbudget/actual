@@ -17,7 +17,7 @@ export interface ModalProps {
   title: string;
   isCurrent?: boolean;
   isHidden?: boolean;
-  children: React.ReactNode;
+  children: React.ReactNode | (() => React.ReactNode);
   size?: { width?: number; height?: number };
   padding?: number;
   showHeader?: boolean;
