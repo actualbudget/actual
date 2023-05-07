@@ -1,4 +1,6 @@
 import React, {
+  forwardRef,
+  memo,
   useState,
   useEffect,
   useLayoutEffect,
@@ -86,7 +88,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
   );
 }
 
-let Payee = React.memo(
+let Payee = memo(
   ({
     style,
     payee,
@@ -164,7 +166,7 @@ let Payee = React.memo(
   },
 );
 
-const PayeeTable = React.forwardRef(
+const PayeeTable = forwardRef(
   (
     {
       payees,
@@ -334,7 +336,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
   );
 }
 
-export const ManagePayees = React.forwardRef(
+export const ManagePayees = forwardRef(
   (
     {
       modalProps,

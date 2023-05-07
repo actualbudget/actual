@@ -1,18 +1,17 @@
-import React from 'react';
+import React, { type ReactNode, type HTMLProps } from 'react';
 
-import { css } from 'glamor';
-import type { CSSProperties } from 'glamor';
+import { css, type CSSProperties } from 'glamor';
 
 import { colors } from '../style';
 
 import { View, Text } from './common';
 
-interface SectionLabelProps {
+type SectionLabelProps = {
   title?: string;
   style?: CSSProperties;
-}
+};
 
-export const SectionLabel: React.FC<SectionLabelProps> = ({ title, style }) => {
+export const SectionLabel = ({ title, style }: SectionLabelProps) => {
   return (
     <View
       style={[
@@ -31,19 +30,14 @@ export const SectionLabel: React.FC<SectionLabelProps> = ({ title, style }) => {
   );
 };
 
-interface FormLabelProps {
+type FormLabelProps = {
   title: string;
   id?: string;
   htmlFor?: string;
   style?: CSSProperties;
-}
+};
 
-export const FormLabel: React.FC<FormLabelProps> = ({
-  style,
-  title,
-  id,
-  htmlFor,
-}) => {
+export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text style={[{ fontSize: 13, marginBottom: 3, color: colors.n3 }, style]}>
       <label htmlFor={htmlFor} id={id}>
@@ -53,23 +47,22 @@ export const FormLabel: React.FC<FormLabelProps> = ({
   );
 };
 
-interface FormFieldProps {
+type FormFieldProps = {
   style?: CSSProperties;
-  children: React.ReactNode;
-}
+  children: ReactNode;
+};
 
-export const FormField: React.FC<FormFieldProps> = ({ style, children }) => {
+export const FormField = ({ style, children }: FormFieldProps) => {
   return <View style={style}>{children}</View>;
 };
 
 // Custom inputs
 
-type CheckboxProps = Omit<
-  React.HTMLProps<HTMLInputElement>,
-  'type' | 'styles'
-> & { styles?: CSSProperties };
+type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type' | 'styles'> & {
+  styles?: CSSProperties;
+};
 
-export const Checkbox: React.FC<CheckboxProps> = props => {
+export const Checkbox = (props: CheckboxProps) => {
   return (
     <input
       type="checkbox"

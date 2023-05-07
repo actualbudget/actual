@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom-v5-compat';
 
@@ -164,7 +164,7 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-export class AccountList extends React.Component {
+export class AccountList extends Component {
   isNewTransaction = id => {
     return this.props.newTransactions.includes(id);
   };

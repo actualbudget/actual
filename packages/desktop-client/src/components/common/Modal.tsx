@@ -1,4 +1,9 @@
-import React, { useEffect, useRef, useLayoutEffect } from 'react';
+import React, {
+  type ReactNode,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+} from 'react';
 import ReactModal from 'react-modal';
 
 import type { CSSProperties } from 'glamor';
@@ -13,11 +18,11 @@ import Button from './Button';
 import Text from './Text';
 import View from './View';
 
-export interface ModalProps {
+export type ModalProps = {
   title: string;
   isCurrent?: boolean;
   isHidden?: boolean;
-  children: React.ReactNode;
+  children: ReactNode | (() => ReactNode);
   size?: { width?: number; height?: number };
   padding?: number;
   showHeader?: boolean;
@@ -28,14 +33,14 @@ export interface ModalProps {
   noAnimation?: boolean;
   focusAfterClose?: boolean;
   stackIndex?: number;
-  parent?: unknown;
+  parent?: HTMLElement;
   style?: CSSProperties;
   contentStyle?: CSSProperties;
   overlayStyle?: CSSProperties;
   onClose?: () => void;
-}
+};
 
-const Modal: React.FC<ModalProps> = ({
+const Modal = ({
   title,
   isCurrent,
   isHidden,
@@ -55,7 +60,7 @@ const Modal: React.FC<ModalProps> = ({
   overlayStyle,
   children,
   onClose,
-}) => {
+}: ModalProps) => {
   useEffect(() => {
     // This deactivates any key handlers in the "app" scope. Ideally
     // each modal would have a name so they could each have their own
@@ -72,7 +77,7 @@ const Modal: React.FC<ModalProps> = ({
       shouldCloseOnOverlayClick={false}
       shouldFocusAfterRender={!global.IS_DESIGN_MODE}
       shouldReturnFocusAfterClose={focusAfterClose}
-      appElement={document.querySelector('#root')}
+      appElement={document.querySelector('#root') as HTMLElement}
       parentSelector={parent && (() => parent)}
       style={{
         content: {
@@ -220,23 +225,23 @@ const Modal: React.FC<ModalProps> = ({
   );
 };
 
-interface ModalContentProps {
+type ModalContentProps = {
   style?: CSSProperties;
   size?: ModalProps['size'];
   noAnimation?: boolean;
   isCurrent?: boolean;
   stackIndex?: number;
-  children: React.ReactNode;
-}
+  children: ReactNode;
+};
 
-const ModalContent: React.FC<ModalContentProps> = ({
+const ModalContent = ({
   style,
   size,
   noAnimation,
   isCurrent,
   stackIndex,
   children,
-}) => {
+}: ModalContentProps) => {
   let contentRef = useRef(null);
   let mounted = useRef(false);
   let rotateFactor = useRef(Math.random() * 10 - 5);
@@ -300,19 +305,19 @@ const ModalContent: React.FC<ModalContentProps> = ({
   );
 };
 
-interface ModalButtonsProps {
+type ModalButtonsProps = {
   style?: CSSProperties;
-  leftContent?: React.ReactNode;
+  leftContent?: ReactNode;
   focusButton?: boolean;
-  children: React.ReactNode;
-}
+  children: ReactNode;
+};
 
-export const ModalButtons: React.FC<ModalButtonsProps> = ({
+export const ModalButtons = ({
   style,
   leftContent,
   focusButton = false,
   children,
-}) => {
+}: ModalButtonsProps) => {
   let containerRef = useRef(null);
 
   useEffect(() => {

@@ -1,4 +1,11 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, {
+  PureComponent,
+  createRef,
+  memo,
+  useState,
+  useRef,
+  useMemo,
+} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
 
@@ -627,7 +634,7 @@ function SelectedTransactionsButton({
   );
 }
 
-const AccountHeader = React.memo(
+const AccountHeader = memo(
   ({
     tableRef,
     editingName,
@@ -1037,11 +1044,11 @@ function AllTransactions({ account = {}, transactions, filtered, children }) {
   return children(allTransactions);
 }
 
-class AccountInternal extends React.PureComponent {
+class AccountInternal extends PureComponent {
   constructor(props) {
     super(props);
     this.paged = null;
-    this.table = React.createRef();
+    this.table = createRef();
     this.animated = true;
 
     this.state = {

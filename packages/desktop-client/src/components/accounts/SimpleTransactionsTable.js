@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
 import {
@@ -32,7 +32,7 @@ function serializeTransaction(transaction, dateFormat) {
   };
 }
 
-const TransactionRow = React.memo(function TransactionRow({
+const TransactionRow = memo(function TransactionRow({
   transaction,
   fields,
   payees,

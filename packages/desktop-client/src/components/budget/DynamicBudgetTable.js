@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { forwardRef, useEffect } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { View } from '../common';
@@ -25,7 +25,7 @@ function getNumPossibleMonths(width) {
   return 6;
 }
 
-const DynamicBudgetTableInner = React.forwardRef(
+const DynamicBudgetTableInner = forwardRef(
   (
     {
       width,
@@ -88,7 +88,7 @@ const DynamicBudgetTableInner = React.forwardRef(
   },
 );
 
-export default React.forwardRef((props, ref) => {
+export default forwardRef((props, ref) => {
   return (
     <AutoSizer>
       {({ width, height }) => (

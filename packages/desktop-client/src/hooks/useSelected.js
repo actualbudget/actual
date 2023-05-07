@@ -1,4 +1,5 @@
 import React, {
+  createContext,
   useContext,
   useReducer,
   useCallback,
@@ -203,8 +204,8 @@ export default function useSelected(name, items, initialSelectedIds) {
   };
 }
 
-let SelectedDispatch = React.createContext(null);
-let SelectedItems = React.createContext(null);
+let SelectedDispatch = createContext(null);
+let SelectedItems = createContext(null);
 
 export function useSelectedDispatch() {
   return useContext(SelectedDispatch);

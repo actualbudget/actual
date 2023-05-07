@@ -1,4 +1,5 @@
 import React, {
+  forwardRef,
   useState,
   useRef,
   useEffect,
@@ -68,7 +69,7 @@ let pickerStyles = {
   },
 };
 
-export let DatePicker = React.forwardRef(
+export let DatePicker = forwardRef(
   ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
     let picker = useRef(null);
     let mountPoint = useRef(null);
