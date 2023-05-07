@@ -28,7 +28,7 @@ export function ResponsiveProvider(props: { children: ReactNode }) {
     isMediumWidth: width >= breakpoints.medium && width < breakpoints.wide,
     isWideWidth: width >= breakpoints.wide,
     height: height,
-    viewportWidth: width, // raw pixel width
+    viewportWidth: document.documentElement.clientWidth, // raw pixel width
   };
 
   return (
