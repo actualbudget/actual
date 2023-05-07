@@ -5,6 +5,9 @@ title: 'Budget Goal Templates'
 :::warning
 This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
 :::
+:::warning
+All functionality described here may not be available in the the latest stable release.  Use the `edge` images for the latest implementation.
+:::
 
 Create a template by adding a note to a category and adding a line that begins with `#template`.
 
@@ -18,7 +21,8 @@ You are welcome to have other lines in your note, but the #template line must ma
 |Syntax|Description|Application|
 |---|---|---|
 |#template $50|Budget $50 each month|Regular monthly bills, such as internet|
-|#template up to $150|Budget up to $150 each month|Variable expenses, such as petrol and groceries|
+|#template up to $150|Budget up to $150 each month, and remove extra funds over $150|Variable expenses, such as petrol and groceries|
+|#template up to $150 hold|Budget up to $150 each month, but retain any funds over $150 |Variable expenses that may get refunds or reimbursments|
 |#template $50 up to $300|Budget $50 each month up to a maximum of $300|Funding rainy day categories, such as replacement shoes and bicycle repairs
 |#template $500 by 2022-03|Break down large, less-frequent expenses into manageable monthly expenses|Saving for a replacement car in a few years
 |#template $500 by 2021-03 repeat every 6 months|Break down large, less-frequent expenses into manageable monthly expenses|Biannual credit card fees
@@ -39,11 +43,11 @@ You are welcome to have other lines in your note, but the #template line must ma
 
 - $ sign is optional, `#template $50` and `#template 50` are the same.
 - Other currency symbols are not supported.
-
 - Number formats that use comma for the decimal separator are not supported (eg, 123,45). You must use 123.45.
 - Thousands separators are not supported (eg, 1,234). You must use 1234.
 - {SCHEDULE NAME} is defined in the **Schedules** editor.
 - By default templates do not consider avaiable funds when being applied.  Use template priorites to not budget more than is available.
+- The `hold` flag can be added to any goal that uses the `up to` key word.
 
 ### Multiple Template Lines
 
@@ -80,7 +84,7 @@ Templates can be given a priority flag to change the order that the templates ge
 
 #### Notes
 - Lower priority values get run first. EX 0 is run first, then 1, then 2, etc.
-- No priority flag defaults to priority 0 and is the same as a standart template.
+- No priority flag defaults to priority 0 and is the same as a standard template.
 - Negative priorities are not allowed and will result in the template being skipped.
 - Default template application order is bottom to top.  This also applies to within a given priority level.
 - If you have multiple `schedule` or `by` template lines in a single category, they will be forced to match the same priority level as the line run first.
