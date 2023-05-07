@@ -111,6 +111,7 @@ export const styles = {
   },
   page: {
     flex: 1,
+    minHeight: 700, // ensure we can scroll on small screens
     paddingTop: 8, // height of the titlebar
     [`@media (min-width: ${tokens.breakpoint_small})`]: {
       paddingTop: 36,
