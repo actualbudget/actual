@@ -25,8 +25,6 @@ import {
 } from '@reach/listbox';
 import { type CSSProperties, css } from 'glamor';
 
-import { integerToCurrency } from 'loot-core/src/shared/util';
-
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import { styles, colors } from '../style';
 import type { HTMLPropsWithStyle } from '../types/utils';
@@ -679,26 +677,6 @@ export function AlignedText({
       >
         {right}
       </Block>
-    </View>
-  );
-}
-
-type PlainCurrencyProps = {
-  amount;
-  style?;
-};
-export function PlainCurrency({ amount, style }: PlainCurrencyProps) {
-  return <span style={style}>{integerToCurrency(amount)}</span>;
-}
-
-type PageHeaderProps = {
-  title;
-  style?: CSSProperties;
-};
-export function PageHeader({ title, style }: PageHeaderProps) {
-  return (
-    <View style={{ alignItems: 'flex-start' }}>
-      <span {...css(styles.pageHeader, style)}>{title}</span>
     </View>
   );
 }

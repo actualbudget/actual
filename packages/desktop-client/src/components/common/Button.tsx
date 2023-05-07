@@ -1,4 +1,4 @@
-import React, { forwardRef, type ReactNode } from 'react';
+import React, { forwardRef } from 'react';
 
 import { css, type CSSProperties } from 'glamor';
 
@@ -19,8 +19,6 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   textStyle?: CSSProperties;
   bounce?: boolean;
   as?: 'button';
-  children: ReactNode;
-  onClick?: (ev) => void;
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
