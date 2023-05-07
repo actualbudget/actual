@@ -16,10 +16,10 @@ export default function MobileWebMessage() {
     return (state.prefs.local && state.prefs.local.hideMobileMessage) || true;
   });
 
-  const { atLeastSmallWidth } = useResponsive();
+  const { isNarrowWidth } = useResponsive();
 
   let [show, setShow] = useState(
-    atLeastSmallWidth &&
+    isNarrowWidth &&
       !hideMobileMessagePref &&
       !document.cookie.match(/hideMobileMessage=true/),
   );
