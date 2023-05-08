@@ -8,16 +8,24 @@ type TResponsiveContext = {
   atLeastSmallWidth: boolean;
   atLeastMediumWidth: boolean;
   isNarrowWidth: boolean;
+  isSmallWidth: boolean;
   isMediumWidth: boolean;
   isWideWidth: boolean;
-  height: number;
-  clientWidth: number;
 };
 
 const ResponsiveContext = React.createContext<TResponsiveContext>(null);
 
 export function ResponsiveProvider(props: { children: ReactNode }) {
-  const { height, width } = useViewportSize();
+  /*
+   * Ensure we render on every viewport size change,
+   * even though we're interested in document.documentElement.client<Width|Height>
+   * clientWidth/Height are the document size, do not change on pinch-zoom,
+   * and are what our `min-width` media queries are reading
+   * Viewport size changes on pinch-zoom, which may be useful later when dealing with on-screen keyboards
+   */
+  useViewportSize();
+
+  const width = document.documentElement.clientWidth;
 
   // Possible view modes: narrow, small, medium, wide
   const viewportInfo = {
@@ -27,8 +35,6 @@ export function ResponsiveProvider(props: { children: ReactNode }) {
     isSmallWidth: width >= breakpoints.small && width < breakpoints.medium,
     isMediumWidth: width >= breakpoints.medium && width < breakpoints.wide,
     isWideWidth: width >= breakpoints.wide,
-    height: height,
-    clientWidth: document.documentElement.clientWidth, // raw pixel width
   };
 
   return (

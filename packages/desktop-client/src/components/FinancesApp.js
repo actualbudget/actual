@@ -309,19 +309,16 @@ function FinancesApp(props) {
         props.resetSync,
         patchedHistory,
       );
+
+      await checkForUpdateNotification(
+        props.addNotification,
+        getIsOutdated,
+        getLatestVersion,
+        props.loadPrefs,
+        props.savePrefs,
+      );
     }, 100);
   }, []);
-
-  setTimeout(async () => {
-    await props.sync();
-    await checkForUpdateNotification(
-      props.addNotification,
-      getIsOutdated,
-      getLatestVersion,
-      props.loadPrefs,
-      props.savePrefs,
-    );
-  }, 100);
 
   return (
     <Router history={patchedHistory}>
