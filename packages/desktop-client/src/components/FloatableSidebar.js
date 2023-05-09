@@ -1,4 +1,4 @@
-import React, { useState, useContext, useMemo } from 'react';
+import React, { createContext, useState, useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
@@ -10,7 +10,7 @@ import { View } from './common';
 import { SIDEBAR_WIDTH } from './sidebar';
 import SidebarWithData from './SidebarWithData';
 
-const SidebarContext = React.createContext(null);
+const SidebarContext = createContext(null);
 
 export function SidebarProvider({ children }) {
   let [hidden, setHidden] = useState(true);

@@ -1,4 +1,9 @@
 import React, {
+  createContext,
+  createElement,
+  createRef,
+  forwardRef,
+  memo,
   useState,
   useRef,
   useMemo,
@@ -136,7 +141,7 @@ function isLastChild(transactions, index) {
   );
 }
 
-let SplitsExpandedContext = React.createContext(null);
+let SplitsExpandedContext = createContext(null);
 
 export function useSplitsExpanded() {
   let data = useContext(SplitsExpandedContext);
@@ -231,7 +236,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
-export const TransactionHeader = React.memo(
+export const TransactionHeader = memo(
   ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
     let dispatchSelected = useSelectedDispatch();
 
@@ -363,7 +368,7 @@ function StatusCell({
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
       >
-        {React.createElement(statusProps.Icon, {
+        {createElement(statusProps.Icon, {
           style: {
             width: 13,
             height: 13,
@@ -491,7 +496,7 @@ function CellWithScheduleIcon({ scheduleId, children }) {
   );
 }
 
-export const Transaction = React.memo(function Transaction(props) {
+export const Transaction = memo(function Transaction(props) {
   let {
     transaction: originalTransaction,
     editing,
@@ -1240,7 +1245,7 @@ function TransactionTableInner({
   onScroll,
   ...props
 }) {
-  const containerRef = React.createRef();
+  const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
 
   useEffect(() => {
@@ -1427,7 +1432,7 @@ function TransactionTableInner({
   );
 }
 
-export let TransactionTable = React.forwardRef((props, ref) => {
+export let TransactionTable = forwardRef((props, ref) => {
   let [newTransactions, setNewTransactions] = useState(null);
   let [hoveredTransaction, setHoveredTransaction] = useState(
     props.hoveredTransaction,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { createContext, useEffect, useState, useContext } from 'react';
 
 import q, { liveQuery } from 'loot-core/src/client/query-helpers';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
@@ -22,7 +22,7 @@ export function usePayees() {
   return data;
 }
 
-let PayeesContext = React.createContext(null);
+let PayeesContext = createContext(null);
 
 export function PayeesProvider({ children }) {
   let data = usePayees();

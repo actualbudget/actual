@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { Component, useState } from 'react';
 
 import { colors } from '../style';
 
 import { View, Stack, Text, Block, Modal, P, Link, Button } from './common';
 import { Checkbox } from './forms';
 
-class FatalError extends React.Component {
+class FatalError extends Component {
   state = { showError: false };
 
   renderSimple(error) {

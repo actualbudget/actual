@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -9,7 +9,7 @@ export function getValidMonthBounds(bounds, startMonth, endMonth) {
   };
 }
 
-export let MonthsContext = React.createContext();
+export let MonthsContext = createContext();
 
 export function MonthsProvider({
   startMonth,
