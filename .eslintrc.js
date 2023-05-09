@@ -17,6 +17,8 @@ module.exports = {
     'prettier/prettier': 'error',
     'no-unused-vars': 'off',
 
+    curly: ['error', 'multi-line', 'consistent'],
+
     'no-restricted-globals': ['error'].concat(
       require('confusing-browser-globals').filter(g => g !== 'self'),
     ),
