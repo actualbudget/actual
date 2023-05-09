@@ -375,15 +375,24 @@ function SelectedBalance({ selectedItems, account }) {
     .filter(id => isPreviewId(id))
     .map(id => id.slice(8));
   for (let s of scheduleData.schedules) {
-    if (previewIds.includes(s.id))
-      if (!account || account.id === s._account) scheduleBalance += s._amount;
-      else scheduleBalance -= s._amount;
+    if (previewIds.includes(s.id)) {
+      if (!account || account.id === s._account) {
+        scheduleBalance += s._amount;
+      } else {
+        scheduleBalance -= s._amount;
+      }
+    }
   }
 
   if (balance == null) {
-    if (scheduleBalance == null) return null;
-    else balance = scheduleBalance;
-  } else if (scheduleBalance != null) balance += scheduleBalance;
+    if (scheduleBalance == null) {
+      return null;
+    } else {
+      balance = scheduleBalance;
+    }
+  } else if (scheduleBalance != null) {
+    balance += scheduleBalance;
+  }
 
   return <DetailedBalance name="Selected balance:" balance={balance} />;
 }
