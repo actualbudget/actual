@@ -362,13 +362,13 @@ export const ManagePayees = forwardRef(
     let haveOrphanedPayees = orphanedPayees.length > 0;
 
     let filteredPayees = useMemo(() => {
-      if ((filter === '') & !orphanedOnly) {
+      if (filter === '' && !orphanedOnly) {
         // no filters
         return payees;
-      } else if ((filter === '') & orphanedOnly) {
+      } else if (filter === '' && orphanedOnly) {
         // just orphans
         return payees.filter(p => orphanedPayees.map(o => o.id).includes(p.id));
-      } else if ((filter !== '') & !orphanedOnly) {
+      } else if (filter !== '' && !orphanedOnly) {
         // just filter
         return payees.filter(p =>
           p.name.toLowerCase().includes(filter.toLowerCase()),
