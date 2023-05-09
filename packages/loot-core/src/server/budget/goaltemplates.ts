@@ -30,8 +30,7 @@ export function sweepTemplate({ month }) {
   return processCleanup(month);
 }
 
-async function processCleanup( month ) {
-  let errors = [];
+async function processCleanup(month) {
   let sinkCategory = [];
   let category_templates = await getCategoryTemplates();
   let categories = await db.all(
@@ -42,9 +41,7 @@ async function processCleanup( month ) {
     let category = categories[c];
     let template = category_templates[category.id];
     if (template) {
-      if (
-        template.filter(t => t.type === 'source').length > 0
-      ) {
+      if (template.filter(t => t.type === 'source').length > 0) {
         let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
         let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
         await setBudget({
@@ -53,10 +50,8 @@ async function processCleanup( month ) {
           amount: budgeted - balance,
         });
       }
-      if (
-        template.filter(t => t.type === 'sink').length > 0
-      ) {
-        sinkCategory.push( {cat: category, temp: template } );
+      if (template.filter(t => t.type === 'sink').length > 0) {
+        sinkCategory.push({ cat: category, temp: template });
       }
     }
   }
@@ -64,9 +59,14 @@ async function processCleanup( month ) {
   let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
 
   for (let c = 0; c < sinkCategory.length; c++) {
-    let budgeted = await getSheetValue(sheetName, `budget-${sinkCategory[c].cat.id}`);
+    let budgeted = await getSheetValue(
+      sheetName,
+      `budget-${sinkCategory[c].cat.id}`,
+    );
     let categoryId = sinkCategory[c].cat.id;
-    let to_budget = budgeted + Math.round(sinkCategory[c].temp[0].percent/100 * budgetAvailable);
+    let to_budget =
+      budgeted +
+      Math.round((sinkCategory[c].temp[0].percent / 100) * budgetAvailable);
     await setBudget({
       category: categoryId,
       month,
