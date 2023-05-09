@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { type Ref, type ReactNode } from 'react';
 
 import { css } from 'glamor';
-import type { CSSProperties } from 'glamor';
 
-interface TextProps extends Omit<React.HTMLProps<HTMLSpanElement>, 'style'> {
-  style?: CSSProperties;
-  innerRef?: React.Ref<HTMLSpanElement>;
+import { type HTMLPropsWithStyle } from '../../types/utils';
+
+type TextProps = HTMLPropsWithStyle<HTMLSpanElement> & {
+  innerRef?: Ref<HTMLSpanElement>;
   className?: string;
-  children?: React.ReactNode;
-}
+  children?: ReactNode;
+};
 
-export const Text: React.FC<TextProps> = props => {
+export const Text = (props: TextProps) => {
   const { style, innerRef, ...restProps } = props;
   return (
     <span

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createRef, PureComponent } from 'react';
 
 import memoizeOne from 'memoize-one';
 
@@ -15,7 +15,7 @@ function ResizeObserver({ onResize, children }) {
   return children(ref);
 }
 
-export class FixedSizeList extends React.PureComponent {
+export class FixedSizeList extends PureComponent {
   _outerRef;
   _resetIsScrollingTimeoutId = null;
 
@@ -31,9 +31,9 @@ export class FixedSizeList extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.lastPositions = React.createRef();
+    this.lastPositions = createRef();
     this.lastPositions.current = new Map();
-    this.needsAnimationRerender = React.createRef();
+    this.needsAnimationRerender = createRef();
     this.needsAnimationRerender.current = false;
     this.animationEnabled = false;
 

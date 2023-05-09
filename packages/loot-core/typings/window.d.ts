@@ -5,6 +5,7 @@ declare global {
     Actual?: {
       IS_FAKE_WEB: boolean;
       ACTUAL_VERSION: string;
+      openURLInBrowser: (url: string) => void;
     };
 
     __history?: {

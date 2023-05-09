@@ -11,15 +11,15 @@ import Text from '../common/Text';
 import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
-interface NordigenInitialiseProps {
+type NordigenInitialiseProps = {
   modalProps?: Partial<ModalProps>;
   onSuccess: () => void;
-}
+};
 
-const NordigenInitialise: React.FC<NordigenInitialiseProps> = ({
+const NordigenInitialise = ({
   modalProps,
   onSuccess,
-}) => {
+}: NordigenInitialiseProps) => {
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);

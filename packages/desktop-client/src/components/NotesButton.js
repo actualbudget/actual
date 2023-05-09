@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { createRef, useState, useEffect, useMemo } from 'react';
 
 import { css } from 'glamor';
 
@@ -18,7 +18,7 @@ export function NotesTooltip({
   onClose,
 }) {
   let [notes, setNotes] = useState(defaultNotes);
-  let inputRef = React.createRef();
+  let inputRef = createRef();
 
   useEffect(() => {
     if (editable) {

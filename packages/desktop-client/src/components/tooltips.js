@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { Component, createContext, createRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import { css, before } from 'glamor';
 
 import { styles } from '../style';
 
-export const IntersectionBoundary = React.createContext();
+export const IntersectionBoundary = createContext();
 
 export function useTooltip() {
   let [isOpen, setIsOpen] = useState(false);
@@ -23,14 +23,14 @@ export function useTooltip() {
   };
 }
 
-export class Tooltip extends React.Component {
+export class Tooltip extends Component {
   static contextType = IntersectionBoundary;
   state = { position: null };
 
   constructor(props) {
     super(props);
     this.position = props.position || 'bottom-right';
-    this.contentRef = React.createRef();
+    this.contentRef = createRef();
   }
 
   setup() {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { colors, styles } from '../style';
@@ -6,7 +6,7 @@ import { isMobile } from '../util';
 
 import { Modal, View, Text } from './common';
 
-let PageTypeContext = React.createContext({ type: 'page' });
+let PageTypeContext = createContext({ type: 'page' });
 
 const HORIZONTAL_PADDING = isMobile() ? 10 : 20;
 
@@ -19,7 +19,7 @@ export function PageTypeProvider({ type, current, children }) {
 }
 
 export function usePageType() {
-  return React.useContext(PageTypeContext);
+  return useContext(PageTypeContext);
 }
 
 function PageTitle({ name, style }) {

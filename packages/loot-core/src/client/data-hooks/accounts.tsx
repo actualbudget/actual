@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { createContext, useEffect, useState, useContext } from 'react';
 
 import q, { liveQuery } from 'loot-core/src/client/query-helpers';
 import { getAccountsById } from 'loot-core/src/client/reducers/queries';
@@ -22,7 +22,7 @@ export function useAccounts() {
   return data;
 }
 
-let AccountsContext = React.createContext(null);
+let AccountsContext = createContext(null);
 
 export function AccountsProvider({ children }) {
   let data = useAccounts();
