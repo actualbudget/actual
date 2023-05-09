@@ -362,25 +362,18 @@ export const ManagePayees = forwardRef(
     let haveOrphanedPayees = orphanedPayees.length > 0;
 
     let filteredPayees = useMemo(() => {
-      if (filter === '' && !orphanedOnly) {
-        // no filters
-        return payees;
-      } else if (filter === '' && orphanedOnly) {
-        // just orphans
-        return payees.filter(p => orphanedPayees.map(o => o.id).includes(p.id));
-      } else if (filter !== '' && !orphanedOnly) {
-        // just filter
-        return payees.filter(p =>
+      let filtered = payees;
+      if (filter) {
+        filtered = filtered.filter(p =>
           p.name.toLowerCase().includes(filter.toLowerCase()),
         );
-      } else {
-        // filter plus orphans
-        return payees.filter(
-          p =>
-            p.name.toLowerCase().includes(filter.toLowerCase()) &&
-            orphanedPayees.map(o => o.id).includes(p.id),
+      }
+      if (orphanedOnly) {
+        filtered = filtered.filter(p =>
+          orphanedPayees.map(o => o.id).includes(p.id),
         );
       }
+      return filtered;
     }, [payees, filter, orphanedOnly]);
 
     let selected = useSelected('payees', filteredPayees, initialSelectedIds);
@@ -521,40 +514,36 @@ export const ManagePayees = forwardRef(
               </View>
             )}
           </Component>
-          <Component initialState={{ orphanedOnly: false }}>
-            {({ state, setState }) => (
-              <View>
-                <Button
-                  id="orphan-button"
-                  bare
-                  style={{
-                    marginRight: '10px',
-                  }}
-                  disabled={!haveOrphanedPayees && !orphanedOnly}
-                  onClick={() => {
-                    setOrphanedOnly(!orphanedOnly);
-                    haveOrphanedPayees = orphanedPayees.length > 0;
-                    const filterInput = document.getElementById('filter-input');
-                    applyFilter(filterInput.value);
-                    tableNavigator.onEdit(null);
-                  }}
-                >
-                  <label
-                    htmlFor="orphan-button"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      width: '100%',
-                      height: '100%',
-                      margin: 0,
-                    }}
-                  >
-                    {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
-                  </label>
-                </Button>
-              </View>
-            )}
-          </Component>
+          <View>
+            <Button
+              id="orphan-button"
+              bare
+              style={{
+                marginRight: '10px',
+              }}
+              disabled={!haveOrphanedPayees && !orphanedOnly}
+              onClick={() => {
+                setOrphanedOnly(!orphanedOnly);
+                haveOrphanedPayees = orphanedPayees.length > 0;
+                const filterInput = document.getElementById('filter-input');
+                applyFilter(filterInput.value);
+                tableNavigator.onEdit(null);
+              }}
+            >
+              <label
+                htmlFor="orphan-button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '100%',
+                  margin: 0,
+                }}
+              >
+                {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
+              </label>
+            </Button>
+          </View>
           <View style={{ flex: 1 }} />
           <Input
             id="filter-input"
