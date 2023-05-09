@@ -37,6 +37,11 @@ export function applyBudgetAction(month, type, args) {
           ),
         );
         break;
+      case 'sweep-goal-template':
+        dispatch(
+          addNotification(await send('budget/sweep-goal-template', { month })),
+        );
+        break;
       case 'hold':
         await send('budget/hold-for-next-month', {
           month,

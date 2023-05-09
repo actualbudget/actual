@@ -20,6 +20,10 @@ expr
     { return { type: 'simple', limit , priority: +priority } }
   / priority: priority? _? schedule _ name: name
     { return { type: 'schedule', name, priority: +priority } }
+  / _? source
+    { return { type: 'source' } }
+  / _? sink _? percent: percent?
+    { return { type: 'sink', percent: +percent || 100 } }
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
@@ -44,6 +48,8 @@ starting = 'starting'i
 upTo = 'up'i _ 'to'i
 schedule = 'schedule'i
 priority = '-'i number: number _ {return number}
+source = 'source'
+sink = 'sink'
 
 _ 'space' = ' '+
 d 'digit' = [0-9]
