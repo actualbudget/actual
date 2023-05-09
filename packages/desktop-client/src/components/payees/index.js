@@ -359,7 +359,6 @@ export const ManagePayees = forwardRef(
     let scrollTo = useRef(null);
     let resetAnimation = useRef(false);
     const [orphanedOnly, setOrphanedOnly] = useState(false);
-    let haveOrphanedPayees = orphanedPayees.length > 0;
 
     let filteredPayees = useMemo(() => {
       let filtered = payees;
@@ -450,7 +449,6 @@ export const ManagePayees = forwardRef(
     function onDelete() {
       onBatchChange({ deleted: [...selected.items].map(id => ({ id })) });
       selected.dispatch({ type: 'select-none' });
-      haveOrphanedPayees = orphanedPayees.length > 0;
     }
 
     async function onMerge() {
@@ -521,10 +519,9 @@ export const ManagePayees = forwardRef(
               style={{
                 marginRight: '10px',
               }}
-              disabled={!haveOrphanedPayees && !orphanedOnly}
+              disabled={!(orphanedPayees.length > 0) && !orphanedOnly}
               onClick={() => {
                 setOrphanedOnly(!orphanedOnly);
-                haveOrphanedPayees = orphanedPayees.length > 0;
                 const filterInput = document.getElementById('filter-input');
                 applyFilter(filterInput.value);
                 tableNavigator.onEdit(null);
