@@ -248,10 +248,8 @@ function MobileNavTabs() {
   );
 }
 
-const patchedHistory = createBrowserHistory();
-
 function FinancesApp(props) {
-  const { isNarrowWidth } = useResponsive();
+  const patchedHistory = createBrowserHistory();
 
   useEffect(() => {
     let oldPush = patchedHistory.push;
@@ -327,7 +325,7 @@ function FinancesApp(props) {
           <GlobalKeys />
 
           <View style={{ flexDirection: 'row', flex: 1 }}>
-            {!isNarrowWidth && <FloatableSidebar />}
+            <FloatableSidebar />
 
             <div
               style={{
@@ -339,18 +337,16 @@ function FinancesApp(props) {
                 width: '100%',
               }}
             >
-              {!isNarrowWidth && (
-                <Titlebar
-                  style={{
-                    WebkitAppRegion: 'drag',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    zIndex: 1000,
-                  }}
-                />
-              )}
+              <Titlebar
+                style={{
+                  WebkitAppRegion: 'drag',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                }}
+              />
               <div
                 style={{
                   flex: 1,

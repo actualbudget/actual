@@ -42,10 +42,11 @@ export function useSidebar() {
 
 function Sidebar({ floatingSidebar }) {
   let sidebar = useSidebar();
+  let { isNarrowWidth } = useResponsive();
 
   let sidebarShouldFloat = floatingSidebar || sidebar.alwaysFloats;
 
-  return (
+  return isNarrowWidth ? null : (
     <View
       onMouseOver={
         sidebarShouldFloat

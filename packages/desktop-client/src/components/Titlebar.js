@@ -13,6 +13,7 @@ import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import NavigationMenu from '../icons/v2/NavigationMenu';
+import { useResponsive } from '../ResponsiveProvider';
 import { colors } from '../style';
 import tokens from '../tokens';
 
@@ -263,9 +264,10 @@ function Titlebar({
   sync,
 }) {
   let sidebar = useSidebar();
+  let { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
 
-  return (
+  return isNarrowWidth ? null : (
     <View
       style={[
         {
