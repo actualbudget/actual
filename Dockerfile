@@ -5,4 +5,4 @@ COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml ./
 COPY . .
 RUN yarn
-CMD ["tail", "-f", "/dev/null"]
+CMD ["yarn", "start:browser"]
