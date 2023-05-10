@@ -1,10 +1,9 @@
 services:
   actual-development:
+    build: .
     image: actual-development
     ports:
       - '3001:3001'
     volumes:
       - '.:/app'
     restart: unless-stopped
-
-# Can you fix my volumes above?
