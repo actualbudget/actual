@@ -65,7 +65,7 @@ async function processCleanup(month) {
   }
 
   if (total_percent !== 100) {
-    errors.push('Sinking funds do not add up to 100%');
+    errors.push(`Sinking funds calculated using a total of ${total_percent}%.`);
   }
 
   //funds all underfunded categories first
