@@ -75,7 +75,11 @@ async function processCleanup(month) {
     let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
     let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
     let to_budget = budgeted + Math.abs(balance);
-    if (balance < 0 && Math.abs(balance) <= budgetAvailable) {
+    if (
+      balance < 0 &&
+      Math.abs(balance) <= budgetAvailable &&
+      !category.is_income
+    ) {
       await setBudget({
         category: category.id,
         month,
@@ -101,12 +105,12 @@ async function processCleanup(month) {
       Math.round(
         (sinkCategory[c].temp[0].percent / total_percent) * budgetAvailable,
       );
-      if (c === sinkCategory.length -1){
-        let currentBudgetAvailable = await getSheetValue(sheetName, `to-budget`);
-        if (to_budget > currentBudgetAvailable) {
-          to_budget = budgeted + currentBudgetAvailable;
-        }
+    if (c === sinkCategory.length - 1) {
+      let currentBudgetAvailable = await getSheetValue(sheetName, `to-budget`);
+      if (to_budget > currentBudgetAvailable) {
+        to_budget = budgeted + currentBudgetAvailable;
       }
+    }
     await setBudget({
       category: categoryId,
       month,
