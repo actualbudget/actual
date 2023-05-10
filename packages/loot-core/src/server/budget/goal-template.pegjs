@@ -11,8 +11,7 @@ expr
       amount,
       month,
       ...(repeat ? repeat[3] : {}),
-      from,
-      priority: +priority
+      from
     } }
   / monthly: amount limit: limit?
     { return { type: 'simple', monthly, limit } }
@@ -29,7 +28,6 @@ repeat 'repeat interval'
 
 limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
 		/ _? upTo _ amount: amount { return {amount: amount, hold: false } }
-
 
 weekCount
   = week { return null }
