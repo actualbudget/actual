@@ -31,8 +31,13 @@ export function sweepTemplate({ month }) {
 }
 
 async function processCleanup(month) {
+  let num_sources = 0;
+  let num_sinks = 0;
+  let total_percent = 0;
+  let errors = [];
   let sinkCategory = [];
-  let category_templates = await getCategoryTemplates();
+  const TEMPLATE_PREFIX = '#cleanup';
+  let category_templates = await getCategoryTemplates(TEMPLATE_PREFIX);
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
@@ -49,14 +54,44 @@ async function processCleanup(month) {
           month,
           amount: budgeted - balance,
         });
+        num_sources += 1;
       }
       if (template.filter(t => t.type === 'sink').length > 0) {
         sinkCategory.push({ cat: category, temp: template });
+        num_sinks += 1;
+        total_percent += template[0].percent;
       }
     }
   }
 
+  if (total_percent != 100) {
+    errors.push('Sinking funds to not equal 100%');
+  }
+
+  //funds all underfunded categories first
+  for (let c = 0; c < categories.length; c++) {
+    let category = categories[c];
+    let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+    let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+    let budgeted = await getSheetValue(
+      sheetName,
+      `budget-${category.id}`,
+    );
+    let to_budget = budgeted + Math.abs(balance); 
+    if (balance < 0 && Math.abs(balance) <= budgetAvailable) {
+      await setBudget({
+        category: category.id,
+        month,
+        amount: to_budget,
+      });
+    }
+  }
+
   let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+
+  if (budgetAvailable <=0) {
+    errors.push('No funds are available to reallocate.');
+  }
 
   for (let c = 0; c < sinkCategory.length; c++) {
     let budgeted = await getSheetValue(
@@ -66,12 +101,44 @@ async function processCleanup(month) {
     let categoryId = sinkCategory[c].cat.id;
     let to_budget =
       budgeted +
-      Math.round((sinkCategory[c].temp[0].percent / 100) * budgetAvailable);
+      Math.round(
+        (sinkCategory[c].temp[0].percent / total_percent) * budgetAvailable,
+      );
     await setBudget({
       category: categoryId,
       month,
       amount: to_budget,
     });
+  }
+
+  if (num_sources === 0) {
+    if (errors.length) {
+      return {
+        type: 'error',
+        sticky: true,
+        message: `There were errors interpreting some templates:`,
+        pre: errors.join('\n\n'),
+      };
+    } else {
+      return { type: 'message', message: 'All categories were up to date.' };
+    }
+  } else {
+    let applied = `Successfully returned funds from ${num_sources} ${
+      num_sources === 1 ? 'source' : 'sources'
+    } and funded ${num_sinks} sinking ${num_sinks === 1 ? 'fund' : 'funds'
+  }.`;
+    if (errors.length) {
+      return {
+        sticky: true,
+        message: `${applied} There were errors interpreting some templates:`,
+        pre: errors.join('\n\n'),
+      };
+    } else {
+      return {
+        type: 'message',
+        message: applied,
+      };
+    }
   }
 }
 
@@ -90,7 +157,8 @@ function checkScheduleTemplates(template) {
 async function processTemplate(month, force) {
   let num_applied = 0;
   let errors = [];
-  let category_templates = await getCategoryTemplates();
+  const TEMPLATE_PREFIX = '#template';
+  let category_templates = await getCategoryTemplates(TEMPLATE_PREFIX);
   let lowestPriority = 0;
   let originalCategoryBalance = [];
 
@@ -240,8 +308,8 @@ async function processTemplate(month, force) {
   }
 }
 
-const TEMPLATE_PREFIX = '#template';
-async function getCategoryTemplates() {
+//const TEMPLATE_PREFIX = '#template';
+async function getCategoryTemplates(TEMPLATE_PREFIX) {
   let templates = {};
 
   let notes = await db.all(
