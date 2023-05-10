@@ -226,7 +226,7 @@ function NavTab({ icon: TabIcon, name, path }) {
 }
 
 function MobileNavTabs() {
-  const { atLeastSmallWidth } = useResponsive();
+  const { isNarrowWidth } = useResponsive();
   return (
     <div
       style={{
@@ -234,7 +234,7 @@ function MobileNavTabs() {
         borderTop: `1px solid ${colors.n10}`,
         bottom: 0,
         ...styles.shadow,
-        display: atLeastSmallWidth ? 'none' : 'flex',
+        display: isNarrowWidth ? 'flex' : 'none',
         height: '80px',
         justifyContent: 'space-around',
         paddingTop: 10,
@@ -251,7 +251,7 @@ function MobileNavTabs() {
 const patchedHistory = createBrowserHistory();
 
 function FinancesApp(props) {
-  const { atLeastSmallWidth } = useResponsive();
+  const { isNarrowWidth } = useResponsive();
 
   useEffect(() => {
     let oldPush = patchedHistory.push;
@@ -327,7 +327,7 @@ function FinancesApp(props) {
           <GlobalKeys />
 
           <View style={{ flexDirection: 'row', flex: 1 }}>
-            {atLeastSmallWidth && <FloatableSidebar />}
+            {!isNarrowWidth && <FloatableSidebar />}
 
             <div
               style={{
@@ -339,7 +339,7 @@ function FinancesApp(props) {
                 width: '100%',
               }}
             >
-              {atLeastSmallWidth && (
+              {!isNarrowWidth && (
                 <Titlebar
                   style={{
                     WebkitAppRegion: 'drag',
