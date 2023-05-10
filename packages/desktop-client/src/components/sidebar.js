@@ -30,7 +30,7 @@ import { useSidebar } from './FloatableSidebar';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CellValue from './spreadsheet/CellValue';
 
-export const SIDEBAR_WIDTH = 240;
+export const SIDEBAR_WIDTH = 240; // Changed from 240 to test
 
 const fontWeight = 600;
 
