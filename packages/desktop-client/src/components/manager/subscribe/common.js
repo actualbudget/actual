@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -93,7 +93,7 @@ export function Title({ text }) {
   );
 }
 
-export const Input = React.forwardRef((props, ref) => {
+export const Input = forwardRef((props, ref) => {
   return (
     <BaseInput
       {...props}
@@ -111,7 +111,7 @@ export const Input = React.forwardRef((props, ref) => {
   );
 });
 
-export const BareButton = React.forwardRef((props, ref) => {
+export const BareButton = forwardRef((props, ref) => {
   return (
     <Button
       ref={ref}
@@ -137,7 +137,7 @@ export const BareButton = React.forwardRef((props, ref) => {
   );
 });
 
-export const ExternalLink = React.forwardRef((props, ref) => {
+export const ExternalLink = forwardRef((props, ref) => {
   let { href, ...linkProps } = props;
   return (
     <BareButton
@@ -151,7 +151,7 @@ export const ExternalLink = React.forwardRef((props, ref) => {
   );
 });
 
-export const BackLink = React.forwardRef((props, ref) => {
+export const BackLink = forwardRef((props, ref) => {
   return (
     <BareButton
       ref={ref}

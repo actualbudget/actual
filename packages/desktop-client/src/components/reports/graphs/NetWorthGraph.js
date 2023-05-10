@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createElement } from 'react';
 
 import * as d from 'date-fns';
 import {
@@ -102,7 +102,7 @@ function NetWorthGraph({ style, start, end, graphData, compact }) {
               end={graphData.end}
               data={graphData.data}
             />
-            {React.createElement(
+            {createElement(
               graphData.data.length === 1 ? VictoryBar : VictoryArea,
               {
                 data: graphData.data,

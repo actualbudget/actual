@@ -81,6 +81,18 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   }, 45000);
 
+  test('ofx import works (credit card)', async () => {
+    prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    let { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../mocks/files/credit-card.ofx',
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  }, 45000);
+
   test('qfx import works', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });

@@ -1,6 +1,6 @@
-import React from 'react';
+import { Component } from 'react';
 
-class AnimateIn extends React.Component {
+class AnimateIn extends Component {
   state = { animating: false };
 
   componentDidMount() {

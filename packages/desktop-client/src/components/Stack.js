@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { Children, Fragment, cloneElement, forwardRef } from 'react';
 
 import Text from './common/Text';
 import View from './common/View';
 
 function getChildren(key, children) {
-  return React.Children.toArray(children).reduce((list, child) => {
+  return Children.toArray(children).reduce((list, child) => {
     if (child) {
-      if (child.type === React.Fragment) {
+      if (child.type === Fragment) {
         return list.concat(getChildren(child.key, child.props.children));
       }
       list.push({ key: key + child.key, child });
@@ -16,7 +16,7 @@ function getChildren(key, children) {
   }, []);
 }
 
-const Stack = React.forwardRef(
+const Stack = forwardRef(
   (
     {
       direction = 'column',
@@ -57,7 +57,7 @@ const Stack = React.forwardRef(
             marginProp = isReversed ? 'marginTop' : 'marginBottom';
           }
 
-          return React.cloneElement(
+          return cloneElement(
             typeof child === 'string' ? <Text>{child}</Text> : child,
             {
               key,

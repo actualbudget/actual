@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 
-let ActiveLocationContext = React.createContext(null);
+let ActiveLocationContext = createContext(null);
 
 export function ActiveLocationProvider({ location, children }) {
   return (

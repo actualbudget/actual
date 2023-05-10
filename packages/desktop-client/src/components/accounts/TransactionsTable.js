@@ -1,4 +1,9 @@
 import React, {
+  createContext,
+  createElement,
+  createRef,
+  forwardRef,
+  memo,
   useState,
   useRef,
   useMemo,
@@ -136,7 +141,7 @@ function isLastChild(transactions, index) {
   );
 }
 
-let SplitsExpandedContext = React.createContext(null);
+let SplitsExpandedContext = createContext(null);
 
 export function useSplitsExpanded() {
   let data = useContext(SplitsExpandedContext);
@@ -231,7 +236,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
-export const TransactionHeader = React.memo(
+export const TransactionHeader = memo(
   ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
     let dispatchSelected = useSelectedDispatch();
 
@@ -363,7 +368,7 @@ function StatusCell({
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
       >
-        {React.createElement(statusProps.Icon, {
+        {createElement(statusProps.Icon, {
           style: {
             width: 13,
             height: 13,
@@ -491,7 +496,7 @@ function CellWithScheduleIcon({ scheduleId, children }) {
   );
 }
 
-export const Transaction = React.memo(function Transaction(props) {
+export const Transaction = memo(function Transaction(props) {
   let {
     transaction: originalTransaction,
     editing,
@@ -529,7 +534,7 @@ export const Transaction = React.memo(function Transaction(props) {
 
   let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
-  let [transaction, setTransaction] = useState(
+  let [transaction, setTransaction] = useState(() =>
     serializeTransaction(originalTransaction, showZeroInDeposit),
   );
   let isPreview = isPreviewId(transaction.id);
@@ -997,14 +1002,14 @@ export const Transaction = React.memo(function Transaction(props) {
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
-        value={debit == null ? '' : debit}
+        value={debit === '' && credit === '' ? '0.00' : debit}
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
         onExpose={!isPreview && (name => onEdit(id, name))}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
-          value: debit,
+          value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
         }}
       />
@@ -1015,7 +1020,7 @@ export const Transaction = React.memo(function Transaction(props) {
         name="credit"
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
-        value={credit == null ? '' : credit}
+        value={credit}
         valueStyle={valueStyle}
         textAlign="right"
         title={credit}
@@ -1108,7 +1113,7 @@ function makeTemporaryTransactions(currentAccountId, lastDate) {
       date: lastDate || currentDay(),
       account: currentAccountId || null,
       cleared: false,
-      amount: 0,
+      amount: null,
     },
   ];
 }
@@ -1240,7 +1245,7 @@ function TransactionTableInner({
   onScroll,
   ...props
 }) {
-  const containerRef = React.createRef();
+  const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
 
   useEffect(() => {
@@ -1427,7 +1432,7 @@ function TransactionTableInner({
   );
 }
 
-export let TransactionTable = React.forwardRef((props, ref) => {
+export let TransactionTable = forwardRef((props, ref) => {
   let [newTransactions, setNewTransactions] = useState(null);
   let [hoveredTransaction, setHoveredTransaction] = useState(
     props.hoveredTransaction,
@@ -1619,9 +1624,6 @@ export let TransactionTable = React.forwardRef((props, ref) => {
             // add split
             onAddSplit(lastTransaction.id);
           } else if (
-            (newNavigator.focusedField === 'debit' ||
-              newNavigator.focusedField === 'credit' ||
-              newNavigator.focusedField === 'cleared') &&
             newNavigator.editingId === lastTransaction.id &&
             (!isSplit || !lastTransaction.error)
           ) {
@@ -1707,15 +1709,17 @@ export let TransactionTable = React.forwardRef((props, ref) => {
         let { data, diff } = splitTransaction(newTrans, id);
         setNewTransactions(data);
 
-        // TODO: what is this for???
-        // if (newTrans[0].amount == null) {
-        //   newNavigator.onEdit(newTrans[0].id, 'debit');
-        // } else {
-        newNavigator.onEdit(
-          diff.added[0].id,
-          latestState.current.newNavigator.focusedField,
-        );
-        // }
+        // Jump next to "debit" field if it is empty
+        // Otherwise jump to the same field as before, but downwards
+        // to the added split transaction
+        if (newTrans[0].amount === null) {
+          newNavigator.onEdit(newTrans[0].id, 'debit');
+        } else {
+          newNavigator.onEdit(
+            diff.added[0].id,
+            latestState.current.newNavigator.focusedField,
+          );
+        }
       } else {
         let trans = latestState.current.transactions.find(t => t.id === id);
         let newId = props.onSplit(id);
@@ -1723,7 +1727,7 @@ export let TransactionTable = React.forwardRef((props, ref) => {
         splitsExpanded.dispatch({ type: 'open-split', id: trans.id });
 
         let { tableNavigator } = latestState.current;
-        if (trans.amount == null) {
+        if (trans.amount === null) {
           tableNavigator.onEdit(trans.id, 'debit');
         } else {
           tableNavigator.onEdit(newId, tableNavigator.focusedField);

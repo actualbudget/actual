@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { createContext, useEffect, useState, useContext } from 'react';
 
 import q, { liveQuery } from 'loot-core/src/client/query-helpers';
 import {
@@ -57,7 +57,7 @@ export function useSchedules({ transform }: UseSchedulesArgs = {}) {
   return data;
 }
 
-let SchedulesContext = React.createContext(null);
+let SchedulesContext = createContext(null);
 
 export function SchedulesProvider({ transform, children }) {
   let data = useSchedules({ transform });

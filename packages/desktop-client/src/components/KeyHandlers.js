@@ -1,8 +1,8 @@
-import React, { useEffect, useContext } from 'react';
+import React, { createContext, useEffect, useContext } from 'react';
 
 import hotkeys from 'hotkeys-js';
 
-let KeyScopeContext = React.createContext('app');
+let KeyScopeContext = createContext('app');
 
 hotkeys.filter = event => {
   var target = event.target || event.srcElement;
