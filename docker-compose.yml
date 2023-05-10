@@ -1,6 +1,7 @@
 ###################################################
 # This creates and stands up the development
-# docker container.
+# docker container. Depends on the Dockerfile and
+# docker-start.sh files.
 ###################################################
 
 services:

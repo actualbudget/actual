@@ -12,4 +12,4 @@ COPY .yarn ./.yarn
 COPY yarn.lock package.json .yarnrc.yml ./
 COPY . .
 RUN yarn
-CMD ["yarn", "start:browser"]
+CMD ["sh", "./docker-start.sh"]
