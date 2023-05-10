@@ -64,8 +64,8 @@ async function processCleanup(month) {
     }
   }
 
-  if (total_percent != 100) {
-    errors.push('Sinking funds to not equal 100%');
+  if (total_percent !== 100) {
+    errors.push('Sinking funds do not add up to 100%');
   }
 
   //funds all underfunded categories first
@@ -73,11 +73,8 @@ async function processCleanup(month) {
     let category = categories[c];
     let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
     let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
-    let budgeted = await getSheetValue(
-      sheetName,
-      `budget-${category.id}`,
-    );
-    let to_budget = budgeted + Math.abs(balance); 
+    let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
+    let to_budget = budgeted + Math.abs(balance);
     if (balance < 0 && Math.abs(balance) <= budgetAvailable) {
       await setBudget({
         category: category.id,
@@ -89,7 +86,7 @@ async function processCleanup(month) {
 
   let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
 
-  if (budgetAvailable <=0) {
+  if (budgetAvailable <= 0) {
     errors.push('No funds are available to reallocate.');
   }
 
@@ -125,8 +122,7 @@ async function processCleanup(month) {
   } else {
     let applied = `Successfully returned funds from ${num_sources} ${
       num_sources === 1 ? 'source' : 'sources'
-    } and funded ${num_sinks} sinking ${num_sinks === 1 ? 'fund' : 'funds'
-  }.`;
+    } and funded ${num_sinks} sinking ${num_sinks === 1 ? 'fund' : 'funds'}.`;
     if (errors.length) {
       return {
         sticky: true,
