@@ -1,3 +1,8 @@
+###################################################
+# This creates and stands up the development
+# docker container.
+###################################################
+
 services:
   actual-development:
     build: .
