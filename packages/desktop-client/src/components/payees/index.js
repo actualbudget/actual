@@ -138,8 +138,8 @@ let Payee = memo(
           }
           focused={focusedField === 'select'}
           selected={selected}
-          onSelect={() => {
-            dispatchSelected({ type: 'select', id: payee.id });
+          onSelect={e => {
+            dispatchSelected({ type: 'select', id: payee.id, event: e });
           }}
         />
         <InputCell
@@ -247,7 +247,7 @@ function PayeeTableHeader() {
           exposed={true}
           focused={false}
           selected={selectedItems.size > 0}
-          onSelect={() => dispatchSelected({ type: 'select-all' })}
+          onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
         <Cell value="Name" width="flex" />
       </TableHeader>
