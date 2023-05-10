@@ -10,7 +10,7 @@ import { View, Block } from './common';
 
 function AppBackground({ initializing, loadingText }) {
   return (
-    <React.Fragment>
+    <>
       <Background />
 
       {(loadingText != null || initializing) && (
@@ -32,7 +32,7 @@ function AppBackground({ initializing, loadingText }) {
           <AnimatedLoading width={25} color={colors.n1} />
         </View>
       )}
-    </React.Fragment>
+    </>
   );
 }
 

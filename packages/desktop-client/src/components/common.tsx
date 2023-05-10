@@ -4,7 +4,16 @@ import React, {
   useLayoutEffect,
   useState,
   useCallback,
+  type ChangeEvent,
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+  type Ref,
+  forwardRef,
+  createElement,
+  cloneElement,
 } from 'react';
+import type { RouteComponentProps } from 'react-router';
 import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
 
 import {
@@ -14,12 +23,11 @@ import {
   ListboxList,
   ListboxOption,
 } from '@reach/listbox';
-import { css } from 'glamor';
-
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import { styles, colors } from '../style';
+import type { HTMLPropsWithStyle } from '../types/utils';
 
 import Button from './common/Button';
 import Input, { defaultInputStyle } from './common/Input';
@@ -33,7 +41,9 @@ export { default as View } from './common/View';
 export { default as Text } from './common/Text';
 export { default as Stack } from './Stack';
 
-export function TextOneLine({ children, ...props }) {
+type TextOneLineProps = ComponentProps<typeof Text>;
+
+export function TextOneLine({ children, ...props }: TextOneLineProps) {
   return (
     <Text
       {...props}
@@ -52,10 +62,12 @@ export function TextOneLine({ children, ...props }) {
   );
 }
 
-export const useStableCallback = callback => {
-  const callbackRef = useRef();
+type UseStableCallbackArg = (...args: unknown[]) => unknown;
+
+export const useStableCallback = (callback: UseStableCallbackArg) => {
+  const callbackRef = useRef<UseStableCallbackArg>();
   const memoCallback = useCallback(
-    (...args) => callbackRef.current(...args),
+    (...args) => callbackRef.current && callbackRef.current(...args),
     [],
   );
   useLayoutEffect(() => {
@@ -64,7 +76,11 @@ export const useStableCallback = callback => {
   return memoCallback;
 };
 
-export function Block(props) {
+type BlockProps = HTMLPropsWithStyle<HTMLDivElement> & {
+  innerRef?: Ref<HTMLDivElement>;
+};
+
+export function Block(props: BlockProps) {
   const { style, innerRef, ...restProps } = props;
   return (
     <div
@@ -75,37 +91,43 @@ export function Block(props) {
   );
 }
 
-export const Card = React.forwardRef(({ children, ...props }, ref) => {
-  return (
-    <View
-      {...props}
-      ref={ref}
-      style={[
-        {
-          marginTop: 15,
-          marginLeft: 5,
-          marginRight: 5,
-          borderRadius: 6,
-          backgroundColor: 'white',
-          borderColor: colors.p3,
-          boxShadow: '0 1px 2px #9594A8',
-        },
-        props.style,
-      ]}
-    >
-      <View
-        style={{
-          borderRadius: 6,
-          overflow: 'hidden',
-        }}
-      >
-        {children}
-      </View>
-    </View>
-  );
-});
+type CardProps = ComponentProps<typeof View>;
 
-export function Link({ style, children, ...nativeProps }) {
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ children, ...props }, ref) => {
+    return (
+      <View
+        {...props}
+        ref={ref}
+        style={[
+          {
+            marginTop: 15,
+            marginLeft: 5,
+            marginRight: 5,
+            borderRadius: 6,
+            backgroundColor: 'white',
+            borderColor: colors.p3,
+            boxShadow: '0 1px 2px #9594A8',
+          },
+          props.style,
+        ]}
+      >
+        <View
+          style={{
+            borderRadius: 6,
+            overflow: 'hidden',
+          }}
+        >
+          {children}
+        </View>
+      </View>
+    );
+  },
+);
+
+type LinkProps = ComponentProps<typeof Button>;
+
+export function Link({ style, children, ...nativeProps }: LinkProps) {
   return (
     <Button
       {...css(
@@ -131,7 +153,21 @@ export function Link({ style, children, ...nativeProps }) {
   );
 }
 
-export function AnchorLink({ to, exact, style, activeStyle, children }) {
+type AnchorLinkProps = {
+  to: string;
+  exact: boolean;
+  style?: CSSProperties;
+  activeStyle?: CSSProperties;
+  children?: ReactNode;
+};
+
+export function AnchorLink({
+  to,
+  exact,
+  style,
+  activeStyle,
+  children,
+}: AnchorLinkProps) {
   let match = useRouteMatch({ path: to, exact: true });
 
   return (
@@ -145,7 +181,15 @@ export function AnchorLink({ to, exact, style, activeStyle, children }) {
   );
 }
 
-export const ExternalLink = React.forwardRef(
+type ExternalLinkAnchorProps = {
+  asAnchor: true;
+} & HTMLPropsWithStyle<HTMLAnchorElement>;
+type ExternalLinkButtonProps = { asAnchor: false | undefined } & ComponentProps<
+  typeof Button
+>;
+type ExternalLinkProps = ExternalLinkAnchorProps | ExternalLinkButtonProps;
+
+export const ExternalLink = forwardRef<HTMLElement, ExternalLinkProps>(
   ({ asAnchor, children, ...props }, ref) => {
     function onClick(e) {
       e.preventDefault();
@@ -154,19 +198,33 @@ export const ExternalLink = React.forwardRef(
 
     if (asAnchor) {
       return (
-        <a ref={ref} {...props} onClick={onClick}>
+        <a
+          ref={ref as Ref<HTMLAnchorElement>}
+          {...(props as ExternalLinkAnchorProps)}
+          onClick={onClick}
+        >
           {children}
         </a>
       );
     }
     return (
-      <Button ref={ref} bare {...props} onClick={onClick}>
+      <Button
+        ref={ref as Ref<HTMLButtonElement>}
+        bare
+        {...(props as ExternalLinkButtonProps)}
+        onClick={onClick}
+      >
         {children}
       </Button>
     );
   },
 );
 
+type ButtonLinkProps = ComponentProps<typeof Button> &
+  RouteComponentProps & {
+    to: string;
+    activeStyle?: CSSProperties;
+  };
 function ButtonLink_({
   history,
   staticContext,
@@ -176,7 +234,7 @@ function ButtonLink_({
   match,
   location,
   ...props
-}) {
+}: ButtonLinkProps) {
   return (
     <Route
       path={to}
@@ -196,6 +254,13 @@ function ButtonLink_({
 
 export const ButtonLink = withRouter(ButtonLink_);
 
+type InputWithContentProps = ComponentProps<typeof Input> & {
+  leftContent: ReactNode;
+  rightContent: ReactNode;
+  inputStyle?: CSSProperties;
+  style?: CSSProperties;
+  getStyle?: (focused: boolean) => CSSProperties;
+};
 export function InputWithContent({
   leftContent,
   rightContent,
@@ -203,7 +268,7 @@ export function InputWithContent({
   style,
   getStyle,
   ...props
-}) {
+}: InputWithContentProps) {
   let [focused, setFocused] = useState(false);
 
   return (
@@ -253,6 +318,14 @@ export function InputWithContent({
   );
 }
 
+type SearchProps = {
+  inputRef: Ref<HTMLInputElement>;
+  value: string;
+  onChange: (value: string) => unknown;
+  placeholder: string;
+  isInModal: boolean;
+  width?: number;
+};
 export function Search({
   inputRef,
   value,
@@ -260,13 +333,13 @@ export function Search({
   placeholder,
   isInModal,
   width = 350,
-}) {
+}: SearchProps) {
   return (
     <Input
       inputRef={inputRef}
       placeholder={placeholder}
       value={value}
-      onChange={e => onChange(e.target.value)}
+      onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
       style={{
         width,
         borderColor: isInModal ? null : 'transparent',
@@ -282,7 +355,14 @@ export function Search({
   );
 }
 
-export function KeyboardButton({ highlighted, children, ...props }) {
+type KeyboardButtonProps = ComponentProps<typeof Button> & {
+  highlighted?: boolean;
+};
+export function KeyboardButton({
+  highlighted,
+  children,
+  ...props
+}: KeyboardButtonProps) {
   return (
     <Button
       {...props}
@@ -309,7 +389,9 @@ export function KeyboardButton({ highlighted, children, ...props }) {
   );
 }
 
-export const Select = React.forwardRef(
+type SelectProps = HTMLPropsWithStyle<HTMLSelectElement>;
+
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ style, children, ...nativeProps }, ref) => {
     return (
       <select
@@ -339,13 +421,21 @@ export const Select = React.forwardRef(
   },
 );
 
+type CustomSelectProps = {
+  options: Array<[string, string]>;
+  value: string;
+  onChange?: (newValue: string) => void;
+  style?: CSSProperties;
+  disabledKeys?: string[];
+};
+
 export function CustomSelect({
   options,
   value,
   onChange,
   style,
   disabledKeys = [],
-}) {
+}: CustomSelectProps) {
   return (
     <ListboxInput
       value={value}
@@ -373,11 +463,37 @@ export function CustomSelect({
   );
 }
 
-export function Keybinding({ keyName }) {
+type KeybindingProps = {
+  keyName: ReactNode;
+};
+
+export function Keybinding({ keyName }: KeybindingProps) {
   return <Text style={{ fontSize: 10, color: colors.n6 }}>{keyName}</Text>;
 }
 
-export function Menu({ header, footer, items: allItems, onMenuSelect }) {
+type MenuItem = {
+  type: string | symbol;
+  name: string;
+  disabled?: boolean;
+  icon?;
+  iconSize?: number;
+  text: string;
+  key: string;
+};
+
+type MenuProps = {
+  header: ReactNode;
+  footer: ReactNode;
+  items: Array<MenuItem | typeof Menu.line>;
+  onMenuSelect;
+};
+
+export function Menu({
+  header,
+  footer,
+  items: allItems,
+  onMenuSelect,
+}: MenuProps) {
   let elRef = useRef(null);
   let items = allItems.filter(x => x);
   let [hoveredIndex, setHoveredIndex] = useState(null);
@@ -415,8 +531,9 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
           break;
         case 'Enter':
           e.preventDefault();
-          if (hoveredIndex !== null) {
-            onMenuSelect && onMenuSelect(items[hoveredIndex].name);
+          const item = items[hoveredIndex];
+          if (hoveredIndex !== null && item !== Menu.line) {
+            onMenuSelect && onMenuSelect(item.name);
           }
           break;
         default:
@@ -493,7 +610,7 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
             {/* Force it to line up evenly */}
             <Text style={{ lineHeight: 0 }}>
               {item.icon &&
-                React.createElement(item.icon, {
+                createElement(item.icon, {
                   width: item.iconSize || 10,
                   height: item.iconSize || 10,
                   style: { marginRight: 7, width: 10 },
@@ -510,9 +627,18 @@ export function Menu({ header, footer, items: allItems, onMenuSelect }) {
   );
 }
 
-Menu.line = Symbol('menu-line');
+const MenuLine: unique symbol = Symbol('menu-line');
+Menu.line = MenuLine;
 Menu.label = Symbol('menu-label');
 
+type AlignedTextProps = ComponentProps<typeof View> & {
+  left;
+  right;
+  style?: CSSProperties;
+  leftStyle?: CSSProperties;
+  rightStyle?: CSSProperties;
+  truncate: 'left' | 'right';
+};
 export function AlignedText({
   left,
   right,
@@ -521,7 +647,7 @@ export function AlignedText({
   rightStyle,
   truncate = 'left',
   ...nativeProps
-}) {
+}: AlignedTextProps) {
   const truncateStyle = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -555,19 +681,10 @@ export function AlignedText({
   );
 }
 
-export function PlainCurrency({ amount, style }) {
-  return <span style={style}>{integerToCurrency(amount)}</span>;
-}
-
-export function PageHeader({ title, style }) {
-  return (
-    <View style={{ alignItems: 'flex-start' }}>
-      <span style={[styles.pageHeader, style]}>{title}</span>
-    </View>
-  );
-}
-
-export function P({ style, isLast, children, ...props }) {
+type PProps = HTMLPropsWithStyle<HTMLDivElement> & {
+  isLast?: boolean;
+};
+export function P({ style, isLast, children, ...props }: PProps) {
   return (
     <div
       {...props}
@@ -578,7 +695,9 @@ export function P({ style, isLast, children, ...props }) {
   );
 }
 
-export function Strong({ style, children, ...props }) {
+type StrongProps = HTMLPropsWithStyle<HTMLSpanElement>;
+
+export function Strong({ style, children, ...props }: StrongProps) {
   return (
     <span {...props} {...css(style, { fontWeight: 500 })}>
       {children}
@@ -586,7 +705,21 @@ export function Strong({ style, children, ...props }) {
   );
 }
 
-export function InlineField({ label, labelWidth, children, width, style }) {
+type InlineFieldProps = {
+  label: ReactNode;
+  labelWidth?: number;
+  children?: ReactNode;
+  width: number;
+  style?: CSSProperties;
+};
+
+export function InlineField({
+  label,
+  labelWidth,
+  children,
+  width,
+  style,
+}: InlineFieldProps) {
   return (
     <label
       {...css(
@@ -614,13 +747,22 @@ export function InlineField({ label, labelWidth, children, width, style }) {
   );
 }
 
-export function FormError({ style, children }) {
+type FormErrorProps = {
+  style?: CSSProperties;
+  children?: ReactNode;
+};
+
+export function FormError({ style, children }: FormErrorProps) {
   return (
     <View style={[{ color: 'red', fontSize: 13 }, style]}>{children}</View>
   );
 }
 
-export function InitialFocus({ children }) {
+type InitialFocusProps = {
+  children?: ReactElement | ((node: unknown) => ReactNode);
+};
+
+export function InitialFocus({ children }: InitialFocusProps) {
   let node = useRef(null);
 
   useEffect(() => {
@@ -640,8 +782,16 @@ export function InitialFocus({ children }) {
   if (typeof children === 'function') {
     return children(node);
   }
-  return React.cloneElement(children, { inputRef: node });
+  return cloneElement(children, { inputRef: node });
 }
+
+type HoverTargetProps = {
+  style?: CSSProperties;
+  contentStyle?: CSSProperties;
+  children: ReactNode;
+  renderContent: () => ReactNode;
+  disabled?: boolean;
+};
 
 export function HoverTarget({
   style,
@@ -649,7 +799,7 @@ export function HoverTarget({
   children,
   renderContent,
   disabled,
-}) {
+}: HoverTargetProps) {
   let [hovered, setHovered] = useState(false);
 
   const onMouseEnter = useCallback(() => {
@@ -684,7 +834,12 @@ export function HoverTarget({
   );
 }
 
-export function Label({ title, style }) {
+type LabelProps = {
+  title: ReactNode;
+  style?: CSSProperties;
+};
+
+export function Label({ title, style }: LabelProps) {
   return (
     <Text
       style={[

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, PureComponent } from 'react';
 // import {
 //   RectButton,
 //   PanGestureHandler,
@@ -99,7 +99,7 @@ function Saved({ projected }) {
   );
 }
 
-export class BudgetCell extends React.PureComponent {
+export class BudgetCell extends PureComponent {
   render() {
     const {
       name,
@@ -237,7 +237,7 @@ function BudgetCategoryPreview({ name, pending, style }) {
   );
 }
 
-export class BudgetCategory extends React.PureComponent {
+export class BudgetCategory extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -364,7 +364,7 @@ export class BudgetCategory extends React.PureComponent {
   }
 }
 
-export class TotalsRow extends React.PureComponent {
+export class TotalsRow extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -483,7 +483,7 @@ export class TotalsRow extends React.PureComponent {
   }
 }
 
-export class IncomeCategory extends React.PureComponent {
+export class IncomeCategory extends PureComponent {
   render() {
     const { name, budget, balance, style, nameTextStyle, amountTextStyle } =
       this.props;
@@ -568,7 +568,7 @@ export class IncomeCategory extends React.PureComponent {
 //   );
 // }
 
-export class BudgetGroup extends React.PureComponent {
+export class BudgetGroup extends PureComponent {
   render() {
     const {
       group,
@@ -650,7 +650,7 @@ export class BudgetGroup extends React.PureComponent {
   }
 }
 
-export class IncomeBudgetGroup extends React.Component {
+export class IncomeBudgetGroup extends Component {
   render() {
     const { type, group } = this.props;
     return (
@@ -713,7 +713,7 @@ export class IncomeBudgetGroup extends React.Component {
   }
 }
 
-export class BudgetGroups extends React.Component {
+export class BudgetGroups extends Component {
   getGroups = memoizeOne(groups => {
     return {
       incomeGroup: groups.find(group => group.is_income),
@@ -766,7 +766,7 @@ export class BudgetGroups extends React.Component {
   }
 }
 
-export class BudgetTable extends React.Component {
+export class BudgetTable extends Component {
   // static contextType = AmountAccessoryContext;
   state = { editingCategory: null };
 
@@ -979,7 +979,7 @@ export class BudgetTable extends React.Component {
               //     scrollRef,
               //     onScroll
               //   }) => (
-              <React.Fragment>
+              <>
                 <View>
                   <BudgetGroups
                     categoryGroups={categoryGroups}
@@ -994,7 +994,7 @@ export class BudgetTable extends React.Component {
                 </View>
 
                 {/* <DragDropHighlight /> */}
-              </React.Fragment>
+              </>
               //   )}
               // </DragDrop>
             )}

@@ -1,4 +1,10 @@
-import React, { useEffect } from 'react';
+import React, {
+  PureComponent,
+  Component,
+  forwardRef,
+  useEffect,
+  useRef,
+} from 'react';
 
 import { useFocusRing } from '@react-aria/focus';
 import { useListBox, useListBoxSection, useOption } from '@react-aria/listbox';
@@ -88,7 +94,7 @@ function Status({ status }) {
   );
 }
 
-export class Transaction extends React.PureComponent {
+export class Transaction extends PureComponent {
   render() {
     const {
       transaction,
@@ -233,7 +239,7 @@ export class Transaction extends React.PureComponent {
   }
 }
 
-export class TransactionList extends React.Component {
+export class TransactionList extends Component {
   makeData = memoizeOne(transactions => {
     // Group by date. We can assume transactions is ordered
     const sections = [];
@@ -339,7 +345,7 @@ export class TransactionList extends React.Component {
 
 function ListBox(props) {
   let state = useListState(props);
-  let listBoxRef = React.useRef();
+  let listBoxRef = useRef();
   let { listBoxProps, labelProps } = useListBox(props, state, listBoxRef);
 
   useEffect(() => {
@@ -439,7 +445,7 @@ function ListBoxSection({ section, state }) {
 
 function Option({ isLast, item, state }) {
   // Get props for the option element
-  let ref = React.useRef();
+  let ref = useRef();
   let { optionProps, isSelected } = useOption({ key: item.key }, state, ref);
 
   // Determine whether we should show a keyboard
@@ -464,25 +470,23 @@ function Option({ isLast, item, state }) {
 
 export const ROW_HEIGHT = 50;
 
-export const ListItem = React.forwardRef(
-  ({ children, style, ...props }, ref) => {
-    return (
-      <View
-        style={[
-          {
-            height: ROW_HEIGHT,
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingLeft: 10,
-            paddingRight: 10,
-          },
-          style,
-        ]}
-        ref={ref}
-        {...props}
-      >
-        {children}
-      </View>
-    );
-  },
-);
+export const ListItem = forwardRef(({ children, style, ...props }, ref) => {
+  return (
+    <View
+      style={[
+        {
+          height: ROW_HEIGHT,
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingLeft: 10,
+          paddingRight: 10,
+        },
+        style,
+      ]}
+      ref={ref}
+      {...props}
+    >
+      {children}
+    </View>
+  );
+});

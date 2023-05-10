@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+} from 'react';
 import { connect } from 'react-redux';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
@@ -33,7 +39,7 @@ import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import SheetValue from './spreadsheet/SheetValue';
 
-export let TitlebarContext = React.createContext();
+export let TitlebarContext = createContext();
 
 export function TitlebarProvider({ children }) {
   let listeners = useRef([]);

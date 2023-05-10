@@ -1,4 +1,6 @@
 import React, {
+  createContext,
+  forwardRef,
   useState,
   useCallback,
   useRef,
@@ -51,7 +53,7 @@ function fireBlur(onBlur, e) {
   }
 }
 
-const CellContext = React.createContext({
+const CellContext = createContext({
   backgroundColor: 'white',
   borderColor: colors.n9,
 });
@@ -68,7 +70,7 @@ function CellProvider({ backgroundColor, borderColor, children }) {
   return <CellContext.Provider value={value}>{children}</CellContext.Provider>;
 }
 
-export const Field = React.forwardRef(function Field(
+export const Field = forwardRef(function Field(
   {
     width,
     name,
@@ -364,7 +366,7 @@ export function InputCell({
   return (
     <Cell textAlign={textAlign} {...props}>
       {() => (
-        <React.Fragment>
+        <>
           <InputValue
             value={props.value}
             onUpdate={onUpdate}
@@ -382,7 +384,7 @@ export function InputCell({
               {error}
             </Tooltip>
           )}
-        </React.Fragment>
+        </>
       )}
     </Cell>
   );
@@ -465,7 +467,7 @@ export function DeleteCell({ onDelete, style, ...props }) {
   );
 }
 
-export const CellButton = React.forwardRef(
+export const CellButton = forwardRef(
   ({ style, disabled, clickBehavior, onSelect, onEdit, children }, ref) => {
     // This represents a cell that acts like a button: it's clickable,
     // focusable, etc. The reason we don't use a button is because the
@@ -724,14 +726,12 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
 let rowStyle = { position: 'absolute', willChange: 'transform', width: '100%' };
 
-export const TableWithNavigator = React.forwardRef(
-  ({ fields, ...props }, ref) => {
-    let navigator = useTableNavigator(props.items, fields);
-    return <Table {...props} navigator={navigator} />;
-  },
-);
+export const TableWithNavigator = forwardRef(({ fields, ...props }, ref) => {
+  let navigator = useTableNavigator(props.items, fields);
+  return <Table {...props} navigator={navigator} />;
+});
 
-export const Table = React.forwardRef(
+export const Table = forwardRef(
   (
     {
       items,

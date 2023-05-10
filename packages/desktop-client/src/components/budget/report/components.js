@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -18,7 +18,7 @@ export { BudgetSummary } from './BudgetSummary';
 
 let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
 
-export const BudgetTotalsMonth = React.memo(function BudgetTotalsMonth() {
+export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
@@ -79,7 +79,7 @@ export function IncomeHeaderMonth() {
   );
 }
 
-export const GroupMonth = React.memo(function ExpenseGroupMonth({ group }) {
+export const GroupMonth = memo(function ExpenseGroupMonth({ group }) {
   let borderColor = colors.border;
   let { id } = group;
 
@@ -158,7 +158,7 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
   );
 }
 
-export const CategoryMonth = React.memo(function CategoryMonth({
+export const CategoryMonth = memo(function CategoryMonth({
   monthIndex,
   category,
   budgeted,

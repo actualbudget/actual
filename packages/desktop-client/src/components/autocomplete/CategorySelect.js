@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { Fragment, forwardRef, useMemo } from 'react';
 
 import Split from '../../icons/v0/Split';
 import { colors } from '../../style';
@@ -6,7 +6,7 @@ import { View, Text, Select } from '../common';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
-export const NativeCategorySelect = React.forwardRef(
+export const NativeCategorySelect = forwardRef(
   ({ categoryGroups, emptyLabel, ...nativeProps }, ref) => {
     return (
       <Select {...nativeProps} ref={ref}>
@@ -80,7 +80,7 @@ export function CategoryList({
           const showGroup = item.cat_group !== lastGroup;
           lastGroup = item.cat_group;
           return (
-            <React.Fragment key={item.id}>
+            <Fragment key={item.id}>
               {showGroup && (
                 <div
                   style={{
@@ -108,7 +108,7 @@ export function CategoryList({
               >
                 {item.name}
               </div>
-            </React.Fragment>
+            </Fragment>
           );
         })}
       </View>

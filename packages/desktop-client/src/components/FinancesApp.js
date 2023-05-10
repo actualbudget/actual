@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { Component, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
@@ -198,7 +198,7 @@ function MobileNavTabs() {
   );
 }
 
-class FinancesApp extends React.Component {
+class FinancesApp extends Component {
   constructor(props) {
     super(props);
     this.state = { isMobile: isMobile() };

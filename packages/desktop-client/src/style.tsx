@@ -71,19 +71,14 @@ export const colors = {
   p9: '#DAC4FF',
   p10: '#F2EBFE',
   p11: '#F9F6FE',
-};
 
-colors.border = colors.n10;
-colors.hover = '#fafafa';
-colors.selected = colors.b9;
-
-colors.resolve = (name, offset) => {
-  switch (name) {
-    case 'border':
-      return colors['n' + (8 + offset)];
-    default:
-  }
-  throw new Error('Unknown color name: ' + name);
+  get border() {
+    return this.n10;
+  },
+  hover: '#fafafa',
+  get selected() {
+    return this.b9;
+  },
 };
 
 export const styles = {
@@ -124,11 +119,9 @@ export const styles = {
   pageHeader: {
     fontSize: 25,
     borderBottomWidth: 5,
-    borderColor: colors.purple2,
     borderStyle: 'solid',
     display: 'inline',
     flex: 0,
-    color: colors.grey4,
     marginTop: 40,
     marginBottom: 20,
     paddingBottom: 5,
@@ -182,6 +175,10 @@ export const styles = {
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
   textColor: colors.n1,
+  // Dynamically set
+  lightScrollbar: undefined,
+  darkScrollbar: undefined,
+  scrollbarWidth: undefined,
 };
 
 let hiddenScrollbars = false;
@@ -222,7 +219,7 @@ if (Platform.env === 'web') {
     el.innerHTML =
       '<div style="width:100px;height:100px;overflow:scroll;position:absolute;top:-9999px;"/>';
     document.body.appendChild(el);
-    let testNode = el.childNodes[0];
+    let testNode = el.childNodes[0] as HTMLDivElement;
     if (testNode.offsetWidth === testNode.clientWidth) {
       return true;
     }

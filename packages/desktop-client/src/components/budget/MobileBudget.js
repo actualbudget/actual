@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
@@ -19,7 +19,7 @@ import SyncRefresh from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';
 
-class Budget extends React.Component {
+class Budget extends Component {
   constructor(props) {
     super(props);
 

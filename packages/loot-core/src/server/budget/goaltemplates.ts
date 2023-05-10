@@ -56,15 +56,17 @@ async function processTemplate(month, force) {
       monthUtils.sheetForMonth(month),
       `budget-${category.id}`,
     );
-    if (budgeted)
+    if (budgeted) {
       originalCategoryBalance.push({ cat: category, amount: budgeted });
+    }
     let template = category_templates[category.id];
     if (template) {
-      for (let l = 0; l < template.length; l++)
+      for (let l = 0; l < template.length; l++) {
         lowestPriority =
           template[l].priority > lowestPriority
             ? template[l].priority
             : lowestPriority;
+      }
       await setBudget({
         category: category.id,
         month,
@@ -92,16 +94,18 @@ async function processTemplate(month, force) {
           priorityCheck = lowPriority;
           skipSchedule = priorityCheck !== priority ? true : false;
           isScheduleOrBy = true;
-          if (!skipSchedule && errorNotice)
+          if (!skipSchedule && errorNotice) {
             errors.push(
               category.name +
                 ': Schedules and By templates should all have the same priority.  Using priority ' +
                 priorityCheck,
             );
+          }
         }
         if (!skipSchedule) {
-          if (!isScheduleOrBy)
+          if (!isScheduleOrBy) {
             template = template.filter(t => t.priority === priority);
+          }
           if (template.length > 0) {
             errors = errors.concat(
               template

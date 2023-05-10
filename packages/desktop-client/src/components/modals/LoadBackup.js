@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 import { colors } from '../../style';
 import { View, Text, Block, Modal, Button } from '../common';
 import { Row, Cell } from '../table';
 
-class BackupTable extends React.Component {
+class BackupTable extends Component {
   state = { hoveredBackup: null };
 
   onHover = id => {
