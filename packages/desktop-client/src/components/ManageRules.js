@@ -329,8 +329,8 @@ let Rule = memo(
         <SelectCell
           exposed={hovered || selected || editing}
           focused={focusedField === 'select'}
-          onSelect={() => {
-            dispatchSelected({ type: 'select', id: rule.id });
+          onSelect={e => {
+            dispatchSelected({ type: 'select', id: rule.id, event: e });
           }}
           onEdit={() => onEdit(rule.id, 'select')}
           selected={selected}
@@ -478,7 +478,7 @@ function RulesHeader() {
         exposed={true}
         focused={false}
         selected={selectedItems.size > 0}
-        onSelect={() => dispatchSelected({ type: 'select-all' })}
+        onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
       />
       <Cell value="Stage" width={50} />
       <Cell value="Rule" width="flex" />
