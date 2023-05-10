@@ -1,33 +1,27 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-import { css } from 'glamor';
-import type { CSSProperties } from 'glamor';
+import { css, type CSSProperties } from 'glamor';
 
 import Loading from '../../icons/AnimatedLoading';
 import { styles, colors } from '../../style';
+import { type HTMLPropsWithStyle } from '../../types/utils';
 
 import View from './View';
 
-interface ButtonProps
-  extends Omit<React.HTMLProps<HTMLButtonElement>, 'style'> {
+type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   pressed?: boolean;
   primary?: boolean;
   hover?: boolean;
   bare?: boolean;
   disabled?: boolean;
-  style?: CSSProperties;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
+  textStyle?: CSSProperties;
   bounce?: boolean;
   as?: 'button';
-  children: React.ReactNode;
-  onClick?: () => void;
-}
+};
 
-const Button: React.FC<ButtonProps> = React.forwardRef<
-  HTMLButtonElement,
-  ButtonProps
->(
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
@@ -115,47 +109,50 @@ const Button: React.FC<ButtonProps> = React.forwardRef<
   },
 );
 
-interface ButtonWithLoadingProps extends ButtonProps {
+type ButtonWithLoadingProps = ButtonProps & {
   loading?: boolean;
-}
+};
 
-export const ButtonWithLoading: React.FC<ButtonWithLoadingProps> =
-  React.forwardRef((props, ref) => {
-    let { loading, children, ...buttonProps } = props;
-    return (
-      <Button
-        {...buttonProps}
-        style={[{ position: 'relative' }, buttonProps.style]}
-      >
-        {loading && (
-          <View
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Loading
-              color="currentColor"
-              style={{ width: 20, height: 20, color: 'currentColor' }}
-            />
-          </View>
-        )}
+export const ButtonWithLoading = forwardRef<
+  HTMLButtonElement,
+  ButtonWithLoadingProps
+>((props, ref) => {
+  let { loading, children, ...buttonProps } = props;
+  return (
+    <Button
+      {...buttonProps}
+      ref={ref}
+      style={[{ position: 'relative' }, buttonProps.style]}
+    >
+      {loading && (
         <View
           style={{
-            opacity: loading ? 0 : 1,
-            flexDirection: 'row',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          {children}
+          <Loading
+            color="currentColor"
+            style={{ width: 20, height: 20, color: 'currentColor' }}
+          />
         </View>
-      </Button>
-    );
-  });
+      )}
+      <View
+        style={{
+          opacity: loading ? 0 : 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        {children}
+      </View>
+    </Button>
+  );
+});
 
 export default Button;

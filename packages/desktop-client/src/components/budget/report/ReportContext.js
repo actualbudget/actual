@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-let Context = React.createContext(null);
+let Context = createContext(null);
 
 export function ReportProvider({
   summaryCollapsed,

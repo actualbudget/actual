@@ -1,4 +1,11 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, {
+  createRef,
+  memo,
+  Component,
+  useContext,
+  useState,
+  useMemo,
+} from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -35,10 +42,10 @@ function getScrollbarWidth() {
   return Math.max(styles.scrollbarWidth - 2, 0);
 }
 
-export class BudgetTable extends React.Component {
+export class BudgetTable extends Component {
   constructor(props) {
     super(props);
-    this.budgetCategoriesRef = React.createRef();
+    this.budgetCategoriesRef = createRef();
 
     this.state = {
       editing: null,
@@ -605,7 +612,7 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
   });
 }
 
-const BudgetTotals = React.memo(function BudgetTotals({ MonthComponent }) {
+const BudgetTotals = memo(function BudgetTotals({ MonthComponent }) {
   return (
     <View
       data-testid="budget-totals"
@@ -906,7 +913,7 @@ function IncomeCategory({
   );
 }
 
-const BudgetCategories = React.memo(
+const BudgetCategories = memo(
   ({
     categoryGroups,
     newCategoryForGroup,
@@ -1209,7 +1216,7 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }) {
   );
 }
 
-export const BudgetPageHeader = React.memo(
+export const BudgetPageHeader = memo(
   ({ startMonth, onMonthSelect, numMonths, monthBounds, style }) => {
     function getValidMonth(month) {
       let start = monthBounds.start;

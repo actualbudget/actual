@@ -1,4 +1,6 @@
 import React, {
+  forwardRef,
+  memo,
   useState,
   useEffect,
   useRef,
@@ -297,7 +299,7 @@ export function ActionExpression({ field, op, value, options, style }) {
   );
 }
 
-let Rule = React.memo(
+let Rule = memo(
   ({
     rule,
     hovered,
@@ -411,7 +413,7 @@ let Rule = React.memo(
   },
 );
 
-let SimpleTable = React.forwardRef(
+let SimpleTable = forwardRef(
   (
     { data, navigator, loadMore, style, onHoverLeave, children, ...props },
     ref,

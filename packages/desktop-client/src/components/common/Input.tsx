@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, type KeyboardEvent, type Ref } from 'react';
 import mergeRefs from 'react-merge-refs';
 
 import { css } from 'glamor';
-import type { CSSProperties } from 'glamor';
 
 import { useProperFocus } from '../../hooks/useProperFocus';
 import { styles, colors } from '../../style';
+import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
   outline: 0,
@@ -16,22 +16,21 @@ export const defaultInputStyle = {
   border: '1px solid #d0d0d0',
 };
 
-interface InputProps extends Omit<React.HTMLProps<HTMLInputElement>, 'style'> {
-  style?: CSSProperties;
-  inputRef?: React.Ref<HTMLInputElement>;
-  onEnter?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+type InputProps = HTMLPropsWithStyle<HTMLInputElement> & {
+  inputRef?: Ref<HTMLInputElement>;
+  onEnter?: (event: KeyboardEvent<HTMLInputElement>) => void;
   onUpdate?: (newValue: string) => void;
   focused?: boolean;
-}
+};
 
-const Input: React.FC<InputProps> = ({
+const Input = ({
   style,
   inputRef,
   onEnter,
   onUpdate,
   focused,
   ...nativeProps
-}) => {
+}: InputProps) => {
   let ref = useRef();
   useProperFocus(ref, focused);
 

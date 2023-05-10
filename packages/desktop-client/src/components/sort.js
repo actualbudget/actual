@@ -1,4 +1,5 @@
 import React, {
+  createContext,
   useEffect,
   useRef,
   useLayoutEffect,
@@ -105,7 +106,7 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
   };
 }
 
-export const DropHighlightPosContext = React.createContext(null);
+export const DropHighlightPosContext = createContext(null);
 
 export function DropHighlight({ pos, offset = {} }) {
   let itemPos = useContext(DropHighlightPosContext);

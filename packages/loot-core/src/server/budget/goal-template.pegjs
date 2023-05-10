@@ -16,7 +16,7 @@ expr
     } }
   / priority: priority? _? monthly: amount limit: limit?
     { return { type: 'simple', monthly, limit, priority: +priority  } }
-  / priority: priority? _? upTo _ limit: amount
+  / priority: priority? _? limit: limit
     { return { type: 'simple', limit , priority: +priority } }
   / priority: priority? _? schedule _ name: name
     { return { type: 'schedule', name, priority: +priority } }
@@ -27,7 +27,9 @@ repeat 'repeat interval'
   / 'year'i { return { annual: true } }
   / years: d _ 'years'i { return { annual: true, repeat: +years } }
 
-limit = _ upTo? _ amount: amount { return amount }
+limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
+		/ _? upTo _ amount: amount { return {amount: amount, hold: false } }
+
 
 weekCount
   = week { return null }

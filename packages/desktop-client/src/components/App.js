@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import { css } from 'glamor';
@@ -20,7 +20,7 @@ import ManagementApp from './manager/ManagementApp';
 import MobileWebMessage from './MobileWebMessage';
 import UpdateNotification from './UpdateNotification';
 
-class App extends React.Component {
+class App extends Component {
   state = {
     fatalError: null,
     initializing: true,
@@ -104,10 +104,10 @@ class App extends React.Component {
           ])}
         >
           {fatalError ? (
-            <React.Fragment>
+            <>
               <AppBackground />
               <FatalError error={fatalError} buttonText="Restart app" />
-            </React.Fragment>
+            </>
           ) : initializing ? (
             <AppBackground
               initializing={initializing}

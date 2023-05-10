@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 
 import { css } from 'glamor';
 
@@ -239,7 +239,7 @@ function Saved({ projected, style }) {
   );
 }
 
-export const BudgetSummary = React.memo(function BudgetSummary({ month }) {
+export const BudgetSummary = memo(function BudgetSummary({ month }) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,

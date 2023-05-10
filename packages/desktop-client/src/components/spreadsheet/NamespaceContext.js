@@ -1,3 +1,3 @@
-import React from 'react';
+import { createContext } from 'react';
 
-export default React.createContext(undefined);
+export default createContext(undefined);

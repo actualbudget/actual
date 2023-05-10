@@ -56,15 +56,17 @@ async function processTemplate(month, force) {
       monthUtils.sheetForMonth(month),
       `budget-${category.id}`,
     );
-    if (budgeted)
+    if (budgeted) {
       originalCategoryBalance.push({ cat: category, amount: budgeted });
+    }
     let template = category_templates[category.id];
     if (template) {
-      for (let l = 0; l < template.length; l++)
+      for (let l = 0; l < template.length; l++) {
         lowestPriority =
           template[l].priority > lowestPriority
             ? template[l].priority
             : lowestPriority;
+      }
       await setBudget({
         category: category.id,
         month,
@@ -92,16 +94,18 @@ async function processTemplate(month, force) {
           priorityCheck = lowPriority;
           skipSchedule = priorityCheck !== priority ? true : false;
           isScheduleOrBy = true;
-          if (!skipSchedule && errorNotice)
+          if (!skipSchedule && errorNotice) {
             errors.push(
               category.name +
                 ': Schedules and By templates should all have the same priority.  Using priority ' +
                 priorityCheck,
             );
+          }
         }
         if (!skipSchedule) {
-          if (!isScheduleOrBy)
+          if (!isScheduleOrBy) {
             template = template.filter(t => t.priority === priority);
+          }
           if (template.length > 0) {
             errors = errors.concat(
               template
@@ -299,6 +303,7 @@ async function applyCategoryTemplate(
   let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   let to_budget = budgeted;
   let limit;
+  let hold;
   let last_month_balance = balance - spent - budgeted;
   let totalTarget = 0;
   let totalMonths = 0;
@@ -313,7 +318,8 @@ async function applyCategoryTemplate(
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
-            limit = amountToInteger(template.limit);
+            limit = amountToInteger(template.limit.amount);
+            hold = template.limit.hold;
           }
         }
         let increment = 0;
@@ -381,7 +387,8 @@ async function applyCategoryTemplate(
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
-            limit = amountToInteger(template.limit);
+            limit = amountToInteger(template.limit.amount);
+            hold = template.limit.hold;
           }
         }
         let w = new Date(template.starting);
@@ -548,7 +555,9 @@ async function applyCategoryTemplate(
   }
 
   if (limit != null) {
-    if (to_budget + last_month_balance > limit) {
+    if (hold && balance > limit) {
+      to_budget = 0;
+    } else if (to_budget + last_month_balance > limit) {
       to_budget = limit - last_month_balance;
     }
   }

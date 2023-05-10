@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { useResponsive } from '../ResponsiveProvider';
@@ -6,7 +6,7 @@ import { colors, styles } from '../style';
 
 import { Modal, View, Text } from './common';
 
-let PageTypeContext = React.createContext({ type: 'page' });
+let PageTypeContext = createContext({ type: 'page' });
 
 export function PageTypeProvider({ type, current, children }) {
   return (
@@ -17,7 +17,7 @@ export function PageTypeProvider({ type, current, children }) {
 }
 
 export function usePageType() {
-  return React.useContext(PageTypeContext);
+  return useContext(PageTypeContext);
 }
 
 function PageTitle({ name, style }) {
