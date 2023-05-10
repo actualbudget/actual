@@ -101,6 +101,12 @@ async function processCleanup(month) {
       Math.round(
         (sinkCategory[c].temp[0].percent / total_percent) * budgetAvailable,
       );
+      if (c === sinkCategory.length -1){
+        let currentBudgetAvailable = await getSheetValue(sheetName, `to-budget`);
+        if (to_budget > currentBudgetAvailable) {
+          to_budget = budgeted + currentBudgetAvailable;
+        }
+      }
     await setBudget({
       category: categoryId,
       month,
