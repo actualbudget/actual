@@ -255,7 +255,7 @@ export const TransactionHeader = memo(
           focused={false}
           selected={hasSelected}
           width={20}
-          onSelect={() => dispatchSelected({ type: 'select-all' })}
+          onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
         <Cell value="Date" width={110} />
         {showAccount && <Cell value="Account" width="flex" />}
@@ -690,8 +690,8 @@ export const Transaction = memo(function Transaction(props) {
         <SelectCell
           exposed={hovered || selected || editing}
           focused={focusedField === 'select'}
-          onSelect={() => {
-            dispatchSelected({ type: 'select', id: transaction.id });
+          onSelect={e => {
+            dispatchSelected({ type: 'select', id: transaction.id, event: e });
           }}
           onEdit={() => onEdit(id, 'select')}
           selected={selected}
