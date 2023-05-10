@@ -202,6 +202,7 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
 
   let to_budget = 0;
   let limit;
+  let hold;
   let sheetName = monthUtils.sheetForMonth(month);
   let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
@@ -220,7 +221,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
-            limit = amountToInteger(template.limit);
+            limit = amountToInteger(template.limit.amount);
+            hold = template.limit.hold;
           }
         }
         if (template.monthly != null) {
@@ -275,7 +277,8 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
-            limit = amountToInteger(template.limit);
+            limit = amountToInteger(template.limit.amount);
+            hold = template.limit.hold;
           }
         }
         let w = new Date(template.starting);
@@ -414,7 +417,9 @@ async function applyCategoryTemplate(category, template_lines, month, force) {
   }
 
   if (limit != null) {
-    if (to_budget + last_month_balance > limit) {
+    if (hold && balance > limit) {
+      to_budget = 0;
+    } else if (to_budget + last_month_balance > limit) {
       to_budget = limit - last_month_balance;
     }
   }
