@@ -3,7 +3,7 @@ import {
   addMonths,
   addWeeks,
   format,
-  } from 'date-fns';
+} from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
 import {
@@ -505,9 +505,6 @@ async function applyCategoryTemplate(
         let conditions = rule.serialize().conditions;
         let { date: dateCond, amount: amountCond } =
           extractScheduleConds(conditions);
-        let isRepeating =
-          Object(dateCond.value) === dateCond.value &&
-          'frequency' in dateCond.value;
         let next_date_string = getNextDate(dateCond, current_month);
         let num_months = differenceInCalendarMonths(
           new Date(next_date_string),
@@ -525,7 +522,6 @@ async function applyCategoryTemplate(
             to_budget += Math.round(diff / num_months);
           }
         } else {
-
           let increment = budgeted;
           if (to_budget + increment < budgetAvailable || !priority) {
             to_budget += increment;
