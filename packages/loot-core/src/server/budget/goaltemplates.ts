@@ -4,7 +4,6 @@ import {
   addWeeks,
   addDays,
   format,
-  addHours,
   addMinutes,
 } from 'date-fns';
 
@@ -528,23 +527,7 @@ async function applyCategoryTemplate(
             to_budget += Math.round(diff / num_months);
           }
         } else {
-          let monthly_target = 0;
-          let next_month = addMonths(current_month, 1);
-          let next_date = new Date(next_date_string);
-          if (isRepeating) {
-            while (next_date.getTime() < next_month.getTime()) {
-              if (next_date.getTime() >= current_month.getTime()) {
-                monthly_target += target;
-              }
-              next_date = addDays(next_date, 1);
-              next_date = addMinutes(next_date, next_date.getTimezoneOffset());
-              next_date_string = getNextDate(dateCond, next_date);
-              next_date = new Date(next_date_string);
-            }
-          } else {
-            monthly_target = target;
-          }
-          let increment = monthly_target - balance + budgeted;
+          let increment = budgeted;
           if (to_budget + increment < budgetAvailable || !priority) {
             to_budget += increment;
           } else {
