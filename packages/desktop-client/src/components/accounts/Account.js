@@ -2011,6 +2011,10 @@ function AccountHack(props) {
 
 export default function Account(props) {
   const syncEnabled = useFeatureFlag('syncAccount');
+  let params = useParams();
+  let location = useLocation();
+  let activeLocation = useActiveLocation();
+
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
     matchedTransactions: state.queries.matchedTransactions,
@@ -2019,16 +2023,11 @@ export default function Account(props) {
     categoryGroups: state.queries.categories.grouped,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     hideFraction: state.prefs.local.hideFraction || false,
-    expandSplits: props.match && state.prefs.local['expand-splits'],
-    showBalances:
-      props.match &&
-      state.prefs.local['show-balances-' + props.match.params.id],
-    showCleared:
-      props.match &&
-      !state.prefs.local['hide-cleared-' + props.match.params.id],
+    expandSplits: params.id && state.prefs.local['expand-splits'],
+    showBalances: params.id && state.prefs.local['show-balances-' + params.id],
+    showCleared: params.id && !state.prefs.local['hide-cleared-' + params.id],
     showExtraBalances:
-      props.match &&
-      state.prefs.local['show-extra-balances-' + props.match.params.id],
+      params.id && state.prefs.local['show-extra-balances-' + params.id],
     payees: state.queries.payees,
     modalShowing: state.modals.modalStack.length > 0,
     accountsSyncing: state.account.accountsSyncing,
@@ -2041,10 +2040,6 @@ export default function Account(props) {
     () => bindActionCreators(actions, dispatch),
     [dispatch],
   );
-
-  let params = useParams();
-  let location = useLocation();
-  let activeLocation = useActiveLocation();
 
   let transform = useMemo(() => {
     let filterByAccount = queries.getAccountFilter(params.id, '_account');

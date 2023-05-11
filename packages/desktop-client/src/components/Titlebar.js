@@ -320,10 +320,8 @@ function Titlebar({
       )}
 
       <Switch>
-        <Route
-          path="/accounts"
-          exact
-          children={props => {
+        <Route path="/accounts" exact>
+          {props => {
             let state = props.location.state || {};
             return state.goBack ? (
               <Button onClick={() => props.history.goBack()} bare>
@@ -336,29 +334,19 @@ function Titlebar({
               </Button>
             ) : null;
           }}
-        />
+        </Route>
 
-        <Route
-          path="/accounts/:id"
-          exact
-          children={props => {
-            return (
-              props.match && <AccountSyncCheck id={props.match.params.id} />
-            );
-          }}
-        />
+        <Route path="/accounts/:id" exact>
+          <AccountSyncCheck />
+        </Route>
 
-        <Route
-          path="/budget"
-          exact
-          children={() => (
-            <BudgetTitlebar
-              globalPrefs={globalPrefs}
-              saveGlobalPrefs={saveGlobalPrefs}
-              localPrefs={localPrefs}
-            />
-          )}
-        />
+        <Route path="/budget" exact>
+          <BudgetTitlebar
+            globalPrefs={globalPrefs}
+            saveGlobalPrefs={saveGlobalPrefs}
+            localPrefs={localPrefs}
+          />
+        </Route>
       </Switch>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
