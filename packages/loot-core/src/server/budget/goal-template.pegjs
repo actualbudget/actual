@@ -22,8 +22,8 @@ expr
     { return { type: 'schedule', name, priority: +priority } }
   / _? source
     { return { type: 'source' } }
-  / _? sink _? percent: percent?
-    { return { type: 'sink', percent: +percent || 100 } }
+  / _? sink _? weight: weight?
+    { return { type: 'sink', weight: +weight || 1 } }
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
@@ -63,5 +63,6 @@ month 'month' = $(year '-' d d)
 day 'day' = $(d d)
 date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
+weight 'weight' = weight: $(d+) { return +weight }
 
 name 'Name' = $([^\r\n\t]+)

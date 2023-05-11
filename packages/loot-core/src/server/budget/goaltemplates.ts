@@ -33,7 +33,7 @@ export function sweepTemplate({ month }) {
 async function processCleanup(month) {
   let num_sources = 0;
   let num_sinks = 0;
-  let total_percent = 0;
+  let total_weight = 0;
   let errors = [];
   let sinkCategory = [];
   const TEMPLATE_PREFIX = '#cleanup';
@@ -59,13 +59,9 @@ async function processCleanup(month) {
       if (template.filter(t => t.type === 'sink').length > 0) {
         sinkCategory.push({ cat: category, temp: template });
         num_sinks += 1;
-        total_percent += template[0].percent;
+        total_weight += template[0].weight;
       }
     }
-  }
-
-  if (total_percent !== 100) {
-    errors.push(`Sinking funds calculated using a total of ${total_percent}%.`);
   }
 
   //funds all underfunded categories first
@@ -103,7 +99,7 @@ async function processCleanup(month) {
     let to_budget =
       budgeted +
       Math.round(
-        (sinkCategory[c].temp[0].percent / total_percent) * budgetAvailable,
+        (sinkCategory[c].temp[0].weight / total_weight) * budgetAvailable,
       );
     if (c === sinkCategory.length - 1) {
       let currentBudgetAvailable = await getSheetValue(sheetName, `to-budget`);
