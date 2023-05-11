@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext } from 'react';
+import { type ReactNode, createContext, useContext } from 'react';
 
 import { useViewportSize } from '@react-aria/utils';
 
@@ -14,7 +14,7 @@ type TResponsiveContext = {
   width: number;
 };
 
-const ResponsiveContext = React.createContext<TResponsiveContext>(null);
+const ResponsiveContext = createContext<TResponsiveContext>(null);
 
 export function ResponsiveProvider(props: { children: ReactNode }) {
   /*
