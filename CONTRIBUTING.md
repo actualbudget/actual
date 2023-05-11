@@ -32,3 +32,15 @@ We welcome all contributions from the community. If you have an idea for a featu
 If you do not have ideas what to build: the issue list is always a good starting point. Look for issues labeled with "[help wanted](https://github.com/actualbudget/actual/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)".
 
 For first time contributions you can also filter the issues labeled with "[good first issue](https://github.com/actualbudget/actual/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)".
+
+
+## Development Environment
+If you would like to contribute you can fork this repository and create a branch specific to the project you are working on. 
+
+There are two options for developing:
+1. Yarn
+    - This is the traditional way to get an envrionment stood up. Run `yarn` to install the dependencies followed by `yarn start:browser` to start the development server. You will then be able to access Actual at `localhost:3001`.
+2. Docker Compose
+    - If you prefer to work with docker containers, a `docker-compose.yml` file is included. Run `docker compose up -d` to start Actual. It will be accessible at `localhost:3001`.
+
+Both options above will dynamically update as you make changes to files. If you are making changes to the front end UI, you may have to reload the page to see any changes you make.
