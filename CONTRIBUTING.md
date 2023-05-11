@@ -39,7 +39,7 @@ If you would like to contribute you can fork this repository and create a branch
 
 There are two options for developing:
 1. Yarn
-    - This is the traditional way to get an envrionment stood up. Simply run `yarn` to install the dependencies followed by `yarn start:browser` to start actual. You will then be able to access actual at `localhost:3001`
+    - This is the traditional way to get an envrionment stood up. Run `yarn` to install the dependencies followed by `yarn start:browser` to start the development server. You will then be able to access Actual at `localhost:3001`.
 2. Docker Compose
     - If you prefer to work with docker containers, a `docker-compose.yml` file is included. Simply run `docker compose up -d` to start actual. It will be accessible at `localhost:3001`
 
