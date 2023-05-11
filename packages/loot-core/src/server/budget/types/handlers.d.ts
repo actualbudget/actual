@@ -11,7 +11,7 @@ export interface BudgetHandlers {
 
   'budget/overwrite-goal-template': (...args: unknown[]) => Promise<unknown>;
 
-  'budget/sweep-goal-template': (...args: unknown[]) => Promise<unknown>;
+  'budget/cleanup-goal-template': (...args: unknown[]) => Promise<unknown>;
 
   'budget/hold-for-next-month': (...args: unknown[]) => Promise<unknown>;
 

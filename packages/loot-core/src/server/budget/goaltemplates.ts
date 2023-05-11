@@ -26,7 +26,7 @@ export function overwriteTemplate({ month }) {
   return processTemplate(month, true);
 }
 
-export function sweepTemplate({ month }) {
+export function cleanupTemplate({ month }) {
   return processCleanup(month);
 }
 
@@ -40,6 +40,10 @@ async function processCleanup(month) {
   let category_templates = await getCategoryTemplates(TEMPLATE_PREFIX);
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+  let db_month = parseInt(month.replace('-', ''));
+  let carryovers = await db.all(
+    `SELECT * FROM zero_budgets WHERE month = ${db_month}`,
   );
   let sheetName = monthUtils.sheetForMonth(month);
   for (let c = 0; c < categories.length; c++) {
@@ -64,17 +68,23 @@ async function processCleanup(month) {
     }
   }
 
-  //funds all underfunded categories first
+  //funds all underfunded categories first unless the overspending rollover is checked
   for (let c = 0; c < categories.length; c++) {
     let category = categories[c];
     let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
     let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
     let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
     let to_budget = budgeted + Math.abs(balance);
+    let carryover_list = carryovers.filter(c => c.category === category.id);
+    let carryover = 0;
+    if (carryover_list.length > 0) {
+      carryover = carryover_list[0].carryover;
+    }
     if (
       balance < 0 &&
       Math.abs(balance) <= budgetAvailable &&
-      !category.is_income
+      !category.is_income &&
+      carryover === 0
     ) {
       await setBudget({
         category: category.id,

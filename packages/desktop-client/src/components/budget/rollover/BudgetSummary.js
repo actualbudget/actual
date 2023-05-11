@@ -384,8 +384,8 @@ export function BudgetSummary({ month, isGoalTemplatesEnabled }) {
                         text: 'Overwrite with budget template',
                       },
                       isGoalTemplatesEnabled && {
-                        name: 'sweep-goal-template',
-                        text: 'Reallocate surplus funds',
+                        name: 'cleanup-goal-template',
+                        text: 'End of month cleanup',
                       },
                     ]}
                   />

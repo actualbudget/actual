@@ -23,8 +23,8 @@ app.method(
   mutator(undoable(goalActions.overwriteTemplate)),
 );
 app.method(
-  'budget/sweep-goal-template',
-  mutator(undoable(goalActions.sweepTemplate)),
+  'budget/cleanup-goal-template',
+  mutator(undoable(goalActions.cleanupTemplate)),
 );
 app.method(
   'budget/hold-for-next-month',
