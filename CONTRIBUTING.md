@@ -41,6 +41,6 @@ There are two options for developing:
 1. Yarn
     - This is the traditional way to get an envrionment stood up. Run `yarn` to install the dependencies followed by `yarn start:browser` to start the development server. You will then be able to access Actual at `localhost:3001`.
 2. Docker Compose
-    - If you prefer to work with docker containers, a `docker-compose.yml` file is included. Simply run `docker compose up -d` to start actual. It will be accessible at `localhost:3001`
+    - If you prefer to work with docker containers, a `docker-compose.yml` file is included. Run `docker compose up -d` to start Actual. It will be accessible at `localhost:3001`.
 
 Both options above will dynamically update as you make changes to files. If you are making changes to the front end UI, you may have to reload the page to see any changes you make.
