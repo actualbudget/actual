@@ -2,10 +2,8 @@ import {
   differenceInCalendarMonths,
   addMonths,
   addWeeks,
-  addDays,
   format,
-  addMinutes,
-} from 'date-fns';
+  } from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
 import {
@@ -527,6 +525,7 @@ async function applyCategoryTemplate(
             to_budget += Math.round(diff / num_months);
           }
         } else {
+
           let increment = budgeted;
           if (to_budget + increment < budgetAvailable || !priority) {
             to_budget += increment;
