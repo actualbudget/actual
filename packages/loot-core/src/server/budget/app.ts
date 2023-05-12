@@ -3,6 +3,7 @@ import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
 import * as actions from './actions';
+import * as cleanupActions from './cleanup-template';
 import * as goalActions from './goaltemplates';
 
 let app = createApp();
@@ -24,7 +25,7 @@ app.method(
 );
 app.method(
   'budget/cleanup-goal-template',
-  mutator(undoable(goalActions.cleanupTemplate)),
+  mutator(undoable(cleanupActions.cleanupTemplate)),
 );
 app.method(
   'budget/hold-for-next-month',
