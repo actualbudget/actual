@@ -354,7 +354,7 @@ async function applyCategoryTemplate(
             current_month,
           );
         }
-        if (l === 0) remainder = last_month_balance;
+        if (l===0) remainder = last_month_balance;
         remainder = amountToInteger(template_lines[l].amount) - remainder;
         if (remainder >= 0) {
           target = remainder;
@@ -510,7 +510,7 @@ async function applyCategoryTemplate(
           new Date(next_date_string),
           current_month,
         );
-        if (l === 0) remainder = last_month_balance;
+        if (l===0) remainder = last_month_balance;
         remainder = -getScheduledAmount(amountCond.value) - remainder;
         let target = 0;
         if (remainder >= 0) {
@@ -520,7 +520,7 @@ async function applyCategoryTemplate(
           target = 0;
           remainder = Math.abs(remainder);
         }
-        let diff = num_months > 0 ? Math.round(target / num_months) : 0;
+        let diff = num_months > 0 ? Math.round(target/num_months) : 0;
         if (num_months < 0) {
           errors.push(
             `Non-repeating schedule ${template.name} was due on ${next_date_string}, which is in the past.`,
@@ -534,18 +534,18 @@ async function applyCategoryTemplate(
           let monthly_target = 0;
           let next_month = addMonths(current_month, 1);
           let next_date = new Date(next_date_string);
-          // if (isRepeating) {
-          //   while (next_date.getTime() < next_month.getTime()) {
-          //     if (next_date.getTime() >= current_month.getTime()) {
-          //       monthly_target += target;
-          //     }
-          //     next_date = addDays(next_date, 1);
-          //     next_date_string = getNextDate(dateCond, next_date);
-          //     next_date = new Date(next_date_string);
-          //   }
-          // } else {
-          //   monthly_target = target;
-          // }
+          if (isRepeating) {
+            while (next_date.getTime() < next_month.getTime()) {
+              if (next_date.getTime() >= current_month.getTime()) {
+                monthly_target += target;
+              }
+              next_date = addDays(next_date, 1);
+              next_date_string = getNextDate(dateCond, next_date);
+              next_date = new Date(next_date_string);
+            }
+          } else {
+            monthly_target = target;
+          }
           if (to_budget + diff < budgetAvailable || !priority) {
             to_budget += diff;
           } else {
