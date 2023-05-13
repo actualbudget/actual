@@ -136,6 +136,17 @@ function ManagePayeesWithData({
       onMerge={async ([targetId, ...mergeIds]) => {
         await send('payees-merge', { targetId, mergeIds });
 
+        let targetIdIsOrphan = orphans.map(o => o.id).includes(targetId);
+        let mergeIdsOrphans = mergeIds.filter(m =>
+          orphans.map(o => o.id).includes(m),
+        );
+
+        if (targetIdIsOrphan && mergeIdsOrphans.length !== mergeIds.length) {
+          // there is a non-orphan in mergeIds, target can be removed from orphan arr
+          orphans = orphans.filter(o => o.id !== targetId);
+        }
+        orphans = orphans.filter(o => !mergeIds.includes(o.id));
+
         let result = payees.filter(p => !mergeIds.includes(p.id));
         mergeIds.forEach(id => {
           let count = ruleCounts.value.get(id) || 0;
@@ -146,6 +157,7 @@ function ManagePayeesWithData({
         });
 
         setPayees(result);
+        setOrphans(orphans);
         setRuleCounts({ value: ruleCounts.value });
       }}
       onViewRules={onViewRules}
