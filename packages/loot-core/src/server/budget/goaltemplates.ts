@@ -398,8 +398,8 @@ async function applyCategoryTemplate(
               if (budgetAvailable > 0) to_budget += budgetAvailable;
               errors.push(`Insufficient funds.`);
             }
-            w = addWeeks(w, weeks);
           }
+          w = addWeeks(w, weeks);
         }
         break;
       }
