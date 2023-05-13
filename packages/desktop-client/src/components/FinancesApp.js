@@ -249,7 +249,7 @@ function MobileNavTabs() {
 }
 
 function FinancesApp(props) {
-  const patchedHistory = createBrowserHistory();
+  const [patchedHistory] = useState(() => createBrowserHistory());
 
   useEffect(() => {
     let oldPush = patchedHistory.push;
