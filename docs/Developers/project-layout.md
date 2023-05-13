@@ -81,6 +81,6 @@ Actual is only updated in npm when a release is created.
 
 ## Actual Releases
 
-This repository holds all of the official releases of Actual Budget, each release gets a tagged and each element of the Actual Budget project can be downloaded.
+This repository holds all of the official releases of Actual Budget, each release gets tagged and each element of the Actual Budget project can be downloaded.
 
 As of right now 0.0.148 is the latest official release.
