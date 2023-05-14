@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - master
+      - goalsSweep
   pull_request:
     branches: '*'
 
