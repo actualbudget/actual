@@ -491,7 +491,7 @@ export const CellButton = forwardRef(
           if (e.key === 'x' || e.key === ' ') {
             e.preventDefault();
             if (!disabled) {
-              onSelect && onSelect();
+              onSelect && onSelect(e);
             }
           }
         }}
@@ -513,9 +513,9 @@ export const CellButton = forwardRef(
         onClick={
           clickBehavior === 'none'
             ? null
-            : () => {
+            : e => {
                 if (!disabled) {
-                  onSelect && onSelect();
+                  onSelect && onSelect(e);
                   onEdit && onEdit();
                 }
               }
@@ -545,7 +545,7 @@ export function SelectCell({
       style={[{ alignItems: 'center', userSelect: 'none' }, style]}
       onClick={e => {
         e.stopPropagation();
-        onSelect && onSelect();
+        onSelect && onSelect(e);
         onEdit && onEdit();
       }}
     >

@@ -282,7 +282,7 @@ export function setNumberFormat({ format, hideFraction }) {
       break;
     case 'space-dot':
       locale = 'dje';
-      regex = /[^-0-9,]/g;
+      regex = /[^-0-9.]/g;
       separator = '.';
       break;
     case 'comma-dot':
