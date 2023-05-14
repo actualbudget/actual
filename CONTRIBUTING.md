@@ -37,7 +37,7 @@ For first time contributions you can also filter the issues labeled with "[good 
 ## Development Environment
 If you would like to contribute you can fork this repository and create a branch specific to the project you are working on. 
 
-There are two options for developing:
+There are three options for developing:
 1. Yarn
     - This is the traditional way to get an environment stood up. Run `yarn` to install the dependencies followed by `yarn start:browser` to start the development server. You will then be able to access Actual at `localhost:3001`.
 2. Docker Compose
