@@ -30,3 +30,6 @@ export-2020-01-10.csv
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# VSCode
+.vscode
