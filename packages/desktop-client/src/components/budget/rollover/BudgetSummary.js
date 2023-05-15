@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import Component from '@reactions/component';
 import { css } from 'glamor';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
@@ -135,6 +134,8 @@ function TotalsList({ prevMonthName, collapsed }) {
 }
 
 function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
+  let [menuOpen, setMenuOpen] = useState(null);
+
   return (
     <SheetValue binding={rolloverBudget.toBudget} initialValue={0}>
       {node => {
@@ -145,97 +146,93 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
         return (
           <View style={{ alignItems: 'center' }}>
             <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
-            <Component initialState={{ menuOpen: null }}>
-              {({ state, setState }) => (
-                <View>
-                  <HoverTarget
-                    disabled={!collapsed || state.menuOpen}
-                    renderContent={() => (
-                      <Tooltip position="bottom-center">
-                        <TotalsList
-                          collapsed={true}
-                          prevMonthName={prevMonthName}
-                        />
-                      </Tooltip>
-                    )}
-                  >
-                    <Block
-                      onClick={() => setState({ menuOpen: 'actions' })}
-                      data-cellname={node.name}
-                      {...css([
-                        styles.veryLargeText,
-                        {
-                          fontWeight: 400,
-                          userSelect: 'none',
-                          cursor: 'pointer',
-                          color: isNegative ? colors.r4 : colors.p5,
-                          marginBottom: -1,
-                          borderBottom: '1px solid transparent',
-                          ':hover': {
-                            borderColor: isNegative ? colors.r4 : colors.p5,
-                          },
-                        },
-                      ])}
-                    >
-                      {format(num, 'financial')}
-                    </Block>
-                  </HoverTarget>
-                  {state.menuOpen === 'actions' && (
-                    <Tooltip
-                      position="bottom-center"
-                      width={200}
-                      style={{ padding: 0 }}
-                      onClose={() => setState({ menuOpen: null })}
-                    >
-                      <Menu
-                        onMenuSelect={type => {
-                          if (type === 'reset-buffer') {
-                            onBudgetAction(month, 'reset-hold');
-                            setState({ menuOpen: null });
-                          } else {
-                            setState({ menuOpen: type });
-                          }
-                        }}
-                        items={[
-                          {
-                            name: 'transfer',
-                            text: 'Move to a category',
-                          },
-                          {
-                            name: 'buffer',
-                            text: 'Hold for next month',
-                          },
-                          {
-                            name: 'reset-buffer',
-                            text: 'Reset next month’s buffer',
-                          },
-                        ]}
-                      />
-                    </Tooltip>
-                  )}
-                  {state.menuOpen === 'buffer' && (
-                    <HoldTooltip
-                      onClose={() => setState({ menuOpen: null })}
-                      onSubmit={amount => {
-                        onBudgetAction(month, 'hold', { amount });
-                      }}
+            <View>
+              <HoverTarget
+                disabled={!collapsed || menuOpen}
+                renderContent={() => (
+                  <Tooltip position="bottom-center">
+                    <TotalsList
+                      collapsed={true}
+                      prevMonthName={prevMonthName}
                     />
-                  )}
-                  {state.menuOpen === 'transfer' && (
-                    <TransferTooltip
-                      initialAmount={availableValue}
-                      onClose={() => setState({ menuOpen: null })}
-                      onSubmit={(amount, category) => {
-                        onBudgetAction(month, 'transfer-available', {
-                          amount,
-                          category,
-                        });
-                      }}
-                    />
-                  )}
-                </View>
+                  </Tooltip>
+                )}
+              >
+                <Block
+                  onClick={() => setMenuOpen('actions')}
+                  data-cellname={node.name}
+                  {...css([
+                    styles.veryLargeText,
+                    {
+                      fontWeight: 400,
+                      userSelect: 'none',
+                      cursor: 'pointer',
+                      color: isNegative ? colors.r4 : colors.p5,
+                      marginBottom: -1,
+                      borderBottom: '1px solid transparent',
+                      ':hover': {
+                        borderColor: isNegative ? colors.r4 : colors.p5,
+                      },
+                    },
+                  ])}
+                >
+                  {format(num, 'financial')}
+                </Block>
+              </HoverTarget>
+              {menuOpen === 'actions' && (
+                <Tooltip
+                  position="bottom-center"
+                  width={200}
+                  style={{ padding: 0 }}
+                  onClose={() => setMenuOpen(null)}
+                >
+                  <Menu
+                    onMenuSelect={type => {
+                      if (type === 'reset-buffer') {
+                        onBudgetAction(month, 'reset-hold');
+                        setMenuOpen(null);
+                      } else {
+                        setMenuOpen(type);
+                      }
+                    }}
+                    items={[
+                      {
+                        name: 'transfer',
+                        text: 'Move to a category',
+                      },
+                      {
+                        name: 'buffer',
+                        text: 'Hold for next month',
+                      },
+                      {
+                        name: 'reset-buffer',
+                        text: 'Reset next month’s buffer',
+                      },
+                    ]}
+                  />
+                </Tooltip>
               )}
-            </Component>
+              {menuOpen === 'buffer' && (
+                <HoldTooltip
+                  onClose={() => setMenuOpen(null)}
+                  onSubmit={amount => {
+                    onBudgetAction(month, 'hold', { amount });
+                  }}
+                />
+              )}
+              {menuOpen === 'transfer' && (
+                <TransferTooltip
+                  initialAmount={availableValue}
+                  onClose={() => setMenuOpen(null)}
+                  onSubmit={(amount, category) => {
+                    onBudgetAction(month, 'transfer-available', {
+                      amount,
+                      category,
+                    });
+                  }}
+                />
+              )}
+            </View>
           </View>
         );
       }}
