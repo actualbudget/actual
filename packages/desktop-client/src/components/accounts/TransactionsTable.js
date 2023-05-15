@@ -771,6 +771,7 @@ export const Transaction = memo(function Transaction(props) {
             inputStyle,
           }) => (
             <AccountAutocomplete
+              includeClosedAccounts={false}
               value={accountId}
               accounts={accounts}
               shouldSaveFromKey={shouldSaveFromKey}
