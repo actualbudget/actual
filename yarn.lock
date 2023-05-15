@@ -63,7 +63,6 @@ __metadata:
     "@react-aria/utils": ^3.13.3
     "@react-stately/collections": ^3.4.3
     "@react-stately/list": ^3.5.3
-    "@reactions/component": ^2.0.2
     "@svgr/cli": ^6.5.1
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
@@ -2947,15 +2946,6 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 117fe230f5a26b7fcaf535c1cfb7c4d42416b0f49d0e0b3436fef2a5851234967908c4e884fc5f2a99a04bee2543543348346a04e1f3f45aaa14c42b6f08491a
-  languageName: node
-  linkType: hard
-
-"@reactions/component@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@reactions/component@npm:2.0.2"
-  peerDependencies:
-    react: 15.x || 16.x
-  checksum: 89d806e2b15974f213806e69a23b1ad2f6675cab93daf1fa56a7df2c74403be4adb5da9a5c64adb89e55e98d767fbe100c289ed615b15645894bef8c03ef87c6
   languageName: node
   linkType: hard
 
