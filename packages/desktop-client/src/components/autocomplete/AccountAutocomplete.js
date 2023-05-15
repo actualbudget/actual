@@ -25,11 +25,18 @@ export function AccountList({
       >
         {items.map((item, idx) => {
           const showGroup = lastItem
-            ? item.offbudget !== lastItem.offbudget
+            ? (item.offbudget !== lastItem.offbudget && !item.closed) ||
+              (item.closed !== lastItem.closed && !item.offbudget)
             : true;
-          const group = `${item.closed ? 'Closed ' : ''}${
-            item.offbudget ? 'Off Budget' : 'For Budget'
+
+          const group = `${
+            item.closed
+              ? 'Closed Accounts'
+              : item.offbudget
+              ? 'Off Budget'
+              : 'For Budget'
           }`;
+
           lastItem = item;
 
           return [
