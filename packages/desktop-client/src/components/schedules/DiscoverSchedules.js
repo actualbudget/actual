@@ -164,7 +164,7 @@ export default function DiscoverSchedules() {
         on all transactions for a schedule to be the same payee.
       </P>
       <P>
-        You can always do this later from “More Tools” &rarr; “Find Schedules.”
+        You can always do this later from “Schedules” &rarr; “Find schedules.”
       </P>
 
       <SelectedProvider instance={selectedInst}>
