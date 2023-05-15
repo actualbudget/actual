@@ -4,10 +4,14 @@ import React, {
   useEffect,
   useMemo,
   type ComponentProps,
+  type HTMLProps,
+  type ReactNode,
+  type KeyboardEvent,
+  type ChangeEvent,
 } from 'react';
 
 import Downshift from 'downshift';
-import { css } from 'glamor';
+import { type CSSProperties, css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
@@ -111,27 +115,32 @@ function defaultItemToString(item) {
 }
 
 type SingleAutocompleteProps = {
-  focused?;
+  focused?: boolean;
   embedded?: boolean;
-  containerProps?;
-  labelProps?;
-  inputProps?;
-  suggestions?;
-  tooltipStyle?;
-  tooltipProps?;
-  renderInput?;
-  renderItems?;
-  itemToString?;
-  shouldSaveFromKey?;
-  filterSuggestions?;
+  containerProps?: HTMLProps<HTMLDivElement>;
+  labelProps?: { id?: string };
+  inputProps?: ComponentProps<typeof Input>;
+  suggestions?: unknown[];
+  tooltipStyle?: CSSProperties;
+  tooltipProps?: ComponentProps<typeof Tooltip>;
+  renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
+  renderItems?: (
+    items,
+    getItemProps: (arg: { item: unknown }) => HTMLProps<HTMLDivElement>,
+    idx: number,
+    value?: unknown,
+  ) => ReactNode;
+  itemToString?: (item: unknown) => string;
+  shouldSaveFromKey?: (e: KeyboardEvent) => boolean;
+  filterSuggestions?: (suggestions, value: string) => unknown[];
   openOnFocus?: boolean;
-  getHighlightedIndex?;
-  highlightFirst?;
-  onUpdate;
-  strict?;
-  onSelect;
-  tableBehavior?;
-  value;
+  getHighlightedIndex?: (suggestions) => number | null;
+  highlightFirst?: boolean;
+  onUpdate: (id: unknown, value: string) => void;
+  strict?: boolean;
+  onSelect: (id: unknown, value: string) => void;
+  tableBehavior?: boolean;
+  value: unknown[];
   isMulti?: boolean;
 };
 function SingleAutocomplete({
@@ -361,6 +370,7 @@ function SingleAutocomplete({
                 }
               },
               onBlur: e => {
+                // @ts-expect-error Should this be e.nativeEvent
                 e.preventDownshiftDefault = true;
                 inputProps.onBlur && inputProps.onBlur(e);
 
@@ -381,7 +391,7 @@ function SingleAutocomplete({
                   setIsOpen(false);
                 }
               },
-              onKeyDown: e => {
+              onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
                 let { onKeyDown } = inputProps || {};
 
                 // If the dropdown is open, an item is highlighted, and the user
@@ -405,7 +415,7 @@ function SingleAutocomplete({
                     } else if (!strict) {
                       // Handle it ourselves
                       e.stopPropagation();
-                      onSelect(value, e.target.value);
+                      onSelect(value, (e.target as HTMLInputElement).value);
                       return onSelectAfter();
                     } else {
                       // No highlighted item, still allow the table to save the item
@@ -421,7 +431,7 @@ function SingleAutocomplete({
 
                 // Handle escape ourselves
                 if (e.key === 'Escape') {
-                  e.nativeEvent.preventDownshiftDefault = true;
+                  e.nativeEvent['preventDownshiftDefault'] = true;
 
                   if (!embedded) {
                     e.stopPropagation();
@@ -441,8 +451,9 @@ function SingleAutocomplete({
                   setIsOpen(embedded ? true : false);
                 }
               },
-              onChange: e => {
+              onChange: (e: ChangeEvent<HTMLInputElement>) => {
                 const { onChange } = inputProps || {};
+                // @ts-expect-error unsure if onChange needs an event or a string
                 onChange && onChange(e.target.value);
               },
             }),
@@ -506,15 +517,22 @@ function MultiItem({ name, onRemove }) {
   );
 }
 
+type MultiAutocompleteProps = Omit<
+  SingleAutocompleteProps,
+  'value' | 'onSelect'
+> & {
+  value: unknown[];
+  onSelect: (ids: unknown[], id?: string) => void;
+};
 export function MultiAutocomplete({
   value: selectedItems,
   onSelect,
   suggestions,
   strict,
   ...props
-}: SingleAutocompleteProps) {
+}: MultiAutocompleteProps) {
   let [focused, setFocused] = useState(false);
-  let lastSelectedItems = useRef();
+  let lastSelectedItems = useRef<unknown[]>();
 
   useEffect(() => {
     lastSelectedItems.current = selectedItems;
@@ -639,7 +657,16 @@ export function AutocompleteFooterButton({
   );
 }
 
-export function AutocompleteFooter({ show = true, embedded, children }) {
+type AutocompleteFooterProps = {
+  show?: boolean;
+  embedded: boolean;
+  children: ReactNode;
+};
+export function AutocompleteFooter({
+  show = true,
+  embedded,
+  children,
+}: AutocompleteFooterProps) {
   return (
     show && (
       <View
@@ -656,7 +683,7 @@ export function AutocompleteFooter({ show = true, embedded, children }) {
 }
 
 type AutocompleteProps = ComponentProps<typeof SingleAutocomplete> & {
-  multi?;
+  multi?: boolean;
 };
 export default function Autocomplete({ multi, ...props }: AutocompleteProps) {
   if (multi) {

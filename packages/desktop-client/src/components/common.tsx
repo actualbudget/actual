@@ -759,7 +759,7 @@ export function FormError({ style, children }: FormErrorProps) {
 }
 
 type InitialFocusProps = {
-  children?: ReactElement | ((node: unknown) => ReactElement);
+  children?: ReactElement | ((node: Ref<HTMLInputElement>) => ReactElement);
 };
 
 export function InitialFocus({ children }: InitialFocusProps) {
