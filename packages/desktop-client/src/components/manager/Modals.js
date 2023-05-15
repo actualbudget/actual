@@ -1,11 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Component from '@reactions/component';
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
 
 import { View } from '../common';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
@@ -70,28 +68,15 @@ function Modals({
         );
       case 'load-backup': {
         return (
-          <Component
-            key={name}
-            initialState={{ backups: [] }}
-            didMount={async ({ setState }) => {
-              setState({
-                backups: await send('backups-get', { id: options.budgetId }),
-              });
+          <LoadBackup
+            budgetId={options.budgetId}
+            modalProps={{
+              ...modalProps,
+              onClose: actions.popModal,
             }}
-          >
-            {({ state }) => (
-              <LoadBackup
-                budgetId={options.budgetId}
-                modalProps={{
-                  ...modalProps,
-                  onClose: actions.popModal,
-                }}
-                backupDisabled={true}
-                actions={actions}
-                backups={state.backups}
-              />
-            )}
-          </Component>
+            backupDisabled={true}
+            actions={actions}
+          />
         );
       }
       case 'create-encryption-key':
