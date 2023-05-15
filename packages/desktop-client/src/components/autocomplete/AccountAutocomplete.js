@@ -27,7 +27,9 @@ export function AccountList({
           const showGroup = lastItem
             ? item.offbudget !== lastItem.offbudget
             : true;
-          const group = item.offbudget ? 'Off Budget' : 'For Budget';
+          const group = `${item.closed ? 'Closed ' : ''}${
+            item.offbudget ? 'Off Budget' : 'For Budget'
+          }`;
           lastItem = item;
 
           return [
