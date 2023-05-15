@@ -12,5 +12,5 @@ services:
       - '3001:3001'
     volumes:
       - '.:/app'
-    restart: no
+    restart: 'no'
 
