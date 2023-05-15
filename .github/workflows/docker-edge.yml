@@ -71,6 +71,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download artifacts
+        run: ./docker/download-artifacts.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push image
         uses: docker/build-push-action@v4
         with:

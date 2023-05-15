@@ -7,7 +7,7 @@ RUN yarn workspaces focus --all --production
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
 RUN mkdir /public
-ADD "https://api.github.com/repos/actualbudget/actual/actions/artifacts?name=actual-web&per_page=100" /tmp/artifacts.json
+ADD artifacts.json /tmp/artifacts.json
 RUN jq -r '[.artifacts[] | select(.workflow_run.head_branch == "master")][0]' /tmp/artifacts.json > /tmp/latest-build.json
 
 ARG GITHUB_TOKEN
