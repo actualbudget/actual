@@ -29,7 +29,11 @@ import HoldTooltip from './HoldTooltip';
 import { useRollover } from './RolloverContext';
 import TransferTooltip from './TransferTooltip';
 
-function TotalsList({ prevMonthName, collapsed }) {
+type TotalsListProps = {
+  prevMonthName: string;
+  collapsed?: boolean;
+};
+function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
   return (
     <View
       style={[
@@ -133,7 +137,18 @@ function TotalsList({ prevMonthName, collapsed }) {
   );
 }
 
-function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
+type ToBudgetProps = {
+  month: string | number;
+  prevMonthName?: string;
+  collapsed?: boolean;
+  onBudgetAction: (idx: string | number, action: string, arg?: unknown) => void;
+};
+function ToBudget({
+  month,
+  prevMonthName,
+  collapsed,
+  onBudgetAction,
+}: ToBudgetProps) {
   let [menuOpen, setMenuOpen] = useState(null);
 
   return (
@@ -240,7 +255,14 @@ function ToBudget({ month, prevMonthName, collapsed, onBudgetAction }) {
   );
 }
 
-export function BudgetSummary({ month, isGoalTemplatesEnabled }) {
+type BudgetSummaryProps = {
+  month: string | number;
+  isGoalTemplatesEnabled: boolean;
+};
+export function BudgetSummary({
+  month,
+  isGoalTemplatesEnabled,
+}: BudgetSummaryProps) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -253,7 +275,7 @@ export function BudgetSummary({ month, isGoalTemplatesEnabled }) {
     setMenuOpen(true);
   }
 
-  function onMenuClose(bag) {
+  function onMenuClose() {
     setMenuOpen(false);
   }
 

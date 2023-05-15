@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  type ComponentProps,
+} from 'react';
 
 import Downshift from 'downshift';
 import { css } from 'glamor';
@@ -7,7 +13,7 @@ import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
 
-const inst = {};
+const inst: { lastChangeType? } = {};
 
 function findItem(strict, suggestions, value) {
   if (strict) {
@@ -104,6 +110,30 @@ function defaultItemToString(item) {
   return item ? getItemName(item) : '';
 }
 
+type SingleAutocompleteProps = {
+  focused?;
+  embedded?: boolean;
+  containerProps?;
+  labelProps?;
+  inputProps?;
+  suggestions?;
+  tooltipStyle?;
+  tooltipProps?;
+  renderInput?;
+  renderItems?;
+  itemToString?;
+  shouldSaveFromKey?;
+  filterSuggestions?;
+  openOnFocus?: boolean;
+  getHighlightedIndex?;
+  highlightFirst?;
+  onUpdate;
+  strict?;
+  onSelect;
+  tableBehavior?;
+  value;
+  isMulti?: boolean;
+};
 function SingleAutocomplete({
   focused,
   embedded = false,
@@ -127,7 +157,7 @@ function SingleAutocomplete({
   tableBehavior,
   value: initialValue,
   isMulti = false,
-}) {
+}: SingleAutocompleteProps) {
   const [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
   );
@@ -220,6 +250,7 @@ function SingleAutocomplete({
             Downshift.stateChangeTypes.controlledPropUpdatedSelectedItem,
             // Do nothing if it is a "touch" selection event
             Downshift.stateChangeTypes.touchEnd,
+            // @ts-expect-error Types say there is no type
           ].includes(changes.type)
         ) {
           return;
@@ -232,7 +263,7 @@ function SingleAutocomplete({
         if (value === '') {
           // A blank value shouldn't highlight any item so that the field
           // can be left blank if desired
-
+          // @ts-expect-error Types say there is no type
           if (changes.type !== Downshift.stateChangeTypes.clickItem) {
             fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
           }
@@ -245,7 +276,7 @@ function SingleAutocomplete({
           let highlightedIndex = (
             getHighlightedIndex || defaultGetHighlightedIndex
           )(filteredSuggestions);
-
+          // @ts-expect-error Types say there is no type
           if (changes.type !== Downshift.stateChangeTypes.clickItem) {
             fireUpdate(
               onUpdate,
@@ -481,7 +512,7 @@ export function MultiAutocomplete({
   suggestions,
   strict,
   ...props
-}) {
+}: SingleAutocompleteProps) {
   let [focused, setFocused] = useState(false);
   let lastSelectedItems = useRef();
 
@@ -624,7 +655,10 @@ export function AutocompleteFooter({ show = true, embedded, children }) {
   );
 }
 
-export default function Autocomplete({ multi, ...props }) {
+type AutocompleteProps = ComponentProps<typeof SingleAutocomplete> & {
+  multi?;
+};
+export default function Autocomplete({ multi, ...props }: AutocompleteProps) {
   if (multi) {
     return <MultiAutocomplete {...props} />;
   } else {

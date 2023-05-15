@@ -1,9 +1,23 @@
-import { useContext, useState, useRef, useLayoutEffect } from 'react';
+import {
+  useContext,
+  useState,
+  useRef,
+  useLayoutEffect,
+  type ReactNode,
+} from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 import NamespaceContext from './NamespaceContext.js';
 
+type Binding = { name: string; value; query?: unknown };
+
+type SheetValueProps = {
+  binding: string | Binding;
+  initialValue?;
+  children?: (result: Binding, setCell: () => void) => ReactNode;
+  onChange?;
+};
 // !! Do not use this!! This is deprecated. Use the `useSheetValue`
 // hook instead. The reason this hasn't been refactored on top of it
 // is because the hook only exposes the value, not the node. It also
@@ -14,7 +28,7 @@ export default function SheetValue({
   initialValue,
   children,
   onChange,
-}) {
+}: SheetValueProps) {
   if (!binding) {
     throw new Error('SheetValue binding is required');
   }
@@ -23,23 +37,24 @@ export default function SheetValue({
     binding = { ...binding, name: binding.value.toString() };
   }
 
-  binding =
+  const bindingObj =
     typeof binding === 'string' ? { name: binding, value: null } : binding;
 
-  if (binding.name == null) {
+  if (bindingObj.name == null) {
     throw new Error('Binding name is now required');
   }
 
   let spreadsheet = useSpreadsheet();
   let sheetName = useContext(NamespaceContext) || '__global';
   let [result, setResult] = useState({
-    name: sheetName + '!' + binding.name,
-    value: initialValue != null ? initialValue : binding.value,
-    query: binding.query,
+    name: sheetName + '!' + bindingObj.name,
+    value: initialValue != null ? initialValue : bindingObj.value,
+    query: bindingObj.query,
   });
   let latestOnChange = useRef(onChange);
   let latestValue = useRef(result.value);
 
+  /** @deprecated */
   function setCell() {
     throw new Error('setCell is not implemented anymore');
   }
@@ -50,11 +65,11 @@ export default function SheetValue({
   });
 
   useLayoutEffect(() => {
-    if (binding.query) {
-      spreadsheet.createQuery(sheetName, binding.name, binding.query);
+    if (bindingObj.query) {
+      spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
     }
 
-    return spreadsheet.bind(sheetName, binding, null, newResult => {
+    return spreadsheet.bind(sheetName, bindingObj, null, newResult => {
       if (latestOnChange.current) {
         latestOnChange.current(newResult);
       }
@@ -63,7 +78,7 @@ export default function SheetValue({
         setResult(newResult);
       }
     });
-  }, [sheetName, binding.name]);
+  }, [sheetName, bindingObj.name]);
 
-  return result.value != null ? children(result, setCell) : null;
+  return result.value != null ? <>{children(result, setCell)}</> : null;
 }

@@ -15,7 +15,11 @@ import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
-function CashFlowGraph({ style, start, end, graphData, isConcise, compact }) {
+type CashFlowGraphProps = {
+  graphData: { expenses; income; balances };
+  isConcise: boolean;
+};
+function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
   return (
     <Container>
       {(width, height, portalHost) =>

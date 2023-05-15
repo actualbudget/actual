@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { type ChangeEvent, useState } from 'react';
 
 import { View, ButtonWithLoading } from '../../common';
 
@@ -44,14 +44,18 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         placeholder="Password"
         type={showPassword ? 'text' : 'password'}
         value={password1}
-        onChange={e => setPassword1(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setPassword1(e.target.value)
+        }
         onEnter={onSubmit}
       />
       <Input
         placeholder="Confirm password"
         type={showPassword ? 'text' : 'password'}
         value={password2}
-        onChange={e => setPassword2(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setPassword2(e.target.value)
+        }
         style={{ marginTop: 10 }}
         onEnter={onSubmit}
       />

@@ -1,4 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  type ChangeEvent,
+} from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -7,7 +12,11 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 import { View, Button, Tooltip, InitialFocus, Input } from '../../common';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 
-export default function HoldTooltip({ onSubmit, onClose }) {
+type HoldTooltipProps = {
+  onSubmit: (amount: number) => void;
+  onClose: () => void;
+};
+export default function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
   const spreadsheet = useSpreadsheet();
   const sheetName = useContext(NamespaceContext);
 
@@ -45,7 +54,9 @@ export default function HoldTooltip({ onSubmit, onClose }) {
         <InitialFocus>
           <Input
             value={amount}
-            onChange={e => setAmount(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setAmount(e.target.value)
+            }
             onEnter={submit}
           />
         </InitialFocus>

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { type ComponentProps, type ReactNode } from 'react';
+
+import { type CSSProperties } from 'glamor';
 
 import { styles } from '../../style';
 import Text from '../common/Text';
@@ -6,9 +8,23 @@ import Text from '../common/Text';
 import format from './format';
 import SheetValue from './SheetValue';
 
-function CellValue({ binding, type, formatter, style, getStyle, debug }) {
+type CellValueProps = {
+  binding: ComponentProps<typeof SheetValue>['binding'];
+  type?: string;
+  formatter?: (value) => ReactNode;
+  style?: CSSProperties;
+  getStyle?: (value) => CSSProperties;
+};
+
+function CellValue({
+  binding,
+  type,
+  formatter,
+  style,
+  getStyle,
+}: CellValueProps) {
   return (
-    <SheetValue binding={binding} debug={debug}>
+    <SheetValue binding={binding}>
       {({ name, value }) => {
         return (
           <Text

@@ -1,4 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  type ComponentProps,
+} from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -9,6 +14,14 @@ import { View, Button, Tooltip, InitialFocus, Input } from '../../common';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import { addToBeBudgetedGroup, CategoryGroupsContext } from '../util';
 
+type TransferTooltipProps = {
+  initialAmount?: number;
+  initialAmountName?: string;
+  showToBeBudgeted?: boolean;
+  tooltipProps?: ComponentProps<typeof Tooltip>;
+  onSubmit: (amount: number, category: unknown) => void;
+  onClose: () => void;
+};
 export default function TransferTooltip({
   initialAmount,
   initialAmountName,
@@ -16,7 +29,7 @@ export default function TransferTooltip({
   tooltipProps,
   onSubmit,
   onClose,
-}) {
+}: TransferTooltipProps) {
   let spreadsheet = useSpreadsheet();
   let sheetName = useContext(NamespaceContext);
   let categoryGroups = useContext(CategoryGroupsContext);
@@ -69,7 +82,7 @@ export default function TransferTooltip({
         <InitialFocus>
           <Input
             value={amount}
-            onChange={e => setAmount(e.target.value)}
+            onChange={e => setAmount(e.target['value'])}
             onEnter={submit}
           />
         </InitialFocus>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { type ChangeEvent, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
@@ -90,7 +90,9 @@ export default function Login() {
           autoFocus={true}
           placeholder="Password"
           type="password"
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setPassword(e.target.value)
+          }
           style={{ flex: 1, marginRight: 10 }}
         />
         <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>

@@ -1,10 +1,16 @@
-import React, { useRef } from 'react';
+import React, { type ReactNode, useRef } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
+
+import { type CSSProperties } from 'glamor';
 
 import { View } from '../common';
 
-export default function Container({ style, children }) {
-  const portalHost = useRef(null);
+type ContainerProps = {
+  style?: CSSProperties;
+  children: (width: number, height: number, host: HTMLDivElement) => ReactNode;
+};
+export default function Container({ style, children }: ContainerProps) {
+  const portalHost = useRef<HTMLDivElement>(null);
 
   return (
     <View style={[{ height: 300, position: 'relative', flexShrink: 0 }, style]}>
