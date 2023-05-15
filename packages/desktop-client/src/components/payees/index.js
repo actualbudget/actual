@@ -342,6 +342,7 @@ export const ManagePayees = forwardRef(
       modalProps,
       payees,
       ruleCounts,
+      orphanedPayees,
       categoryGroups,
       initialSelectedIds,
       ruleActions,
@@ -357,16 +358,22 @@ export const ManagePayees = forwardRef(
     let table = useRef(null);
     let scrollTo = useRef(null);
     let resetAnimation = useRef(false);
+    const [orphanedOnly, setOrphanedOnly] = useState(false);
 
-    let filteredPayees = useMemo(
-      () =>
-        filter === ''
-          ? payees
-          : payees.filter(p =>
-              p.name.toLowerCase().includes(filter.toLowerCase()),
-            ),
-      [payees, filter],
-    );
+    let filteredPayees = useMemo(() => {
+      let filtered = payees;
+      if (filter) {
+        filtered = filtered.filter(p =>
+          p.name.toLowerCase().includes(filter.toLowerCase()),
+        );
+      }
+      if (orphanedOnly) {
+        filtered = filtered.filter(p =>
+          orphanedPayees.map(o => o.id).includes(p.id),
+        );
+      }
+      return filtered;
+    }, [payees, filter, orphanedOnly]);
 
     let selected = useSelected('payees', filteredPayees, initialSelectedIds);
 
@@ -505,6 +512,23 @@ export const ManagePayees = forwardRef(
               </View>
             )}
           </Component>
+          <View>
+            <Button
+              bare
+              style={{
+                marginRight: '10px',
+              }}
+              disabled={!(orphanedPayees.length > 0) && !orphanedOnly}
+              onClick={() => {
+                setOrphanedOnly(!orphanedOnly);
+                const filterInput = document.getElementById('filter-input');
+                applyFilter(filterInput.value);
+                tableNavigator.onEdit(null);
+              }}
+            >
+              {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
+            </Button>
+          </View>
           <View style={{ flex: 1 }} />
           <Input
             placeholder="Filter payees..."
