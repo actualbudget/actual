@@ -514,7 +514,6 @@ export const ManagePayees = forwardRef(
           </Component>
           <View>
             <Button
-              id="orphan-button"
               bare
               style={{
                 marginRight: '10px',
@@ -527,23 +526,11 @@ export const ManagePayees = forwardRef(
                 tableNavigator.onEdit(null);
               }}
             >
-              <label
-                htmlFor="orphan-button"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  width: '100%',
-                  height: '100%',
-                  margin: 0,
-                }}
-              >
-                {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
-              </label>
+              {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
             </Button>
           </View>
           <View style={{ flex: 1 }} />
           <Input
-            id="filter-input"
             placeholder="Filter payees..."
             value={filter}
             onChange={e => {
