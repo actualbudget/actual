@@ -81,5 +81,6 @@ export function KeyHandlers({ eventType, keys = {} }: KeyHandlersProps) {
     );
   });
 
+  // eslint-disable-next-line react/jsx-no-useless-fragment
   return <>{handlers}</>;
 }
