@@ -10,7 +10,6 @@ import React, {
   useImperativeHandle,
 } from 'react';
 
-import Component from '@reactions/component';
 import memoizeOne from 'memoize-one';
 
 import { groupById } from 'loot-core/src/shared/util';
@@ -475,6 +474,8 @@ export const ManagePayees = forwardRef(
 
     let payeesById = getPayeesById(payees);
 
+    let [menuOpen, setMenuOpen] = useState(false);
+
     return (
       <View style={{ height: '100%' }}>
         <View
@@ -484,34 +485,30 @@ export const ManagePayees = forwardRef(
             padding: '0 10px 5px',
           }}
         >
-          <Component initialState={{ menuOpen: false }}>
-            {({ state, setState }) => (
-              <View>
-                <Button
-                  bare
-                  style={{ marginRight: 10 }}
-                  disabled={buttonsDisabled}
-                  onClick={() => setState({ menuOpen: true })}
-                >
-                  {buttonsDisabled
-                    ? 'No payees selected'
-                    : selected.items.size +
-                      ' ' +
-                      plural(selected.items.size, 'payee', 'payees')}
-                  <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
-                </Button>
-                {state.menuOpen && (
-                  <PayeeMenu
-                    payeesById={payeesById}
-                    selectedPayees={selected.items}
-                    onClose={() => setState({ menuOpen: false })}
-                    onDelete={onDelete}
-                    onMerge={onMerge}
-                  />
-                )}
-              </View>
+          <View>
+            <Button
+              bare
+              style={{ marginRight: 10 }}
+              disabled={buttonsDisabled}
+              onClick={() => setMenuOpen(true)}
+            >
+              {buttonsDisabled
+                ? 'No payees selected'
+                : selected.items.size +
+                  ' ' +
+                  plural(selected.items.size, 'payee', 'payees')}
+              <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
+            </Button>
+            {menuOpen && (
+              <PayeeMenu
+                payeesById={payeesById}
+                selectedPayees={selected.items}
+                onClose={() => setMenuOpen(false)}
+                onDelete={onDelete}
+                onMerge={onMerge}
+              />
             )}
-          </Component>
+          </View>
           <View>
             <Button
               bare
