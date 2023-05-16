@@ -6,15 +6,15 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "default-db.sqlite",
-    "migrations"
+    "dist"
   ],
   "scripts": {
     "lint": "eslint .",
     "build:app": "yarn workspace loot-core build:api",
     "build:node": "tsc --p tsconfig.dist.json",
-    "build": "yarn run build:app && yarn run build:node"
+    "build:migrations": "cp migrations/*.sql dist/migrations",
+    "build:default-db": "cp default-db.sqlite dist/",
+    "build": "rm -rf dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db"
   },
   "dependencies": {
     "better-sqlite3": "^8.2.0",
