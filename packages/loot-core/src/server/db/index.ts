@@ -511,6 +511,15 @@ export function getPayees() {
   `);
 }
 
+export function syncGetOrphanedPayees() {
+  return all(`
+  SELECT p.id FROM payees p
+  LEFT JOIN payee_mapping pm ON pm.id = p.id
+  LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
+  WHERE p.tombstone = 0 AND p.transfer_acct IS NULL AND t.id IS NULL
+`);
+}
+
 export async function getOrphanedPayees() {
   let rows = await all(`
     SELECT p.id FROM payees p
