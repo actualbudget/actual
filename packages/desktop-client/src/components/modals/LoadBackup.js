@@ -1,4 +1,6 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
+
+import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../style';
 import { View, Text, Block, Modal, Button } from '../common';
@@ -43,11 +45,24 @@ class BackupTable extends Component {
 
 function LoadBackup({
   budgetId,
-  backups,
+  watchUpdates,
   backupDisabled,
   actions,
   modalProps,
 }) {
+  let [backups, setBackups] = useState([]);
+
+  useEffect(() => {
+    send('backups-get', { id: budgetId }).then(setBackups);
+  }, [budgetId]);
+
+  useEffect(() => {
+    if (watchUpdates) {
+      listen('backups-updated', setBackups);
+      return () => unlisten('backups-updated', setBackups);
+    }
+  }, [watchUpdates]);
+
   const latestBackup = backups.find(backup => backup.isLatest);
   const previousBackups = backups.filter(backup => !backup.isLatest);
 
