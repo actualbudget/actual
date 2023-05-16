@@ -182,11 +182,15 @@ export default function PayeeAutocomplete({
   onSelect,
   onManagePayees,
   accounts,
+  payees,
   ...props
 }) {
-  let payees = useCachedPayees();
-  let cachedAccounts = useCachedAccounts();
+  let cachedPayees = useCachedPayees();
+  if (!payees) {
+    payees = cachedPayees;
+  }
 
+  let cachedAccounts = useCachedAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
   }
