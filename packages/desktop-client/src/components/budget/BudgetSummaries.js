@@ -75,7 +75,7 @@ export default function BudgetSummaries({ SummaryComponent }) {
           flexDirection: 'row',
           width: widthState,
           willChange: 'transform',
-          transform: styles.x.interpolate(x => `translateX(${x}px)`),
+          transform: styles.x.to(x => `translateX(${x}px)`),
         }}
       >
         {allMonths.map(month => {
