@@ -1,12 +1,12 @@
 import React, { createContext, useEffect, useContext } from 'react';
 
-import hotkeys from 'hotkeys-js';
+import hotkeys, { type KeyHandler as HotKeyHandler } from 'hotkeys-js';
 
 let KeyScopeContext = createContext('app');
 
 hotkeys.filter = event => {
-  var target = event.target || event.srcElement;
-  var tagName = target.tagName;
+  let target = (event.target || event.srcElement) as HTMLElement;
+  let tagName = target.tagName;
 
   // This is the default behavior of hotkeys, except we only suppress
   // key presses if the meta key is not pressed
@@ -16,7 +16,7 @@ hotkeys.filter = event => {
       ((tagName === 'INPUT' ||
         tagName === 'TEXTAREA' ||
         tagName === 'SELECT') &&
-        !target.readOnly))
+        !target['readOnly']))
   ) {
     return false;
   }
@@ -24,7 +24,16 @@ hotkeys.filter = event => {
   return true;
 };
 
-export function KeyHandler({ keyName, eventType = 'keydown', handler }) {
+type KeyHandlerProps = {
+  keyName: string;
+  eventType?: string;
+  handler: HotKeyHandler;
+};
+export function KeyHandler({
+  keyName,
+  eventType = 'keydown',
+  handler,
+}: KeyHandlerProps) {
   let scope = useContext(KeyScopeContext);
 
   if (eventType !== 'keyup' && eventType !== 'keydown') {
@@ -44,6 +53,7 @@ export function KeyHandler({ keyName, eventType = 'keydown', handler }) {
     hotkeys(keyName, { scope, keyup: true }, _handler);
 
     return () => {
+      // @ts-expect-error unbind args typedef does not expect an object
       hotkeys.unbind({
         key: keyName,
         scope,
@@ -55,7 +65,11 @@ export function KeyHandler({ keyName, eventType = 'keydown', handler }) {
   return null;
 }
 
-export function KeyHandlers({ eventType, keys = {} }) {
+type KeyHandlersProps = {
+  eventType?: string;
+  keys: Record<string, HotKeyHandler>;
+};
+export function KeyHandlers({ eventType, keys = {} }: KeyHandlersProps) {
   let handlers = Object.keys(keys).map(key => {
     return (
       <KeyHandler
@@ -67,5 +81,6 @@ export function KeyHandlers({ eventType, keys = {} }) {
     );
   });
 
-  return handlers;
+  // eslint-disable-next-line react/jsx-no-useless-fragment
+  return <>{handlers}</>;
 }

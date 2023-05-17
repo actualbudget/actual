@@ -79,7 +79,10 @@ export function IncomeHeaderMonth() {
   );
 }
 
-export const GroupMonth = memo(function ExpenseGroupMonth({ group }) {
+type GroupMonthProps = {
+  group: { id: string; is_income: boolean };
+};
+export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
   let borderColor = colors.border;
   let { id } = group;
 
@@ -127,7 +130,18 @@ export const GroupMonth = memo(function ExpenseGroupMonth({ group }) {
   );
 });
 
-function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
+type BalanceTooltipProps = {
+  categoryId: string;
+  tooltip: { close: () => void };
+  monthIndex: number;
+  onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+};
+function BalanceTooltip({
+  categoryId,
+  tooltip,
+  monthIndex,
+  onBudgetAction,
+}: BalanceTooltipProps) {
   let carryover = useSheetValue(reportBudget.catCarryover(categoryId));
 
   return (
@@ -158,17 +172,22 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
   );
 }
 
+type CategoryMonthProps = {
+  monthIndex: number;
+  category: { id: string; name: string; is_income: boolean };
+  editing: boolean;
+  onEdit: (id: string | null, idx?: number) => void;
+  onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+  onShowActivity: (name: string, id: string, idx: number) => void;
+};
 export const CategoryMonth = memo(function CategoryMonth({
   monthIndex,
   category,
-  budgeted,
-  currentSum,
-  balance,
   editing,
   onEdit,
   onBudgetAction,
   onShowActivity,
-}) {
+}: CategoryMonthProps) {
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
 
@@ -176,7 +195,6 @@ export const CategoryMonth = memo(function CategoryMonth({
     <View style={{ flex: 1, flexDirection: 'row' }}>
       <SheetCell
         name="budget"
-        sync={true}
         exposed={editing}
         width="flex"
         borderColor={borderColor}
@@ -253,7 +271,6 @@ export const CategoryMonth = memo(function CategoryMonth({
         >
           <span {...(category.is_income ? {} : balanceTooltip.getOpenEvents())}>
             <BalanceWithCarryover
-              category={category}
               disabled={category.is_income}
               carryover={reportBudget.catCarryover(category.id)}
               balance={reportBudget.catBalance(category.id)}

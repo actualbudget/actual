@@ -1,6 +1,7 @@
 import React, { createElement } from 'react';
 
 import * as d from 'date-fns';
+import { type CSSProperties } from 'glamor';
 import {
   VictoryChart,
   VictoryBar,
@@ -14,7 +15,13 @@ import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
-function Area({ start, end, data, style, scale, range }) {
+type AreaProps = {
+  start: string;
+  end: string;
+  scale?;
+  range?;
+};
+function Area({ start, end, scale, range }: AreaProps) {
   const zero = scale.y(0);
 
   const startX = scale.x(d.parseISO(start + '-01'));
@@ -72,7 +79,12 @@ function Area({ start, end, data, style, scale, range }) {
   );
 }
 
-function NetWorthGraph({ style, start, end, graphData, compact }) {
+type NetWorthGraphProps = {
+  style?: CSSProperties;
+  graphData;
+  compact: boolean;
+};
+function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
   const Chart = compact ? VictoryGroup : VictoryChart;
 
   return (
@@ -97,12 +109,9 @@ function NetWorthGraph({ style, start, end, graphData, compact }) {
               }
             }
           >
-            <Area
-              start={graphData.start}
-              end={graphData.end}
-              data={graphData.data}
-            />
+            <Area start={graphData.start} end={graphData.end} />
             {createElement(
+              // @ts-expect-error defaultProps mismatch causing issue
               graphData.data.length === 1 ? VictoryBar : VictoryArea,
               {
                 data: graphData.data,

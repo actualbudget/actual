@@ -1,37 +1,67 @@
-import React, { Fragment, forwardRef, useMemo } from 'react';
+import React, {
+  type ComponentProps,
+  Fragment,
+  forwardRef,
+  useMemo,
+  type ReactNode,
+} from 'react';
 
 import Split from '../../icons/v0/Split';
 import { colors } from '../../style';
+import { type HTMLPropsWithStyle } from '../../types/utils';
 import { View, Text, Select } from '../common';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
-export const NativeCategorySelect = forwardRef(
-  ({ categoryGroups, emptyLabel, ...nativeProps }, ref) => {
-    return (
-      <Select {...nativeProps} ref={ref}>
-        <option value="">{emptyLabel || 'Select category...'}</option>
-        {categoryGroups.map(group => (
-          <optgroup key={group.id} label={group.name}>
-            {group.categories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </Select>
-    );
-  },
-);
+type CategoryGroup = {
+  id: string;
+  name: string;
+  categories: Array<{ id: string; name: string }>;
+};
 
+type NativeCategorySelectProps = HTMLPropsWithStyle<HTMLSelectElement> & {
+  categoryGroups: CategoryGroup[];
+  emptyLabel: string;
+};
+export const NativeCategorySelect = forwardRef<
+  HTMLSelectElement,
+  NativeCategorySelectProps
+>(({ categoryGroups, emptyLabel, ...nativeProps }, ref) => {
+  return (
+    <Select {...nativeProps} ref={ref}>
+      <option value="">{emptyLabel || 'Select category...'}</option>
+      {categoryGroups.map(group => (
+        <optgroup key={group.id} label={group.name}>
+          {group.categories.map(category => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </Select>
+  );
+});
+
+type CategoryListProps = {
+  items: Array<{
+    id: string;
+    cat_group: unknown;
+    groupName: string;
+    name: string;
+  }>;
+  getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
+  highlightedIndex: number;
+  embedded: boolean;
+  footer?: ReactNode;
+};
 export function CategoryList({
   items,
   getItemProps,
   highlightedIndex,
   embedded,
   footer,
-}) {
+}: CategoryListProps) {
   let lastGroup = null;
 
   return (
@@ -117,13 +147,16 @@ export function CategoryList({
   );
 }
 
+type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
+  categoryGroups: CategoryGroup[];
+  showSplitOption?: boolean;
+};
 export default function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,
   embedded,
-  onSplit,
   ...props
-}) {
+}: CategoryAutocompleteProps) {
   let categorySuggestions = useMemo(
     () =>
       categoryGroups.reduce(

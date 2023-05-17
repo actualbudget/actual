@@ -1,3 +1,3 @@
-export interface NoteHandlers {
+export interface NotesHandlers {
   'notes-save': (arg: { id; note }) => Promise<unknown>;
 }

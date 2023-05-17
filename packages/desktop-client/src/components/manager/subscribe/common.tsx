@@ -1,5 +1,13 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, {
+  type ComponentProps,
+  forwardRef,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+
+import { type CSSProperties } from 'glamor';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -36,28 +44,27 @@ export function useBootstrapped() {
       if (url == null) {
         // A server hasn't been specified yet
         let serverURL = window.location.origin;
-        let { error, hasServer, bootstrapped } = await send(
-          'subscribe-needs-bootstrap',
-          { url: serverURL },
-        );
-        if (error || !hasServer) {
-          console.log(error);
+        let result = await send('subscribe-needs-bootstrap', {
+          url: serverURL,
+        });
+        if ('error' in result || !result.hasServer) {
+          console.log('error' in result && result.error);
           history.push('/config-server');
           return;
         }
 
         await setServerURL(serverURL, { validate: false });
 
-        if (bootstrapped) {
+        if (result.bootstrapped) {
           ensure('/login');
         } else {
           ensure('/bootstrap');
         }
       } else {
-        let { error, bootstrapped } = await send('subscribe-needs-bootstrap');
-        if (error) {
-          history.push('/error', { error });
-        } else if (bootstrapped) {
+        let result = await send('subscribe-needs-bootstrap');
+        if ('error' in result) {
+          history.push('/error', { error: result.error });
+        } else if (result.bootstrapped) {
           ensure('/login');
         } else {
           ensure('/bootstrap');
@@ -78,7 +85,10 @@ export function getEmail(location) {
   return decodeURIComponent(m[1]);
 }
 
-export function Title({ text }) {
+type TitleProps = {
+  text: string;
+};
+export function Title({ text }: TitleProps) {
   return (
     <h1
       style={{
@@ -93,7 +103,8 @@ export function Title({ text }) {
   );
 }
 
-export const Input = forwardRef((props, ref) => {
+type InputProps = ComponentProps<typeof BaseInput>;
+export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   return (
     <BaseInput
       {...props}
@@ -111,62 +122,79 @@ export const Input = forwardRef((props, ref) => {
   );
 });
 
-export const BareButton = forwardRef((props, ref) => {
-  return (
-    <Button
-      ref={ref}
-      bare
-      {...props}
-      style={[
-        {
-          color: colors.p4,
-          fontSize: 15,
-          textDecoration: 'none',
-          padding: '5px 7px',
-          borderRadius: 4,
-          ':hover': {
-            backgroundColor: colors.n9,
+type BareButtonProps = ComponentProps<typeof Button>;
+export const BareButton = forwardRef<HTMLButtonElement, BareButtonProps>(
+  (props, ref) => {
+    return (
+      <Button
+        ref={ref}
+        bare
+        {...props}
+        style={[
+          {
+            color: colors.p4,
+            fontSize: 15,
+            textDecoration: 'none',
+            padding: '5px 7px',
+            borderRadius: 4,
+            ':hover': {
+              backgroundColor: colors.n9,
+            },
+            ':active': {
+              backgroundColor: colors.n9,
+            },
           },
-          ':active': {
-            backgroundColor: colors.n9,
-          },
-        },
-        props.style,
-      ]}
-    />
-  );
-});
+          props.style,
+        ]}
+      />
+    );
+  },
+);
 
-export const ExternalLink = forwardRef((props, ref) => {
-  let { href, ...linkProps } = props;
-  return (
-    <BareButton
-      to="/"
-      {...linkProps}
-      onClick={e => {
-        e.preventDefault();
-        window.Actual.openURLInBrowser(href);
-      }}
-    />
-  );
-});
+type ExternalLinkProps = ComponentProps<typeof BareButton>;
+export const ExternalLink = forwardRef<HTMLButtonElement, ExternalLinkProps>(
+  (props, ref) => {
+    let { href, ...linkProps } = props;
+    return (
+      <BareButton
+        // @ts-expect-error prop does not exist on Button
+        to="/"
+        {...linkProps}
+        onClick={e => {
+          e.preventDefault();
+          window.Actual.openURLInBrowser(href);
+        }}
+      />
+    );
+  },
+);
 
-export const BackLink = forwardRef((props, ref) => {
-  return (
-    <BareButton
-      ref={ref}
-      to="/"
-      onClick={e => {
-        e.preventDefault();
-        props.history.goBack();
-      }}
-    >
-      Back
-    </BareButton>
-  );
-});
+type BackLinkProps = ComponentProps<typeof BareButton> & {
+  history;
+};
+export const BackLink = forwardRef<HTMLButtonElement, BackLinkProps>(
+  (props, ref) => {
+    return (
+      <BareButton
+        ref={ref}
+        // @ts-expect-error prop does not exist on Button
+        to="/"
+        onClick={e => {
+          e.preventDefault();
+          props.history.goBack();
+        }}
+      >
+        Back
+      </BareButton>
+    );
+  },
+);
 
-export function Paragraph({ style, children }) {
+type ParagraphProps = {
+  style?: CSSProperties;
+  children: ReactNode;
+};
+export function Paragraph({ style, children }: ParagraphProps) {
   return (
     <Text
       style={[

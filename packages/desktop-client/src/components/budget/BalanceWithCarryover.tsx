@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { View } from '../common';
@@ -7,12 +7,16 @@ import useSheetValue from '../spreadsheet/useSheetValue';
 
 import { makeAmountStyle } from './util';
 
+type BalanceWithCarryoverProps = {
+  carryover: ComponentProps<typeof CellValue>['binding'];
+  balance: ComponentProps<typeof CellValue>['binding'];
+  disabled?: boolean;
+};
 export default function BalanceWithCarryover({
   carryover,
   balance,
-  category,
   disabled,
-}) {
+}: BalanceWithCarryoverProps) {
   let carryoverValue = useSheetValue(carryover);
   let balanceValue = useSheetValue(balance);
 
