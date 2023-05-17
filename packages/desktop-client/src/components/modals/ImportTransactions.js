@@ -623,7 +623,7 @@ export function ImportTransactions({
           message:
             'Import was successful, but please [file a bug report](https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug%2Cneeds+triage&template=bug-report.yml&title=%5BBug%5D%3A+New+OFX+Importer:+bad+new+parse:) and attach a redacted version of the file so we can fix our new algorithm.',
         });
-        errors = [];
+        errors = []; // dont set errors cause everythings still working.
         transactions = results.transactions;
       } else if (results.which === 'none') {
         // Results were the same between the two!

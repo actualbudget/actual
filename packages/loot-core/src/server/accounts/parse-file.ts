@@ -215,22 +215,45 @@ async function parseOfxJavascript(filepath) {
       ).BANKTRANLIST.STMTTRN,
     ].flat();
   } catch (err) {
+    console.log('Error in new parser: ', err);
     errors.push({
       message: 'Failed importing file',
       internal: err.stack,
     });
     return { errors };
   }
+
+  const extractTransaction = trans => {
+    let amount = parseFloat(trans.TRNAMT._text);
+    let imported_id = trans.FITID._text?.trim();
+    let date = trans.DTPOSTED
+      ? ofxDateParse(trans.DTPOSTED._text?.trim())
+      : null;
+    let payee_name, imported_payee, notes;
+    if (trans.NAME?._text === undefined && trans.NAME?.MEMO !== undefined) {
+      // probably nested MEMO inside NAME.
+      let name = trans.NAME.MEMO?._text.trim();
+      // use '' for payee to copy node-libofx behavior.
+      payee_name = imported_payee = '';
+      notes = name;
+    } else {
+      // keep default behavior.
+      payee_name = trans.NAME?._text?.trim();
+      imported_payee = trans.NAME?._text?.trim();
+      notes = trans.MEMO?._text?.trim();
+    }
+    return {
+      amount,
+      imported_id,
+      date,
+      payee_name,
+      imported_payee,
+      notes,
+    };
+  };
   return {
     errors,
-    transactions: transactions.map(trans => ({
-      amount: parseFloat(trans.TRNAMT._text),
-      imported_id: trans.FITID._text,
-      date: trans.DTPOSTED ? ofxDateParse(trans.DTPOSTED._text) : null,
-      payee_name: trans.NAME?._text,
-      imported_payee: trans.NAME?._text,
-      notes: trans.MEMO?._text,
-    })),
+    transactions: transactions.map(extractTransaction),
   };
 }
 
