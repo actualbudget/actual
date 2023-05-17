@@ -106,7 +106,6 @@ __metadata:
     redux: ^4.0.5
     redux-thunk: ^2.3.0
     victory: ^36.6.8
-    wobble: ^1.5.0
   languageName: unknown
   linkType: soft
 
@@ -21295,13 +21294,6 @@ __metadata:
   dependencies:
     string-width: ^4.0.0
   checksum: 03db6c9d0af9329c37d74378ff1d91972b12553c7d72a6f4e8525fe61563fa7adb0b9d6e8d546b7e059688712ea874edd5ded475999abdeedf708de9849310e0
-  languageName: node
-  linkType: hard
-
-"wobble@npm:^1.5.0":
-  version: 1.5.1
-  resolution: "wobble@npm:1.5.1"
-  checksum: 315b0e659e1ffd2bae31046df8e7be53cdc81f3ebd3a4fa2ae8f15810d25524f2bee6c6cb8929a9644d5bf6034e0b4e3379e179132d84de1d4b5c5e604172b6b
   languageName: node
   linkType: hard
 
