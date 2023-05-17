@@ -77,7 +77,6 @@ export default function BudgetSummaries({ SummaryComponent }) {
           willChange: 'transform',
           transform: styles.x.interpolate(x => `translateX(${x}px)`),
         }}
-        // ref={scrollerRef}
       >
         {allMonths.map(month => {
           return (
