@@ -97,7 +97,7 @@ export const styles = {
   },
   smallText: {
     fontSize: 13,
-    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+    [`@media (min-width: ${tokens.breakpoint_small})`]: {
       // lineHeight: 21 // TODO: This seems like trouble, but what's the right value?
     },
   },
@@ -105,15 +105,11 @@ export const styles = {
     fontSize: 13,
   },
   page: {
-    // This is the height of the titlebar
-    paddingTop: 8,
     flex: 1,
-    [`@media (min-width: ${tokens.breakpoint_xs})`]: {
-      minWidth: 360,
+    minHeight: 700, // ensure we can scroll on small screens
+    paddingTop: 8, // height of the titlebar
+    [`@media (min-width: ${tokens.breakpoint_small})`]: {
       paddingTop: 36,
-    },
-    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
-      minWidth: 500,
     },
   },
   pageHeader: {
@@ -129,14 +125,14 @@ export const styles = {
   pageContent: {
     paddingLeft: 2,
     paddingRight: 2,
-    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+    [`@media (min-width: ${tokens.breakpoint_small})`]: {
       paddingLeft: 20,
       paddingRight: 20,
     },
   },
   settingsPageContent: {
     padding: 20,
-    [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+    [`@media (min-width: ${tokens.breakpoint_small})`]: {
       padding: 'inherit',
     },
   },

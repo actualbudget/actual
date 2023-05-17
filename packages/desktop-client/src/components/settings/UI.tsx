@@ -63,7 +63,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
           marginBottom: 25,
           width: '100%',
         },
-        media(`(min-width: ${tokens.breakpoint_medium})`, {
+        media(`(min-width: ${tokens.breakpoint_small})`, {
           width: 'auto',
         }),
       ]}
