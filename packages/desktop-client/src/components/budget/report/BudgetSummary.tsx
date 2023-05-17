@@ -1,6 +1,13 @@
-import React, { memo, useState } from 'react';
+import React, {
+  type ComponentProps,
+  type ComponentType,
+  memo,
+  type ReactNode,
+  useState,
+  type SVGProps,
+} from 'react';
 
-import { css } from 'glamor';
+import { css, type CSSProperties } from 'glamor';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -29,7 +36,18 @@ import { makeAmountFullStyle } from '../util';
 
 import { useReport } from './ReportContext';
 
-function PieProgress({ style, progress, color, backgroundColor }) {
+type PieProgressProps = {
+  style?: SVGProps<SVGSVGElement>['style'];
+  progress: number;
+  color: string;
+  backgroundColor: string;
+};
+function PieProgress({
+  style,
+  progress,
+  color,
+  backgroundColor,
+}: PieProgressProps) {
   let radius = 4;
   let circum = 2 * Math.PI * radius;
   let dash = progress * circum;
@@ -63,7 +81,11 @@ function fraction(num, denom) {
   return num / denom;
 }
 
-function IncomeProgress({ current, target }) {
+type IncomeProgressProps = {
+  current: ComponentProps<typeof CellValue>['binding'];
+  target: ComponentProps<typeof CellValue>['binding'];
+};
+function IncomeProgress({ current, target }: IncomeProgressProps) {
   let totalIncome = useSheetValue(current) || 0;
   let totalBudgeted = useSheetValue(target) || 0;
 
@@ -86,7 +108,11 @@ function IncomeProgress({ current, target }) {
   );
 }
 
-function ExpenseProgress({ current, target }) {
+type ExpenseProgressProps = {
+  current: ComponentProps<typeof CellValue>['binding'];
+  target: ComponentProps<typeof CellValue>['binding'];
+};
+function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   let totalSpent = useSheetValue(current) || 0;
   let totalBudgeted = useSheetValue(target) || 0;
 
@@ -115,7 +141,20 @@ function ExpenseProgress({ current, target }) {
   );
 }
 
-function BudgetTotal({ title, current, target, ProgressComponent, style }) {
+type BudgetTotalProps = {
+  title: ReactNode;
+  current: ComponentProps<typeof CellValue>['binding'];
+  target: ComponentProps<typeof CellValue>['binding'];
+  ProgressComponent: ComponentType<{ current; target }>;
+  style?: CSSProperties;
+};
+function BudgetTotal({
+  title,
+  current,
+  target,
+  ProgressComponent,
+  style,
+}: BudgetTotalProps) {
   return (
     <View
       style={[
@@ -151,7 +190,10 @@ function BudgetTotal({ title, current, target, ProgressComponent, style }) {
   );
 }
 
-function IncomeTotal({ projected, style }) {
+type IncomeTotalProps = {
+  style?: CSSProperties;
+};
+function IncomeTotal({ style }: IncomeTotalProps) {
   return (
     <BudgetTotal
       title="Income"
@@ -163,7 +205,10 @@ function IncomeTotal({ projected, style }) {
   );
 }
 
-function ExpenseTotal({ style }) {
+type ExpenseTotalProps = {
+  style?: CSSProperties;
+};
+function ExpenseTotal({ style }: ExpenseTotalProps) {
   return (
     <BudgetTotal
       title="Expenses"
@@ -175,7 +220,11 @@ function ExpenseTotal({ style }) {
   );
 }
 
-function Saved({ projected, style }) {
+type SavedProps = {
+  projected: boolean;
+  style?: CSSProperties;
+};
+function Saved({ projected, style }: SavedProps) {
   let budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
   let totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
   let saved = projected ? budgetedSaved : totalSaved;
@@ -239,7 +288,12 @@ function Saved({ projected, style }) {
   );
 }
 
-export const BudgetSummary = memo(function BudgetSummary({ month }) {
+type BudgetSummaryProps = {
+  month?: string;
+};
+export const BudgetSummary = memo(function BudgetSummary({
+  month,
+}: BudgetSummaryProps) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -248,11 +302,11 @@ export const BudgetSummary = memo(function BudgetSummary({ month }) {
   } = useReport();
 
   let [menuOpen, setMenuOpen] = useState(false);
-  function onMenuOpen(e) {
+  function onMenuOpen() {
     setMenuOpen(true);
   }
 
-  function onMenuClose(bag) {
+  function onMenuClose() {
     setMenuOpen(false);
   }
 
@@ -280,9 +334,7 @@ export const BudgetSummary = memo(function BudgetSummary({ month }) {
         },
       }}
     >
-      <NamespaceContext.Provider
-        value={monthUtils.sheetForMonth(month, 'report')}
-      >
+      <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
           style={[
             { padding: '0 13px' },

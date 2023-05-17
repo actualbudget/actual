@@ -1,6 +1,6 @@
 import React, { createRef, useState, useEffect, useMemo } from 'react';
 
-import { css } from 'glamor';
+import { type CSSProperties, css } from 'glamor';
 
 import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
@@ -11,14 +11,20 @@ import { colors } from '../style';
 
 import { View, Button, Tooltip, useTooltip, Text } from './common';
 
+type NotesTooltipProps = {
+  editable?: boolean;
+  defaultNotes?: string;
+  position?: string;
+  onClose?: (notes: string) => void;
+};
 export function NotesTooltip({
   editable,
   defaultNotes,
   position = 'bottom-left',
   onClose,
-}) {
-  let [notes, setNotes] = useState(defaultNotes);
-  let inputRef = createRef();
+}: NotesTooltipProps) {
+  let [notes, setNotes] = useState<string>(defaultNotes);
+  let inputRef = createRef<HTMLTextAreaElement>();
 
   useEffect(() => {
     if (editable) {
@@ -58,6 +64,14 @@ export function NotesTooltip({
   );
 }
 
+type NotesButtonProps = {
+  id: string;
+  width?: number;
+  height?: number;
+  defaultColor?: string;
+  tooltipPosition?: string;
+  style?: CSSProperties;
+};
 export default function NotesButton({
   id,
   width = 12,
@@ -65,7 +79,7 @@ export default function NotesButton({
   defaultColor = colors.n8,
   tooltipPosition,
   style,
-}) {
+}: NotesButtonProps) {
   let [hover, setHover] = useState(false);
   let tooltip = useTooltip();
   let { data } = useLiveQuery(

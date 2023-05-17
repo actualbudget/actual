@@ -16,7 +16,7 @@ function getErrorMessage(reason) {
 export default function Error() {
   let history = useHistory();
   let location = useLocation();
-  let { error } = location.state || {};
+  let { error } = (location.state || {}) as { error? };
 
   function onTryAgain() {
     history.push('/');

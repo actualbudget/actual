@@ -1,4 +1,4 @@
-import React, { memo, useContext, useState } from 'react';
+import React, { type ComponentProps, memo, useContext, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -31,13 +31,12 @@ import TransferTooltip from './TransferTooltip';
 
 export { BudgetSummary } from './BudgetSummary';
 
-function CoverTooltip({
-  showToBeBudgeted,
-  inline,
-  tooltipProps,
-  onSubmit,
-  onClose,
-}) {
+type CoverTooltipProps = {
+  tooltipProps?: ComponentProps<typeof Tooltip>;
+  onSubmit: (category: unknown) => void;
+  onClose: () => void;
+};
+function CoverTooltip({ tooltipProps, onSubmit, onClose }: CoverTooltipProps) {
   let categoryGroups = useContext(CategoryGroupsContext);
   categoryGroups = addToBeBudgetedGroup(
     categoryGroups.filter(g => !g.is_income),
@@ -102,7 +101,18 @@ function CoverTooltip({
   );
 }
 
-function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
+type BalanceTooltipProps = {
+  categoryId: string;
+  tooltip: { close: () => void };
+  monthIndex: number;
+  onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
+};
+function BalanceTooltip({
+  categoryId,
+  tooltip,
+  monthIndex,
+  onBudgetAction,
+}: BalanceTooltipProps) {
   let carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
   let balance = useSheetValue(rolloverBudget.catBalance(categoryId));
   let [menu, setMenu] = useState('menu');
@@ -165,7 +175,6 @@ function BalanceTooltip({ categoryId, tooltip, monthIndex, onBudgetAction }) {
 
       {menu === 'cover' && (
         <CoverTooltip
-          showToBeBudgeted={true}
           onClose={tooltip.close}
           onSubmit={fromCategory => {
             onBudgetAction(monthIndex, 'cover', {
@@ -237,7 +246,12 @@ export function IncomeHeaderMonth() {
   );
 }
 
-export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({ group }) {
+type ExpenseGroupMonthProps = {
+  group: { id: string };
+};
+export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
+  group,
+}: ExpenseGroupMonthProps) {
   let borderColor = colors.border;
   let { id } = group;
 
@@ -283,6 +297,14 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({ group }) {
   );
 });
 
+type ExpenseCategoryMonthProps = {
+  monthIndex: number;
+  category: { id: string; name: string; is_income: boolean };
+  editing: boolean;
+  onEdit: (id: string | null, idx?: number) => void;
+  onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
+  onShowActivity: (name: string, id: string, idx: number) => void;
+};
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   monthIndex,
   category,
@@ -290,7 +312,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onEdit,
   onBudgetAction,
   onShowActivity,
-}) {
+}: ExpenseCategoryMonthProps) {
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
 
@@ -298,7 +320,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
     <View style={{ flex: 1, flexDirection: 'row' }}>
       <SheetCell
         name="budget"
-        sync={true}
         exposed={editing}
         width="flex"
         borderColor={borderColor}
@@ -372,7 +393,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       >
         <span {...balanceTooltip.getOpenEvents()}>
           <BalanceWithCarryover
-            category={category}
             carryover={rolloverBudget.catCarryover(category.id)}
             balance={rolloverBudget.catBalance(category.id)}
           />
@@ -390,9 +410,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   );
 });
 
-export function IncomeGroupMonth({ group }) {
-  // let { id } = group;
-
+export function IncomeGroupMonth() {
   return (
     <View style={{ flex: 1 }}>
       <SheetCell
@@ -413,12 +431,18 @@ export function IncomeGroupMonth({ group }) {
   );
 }
 
+type IncomeCategoryMonthProps = {
+  category: { id: string; name: string };
+  isLast: boolean;
+  monthIndex: number;
+  onShowActivity: (name: string, id: string, idx: number) => void;
+};
 export function IncomeCategoryMonth({
   category,
   isLast,
   monthIndex,
   onShowActivity,
-}) {
+}: IncomeCategoryMonthProps) {
   return (
     <View style={{ flex: 1 }}>
       <Field

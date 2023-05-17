@@ -1,4 +1,11 @@
-import React, { Children, Fragment, cloneElement, forwardRef } from 'react';
+import React, {
+  Children,
+  type ComponentProps,
+  Fragment,
+  cloneElement,
+  forwardRef,
+  type ReactNode,
+} from 'react';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -6,17 +13,28 @@ import View from './common/View';
 function getChildren(key, children) {
   return Children.toArray(children).reduce((list, child) => {
     if (child) {
-      if (child.type === Fragment) {
+      if (
+        typeof child === 'object' &&
+        'type' in child &&
+        child.type === Fragment
+      ) {
         return list.concat(getChildren(child.key, child.props.children));
       }
-      list.push({ key: key + child.key, child });
+      list.push({ key: key + child['key'], child });
       return list;
     }
     return list;
-  }, []);
+  }, [] as Array<{ key: string; child: ReactNode }>);
 }
 
-const Stack = forwardRef(
+type StackProps = ComponentProps<typeof View> & {
+  direction?: string;
+  align?: string;
+  justify?: string;
+  spacing?: number;
+  debug?: boolean;
+};
+const Stack = forwardRef<HTMLDivElement, StackProps>(
   (
     {
       direction = 'column',

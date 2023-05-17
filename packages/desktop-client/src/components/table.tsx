@@ -9,9 +9,15 @@ import React, {
   useImperativeHandle,
   useContext,
   useMemo,
+  type ComponentProps,
+  type ReactNode,
+  type KeyboardEvent,
+  type UIEvent,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
+
+import { type CSSProperties } from 'glamor';
 
 import {
   AvoidRefocusScrollProvider,
@@ -58,7 +64,16 @@ const CellContext = createContext({
   borderColor: colors.n9,
 });
 
-function CellProvider({ backgroundColor, borderColor, children }) {
+type CellProviderProps = {
+  backgroundColor: string;
+  borderColor: string;
+  children: ReactNode;
+};
+function CellProvider({
+  backgroundColor,
+  borderColor,
+  children,
+}: CellProviderProps) {
   let value = useMemo(
     () => ({
       backgroundColor,
@@ -70,7 +85,14 @@ function CellProvider({ backgroundColor, borderColor, children }) {
   return <CellContext.Provider value={value}>{children}</CellContext.Provider>;
 }
 
-export const Field = forwardRef(function Field(
+type FieldProps = ComponentProps<typeof View> & {
+  width: number | 'flex';
+  name?: string;
+  borderColor?: string;
+  truncate?: boolean;
+  contentStyle?: CSSProperties;
+};
+export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   {
     width,
     name,
@@ -140,6 +162,18 @@ export const Field = forwardRef(function Field(
   );
 });
 
+type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
+  formatter?: (value: string, type?: unknown) => string;
+  focused?: boolean;
+  textAlign?: string;
+  borderColor?: string;
+  plain?: boolean;
+  exposed?: boolean;
+  children?: ReactNode | (() => ReactNode);
+  value?: string;
+  valueStyle?: CSSProperties;
+  onExpose?: (name: string) => void;
+};
 export function Cell({
   width,
   name,
@@ -155,7 +189,7 @@ export function Cell({
   style,
   valueStyle,
   ...viewProps
-}) {
+}: CellProps) {
   let mouseCoords = useRef(null);
   let viewRef = useRef(null);
 
@@ -191,6 +225,7 @@ export function Cell({
       {plain ? (
         children
       ) : exposed ? (
+        // @ts-expect-error Missing props refinement
         children()
       ) : (
         <View
@@ -234,6 +269,14 @@ export function Cell({
   );
 }
 
+type RowProps = ComponentProps<typeof View> & {
+  backgroundColor?: string;
+  borderColor?: string;
+  inset?: number;
+  collapsed?: boolean;
+  focused?: boolean;
+  highlighted?: boolean;
+};
 export function Row({
   backgroundColor = 'white',
   borderColor = colors.border,
@@ -245,7 +288,7 @@ export function Row({
   height,
   style,
   ...nativeProps
-}) {
+}: RowProps) {
   let [shouldHighlight, setShouldHighlight] = useState(false);
   let prevHighlighted = useRef(false);
   let rowRef = useRef(null);
@@ -315,7 +358,15 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: '#d9d9d9' },
 };
 
-function InputValue({ value: defaultValue, onUpdate, onBlur, ...props }) {
+type InputValueProps = ComponentProps<typeof Input> & {
+  value: string;
+};
+function InputValue({
+  value: defaultValue,
+  onUpdate,
+  onBlur,
+  ...props
+}: InputValueProps) {
   let [value, setValue] = useState(defaultValue);
 
   function onBlur_(e) {
@@ -355,6 +406,13 @@ function InputValue({ value: defaultValue, onUpdate, onBlur, ...props }) {
   );
 }
 
+type InputCellProps = ComponentProps<typeof Cell> & {
+  inputProps: ComponentProps<typeof InputValue>;
+  onUpdate: ComponentProps<typeof InputValue>['onUpdate'];
+  onBlur: ComponentProps<typeof InputValue>['onBlur'];
+  textAlign?: string;
+  error?: ReactNode;
+};
 export function InputCell({
   inputProps,
   onUpdate,
@@ -362,7 +420,7 @@ export function InputCell({
   textAlign,
   error,
   ...props
-}) {
+}: InputCellProps) {
   return (
     <Cell textAlign={textAlign} {...props}>
       {() => (
@@ -400,13 +458,26 @@ export function shouldSaveFromKey(e) {
   }
 }
 
+type CustomCellRenderProps = {
+  onBlur: (ev: UIEvent<unknown>) => void;
+  onKeyDown: (ev: KeyboardEvent<unknown>) => void;
+  onUpdate: (value: string) => void;
+  onSave: (value: string) => void;
+  shouldSaveFromKey: (ev: KeyboardEvent<unknown>) => boolean;
+  inputStyle: CSSProperties;
+};
+type CustomCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
+  children: (props: CustomCellRenderProps) => ReactNode;
+  onUpdate: (value: string) => void;
+  onBlur: (ev: UIEvent<unknown>) => void;
+};
 export function CustomCell({
   value: defaultValue,
   children,
   onUpdate,
   onBlur,
   ...props
-}) {
+}: CustomCellProps) {
   let [value, setValue] = useState(defaultValue);
   let [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
 
@@ -450,7 +521,10 @@ export function CustomCell({
   );
 }
 
-export function DeleteCell({ onDelete, style, ...props }) {
+type DeleteCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
+  onDelete?: () => void;
+};
+export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
   return (
     <Cell
       {...props}
@@ -467,7 +541,15 @@ export function DeleteCell({ onDelete, style, ...props }) {
   );
 }
 
-export const CellButton = forwardRef(
+type CellButtonProps = {
+  style?: CSSProperties;
+  disabled?: boolean;
+  clickBehavior?: string;
+  onSelect?: (e) => void;
+  onEdit?: () => void;
+  children: ReactNode;
+};
+export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
   ({ style, disabled, clickBehavior, onSelect, onEdit, children }, ref) => {
     // This represents a cell that acts like a button: it's clickable,
     // focusable, etc. The reason we don't use a button is because the
@@ -486,7 +568,7 @@ export const CellButton = forwardRef(
       <View
         innerRef={ref}
         className="cell-button"
-        tabIndex="0"
+        tabIndex={0}
         onKeyDown={e => {
           if (e.key === 'x' || e.key === ' ') {
             e.preventDefault();
@@ -527,6 +609,11 @@ export const CellButton = forwardRef(
   },
 );
 
+type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
+  partial: boolean;
+  onEdit?: () => void;
+  onSelect?: (e) => void;
+};
 export function SelectCell({
   focused,
   selected,
@@ -535,7 +622,7 @@ export function SelectCell({
   onSelect,
   onEdit,
   ...props
-}) {
+}: SelectCellProps) {
   return (
     <Cell
       {...props}
@@ -583,24 +670,36 @@ export function SelectCell({
   );
 }
 
+type SheetCellValueProps = {
+  binding: ComponentProps<typeof SheetValue>['binding'];
+  type: string;
+  getValueStyle?: (value: unknown) => CSSProperties;
+  formatExpr?: (value) => string;
+  unformatExpr?: (value: string) => unknown;
+};
+
+type SheetCellProps = ComponentProps<typeof Cell> & {
+  valueProps: SheetCellValueProps;
+  inputProps?: Omit<ComponentProps<typeof InputValue>, 'value' | 'onUpdate'>;
+  onSave?: (value) => void;
+};
 export function SheetCell({
   valueProps,
   valueStyle,
   inputProps,
-  sync,
   textAlign,
   onSave,
   ...props
-}) {
+}: SheetCellProps) {
   const { binding, type, getValueStyle, formatExpr, unformatExpr } = valueProps;
 
   return (
     <SheetValue
       binding={binding}
-      onChange={() => {
+      onChange={e => {
         // "close" the cell if it's editing
         if (props.exposed && inputProps && inputProps.onBlur) {
-          inputProps.onBlur();
+          inputProps.onBlur(e);
         }
       }}
     >
@@ -641,7 +740,16 @@ export function SheetCell({
   );
 }
 
-export function TableHeader({ headers, children, version, ...rowProps }) {
+type TableHeaderProps = ComponentProps<typeof Row> & {
+  headers?: Array<ComponentProps<typeof Cell>>;
+  version?: string;
+};
+export function TableHeader({
+  headers,
+  children,
+  version,
+  ...rowProps
+}: TableHeaderProps) {
   return (
     <View
       style={
@@ -726,12 +834,59 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
 let rowStyle = { position: 'absolute', willChange: 'transform', width: '100%' };
 
-export const TableWithNavigator = forwardRef(({ fields, ...props }, ref) => {
+type TableHandleRef = {
+  scrollTo: (id: number, alignment?: string) => void;
+  scrollToTop: () => void;
+  getScrolledItem: () => number;
+  setRowAnimation: (flag) => void;
+  edit(id: number, field, shouldScroll): void;
+  anchor(): void;
+  unanchor(): void;
+  isAnchored(): boolean;
+};
+
+type TableWithNavigatorProps = TableProps & {
+  fields;
+};
+export const TableWithNavigator = forwardRef<
+  TableHandleRef,
+  TableWithNavigatorProps
+>(({ fields, ...props }, ref) => {
   let navigator = useTableNavigator(props.items, fields);
   return <Table {...props} navigator={navigator} />;
 });
 
-export const Table = forwardRef(
+type TableItem = { id: number };
+
+type TableProps = {
+  items: TableItem[];
+  count?: number;
+  headers?: ReactNode | TableHeaderProps['headers'];
+  contentHeader: ReactNode;
+  loading: boolean;
+  rowHeight?: number;
+  backgroundColor?: string;
+  renderItem: (arg: {
+    item: TableItem;
+    editing: boolean;
+    focusedField: unknown;
+    onEdit: (id, field) => void;
+    index: number;
+    position: number;
+  }) => ReactNode;
+  renderEmpty?: ReactNode | (() => ReactNode);
+  getItemKey: (index: number) => TableItem['id'];
+  loadMore?: () => void;
+  style?: CSSProperties;
+  navigator: ReturnType<typeof useTableNavigator>;
+  listRef;
+  onScroll: () => void;
+  version?: string;
+  animated?: boolean;
+  allowPopupsEscape?: boolean;
+  isSelected?: (id: TableItem['id']) => boolean;
+};
+export const Table = forwardRef<TableHandleRef, TableProps>(
   (
     {
       items,
@@ -808,6 +963,7 @@ export const Table = forwardRef(
         onEdit(id, field);
 
         if (id && shouldScroll) {
+          // @ts-expect-error this should not be possible
           ref.scrollTo(id);
         }
       },
@@ -863,6 +1019,7 @@ export const Table = forwardRef(
               transform: 'translateY(var(--pos))',
             },
           ]}
+          // @ts-expect-error not a recognised style attribute
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
         >
@@ -1006,14 +1163,14 @@ export function useTableNavigator(data, fields) {
   let getFields = typeof fields !== 'function' ? () => fields : fields;
   let [editingId, setEditingId] = useState(null);
   let [focusedField, setFocusedField] = useState(null);
-  let containerRef = useRef();
+  let containerRef = useRef<HTMLDivElement>();
 
   // See `onBlur` for why we need this
   let store = useStore();
   let modalStackLength = useRef(0);
 
   // onEdit is passed to children, so make sure it maintains identity
-  let onEdit = useCallback((id, field) => {
+  let onEdit = useCallback((id, field?) => {
     setEditingId(id);
     setFocusedField(id ? field : null);
   }, []);
