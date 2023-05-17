@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { type ReactNode, useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
@@ -8,17 +8,13 @@ import { colors } from '../../style';
 import tokens from '../../tokens';
 import { View, Link } from '../common';
 
-interface SettingProps {
-  primaryAction: React.ReactNode;
+type SettingProps = {
+  primaryAction: ReactNode;
   style?: CSSProperties;
-  children: React.ReactNode;
-}
+  children: ReactNode;
+};
 
-export const Setting: React.FC<SettingProps> = ({
-  primaryAction,
-  style,
-  children,
-}) => {
+export const Setting = ({ primaryAction, style, children }: SettingProps) => {
   return (
     <View
       {...css([
@@ -49,11 +45,11 @@ export const Setting: React.FC<SettingProps> = ({
   );
 };
 
-interface AdvancedToggleProps {
-  children: React.ReactNode;
-}
+type AdvancedToggleProps = {
+  children: ReactNode;
+};
 
-export const AdvancedToggle: React.FC<AdvancedToggleProps> = ({ children }) => {
+export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
   let location = useLocation();
   let [expanded, setExpanded] = useState(location.hash === '#advanced');
 
@@ -67,7 +63,7 @@ export const AdvancedToggle: React.FC<AdvancedToggleProps> = ({ children }) => {
           marginBottom: 25,
           width: '100%',
         },
-        media(`(min-width: ${tokens.breakpoint_medium})`, {
+        media(`(min-width: ${tokens.breakpoint_small})`, {
           width: 'auto',
         }),
       ]}

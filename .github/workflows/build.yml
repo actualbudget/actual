@@ -23,6 +23,13 @@ jobs:
         uses: ./.github/actions/setup
       - name: Build API
         run: cd packages/api && yarn build
+      - name: Create package tgz
+        run: cd packages/api && yarn pack && mv package.tgz actual-api.tgz
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: actual-api
+          path: packages/api/actual-api.tgz
 
   web:
     runs-on: ubuntu-latest

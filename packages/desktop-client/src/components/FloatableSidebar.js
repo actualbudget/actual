@@ -1,44 +1,52 @@
-import React, { useState, useContext, useMemo } from 'react';
-import { connect } from 'react-redux';
+import React, { createContext, useState, useContext, useMemo } from 'react';
+import { connect, useSelector } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
-import { useViewportSize } from '@react-aria/utils';
-
 import * as actions from 'loot-core/src/client/actions';
+
+import { useResponsive } from '../ResponsiveProvider';
 
 import { View } from './common';
 import { SIDEBAR_WIDTH } from './sidebar';
 import SidebarWithData from './SidebarWithData';
 
-const SidebarContext = React.createContext(null);
+const SidebarContext = createContext(null);
 
 export function SidebarProvider({ children }) {
+  let floatingSidebar = useSelector(
+    state => state.prefs.global.floatingSidebar,
+  );
   let [hidden, setHidden] = useState(true);
+  let { width } = useResponsive();
+  let alwaysFloats = width < 668;
+  let floating = floatingSidebar || alwaysFloats;
+
   return (
-    <SidebarContext.Provider value={[hidden, setHidden]}>
+    <SidebarContext.Provider
+      value={{ hidden, setHidden, floating, alwaysFloats }}
+    >
       {children}
     </SidebarContext.Provider>
   );
 }
 
 export function useSidebar() {
-  useViewportSize(); // Force re-render on window resize
-  let windowWidth = document.documentElement.clientWidth;
-  let alwaysFloats = windowWidth < 668;
+  let { hidden, setHidden, floating, alwaysFloats } =
+    useContext(SidebarContext);
 
-  let [hidden, setHidden] = useContext(SidebarContext);
   return useMemo(
-    () => ({ hidden, setHidden, alwaysFloats }),
-    [hidden, setHidden, alwaysFloats],
+    () => ({ hidden, setHidden, floating, alwaysFloats }),
+    [hidden, setHidden, floating, alwaysFloats],
   );
 }
 
 function Sidebar({ floatingSidebar }) {
   let sidebar = useSidebar();
+  let { isNarrowWidth } = useResponsive();
 
   let sidebarShouldFloat = floatingSidebar || sidebar.alwaysFloats;
 
-  return (
+  return isNarrowWidth ? null : (
     <View
       onMouseOver={
         sidebarShouldFloat

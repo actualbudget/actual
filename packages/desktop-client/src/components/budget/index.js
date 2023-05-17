@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { memo, PureComponent, useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
@@ -30,7 +30,7 @@ import { RolloverContext } from './rollover/RolloverContext';
 
 let _initialBudgetMonth = null;
 
-class Budget extends React.PureComponent {
+class Budget extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -497,7 +497,7 @@ class Budget extends React.PureComponent {
   }
 }
 
-const RolloverBudgetSummary = React.memo(props => {
+const RolloverBudgetSummary = memo(props => {
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   return (
     <rollover.BudgetSummary

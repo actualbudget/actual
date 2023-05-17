@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
 import { css, before } from 'glamor';
@@ -6,7 +6,7 @@ import { VictoryTooltip } from 'victory';
 
 import { colors } from '../../style';
 
-class Tooltip extends React.Component {
+class Tooltip extends Component {
   static defaultEvents = VictoryTooltip.defaultEvents;
 
   render() {

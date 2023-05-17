@@ -1,4 +1,5 @@
 import React, {
+  createContext,
   useContext,
   useReducer,
   useCallback,
@@ -9,8 +10,7 @@ import { useSelector } from 'react-redux';
 
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
-
-import { hasModifierKey } from '../util/keys';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 function iterateRange(range, func) {
   let from = Math.min(range.start, range.end);
@@ -28,9 +28,9 @@ export default function useSelected(name, items, initialSelectedIds) {
         case 'select': {
           let { selectedRange } = state;
           let selectedItems = new Set(state.selectedItems);
-          let { id } = action;
+          let { id, event } = action;
 
-          if (hasModifierKey('shift') && selectedRange) {
+          if (event.shiftKey && selectedRange) {
             let idx = items.findIndex(p => p.id === id);
             let startIdx = items.findIndex(p => p.id === selectedRange.start);
             let endIdx = items.findIndex(p => p.id === selectedRange.end);
@@ -203,8 +203,8 @@ export default function useSelected(name, items, initialSelectedIds) {
   };
 }
 
-let SelectedDispatch = React.createContext(null);
-let SelectedItems = React.createContext(null);
+let SelectedDispatch = createContext(null);
+let SelectedItems = createContext(null);
 
 export function useSelectedDispatch() {
   return useContext(SelectedDispatch);
@@ -223,17 +223,24 @@ export function SelectedProvider({ instance, fetchAllIds, children }) {
 
   let dispatch = useCallback(
     async action => {
+      if (!action.event && isNonProductionEnvironment()) {
+        throw new Error('SelectedDispatch actions must have an event');
+      }
       if (action.type === 'select-all') {
         if (latestItems.current && latestItems.current.size > 0) {
-          return instance.dispatch({ type: 'select-none' });
+          return instance.dispatch({
+            type: 'select-none',
+            event: action.event,
+          });
         } else {
           if (fetchAllIds) {
             return instance.dispatch({
               type: 'select-all',
               ids: await fetchAllIds(),
+              event: action.event,
             });
           }
-          return instance.dispatch({ type: 'select-all' });
+          return instance.dispatch({ type: 'select-all', event: action.event });
         }
       }
       return instance.dispatch(action);

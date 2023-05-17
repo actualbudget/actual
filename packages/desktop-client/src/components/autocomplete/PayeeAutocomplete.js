@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { Fragment, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
@@ -120,7 +120,7 @@ export function PayeeList({
           lastType = type;
 
           return (
-            <React.Fragment key={item.id}>
+            <Fragment key={item.id}>
               {title && (
                 <div
                   key={'title-' + idx}
@@ -161,7 +161,7 @@ export function PayeeList({
                   More payees are available, search to find them
                 </div>
               )}
-            </React.Fragment>
+            </Fragment>
           );
         })}
       </View>

@@ -1,4 +1,6 @@
 import React, {
+  forwardRef,
+  memo,
   useState,
   useEffect,
   useRef,
@@ -297,7 +299,7 @@ export function ActionExpression({ field, op, value, options, style }) {
   );
 }
 
-let Rule = React.memo(
+let Rule = memo(
   ({
     rule,
     hovered,
@@ -327,8 +329,8 @@ let Rule = React.memo(
         <SelectCell
           exposed={hovered || selected || editing}
           focused={focusedField === 'select'}
-          onSelect={() => {
-            dispatchSelected({ type: 'select', id: rule.id });
+          onSelect={e => {
+            dispatchSelected({ type: 'select', id: rule.id, event: e });
           }}
           onEdit={() => onEdit(rule.id, 'select')}
           selected={selected}
@@ -411,7 +413,7 @@ let Rule = React.memo(
   },
 );
 
-let SimpleTable = React.forwardRef(
+let SimpleTable = forwardRef(
   (
     { data, navigator, loadMore, style, onHoverLeave, children, ...props },
     ref,
@@ -476,7 +478,7 @@ function RulesHeader() {
         exposed={true}
         focused={false}
         selected={selectedItems.size > 0}
-        onSelect={() => dispatchSelected({ type: 'select-all' })}
+        onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
       />
       <Cell value="Stage" width={50} />
       <Cell value="Rule" width="flex" />

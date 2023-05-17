@@ -452,6 +452,10 @@ handlers['payees-get'] = async function () {
   return db.getPayees();
 };
 
+handlers['payees-get-orphaned'] = async function () {
+  return db.syncGetOrphanedPayees();
+};
+
 handlers['payees-get-rule-counts'] = async function () {
   let payeeCounts = {};
 
