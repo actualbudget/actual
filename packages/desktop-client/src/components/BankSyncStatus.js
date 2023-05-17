@@ -16,7 +16,7 @@ function BankSyncStatus({ accountsSyncing }) {
       : accountsSyncing
     : null;
 
-  const transitions = useTransition(name, null, {
+  const transitions = useTransition(name, {
     from: { opacity: 0, transform: 'translateY(-100px)' },
     enter: { opacity: 1, transform: 'translateY(0)' },
     leave: { opacity: 0, transform: 'translateY(-100px)' },
@@ -35,10 +35,10 @@ function BankSyncStatus({ accountsSyncing }) {
         zIndex: 501,
       }}
     >
-      {transitions.map(
-        ({ item, key, props }) =>
+      {transitions(
+        (style, item) =>
           item && (
-            <animated.div key={key} style={props}>
+            <animated.div key={item} style={style}>
               <View
                 style={{
                   borderRadius: 4,
