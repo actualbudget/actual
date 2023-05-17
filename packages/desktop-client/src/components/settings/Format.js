@@ -4,6 +4,7 @@ import { numberFormats } from 'loot-core/src/shared/util';
 
 import tokens from '../../tokens';
 import { Button, CustomSelect, Text, View } from '../common';
+import { useSidebar } from '../FloatableSidebar';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
@@ -33,11 +34,9 @@ function Column({ title, children }) {
     <View
       style={{
         alignItems: 'flex-start',
-        gap: '0.5em',
         flexGrow: 1,
-        [`@media (max-width: ${tokens.breakpoint_xs})`]: {
-          width: '100%',
-        },
+        gap: '0.5em',
+        width: '100%',
       }}
     >
       <Text style={{ fontWeight: 500 }}>{title}</Text>
@@ -64,6 +63,7 @@ export default function FormatSettings({ prefs, savePrefs }) {
     savePrefs({ hideFraction });
   }
 
+  let sidebar = useSidebar();
   let firstDayOfWeekIdx = prefs.firstDayOfWeekIdx || '0'; // Sunday
   let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
   let numberFormat = prefs.numberFormat || 'comma-dot';
@@ -73,11 +73,15 @@ export default function FormatSettings({ prefs, savePrefs }) {
       primaryAction={
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: 'column',
             gap: '1em',
             width: '100%',
-            [`@media (max-width: ${tokens.breakpoint_xs})`]: {
-              flexDirection: 'column',
+            [`@media (min-width: ${
+              sidebar.floating
+                ? tokens.breakpoint_small
+                : tokens.breakpoint_medium
+            })`]: {
+              flexDirection: 'row',
             },
           }}
         >

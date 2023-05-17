@@ -19,6 +19,7 @@ import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import NavigationMenu from '../icons/v2/NavigationMenu';
+import { useResponsive } from '../ResponsiveProvider';
 import { colors } from '../style';
 import tokens from '../tokens';
 
@@ -136,7 +137,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
               ? colors.n9
               : null,
         },
-        media(`(min-width: ${tokens.breakpoint_medium})`, {
+        media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
             syncState === 'error'
               ? colors.r4
@@ -269,9 +270,10 @@ function Titlebar({
   sync,
 }) {
   let sidebar = useSidebar();
+  let { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
 
-  return (
+  return isNarrowWidth ? null : (
     <View
       style={[
         {
