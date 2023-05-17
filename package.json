@@ -22,7 +22,7 @@
     "start:desktop": "npm-run-all --parallel 'start:desktop-*'",
     "start:desktop-node": "yarn workspace loot-core watch:node",
     "start:desktop-client": "yarn workspace @actual-app/web watch",
-    "start:desktop-electron": "yarn workspace Actual watch",
+    "start:desktop-electron": "yarn workspace desktop-electron watch",
     "start:browser": "npm-run-all --parallel 'start:browser-*'",
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
