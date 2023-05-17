@@ -358,7 +358,6 @@ function FinancesApp(props) {
                 <Notifications />
                 <BankSyncStatus />
                 <StackedRoutes />
-                {/*window.Actual.IS_DEV && <Debugger />*/}
                 <Modals history={patchedHistory} />
               </div>
 
