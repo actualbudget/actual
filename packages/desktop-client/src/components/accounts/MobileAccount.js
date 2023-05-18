@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 
 import debounce from 'debounce';
 import memoizeOne from 'memoize-one';

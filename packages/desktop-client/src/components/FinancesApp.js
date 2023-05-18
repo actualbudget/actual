@@ -10,6 +10,7 @@ import {
   useLocation,
   NavLink,
 } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { createBrowserHistory } from 'history';
 import hotkeys from 'hotkeys-js';
@@ -283,60 +284,62 @@ function FinancesApp(props) {
 
   return (
     <Router history={patchedHistory}>
-      <View style={{ height: '100%', backgroundColor: colors.n10 }}>
-        <GlobalKeys />
+      <CompatRouter>
+        <View style={{ height: '100%', backgroundColor: colors.n10 }}>
+          <GlobalKeys />
 
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <FloatableSidebar />
+          <View style={{ flexDirection: 'row', flex: 1 }}>
+            <FloatableSidebar />
 
-          <div
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              position: 'relative',
-              width: '100%',
-            }}
-          >
-            <Titlebar
-              style={{
-                WebkitAppRegion: 'drag',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-              }}
-            />
             <div
               style={{
                 flex: 1,
                 display: 'flex',
-                overflow: 'auto',
+                flexDirection: 'column',
+                overflow: 'hidden',
                 position: 'relative',
+                width: '100%',
               }}
             >
-              <Notifications />
-              <BankSyncStatus />
-              <StackedRoutes />
-              <Modals history={patchedHistory} />
-            </div>
+              <Titlebar
+                style={{
+                  WebkitAppRegion: 'drag',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                }}
+              />
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  overflow: 'auto',
+                  position: 'relative',
+                }}
+              >
+                <Notifications />
+                <BankSyncStatus />
+                <StackedRoutes />
+                <Modals history={patchedHistory} />
+              </div>
 
-            <Switch>
-              <Route path="/budget">
-                <MobileNavTabs />
-              </Route>
-              <Route path="/accounts">
-                <MobileNavTabs />
-              </Route>
-              <Route path="/settings">
-                <MobileNavTabs />
-              </Route>
-            </Switch>
-          </div>
+              <Switch>
+                <Route path="/budget">
+                  <MobileNavTabs />
+                </Route>
+                <Route path="/accounts">
+                  <MobileNavTabs />
+                </Route>
+                <Route path="/settings">
+                  <MobileNavTabs />
+                </Route>
+              </Switch>
+            </div>
+          </View>
         </View>
-      </View>
+      </CompatRouter>
     </Router>
   );
 }
