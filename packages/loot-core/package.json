@@ -34,7 +34,8 @@
     "md5": "^2.3.0",
     "mitt": "^3.0.0",
     "node-fetch": "^2.6.9",
-    "node-libofx": "*"
+    "node-libofx": "*",
+    "ws": "8.13.0"
   },
   "devDependencies": {
     "@actual-app/api": "*",
@@ -45,7 +46,6 @@
     "@types/better-sqlite3": "^7.6.4",
     "@types/jest": "^27.5.0",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
-    "@types/node-ipc": "^9.2.0",
     "@types/pegjs": "^0.10.3",
     "@types/webpack": "^5.28.0",
     "adm-zip": "^0.5.9",

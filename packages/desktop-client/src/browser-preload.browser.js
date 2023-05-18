@@ -110,7 +110,6 @@ global.Actual = {
   applyAppUpdate: () => {},
   updateAppMenu: isBudgetOpen => {},
 
-  ipcConnect: () => {},
   getServerSocket: async () => {
     return worker;
   },

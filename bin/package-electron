@@ -74,19 +74,15 @@ if [ "$OSTYPE" == "msys" ]; then
     fi
 fi
 
-# We only need to run linting once (and this doesn't seem to work on
-# Windows for some reason)
-if [[ $CI != true && "$OSTYPE" == "darwin"* ]]; then
-    yarn lint
-fi
-
 yarn patch-package
+
+yarn rebuild-electron
 
 yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build
 
-yarn workspace Actual update-client
+yarn workspace desktop-electron update-client
 
 (
     cd packages/desktop-electron;
@@ -103,7 +99,7 @@ yarn workspace Actual update-client
         echo "\nCreated release $VERSION with release notes \"$RELEASE_NOTES\""
     elif [ "$RELEASE" == "beta" ]; then
         yarn build --publish never --arm64 --x64
-        
+
         echo "\nCreated beta release $VERSION"
     else
         SKIP_NOTARIZATION=true yarn build --publish never --x64
