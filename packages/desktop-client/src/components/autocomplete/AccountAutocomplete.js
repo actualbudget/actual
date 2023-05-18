@@ -25,9 +25,18 @@ export function AccountList({
       >
         {items.map((item, idx) => {
           const showGroup = lastItem
-            ? item.offbudget !== lastItem.offbudget
+            ? (item.offbudget !== lastItem.offbudget && !item.closed) ||
+              (item.closed !== lastItem.closed && !item.offbudget)
             : true;
-          const group = item.offbudget ? 'Off Budget' : 'For Budget';
+
+          const group = `${
+            item.closed
+              ? 'Closed Accounts'
+              : item.offbudget
+              ? 'Off Budget'
+              : 'For Budget'
+          }`;
+
           lastItem = item;
 
           return [
@@ -74,16 +83,26 @@ export default function AccountAutocomplete({
 }) {
   let accounts = useCachedAccounts() || [];
 
+  //remove closed accounts if needed
+  //then sort by closed, then offbudget
+  accounts = accounts
+    .filter(item => {
+      return includeClosedAccounts ? item : !item.closed;
+    })
+    .sort((a, b) => {
+      if (a.closed === b.closed) {
+        return a.offbudget === b.offbudget ? 0 : a.offbudget ? 1 : -1;
+      } else {
+        return a.closed ? 1 : -1;
+      }
+    });
+
   return (
     <Autocomplete
       strict={true}
       highlightFirst={true}
       embedded={embedded}
-      suggestions={
-        includeClosedAccounts
-          ? accounts
-          : accounts.filter(a => a.closed === false)
-      }
+      suggestions={accounts}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <AccountList
           items={items}

@@ -2,7 +2,6 @@ import {
   differenceInCalendarMonths,
   addMonths,
   addWeeks,
-  addDays,
   format,
 } from 'date-fns';
 
@@ -56,15 +55,17 @@ async function processTemplate(month, force) {
       monthUtils.sheetForMonth(month),
       `budget-${category.id}`,
     );
-    if (budgeted)
+    if (budgeted) {
       originalCategoryBalance.push({ cat: category, amount: budgeted });
+    }
     let template = category_templates[category.id];
     if (template) {
-      for (let l = 0; l < template.length; l++)
+      for (let l = 0; l < template.length; l++) {
         lowestPriority =
           template[l].priority > lowestPriority
             ? template[l].priority
             : lowestPriority;
+      }
       await setBudget({
         category: category.id,
         month,
@@ -92,16 +93,18 @@ async function processTemplate(month, force) {
           priorityCheck = lowPriority;
           skipSchedule = priorityCheck !== priority ? true : false;
           isScheduleOrBy = true;
-          if (!skipSchedule && errorNotice)
+          if (!skipSchedule && errorNotice) {
             errors.push(
               category.name +
                 ': Schedules and By templates should all have the same priority.  Using priority ' +
                 priorityCheck,
             );
+          }
         }
         if (!skipSchedule) {
-          if (!isScheduleOrBy)
+          if (!isScheduleOrBy) {
             template = template.filter(t => t.priority === priority);
+          }
           if (template.length > 0) {
             errors = errors.concat(
               template
@@ -299,10 +302,9 @@ async function applyCategoryTemplate(
   let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   let to_budget = budgeted;
   let limit;
+  let hold;
   let last_month_balance = balance - spent - budgeted;
-  let totalTarget = 0;
-  let totalMonths = 0;
-  let skipMonths = 0;
+  let remainder = 0;
   for (let l = 0; l < template_lines.length; l++) {
     let template = template_lines[l];
     switch (template.type) {
@@ -313,7 +315,8 @@ async function applyCategoryTemplate(
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
-            limit = amountToInteger(template.limit);
+            limit = amountToInteger(template.limit.amount);
+            hold = template.limit.hold;
           }
         }
         let increment = 0;
@@ -333,7 +336,7 @@ async function applyCategoryTemplate(
       }
       case 'by': {
         // by has 'amount' and 'month' params
-        let N = template_lines.length;
+        let target = 0;
         let target_month = new Date(`${template_lines[l].month}-01`);
         let num_months = differenceInCalendarMonths(
           target_month,
@@ -350,21 +353,19 @@ async function applyCategoryTemplate(
             current_month,
           );
         }
-        if (num_months < 0) {
-          skipMonths++;
+        if (l === 0) remainder = last_month_balance;
+        remainder = amountToInteger(template_lines[l].amount) - remainder;
+        if (remainder >= 0) {
+          target = remainder;
+          remainder = 0;
         } else {
-          totalTarget += amountToInteger(template_lines[l].amount);
-          totalMonths += num_months + 1;
+          target = 0;
+          remainder = Math.abs(remainder);
         }
-
-        let diff = totalTarget - last_month_balance;
-        if (diff >= 0 && totalMonths > 0 && l === N - 1) {
-          let increment = Math.round(
-            ((totalTarget - last_month_balance) / totalMonths) *
-              (N - skipMonths),
-          );
-          if (to_budget + increment < budgetAvailable || !priority) {
-            to_budget += increment;
+        let diff = num_months > -1 ? Math.round(target / (num_months + 1)) : 0;
+        if (diff >= 0) {
+          if (to_budget + diff < budgetAvailable || !priority) {
+            to_budget += diff;
           } else {
             if (budgetAvailable > 0) to_budget += budgetAvailable;
             errors.push(`Insufficient funds.`);
@@ -381,7 +382,8 @@ async function applyCategoryTemplate(
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
-            limit = amountToInteger(template.limit);
+            limit = amountToInteger(template.limit.amount);
+            hold = template.limit.hold;
           }
         }
         let w = new Date(template.starting);
@@ -396,8 +398,8 @@ async function applyCategoryTemplate(
               if (budgetAvailable > 0) to_budget += budgetAvailable;
               errors.push(`Insufficient funds.`);
             }
-            w = addWeeks(w, weeks);
           }
+          w = addWeeks(w, weeks);
         }
         break;
       }
@@ -499,44 +501,35 @@ async function applyCategoryTemplate(
         let conditions = rule.serialize().conditions;
         let { date: dateCond, amount: amountCond } =
           extractScheduleConds(conditions);
-        let isRepeating =
-          Object(dateCond.value) === dateCond.value &&
-          'frequency' in dateCond.value;
         let next_date_string = getNextDate(dateCond, current_month);
         let num_months = differenceInCalendarMonths(
           new Date(next_date_string),
           current_month,
         );
-        let target = -getScheduledAmount(amountCond.value);
-        let diff = target - balance + budgeted;
+        if (l === 0) remainder = last_month_balance;
+        remainder = -getScheduledAmount(amountCond.value) - remainder;
+        let target = 0;
+        if (remainder >= 0) {
+          target = remainder;
+          remainder = 0;
+        } else {
+          target = 0;
+          remainder = Math.abs(remainder);
+        }
+        let diff = num_months > 0 ? Math.round(target / num_months) : 0;
         if (num_months < 0) {
           errors.push(
             `Non-repeating schedule ${template.name} was due on ${next_date_string}, which is in the past.`,
           );
           return { errors };
         } else if (num_months > 0) {
-          if (diff >= 0 && num_months > -1) {
-            to_budget += Math.round(diff / num_months);
-          }
-        } else {
-          let monthly_target = 0;
-          let next_month = addMonths(current_month, 1);
-          let next_date = new Date(next_date_string);
-          if (isRepeating) {
-            while (next_date.getTime() < next_month.getTime()) {
-              if (next_date.getTime() >= current_month.getTime()) {
-                monthly_target += target;
-              }
-              next_date = addDays(next_date, 1);
-              next_date_string = getNextDate(dateCond, next_date);
-              next_date = new Date(next_date_string);
-            }
-          } else {
-            monthly_target = target;
-          }
-          let increment = monthly_target - balance + budgeted;
-          if (to_budget + increment < budgetAvailable || !priority) {
-            to_budget += increment;
+          if (
+            (diff >= 0 &&
+              num_months > -1 &&
+              to_budget + diff < budgetAvailable) ||
+            !priority
+          ) {
+            to_budget += diff;
           } else {
             if (budgetAvailable > 0) to_budget = budgetAvailable;
             errors.push(`Insufficient funds.`);
@@ -548,7 +541,9 @@ async function applyCategoryTemplate(
   }
 
   if (limit != null) {
-    if (to_budget + last_month_balance > limit) {
+    if (hold && balance > limit) {
+      to_budget = 0;
+    } else if (to_budget + last_month_balance > limit) {
       to_budget = limit - last_month_balance;
     }
   }

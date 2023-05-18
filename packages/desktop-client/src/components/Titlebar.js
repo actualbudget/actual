@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+} from 'react';
 import { connect } from 'react-redux';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
@@ -13,6 +19,7 @@ import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import NavigationMenu from '../icons/v2/NavigationMenu';
+import { useResponsive } from '../ResponsiveProvider';
 import { colors } from '../style';
 import tokens from '../tokens';
 
@@ -33,7 +40,7 @@ import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import SheetValue from './spreadsheet/SheetValue';
 
-export let TitlebarContext = React.createContext();
+export let TitlebarContext = createContext();
 
 export function TitlebarProvider({ children }) {
   let listeners = useRef([]);
@@ -130,7 +137,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
               ? colors.n9
               : null,
         },
-        media(`(min-width: ${tokens.breakpoint_medium})`, {
+        media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
             syncState === 'error'
               ? colors.r4
@@ -263,9 +270,10 @@ function Titlebar({
   sync,
 }) {
   let sidebar = useSidebar();
+  let { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
 
-  return (
+  return isNarrowWidth ? null : (
     <View
       style={[
         {

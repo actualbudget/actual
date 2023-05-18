@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import { css } from 'glamor';
@@ -10,6 +10,7 @@ import {
 } from 'loot-core/src/platform/client/fetch';
 
 import installPolyfills from '../polyfills';
+import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars } from '../style';
 
 import AppBackground from './AppBackground';
@@ -19,7 +20,7 @@ import ManagementApp from './manager/ManagementApp';
 import MobileWebMessage from './MobileWebMessage';
 import UpdateNotification from './UpdateNotification';
 
-class App extends React.Component {
+class App extends Component {
   state = {
     fatalError: null,
     initializing: true,
@@ -90,42 +91,44 @@ class App extends React.Component {
     const { fatalError, initializing, hiddenScrollbars } = this.state;
 
     return (
-      <div
-        key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-        {...css([
-          {
-            height: '100%',
-            backgroundColor: '#E8ECF0',
-            overflow: 'hidden',
-          },
-          styles.lightScrollbar,
-        ])}
-      >
-        {fatalError ? (
-          <React.Fragment>
-            <AppBackground />
-            <FatalError error={fatalError} buttonText="Restart app" />
-          </React.Fragment>
-        ) : initializing ? (
-          <AppBackground
-            initializing={initializing}
-            loadingText={loadingText}
-          />
-        ) : budgetId ? (
-          <FinancesApp />
-        ) : (
-          <>
+      <ResponsiveProvider>
+        <div
+          key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+          {...css([
+            {
+              height: '100%',
+              backgroundColor: '#E8ECF0',
+              overflow: 'hidden',
+            },
+            styles.lightScrollbar,
+          ])}
+        >
+          {fatalError ? (
+            <>
+              <AppBackground />
+              <FatalError error={fatalError} buttonText="Restart app" />
+            </>
+          ) : initializing ? (
             <AppBackground
               initializing={initializing}
               loadingText={loadingText}
             />
-            <ManagementApp isLoading={loadingText != null} />
-          </>
-        )}
+          ) : budgetId ? (
+            <FinancesApp />
+          ) : (
+            <>
+              <AppBackground
+                initializing={initializing}
+                loadingText={loadingText}
+              />
+              <ManagementApp isLoading={loadingText != null} />
+            </>
+          )}
 
-        <UpdateNotification />
-        <MobileWebMessage />
-      </div>
+          <UpdateNotification />
+          <MobileWebMessage />
+        </div>
+      </ResponsiveProvider>
     );
   }
 }

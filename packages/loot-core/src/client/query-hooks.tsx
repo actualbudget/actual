@@ -1,10 +1,16 @@
-import React, { useState, useContext, useMemo, useEffect } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useMemo,
+  useEffect,
+} from 'react';
 
 import { liveQuery, LiveQuery, PagedQuery } from './query-helpers';
 
 function makeContext(queryState, opts, QueryClass) {
   let query = new QueryClass(queryState, null, opts);
-  let Context = React.createContext(null);
+  let Context = createContext(null);
 
   function Provider({ children }) {
     let [data, setData] = useState(query.getData());
@@ -64,7 +70,7 @@ export function pagedQueryContext(query, opts) {
   return makeContext(query, opts, PagedQuery);
 }
 
-export function useLiveQuery(query, opts) {
+export function useLiveQuery(query, opts?) {
   let [data, setData] = useState(null);
 
   useEffect(() => {

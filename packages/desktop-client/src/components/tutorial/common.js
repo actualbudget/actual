@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useState } from 'react';
 
 import { colors } from '../../style';
 import { View, AnchorLink } from '../common';
@@ -42,7 +42,7 @@ export function Standalone({ children, width = 320, skipAnimation = false }) {
   );
 }
 
-export const ExternalLink = React.forwardRef((props, ref) => {
+export const ExternalLink = forwardRef((props, ref) => {
   let { href, ...linkProps } = props;
   return (
     <AnchorLink

@@ -1,8 +1,8 @@
-import React from 'react';
+import { createContext } from 'react';
 
 import { colors } from '../../style';
 
-export let CategoryGroupsContext = React.createContext([]);
+export let CategoryGroupsContext = createContext([]);
 
 export function addToBeBudgetedGroup(groups) {
   return [

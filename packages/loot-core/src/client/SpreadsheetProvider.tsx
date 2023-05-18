@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useContext } from 'react';
+import React, { createContext, useEffect, useMemo, useContext } from 'react';
 
 import LRU from 'lru-cache';
 
 import { listen, send } from '../platform/client/fetch';
 
-const SpreadsheetContext = React.createContext(undefined);
+const SpreadsheetContext = createContext(undefined);
 
 export function useSpreadsheet() {
   return useContext(SpreadsheetContext);

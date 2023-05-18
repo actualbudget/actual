@@ -1,14 +1,12 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
-import { isMobile } from '../util';
 
 import { Modal, View, Text } from './common';
 
-let PageTypeContext = React.createContext({ type: 'page' });
-
-const HORIZONTAL_PADDING = isMobile() ? 10 : 20;
+let PageTypeContext = createContext({ type: 'page' });
 
 export function PageTypeProvider({ type, current, children }) {
   return (
@@ -19,11 +17,13 @@ export function PageTypeProvider({ type, current, children }) {
 }
 
 export function usePageType() {
-  return React.useContext(PageTypeContext);
+  return useContext(PageTypeContext);
 }
 
 function PageTitle({ name, style }) {
-  if (isMobile()) {
+  const { isNarrowWidth } = useResponsive();
+
+  if (isNarrowWidth) {
     return (
       <View
         style={[
@@ -53,8 +53,6 @@ function PageTitle({ name, style }) {
         {
           fontSize: 25,
           fontWeight: 500,
-          paddingLeft: HORIZONTAL_PADDING,
-          paddingRight: HORIZONTAL_PADDING,
           marginBottom: 15,
         },
         style,
@@ -68,6 +66,8 @@ function PageTitle({ name, style }) {
 export function Page({ title, modalSize, children, titleStyle }) {
   let { type, current } = usePageType();
   let history = useHistory();
+  let { isNarrowWidth } = useResponsive();
+  let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 
   if (type === 'modal') {
     let size = modalSize;
@@ -89,11 +89,17 @@ export function Page({ title, modalSize, children, titleStyle }) {
   }
 
   return (
-    <View style={isMobile() ? undefined : styles.page}>
-      <PageTitle name={title} style={titleStyle} />
+    <View style={isNarrowWidth ? undefined : styles.page}>
+      <PageTitle
+        name={title}
+        style={{
+          ...titleStyle,
+          paddingInline: HORIZONTAL_PADDING,
+        }}
+      />
       <View
         style={
-          isMobile()
+          isNarrowWidth
             ? { overflowY: 'auto', padding: HORIZONTAL_PADDING }
             : {
                 paddingLeft: HORIZONTAL_PADDING,

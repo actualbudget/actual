@@ -1,4 +1,6 @@
 import React, {
+  forwardRef,
+  memo,
   useState,
   useEffect,
   useLayoutEffect,
@@ -8,7 +10,6 @@ import React, {
   useImperativeHandle,
 } from 'react';
 
-import Component from '@reactions/component';
 import memoizeOne from 'memoize-one';
 
 import { groupById } from 'loot-core/src/shared/util';
@@ -86,7 +87,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
   );
 }
 
-let Payee = React.memo(
+let Payee = memo(
   ({
     style,
     payee,
@@ -136,8 +137,8 @@ let Payee = React.memo(
           }
           focused={focusedField === 'select'}
           selected={selected}
-          onSelect={() => {
-            dispatchSelected({ type: 'select', id: payee.id });
+          onSelect={e => {
+            dispatchSelected({ type: 'select', id: payee.id, event: e });
           }}
         />
         <InputCell
@@ -164,7 +165,7 @@ let Payee = React.memo(
   },
 );
 
-const PayeeTable = React.forwardRef(
+const PayeeTable = forwardRef(
   (
     {
       payees,
@@ -245,7 +246,7 @@ function PayeeTableHeader() {
           exposed={true}
           focused={false}
           selected={selectedItems.size > 0}
-          onSelect={() => dispatchSelected({ type: 'select-all' })}
+          onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
         <Cell value="Name" width="flex" />
       </TableHeader>
@@ -334,12 +335,13 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
   );
 }
 
-export const ManagePayees = React.forwardRef(
+export const ManagePayees = forwardRef(
   (
     {
       modalProps,
       payees,
       ruleCounts,
+      orphanedPayees,
       categoryGroups,
       initialSelectedIds,
       ruleActions,
@@ -355,16 +357,22 @@ export const ManagePayees = React.forwardRef(
     let table = useRef(null);
     let scrollTo = useRef(null);
     let resetAnimation = useRef(false);
+    const [orphanedOnly, setOrphanedOnly] = useState(false);
 
-    let filteredPayees = useMemo(
-      () =>
-        filter === ''
-          ? payees
-          : payees.filter(p =>
-              p.name.toLowerCase().includes(filter.toLowerCase()),
-            ),
-      [payees, filter],
-    );
+    let filteredPayees = useMemo(() => {
+      let filtered = payees;
+      if (filter) {
+        filtered = filtered.filter(p =>
+          p.name.toLowerCase().includes(filter.toLowerCase()),
+        );
+      }
+      if (orphanedOnly) {
+        filtered = filtered.filter(p =>
+          orphanedPayees.map(o => o.id).includes(p.id),
+        );
+      }
+      return filtered;
+    }, [payees, filter, orphanedOnly]);
 
     let selected = useSelected('payees', filteredPayees, initialSelectedIds);
 
@@ -466,6 +474,8 @@ export const ManagePayees = React.forwardRef(
 
     let payeesById = getPayeesById(payees);
 
+    let [menuOpen, setMenuOpen] = useState(false);
+
     return (
       <View style={{ height: '100%' }}>
         <View
@@ -475,34 +485,47 @@ export const ManagePayees = React.forwardRef(
             padding: '0 10px 5px',
           }}
         >
-          <Component initialState={{ menuOpen: false }}>
-            {({ state, setState }) => (
-              <View>
-                <Button
-                  bare
-                  style={{ marginRight: 10 }}
-                  disabled={buttonsDisabled}
-                  onClick={() => setState({ menuOpen: true })}
-                >
-                  {buttonsDisabled
-                    ? 'No payees selected'
-                    : selected.items.size +
-                      ' ' +
-                      plural(selected.items.size, 'payee', 'payees')}
-                  <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
-                </Button>
-                {state.menuOpen && (
-                  <PayeeMenu
-                    payeesById={payeesById}
-                    selectedPayees={selected.items}
-                    onClose={() => setState({ menuOpen: false })}
-                    onDelete={onDelete}
-                    onMerge={onMerge}
-                  />
-                )}
-              </View>
+          <View>
+            <Button
+              bare
+              style={{ marginRight: 10 }}
+              disabled={buttonsDisabled}
+              onClick={() => setMenuOpen(true)}
+            >
+              {buttonsDisabled
+                ? 'No payees selected'
+                : selected.items.size +
+                  ' ' +
+                  plural(selected.items.size, 'payee', 'payees')}
+              <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
+            </Button>
+            {menuOpen && (
+              <PayeeMenu
+                payeesById={payeesById}
+                selectedPayees={selected.items}
+                onClose={() => setMenuOpen(false)}
+                onDelete={onDelete}
+                onMerge={onMerge}
+              />
             )}
-          </Component>
+          </View>
+          <View>
+            <Button
+              bare
+              style={{
+                marginRight: '10px',
+              }}
+              disabled={!(orphanedPayees.length > 0) && !orphanedOnly}
+              onClick={() => {
+                setOrphanedOnly(!orphanedOnly);
+                const filterInput = document.getElementById('filter-input');
+                applyFilter(filterInput.value);
+                tableNavigator.onEdit(null);
+              }}
+            >
+              {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
+            </Button>
+          </View>
           <View style={{ flex: 1 }} />
           <Input
             placeholder="Filter payees..."

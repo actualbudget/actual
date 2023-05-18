@@ -1,0 +1,16 @@
+###################################################
+# This creates and stands up the development
+# docker container. Depends on the Dockerfile and
+# docker-start.sh files.
+###################################################
+
+services:
+  actual-development:
+    build: .
+    image: actual-development
+    ports:
+      - '3001:3001'
+    volumes:
+      - '.:/app'
+    restart: 'no'
+

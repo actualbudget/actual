@@ -2,12 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import Component from '@reactions/component';
 import { createLocation } from 'history';
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
+import { send } from 'loot-core/src/platform/client/fetch';
 
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
@@ -132,34 +131,14 @@ function Modals({
 
         <Route
           path="/load-backup"
-          render={() => {
-            return (
-              <Component
-                initialState={{ backups: [] }}
-                didMount={async ({ setState }) => {
-                  setState({
-                    backups: await send('backups-get', { id: budgetId }),
-                  });
-
-                  listen('backups-updated', backups => {
-                    setState({ backups });
-                  });
-                }}
-                willUnmount={() => {
-                  unlisten('backups-updated');
-                }}
-              >
-                {({ state }) => (
-                  <LoadBackup
-                    budgetId={budgetId}
-                    modalProps={modalProps}
-                    actions={actions}
-                    backups={state.backups}
-                  />
-                )}
-              </Component>
-            );
-          }}
+          render={() => (
+            <LoadBackup
+              watchUpdates
+              budgetId={budgetId}
+              modalProps={modalProps}
+              actions={actions}
+            />
+          )}
         />
 
         <Route

@@ -1,4 +1,11 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, {
+  PureComponent,
+  createRef,
+  memo,
+  useState,
+  useRef,
+  useMemo,
+} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
 
@@ -346,7 +353,7 @@ function DetailedBalance({ name, balance }) {
   );
 }
 
-function SelectedBalance({ selectedItems }) {
+function SelectedBalance({ selectedItems, account }) {
   let name = `selected-balance-${[...selectedItems].join('-')}`;
 
   let rows = useSheetValue({
@@ -369,9 +376,31 @@ function SelectedBalance({ selectedItems }) {
       .calculate({ $sum: '$amount' }),
   });
 
-  if (balance == null) {
-    return null;
+  let scheduleBalance = null;
+  let scheduleData = useCachedSchedules();
+  let previewIds = [...selectedItems]
+    .filter(id => isPreviewId(id))
+    .map(id => id.slice(8));
+  for (let s of scheduleData.schedules) {
+    if (previewIds.includes(s.id)) {
+      if (!account || account.id === s._account) {
+        scheduleBalance += s._amount;
+      } else {
+        scheduleBalance -= s._amount;
+      }
+    }
   }
+
+  if (balance == null) {
+    if (scheduleBalance == null) {
+      return null;
+    } else {
+      balance = scheduleBalance;
+    }
+  } else if (scheduleBalance != null) {
+    balance += scheduleBalance;
+  }
+
   return <DetailedBalance name="Selected balance:" balance={balance} />;
 }
 
@@ -393,7 +422,12 @@ function MoreBalances({ balanceQuery }) {
   );
 }
 
-function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
+function Balances({
+  balanceQuery,
+  showExtraBalances,
+  onToggleExtraBalances,
+  account,
+}) {
   let selectedItems = useSelectedItems();
 
   return (
@@ -438,7 +472,7 @@ function Balances({ balanceQuery, showExtraBalances, onToggleExtraBalances }) {
       {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
 
       {selectedItems.size > 0 && (
-        <SelectedBalance selectedItems={selectedItems} />
+        <SelectedBalance selectedItems={selectedItems} account={account} />
       )}
     </View>
   );
@@ -627,7 +661,7 @@ function SelectedTransactionsButton({
   );
 }
 
-const AccountHeader = React.memo(
+const AccountHeader = memo(
   ({
     tableRef,
     editingName,
@@ -787,6 +821,7 @@ const AccountHeader = React.memo(
             balanceQuery={balanceQuery}
             showExtraBalances={showExtraBalances}
             onToggleExtraBalances={onToggleExtraBalances}
+            account={account}
           />
 
           <Stack
@@ -1037,11 +1072,11 @@ function AllTransactions({ account = {}, transactions, filtered, children }) {
   return children(allTransactions);
 }
 
-class AccountInternal extends React.PureComponent {
+class AccountInternal extends PureComponent {
   constructor(props) {
     super(props);
     this.paged = null;
-    this.table = React.createRef();
+    this.table = createRef();
     this.animated = true;
 
     this.state = {

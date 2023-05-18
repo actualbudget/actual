@@ -35,8 +35,8 @@ function DiscoverSchedulesTable({ schedules, loading }) {
         height={ROW_HEIGHT}
         inset={15}
         backgroundColor="transparent"
-        onClick={() => {
-          dispatchSelected({ type: 'select', id: item.id });
+        onClick={e => {
+          dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
         borderColor={selected ? colors.b8 : colors.border}
         style={{
@@ -51,8 +51,8 @@ function DiscoverSchedulesTable({ schedules, loading }) {
           exposed={true}
           focused={false}
           selected={selected}
-          onSelect={() => {
-            dispatchSelected({ type: 'select', id: item.id });
+          onSelect={e => {
+            dispatchSelected({ type: 'select', id: item.id, event: e });
           }}
         />
         <Field width="flex">
@@ -76,7 +76,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
           exposed={true}
           focused={false}
           selected={selectedItems.size > 0}
-          onSelect={() => dispatchSelected({ type: 'select-all' })}
+          onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
@@ -162,9 +162,6 @@ export default function DiscoverSchedules() {
         If you expected a schedule here and don’t see it, it might be because
         the payees of the transactions don’t match. Make sure you rename payees
         on all transactions for a schedule to be the same payee.
-      </P>
-      <P>
-        You can always do this later from “More Tools” &rarr; “Find Schedules.”
       </P>
 
       <SelectedProvider instance={selectedInst}>
