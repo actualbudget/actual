@@ -57,13 +57,9 @@ import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 
-function PageWrapper({ children }) {
-  return <View style={{ flex: 1 }}>{children}</View>;
-}
-
 function NarrowNotSupported({ children, redirectTo = '/budget' }) {
   const { isNarrowWidth } = useResponsive();
-  return isNarrowWidth ? children : <Redirect to={redirectTo} />;
+  return isNarrowWidth ? <Redirect to={redirectTo} /> : children;
 }
 
 function Routes({ location }) {
@@ -74,16 +70,12 @@ function Routes({ location }) {
 
       <Route path="/reports">
         <NarrowNotSupported>
-          <PageWrapper>
-            <Reports />
-          </PageWrapper>
+          <Reports />
         </NarrowNotSupported>
       </Route>
 
       <Route path="/budget">
-        <PageWrapper>
-          {isNarrowWidth ? <MobileBudget /> : <Budget />}
-        </PageWrapper>
+        {isNarrowWidth ? <MobileBudget /> : <Budget />}
       </Route>
 
       <Route path="/schedules" exact>
