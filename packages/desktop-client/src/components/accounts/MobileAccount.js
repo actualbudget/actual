@@ -91,7 +91,7 @@ function Account(props) {
 
   const { id: accountId } = useParams();
 
-  const makeRootQuery = () => queries.makeTransactionsQuery(accountId || {});
+  const makeRootQuery = () => queries.makeTransactionsQuery(accountId);
 
   const updateQuery = query => {
     if (paged) {
