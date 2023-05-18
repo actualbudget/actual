@@ -101,7 +101,9 @@ export interface MainHandlers {
 
   'rules-run': (arg: { transaction }) => Promise<unknown>;
 
-  'make-filters-from-conditions': (arg: { conditions }) => Promise<unknown>;
+  'make-filters-from-conditions': (arg: {
+    conditions;
+  }) => Promise<{ filters: unknown[] }>;
 
   getCell: (arg: { sheetName; name }) => Promise<unknown>;
 

@@ -33,7 +33,7 @@ function Version() {
         ':hover': { color: colors.n2 },
         margin: 15,
         marginLeft: 17,
-        [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+        [`@media (min-width: ${tokens.breakpoint_small})`]: {
           position: 'absolute',
           bottom: 0,
           right: 0,

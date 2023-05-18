@@ -163,9 +163,6 @@ export default function DiscoverSchedules() {
         the payees of the transactions don’t match. Make sure you rename payees
         on all transactions for a schedule to be the same payee.
       </P>
-      <P>
-        You can always do this later from “More Tools” &rarr; “Find Schedules.”
-      </P>
 
       <SelectedProvider instance={selectedInst}>
         <DiscoverSchedulesTable

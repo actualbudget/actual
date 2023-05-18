@@ -1,18 +1,14 @@
-import React, {
-  type HTMLProps,
-  type Ref,
-  type StyleHTMLAttributes,
-} from 'react';
+import React, { type Ref, type StyleHTMLAttributes } from 'react';
 
 import { css } from 'glamor';
-import type { CSSProperties } from 'glamor';
 
-type ViewProps = {
+import { type HTMLPropsWithStyle } from '../../types/utils';
+
+type ViewProps = HTMLPropsWithStyle<HTMLDivElement> & {
   className?: string;
-  style?: CSSProperties;
   nativeStyle?: StyleHTMLAttributes<HTMLDivElement>;
   innerRef?: Ref<HTMLDivElement>;
-} & Omit<HTMLProps<HTMLDivElement>, 'style'>;
+};
 
 const View = (props: ViewProps) => {
   // The default styles are special-cased and pulled out into static
