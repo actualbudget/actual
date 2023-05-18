@@ -291,13 +291,10 @@ function FinancesApp(props) {
           <View style={{ flexDirection: 'row', flex: 1 }}>
             <FloatableSidebar />
 
-            <div
+            <View
               style={{
                 flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
                 overflow: 'hidden',
-                position: 'relative',
                 width: '100%',
               }}
             >
@@ -336,7 +333,7 @@ function FinancesApp(props) {
                   <MobileNavTabs />
                 </Route>
               </Switch>
-            </div>
+            </View>
           </View>
         </View>
       </CompatRouter>

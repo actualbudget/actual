@@ -113,19 +113,14 @@ function Modals({
         </Route>
 
         <Route path="/confirm-category-delete">
-          {() => {
-            const { category, group, onDelete } = options;
-            return (
-              <ConfirmCategoryDelete
-                modalProps={modalProps}
-                actions={actions}
-                category={categories.find(c => c.id === category)}
-                group={categoryGroups.find(g => g.id === group)}
-                categoryGroups={categoryGroups}
-                onDelete={onDelete}
-              />
-            );
-          }}
+          <ConfirmCategoryDelete
+            modalProps={modalProps}
+            actions={actions}
+            category={categories.find(c => c.id === options.category)}
+            group={categoryGroups.find(g => g.id === options.group)}
+            categoryGroups={categoryGroups}
+            onDelete={options.onDelete}
+          />
         </Route>
 
         <Route path="/load-backup">
