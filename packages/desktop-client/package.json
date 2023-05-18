@@ -52,12 +52,11 @@
     "react-router-dom": "5.2.0",
     "react-router-dom-v5-compat": "^6.4.1",
     "react-scripts": "^5.0.1",
-    "react-spring": "^8.0.27",
+    "react-spring": "^9.7.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "victory": "^36.6.8",
-    "wobble": "^1.5.0"
+    "victory": "^36.6.8"
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-app-rewired start",
