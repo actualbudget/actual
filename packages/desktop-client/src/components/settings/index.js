@@ -8,9 +8,9 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import tokens from '../../tokens';
-import { isMobile } from '../../util';
 import { withThemeColor } from '../../util/withThemeColor';
 import { View, Text, Button, Input } from '../common';
 import { FormField, FormLabel } from '../forms';
@@ -40,7 +40,7 @@ function About() {
       <View
         style={[
           { flexDirection: 'column', gap: 10 },
-          media(`(min-width: ${tokens.breakpoint_medium})`, {
+          media(`(min-width: ${tokens.breakpoint_small})`, {
             display: 'grid',
             gridTemplateRows: '1fr 1fr',
             gridTemplateColumns: '50% 50%',
@@ -122,16 +122,19 @@ function Settings({
     return () => unlisten();
   }, [loadPrefs]);
 
+  const { isNarrowWidth } = useResponsive();
+
   return (
     <View
       style={{
-        marginInline: globalPrefs.floatingSidebar && !isMobile() ? 'auto' : 0,
+        marginInline:
+          globalPrefs.floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
       <Page
         title="Settings"
         titleStyle={
-          isMobile()
+          isNarrowWidth
             ? {
                 backgroundColor: colors.n11,
                 color: colors.n1,
@@ -140,7 +143,7 @@ function Settings({
         }
       >
         <View style={{ flexShrink: 0, gap: 30 }}>
-          {isMobile() && (
+          {isNarrowWidth && (
             <View
               style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
             >

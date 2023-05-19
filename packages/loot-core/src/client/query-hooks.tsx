@@ -70,7 +70,7 @@ export function pagedQueryContext(query, opts) {
   return makeContext(query, opts, PagedQuery);
 }
 
-export function useLiveQuery(query, opts) {
+export function useLiveQuery(query, opts?) {
   let [data, setData] = useState(null);
 
   useEffect(() => {
