@@ -506,7 +506,7 @@ async function applyCategoryTemplate(
           new Date(next_date_string),
           current_month,
         );
-        if (l === 0) remainder = last_month_balance;
+        if (l === 0) remainder = last_month_balance + spent;
         remainder = -getScheduledAmount(amountCond.value) - remainder;
         let target = 0;
         if (remainder >= 0) {
