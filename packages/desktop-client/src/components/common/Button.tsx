@@ -84,6 +84,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             (primary ? (disabled ? colors.n7 : colors.p5) : colors.n9),
         color: primary ? 'white' : disabled ? colors.n6 : colors.n1,
         transition: 'box-shadow .25s',
+        WebkitAppRegion: 'no-drag',
         ...styles.smallText,
       },
       { ':hover': !disabled && hoveredStyle },
