@@ -1,7 +1,7 @@
 import type { ServerEvents } from '../../../types/server-events';
 
 export function init(
-  channel: Window | string,
+  channel: Window | number, // in electron the port number, in web the worker
   handlers: Record<string, () => void>,
 ): void;
 export type Init = typeof init;
