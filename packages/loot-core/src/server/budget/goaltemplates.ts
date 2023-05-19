@@ -506,7 +506,7 @@ async function applyCategoryTemplate(
           new Date(next_date_string),
           current_month,
         );
-        if (l === 0) remainder = last_month_balance + spent;
+        if (l === 0) remainder = last_month_balance;
         remainder = -getScheduledAmount(amountCond.value) - remainder;
         let target = 0;
         if (remainder >= 0) {
@@ -530,6 +530,7 @@ async function applyCategoryTemplate(
             !priority
           ) {
             to_budget += diff;
+            if (l===template_lines.length-1) to_budget -= spent;
           } else {
             if (budgetAvailable > 0) to_budget = budgetAvailable;
             errors.push(`Insufficient funds.`);
