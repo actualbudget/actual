@@ -18,14 +18,7 @@ import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
 import { styles, colors } from '../style';
 
-import {
-  View,
-  Block,
-  AlignedText,
-  AnchorLink,
-  ButtonLink,
-  Button,
-} from './common';
+import { View, Block, AlignedText, AnchorLink, Button } from './common';
 import { useSidebar } from './FloatableSidebar';
 import { useDraggable, useDroppable, DropHighlight } from './sort.js';
 import CellValue from './spreadsheet/CellValue';
@@ -575,22 +568,6 @@ export function Sidebar({
         style,
       ]}
     >
-      {hasWindowButtons && !sidebar.alwaysFloats && (
-        <ToggleButton
-          style={[
-            {
-              height: isFloating ? 0 : 36,
-              alignItems: 'flex-end',
-              justifyContent: 'center',
-              overflow: 'hidden',
-              WebkitAppRegion: 'drag',
-              paddingRight: 8,
-            },
-          ]}
-          isFloating={isFloating}
-          onFloat={onFloat}
-        />
-      )}
       <View
         style={[
           {
@@ -609,26 +586,9 @@ export function Sidebar({
       >
         {budgetName}
 
-        {!Platform.isBrowser && (
-          <ButtonLink
-            bare
-            to="/settings"
-            style={{
-              // Needed for Windows? No idea why this is displayed as block
-              display: 'inherit',
-              color: colors.n5,
-              marginLeft: hasWindowButtons ? 0 : 5,
-              flexShrink: 0,
-            }}
-            activeStyle={{ color: colors.p7 }}
-          >
-            <Cog width={15} height={15} style={{ color: 'inherit' }} />
-          </ButtonLink>
-        )}
-
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
-        {!hasWindowButtons && !sidebar.alwaysFloats && (
+        {!sidebar.alwaysFloats && (
           <ToggleButton isFloating={isFloating} onFloat={onFloat} />
         )}
       </View>
