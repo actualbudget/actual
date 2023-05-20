@@ -57,118 +57,82 @@ import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 
-function PageRoute({
-  path,
-  component: Component,
-  redirectTo = '/budget',
-  worksInNarrow = true,
-}) {
+function NarrowNotSupported({ children, redirectTo = '/budget' }) {
   const { isNarrowWidth } = useResponsive();
-  return worksInNarrow || !isNarrowWidth ? (
-    <Route
-      path={path}
-      children={props => {
-        return (
-          <View
-            style={{
-              flex: 1,
-              display: props.match ? 'flex' : 'none',
-            }}
-          >
-            <Component {...props} />
-          </View>
-        );
-      }}
-    />
-  ) : (
-    <Redirect to={redirectTo} />
-  );
-}
-
-function NonPageRoute({
-  redirectTo = '/budget',
-  worksInNarrow = true,
-  ...routeProps
-}) {
-  const { isNarrowWidth } = useResponsive();
-
-  return worksInNarrow || !isNarrowWidth ? (
-    <Route {...routeProps} />
-  ) : (
-    <Redirect to={redirectTo} />
-  );
+  return isNarrowWidth ? <Redirect to={redirectTo} /> : children;
 }
 
 function Routes({ location }) {
   const { isNarrowWidth } = useResponsive();
   return (
     <Switch location={location}>
-      <Redirect from="/" exact to="/budget" />
+      <Route path="/" exact render={() => <Redirect to="/budget" />} />
 
-      <PageRoute path="/reports" component={Reports} worksInNarrow={false} />
+      <Route path="/reports">
+        <NarrowNotSupported>
+          <Reports />
+        </NarrowNotSupported>
+      </Route>
 
-      <PageRoute
-        path="/budget"
-        component={isNarrowWidth ? MobileBudget : Budget}
-      />
+      <Route path="/budget">
+        {isNarrowWidth ? <MobileBudget /> : <Budget />}
+      </Route>
 
-      <NonPageRoute
-        path="/schedules"
-        exact
-        component={Schedules}
-        worksInNarrow={false}
-      />
-      <NonPageRoute
-        path="/schedule/edit"
-        exact
-        component={EditSchedule}
-        worksInNarrow={false}
-      />
-      <NonPageRoute
-        path="/schedule/edit/:id"
-        component={EditSchedule}
-        worksInNarrow={false}
-      />
-      <NonPageRoute
-        path="/schedule/link"
-        component={LinkSchedule}
-        worksInNarrow={false}
-      />
-      <NonPageRoute
-        path="/schedule/discover"
-        component={DiscoverSchedules}
-        worksInNarrow={false}
-      />
-      <NonPageRoute
-        path="/schedule/posts-offline-notification"
-        component={PostsOfflineNotification}
-      />
+      <Route path="/schedules" exact>
+        <NarrowNotSupported>
+          <Schedules />
+        </NarrowNotSupported>
+      </Route>
+      <Route path="/schedule/edit" exact>
+        <NarrowNotSupported>
+          <EditSchedule />
+        </NarrowNotSupported>
+      </Route>
+      <Route path="/schedule/edit/:id">
+        <NarrowNotSupported>
+          <EditSchedule />
+        </NarrowNotSupported>
+      </Route>
+      <Route path="/schedule/link">
+        <NarrowNotSupported>
+          <LinkSchedule />
+        </NarrowNotSupported>
+      </Route>
+      <Route path="/schedule/discover">
+        <NarrowNotSupported>
+          <DiscoverSchedules />
+        </NarrowNotSupported>
+      </Route>
+      <Route path="/schedule/posts-offline-notification">
+        <PostsOfflineNotification />
+      </Route>
 
-      <NonPageRoute path="/payees" exact component={ManagePayeesPage} />
-      <NonPageRoute path="/rules" exact component={ManageRulesPage} />
-      <NonPageRoute path="/settings" component={Settings} />
-      <NonPageRoute
-        path="/nordigen/link"
-        exact
-        component={NordigenLink}
-        worksInNarrow={false}
-      />
+      <Route path="/payees" exact>
+        <ManagePayeesPage />
+      </Route>
+      <Route path="/rules" exact>
+        <ManageRulesPage />
+      </Route>
+      <Route path="/settings">
+        <Settings />
+      </Route>
+      <Route path="/nordigen/link" exact>
+        <NarrowNotSupported>
+          <NordigenLink />
+        </NarrowNotSupported>
+      </Route>
 
-      <NonPageRoute
-        path="/accounts/:id"
-        exact
-        children={props => {
+      <Route path="/accounts/:id" exact>
+        {props => {
           const AcctCmp = isNarrowWidth ? MobileAccount : Account;
           return (
             props.match && <AcctCmp key={props.match.params.id} {...props} />
           );
         }}
-      />
-      <NonPageRoute
-        path="/accounts"
-        exact
-        component={isNarrowWidth ? MobileAccounts : Account}
-      />
+      </Route>
+      <Route path="/accounts" exact>
+        {isNarrowWidth ? <MobileAccounts /> : <Account />}
+      </Route>
     </Switch>
   );
 }
@@ -327,13 +291,10 @@ function FinancesApp(props) {
           <View style={{ flexDirection: 'row', flex: 1 }}>
             <FloatableSidebar />
 
-            <div
+            <View
               style={{
                 flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
                 overflow: 'hidden',
-                position: 'relative',
                 width: '100%',
               }}
             >
@@ -362,11 +323,17 @@ function FinancesApp(props) {
               </div>
 
               <Switch>
-                <Route path="/budget" component={MobileNavTabs} />
-                <Route path="/accounts" component={MobileNavTabs} />
-                <Route path="/settings" component={MobileNavTabs} />
+                <Route path="/budget">
+                  <MobileNavTabs />
+                </Route>
+                <Route path="/accounts">
+                  <MobileNavTabs />
+                </Route>
+                <Route path="/settings">
+                  <MobileNavTabs />
+                </Route>
               </Switch>
-            </div>
+            </View>
           </View>
         </View>
       </CompatRouter>

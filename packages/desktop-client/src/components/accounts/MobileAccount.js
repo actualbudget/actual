@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom-v5-compat';
 
 import debounce from 'debounce';
@@ -88,12 +89,9 @@ function Account(props) {
     [dispatch],
   );
 
-  const { id: accountId } = props.match.params;
+  const { id: accountId } = useParams();
 
-  const makeRootQuery = () => {
-    const { id } = props.match.params || {};
-    return queries.makeTransactionsQuery(id);
-  };
+  const makeRootQuery = () => queries.makeTransactionsQuery(accountId);
 
   const updateQuery = query => {
     if (paged) {
