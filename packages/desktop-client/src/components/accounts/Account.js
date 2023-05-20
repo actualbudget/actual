@@ -2024,7 +2024,7 @@ export default function Account() {
     categoryGroups: state.queries.categories.grouped,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     hideFraction: state.prefs.local.hideFraction || false,
-    expandSplits: params.id && state.prefs.local['expand-splits'],
+    expandSplits: state.prefs.local['expand-splits'],
     showBalances: params.id && state.prefs.local['show-balances-' + params.id],
     showCleared: params.id && !state.prefs.local['hide-cleared-' + params.id],
     showExtraBalances:
