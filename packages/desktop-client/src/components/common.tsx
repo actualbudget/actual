@@ -13,8 +13,8 @@ import React, {
   createElement,
   cloneElement,
 } from 'react';
-import type { RouteComponentProps } from 'react-router';
-import { Route, NavLink, useRouteMatch } from 'react-router-dom';
+import { Route, NavLink, useMatch } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import {
   ListboxInput,
@@ -167,7 +167,7 @@ export function AnchorLink({
   activeStyle,
   children,
 }: AnchorLinkProps) {
-  let match = useRouteMatch({ path: to, exact: true });
+  let match = useMatch({ path: to });
 
   return (
     <NavLink
@@ -223,7 +223,7 @@ type ButtonLinkProps = ComponentProps<typeof Button> &
     to: string;
     activeStyle?: CSSProperties;
   };
-function ButtonLink_({
+export function ButtonLink({
   history,
   staticContext,
   to,
@@ -236,21 +236,22 @@ function ButtonLink_({
   return (
     <Route
       path={to}
-      children={({ match }) => (
+      element={
         <Button
-          style={[style, match ? activeStyle : null]}
+          style={({ isActive }) => ({
+            ...style,
+            ...(isActive ? activeStyle : {}),
+          })}
           {...props}
           onClick={e => {
             props.onClick && props.onClick(e);
             history.push(to);
           }}
         />
-      )}
+      }
     />
   );
 }
-
-export const ButtonLink = withRouter(ButtonLink_);
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
   leftContent: ReactNode;
