@@ -6,7 +6,7 @@ import React, {
   useContext,
 } from 'react';
 import { connect } from 'react-redux';
-import { Switch, Route, withRouter } from 'react-router-dom';
+import { Switch, Route, useLocation, useHistory } from 'react-router-dom';
 
 import { css, media } from 'glamor';
 
@@ -258,7 +258,6 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
 }
 
 function Titlebar({
-  location,
   globalPrefs,
   saveGlobalPrefs,
   localPrefs,
@@ -269,6 +268,8 @@ function Titlebar({
   style,
   sync,
 }) {
+  let history = useHistory();
+  let location = useLocation();
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
@@ -320,45 +321,30 @@ function Titlebar({
       )}
 
       <Switch>
-        <Route
-          path="/accounts"
-          exact
-          children={props => {
-            let state = props.location.state || {};
-            return state.goBack ? (
-              <Button onClick={() => props.history.goBack()} bare>
-                <ArrowLeft
-                  width={10}
-                  height={10}
-                  style={{ marginRight: 5, color: 'currentColor' }}
-                />{' '}
-                Back
-              </Button>
-            ) : null;
-          }}
-        />
+        <Route path="/accounts" exact>
+          {location.state?.goBack ? (
+            <Button onClick={() => history.goBack()} bare>
+              <ArrowLeft
+                width={10}
+                height={10}
+                style={{ marginRight: 5, color: 'currentColor' }}
+              />{' '}
+              Back
+            </Button>
+          ) : null}
+        </Route>
 
-        <Route
-          path="/accounts/:id"
-          exact
-          children={props => {
-            return (
-              props.match && <AccountSyncCheck id={props.match.params.id} />
-            );
-          }}
-        />
+        <Route path="/accounts/:id" exact>
+          <AccountSyncCheck />
+        </Route>
 
-        <Route
-          path="/budget"
-          exact
-          children={() => (
-            <BudgetTitlebar
-              globalPrefs={globalPrefs}
-              saveGlobalPrefs={saveGlobalPrefs}
-              localPrefs={localPrefs}
-            />
-          )}
-        />
+        <Route path="/budget" exact>
+          <BudgetTitlebar
+            globalPrefs={globalPrefs}
+            saveGlobalPrefs={saveGlobalPrefs}
+            localPrefs={localPrefs}
+          />
+        </Route>
       </Switch>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
@@ -374,14 +360,12 @@ function Titlebar({
   );
 }
 
-export default withRouter(
-  connect(
-    state => ({
-      globalPrefs: state.prefs.global,
-      localPrefs: state.prefs.local,
-      userData: state.user.data,
-      floatingSidebar: state.prefs.global.floatingSidebar,
-    }),
-    actions,
-  )(Titlebar),
-);
+export default connect(
+  state => ({
+    globalPrefs: state.prefs.global,
+    localPrefs: state.prefs.local,
+    userData: state.user.data,
+    floatingSidebar: state.prefs.global.floatingSidebar,
+  }),
+  actions,
+)(Titlebar);
