@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -23,7 +23,7 @@ import { useSetServerURL } from '../../ServerContext';
 // do any checks.
 export function useBootstrapped() {
   let [checked, setChecked] = useState(false);
-  let history = useHistory();
+  let navigate = useNavigate();
   let location = useLocation();
   let setServerURL = useSetServerURL();
 
@@ -31,7 +31,7 @@ export function useBootstrapped() {
     async function run() {
       let ensure = url => {
         if (location.pathname !== url) {
-          history.push(url);
+          navigate(url);
         } else {
           setChecked(true);
         }
@@ -47,7 +47,7 @@ export function useBootstrapped() {
         });
         if ('error' in result || !result.hasServer) {
           console.log('error' in result && result.error);
-          history.push('/config-server');
+          navigate('/config-server');
           return;
         }
 
@@ -61,7 +61,7 @@ export function useBootstrapped() {
       } else {
         let result = await send('subscribe-needs-bootstrap');
         if ('error' in result) {
-          history.push('/error', { error: result.error });
+          navigate('/error', { state: { error: result.error } });
         } else if (result.bootstrapped) {
           ensure('/login');
         } else {
@@ -70,7 +70,7 @@ export function useBootstrapped() {
       }
     }
     run();
-  }, [history, location]);
+  }, [location]);
 
   return { checked };
 }

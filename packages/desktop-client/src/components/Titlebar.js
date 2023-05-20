@@ -6,7 +6,7 @@ import React, {
   useContext,
 } from 'react';
 import { connect } from 'react-redux';
-import { Routes, Route, useLocation, useHistory } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import { css, media } from 'glamor';
 
@@ -268,7 +268,7 @@ function Titlebar({
   style,
   sync,
 }) {
-  let history = useHistory();
+  let navigate = useNavigate();
   let location = useLocation();
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
@@ -325,7 +325,7 @@ function Titlebar({
           path="/accounts"
           element={
             location.state?.goBack ? (
-              <Button onClick={() => history.goBack()} bare>
+              <Button onClick={() => navigate(-1)} bare>
                 <ArrowLeft
                   width={10}
                   height={10}

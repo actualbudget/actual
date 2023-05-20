@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { bindActionCreators } from 'redux';
 
@@ -18,7 +18,7 @@ import { Sidebar } from './sidebar';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
-  let history = useHistory();
+  let navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -30,7 +30,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
         setEditing(true);
         break;
       case 'settings':
-        history.push('/settings');
+        navigate('/settings');
         break;
       case 'help':
         window.open('https://actualbudget.org/docs/', '_blank');
