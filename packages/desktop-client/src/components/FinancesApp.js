@@ -191,14 +191,13 @@ function NavTab({ icon: TabIcon, name, path }) {
   return (
     <NavLink
       to={path}
-      style={{
+      style={({ isActive }) => ({
         alignItems: 'center',
-        color: '#8E8E8F',
+        color: isActive ? colors.p5 : '#8E8E8F',
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
-      }}
-      activeStyle={{ color: colors.p5 }}
+      })}
     >
       <TabIcon
         width={22}
