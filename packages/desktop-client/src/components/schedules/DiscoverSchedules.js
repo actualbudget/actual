@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -109,7 +109,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
 
 export default function DiscoverSchedules() {
   let pageType = usePageType();
-  let history = useHistory();
+  let navigate = useNavigate();
   let { data: schedules = [], isLoading } =
     useSendPlatformRequest('schedule/discover');
   let [creating, setCreating] = useState(false);
@@ -144,7 +144,7 @@ export default function DiscoverSchedules() {
     }
 
     setCreating(false);
-    history.goBack();
+    navigate(-1);
   }
 
   return (

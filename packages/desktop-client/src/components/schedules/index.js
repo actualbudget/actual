@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -10,7 +10,8 @@ import { Page } from '../Page';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {
-  let history = useHistory();
+  let navigate = useNavigate();
+  let location = useLocation();
 
   let [filter, setFilter] = useState('');
 
@@ -23,15 +24,19 @@ export default function Schedules() {
   let { schedules, statuses } = scheduleData;
 
   function onEdit(id) {
-    history.push(`/schedule/edit/${id}`, { locationPtr: history.location });
+    navigate(`/schedule/edit/${id}`, {
+      state: { locationPtr: location },
+    });
   }
 
   function onAdd() {
-    history.push(`/schedule/edit`, { locationPtr: history.location });
+    navigate(`/schedule/edit`, { state: { locationPtr: location } });
   }
 
   function onDiscover() {
-    history.push(`/schedule/discover`, { locationPtr: history.location });
+    navigate(`/schedule/discover`, {
+      state: { locationPtr: location },
+    });
   }
 
   async function onAction(name, id) {

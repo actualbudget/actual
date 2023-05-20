@@ -7,7 +7,12 @@ import React, {
   useMemo,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
+import {
+  Redirect,
+  useParams,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom';
 
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
@@ -521,7 +526,8 @@ function SelectedTransactionsButton({
   onScheduleAction,
 }) {
   let selectedItems = useSelectedItems();
-  let history = useHistory();
+  let navigate = useNavigate();
+  let location = useLocation();
 
   let types = useMemo(() => {
     let items = [...selectedItems];
@@ -633,14 +639,14 @@ function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              history.push(`/schedule/edit/${scheduleId}`, {
-                locationPtr: history.location,
+              navigate(`/schedule/edit/${scheduleId}`, {
+                locationPtr: location,
               });
             }
             break;
           case 'link-schedule':
-            history.push(`/schedule/link`, {
-              locationPtr: history.location,
+            navigate(`/schedule/link`, {
+              locationPtr: location,
               transactionIds: [...selectedItems],
             });
             break;
