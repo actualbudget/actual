@@ -2001,6 +2001,7 @@ class AccountInternal extends PureComponent {
 
 function AccountHack(props) {
   let { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+
   return (
     <AccountInternal
       {...props}
@@ -2009,7 +2010,7 @@ function AccountHack(props) {
   );
 }
 
-export default function Account(props) {
+export default function Account() {
   const syncEnabled = useFeatureFlag('syncAccount');
   let params = useParams();
   let location = useLocation();
@@ -2080,7 +2081,7 @@ export default function Account(props) {
             !!(activeLocation.state && activeLocation.state.locationPtr)
           }
           accountId={params.id}
-          location={props.location}
+          location={location}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>
