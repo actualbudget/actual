@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { createLocation } from 'history';
 import { bindActionCreators } from 'redux';
@@ -57,176 +57,230 @@ function Modals({
 
     let location = createLocation('/' + name);
     return (
-      <Switch key={name} location={location}>
-        <Route path="/import-transactions">
-          <ImportTransactions modalProps={modalProps} options={options} />
-        </Route>
+      <Routes key={name} location={location}>
+        <Route
+          path="/import-transactions"
+          element={
+            <ImportTransactions modalProps={modalProps} options={options} />
+          }
+        />
 
-        <Route path="/add-account">
-          <CreateAccount
-            modalProps={modalProps}
-            actions={actions}
-            syncServerStatus={syncServerStatus}
-          />
-        </Route>
+        <Route
+          path="/add-account"
+          element={
+            <CreateAccount
+              modalProps={modalProps}
+              actions={actions}
+              syncServerStatus={syncServerStatus}
+            />
+          }
+        />
 
-        <Route path="/add-local-account">
-          <CreateLocalAccount
-            modalProps={modalProps}
-            actions={actions}
-            history={history}
-          />
-        </Route>
+        <Route
+          path="/add-local-account"
+          element={
+            <CreateLocalAccount
+              modalProps={modalProps}
+              actions={actions}
+              history={history}
+            />
+          }
+        />
 
-        <Route path="/close-account">
-          <CloseAccount
-            modalProps={modalProps}
-            account={options.account}
-            balance={options.balance}
-            canDelete={options.canDelete}
-            accounts={accounts.filter(acct => acct.closed === 0)}
-            categoryGroups={categoryGroups}
-            actions={actions}
-          />
-        </Route>
+        <Route
+          path="/close-account"
+          element={
+            <CloseAccount
+              modalProps={modalProps}
+              account={options.account}
+              balance={options.balance}
+              canDelete={options.canDelete}
+              accounts={accounts.filter(acct => acct.closed === 0)}
+              categoryGroups={categoryGroups}
+              actions={actions}
+            />
+          }
+        />
 
-        <Route path="/select-linked-accounts">
-          <SelectLinkedAccounts
-            modalProps={modalProps}
-            externalAccounts={options.accounts}
-            requisitionId={options.requisitionId}
-            localAccounts={accounts.filter(acct => acct.closed === 0)}
-            upgradingAccountId={options.upgradingAccountId}
-            actions={actions}
-          />
-        </Route>
+        <Route
+          path="/select-linked-accounts"
+          element={
+            <SelectLinkedAccounts
+              modalProps={modalProps}
+              externalAccounts={options.accounts}
+              requisitionId={options.requisitionId}
+              localAccounts={accounts.filter(acct => acct.closed === 0)}
+              upgradingAccountId={options.upgradingAccountId}
+              actions={actions}
+            />
+          }
+        />
 
-        <Route path="/configure-linked-accounts">
-          <ConfigureLinkedAccounts
-            modalProps={modalProps}
-            institution={options.institution}
-            publicToken={options.publicToken}
-            accounts={options.accounts}
-            upgradingId={options.upgradingId}
-            actions={actions}
-          />
-        </Route>
+        <Route
+          path="/configure-linked-accounts"
+          element={
+            <ConfigureLinkedAccounts
+              modalProps={modalProps}
+              institution={options.institution}
+              publicToken={options.publicToken}
+              accounts={options.accounts}
+              upgradingId={options.upgradingId}
+              actions={actions}
+            />
+          }
+        />
 
-        <Route path="/confirm-category-delete">
-          <ConfirmCategoryDelete
-            modalProps={modalProps}
-            actions={actions}
-            category={categories.find(c => c.id === options.category)}
-            group={categoryGroups.find(g => g.id === options.group)}
-            categoryGroups={categoryGroups}
-            onDelete={options.onDelete}
-          />
-        </Route>
+        <Route
+          path="/confirm-category-delete"
+          element={
+            <ConfirmCategoryDelete
+              modalProps={modalProps}
+              actions={actions}
+              category={categories.find(c => c.id === options.category)}
+              group={categoryGroups.find(g => g.id === options.group)}
+              categoryGroups={categoryGroups}
+              onDelete={options.onDelete}
+            />
+          }
+        />
 
-        <Route path="/load-backup">
-          <LoadBackup
-            watchUpdates
-            budgetId={budgetId}
-            modalProps={modalProps}
-            actions={actions}
-          />
-        </Route>
+        <Route
+          path="/load-backup"
+          element={
+            <LoadBackup
+              watchUpdates
+              budgetId={budgetId}
+              modalProps={modalProps}
+              actions={actions}
+            />
+          }
+        />
 
-        <Route path="/manage-rules">
-          <ManageRulesModal
-            history={history}
-            modalProps={modalProps}
-            payeeId={options.payeeId}
-          />
-        </Route>
+        <Route
+          path="/manage-rules"
+          element={
+            <ManageRulesModal
+              history={history}
+              modalProps={modalProps}
+              payeeId={options.payeeId}
+            />
+          }
+        />
 
-        <Route path="/edit-rule">
-          <EditRule
-            history={history}
-            modalProps={modalProps}
-            defaultRule={options.rule}
-            onSave={options.onSave}
-          />
-        </Route>
+        <Route
+          path="/edit-rule"
+          element={
+            <EditRule
+              history={history}
+              modalProps={modalProps}
+              defaultRule={options.rule}
+              onSave={options.onSave}
+            />
+          }
+        />
 
-        <Route path="/merge-unused-payees">
-          <MergeUnusedPayees
-            history={history}
-            modalProps={modalProps}
-            payeeIds={options.payeeIds}
-            targetPayeeId={options.targetPayeeId}
-          />
-        </Route>
+        <Route
+          path="/merge-unused-payees"
+          element={
+            <MergeUnusedPayees
+              history={history}
+              modalProps={modalProps}
+              payeeIds={options.payeeIds}
+              targetPayeeId={options.targetPayeeId}
+            />
+          }
+        />
 
-        <Route path="/plaid-external-msg">
-          <PlaidExternalMsg
-            modalProps={modalProps}
-            actions={actions}
-            onMoveExternal={options.onMoveExternal}
-            onClose={() => {
-              options.onClose && options.onClose();
-              send('poll-web-token-stop');
-            }}
-            onSuccess={options.onSuccess}
-          />
-        </Route>
-        <Route path="/nordigen-init">
-          <NordigenInitialise
-            modalProps={modalProps}
-            onSuccess={options.onSuccess}
-          />
-        </Route>
-        <Route path="/nordigen-external-msg">
-          <NordigenExternalMsg
-            modalProps={modalProps}
-            actions={actions}
-            onMoveExternal={options.onMoveExternal}
-            onClose={() => {
-              options.onClose && options.onClose();
-              send('nordigen-poll-web-token-stop');
-            }}
-            onSuccess={options.onSuccess}
-          />
-        </Route>
+        <Route
+          path="/plaid-external-msg"
+          element={
+            <PlaidExternalMsg
+              modalProps={modalProps}
+              actions={actions}
+              onMoveExternal={options.onMoveExternal}
+              onClose={() => {
+                options.onClose && options.onClose();
+                send('poll-web-token-stop');
+              }}
+              onSuccess={options.onSuccess}
+            />
+          }
+        />
+        <Route
+          path="/nordigen-init"
+          element={
+            <NordigenInitialise
+              modalProps={modalProps}
+              onSuccess={options.onSuccess}
+            />
+          }
+        />
+        <Route
+          path="/nordigen-external-msg"
+          element={
+            <NordigenExternalMsg
+              modalProps={modalProps}
+              actions={actions}
+              onMoveExternal={options.onMoveExternal}
+              onClose={() => {
+                options.onClose && options.onClose();
+                send('nordigen-poll-web-token-stop');
+              }}
+              onSuccess={options.onSuccess}
+            />
+          }
+        />
 
-        <Route path="/create-encryption-key">
-          <CreateEncryptionKey
-            key={name}
-            modalProps={modalProps}
-            actions={actions}
-            options={options}
-          />
-        </Route>
+        <Route
+          path="/create-encryption-key"
+          element={
+            <CreateEncryptionKey
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
+              options={options}
+            />
+          }
+        />
 
-        <Route path="/fix-encryption-key">
-          <FixEncryptionKey
-            key={name}
-            modalProps={modalProps}
-            actions={actions}
-            options={options}
-          />
-        </Route>
+        <Route
+          path="/fix-encryption-key"
+          element={
+            <FixEncryptionKey
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
+              options={options}
+            />
+          }
+        />
 
-        <Route path="/edit-field">
-          <EditField
-            key={name}
-            modalProps={modalProps}
-            actions={actions}
-            name={options.name}
-            onSubmit={options.onSubmit}
-          />
-        </Route>
+        <Route
+          path="/edit-field"
+          element={
+            <EditField
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
+              name={options.name}
+              onSubmit={options.onSubmit}
+            />
+          }
+        />
 
-        <Route path="/budget-summary">
-          <BudgetSummary
-            key={name}
-            modalProps={modalProps}
-            month={options.month}
-            actions={actions}
-            isGoalTemplatesEnabled={isGoalTemplatesEnabled}
-          />
-        </Route>
-      </Switch>
+        <Route
+          path="/budget-summary"
+          element={
+            <BudgetSummary
+              key={name}
+              modalProps={modalProps}
+              month={options.month}
+              actions={actions}
+              isGoalTemplatesEnabled={isGoalTemplatesEnabled}
+            />
+          }
+        />
+      </Routes>
     );
   });
 }

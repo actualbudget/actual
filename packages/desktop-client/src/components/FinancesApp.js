@@ -5,12 +5,11 @@ import { connect } from 'react-redux';
 import {
   Router,
   Route,
+  Routes,
   Redirect,
-  Switch,
   useLocation,
   NavLink,
 } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { createBrowserHistory } from 'history';
 import hotkeys from 'hotkeys-js';
@@ -61,78 +60,100 @@ function NarrowNotSupported({ children, redirectTo = '/budget' }) {
   return isNarrowWidth ? <Redirect to={redirectTo} /> : children;
 }
 
-function Routes({ location }) {
+function StackedRoutesInner({ location }) {
   const { isNarrowWidth } = useResponsive();
   return (
-    <Switch location={location}>
-      <Route path="/" exact render={() => <Redirect to="/budget" />} />
+    <Routes location={location}>
+      <Route path="/" render={() => <Redirect to="/budget" />} />
 
-      <Route path="/reports">
-        <NarrowNotSupported>
-          <Reports />
-        </NarrowNotSupported>
-      </Route>
+      <Route
+        path="/reports"
+        element={
+          <NarrowNotSupported>
+            <Reports />
+          </NarrowNotSupported>
+        }
+      />
 
-      <Route path="/budget">
-        {isNarrowWidth ? <MobileBudget /> : <Budget />}
-      </Route>
+      <Route
+        path="/budget"
+        element={isNarrowWidth ? <MobileBudget /> : <Budget />}
+      />
 
-      <Route path="/schedules" exact>
-        <NarrowNotSupported>
-          <Schedules />
-        </NarrowNotSupported>
-      </Route>
-      <Route path="/schedule/edit" exact>
-        <NarrowNotSupported>
-          <EditSchedule />
-        </NarrowNotSupported>
-      </Route>
-      <Route path="/schedule/edit/:id">
-        <NarrowNotSupported>
-          <EditSchedule />
-        </NarrowNotSupported>
-      </Route>
-      <Route path="/schedule/link">
-        <NarrowNotSupported>
-          <LinkSchedule />
-        </NarrowNotSupported>
-      </Route>
-      <Route path="/schedule/discover">
-        <NarrowNotSupported>
-          <DiscoverSchedules />
-        </NarrowNotSupported>
-      </Route>
-      <Route path="/schedule/posts-offline-notification">
-        <PostsOfflineNotification />
-      </Route>
+      <Route
+        path="/schedules"
+        element={
+          <NarrowNotSupported>
+            <Schedules />
+          </NarrowNotSupported>
+        }
+      />
 
-      <Route path="/payees" exact>
-        <ManagePayeesPage />
-      </Route>
-      <Route path="/rules" exact>
-        <ManageRulesPage />
-      </Route>
-      <Route path="/settings">
-        <Settings />
-      </Route>
-      <Route path="/nordigen/link" exact>
-        <NarrowNotSupported>
-          <NordigenLink />
-        </NarrowNotSupported>
-      </Route>
+      <Route
+        path="/schedule/edit"
+        element={
+          <NarrowNotSupported>
+            <EditSchedule />
+          </NarrowNotSupported>
+        }
+      />
+      <Route
+        path="/schedule/edit/:id"
+        element={
+          <NarrowNotSupported>
+            <EditSchedule />
+          </NarrowNotSupported>
+        }
+      />
+      <Route
+        path="/schedule/link"
+        element={
+          <NarrowNotSupported>
+            <LinkSchedule />
+          </NarrowNotSupported>
+        }
+      />
+      <Route
+        path="/schedule/discover"
+        element={
+          <NarrowNotSupported>
+            <DiscoverSchedules />
+          </NarrowNotSupported>
+        }
+      />
 
-      <Route path="/accounts/:id" exact>
-        {props => {
+      <Route
+        path="/schedule/posts-offline-notification"
+        element={<PostsOfflineNotification />}
+      />
+
+      <Route path="/payees" element={<ManagePayeesPage />} />
+      <Route path="/rules" element={<ManageRulesPage />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route
+        path="/nordigen/link"
+        element={
+          <NarrowNotSupported>
+            <NordigenLink />
+          </NarrowNotSupported>
+        }
+      />
+
+      <Route
+        path="/accounts/:id"
+        element={props => {
           const AcctCmp = isNarrowWidth ? MobileAccount : Account;
           return (
             props.match && <AcctCmp key={props.match.params.id} {...props} />
           );
         }}
-      </Route>
-      <Route path="/accounts" exact>
-        {isNarrowWidth ? <MobileAccounts /> : <Account />}
-      </Route>
-    </Switch>
+      />
+
+      <Route
+        path="/accounts"
+        element={isNarrowWidth ? <MobileAccounts /> : <Account />}
+      />
+    </Routes>
   );
 }
 
@@ -151,14 +172,14 @@ function StackedRoutes() {
 
   return (
     <ActiveLocationProvider location={locations[locations.length - 1]}>
-      <Routes location={base} />
+      <StackedRoutesInner location={base} />
       {stack.map((location, idx) => (
         <PageTypeProvider
           key={location.key}
           type="modal"
           current={idx === stack.length - 1}
         >
-          <Routes location={location} />
+          <StackedRoutesInner location={location} />
         </PageTypeProvider>
       ))}
     </ActiveLocationProvider>
@@ -274,59 +295,51 @@ function FinancesApp(props) {
 
   return (
     <Router history={patchedHistory}>
-      <CompatRouter>
-        <View style={{ height: '100%', backgroundColor: colors.n10 }}>
-          <GlobalKeys />
+      <View style={{ height: '100%', backgroundColor: colors.n10 }}>
+        <GlobalKeys />
 
-          <View style={{ flexDirection: 'row', flex: 1 }}>
-            <FloatableSidebar />
+        <View style={{ flexDirection: 'row', flex: 1 }}>
+          <FloatableSidebar />
 
-            <View
+          <View
+            style={{
+              flex: 1,
+              overflow: 'hidden',
+              width: '100%',
+            }}
+          >
+            <Titlebar
+              style={{
+                WebkitAppRegion: 'drag',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1000,
+              }}
+            />
+            <div
               style={{
                 flex: 1,
-                overflow: 'hidden',
-                width: '100%',
+                display: 'flex',
+                overflow: 'auto',
+                position: 'relative',
               }}
             >
-              <Titlebar
-                style={{
-                  WebkitAppRegion: 'drag',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 1000,
-                }}
-              />
-              <div
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  overflow: 'auto',
-                  position: 'relative',
-                }}
-              >
-                <Notifications />
-                <BankSyncStatus />
-                <StackedRoutes />
-                <Modals history={patchedHistory} />
-              </div>
+              <Notifications />
+              <BankSyncStatus />
+              <StackedRoutes />
+              <Modals history={patchedHistory} />
+            </div>
 
-              <Switch>
-                <Route path="/budget">
-                  <MobileNavTabs />
-                </Route>
-                <Route path="/accounts">
-                  <MobileNavTabs />
-                </Route>
-                <Route path="/settings">
-                  <MobileNavTabs />
-                </Route>
-              </Switch>
-            </View>
+            <Routes>
+              <Route path="/budget" element={<MobileNavTabs />} />
+              <Route path="/accounts" element={<MobileNavTabs />} />
+              <Route path="/settings" element={<MobileNavTabs />} />
+            </Routes>
           </View>
         </View>
-      </CompatRouter>
+      </View>
     </Router>
   );
 }

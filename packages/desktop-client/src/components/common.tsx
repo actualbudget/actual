@@ -14,7 +14,7 @@ import React, {
   cloneElement,
 } from 'react';
 import type { RouteComponentProps } from 'react-router';
-import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
+import { Route, NavLink, useRouteMatch } from 'react-router-dom';
 
 import {
   ListboxInput,
@@ -156,7 +156,6 @@ export function Link({ style, children, ...nativeProps }: LinkProps) {
 
 type AnchorLinkProps = {
   to: string;
-  exact: boolean;
   style?: CSSProperties;
   activeStyle?: CSSProperties;
   children?: ReactNode;
@@ -164,7 +163,6 @@ type AnchorLinkProps = {
 
 export function AnchorLink({
   to,
-  exact,
   style,
   activeStyle,
   children,
@@ -174,7 +172,6 @@ export function AnchorLink({
   return (
     <NavLink
       to={to}
-      exact={exact}
       {...css([styles.smallText, style, match ? activeStyle : null])}
     >
       {children}

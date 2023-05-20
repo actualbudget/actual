@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 
 import { css } from 'glamor';
 
@@ -132,4 +131,4 @@ function LoggedInUser({
 export default connect(
   state => ({ userData: state.user.data }),
   actions,
-)(withRouter(LoggedInUser));
+)(LoggedInUser);
