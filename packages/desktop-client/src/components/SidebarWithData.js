@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { withRouter, useHistory } from 'react-router';
+import { useHistory } from 'react-router';
 
 import { bindActionCreators } from 'redux';
 
@@ -155,15 +155,13 @@ function SidebarWithData({
   );
 }
 
-export default withRouter(
-  connect(
-    state => ({
-      accounts: state.queries.accounts,
-      failedAccounts: state.account.failedAccounts,
-      updatedAccounts: state.queries.updatedAccounts,
-      prefs: state.prefs.local,
-      floatingSidebar: state.prefs.global.floatingSidebar,
-    }),
-    dispatch => bindActionCreators(actions, dispatch),
-  )(SidebarWithData),
-);
+export default connect(
+  state => ({
+    accounts: state.queries.accounts,
+    failedAccounts: state.account.failedAccounts,
+    updatedAccounts: state.queries.updatedAccounts,
+    prefs: state.prefs.local,
+    floatingSidebar: state.prefs.global.floatingSidebar,
+  }),
+  dispatch => bindActionCreators(actions, dispatch),
+)(SidebarWithData);

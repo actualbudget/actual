@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Switch, Redirect, Router, Route } from 'react-router-dom';
+import { Redirect, Router, Route, Routes } from 'react-router-dom';
 
 import { createBrowserHistory } from 'history';
 
@@ -150,25 +150,18 @@ function ManagementApp({
           >
             {userData && files ? (
               <>
-                <Switch>
-                  <Route exact path="/config-server">
-                    <ConfigServer />
-                  </Route>
-                  <Route exact path="/change-password">
-                    <ChangePassword />
-                  </Route>
+                <Routes>
+                  <Route path="/config-server" element={<ConfigServer />} />
+
+                  <Route path="/change-password" element={<ChangePassword />} />
                   {files && files.length > 0 ? (
-                    <Route exact path="/">
-                      <BudgetList />
-                    </Route>
+                    <Route path="/" element={<BudgetList />} />
                   ) : (
-                    <Route exact path="/">
-                      <WelcomeScreen />
-                    </Route>
+                    <Route path="/" element={<WelcomeScreen />} />
                   )}
                   {/* Redirect all other pages to this route */}
                   <Route path="/" render={() => <Redirect to="/" />} />
-                </Switch>
+                </Routes>
 
                 <View
                   style={{
@@ -179,44 +172,37 @@ function ManagementApp({
                     zIndex: 4000,
                   }}
                 >
-                  <Switch>
-                    <Route exact path="/config-server" children={null} />
-                    <Route exact path="/">
-                      <LoggedInUser
-                        hideIfNoServer
-                        style={{ padding: '4px 7px' }}
-                      />
-                    </Route>
-                  </Switch>
+                  <Routes>
+                    <Route path="/config-server" element={null} />
+                    <Route
+                      path="/"
+                      element={
+                        <LoggedInUser
+                          hideIfNoServer
+                          style={{ padding: '4px 7px' }}
+                        />
+                      }
+                    />
+                  </Routes>
                 </View>
               </>
             ) : (
-              <Switch>
-                <Route exact path="/login">
-                  <Login />
-                </Route>
-                <Route exact path="/error">
-                  <Error />
-                </Route>
-                <Route exact path="/config-server">
-                  <ConfigServer />
-                </Route>
-                <Route exact path="/bootstrap">
-                  <Bootstrap />
-                </Route>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/error" element={<Error />} />
+                <Route path="/config-server" element={<ConfigServer />} />
+                <Route path="/bootstrap" element={<Bootstrap />} />
                 {/* Redirect all other pages to this route */}
                 <Route path="/" render={() => <Redirect to="/bootstrap" />} />
-              </Switch>
+              </Routes>
             )}
           </View>
         )}
 
-        <Switch>
-          <Route exact path="/config-server" children={null} />
-          <Route path="/">
-            <ServerURL />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path="/config-server" element={null} />
+          <Route path="/" element={<ServerURL />} />
+        </Routes>
         <Version />
       </View>
       <Modals history={history} />
