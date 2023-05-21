@@ -27,7 +27,7 @@ repeat 'repeat interval'
   / years: d _ 'years'i { return { annual: true, repeat: +years } }
 
 limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
-  / _? upTo _ amount: amount { return {amount: amount, hold: false } }
+        / _? upTo _ amount: amount { return {amount: amount, hold: false } }
 
 
 weekCount
