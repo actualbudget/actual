@@ -11,7 +11,7 @@ expr
       ...(repeat ? repeat[3] : {}),
       from,
       priority: +priority
-    } } 
+    } }
   / priority: priority? monthly: amount limit: limit?
     { return { type: 'simple', monthly, limit, priority: +priority  } } 
   / priority: priority? limit: limit
@@ -21,13 +21,13 @@ expr
   
 
 repeat 'repeat interval'
-  = 'month'i { return { annual: false } } 
-  / months: d _ 'months'i { return { annual: false, repeat: +months } } 
-  / 'year'i { return { annual: true } } 
-  / years: d _ 'years'i { return { annual: true, repeat: +years } } 
+  = 'month'i { return { annual: false } }
+  / months: d _ 'months'i { return { annual: false, repeat: +months } }
+  / 'year'i { return { annual: true } }
+  / years: d _ 'years'i { return { annual: true, repeat: +years } }
 
-limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } } 
-    / _? upTo _ amount: amount { return {amount: amount, hold: false } } 
+limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
+  / _? upTo _ amount: amount { return {amount: amount, hold: false } }
 
 
 weekCount
@@ -45,7 +45,7 @@ starting = 'starting'i
 upTo = 'up'i _ 'to'i
 schedule = 'schedule'i
 full = 'full'i _ {return true}
-priority = '-'i number: number _ {return +number}
+priority = '-'i number: number _ {return number}
 
 _ 'space' = ' '+
 d 'digit' = [0-9]
