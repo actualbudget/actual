@@ -181,10 +181,19 @@ export default function PayeeAutocomplete({
   onUpdate,
   onSelect,
   onManagePayees,
+  accounts,
+  payees,
   ...props
 }) {
-  let payees = useCachedPayees();
-  let accounts = useCachedAccounts();
+  let cachedPayees = useCachedPayees();
+  if (!payees) {
+    payees = cachedPayees;
+  }
+
+  let cachedAccounts = useCachedAccounts();
+  if (!accounts) {
+    accounts = cachedAccounts;
+  }
 
   let [focusTransferPayees, setFocusTransferPayees] = useState(
     defaultFocusTransferPayees,
