@@ -501,9 +501,6 @@ async function applyCategoryTemplate(
         }
         break;
       }
-      case 'error':
-        return { errors };
-      default:
       case 'schedule': {
         let { id: schedule_id } = await db.first(
           'SELECT id FROM schedules WHERE name = ?',
@@ -520,6 +517,14 @@ async function applyCategoryTemplate(
           next_date,
           current_month,
         );
+
+        if (template.full === true) {
+          if (num_months === 1) {
+            to_budget = -getScheduledAmount(amountCond.value);
+          }
+          break;
+        }
+
         if (l === 0) remainder = last_month_balance;
         remainder = -getScheduledAmount(amountCond.value) - remainder;
         let target = 0;
@@ -552,6 +557,9 @@ async function applyCategoryTemplate(
         }
         break;
       }
+      case 'error':
+        return { errors };
+      default:
     }
   }
   
