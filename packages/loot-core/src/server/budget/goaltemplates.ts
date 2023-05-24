@@ -359,7 +359,6 @@ async function applyCategoryTemplate(
             : (template.repeat || 1) * 12;
         while (num_months < 0 && repeat) {
           target_month = addMonths(target_month, repeat);
-          //??
           num_months = differenceInCalendarMonths(
             template_lines[l],
             current_month,
