@@ -505,8 +505,10 @@ async function applyCategoryTemplate(
         let { date: dateCond, amount: amountCond } =
           extractScheduleConds(conditions);
         let next_date_string = getNextDate(dateCond, current_month);
-        let next_date = getCorrectedDate(next_date_string);
-        let num_months = differenceInCalendarMonths(next_date, current_month);
+        let num_months = differenceInCalendarMonths(
+          getCorrectedDate(next_date_string),
+          current_month,
+        );
 
         if (template.full === true) {
           if (num_months === 1) {
