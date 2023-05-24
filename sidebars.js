@@ -266,6 +266,7 @@ const sidebars = {
           collapsed: true,
           items: [
             'Advanced/Experimental-Features/goal-templates',
+            'Advanced/Experimental-Features/monthly-cleanup',
             'Advanced/Experimental-Features/report-budget',
             'Accounts/connecting-your-bank',
           ],
