@@ -3,6 +3,7 @@ import {
   addMonths,
   addWeeks,
   format,
+  addMinutes,
 } from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
@@ -231,6 +232,7 @@ async function applyCategoryTemplate(
   force,
 ) {
   let current_month = new Date(`${month}-01`);
+  current_month = addMinutes(current_month, current_month.getTimezoneOffset());
   let errors = [];
   let all_schedule_names = await db.all(
     'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
@@ -243,6 +245,7 @@ async function applyCategoryTemplate(
       case 'by':
       case 'spend':
         let target_month = new Date(`${template.month}-01`);
+        target_month = addMinutes(target_month, target_month.getTimezoneOffset());
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month,
@@ -285,9 +288,13 @@ async function applyCategoryTemplate(
   if (template_lines.length > 1) {
     template_lines = template_lines.sort((a, b) => {
       if (a.type === 'by' && !a.annual) {
+        let date_a = new Date(`${a.month}-01`);
+        date_a = addMinutes(date_a, date_a.getTimezoneOffset());
+        let date_b = new Date(`${b.month}-01`);
+        date_b = addMinutes(date_b, date_b.getTimezoneOffset());
         return differenceInCalendarMonths(
-          new Date(`${a.month}-01`),
-          new Date(`${b.month}-01`),
+          date_a,
+          date_b,
         );
       } else {
         return a.type.localeCompare(b.type);
@@ -338,6 +345,7 @@ async function applyCategoryTemplate(
         // by has 'amount' and 'month' params
         let target = 0;
         let target_month = new Date(`${template_lines[l].month}-01`);
+        target_month = addMinutes(target_month, target_month.getTimezoneOffset());
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month,
@@ -348,8 +356,9 @@ async function applyCategoryTemplate(
             : (template.repeat || 1) * 12;
         while (num_months < 0 && repeat) {
           target_month = addMonths(target_month, repeat);
+          //??
           num_months = differenceInCalendarMonths(
-            template_lines[l],
+            template_lines[l], 
             current_month,
           );
         }
@@ -387,6 +396,7 @@ async function applyCategoryTemplate(
           }
         }
         let w = new Date(template.starting);
+        w = addMinutes(w, w.getTimezoneOffset());
 
         let next_month = addMonths(current_month, 1);
 
@@ -406,7 +416,9 @@ async function applyCategoryTemplate(
       case 'spend': {
         // spend has 'amount' and 'from' and 'month' params
         let from_month = new Date(`${template.from}-01`);
+        from_month = addMinutes(from_month, from_month.getTimezoneOffset());
         let to_month = new Date(`${template.month}-01`);
+        to_month = addMinutes(to_month, to_month.getTimezoneOffset());
         let already_budgeted = last_month_balance;
         let first_month = true;
         for (
@@ -502,8 +514,10 @@ async function applyCategoryTemplate(
         let { date: dateCond, amount: amountCond } =
           extractScheduleConds(conditions);
         let next_date_string = getNextDate(dateCond, current_month);
+        let next_date = new Date(next_date_string);
+        next_date = addMinutes(next_date, next_date.getTimezoneOffset());
         let num_months = differenceInCalendarMonths(
-          new Date(next_date_string),
+          next_date,
           current_month,
         );
         if (l === 0) remainder = last_month_balance;
@@ -516,30 +530,31 @@ async function applyCategoryTemplate(
           target = 0;
           remainder = Math.abs(remainder);
         }
-        let diff = num_months > 0 ? Math.round(target / num_months) : 0;
+        let diff = num_months > -1 ? Math.round(target / (num_months + 1)) : 0;
         if (num_months < 0) {
           errors.push(
             `Non-repeating schedule ${template.name} was due on ${next_date_string}, which is in the past.`,
           );
           return { errors };
-        } else if (num_months > 0) {
-          if (
-            (diff >= 0 &&
-              num_months > -1 &&
-              to_budget + diff < budgetAvailable) ||
-            !priority
-          ) {
-            to_budget += diff;
-          } else {
-            if (budgetAvailable > 0) to_budget = budgetAvailable;
-            errors.push(`Insufficient funds.`);
-          }
+          } else if (num_months > -1) {
+            if (
+              (diff >= 0 &&
+                num_months > -1 &&
+                to_budget + diff < budgetAvailable) ||
+              !priority
+            ) {
+              to_budget += diff;
+              if (l === template_lines.length - 1) to_budget -= spent;
+            } else {
+          if (budgetAvailable > 0) to_budget = budgetAvailable;
+          errors.push(`Insufficient funds.`);
+        }
         }
         break;
       }
     }
   }
-
+  
   if (limit != null) {
     if (hold && balance > limit) {
       to_budget = 0;
