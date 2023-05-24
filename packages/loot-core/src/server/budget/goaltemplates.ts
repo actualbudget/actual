@@ -3,6 +3,7 @@ import {
   addMonths,
   addWeeks,
   format,
+  addMinutes,
 } from 'date-fns';
 
 import * as monthUtils from '../../shared/months';
@@ -35,6 +36,12 @@ function checkScheduleTemplates(template) {
     }
   }
   return { lowPriority, errorNotice };
+}
+
+function getCorrectedDate(dateString) {
+  let newDate = new Date(dateString);
+  newDate = addMinutes(newDate, newDate.getTimezoneOffset());
+  return newDate;
 }
 
 async function processTemplate(month, force) {
@@ -230,7 +237,7 @@ async function applyCategoryTemplate(
   priority,
   force,
 ) {
-  let current_month = new Date(`${month}-01`);
+  let current_month = getCorrectedDate(`${month}-01`);
   let errors = [];
   let all_schedule_names = await db.all(
     'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
@@ -242,7 +249,7 @@ async function applyCategoryTemplate(
     switch (template.type) {
       case 'by':
       case 'spend':
-        let target_month = new Date(`${template.month}-01`);
+        let target_month = getCorrectedDate(`${template.month}-01`);
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month,
@@ -253,7 +260,7 @@ async function applyCategoryTemplate(
 
         let spend_from;
         if (template.type === 'spend') {
-          spend_from = new Date(`${template.from}-01`);
+          spend_from = getCorrectedDate(`${template.from}-01`);
         }
         while (num_months < 0 && repeat) {
           target_month = addMonths(target_month, repeat);
@@ -286,8 +293,8 @@ async function applyCategoryTemplate(
     template_lines = template_lines.sort((a, b) => {
       if (a.type === 'by' && !a.annual) {
         return differenceInCalendarMonths(
-          new Date(`${a.month}-01`),
-          new Date(`${b.month}-01`),
+          getCorrectedDate(`${a.month}-01`),
+          getCorrectedDate(`${b.month}-01`),
         );
       } else {
         return a.type.localeCompare(b.type);
@@ -337,7 +344,7 @@ async function applyCategoryTemplate(
       case 'by': {
         // by has 'amount' and 'month' params
         let target = 0;
-        let target_month = new Date(`${template_lines[l].month}-01`);
+        let target_month = getCorrectedDate(`${template_lines[l].month}-01`);
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month,
@@ -362,7 +369,7 @@ async function applyCategoryTemplate(
           target = 0;
           remainder = Math.abs(remainder);
         }
-        let diff = num_months > -1 ? Math.round(target / (num_months + 1)) : 0;
+        let diff = num_months >= 0 ? Math.round(target / (num_months + 1)) : 0;
         if (diff >= 0) {
           if (to_budget + diff < budgetAvailable || !priority) {
             to_budget += diff;
@@ -386,8 +393,7 @@ async function applyCategoryTemplate(
             hold = template.limit.hold;
           }
         }
-        let w = new Date(template.starting);
-
+        let w = getCorrectedDate(template.starting);
         let next_month = addMonths(current_month, 1);
 
         while (w.getTime() < next_month.getTime()) {
@@ -405,8 +411,8 @@ async function applyCategoryTemplate(
       }
       case 'spend': {
         // spend has 'amount' and 'from' and 'month' params
-        let from_month = new Date(`${template.from}-01`);
-        let to_month = new Date(`${template.month}-01`);
+        let from_month = getCorrectedDate(`${template.from}-01`);
+        let to_month = getCorrectedDate(`${template.month}-01`);
         let already_budgeted = last_month_balance;
         let first_month = true;
         for (
@@ -500,7 +506,7 @@ async function applyCategoryTemplate(
           extractScheduleConds(conditions);
         let next_date_string = getNextDate(dateCond, current_month);
         let num_months = differenceInCalendarMonths(
-          new Date(next_date_string),
+          getCorrectedDate(next_date_string),
           current_month,
         );
 
@@ -521,16 +527,16 @@ async function applyCategoryTemplate(
           target = 0;
           remainder = Math.abs(remainder);
         }
-        let diff = num_months > 0 ? Math.round(target / num_months) : 0;
+        let diff = num_months >= 0 ? Math.round(target / (num_months + 1)) : 0;
         if (num_months < 0) {
           errors.push(
             `Non-repeating schedule ${template.name} was due on ${next_date_string}, which is in the past.`,
           );
           return { errors };
-        } else if (num_months > 0) {
+        } else if (num_months >= 0) {
           if (
             (diff >= 0 &&
-              num_months > -1 &&
+              num_months >= 0 &&
               to_budget + diff < budgetAvailable) ||
             !priority
           ) {
