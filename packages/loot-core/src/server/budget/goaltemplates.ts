@@ -245,7 +245,10 @@ async function applyCategoryTemplate(
       case 'by':
       case 'spend':
         let target_month = new Date(`${template.month}-01`);
-        target_month = addMinutes(target_month, target_month.getTimezoneOffset());
+        target_month = addMinutes(
+          target_month,
+          target_month.getTimezoneOffset(),
+        );
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month,
@@ -292,10 +295,7 @@ async function applyCategoryTemplate(
         date_a = addMinutes(date_a, date_a.getTimezoneOffset());
         let date_b = new Date(`${b.month}-01`);
         date_b = addMinutes(date_b, date_b.getTimezoneOffset());
-        return differenceInCalendarMonths(
-          date_a,
-          date_b,
-        );
+        return differenceInCalendarMonths(date_a, date_b);
       } else {
         return a.type.localeCompare(b.type);
       }
@@ -345,7 +345,10 @@ async function applyCategoryTemplate(
         // by has 'amount' and 'month' params
         let target = 0;
         let target_month = new Date(`${template_lines[l].month}-01`);
-        target_month = addMinutes(target_month, target_month.getTimezoneOffset());
+        target_month = addMinutes(
+          target_month,
+          target_month.getTimezoneOffset(),
+        );
         let num_months = differenceInCalendarMonths(
           target_month,
           current_month,
@@ -358,7 +361,7 @@ async function applyCategoryTemplate(
           target_month = addMonths(target_month, repeat);
           //??
           num_months = differenceInCalendarMonths(
-            template_lines[l], 
+            template_lines[l],
             current_month,
           );
         }
@@ -513,10 +516,7 @@ async function applyCategoryTemplate(
         let next_date_string = getNextDate(dateCond, current_month);
         let next_date = new Date(next_date_string);
         next_date = addMinutes(next_date, next_date.getTimezoneOffset());
-        let num_months = differenceInCalendarMonths(
-          next_date,
-          current_month,
-        );
+        let num_months = differenceInCalendarMonths(next_date, current_month);
 
         if (template.full === true) {
           if (num_months === 1) {
@@ -541,19 +541,19 @@ async function applyCategoryTemplate(
             `Non-repeating schedule ${template.name} was due on ${next_date_string}, which is in the past.`,
           );
           return { errors };
-          } else if (num_months > -1) {
-            if (
-              (diff >= 0 &&
-                num_months > -1 &&
-                to_budget + diff < budgetAvailable) ||
-              !priority
-            ) {
-              to_budget += diff;
-              if (l === template_lines.length - 1) to_budget -= spent;
-            } else {
-          if (budgetAvailable > 0) to_budget = budgetAvailable;
-          errors.push(`Insufficient funds.`);
-        }
+        } else if (num_months > -1) {
+          if (
+            (diff >= 0 &&
+              num_months > -1 &&
+              to_budget + diff < budgetAvailable) ||
+            !priority
+          ) {
+            to_budget += diff;
+            if (l === template_lines.length - 1) to_budget -= spent;
+          } else {
+            if (budgetAvailable > 0) to_budget = budgetAvailable;
+            errors.push(`Insufficient funds.`);
+          }
         }
         break;
       }
@@ -562,7 +562,7 @@ async function applyCategoryTemplate(
       default:
     }
   }
-  
+
   if (limit != null) {
     if (hold && balance > limit) {
       to_budget = 0;
