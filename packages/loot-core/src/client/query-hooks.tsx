@@ -90,5 +90,5 @@ export function useLiveQuery(query, opts?) {
     };
   }, [query]);
 
-  return { data };
+  return data;
 }
