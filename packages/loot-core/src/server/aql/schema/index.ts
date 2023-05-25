@@ -72,6 +72,7 @@ export const schema = {
     id: f('id'),
     name: f('string'),
     is_income: f('boolean'),
+    hidden: f('boolean'),
     group: f('id', { ref: 'category_groups' }),
     sort_order: f('float'),
     tombstone: f('boolean'),
