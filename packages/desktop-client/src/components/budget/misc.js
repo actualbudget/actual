@@ -353,12 +353,15 @@ export function SidebarCategory({
               onMenuSelect={type => {
                 if (type === 'rename') {
                   onEditName(category.id);
-                } else {
+                } else if (type === 'delete') {
                   onDelete(category.id);
+                } else if (type === 'toggleHide') {
+                  onSave({ ...category, hidden: !category.hidden });
                 }
                 setMenuOpen(false);
               }}
               items={[
+                { name: 'toggleHide', text: category.hidden ? 'Show' : 'Hide' },
                 { name: 'rename', text: 'Rename' },
                 { name: 'delete', text: 'Delete' },
               ]}
