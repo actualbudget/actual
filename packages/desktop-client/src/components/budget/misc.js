@@ -14,6 +14,7 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import CheveronDown from '../../icons/v1/CheveronDown';
+import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { styles, colors } from '../../style';
 import {
   View,
@@ -50,6 +51,7 @@ export class BudgetTable extends Component {
     this.state = {
       editing: null,
       draggingState: null,
+      showHiddenCategories: false,
     };
   }
 
@@ -166,6 +168,12 @@ export class BudgetTable extends Component {
     this.setState({ editing: null });
   }
 
+  toggleHiddenCategories = () => {
+    this.setState(prevState => ({
+      showHiddenCategories: !prevState.showHiddenCategories,
+    }));
+  };
+
   render() {
     let {
       type,
@@ -188,7 +196,7 @@ export class BudgetTable extends Component {
       onShowNewGroup,
       onHideNewGroup,
     } = this.props;
-    let { editing, draggingState } = this.state;
+    let { editing, draggingState, showHiddenCategories } = this.state;
 
     return (
       <View
@@ -235,7 +243,10 @@ export class BudgetTable extends Component {
           monthBounds={monthBounds}
           type={type}
         >
-          <BudgetTotals MonthComponent={dataComponents.BudgetTotalsComponent} />
+          <BudgetTotals
+            MonthComponent={dataComponents.BudgetTotalsComponent}
+            toggleHiddenCategories={this.toggleHiddenCategories}
+          />
           <IntersectionBoundary.Provider value={this.budgetCategoriesRef}>
             <View
               style={{
@@ -256,6 +267,7 @@ export class BudgetTable extends Component {
                 innerRef={el => (this.budgetDataNode = el)}
               >
                 <BudgetCategories
+                  showHiddenCategories={showHiddenCategories}
                   categoryGroups={categoryGroups}
                   newCategoryForGroup={newCategoryForGroup}
                   isAddingGroup={isAddingGroup}
@@ -616,7 +628,11 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
   });
 }
 
-const BudgetTotals = memo(function BudgetTotals({ MonthComponent }) {
+const BudgetTotals = memo(function BudgetTotals({
+  MonthComponent,
+  toggleHiddenCategories,
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <View
       data-testid="budget-totals"
@@ -636,10 +652,51 @@ const BudgetTotals = memo(function BudgetTotals({ MonthComponent }) {
           width: 200,
           color: colors.n4,
           justifyContent: 'center',
-          paddingLeft: 18,
+          paddingLeft: 15,
+          paddingRight: 5,
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
         }}
       >
-        Category
+        <View style={{ flexGrow: '1' }}>Category</View>
+        <Button
+          bare
+          onClick={() => {
+            setMenuOpen(true);
+          }}
+          style={{ color: 'currentColor', padding: 3 }}
+        >
+          <DotsHorizontalTriple
+            width={15}
+            height={15}
+            style={{ color: colors.n5 }}
+          />
+          {menuOpen && (
+            <Tooltip
+              position="bottom-right"
+              width={200}
+              style={{ padding: 0 }}
+              onClose={() => {
+                setMenuOpen(false);
+              }}
+            >
+              <Menu
+                onMenuSelect={type => {
+                  if (type === 'toggleHidden') {
+                    toggleHiddenCategories();
+                  }
+                  setMenuOpen(false);
+                }}
+                items={[
+                  { name: 'toggleHidden', text: 'Toggle hidden categories' },
+                ]}
+              />
+            </Tooltip>
+          )}
+        </Button>
       </View>
       <RenderMonths component={MonthComponent} />
     </View>
@@ -921,6 +978,7 @@ const BudgetCategories = memo(
   ({
     categoryGroups,
     newCategoryForGroup,
+    showHiddenCategories,
     isAddingGroup,
     editingCell,
     collapsed,
@@ -955,12 +1013,15 @@ const BudgetCategories = memo(
 
           return [
             ...items,
-            ...(collapsed.includes(group.id) ? [] : group.categories).map(
-              cat => ({
-                type: 'expense-category',
-                value: cat,
-              }),
-            ),
+            ...(collapsed.includes(group.id)
+              ? []
+              : group.categories.filter(
+                  cat => showHiddenCategories || !cat.hidden,
+                )
+            ).map(cat => ({
+              type: 'expense-category',
+              value: cat,
+            })),
           ];
         }),
       );
@@ -977,7 +1038,9 @@ const BudgetCategories = memo(
             newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
             ...(collapsed.includes(incomeGroup.id)
               ? []
-              : incomeGroup.categories
+              : incomeGroup.categories.filter(
+                  cat => showHiddenCategories || !cat.hidden,
+                )
             ).map(cat => ({
               type: 'income-category',
               value: cat,
@@ -987,7 +1050,13 @@ const BudgetCategories = memo(
       }
 
       return items;
-    }, [categoryGroups, collapsed, newCategoryForGroup, isAddingGroup]);
+    }, [
+      categoryGroups,
+      collapsed,
+      newCategoryForGroup,
+      isAddingGroup,
+      showHiddenCategories,
+    ]);
 
     let [dragState, setDragState] = useState(null);
     let [savedCollapsed, setSavedCollapsed] = useState(null);
