@@ -322,6 +322,7 @@ export function SidebarCategory({
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           minWidth: 0,
+          opacity: category.hidden ? 0.33 : undefined,
         }}
       >
         {category.name}
