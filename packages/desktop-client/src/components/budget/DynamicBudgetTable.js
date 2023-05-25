@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { View } from '../common';
@@ -7,8 +7,8 @@ import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader, BudgetTable } from './misc';
 import { CategoryGroupsContext } from './util';
 
-function getNumPossibleMonths(width) {
-  let estimatedTableWidth = width - 200;
+function getNumPossibleMonths(width, wideCategories) {
+  let estimatedTableWidth = width - (wideCategories ? 250 : 150);
 
   if (estimatedTableWidth < 500) {
     return 1;
@@ -43,9 +43,15 @@ const DynamicBudgetTableInner = forwardRef(
   ) => {
     let { setDisplayMax } = useBudgetMonthCount();
 
-    let numPossible = getNumPossibleMonths(width);
+    const [wideCategories, setWideCategories] = useState(false);
+
+    function toggleWideCategories() {
+      setWideCategories(prev => !prev);
+    }
+
+    let numPossible = getNumPossibleMonths(width, wideCategories);
     let numMonths = Math.min(numPossible, maxMonths);
-    let maxWidth = 200 + 500 * numMonths;
+    let maxWidth = (wideCategories ? 250 : 150) + 500 * numMonths;
 
     useEffect(() => {
       setDisplayMax(numPossible);
@@ -71,6 +77,7 @@ const DynamicBudgetTableInner = forwardRef(
               numMonths={numMonths}
               monthBounds={monthBounds}
               onMonthSelect={onMonthSelect}
+              wideCategories={wideCategories}
             />
             <BudgetTable
               ref={ref}
@@ -79,6 +86,8 @@ const DynamicBudgetTableInner = forwardRef(
               startMonth={startMonth}
               numMonths={numMonths}
               monthBounds={monthBounds}
+              wideCategories={wideCategories}
+              onToggleWideCategories={toggleWideCategories}
               {...props}
             />
           </View>
