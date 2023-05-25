@@ -82,7 +82,7 @@ export default function NotesButton({
 }: NotesButtonProps) {
   let [hover, setHover] = useState(false);
   let tooltip = useTooltip();
-  let { data } = useLiveQuery(
+  let data = useLiveQuery(
     useMemo(() => q('notes').filter({ id }).select('*'), [id]),
   );
   let note = data && data.length > 0 ? data[0].note : null;

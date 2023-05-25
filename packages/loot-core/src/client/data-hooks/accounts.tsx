@@ -1,25 +1,11 @@
-import React, { createContext, useEffect, useState, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 
-import q, { liveQuery } from 'loot-core/src/client/query-helpers';
+import q from 'loot-core/src/client/query-helpers';
+import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { getAccountsById } from 'loot-core/src/client/reducers/queries';
 
 export function useAccounts() {
-  let [data, setData] = useState(null);
-
-  useEffect(() => {
-    let query = liveQuery(q('accounts').select('*'), async accounts => {
-      if (query) {
-        setData(accounts);
-      }
-    });
-
-    return () => {
-      query.unsubscribe();
-      query = null;
-    };
-  }, []);
-
-  return data;
+  return useLiveQuery(q('accounts').select('*'));
 }
 
 let AccountsContext = createContext(null);
