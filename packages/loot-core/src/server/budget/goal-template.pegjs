@@ -1,9 +1,11 @@
+// https://peggyjs.org
+
 expr
-  = priority: priority? percent: percent _ of _ category: name
+  = priority: priority? _? percent: percent _ of _ category: name
     { return { type: 'percentage', percent: +percent, category, priority: +priority }}
-  / priority: priority? amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
+  / priority: priority? _? amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
     { return { type: 'week', amount, weeks, starting, limit, priority: +priority }}
-  / priority: priority? amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
+  / priority: priority? _? amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
     { return {
       type: from ? 'spend' : 'by',
       amount,
@@ -12,11 +14,11 @@ expr
       from,
       priority: +priority
     } }
-  / priority: priority? monthly: amount limit: limit?
+  / priority: priority? _? monthly: amount limit: limit?
     { return { type: 'simple', monthly, limit, priority: +priority  } } 
-  / priority: priority? limit: limit
+  / priority: priority? _? limit: limit
     { return { type: 'simple', limit , priority: +priority } }
-  / priority: priority? schedule _ full:full? name: name
+  / priority: priority? _? schedule _ full:full? name: name
   	{ return { type: 'schedule', name, priority: +priority, full } }
   
 
