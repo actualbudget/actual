@@ -726,7 +726,6 @@ function ExpenseGroup({
   collapsed,
   editingCell,
   dragState,
-  allCategoriesHidden,
   itemPos,
   MonthComponent,
   onEditName,
@@ -770,7 +769,6 @@ function ExpenseGroup({
       backgroundColor={colors.n11}
       style={{
         fontWeight: 600,
-        opacity: allCategoriesHidden ? 0.33 : undefined,
       }}
     >
       {dragState && !dragState.preview && dragState.type === 'group' && (
@@ -1034,22 +1032,16 @@ const BudgetCategories = memo(
       let items = Array.prototype.concat.apply(
         [],
         expenseGroups.map(group => {
-          const allHidden =
-            group.categories.length > 0 &&
-            group.categories.every(cat => cat.hidden);
-
           const groupCategories = group.categories.filter(
             cat => showHiddenCategories || !cat.hidden,
           );
 
-          //checking group.categories.length to make sure groups with no categories still show
-          if (group.categories.length > 0 && groupCategories.length === 0) {
-            return [];
-          }
+          // //checking group.categories.length to make sure groups with no categories still show
+          // if (group.categories.length > 0 && groupCategories.length === 0) {
+          //   return [];
+          // }
 
-          let items = [
-            { type: 'expense-group', value: { ...group, allHidden } },
-          ];
+          let items = [{ type: 'expense-group', value: { ...group } }];
 
           if (newCategoryForGroup === group.id) {
             items.push({ type: 'new-category' });
@@ -1193,7 +1185,6 @@ const BudgetCategories = memo(
               content = (
                 <ExpenseGroup
                   group={item.value}
-                  allCategoriesHidden={item.value.allHidden}
                   editingCell={editingCell}
                   collapsed={collapsed.includes(item.value.id)}
                   MonthComponent={dataComponents.ExpenseGroupComponent}
