@@ -6,7 +6,11 @@ import React, {
   useState,
   useMemo,
 } from 'react';
+import { connect } from 'react-redux';
 
+import { bindActionCreators } from 'redux';
+
+import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
@@ -43,7 +47,7 @@ function getScrollbarWidth() {
   return Math.max(styles.scrollbarWidth - 2, 0);
 }
 
-export class BudgetTable extends Component {
+class BudgetTable extends Component {
   constructor(props) {
     super(props);
     this.budgetCategoriesRef = createRef();
@@ -51,7 +55,7 @@ export class BudgetTable extends Component {
     this.state = {
       editing: null,
       draggingState: null,
-      showHiddenCategories: false,
+      showHiddenCategories: props.prefs['budget.showHiddenCategories'] ?? false,
     };
   }
 
@@ -172,6 +176,9 @@ export class BudgetTable extends Component {
     this.setState(prevState => ({
       showHiddenCategories: !prevState.showHiddenCategories,
     }));
+    this.props.savePrefs({
+      'budget.showHiddenCategories': !this.state.showHiddenCategories,
+    });
   };
 
   render() {
@@ -298,6 +305,15 @@ export class BudgetTable extends Component {
     );
   }
 }
+
+const connected = connect(
+  state => ({
+    prefs: state.prefs.local,
+  }),
+  dispatch => bindActionCreators(actions, dispatch),
+)(BudgetTable);
+
+export { connected as BudgetTable };
 
 export function SidebarCategory({
   innerRef,
