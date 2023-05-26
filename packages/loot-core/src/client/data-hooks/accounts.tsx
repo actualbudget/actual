@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { getAccountsById } from 'loot-core/src/client/reducers/queries';
 
 export function useAccounts() {
-  return useLiveQuery(useMemo(() => q('accounts').select('*'), []));
+  return useLiveQuery(() => q('accounts').select('*'), []);
 }
 
 let AccountsContext = createContext(null);

@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 
 export function usePayees() {
-  return useLiveQuery(useMemo(() => q('payees').select('*'), []));
+  return useLiveQuery(() => q('payees').select('*'), []);
 }
 
 let PayeesContext = createContext(null);

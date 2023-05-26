@@ -4,7 +4,10 @@ import React, {
   useContext,
   useMemo,
   useEffect,
+  type DependencyList,
 } from 'react';
+
+import { type Query } from 'loot-core/src/shared/query';
 
 import { liveQuery, LiveQuery, PagedQuery } from './query-helpers';
 
@@ -70,19 +73,16 @@ export function pagedQueryContext(query, opts) {
   return makeContext(query, opts, PagedQuery);
 }
 
-export function useLiveQuery(query, opts?) {
+export function useLiveQuery(makeQuery: () => Query, deps: DependencyList) {
   let [data, setData] = useState(null);
+  let query = useMemo(makeQuery, deps);
 
   useEffect(() => {
-    let live = liveQuery(
-      query,
-      async data => {
-        if (live) {
-          setData(data);
-        }
-      },
-      opts,
-    );
+    let live = liveQuery(query, async data => {
+      if (live) {
+        setData(data);
+      }
+    });
 
     return () => {
       live.unsubscribe();

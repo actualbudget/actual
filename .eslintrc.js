@@ -47,6 +47,12 @@ module.exports = {
 
     // TODO: re-enable these rules
     'react-hooks/exhaustive-deps': 'off',
+    // 'react-hooks/exhaustive-deps': [
+    //   'error',
+    //   {
+    //     additionalHooks: 'useLiveQuery',
+    //   },
+    // ],
 
     'import/no-useless-path-segments': 'error',
     'import/order': [
