@@ -178,7 +178,7 @@ export class BudgetTable extends Component {
       monthBounds,
       collapsed,
       setCollapsed,
-      wideCategories,
+      categoryWidth,
       newCategoryForGroup,
       dataComponents,
       isAddingGroup,
@@ -190,7 +190,7 @@ export class BudgetTable extends Component {
       onHideNewCategory,
       onShowNewGroup,
       onHideNewGroup,
-      onToggleWideCategories,
+      onToggleCategoryWidth,
     } = this.props;
     let { editing, draggingState } = this.state;
 
@@ -220,7 +220,7 @@ export class BudgetTable extends Component {
             paddingRight: 5 + getScrollbarWidth(),
           }}
         >
-          <View style={{ width: wideCategories ? 250 : 150 }} />
+          <View style={{ width: categoryWidth }} />
           <MonthsProvider
             startMonth={prewarmStartMonth}
             numMonths={numMonths}
@@ -241,8 +241,8 @@ export class BudgetTable extends Component {
         >
           <BudgetTotals
             MonthComponent={dataComponents.BudgetTotalsComponent}
-            wideCategories={wideCategories}
-            onToggleWideCategories={onToggleWideCategories}
+            categoryWidth={categoryWidth}
+            onToggleCategoryWidth={onToggleCategoryWidth}
           />
           <IntersectionBoundary.Provider value={this.budgetCategoriesRef}>
             <View
@@ -264,7 +264,7 @@ export class BudgetTable extends Component {
                 innerRef={el => (this.budgetDataNode = el)}
               >
                 <BudgetCategories
-                  wideCategories={wideCategories}
+                  categoryWidth={categoryWidth}
                   categoryGroups={categoryGroups}
                   newCategoryForGroup={newCategoryForGroup}
                   isAddingGroup={isAddingGroup}
@@ -300,7 +300,7 @@ export function SidebarCategory({
   innerRef,
   category,
   dragPreview,
-  wideCategories,
+  categoryWidth,
   dragging,
   editing,
   style,
@@ -354,7 +354,7 @@ export function SidebarCategory({
         {menuOpen && (
           <Tooltip
             position="bottom-left"
-            width={wideCategories ? 250 : 150}
+            width={categoryWidth}
             style={{ padding: 0 }}
             onClose={() => setMenuOpen(false)}
           >
@@ -388,7 +388,7 @@ export function SidebarCategory({
       innerRef={innerRef}
       style={[
         {
-          width: wideCategories ? 250 : 150,
+          width: categoryWidth,
           '& button': { display: 'none' },
         },
         !dragging &&
@@ -448,7 +448,7 @@ export function SidebarGroup({
   editing,
   collapsed,
   dragPreview,
-  wideCategories,
+  categoryWidth,
   innerRef,
   style,
   borderColor = colors.border,
@@ -514,7 +514,7 @@ export function SidebarGroup({
             {menuOpen && (
               <Tooltip
                 position="bottom-left"
-                width={wideCategories ? 250 : 150}
+                width={categoryWidth}
                 style={{ padding: 0 }}
                 onClose={() => setMenuOpen(false)}
               >
@@ -551,7 +551,7 @@ export function SidebarGroup({
       style={[
         style,
         {
-          width: wideCategories ? 250 : 150,
+          width: categoryWidth,
           backgroundColor: colors.n11,
           '& button': { display: 'none' },
           '&:hover button': { display: 'flex', color: colors.n1 },
@@ -625,12 +625,13 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
 
 const BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
-  wideCategories,
-  onToggleWideCategories,
+  categoryWidth,
+  onToggleCategoryWidth,
 }) {
-  let ExpandOrCollapseIcon = wideCategories
-    ? ArrowButtonLeft1
-    : ArrowButtonRight1;
+  console.log(categoryWidth);
+
+  let ExpandOrCollapseIcon =
+    categoryWidth === 200 ? ArrowButtonRight1 : ArrowButtonLeft1;
 
   return (
     <View
@@ -648,7 +649,7 @@ const BudgetTotals = memo(function BudgetTotals({
     >
       <View
         style={{
-          width: wideCategories ? 250 : 150,
+          width: categoryWidth,
           color: colors.n4,
           justifyContent: 'center',
           paddingLeft: 15,
@@ -671,7 +672,7 @@ const BudgetTotals = memo(function BudgetTotals({
         <Button
           bare
           onClick={() => {
-            onToggleWideCategories();
+            onToggleCategoryWidth();
           }}
           style={{ color: 'currentColor', padding: 5 }}
           className="hover-visible"
@@ -692,7 +693,7 @@ function ExpenseGroup({
   group,
   collapsed,
   editingCell,
-  wideCategories,
+  categoryWidth,
   dragState,
   itemPos,
   MonthComponent,
@@ -765,7 +766,7 @@ function ExpenseGroup({
         }}
       >
         <SidebarGroup
-          wideCategories={wideCategories}
+          categoryWidth={categoryWidth}
           innerRef={dragRef}
           group={group}
           editing={
@@ -790,7 +791,7 @@ function ExpenseGroup({
 function ExpenseCategory({
   cat,
   budgetArray,
-  wideCategories,
+  categoryWidth,
   editingCell,
   dragState,
   MonthComponent,
@@ -837,7 +838,7 @@ function ExpenseCategory({
         <SidebarCategory
           innerRef={dragRef}
           category={cat}
-          wideCategories={wideCategories}
+          categoryWidth={categoryWidth}
           dragPreview={dragging && dragState.preview}
           dragging={dragging && !dragState.preview}
           editing={
@@ -871,7 +872,7 @@ function ExpenseCategory({
 function IncomeGroup({
   group,
   editingCell,
-  wideCategories,
+  categoryWidth,
   collapsed,
   MonthComponent,
   onEditName,
@@ -886,7 +887,7 @@ function IncomeGroup({
       style={{ fontWeight: 600 }}
     >
       <SidebarGroup
-        wideCategories={wideCategories}
+        categoryWidth={categoryWidth}
         group={group}
         collapsed={collapsed}
         editing={
@@ -905,7 +906,7 @@ function IncomeGroup({
 }
 
 function IncomeCategory({
-  wideCategories,
+  categoryWidth,
   cat,
   isLast,
   editingCell,
@@ -938,7 +939,7 @@ function IncomeCategory({
 
       <SidebarCategory
         innerRef={dragRef}
-        wideCategories={wideCategories}
+        categoryWidth={categoryWidth}
         category={cat}
         isLast={isLast}
         editing={
@@ -970,7 +971,7 @@ function IncomeCategory({
 const BudgetCategories = memo(
   ({
     categoryGroups,
-    wideCategories,
+    categoryWidth,
     newCategoryForGroup,
     isAddingGroup,
     editingCell,
@@ -1100,7 +1101,7 @@ const BudgetCategories = memo(
               content = (
                 <Row style={{ backgroundColor: colors.n11 }}>
                   <SidebarGroup
-                    wideCategories={wideCategories}
+                    categoryWidth={categoryWidth}
                     group={{ id: 'new', name: '' }}
                     editing={true}
                     onSave={onSaveGroup}
@@ -1114,7 +1115,7 @@ const BudgetCategories = memo(
               content = (
                 <Row>
                   <SidebarCategory
-                    wideCategories={wideCategories}
+                    categoryWidth={categoryWidth}
                     category={{
                       name: '',
                       cat_group: newCategoryForGroup,
@@ -1136,7 +1137,7 @@ const BudgetCategories = memo(
               content = (
                 <ExpenseGroup
                   group={item.value}
-                  wideCategories={wideCategories}
+                  categoryWidth={categoryWidth}
                   editingCell={editingCell}
                   collapsed={collapsed.includes(item.value.id)}
                   MonthComponent={dataComponents.ExpenseGroupComponent}
@@ -1156,7 +1157,7 @@ const BudgetCategories = memo(
               content = (
                 <ExpenseCategory
                   cat={item.value}
-                  wideCategories={wideCategories}
+                  categoryWidth={categoryWidth}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.ExpenseCategoryComponent}
                   dragState={dragState}
@@ -1180,7 +1181,7 @@ const BudgetCategories = memo(
                   }}
                 >
                   <IncomeHeader
-                    wideCategories={wideCategories}
+                    categoryWidth={categoryWidth}
                     MonthComponent={dataComponents.IncomeHeaderComponent}
                     onShowNewGroup={onShowNewGroup}
                   />
@@ -1190,7 +1191,7 @@ const BudgetCategories = memo(
             case 'income-group':
               content = (
                 <IncomeGroup
-                  wideCategories={wideCategories}
+                  categoryWidth={categoryWidth}
                   group={item.value}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.IncomeGroupComponent}
@@ -1205,7 +1206,7 @@ const BudgetCategories = memo(
             case 'income-category':
               content = (
                 <IncomeCategory
-                  wideCategories={wideCategories}
+                  categoryWidth={categoryWidth}
                   cat={item.value}
                   editingCell={editingCell}
                   isLast={idx === items.length - 1}
@@ -1256,12 +1257,12 @@ const BudgetCategories = memo(
   },
 );
 
-function IncomeHeader({ MonthComponent, onShowNewGroup, wideCategories }) {
+function IncomeHeader({ MonthComponent, onShowNewGroup, categoryWidth }) {
   return (
     <View style={{ flexDirection: 'row', flex: 1 }}>
       <View
         style={{
-          width: wideCategories ? 250 : 150,
+          width: categoryWidth,
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
         }}
@@ -1285,7 +1286,7 @@ export const BudgetPageHeader = memo(
     numMonths,
     monthBounds,
     style,
-    wideCategories,
+    categoryWidth,
   }) => {
     function getValidMonth(month) {
       let start = monthBounds.start;
@@ -1300,9 +1301,7 @@ export const BudgetPageHeader = memo(
     }
 
     return (
-      <View
-        style={{ marginLeft: (wideCategories ? 250 : 150) + 5, flexShrink: 0 }}
-      >
+      <View style={{ marginLeft: categoryWidth + 5, flexShrink: 0 }}>
         <View style={{ marginRight: 5 + getScrollbarWidth() }}>
           <MonthPicker
             startMonth={startMonth}

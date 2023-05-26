@@ -7,8 +7,8 @@ import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader, BudgetTable } from './misc';
 import { CategoryGroupsContext } from './util';
 
-function getNumPossibleMonths(width, wideCategories) {
-  let estimatedTableWidth = width - (wideCategories ? 250 : 150);
+function getNumPossibleMonths(width, categoryWidth) {
+  let estimatedTableWidth = width - categoryWidth;
 
   if (estimatedTableWidth < 500) {
     return 1;
@@ -43,15 +43,21 @@ const DynamicBudgetTableInner = forwardRef(
   ) => {
     let { setDisplayMax } = useBudgetMonthCount();
 
-    const [wideCategories, setWideCategories] = useState(false);
+    const [categoryWidth, setCategoryWidth] = useState(200);
 
-    function toggleWideCategories() {
-      setWideCategories(prev => !prev);
+    function toggleCategoryWidth() {
+      setCategoryWidth(prev => {
+        if (prev === 200) {
+          return 300;
+        } else {
+          return 200;
+        }
+      });
     }
 
-    let numPossible = getNumPossibleMonths(width, wideCategories);
+    let numPossible = getNumPossibleMonths(width, categoryWidth);
     let numMonths = Math.min(numPossible, maxMonths);
-    let maxWidth = (wideCategories ? 250 : 150) + 500 * numMonths;
+    let maxWidth = categoryWidth + 500 * numMonths;
 
     useEffect(() => {
       setDisplayMax(numPossible);
@@ -77,7 +83,7 @@ const DynamicBudgetTableInner = forwardRef(
               numMonths={numMonths}
               monthBounds={monthBounds}
               onMonthSelect={onMonthSelect}
-              wideCategories={wideCategories}
+              categoryWidth={categoryWidth}
             />
             <BudgetTable
               ref={ref}
@@ -86,8 +92,8 @@ const DynamicBudgetTableInner = forwardRef(
               startMonth={startMonth}
               numMonths={numMonths}
               monthBounds={monthBounds}
-              wideCategories={wideCategories}
-              onToggleWideCategories={toggleWideCategories}
+              categoryWidth={categoryWidth}
+              onToggleCategoryWidth={toggleCategoryWidth}
               {...props}
             />
           </View>
