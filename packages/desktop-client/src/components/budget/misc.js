@@ -628,8 +628,6 @@ const BudgetTotals = memo(function BudgetTotals({
   categoryWidth,
   onToggleCategoryWidth,
 }) {
-  console.log(categoryWidth);
-
   let ExpandOrCollapseIcon =
     categoryWidth === 200 ? ArrowButtonRight1 : ArrowButtonLeft1;
 
