@@ -282,9 +282,14 @@ class Budget extends PureComponent {
         }),
       });
     } else {
-      this.props.updateGroup(group);
+      const grp = {
+        ...group,
+        hidden: group.hidden ? 1 : 0,
+      };
+
+      this.props.updateGroup(grp);
       this.setState({
-        categoryGroups: updateGroup(categoryGroups, group),
+        categoryGroups: updateGroup(categoryGroups, grp),
       });
     }
   };

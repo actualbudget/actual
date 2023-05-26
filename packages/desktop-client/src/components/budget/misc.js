@@ -547,13 +547,19 @@ export function SidebarGroup({
                       onEdit(group.id);
                     } else if (type === 'add-category') {
                       onShowNewCategory(group.id);
-                    } else {
+                    } else if (type === 'delete') {
                       onDelete(group.id);
+                    } else if (type === 'toggleHidden') {
+                      onSave({ ...group, hidden: !group.hidden });
                     }
                     setMenuOpen(false);
                   }}
                   items={[
                     { name: 'add-category', text: 'Add category' },
+                    {
+                      name: 'toggleHidden',
+                      text: group.hidden ? 'Show' : 'Hide',
+                    },
                     { name: 'rename', text: 'Rename' },
                     onDelete && { name: 'delete', text: 'Delete' },
                   ]}
@@ -769,6 +775,7 @@ function ExpenseGroup({
       backgroundColor={colors.n11}
       style={{
         fontWeight: 600,
+        opacity: group.hidden ? 0.33 : undefined,
       }}
     >
       {dragState && !dragState.preview && dragState.type === 'group' && (
@@ -1032,6 +1039,10 @@ const BudgetCategories = memo(
       let items = Array.prototype.concat.apply(
         [],
         expenseGroups.map(group => {
+          if (group.hidden && !showHiddenCategories) {
+            return [];
+          }
+
           const groupCategories = group.categories.filter(
             cat => showHiddenCategories || !cat.hidden,
           );
