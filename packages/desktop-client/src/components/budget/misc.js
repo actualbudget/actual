@@ -311,6 +311,8 @@ const connected = connect(
     prefs: state.prefs.local,
   }),
   dispatch => bindActionCreators(actions, dispatch),
+  null,
+  { forwardRef: true },
 )(BudgetTable);
 
 export { connected as BudgetTable };
