@@ -343,6 +343,7 @@ export function SidebarCategory({
         alignItems: 'center',
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        opacity: category.hidden ? 0.33 : undefined,
       }}
     >
       <div
@@ -352,7 +353,6 @@ export function SidebarCategory({
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           minWidth: 0,
-          opacity: category.hidden ? 0.33 : undefined,
         }}
       >
         {category.name}
@@ -857,7 +857,14 @@ function ExpenseCategory({
   });
 
   return (
-    <Row innerRef={dropRef} collapsed={true} backgroundColor="transparent">
+    <Row
+      innerRef={dropRef}
+      collapsed={true}
+      style={{
+        backgroundColor: 'transparent',
+        opacity: cat.hidden ? 0.5 : undefined,
+      }}
+    >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
       <View
