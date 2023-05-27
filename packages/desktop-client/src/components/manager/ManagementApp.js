@@ -33,7 +33,7 @@ function Version() {
         ':hover': { color: colors.n2 },
         margin: 15,
         marginLeft: 17,
-        [`@media (min-width: ${tokens.breakpoint_medium})`]: {
+        [`@media (min-width: ${tokens.breakpoint_small})`]: {
           position: 'absolute',
           bottom: 0,
           right: 0,
@@ -151,16 +151,20 @@ function ManagementApp({
             {userData && files ? (
               <>
                 <Switch>
-                  <Route exact path="/config-server" component={ConfigServer} />
-                  <Route
-                    exact
-                    path="/change-password"
-                    component={ChangePassword}
-                  />
+                  <Route exact path="/config-server">
+                    <ConfigServer />
+                  </Route>
+                  <Route exact path="/change-password">
+                    <ChangePassword />
+                  </Route>
                   {files && files.length > 0 ? (
-                    <Route exact path="/" component={BudgetList} />
+                    <Route exact path="/">
+                      <BudgetList />
+                    </Route>
                   ) : (
-                    <Route exact path="/" component={WelcomeScreen} />
+                    <Route exact path="/">
+                      <WelcomeScreen />
+                    </Route>
                   )}
                   {/* Redirect all other pages to this route */}
                   <Route path="/" render={() => <Redirect to="/" />} />
@@ -176,23 +180,27 @@ function ManagementApp({
                   }}
                 >
                   <Switch>
-                    <Route exact path="/config-server" component={null} />
-                    <Route
-                      exact
-                      path="/"
-                      render={() => (
-                        <LoggedInUser style={{ padding: '4px 7px' }} />
-                      )}
-                    />
+                    <Route exact path="/config-server" children={null} />
+                    <Route exact path="/">
+                      <LoggedInUser style={{ padding: '4px 7px' }} />
+                    </Route>
                   </Switch>
                 </View>
               </>
             ) : (
               <Switch>
-                <Route exact path="/login" component={Login} />
-                <Route exact path="/error" component={Error} />
-                <Route exact path="/config-server" component={ConfigServer} />
-                <Route exact path="/bootstrap" component={Bootstrap} />
+                <Route exact path="/login">
+                  <Login />
+                </Route>
+                <Route exact path="/error">
+                  <Error />
+                </Route>
+                <Route exact path="/config-server">
+                  <ConfigServer />
+                </Route>
+                <Route exact path="/bootstrap">
+                  <Bootstrap />
+                </Route>
                 {/* Redirect all other pages to this route */}
                 <Route path="/" render={() => <Redirect to="/bootstrap" />} />
               </Switch>
@@ -201,8 +209,10 @@ function ManagementApp({
         )}
 
         <Switch>
-          <Route exact path="/config-server" component={null} />
-          <Route path="/" component={ServerURL} />
+          <Route exact path="/config-server" children={null} />
+          <Route path="/">
+            <ServerURL />
+          </Route>
         </Switch>
         <Version />
       </View>

@@ -10,9 +10,15 @@ import Overview from './Overview';
 export default function Reports() {
   return (
     <View style={{ flex: 1 }} data-testid="reports-page">
-      <Route path="/reports" exact component={Overview} />
-      <Route path="/reports/net-worth" exact component={NetWorth} />
-      <Route path="/reports/cash-flow" exact component={CashFlow} />
+      <Route path="/reports" exact>
+        <Overview />
+      </Route>
+      <Route path="/reports/net-worth" exact>
+        <NetWorth />
+      </Route>
+      <Route path="/reports/cash-flow" exact>
+        <CashFlow />
+      </Route>
     </View>
   );
 }

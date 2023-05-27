@@ -23,6 +23,13 @@ jobs:
         uses: ./.github/actions/setup
       - name: Build API
         run: cd packages/api && yarn build
+      - name: Create package tgz
+        run: cd packages/api && yarn pack && mv package.tgz actual-api.tgz
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: actual-api
+          path: packages/api/actual-api.tgz
 
   web:
     runs-on: ubuntu-latest
@@ -38,20 +45,26 @@ jobs:
           name: actual-web
           path: packages/desktop-client/build
 
-  # TODO: re-enable after solving https://github.com/actualbudget/actual/issues/468
-  # electron:
-  #   # As electron builds take longer, we only run them in master.
-  #   if: github.event_name != 'pull_request'
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - ubuntu-latest
-  #         - windows-latest
-  #         - macos-latest
-  #   runs-on: ${{ matrix.os }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Set up environment
-  #       uses: ./.github/actions/setup
-  #     - name: Build Electron
-  #       run: ./bin/package
+  electron:
+    # As electron builds take longer, we only run them in master.
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Electron
+        run: ./bin/package-electron
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: actual-electron-${{ matrix.os }}
+          path: |
+            packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/*.exe
+            packages/desktop-electron/dist/*.AppImage

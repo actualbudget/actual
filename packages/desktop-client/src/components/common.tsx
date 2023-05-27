@@ -472,18 +472,18 @@ export function Keybinding({ keyName }: KeybindingProps) {
 }
 
 type MenuItem = {
-  type: string | symbol;
+  type?: string | symbol;
   name: string;
   disabled?: boolean;
   icon?;
   iconSize?: number;
   text: string;
-  key: string;
+  key?: string;
 };
 
 type MenuProps = {
-  header: ReactNode;
-  footer: ReactNode;
+  header?: ReactNode;
+  footer?: ReactNode;
   items: Array<MenuItem | typeof Menu.line>;
   onMenuSelect;
 };
@@ -637,7 +637,7 @@ type AlignedTextProps = ComponentProps<typeof View> & {
   style?: CSSProperties;
   leftStyle?: CSSProperties;
   rightStyle?: CSSProperties;
-  truncate: 'left' | 'right';
+  truncate?: 'left' | 'right';
 };
 export function AlignedText({
   left,
@@ -759,7 +759,7 @@ export function FormError({ style, children }: FormErrorProps) {
 }
 
 type InitialFocusProps = {
-  children?: ReactElement | ((node: unknown) => ReactNode);
+  children?: ReactElement | ((node: Ref<HTMLInputElement>) => ReactElement);
 };
 
 export function InitialFocus({ children }: InitialFocusProps) {

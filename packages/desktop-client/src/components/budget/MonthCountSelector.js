@@ -41,6 +41,7 @@ export function MonthCountSelector({ maxMonths, onChange }) {
         flexDirection: 'row',
         marginRight: 20,
         marginTop: -1,
+        WebkitAppRegion: 'no-drag',
         '& svg': {
           transition: 'transform .15s',
         },

@@ -24,14 +24,16 @@ module.exports = {
       '.ts',
       '.tsx',
       '.json',
+      'pegjs',
     ],
   },
   externals: [
     'better-sqlite3',
-    'node-ipc',
     'electron-log',
     'node-fetch',
     'node-libofx',
+    'ws',
+    'fs',
   ],
   plugins: [
     new webpack.IgnorePlugin({

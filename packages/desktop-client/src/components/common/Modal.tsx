@@ -126,8 +126,8 @@ const Modal = ({
             borderRadius: 4,
             backgroundColor: 'white',
             opacity: isHidden ? 0 : 1,
-            [`@media (min-width: ${tokens.breakpoint_narrow})`]: {
-              minWidth: tokens.breakpoint_narrow,
+            [`@media (min-width: ${tokens.breakpoint_small})`]: {
+              minWidth: tokens.breakpoint_small,
             },
           },
           styles.shadowLarge,

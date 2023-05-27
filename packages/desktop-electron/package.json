@@ -1,9 +1,9 @@
 {
-  "name": "Actual",
+  "name": "desktop-electron",
   "productName": "Actual",
   "author": "Shift Reset LLC",
   "description": "A simple and powerful personal finance system",
-  "version": "22.12.3",
+  "version": "23.5.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -48,15 +48,16 @@
     "electron-is-dev": "2.0.0",
     "electron-log": "4.3.2",
     "electron-updater": "4.3.8",
+    "get-port-please": "3.0.1",
     "loot-core": "*",
     "node-fetch": "^2.6.9",
-    "node-ipc": "9.1.4",
-    "promise-retry": "^2.0.1"
+    "promise-retry": "^2.0.1",
+    "ws": "8.13.0"
   },
   "devDependencies": {
-    "electron": "12.2.1",
-    "electron-builder": "22.10.5",
-    "electron-notarize": "1.0.0",
-    "electron-rebuild": "2.3.5"
+    "@electron/notarize": "1.2.3",
+    "@electron/rebuild": "3.2.13",
+    "electron": "24.1.3",
+    "electron-builder": "23.6.0"
   }
 }
