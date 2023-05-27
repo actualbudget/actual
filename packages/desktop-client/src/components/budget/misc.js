@@ -385,13 +385,16 @@ export function SidebarCategory({
                   onEditName(category.id);
                 } else if (type === 'delete') {
                   onDelete(category.id);
-                } else if (type === 'toggleHide') {
+                } else if (type === 'toggleVisibility') {
                   onSave({ ...category, hidden: !category.hidden });
                 }
                 setMenuOpen(false);
               }}
               items={[
-                { name: 'toggleHide', text: category.hidden ? 'Show' : 'Hide' },
+                {
+                  name: 'toggleVisibility',
+                  text: category.hidden ? 'Show' : 'Hide',
+                },
                 { name: 'rename', text: 'Rename' },
                 { name: 'delete', text: 'Delete' },
               ]}
@@ -549,7 +552,7 @@ export function SidebarGroup({
                       onShowNewCategory(group.id);
                     } else if (type === 'delete') {
                       onDelete(group.id);
-                    } else if (type === 'toggleHidden') {
+                    } else if (type === 'toggleVisibility') {
                       onSave({ ...group, hidden: !group.hidden });
                     }
                     setMenuOpen(false);
@@ -557,7 +560,7 @@ export function SidebarGroup({
                   items={[
                     { name: 'add-category', text: 'Add category' },
                     {
-                      name: 'toggleHidden',
+                      name: 'toggleVisibility',
                       text: group.hidden ? 'Show' : 'Hide',
                     },
                     { name: 'rename', text: 'Rename' },
@@ -709,13 +712,16 @@ const BudgetTotals = memo(function BudgetTotals({
             >
               <Menu
                 onMenuSelect={type => {
-                  if (type === 'toggleHidden') {
+                  if (type === 'toggleVisibility') {
                     toggleHiddenCategories();
                   }
                   setMenuOpen(false);
                 }}
                 items={[
-                  { name: 'toggleHidden', text: 'Toggle hidden categories' },
+                  {
+                    name: 'toggleVisibility',
+                    text: 'Toggle hidden categories',
+                  },
                 ]}
               />
             </Tooltip>
@@ -1046,11 +1052,6 @@ const BudgetCategories = memo(
           const groupCategories = group.categories.filter(
             cat => showHiddenCategories || !cat.hidden,
           );
-
-          // //checking group.categories.length to make sure groups with no categories still show
-          // if (group.categories.length > 0 && groupCategories.length === 0) {
-          //   return [];
-          // }
 
           let items = [{ type: 'expense-group', value: { ...group } }];
 
