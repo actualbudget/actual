@@ -331,7 +331,7 @@ class Budget extends PureComponent {
   };
 
   onShowActivity = (categoryName, categoryId, month) => {
-    this.props.history.push({
+    window.__history.push({
       pathname: '/accounts',
       state: {
         goBack: true,
