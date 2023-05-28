@@ -5,7 +5,7 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 
 export function usePayees() {
-  return useLiveQuery(q('payees').select('*'));
+  return useLiveQuery(() => q('payees').select('*'), []);
 }
 
 let PayeesContext = createContext(null);

@@ -1,4 +1,4 @@
-import React, { createRef, useState, useEffect, useMemo } from 'react';
+import React, { createRef, useState, useEffect } from 'react';
 
 import { type CSSProperties, css } from 'glamor';
 
@@ -82,9 +82,7 @@ export default function NotesButton({
 }: NotesButtonProps) {
   let [hover, setHover] = useState(false);
   let tooltip = useTooltip();
-  let data = useLiveQuery(
-    useMemo(() => q('notes').filter({ id }).select('*'), [id]),
-  );
+  let data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   let note = data && data.length > 0 ? data[0].note : null;
   let hasNotes = note && note !== '';
 
