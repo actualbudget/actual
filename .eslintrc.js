@@ -55,6 +55,7 @@ module.exports = {
     // ],
 
     'import/no-useless-path-segments': 'error',
+    'import/no-duplicates': ['error', { 'prefer-inline': true }],
     'import/order': [
       'error',
       {
@@ -128,6 +129,23 @@ module.exports = {
               FC: { message: ruleFCMsg },
             },
             extendDefaults: true,
+          },
+        ],
+      },
+    },
+    {
+      files: ['./packages/loot-core/src/**/*'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: ['loot-core/**'],
+                message:
+                  'Please use relative imports in loot-core instead of importing from `loot-core/*`',
+              },
+            ],
           },
         ],
       },
