@@ -55,6 +55,7 @@ module.exports = {
     // ],
 
     'import/no-useless-path-segments': 'error',
+    'import/no-duplicates': ['error', { 'prefer-inline': true }],
     'import/order': [
       'error',
       {

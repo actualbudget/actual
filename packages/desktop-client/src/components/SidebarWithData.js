@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { useDispatch } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { withRouter, useHistory } from 'react-router';
 
 import { bindActionCreators } from 'redux';
