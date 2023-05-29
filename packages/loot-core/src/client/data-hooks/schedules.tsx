@@ -1,10 +1,7 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 
-import q, { liveQuery } from 'loot-core/src/client/query-helpers';
-import {
-  getStatus,
-  getHasTransactionsQuery,
-} from 'loot-core/src/shared/schedules';
+import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
+import q, { liveQuery } from '../query-helpers';
 
 function loadStatuses(schedules, onData) {
   return liveQuery(getHasTransactionsQuery(schedules), onData, {

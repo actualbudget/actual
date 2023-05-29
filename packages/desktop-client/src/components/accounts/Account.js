@@ -2001,6 +2001,7 @@ class AccountInternal extends PureComponent {
 
 function AccountHack(props) {
   let { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+
   return (
     <AccountInternal
       {...props}
@@ -2009,8 +2010,12 @@ function AccountHack(props) {
   );
 }
 
-export default function Account(props) {
+export default function Account() {
   const syncEnabled = useFeatureFlag('syncAccount');
+  let params = useParams();
+  let location = useLocation();
+  let activeLocation = useActiveLocation();
+
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
     matchedTransactions: state.queries.matchedTransactions,
@@ -2019,16 +2024,11 @@ export default function Account(props) {
     categoryGroups: state.queries.categories.grouped,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     hideFraction: state.prefs.local.hideFraction || false,
-    expandSplits: props.match && state.prefs.local['expand-splits'],
-    showBalances:
-      props.match &&
-      state.prefs.local['show-balances-' + props.match.params.id],
-    showCleared:
-      props.match &&
-      !state.prefs.local['hide-cleared-' + props.match.params.id],
+    expandSplits: state.prefs.local['expand-splits'],
+    showBalances: params.id && state.prefs.local['show-balances-' + params.id],
+    showCleared: params.id && !state.prefs.local['hide-cleared-' + params.id],
     showExtraBalances:
-      props.match &&
-      state.prefs.local['show-extra-balances-' + props.match.params.id],
+      params.id && state.prefs.local['show-extra-balances-' + params.id],
     payees: state.queries.payees,
     modalShowing: state.modals.modalStack.length > 0,
     accountsSyncing: state.account.accountsSyncing,
@@ -2041,10 +2041,6 @@ export default function Account(props) {
     () => bindActionCreators(actions, dispatch),
     [dispatch],
   );
-
-  let params = useParams();
-  let location = useLocation();
-  let activeLocation = useActiveLocation();
 
   let transform = useMemo(() => {
     let filterByAccount = queries.getAccountFilter(params.id, '_account');
@@ -2085,7 +2081,7 @@ export default function Account(props) {
             !!(activeLocation.state && activeLocation.state.locationPtr)
           }
           accountId={params.id}
-          location={props.location}
+          location={location}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

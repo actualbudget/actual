@@ -6,7 +6,10 @@ import * as injected from './injected';
 let actualApp;
 export const internal = bundle.lib;
 
+// DEPRECATED: remove the next line in @actual-app/api v7
 export * as methods from './methods';
+
+export * from './methods';
 export * as utils from './utils';
 
 export async function init(config = {}) {

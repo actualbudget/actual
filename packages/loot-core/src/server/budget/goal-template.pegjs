@@ -15,11 +15,12 @@ expr
       priority: +priority
     } }
   / priority: priority? _? monthly: amount limit: limit?
-    { return { type: 'simple', monthly, limit, priority: +priority  } }
+    { return { type: 'simple', monthly, limit, priority: +priority  } } 
   / priority: priority? _? limit: limit
     { return { type: 'simple', limit , priority: +priority } }
-  / priority: priority? _? schedule _ name: name
-    { return { type: 'schedule', name, priority: +priority } }
+  / priority: priority? _? schedule _ full:full? name: name
+  	{ return { type: 'schedule', name, priority: +priority, full } }
+  
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
@@ -28,7 +29,7 @@ repeat 'repeat interval'
   / years: d _ 'years'i { return { annual: true, repeat: +years } }
 
 limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
-		/ _? upTo _ amount: amount { return {amount: amount, hold: false } }
+        / _? upTo _ amount: amount { return {amount: amount, hold: false } }
 
 
 weekCount
@@ -45,6 +46,7 @@ repeatEvery = 'repeat'i _ 'every'i
 starting = 'starting'i
 upTo = 'up'i _ 'to'i
 schedule = 'schedule'i
+full = 'full'i _ {return true}
 priority = '-'i number: number _ {return number}
 
 _ 'space' = ' '+
@@ -59,3 +61,4 @@ date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
 
 name 'Name' = $([^\r\n\t]+)
+

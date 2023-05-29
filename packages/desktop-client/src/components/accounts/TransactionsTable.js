@@ -403,6 +403,7 @@ function PayeeCell({
 
   // Filter out the account we're currently in as it is not a valid transfer
   accounts = accounts.filter(account => account.id !== accountId);
+  payees = payees.filter(payee => payee.transfer_acct !== accountId);
 
   return (
     <CustomCell
