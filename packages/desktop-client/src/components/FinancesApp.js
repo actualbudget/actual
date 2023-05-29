@@ -26,6 +26,7 @@ import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
+import ExposeNavigate from '../util/ExposeNavigate';
 import { getLocationState, makeLocationState } from '../util/location-state';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
