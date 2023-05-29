@@ -8,9 +8,6 @@ declare global {
       openURLInBrowser: (url: string) => void;
     };
 
-    __history?: {
-      location;
-      push(url: string, opts?: unknown): void;
-    };
+    __navigate?: ReturnType<import('react-router')['useNavigate']>;
   }
 }

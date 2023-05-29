@@ -8,6 +8,7 @@ import * as actions from 'loot-core/src/client/actions';
 
 import { colors } from '../../style';
 import tokens from '../../tokens';
+import ExposeNavigate from '../../util/ExposeNavigate';
 import { View, Text } from '../common';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
@@ -59,7 +60,6 @@ function ManagementApp({
   loadAllFiles,
 }) {
   const [history] = useState(createBrowserHistory);
-  window.__history = history;
 
   // runs on mount only
   useEffect(() => {
@@ -108,6 +108,7 @@ function ManagementApp({
 
   return (
     <Router history={history}>
+      <ExposeNavigate />
       <View style={{ height: '100%' }}>
         <View
           style={{
