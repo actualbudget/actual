@@ -1,7 +1,10 @@
+import { useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ExposeNavigate() {
   let navigate = useNavigate();
-  window.__navigate = navigate;
+  useLayoutEffect(() => {
+    window.__navigate = navigate;
+  }, [navigate]);
   return null;
 }
