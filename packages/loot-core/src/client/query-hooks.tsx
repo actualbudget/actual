@@ -7,7 +7,7 @@ import React, {
   type DependencyList,
 } from 'react';
 
-import { type Query } from 'loot-core/src/shared/query';
+import { type Query } from '../shared/query';
 
 import { liveQuery, LiveQuery, PagedQuery } from './query-helpers';
 

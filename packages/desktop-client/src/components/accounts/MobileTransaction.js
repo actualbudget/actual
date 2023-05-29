@@ -15,8 +15,11 @@ import memoizeOne from 'memoize-one';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
-import { titleFirst } from 'loot-core/src/shared/util';
-import { integerToCurrency, groupById } from 'loot-core/src/shared/util';
+import {
+  titleFirst,
+  integerToCurrency,
+  groupById,
+} from 'loot-core/src/shared/util';
 
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';

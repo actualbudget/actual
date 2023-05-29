@@ -1,8 +1,8 @@
 import React, { createContext, useContext } from 'react';
 
-import q from 'loot-core/src/client/query-helpers';
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+import q from '../query-helpers';
+import { useLiveQuery } from '../query-hooks';
+import { getPayeesById } from '../reducers/queries';
 
 export function usePayees() {
   return useLiveQuery(() => q('payees').select('*'), []);
