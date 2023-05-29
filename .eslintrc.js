@@ -133,5 +133,22 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['./packages/loot-core/src/**/*'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: ['loot-core/**'],
+                message:
+                  'Please use relative imports in loot-core instead of importing from `loot-core/*`',
+              },
+            ],
+          },
+        ],
+      },
+    },
   ],
 };
