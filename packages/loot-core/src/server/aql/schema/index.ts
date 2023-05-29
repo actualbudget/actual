@@ -116,6 +116,12 @@ export const schema = {
     id: f('id'),
     note: f('string'),
   },
+  filters: {
+    id: f('id'),
+    name: f('string'),
+    conditions: f('json'),
+    tombstone: f('boolean'),
+  },
 };
 
 export const schemaConfig = {
