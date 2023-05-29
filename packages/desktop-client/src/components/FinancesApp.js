@@ -245,11 +245,6 @@ function FinancesApp(props) {
       }
     };
 
-    // I'm not sure if this is the best approach but we need this to
-    // globally. We could instead move various workflows inside global
-    // React components, but that's for another day.
-    window.__history = patchedHistory;
-
     undo.setUndoState('url', window.location.href);
 
     const cleanup = patchedHistory.listen(location => {
@@ -294,6 +289,8 @@ function FinancesApp(props) {
 
   return (
     <Router history={patchedHistory}>
+      <ExposeNavigate />
+
       <View style={{ height: '100%', backgroundColor: colors.n10 }}>
         <GlobalKeys />
 
