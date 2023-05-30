@@ -61,11 +61,11 @@ describe('sync migrations', () => {
     tracer.start();
 
     let cleanup = addSyncListener((oldValues, newValues) => {
-      let transationsMap = newValues.get('transactions') as Map<
+      let transactionsMap = newValues.get('transactions') as Map<
         string,
         unknown
       >;
-      tracer.event('applied', [...transationsMap.keys()]);
+      tracer.event('applied', [...transactionsMap.keys()]);
     });
 
     await db.insert('transactions', {
