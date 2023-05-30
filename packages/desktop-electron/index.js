@@ -165,6 +165,21 @@ async function createWindow() {
     win.webContents.send('set-socket', { name: serverSocket });
   });
 
+  // hit when middle-clicking buttons or <a href/> with a target set to _blank
+  // always deny, optionally redirect to browser
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    processUrl(url)
+    return { action: 'deny' };
+  });
+
+  // hit when clicking <a href/> with no target
+  // optionally redirect to browser
+  win.webContents.on('will-navigate', (event, url) => {
+    if (processUrl(url)) {
+      event.preventDefault()
+    }
+  });
+
   if (process.platform === 'win32') {
     Menu.setApplicationMenu(null);
     win.setMenu(getMenu(isDev, createWindow));
@@ -173,6 +188,14 @@ async function createWindow() {
   }
 
   clientWin = win;
+}
+
+function processUrl(url){
+  if (!url.includes('localhost:') && !url.includes('app://')){
+    shell.openExternal(url)
+    return true;
+  }
+  return false;
 }
 
 function updateMenu(isBudgetOpen) {
