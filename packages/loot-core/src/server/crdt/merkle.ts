@@ -68,7 +68,7 @@ export function build(timestamps: Timestamp[]) {
   return trie;
 }
 
-export function diff(trie1: TrieNode, trie2: TrieNode) {
+export function diff(trie1: TrieNode, trie2: TrieNode): number {
   if (trie1.hash === trie2.hash) {
     return null;
   }
