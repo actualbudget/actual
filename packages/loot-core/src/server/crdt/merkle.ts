@@ -37,7 +37,7 @@ export function keyToTimestamp(key: string): number {
 }
 
 /**
- * Mutates `trie` to insert a node at `timestamp
+ * Mutates `trie` to insert a node at `timestamp`
  */
 export function insert(trie: TrieNode, timestamp: Timestamp) {
   let hash = timestamp.hash();
