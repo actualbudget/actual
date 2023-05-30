@@ -122,8 +122,8 @@ export function diff(trie1: TrieNode, trie2: TrieNode) {
     }
 
     k += diffkey;
-    node1 = node1[diffkey] ?? emptyTrie();
-    node2 = node2[diffkey] ?? emptyTrie();
+    node1 = node1[diffkey] || emptyTrie();
+    node2 = node2[diffkey] || emptyTrie();
   }
 }
 
