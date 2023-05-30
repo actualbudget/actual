@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 
-export default function useResizeObserver(func) {
+export default function useResizeObserver(func: (contentRect: DOMRectReadOnly) => ResizeObserver): (el: any) => void {
   let observer = useRef(null);
   if (!observer.current) {
     observer.current = new ResizeObserver(entries => {
