@@ -1,21 +1,24 @@
 import { serializeClock, getClock, Timestamp, merkle } from '../crdt';
 import * as db from '../db';
 
-export function rebuildMerkleHash() {
+export function rebuildMerkleHash(): {
+  numMessages: number;
+  trie: merkle.TrieNode;
+} {
   let rows = db.runQuery('SELECT timestamp FROM messages_crdt', [], true);
-  let trie: Record<string, unknown> = {};
+  let trie = merkle.emptyTrie();
 
   for (let i = 0; i < rows.length; i++) {
     trie = merkle.insert(trie, Timestamp.parse(rows[i].timestamp));
   }
 
   return {
-    numMessages: rows.length,
+    numMessages: rows.length as number,
     trie: trie,
   };
 }
 
-export default async function repairSync() {
+export default async function repairSync(): Promise<void> {
   let rebuilt = rebuildMerkleHash();
   let clock = getClock();
 
