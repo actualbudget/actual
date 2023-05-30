@@ -2,6 +2,8 @@ import murmurhash from 'murmurhash';
 
 import * as uuid from '../../platform/uuid';
 
+import { TrieNode } from './merkle';
+
 /**
  * Hybrid Unique Logical Clock (HULC) timestamp generator
  *
@@ -25,29 +27,37 @@ import * as uuid from '../../platform/uuid';
  * http://www.cse.buffalo.edu/tech-reports/2014-04.pdf
  */
 
-// A mutable global clock
-let clock = null;
+type Clock = {
+  timestamp: MutableTimestamp;
+  merkle: TrieNode;
+};
 
-export function setClock(clock_) {
+// A mutable global clock
+let clock: Clock = null;
+
+export function setClock(clock_: Clock): void {
   clock = clock_;
 }
 
-export function getClock() {
+export function getClock(): Clock {
   return clock;
 }
 
-export function makeClock(timestamp, merkle = {}) {
+export function makeClock(
+  timestamp: Timestamp,
+  merkle: TrieNode = { hash: 0 },
+) {
   return { timestamp: MutableTimestamp.from(timestamp), merkle };
 }
 
-export function serializeClock(clock) {
+export function serializeClock(clock: Clock): string {
   return JSON.stringify({
     timestamp: clock.timestamp.toString(),
     merkle: clock.merkle,
   });
 }
 
-export function deserializeClock(clock) {
+export function deserializeClock(clock: string): Clock {
   let data;
   try {
     data = JSON.parse(clock);
@@ -64,7 +74,7 @@ export function deserializeClock(clock) {
   };
 }
 
-export function makeClientId() {
+export function makeClientId(): string {
   return uuid.v4Sync().replace(/-/g, '').slice(-16);
 }
 

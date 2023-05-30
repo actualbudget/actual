@@ -1,4 +1,5 @@
 import * as merkle from './merkle';
+import { emptyTrie } from './merkle';
 import { Timestamp } from './timestamp';
 
 function message(timestamp, hash) {
@@ -17,7 +18,7 @@ function insertMessages(trie, messages) {
 describe('merkle trie', () => {
   test('adding an item works', () => {
     let trie = merkle.insert(
-      {},
+      emptyTrie(),
       Timestamp.parse('2018-11-12T13:21:40.122Z-0000-0123456789ABCDEF'),
     );
     trie = merkle.insert(
@@ -28,8 +29,8 @@ describe('merkle trie', () => {
   });
 
   test('diff returns the correct time difference', () => {
-    let trie1: { hash?: unknown } = {};
-    let trie2: { hash?: unknown } = {};
+    let trie1 = emptyTrie();
+    let trie2 = emptyTrie();
 
     const messages = [
       // First client messages
@@ -65,9 +66,9 @@ describe('merkle trie', () => {
   });
 
   test('diffing works with empty tries', () => {
-    let trie1 = {};
+    let trie1 = emptyTrie();
     let trie2 = merkle.insert(
-      {},
+      emptyTrie(),
       Timestamp.parse('2009-01-02T10:17:37.789Z-0000-0000testinguuid1'),
     );
 
@@ -90,7 +91,7 @@ describe('merkle trie', () => {
       message('2018-11-01T02:37:00.000Z-0000-0123456789ABCDEF', 2100),
     ];
 
-    let trie: { hash?: unknown } = {};
+    let trie = emptyTrie();
     messages.forEach(msg => {
       trie = merkle.insert(trie, msg.timestamp);
     });
@@ -122,10 +123,10 @@ describe('merkle trie', () => {
 
     // Case 0: It always returns a base time when comparing with an
     // empty trie
-    expect(new Date(merkle.diff({}, trie)).toISOString()).toBe(
+    expect(new Date(merkle.diff(emptyTrie(), trie)).toISOString()).toBe(
       '1970-01-01T00:00:00.000Z',
     );
-    expect(new Date(merkle.diff(trie, {})).toISOString()).toBe(
+    expect(new Date(merkle.diff(trie, emptyTrie())).toISOString()).toBe(
       '1970-01-01T00:00:00.000Z',
     );
 

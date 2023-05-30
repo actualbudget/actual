@@ -243,7 +243,7 @@ type Message = {
   dataset: string;
   old?: unknown;
   row: string;
-  timestamp: number;
+  timestamp: Timestamp;
   value: unknown;
 };
 
