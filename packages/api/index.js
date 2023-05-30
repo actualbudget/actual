@@ -28,6 +28,7 @@ export async function init(config = {}) {
 
 export async function shutdown() {
   if (actualApp) {
+    await actualApp.send('sync');
     await actualApp.send('close-budget');
     actualApp = null;
   }
