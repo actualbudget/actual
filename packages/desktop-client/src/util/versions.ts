@@ -5,7 +5,10 @@ function parseSemanticVersion(versionString): [number, number, number] {
     .map(n => parseInt(n));
 }
 
-export function cmpSemanticVersion(versionStringA: string, versionStringB: string): number {
+export function cmpSemanticVersion(
+  versionStringA: string,
+  versionStringB: string,
+): number {
   let x = parseSemanticVersion(versionStringA);
   let y = parseSemanticVersion(versionStringB);
 
