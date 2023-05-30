@@ -198,6 +198,14 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   }
 };
 
+handlers['api/sync'] = async function () {
+  let { id } = prefs.getPrefs();
+  let result = await handlers['sync-budget']({ id });
+  if (result.error) {
+    throw new Error(getSyncError(result.error, id));
+  }
+};
+
 handlers['api/start-import'] = async function ({ budgetName }) {
   // Notify UI to close budget
   await handlers['close-budget']();
