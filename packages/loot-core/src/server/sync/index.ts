@@ -243,7 +243,7 @@ type Message = {
   dataset: string;
   old?: unknown;
   row: string;
-  timestamp: Timestamp;
+  timestamp: string;
   value: unknown;
 };
 
@@ -351,7 +351,10 @@ export const applyMessages = sequential(async (messages: Message[]) => {
           [timestamp.toString(), dataset, row, column, serializeValue(value)],
         );
 
-        currentMerkle = merkle.insert(currentMerkle, msg.timestamp);
+        currentMerkle = merkle.insert(
+          currentMerkle,
+          Timestamp.parse(msg.timestamp),
+        );
       }
     }
 
