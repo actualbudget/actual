@@ -221,7 +221,7 @@ async function compareMessages(messages: Message[]): Promise<Message[]> {
 // listeners importers should not rely on any functions that use any
 // projected state (like rules). We can't fire those because they
 // depend on having both old and new data which we don't quere here
-function applyMessagesForImport(messages: Message[]) {
+function applyMessagesForImport(messages: Message[]): void {
   db.transaction(() => {
     for (let i = 0; i < messages.length; i++) {
       let msg = messages[i];
@@ -485,7 +485,7 @@ export async function sendMessages(messages: Message[]) {
   }
 }
 
-export function getMessagesSince(since: number) {
+export function getMessagesSince(since: string) {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
     [since],
@@ -495,7 +495,7 @@ export function getMessagesSince(since: number) {
 
 export async function syncAndReceiveMessages(
   messages: Message[],
-  since: number,
+  since: string,
 ): Promise<Message[]> {
   let localMessages = await getMessagesSince(since);
   await receiveMessages(
@@ -696,7 +696,7 @@ async function _fullSync(
     receivedMessages = await receiveMessages(
       res.messages.map(msg => ({
         ...msg,
-        value: deserializeValue(msg.value),
+        value: deserializeValue(msg.value as string),
         timestamp: Timestamp.parse(msg.timestamp),
       })),
     );
