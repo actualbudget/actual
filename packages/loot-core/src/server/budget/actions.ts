@@ -122,7 +122,7 @@ export async function copyPreviousMonth({ month }) {
   let table = getBudgetTable();
   let budgetData = await getBudgetData(table, prevMonth);
 
-  await batchMessages(() => {
+  await batchMessages(async () => {
     budgetData.forEach(prevBudget => {
       if (prevBudget.is_income === 1 && !isReflectBudget()) {
         return;
@@ -141,7 +141,7 @@ export async function setZero({ month }) {
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
 
-  await batchMessages(() => {
+  await batchMessages(async () => {
     categories.forEach(cat => {
       if (cat.is_income === 1 && !isReflectBudget()) {
         return;
@@ -266,7 +266,7 @@ export async function setCategoryCarryover({ startMonth, category, flag }) {
   let table = getBudgetTable();
   let months = getAllMonths(startMonth);
 
-  await batchMessages(() => {
+  await batchMessages(async () => {
     for (let month of months) {
       setCarryover(table, category, dbMonth(month), flag);
     }

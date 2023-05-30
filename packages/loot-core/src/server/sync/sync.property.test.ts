@@ -15,6 +15,10 @@ const uuidGenerator = jsc.integer(97, 122).smap(
   x => x.charCodeAt(Number(x)),
 );
 
+function isError(value: unknown): value is { error: unknown } {
+  return (value as { error: unknown }).error !== undefined;
+}
+
 beforeEach(() => {
   sync.setSyncingMode('enabled');
   mockSyncServer.reset();
@@ -278,10 +282,10 @@ async function run(msgs) {
     ),
   );
 
-  let { error } = await syncPromise;
-  if (error) {
-    console.log(error);
-    throw error;
+  let result = await syncPromise;
+  if (isError(result)) {
+    console.log(result.error);
+    throw result.error;
   }
 
   let serverMerkle = mockSyncServer.getClock().merkle;

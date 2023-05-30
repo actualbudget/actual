@@ -175,11 +175,11 @@ export function deserializeValue(value: string): string | number | null {
 }
 
 // TODO make this type stricter.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type DataMap = Map<[string, any], any>;
-let _syncListeners: ((oldData: DataMap, newData: DataMap) => unknown)[] = [];
+type DataMap = Map<string, unknown>;
+type SyncListener = (oldData: DataMap, newData: DataMap) => unknown;
+let _syncListeners: SyncListener[] = [];
 
-export function addSyncListener(func: () => unknown) {
+export function addSyncListener(func: SyncListener) {
   _syncListeners.push(func);
 
   return () => {
@@ -242,12 +242,12 @@ function applyMessagesForImport(messages: Message[]) {
   });
 }
 
-type Message = {
+export type Message = {
   column: string;
   dataset: string;
   old?: unknown;
   row: string;
-  timestamp: number;
+  timestamp: string;
   value: string | number | null;
 };
 
