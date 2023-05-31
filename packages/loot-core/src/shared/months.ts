@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-function _parse(value: string | Date) {
+export function _parse(value: string | Date) {
   if (typeof value === 'string') {
     // Dates are hard. We just want to deal with months in the format
     // 2020-01 and days in the format 2020-01-01, but life is never

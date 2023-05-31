@@ -223,10 +223,7 @@ async function applyCategoryTemplate(
   priority,
   force,
 ) {
-  //let current_month = getCorrectedDate(`${month}-01`);
   let current_month = `${month}-01`;
-  let [year, mon, day] = current_month.split('-');
-  let currentMonth = new Date(parseInt(year), parseInt(mon) - 1, parseInt(day), 12);
   let errors = [];
   let all_schedule_names = await db.all(
     'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
@@ -238,7 +235,6 @@ async function applyCategoryTemplate(
     switch (template.type) {
       case 'by':
       case 'spend':
-        //let target_month = getCorrectedDate(`${template.month}-01`);
         let target_month = `${template.month}-01`;
         let num_months = monthUtils.differenceInCalendarMonths(
           target_month,
@@ -257,7 +253,10 @@ async function applyCategoryTemplate(
           if (spend_from) {
             spend_from = monthUtils.addMonths(spend_from, repeat);
           }
-          num_months = monthUtils.differenceInCalendarMonths(target_month, current_month);
+          num_months = monthUtils.differenceInCalendarMonths(
+            target_month,
+            current_month,
+          );
         }
         if (num_months < 0) {
           errors.push(`${template.month} is in the past.`);
@@ -411,7 +410,9 @@ async function applyCategoryTemplate(
           monthUtils.differenceInCalendarMonths(current_month, m) > 0;
           m = monthUtils.addMonths(m, 1)
         ) {
-          let sheetName = monthUtils.sheetForMonth(monthUtils.format(m, 'yyyy-MM'));
+          let sheetName = monthUtils.sheetForMonth(
+            monthUtils.format(m, 'yyyy-MM'),
+          );
 
           if (first_month) {
             let spent = await getSheetValue(
@@ -432,7 +433,10 @@ async function applyCategoryTemplate(
             already_budgeted += budgeted;
           }
         }
-        let num_months = monthUtils.differenceInCalendarMonths(to_month, currentMonth);
+        let num_months = monthUtils.differenceInCalendarMonths(
+          to_month,
+          monthUtils._parse(current_month),
+        );
         let target = amountToInteger(template.amount);
 
         let increment = 0;
@@ -495,7 +499,10 @@ async function applyCategoryTemplate(
         let conditions = rule.serialize().conditions;
         let { date: dateCond, amount: amountCond } =
           extractScheduleConds(conditions);
-        let next_date_string = getNextDate(dateCond, currentMonth);
+        let next_date_string = getNextDate(
+          dateCond,
+          monthUtils._parse(current_month),
+        );
         let num_months = monthUtils.differenceInCalendarMonths(
           next_date_string,
           current_month,
