@@ -1,11 +1,40 @@
 import * as uuid from '../../platform/uuid';
 import { FilterEntity } from '../../types/models/filter';
+import {
+  parseConditionsOrActions,
+  serializeConditionsOrActions,
+} from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import * as db from '../db';
+import { requiredFields } from '../models';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
 let app = createApp();
+
+export const filterModel = {
+  validate(filter, { update }: { update?: boolean } = {}) {
+    requiredFields('filters', filter, ['conditions'], update);
+
+    return filter;
+  },
+
+  toJS(row) {
+    let { conditions, conditions_op, actions, ...fields } = row;
+    return {
+      ...fields,
+      conditions: parseConditionsOrActions(conditions),
+    };
+  },
+
+  fromJS(rule) {
+    let { conditions, ...row } = rule;
+    if (Array.isArray(conditions)) {
+      row.conditions = serializeConditionsOrActions(conditions);
+    }
+    return row;
+  },
+};
 
 export async function checkIfFilterExists(name, filterId) {
   let idForName = await db.first('SELECT id from filters WHERE name = ?', [
@@ -62,11 +91,6 @@ export async function updateFilter({
   // This must be outside the `batchMessages` call because we change
   // and then read data
   if (conditions) {
-    let { date: dateCond } = extractScheduleConds(conditions);
-    if (dateCond && dateCond.value == null) {
-      throw new Error('Date is required');
-    }
-
     // We need to get the full rule to merge in the updated
     // conditions
     rule = await getRuleForSchedule(schedule.id);
