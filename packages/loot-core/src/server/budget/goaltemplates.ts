@@ -395,7 +395,6 @@ async function applyCategoryTemplate(
             }
           }
           w = monthUtils.addWeeks(w, weeks);
-          monthUtils.dayFromDate(w);
         }
         break;
       }
