@@ -111,6 +111,14 @@ export function addMonths(month, n) {
   return d.format(d.addMonths(_parse(month), n), 'yyyy-MM');
 }
 
+export function addWeeks(date, n) {
+  return d.format(d.addWeeks(_parse(date), n), 'yyyy-MM-dd');
+}
+
+export function differenceInCalendarMonths(month1, month2) {
+  return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
+}
+
 export function subMonths(month, n) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
