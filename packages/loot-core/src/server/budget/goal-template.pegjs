@@ -24,9 +24,9 @@ expr
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
-  / months: d _ 'months'i { return { annual: false, repeat: +months } }
+  / months: positive _ 'months'i { return { annual: false, repeat: +months } }
   / 'year'i { return { annual: true } }
-  / years: d _ 'years'i { return { annual: true, repeat: +years } }
+  / years: positive _ 'years'i { return { annual: true, repeat: +years } }
 
 limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
         / _? upTo _ amount: amount { return {amount: amount, hold: false } }
@@ -52,6 +52,7 @@ priority = '-'i number: number _ {return number}
 _ 'space' = ' '+
 d 'digit' = [0-9]
 number 'number' = $(d+)
+positive = $([1-9][0-9]*)
 amount 'amount' = currencySymbol? _? amount: $(d+ ('.' (d d?)?)?) { return +amount }
 percent 'percentage' = percent: $(d+) _? '%' { return +percent }
 year 'year' = $(d d d d)
