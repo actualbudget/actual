@@ -2,6 +2,82 @@
 title: Release Notes
 ---
 
+## 23.6.0
+
+**Docker tag: 23.6.0**
+
+### Actual
+
+Version: 23.6.0
+
+#### Features
+
+- [#994](https://github.com/actualbudget/actual/pull/994) Reports: ability to filter the data by payee/account/category/etc. — thanks [MatissJanis]
+- [#1060](https://github.com/actualbudget/actual/pull/1060) Added the ability to hide category groups while keeping them in the same category group. — thanks [Miodec]
+- [#1011](https://github.com/actualbudget/actual/pull/1011) Add ability to filter the Manage Payees screen to show orphaned payees only. — thanks [sudoCerb]
+
+#### Enhancements
+
+- [#964](https://github.com/actualbudget/actual/pull/964) Introduces a ResponsiveProvider as a foundation for future mobile development. Makes transaction entry available to many mobile users in landscape orientation. — thanks [trevdor]
+- [#995](https://github.com/actualbudget/actual/pull/995) Number Format: Add a new option (space-dot) e.g. "1 234.56" — thanks [TheTrueCaligari]
+- [#1004](https://github.com/actualbudget/actual/pull/1004) Add option to not remove funds when using an "up to" goal template. — thanks [youngcw]
+- [#1016](https://github.com/actualbudget/actual/pull/1016) Add menu item and keywords for end-of-month budget reassignments — thanks [shall0pass]
+- [#1023](https://github.com/actualbudget/actual/pull/1023) Created development docker container — thanks [jonezy35]
+- [#1029](https://github.com/actualbudget/actual/pull/1029) Make number parsing agnostic to decimal and thousands separators — thanks [chylex]
+- [#1034](https://github.com/actualbudget/actual/pull/1034) Updated account order inside the account autocomplete popup to: On Budget, Off Budget, Closed Accounts. Removed closed accounts from suggestions when creating a new transaction. — thanks [Miodec]
+- [#1052](https://github.com/actualbudget/actual/pull/1052) Templates: Add option to only apply schedule template to the month of the schedule instead of spreading out the charge. — thanks [youngcw]
+
+#### Bugfix
+
+- [#999](https://github.com/actualbudget/actual/pull/999) Transactions table: when creating a split transaction - focus on the "debit" field next. — thanks [MatissJanis]
+- [#1000](https://github.com/actualbudget/actual/pull/1000) Reports: 1y date range should be 12 months, not 13 months — thanks [MatissJanis]
+- [#1008](https://github.com/actualbudget/actual/pull/1008) Reports: Add Upcoming/Due transactions in the "Selected balance" sum (Issue #319) — thanks [TheTrueCaligari]
+- [#1017](https://github.com/actualbudget/actual/pull/1017) Bugfix: amounts for schedules incorrectly read in 'space-dot' format. — thanks [TheTrueCaligari]
+- [#1019](https://github.com/actualbudget/actual/pull/1019) Fix infinite loop condition in repeat goal — thanks [youngcw]
+- [#1028](https://github.com/actualbudget/actual/pull/1028) Bugfix: Goals template compounding - Large target differences resulted in not enough funding — thanks [shall0pass]
+- [#1033](https://github.com/actualbudget/actual/pull/1033) Remove unnecessary message in the “Find schedules” modal — thanks [j-f1]
+- [#1038](https://github.com/actualbudget/actual/pull/1038) Fixed a bug where it was possible to make a transfer to the same account as the one making the transfer. — thanks [Miodec]
+- [#1048](https://github.com/actualbudget/actual/pull/1048) Fix a couple of bugs/inconsistencies in the Electron app — thanks [j-f1]
+- [#1049](https://github.com/actualbudget/actual/pull/1049) Goals Schedule - Include spent in calculation — thanks [shall0pass]
+- [#1054](https://github.com/actualbudget/actual/pull/1054) Re-export the API methods at the top level of the `@actual-budget/api` package like they were in the past. Note: If you were using the `api.methods.<method>` syntax to access API methods in recent versions, that is now deprecated and will stop working with the next major release of the API package. — thanks [j-f1]
+- [#1056](https://github.com/actualbudget/actual/pull/1056) Change copy-migrations shebang to bash. yarn build failed on copy-migrations because /bin/sh is not bash on WSL and doesn't expect -e — thanks [fry]
+- [#1058](https://github.com/actualbudget/actual/pull/1058) Fix date calculations in Goal Templates by adding a time zone correction — thanks [shall0pass]
+- [#1059](https://github.com/actualbudget/actual/pull/1059) Goals: Undo change that broke some template parsing — thanks [youngcw]
+- [#1067](https://github.com/actualbudget/actual/pull/1067) Fix link to spent transactions for a budget category — thanks [MatissJanis]
+- [#1083](https://github.com/actualbudget/actual/pull/1083) Goals: Fix bug that made repeat values >9 fail parsing. — thanks [youngcw]
+- [#1084](https://github.com/actualbudget/actual/pull/1084) Fix error if sink/source were defined in same category. — thanks [shall0pass]
+
+#### Maintenance
+
+- [#979](https://github.com/actualbudget/actual/pull/979) Convert top common components in `desktop-client` to Typescript — thanks [albertogasparin]
+- [#1001](https://github.com/actualbudget/actual/pull/1001) Improve Actions setup, add more automation around issue management — thanks [j-f1]
+- [#1002](https://github.com/actualbudget/actual/pull/1002) Add missing migrations to the API package — thanks [j-f1]
+- [#1003](https://github.com/actualbudget/actual/pull/1003) Fixing Electron App — thanks [Shazib]
+- [#1005](https://github.com/actualbudget/actual/pull/1005) Detect more errors in JS OFX importer. — thanks [Sinistersnare]
+- [#1012](https://github.com/actualbudget/actual/pull/1012) Add link to current feature requests to README. — thanks [youngcw]
+- [#1015](https://github.com/actualbudget/actual/pull/1015) Enable ESLint’s `curly` rule — thanks [j-f1]
+- [#1022](https://github.com/actualbudget/actual/pull/1022) Improve behavior of shift-clicking checkboxes to select multiple transactions. — thanks [j-f1]
+- [#1032](https://github.com/actualbudget/actual/pull/1032) Adds support for dev containers, allowing for easier contributions. — thanks [jlsjonas]
+- [#1036](https://github.com/actualbudget/actual/pull/1036) Remove dependency on `@reactions/component` — thanks [j-f1]
+- [#1037](https://github.com/actualbudget/actual/pull/1037) Convert few other components in `desktop-client` to Typescript — thanks [albertogasparin]
+- [#1042](https://github.com/actualbudget/actual/pull/1042) Update Yarn — thanks [j-f1]
+- [#1043](https://github.com/actualbudget/actual/pull/1043) Upgrade `react-spring`, remove `wobble` dependency — thanks [j-f1]
+- [#1045](https://github.com/actualbudget/actual/pull/1045) Update to React Router v5.1 conventions to facilitate the v6 upgrade. — thanks [trevdor]
+- [#1061](https://github.com/actualbudget/actual/pull/1061) Use the `useLiveQuery` hook in a couple more places — thanks [j-f1]
+- [#1064](https://github.com/actualbudget/actual/pull/1064) Integrate `useMemo` into `useLiveQuery` — thanks [j-f1]
+- [#1070](https://github.com/actualbudget/actual/pull/1070) Add a few more `eslint-plugin-import` rules to keep our imports tidy — thanks [j-f1]
+- [#1078](https://github.com/actualbudget/actual/pull/1078) Migrate some files in `desktop-client` to use Typescript. — thanks [TomAFrench]
+- [#1079](https://github.com/actualbudget/actual/pull/1079) Remove stale reference to `loot-design` package. — thanks [TomAFrench]
+
+### Actual Server
+
+Version: 23.6.0
+
+#### Maintenance
+
+- [#204](https://github.com/actualbudget/actual-server/pull/204) Fix build process for edge Docker images — thanks [j-f1]
+- [#208](https://github.com/actualbudget/actual-server/pull/208) Migrate to the combined release notes action from the main repo — thanks [j-f1]
+
 ## 23.5.0
 
 **Docker tag: 23.5.0**
@@ -17,7 +93,7 @@ Version: 23.5.0
 #### Enhancements
 
 - [#858](https://github.com/actualbudget/actual/pull/858) Goals: Added support for percentage driven targets — thanks [shall0pass]
-- [#879](https://github.com/actualbudget/actual/pull/879) Goal templates: Changed how compounding 'by' matches are filled.  Now uses an average across templates. — thanks [shall0pass]
+- [#879](https://github.com/actualbudget/actual/pull/879) Goal templates: Changed how compounding 'by' matches are filled. Now uses an average across templates. — thanks [shall0pass]
 - [#910](https://github.com/actualbudget/actual/pull/910) Add setting to change first day of the week — thanks [biohzrddd]
 - [#919](https://github.com/actualbudget/actual/pull/919) Show pending transactions from Nordigen in transactions table — thanks [henrikmaa]
 - [#933](https://github.com/actualbudget/actual/pull/933) Autocomplete: set min-width for the tooltip — thanks [MatissJanis]
@@ -60,7 +136,7 @@ Version: 23.5.0
 - [#982](https://github.com/actualbudget/actual/pull/982) Run feature-request management github action only once and for the "feature" label only (not for other labels) — thanks [MatissJanis]
 - [#985](https://github.com/actualbudget/actual/pull/985) Remove unused payee rules feature — thanks [j-f1]
 
-### Actual Server 
+### Actual Server
 
 Version: 23.5.0
 
@@ -813,6 +889,7 @@ Version: 22.10.25
 - [#82](https://github.com/actualbudget/actual-server/pull/82) Build docker image on push to master or tag — thanks [trevdor]
 
 [7brend7]: https://github.com/7brend7
+[aaroneiche]: https://github.com/aaroneiche
 [aharbis]: https://github.com/aharbis
 [ajtrichards]: https://github.com/ajtrichards
 [albertogasparin]: https://github.com/albertogasparin
@@ -821,27 +898,33 @@ Version: 22.10.25
 [biohzrddd]: https://github.com/biohzrddd
 [brtwrst]: https://github.com/brtwrst
 [carkom]: https://github.com/carkom
+[chylex]: https://github.com/chylex
 [ciwchris]: https://github.com/ciwchris
 [coliff]: https://github.com/coliff
 [eberureon]: https://github.com/eberureon
 [ejmurra]: https://github.com/ejmurra
 [ezfe]: https://github.com/ezfe
+[fry]: https://github.com/fry
 [fstybel]: https://github.com/fstybel
 [gsumpster]: https://github.com/gsumpster
 [heilerich]: https://github.com/heilerich
-[iurynogueira]: https://github.com/iurynogueira
+[henrikmaa]: https://github.com/henrikmaa
 [intiplink]: https://github.com/intiplink
+[iurynogueira]: https://github.com/iurynogueira
 [j-f1]: https://github.com/j-f1
 [Jackenmen]: https://github.com/Jackenmen
 [jamesmortensen]: https://github.com/jamesmortensen
 [JazzaG]: https://github.com/JazzaG
 [jlongster]: https://github.com/jlongster
+[jlsjonas]: https://github.com/jlsjonas
+[jonezy35]: https://github.com/jonezy35
 [Kk-ships]: https://github.com/Kk-ships
 [Kovah]: https://github.com/Kovah
 [ldotlopez]: https://github.com/ldotlopez
 [m3nu]: https://github.com/m3nu
 [manuelcanepa]: https://github.com/manuelcanepa
 [MatissJanis]: https://github.com/MatissJanis
+[Miodec]: https://github.com/Miodec
 [mnsrv]: https://github.com/mnsrv
 [modrzew]: https://github.com/modrzew
 [n1thun]: https://github.com/n1thun
@@ -854,8 +937,12 @@ Version: 22.10.25
 [rickdoesdev]: https://github.com/rickdoesdev
 [S3B4S]: https://github.com/S3B4S
 [shall0pass]: https://github.com/shall0pass
+[Shazib]: https://github.com/Shazib
 [Silvenga]: https://github.com/Silvenga
+[sinistersnare]: https://github.com/sinistersnare
+[sudoCerb]: https://github.com/sudoCerb
 [suryaatevellore]: https://github.com/suryaatevellore
+[TheTrueCaligari]: https://github.com/TheTrueCaligari
 [TomAFrench]: https://github.com/TomAFrench
 [trevdor]: https://github.com/trevdor
 [UnexomWid]: https://github.com/UnexomWid
@@ -864,7 +951,4 @@ Version: 22.10.25
 [waseem-h]: https://github.com/waseem-h
 [winklevos]: https://github.com/winklevos
 [wmertens]: https://github.com/wmertens
-[sinistersnare]: https://github.com/sinistersnare 
-[henrikmaa]: https://github.com/henrikmaa 
-[youngcw]: https://github.com/youngcw 
-[aaroneiche]: https://github.com/aaroneiche
+[youngcw]: https://github.com/youngcw
