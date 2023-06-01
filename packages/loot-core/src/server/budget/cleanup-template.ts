@@ -82,10 +82,11 @@ async function processCleanup(month) {
       `budget-${sinkCategory[c].cat.id}`,
     );
     let categoryId = sinkCategory[c].cat.id;
+    let weight = sinkCategory[c].temp.filter(w=> w.type === 'sink')[0].weight;
     let to_budget =
       budgeted +
       Math.round(
-        (sinkCategory[c].temp[0].weight / total_weight) * budgetAvailable,
+        (weight / total_weight) * budgetAvailable,
       );
     if (c === sinkCategory.length - 1) {
       let currentBudgetAvailable = await getSheetValue(sheetName, `to-budget`);
