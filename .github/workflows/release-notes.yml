@@ -10,12 +10,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Debug
-        run: >
-          echo "github.head_ref: ${{ github.head_ref }}"
       - name: Check release notes
-        if: startsWith(github.head_ref, 'refs/heads/release/') == false
+        if: startsWith(github.head_ref, 'release/') == false
         uses: actualbudget/actions/release-notes/check@main
       - name: Generate release notes
-        if: startsWith(github.head_ref, 'refs/heads/release/') == true
+        if: startsWith(github.head_ref, 'release/') == true
         uses: actualbudget/actions/release-notes/generate@main
