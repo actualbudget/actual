@@ -5,21 +5,21 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@actual-app/api@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@actual-app/api@npm:6.0.0"
+"@actual-app/api@npm:6.1.0":
+  version: 6.1.0
+  resolution: "@actual-app/api@npm:6.1.0"
   dependencies:
     better-sqlite3: ^8.2.0
     node-fetch: ^2.6.9
     uuid: 3.3.2
-  checksum: c0e579b03571258ca0ecdc67f3c05b1fed1d5b821f92cf4c0d7fb55040e75cbcd56372e0030e679b5f701404fb3b05e6e95516c6dd501ad1b98ab4e50a7cce49
+  checksum: 75eeb5fdb2377175117bf2a229883a23224c8272d20aeaa79c2f30d609206156b9c1a0a9d65d580454b52da86a3aa38ead24d44daac69e728604467b1194e985
   languageName: node
   linkType: hard
 
-"@actual-app/web@npm:23.5.0":
-  version: 23.5.0
-  resolution: "@actual-app/web@npm:23.5.0"
-  checksum: 9961c35c58efb52bed28eb0b25954e414f8d509a5633bf5153cbe9251f8325614208010fc91850001a96e2e67520d3fe973d87f32443d55d25390fbdee0ea142
+"@actual-app/web@npm:23.6.0":
+  version: 23.6.0
+  resolution: "@actual-app/web@npm:23.6.0"
+  checksum: a3bbfe54c9285f3d285b36a1fc57ec856d1af82ec66d4ae16e70031bb4279b213a4f214757f72dce087ff9f0537624c70c612726b0779e4c0525975f7aee0637
   languageName: node
   linkType: hard
 
@@ -1555,8 +1555,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual-sync@workspace:."
   dependencies:
-    "@actual-app/api": 6.0.0
-    "@actual-app/web": 23.5.0
+    "@actual-app/api": 6.1.0
+    "@actual-app/web": 23.6.0
     "@babel/preset-typescript": ^7.20.2
     "@types/bcrypt": ^5.0.0
     "@types/better-sqlite3": ^7.6.3
