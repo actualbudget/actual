@@ -62,6 +62,17 @@ const boundActions = bindActionCreators(actions, store.dispatch);
 // Listen for global events from the server or main process
 handleGlobalEvents(boundActions, store);
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface Window {
+    __actionsForMenu: typeof actions;
+
+    $send: typeof send;
+    $query: typeof runQuery;
+    $q: typeof q;
+  }
+}
+
 // Expose this to the main process to menu items can access it
 window.__actionsForMenu = boundActions;
 
