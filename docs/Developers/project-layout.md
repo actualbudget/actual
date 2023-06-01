@@ -25,7 +25,6 @@ This repository holds all of the front end code for the Actual Budget applicatio
         └── import-ynab4
         └── import-ynab5
         └── loot-core
-        └── loot-design
         └── node-libofx
         ...
 │
