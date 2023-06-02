@@ -1,3 +1,5 @@
+import { type Database } from 'better-sqlite3';
+
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
@@ -7,14 +9,15 @@ import * as prefs from './prefs';
 import Spreadsheet from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
 
-let globalSheet, globalOnChange;
+let globalSheet: Spreadsheet;
+let globalOnChange;
 let globalCacheDb;
 
-export function get() {
+export function get(): Spreadsheet {
   return globalSheet;
 }
 
-async function updateSpreadsheetCache(rawDb, names) {
+async function updateSpreadsheetCache(rawDb, names: string[]) {
   await sqlite.transaction(rawDb, () => {
     names.forEach(name => {
       const node = globalSheet._getNode(name);
@@ -31,7 +34,11 @@ async function updateSpreadsheetCache(rawDb, names) {
   });
 }
 
-function setCacheStatus(mainDb, cacheDb, { clean }) {
+function setCacheStatus(
+  mainDb: unknown,
+  cacheDb: unknown,
+  { clean }: { clean: boolean },
+) {
   if (clean) {
     // Generate random number and stick in both places
     let num = Math.random() * 10000000;
@@ -53,7 +60,7 @@ function setCacheStatus(mainDb, cacheDb, { clean }) {
   }
 }
 
-function isCacheDirty(mainDb, cacheDb) {
+function isCacheDirty(mainDb: Database, cacheDb: Database): boolean {
   let rows = sqlite.runQuery<{ key?: number }>(
     cacheDb,
     'SELECT key FROM kvcache_key WHERE id = 1',
@@ -84,7 +91,10 @@ function isCacheDirty(mainDb, cacheDb) {
   return rows.length === 0;
 }
 
-export async function loadSpreadsheet(db, onSheetChange?) {
+export async function loadSpreadsheet(
+  db,
+  onSheetChange?,
+): Promise<Spreadsheet> {
   let cacheEnabled = process.env.NODE_ENV !== 'test';
   let mainDb = db.getDatabase();
   let cacheDb;
@@ -157,7 +167,7 @@ export async function loadSpreadsheet(db, onSheetChange?) {
   return sheet;
 }
 
-export function unloadSpreadsheet() {
+export function unloadSpreadsheet(): void {
   if (globalSheet) {
     // TODO: Should wait for the sheet to finish
     globalSheet.unload();
@@ -170,14 +180,14 @@ export function unloadSpreadsheet() {
   }
 }
 
-export async function reloadSpreadsheet(db) {
+export async function reloadSpreadsheet(db): Promise<Spreadsheet> {
   if (globalSheet) {
     unloadSpreadsheet();
     return loadSpreadsheet(db, globalOnChange);
   }
 }
 
-export async function loadUserBudgets(db) {
+export async function loadUserBudgets(db): Promise<void> {
   let sheet = globalSheet;
 
   // TODO: Clear out the cache here so make sure future loads of the app
@@ -218,27 +228,30 @@ export async function loadUserBudgets(db) {
   sheet.endTransaction();
 }
 
-export function getCell(sheet, name) {
+export function getCell(sheet: string, name: string) {
   return globalSheet._getNode(resolveName(sheet, name));
 }
 
-export function getCellValue(sheet, name) {
+export function getCellValue(
+  sheet: string,
+  name: string,
+): string | number | boolean {
   return globalSheet.getValue(resolveName(sheet, name));
 }
 
-export function startTransaction() {
+export function startTransaction(): void {
   if (globalSheet) {
     globalSheet.startTransaction();
   }
 }
 
-export function endTransaction() {
+export function endTransaction(): void {
   if (globalSheet) {
     globalSheet.endTransaction();
   }
 }
 
-export function waitOnSpreadsheet() {
+export function waitOnSpreadsheet(): Promise<void> {
   return new Promise(resolve => {
     if (globalSheet) {
       globalSheet.onFinish(resolve);

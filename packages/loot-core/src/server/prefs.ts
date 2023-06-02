@@ -2,14 +2,36 @@ import { Timestamp } from '@actual-app/crdt';
 
 import * as fs from '../platform/server/fs';
 
-import { sendMessages } from './sync';
+import { Message, sendMessages } from './sync';
 
-let prefs = null;
+export const BUDGET_TYPES = ['report', 'rollover'] as const;
+export type BudgetType = (typeof BUDGET_TYPES)[number];
 
-export async function loadPrefs(id?) {
+type Preferences = {
+  id: string;
+  budgetName: string;
+  budgetType?: BudgetType;
+  clientId?: string;
+  groupId?: string;
+  userId?: string;
+  lastSyncedTimestamp?: string;
+  resetClock?: boolean;
+  cloudFileId?: string;
+  lastUploaded?: string;
+  encryptKeyId?: string;
+  'notifications.schedules'?: boolean;
+  'notifications.repair-splits'?: boolean;
+  dummyTestPrefs?: boolean;
+};
+
+let prefs: Preferences = null;
+
+export async function loadPrefs(
+  id?: string,
+): Promise<Preferences | { dummyTestPrefs: boolean }> {
   if (process.env.NODE_ENV === 'test' && !id) {
-    prefs = { dummyTestPrefs: true };
-    return prefs;
+    // TODO: check if we can remove this as it seems to be unused.
+    return { dummyTestPrefs: true };
   }
 
   const fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
@@ -42,12 +64,15 @@ export async function loadPrefs(id?) {
   return prefs;
 }
 
-export async function savePrefs(prefsToSet, { avoidSync = false } = {}) {
+export async function savePrefs(
+  prefsToSet: Partial<Preferences>,
+  { avoidSync = false } = {},
+): Promise<void> {
   Object.assign(prefs, prefsToSet);
 
   if (!avoidSync) {
     // Sync whitelisted prefs
-    let messages = Object.keys(prefsToSet)
+    const messages: Message[] = Object.keys(prefsToSet)
       .map(key => {
         if (key === 'budgetType' || key === 'budgetName') {
           return {
@@ -60,32 +85,32 @@ export async function savePrefs(prefsToSet, { avoidSync = false } = {}) {
         }
         return null;
       })
-      .filter(x => x);
+      .filter(x => x !== null);
 
     if (messages.length > 0) {
       await sendMessages(messages);
     }
   }
 
-  if (!prefs.dummyTestPrefs) {
+  if (process.env.NODE_ENV !== 'test') {
     let prefsPath = fs.join(fs.getBudgetDir(prefs.id), 'metadata.json');
     await fs.writeFile(prefsPath, JSON.stringify(prefs));
   }
 }
 
-export function unloadPrefs() {
+export function unloadPrefs(): void {
   prefs = null;
 }
 
-export function getPrefs() {
+export function getPrefs(): Preferences {
   return prefs;
 }
 
-export function getDefaultPrefs(id, budgetName) {
+export function getDefaultPrefs(id: string, budgetName: string): Preferences {
   return { id, budgetName };
 }
 
-export async function readPrefs(id) {
+export async function readPrefs(id: string): Promise<Preferences> {
   const fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
 
   try {
