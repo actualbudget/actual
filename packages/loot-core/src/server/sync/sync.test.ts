@@ -5,9 +5,9 @@ import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
 import * as encoder from './encoder';
+import { isError } from './utils';
 
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
-import { isError } from './utils';
 
 beforeEach(() => {
   mockSyncServer.reset();
