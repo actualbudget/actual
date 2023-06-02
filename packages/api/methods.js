@@ -25,6 +25,10 @@ export async function downloadBudget(syncId, { password } = {}) {
   return send('api/download-budget', { syncId, password });
 }
 
+export async function sync() {
+  return send('api/sync');
+}
+
 export async function batchBudgetUpdates(func) {
   await send('api/batch-budget-start');
   try {

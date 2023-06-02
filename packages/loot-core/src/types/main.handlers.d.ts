@@ -287,7 +287,7 @@ export interface MainHandlers {
 
   'download-budget': (arg: { fileId; replace }) => Promise<{ error; id }>;
 
-  'sync-budget': (arg: { id }) => Promise<unknown>;
+  'sync-budget': () => Promise<Record<string, never>>;
 
   'load-budget': (arg: { id }) => Promise<{ error }>;
 
