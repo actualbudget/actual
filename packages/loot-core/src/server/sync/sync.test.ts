@@ -20,7 +20,6 @@ afterEach(() => {
   setSyncingMode('disabled');
 });
 
-
 describe('Sync', () => {
   it('should send messages to the server', async () => {
     prefs.loadPrefs();
