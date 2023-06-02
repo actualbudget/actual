@@ -7,6 +7,7 @@ import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
 import * as encoder from './encoder';
+import { isError } from './utils';
 
 import * as sync from './index';
 
@@ -14,10 +15,6 @@ const uuidGenerator = jsc.integer(97, 122).smap(
   x => String.fromCharCode(x),
   x => x.charCodeAt(Number(x)),
 );
-
-function isError(value: unknown): value is { error: unknown } {
-  return (value as { error: unknown }).error !== undefined;
-}
 
 beforeEach(() => {
   sync.setSyncingMode('enabled');

@@ -24,6 +24,7 @@ import * as undo from '../undo';
 
 import * as encoder from './encoder';
 import { rebuildMerkleHash } from './repair';
+import { isError } from './utils';
 
 export { default as makeTestMessage } from './make-test-message';
 export { default as resetSync } from './reset';
@@ -513,10 +514,6 @@ export function clearFullSyncTimeout(): void {
     clearTimeout(syncTimeout);
     syncTimeout = null;
   }
-}
-
-function isError(value: unknown): value is { error: unknown } {
-  return (value as { error: unknown }).error !== undefined;
 }
 
 let syncTimeout = null;

@@ -7,6 +7,7 @@ import * as mockSyncServer from '../tests/mockSyncServer';
 import * as encoder from './encoder';
 
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
+import { isError } from './utils';
 
 beforeEach(() => {
   mockSyncServer.reset();
@@ -19,9 +20,6 @@ afterEach(() => {
   setSyncingMode('disabled');
 });
 
-function isError(value: unknown): value is { error: unknown } {
-  return (value as { error: unknown }).error !== undefined;
-}
 
 describe('Sync', () => {
   it('should send messages to the server', async () => {
@@ -90,7 +88,7 @@ describe('Sync', () => {
     expect(mockSyncServer.getMessages().length).toBe(0);
 
     const result = await fullSync();
-    if (isError(result)) throw Error('fullSync returned error');
+    if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(0);
     expect(mockSyncServer.getMessages().length).toBe(2);
   });
@@ -137,7 +135,7 @@ describe('Sync', () => {
     ]);
 
     const result = await fullSync();
-    if (isError(result)) throw Error('fullSync returned error');
+    if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(2);
     expect(mockSyncServer.getMessages().length).toBe(3);
   });
