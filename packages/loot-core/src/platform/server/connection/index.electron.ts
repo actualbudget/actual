@@ -22,6 +22,9 @@ export const init: T.Init = function (socketName, handlers) {
 
   // websockets doesn't support sending objects so parse/stringify needed
   wss.on('connection', function connection(ws) {
+    
+    ws.on( 'error', console.error );
+
     ws.on('message', data => {
       let msg = JSON.parse(data);
       let { id, name, args, undoTag, catchErrors } = msg;
