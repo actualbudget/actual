@@ -15,12 +15,14 @@ expr
       priority: +priority
     } }
   / priority: priority? _? monthly: amount limit: limit?
-    { return { type: 'simple', monthly, limit, priority: +priority  } } 
+    { return { type: 'simple', monthly, limit, priority: +priority } }
   / priority: priority? _? limit: limit
     { return { type: 'simple', limit , priority: +priority } }
   / priority: priority? _? schedule _ full:full? name: name
-  	{ return { type: 'schedule', name, priority: +priority, full } }
-  
+    { return { type: 'schedule', name, priority: +priority, full } }
+  / priority: priority? _? remainder: remainder
+    { return { type: 'remainder', priority: null, weight: remainder } }
+
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
@@ -48,6 +50,7 @@ upTo = 'up'i _ 'to'i
 schedule = 'schedule'i
 full = 'full'i _ {return true}
 priority = '-'i number: number _ {return number}
+remainder = 'remainder'i _? weight: positive? { return +weight || 1 }
 
 _ 'space' = ' '+
 d 'digit' = [0-9]
