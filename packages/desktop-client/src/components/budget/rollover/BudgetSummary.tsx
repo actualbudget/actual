@@ -402,6 +402,10 @@ export function BudgetSummary({
                         name: 'overwrite-goal-template',
                         text: 'Overwrite with budget template',
                       },
+                      isGoalTemplatesEnabled && {
+                        name: 'cleanup-goal-template',
+                        text: 'End of month cleanup',
+                      },
                     ]}
                   />
                 </Tooltip>

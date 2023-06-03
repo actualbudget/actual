@@ -541,6 +541,7 @@ async function applyCategoryTemplate(
             !priority
           ) {
             to_budget += diff;
+            if (l === template_lines.length - 1) to_budget -= spent;
           } else {
             if (budgetAvailable > 0) to_budget = budgetAvailable;
             errors.push(`Insufficient funds.`);

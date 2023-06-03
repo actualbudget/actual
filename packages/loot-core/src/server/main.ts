@@ -1891,7 +1891,7 @@ handlers['download-budget'] = async function ({ fileId }) {
 
   let id = result.id;
   await handlers['load-budget']({ id });
-  result = await handlers['sync-budget']({ id });
+  result = await handlers['sync-budget']();
   await handlers['close-budget']();
   if (result.error) {
     return result;
@@ -1900,7 +1900,7 @@ handlers['download-budget'] = async function ({ fileId }) {
 };
 
 // open and sync, but don’t close
-handlers['sync-budget'] = async function ({ id }) {
+handlers['sync-budget'] = async function () {
   setSyncingMode('enabled');
   await initialFullSync();
 
