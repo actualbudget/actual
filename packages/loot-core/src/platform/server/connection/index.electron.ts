@@ -6,7 +6,6 @@ import type * as T from '.';
 // for some reason import doesn't work
 const WebSocketServer = require('ws').Server;
 
-
 // the websocket server
 let wss = null;
 
@@ -23,13 +22,12 @@ export const init: T.Init = function (socketName, handlers) {
 
   // websockets doesn't support sending objects so parse/stringify needed
   wss.on('connection', function connection(ws) {
-    
-    ws.on( 'error', console.error );
+    ws.on('error', console.error);
 
     ws.on('message', data => {
       let msg = JSON.parse(data);
 
-      if (ws.readyState != 1) {
+      if (ws.readyState !== 1) {
         return;
       }
 
@@ -38,7 +36,7 @@ export const init: T.Init = function (socketName, handlers) {
       if (handlers[name]) {
         runHandler(handlers[name], args, { undoTag, name }).then(
           result => {
-            if (ws.readyState != 1) {
+            if (ws.readyState !== 1) {
               return;
             }
             if (catchErrors) {
@@ -59,7 +57,7 @@ export const init: T.Init = function (socketName, handlers) {
             );
           },
           nativeError => {
-            if (ws.readyState != 1) {
+            if (ws.readyState !== 1) {
               return;
             }
             let error = coerceError(nativeError);

@@ -138,7 +138,7 @@ export const unlisten: T.Unlisten = function (name) {
   listeners.set(name, []);
 };
 
-async function closeSocket (onClose) {
+async function closeSocket(onClose) {
   socketClient.onclose = event => {
     socketClient = null;
     onClose();
@@ -147,8 +147,8 @@ async function closeSocket (onClose) {
   await socketClient.close();
 }
 
-export const clearServer: T.ClearServer = async function() {
-  if (socketClient!=null) {
+export const clearServer: T.ClearServer = async function () {
+  if (socketClient != null) {
     return new Promise(resolve => closeSocket(resolve));
   }
-}
+};

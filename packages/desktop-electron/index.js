@@ -168,7 +168,7 @@ async function createWindow() {
   // hit when middle-clicking buttons or <a href/> with a target set to _blank
   // always deny, optionally redirect to browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    processUrl(url)
+    processUrl(url);
     return { action: 'deny' };
   });
 
@@ -176,7 +176,7 @@ async function createWindow() {
   // optionally redirect to browser
   win.webContents.on('will-navigate', (event, url) => {
     if (processUrl(url)) {
-      event.preventDefault()
+      event.preventDefault();
     }
   });
 
@@ -190,9 +190,9 @@ async function createWindow() {
   clientWin = win;
 }
 
-function processUrl(url){
-  if (!url.includes('localhost:') && !url.includes('app://')){
-    shell.openExternal(url)
+function processUrl(url) {
+  if (!url.includes('localhost:') && !url.includes('app://')) {
+    shell.openExternal(url);
     return true;
   }
   return false;
