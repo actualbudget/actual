@@ -44,6 +44,16 @@ git pull origin master
 
 ![](/img/fly/cmd-25.png)
 
+:::info
+As the fly.toml is excluded in the gitignore changes made upstream will not be pulled down, ensure you check the fly.toml against the fly.template.toml using the steps below before proceeding
+:::
+
+At this point, open the fly.toml (this should be located in `C:\github\actual-server`) by right clicking on it and selecting `Open` it should open in a text editor. 
+
+Open the fly.template.toml by doing the same steps as above.
+
+Once the two files are open, compare the fly.toml to the fly.template.toml ensuring that everything below the `app = "%NAME%"` is the same. 
+
 Once that is done, run the deployment command to push your changes to fly.
 
 ```cmd
