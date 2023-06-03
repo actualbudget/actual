@@ -1,4 +1,5 @@
-import { CSSProperties } from 'glamor';
+import type { CSSProperties } from 'glamor';
+
 import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from './tokens';
