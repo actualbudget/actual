@@ -6,6 +6,7 @@ import type * as T from '.';
 // for some reason import doesn't work
 const WebSocketServer = require('ws').Server;
 
+
 // the websocket server
 let wss = null;
 
@@ -27,11 +28,19 @@ export const init: T.Init = function (socketName, handlers) {
 
     ws.on('message', data => {
       let msg = JSON.parse(data);
+
+      if (ws.readyState != 1) {
+        return;
+      }
+
       let { id, name, args, undoTag, catchErrors } = msg;
 
       if (handlers[name]) {
         runHandler(handlers[name], args, { undoTag, name }).then(
           result => {
+            if (ws.readyState != 1) {
+              return;
+            }
             if (catchErrors) {
               result = { data: result, error: null };
             }
@@ -50,6 +59,9 @@ export const init: T.Init = function (socketName, handlers) {
             );
           },
           nativeError => {
+            if (ws.readyState != 1) {
+              return;
+            }
             let error = coerceError(nativeError);
 
             if (name.startsWith('api/')) {
