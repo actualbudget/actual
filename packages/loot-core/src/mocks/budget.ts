@@ -664,31 +664,27 @@ export async function createTestBudget(handlers) {
   await runMutator(() =>
     batchMessages(async () => {
       for (let account of accounts) {
-        switch (account.type) {
-          case 'checking':
-            if (account.name === 'Bank of America') {
-              await fillPrimaryChecking(handlers, account, payees, allGroups);
-            } else {
-              await fillChecking(handlers, account, payees, allGroups);
-            }
-            break;
-          case 'investment':
-            await fillInvestment(handlers, account, payees, allGroups);
-            break;
-          case 'savings':
-            await fillSavings(handlers, account, payees, allGroups);
-            break;
-          case 'mortgage':
-            await fillMortgage(handlers, account, payees, allGroups);
-            break;
-          case 'other':
-            if (account.name === 'House Asset') {
-              await fillOther(handlers, account, payees, allGroups);
-            } else {
-              await fillChecking(handlers, account, payees, allGroups);
-            }
-            break;
-          default:
+        if (account.name === 'Bank of America') {
+          await fillPrimaryChecking(handlers, account, payees, allGroups);
+        } else if (
+          account.name === 'Capital One Checking' ||
+          account.name === 'HSBC'
+        ) {
+          await fillChecking(handlers, account, payees, allGroups);
+        } else if (account.name === 'Ally Savings') {
+          await fillSavings(handlers, account, payees, allGroups);
+        } else if (
+          account.name === 'Vanguard 401k' ||
+          account.name === 'Roth IRA'
+        ) {
+          await fillInvestment(handlers, account, payees, allGroups);
+        } else if (account.name === 'Mortgage') {
+          await fillMortgage(handlers, account, payees, allGroups);
+        } else if (account.name === 'House Asset') {
+          await fillOther(handlers, account, payees, allGroups);
+        } else {
+          console.error('Unknown account name for test budget: ', account.name);
+          await fillChecking(handlers, account, payees, allGroups);
         }
       }
     }),
