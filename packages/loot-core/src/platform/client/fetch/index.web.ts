@@ -149,6 +149,6 @@ async function closeSocket(onClose) {
 
 export const clearServer: T.ClearServer = async function () {
   if (socketClient != null) {
-    return new Promise(resolve => closeSocket(resolve));
+    return new Promise(closeSocket);
   }
 };
