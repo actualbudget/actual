@@ -75,6 +75,7 @@ function connectSocket(port, onOpen) {
 }
 
 export const init: T.Init = async function (socketName) {
+  await clearServer();
   return new Promise(resolve => connectSocket(socketName, resolve));
 };
 

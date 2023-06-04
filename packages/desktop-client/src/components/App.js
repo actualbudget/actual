@@ -7,7 +7,6 @@ import * as actions from 'loot-core/src/client/actions';
 import {
   init as initConnection,
   send,
-  clearServer,
 } from 'loot-core/src/platform/client/fetch';
 
 import installPolyfills from '../polyfills';
@@ -29,7 +28,6 @@ class App extends Component {
   };
 
   async init() {
-    await clearServer();
     const socketName = await global.Actual.getServerSocket();
 
     try {
