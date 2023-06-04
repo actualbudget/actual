@@ -1626,6 +1626,10 @@ handlers['key-test'] = async function ({ fileId, password }) {
   return {};
 };
 
+handlers['get-did-bootstrap'] = async function () {
+  return Boolean(await asyncStorage.getItem('did-bootstrap'));
+};
+
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
 }: { url? } = {}) {

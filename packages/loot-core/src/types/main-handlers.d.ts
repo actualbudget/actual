@@ -248,6 +248,8 @@ export interface MainHandlers {
 
   'key-test': (arg: { fileId; password }) => Promise<unknown>;
 
+  'get-did-bootstrap': () => Promise<boolean>;
+
   'subscribe-needs-bootstrap': (
     args: { url } = {},
   ) => Promise<
