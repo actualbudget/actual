@@ -38,7 +38,7 @@
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "cross-env": "^5.1.5",
+    "cross-env": "^7.0.3",
     "eslint": "^8.37.0",
     "eslint-config-react-app": "7.0.1",
     "eslint-plugin-prettier": "4.2.1",
