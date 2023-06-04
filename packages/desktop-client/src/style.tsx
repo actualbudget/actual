@@ -6,7 +6,7 @@ import tokens from './tokens';
 
 export const debug = { borderWidth: 1, borderColor: 'red' };
 
-export const colorsn = {
+const colorsDark = {
   primary: '#E8ECF0',
   primaryText: '#131416',
   primaryAccent: '#BCCCDC',
@@ -32,6 +32,40 @@ export const colorsn = {
 
   background: '#FFFFFF',
 };
+
+const colorsLight = {
+  primary: '#E8ECF0',
+  primaryText: '#131416',
+  primaryAccent: '#BCCCDC',
+  primaryAccentText: '#131416',
+
+  secondary: '#102A43',
+  secondaryText: '#D9E2EC',
+  secondaryAccent: '#829AB1',
+  secondaryAccentText: '#131416',
+
+  error: '#FFE3E3',
+  errorText: '#EF4E4E',
+  errorAccent: '#CF1124',
+
+  warning: '#FFF7C4',
+  warningText: '#E6BB20',
+  warningAccent: '#B88115',
+
+  notice: '#C6F7E2',
+  noticeText: '#0C6B58',
+  noticeAccent: '#014D40',
+  noticeAccentText: '#FAFFFD',
+
+  background: '#FFFFFF',
+};
+
+const colorThemes = [
+  { name: 'dark', colors: colorsDark, type: 'dark' },
+  { name: 'dark', colors: colorsLight, type: 'dark' },
+];
+
+export const colorsn = colorThemes[0].colors;
 
 const _colors = {
   y1: '#733309',
