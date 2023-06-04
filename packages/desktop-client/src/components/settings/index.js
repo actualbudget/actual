@@ -176,7 +176,7 @@ function Settings({
           <AdvancedToggle>
             <AdvancedAbout prefs={prefs} />
             <ResetCache />
-            <ResetSync resetSync={resetSync} />
+            <ResetSync isEnabled={!!prefs.groupId} resetSync={resetSync} />
             <FixSplitsTool />
             <ExperimentalFeatures prefs={prefs} savePrefs={savePrefs} />
           </AdvancedToggle>
