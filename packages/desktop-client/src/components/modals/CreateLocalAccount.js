@@ -28,9 +28,6 @@ function CreateLocalAccount({ modalProps, actions, history }) {
             validate={() => ({})}
             onSubmit={async (values, { setErrors }) => {
               const errors = {};
-              if (!values.type) {
-                errors.type = 'required';
-              }
               if (!values.name) {
                 errors.name = 'required';
               }
