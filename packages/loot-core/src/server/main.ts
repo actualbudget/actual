@@ -1674,7 +1674,7 @@ handlers['subscribe-set-user'] = async function ({ token }) {
 
 handlers['subscribe-get-user'] = async function () {
   if (!getServer()) {
-    if (await asyncStorage.getItem('did-bootstrap')) {
+    if (!(await asyncStorage.getItem('did-bootstrap'))) {
       return null;
     }
     return { offline: false };
