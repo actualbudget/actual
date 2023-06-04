@@ -326,7 +326,7 @@ export async function possiblyUpload() {
 }
 
 export async function removeFile(fileId) {
-  const [[, userToken]] = await asyncStorage.multiGet(['user-token']);
+  let userToken = await asyncStorage.getItem('user-token');
 
   await post(getServer().SYNC_SERVER + '/delete-user-file', {
     token: userToken,
