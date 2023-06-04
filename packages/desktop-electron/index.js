@@ -168,14 +168,18 @@ async function createWindow() {
   // hit when middle-clicking buttons or <a href/> with a target set to _blank
   // always deny, optionally redirect to browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    processUrl(url);
+    if (isExternalUrl(url)) {
+      shell.openExternal(url);
+    }
+
     return { action: 'deny' };
   });
 
   // hit when clicking <a href/> with no target
   // optionally redirect to browser
   win.webContents.on('will-navigate', (event, url) => {
-    if (processUrl(url)) {
+    if (isExternalUrl(url)) {
+      shell.openExternal(url);
       event.preventDefault();
     }
   });
@@ -192,14 +196,6 @@ async function createWindow() {
 
 function isExternalUrl(url) {
   return !url.includes('localhost:') && !url.includes('app://');
-}
-
-function processUrl(url) {
-  if (isExternalUrl(url)) {
-    shell.openExternal(url);
-    return true;
-  }
-  return false;
 }
 
 function updateMenu(isBudgetOpen) {
