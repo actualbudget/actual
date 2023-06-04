@@ -12,6 +12,7 @@ import { View, Text } from '../common';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
 import { useServerVersion } from '../ServerContext';
+import { ThemesPage } from '../themes/ThemesPage';
 
 import BudgetList from './BudgetList';
 import ConfigServer from './ConfigServer';
@@ -151,6 +152,9 @@ function ManagementApp({
             {userData && files ? (
               <>
                 <Switch>
+                  <Route path="/themes">
+                    <ThemesPage />
+                  </Route>
                   <Route exact path="/config-server">
                     <ConfigServer />
                   </Route>
