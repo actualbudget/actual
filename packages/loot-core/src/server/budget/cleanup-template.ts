@@ -37,7 +37,7 @@ async function processCleanup(month) {
       if (template.filter(t => t.type === 'sink').length > 0) {
         sinkCategory.push({ cat: category, temp: template });
         num_sinks += 1;
-        total_weight += template[0].weight;
+        total_weight += template.filter(w => w.type === 'sink')[0].weight;
       }
     }
   }
