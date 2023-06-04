@@ -27,6 +27,13 @@ body:
       value: 'A bug happened!'
     validations:
       required: true
+   - type: textarea
+    id: discord-user
+    attributes:
+      label: What is your Discord username?
+      description: If you have Discord, please provide your username below so we can reach out there if we need clarity on your issue.
+    validations:
+      required: false
   - type: textarea
     id: errors-received
     attributes:
