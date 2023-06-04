@@ -190,8 +190,12 @@ async function createWindow() {
   clientWin = win;
 }
 
+function isExternalUrl(url) {
+  return !url.includes('localhost:') && !url.includes('app://');
+}
+
 function processUrl(url) {
-  if (!url.includes('localhost:') && !url.includes('app://')) {
+  if (isExternalUrl(url)) {
     shell.openExternal(url);
     return true;
   }
