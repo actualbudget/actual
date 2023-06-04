@@ -33,5 +33,5 @@ export type InitServer = typeof initServer;
 export function serverPush(name: string, args: unknown): void;
 export type ServerPush = typeof serverPush;
 
-export function clearServer(): void;
+export async function clearServer(): void;
 export type ClearServer = typeof clearServer;
