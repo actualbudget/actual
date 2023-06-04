@@ -13,8 +13,7 @@ import React, {
   createElement,
   cloneElement,
 } from 'react';
-import { Route, NavLink, useMatch } from 'react-router-dom';
-import type { RouteComponentProps } from 'react-router-dom';
+import { Route, NavLink, useMatch, useNavigate } from 'react-router-dom';
 
 import {
   ListboxInput,
@@ -218,21 +217,17 @@ export const ExternalLink = forwardRef<HTMLElement, ExternalLinkProps>(
   },
 );
 
-type ButtonLinkProps = ComponentProps<typeof Button> &
-  RouteComponentProps & {
-    to: string;
-    activeStyle?: CSSProperties;
-  };
+type ButtonLinkProps = ComponentProps<typeof Button> & {
+  to: string;
+  activeStyle?: CSSProperties;
+};
 export function ButtonLink({
-  history,
-  staticContext,
   to,
   style,
   activeStyle,
-  match,
-  location,
   ...props
 }: ButtonLinkProps) {
+  const navigate = useNavigate();
   return (
     <Route
       path={to}
@@ -245,7 +240,7 @@ export function ButtonLink({
           {...props}
           onClick={e => {
             props.onClick && props.onClick(e);
-            history.push(to);
+            navigate(to);
           }}
         />
       }
