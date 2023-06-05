@@ -183,9 +183,7 @@ async function processTemplate(month, force) {
       return { type: 'message', message: 'All categories were up to date.' };
     }
   } else {
-    let applied = `Successfully applied templates to ${num_applied} ${
-      num_applied === 1 ? 'category' : 'categories'
-    }.`;
+    let applied = `Successfully applied ${num_applied} templates.`;
     if (errors.length) {
       return {
         sticky: true,
