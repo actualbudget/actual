@@ -396,7 +396,7 @@ export function BudgetSummary({
                       },
                       isGoalTemplatesEnabled && {
                         name: 'check-templates',
-                        text: 'Check Templates',
+                        text: 'Check templates',
                       },
                       isGoalTemplatesEnabled && {
                         name: 'apply-goal-template',
