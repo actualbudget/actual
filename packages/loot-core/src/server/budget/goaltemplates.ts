@@ -26,7 +26,7 @@ export function overwriteTemplate({ month }) {
   return processTemplate(month, true);
 }
 
-export function runCheckTemplates(){
+export function runCheckTemplates() {
   return checkTemplates();
 }
 
@@ -585,9 +585,9 @@ async function applyCategoryTemplate(
   }
 }
 
-async function checkTemplates(){
+async function checkTemplates() {
   let category_templates = await getCategoryTemplates();
-  let errors =[];
+  let errors = [];
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -599,14 +599,14 @@ async function checkTemplates(){
     let template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
-        if ( template[l].type==='error' ) {
+        if (template[l].type === 'error') {
           //return { type: 'message', message: "found a bad one",};
-          errors.push(category.name+": "+template[l].line)
+          errors.push(category.name + ': ' + template[l].line);
         }
       }
     }
   }
-  if (errors.length){
+  if (errors.length) {
     return {
       sticky: true,
       message: `There were errors interpreting some templates:`,
@@ -615,7 +615,7 @@ async function checkTemplates(){
   } else {
     return {
       type: 'message',
-      message: "All templates passed! 🎉",
+      message: 'All templates passed! 🎉',
     };
   }
 }
