@@ -528,6 +528,7 @@ export const ManagePayees = forwardRef(
           </View>
           <View style={{ flex: 1 }} />
           <Input
+            id="filter-input"
             placeholder="Filter payees..."
             value={filter}
             onChange={e => {
