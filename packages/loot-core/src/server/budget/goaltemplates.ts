@@ -26,6 +26,10 @@ export function overwriteTemplate({ month }) {
   return processTemplate(month, true);
 }
 
+export function runCheckTemplates(){
+  return checkTemplates();
+}
+
 function checkScheduleTemplates(template) {
   let lowPriority = template[0].priority;
   let errorNotice = false;
@@ -578,5 +582,22 @@ async function applyCategoryTemplate(
     str += ' ' + template_lines.map(x => x.line).join('\n');
     console.log(str);
     return { amount: to_budget, errors };
+  }
+}
+
+async function checkTemplates(){
+  let templates = {};
+
+  let notes = await db.all(
+    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
+  );
+  for (let n = 0; n < notes.length; n++) {
+    let lines = notes[n].note.split('\n');
+    let template_lines = [];
+    for (let l = 0; l < lines.length; l++) {
+      let line = lines[l].trim();
+      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
+      let expression = line.slice(TEMPLATE_PREFIX.length);
+    }
   }
 }
