@@ -586,18 +586,36 @@ async function applyCategoryTemplate(
 }
 
 async function checkTemplates(){
-  let templates = {};
+  let category_templates = await getCategoryTemplates();
+  let errors =[];
 
-  let notes = await db.all(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
+  let categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
   );
-  for (let n = 0; n < notes.length; n++) {
-    let lines = notes[n].note.split('\n');
-    let template_lines = [];
-    for (let l = 0; l < lines.length; l++) {
-      let line = lines[l].trim();
-      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
-      let expression = line.slice(TEMPLATE_PREFIX.length);
+
+  // run through each line and see if its an error
+  for (let c = 0; c < categories.length; c++) {
+    let category = categories[c];
+    let template = category_templates[category.id];
+    if (template) {
+      for (let l = 0; l < template.length; l++) {
+        if ( template[l].type==='error' ) {
+          //return { type: 'message', message: "found a bad one",};
+          errors.push(category.name+": "+template[l].line)
+        }
+      }
     }
+  }
+  if (errors.length){
+    return {
+      sticky: true,
+      message: `There were errors interpreting some templates:`,
+      pre: errors.join('\n\n'),
+    };
+  } else {
+    return {
+      type: 'message',
+      message: "All templates passed! 🎉",
+    };
   }
 }
