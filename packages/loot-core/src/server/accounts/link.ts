@@ -1,6 +1,5 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as uuid from '../../platform/uuid';
-import { fromPlaidAccountType } from '../../shared/accounts';
 import { amountToInteger } from '../../shared/util';
 import * as db from '../db';
 import { runMutator } from '../mutators';
@@ -81,7 +80,6 @@ export async function addAccounts(bankId, accountIds, offbudgetIds = []) {
           account_id: acct.account_id,
           name: acct.name,
           official_name: acct.official_name,
-          type: fromPlaidAccountType(acct.type),
           balance_current: amountToInteger(acct.balances.current),
           mask: acct.mask,
           bank: bankId,
@@ -128,7 +126,6 @@ export async function addNordigenAccounts(
           account_id: acct.account_id,
           name: acct.name,
           official_name: acct.official_name,
-          type: fromPlaidAccountType(acct.type),
           balance_current: amountToInteger(acct.balances.current),
           mask: acct.mask,
           bank: bankId,

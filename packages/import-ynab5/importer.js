@@ -16,25 +16,6 @@ function monthFromDate(date) {
   return parts[0] + '-' + parts[1];
 }
 
-function mapAccountType(type) {
-  switch (type) {
-    case 'cash':
-    case 'checking':
-      return 'checking';
-    case 'creditCard':
-    case 'lineOfCredit':
-      return 'credit';
-    case 'savings':
-      return 'savings';
-    case 'investmentAccount':
-      return 'investment';
-    case 'mortgage':
-      return 'mortgage';
-    default:
-      return 'other';
-  }
-}
-
 function sortByKey(arr, key) {
   return [...arr].sort((item1, item2) => {
     if (item1[key] < item2[key]) {
@@ -62,7 +43,6 @@ function importAccounts(data, entityIdMap) {
     data.accounts.map(async account => {
       if (!account.deleted) {
         let id = await actual.createAccount({
-          type: mapAccountType(account.type),
           name: account.name,
           offbudget: account.on_budget ? false : true,
           closed: account.closed,
