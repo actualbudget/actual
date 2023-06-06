@@ -33,32 +33,7 @@ const colorsDark = {
   background: '#FFFFFF',
 };
 
-const colorsLight = {
-  primary: '#E8ECF0',
-  primaryText: '#131416',
-  primaryAccent: '#BCCCDC',
-  primaryAccentText: '#131416',
-
-  secondary: '#102A43',
-  secondaryText: '#D9E2EC',
-  secondaryAccent: '#829AB1',
-  secondaryAccentText: '#131416',
-
-  error: '#FFE3E3',
-  errorText: '#EF4E4E',
-  errorAccent: '#CF1124',
-
-  warning: '#FFF7C4',
-  warningText: '#E6BB20',
-  warningAccent: '#B88115',
-
-  notice: '#C6F7E2',
-  noticeText: '#0C6B58',
-  noticeAccent: '#014D40',
-  noticeAccentText: '#FAFFFD',
-
-  background: '#FFFFFF',
-};
+const colorsLight = {};
 
 const colorThemes = [
   { name: 'dark', colors: colorsDark, type: 'dark' },
@@ -66,6 +41,89 @@ const colorThemes = [
 ];
 
 export const colorsn = colorThemes[0].colors;
+
+const colorPallet = {
+  orange900: '#331302',
+  orange800: '#5f1a05',
+  orange700: '#842106',
+  orange600: '#a82c00',
+  orange500: '#c84801',
+  orange400: '#ed6704',
+  orange300: '#ff8f0e',
+  orange200: '#fcbd3a',
+  orange150: '#fcd579',
+  orange100: '#fcedb9',
+  orange50: '#fef9da',
+  red900: '#3e021a',
+  red800: '#68052b',
+  red700: '#890d37',
+  red600: '#b3093c',
+  red500: '#df1b41',
+  red400: '#fc526a',
+  red300: '#fe87a1',
+  red200: '#ffb1cd',
+  red150: '#ffccdf',
+  red100: '#ffe7f2',
+  red50: '#fff5fa',
+  navy900: '#171739',
+  navy800: '#272a61',
+  navy700: '#323e82',
+  navy600: '#3e4fa9',
+  navy500: '#476bcc',
+  navy400: '#668ddf',
+  navy300: '#8bace8',
+  navy200: '#b4c8ec',
+  navy150: '#cedbf2',
+  navy100: '#e7eefc',
+  navy50: '#f5f7f9',
+  gray900: '#1a1b25',
+  gray800: '#30313d',
+  gray700: '#414552',
+  gray600: '#545969',
+  gray500: '#687385',
+  gray400: '#87909f',
+  gray300: '#a3acba',
+  gray200: '#c0c8d2',
+  gray150: '#d5dbe1',
+  gray100: '#ebeef1',
+  gray50: '#f6f8fa',
+  green900: '#02220d',
+  green800: '#043b15',
+  green700: '#0b5019',
+  green600: '#006908',
+  green500: '#228403',
+  green400: '#3fa40d',
+  green300: '#48c404',
+  green200: '#76df47',
+  green150: '#a6eb84',
+  green100: '#d7f7c2',
+  green50: '#ecfed7',
+  purple900: '#14134e',
+  purple800: '#302476',
+  purple700: '#3f32a1',
+  purple600: '#513dd9',
+  purple500: '#625afa',
+  purple400: '#8d7ffa',
+  purple300: '#b49cfc',
+  purple200: '#d1befe',
+  purple150: '#dfd3fc',
+  purple100: '#f2ebff',
+  purple50: '#f9f7ff',
+};
+
+// Contextual
+export const colorsm = {
+  sidebarBackground: colorPallet.navy800,
+  sidebarItemBackground: colorPallet.navy800,
+  sidebarItemBackgroundSelected: colorPallet.navy600,
+  sidebarItemBackgroundHover: colorPallet.navy700,
+  sidebarItemAccent: colorPallet.navy800,
+  sidebarItemAccentSelected: colorPallet.purple300,
+  sidebarItemAccentHover: colorPallet.navy700,
+  sidebarItemText: colorPallet.gray100,
+  sidebarItemTextSelected: colorPallet.gray50,
+  sidebarItemTextHover: colorPallet.gray50,
+};
 
 const _colors = {
   y1: '#733309',
