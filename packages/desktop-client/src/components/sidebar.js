@@ -16,7 +16,7 @@ import TuningIcon from '../icons/v1/Tuning';
 import Wallet from '../icons/v1/Wallet';
 import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
-import { styles, colorsn } from '../style';
+import { styles, colorsn, colorsm } from '../style';
 
 import { View, Block, AlignedText, AnchorLink, Button } from './common';
 import { useSidebar } from './FloatableSidebar';
@@ -81,12 +81,14 @@ function Item({
   forceActive = false,
 }) {
   const hoverStyle = {
-    backgroundColor: colorsn.secondaryAccent,
+    backgroundColor: colorsm.sidebarItemBackgroundHover,
+    color: colorsm.sidebarItemTextHover,
   };
   const activeStyle = {
-    borderLeft: '4px solid ' + colorsn.secondaryAccent,
+    backgroundColor: colorsm.sidebarItemBackgroundSelected,
+    color: colorsm.sidebarItemTextSelected,
+    borderLeft: '4px solid ' + colorsm.sidebarItemAccentSelected,
     paddingLeft: 19 + indent - 4,
-    color: colorsn.secondaryText,
   };
   const linkStyle = [
     {
@@ -96,7 +98,7 @@ function Item({
       paddingLeft: 19 + indent,
       paddingRight: 10,
       textDecoration: 'none',
-      color: colorsn.secondaryText,
+      color: colorsm.sidebarItemText,
       ...(forceHover ? hoverStyle : {}),
     },
     { ':hover': hoverStyle },
@@ -145,18 +147,21 @@ function SecondaryItem({
   indent = 0,
 }) {
   const hoverStyle = {
-    backgroundColor: colorsn.secondaryAccent,
+    color: colorsm.sidebarItemTextHover,
+    backgroundColor: colorsm.sidebarItemBackgroundHover,
   };
   const activeStyle = {
-    borderLeft: '4px solid ' + colorsn.secondaryAccent,
+    color: colorsm.sidebarItemTextSelected,
+    backgroundColor: colorsm.sidebarItemBackgroundSelected,
+    borderLeft: '4px solid ' + colorsm.sidebarItemAccentSelected,
     paddingLeft: 14 - 4 + indent,
-    color: colorsn.secondaryText,
     fontWeight: bold ? fontWeight : null,
   };
   const linkStyle = [
     accountNameStyle,
     {
-      color: colorsn.secondaryText,
+      color: colorsm.sidebarItemText,
+      backgroundColor: colorsm.sidebarItemBackground,
       paddingLeft: 14 + indent,
       fontWeight: bold ? fontWeight : null,
     },
@@ -202,9 +207,10 @@ let accountNameStyle = [
     paddingRight: 15,
     paddingLeft: 10,
     textDecoration: 'none',
-    color: colorsn.secondaryText,
+    color: colorsm.sidebarItemText,
+    backgroundColor: colorsm.sidebarItemBackground,
   },
-  { ':hover': { backgroundColor: colorsn.secondaryAccent } },
+  { ':hover': { backgroundColor: colorsm.sidebarItemBackgroundHover } },
   styles.smallText,
 ];
 
@@ -252,12 +258,12 @@ function Account({
             style={[
               accountNameStyle,
               style,
-              { position: 'relative', borderLeft: '4px solid transparent' },
+              { position: 'relative', borderLeft: '4px solid' },
               updated && { fontWeight: 700 },
             ]}
             activeStyle={{
-              borderLeft: '4px solid ' + colorsn.secondaryAccent,
-              color: colorsn.secondaryText,
+              borderLeft: '4px solid ' + colorsm.sidebarItemAccentSelected,
+              color: colorsm.sidebarItemTextSelected,
               // This is kind of a hack, but we don't ever want the account
               // that the user is looking at to be "bolded" which means it
               // has unread transactions. The system does mark is read and
@@ -265,7 +271,7 @@ function Account({
               // ignores it if it's active
               fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
-                backgroundColor: colorsn.secondary,
+                backgroundColor: colorsm.sidebarItemBackgroundSelected,
                 transform: 'translateX(-4.5px)',
               },
             }}
@@ -555,15 +561,13 @@ export function Sidebar({
       style={[
         {
           width: SIDEBAR_WIDTH,
-          color: colorsn.secondaryText,
-          backgroundColor: colorsn.secondary,
+          color: colorsm.sidebarItemText,
+          backgroundColor: colorsm.sidebarBackground,
           '& .float': {
-            opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
             width: hasWindowButtons || isFloating ? null : 0,
           },
           '&:hover .float': {
-            opacity: 1,
             width: hasWindowButtons ? null : 'auto',
           },
         },
@@ -606,7 +610,7 @@ export function Sidebar({
         <View
           style={{
             height: 1,
-            backgroundColor: colorsn.secondary,
+            backgroundColor: colorsm.sidebarBackground,
             marginTop: 15,
             flexShrink: 0,
           }}
