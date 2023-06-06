@@ -60,7 +60,6 @@ export class Navigation {
 
     // Fill the form
     await this.page.getByLabel('Name:').fill(data.name);
-    await this.page.getByLabel('Type:').selectOption({ label: data.type });
     await this.page.getByLabel('Balance:').fill(String(data.balance));
 
     if (data.offBudget) {

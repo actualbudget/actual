@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 
-import {
-  fromPlaidAccountType,
-  determineOffBudget,
-  prettyAccountType,
-} from 'loot-core/src/shared/accounts';
+import { determineOffBudget } from 'loot-core/src/shared/accounts';
 
 import Checkmark from '../../icons/v1/Checkmark';
 import { styles, colors } from '../../style';
@@ -47,9 +43,6 @@ function Account({ account, offbudget, onSelect }) {
               flexDirection: 'row',
             }}
           >
-            {prettyAccountType(
-              fromPlaidAccountType(account.type, account.subtype),
-            )}
             <Text style={{ marginLeft: 4 }}>
               ...
               {account.mask}
@@ -79,9 +72,7 @@ export default function ConfigureLinkedAccounts({
   actions,
 }) {
   let [offbudgetAccounts, setOffbudgetAccounts] = useState(() =>
-    accounts
-      .filter(acct => determineOffBudget(fromPlaidAccountType(acct.type)))
-      .map(acct => acct.id),
+    accounts.filter(acct => determineOffBudget(acct.type)).map(acct => acct.id),
   );
 
   function toggleAccount(id) {
