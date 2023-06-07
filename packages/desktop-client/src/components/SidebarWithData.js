@@ -12,7 +12,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ExpandArrow from '../icons/v0/ExpandArrow';
-import { styles, colors } from '../style';
+import { styles, colorsm } from '../style';
 
 import { Button, Input, InitialFocus, Text, Tooltip, Menu } from './common';
 import { Sidebar } from './sidebar';
@@ -78,7 +78,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
       <Button
         bare
         style={{
-          color: colors.n9,
+          color: colorsm.sidebarItemText,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,
