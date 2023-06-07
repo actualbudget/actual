@@ -406,6 +406,10 @@ export function BudgetSummary({
                         name: 'cleanup-goal-template',
                         text: 'End of month cleanup',
                       },
+                      isGoalTemplatesEnabled && {
+                        name: 'get-full-template',
+                        text: 'Print full template amount',
+                      },
                     ]}
                   />
                 </Tooltip>

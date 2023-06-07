@@ -26,6 +26,10 @@ export function overwriteTemplate({ month }) {
   return processTemplate(month, true);
 }
 
+export function getFullTemplate({month}) {
+  return processTemplate(month, false, true);
+}
+
 function checkScheduleTemplates(template) {
   let lowPriority = template[0].priority;
   let errorNotice = false;
@@ -44,12 +48,13 @@ function getCorrectedDate(dateString) {
   return newDate;
 }
 
-async function processTemplate(month, force) {
+async function processTemplate(month, force, check=false) {
   let num_applied = 0;
   let errors = [];
   let category_templates = await getCategoryTemplates();
   let lowestPriority = 0;
   let originalCategoryBalance = [];
+  let check_list=[];
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -158,11 +163,22 @@ async function processTemplate(month, force) {
                 category,
                 template,
                 month,
+<<<<<<< HEAD
                 priority,
+=======
+                //priority,
+                check===true ? 0 : priority,
+>>>>>>> 0ac81b6 (working example)
                 remainder_scale,
                 force,
               );
-            if (to_budget != null) {
+            if ( check ) {
+              if ( to_budget) {
+                check_list.push(`Requested amount for ${category.name}: ${to_budget}`);
+              } else {
+                check_list.push(`Requested amount for ${category.name}: 0`);
+              }
+            } else if (to_budget != null) {
               num_applied++;
               await setBudget({
                 category: category.id,
@@ -198,7 +214,13 @@ async function processTemplate(month, force) {
       }
     }
   }
-
+  if (check){
+    return {
+      sticky: true,
+      message: `Full Values`,
+      pre: check_list.join('\n\n'),
+    };
+  }
   if (num_applied === 0) {
     if (errors.length) {
       return {

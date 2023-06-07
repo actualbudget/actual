@@ -16,6 +16,10 @@ app.method(
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
 app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
 app.method(
+  'budget/get-full-template',
+  mutator(undoable(goalActions.getFullTemplate)),
+);
+app.method(
   'budget/apply-goal-template',
   mutator(undoable(goalActions.applyTemplate)),
 );

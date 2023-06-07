@@ -9,6 +9,8 @@ export interface BudgetHandlers {
 
   'budget/apply-goal-template': (...args: unknown[]) => Promise<unknown>;
 
+  'budget/get-full-template': (...args: unknown[]) => Promise<unknown>;
+
   'budget/overwrite-goal-template': (...args: unknown[]) => Promise<unknown>;
 
   'budget/cleanup-goal-template': (...args: unknown[]) => Promise<unknown>;

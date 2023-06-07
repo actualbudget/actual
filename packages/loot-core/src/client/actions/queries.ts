@@ -30,6 +30,11 @@ export function applyBudgetAction(month, type, args) {
           addNotification(await send('budget/apply-goal-template', { month })),
         );
         break;
+      case 'get-full-template':
+        dispatch(
+          addNotification(await send('budget/get-full-template', { month })),
+        );
+        break;
       case 'overwrite-goal-template':
         dispatch(
           addNotification(
