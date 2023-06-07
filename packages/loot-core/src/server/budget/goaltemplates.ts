@@ -163,12 +163,8 @@ async function processTemplate(month, force, check=false) {
                 category,
                 template,
                 month,
-<<<<<<< HEAD
-                priority,
-=======
                 //priority,
                 check===true ? 0 : priority,
->>>>>>> 0ac81b6 (working example)
                 remainder_scale,
                 force,
               );
