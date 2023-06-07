@@ -39,6 +39,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template 15% of all income|Budget 15% of all income categories|
 |#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transacions|
 |#template schedule full {SCHEDULE NAME}|Fund upcoming scheduled transaction only on needed month| Small schedules that are non-monthly|
+|#template remainder | Add all remaining funds to this category| See the [Remainder Template](#remainder-template) Section for info |
 
 ### Notes
 
@@ -89,6 +90,45 @@ Templates can be given a priority flag to change the order that the templates ge
 - Negative priorities are not allowed and will result in the template being skipped.
 - Default template application order is bottom to top.  This also applies to within a given priority level.
 - If you have multiple `schedule` or `by` template lines in a single category, they will be forced to match the same priority level as the line run first.
+
+### Remainder Template
+The remainder template is run differently to the other templates.  Any remainder templates will be forced to run last in their own pass.  This way the remaining budget is after all other templates have had a chance to run. Below are a few considerations when using the remainder template
+
+- You can use as many remainder templates as you want
+- Remainder templates don't have a priority as they are always run last
+- The remainder template supports weights to control the distribution of funds accross multiple categories. See the examples on how this is done.
+- If no weight is provided, the weight will be defaulted to 1
+- The budgeted amout is calculated as `budgeted_amount=available_funds/sum_of_weights*category_weight`
+
+#### Examples
+All the examples below use the case of $100 leftover when the remainder pass is run.
+1. Add all remaining funds to a single category
+
+|Category|Template line|Amount applied|
+|---|---|---|
+|Savings|#template remainder|$100|
+
+2. Split funds evenly between two categories
+
+|Category|Template line|Amount applied|
+|---|---|---|
+|Savings|#template remainder|$50|
+|Vacation Fund|#template remainder|$50|
+
+3. Split funds with one category recieving extra
+
+|Category|Template line|Amount applied|
+|---|---|---|
+|Savings|#template remainder 2|$66.66|
+|Vacation Fund|#template remainder|$33.34|
+
+4. Spread funds over many categories
+
+|Category|Template line|Amount applied|
+|---|---|---|
+|Savings|#template remainder 3|$50|
+|Vacation Fund|#template remainder|$16.66|
+|Investment Fund|#template remainder 2|$33.34|
 
 ## Apply the templates
 
