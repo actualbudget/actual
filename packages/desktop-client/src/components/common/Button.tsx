@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 import { css, type CSSProperties } from 'glamor';
 
 import Loading from '../../icons/AnimatedLoading';
-import { styles, colors } from '../../style';
+import { styles, colorsm } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 import View from './View';
@@ -75,14 +75,22 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? 'transparent'
           : primary
           ? disabled
-            ? colors.n7
-            : colors.p5
-          : 'white',
+            ? colorsm.buttonDisabledBackground
+            : colorsm.buttonPositiveBackground
+          : colorsm.buttonNeutralBackground,
         border: bare
           ? 'none'
           : '1px solid ' +
-            (primary ? (disabled ? colors.n7 : colors.p5) : colors.n9),
-        color: primary ? 'white' : disabled ? colors.n6 : colors.n1,
+            (primary
+              ? disabled
+                ? colorsm.buttonDisabledBorder
+                : colorsm.buttonPositiveBorder
+              : colorsm.buttonNeutralBorder),
+        color: primary
+          ? colorsm.buttonPositiveText
+          : disabled
+          ? colorsm.buttonDisabledText
+          : colorsm.buttonNeutralText,
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,
