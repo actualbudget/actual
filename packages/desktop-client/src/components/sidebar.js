@@ -16,7 +16,7 @@ import TuningIcon from '../icons/v1/Tuning';
 import Wallet from '../icons/v1/Wallet';
 import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
-import { styles, colorsn, colorsm } from '../style';
+import { styles, colorsm } from '../style';
 
 import { View, Block, AlignedText, AnchorLink, Button } from './common';
 import { useSidebar } from './FloatableSidebar';
@@ -226,6 +226,7 @@ function Account({
   outerStyle,
   onDragChange,
   onDrop,
+  indent = 0,
 }) {
   let type = account
     ? account.closed
@@ -258,11 +259,12 @@ function Account({
             style={[
               accountNameStyle,
               style,
-              { position: 'relative', borderLeft: '4px solid' },
+              { position: 'relative', paddingLeft: 14 + indent },
               updated && { fontWeight: 700 },
             ]}
             activeStyle={{
               borderLeft: '4px solid ' + colorsm.sidebarItemAccentSelected,
+              paddingLeft: 14 - 4 + indent,
               color: colorsm.sidebarItemTextSelected,
               // This is kind of a hack, but we don't ever want the account
               // that the user is looking at to be "bolded" which means it
@@ -294,8 +296,8 @@ function Account({
                   height: 5,
                   borderRadius: 5,
                   backgroundColor: failed
-                    ? colorsn.notice
-                    : colorsn.secondaryAccent,
+                    ? colorsm.noticeBackground
+                    : colorsm.sidebarItemBackground,
                   marginLeft: 2,
                   transition: 'transform .3s',
                   opacity: connected ? 1 : 0,
@@ -471,13 +473,13 @@ function ToggleButton({ style, isFloating, onFloat }) {
               margin: -2,
               width: 15,
               height: 15,
-              color: colorsn.secondaryAccent,
+              color: colorsm.sidebarItemAccent,
               transform: 'rotate(45deg)',
             }}
           />
         ) : (
           <ArrowButtonLeft1
-            style={{ width: 13, height: 13, color: colorsn.secondaryAccent }}
+            style={{ width: 13, height: 13, color: colorsm.sidebarItemAccent }}
           />
         )}
       </Button>
