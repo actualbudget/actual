@@ -45,7 +45,7 @@ jobs:
             git ls-tree $1 --name-only packages/loot-core/migrations/ | xargs -I{} basename {} | sort -n | grep -Ev '^\.'
           }
           git fetch origin master
-          old_migrations=$(get_migrations master)
+          old_migrations=$(get_migrations origin/master)
           newest_old_migration=$(tail -n1 <<< "$old_migrations")
 
           new_migrations=$(get_migrations HEAD)
