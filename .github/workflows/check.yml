@@ -32,3 +32,13 @@ jobs:
         uses: ./.github/actions/setup
       - name: Test
         run: yarn test
+
+  migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '19'
+      - name: Check migrations
+        run: node ./.github/actions/check-migrations.js
