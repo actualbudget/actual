@@ -37,23 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up environment
-        uses: ./.github/actions/setup
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '19'
       - name: Check migrations
-        run: |
-          function get_migrations() {
-            git ls-tree $1 --name-only packages/loot-core/migrations/ | xargs -I{} basename {} | sort -n | grep -Ev '^\.'
-          }
-          git fetch origin master
-          old_migrations=$(get_migrations origin/master)
-          newest_old_migration=$(tail -n1 <<< "$old_migrations")
-
-          new_migrations=$(get_migrations HEAD)
-          added_migrations=$(comm -13 <(echo "$old_migrations") <(echo "$new_migrations"))
-          for migration in $added_migrations; do
-            if [[ "$migration" < "$newest_old_migration" ]]; then
-              echo "Migration $migration is older than the newest migration in master ($newest_old_migration)"
-              exit 1
-            fi
-          done
-          echo "Migrations are valid"
+        run: node ./.github/actions/check-migrations.js
