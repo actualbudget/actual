@@ -61,6 +61,13 @@ module.exports = {
     //   },
     // ],
 
+    'import/extensions': [
+      'error',
+      'never',
+      {
+        json: 'always',
+      },
+    ],
     'import/no-useless-path-segments': 'error',
     'import/no-duplicates': ['error', { 'prefer-inline': true }],
     'import/order': [

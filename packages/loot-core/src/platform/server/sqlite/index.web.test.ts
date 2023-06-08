@@ -5,6 +5,7 @@ import {
   transaction,
   execQuery,
   runQuery,
+  // eslint-disable-next-line import/extensions
 } from './index.web';
 
 beforeAll(() => {

@@ -49,6 +49,7 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
   process.env.ACTUAL_DATA_DIR = app.getPath('userData');
 }
 
+// eslint-disable-next-line import/extensions
 const WindowState = require('./window-state.js');
 
 // Keep a global reference of the window object, if you don't, the window will
