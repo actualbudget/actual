@@ -4530,15 +4530,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wademason/ofx@npm:1.0.1":
-  version: 1.0.1
-  resolution: "@wademason/ofx@npm:1.0.1"
-  dependencies:
-    xml-js: ^1.6.11
-  checksum: 704f33ec70bb44f1612723a1ac216a938dcd47399414d5c39a7d95c365ffedbe033eb5812f732ab9e6f5dc6fcce318e6145a5ca058d4dad2d34b621bd786001e
-  languageName: node
-  linkType: hard
-
 "@webassemblyjs/ast@npm:1.11.5, @webassemblyjs/ast@npm:^1.11.5":
   version: 1.11.5
   resolution: "@webassemblyjs/ast@npm:1.11.5"
@@ -13249,7 +13240,6 @@ __metadata:
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/pegjs": ^0.10.3
     "@types/webpack": ^5.28.0
-    "@wademason/ofx": 1.0.1
     absurd-sql: 0.0.53
     adm-zip: ^0.5.9
     babel-loader: ^8.0.6
@@ -20974,17 +20964,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: c3c100a181b731f40b7f2fddf004aa023f79d64f489706a28bc23ff88e87f6a64b3c6651fbec3a84a53960b75159574d7a7385709847a62ddb7ad6af76f49138
-  languageName: node
-  linkType: hard
-
-"xml-js@npm:^1.6.11":
-  version: 1.6.11
-  resolution: "xml-js@npm:1.6.11"
-  dependencies:
-    sax: ^1.2.4
-  bin:
-    xml-js: ./bin/cli.js
-  checksum: 24a55479919413687105fc2d8ab05e613ebedb1c1bc12258a108e07cff5ef793779297db854800a4edf0281303ebd1f177bc4a588442f5344e62b3dddda26c2b
   languageName: node
   linkType: hard
 
