@@ -51,31 +51,3 @@ The server will put all the budget files in this directory as binary blobs. If n
 (Advanced, most people will not need to configure this.) The server will serve the frontend from this directory. If not specified, the server will use the files in the `@actual-app/web` package that it has installed. (environment variable: `ACTUAL_WEB_ROOT`)
 
 If you’re providing a custom frontend, make sure you provide an `index.html` in the top level of the `webRoot` directory, which will be served from the `/` route.
-
-## Bank syncing
-
-### Nordigen
-
-The `nordigen` key of the config file is used to configure syncing using Nordigen. It should be an object with two keys:
-
-- `secretId`: The ID of your Nordigen secret. (environment variable: `ACTUAL_NORDIGEN_SECRET_ID`)
-- `secretKey`: The key of your Nordigen secret. (environment variable: `ACTUAL_NORDIGEN_SECRET_KEY`)
-
-In the below examples, replace `xxxxx` with your secret ID / secret key.
-
-Example with the `config.json`:
-
-```json
-{
-  "nordigen": {
-    "secretId": "xxxxx",
-    "secretKey": "xxxxx"
-  }
-}
-```
-
-Example using environment variables on Fly.io:
-
-```sh
-flyctl secrets set ACTUAL_NORDIGEN_SECRET_ID=xxxxx ACTUAL_NORDIGEN_SECRET_KEY=xxxxx
-```
