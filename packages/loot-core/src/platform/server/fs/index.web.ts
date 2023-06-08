@@ -16,12 +16,8 @@ export const bundledDatabasePath = '/default-db.sqlite';
 export const migrationsPath = '/migrations';
 export const demoBudgetPath = '/demo-budget';
 export { join };
-export {
-  getDataDir,
-  getDocumentDir,
-  getBudgetDir,
-  _setDocumentDir,
-} from './index.electron';
+export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
+export const getDataDir = () => process.env.ACTUAL_DATA_DIR;
 
 export const pathToId = function (filepath) {
   return filepath.replace(/^\//, '').replace(/\//g, '-');
