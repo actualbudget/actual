@@ -1,3 +1,5 @@
+import join from './path-join';
+
 let documentDir;
 export const _setDocumentDir = dir => (documentDir = dir);
 
@@ -26,5 +28,5 @@ export const getBudgetDir = id => {
     );
   }
 
-  return path.join(getDocumentDir(), id);
+  return join(getDocumentDir(), id);
 };
