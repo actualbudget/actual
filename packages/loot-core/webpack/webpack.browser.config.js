@@ -49,7 +49,6 @@ module.exports = {
     rules: [
       {
         test: /\.m?[tj]sx?$/,
-        exclude: /\.electron\.m?[tj]sx?$/,
         use: {
           loader: 'babel-loader',
           options: {
