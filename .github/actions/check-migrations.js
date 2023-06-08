@@ -7,7 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 
 // Please don’t add to this list, we just can’t change this migration ID since it already happened
 const exceptions = ['1679728867040_rules_conditions.sql'];
@@ -26,10 +26,13 @@ const migrations = fs
   .filter(file => !file.startsWith('.'))
   .map(file => {
     const [_, date] = file.match(/^(\d+)_/) || [];
-    const stdout = execSync(
-      `git log --format=%ct -n 1 ${path.join(migrationsDir, file)}`,
-      { encoding: 'utf8' },
-    );
+    const { stdout } = spawnSync('git', [
+      'log',
+      '--format=%ct',
+      '-n',
+      '1',
+      path.join(migrationsDir, file),
+    ]);
     return {
       migrationDate: parseInt(date),
       commitDate: parseInt(stdout) * 1000,
