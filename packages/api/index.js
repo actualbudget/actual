@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
-// eslint-disable-next-line no-restricted-imports
-import * as bundle from './app/bundle.api';
+// eslint-disable-next-line import/extensions
+import * as bundle from './app/bundle.api.js';
 import * as injected from './injected';
 
 let actualApp;
