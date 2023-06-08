@@ -13,6 +13,9 @@ module.exports = {
     library: 'backend',
     publicPath: '/kcab/',
   },
+  stats: {
+    errorDetails: true,
+  },
   resolve: {
     extensions: [
       '.web.js',
@@ -23,15 +26,31 @@ module.exports = {
       '.tsx',
       '.json',
     ],
-    alias: {
-      fs: 'memfs',
-      path: 'path-browserify',
+    alias: {},
+    fallback: {
+      assert: require.resolve('assert/'),
+      // used by sql.js, but only if the 'crypto' global is not defined
+      // used by adm-zip in a way that needs it so un
+      crypto: false,
+      dgram: false,
+      fs: require.resolve('memfs'),
+      net: false,
+      path: require.resolve('path-browserify'),
+      // used by memfs, but only if the 'process' global is not defined
+      process: false,
+      stream: require.resolve('stream-browserify'),
+      tls: false,
+      // used by memfs in a check which we can ignore I think
+      url: false,
+      util: require.resolve('util/'),
+      zlib: require.resolve('browserify-zlib'),
     },
   },
   module: {
     rules: [
       {
         test: /\.m?[tj]sx?$/,
+        exclude: /\.electron\.m?[tj]sx?$/,
         use: {
           loader: 'babel-loader',
           options: {
@@ -46,7 +65,7 @@ module.exports = {
     ],
   },
   optimization: {
-    namedChunks: true,
+    chunkIds: 'named',
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -68,9 +87,4 @@ module.exports = {
       resourceRegExp: /worker_threads|original-fs/,
     }),
   ],
-  node: {
-    dgram: 'empty',
-    net: 'empty',
-    tls: 'empty',
-  },
 };
