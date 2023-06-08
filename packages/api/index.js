@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 
+// eslint-disable-next-line no-restricted-imports
 import * as bundle from './app/bundle.api';
 import * as injected from './injected';
 
