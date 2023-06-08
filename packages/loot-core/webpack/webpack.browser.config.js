@@ -26,9 +26,9 @@ module.exports = {
       '.tsx',
       '.json',
     ],
-    alias: {},
     fallback: {
       assert: require.resolve('assert/'),
+      buffer: require.resolve('buffer/'),
       // used by sql.js, but only if the 'crypto' global is not defined
       // used by adm-zip in a way that needs it so un
       crypto: false,
@@ -36,8 +36,7 @@ module.exports = {
       fs: require.resolve('memfs'),
       net: false,
       path: require.resolve('path-browserify'),
-      // used by memfs, but only if the 'process' global is not defined
-      process: false,
+      process: require.resolve('process/browser'),
       stream: require.resolve('stream-browserify'),
       tls: false,
       // used by memfs in a check which we can ignore I think
@@ -69,6 +68,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
+      'process.env': '{}',
       'process.env.IS_DEV': JSON.stringify(
         process.env.NODE_ENV === 'development',
       ),
@@ -78,6 +78,10 @@ module.exports = {
       'process.env.PUBLIC_URL': JSON.stringify(process.env.PUBLIC_URL || '/'),
       'process.env.ACTUAL_DATA_DIR': JSON.stringify('/'),
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser',
     }),
     new webpack.SourceMapDevToolPlugin({
       filename: '[file].map',
