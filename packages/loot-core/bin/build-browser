@@ -12,7 +12,7 @@ cd "$DATA_DIR"
 find * -type f | sort > ../data-file-index.txt
 cd "$ROOT"
 
-OUTPUT_HASH="[hash]"
+OUTPUT_HASH="[contenthash]"
 if [ $NODE_ENV == 'development' ]; then
     # Use a constant filename in development mode to make it easier to
     # rebuild the backend without having to rebuild the frontend
