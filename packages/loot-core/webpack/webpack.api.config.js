@@ -14,6 +14,7 @@ config.resolve.extensions = [
   '.tsx',
   '.json',
 ];
+config.resolve.fallback = {};
 config.output.filename = 'bundle.api.js';
 config.output.sourceMapFilename = 'bundle.api.js.map';
 config.output.path = path.join(
