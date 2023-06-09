@@ -41,7 +41,6 @@ module.exports = {
       tls: false,
       // used by memfs in a check which we can ignore I think
       url: false,
-      util: require.resolve('util/'),
       zlib: require.resolve('browserify-zlib'),
     },
   },
