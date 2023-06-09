@@ -30,7 +30,7 @@ module.exports = {
       assert: require.resolve('assert/'),
       buffer: require.resolve('buffer/'),
       // used by sql.js, but only if the 'crypto' global is not defined
-      // used by adm-zip in a way that needs it so un
+      // used by adm-zip for ZipCrypto, but we don’t use that
       crypto: false,
       dgram: false,
       fs: require.resolve('memfs'),
