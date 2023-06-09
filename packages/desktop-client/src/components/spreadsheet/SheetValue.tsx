@@ -8,7 +8,7 @@ import {
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
-import NamespaceContext from './NamespaceContext.js';
+import NamespaceContext from './NamespaceContext';
 
 type Binding = { name: string; value; query?: unknown };
 

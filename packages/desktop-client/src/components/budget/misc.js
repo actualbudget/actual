@@ -34,7 +34,7 @@ import {
   useDroppable,
   DropHighlight,
   DropHighlightPosContext,
-} from '../sort.js';
+} from '../sort';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import { Row, InputCell, ROW_HEIGHT } from '../table';
 
