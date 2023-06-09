@@ -20,7 +20,7 @@ import { styles, colors } from '../style';
 
 import { View, Block, AlignedText, AnchorLink, Button } from './common';
 import { useSidebar } from './FloatableSidebar';
-import { useDraggable, useDroppable, DropHighlight } from './sort.js';
+import { useDraggable, useDroppable, DropHighlight } from './sort';
 import CellValue from './spreadsheet/CellValue';
 
 export const SIDEBAR_WIDTH = 240;
