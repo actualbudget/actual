@@ -14,7 +14,7 @@ import Downshift from 'downshift';
 import { type CSSProperties, css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
-import { colors } from '../../style';
+import { colors, colorsm } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
 
 const inst: { lastChangeType? } = {};
@@ -95,7 +95,10 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
             {...css({
               padding: 5,
               cursor: 'default',
-              backgroundColor: highlightedIndex === index ? colors.n4 : null,
+              backgroundColor:
+                highlightedIndex === index
+                  ? colorsm.menuItemBackgroundHover
+                  : null,
             })}
           >
             {name}
@@ -475,8 +478,8 @@ function SingleAutocomplete({
                 offset={2}
                 style={{
                   padding: 0,
-                  backgroundColor: colors.n1,
-                  color: 'white',
+                  backgroundColor: colorsm.menuBackground,
+                  color: colorsm.menuItemText,
                   minWidth: 200,
                   ...tooltipStyle,
                 }}
@@ -503,7 +506,7 @@ function MultiItem({ name, onRemove }) {
       style={{
         alignItems: 'center',
         flexDirection: 'row',
-        backgroundColor: colors.b9,
+        backgroundColor: colorsm.menuBackground,
         padding: '2px 4px',
         margin: '2px',
         borderRadius: 4,
@@ -580,12 +583,12 @@ export function MultiAutocomplete({
               flexWrap: 'wrap',
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: 'white',
+              backgroundColor: colorsm.menuBackground,
               borderRadius: 4,
-              border: '1px solid #d0d0d0',
+              border: '1px solid ' + colorsm.menuBorder,
             },
             focused && {
-              border: '1px solid ' + colors.b5,
+              border: '1px solid ' + colorsm.menuBorderHover,
               boxShadow: '0 1px 1px ' + colors.b7,
             },
           ]}
@@ -640,16 +643,10 @@ export function AutocompleteFooterButton({
       style={[
         {
           fontSize: 12,
-          color: colors.n10,
-          backgroundColor: 'transparent',
-          borderColor: colors.n5,
         },
         style,
       ]}
-      hoveredStyle={[
-        { backgroundColor: 'rgba(200, 200, 200, .25)' },
-        hoveredStyle,
-      ]}
+      hoveredStyle={[hoveredStyle]}
       onClick={onClick}
     >
       {title}

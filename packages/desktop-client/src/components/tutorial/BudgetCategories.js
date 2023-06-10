@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { colors } from '../../style';
+import { colors, colorsm } from '../../style';
 import { Tooltip, Pointer, P } from '../common';
 
 import { Title } from './common';

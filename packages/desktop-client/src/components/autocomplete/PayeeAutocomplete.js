@@ -7,7 +7,7 @@ import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
-import { colorsn } from '../../style';
+import { colorsm } from '../../style';
 import { View } from '../common';
 
 import Autocomplete, {
@@ -75,20 +75,24 @@ export function PayeeList({
         ]}
       >
         {createNew && (
+          // "Create payee" menu item
           <View
             {...(getItemProps ? getItemProps({ item: createNew }) : null)}
             style={{
               flexShrink: 0,
               padding: '6px 9px',
               backgroundColor:
-                highlightedIndex === 0 ? colorsn.primary : 'transparent',
+                highlightedIndex === 0
+                  ? colorsm.menuItemBackgroundHover
+                  : 'transparent',
+              color:
+                highlightedIndex === 0 ? colorsm.menuItemTextHover : 'inherit',
               borderRadius: embedded ? 4 : 0,
             }}
           >
             <View
               style={{
                 display: 'block',
-                color: colorsn.notice,
                 borderRadius: 4,
                 fontSize: 11,
                 fontWeight: 500,
@@ -98,7 +102,6 @@ export function PayeeList({
                 width={8}
                 height={8}
                 style={{
-                  color: colorsn.notice,
                   marginRight: 5,
                   display: 'inline-block',
                 }}
@@ -123,9 +126,11 @@ export function PayeeList({
             <Fragment key={item.id}>
               {title && (
                 <div
+                  // Payee headers
                   key={'title-' + idx}
                   style={{
-                    color: colorsn.notice,
+                    color: colorsm.menuItemTextHeader,
+                    fontWeight: 500,
                     padding: '4px 9px',
                   }}
                 >
@@ -134,12 +139,13 @@ export function PayeeList({
               )}
 
               <div
+                // List each payee up to a max
                 {...(getItemProps ? getItemProps({ item }) : null)}
                 key={item.id}
                 style={{
                   backgroundColor:
                     highlightedIndex === idx + offset
-                      ? colorsn.primaryAccent
+                      ? colorsm.menuItemBackgroundHover
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   padding: 4,
@@ -154,7 +160,6 @@ export function PayeeList({
                   style={{
                     fontSize: 11,
                     padding: 5,
-                    color: colorsn.primaryAccent,
                     textAlign: 'center',
                   }}
                 >
@@ -331,22 +336,17 @@ export default function PayeeAutocomplete({
           footer={
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
+                // Buttons at bottom of payee list
                 <AutocompleteFooterButton
                   title="Make Transfer"
                   style={[
                     showManagePayees && { marginBottom: 5 },
                     focusTransferPayees && {
-                      backgroundColor: colorsn.secondary,
-                      color: colorsn.secondaryText,
-                      borderColor: colorsn.secondaryAccent,
+                      backgroundColor: colorsm.buttonPositiveBackground,
+                      color: colorsm.buttonPositiveText,
+                      borderColor: colorsm.buttonPositiveBorder,
                     },
                   ]}
-                  hoveredStyle={
-                    focusTransferPayees && {
-                      backgroundColor: colorsn.secondaryAccent,
-                      colors: colorsn.secondaryAccentText,
-                    }
-                  }
                   onClick={() => {
                     onUpdate && onUpdate(null);
                     setFocusTransferPayees(!focusTransferPayees);

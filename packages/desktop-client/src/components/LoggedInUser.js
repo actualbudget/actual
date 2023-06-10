@@ -4,7 +4,7 @@ import { withRouter } from 'react-router';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import { colors } from '../style';
+import { colorsm } from '../style';
 
 import { View, Text, Button, Tooltip, Menu } from './common';
 import { useServerURL } from './ServerContext';
@@ -62,7 +62,7 @@ function LoggedInUser({
 
   if (loading) {
     return (
-      <Text style={[{ color: colors.n5, fontStyle: 'italic' }, style]}>
+      <Text style={[{ color: colorsm.pageText, fontStyle: 'italic' }, style]}>
         Loading account...
       </Text>
     );

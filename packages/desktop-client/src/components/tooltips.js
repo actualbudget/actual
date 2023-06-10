@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import { css, before } from 'glamor';
 
-import { styles } from '../style';
+import { styles, colorsm } from '../style';
 
 export const IntersectionBoundary = createContext();
 
@@ -299,7 +299,7 @@ export class Tooltip extends Component {
       width,
       ...styles.shadowLarge,
       borderRadius: 4,
-      backgroundColor: 'white',
+      backgroundColor: colorsm.tooltipBackground,
       // opacity: 0,
       // transition: 'transform .1s, opacity .1s',
       // transitionTimingFunction: 'ease-out'
@@ -343,7 +343,7 @@ export function Pointer({
   pointerDirection = 'up',
   pointerPosition = 'left',
   backgroundColor,
-  borderColor = '#c0c0c0',
+  borderColor = colorsm.tooltipBorder,
   border = true,
   color,
   style,
@@ -357,8 +357,8 @@ export function Pointer({
         {...css(
           {
             zIndex: 3000,
-            backgroundColor: backgroundColor,
-            color: color,
+            backgroundColor: colorsm.tooltipBackground,
+            color: colorsm.tooltipText,
             padding: 10,
             boxShadow: '0 2px 6px rgba(0, 0, 0, .25)',
             border: border && '1px solid ' + borderColor,

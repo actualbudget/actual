@@ -7,9 +7,9 @@ import React, {
 } from 'react';
 
 import Split from '../../icons/v0/Split';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
-import { View, Text, Select } from '../common';
+import { View, Select, Button } from '../common';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
@@ -78,31 +78,30 @@ export function CategoryList({
         {items.map((item, idx) => {
           if (item.id === 'split') {
             return (
+              // Split transaction menu item
               <View
                 key="split"
                 {...(getItemProps ? getItemProps({ item }) : null)}
-                style={{
-                  backgroundColor:
-                    highlightedIndex === idx ? colors.n4 : 'transparent',
-                  borderRadius: embedded ? 4 : 0,
-                  flexShrink: 0,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: colors.g8,
-                  padding: '6px 8px',
-                }}
+                style={{ flexShrink: 0, margin: 5 }}
                 data-testid="split-transaction-button"
               >
-                <Text style={{ lineHeight: 0 }}>
+                <Button
+                  style={{
+                    fontWeight: 500,
+                    backgroundColor: colorsm.buttonNeutralBackground,
+                    color: colorsm.buttonNeutralText,
+                    borderColor: colorsm.buttonNeutralBorder,
+                  }}
+                >
                   <Split
                     width={10}
                     height={10}
-                    style={{ marginRight: 5, color: 'inherit' }}
+                    style={{
+                      marginRight: 5,
+                    }}
                   />
-                </Text>
-                Split Transaction
+                  Split Transaction
+                </Button>
               </View>
             );
           }
@@ -112,9 +111,11 @@ export function CategoryList({
           return (
             <Fragment key={item.id}>
               {showGroup && (
+                // Category group headers
                 <div
                   style={{
-                    color: colors.y9,
+                    fontWeight: 500,
+                    color: colorsm.menuItemTextHeader,
                     padding: '4px 9px',
                   }}
                   data-testid="category-item-group"
@@ -122,11 +123,15 @@ export function CategoryList({
                   {item.groupName}
                 </div>
               )}
+
               <div
+                // Category item
                 {...(getItemProps ? getItemProps({ item }) : null)}
                 style={{
                   backgroundColor:
-                    highlightedIndex === idx ? colors.n4 : 'transparent',
+                    highlightedIndex === idx
+                      ? colorsm.menuItemBackgroundHover
+                      : colorsm.menuItemBackground,
                   padding: 4,
                   paddingLeft: 20,
                   borderRadius: embedded ? 4 : 0,

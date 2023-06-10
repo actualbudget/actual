@@ -4,16 +4,17 @@ import mergeRefs from 'react-merge-refs';
 import { css } from 'glamor';
 
 import { useProperFocus } from '../../hooks/useProperFocus';
-import { styles, colors } from '../../style';
+import { styles, colorsm } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
   outline: 0,
-  backgroundColor: 'white',
+  color: colorsm.formInputText,
+  backgroundColor: colorsm.formInputBackground,
   margin: 0,
   padding: 5,
   borderRadius: 4,
-  border: '1px solid #d0d0d0',
+  border: '1px solid ' + colorsm.formInputBorder,
 };
 
 type InputProps = HTMLPropsWithStyle<HTMLInputElement> & {
@@ -40,11 +41,16 @@ const Input = ({
       {...css(
         defaultInputStyle,
         {
+          color: colorsm.formInputText,
           ':focus': {
-            border: '1px solid ' + colors.b5,
-            boxShadow: '0 1px 1px ' + colors.b7,
+            border: '1px solid ' + colorsm.formInputBorderSelected,
+            boxShadow: '0 1px 1px ' + colorsm.formInputShadowSelected,
           },
-          '::placeholder': { color: colors.n7 },
+          '::placeholder': { color: colorsm.formInputTextPlaceholder },
+          '::selection': {
+            color: colorsm.formInputTextSelection,
+            backgroundColor: colorsm.formInputBackgroundSelection,
+          },
         },
         styles.smallText,
         style,

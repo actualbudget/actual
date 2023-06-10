@@ -26,7 +26,7 @@ import {
 import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../icons/v0/ExpandArrow';
-import { styles, colors } from '../style';
+import { styles, colors, colorsm } from '../style';
 import type { HTMLPropsWithStyle } from '../types/utils';
 
 import Button from './common/Button';
@@ -105,9 +105,9 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
             marginLeft: 5,
             marginRight: 5,
             borderRadius: 6,
-            backgroundColor: 'white',
-            borderColor: colors.p3,
-            boxShadow: '0 1px 2px #9594A8',
+            backgroundColor: colorsm.cardBackground,
+            borderColor: colorsm.cardBorder,
+            boxShadow: '0 1px 2px ' + colorsm.cardShadow,
           },
           props.style,
         ]}
@@ -133,7 +133,7 @@ export function Link({ style, children, ...nativeProps }: LinkProps) {
       {...css(
         {
           textDecoration: 'none',
-          color: styles.textColor,
+          color: 'inherit',
           backgroundColor: 'transparent',
           border: 0,
           cursor: 'pointer',
@@ -282,8 +282,8 @@ export function InputWithContent({
           alignItems: 'center',
         },
         focused && {
-          border: '1px solid ' + colors.b5,
-          boxShadow: '0 1px 1px ' + colors.b7,
+          border: '1px solid ' + colorsm.buttonPositiveBorder,
+          boxShadow: '0 1px 1px ' + colorsm.buttonShadow,
         },
         style,
         getStyle && getStyle(focused),
@@ -343,49 +343,15 @@ export function Search({
       style={{
         width,
         borderColor: isInModal ? null : 'transparent',
-        backgroundColor: isInModal ? null : colors.n11,
+        backgroundColor: isInModal ? null : colorsm.searchBackground,
         ':focus': isInModal
           ? null
           : {
-              backgroundColor: 'white',
-              '::placeholder': { color: colors.n8 },
+              backgroundColor: colorsm.searchBackgroundFocus,
+              '::placeholder': { color: colorsm.searchTextFocus },
             },
       }}
     />
-  );
-}
-
-type KeyboardButtonProps = ComponentProps<typeof Button> & {
-  highlighted?: boolean;
-};
-export function KeyboardButton({
-  highlighted,
-  children,
-  ...props
-}: KeyboardButtonProps) {
-  return (
-    <Button
-      {...props}
-      bare
-      style={[
-        {
-          backgroundColor: 'white',
-          shadowColor: colors.n3,
-          shadowOffset: { width: 0, height: 1 },
-          shadowRadius: 1,
-          shadowOpacity: 1,
-          elevation: 4,
-          borderWidth: 0,
-          paddingLeft: 17,
-          paddingRight: 17,
-        },
-        highlighted && { backgroundColor: colors.p6 },
-        props.style,
-      ]}
-      textStyle={[highlighted && { color: 'white' }]}
-    >
-      {children}
-    </Button>
   );
 }
 
@@ -398,16 +364,16 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         ref={ref}
         {...css(
           {
-            backgroundColor: 'transparent',
+            backgroundColor: colorsm.menuBackground,
             height: 28,
             fontSize: 14,
             flex: 1,
-            border: '1px solid #d0d0d0',
+            border: '1px solid',
             borderRadius: 4,
-            color: colors.n1,
+            color: colorsm.menuItemText,
             ':focus': {
-              border: '1px solid ' + colors.b5,
-              boxShadow: '0 1px 1px ' + colors.b7,
+              border: '1px solid ' + colorsm.menuBorder,
+              boxShadow: '0 1px 1px ' + colorsm.buttonShadow,
               outline: 'none',
             },
           },
@@ -566,7 +532,7 @@ export function Menu({
             <Text
               key={item.name}
               style={{
-                color: colors.n6,
+                color: colorsm.menuItemText,
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',
@@ -597,9 +563,11 @@ export function Menu({
                 flexDirection: 'row',
                 alignItems: 'center',
               },
-              item.disabled && { color: colors.n7 },
+              item.disabled && { color: colorsm.buttonDisabledBackground },
               !item.disabled &&
-                hoveredIndex === idx && { backgroundColor: colors.n10 },
+                hoveredIndex === idx && {
+                  backgroundColor: colorsm.buttonNeutralBackground,
+                },
             ]}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
