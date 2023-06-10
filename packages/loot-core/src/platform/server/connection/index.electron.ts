@@ -22,13 +22,23 @@ export const init: T.Init = function (socketName, handlers) {
 
   // websockets doesn't support sending objects so parse/stringify needed
   wss.on('connection', function connection(ws) {
+    ws.on('error', console.error);
+
     ws.on('message', data => {
       let msg = JSON.parse(data);
+
+      if (ws.readyState !== 1) {
+        return;
+      }
+
       let { id, name, args, undoTag, catchErrors } = msg;
 
       if (handlers[name]) {
         runHandler(handlers[name], args, { undoTag, name }).then(
           result => {
+            if (ws.readyState !== 1) {
+              return;
+            }
             if (catchErrors) {
               result = { data: result, error: null };
             }
@@ -47,6 +57,9 @@ export const init: T.Init = function (socketName, handlers) {
             );
           },
           nativeError => {
+            if (ws.readyState !== 1) {
+              return;
+            }
             let error = coerceError(nativeError);
 
             if (name.startsWith('api/')) {

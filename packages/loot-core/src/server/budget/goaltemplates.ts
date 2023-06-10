@@ -80,8 +80,35 @@ async function processTemplate(month, force) {
       });
     }
   }
+  // find all remainder templates, place them after all other templates
+  let remainder_found;
+  let remainder_priority = lowestPriority + 1;
+  let remainder_weight_total = 0;
+  for (let c = 0; c < categories.length; c++) {
+    let category = categories[c];
+    let templates = category_templates[category.id];
+    if (templates) {
+      for (let i = 0; i < templates.length; i++) {
+        if (templates[i].type === 'remainder') {
+          templates[i].priority = remainder_priority;
+          remainder_weight_total += templates[i].weight;
+          remainder_found = true;
+        }
+      }
+    }
+  }
+  // so the remainders don't get skiped
+  if (remainder_found) lowestPriority = remainder_priority;
 
   for (let priority = 0; priority <= lowestPriority; priority++) {
+    // setup scaling for remainder
+    let remainder_scale = 1;
+    if (priority === lowestPriority) {
+      let sheetName = monthUtils.sheetForMonth(month);
+      let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+      remainder_scale = Math.round(budgetAvailable / remainder_weight_total);
+    }
+
     for (let c = 0; c < categories.length; c++) {
       let category = categories[c];
       let template = category_templates[category.id];
@@ -132,6 +159,7 @@ async function processTemplate(month, force) {
                 template,
                 month,
                 priority,
+                remainder_scale,
                 force,
               );
             if (to_budget != null) {
@@ -235,6 +263,7 @@ async function applyCategoryTemplate(
   template_lines,
   month,
   priority,
+  remainder_scale,
   force,
 ) {
   let current_month = getCorrectedDate(`${month}-01`);
@@ -547,6 +576,12 @@ async function applyCategoryTemplate(
             errors.push(`Insufficient funds.`);
           }
         }
+        break;
+      }
+      case 'remainder': {
+        to_budget = Math.round(remainder_scale * template.weight);
+        // can over budget with the rounding, so checking that
+        if (to_budget > budgetAvailable) to_budget = budgetAvailable;
         break;
       }
       case 'error':

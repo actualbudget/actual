@@ -4,9 +4,7 @@ import { useNavigate } from 'react-router-dom-v5-compat';
 
 import * as actions from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
-import { prettyAccountType } from 'loot-core/src/shared/accounts';
 
-import Wallet from '../../icons/v1/Wallet';
 import { colors, styles } from '../../style';
 import { withThemeColor } from '../../util/withThemeColor';
 import { Button, Text, TextOneLine, View } from '../common';
@@ -103,26 +101,6 @@ export function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
                 }}
               />
             )}
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginTop: '4px',
-            }}
-          >
-            <Text style={[styles.smallText, { color: colors.n5 }]}>
-              {prettyAccountType(account.type)}
-            </Text>
-            <Wallet
-              style={{
-                width: 15,
-                height: 15,
-                color: colors.n9,
-                marginLeft: 8,
-                marginBottom: 2,
-              }}
-            />
           </View>
         </View>
         <CellValue

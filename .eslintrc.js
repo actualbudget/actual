@@ -13,6 +13,13 @@ rulesDirPlugin.RULES_DIR = path.join(
 const ruleFCMsg =
   'Type the props argument and let TS infer or use ComponentType for a component prop';
 
+const restrictedImportPatterns = [
+  {
+    group: ['*.api', '*.web', '*.electron'],
+    message: 'Don’t directly reference imports from other platforms',
+  },
+];
+
 module.exports = {
   plugins: ['prettier', 'import', 'rulesdir', '@typescript-eslint'],
   extends: ['react-app', 'plugin:@typescript-eslint/recommended'],
@@ -54,6 +61,13 @@ module.exports = {
     //   },
     // ],
 
+    'import/extensions': [
+      'error',
+      'never',
+      {
+        json: 'always',
+      },
+    ],
     'import/no-useless-path-segments': 'error',
     'import/no-duplicates': ['error', { 'prefer-inline': true }],
     'import/order': [
@@ -95,6 +109,7 @@ module.exports = {
           'Using default React import is discouraged, please use named exports directly instead.',
       },
     ],
+    'no-restricted-imports': ['error', { patterns: restrictedImportPatterns }],
 
     // Rules disable during TS migration
     '@typescript-eslint/no-var-requires': 'off',
@@ -140,6 +155,7 @@ module.exports = {
           'error',
           {
             patterns: [
+              ...restrictedImportPatterns,
               {
                 group: ['loot-core/**'],
                 message:

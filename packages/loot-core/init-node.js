@@ -3,7 +3,8 @@ import { dirname, basename } from 'path';
 import fetch from 'node-fetch';
 import 'source-map-support/register';
 
-import bundle from './lib-dist/bundle.desktop';
+// eslint-disable-next-line import/extensions
+import bundle from './lib-dist/bundle.desktop.js';
 
 global.fetch = fetch;
 
