@@ -201,8 +201,8 @@ export const colorsm = {
   formInputBackgroundSelection: colorPallet.purple700,
   formInputBorder: colorPallet.gray300,
   formInputBorderSelected: colorPallet.purple600,
-  formInputText: colorPallet.gray300,
-  formInputTextPlaceholder: colorPallet.gray700,
+  formInputText: colorPallet.gray700,
+  formInputTextPlaceholder: colorPallet.gray300,
   formInputTextSelection: colorPallet.gray100,
   formInputShadowSelected: colorPallet.purple600,
 };
