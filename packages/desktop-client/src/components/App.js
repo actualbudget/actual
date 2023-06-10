@@ -97,7 +97,7 @@ class App extends Component {
           {...css([
             {
               height: '100%',
-              backgroundColor: colorsm.backgroundColor,
+              backgroundColor: colorsm.pageBackground,
               overflow: 'hidden',
             },
             styles.lightScrollbar,
