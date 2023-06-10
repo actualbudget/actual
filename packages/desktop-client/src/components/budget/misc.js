@@ -19,7 +19,7 @@ import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { styles, colorsn } from '../../style';
+import { styles, colorsn, colorsm } from '../../style';
 import {
   View,
   Text,
@@ -477,7 +477,6 @@ export function SidebarGroup({
   dragPreview,
   innerRef,
   style,
-  borderColor = colorsn.primaryAccent,
   onEdit,
   onSave,
   onDelete,
@@ -664,20 +663,20 @@ const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
-        backgroundColor: colorsn.background,
+        backgroundColor: colorsm.tableBackground,
         flexDirection: 'row',
         flexShrink: 0,
         boxShadow: MONTH_BOX_SHADOW,
         marginLeft: 5,
         marginRight: 5 + getScrollbarWidth(),
         borderRadius: '4px 4px 0 0',
-        borderBottom: '1px solid ' + colorsn.primaryAccent,
+        borderBottom: '1px solid ' + colorsm.tableBorder,
       }}
     >
       <View
         style={{
           width: 200,
-          color: colorsn.primaryAccentText,
+          color: colorsn.tableHeaderText,
           justifyContent: 'center',
           paddingLeft: 15,
           paddingRight: 5,
@@ -738,7 +737,6 @@ function ExpenseGroup({
   collapsed,
   editingCell,
   dragState,
-  itemPos,
   MonthComponent,
   onEditName,
   onSave,
@@ -778,8 +776,9 @@ function ExpenseGroup({
   return (
     <Row
       collapsed={true}
-      backgroundColor={colorsn.primary}
+      backgroundColor={colorsm.tableRowHeaderBackground}
       style={{
+        color: colorsm.tableRowHeaderText,
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
       }}
@@ -872,7 +871,6 @@ function ExpenseCategory({
       innerRef={dropRef}
       collapsed={true}
       style={{
-        backgroundColor: 'transparent',
         opacity: cat.hidden ? 0.5 : undefined,
       }}
     >
@@ -932,7 +930,7 @@ function IncomeGroup({
   return (
     <Row
       collapsed={true}
-      backgroundColor={colorsn.background}
+      backgroundColor={colorsm.tableRowHeaderBackground}
       style={{ fontWeight: 600 }}
     >
       <SidebarGroup
@@ -981,7 +979,7 @@ function IncomeCategory({
   });
 
   return (
-    <Row innerRef={dropRef} collapsed={true} backgroundColor="transparent">
+    <Row innerRef={dropRef} collapsed={true}>
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
       <SidebarCategory
@@ -1149,7 +1147,7 @@ const BudgetCategories = memo(
       <View
         style={{
           marginBottom: 10,
-          backgroundColor: colorsn.background,
+          backgroundColor: colorsm.tableBackground,
           overflow: 'hidden',
           boxShadow: MONTH_BOX_SHADOW,
           borderRadius: '0 0 4px 4px',
@@ -1161,7 +1159,7 @@ const BudgetCategories = memo(
           switch (item.type) {
             case 'new-group':
               content = (
-                <Row style={{ backgroundColor: colorsn.background }}>
+                <Row>
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
                     editing={true}
@@ -1174,7 +1172,7 @@ const BudgetCategories = memo(
               break;
             case 'new-category':
               content = (
-                <Row style={{ backgroundColor: colorsn.background }}>
+                <Row>
                   <SidebarCategory
                     category={{
                       name: '',
@@ -1235,7 +1233,6 @@ const BudgetCategories = memo(
                 <View
                   style={{
                     height: INCOME_HEADER_HEIGHT,
-                    backgroundColor: colorsn.background,
                   }}
                 >
                   <IncomeHeader
@@ -1298,7 +1295,9 @@ const BudgetCategories = memo(
               <View
                 style={
                   !dragState && {
-                    ':hover': { backgroundColor: colorsn.background },
+                    ':hover': {
+                      backgroundColor: colorsm.tableBackgroundHover,
+                    },
                   }
                 }
               >
@@ -1314,7 +1313,12 @@ const BudgetCategories = memo(
 
 function IncomeHeader({ MonthComponent, onShowNewGroup }) {
   return (
-    <View style={{ flexDirection: 'row', flex: 1 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        flex: 1,
+      }}
+    >
       <View
         style={{
           width: 200,

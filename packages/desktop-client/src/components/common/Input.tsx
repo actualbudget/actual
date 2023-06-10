@@ -37,6 +37,7 @@ const Input = ({
 
   return (
     <input
+      // Intentionally no background so we can blend with everywhere
       ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
       {...css(
         defaultInputStyle,

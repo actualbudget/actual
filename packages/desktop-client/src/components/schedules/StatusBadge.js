@@ -9,7 +9,7 @@ import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { View, Text } from '../common';
 
 export function getStatusProps(status) {
@@ -17,48 +17,48 @@ export function getStatusProps(status) {
 
   switch (status) {
     case 'missed':
-      color = colors.r1;
-      backgroundColor = colors.r10;
+      color = colorsm.errorText;
+      backgroundColor = colorsm.errorBackground;
       Icon = EditSkull1;
       break;
     case 'due':
-      color = colors.y1;
-      backgroundColor = colors.y9;
+      color = colorsm.warningText;
+      backgroundColor = colorsm.warningBackground;
       Icon = AlertTriangle;
       break;
     case 'upcoming':
-      color = colors.p1;
-      backgroundColor = colors.p10;
+      color = colorsm.formInputTextHighlight;
+      backgroundColor = colorsm.tableBackground;
       Icon = CalendarIcon;
       break;
     case 'paid':
-      color = colors.g2;
-      backgroundColor = colors.g10;
+      color = colorsm.noticeText;
+      backgroundColor = colorsm.noticeBackground;
       Icon = ValidationCheck;
       break;
     case 'completed':
-      color = colors.n4;
-      backgroundColor = colors.n11;
+      color = colorsm.tableText;
+      backgroundColor = colorsm.tableBackground;
       Icon = FavoriteStar;
       break;
     case 'pending':
-      color = colors.g4;
-      backgroundColor = colors.g11;
+      color = colorsm.noticeText;
+      backgroundColor = colorsm.noticeBackground;
       Icon = CalendarIcon;
       break;
     case 'scheduled':
-      color = colors.n1;
-      backgroundColor = colors.n11;
+      color = colorsm.tableText;
+      backgroundColor = colorsm.tableBackground;
       Icon = CalendarIcon;
       break;
     case 'cleared':
-      color = colors.g5;
-      backgroundColor = colors.n11;
+      color = colorsm.noticeText;
+      backgroundColor = colorsm.noticeBackground;
       Icon = CheckCircle1;
       break;
     default:
-      color = colors.n1;
-      backgroundColor = colors.n11;
+      color = colorsm.buttonDisabledText;
+      backgroundColor = colorsm.buttonDisabledBackground;
       Icon = CheckCircleHollow;
       break;
   }

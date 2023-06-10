@@ -51,7 +51,7 @@ import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
-import { styles, colorsn } from '../../style';
+import { styles, colorsm } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -242,10 +242,8 @@ export const TransactionHeader = memo(
 
     return (
       <Row
-        borderColor={colorsn.primaryAccent}
-        backgroundColor={colorsn.background}
+        backgroundColor={colorsm.tableRowHeaderBackground}
         style={{
-          color: colorsn.primaryText,
           fontWeight: 300,
           zIndex: 200,
         }}
@@ -326,14 +324,14 @@ function StatusCell({
   let props = {
     color:
       status === 'cleared'
-        ? colorsn.notice
+        ? colorsm.noticeText
         : status === 'missed'
-        ? colorsn.error
+        ? colorsm.errorText
         : status === 'due'
-        ? colorsn.warning
+        ? colorsm.warningText
         : selected
-        ? colorsn.secondaryAccent
-        : colorsn.secondary,
+        ? colorsm.tableTextSelected
+        : colorsm.tableText,
   };
 
   function onSelect() {
@@ -410,7 +408,10 @@ function PayeeCell({
       width="flex"
       name="payee"
       value={payeeId}
-      valueStyle={[valueStyle, inherited && { color: colorsn.primary }]}
+      valueStyle={[
+        valueStyle,
+        inherited && { color: colorsm.tableTextInactive },
+      ]}
       formatter={() => getPayeePretty(transaction, payee, transferAcct)}
       exposed={focused}
       onExpose={!isPreview && (name => onEdit(id, name))}
@@ -626,7 +627,9 @@ export const Transaction = memo(function Transaction(props) {
   }
 
   let isChild = transaction.is_child;
-  let borderColor = selected ? colorsn.primaryAccent : colorsn.primary;
+  let borderColor = selected
+    ? colorsm.tableBorderSelected
+    : colorsm.tableBorder;
   let isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   let isOffBudget = account && account.offbudget === 1;
 
@@ -639,15 +642,18 @@ export const Transaction = memo(function Transaction(props) {
       borderColor={borderColor}
       backgroundColor={
         selected
-          ? colorsn.primaryAccent
+          ? colorsm.tableBackgroundSelected
           : backgroundFocus
-          ? colorsn.primary
-          : colorsn.background
+          ? colorsm.tableBackground
+          : colorsm.background
       }
       highlighted={highlighted}
       style={[
         style,
-        isPreview && { color: colorsn.secondaryAccent, fontStyle: 'italic' },
+        isPreview && {
+          color: colorsm.formInputTextHighlight,
+          fontStyle: 'italic',
+        },
         _unmatched && { opacity: 0.5 },
       ]}
       onMouseEnter={() => onHover && onHover(transaction.id)}
@@ -658,7 +664,6 @@ export const Transaction = memo(function Transaction(props) {
           width={110}
           style={{
             width: 110,
-            backgroundColor: colorsn.background,
             borderBottomWidth: 0,
           }}
         />
@@ -668,8 +673,6 @@ export const Transaction = memo(function Transaction(props) {
           borderColor="transparent"
           style={{
             flex: 1,
-            backgroundColor: colorsn.background,
-            opacity: 0,
           }}
         />
       )}
@@ -697,7 +700,7 @@ export const Transaction = memo(function Transaction(props) {
           value={
             matched && (
               <Hyperlink2
-                style={{ width: 13, height: 13, color: colorsn.errorAccent }}
+                style={{ width: 13, height: 13, color: colorsm.errorText }}
               />
             )
           }
@@ -843,20 +846,20 @@ export const Transaction = memo(function Transaction(props) {
               style={{
                 color:
                   notes === 'missed'
-                    ? colorsn.errorText
+                    ? colorsm.errorText
                     : notes === 'due'
-                    ? colorsn.warningText
+                    ? colorsm.warningText
                     : selected
-                    ? colorsn.secondaryAccentText
-                    : colorsn.secondaryText,
+                    ? colorsm.formInputTextHighlight
+                    : colorsm.tableText,
                 backgroundColor:
                   notes === 'missed'
-                    ? colorsn.error
+                    ? colorsm.errorBackground
                     : notes === 'due'
-                    ? colorsn.warning
+                    ? colorsm.warningBackground
                     : selected
-                    ? colorsn.secondaryAccent
-                    : colorsn.secondary,
+                    ? colorsm.tableBackgroundSelected
+                    : colorsm.tableBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
@@ -877,12 +880,11 @@ export const Transaction = memo(function Transaction(props) {
           <CellButton
             style={{
               alignSelf: 'flex-start',
-              color: colorsn.secondaryText,
               borderRadius: 4,
               transition: 'none',
               '&:hover': {
-                backgroundColor: colorsn.secondaryAccent,
-                color: colorsn.secondaryAccentText,
+                backgroundColor: colorsm.tableBackgroundHover,
+                color: colorsm.tableTextHover,
               },
             }}
             disabled={isTemporaryId(transaction.id)}
@@ -904,7 +906,6 @@ export const Transaction = memo(function Transaction(props) {
                   style={{
                     width: 14,
                     height: 14,
-                    color: 'currentColor',
                     transition: 'transform .08s',
                     transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
                   }}
@@ -935,7 +936,7 @@ export const Transaction = memo(function Transaction(props) {
           valueStyle={valueStyle}
           style={{
             fontStyle: 'italic',
-            color: colorsn.primary,
+            color: colorsm.tableText,
             fontWeight: 300,
           }}
           inputProps={{
@@ -964,8 +965,8 @@ export const Transaction = memo(function Transaction(props) {
             !category
               ? {
                   fontStyle: 'italic',
-                  fontWeight: 300,
-                  color: colorsn.secondaryAccent,
+                  fontWeight: 500,
+                  color: colorsm.formInputTextHighlight,
                 }
               : valueStyle
           }
@@ -1046,7 +1047,7 @@ export const Transaction = memo(function Transaction(props) {
               : integerToCurrency(balance)
           }
           valueStyle={{
-            color: balance < 0 ? colorsn.errorText : colorsn.noticeText,
+            color: balance < 0 ? colorsm.errorText : colorsm.noticeText,
           }}
           style={[styles.tnum, amountStyle]}
           width={88}
@@ -1164,9 +1165,9 @@ function NewTransaction({
   return (
     <View
       style={{
-        borderBottom: '1px solid ' + colorsn.primary,
+        borderBottom: '1px solid ' + colorsm.primary,
         paddingBottom: 6,
-        backgroundColor: colorsn.background,
+        backgroundColor: colorsm.tableBackground,
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
@@ -1429,7 +1430,7 @@ function TransactionTableInner({
               left: 0,
               right: 0,
               height: 20,
-              backgroundColor: colorsn.errorText,
+              backgroundColor: colorsm.errorText,
               boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
             }}
           />

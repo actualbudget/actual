@@ -28,7 +28,7 @@ import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
-import { styles, colors } from '../style';
+import { styles, colorsm } from '../style';
 
 import {
   View,
@@ -45,7 +45,6 @@ import format from './spreadsheet/format';
 import SheetValue from './spreadsheet/SheetValue';
 
 export const ROW_HEIGHT = 32;
-export const TABLE_BACKGROUND_COLOR = colors.n11;
 
 function fireBlur(onBlur, e) {
   if (document.hasFocus()) {
@@ -60,8 +59,8 @@ function fireBlur(onBlur, e) {
 }
 
 const CellContext = createContext({
-  backgroundColor: 'white',
-  borderColor: colors.n9,
+  backgroundColor: colorsm.formInputBackground,
+  borderColor: colorsm.formInputBorder,
 });
 
 type CellProviderProps = {
@@ -201,6 +200,8 @@ export function Cell({
   // the border color is manually passed in.
   if (oldBorderColor) {
     borderColor = oldBorderColor;
+  } else {
+    borderColor = colorsm.tableBorder;
   }
 
   const widthStyle = width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
@@ -278,8 +279,8 @@ type RowProps = ComponentProps<typeof View> & {
   highlighted?: boolean;
 };
 export function Row({
-  backgroundColor = 'white',
-  borderColor = colors.border,
+  backgroundColor = colorsm.tableBackground,
+  borderColor = colorsm.tableBorder,
   inset = 0,
   collapsed,
   focused,
@@ -318,8 +319,10 @@ export function Row({
 
   return (
     <CellProvider
-      backgroundColor={shouldHighlight ? colors.y9 : backgroundColor}
-      borderColor={shouldHighlight ? colors.y8 : borderColor}
+      backgroundColor={
+        shouldHighlight ? colorsm.tableRowBackgroundHighlight : backgroundColor
+      }
+      borderColor={shouldHighlight ? colorsm.tableBackgroundSelected : 'none'}
     >
       <View
         innerRef={rowRef}
@@ -348,14 +351,13 @@ export function Row({
 }
 
 const inputCellStyle = {
-  backgroundColor: 'white',
   padding: '5px 3px',
   margin: '0 1px',
 };
 
 const readonlyInputStyle = {
   backgroundColor: 'transparent',
-  '::selection': { backgroundColor: '#d9d9d9' },
+  '::selection': { backgroundColor: colorsm.formInputTextReadOnlySelection },
 };
 
 type InputValueProps = ComponentProps<typeof Input> & {
@@ -585,7 +587,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             transition: 'box-shadow .15s',
             ':focus': {
               outline: 0,
-              boxShadow: `0 0 0 3px white, 0 0 0 5px ${colors.b5}`,
+              boxShadow: `0 0 0 3px white, 0 0 0 5px ${colorsm.buttonShadow}`,
             },
           },
           style,
@@ -617,7 +619,6 @@ type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
 export function SelectCell({
   focused,
   selected,
-  partial,
   style,
   onSelect,
   onEdit,
@@ -642,19 +643,19 @@ export function SelectCell({
             {
               width: 12,
               height: 12,
-              border: '1px solid ' + colors.n8,
+              border: '1px solid ' + colorsm.tableBorder,
               borderRadius: 3,
               justifyContent: 'center',
               alignItems: 'center',
 
               ':focus': {
-                border: '1px solid ' + colors.b5,
-                boxShadow: '0 1px 2px ' + colors.b5,
+                border: '1px solid ' + colorsm.tableBorderSelected,
+                boxShadow: '0 1px 2px ' + colorsm.buttonShadow,
               },
             },
             selected && {
-              backgroundColor: partial ? colors.b9 : colors.b5,
-              borderColor: partial ? colors.b9 : colors.b5,
+              backgroundColor: colorsm.tableBackgroundSelected,
+              borderColor: colorsm.tableBorderSelected,
             },
           ]}
           onEdit={onEdit}
@@ -662,7 +663,11 @@ export function SelectCell({
           clickBehavior="none"
         >
           {selected && (
-            <Checkmark width={6} height={6} style={{ color: 'white' }} />
+            <Checkmark
+              width={6}
+              height={6}
+              style={{ color: colorsm.tableTextSelected }}
+            />
           )}
         </CellButton>
       )}
@@ -761,15 +766,15 @@ export function TableHeader({
       }
     >
       <Row
-        backgroundColor="white"
-        borderColor={colors.border}
+        backgroundColor={colorsm.tableHeaderBackground}
+        borderColor={colorsm.tableBorder}
         collapsed={true}
         {...rowProps}
         style={[
           { zIndex: 200 },
           version === 'v2'
-            ? { color: colors.n4, fontWeight: 500 }
-            : { color: colors.n4 },
+            ? { color: colorsm.tableText, fontWeight: 500 }
+            : { color: colorsm.tableText },
           rowProps.style,
         ]}
       >
@@ -805,7 +810,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
       <Button
         bare
-        style={{ color: colors.b3 }}
+        style={{ color: colorsm.buttonNeutralText }}
         onClick={() => setMenuOpen(true)}
       >
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
@@ -895,7 +900,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
-      backgroundColor = TABLE_BACKGROUND_COLOR,
+      backgroundColor = colorsm.tableBackground,
       renderItem,
       renderEmpty,
       getItemKey,
@@ -1056,7 +1061,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             justifyContent: 'center',
             alignItems: 'center',
             fontStyle: 'italic',
-            color: colors.n6,
+            color: colorsm.tableText,
             flex: 1,
           }}
         >
@@ -1077,7 +1082,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             },
           ]}
         >
-          <AnimatedLoading width={25} color={colors.n1} />
+          <AnimatedLoading width={25} color={colorsm.tableText} />
         </View>
       );
     }

@@ -11,6 +11,8 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
+import { colorsm } from '../../style';
+
 import { TransactionTable } from './TransactionsTable';
 
 // When data changes, there are two ways to update the UI:
@@ -183,7 +185,7 @@ export default function TransactionList({
       onAddSplit={onAddSplit}
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
-      style={{ backgroundColor: 'white' }}
+      style={{ backgroundColor: colorsm.tableBackground }}
     />
   );
 }

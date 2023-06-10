@@ -4,7 +4,7 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import { styles, colors } from '../../../style';
+import { styles, colorsm } from '../../../style';
 import CategoryAutocomplete from '../../autocomplete/CategorySelect';
 import {
   View,
@@ -189,11 +189,12 @@ function BalanceTooltip({
 }
 
 let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
-
+let valueStyle = { fontWeight: 600 };
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
+        color: colorsm.tableHeaderText,
         flex: 1,
         flexDirection: 'row',
         marginRight: MONTH_RIGHT_PADDING,
@@ -202,30 +203,30 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: colors.n4 }}>Budgeted</Text>
+        <Text>Budgeted</Text>
         <CellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
-          style={{ color: colors.n4, fontWeight: 600 }}
+          style={valueStyle}
           formatter={value => {
             return format(-parseFloat(value || '0'), 'financial');
           }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: colors.n4 }}>Spent</Text>
+        <Text>Spent</Text>
         <CellValue
           binding={rolloverBudget.totalSpent}
           type="financial"
-          style={{ color: colors.n4, fontWeight: 600 }}
+          style={valueStyle}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: colors.n4 }}>Balance</Text>
+        <Text>Balance</Text>
         <CellValue
           binding={rolloverBudget.totalBalance}
           type="financial"
-          style={{ color: colors.n4, fontWeight: 600 }}
+          style={valueStyle}
         />
       </View>
     </View>
@@ -236,7 +237,6 @@ export function IncomeHeaderMonth() {
   return (
     <Row
       style={{
-        color: colors.n4,
         alignItems: 'center',
         paddingRight: 10,
       }}
@@ -252,7 +252,7 @@ type ExpenseGroupMonthProps = {
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: ExpenseGroupMonthProps) {
-  let borderColor = colors.border;
+  let borderColor = colorsm.tableBorder;
   let { id } = group;
 
   return (
@@ -313,7 +313,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: ExpenseCategoryMonthProps) {
-  let borderColor = colors.border;
+  let borderColor = colorsm.tableBorder;
   let balanceTooltip = useTooltip();
 
   return (
@@ -335,8 +335,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           },
           {
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-              backgroundColor: 'white',
+              boxShadow: 'inset 0 0 0 1px ' + colorsm.formInputShadowSelected,
             },
           },
         ]}
@@ -416,7 +415,7 @@ export function IncomeGroupMonth() {
       <SheetCell
         name="received"
         width="flex"
-        borderColor={colors.border}
+        borderColor={colorsm.tableBorder}
         textAlign="right"
         style={[
           { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
@@ -448,7 +447,7 @@ export function IncomeCategoryMonth({
       <Field
         name="received"
         width="flex"
-        borderColor={colors.border}
+        borderColor={colorsm.tableBorder}
         style={[
           { paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' },
           isLast && { borderBottomWidth: 0 },

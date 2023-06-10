@@ -4,7 +4,7 @@ import { reportBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import { styles, colorsn } from '../../../style';
+import { styles, colorsm } from '../../../style';
 import { View, Text, Tooltip, Menu, useTooltip } from '../../common';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
@@ -16,8 +16,13 @@ import { makeAmountGrey } from '../util';
 
 export { BudgetSummary } from './BudgetSummary';
 
-let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
-
+let headerLabelStyle = {
+  color: colorsm.tableHeaderText,
+  flex: 1,
+  padding: '0 5px',
+  textAlign: 'right',
+};
+let valueStyle = { fontWeight: 600 };
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
@@ -30,30 +35,30 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: colorsn.primaryAccentText }}>Budgeted</Text>
+        <Text>Budgeted</Text>
         <CellValue
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
-          style={{ color: colorsn.primaryAccentText, fontWeight: 600 }}
+          style={valueStyle}
           formatter={value => {
             return format(parseFloat(value || '0'), 'financial');
           }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: colorsn.primaryAccentText }}>Spent</Text>
+        <Text>Spent</Text>
         <CellValue
           binding={reportBudget.totalSpent}
           type="financial"
-          style={{ color: colorsn.primaryAccentText, fontWeight: 600 }}
+          style={valueStyle}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: colorsn.primaryAccentText }}>Balance</Text>
+        <Text>Balance</Text>
         <CellValue
           binding={reportBudget.totalLeftover}
           type="financial"
-          style={{ color: colorsn.primaryAccentText, fontWeight: 600 }}
+          style={valueStyle}
         />
       </View>
     </View>
@@ -70,10 +75,10 @@ export function IncomeHeaderMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: colorsn.primaryAccentText }}>Budgeted</Text>
+        <Text>Budgeted</Text>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: colorsn.primaryAccentText }}>Received</Text>
+        <Text>Received</Text>
       </View>
     </View>
   );
@@ -83,7 +88,7 @@ type GroupMonthProps = {
   group: { id: string; is_income: boolean };
 };
 export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
-  let borderColor = colorsn.primaryAccent;
+  let borderColor = colorsm.tableBorder;
   let { id } = group;
 
   return (
@@ -188,7 +193,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
-  let borderColor = colorsn.primaryAccent;
+  let borderColor = colorsm.tableBorder;
   let balanceTooltip = useTooltip();
 
   return (
@@ -210,8 +215,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           },
           {
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + colorsn.primaryAccent,
-              backgroundColor: 'white',
+              boxShadow: 'inset 0 0 0 1px ' + colorsm.formInputShadowSelected,
             },
           },
         ]}

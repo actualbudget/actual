@@ -26,7 +26,7 @@ import {
 import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../icons/v0/ExpandArrow';
-import { styles, colors, colorsm } from '../style';
+import { styles, colorsm } from '../style';
 import type { HTMLPropsWithStyle } from '../types/utils';
 
 import Button from './common/Button';
@@ -434,7 +434,9 @@ type KeybindingProps = {
 };
 
 export function Keybinding({ keyName }: KeybindingProps) {
-  return <Text style={{ fontSize: 10, color: colors.n6 }}>{keyName}</Text>;
+  return (
+    <Text style={{ fontSize: 10, color: colorsm.pageText }}>{keyName}</Text>
+  );
 }
 
 type MenuItem = {
@@ -515,7 +517,12 @@ export function Menu({
 
   return (
     <View
-      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
+      style={{
+        outline: 'none',
+        borderRadius: 4,
+        overflow: 'hidden',
+        backgroundColor: colorsm.menuBackground,
+      }}
       tabIndex={1}
       innerRef={elRef}
     >
@@ -524,7 +531,7 @@ export function Menu({
         if (item === Menu.line) {
           return (
             <View key={idx} style={{ margin: '3px 0px' }}>
-              <View style={{ borderTop: '1px solid ' + colors.n10 }} />
+              <View style={{ borderTop: '1px solid ' + colorsm.menuBorder }} />
             </View>
           );
         } else if (item.type === Menu.label) {
@@ -562,12 +569,13 @@ export function Menu({
                     : -3,
                 flexDirection: 'row',
                 alignItems: 'center',
+                color: item.disabled ? colorsm.buttonDisabledText : 'inherit',
+                backgroundColor: item.disabled
+                  ? colorsm.buttonDisabledBackground
+                  : hoveredIndex === idx
+                  ? colorsm.buttonNeutralBackgroundHover
+                  : colorsm.buttonNeutralBackground,
               },
-              item.disabled && { color: colorsm.buttonDisabledBackground },
-              !item.disabled &&
-                hoveredIndex === idx && {
-                  backgroundColor: colorsm.buttonNeutralBackground,
-                },
             ]}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
@@ -722,7 +730,9 @@ type FormErrorProps = {
 
 export function FormError({ style, children }: FormErrorProps) {
   return (
-    <View style={[{ color: 'red', fontSize: 13 }, style]}>{children}</View>
+    <View style={[{ color: colorsm.errorText, fontSize: 13 }, style]}>
+      {children}
+    </View>
   );
 }
 
@@ -813,7 +823,7 @@ export function Label({ title, style }: LabelProps) {
       style={[
         styles.text,
         {
-          color: colors.n2,
+          color: colorsm.pageText,
           textAlign: 'right',
           fontSize: 12,
           marginBottom: 2,
