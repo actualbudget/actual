@@ -320,11 +320,11 @@ export const styles = {
   pageHeader: {
     fontSize: 25,
     borderBottomWidth: 5,
-    borderColor: colorsn.primaryAccent,
+    borderColor: '#610316',
     borderStyle: 'solid',
     display: 'inline',
     flex: 0,
-    color: colorsn.primaryText,
+    color: '#610316',
     marginTop: 40,
     marginBottom: 20,
     paddingBottom: 5,
