@@ -28,7 +28,7 @@ class FatalError extends Component {
           function properly. If you’re seeing this error, either your browser
           does not support <code>SharedArrayBuffer</code>, or your server is not
           sending the appropriate headers, or you are not using HTTPS. See{' '}
-          <a href="https://actualbudget.github.io/docs/Troubleshooting/SharedArrayBuffer">
+          <a href="https://docs.actualbudget.org/Troubleshooting/SharedArrayBuffer">
             our troubleshooting documentation
           </a>{' '}
           to learn more. <SharedArrayBufferOverride />

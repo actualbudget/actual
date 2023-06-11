@@ -23,7 +23,7 @@ function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {
         <Text>
           <ExternalLink
             asAnchor
-            href="https://actualbudget.github.io/docs/category/getting-started"
+            href="https://docs.actualbudget.org/category/getting-started"
           >
             Getting Started
           </ExternalLink>
@@ -32,7 +32,7 @@ function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {
         <Text>
           <ExternalLink
             asAnchor
-            href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+            href="https://docs.actualbudget.org/Budgeting/howitworks"
           >
             How it Works
           </ExternalLink>

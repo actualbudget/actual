@@ -35,7 +35,7 @@ function Final({ targetRect, navigationProps }) {
         Read{' '}
         <ExternalLink
           asAnchor
-          href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+          href="https://docs.actualbudget.org/Budgeting/howitworks"
         >
           How it Works
         </ExternalLink>{' '}

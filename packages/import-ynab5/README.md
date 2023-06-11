@@ -83,4 +83,4 @@ Once the import is complete, it may not show all the up-to-date information corr
 
 
 ## Contributions
-If you would like to contribute, check out the [documentation for the API](https://actualbudget.github.io/docs/Developers/using-the-API), specifically about [importers](https://actualbudget.github.io/docs/Developers/using-the-API#writing-data-importers). All of the available methods can be found [here](https://actualbudget.github.io/docs/Developers/API).
+If you would like to contribute, check out the [documentation for the API](https://docs.actualbudget.org/Developers/using-the-API), specifically about [importers](https://docs.actualbudget.org/Developers/using-the-API#writing-data-importers). All of the available methods can be found [here](https://docs.actualbudget.org/Developers/API).
