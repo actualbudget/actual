@@ -38,6 +38,8 @@ export function NotesTooltip({
         <textarea
           ref={inputRef}
           {...css({
+            backgroundColor: colorsm.formInputBackground,
+            color: colorsm.formInputText,
             border: '1px solid ' + colorsm.buttonNeutralBorder,
             padding: 7,
             minWidth: 300,

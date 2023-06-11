@@ -784,7 +784,7 @@ function ExpenseGroup({
       collapsed={true}
       backgroundColor={colorsm.tableRowHeaderBackground}
       style={{
-        color: colorsm.tableRowHeaderText,
+        color: colorsm.tableHeaderText,
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
       }}
@@ -878,6 +878,7 @@ function ExpenseCategory({
       collapsed={true}
       style={{
         opacity: cat.hidden ? 0.5 : undefined,
+        color: colorsm.tableText,
       }}
     >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
@@ -937,7 +938,7 @@ function IncomeGroup({
     <Row
       collapsed={true}
       backgroundColor={colorsm.tableRowHeaderBackground}
-      style={{ fontWeight: 600 }}
+      style={{ fontWeight: 600, color: colorsm.tableHeaderText }}
     >
       <SidebarGroup
         group={group}
@@ -985,7 +986,11 @@ function IncomeCategory({
   });
 
   return (
-    <Row innerRef={dropRef} collapsed={true}>
+    <Row
+      innerRef={dropRef}
+      collapsed={true}
+      style={{ color: colorsm.tableText }}
+    >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
       <SidebarCategory
@@ -1323,6 +1328,7 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }) {
       style={{
         flexDirection: 'row',
         flex: 1,
+        color: colorsm.tableHeaderText,
       }}
     >
       <View
@@ -1419,6 +1425,7 @@ export const MonthPicker = ({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
+          color: colorsm.pageText,
         },
         style,
       ]}

@@ -29,6 +29,7 @@ function BudgetSummary({ month, modalProps }) {
               style={[
                 styles.text,
                 {
+                  color: colorsm.tableText,
                   fontWeight: '600',
                   textAlign: 'right',
                   marginRight: 10,

@@ -623,6 +623,7 @@ export class BudgetGroup extends PureComponent {
         style={{
           marginTop: 7,
           marginBottom: 7,
+          color: colorsm.tableHeaderText,
         }}
       >
         <TotalsRow
@@ -690,7 +691,10 @@ export class IncomeBudgetGroup extends Component {
             }
             nameTextStyle={{ fontWeight: '500' }}
             amountTextStyle={{ fontWeight: '500' }}
-            style={{ backgroundColor: colorsm.tableRowHeaderBackground }}
+            style={{
+              backgroundColor: colorsm.tableRowHeaderBackground,
+              color: colorsm.tableHeaderText,
+            }}
           />
 
           {group.categories.map((category, index) => {
@@ -710,6 +714,10 @@ export class IncomeBudgetGroup extends Component {
                     : rolloverBudget.catSumAmount(category.id)
                 }
                 index={index}
+                style={{
+                  backgroundColor: colorsm.tableRowBackground,
+                  color: colorsm.tableText,
+                }}
               />
             );
           })}

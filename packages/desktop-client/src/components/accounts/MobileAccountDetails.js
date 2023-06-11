@@ -134,6 +134,7 @@ export default function AccountDetails({
             style={{
               fontSize: 16,
               fontWeight: 500,
+              color: colorsm.pageText,
             }}
           >
             {account.name}

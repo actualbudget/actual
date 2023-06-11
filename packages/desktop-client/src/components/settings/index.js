@@ -136,10 +136,10 @@ function Settings({
                 backgroundColor: colorsm.sidebarBackground,
                 color: colorsm.sidebarItemText,
               }
-            : undefined
+            : { color: colorsm.tableText }
         }
       >
-        <View style={{ flexShrink: 0, gap: 30 }}>
+        <View style={{ flexShrink: 0, gap: 30, color: colorsm.tableText }}>
           {isNarrowWidth && (
             <View
               style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}

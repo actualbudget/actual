@@ -149,7 +149,7 @@ export class Transaction extends PureComponent {
           style,
         ]}
       >
-        <View style={[{ flex: 1 }]}>
+        <View style={[{ flex: 1, color: colorsm.tableText }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {schedule && (
               <ArrowsSynchronize
@@ -157,7 +157,7 @@ export class Transaction extends PureComponent {
                   width: 12,
                   height: 12,
                   marginRight: 5,
-                  color: textStyle.color || colorsm.tableText,
+                  color: colorsm.tableText,
                 }}
               />
             )}
@@ -216,7 +216,12 @@ export class Transaction extends PureComponent {
           style={[
             styles.text,
             textStyle,
-            { marginLeft: 25, marginRight: 5, fontSize: 14 },
+            {
+              marginLeft: 25,
+              marginRight: 5,
+              fontSize: 14,
+              color: colorsm.tableText,
+            },
           ]}
         >
           {integerToCurrency(amount)}

@@ -522,6 +522,7 @@ export function Menu({
         borderRadius: 4,
         overflow: 'hidden',
         backgroundColor: colorsm.menuBackground,
+        color: colorsm.menuItemText,
       }}
       tabIndex={1}
       innerRef={elRef}

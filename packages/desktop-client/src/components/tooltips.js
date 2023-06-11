@@ -300,6 +300,7 @@ export class Tooltip extends Component {
       ...styles.shadowLarge,
       borderRadius: 4,
       backgroundColor: colorsm.tooltipBackground,
+      color: colorsm.tableText,
       // opacity: 0,
       // transition: 'transform .1s, opacity .1s',
       // transitionTimingFunction: 'ease-out'
