@@ -27,7 +27,7 @@ import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
 import { useResponsive } from '../ResponsiveProvider';
-import { colors, styles } from '../style';
+import { colorsm, styles } from '../style';
 import { getLocationState, makeLocationState } from '../util/location-state';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -172,12 +172,12 @@ function NavTab({ icon: TabIcon, name, path }) {
       to={path}
       style={{
         alignItems: 'center',
-        color: '#8E8E8F',
+        color: colorsm.sidebarItemText,
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
       }}
-      activeStyle={{ color: colors.p5 }}
+      activeStyle={{ color: colorsm.sidebarItemAccentSelected }}
     >
       <TabIcon
         width={22}
@@ -194,8 +194,8 @@ function MobileNavTabs() {
   return (
     <div
       style={{
-        backgroundColor: 'white',
-        borderTop: `1px solid ${colors.n10}`,
+        backgroundColor: colorsm.sidebarBackground,
+        borderTop: `1px solid ${colorsm.menuBorder}`,
         bottom: 0,
         ...styles.shadow,
         display: isNarrowWidth ? 'flex' : 'none',
@@ -285,7 +285,9 @@ function FinancesApp(props) {
   return (
     <Router history={patchedHistory}>
       <CompatRouter>
-        <View style={{ height: '100%', backgroundColor: colors.n10 }}>
+        <View
+          style={{ height: '100%', backgroundColor: colorsm.pageBackground }}
+        >
           <GlobalKeys />
 
           <View style={{ flexDirection: 'row', flex: 1 }}>

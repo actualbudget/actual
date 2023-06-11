@@ -2,7 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { useResponsive } from '../ResponsiveProvider';
-import { colors, styles } from '../style';
+import { colorsm, styles } from '../style';
 
 import { Modal, View, Text } from './common';
 
@@ -29,8 +29,8 @@ function PageTitle({ name, style }) {
         style={[
           {
             alignItems: 'center',
-            backgroundColor: colors.b2,
-            color: 'white',
+            backgroundColor: colorsm.sidebarBackground,
+            color: colorsm.sidebarItemText,
             flexDirection: 'row',
             flex: '1 0 auto',
             fontSize: 18,

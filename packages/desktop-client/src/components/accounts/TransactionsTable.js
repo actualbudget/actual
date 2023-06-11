@@ -242,7 +242,7 @@ export const TransactionHeader = memo(
 
     return (
       <Row
-        backgroundColor={colorsm.tableRowHeaderBackground}
+        backgroundColor={colorsm.tableBackground}
         style={{
           fontWeight: 300,
           zIndex: 200,
@@ -255,16 +255,18 @@ export const TransactionHeader = memo(
           width={20}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
-        <Cell value="Date" width={110} />
-        {showAccount && <Cell value="Account" width="flex" />}
-        <Cell value="Payee" width="flex" />
-        <Cell value="Notes" width="flex" />
-        {showCategory && <Cell value="Category" width="flex" />}
-        <Cell value="Payment" width={80} textAlign="right" />
-        <Cell value="Deposit" width={80} textAlign="right" />
-        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
+        <Field children="Date" width={110} />
+        {showAccount && <Field children="Account" width="flex" />}
+        <Field children="Payee" width="flex" />
+        <Field children="Notes" width="flex" />
+        {showCategory && <Field children="Category" width="flex" />}
+        <Field children="Payment" width={80} textAlign="right" />
+        <Field children="Deposit" width={80} textAlign="right" />
+        {showBalance && (
+          <Field children="Balance" width={88} textAlign="right" />
+        )}
         {showCleared && <Field width={21} truncate={false} />}
-        <Cell value="" width={15 + styles.scrollbarWidth} />
+        <Field children="" width={15 + styles.scrollbarWidth} />
       </Row>
     );
   },
@@ -642,7 +644,7 @@ export const Transaction = memo(function Transaction(props) {
       borderColor={borderColor}
       backgroundColor={
         selected
-          ? colorsm.tableBackgroundSelected
+          ? colorsm.tableRowBackgroundHighlight
           : backgroundFocus
           ? colorsm.tableBackground
           : colorsm.background
@@ -858,7 +860,7 @@ export const Transaction = memo(function Transaction(props) {
                     : notes === 'due'
                     ? colorsm.warningBackground
                     : selected
-                    ? colorsm.tableBackgroundSelected
+                    ? colorsm.tableRowBackgroundHighlight
                     : colorsm.tableBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
@@ -1165,7 +1167,7 @@ function NewTransaction({
   return (
     <View
       style={{
-        borderBottom: '1px solid ' + colorsm.primary,
+        borderBottom: '1px solid ' + colorsm.tableBorderHover,
         paddingBottom: 6,
         backgroundColor: colorsm.tableBackground,
       }}

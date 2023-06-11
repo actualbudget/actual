@@ -656,7 +656,7 @@ export function SelectCell({
               },
             },
             selected && {
-              backgroundColor: colorsm.tableBackgroundSelected,
+              backgroundColor: colorsm.tableTextEditingBackground,
               borderColor: colorsm.tableBorderSelected,
             },
           ]}
@@ -668,7 +668,7 @@ export function SelectCell({
             <Checkmark
               width={6}
               height={6}
-              style={{ color: colorsm.tableTextSelected }}
+              style={{ color: colorsm.tableBackground }}
             />
           )}
         </CellButton>

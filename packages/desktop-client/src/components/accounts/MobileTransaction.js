@@ -23,7 +23,7 @@ import {
 
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import { styles, colors } from '../../style';
+import { styles, colorsm } from '../../style';
 import { Text, TextOneLine, View } from '../common';
 
 const zIndices = { SECTION_HEADING: 10 };
@@ -51,35 +51,18 @@ function lookupName(items, id) {
   return items.find(item => item.id === id).name;
 }
 
-export function DateHeader({ date }) {
-  return (
-    <ListItem
-      style={{
-        height: 25,
-        backgroundColor: colors.n10,
-        borderColor: colors.n9,
-        justifyContent: 'center',
-      }}
-    >
-      <Text style={[styles.text, { fontSize: 13, color: colors.n4 }]}>
-        {monthUtils.format(date, 'MMMM dd, yyyy')}
-      </Text>
-    </ListItem>
-  );
-}
-
 function Status({ status }) {
   let color;
 
   switch (status) {
     case 'missed':
-      color = colors.r3;
+      color = colorsm.errorText;
       break;
     case 'due':
-      color = colors.y3;
+      color = colorsm.warningText;
       break;
     case 'upcoming':
-      color = colors.n4;
+      color = colorsm.tableText;
       break;
     default:
   }
@@ -146,7 +129,7 @@ export class Transaction extends PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: colors.n5,
+      color: colorsm.tableText,
     };
 
     return (
@@ -162,7 +145,7 @@ export class Transaction extends PureComponent {
       <ListItem
         style={[
           { flex: 1, height: 60, padding: '5px 10px' }, // remove padding when Button is back
-          isPreview && { backgroundColor: colors.n11 },
+          isPreview && { backgroundColor: colorsm.tableBackground },
           style,
         ]}
       >
@@ -174,7 +157,7 @@ export class Transaction extends PureComponent {
                   width: 12,
                   height: 12,
                   marginRight: 5,
-                  color: textStyle.color || colors.n1,
+                  color: textStyle.color || colorsm.tableText,
                 }}
               />
             )}
@@ -184,7 +167,7 @@ export class Transaction extends PureComponent {
                 textStyle,
                 { fontSize: 14, fontWeight: added ? '600' : '400' },
                 prettyDescription === '' && {
-                  color: colors.n6,
+                  color: colorsm.tableText,
                   fontStyle: 'italic',
                 },
               ]}
@@ -206,7 +189,7 @@ export class Transaction extends PureComponent {
                 style={{
                   width: 11,
                   height: 11,
-                  color: cleared ? colors.g6 : colors.n8,
+                  color: cleared ? colorsm.noticeText : colorsm.tableText,
                   marginRight: 5,
                 }}
               />
@@ -216,7 +199,9 @@ export class Transaction extends PureComponent {
                     fontSize: 11,
                     marginTop: 1,
                     fontWeight: '400',
-                    color: prettyCategory ? colors.n3 : colors.p7,
+                    color: prettyCategory
+                      ? colorsm.buttonDisabledText
+                      : colorsm.formInputTextHighlight,
                     fontStyle: prettyCategory ? null : 'italic',
                     textAlign: 'left',
                   }}
@@ -409,10 +394,10 @@ function ListBoxSection({ section, state }) {
           {...headingProps}
           style={{
             ...styles.smallText,
-            backgroundColor: colors.n10,
-            borderBottom: `1px solid ${colors.n9}`,
-            borderTop: `1px solid ${colors.n9}`,
-            color: colors.n4,
+            backgroundColor: colorsm.tableRowHeaderBackground,
+            borderBottom: `1px solid ${colorsm.tableBorder}`,
+            borderTop: `1px solid ${colorsm.tableBorder}`,
+            color: colorsm.tableRowHeaderBackgroundText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,
@@ -460,10 +445,12 @@ function Option({ isLast, item, state }) {
       {...mergeProps(optionProps, focusProps)}
       ref={ref}
       style={{
-        background: isSelected ? 'blueviolet' : 'transparent',
-        color: isSelected ? 'white' : null,
+        background: isSelected
+          ? colorsm.tableRowBackgroundHighlight
+          : colorsm.tableBackground,
+        color: isSelected ? colorsm.tableText : null,
         outline: isFocusVisible ? '2px solid orange' : 'none',
-        ...(!isLast && { borderBottom: `1px solid ${colors.border}` }),
+        ...(!isLast && { borderBottom: `1px solid ${colorsm.tableBorder}` }),
       }}
     >
       {item.rendered}

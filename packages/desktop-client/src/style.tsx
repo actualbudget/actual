@@ -42,6 +42,7 @@ const colorThemes = [
 
 export const colorsn = colorThemes[0].colors;
 
+// Only for use in contextual color definitions
 const colorPallet = {
   orange900: '#331302',
   orange800: '#5f1a05',
@@ -109,18 +110,19 @@ const colorPallet = {
   purple150: '#dfd3fc',
   purple100: '#f2ebff',
   purple50: '#f9f7ff',
+  white: '#fafafa',
+  black: '#0a0a0a',
 };
 
-// Contextual
+// Contextual colors, only pull from the pallet
 export const colorsm = {
-  pageBackground: colorPallet.navy100,
-  pageBackgroundModalActive: colorPallet.navy300,
+  pageBackground: colorPallet.gray100,
+  pageBackgroundModalActive: colorPallet.gray200,
   pageText: colorPallet.gray700,
   cardBackground: colorPallet.gray50,
   cardBorder: colorPallet.purple600,
   cardShadow: colorPallet.gray700,
-  tableBackground: colorPallet.gray50,
-  tableBackgroundSelected: colorPallet.gray200,
+  tableBackground: colorPallet.white,
   tableBackgroundHover: colorPallet.gray150,
   tableText: colorPallet.gray700,
   tableTextSelected: colorPallet.gray700,
@@ -129,13 +131,13 @@ export const colorsm = {
   tableTextEditingBackground: colorPallet.purple600,
   tableTextInactive: colorPallet.gray500,
   tableHeaderText: colorPallet.gray600,
-  tableHeaderBackground: colorPallet.gray150,
+  tableHeaderBackground: colorPallet.gray100,
   tableBorder: colorPallet.gray150,
   tableBorderSelected: colorPallet.purple600,
   tableBorderHover: colorPallet.purple500,
   tableBorderSeparator: colorPallet.gray400,
   tableRowBackgroundHighlight: colorPallet.purple200,
-  tableRowHeaderBackground: colorPallet.gray150,
+  tableRowHeaderBackground: colorPallet.gray100,
   tableRowHeaderBackgroundText: colorPallet.gray800,
   sidebarBackground: colorPallet.navy800,
   sidebarItemBackground: colorPallet.navy800,

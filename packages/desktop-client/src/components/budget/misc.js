@@ -1456,8 +1456,8 @@ export const MonthPicker = ({
                   cursor: 'default',
                   borderRadius: 2,
                   ':hover': isMonthBudgeted && {
-                    backgroundColor: colorsn.secondary,
-                    color: colorsn.secondaryText,
+                    backgroundColor: colorsm.formInputTextHighlight,
+                    color: colorsm.formInputBackground,
                   },
                 },
                 !isMonthBudgeted && { color: colorsn.primaryAccent },

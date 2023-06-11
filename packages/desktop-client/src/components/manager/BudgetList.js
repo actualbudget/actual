@@ -12,7 +12,7 @@ import FileDouble from '../../icons/v1/FileDouble';
 import CloudUnknown from '../../icons/v2/CloudUnknown';
 import Key from '../../icons/v2/Key';
 import RefreshArrow from '../../icons/v2/RefreshArrow';
-import { styles, colors } from '../../style';
+import { styles, colorsm } from '../../style';
 import tokens from '../../tokens';
 import { View, Text, Button, Tooltip, Menu } from '../common';
 
@@ -91,7 +91,7 @@ function FileState({ file }) {
     case 'unknown':
       Icon = CloudUnknown;
       status = 'Network unavailable';
-      color = colors.n7;
+      color = colorsm.buttonDisabledText;
       break;
     case 'remote':
       Icon = CloudDownload;
@@ -156,12 +156,12 @@ function File({ file, onSelect, onDelete }) {
           ...styles.shadow,
           margin: 10,
           padding: '12px 15px',
-          backgroundColor: 'white',
+          backgroundColor: colorsm.tableBackground,
           borderRadius: 6,
           flexShrink: 0,
           cursor: 'pointer',
           ':hover': {
-            backgroundColor: colors.hover,
+            backgroundColor: colorsm.tableRowBackgroundHighlight,
           },
         },
       ]}
@@ -181,7 +181,9 @@ function File({ file, onSelect, onDelete }) {
               width: 13,
               height: 13,
               marginRight: 8,
-              color: file.hasKey ? colors.b5 : colors.n8,
+              color: file.hasKey
+                ? colorsm.tableText
+                : colorsm.buttonDisabledText,
             }}
           />
         )}
@@ -231,8 +233,8 @@ function RefreshButton({ onRefresh }) {
   return (
     <Button bare style={{ padding: 10, marginRight: 5 }} onClick={_onRefresh}>
       <Icon
-        color={colors.n1}
-        style={{ width: 18, height: 18, color: colors.n1 }}
+        color={colorsm.tableText}
+        style={{ width: 18, height: 18, color: colorsm.tableText }}
       />
     </Button>
   );
@@ -314,7 +316,7 @@ function BudgetList({
           bare
           style={{
             marginLeft: 10,
-            color: colors.n4,
+            color: colorsm.tableText,
           }}
           onClick={e => {
             e.preventDefault();

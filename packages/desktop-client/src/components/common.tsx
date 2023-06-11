@@ -283,7 +283,7 @@ export function InputWithContent({
         },
         focused && {
           border: '1px solid ' + colorsm.buttonPositiveBorder,
-          boxShadow: '0 1px 1px ' + colorsm.buttonShadow,
+          boxShadow: '0 1px 1px ' + colorsm.buttonPositiveBorder,
         },
         style,
         getStyle && getStyle(focused),

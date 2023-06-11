@@ -52,7 +52,7 @@ import Pencil1 from '../../icons/v2/Pencil1';
 import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { authorizeBank } from '../../nordigen';
-import { styles, colorsn } from '../../style';
+import { styles, colorsm } from '../../style';
 import { useActiveLocation } from '../ActiveLocation';
 import AnimatedRefresh from '../AnimatedRefresh';
 import {
@@ -85,11 +85,11 @@ function EmptyMessage({ onAdd }) {
   return (
     <View
       style={{
-        backgroundColor: colorsn.background,
+        backgroundColor: colorsm.tableBackground,
         flex: 1,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderColor: colorsn.primaryAccent,
+        borderColor: colorsm.tableBorderHover,
       }}
     >
       <View
@@ -110,9 +110,7 @@ function EmptyMessage({ onAdd }) {
           Add account
         </Button>
 
-        <View
-          style={{ marginTop: 20, fontSize: 13, color: colorsn.primaryText }}
-        >
+        <View style={{ marginTop: 20, fontSize: 13, color: colorsm.tableText }}>
           In the future, you can add accounts from the sidebar.
         </View>
       </View>
@@ -138,7 +136,7 @@ function ReconcilingMessage({
       style={{
         flexDirection: 'row',
         alignSelf: 'center',
-        backgroundColor: colorsn.background,
+        backgroundColor: colorsm.tableBackground,
         ...styles.shadow,
         borderRadius: 4,
         marginTop: 5,
@@ -150,7 +148,7 @@ function ReconcilingMessage({
         {targetDiff === 0 ? (
           <View
             style={{
-              color: colorsn.noticeText,
+              color: colorsm.noticeText,
               flex: 1,
               flexDirection: 'row',
               alignItems: 'center',
@@ -161,14 +159,14 @@ function ReconcilingMessage({
               style={{
                 width: 13,
                 height: 13,
-                color: colorsn.noticeText,
+                color: colorsm.noticeText,
                 marginRight: 3,
               }}
             />
             All reconciled!
           </View>
         ) : (
-          <View style={{ color: colorsn.secondary }}>
+          <View style={{ color: colorsm.sidebarBackground }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
               Your cleared balance{' '}
               <strong>{format(cleared, 'financial')}</strong> needs{' '}
@@ -343,10 +341,10 @@ function DetailedBalance({ name, balance }) {
     <Text
       style={{
         marginLeft: 15,
-        backgroundColor: colorsn.background,
+        backgroundColor: colorsm.tableBackground,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colorsn.primaryText,
+        color: colorsm.tableText,
       }}
     >
       {name}{' '}
@@ -459,10 +457,10 @@ function Balances({
           getStyle={value => ({
             color:
               value < 0
-                ? colorsn.errorText
+                ? colorsm.errorText
                 : value > 0
-                ? colorsn.noticeText
-                : colorsn.primaryText,
+                ? colorsm.noticeText
+                : colorsm.tableText,
           })}
         />
 
@@ -471,7 +469,7 @@ function Balances({
             width: 10,
             height: 10,
             marginLeft: 10,
-            color: colorsn.primaryText,
+            color: colorsm.tableText,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
           }}
         />
@@ -806,7 +804,7 @@ const AccountHeader = memo(
                       style={{
                         width: 11,
                         height: 11,
-                        color: colorsn.primaryText,
+                        color: colorsm.tableText,
                       }}
                     />
                   </Button>
@@ -884,7 +882,7 @@ const AccountHeader = memo(
                     width: 13,
                     height: 13,
                     flexShrink: 0,
-                    color: search ? colorsn.primaryText : 'inherit',
+                    color: search ? colorsm.formInputTextHighlight : 'inherit',
                     margin: 5,
                     marginRight: 0,
                   }}
@@ -921,19 +919,22 @@ const AccountHeader = memo(
                   boxShadow: 'none',
                   transition: 'color .15s',
                   '& input::placeholder': {
-                    color: colorsn.secondary,
+                    color: colorsm.sidebarItemText,
                     transition: 'color .25s',
                   },
                 },
-                focused && { boxShadow: '0 0 0 2px ' + colorsn.primaryAccent },
-                !focused && search !== '' && { color: colorsn.secondary },
+                focused && {
+                  boxShadow: '0 0 0 2px ' + colorsm.menuBorderHover,
+                },
+                !focused &&
+                  search !== '' && { color: colorsm.formInputTextHighlight },
               ]}
               onChange={e => onSearch(e.target.value)}
             />
             {workingHard ? (
               <View>
                 <Loading
-                  color={colorsn.secondary}
+                  color={colorsm.sidebarBackground}
                   style={{ width: 16, height: 16 }}
                 />
               </View>
@@ -1885,7 +1886,10 @@ class AccountInternal extends PureComponent {
               registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
             >
               <View
-                style={[styles.page, { backgroundColor: colorsn.background }]}
+                style={[
+                  styles.page,
+                  { backgroundColor: colorsm.pageBackground },
+                ]}
               >
                 <AccountHeader
                   tableRef={this.table}

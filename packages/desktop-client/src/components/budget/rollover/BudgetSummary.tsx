@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colorsn, styles } from '../../../style';
+import { colorsm, styles } from '../../../style';
 import {
   View,
   Block,
@@ -45,10 +45,10 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
         !collapsed && {
           padding: '5px 0',
           marginTop: 17,
-          backgroundColor: colorsn.primary,
+          backgroundColor: colorsm.tableHeaderBackground,
           borderTopWidth: 1,
           borderBottomWidth: 1,
-          borderColor: colorsn.primaryAccent,
+          borderColor: colorsm.tableBorder,
         },
         collapsed && {
           padding: 7,
@@ -183,14 +183,14 @@ function ToBudget({
                       userSelect: 'none',
                       cursor: 'pointer',
                       color: isNegative
-                        ? colorsn.errorText
-                        : colorsn.noticeText,
+                        ? colorsm.errorText
+                        : colorsm.noticeText,
                       marginBottom: -1,
                       borderBottom: '1px solid transparent',
                       ':hover': {
                         borderColor: isNegative
-                          ? colorsn.errorText
-                          : colorsn.noticeText,
+                          ? colorsm.errorText
+                          : colorsm.noticeText,
                       },
                     },
                   ])}
@@ -291,7 +291,7 @@ export function BudgetSummary({
     <View
       data-testid="budget-summary"
       style={{
-        backgroundColor: colorsn.background,
+        backgroundColor: colorsm.tableBackground,
         boxShadow: MONTH_BOX_SHADOW,
         borderRadius: 6,
         marginLeft: 0,
@@ -333,7 +333,7 @@ export function BudgetSummary({
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: colorsn.primaryText, margin: 1 }}
+                style={{ color: colorsm.tableText, margin: 1 }}
               />
             </Button>
           </View>
@@ -368,7 +368,7 @@ export function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colorsn.primaryText}
+                defaultColor={colorsm.tableText}
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
@@ -376,7 +376,7 @@ export function BudgetSummary({
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: colorsn.primaryText }}
+                  style={{ color: colorsm.tableText }}
                 />
               </Button>
               {menuOpen && (
@@ -424,8 +424,8 @@ export function BudgetSummary({
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: colorsn.primary,
-              borderTop: '1px solid ' + colorsn.primaryAccent,
+              backgroundColor: colorsm.tableBackground,
+              borderTop: '1px solid ' + colorsm.tableBorderSelected,
             }}
           >
             <ToBudget

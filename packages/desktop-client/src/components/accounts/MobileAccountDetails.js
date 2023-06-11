@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { colors, styles } from '../../style';
+import { colorsm, styles } from '../../style';
 import { Button, InputWithContent, Label, View } from '../common';
 import Text from '../common/Text';
 import CellValue from '../spreadsheet/CellValue';
@@ -19,7 +19,6 @@ function TransactionSearchInput({ accountName, onSearch }) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.n11,
         margin: '11px auto 4px',
         borderRadius: 4,
         padding: 10,
@@ -33,7 +32,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
               width: 13,
               height: 13,
               flexShrink: 0,
-              color: text ? colors.p7 : 'inherit',
+              color: text ? colorsm.formInputTextHighlight : 'inherit',
               margin: 5,
               marginRight: 0,
             }}
@@ -46,8 +45,8 @@ function TransactionSearchInput({ accountName, onSearch }) {
         }}
         placeholder={`Search ${accountName}`}
         style={{
-          backgroundColor: colors.n11,
-          border: `1px solid ${colors.n9}`,
+          backgroundColor: colorsm.tableBackground,
+          border: `1px solid ${colorsm.formInputBorder}`,
           fontSize: 15,
           flex: 1,
           height: 32,
@@ -82,7 +81,7 @@ export default function AccountDetails({
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.n11,
+        backgroundColor: colorsm.pageBackground,
         overflowY: 'hidden',
         width: '100%',
       }}
@@ -90,7 +89,6 @@ export default function AccountDetails({
       <View
         style={{
           alignItems: 'center',
-          backgroundColor: colors.n11,
           flexShrink: 0,
           overflowY: 'hidden',
           paddingTop: 20,
@@ -117,12 +115,18 @@ export default function AccountDetails({
           >
             <CheveronLeft
               style={{
-                color: colors.b5,
+                color: colorsm.pageText,
                 width: 32,
                 height: 32,
               }}
             />
-            <Text style={{ ...styles.text, color: colors.b5, fontWeight: 500 }}>
+            <Text
+              style={{
+                ...styles.text,
+                color: colorsm.pageText,
+                fontWeight: 500,
+              }}
+            >
               Back
             </Text>
           </Link>
@@ -157,7 +161,7 @@ export default function AccountDetails({
             fontWeight: '500',
           }}
           getStyle={value => ({
-            color: value < 0 ? colors.r4 : colors.p5,
+            color: value < 0 ? colorsm.errorText : colorsm.noticeText,
           })}
         />
         <TransactionSearchInput
