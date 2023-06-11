@@ -2181,7 +2181,7 @@ async function loadBudget(id) {
   // Older versions didn't tag the file with the current user, so do
   // so now
   if (!prefs.getPrefs().userId) {
-    let [[, userId]] = await asyncStorage.multiGet(['user-token']);
+    let userId = await asyncStorage.getItem('user-token');
     prefs.savePrefs({ userId });
   }
 
