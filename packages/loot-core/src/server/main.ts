@@ -2419,6 +2419,7 @@ export async function initApp(isDev, socketName) {
   // }
 
   const url = await asyncStorage.getItem('server-url');
+  // TODO: remove this first part of the `if` block after a few releases
   if (url === 'https://not-configured/') {
     await asyncStorage.setItem('server-url', null);
     await asyncStorage.setItem('did-bootstrap', true);
