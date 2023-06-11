@@ -70,6 +70,7 @@ module.exports = {
     ],
     'import/no-useless-path-segments': 'error',
     'import/no-duplicates': ['error', { 'prefer-inline': true }],
+    'import/no-unused-modules': ['error', { 'unusedExports': true }],
     'import/order': [
       'error',
       {
@@ -165,6 +166,10 @@ module.exports = {
           },
         ],
       },
+    },
+    {
+      files: ['**/icons/**/*.js'],
+      rules: { 'import/no-unused-modules': 'off' }
     },
   ],
 };
