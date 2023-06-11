@@ -110,6 +110,8 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   // the border color is manually passed in.
   if (oldBorderColor) {
     borderColor = oldBorderColor;
+  } else {
+    borderColor = colorsm.tableBorder;
   }
 
   return (
@@ -322,7 +324,7 @@ export function Row({
       backgroundColor={
         shouldHighlight ? colorsm.tableRowBackgroundHighlight : backgroundColor
       }
-      borderColor={shouldHighlight ? colorsm.tableBackgroundSelected : 'none'}
+      borderColor={shouldHighlight ? colorsm.tableBorderSelected : 'none'}
     >
       <View
         innerRef={rowRef}
