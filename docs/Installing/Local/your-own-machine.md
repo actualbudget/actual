@@ -8,7 +8,7 @@ Actual Server is the server element of Actual that is used for syncing changes a
 
 ## Pre-requisites
 
-Actual Server currently requires Node.js v16. If you don’t have Node.js installed, you can download the latest version of Node.js 16 from the [Node.js website](https://nodejs.org/en/download/releases/) (search for “16” to find the right version). If you already have Node.js installed, consider using a tool like [`nvm`](https://github.com/nvm-sh/nvm) or [`asdf`](https://asdf-vm.com) to install and manage multiple versions of Node.js.
+Actual Server currently requires at least Node.js v16. If you don’t have Node.js installed, you can download the latest version of Node.js from the [Node.js website](https://nodejs.org/en/download) (we recommend downloading the “LTS” version). If you already have Node.js installed, you can use it directly if it’s version 16 or newer. Consider using a tool like [`nvm`](https://github.com/nvm-sh/nvm) or [`asdf`](https://asdf-vm.com) to install and manage multiple versions of Node.js.
 
 You’ll also need to have Git installed. The Git website has [instructions for all supported operating systems](https://git-scm.com/download).
 
