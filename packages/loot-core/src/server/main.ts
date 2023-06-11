@@ -2416,14 +2416,19 @@ export async function initApp(isDev, socketName) {
   // }
   // }
 
-  const url = await asyncStorage.getItem('server-url');
-  // TODO: remove this first part of the `if` block after a few releases
+  let url = await asyncStorage.getItem('server-url');
+
+  // TODO: remove this if statement after a few releases
   if (url === 'https://not-configured/') {
+    url = null;
     await asyncStorage.setItem('server-url', null);
     await asyncStorage.setItem('did-bootstrap', true);
-  } else if (url) {
-    setServer(url);
   }
+
+  if (!url) {
+    await asyncStorage.removeItem('user-token');
+  }
+  setServer(url);
 
   connection.init(socketName, app.handlers);
 
