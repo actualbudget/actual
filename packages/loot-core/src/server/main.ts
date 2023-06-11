@@ -81,7 +81,6 @@ import { uniqueFileName, idFromFileName } from './util/budget-name';
 
 let DEMO_BUDGET_ID = '_demo-budget';
 let TEST_BUDGET_ID = '_test-budget';
-let UNCONFIGURED_SERVER = 'https://not-configured/';
 
 // util
 
@@ -1132,40 +1131,42 @@ handlers['accounts-sync'] = async function ({ id }) {
 handlers['secret-set'] = async function ({ name, value }) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (userToken) {
-    try {
-      return await post(
-        getServer().BASE_SERVER + '/secret',
-        {
-          name,
-          value,
-        },
-        {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      );
-    } catch (error) {
-      console.error(error);
-      return { error: 'failed' };
-    }
+  if (!userToken) {
+    return { error: 'unauthorized' };
   }
-  return { error: 'unauthorized' };
+
+  try {
+    return await post(
+      getServer().BASE_SERVER + '/secret',
+      {
+        name,
+        value,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+  } catch (error) {
+    console.error(error);
+    return { error: 'failed' };
+  }
 };
 
 handlers['secret-check'] = async function (name) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (userToken) {
-    try {
-      return await get(getServer().BASE_SERVER + '/secret/' + name, {
-        'X-ACTUAL-TOKEN': userToken,
-      });
-    } catch (error) {
-      console.error(error);
-      return { error: 'failed' };
-    }
+  if (!userToken) {
+    return { error: 'unauthorized' };
   }
-  return { error: 'unauthorized' };
+
+  try {
+    return await get(getServer().BASE_SERVER + '/secret/' + name, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+  } catch (error) {
+    console.error(error);
+    return { error: 'failed' };
+  }
 };
 
 handlers['nordigen-poll-web-token'] = async function ({
@@ -1173,62 +1174,59 @@ handlers['nordigen-poll-web-token'] = async function ({
   requisitionId,
 }) {
   let userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return null;
 
-  if (userToken) {
-    let startTime = Date.now();
-    stopPolling = false;
+  let startTime = Date.now();
+  stopPolling = false;
 
-    async function getData(cb) {
-      if (stopPolling) {
-        return;
-      }
-
-      if (Date.now() - startTime >= 1000 * 60 * 10) {
-        cb('timeout');
-        return;
-      }
-
-      let data = await post(
-        getServer().NORDIGEN_SERVER + '/get-accounts',
-        {
-          upgradingAccountId,
-          requisitionId,
-        },
-        {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      );
-
-      if (data) {
-        if (data.error) {
-          cb('unknown');
-        } else {
-          cb(null, data);
-        }
-      } else {
-        setTimeout(() => getData(cb), 3000);
-      }
+  async function getData(cb) {
+    if (stopPolling) {
+      return;
     }
 
-    return new Promise(resolve => {
-      getData((error, data) => {
-        if (error) {
-          resolve({ error });
-        } else {
-          resolve({ data });
-        }
-      });
-    });
+    if (Date.now() - startTime >= 1000 * 60 * 10) {
+      cb('timeout');
+      return;
+    }
+
+    let data = await post(
+      getServer().NORDIGEN_SERVER + '/get-accounts',
+      {
+        upgradingAccountId,
+        requisitionId,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    if (data) {
+      if (data.error) {
+        cb('unknown');
+      } else {
+        cb(null, data);
+      }
+    } else {
+      setTimeout(() => getData(cb), 3000);
+    }
   }
 
-  return null;
+  return new Promise(resolve => {
+    getData((error, data) => {
+      if (error) {
+        resolve({ error });
+      } else {
+        resolve({ data });
+      }
+    });
+  });
 };
 
 handlers['nordigen-status'] = async function () {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
-    return Promise.reject({ error: 'unauthorized' });
+    return { error: 'unauthorized' };
   }
 
   return post(
@@ -1244,7 +1242,7 @@ handlers['nordigen-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
-    return Promise.reject({ error: 'unauthorized' });
+    return { error: 'unauthorized' };
   }
 
   return post(
@@ -1268,25 +1266,26 @@ handlers['nordigen-create-web-token'] = async function ({
 }) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (userToken) {
-    try {
-      return await post(
-        getServer().NORDIGEN_SERVER + '/create-web-token',
-        {
-          upgradingAccountId,
-          institutionId,
-          accessValidForDays,
-        },
-        {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      );
-    } catch (error) {
-      console.error(error);
-      return { error: 'failed' };
-    }
+  if (!userToken) {
+    return { error: 'unauthorized' };
   }
-  return { error: 'unauthorized' };
+
+  try {
+    return await post(
+      getServer().NORDIGEN_SERVER + '/create-web-token',
+      {
+        upgradingAccountId,
+        institutionId,
+        accessValidForDays,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+  } catch (error) {
+    console.error(error);
+    return { error: 'failed' };
+  }
 };
 
 handlers['nordigen-accounts-sync'] = async function ({ id }) {
@@ -1418,8 +1417,11 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   // No more accounts are associated with this bank. We can remove
   // it from Nordigen.
   let userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return 'ok';
+  }
 
-  if (userToken && count === 0) {
+  if (count === 0) {
     let { bank_id: requisitionId } = await db.first(
       'SELECT bank_id FROM banks WHERE id = ?',
       [bankId],
@@ -1624,10 +1626,14 @@ handlers['key-test'] = async function ({ fileId, password }) {
   return {};
 };
 
+handlers['get-did-bootstrap'] = async function () {
+  return Boolean(await asyncStorage.getItem('did-bootstrap'));
+};
+
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
 }: { url? } = {}) {
-  if (getServer(url).BASE_SERVER === UNCONFIGURED_SERVER) {
+  if (!getServer(url)) {
     return { bootstrapped: true, hasServer: false };
   }
 
@@ -1666,45 +1672,48 @@ handlers['subscribe-bootstrap'] = async function ({ password }) {
   return { error: 'internal' };
 };
 
-handlers['subscribe-set-user'] = async function ({ token }) {
-  await asyncStorage.setItem('user-token', token);
-};
-
 handlers['subscribe-get-user'] = async function () {
-  if (getServer() && getServer().BASE_SERVER === UNCONFIGURED_SERVER) {
+  if (!getServer()) {
+    if (!(await asyncStorage.getItem('did-bootstrap'))) {
+      return null;
+    }
     return { offline: false };
   }
 
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (userToken) {
-    try {
-      const res = await get(getServer().SIGNUP_SERVER + '/validate', {
-        headers: {
-          'X-ACTUAL-TOKEN': userToken,
-        },
-      });
-      const { status, reason } = JSON.parse(res);
-
-      if (status === 'error') {
-        if (reason === 'unauthorized') {
-          return null;
-        }
-        return { offline: true };
-      }
-
-      return { offline: false };
-    } catch (e) {
-      console.log(e);
-      return { offline: true };
-    }
+  if (!userToken) {
+    return null;
   }
 
-  return null;
+  try {
+    const res = await get(getServer().SIGNUP_SERVER + '/validate', {
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    });
+    const { status, reason } = JSON.parse(res);
+
+    if (status === 'error') {
+      if (reason === 'unauthorized') {
+        return null;
+      }
+      return { offline: true };
+    }
+
+    return { offline: false };
+  } catch (e) {
+    console.log(e);
+    return { offline: true };
+  }
 };
 
 handlers['subscribe-change-password'] = async function ({ password }) {
   let userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
   try {
     await post(getServer().SIGNUP_SERVER + '/change-password', {
       token: userToken,
@@ -1742,7 +1751,7 @@ handlers['subscribe-sign-out'] = async function () {
 };
 
 handlers['get-server-version'] = async function () {
-  if (!getServer() || getServer().BASE_SERVER === UNCONFIGURED_SERVER) {
+  if (!getServer()) {
     return { error: 'no-server' };
   }
 
@@ -1764,7 +1773,9 @@ handlers['get-server-url'] = async function () {
 };
 
 handlers['set-server-url'] = async function ({ url, validate = true }) {
-  if (url != null) {
+  if (url == null) {
+    await asyncStorage.removeItem('user-token');
+  } else {
     if (validate) {
       // Validate the server is running
       let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
@@ -1774,12 +1785,10 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
         return { error };
       }
     }
-  } else {
-    // When the server isn't configured, we just use a placeholder
-    url = UNCONFIGURED_SERVER;
   }
 
-  asyncStorage.setItem('server-url', url);
+  await asyncStorage.setItem('server-url', url);
+  await asyncStorage.setItem('did-bootstrap', true);
   setServer(url);
   return {};
 };
@@ -2170,7 +2179,7 @@ async function loadBudget(id) {
   // Older versions didn't tag the file with the current user, so do
   // so now
   if (!prefs.getPrefs().userId) {
-    let [[, userId]] = await asyncStorage.multiGet(['user-token']);
+    let userId = await asyncStorage.getItem('user-token');
     prefs.savePrefs({ userId });
   }
 
@@ -2244,10 +2253,12 @@ async function loadBudget(id) {
   if (process.env.NODE_ENV !== 'test') {
     if (process.env.IS_BETA || id === DEMO_BUDGET_ID) {
       setSyncingMode('disabled');
-    } else if (id === TEST_BUDGET_ID) {
-      await asyncStorage.setItem('lastBudget', id);
     } else {
-      setSyncingMode('enabled');
+      if (getServer()) {
+        setSyncingMode('enabled');
+      } else {
+        setSyncingMode('disabled');
+      }
 
       await asyncStorage.setItem('lastBudget', id);
 
@@ -2405,10 +2416,19 @@ export async function initApp(isDev, socketName) {
   // }
   // }
 
-  const url = await asyncStorage.getItem('server-url');
-  if (url) {
-    setServer(url);
+  let url = await asyncStorage.getItem('server-url');
+
+  // TODO: remove this if statement after a few releases
+  if (url === 'https://not-configured/') {
+    url = null;
+    await asyncStorage.setItem('server-url', null);
+    await asyncStorage.setItem('did-bootstrap', true);
   }
+
+  if (!url) {
+    await asyncStorage.removeItem('user-token');
+  }
+  setServer(url);
 
   connection.init(socketName, app.handlers);
 

@@ -26,6 +26,10 @@ export function overwriteTemplate({ month }) {
   return processTemplate(month, true);
 }
 
+export function runCheckTemplates() {
+  return checkTemplates();
+}
+
 function checkScheduleTemplates(template) {
   let lowPriority = template[0].priority;
   let errorNotice = false;
@@ -211,9 +215,7 @@ async function processTemplate(month, force) {
       return { type: 'message', message: 'All categories were up to date.' };
     }
   } else {
-    let applied = `Successfully applied templates to ${num_applied} ${
-      num_applied === 1 ? 'category' : 'categories'
-    }.`;
+    let applied = `Successfully applied ${num_applied} templates.`;
     if (errors.length) {
       return {
         sticky: true,
@@ -615,5 +617,40 @@ async function applyCategoryTemplate(
     str += ' ' + template_lines.map(x => x.line).join('\n');
     console.log(str);
     return { amount: to_budget, errors };
+  }
+}
+
+async function checkTemplates() {
+  let category_templates = await getCategoryTemplates();
+  let errors = [];
+
+  let categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  // run through each line and see if its an error
+  for (let c = 0; c < categories.length; c++) {
+    let category = categories[c];
+    let template = category_templates[category.id];
+    if (template) {
+      for (let l = 0; l < template.length; l++) {
+        if (template[l].type === 'error') {
+          //return { type: 'message', message: "found a bad one",};
+          errors.push(category.name + ': ' + template[l].line);
+        }
+      }
+    }
+  }
+  if (errors.length) {
+    return {
+      sticky: true,
+      message: `There were errors interpreting some templates:`,
+      pre: errors.join('\n\n'),
+    };
+  } else {
+    return {
+      type: 'message',
+      message: 'All templates passed! 🎉',
+    };
   }
 }
