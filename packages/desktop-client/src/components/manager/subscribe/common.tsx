@@ -41,7 +41,8 @@ export function useBootstrapped() {
       };
 
       let url = await send('get-server-url');
-      if (url == null) {
+      let bootstrapped = await send('get-did-bootstrap');
+      if (url == null && !bootstrapped) {
         // A server hasn't been specified yet
         let serverURL = window.location.origin;
         let result = await send('subscribe-needs-bootstrap', {

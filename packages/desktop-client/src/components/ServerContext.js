@@ -14,14 +14,6 @@ export const useServerURL = () => useContext(ServerContext).url;
 export const useServerVersion = () => useContext(ServerContext).version;
 export const useSetServerURL = () => useContext(ServerContext).setURL;
 
-async function getServerUrl() {
-  let url = (await send('get-server-url')) || '';
-  if (url === 'https://not-configured/') {
-    url = '';
-  }
-  return url;
-}
-
 async function getServerVersion() {
   let { error, version } = await send('get-server-version');
   if (error) {
@@ -36,7 +28,7 @@ export function ServerProvider({ children }) {
 
   useEffect(() => {
     async function run() {
-      setServerURL(await getServerUrl());
+      setServerURL(await send('get-server-url'));
       setVersion(await getServerVersion());
     }
     run();
@@ -46,7 +38,7 @@ export function ServerProvider({ children }) {
     async (url, opts = {}) => {
       let { error } = await send('set-server-url', { ...opts, url });
       if (!error) {
-        setServerURL(await getServerUrl());
+        setServerURL(await send('get-server-url'));
         setVersion(await getServerVersion());
       }
       return { error };
