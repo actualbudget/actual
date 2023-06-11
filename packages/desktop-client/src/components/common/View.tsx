@@ -22,7 +22,7 @@ const View = (props: ViewProps) => {
       {...restProps}
       ref={innerRef}
       style={nativeStyle}
-      className={`view ${css([props.className, props.style])}`}
+      className={`view ${props.className} ${css([props.style])}`}
     />
   );
 };
