@@ -1514,12 +1514,14 @@ export const MonthPicker = ({
         <Button
           onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
           bare
+          style={{ color: colorsm.pageText }}
         >
           <ArrowThinLeft width={12} height={12} />
         </Button>
         <Button
           onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
           bare
+          style={{ color: colorsm.pageText }}
         >
           <ArrowThinRight width={12} height={12} />
         </Button>

@@ -612,7 +612,7 @@ export function Sidebar({
         <View
           style={{
             height: 1,
-            backgroundColor: colorsm.sidebarBackground,
+            backgroundColor: colorsm.sidebarItemText,
             marginTop: 15,
             flexShrink: 0,
           }}
