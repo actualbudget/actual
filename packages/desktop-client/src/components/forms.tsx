@@ -82,7 +82,7 @@ export const Checkbox = (props: CheckboxProps) => {
             height: 15,
             appearance: 'none',
             outline: 0,
-            border: '1px solid #d0d0d0',
+            border: '1px solid ' + colorsm.formInputBorder,
             borderRadius: 4,
             display: 'flex',
             alignItems: 'center',
@@ -90,15 +90,19 @@ export const Checkbox = (props: CheckboxProps) => {
             color: 'none',
             backgroundColor: 'none',
             ':checked': {
-              border: '1px solid ' + colorsm.buttonPositiveText,
-              backgroundColor: colorsm.buttonPositiveText,
-              color: colorsm.buttonPositiveBackground,
+              border: '1px solid ' + colorsm.formInputBorderSelected,
+              backgroundColor: colorsm.formInputBackgroundSelected,
+              color: colorsm.formInputTextSelected,
               '::after': {
                 display: 'block',
                 background:
-                  colorsm.buttonPositiveText +
+                  colorsm.formInputBackgroundSelected +
                   // eslint-disable-next-line rulesdir/typography
-                  ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
+                  ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="' +
+                  // TODO: The # needs escaped for the SVG to render the checkmark with color. Really we need to replace this entire component with soemthing like SelectCell
+                  colorsm.formInputTextSelected +
+                  // eslint-disable-next-line rulesdir/typography
+                  '" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
                 width: 9,
                 height: 9,
                 content: ' ',
@@ -111,7 +115,7 @@ export const Checkbox = (props: CheckboxProps) => {
                 bottom: -5,
                 left: -5,
                 right: -5,
-                border: '2px solid ' + colorsm.buttonPositiveText,
+                border: '2px solid ' + colorsm.formInputBorderSelected,
                 borderRadius: 6,
                 content: ' ',
               },

@@ -333,7 +333,7 @@ function StatusCell({
         ? colorsm.warningText
         : selected
         ? colorsm.tableTextSelected
-        : colorsm.tableText,
+        : colorsm.tableBorder,
   };
 
   function onSelect() {

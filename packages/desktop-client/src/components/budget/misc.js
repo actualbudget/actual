@@ -19,7 +19,7 @@ import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { styles, colorsn, colorsm } from '../../style';
+import { styles, colorsm } from '../../style';
 import {
   View,
   Text,
@@ -215,7 +215,7 @@ class BudgetTable extends Component {
               backgroundColor: 'transparent',
             },
             '& ::-webkit-scrollbar-thumb:vertical': {
-              backgroundColor: colorsn.background,
+              backgroundColor: colorsm.pageBackground,
             },
           },
         ]}
@@ -324,7 +324,7 @@ export function SidebarCategory({
   dragging,
   editing,
   style,
-  borderColor = colorsn.primaryAccent,
+  borderColor = colorsm.tableBorder,
   isLast,
   onDragChange,
   onEditMonth,
@@ -364,12 +364,12 @@ export function SidebarCategory({
             e.stopPropagation();
             setMenuOpen(true);
           }}
-          style={{ color: colorsn.primaryText, padding: 3 }}
+          style={{ color: colorsm.tableText, padding: 3 }}
         >
           <CheveronDown
             width={14}
             height={14}
-            style={{ color: colorsn.primaryText }}
+            style={{ color: colorsm.tableText }}
           />
         </Button>
         {menuOpen && (
@@ -405,7 +405,7 @@ export function SidebarCategory({
       <View style={{ flex: 1 }} />
       <NotesButton
         id={category.id}
-        style={dragging && { color: colorsn.primaryText }}
+        style={dragging && { color: colorsm.tableTextHover }}
       />
     </View>
   );
@@ -420,14 +420,17 @@ export function SidebarCategory({
         },
         !dragging &&
           !dragPreview && {
-            '&:hover button': { display: 'flex', color: colorsn.secondary },
+            '&:hover button': {
+              display: 'flex',
+              color: colorsm.tableText,
+            },
           },
-        dragging && { color: colorsn.primaryAccent },
+        dragging && { color: colorsm.tableTextHover },
 
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         dragPreview && {
-          backgroundColor: colorsn.primaryAccent,
+          backgroundColor: colorsm.tableRowBackgroundHighlight,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
@@ -583,9 +586,12 @@ export function SidebarGroup({
         style,
         {
           width: 200,
-          backgroundColor: colorsn.background,
+          backgroundColor: colorsm.tableBackground,
           '& button': { display: 'none' },
-          '&:hover button': { display: 'flex', color: colorsn.primaryText },
+          '&:hover button': {
+            display: 'flex',
+            color: colorsm.tableBackgroundHover,
+          },
         },
         dragPreview && {
           paddingLeft: 10,
@@ -606,7 +612,7 @@ export function SidebarGroup({
         formatter={value => displayed}
         width="flex"
         exposed={editing}
-        borderColor={colorsn.primaryAccent}
+        borderColor={colorsm.tableBorder}
         onUpdate={value => {
           if (temporary) {
             if (value === '') {
@@ -643,7 +649,7 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
         <View
           style={[
             { flex: 1 },
-            { borderLeft: '1px solid ' + colorsn.primaryAccent },
+            { borderLeft: '1px solid ' + colorsm.tableBorder },
             style,
           ]}
         >
@@ -676,7 +682,7 @@ const BudgetTotals = memo(function BudgetTotals({
       <View
         style={{
           width: 200,
-          color: colorsn.tableHeaderText,
+          color: colorsm.tableHeaderText,
           justifyContent: 'center',
           paddingLeft: 15,
           paddingRight: 5,
@@ -698,7 +704,7 @@ const BudgetTotals = memo(function BudgetTotals({
           <DotsHorizontalTriple
             width={15}
             height={15}
-            style={{ color: colorsn.secondaryAccent }}
+            style={{ color: colorsm.tableText }}
           />
           {menuOpen && (
             <Tooltip
@@ -1460,11 +1466,11 @@ export const MonthPicker = ({
                     color: colorsm.formInputBackground,
                   },
                 },
-                !isMonthBudgeted && { color: colorsn.primaryAccent },
+                !isMonthBudgeted && { color: colorsm.pageText },
                 styles.smallText,
                 selected && {
-                  backgroundColor: colorsn.secondary,
-                  color: colorsn.secondaryText,
+                  backgroundColor: colorsm.buttonPositiveBackground,
+                  color: colorsm.buttonPositiveText,
                   borderRadius: 0,
                 },
                 idx === selectedIndex && {
@@ -1479,7 +1485,7 @@ export const MonthPicker = ({
                   idx < lastSelectedIndex - 1 && {
                     marginRight: 0,
                     borderRight: 'solid 1px',
-                    borderColor: colorsn.primaryAccent,
+                    borderColor: colorsm.tableBorderHover,
                   },
                 current && { textDecoration: 'underline' },
               ]}

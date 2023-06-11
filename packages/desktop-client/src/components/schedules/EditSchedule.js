@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import { colors } from '../../style';
+import { colors, colorsm } from '../../style';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -502,7 +502,7 @@ export default function ScheduleDetails() {
               }}
               style={{
                 padding: '0 10px',
-                color: colors.n5,
+                color: colorsm.tableText,
                 fontSize: 12,
               }}
               onChange={(_, op) =>
@@ -562,13 +562,13 @@ export default function ScheduleDetails() {
 
           {state.upcomingDates && (
             <View style={{ fontSize: 13, marginTop: 20 }}>
-              <Text style={{ color: colors.n4, fontWeight: 600 }}>
+              <Text style={{ color: colorsm.tableText, fontWeight: 600 }}>
                 Upcoming dates
               </Text>
               <Stack
                 direction="column"
                 spacing={1}
-                style={{ marginTop: 10, color: colors.n4 }}
+                style={{ marginTop: 10, color: colorsm.tableText }}
               >
                 {state.upcomingDates.map(date => (
                   <View key={date}>
@@ -639,7 +639,7 @@ export default function ScheduleDetails() {
             style={{
               width: 350,
               textAlign: 'right',
-              color: colors.n4,
+              color: colorsm.tabletext,
               marginTop: 10,
               fontSize: 13,
               lineHeight: '1.4em',
@@ -654,7 +654,7 @@ export default function ScheduleDetails() {
               {state.isCustom && (
                 <Text
                   style={{
-                    color: colors.b5,
+                    color: colorsm.tableText,
                     fontSize: 13,
                     textAlign: 'right',
                     width: 350,
@@ -675,11 +675,11 @@ export default function ScheduleDetails() {
         <SelectedProvider instance={selectedInst}>
           {adding ? (
             <View style={{ flexDirection: 'row', padding: '5px 0' }}>
-              <Text style={{ color: colors.n4 }}>
+              <Text style={{ color: colorsm.tabletext }}>
                 These transactions match this schedule:
               </Text>
               <View style={{ flex: 1 }} />
-              <Text style={{ color: colors.n6 }}>
+              <Text style={{ color: colorsm.tableText }}>
                 Select transactions to link on save
               </Text>
             </View>
@@ -689,7 +689,9 @@ export default function ScheduleDetails() {
                 bare
                 style={{
                   color:
-                    state.transactionsMode === 'linked' ? colors.b4 : colors.n7,
+                    state.transactionsMode === 'linked'
+                      ? colorsm.tableText
+                      : colorsm.buttonDisabledText,
                   marginRight: 10,
                   fontSize: 14,
                 }}
@@ -702,8 +704,8 @@ export default function ScheduleDetails() {
                 style={{
                   color:
                     state.transactionsMode === 'matched'
-                      ? colors.b4
-                      : colors.n7,
+                      ? colorsm.tableText
+                      : colorsm.buttonDisabledText,
                   fontSize: 14,
                 }}
                 onClick={() => onSwitchTransactions('matched')}
@@ -738,7 +740,11 @@ export default function ScheduleDetails() {
               state.transactionsMode === 'matched' &&
               (() => (
                 <View
-                  style={{ padding: 20, color: colors.n4, textAlign: 'center' }}
+                  style={{
+                    padding: 20,
+                    color: colorsm.tabletext,
+                    textAlign: 'center',
+                  }}
                 >
                   {state.error ? (
                     <Text style={{ color: colors.r4 }}>

@@ -50,7 +50,7 @@ const Input = ({
           '::placeholder': { color: colorsm.formInputTextPlaceholder },
           '::selection': {
             color: colorsm.formInputTextSelection,
-            backgroundColor: colorsm.formInputBackgroundSelection,
+            backgroundColor: colorsm.formInputBackgroundSelected,
           },
         },
         styles.smallText,

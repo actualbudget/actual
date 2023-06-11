@@ -7,30 +7,30 @@ import tokens from './tokens';
 export const debug = { borderWidth: 1, borderColor: 'red' };
 
 const colorsDark = {
-  primary: '#E8ECF0',
-  primaryText: '#131416',
-  primaryAccent: '#BCCCDC',
-  primaryAccentText: '#131416',
+  primary: '#AB091E',
+  primaryText: '#AB091E',
+  primaryAccent: '#AB091E',
+  primaryAccentText: '#AB091E',
 
-  secondary: '#102A43',
-  secondaryText: '#D9E2EC',
-  secondaryAccent: '#829AB1',
-  secondaryAccentText: '#131416',
+  secondary: '#AB091E',
+  secondaryText: '#AB091E',
+  secondaryAccent: '#AB091E',
+  secondaryAccentText: '#AB091E',
 
-  error: '#FFE3E3',
-  errorText: '#EF4E4E',
-  errorAccent: '#CF1124',
+  error: '#AB091E',
+  errorText: '#AB091E',
+  errorAccent: '#AB091E',
 
-  warning: '#FFF7C4',
-  warningText: '#E6BB20',
-  warningAccent: '#B88115',
+  warning: '#AB091E',
+  warningText: '#AB091E',
+  warningAccent: '#AB091E',
 
-  notice: '#C6F7E2',
-  noticeText: '#0C6B58',
-  noticeAccent: '#014D40',
-  noticeAccentText: '#FAFFFD',
+  notice: '#AB091E',
+  noticeText: '#AB091E',
+  noticeAccent: '#AB091E',
+  noticeAccentText: '#AB091E',
 
-  background: '#FFFFFF',
+  background: '#AB091E',
 };
 
 const colorsLight = {};
@@ -116,7 +116,7 @@ const colorPallet = {
 
 // Contextual colors, only pull from the pallet
 export const colorsm = {
-  pageBackground: colorPallet.gray100,
+  pageBackground: colorPallet.gray50,
   pageBackgroundModalActive: colorPallet.gray200,
   pageText: colorPallet.gray700,
   cardBackground: colorPallet.gray50,
@@ -171,9 +171,9 @@ export const colorsm = {
   buttonNeutralBackgroundHover: colorPallet.gray150,
   buttonNeutralBorder: colorPallet.gray300,
   buttonNeutralBorderHover: colorPallet.gray700,
-  buttonDisabledText: colorPallet.gray100,
-  buttonDisabledBackground: colorPallet.gray300,
-  buttonDisabledBorder: colorPallet.gray50,
+  buttonDisabledText: colorPallet.gray200,
+  buttonDisabledBackground: colorPallet.gray50,
+  buttonDisabledBorder: colorPallet.gray150,
   buttonShadow: colorPallet.gray700,
   noticeBackground: colorPallet.gray900,
   noticeText: colorPallet.green400,
@@ -189,11 +189,13 @@ export const colorsm = {
   searchTextFocus: colorPallet.gray300,
   formLabelText: colorPallet.gray700,
   formInputBackground: colorPallet.gray50,
-  formInputBackgroundSelection: colorPallet.purple700,
+  formInputBackgroundSelected: colorPallet.purple600,
+  formInputBackgroundSelection: colorPallet.purple600,
   formInputBorder: colorPallet.gray300,
   formInputTextReadOnlySelection: colorPallet.gray50,
   formInputBorderSelected: colorPallet.purple600,
   formInputText: colorPallet.gray700,
+  formInputTextSelected: colorPallet.gray50,
   formInputTextPlaceholder: colorPallet.gray300,
   formInputTextSelection: colorPallet.gray100,
   formInputShadowSelected: colorPallet.purple600,
