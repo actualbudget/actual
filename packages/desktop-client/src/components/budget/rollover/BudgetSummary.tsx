@@ -395,6 +395,10 @@ export function BudgetSummary({
                         text: 'Set budgets to 3 month avg',
                       },
                       isGoalTemplatesEnabled && {
+                        name: 'check-templates',
+                        text: 'Check templates',
+                      },
+                      isGoalTemplatesEnabled && {
                         name: 'apply-goal-template',
                         text: 'Apply budget template',
                       },
