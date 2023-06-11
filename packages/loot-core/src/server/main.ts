@@ -1773,7 +1773,9 @@ handlers['get-server-url'] = async function () {
 };
 
 handlers['set-server-url'] = async function ({ url, validate = true }) {
-  if (url != null) {
+  if (url == null) {
+    await asyncStorage.removeItem('user-token');
+  } else {
     if (validate) {
       // Validate the server is running
       let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
