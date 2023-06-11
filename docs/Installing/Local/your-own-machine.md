@@ -53,3 +53,12 @@ Note that if you restart your computer, you’ll have to run this command again 
 You should now be able to visit Actual by going to [http://localhost:5006](http://localhost:5006) in your browser.
 
 When first accessing Actual, you may be prompted to provide a URL for the server. For a local installation like this, you can click the “Use localhost:5006” button to use the same URL as the one you’re accessing Actual from.
+
+## Updating Actual
+
+When we publish a new release, you’ll need to follow these steps to update:
+
+1. Stop the server if it’s running. You can use the keyboard shortcut `Ctrl & c` (even on macOS) to stop the server, or close the terminal window it’s running from.
+2. Run `git pull` from the directory you cloned the project into. This will download the latest server code.
+3. Run `yarn install` from that same directory. This will download the latest web client code, along with any updated dependencies for the server.
+4. Restart the server by running `yarn start`.
