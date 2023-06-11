@@ -31,14 +31,14 @@ function WelcomeScreen({ createBudget, pushModal }) {
           <ExternalLink
             asAnchor
             style={{ color: colors.p5 }}
-            href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+            href="https://docs.actualbudget.org/Budgeting/howitworks"
           >
             monthly envelope system
           </ExternalLink>
           . Consider taking our{' '}
           <ExternalLink
             asAnchor
-            href="https://actualbudget.github.io/docs/Getting-Started/using-actual/"
+            href="https://docs.actualbudget.org/Getting-Started/using-actual/"
           >
             guided tour
           </ExternalLink>{' '}

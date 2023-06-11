@@ -253,7 +253,7 @@ export default function NordigenExternalMsg({
               Nordigen integration has not been configured so linking accounts
               is not available.{' '}
               <a
-                href="https://actualbudget.github.io/docs/Accounts/connecting-your-bank/"
+                href="https://docs.actualbudget.org/Accounts/connecting-your-bank/"
                 target="_blank"
                 rel="noopener noreferrer"
               >

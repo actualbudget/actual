@@ -71,7 +71,7 @@ class FatalError extends Component {
           <Text>{msg}</Text>
           <Text>
             Please get{' '}
-            <a href="https://actualbudget.github.io/docs/Contact">in touch</a>{' '}
+            <a href="https://docs.actualbudget.org/Contact">in touch</a>{' '}
             for support
           </Text>
         </Stack>
@@ -95,7 +95,7 @@ class FatalError extends Component {
             <P>
               If this error persists, please get{' '}
               <a
-                href="https://actualbudget.github.io/docs/Contact"
+                href="https://docs.actualbudget.org/Contact"
                 style={{ color: colors.p4 }}
               >
                 in touch

@@ -54,7 +54,7 @@ function About() {
         {isOutdated ? (
           <a
             style={{ color: colors.p4 }}
-            href="https://actualbudget.github.io/docs/Release-Notes"
+            href="https://docs.actualbudget.org/Release-Notes"
           >
             New version available: {latestVersion}
           </a>
@@ -64,7 +64,7 @@ function About() {
           </Text>
         )}
         <Text>
-          <a href="https://actualbudget.github.io/docs/Release-Notes">
+          <a href="https://docs.actualbudget.org/Release-Notes">
             Release Notes
           </a>
         </Text>

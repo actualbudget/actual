@@ -42,7 +42,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         on your server to use end-to-end encryption. This problem may also occur
         if your browser is too old to work with Actual.{' '}
         <a
-          href="https://actualbudget.github.io/docs/Installing/HTTPS"
+          href="https://docs.actualbudget.org/Installing/HTTPS"
           target="_blank"
           rel="noopener noreferrer"
         >

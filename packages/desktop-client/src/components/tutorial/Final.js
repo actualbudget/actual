@@ -22,7 +22,7 @@ function Final({ targetRect, navigationProps }) {
         You probably want to delete the transactions you added and clean up your
         budget. If you have any questions or feedback, please get{' '}
         <a
-          href="https://actualbudget.github.io/docs/Contact/"
+          href="https://docs.actualbudget.org/Contact/"
           target="_blank"
           rel="noopener noreferrer"
         >
