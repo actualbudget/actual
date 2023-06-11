@@ -1131,7 +1131,7 @@ handlers['accounts-sync'] = async function ({ id }) {
 handlers['secret-set'] = async function ({ name, value }) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (!userToken || !getServer()) {
+  if (!userToken) {
     return { error: 'unauthorized' };
   }
 
@@ -1155,7 +1155,7 @@ handlers['secret-set'] = async function ({ name, value }) {
 handlers['secret-check'] = async function (name) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (!userToken || !getServer()) {
+  if (!userToken) {
     return { error: 'unauthorized' };
   }
 
@@ -1174,7 +1174,7 @@ handlers['nordigen-poll-web-token'] = async function ({
   requisitionId,
 }) {
   let userToken = await asyncStorage.getItem('user-token');
-  if (!userToken || !getServer()) return null;
+  if (!userToken) return null;
 
   let startTime = Date.now();
   stopPolling = false;
@@ -1225,7 +1225,7 @@ handlers['nordigen-poll-web-token'] = async function ({
 handlers['nordigen-status'] = async function () {
   const userToken = await asyncStorage.getItem('user-token');
 
-  if (!userToken || !getServer()) {
+  if (!userToken) {
     return { error: 'unauthorized' };
   }
 
@@ -1241,7 +1241,7 @@ handlers['nordigen-status'] = async function () {
 handlers['nordigen-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
-  if (!userToken || !getServer()) {
+  if (!userToken) {
     return { error: 'unauthorized' };
   }
 
@@ -1266,7 +1266,7 @@ handlers['nordigen-create-web-token'] = async function ({
 }) {
   let userToken = await asyncStorage.getItem('user-token');
 
-  if (!userToken || !getServer()) {
+  if (!userToken) {
     return { error: 'unauthorized' };
   }
 
@@ -1417,7 +1417,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   // No more accounts are associated with this bank. We can remove
   // it from Nordigen.
   let userToken = await asyncStorage.getItem('user-token');
-  if (!userToken || !getServer()) {
+  if (!userToken) {
     return 'ok';
   }
 
@@ -1710,7 +1710,7 @@ handlers['subscribe-get-user'] = async function () {
 
 handlers['subscribe-change-password'] = async function ({ password }) {
   let userToken = await asyncStorage.getItem('user-token');
-  if (!userToken || !getServer()) {
+  if (!userToken) {
     return { error: 'not-logged-in' };
   }
 

@@ -77,7 +77,7 @@ export async function getAccounts(userId, userKey, id) {
 
 export async function getNordigenAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
-  if (!userToken || !getServer()) return;
+  if (!userToken) return;
 
   let res = await post(
     getServer().NORDIGEN_SERVER + '/accounts',
@@ -182,7 +182,7 @@ async function downloadNordigenTransactions(
   since,
 ) {
   let userToken = await asyncStorage.getItem('user-token');
-  if (!userToken || !getServer()) return;
+  if (!userToken) return;
 
   const endDate = new Date().toISOString().split('T')[0];
 
