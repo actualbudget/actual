@@ -25,6 +25,9 @@ export function applyBudgetAction(month, type, args) {
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
         break;
+      case 'check-templates':
+        dispatch(addNotification(await send('budget/check-templates')));
+        break;
       case 'apply-goal-template':
         dispatch(
           addNotification(await send('budget/apply-goal-template', { month })),
