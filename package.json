@@ -41,6 +41,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.37.0",
     "eslint-config-react-app": "7.0.1",
+    "eslint-import-resolver-typescript": "3.5.5",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-rulesdir": "^0.2.2",
     "npm-run-all": "^4.1.3",

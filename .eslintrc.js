@@ -172,4 +172,14 @@ module.exports = {
       rules: { 'import/no-unused-modules': 'off' }
     },
   ],
+  settings: {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  }
 };
