@@ -258,8 +258,6 @@ export interface MainHandlers {
 
   'subscribe-bootstrap': (arg: { password }) => Promise<{ error: string }>;
 
-  'subscribe-set-user': (arg: { token }) => Promise<unknown>;
-
   'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
 
   'subscribe-change-password': (arg: {

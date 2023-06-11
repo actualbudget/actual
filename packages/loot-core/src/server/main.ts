@@ -1672,10 +1672,6 @@ handlers['subscribe-bootstrap'] = async function ({ password }) {
   return { error: 'internal' };
 };
 
-handlers['subscribe-set-user'] = async function ({ token }) {
-  await asyncStorage.setItem('user-token', token);
-};
-
 handlers['subscribe-get-user'] = async function () {
   if (!getServer()) {
     if (!(await asyncStorage.getItem('did-bootstrap'))) {
