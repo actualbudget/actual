@@ -15,7 +15,7 @@ function ResizeObserver({ onResize, children }) {
   return children(ref);
 }
 
-export class FixedSizeList extends PureComponent {
+export default class FixedSizeList extends PureComponent {
   _outerRef;
   _resetIsScrollingTimeoutId = null;
 

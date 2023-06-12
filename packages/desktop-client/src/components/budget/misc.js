@@ -317,7 +317,7 @@ const connected = connect(
 
 export { connected as BudgetTable };
 
-export function SidebarCategory({
+function SidebarCategory({
   innerRef,
   category,
   dragPreview,
@@ -470,7 +470,7 @@ export function SidebarCategory({
   );
 }
 
-export function SidebarGroup({
+function SidebarGroup({
   group,
   editing,
   collapsed,
@@ -1381,7 +1381,7 @@ function getCurrentMonthName(startMonth, currentMonth) {
     : null;
 }
 
-export const MonthPicker = ({
+const MonthPicker = ({
   startMonth,
   numDisplayed,
   monthBounds,
