@@ -158,7 +158,7 @@ Now that you’ve gotten the CLI set up, you’re ready to deploy your app to Fl
 2. <a rel="download" target="_top" href="/fly.toml">Download the template <code>fly.toml</code> file by clicking here</a> and move it into the folder you just created.
 3. Switch back to your terminal and navigate to the folder you just created.
    - On macOS, drag the folder from Finder to Terminal and hold the command key when dropping it into the terminal window.
-   - On Windows, [FIXME!]
+   - On Windows, type `cd`, followed by a space, and then enter the full path (e.g. starting with `C:\`) to the folder you created. You can find the path in Explorer.
    - On Linux, use the `cd` command.
 
 ## Deploying the app
