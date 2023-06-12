@@ -19,12 +19,10 @@ import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
 import CreateLocalAccount from './modals/CreateLocalAccount';
 import EditField from './modals/EditField';
-import EditFilter from './modals/EditFilter';
 import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
 import ImportTransactions from './modals/ImportTransactions';
 import LoadBackup from './modals/LoadBackup';
-import ManageFiltersModal from './modals/ManageFiltersModal';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import NordigenExternalMsg from './modals/NordigenExternalMsg';
@@ -151,31 +149,6 @@ function Modals({
           />
         </Route>
 
-        <Route
-          path="/manage-filters"
-          render={() => {
-            return (
-              <ManageFiltersModal
-                history={history}
-                modalProps={modalProps}
-                payeeId={options.payeeId}
-              />
-            );
-          }}
-        />
-
-        <Route
-          path="/edit-filter"
-          render={() => {
-            return (
-              <EditFilter
-                modalProps={modalProps}
-                defaultFilter={options.filter}
-                onSave={options.onSave}
-              />
-            );
-          }}
-        />
         <Route path="/merge-unused-payees">
           <MergeUnusedPayees
             history={history}

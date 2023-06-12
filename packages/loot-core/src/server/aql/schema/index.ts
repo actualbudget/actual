@@ -116,7 +116,7 @@ export const schema = {
     id: f('id'),
     note: f('string'),
   },
-  filters: {
+  transaction_filters: {
     id: f('id'),
     name: f('string'),
     conditions: f('json'),

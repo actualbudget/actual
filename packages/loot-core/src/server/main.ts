@@ -52,6 +52,7 @@ import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
 import { APIError, TransactionError, PostError, RuleError } from './errors';
+import filtersApp from './filters/app';
 import app from './main-app';
 import { mutator, runHandler } from './mutators';
 import notesApp from './notes/app';
@@ -2340,7 +2341,7 @@ injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 
 // A hack for now until we clean up everything
 app.handlers = handlers;
-app.combine(schedulesApp, budgetApp, notesApp, toolsApp);
+app.combine(schedulesApp, budgetApp, notesApp, toolsApp, filtersApp);
 
 function getDefaultDocumentDir() {
   if (Platform.isMobile) {

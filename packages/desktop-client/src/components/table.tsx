@@ -894,7 +894,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       headers,
       contentHeader,
       loading,
-      rowHeight = ROW_HEIGHT,
+      rowHeight,
       backgroundColor = TABLE_BACKGROUND_COLOR,
       renderItem,
       renderEmpty,

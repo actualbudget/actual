@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import { useParams, useHistory } from 'react-router-dom';
 
 import {
   initiallyLoadPayees,
   setUndoEnabled,
 } from 'loot-core/src/client/actions/queries';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import {
   mapField,
   friendlyOp,
   getFieldError,
-  parse,
   unparse,
   makeValue,
   FIELD_TYPES,
@@ -24,18 +24,14 @@ import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import { colors } from '../../style';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
-import { View, Text, Modal, Button, Stack, CustomSelect } from '../common';
+import { View, Text, Button, Stack, CustomSelect } from '../common';
+import { FormField, FormLabel } from '../forms';
+import { Page } from '../Page';
 import { BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
-}
-
-function applyErrors(array, errorsArray) {
-  return array.map((item, i) => {
-    return { ...item, error: errorsArray[i] };
-  });
 }
 
 function getTransactionFields(conditions) {
@@ -94,12 +90,22 @@ function EditorButtons({ onAdd, onDelete, style }) {
   return (
     <>
       {onDelete && (
-        <Button bare onClick={onDelete} style={{ padding: 7 }}>
+        <Button
+          bare
+          onClick={onDelete}
+          style={{ padding: 7 }}
+          aria-label="Delete entry"
+        >
           <SubtractIcon style={{ width: 8, height: 8 }} />
         </Button>
       )}
       {onAdd && (
-        <Button bare onClick={onAdd} style={{ padding: 7 }}>
+        <Button
+          bare
+          onClick={onAdd}
+          style={{ padding: 7 }}
+          aria-label="Add entry"
+        >
           <AddIcon style={{ width: 10, height: 10 }} />
         </Button>
       )}
@@ -124,7 +130,7 @@ function FieldError({ type }) {
 
 function Editor({ error, style, children }) {
   return (
-    <View style={style}>
+    <View style={style} data-testid="editor-row">
       <Stack
         direction="row"
         align="center"
@@ -203,7 +209,6 @@ export function ConditionsList({
   conditionsOp,
   conditions,
   editorStyle,
-  isSchedule,
   onChangeConditions,
 }) {
   function addCondition(index) {
@@ -345,7 +350,6 @@ export function ConditionsList({
               editorStyle={editorStyle}
               ops={ops}
               condition={cond}
-              isSchedule={isSchedule}
               onChange={(name, value) => {
                 updateCondition(cond, name, value);
               }}
@@ -363,11 +367,11 @@ export function ConditionsList({
 // * Dont touch child transactions?
 
 let conditionFields = [
-  'account',
   'imported_payee',
-  'payee',
+  'account',
   'category',
   'date',
+  'payee',
   'notes',
   'amount',
 ]
@@ -377,19 +381,23 @@ let conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export default function EditFilter({
-  modalProps,
-  defaultFilter,
-  onSave: originalOnSave,
-}) {
-  let [conditions, setConditions] = useState(
-    defaultFilter.conditions.map(parse),
-  );
-  //let [title, setTitle] = useState(defaultFilter.stage);
-  let [conditionsOp, setConditionsOp] = useState(defaultFilter.conditionsOp);
+export default function EditFilter() {
+  let [conditions, setConditions] = useState([
+    {
+      field: 'payee',
+      op: 'is',
+      value: null,
+      type: 'id',
+    },
+  ]);
+  let [conditionsOp, setConditionsOp] = useState('and');
+  let { id, initialFields } = useParams();
   let [transactions, setTransactions] = useState([]);
+  let [name, setName] = useState('None');
   let dispatch = useDispatch();
   let scrollableEl = useRef();
+  let history = useHistory();
+  let adding = id == null;
 
   useEffect(() => {
     dispatch(initiallyLoadPayees());
@@ -398,6 +406,11 @@ export default function EditFilter({
     setUndoEnabled(false);
     return () => setUndoEnabled(true);
   }, []);
+
+  async function loadFilter() {
+    let { data } = await runQuery(q('transaction_filters').filter({ id }).select('*'));
+    return data[0];
+  }
 
   useEffect(() => {
     // Flash the scrollbar
@@ -410,50 +423,58 @@ export default function EditFilter({
 
     // Run it here
     async function run() {
-      let { filters } = await send('make-filters-from-conditions', {
-        conditions: conditions.map(unparse),
-      });
+      if (adding) {
+        let { filters } = await send('make-filters-from-conditions', {
+          conditions: conditions.map(unparse),
+        });
 
-      if (filters.length > 0) {
-        let { data: transactions } = await runQuery(
-          q('transactions').filter({ $and: filters }).select('*'),
-        );
-        setTransactions(transactions);
+        if (filters.length > 0) {
+          const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+          let { data: transactions } = await runQuery(
+            q('transactions')
+              .filter({ [conditionsOpKey]: filters })
+              .select('*'),
+          );
+          setTransactions(transactions);
+        } else {
+          setTransactions([]);
+        }
       } else {
-        setTransactions([]);
+        let filters = await loadFilter();
+
+        //if (filters) {
+        //  setConditions(filters.conditions);
+        //  setName(filters.name);
+        //}
       }
     }
     run();
-  }, [conditions]);
+  }, [conditions, conditionsOp]);
 
   let selectedInst = useSelected('transactions', transactions, []);
 
-  function onChangeConditionsOp(name, value) {
+  function onChangeConditionsOp(value) {
     setConditionsOp(value);
   }
 
+  function onChangeName(value) {
+    setName(value);
+  }
+
   async function onSave() {
-    let filter = {
-      ...defaultFilter,
-      //title,
+    let res = await sendCatch(adding ? 'filter/create' : 'filter/update', {
+      name: name,
       conditions: conditions.map(unparse),
-    };
+    });
 
-    let method = filter.id ? 'filter-update' : 'filter-add';
-    let { error, id: newId } = await send(method, filter);
-
-    if (error) {
-      if (error.conditionErrors) {
-        setConditions(applyErrors(conditions, error.conditionErrors));
-      }
+    if (res.error) {
+      dispatch({
+        type: 'form-error',
+        error:
+          'An error occurred while saving. Please contact help@actualbudget.com for support.',
+      });
     } else {
-      // If adding a filter, we got back an id
-      if (newId) {
-        filter.id = newId;
-      }
-
-      originalOnSave && originalOnSave(filter);
-      modalProps.onClose();
+      history.goBack();
     }
   }
 
@@ -463,94 +484,82 @@ export default function EditFilter({
   };
 
   return (
-    <Modal
-      title="Custom Filter"
-      padding={0}
-      {...modalProps}
-      style={[modalProps.style, { flex: 'inherit', maxWidth: '90%' }]}
-    >
-      {() => (
-        <View
-          style={{
-            maxWidth: '100%',
-            width: 900,
-            height: '80vh',
-            flexGrow: 0,
-            flexShrink: 0,
-            flexBasis: 'auto',
-            overflow: 'hidden',
-          }}
-        >
+    <Page title="Custom Filter" modalSize="medium">
+      <Stack direction="row" style={{ marginTop: 10 }}>
+        <FormField style={{ flex: 1 }}>
+          <FormLabel title="Filter Name" htmlFor="name-field" />
+          <GenericInput
+            field="string"
+            type="string"
+            value={name}
+            onChange={onChangeName}
+          />
+        </FormField>
+      </Stack>
+      <View style={{ flexShrink: 0 }}>
+        <View style={{ marginBottom: 10, marginTop: 20 }}>
+          <Text style={{ color: colors.n4, marginBottom: 5 }}>
+            If
+            <FieldSelect
+              data-testid="conditions-op"
+              style={{ display: 'inline-flex' }}
+              fields={[
+                ['and', 'all'],
+                ['or', 'any'],
+              ]}
+              value={conditionsOp}
+              onChange={onChangeConditionsOp}
+            />
+            of these conditions match:
+          </Text>
+
+          <ConditionsList
+            conditionsOp={conditionsOp}
+            conditions={conditions}
+            editorStyle={editorStyle}
+            onChangeConditions={conds => setConditions(conds)}
+          />
+        </View>
+      </View>
+
+      <SelectedProvider instance={selectedInst}>
+        <View style={{ padding: '20px', flex: 1 }}>
           <View
-            innerRef={scrollableEl}
             style={{
-              borderBottom: '1px solid ' + colors.border,
-              padding: 20,
-              overflow: 'auto',
-              maxHeight: 'calc(100% - 300px)',
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 12,
             }}
           >
-            <View style={{ flexShrink: 0 }}>
-              <View style={{ marginBottom: 30 }}>
-                <Text style={{ color: colors.n4, marginBottom: 15 }}>
-                  If
-                  <FieldSelect
-                    data-testid="conditions-op"
-                    style={{ display: 'inline-flex' }}
-                    fields={[
-                      ['and', 'all'],
-                      ['or', 'any'],
-                    ]}
-                    value={conditionsOp}
-                    onChange={onChangeConditionsOp}
-                  />
-                  of these conditions match:
-                </Text>
-
-                <ConditionsList
-                  conditionsOp={conditionsOp}
-                  conditions={conditions}
-                  editorStyle={editorStyle}
-                  onChangeConditions={conds => setConditions(conds)}
-                />
-              </View>
-            </View>
+            <Text style={{ color: colors.n4, marginBottom: 0 }}>
+              Filter results:
+            </Text>
           </View>
 
-          <SelectedProvider instance={selectedInst}>
-            <View style={{ padding: '20px', flex: 1 }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 12,
-                }}
-              >
-                <Text style={{ color: colors.n4, marginBottom: 0 }}>
-                  Filter results:
-                </Text>
-              </View>
+          <SimpleTransactionsTable
+            transactions={transactions}
+            fields={getTransactionFields(conditions)}
+            style={{
+              border: '1px solid ' + colors.border,
+              borderRadius: 4,
+              overflow: 'hidden',
+              marginTop: 5,
+            }}
+          />
 
-              <SimpleTransactionsTable
-                transactions={transactions}
-                fields={getTransactionFields(conditions)}
-                style={{ border: '1px solid ' + colors.border }}
-              />
-
-              <Stack
-                direction="row"
-                justify="flex-end"
-                style={{ marginTop: 20 }}
-              >
-                <Button onClick={() => modalProps.onClose()}>Cancel</Button>
-                <Button primary onClick={() => onSave()}>
-                  Save
-                </Button>
-              </Stack>
-            </View>
-          </SelectedProvider>
+          <Stack direction="row" justify="flex-end" style={{ marginTop: 20 }}>
+            <Button
+              style={{ marginRight: 10 }}
+              onClick={() => history.goBack()}
+            >
+              Cancel
+            </Button>
+            <Button primary onClick={onSave}>
+              {adding ? 'Add' : 'Save'}
+            </Button>
+          </Stack>
         </View>
-      )}
-    </Modal>
+      </SelectedProvider>
+    </Page>
   );
 }

@@ -40,9 +40,10 @@ import Budget from './budget';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import MobileBudget from './budget/MobileBudget';
 import { View } from './common';
+import Filters from './filters';
+import EditFilter from './filters/EditFilter';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
-import { ManageFiltersPage } from './ManageFiltersPage';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
 import NordigenLink from './nordigen/NordigenLink';
@@ -108,6 +109,22 @@ function Routes({ location }) {
         <PostsOfflineNotification />
       </Route>
 
+      <Route path="/filters" exact>
+        <NarrowNotSupported>
+          <Filters />
+        </NarrowNotSupported>
+      </Route>
+      <Route path="/filters/edit" exact>
+        <NarrowNotSupported>
+          <EditFilter />
+        </NarrowNotSupported>
+      </Route>
+      <Route path="/filters/edit/:id" exact>
+        <NarrowNotSupported>
+          <EditFilter />
+        </NarrowNotSupported>
+      </Route>
+
       <Route path="/payees" exact>
         <ManagePayeesPage />
       </Route>
@@ -117,7 +134,6 @@ function Routes({ location }) {
       <Route path="/settings">
         <Settings />
       </Route>
-      <Route path="/filters" exact component={ManageFiltersPage} />
       <Route path="/nordigen/link" exact>
         <NarrowNotSupported>
           <NordigenLink />
