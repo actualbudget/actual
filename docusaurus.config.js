@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 module.exports = {
   title: 'Actual Budget Documentation',
   tagline: 'Dinosaurs are cool',
-  url: 'https://actualbudget.github.io',
+  url: 'https://docs.actualbudget.org',
   baseUrl: '/docs/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
