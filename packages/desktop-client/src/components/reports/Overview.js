@@ -8,7 +8,7 @@ import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { colors, styles } from '../../style';
+import { colorsm, styles } from '../../style';
 import { View, Block, AnchorLink } from '../common';
 
 import Change from './Change';
@@ -28,7 +28,7 @@ function Card({ flex, to, style, children }) {
     <View
       style={[
         {
-          backgroundColor: 'white',
+          backgroundColor: colorsm.cardBackground,
           borderRadius: 2,
           height: 200,
           boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
@@ -94,7 +94,7 @@ function NetWorthCard({ accounts }) {
             </Block>
             <Change
               amount={data.totalChange}
-              style={{ color: colors.n6, fontWeight: 300 }}
+              style={{ color: colorsm.tableText, fontWeight: 300 }}
             />
           </View>
         </View>
@@ -141,7 +141,7 @@ function CashFlowCard() {
           <View style={{ textAlign: 'right' }}>
             <Change
               amount={income - expense}
-              style={{ color: colors.n6, fontWeight: 300 }}
+              style={{ color: colorsm.tableText, fontWeight: 300 }}
             />
           </View>
         </View>
@@ -249,7 +249,7 @@ function Overview({ accounts }) {
         <Card
           style={[
             {
-              color: '#a0a0a0',
+              color: colorsm.tableBackground,
               justifyContent: 'center',
               alignItems: 'center',
               width: 200,

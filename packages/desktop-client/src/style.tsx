@@ -118,6 +118,11 @@ const colorPallet = {
 export const colorsm = {
   pageBackground: colorPallet.gray400,
   pageBackgroundModalActive: colorPallet.gray800,
+  pageBackgroundTopLeft: colorPallet.gray400,
+  pageBackgroundBottomRight: colorPallet.gray500,
+  pageBackgroundLineTop: colorPallet.gray800,
+  pageBackgroundLineMid: colorPallet.gray500,
+  pageBackgroundLineBottom: colorPallet.gray300,
   pageText: colorPallet.gray100,
   pageTextSubdued: colorPallet.gray300,
   cardBackground: colorPallet.gray800,
@@ -271,9 +276,9 @@ const _colors = {
   p10: '#F2EBFE',
   p11: '#F9F6FE',
 
-  border: '#610316',
-  hover: '#610316',
-  selected: '#610316',
+  border: '#ed6704',
+  hover: '#ed6704',
+  selected: '#ed6704',
 };
 
 export const colors = {
@@ -322,11 +327,11 @@ export const styles = {
   pageHeader: {
     fontSize: 25,
     borderBottomWidth: 5,
-    borderColor: '#610316',
+    borderColor: '#ed6704',
     borderStyle: 'solid',
     display: 'inline',
     flex: 0,
-    color: '#610316',
+    color: '#ed6704',
     marginTop: 40,
     marginBottom: 20,
     paddingBottom: 5,
@@ -387,7 +392,7 @@ function onScrollbarChange() {
           border: '2px solid rgba(0, 0, 0, 0)',
         },
         '& ::-webkit-scrollbar-thumb:vertical': {
-          backgroundColor: '#d0d0d0',
+          backgroundColor: '#ed6704',
         },
       };
 
