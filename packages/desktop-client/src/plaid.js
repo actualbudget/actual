@@ -1,3 +1,4 @@
+/* eslint import/no-unused-modules: 0 */
 import { send } from 'loot-core/src/platform/client/fetch';
 
 function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
