@@ -7,6 +7,8 @@ export interface BudgetHandlers {
 
   'budget/set-3month-avg': (...args: unknown[]) => Promise<unknown>;
 
+  'budget/check-templates': (...args: unknown[]) => Promise<unknown>;
+
   'budget/apply-goal-template': (...args: unknown[]) => Promise<unknown>;
 
   'budget/overwrite-goal-template': (...args: unknown[]) => Promise<unknown>;

@@ -248,6 +248,8 @@ export interface MainHandlers {
 
   'key-test': (arg: { fileId; password }) => Promise<unknown>;
 
+  'get-did-bootstrap': () => Promise<boolean>;
+
   'subscribe-needs-bootstrap': (
     args: { url } = {},
   ) => Promise<
@@ -255,8 +257,6 @@ export interface MainHandlers {
   >;
 
   'subscribe-bootstrap': (arg: { password }) => Promise<{ error: string }>;
-
-  'subscribe-set-user': (arg: { token }) => Promise<unknown>;
 
   'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
 
