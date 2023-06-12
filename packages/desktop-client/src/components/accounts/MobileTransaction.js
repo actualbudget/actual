@@ -31,7 +31,7 @@ const zIndices = { SECTION_HEADING: 10 };
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));
 
-export function isPreviewId(id) {
+function isPreviewId(id) {
   return id.indexOf('preview/') !== -1;
 }
 
@@ -49,23 +49,6 @@ function getDescriptionPretty(transaction, payee, transferAcct) {
 
 function lookupName(items, id) {
   return items.find(item => item.id === id).name;
-}
-
-export function DateHeader({ date }) {
-  return (
-    <ListItem
-      style={{
-        height: 25,
-        backgroundColor: colors.n10,
-        borderColor: colors.n9,
-        justifyContent: 'center',
-      }}
-    >
-      <Text style={[styles.text, { fontSize: 13, color: colors.n4 }]}>
-        {monthUtils.format(date, 'MMMM dd, yyyy')}
-      </Text>
-    </ListItem>
-  );
 }
 
 function Status({ status }) {
@@ -97,7 +80,7 @@ function Status({ status }) {
   );
 }
 
-export class Transaction extends PureComponent {
+class Transaction extends PureComponent {
   render() {
     const {
       transaction,
@@ -471,9 +454,9 @@ function Option({ isLast, item, state }) {
   );
 }
 
-export const ROW_HEIGHT = 50;
+const ROW_HEIGHT = 50;
 
-export const ListItem = forwardRef(({ children, style, ...props }, ref) => {
+const ListItem = forwardRef(({ children, style, ...props }, ref) => {
   return (
     <View
       style={[
