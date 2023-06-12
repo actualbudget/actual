@@ -246,6 +246,7 @@ export const TransactionHeader = memo(
         style={{
           fontWeight: 300,
           zIndex: 200,
+          color: colorsm.tableHeaderText,
         }}
       >
         <SelectCell
@@ -260,10 +261,10 @@ export const TransactionHeader = memo(
         <Field children="Payee" width="flex" />
         <Field children="Notes" width="flex" />
         {showCategory && <Field children="Category" width="flex" />}
-        <Field children="Payment" width={80} textAlign="right" />
-        <Field children="Deposit" width={80} textAlign="right" />
+        <Field children="Payment" width={80} style={{ textAlign: 'right' }} />
+        <Field children="Deposit" width={80} style={{ textAlign: 'right' }} />
         {showBalance && (
-          <Field children="Balance" width={88} textAlign="right" />
+          <Field children="Balance" width={88} style={{ textAlign: 'right' }} />
         )}
         {showCleared && <Field width={21} truncate={false} />}
         <Field children="" width={15 + styles.scrollbarWidth} />
@@ -651,6 +652,9 @@ export const Transaction = memo(function Transaction(props) {
       }
       highlighted={highlighted}
       style={[
+        highlighted || selected
+          ? { color: colorsm.tableRowBackgroundHighlightText }
+          : { color: colorsm.tableText },
         style,
         isPreview && {
           color: colorsm.formInputTextHighlight,

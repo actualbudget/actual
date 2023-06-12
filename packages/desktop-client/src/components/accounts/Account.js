@@ -444,10 +444,10 @@ function Balances({
         bare
         onClick={onToggleExtraBalances}
         style={{
+          backgroundColor: colorsm.tableBackground,
           '& svg': {
-            opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0,
+            opacity: selectedItems.size > 0,
           },
-          '&:hover svg': { opacity: 1 },
         }}
       >
         <CellValue
@@ -470,7 +470,7 @@ function Balances({
             height: 10,
             marginLeft: 10,
             color: colorsm.tableText,
-            transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
+            transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0deg)',
           }}
         />
       </Button>

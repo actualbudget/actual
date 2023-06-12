@@ -1425,7 +1425,7 @@ export const MonthPicker = ({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          color: colorsm.pageText,
+          color: colorsm.pageTextSubdued,
         },
         style,
       ]}
@@ -1514,16 +1514,30 @@ export const MonthPicker = ({
         <Button
           onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
           bare
-          style={{ color: colorsm.pageText }}
+          style={{
+            color: colorsm.pageTextSubdued,
+          }}
         >
-          <ArrowThinLeft width={12} height={12} />
+          <ArrowThinLeft
+            width={12}
+            height={12}
+            style={{
+              color: colorsm.pageTextSubdued,
+            }}
+          />
         </Button>
         <Button
           onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
           bare
           style={{ color: colorsm.pageText }}
         >
-          <ArrowThinRight width={12} height={12} />
+          <ArrowThinRight
+            width={12}
+            height={12}
+            style={{
+              color: colorsm.pageTextSubdued,
+            }}
+          />
         </Button>
       </View>
     </View>

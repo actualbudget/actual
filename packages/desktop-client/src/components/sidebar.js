@@ -473,13 +473,13 @@ function ToggleButton({ style, isFloating, onFloat }) {
               margin: -2,
               width: 15,
               height: 15,
-              color: colorsm.sidebarItemAccent,
+              color: colorsm.sidebarItemText,
               transform: 'rotate(45deg)',
             }}
           />
         ) : (
           <ArrowButtonLeft1
-            style={{ width: 13, height: 13, color: colorsm.sidebarItemAccent }}
+            style={{ width: 13, height: 13, color: colorsm.sidebarItemText }}
           />
         )}
       </Button>

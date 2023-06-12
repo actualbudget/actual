@@ -1,7 +1,7 @@
 import React from 'react';
 
 import CalendarIcon from '../../icons/v2/Calendar';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { View } from '../common';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
@@ -29,7 +29,7 @@ export function MonthCountSelector({ maxMonths, onChange }) {
     calendars.push(
       <Calendar
         key={i}
-        color={maxMonths >= i ? colors.n5 : colors.n8}
+        color={maxMonths >= i ? colorsm.pageText : colorsm.pageTextSubdued}
         onClick={() => onChange(i)}
       />,
     );

@@ -15,6 +15,7 @@ import RefreshArrow from '../../icons/v2/RefreshArrow';
 import { styles, colorsm } from '../../style';
 import tokens from '../../tokens';
 import { View, Text, Button, Tooltip, Menu } from '../common';
+import { PageTitle } from '../Page';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -51,7 +52,7 @@ function FileMenu({ onDelete, onClose }) {
   return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
-function DetailButton({ state, onDelete }) {
+function DetailButton({ style, state, onDelete }) {
   let [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -63,7 +64,7 @@ function DetailButton({ state, onDelete }) {
           setMenuOpen(true);
         }}
       >
-        <DotsHorizontalTriple style={{ width: 16, height: 16 }} />
+        <DotsHorizontalTriple style={{ width: 16, height: 16, ...style }} />
       </Button>
       {menuOpen && (
         <Tooltip
@@ -157,11 +158,13 @@ function File({ file, onSelect, onDelete }) {
           margin: 10,
           padding: '12px 15px',
           backgroundColor: colorsm.tableBackground,
+          color: colorsm.tableText,
           borderRadius: 6,
           flexShrink: 0,
           cursor: 'pointer',
           ':hover': {
             backgroundColor: colorsm.tableRowBackgroundHighlight,
+            color: colorsm.tableRowBackgroundHighlightText,
           },
         },
       ]}
@@ -188,7 +191,13 @@ function File({ file, onSelect, onDelete }) {
           />
         )}
 
-        <DetailButton state={file.state} onDelete={() => onDelete(file)} />
+        <DetailButton
+          state={file.state}
+          onDelete={() => onDelete(file)}
+          style={{
+            color: colorsm.tableText,
+          }}
+        />
       </View>
     </View>
   );
@@ -272,8 +281,18 @@ function BudgetList({
         },
       }}
     >
-      <View>
-        <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
+      <View
+        style={{
+          color: colorsm.pageText,
+        }}
+      >
+        <PageTitle
+          name="Files"
+          style={{
+            margin: 20,
+            color: colorsm.pageText,
+          }}
+        />
         <View
           style={{
             position: 'absolute',

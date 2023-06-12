@@ -20,7 +20,7 @@ export function usePageType() {
   return useContext(PageTypeContext);
 }
 
-function PageTitle({ name, style }) {
+export function PageTitle({ name, style }) {
   const { isNarrowWidth } = useResponsive();
 
   if (isNarrowWidth) {

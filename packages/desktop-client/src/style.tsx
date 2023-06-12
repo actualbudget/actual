@@ -6,7 +6,7 @@ import tokens from './tokens';
 
 export const debug = { borderWidth: 1, borderColor: 'red' };
 
-const colorsDark = {
+export const colorsn = {
   primary: '#AB091E',
   primaryText: '#AB091E',
   primaryAccent: '#AB091E',
@@ -32,15 +32,6 @@ const colorsDark = {
 
   background: '#AB091E',
 };
-
-const colorsLight = {};
-
-const colorThemes = [
-  { name: 'dark', colors: colorsDark, type: 'dark' },
-  { name: 'dark', colors: colorsLight, type: 'dark' },
-];
-
-export const colorsn = colorThemes[0].colors;
 
 // Only for use in contextual color definitions
 const colorPallet = {
@@ -115,16 +106,16 @@ const colorPallet = {
 };
 
 // Contextual colors, only pull from the pallet
-export const colorsm = {
-  pageBackground: colorPallet.gray400,
+const colorsDark = {
+  pageBackground: colorPallet.gray500,
   pageBackgroundModalActive: colorPallet.gray800,
-  pageBackgroundTopLeft: colorPallet.gray400,
-  pageBackgroundBottomRight: colorPallet.gray500,
+  pageBackgroundTopLeft: colorPallet.gray500,
+  pageBackgroundBottomRight: colorPallet.gray600,
   pageBackgroundLineTop: colorPallet.gray800,
-  pageBackgroundLineMid: colorPallet.gray500,
-  pageBackgroundLineBottom: colorPallet.gray300,
+  pageBackgroundLineMid: colorPallet.gray600,
+  pageBackgroundLineBottom: colorPallet.gray400,
   pageText: colorPallet.gray100,
-  pageTextSubdued: colorPallet.gray300,
+  pageTextSubdued: colorPallet.gray200,
   cardBackground: colorPallet.gray800,
   cardBorder: colorPallet.purple300,
   cardShadow: colorPallet.gray700,
@@ -143,15 +134,16 @@ export const colorsm = {
   tableBorderHover: colorPallet.purple200,
   tableBorderSeparator: colorPallet.gray400,
   tableRowBackgroundHighlight: colorPallet.purple300,
+  tableRowBackgroundHighlightText: colorPallet.gray800,
   tableRowHeaderBackground: colorPallet.gray800,
   tableRowHeaderBackgroundText: colorPallet.gray100,
-  sidebarBackground: colorPallet.navy800,
-  sidebarItemBackground: colorPallet.navy800,
-  sidebarItemBackgroundSelected: colorPallet.navy800,
-  sidebarItemBackgroundHover: colorPallet.navy700,
-  sidebarItemAccent: colorPallet.navy800,
+  sidebarBackground: colorPallet.gray800,
+  sidebarItemBackground: colorPallet.gray800,
+  sidebarItemBackgroundSelected: colorPallet.gray800,
+  sidebarItemBackgroundHover: colorPallet.gray700,
+  sidebarItemAccent: colorPallet.gray800,
   sidebarItemAccentSelected: colorPallet.purple300,
-  sidebarItemAccentHover: colorPallet.navy700,
+  sidebarItemAccentHover: colorPallet.gray700,
   sidebarItemText: colorPallet.gray50,
   sidebarItemTextSelected: colorPallet.purple300,
   sidebarItemTextHover: colorPallet.gray50,
@@ -187,7 +179,7 @@ export const colorsm = {
   warningBackground: colorPallet.orange400,
   warningText: colorPallet.gray900,
   warningAccent: colorPallet.orange100,
-  errorBackground: colorPallet.gray200,
+  errorBackground: colorPallet.gray600,
   errorText: colorPallet.red300,
   errorAccent: colorPallet.red150,
   searchBackground: colorPallet.gray800,
@@ -207,6 +199,107 @@ export const colorsm = {
   formInputShadowSelected: colorPallet.purple300,
   formInputTextHighlight: colorPallet.purple300,
 };
+
+const colorsLight = {
+  pageBackground: colorPallet.gray50,
+  pageBackgroundModalActive: colorPallet.gray200,
+  pageBackgroundTopLeft: colorPallet.navy100,
+  pageBackgroundBottomRight: colorPallet.navy150,
+  pageBackgroundLineTop: colorPallet.gray50,
+  pageBackgroundLineMid: colorPallet.navy100,
+  pageBackgroundLineBottom: colorPallet.navy200,
+  pageText: colorPallet.gray700,
+  pageTextSubdued: colorPallet.gray500,
+  cardBackground: colorPallet.gray50,
+  cardBorder: colorPallet.purple600,
+  cardShadow: colorPallet.gray700,
+  tableBackground: colorPallet.white,
+  tableBackgroundHover: colorPallet.gray150,
+  tableText: colorPallet.gray700,
+  tableTextSelected: colorPallet.gray700,
+  tableTextHover: colorPallet.gray900,
+  tableTextEditing: colorPallet.gray50,
+  tableTextEditingBackground: colorPallet.purple600,
+  tableTextInactive: colorPallet.gray500,
+  tableHeaderText: colorPallet.gray600,
+  tableHeaderBackground: colorPallet.gray100,
+  tableBorder: colorPallet.gray150,
+  tableBorderSelected: colorPallet.purple600,
+  tableBorderHover: colorPallet.purple500,
+  tableBorderSeparator: colorPallet.gray400,
+  tableRowBackgroundHighlight: colorPallet.purple200,
+  tableRowBackgroundHighlightText: colorPallet.gray700,
+  tableRowHeaderBackground: colorPallet.gray100,
+  tableRowHeaderBackgroundText: colorPallet.gray800,
+  sidebarBackground: colorPallet.navy800,
+  sidebarItemBackground: colorPallet.navy800,
+  sidebarItemBackgroundSelected: colorPallet.navy800,
+  sidebarItemBackgroundHover: colorPallet.navy700,
+  sidebarItemAccent: colorPallet.navy800,
+  sidebarItemAccentSelected: colorPallet.purple300,
+  sidebarItemAccentHover: colorPallet.navy700,
+  sidebarItemText: colorPallet.gray100,
+  sidebarItemTextSelected: colorPallet.gray50,
+  sidebarItemTextHover: colorPallet.gray50,
+  tooltipBackground: colorPallet.gray50,
+  tooltipBorder: colorPallet.gray300,
+  menuBackground: colorPallet.gray50,
+  menuItemBackground: colorPallet.gray50,
+  menuItemBackgroundHover: colorPallet.gray150,
+  menuItemBackgroundSelected: colorPallet.purple200,
+  menuItemText: colorPallet.gray800,
+  menuItemTextHover: colorPallet.gray800,
+  menuItemTextSelected: colorPallet.gray800,
+  menuItemTextHeader: colorPallet.purple700,
+  menuBorder: colorPallet.gray100,
+  menuBorderHover: colorPallet.purple200,
+  buttonPositiveText: colorPallet.gray50,
+  buttonPositiveTextHover: colorPallet.gray50,
+  buttonPositiveTextSelected: colorPallet.gray50,
+  buttonPositiveBackground: colorPallet.purple600,
+  buttonPositiveBorder: colorPallet.purple600,
+  buttonNeutralText: colorPallet.gray700,
+  buttonNeutralBackground: colorPallet.gray50,
+  buttonNeutralBackgroundHover: colorPallet.gray150,
+  buttonNeutralBorder: colorPallet.gray300,
+  buttonNeutralBorderHover: colorPallet.gray700,
+  buttonDisabledText: colorPallet.gray200,
+  buttonDisabledBackground: colorPallet.gray50,
+  buttonDisabledBorder: colorPallet.gray150,
+  buttonShadow: colorPallet.gray700,
+  noticeBackground: colorPallet.gray900,
+  noticeText: colorPallet.green400,
+  noticeAccent: colorPallet.gray700,
+  warningBackground: colorPallet.orange300,
+  warningText: colorPallet.gray900,
+  warningAccent: colorPallet.orange100,
+  errorBackground: colorPallet.gray50,
+  errorText: colorPallet.red500,
+  errorAccent: colorPallet.red500,
+  searchBackground: colorPallet.gray50,
+  searchBackgroundFocus: colorPallet.gray50,
+  searchTextFocus: colorPallet.gray300,
+  formLabelText: colorPallet.gray700,
+  formInputBackground: colorPallet.gray50,
+  formInputBackgroundSelected: colorPallet.purple600,
+  formInputBackgroundSelection: colorPallet.purple600,
+  formInputBorder: colorPallet.gray300,
+  formInputTextReadOnlySelection: colorPallet.gray50,
+  formInputBorderSelected: colorPallet.purple600,
+  formInputText: colorPallet.gray700,
+  formInputTextSelected: colorPallet.gray50,
+  formInputTextPlaceholder: colorPallet.gray300,
+  formInputTextSelection: colorPallet.gray100,
+  formInputShadowSelected: colorPallet.purple600,
+  formInputTextHighlight: colorPallet.purple600,
+};
+
+const colorThemes = [
+  { name: 'actual-dark', colors: colorsDark, type: 'dark' },
+  { name: 'actual-light', colors: colorsLight, type: 'light' },
+];
+
+export const colorsm = colorThemes[0].colors;
 
 const _colors = {
   y1: '#733309',

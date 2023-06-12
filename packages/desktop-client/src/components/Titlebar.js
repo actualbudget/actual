@@ -20,7 +20,7 @@ import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { colors } from '../style';
+import { colorsm } from '../style';
 import tokens from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
@@ -73,7 +73,10 @@ export function UncategorizedButton() {
             <ButtonLink
               bare
               to="/accounts/uncategorized"
-              style={{ color: colors.r5 }}
+              style={{
+                color: colorsm.errorText,
+                backgroundColor: colorsm.errorBackground,
+              }}
             >
               {num} uncategorized {num === 1 ? 'transaction' : 'transactions'}
             </ButtonLink>
@@ -130,21 +133,21 @@ export function SyncButton({ localPrefs, style, onSync }) {
           WebkitAppRegion: 'none',
           color:
             syncState === 'error'
-              ? colors.r7
+              ? colorsm.errorText
               : syncState === 'disabled' ||
                 syncState === 'offline' ||
                 syncState === 'local'
-              ? colors.n9
+              ? colorsm.pageTextSubdued
               : null,
         },
         media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
             syncState === 'error'
-              ? colors.r4
+              ? colorsm.errorText
               : syncState === 'disabled' ||
                 syncState === 'offline' ||
                 syncState === 'local'
-              ? colors.n6
+              ? colorsm.pageTextSubdued
               : null,
         }),
       )}
@@ -242,7 +245,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                 <a
                   href="#"
                   style={{
-                    color: colors.n4,
+                    color: colorsm.pageText,
                     fontStyle: 'italic',
                   }}
                 >
@@ -296,7 +299,7 @@ function Titlebar({
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
           bare
-          style={{ marginRight: 8 }}
+          style={{ marginRight: 8, color: colorsm.pageText }}
           onPointerEnter={e => {
             if (e.pointerType === 'mouse') {
               sidebar.setHidden(false);
@@ -315,7 +318,7 @@ function Titlebar({
         >
           <NavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: colors.n5, left: 0 }}
+            style={{ width: 15, height: 15, color: colorsm.pageText, left: 0 }}
           />
         </Button>
       )}

@@ -10,14 +10,14 @@ import {
 } from 'loot-core/src/shared/environment';
 
 import { useSetThemeColor } from '../../hooks';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { View, Text, Button, ButtonWithLoading } from '../common';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title, Input } from './subscribe/common';
 
 export default function ConfigServer() {
-  useSetThemeColor(colors.p5);
+  useSetThemeColor(colorsm.buttonPositiveBackground);
   let dispatch = useDispatch();
   let history = useHistory();
   let [url, setUrl] = useState('');
@@ -94,7 +94,7 @@ export default function ConfigServer() {
       <Text
         style={{
           fontSize: 16,
-          color: colors.n2,
+          color: colorsm.pageText,
           lineHeight: 1.5,
         }}
       >
@@ -116,7 +116,8 @@ export default function ConfigServer() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.r4,
+            color: colorsm.errorText,
+            backgroundColor: colorsm.errorBackground,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -163,7 +164,7 @@ export default function ConfigServer() {
         }}
       >
         {currentUrl ? (
-          <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
+          <Button bare style={{ color: colorsm.pageText }} onClick={onSkip}>
             Stop using a server
           </Button>
         ) : (
@@ -172,7 +173,7 @@ export default function ConfigServer() {
               <Button
                 bare
                 style={{
-                  color: colors.n4,
+                  color: colorsm.pageText,
                   margin: 5,
                   marginRight: 15,
                 }}
@@ -183,7 +184,7 @@ export default function ConfigServer() {
             )}
             <Button
               bare
-              style={{ color: colors.n4, margin: 5 }}
+              style={{ color: colorsm.pageText, margin: 5 }}
               onClick={onSkip}
             >
               Don’t use a server

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { View, Text, Modal, ButtonWithLoading } from '../common';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
@@ -34,6 +34,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
       padding={0}
       showOverlay={false}
       onClose={modalProps.onBack}
+      style={{ backgroundColor: colorsm.tableBackground }}
     >
       {() => (
         <View
@@ -43,6 +44,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
             paddingBottom: 25,
             width: 500,
             lineHeight: '1.5em',
+            color: colorsm.tableText,
           }}
         >
           {isRemote && (
@@ -58,7 +60,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                 primary
                 loading={loadingState === 'cloud'}
                 style={{
-                  backgroundColor: colors.r4,
+                  backgroundColor: colorsm.tableText,
                   alignSelf: 'center',
                   border: 0,
                   marginTop: 10,
@@ -74,7 +76,11 @@ export default function DeleteMenu({ modalProps, actions, file }) {
 
           {file.id && (
             <>
-              <Text style={[isRemote && { marginTop: 20 }]}>
+              <Text
+                style={[
+                  isRemote && { marginTop: 20, color: colorsm.tableText },
+                ]}
+              >
                 {isRemote ? (
                   <Text>
                     You can also delete just the local copy. This will remove
@@ -113,12 +119,14 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                   },
                   isRemote
                     ? {
-                        color: colors.r4,
-                        borderColor: colors.r4,
+                        borderColor: colorsm.errorAccent,
+                        color: colorsm.errorBackground,
+                        backgroundColor: colorsm.errorText,
                       }
                     : {
                         border: 0,
-                        backgroundColor: colors.r4,
+                        color: colorsm.errorBackground,
+                        backgroundColor: colorsm.errorText,
                       },
                 ]}
                 onClick={onDeleteLocal}
