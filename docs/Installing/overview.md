@@ -8,7 +8,7 @@ While running a server can be a complicated endeavour, we’ve tried to make it 
 
 - If you’re not comfortable with the command line and are willing to pay a small amount of money to have your version of Actual hosted on the cloud for you, we recommend [PikaPods](PikaPods.md).
 - If you’re willing to run a few commands in the terminal:
-  - [Fly.io](fly/Fly.io.md) offers free cloud hosting. (Make sure you read the section about [persisting your data](fly/Fly-persisting.md)!)
+  - [Fly.io](Fly.md) offers free cloud hosting.
   - You could [directly install Actual locally](Local/your-own-machine.md) on macOS, Windows, or Linux if you don’t want to use a tool like Docker. (This method is the best option if you want to contribute to Actual!)
   - If you want to use Docker, we have instructions for [using our provided Docker containers](Docker.md).
 

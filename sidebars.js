@@ -64,21 +64,22 @@ const sidebars = {
               label: 'In the Cloud',
               collapsible: false,
               items: [
-                {
-                  type: 'category',
-                  label: 'Fly.io',
-                  link: {
-                    type: 'doc',
-                    id: 'Installing/fly/Fly.io',
-                  },
-                  items: [
-                    'Installing/fly/Fly-prerequisites',
-                    'Installing/fly/Fly-git',
-                    'Installing/fly/Fly-image',
-                    'Installing/fly/Fly-updating',
-                    'Installing/fly/Fly-persisting',
-                  ],
-                },
+                'Installing/Fly',
+                // {
+                //   type: 'category',
+                //   label: 'Fly.io',
+                //   link: {
+                //     type: 'doc',
+                //     id: 'Installing/fly/Fly.io',
+                //   },
+                //   items: [
+                //     'Installing/fly/Fly-prerequisites',
+                //     'Installing/fly/Fly-git',
+                //     'Installing/fly/Fly-image',
+                //     'Installing/fly/Fly-updating',
+                //     'Installing/fly/Fly-persisting',
+                //   ],
+                // },
                 'Installing/PikaPods',
               ],
             },

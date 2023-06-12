@@ -14,20 +14,15 @@ title: 'Frequently Asked Questions'
 
 - **Q.** _Can I import my Actual Budget from the hosted instance of Actual to my Self Hosted version_
 
-  **A.** Yes, this has been added to the web version recently, we made a [guide for exporting](/Installing/fly/Fly-git#exporting-data-from-actual)
-  and then [one for importing](/Installing/fly/Fly-git#importing-data-into-actual)
+  **A.** Yes, this has been added to the web version recently, see [our documentation on migrating from the subscription service](./Getting-Started/migration/actual-import.md).
 
 - **Q.** _How do I update my version of Actual after it has been updated?_
 
   **A.** That depends how you’re hosting it.
 
   - PikaPods seems to refresh their image automatically.
-  - Actual builds and publishes an updated docker image on each merge.
-  - If you're on Fly.io we have a [guide for that too](/Installing/fly/Fly-git#updating-actual).
-
-- **Q.** _How do I make sure my data on Fly.io isn't deleted when I update?_
-
-  **A.** We have a guide for you [here](/Installing/fly/Fly-git#persisting-the-data-in-fly)
+  - Actual builds and publishes an updated docker image with each release.
+  - If you’re on Fly.io we have a [guide for that too](./Installing/Fly.md#updating-actual).
 
 - **Q.** _I have deployed actual to Fly.io but I am being charged, why is this?_
 
