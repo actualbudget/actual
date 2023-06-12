@@ -47,15 +47,11 @@ export default function Filters() {
     }
   }
 
+  //<Search placeholder="Filter filters…" value={filter} onChange={setFilter} />
+
   return (
     <Page title="Filters">
-      <View style={{ alignItems: 'flex-end' }}>
-        <Search
-          placeholder="Filter filters…"
-          value={filter}
-          onChange={setFilter}
-        />
-      </View>
+      <View style={{ alignItems: 'flex-end' }}></View>
 
       <View
         style={{
@@ -82,7 +78,7 @@ export default function Filters() {
         }}
       >
         <Button primary onClick={onAdd}>
-          Crerate new Filter
+          Create new Filter
         </Button>
       </View>
     </Page>

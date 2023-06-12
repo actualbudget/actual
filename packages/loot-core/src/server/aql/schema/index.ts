@@ -119,6 +119,7 @@ export const schema = {
   transaction_filters: {
     id: f('id'),
     name: f('string'),
+    conditions_op: f('string'),
     conditions: f('json'),
     tombstone: f('boolean'),
   },

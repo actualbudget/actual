@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom';
 
-import {
-  initiallyLoadPayees,
-  setUndoEnabled,
-} from 'loot-core/src/client/actions/queries';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import {
@@ -26,6 +21,7 @@ import { colors } from '../../style';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { View, Text, Button, Stack, CustomSelect } from '../common';
 import { FormField, FormLabel } from '../forms';
+import { FieldSelect } from '../modals/EditRule';
 import { Page } from '../Page';
 import { BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
@@ -47,19 +43,6 @@ function getTransactionFields(conditions) {
   fields.push('amount');
 
   return fields;
-}
-
-export function FieldSelect({ fields, style, value, onChange }) {
-  return (
-    <View style={style}>
-      <CustomSelect
-        options={fields}
-        value={value}
-        onChange={value => onChange('field', value)}
-        style={{ color: colors.p4 }}
-      />
-    </View>
-  );
 }
 
 export function OpSelect({
@@ -391,24 +374,18 @@ export default function EditFilter() {
     },
   ]);
   let [conditionsOp, setConditionsOp] = useState('and');
-  let { id, initialFields } = useParams();
   let [transactions, setTransactions] = useState([]);
   let [name, setName] = useState('None');
-  let dispatch = useDispatch();
+  let [dispatch, setDispatch] = useState('');
+  let { id } = useParams();
   let scrollableEl = useRef();
   let history = useHistory();
   let adding = id == null;
 
-  useEffect(() => {
-    dispatch(initiallyLoadPayees());
-
-    // Disable undo while this modal is open
-    setUndoEnabled(false);
-    return () => setUndoEnabled(true);
-  }, []);
-
   async function loadFilter() {
-    let { data } = await runQuery(q('transaction_filters').filter({ id }).select('*'));
+    let { data } = await runQuery(
+      q('transaction_filters').filter({ id }).select('*'),
+    );
     return data[0];
   }
 
@@ -440,8 +417,7 @@ export default function EditFilter() {
           setTransactions([]);
         }
       } else {
-        let filters = await loadFilter();
-
+        //let filters = await loadFilter();
         //if (filters) {
         //  setConditions(filters.conditions);
         //  setName(filters.name);
@@ -453,7 +429,7 @@ export default function EditFilter() {
 
   let selectedInst = useSelected('transactions', transactions, []);
 
-  function onChangeConditionsOp(value) {
+  function onChangeConditionsOp(name, value) {
     setConditionsOp(value);
   }
 
@@ -462,17 +438,16 @@ export default function EditFilter() {
   }
 
   async function onSave() {
+    setDispatch('');
+
     let res = await sendCatch(adding ? 'filter/create' : 'filter/update', {
       name: name,
       conditions: conditions.map(unparse),
+      conditionsOp: conditionsOp,
     });
 
     if (res.error) {
-      dispatch({
-        type: 'form-error',
-        error:
-          'An error occurred while saving. Please contact help@actualbudget.com for support.',
-      });
+      setDispatch(res.error);
     } else {
       history.goBack();
     }
@@ -547,7 +522,15 @@ export default function EditFilter() {
             }}
           />
 
-          <Stack direction="row" justify="flex-end" style={{ marginTop: 20 }}>
+          <Stack
+            direction="row"
+            justify="flex-end"
+            align="center"
+            style={{ marginTop: 20 }}
+          >
+            {dispatch.message && (
+              <Text style={{ color: colors.r4 }}>{dispatch.message}</Text>
+            )}
             <Button
               style={{ marginRight: 10 }}
               onClick={() => history.goBack()}

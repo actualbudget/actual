@@ -38,7 +38,7 @@ export const filterModel = {
 
 export async function checkIfFilterExists(name, filterId) {
   let idForName = await db.first(
-    'SELECT id from transaction_filters WHERE name = ?',
+    'SELECT id from transaction_filters WHERE tombstone = 0 AND name = ?',
     [name],
   );
 
@@ -59,14 +59,15 @@ export async function createFilter(filter) {
       throw new Error('Cannot create filters with the same name');
     }
   } else {
-    //filter.name = null;
-    throw new Error('Filters must be named');
+    filter.name = null;
+    //throw new Error('Filters must be named');
   }
 
   // Create the rule here based on the info
   await db.insertWithSchema('transaction_filters', {
     name: filter.name,
     conditions: filter.conditions,
+    conditions_op: filter.conditionsOp,
     id: filterId,
   });
 
