@@ -17,7 +17,7 @@ Actual Budget can be installed on many different platforms, however at this time
 - PikaPods
 - Docker
 
-If you would like to write documentation for another installation variant, please feel free to continue to do this and host it on your own personal blog, medium, Tumblr or any other short form publication service and we will be more than happy to add a link to that from our documentation, open a [PR](https://github.com/actualbudget/docs/pulls) and add it to the list in the [installation overview](https://github.com/actualbudget/docs/blob/master/docs/Installing/overview.md).
+If you would like to write documentation for another installation variant, please feel free to continue to do this and host it on your own personal blog, medium, Tumblr or any other short form publication service and we will be more than happy to add a link to that from our documentation, open a [PR](https://github.com/actualbudget/docs/pulls) and add it to the list in the [installation overview](https://github.com/actualbudget/docs/blob/master/docs/install/index.md).
 
 However, in doing so you would become responsible for these instructions, if they become out of date or people want in-depth help with them we will point them to you for assistance if the community is unable to help and if lots of people report issues with them we may have to remove the link altogether.
 

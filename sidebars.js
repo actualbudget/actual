@@ -11,7 +11,10 @@
 
 // @ts-check
 
-/** @type {(title: string) => unknown} */
+/**
+ * @param {string} title
+ * @returns {import('@docusaurus/plugin-content-docs/src/sidebars/types').SidebarItemHtml}
+ */
 const unavailable = title => ({
   type: 'html',
   value: title,
@@ -23,7 +26,7 @@ const unavailable = title => ({
 const sidebars = {
   docs: [
     'index',
-    'Release-Notes',
+    'releases',
     {
       type: 'category',
       label: 'Contributing',
@@ -31,13 +34,18 @@ const sidebars = {
       items: [
         {
           type: 'link',
-          label: 'Open Issues',
+          label: 'Open Bug Reports',
           href: 'https://github.com/actualbudget/actual/issues',
         },
-        'Developers/project-layout',
-        'Developers/preview-builds',
-        'Developers/releasing',
-        'Developers/Building-Windows',
+        {
+          type: 'link',
+          label: 'Feature Requests',
+          href: 'https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+',
+        },
+        'contributing/project-layout',
+        'contributing/preview-builds',
+        'contributing/releasing',
+        'contributing/windows',
       ],
     },
     {
@@ -50,38 +58,20 @@ const sidebars = {
           label: 'Installing Actual',
           link: {
             type: 'doc',
-            id: 'Installing/overview',
+            id: 'install/index',
           },
           items: [
             {
               type: 'category',
               label: 'On Your Own Machine',
               collapsible: false,
-              items: ['Installing/Local/your-own-machine', 'Installing/Docker'],
+              items: ['install/local', 'install/docker'],
             },
             {
               type: 'category',
               label: 'In the Cloud',
               collapsible: false,
-              items: [
-                'Installing/Fly',
-                // {
-                //   type: 'category',
-                //   label: 'Fly.io',
-                //   link: {
-                //     type: 'doc',
-                //     id: 'Installing/fly/Fly.io',
-                //   },
-                //   items: [
-                //     'Installing/fly/Fly-prerequisites',
-                //     'Installing/fly/Fly-git',
-                //     'Installing/fly/Fly-image',
-                //     'Installing/fly/Fly-updating',
-                //     'Installing/fly/Fly-persisting',
-                //   ],
-                // },
-                'Installing/PikaPods',
-              ],
+              items: ['install/pikapods', 'install/fly'],
             },
           ],
         },
@@ -90,47 +80,47 @@ const sidebars = {
           label: 'Configuring the Server',
           link: {
             type: 'doc',
-            id: 'Installing/Configuration',
+            id: 'config/index',
           },
-          items: ['Installing/HTTPS'],
+          items: ['config/https'],
         },
         {
           type: 'category',
           label: 'A Tour of Actual',
           link: {
             type: 'doc',
-            id: 'Getting-Started/using-actual/index',
+            id: 'tour/index',
           },
           items: [
-            'Getting-Started/using-actual/files',
-            'Getting-Started/using-actual/overview',
-            'Getting-Started/using-actual/sidebar',
-            'Getting-Started/using-actual/accounts',
-            'Getting-Started/using-actual/budget',
-            'Getting-Started/using-actual/schedules',
-            'Getting-Started/using-actual/settings',
+            'tour/files',
+            'tour/overview',
+            'tour/sidebar',
+            'tour/accounts',
+            'tour/budget',
+            'tour/schedules',
+            'tour/settings',
           ],
         },
-        'Getting-Started/tipstricks',
-        'Getting-Started/sync',
-        'Getting-Started/managefiles',
+        'getting-started/tipstricks',
+        'getting-started/sync',
+        'getting-started/managefiles',
         {
           type: 'category',
           label: 'Migration',
           link: {
             type: 'doc',
-            id: 'Getting-Started/migration/migration-intro',
+            id: 'migration/index',
           },
           items: [
-            'Getting-Started/migration/simple-sync',
+            'migration/simple-sync',
             {
               type: 'category',
               label: 'Migrating From Other Apps',
               collapsible: false,
               items: [
-                'Getting-Started/migration/actual-import',
-                'Getting-Started/migration/ynab4',
-                'Getting-Started/migration/nynab',
+                'migration/actual-import',
+                'migration/ynab4',
+                'migration/nynab',
               ],
             },
           ],
@@ -148,80 +138,66 @@ const sidebars = {
           collapsed: true,
           link: {
             type: 'doc',
-            id: 'Budgeting/howitworks',
+            id: 'budgeting/howitworks',
           },
           items: [
-            'Budgeting/filters',
-            'Budgeting/categories',
+            'budgeting/filters',
+            'budgeting/categories',
             {
               type: 'category',
               label: 'Rules',
               collapsed: true,
               link: {
                 type: 'doc',
-                id: 'Budgeting/rules/rules',
+                id: 'budgeting/rules/index',
               },
-              items: ['Budgeting/rules/rules-custom'],
+              items: ['budgeting/rules/custom'],
             },
-            'Budgeting/schedules',
-            'Budgeting/returnsandreimbursements',
-            'Budgeting/creditcards',
-            'Budgeting/jointaccounts',
+            'budgeting/schedules',
+            'budgeting/returnsandreimbursements',
+            'budgeting/creditcards',
+            'budgeting/jointaccounts',
             //unavailable('Returns and Reimbursements'),
           ],
         },
         {
           type: 'category',
-          label: 'Accounts',
+          label: 'Accounts & Transactions',
           collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'accounts/index',
+          },
           items: [
-            'Accounts/overview',
-            'Accounts/addaccount',
-            'Accounts/reconcile',
-            {
-              type: 'category',
-              label: 'Transactions',
-              collapsible: false,
-              items: [
-                'Accounts/Transactions/importing-trans',
-                'Accounts/Transactions/bulk-editing-transactions',
-              ],
-            },
-            unavailable('Connecting Your Bank'),
-            'Accounts/payees',
-            'Accounts/transfers',
+            'accounts/reconciliation',
+            'transactions/importing',
+            'transactions/bulk-editing',
+            'transactions/payees',
+            'transactions/transfers',
           ],
         },
-        {
-          type: 'category',
-          label: 'Reports',
-          collapsed: true,
-          items: ['Reports/overview', unavailable('Custom Reports')],
-        },
+        'reports/index',
         {
           type: 'category',
           label: 'Backup & Restore',
           collapsed: true,
-          items: ['Backup-Restore/Backups', 'Backup-Restore/Restore'],
+          items: ['backup-restore/backup', 'backup-restore/restore'],
         },
         {
           type: 'category',
           label: 'API',
-          link: { type: 'doc', id: 'Developers/using-the-API' },
+          link: { type: 'doc', id: 'api/index' },
           items: [
-            'Developers/API',
+            'api/reference',
             {
               type: 'category',
               label: 'ActualQL',
               collapsed: true,
               link: {
                 type: 'doc',
-                id: 'Developers/ActualQL/Overview',
+                id: 'api/actual-ql/index',
               },
-              items: [
-                'Developers/ActualQL/Functions',
-                'Developers/ActualQL/Examples',
-              ],
+              items: ['api/actual-ql/functions', 'api/actual-ql/examples'],
             },
           ],
         },
@@ -231,15 +207,26 @@ const sidebars = {
           collapsed: true,
           link: {
             type: 'doc',
-            id: 'Advanced/advanced-intro',
+            id: 'advanced/index',
           },
           items: [
             {
               type: 'category',
               label: 'Scripts',
               collapsible: false,
-              items: ['Advanced/Scripts/modify-transfers'],
+              items: ['advanced/scripts/modify-transfers'],
             },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Experimental features',
+          collapsed: true,
+          items: [
+            'experimental/goal-templates',
+            'experimental/monthly-cleanup',
+            'experimental/report-budget',
+            'experimental/bank-sync',
           ],
         },
       ],
@@ -249,27 +236,16 @@ const sidebars = {
       label: 'Help & Support',
       collapsible: false,
       items: [
-        'Contact',
-        'FAQ',
+        'contact',
+        'faq',
         {
           type: 'category',
           label: 'Troubleshooting',
           collapsed: true,
           items: [
-            'Troubleshooting/Server',
-            'Troubleshooting/SharedArrayBuffer',
-            'Troubleshooting/Troubleshooting-Edge',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Experimental features',
-          collapsed: true,
-          items: [
-            'Advanced/Experimental-Features/goal-templates',
-            'Advanced/Experimental-Features/monthly-cleanup',
-            'Advanced/Experimental-Features/report-budget',
-            'Accounts/connecting-your-bank',
+            'troubleshooting/server',
+            'troubleshooting/shared-array-buffer',
+            'troubleshooting/edge-browser',
           ],
         },
       ],

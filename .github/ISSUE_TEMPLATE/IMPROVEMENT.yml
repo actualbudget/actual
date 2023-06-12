@@ -16,6 +16,6 @@ body:
     attributes:
       label: 'Documentation URL'
       description: Please enter the GitHub URL to the documentation file
-      placeholder: ex. https://github.com/USERNAME/REPO_NAME/blob/main/docs/Budgeting/categories.md
+      placeholder: ex. https://github.com/USERNAME/REPO_NAME/blob/main/docs/budgeting/categories.md
     validations:
       required: true
