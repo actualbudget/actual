@@ -168,7 +168,7 @@ module.exports = {
       },
     },
     {
-      files: ['**/icons/**/*.js'],
+      files: ['**/icons/**/*.js', '**/loot-core/**/*'],
       rules: { 'import/no-unused-modules': 'off' }
     },
   ],
