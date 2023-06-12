@@ -382,12 +382,12 @@ export default function EditFilter() {
   let history = useHistory();
   let adding = id == null;
 
-  async function loadFilter() {
-    let { data } = await runQuery(
-      q('transaction_filters').filter({ id }).select('*'),
-    );
-    return data[0];
-  }
+  //async function loadFilter() {
+  //  let { data } = await runQuery(
+  //    q('transaction_filters').filter({ id }).select('*'),
+  //  );
+  //  return data[0];
+  //}
 
   useEffect(() => {
     // Flash the scrollbar

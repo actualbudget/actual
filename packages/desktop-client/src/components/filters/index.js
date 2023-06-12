@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { View, Button, Search } from '../common';
+import { View, Button } from '../common';
 import { Page } from '../Page';
 
 import { FiltersTable, ROW_HEIGHT } from './FiltersTable';
@@ -12,7 +12,7 @@ import { FiltersTable, ROW_HEIGHT } from './FiltersTable';
 export default function Filters() {
   let history = useHistory();
 
-  let [filter, setFilter] = useState('');
+  //let [filter, setFilter] = useState('');
 
   let filterData = useFilters();
   //let filterData = [];
@@ -62,7 +62,7 @@ export default function Filters() {
       >
         <FiltersTable
           filters={filterz}
-          filter={filter}
+          //filter={filter}
           onSelect={onEdit}
           onAction={onAction}
           style={{ backgroundColor: 'white' }}
