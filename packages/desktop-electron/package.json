@@ -57,6 +57,7 @@
   "devDependencies": {
     "@electron/notarize": "1.2.3",
     "@electron/rebuild": "3.2.13",
+    "cross-env": "^7.0.3",
     "electron": "24.1.3",
     "electron-builder": "23.6.0"
   }

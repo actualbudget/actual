@@ -34,7 +34,6 @@ We have a wide range of documentation on how to use Actual, this is all availabl
 The Actual app is split up into a few packages:
 
 - loot-core - The core application that runs on any platform
-- loot-design - The generic design components that make up the UI
 - desktop-client - The desktop UI
 - desktop-electron - The desktop app
 

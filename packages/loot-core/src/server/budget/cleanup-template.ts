@@ -37,7 +37,7 @@ async function processCleanup(month) {
       if (template.filter(t => t.type === 'sink').length > 0) {
         sinkCategory.push({ cat: category, temp: template });
         num_sinks += 1;
-        total_weight += template[0].weight;
+        total_weight += template.filter(w => w.type === 'sink')[0].weight;
       }
     }
   }
@@ -82,11 +82,9 @@ async function processCleanup(month) {
       `budget-${sinkCategory[c].cat.id}`,
     );
     let categoryId = sinkCategory[c].cat.id;
+    let weight = sinkCategory[c].temp.filter(w => w.type === 'sink')[0].weight;
     let to_budget =
-      budgeted +
-      Math.round(
-        (sinkCategory[c].temp[0].weight / total_weight) * budgetAvailable,
-      );
+      budgeted + Math.round((weight / total_weight) * budgetAvailable);
     if (c === sinkCategory.length - 1) {
       let currentBudgetAvailable = await getSheetValue(sheetName, `to-budget`);
       if (to_budget > currentBudgetAvailable) {

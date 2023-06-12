@@ -547,12 +547,6 @@ export function getAccounts() {
 }
 
 export async function insertAccount(account) {
-  // Default to checking. Makes it a lot easier for tests and is
-  // generally harmless.
-  if (account.type === undefined) {
-    account = { ...account, type: 'checking' };
-  }
-
   const accounts = await all(
     'SELECT * FROM accounts WHERE offbudget = ? ORDER BY sort_order, name',
     [account.offbudget != null ? account.offbudget : 0],

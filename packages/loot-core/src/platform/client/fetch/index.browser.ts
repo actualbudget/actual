@@ -188,3 +188,7 @@ export const listen: T.Listen = function (name, cb) {
 export const unlisten: T.Unlisten = function (name) {
   listeners.set(name, []);
 };
+
+export const clearServer: T.ClearServer = async function () {
+  //
+};

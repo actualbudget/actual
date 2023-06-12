@@ -6,13 +6,13 @@ runs:
     - name: Install node
       uses: actions/setup-node@v3
       with:
-        node-version: 16.15.0
+        node-version: 18.16.0
     - name: Cache
       uses: actions/cache@v3
       id: cache
       with:
         path: '**/node_modules'
-        key: yarn-v1-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+        key: yarn-v1-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('**/yarn.lock') }}
     - name: Install
       run: yarn --immutable
       shell: bash

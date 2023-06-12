@@ -84,7 +84,6 @@ export const accountModel = {
     return {
       id: account.id,
       name: account.name,
-      type: account.type,
       offbudget: account.offbudget ? true : false,
       closed: account.closed ? true : false,
     };
