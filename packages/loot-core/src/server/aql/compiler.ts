@@ -1119,6 +1119,10 @@ export function generateSQLWithState(
   return { sql: defaultConstructQuery(queryState, state, sqlPieces), state };
 }
 
-export function generateSQL(queryState) {
-  return generateSQLWithState(queryState).sql;
+export function generateSQL(
+  queryState,
+  schema?: unknown,
+  schemaConfig?: unknown,
+) {
+  return generateSQLWithState(queryState, schema, schemaConfig).sql;
 }

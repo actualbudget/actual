@@ -741,7 +741,12 @@ export function SheetCell({
 }
 
 type TableHeaderProps = ComponentProps<typeof Row> & {
-  headers?: Array<ComponentProps<typeof Cell>>;
+  headers?: Array<{
+    name: string;
+    width: CellProps['width'];
+    style?: CSSProperties;
+    valueStyle?: CSSProperties;
+  }>;
   version?: string;
 };
 export function TableHeader({

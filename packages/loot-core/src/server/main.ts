@@ -692,6 +692,10 @@ handlers['query'] = async function (query) {
   return aqlQuery(query);
 };
 
+handlers['sql-query'] = async function (query) {
+  return await db.runQuery(query, [], true);
+};
+
 handlers['bank-delete'] = async function ({ id }) {
   const accts = await db.runQuery(
     'SELECT * FROM accounts WHERE bank = ?',

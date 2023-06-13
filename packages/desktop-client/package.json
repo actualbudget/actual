@@ -72,5 +72,9 @@
     "setupFilesAfterEnv": [
       "<rootDir>/src/setupTests.js"
     ]
+  },
+  "dependencies": {
+    "@react-aria/tabs": "^3.6.0",
+    "react-aria-components": "^1.0.0-alpha.4"
   }
 }

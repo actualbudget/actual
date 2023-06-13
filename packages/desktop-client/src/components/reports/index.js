@@ -3,6 +3,7 @@ import { Route } from 'react-router-dom';
 
 import { View } from '../common';
 
+import AQL from './AQL';
 import CashFlow from './CashFlow';
 import NetWorth from './NetWorth';
 import Overview from './Overview';
@@ -18,6 +19,9 @@ export default function Reports() {
       </Route>
       <Route path="/reports/cash-flow" exact>
         <CashFlow />
+      </Route>
+      <Route path="/reports/aql" exact>
+        <AQL />
       </Route>
     </View>
   );
