@@ -1,8 +1,13 @@
 import React, { useState, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
+import { useCategories } from 'loot-core/src/client/data-hooks/categories';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
+import * as monthUtils from 'loot-core/src/shared/months';
+import { strConds, getAmount, getDate } from 'loot-core/src/shared/filters';
 import { friendlyOp } from 'loot-core/src/shared/rules';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { colors } from '../../style';
@@ -59,8 +64,13 @@ export function FiltersTable({
   style,
   tableStyle,
 }) {
+  let dateFormat = useSelector(state => {
+    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
+  });
+
   let payees = useCachedPayees();
   let accounts = useCachedAccounts();
+  let categories = useCategories();
 
   let filteredFilters = useMemo(() => {
     if (!filter) {
@@ -72,16 +82,31 @@ export function FiltersTable({
           filter.toLowerCase().includes(str.toLowerCase())
         : false;
 
-    return filters.filter(filter => {
-      let payee = payees.find(p => filter.conditions._payee === p.id);
-      let account = accounts.find(a => filter.conditions._account === a.id);
-      //let category = category.find(c => filter.conditions._category === c.id);
+    return filters.filter(schedule => {
+      let cCheck = false;
+      let schedCheck = schedule.name;
+      schedule.conditions.map(conditions => {
+        let payee = payees.find(p => conditions.value === p.id);
+        let account = accounts.find(a => conditions.value === a.id);
+        let category = categories.find(c => conditions.value === c.id);
+        let stringStr = strConds(conditions.field) && conditions.value;
+        let amountStr = getAmount(conditions.field) && integerToCurrency(Math.abs(conditions.value || 0));
+        let dateStr = getDate(conditions.field) && conditions.value
+          ? monthUtils.format(conditions.value, dateFormat)
+          : null;
 
-      return (
-        filterIncludes(payee && payee.name) ||
-        filterIncludes(account && account.name)
-        //filterIncludes(category && category.name)
-      );
+        let condCheck =
+          filterIncludes(payee && payee.name) ||
+          filterIncludes(account && account.name) ||
+          filterIncludes(category && category.name) ||
+          filterIncludes(stringStr) ||
+          filterIncludes(amountStr) ||
+          filterIncludes(dateStr) ||
+          filterIncludes(schedCheck);
+        cCheck = condCheck ? true : cCheck && true;
+        return cCheck;
+      });
+      return cCheck;
     });
   }, [filters, filter]);
 
@@ -90,11 +115,9 @@ export function FiltersTable({
   }, [filteredFilters]);
 
   function renderFilter({ item }) {
-    //let heightCalc = 50 + (25 * (item.conditions.length-1));
     return (
       <Row
         height={ROW_HEIGHT}
-        //height="auto"
         inset={15}
         backgroundColor="transparent"
         onClick={() => onSelect(item.id)}

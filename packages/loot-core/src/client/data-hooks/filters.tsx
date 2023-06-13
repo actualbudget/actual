@@ -1,14 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import q, { liveQuery } from '../query-helpers';
 
 export function useFilters() {
   let [data, setData] = useState([]);
-  let query = q('transaction_filters').select('*');
 
-  liveQuery(query, async filters => {
-    setData(filters);
-  });
+  useEffect(() => {
+    let query = q('transaction_filters').select('*');
+
+    let filterQuery = liveQuery(query, async filters => {
+      setData(filters);
+    });
+
+    return () => {
+      filterQuery.unsubscribe();
+    };
+  }, []);
 
   return data;
 }

@@ -8,11 +8,7 @@ import {
   friendlyOp,
   getFieldError,
   unparse,
-  makeValue,
-  FIELD_TYPES,
-  TYPE_INFO,
 } from 'loot-core/src/shared/rules';
-import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
 import AddIcon from '../../icons/v0/Add';
@@ -21,14 +17,10 @@ import { colors } from '../../style';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import { View, Text, Button, Stack, CustomSelect } from '../common';
 import { FormField, FormLabel } from '../forms';
-import { FieldSelect } from '../modals/EditRule';
+import { FieldSelect, ConditionsList } from '../modals/EditRule';
 import { Page } from '../Page';
 import { BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
-
-function updateValue(array, value, update) {
-  return array.map(v => (v === value ? update() : v));
-}
 
 function getTransactionFields(conditions) {
   let fields = ['date'];
@@ -181,168 +173,6 @@ export function ConditionEditor({
         />
       </Stack>
     </Editor>
-  );
-}
-
-function newInput(item) {
-  return { ...item, inputKey: '' + Math.random() };
-}
-
-export function ConditionsList({
-  conditionsOp,
-  conditions,
-  editorStyle,
-  onChangeConditions,
-}) {
-  function addCondition(index) {
-    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
-    let fields = conditionFields
-      .map(f => f[0])
-      .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');
-
-    // suggest a sensible next field: the same if 'or' or different if 'and'
-    if (conditions.length && conditionsOp === 'or') {
-      fields = [conditions[0].field];
-    } else {
-      fields = fields.filter(
-        f => !conditions.some(c => c.field.includes(f) || f.includes(c.field)),
-      );
-    }
-    let field = fields[0] || 'payee';
-
-    let copy = [...conditions];
-    copy.splice(index + 1, 0, {
-      type: FIELD_TYPES.get(field),
-      field,
-      op: 'is',
-      value: null,
-    });
-    onChangeConditions(copy);
-  }
-
-  function addInitialCondition() {
-    addCondition(-1);
-  }
-
-  function removeCondition(cond) {
-    onChangeConditions(conditions.filter(c => c !== cond));
-  }
-
-  function updateCondition(cond, field, value) {
-    onChangeConditions(
-      updateValue(conditions, cond, () => {
-        if (field === 'field') {
-          let newCond = { field: value };
-
-          if (value === 'amount-inflow') {
-            newCond.field = 'amount';
-            newCond.options = { inflow: true };
-          } else if (value === 'amount-outflow') {
-            newCond.field = 'amount';
-            newCond.options = { outflow: true };
-          }
-
-          newCond.type = FIELD_TYPES.get(newCond.field);
-
-          let prevType = FIELD_TYPES.get(cond.field);
-          if (
-            (prevType === 'string' || prevType === 'number') &&
-            prevType === newCond.type &&
-            cond.op !== 'isbetween'
-          ) {
-            // Don't clear the value & op if the type is string/number and
-            // the type hasn't changed
-            newCond.op = cond.op;
-            return newInput(makeValue(cond.value, newCond));
-          } else {
-            newCond.op = TYPE_INFO[newCond.type].ops[0];
-            return newInput(makeValue(null, newCond));
-          }
-        } else if (field === 'op') {
-          let op = value;
-
-          // Switching between oneOf and other operators is a
-          // special-case. It changes the input type, so we need to
-          // clear the value
-          if (cond.op !== 'oneOf' && op === 'oneOf') {
-            return newInput(
-              makeValue(cond.value != null ? [cond.value] : [], {
-                ...cond,
-                op: value,
-              }),
-            );
-          } else if (cond.op === 'oneOf' && op !== 'oneOf') {
-            return newInput(
-              makeValue(cond.value.length > 0 ? cond.value[0] : null, {
-                ...cond,
-                op: value,
-              }),
-            );
-          } else if (cond.op !== 'isbetween' && op === 'isbetween') {
-            // TODO: I don't think we need `makeValue` anymore. It
-            // tries to parse the value as a float and we had to
-            // special-case isbetween. I don't know why we need that
-            // behavior and we can probably get rid of `makeValue`
-            return makeValue(
-              {
-                num1: amountToInteger(cond.value),
-                num2: amountToInteger(cond.value),
-              },
-              { ...cond, op: value },
-            );
-          } else if (cond.op === 'isbetween' && op !== 'isbetween') {
-            return makeValue(integerToAmount(cond.value.num1 || 0), {
-              ...cond,
-              op: value,
-            });
-          } else {
-            return { ...cond, op: value };
-          }
-        } else if (field === 'value') {
-          return makeValue(value, cond);
-        }
-
-        return cond;
-      }),
-    );
-  }
-
-  return conditions.length === 0 ? (
-    <Button style={{ alignSelf: 'flex-start' }} onClick={addInitialCondition}>
-      Add condition
-    </Button>
-  ) : (
-    <Stack spacing={2} data-testid="condition-list">
-      {conditions.map((cond, i) => {
-        let ops = TYPE_INFO[cond.type].ops;
-
-        // Hack for now, these ops should be the only ones available
-        // for recurring dates
-        if (cond.type === 'date' && cond.value && cond.value.frequency) {
-          ops = ['is', 'isapprox'];
-        } else if (
-          cond.options &&
-          (cond.options.inflow || cond.options.outflow)
-        ) {
-          ops = ops.filter(op => op !== 'isbetween');
-        }
-
-        return (
-          <View key={i}>
-            <ConditionEditor
-              editorStyle={editorStyle}
-              ops={ops}
-              condition={cond}
-              onChange={(name, value) => {
-                updateCondition(cond, name, value);
-              }}
-              onDelete={() => removeCondition(cond)}
-              onAdd={() => addCondition(i)}
-            />
-          </View>
-        );
-      })}
-    </Stack>
   );
 }
 
