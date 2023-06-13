@@ -6,7 +6,7 @@ This repo forms the basis for what will become the new Actual Budget community d
 
 ## Contributing
 
-Firstly, thankyou for stopping by and giving up some of your time to either check out the documentation we have already produced or pick off some of the [issues](https://github.com/rich-howell/actual-community-docs/issues) and help create some new documentation for our future users.
+Firstly, thankyou for stopping by and giving up some of your time to either check out the documentation we have already produced or pick off some of the [issues](https://github.com/actualbudget/docs/issues) and help create some new documentation for our future users.
 
 ### Installation Methods
 

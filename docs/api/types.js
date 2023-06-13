@@ -28,9 +28,9 @@ export let types = {
     description: (
       <span>
         A currency amount is an integer representing the value without any
-        decimal places. Usually it{"'"}s <code>value * 100</code>, but it
-        depends on your currency. For example, a USD amount of{' '}
-        <code>$120.30</code> would be <code>12030</code>.
+        decimal places. Usually it’s <code>value * 100</code>, but it depends on
+        your currency. For example, a USD amount of <code>$120.30</code> would
+        be <code>12030</code>.
       </span>
     ),
   },
