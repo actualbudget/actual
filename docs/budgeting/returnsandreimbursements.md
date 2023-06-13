@@ -1,7 +1,5 @@
 # Returns and Reimbursements
 
-[budgeting]: ./howitworks#overspending
-
 ## Returns
 
 We have all been there. We purchased something that looked great at the time, but unfortunately it was the wrong size, didn't fit the purpose just as we had imagined, or just decided that we don't really need it and now we have to return it. But how do we do that with our budget? The thing to remember is that even though money will be flowing **in** to your budget, it isn't income. You used a budget category when you bought the item, so the most appropriate method to return that money to the budget is to allow the return amount to flow directly back to the category that was used to purchase it.
@@ -50,7 +48,7 @@ Ultimately this is a personal decision. If you are capable, there is less short 
 
 ![](/img/returns-reimbursements/reimbursement-1.png)
 
-Once enabled, a little arrow will be shown next to the each row's 'Balance' sum in the Budget view. It signals that over spending will be carried over from month to month. Check out the [overspending](/budgeting/howitworks#overspending) section in "How Budgeting Works" for an explanation of this feature.
+Once enabled, a little arrow will be shown next to the each row's 'Balance' sum in the Budget view. It signals that over spending will be carried over from month to month. Check out the [overspending](./howitworks.md#overspending) section in "How Budgeting Works" for an explanation of this feature.
 
 ![](/img/returns-reimbursements/reimbursement-2.png)
 

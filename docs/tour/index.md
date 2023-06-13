@@ -12,7 +12,7 @@ When first opening the app, it will ask you to add a bank account. Fill out the 
 
 Once you’ve added your first account, you can navigate to the Budget page by clicking its link in the sidebar. Once you’re there, you can choose categories you’d like to use for budgeting.. Some basic categories have been added for you, but you can add more or remove the default ones by clicking the arrow on a category group or a category.
 
-Create your first budget by entering amounts into the “budgeted” column of the categories you want to track. Your starting balance will be available as money to budget (see [how budgeting works](/budgeting/howitworks/)).
+Create your first budget by entering amounts into the “budgeted” column of the categories you want to track. Your starting balance will be available as money to budget (see [how budgeting works](../budgeting/howitworks.md)).
 
 ### Check back throughout the month
 

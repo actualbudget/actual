@@ -280,7 +280,7 @@ fly deploy
 
   **A.** While we wouldn’t know for certain without seeing your configuration, it is likely that during
   deployment you created a Postgres database. Actual doesn’t need this so you can just delete it and
-  charges should then stop. If you're unsure, please [reach out to us](/Contact).
+  charges should then stop. If you're unsure, please [reach out to us](/contact).
 
 - **Q.** _How can I try out a beta/unstable version of Actual?_
 

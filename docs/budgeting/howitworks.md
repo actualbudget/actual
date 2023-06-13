@@ -17,7 +17,7 @@ If you are **creating a budget for the first time**, here's how that works:
 1. Your total **account balance** is available to budget. It knows how much cash you have currently, and that is all you can currently budget. (Remember, your budget is always based on your current money!)
 2. Click on the **budgeted** column of a category and enter a number for what you think you'll spend that month. **Tip**: don't overthink it. You can always adjust it later.
 3. Continue to budget until the **To budget** amount is **0**.
-4. You can also [customize the categories](/budgeting/categories/).
+4. You can also [customize the categories](./categories.md).
 
 ## The budgeting workflow
 

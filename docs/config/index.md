@@ -6,7 +6,7 @@ When it starts up, Actual looks for an optional `config.json` file in the same d
 
 :::info
 
-Running into issues with your configuration not being interpreted correctly? Check out our documentation for [troubleshooting the server](/Troubleshooting/Server) for information on how to enable debug logging to track down the issue.
+Running into issues with your configuration not being interpreted correctly? Check out our documentation for [troubleshooting the server](../troubleshooting/server.md) for information on how to enable debug logging to track down the issue.
 
 :::
 

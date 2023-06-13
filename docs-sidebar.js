@@ -236,7 +236,6 @@ const sidebars = {
       label: 'Help & Support',
       collapsible: false,
       items: [
-        'contact',
         'faq',
         {
           type: 'category',

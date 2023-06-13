@@ -9,15 +9,10 @@ module.exports = {
   title: 'Actual Budget Documentation',
   tagline: 'Dinosaurs are cool',
   url: 'https://docs.actualbudget.org',
-  baseUrl: '/docs/',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'actualbudget', // Usually your GitHub org/user name.
-  projectName: 'docs', // Usually your repo name.
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -33,10 +28,8 @@ module.exports = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          routeBasePath: '/', // Serve the docs at the site's root
-          sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
+          routeBasePath: 'docs/',
+          sidebarPath: require.resolve('./docs-sidebar.js'),
           editUrl: 'https://github.com/actualbudget/docs/tree/master/',
           beforeDefaultRemarkPlugins: [require('./src/remark/rewrite-images')],
         },
@@ -50,17 +43,33 @@ module.exports = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'Documentation',
         logo: {
-          alt: 'Actual Logo',
+          alt: 'Actual Open Source',
           src: 'img/actual.png',
         },
         items: [
           {
+            to: '/#features',
+            // never render as active
+            activeBaseRegex: '^$',
+            position: 'left',
+            label: 'Features',
+          },
+          {
             type: 'doc',
             docId: 'index',
             position: 'left',
-            label: 'Home',
+            label: 'Docs',
+          },
+          {
+            to: '/contact',
+            position: 'left',
+            label: 'Contact',
+          },
+          {
+            href: 'https://discord.gg/8JfAXSgfRf',
+            label: 'Discord',
+            position: 'right',
           },
           {
             href: 'https://github.com/actualbudget/docs',

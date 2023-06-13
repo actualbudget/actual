@@ -12,4 +12,4 @@ If you’re completely new to Actual, you’ll need to [install](./install/index
 
 If you would just like to test things out, you can [download](/test-budget.zip) the test budget and [import](./migration/actual-import.md) it into Actual
 
-If you ever get stuck, don’t hesitate to [reach out to the maintainers and community](./contact.md) for help.
+If you ever get stuck, don’t hesitate to [reach out to the maintainers and community](/contact) for help.

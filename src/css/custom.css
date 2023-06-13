@@ -4,6 +4,20 @@
  * work well for content-centric websites.
  */
 
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap');
+
+h1,
+.serif-header {
+  font-family: Libre Baskerville, serif;
+  text-wrap: balance;
+}
+h1 {
+  font-size: 2.5rem;
+}
+.serif-header {
+  font-weight: normal;
+}
+
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #6b46c1;
@@ -27,6 +41,11 @@
   --ifm-color-primary-lighter: #6b46c1;
   --ifm-color-primary-lightest: #6b46c1;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.footer,
+.footer--dark {
+  --ifm-footer-background-color: #2e346b;
 }
 
 .menu__link--unavailable {

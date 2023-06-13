@@ -40,12 +40,12 @@ This is your budget, this is where all your category groups and category heading
 
 ### Category Group Heading
 
-This is the category group heading, each collection of categories has a heading, for example if you had **long term savings** you could create a group heading called **long term savings** then within that you could have **Holiday** or **Car** you can find out how to add a category group [here](/budgeting/categories#adding-a-category-group)
+This is the category group heading, each collection of categories has a heading, for example if you had **long term savings** you could create a group heading called **long term savings** then within that you could have **Holiday** or **Car** you can find out how to add a category group [here](../budgeting/categories.md#adding-a-category-group)
 
 ![](/img/using-actual/budget-category-heading.png)
 
 ### Category Heading
 
-The category headings are the headings for each individual item in the budget, if we take the examples above, these might be **Holiday** or **Car** you can find out how to add a category [here](/budgeting/categories#add-a-category)
+The category headings are the headings for each individual item in the budget, if we take the examples above, these might be **Holiday** or **Car** you can find out how to add a category [here](../budgeting/categories.md#add-a-category)
 
 ![](/img/using-actual/budget-category.png)

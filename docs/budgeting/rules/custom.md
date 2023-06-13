@@ -1,6 +1,6 @@
 # Supercharge your Budget
 
-This page has examples of custom rules that some of our users have found useful for their own budgets. If you have any custom rules you're proud of, click the “Edit this page” button below to propose adding them to this page [tell us about them](../../contact.md)!
+This page has examples of custom rules that some of our users have found useful for their own budgets. If you have any custom rules you're proud of, click the “Edit this page” button below to propose adding them to this page [tell us about them](/contact)!
 
 **Q: How do I set a default account when I add transactions?**
 
