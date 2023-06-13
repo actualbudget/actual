@@ -169,7 +169,7 @@
 
 .smallFeaturesGrid {
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 1fr 1fr;
   gap: 4rem;
   margin-bottom: 4rem;
 }

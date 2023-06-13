@@ -46,7 +46,7 @@ Most likely, a common workflow will be to "hold" income you make this month for 
 
 ![](/img/how-it-works/buffer-1.png)
 
-3.  Press `Enter` to hold all available money, or enter a custom amount to hold.
+3.  Press <Key k="enter" /> to hold all available money, or enter a custom amount to hold.
 
 This doesn't do anything except takes out money from the **To Budget** amount for that month, allowing you to "zero it out" and mark it to be used for later. That money will appear in next month's **To Budget**.
 
@@ -114,5 +114,3 @@ This might sound complex, but it's really not! You can get as detailed as you wa
 If you don't have a savings account, you can simply skip step 6. The **Savings** category will build up a balance and represent the savings that you are keeping in your account.
 
 This also assumes you have enough income to cover a full month plus any overspending. If you don't, you need to watch your budget more carefully and make sure to cover overspending from other categories.
-
-<NextLink href="/docs/budgeting/categories/">Next step: learn about categories</NextLink>

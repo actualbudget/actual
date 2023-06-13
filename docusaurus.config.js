@@ -77,7 +77,7 @@ module.exports = {
             position: 'right',
           },
           {
-            href: 'https://github.com/actualbudget/docs',
+            href: 'https://github.com/actualbudget/actual',
             label: 'GitHub',
             position: 'right',
           },
@@ -87,31 +87,20 @@ module.exports = {
         style: 'dark',
         links: [
           {
-            title: 'GitHub',
-            items: [
-              {
-                label: 'GitHub',
-                href: 'https://github.com/actualbudget',
-              },
-            ],
+            label: 'Discord',
+            href: 'https://discord.gg/8JfAXSgfRf',
           },
           {
-            title: 'Discord',
-            items: [
-              {
-                label: 'Discord',
-                href: 'https://discord.gg/8JfAXSgfRf',
-              },
-            ],
+            label: 'GitHub',
+            href: 'https://github.com/actualbudget/actual',
           },
           {
-            title: 'RSS Feed',
-            items: [
-              {
-                label: 'RSS Feed',
-                href: 'https://actualbudget.org/blog/rss.xml',
-              },
-            ],
+            label: 'Website Source',
+            href: 'https://github.com/actualbudget/docs',
+          },
+          {
+            label: 'RSS Feed',
+            href: 'https://actualbudget.org/blog/rss.xml',
           },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Actual Budget. Built with Docusaurus.`,

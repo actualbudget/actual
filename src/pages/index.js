@@ -88,7 +88,7 @@ export default function Hello() {
           your real income instead of made up numbers. This makes you face your
           real spending, and clearly shows how much you are saving each month.
           We make this process as simple as possible.{' '}
-          <Link to="/docs/budgeting/howitworks">Learn more</Link>
+          <Link to="/docs/budgeting/howitworks">Learn&nbsp;more</Link>
         </BigFeature>
 
         <BigFeature
@@ -232,7 +232,8 @@ function SmallFeature({ title, icon, learnMore, children }) {
       <div class={classes.smallFeatureContent}>
         <h3 class={classes.smallFeatureTitle}>{title}</h3>
         <p class={classes.smallFeatureText}>
-          {children} {learnMore ? <Link to={learnMore}>Learn more</Link> : null}
+          {children}{' '}
+          {learnMore ? <Link to={learnMore}>Learn&nbsp;more</Link> : null}
         </p>
       </div>
     </div>

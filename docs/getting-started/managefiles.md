@@ -10,7 +10,7 @@ These instructions relate exclusively to the desktop application
 
 ### Desktop
 
-- On the desktop app, go to the file management screen from the **File** > **Open file…** menu item, or press `CTRL & O`.
+- On the desktop app, go to the file management screen from the **File** > **Open file…** menu item, or press <Key mod="cmd" k="o" />.
 - Click **Create new file**.
 
 ## Delete a file

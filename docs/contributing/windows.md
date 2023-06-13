@@ -14,7 +14,7 @@ Many of the build scripts are bash scripts and not natively invokable in Windows
 ## How to build the Electron app on Windows
 
 1. Follow steps 1 - 6 above.
-2. Run `yarn start`. If you get an error about bundle.desktop.js, just CTRL+C and rerun `yarn start`.
+2. Run `yarn start`. If you get an error about bundle.desktop.js, just <Key mod="ctrl" k="c" /> and rerun `yarn start`.
 3. If you get an error from electron, run `yarn rebuild-electron` and rerun `yarn start`;
 
 # Errors
