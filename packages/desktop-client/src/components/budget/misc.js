@@ -15,6 +15,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
+import SvgAdd from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import CheveronDown from '../../icons/v1/CheveronDown';
@@ -513,7 +514,7 @@ export function SidebarGroup({
           }}
         />
       )}
-      <div
+      <View
         style={{
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -523,7 +524,7 @@ export function SidebarGroup({
       >
         {dragPreview && <Text style={{ fontWeight: 500 }}>Group: </Text>}
         {group.name}
-      </div>
+      </View>
       {!dragPreview && (
         <>
           <View style={{ marginLeft: 5, flexShrink: 0 }}>
@@ -548,8 +549,6 @@ export function SidebarGroup({
                   onMenuSelect={type => {
                     if (type === 'rename') {
                       onEdit(group.id);
-                    } else if (type === 'add-category') {
-                      onShowNewCategory(group.id);
                     } else if (type === 'delete') {
                       onDelete(group.id);
                     } else if (type === 'toggleVisibility') {
@@ -558,7 +557,6 @@ export function SidebarGroup({
                     setMenuOpen(false);
                   }}
                   items={[
-                    { name: 'add-category', text: 'Add category' },
                     {
                       name: 'toggleVisibility',
                       text: group.hidden ? 'Show' : 'Hide',
@@ -573,6 +571,20 @@ export function SidebarGroup({
           <View style={{ flex: 1 }} />
           <NotesButton id={group.id} />
         </>
+      )}
+      {!dragPreview && (
+        <View style={{ flexShrink: 0 }}>
+          <Button
+            bare
+            onClick={e => {
+              e.stopPropagation();
+              onShowNewCategory(group.id);
+            }}
+            style={{ display: 'flex !important' }}
+          >
+            <SvgAdd width={12} height={12} />
+          </Button>
+        </View>
       )}
     </View>
   );
