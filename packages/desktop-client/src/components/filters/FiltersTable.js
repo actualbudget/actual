@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCategories } from 'loot-core/src/client/data-hooks/categories';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
-import * as monthUtils from 'loot-core/src/shared/months';
 import { strConds, getAmount, getDate } from 'loot-core/src/shared/filters';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { friendlyOp } from 'loot-core/src/shared/rules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
@@ -90,10 +90,13 @@ export function FiltersTable({
         let account = accounts.find(a => conditions.value === a.id);
         let category = categories.find(c => conditions.value === c.id);
         let stringStr = strConds(conditions.field) && conditions.value;
-        let amountStr = getAmount(conditions.field) && integerToCurrency(Math.abs(conditions.value || 0));
-        let dateStr = getDate(conditions.field) && conditions.value
-          ? monthUtils.format(conditions.value, dateFormat)
-          : null;
+        let amountStr =
+          getAmount(conditions.field) &&
+          integerToCurrency(Math.abs(conditions.value || 0));
+        let dateStr =
+          getDate(conditions.field) && conditions.value
+            ? monthUtils.format(conditions.value, dateFormat)
+            : null;
 
         let condCheck =
           filterIncludes(payee && payee.name) ||
