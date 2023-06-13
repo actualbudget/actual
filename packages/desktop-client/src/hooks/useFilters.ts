@@ -4,8 +4,10 @@ export default function useFilters<T>(initialFilters: T[] = []) {
   const [filters, setFilters] = useState<T[]>(initialFilters);
 
   const onApply = useCallback(
-    (newFilter: T) => {
-      setFilters(state => [...state, newFilter]);
+    newFilter => {
+      newFilter.length
+        ? setFilters([...newFilter])
+        : setFilters(state => [...state, newFilter]);
     },
     [setFilters],
   );

@@ -202,6 +202,16 @@ function ConfigureField({
           )}
         </View>
 
+        <View
+          style={{
+            color: colors.n4,
+            marginBottom: 10,
+            alignItems: 'center',
+          }}
+        >
+          {field === 'saved' && 'Existing filters will be cleared'}
+        </View>
+
         <Stack
           direction="row"
           align="flex-start"
