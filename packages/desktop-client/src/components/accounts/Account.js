@@ -323,14 +323,17 @@ function AccountMenu({
   );
 }
 
-function CategoryMenu({ onClose, onMenuSelect }) {
+function CategoryMenu({ onClose, onMenuSelect, filters }) {
   return (
     <MenuTooltip onClose={onClose}>
       <Menu
         onMenuSelect={item => {
           onMenuSelect(item);
         }}
-        items={[{ name: 'export', text: 'Export' }]}
+        items={[
+          { name: 'export', text: 'Export' },
+          filters.length > 0 && { name: 'save-filter', text: 'Save Filter' },
+        ]}
       />
     </MenuTooltip>
   );
@@ -1000,6 +1003,7 @@ const AccountHeader = memo(
                       onMenuSelect(item);
                     }}
                     onClose={() => setMenuOpen(false)}
+                    filters={filters}
                   />
                 )}
               </View>
