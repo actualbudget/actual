@@ -8,6 +8,7 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
+import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import {
@@ -276,6 +277,8 @@ function ConfigureField({
 }
 
 export function FilterButton({ onApply }) {
+  let filters = useFilters();
+
   let { dateFormat } = useSelector(state => {
     return {
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
@@ -336,16 +339,20 @@ export function FilterButton({ onApply }) {
       }
     }
 
-    let { error } = await send('rule-validate', {
-      conditions: [cond],
-      actions: [],
-    });
+    let { error } =
+      cond.field !== 'saved' &&
+      (await send('rule-validate', {
+        conditions: [cond],
+        actions: [],
+      }));
+
+    let saved = filters.find(f => cond.value === f.id);
 
     if (error && error.conditionErrors.length > 0) {
       let field = titleFirst(mapField(cond.field));
       alert(field + ': ' + getFieldError(error.conditionErrors[0]));
     } else {
-      onApply(cond);
+      onApply(saved ? saved.conditions : cond);
       dispatch({ type: 'close' });
     }
   }

@@ -1776,7 +1776,8 @@ class AccountInternal extends PureComponent {
     if (cond.customName) {
       filters = filters.filter(f => f.customName !== cond.customName);
     }
-    this.applyFilters([...filters, cond]);
+    let conds = cond.length ? cond : [cond];
+    this.applyFilters([...filters, ...conds]);
   };
 
   onScheduleAction = async (name, ids) => {
