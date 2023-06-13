@@ -112,6 +112,7 @@ export default function update(state = initialState, action) {
 
 export const getAccountsById = memoizeOne(accounts => groupById(accounts));
 export const getPayeesById = memoizeOne(payees => groupById(payees));
+export const getFiltersById = memoizeOne(filters => groupById(filters));
 export const getCategoriesById = memoizeOne(categoryGroups => {
   let res = {};
   categoryGroups.forEach(group => {

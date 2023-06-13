@@ -45,6 +45,7 @@ let filterFields = [
   'category',
   'amount',
   'cleared',
+  'saved',
 ].map(field => [field, mapField(field)]);
 
 function subfieldFromFilter({ field, options, value }) {

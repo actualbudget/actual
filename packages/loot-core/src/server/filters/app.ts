@@ -59,8 +59,8 @@ export async function createFilter(filter) {
       throw new Error('Cannot create filters with the same name');
     }
   } else {
-    filter.name = null;
-    //throw new Error('Filters must be named');
+    //filter.name = null;
+    throw new Error('Filters must be named');
   }
 
   // Create the rule here based on the info

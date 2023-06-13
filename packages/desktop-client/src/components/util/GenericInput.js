@@ -7,6 +7,7 @@ import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import Autocomplete from '../autocomplete/Autocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import SavedAutocomplete from '../autocomplete/SavedAutocomplete';
 import { View, Input } from '../common';
 import { Checkbox } from '../forms';
 import DateSelect from '../select/DateSelect';
@@ -22,14 +23,17 @@ export default function GenericInput({
   style,
   onChange,
 }) {
-  let { payees, accounts, categoryGroups, dateFormat } = useSelector(state => {
-    return {
-      payees: state.queries.payees,
-      accounts: state.queries.accounts,
-      categoryGroups: state.queries.categories.grouped,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    };
-  });
+  let { payees, accounts, saved, categoryGroups, dateFormat } = useSelector(
+    state => {
+      return {
+        payees: state.queries.payees,
+        accounts: state.queries.accounts,
+        saved: state.queries.saved,
+        categoryGroups: state.queries.categories.grouped,
+        dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
+      };
+    },
+  );
 
   // This makes the UI more resilient in case of faulty data
   if (multi && !Array.isArray(value)) {
@@ -82,6 +86,28 @@ export default function GenericInput({
           content = (
             <CategoryAutocomplete
               categoryGroups={categoryGroups}
+              value={value}
+              multi={multi}
+              openOnFocus={true}
+              onSelect={onChange}
+              inputProps={{
+                inputRef,
+                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+              }}
+            />
+          );
+          break;
+
+        default:
+      }
+      break;
+
+    case 'id2':
+      switch (field) {
+        case 'saved':
+          content = (
+            <SavedAutocomplete
+              saved={saved}
               value={value}
               multi={multi}
               openOnFocus={true}

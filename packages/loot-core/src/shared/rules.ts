@@ -11,6 +11,10 @@ export const TYPE_INFO = {
     ops: ['is', 'contains', 'oneOf'],
     nullable: true,
   },
+  id2: {
+    ops: [],
+    nullable: false,
+  },
   string: {
     ops: ['is', 'contains', 'oneOf'],
     nullable: false,
@@ -36,6 +40,7 @@ export type FieldTypes = {
   category: string;
   account: string;
   cleared: boolean;
+  saved: string;
 };
 
 export const FIELD_TYPES = new Map(
@@ -50,6 +55,7 @@ export const FIELD_TYPES = new Map(
     category: 'id',
     account: 'id',
     cleared: 'boolean',
+    saved: 'id2',
   }),
 );
 
