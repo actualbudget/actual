@@ -165,7 +165,7 @@ function getMenu(isDev, createWindow) {
         {
           label: 'Learn More',
           click() {
-            shell.openExternal('https://actualbudget.github.io/docs/');
+            shell.openExternal('https://actualbudget.org/docs/');
           },
         },
       ],

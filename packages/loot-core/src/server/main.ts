@@ -1106,7 +1106,7 @@ handlers['accounts-sync'] = async function ({ id }) {
           errors.push({
             accountId: acct.id,
             message:
-              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
+              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
 
@@ -1347,7 +1347,7 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
           errors.push({
             accountId: acct.id,
             message:
-              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
+              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
 
