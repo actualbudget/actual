@@ -62,6 +62,11 @@ module.exports = {
             label: 'Docs',
           },
           {
+            to: 'blog', 
+            position: 'left',
+            label: 'Blog', 
+          },
+          {
             to: '/contact',
             position: 'left',
             label: 'Contact',
@@ -96,6 +101,15 @@ module.exports = {
               {
                 label: 'Discord',
                 href: 'https://discord.gg/8JfAXSgfRf',
+              },
+            ],
+          },
+          {
+            title: 'RSS Feed',
+            items: [
+              {
+                label: 'RSS Feed',
+                href: 'https://actualbudget.org/blog/rss.xml',
               },
             ],
           },
