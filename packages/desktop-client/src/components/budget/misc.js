@@ -580,7 +580,6 @@ export function SidebarGroup({
               e.stopPropagation();
               onShowNewCategory(group.id);
             }}
-            style={{ display: 'flex !important' }}
           >
             <SvgAdd width={12} height={12} />
           </Button>
