@@ -138,7 +138,7 @@ const sidebars = {
           collapsed: true,
           link: {
             type: 'doc',
-            id: 'budgeting/howitworks',
+            id: 'budgeting/index',
           },
           items: [
             'budgeting/filters',

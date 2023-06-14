@@ -48,7 +48,7 @@ Ultimately this is a personal decision. If you are capable, there is less short 
 
 ![](/img/returns-reimbursements/reimbursement-1.png)
 
-Once enabled, a little arrow will be shown next to the each row's 'Balance' sum in the Budget view. It signals that over spending will be carried over from month to month. Check out the [overspending](./howitworks.md#overspending) section in "How Budgeting Works" for an explanation of this feature.
+Once enabled, a little arrow will be shown next to the each row's 'Balance' sum in the Budget view. It signals that over spending will be carried over from month to month. Check out the [overspending](./index.md#overspending) section in "How Budgeting Works" for an explanation of this feature.
 
 ![](/img/returns-reimbursements/reimbursement-2.png)
 

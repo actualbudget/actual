@@ -88,7 +88,7 @@ export default function Hello() {
           your real income instead of made up numbers. This makes you face your
           real spending, and clearly shows how much you are saving each month.
           We make this process as simple as possible.{' '}
-          <Link to="/docs/budgeting/howitworks">Learn&nbsp;more</Link>
+          <Link to="/docs/budgeting/">Learn&nbsp;more</Link>
         </BigFeature>
 
         <BigFeature
@@ -159,7 +159,7 @@ export default function Hello() {
           <SmallFeature
             title="Budgeting"
             icon={icons.wallet}
-            learnMore="/docs/budgeting/howitworks"
+            learnMore="/docs/budgeting/"
           >
             Track your spending with budgets. You can only budget cash you have
             on hand, which means your budget stays realistic and you don't make
