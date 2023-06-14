@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 
@@ -51,14 +51,12 @@ function getErrorMessage(type, code) {
 }
 
 function AccountSyncCheck({
-  match: {
-    params: { id },
-  },
   accounts,
   failedAccounts,
   unlinkAccount,
   pushModal,
 }) {
+  let { id } = useParams();
   let [open, setOpen] = useState(false);
   if (!failedAccounts) {
     return null;
@@ -143,12 +141,10 @@ function AccountSyncCheck({
   );
 }
 
-export default withRouter(
-  connect(
-    state => ({
-      accounts: state.queries.accounts,
-      failedAccounts: state.account.failedAccounts,
-    }),
-    actions,
-  )(AccountSyncCheck),
-);
+export default connect(
+  state => ({
+    accounts: state.queries.accounts,
+    failedAccounts: state.account.failedAccounts,
+  }),
+  actions,
+)(AccountSyncCheck);
