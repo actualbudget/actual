@@ -213,4 +213,4 @@ If you are using GitHub pages for hosting, this command is a convenient way to b
 
 ### Writing Good Release Notes
 
-This is detailed in the [contributing](https://actualbudget.org/docs/contributing/) section of the documentation.
+This is detailed in the [contributing](https://actualbudget.org/docs/contributing/#writing-good-release-notes) section of the documentation.
