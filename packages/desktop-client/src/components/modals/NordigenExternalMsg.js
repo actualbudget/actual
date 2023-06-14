@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { pushModal } from 'loot-core/src/client/actions/modals';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 
 import useNordigenStatus from '../../hooks/useNordigenStatus';
@@ -67,11 +69,14 @@ export default function NordigenExternalMsg({
   onSuccess,
   onClose: originalOnClose,
 }) {
+  const dispatch = useDispatch();
+
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
   let [institutionId, setInstitutionId] = useState();
   let [country, setCountry] = useState();
   let [error, setError] = useState(null);
+  let [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
   let data = useRef(null);
 
   const {
@@ -108,6 +113,14 @@ export default function NordigenExternalMsg({
     await onSuccess(data.current);
     setWaiting(null);
   }
+
+  const onNordigenInit = () => {
+    dispatch(
+      pushModal('nordigen-init', {
+        onSuccess: () => setIsNordigenSetupComplete(true),
+      }),
+    );
+  };
 
   const renderLinkButton = () => {
     return (
@@ -246,20 +259,17 @@ export default function NordigenExternalMsg({
             >
               Success! Click to continue &rarr;
             </Button>
-          ) : isConfigured ? (
+          ) : isConfigured || isNordigenSetupComplete ? (
             renderLinkButton()
           ) : (
-            <P style={{ color: colors.r5 }}>
-              Nordigen integration has not been configured so linking accounts
-              is not available.{' '}
-              <a
-                href="https://actualbudget.github.io/docs/Accounts/connecting-your-bank/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Learn more.
-              </a>
-            </P>
+            <>
+              <P style={{ color: colors.r5 }}>
+                Nordigen integration has not yet been configured.
+              </P>
+              <Button primary onClick={onNordigenInit}>
+                Configure Nordigen integration
+              </Button>
+            </>
           )}
         </View>
       )}
