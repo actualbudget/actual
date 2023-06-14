@@ -49,7 +49,6 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
           </Text>
 
           <ButtonWithLoading
-            primary
             disabled={syncServerStatus !== 'online'}
             style={{
               padding: '10px 0',
@@ -102,7 +101,6 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
               fontSize: 15,
               fontWeight: 600,
               marginTop: 10,
-              color: colors.n3,
             }}
             onClick={onCreateLocalAccount}
           >
