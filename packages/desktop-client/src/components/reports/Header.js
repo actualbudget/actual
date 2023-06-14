@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
+import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { styles } from '../../style';
-import { View, Select, Button, ButtonLink } from '../common';
+import { View, Select, Button, ButtonLink, Menu, Tooltip } from '../common';
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
@@ -45,6 +46,52 @@ function getFullRange(allMonths) {
   return [start, end];
 }
 
+function MenuButton({ onClick }) {
+  return (
+    <Button bare onClick={onClick} aria-label="Menu">
+      <DotsHorizontalTriple
+        width={15}
+        height={15}
+        style={{ color: 'inherit', transform: 'rotateZ(90deg)' }}
+      />
+    </Button>
+  );
+}
+
+function CategoryMenu({ onClose, filters, saved }) {
+  return (
+    <MenuTooltip onClose={onClose}>
+      <Menu
+        onMenuSelect={item => {
+          //onMenuSelect(item);
+        }}
+        items={[
+          { name: 'testing', text: 'Testing' },
+          saved !== null && { name: 'edit-filter', text: 'Edit filter' },
+          filters.length > 0 &&
+            saved === null && {
+              name: 'save-filter',
+              text: 'Create new filter',
+            },
+        ]}
+      />
+    </MenuTooltip>
+  );
+}
+
+function MenuTooltip({ onClose, children }) {
+  return (
+    <Tooltip
+      position="bottom-right"
+      width={200}
+      style={{ padding: 0 }}
+      onClose={onClose}
+    >
+      {children}
+    </Tooltip>
+  );
+}
+
 function Header({
   title,
   start,
@@ -52,8 +99,11 @@ function Header({
   show1Month,
   allMonths,
   onChangeDates,
+  filters,
+  saved,
   extraButtons,
 }) {
+  let [menuOpen, setMenuOpen] = useState(false);
   return (
     <View
       style={{
@@ -128,6 +178,26 @@ function Header({
         <Button bare onClick={() => onChangeDates(...getFullRange(allMonths))}>
           All Time
         </Button>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+          }}
+        >
+          <MenuButton onClick={() => setMenuOpen(true)} />
+
+          {menuOpen && (
+            <CategoryMenu
+              onMenuSelect={item => {
+                setMenuOpen(false);
+                //onMenuSelect(item);
+              }}
+              onClose={() => setMenuOpen(false)}
+              filters={filters}
+              saved={saved}
+            />
+          )}
+        </View>
       </View>
     </View>
   );

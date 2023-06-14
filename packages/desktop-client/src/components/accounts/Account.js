@@ -271,6 +271,8 @@ function AccountMenu({
   onClose,
   onReconcile,
   onMenuSelect,
+  filters,
+  saved,
 }) {
   let [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
@@ -317,13 +319,19 @@ function AccountMenu({
           account.closed
             ? { name: 'reopen', text: 'Reopen Account' }
             : { name: 'close', text: 'Close Account' },
+          saved !== null && { name: 'edit-filter', text: 'Edit filter' },
+          filters.length > 0 &&
+            saved === null && {
+              name: 'save-filter',
+              text: 'Create new filter',
+            },
         ].filter(x => x)}
       />
     </MenuTooltip>
   );
 }
 
-function CategoryMenu({ onClose, onMenuSelect, filters }) {
+function CategoryMenu({ onClose, onMenuSelect, filters, saved }) {
   return (
     <MenuTooltip onClose={onClose}>
       <Menu
@@ -332,7 +340,12 @@ function CategoryMenu({ onClose, onMenuSelect, filters }) {
         }}
         items={[
           { name: 'export', text: 'Export' },
-          filters.length > 0 && { name: 'save-filter', text: 'Save Filter' },
+          saved !== null && { name: 'edit-filter', text: 'Edit filter' },
+          filters.length > 0 &&
+            saved === null && {
+              name: 'save-filter',
+              text: 'Create new filter',
+            },
         ]}
       />
     </MenuTooltip>
@@ -670,6 +683,7 @@ const AccountHeader = memo(
     editingName,
     isNameEditable,
     workingHard,
+    saved,
     accountName,
     account,
     accountsSyncing,
@@ -989,6 +1003,8 @@ const AccountHeader = memo(
                     }}
                     onReconcile={onReconcile}
                     onClose={() => setMenuOpen(false)}
+                    filters={filters}
+                    saved={saved}
                   />
                 )}
               </View>
@@ -1004,6 +1020,7 @@ const AccountHeader = memo(
                     }}
                     onClose={() => setMenuOpen(false)}
                     filters={filters}
+                    saved={saved}
                   />
                 )}
               </View>
@@ -1097,6 +1114,7 @@ class AccountInternal extends PureComponent {
       editingName: false,
       isAdding: false,
       latestDate: null,
+      saved: null,
     };
   }
 
@@ -1765,10 +1783,12 @@ class AccountInternal extends PureComponent {
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
+    this.setState({ saved: null });
   };
 
   onDeleteFilter = filter => {
     this.applyFilters(this.state.filters.filter(f => f !== filter));
+    this.setState({ saved: null });
   };
 
   onApplyFilter = async cond => {
@@ -1776,9 +1796,13 @@ class AccountInternal extends PureComponent {
     if (cond.customName) {
       filters = filters.filter(f => f.customName !== cond.customName);
     }
-    cond.length
-      ? this.applyFilters([...cond])
-      : this.applyFilters([...filters, cond]);
+    if (cond.conditions) {
+      this.setState({ saved: cond.id });
+      this.applyFilters([...cond.conditions]);
+    } else {
+      this.setState({ saved: null });
+      this.applyFilters([...filters, cond]);
+    }
   };
 
   onScheduleAction = async (name, ids) => {
@@ -1839,6 +1863,7 @@ class AccountInternal extends PureComponent {
       transactions,
       loading,
       workingHard,
+      saved,
       reconcileAmount,
       transactionsFiltered,
       editingName,
@@ -1886,6 +1911,7 @@ class AccountInternal extends PureComponent {
                   editingName={editingName}
                   isNameEditable={isNameEditable}
                   workingHard={workingHard}
+                  saved={saved}
                   account={account}
                   accountName={accountName}
                   accountsSyncing={accountsSyncing}

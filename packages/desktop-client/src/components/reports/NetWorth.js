@@ -24,6 +24,7 @@ import { fromDateRepr } from './util';
 function NetWorth({ accounts }) {
   const {
     filters,
+    saved,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
@@ -87,6 +88,8 @@ function NetWorth({ accounts }) {
         start={start}
         end={end}
         onChangeDates={onChangeDates}
+        filters={filters}
+        saved={saved}
         extraButtons={<FilterButton onApply={onApplyFilter} />}
       />
 

@@ -362,7 +362,7 @@ export function FilterButton({ onApply }) {
       let field = titleFirst(mapField(cond.field));
       alert(field + ': ' + getFieldError(error.conditionErrors[0]));
     } else {
-      onApply(saved ? saved.conditions : cond);
+      onApply(saved ? saved : cond);
       dispatch({ type: 'close' });
     }
   }
