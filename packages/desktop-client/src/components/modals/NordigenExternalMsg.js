@@ -267,7 +267,7 @@ export default function NordigenExternalMsg({
                 Nordigen integration has not yet been configured.
               </P>
               <Button primary onClick={onNordigenInit}>
-                Click here to configure
+                Configure Nordigen integration
               </Button>
             </>
           )}
