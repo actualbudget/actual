@@ -61,8 +61,8 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                 style={{ marginTop: 10, lineHeight: '1.4em', fontSize: 15 }}
               >
                 <strong>Link a bank account</strong> to automatically download
-                transactions. Nordigen will provide reliable, up-to-date
-                information from hundreds of banks.
+                transactions. Nordigen provides reliable, up-to-date information
+                from hundreds of banks.
               </Text>
             </>
           ) : (
@@ -115,7 +115,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
               fontSize: 15,
             }}
           >
-            <P>
+            <Text>
               <strong>Create a local account</strong> if you want to add
               transactions manually. You can also{' '}
               <a
@@ -126,7 +126,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                 import QIF/OFX/QFX files into a local account
               </a>
               .
-            </P>
+            </Text>
           </View>
         </View>
       )}
