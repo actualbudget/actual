@@ -143,7 +143,14 @@ export default function NordigenExternalMsg({
         {isBankOptionError ? (
           <Error>
             Failed loading available banks: Nordigen access credentials might be
-            misconfigured. Please set them up again.
+            misconfigured. Please{' '}
+            <Link
+              onClick={onNordigenInit}
+              style={{ color: colors.b3, display: 'inline' }}
+            >
+              set them up
+            </Link>{' '}
+            again.
           </Error>
         ) : (
           country &&
