@@ -7,8 +7,7 @@
 
 - **Q.** _Can I sync my bank to Actual automatically?_
 
-  **A.** At the moment no, but this is currently under development.
-  See [PR#53](https://github.com/actualbudget/actual-server/pull/53)
+  **A.** Yes, certain banks are now supported, you can find the documentation [here](./experimental/bank-sync.md)
 
 - **Q.** _Can I import my Actual Budget from the hosted instance of Actual to my Self Hosted version_
 
