@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
+import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import {
@@ -211,6 +212,7 @@ export default function EditFilter() {
   let scrollableEl = useRef();
   let history = useHistory();
   let adding = id == null;
+  let filters = useFilters();
 
   //async function loadFilter() {
   //  let { data } = await runQuery(
@@ -273,7 +275,8 @@ export default function EditFilter() {
     let res = await sendCatch(adding ? 'filter/create' : 'filter/update', {
       name: name,
       conditions: conditions.map(unparse),
-      conditionsOp: conditionsOp,
+      conditionsOp,
+      filters,
     });
 
     if (res.error) {

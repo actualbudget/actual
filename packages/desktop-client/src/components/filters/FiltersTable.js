@@ -133,7 +133,7 @@ export function FiltersTable({
       >
         <Field width="flex" name="name">
           <Text
-            style={item.name == null ? { color: colors.n8 } : null}
+            style={!item.name ? { color: colors.n8 } : null}
             title={item.name ? item.name : ''}
           >
             {item.name ? item.name : 'None'}
