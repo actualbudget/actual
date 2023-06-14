@@ -4,6 +4,14 @@
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
+const defaultOptions = {
+  editUrl: 'https://github.com/actualbudget/docs/tree/master/',
+  beforeDefaultRemarkPlugins: [
+    require('./src/remark/rewrite-images'),
+    require('./src/remark/mentions'),
+  ],
+};
+
 /** @type {import('@docusaurus/types').Config} */
 module.exports = {
   title: 'Actual Budget Documentation',
@@ -28,10 +36,12 @@ module.exports = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          routeBasePath: 'docs/',
+          routeBasePath: 'docs',
           sidebarPath: require.resolve('./docs-sidebar.js'),
-          editUrl: 'https://github.com/actualbudget/docs/tree/master/',
-          beforeDefaultRemarkPlugins: [require('./src/remark/rewrite-images')],
+          ...defaultOptions,
+        },
+        blog: {
+          ...defaultOptions,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -62,9 +72,9 @@ module.exports = {
             label: 'Docs',
           },
           {
-            to: 'blog', 
+            to: 'blog',
             position: 'left',
-            label: 'Blog', 
+            label: 'Blog',
           },
           {
             to: '/contact',
