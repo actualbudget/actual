@@ -49,6 +49,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                   padding: '10px 0',
                   fontSize: 15,
                   fontWeight: 600,
+                  flex: 1,
                 }}
                 onClick={onConnect}
               >
@@ -56,11 +57,6 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                   ? 'Link bank account with Nordigen'
                   : 'Set up Nordigen for bank sync'}
               </ButtonWithLoading>
-              {isNordigenSetupComplete && (
-                <Button bare onClick={onNordigenInit}>
-                  set new API secrets
-                </Button>
-              )}
               <Text
                 style={{ marginTop: 10, lineHeight: '1.4em', fontSize: 15 }}
               >
