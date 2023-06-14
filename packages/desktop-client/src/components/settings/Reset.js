@@ -34,7 +34,7 @@ export function ResetCache() {
   );
 }
 
-export function ResetSync({ resetSync }) {
+export function ResetSync({ isEnabled, resetSync }) {
   let [resetting, setResetting] = useState(false);
 
   async function onResetSync() {
@@ -46,17 +46,28 @@ export function ResetSync({ resetSync }) {
   return (
     <Setting
       primaryAction={
-        <ButtonWithLoading loading={resetting} onClick={onResetSync}>
+        <ButtonWithLoading
+          loading={resetting}
+          disabled={!isEnabled}
+          onClick={onResetSync}
+        >
           Reset sync
         </ButtonWithLoading>
       }
     >
-      <Text>
-        <strong>Reset sync</strong> will remove all local data used to track
-        changes for syncing, and create a fresh sync ID on the server. This file
-        on other devices will have to be re-downloaded to use the new sync ID.
-        Use this if there is a problem with syncing and you want to start fresh.
-      </Text>
+      {isEnabled ? (
+        <Text>
+          <strong>Reset sync</strong> will remove all local data used to track
+          changes for syncing, and create a fresh sync ID on the server. This
+          file on other devices will have to be re-downloaded to use the new
+          sync ID. Use this if there is a problem with syncing and you want to
+          start fresh.
+        </Text>
+      ) : (
+        <Text>
+          <strong>Reset sync</strong> is only available when syncing is enabled.
+        </Text>
+      )}
     </Setting>
   );
 }

@@ -1,9 +1,11 @@
+// eslint-disable-next-line no-restricted-imports
 import {
   init,
   openDatabase,
   transaction,
   execQuery,
   runQuery,
+  // eslint-disable-next-line import/extensions
 } from './index.web';
 
 beforeAll(() => {

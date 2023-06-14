@@ -18,6 +18,10 @@ export function overwriteTemplate({ month }) {
   return processTemplate(month, true);
 }
 
+export function runCheckTemplates() {
+  return checkTemplates();
+}
+
 function checkScheduleTemplates(template) {
   let lowPriority = template[0].priority;
   let errorNotice = false;
@@ -66,8 +70,35 @@ async function processTemplate(month, force) {
       });
     }
   }
+  // find all remainder templates, place them after all other templates
+  let remainder_found;
+  let remainder_priority = lowestPriority + 1;
+  let remainder_weight_total = 0;
+  for (let c = 0; c < categories.length; c++) {
+    let category = categories[c];
+    let templates = category_templates[category.id];
+    if (templates) {
+      for (let i = 0; i < templates.length; i++) {
+        if (templates[i].type === 'remainder') {
+          templates[i].priority = remainder_priority;
+          remainder_weight_total += templates[i].weight;
+          remainder_found = true;
+        }
+      }
+    }
+  }
+  // so the remainders don't get skiped
+  if (remainder_found) lowestPriority = remainder_priority;
 
   for (let priority = 0; priority <= lowestPriority; priority++) {
+    // setup scaling for remainder
+    let remainder_scale = 1;
+    if (priority === lowestPriority) {
+      let sheetName = monthUtils.sheetForMonth(month);
+      let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+      remainder_scale = Math.round(budgetAvailable / remainder_weight_total);
+    }
+
     for (let c = 0; c < categories.length; c++) {
       let category = categories[c];
       let template = category_templates[category.id];
@@ -118,6 +149,7 @@ async function processTemplate(month, force) {
                 template,
                 month,
                 priority,
+                remainder_scale,
                 force,
               );
             if (to_budget != null) {
@@ -169,9 +201,7 @@ async function processTemplate(month, force) {
       return { type: 'message', message: 'All categories were up to date.' };
     }
   } else {
-    let applied = `Successfully applied templates to ${num_applied} ${
-      num_applied === 1 ? 'category' : 'categories'
-    }.`;
+    let applied = `Successfully applied ${num_applied} templates.`;
     if (errors.length) {
       return {
         sticky: true,
@@ -221,6 +251,7 @@ async function applyCategoryTemplate(
   template_lines,
   month,
   priority,
+  remainder_scale,
   force,
 ) {
   let current_month = `${month}-01`;
@@ -546,6 +577,12 @@ async function applyCategoryTemplate(
         }
         break;
       }
+      case 'remainder': {
+        to_budget = Math.round(remainder_scale * template.weight);
+        // can over budget with the rounding, so checking that
+        if (to_budget > budgetAvailable) to_budget = budgetAvailable;
+        break;
+      }
       case 'error':
         return { errors };
       default:
@@ -577,5 +614,40 @@ async function applyCategoryTemplate(
     str += ' ' + template_lines.map(x => x.line).join('\n');
     console.log(str);
     return { amount: to_budget, errors };
+  }
+}
+
+async function checkTemplates() {
+  let category_templates = await getCategoryTemplates();
+  let errors = [];
+
+  let categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  // run through each line and see if its an error
+  for (let c = 0; c < categories.length; c++) {
+    let category = categories[c];
+    let template = category_templates[category.id];
+    if (template) {
+      for (let l = 0; l < template.length; l++) {
+        if (template[l].type === 'error') {
+          //return { type: 'message', message: "found a bad one",};
+          errors.push(category.name + ': ' + template[l].line);
+        }
+      }
+    }
+  }
+  if (errors.length) {
+    return {
+      sticky: true,
+      message: `There were errors interpreting some templates:`,
+      pre: errors.join('\n\n'),
+    };
+  } else {
+    return {
+      type: 'message',
+      message: 'All templates passed! 🎉',
+    };
   }
 }

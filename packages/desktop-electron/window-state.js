@@ -3,6 +3,7 @@ let path = require('path');
 
 let electron = require('electron');
 
+// eslint-disable-next-line import/extensions
 let backend = require('loot-core/lib-dist/bundle.desktop.js');
 
 function loadState() {

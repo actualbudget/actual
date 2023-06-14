@@ -2,7 +2,7 @@ import { useContext, useState, useRef, useLayoutEffect } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
-import NamespaceContext from './NamespaceContext.js';
+import NamespaceContext from './NamespaceContext';
 
 function unresolveName(name) {
   let idx = name.indexOf('!');

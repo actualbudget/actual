@@ -72,13 +72,10 @@ function connectSocket(port, onOpen) {
 
     onOpen();
   };
-
-  client.onclose = event => {
-    socketClient = null;
-  };
 }
 
 export const init: T.Init = async function (socketName) {
+  await clearServer();
   return new Promise(resolve => connectSocket(socketName, resolve));
 };
 
@@ -140,4 +137,19 @@ export const listen: T.Listen = function (name, cb) {
 
 export const unlisten: T.Unlisten = function (name) {
   listeners.set(name, []);
+};
+
+async function closeSocket(onClose) {
+  socketClient.onclose = event => {
+    socketClient = null;
+    onClose();
+  };
+
+  await socketClient.close();
+}
+
+export const clearServer: T.ClearServer = async function () {
+  if (socketClient != null) {
+    return new Promise(closeSocket);
+  }
 };
