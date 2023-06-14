@@ -6,7 +6,7 @@
 
 Actual is a local-first personal finance tool. It is 100% free and open-source, written in NodeJS, it has a synchronization element so that all your changes can move between devices without any heavy lifting.
 
-If you are interested in contributing, or want to know how development works, see [CONTRIBUTING.md](https://github.com/actualbudget/actual/blob/master/CONTRIBUTING.md) we would love to have you.
+If you are interested in contributing, or want to know how development works, see our [contributing](https://actualbudget.org/docs/contributing/) document we would love to have you.
 
 Want to say thanks? Click the ⭐ at the top of the page.
 
