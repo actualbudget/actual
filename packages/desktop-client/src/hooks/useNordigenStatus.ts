@@ -7,7 +7,7 @@ import useSyncServerStatus from './useSyncServerStatus';
 export default function useNordigenStatus() {
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [status] = useSyncServerStatus();
+  const status = useSyncServerStatus();
 
   useEffect(() => {
     async function fetch() {
