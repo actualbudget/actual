@@ -30,6 +30,10 @@ const sidebars = {
     {
       type: 'category',
       label: 'Contributing',
+      link: {
+        type: 'doc',
+        id: 'contributing/index',
+      },
       collapsed: true,
       items: [
         {
