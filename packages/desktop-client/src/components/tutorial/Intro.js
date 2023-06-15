@@ -21,18 +21,15 @@ function Intro({ fromYNAB, nextTutorialStage, closeTutorial }) {
 
       <View style={{ lineHeight: '1.5em' }}>
         <Text>
-          <ExternalLink
-            asAnchor
-            href="https://actualbudget.github.io/docs/category/getting-started"
-          >
-            Getting Started
+          <ExternalLink asAnchor href="https://actualbudget.org/docs/tour/">
+            Tour
           </ExternalLink>
           : A guide on what to do first
         </Text>
         <Text>
           <ExternalLink
             asAnchor
-            href="https://actualbudget.github.io/docs/Budgeting/howitworks"
+            href="https://actualbudget.org/docs/budgeting/"
           >
             How it Works
           </ExternalLink>

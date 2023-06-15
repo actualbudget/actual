@@ -373,7 +373,7 @@ export default function ScheduleDetails() {
       dispatch({
         type: 'form-error',
         error:
-          'An error occurred while saving. Please contact help@actualbudget.com for support.',
+          'An error occurred while saving. Please visit https://actualbudget.org/contact/ for support.',
       });
     } else {
       if (adding) {
