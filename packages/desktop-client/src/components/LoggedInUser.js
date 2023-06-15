@@ -10,7 +10,7 @@ import { View, Text, Button, Tooltip, Menu } from './common';
 import { useServerURL } from './ServerContext';
 
 function LoggedInUser({
-  hideChange,
+  hideIfNoServer,
   userData,
   getUserData,
   signOut,
@@ -63,6 +63,10 @@ function LoggedInUser({
     }
 
     return 'Server';
+  }
+
+  if (hideIfNoServer && !serverUrl) {
+    return null;
   }
 
   if (loading && serverUrl) {
