@@ -65,7 +65,7 @@ function LoggedInUser({
     return 'Server';
   }
 
-  if (loading) {
+  if (loading && serverUrl) {
     return (
       <Text style={[{ color: colors.n5, fontStyle: 'italic' }, style]}>
         Loading account...
