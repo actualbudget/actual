@@ -376,7 +376,7 @@ async function applyCategoryTemplate(
         while (num_months < 0 && repeat) {
           target_month = monthUtils.addMonths(target_month, repeat);
           num_months = monthUtils.differenceInCalendarMonths(
-            template_lines[l],
+            template_lines[l].month,
             current_month,
           );
         }
