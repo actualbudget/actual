@@ -1,8 +1,5 @@
 import * as uuid from '../../platform/uuid';
-import {
-  parseConditionsOrActions,
-  serializeConditionsOrActions,
-} from '../accounts/transaction-rules';
+import { parseConditionsOrActions } from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import * as db from '../db';
 import { requiredFields } from '../models';
@@ -35,18 +32,15 @@ export const filterModel = {
   },
 
   fromJS(filter) {
-    let { conditions, conditionsOp, ...row } = filter;
+    let { conditionsOp, ...row } = filter;
     if (conditionsOp) {
       row.conditions_op = conditionsOp;
-    }
-    if (Array.isArray(conditions)) {
-      row.conditions = serializeConditionsOrActions(conditions);
     }
     return row;
   },
 };
 
-export async function filterNameExists(name, filterId) {
+export async function filterNameExists(name, filterId, newItem) {
   let idForName = await db.first(
     'SELECT id from transaction_filters WHERE tombstone = 0 AND name = ?',
     [name],
@@ -55,26 +49,28 @@ export async function filterNameExists(name, filterId) {
   if (idForName === null) {
     return false;
   }
-  if (filterId) {
+  if (!newItem) {
     return idForName.id !== filterId;
   }
   return true;
 }
 
 //TODO: Possible to simplify this?
-export function ConditionExists(filter) {
-  let {conditions, conditionsOp, filters} = filter;
+//use filters and maps
+/* export function ConditionExists(item, filters, newItem) {
+  let { conditions, conditionsOp } = item;
   let condCheck = [];
   let fCondCheck = false;
-  let fCondName = '';
+  let fCondFound;
 
   filters.map(filter => {
     fCondCheck = false;
     if (
       !condCheck[conditions.length - 1] &&
-      filter.tombstone == '0' &&
-      filter.conditions.length == conditions.length &&
-      filter.conditionsOp == conditionsOp
+      !filter.tombstone &&
+      filter.conditions.length === conditions.length &&
+      //Add: if conditions.length === 1 then ignore conditionsOp
+      filter.conditionsOp === conditionsOp
     ) {
       filter.conditions.map(fcond => {
         if (!fCondCheck) {
@@ -82,9 +78,9 @@ export function ConditionExists(filter) {
             condCheck[i] = false;
             if (
               !condCheck[i - 1] &&
-              cond.field == fcond.field &&
-              cond.op == fcond.op &&
-              cond.value == fcond.value
+              cond.field === fcond.field &&
+              cond.op === fcond.op &&
+              cond.value === fcond.value
             ) {
               condCheck[i] = true;
             }
@@ -92,56 +88,67 @@ export function ConditionExists(filter) {
           });
         }
       });
-      fCondName = condCheck[conditions.length - 1] && filter.name;
+      fCondFound = condCheck[conditions.length - 1] && filter;
     }
   });
 
-  return fCondName;
-}
+  condCheck = [];
+
+  if (!newItem) {
+    return fCondFound.id !== item.id && fCondFound.name;
+  }
+  return fCondFound.name;
+} */
 
 export async function createFilter(filter) {
   let filterId = uuid.v4Sync();
+  let item = { ...filter.state, id: filterId };
 
-  if (filter.name) {
-    if (await filterNameExists(filter.name, filterId)) {
+  if (item.name) {
+    if (await filterNameExists(item.name, item.id, true)) {
       throw new Error('Cannot create filters with the same name');
     }
   } else {
-    //filter.name = null;
     throw new Error('Filters must be named');
   }
 
-  if (filter.conditions) {
-    let condExists = ConditionExists(filter);
+  /*   if (item.conditions) {
+    let condExists = ConditionExists(item, filter.filters, true);
     if (condExists) {
       throw new Error(
         'Duplicate filter warning: conditions already exist. Filter name: ' +
           condExists,
       );
     }
-  }
+  } */
 
   // Create the filter here based on the info
-  await db.insertWithSchema('transaction_filters', {
-    name: filter.name,
-    conditions: filter.conditions,
-    conditions_op: filter.conditionsOp,
-    id: filterId,
-  });
+  await db.insertWithSchema('transaction_filters', filterModel.fromJS(item));
 
   return filterId;
 }
 
-export async function updateFilter({ filter }: { filter }) {
-  if (filter.name) {
-    if (await filterNameExists(filter.name, filter.id)) {
+export async function updateFilter(filter) {
+  let item = filter.state;
+  if (item.name) {
+    if (await filterNameExists(item.name, item.id, false)) {
       throw new Error('There is already a filter with this name');
     }
   } else {
-    filter.name = undefined;
+    throw new Error('Filters must be named');
   }
 
-  await db.updateWithSchema('transaction_filters', filterModel.toJS(filter));
+  /*   if (item.conditions) {
+    let condExists = ConditionExists(item, filter.filters, false);
+    if (condExists) {
+      throw new Error(
+        'Duplicate filter warning: conditions already exist. Filter name: ' +
+          condExists,
+      );
+    }
+  } */
+
+  await db.updateWithSchema('transaction_filters', filterModel.fromJS(item));
 }
 
 export async function deleteFilter({ id }) {

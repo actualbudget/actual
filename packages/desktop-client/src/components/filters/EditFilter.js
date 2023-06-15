@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useReducer } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import q, { liveQuery, runQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import {
   mapField,
@@ -196,31 +196,61 @@ let conditionFields = [
   ]);
 
 export default function EditFilter() {
-  let [conditions, setConditions] = useState([
-    {
-      field: 'payee',
-      op: 'is',
-      value: null,
-      type: 'id',
-    },
-  ]);
-  let [conditionsOp, setConditionsOp] = useState('and');
-  let [transactions, setTransactions] = useState([]);
-  let [name, setName] = useState('None');
-  let [dispatch, setDispatch] = useState('');
+  //let [dispatch, setDispatch] = useState('');
   let { id } = useParams();
   let scrollableEl = useRef();
   let history = useHistory();
   let adding = id == null;
   let filters = useFilters();
 
-  //async function loadFilter() {
-  //  let { data } = await runQuery(
-  //    q('transaction_filters').filter({ id }).select('*'),
-  //  );
-  //  return data[0];
-  //}
+  let [state, dispatch] = useReducer(
+    (state, action) => {
+      switch (action.type) {
+        case 'set-schedule': {
+          let filter = action.filter;
+          return {
+            ...state,
+            filter: {
+              conditions: filter.conditions,
+              conditionsOp: filter.conditions_op,
+              name: filter.name,
+              id: filter.id,
+            },
+          };
+        }
 
+        case 'set-field':
+          let filter = { [action.field]: action.value };
+          return {
+            ...state,
+            filter: { ...state.filter, ...filter },
+          };
+
+        case 'set-transactions':
+          return { ...state, transactions: action.transactions };
+
+        case 'form-error':
+          return { ...state, error: action.error };
+
+        default:
+          throw new Error('Unknown action: ');
+      }
+    },
+    {
+      filter: { conditions: [] },
+      error: null,
+      transactions: [],
+    },
+  );
+
+  async function loadFilter() {
+    let { data } = await runQuery(
+      q('transaction_filters').filter({ id }).select('*'),
+    );
+    return data[0];
+  }
+
+  //Set Modal (default values or pull edit data)
   useEffect(() => {
     // Flash the scrollbar
     if (scrollableEl.current) {
@@ -233,54 +263,66 @@ export default function EditFilter() {
     // Run it here
     async function run() {
       if (adding) {
-        let { filters } = await send('make-filters-from-conditions', {
-          conditions: conditions.map(unparse),
-        });
+        let filter = {
+          name: 'None1',
+          conditions_op: 'and',
+          conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
+        };
 
-        if (filters.length > 0) {
-          const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-          let { data: transactions } = await runQuery(
-            q('transactions')
-              .filter({ [conditionsOpKey]: filters })
-              .select('*'),
-          );
-          setTransactions(transactions);
-        } else {
-          setTransactions([]);
-        }
+        dispatch({ type: 'set-schedule', filter });
       } else {
-        //let filters = await loadFilter();
-        //if (filters) {
-        //  setConditions(filters.conditions);
-        //  setName(filters.name);
-        //}
+        let filter = await loadFilter();
+        if (filter) {
+          dispatch({ type: 'set-schedule', filter });
+        }
       }
     }
     run();
-  }, [conditions, conditionsOp]);
+  }, []);
 
-  let selectedInst = useSelected('transactions', transactions, []);
+  //Set Transactions preview table
+  useEffect(() => {
+    let unsubscribe;
 
-  function onChangeConditionsOp(name, value) {
-    setConditionsOp(value);
-  }
+    send('make-filters-from-conditions', {
+      conditions: state.filter.conditions.map(unparse),
+    }).then(({ filters }) => {
+      if (filters.length > 0) {
+        const conditionsOpKey =
+          state.filter.conditionsOp === 'or' ? '$or' : '$and';
+        let live = liveQuery(
+          q('transactions')
+            .filter({ [conditionsOpKey]: filters })
+            .select('*'),
+          data => dispatch({ type: 'set-transactions', transactions: data }),
+        );
+        unsubscribe = live.unsubscribe;
+      }
+    });
 
-  function onChangeName(value) {
-    setName(value);
-  }
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [state.filter.conditions, state.filter.conditionsOp]);
+
+  let selectedInst = useSelected('transactions', state.transactions, []);
 
   async function onSave() {
-    setDispatch('');
+    dispatch({ type: 'form-error', error: null });
 
     let res = await sendCatch(adding ? 'filter/create' : 'filter/update', {
-      name: name,
-      conditions: conditions.map(unparse),
-      conditionsOp,
+      state: state.filter,
       filters,
     });
 
     if (res.error) {
-      setDispatch(res.error);
+      dispatch({
+        type: 'form-error',
+        error: res.error.message,
+        //'An error occurred while saving. Please contact help@actualbudget.com for support.',
+      });
     } else {
       history.goBack();
     }
@@ -299,8 +341,10 @@ export default function EditFilter() {
           <GenericInput
             field="string"
             type="string"
-            value={name}
-            onChange={onChangeName}
+            value={state.filter.name}
+            onChange={e => {
+              dispatch({ type: 'set-field', field: 'name', value: e });
+            }}
           />
         </FormField>
       </Stack>
@@ -315,17 +359,25 @@ export default function EditFilter() {
                 ['and', 'all'],
                 ['or', 'any'],
               ]}
-              value={conditionsOp}
-              onChange={onChangeConditionsOp}
+              value={state.filter.conditionsOp}
+              onChange={(name, value) => {
+                dispatch({
+                  type: 'set-field',
+                  field: 'conditionsOp',
+                  value: value,
+                });
+              }}
             />
             of these conditions match:
           </Text>
 
           <ConditionsList
-            conditionsOp={conditionsOp}
-            conditions={conditions}
+            conditionsOp={state.filter.conditionsOp}
+            conditions={state.filter.conditions}
             editorStyle={editorStyle}
-            onChangeConditions={conds => setConditions(conds)}
+            onChangeConditions={e => {
+              dispatch({ type: 'set-field', field: 'conditions', value: e });
+            }}
           />
         </View>
       </View>
@@ -345,8 +397,8 @@ export default function EditFilter() {
           </View>
 
           <SimpleTransactionsTable
-            transactions={transactions}
-            fields={getTransactionFields(conditions)}
+            transactions={state.transactions}
+            fields={getTransactionFields(state.filter.conditions)}
             style={{
               border: '1px solid ' + colors.border,
               borderRadius: 4,
@@ -361,8 +413,8 @@ export default function EditFilter() {
             align="center"
             style={{ marginTop: 20 }}
           >
-            {dispatch.message && (
-              <Text style={{ color: colors.r4 }}>{dispatch.message}</Text>
+            {state.error && (
+              <Text style={{ color: colors.r4 }}>{state.error}</Text>
             )}
             <Button
               style={{ marginRight: 10 }}
@@ -371,7 +423,7 @@ export default function EditFilter() {
               Cancel
             </Button>
             <Button primary onClick={onSave}>
-              {adding ? 'Add' : 'Save'}
+              {adding ? 'Add' : 'Update'}
             </Button>
           </Stack>
         </View>

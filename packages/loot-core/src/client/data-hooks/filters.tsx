@@ -3,17 +3,17 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import q, { liveQuery } from '../query-helpers';
 import { getFiltersById } from '../reducers/queries';
 
-function toJS(rows) {
+export function toJS(rows) {
   let filters = rows.map(row => {
-  return {
-    ...row.fields,
-    id: row.id,
-    name: row.name,
-    tombstone: row.tombstone,
-    conditionsOp: row.conditions_op,
-    conditions: row.conditions,
-  };
-})
+    return {
+      ...row.fields,
+      id: row.id,
+      name: row.name,
+      tombstone: row.tombstone,
+      conditionsOp: row.conditions_op,
+      conditions: row.conditions,
+    };
+  });
   return filters;
 }
 
