@@ -212,12 +212,7 @@ export default function NordigenExternalMsg({
           >
             Link bank in browser &rarr;
           </Button>
-          <Button
-            bare
-            // style={{ padding: 10 }}
-            onClick={() => setMenuOpen(true)}
-            aria-label="Menu"
-          >
+          <Button bare onClick={() => setMenuOpen(true)} aria-label="Menu">
             <DotsHorizontalTriple
               width={15}
               height={15}
