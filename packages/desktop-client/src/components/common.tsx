@@ -467,7 +467,7 @@ type KeybindingProps = {
   keyName: ReactNode;
 };
 
-export function Keybinding({ keyName }: KeybindingProps) {
+function Keybinding({ keyName }: KeybindingProps) {
   return <Text style={{ fontSize: 10, color: colors.n6 }}>{keyName}</Text>;
 }
 

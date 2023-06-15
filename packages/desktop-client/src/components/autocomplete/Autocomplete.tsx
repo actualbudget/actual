@@ -48,7 +48,7 @@ export function defaultFilterSuggestion(suggestion, value) {
   return getItemName(suggestion).toLowerCase().includes(value.toLowerCase());
 }
 
-export function defaultFilterSuggestions(suggestions, value) {
+function defaultFilterSuggestions(suggestions, value) {
   return suggestions.filter(suggestion =>
     defaultFilterSuggestion(suggestion, value),
   );
@@ -524,7 +524,7 @@ type MultiAutocompleteProps = Omit<
   value: unknown[];
   onSelect: (ids: unknown[], id?: string) => void;
 };
-export function MultiAutocomplete({
+function MultiAutocomplete({
   value: selectedItems,
   onSelect,
   suggestions,
