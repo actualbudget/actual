@@ -410,7 +410,16 @@ export function CustomSelect({
     >
       <ListboxButton
         {...css([{ borderWidth: 0, padding: 5, borderRadius: 4 }, style])}
-        arrow={<ExpandArrow style={{ width: 7, height: 7, paddingTop: 3 }} />}
+        arrow={
+          <ExpandArrow
+            style={{
+              width: 7,
+              height: 7,
+              paddingTop: 3,
+              color: colorsm.formInputText,
+            }}
+          />
+        }
       />
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
         <ListboxList>

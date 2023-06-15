@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { colorsm } from '../../style';
 import { View, Button, Search } from '../common';
 import { Page } from '../Page';
 
@@ -82,7 +83,7 @@ export default function Schedules() {
           allowCompleted={true}
           onSelect={onEdit}
           onAction={onAction}
-          style={{ backgroundColor: 'white' }}
+          style={{ backgroundColor: colorsm.tableBackground }}
         />
       </View>
 

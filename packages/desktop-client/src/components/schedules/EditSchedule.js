@@ -614,6 +614,7 @@ export default function ScheduleDetails() {
               alignItems: 'center',
               userSelect: 'none',
               justifyContent: 'flex-end',
+              color: colorsm.pageText,
             }}
           >
             <Checkbox
@@ -626,6 +627,7 @@ export default function ScheduleDetails() {
                   value: e.target.checked,
                 });
               }}
+              style={{ color: colorsm.pageText }}
             />
             <label
               htmlFor="form_posts_transaction"
@@ -639,7 +641,7 @@ export default function ScheduleDetails() {
             style={{
               width: 350,
               textAlign: 'right',
-              color: colorsm.tabletext,
+              color: colorsm.pageText,
               marginTop: 10,
               fontSize: 13,
               lineHeight: '1.4em',
