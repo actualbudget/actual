@@ -759,7 +759,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
               Rules are always run in the order that you see them.{' '}
               <ExternalLink
                 asAnchor={true}
-                href="https://actualbudget.github.io/docs/Budgeting/rules/"
+                href="https://actualbudget.org/docs/budgeting/rules/"
                 style={{ color: colors.n4 }}
               >
                 Learn more

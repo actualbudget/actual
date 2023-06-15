@@ -74,7 +74,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
               Nordigen integration is only available for budgets using
               actual-server.{' '}
               <a
-                href="https://actualbudget.github.io/docs/Installing/overview"
+                href="https://actualbudget.org/docs/install/"
                 target="_blank"
                 rel="noopener noreferrer"
               >

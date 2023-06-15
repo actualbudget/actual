@@ -13,7 +13,7 @@ Want to say thanks? Click the ⭐ at the top of the page.
 ## Key Links
 
 - Actual [discord](https://discord.gg/pRYNYr4W5A) community.
-- Actual [Community Documentation](https://actualbudget.github.io/docs)
+- Actual [Community Documentation](https://actualbudget.org/docs)
 
 ## Installation
 
@@ -23,11 +23,11 @@ If you are only interested in running the latest version and not contributing to
 
 The easiest way to get Actual running is to use the [actual-server](https://github.com/actualbudget/actual-server) project. That is the server for syncing changes across devices, and it comes with the latest version of Actual. The server will provide both the web project and a server for syncing.
 
-You can get up and running quickly and easily by following our [Running Actual Locally Guide](https://actualbudget.github.io/docs/Installing/Local/your-own-machine)
+You can get up and running quickly and easily by following our [Running Actual Locally Guide](https://actualbudget.org/docs/install/local)
 
 ## Documentation
 
-We have a wide range of documentation on how to use Actual, this is all available in our [Community Documentation](https://actualbudget.github.io/docs), this includes topics on Budgeting, Account Management, Tips & Tricks and some documentation for developers.
+We have a wide range of documentation on how to use Actual, this is all available in our [Community Documentation](https://actualbudget.org/docs), this includes topics on Budgeting, Account Management, Tips & Tricks and some documentation for developers.
 
 ## Code structure
 
@@ -37,9 +37,10 @@ The Actual app is split up into a few packages:
 - desktop-client - The desktop UI
 - desktop-electron - The desktop app
 
-More information on the project structure is available in our [community documentation](https://actualbudget.github.io/docs/Developers/project-layout).
+More information on the project structure is available in our [community documentation](https://actualbudget.org/docs/contributing/project-layout).
 
 ## Feature Requests
+
 Current feature requests can be seen [here](https://github.com/actualbudget/actual/issues?q=is%3Aissue+label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc).
 Vote for your favorite requests by reacting :+1: to the top comment of the request.
 
