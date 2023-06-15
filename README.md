@@ -39,28 +39,35 @@ Below is the documentation structure for the Actual Community Docs.
 website # the root directory of the documentation site
 ├── docs
 │   └── index.md # the introduction file
-    └── Getting Started
-        └── Migration
-        └── Installing # Documentation around installing actual
-            └── Fly # sub folders for each installation method when the method has multiple files
-            └── Synology
-            ... # If the installation method only has one file, leave it in root of Installing
-    └── Budgeting
-        └── Rules
+│   └── faq.md
+│   └── releases.md # release notes
+    └── accounts # Anything relating to accounts, account management or transactions
         ...
-    └── Accounts # Anything relating to accounts, account management or transactions
+    └── advanced # Some more advanced guides for Actual
+        └── scripts
         ...
-    └── Budgeting # Budget specific, including rules, schedules etc.
+    └── backup-restore
         ...
-    └── Reports # Just reporting
+    └── budgeting # Budget specific, including rules, schedules etc.
+        └── rules
         ...
-    └── Backup & Restore # Self explanatory title
+    └── contributing # How to contribute, project structures etc.
         ...
-    └── Developers # Documentation for developers, API etc.
+    └── experimental # Documentation for experimental features
         ...
-    └── Other # Anything that doesn't fit above
+    └── getting-started # Getting started with Actual
         ...
-    └── Troubleshooting # Self explanatory title
+    └── install # Documentation around installing actual
+        ...
+    └── migration # Migrating into Actual and using the tools available.
+        ...
+    └── reports
+        ...
+    └── tour
+        ...
+    └── transactions
+        ...
+    └── troubleshooting
         ...
 │
 └── static
