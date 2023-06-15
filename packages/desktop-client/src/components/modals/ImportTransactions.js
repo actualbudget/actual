@@ -546,7 +546,7 @@ function MultipliersField({ multiplierCB, value, onChange }) {
   );
 }
 
-export function ImportTransactions({
+function ImportTransactions({
   modalProps,
   options,
   dateFormat = 'MM/dd/yyyy',
