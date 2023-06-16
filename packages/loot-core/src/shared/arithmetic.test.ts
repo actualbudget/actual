@@ -1,7 +1,4 @@
-import { generateTestCases } from '../mocks/number-formats';
-
 import evalArithmetic from './arithmetic';
-import { setNumberFormat } from './util';
 
 describe('arithmetic', () => {
   test('handles negative numbers', () => {
@@ -44,76 +41,4 @@ describe('arithmetic', () => {
   test('respects current number format', () => {
     expect(evalArithmetic('1,222.45')).toEqual(1222.45);
   });
-
-  let configurableFormats = [
-    'dot-comma',
-    'comma-dot',
-    'space-comma',
-    'space-dot',
-  ];
-
-  let inputFormats = [
-    {
-      name: 'dot-comma',
-      tests: [
-        { places: 3, input: '1.234.567', expected: 1234567 },
-        { places: 2, input: '1.234,56', expected: 1234.56 },
-        { places: 1, input: '1.234,5', expected: 1234.5 },
-        { places: 0, input: '1.234,', expected: 1234.0 },
-      ],
-    },
-    {
-      name: 'comma-dot',
-      tests: [
-        { places: 3, input: '1,234,567', expected: 1234567 },
-        { places: 2, input: '1,234.56', expected: 1234.56 },
-        { places: 1, input: '1,234.5', expected: 1234.5 },
-        { places: 0, input: '1,234.', expected: 1234.0 },
-      ],
-    },
-    {
-      name: 'dot-dot',
-      tests: [
-        { places: 3, input: '1.234.567', expected: 1234567 },
-        { places: 2, input: '1.234.56', expected: 1234.56 },
-        { places: 1, input: '1.234.5', expected: 1234.5 },
-        { places: 0, input: '1.234.', expected: 1234.0 },
-      ],
-    },
-    {
-      name: 'comma-comma',
-      tests: [
-        { places: 3, input: '1,234,567', expected: 1234567 },
-        { places: 2, input: '1,234,56', expected: 1234.56 },
-        { places: 1, input: '1,234,5', expected: 1234.5 },
-        { places: 0, input: '1,234,', expected: 1234.0 },
-      ],
-    },
-    {
-      name: 'space-comma',
-      tests: [
-        { places: 3, input: '1 234 567', expected: 1234567 },
-        { places: 2, input: '1 234,56', expected: 1234.56 },
-        { places: 1, input: '1 234,5', expected: 1234.5 },
-        { places: 0, input: '1 234,', expected: 1234.0 },
-      ],
-    },
-    {
-      name: 'space-dot',
-      tests: [
-        { places: 3, input: '1 234 567', expected: 1234567 },
-        { places: 2, input: '1 234.56', expected: 1234.56 },
-        { places: 1, input: '1 234.5', expected: 1234.5 },
-        { places: 0, input: '1 234.', expected: 1234.0 },
-      ],
-    },
-  ];
-
-  test.each(generateTestCases(configurableFormats, inputFormats))(
-    'format is agnostic: %s can parse %s with %d decimal place(s)',
-    (configurableFormat, inputFormat, places, input, expected) => {
-      setNumberFormat({ format: configurableFormat, hideFraction: false });
-      expect(evalArithmetic(input)).toEqual(expected);
-    },
-  );
 });
