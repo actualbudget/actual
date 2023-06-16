@@ -1776,9 +1776,7 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
   if (url == null) {
     await asyncStorage.removeItem('user-token');
   } else {
-    if (url.endsWith('/')) {
-      url = url.slice(0, -1);
-    }
+    url = url.replace(/\/+$/, '');
 
     if (validate) {
       // Validate the server is running
