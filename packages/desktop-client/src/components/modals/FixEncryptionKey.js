@@ -72,7 +72,7 @@ export default function FixEncryptionKey({
               Enter your current password to update your key.{' '}
               <ExternalLink
                 asAnchor
-                href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
+                href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
               >
                 Learn more
               </ExternalLink>
@@ -83,7 +83,7 @@ export default function FixEncryptionKey({
               password for this file to create the key for encryption.{' '}
               <ExternalLink
                 asAnchor
-                href="https://actualbudget.github.io/docs/Getting-Started/sync#end-to-end-encryption"
+                href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
               >
                 Learn more
               </ExternalLink>

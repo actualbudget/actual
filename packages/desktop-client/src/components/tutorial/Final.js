@@ -22,7 +22,7 @@ function Final({ targetRect, navigationProps }) {
         You probably want to delete the transactions you added and clean up your
         budget. If you have any questions or feedback, please get{' '}
         <a
-          href="https://actualbudget.github.io/docs/Contact/"
+          href="https://actualbudget.org/contact/"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -33,10 +33,7 @@ function Final({ targetRect, navigationProps }) {
 
       <P isLast={true}>
         Read{' '}
-        <ExternalLink
-          asAnchor
-          href="https://actualbudget.github.io/docs/Budgeting/howitworks"
-        >
+        <ExternalLink asAnchor href="https://actualbudget.org/docs/budgeting/">
           How it Works
         </ExternalLink>{' '}
         for an in-depth explanation of the budgeting workflow.

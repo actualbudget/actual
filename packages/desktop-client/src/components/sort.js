@@ -13,7 +13,7 @@ import { colors } from '../style';
 
 import { View } from './common';
 
-export function useMergedRefs(ref1, ref2) {
+function useMergedRefs(ref1, ref2) {
   return useMemo(() => {
     function ref(value) {
       [ref1, ref2].forEach(ref => {

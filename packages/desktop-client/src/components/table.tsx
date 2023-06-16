@@ -39,13 +39,13 @@ import {
   IntersectionBoundary,
   Menu,
 } from './common';
-import { FixedSizeList } from './FixedSizeList';
+import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import format from './spreadsheet/format';
 import SheetValue from './spreadsheet/SheetValue';
 
 export const ROW_HEIGHT = 32;
-export const TABLE_BACKGROUND_COLOR = colors.n11;
+const TABLE_BACKGROUND_COLOR = colors.n11;
 
 function fireBlur(onBlur, e) {
   if (document.hasFocus()) {
@@ -448,7 +448,7 @@ export function InputCell({
   );
 }
 
-export function shouldSaveFromKey(e) {
+function shouldSaveFromKey(e) {
   switch (e.key) {
     case 'Tab':
     case 'Enter':

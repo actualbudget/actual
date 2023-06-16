@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 
@@ -38,7 +39,7 @@ function getErrorMessage(type, code) {
     <>
       An internal error occurred. Try to login again, or get{' '}
       <a
-        href="https://actualbudget.github.io/docs/Contact/"
+        href="https://actualbudget.org/contact/"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -50,17 +51,12 @@ function getErrorMessage(type, code) {
 }
 
 function AccountSyncCheck({
-  id,
   accounts,
   failedAccounts,
-  syncAndDownload,
-  markAccountSuccess,
   unlinkAccount,
   pushModal,
-  closeModal,
-  getAccounts,
-  addNotification,
 }) {
+  let { id } = useParams();
   let [open, setOpen] = useState(false);
   if (!failedAccounts) {
     return null;
