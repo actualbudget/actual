@@ -141,6 +141,7 @@ export function Link({ style, children, ...nativeProps }: LinkProps) {
           font: 'inherit',
           ':hover': {
             textDecoration: 'underline',
+            boxShadow: 'none',
           },
         },
         styles.smallText,
