@@ -56,10 +56,12 @@ If the feature is relatively small, feel free to start the discussion by opening
 
 Create a Markdown file in the upcoming-release-notes directory of the repository you’re contributing to named after the PR number. The file should contain front matter with a category key (defining which header to put the entry under) and an authors key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is “Maintenance”). Copy-paste the template below to get started!
 
-`---
+```markdown
+---
 category: Features
 authors: [YourGitHubUsername]
----`
+---
+```
 
 Add option to include exchange rate multiplier during import
 Valid categories:
