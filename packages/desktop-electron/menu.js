@@ -5,20 +5,6 @@ function getMenu(isDev, createWindow) {
     {
       label: 'File',
       submenu: [
-        // {
-        //   label: 'Start Tutorial',
-        //   enabled: false,
-        //   click(item, focusedWindow) {
-        //     if (
-        //       focusedWindow &&
-        //       focusedWindow.webContents.getTitle() === 'Actual'
-        //     ) {
-        //       focusedWindow.webContents.executeJavaScript(
-        //         '__actionsForMenu.startTutorial()'
-        //       );
-        //     }
-        //   }
-        // },
         {
           label: 'Load Backup...',
           enabled: false,
