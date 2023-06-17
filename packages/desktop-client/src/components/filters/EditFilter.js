@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useReducer } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import q, { liveQuery, runQuery } from 'loot-core/src/client/query-helpers';
@@ -198,6 +198,7 @@ let conditionFields = [
 export default function EditFilter() {
   //let [dispatch, setDispatch] = useState('');
   let { id } = useParams();
+  let location = useLocation();
   let scrollableEl = useRef();
   let history = useHistory();
   let adding = id == null;
@@ -263,11 +264,18 @@ export default function EditFilter() {
     // Run it here
     async function run() {
       if (adding) {
-        let filter = {
-          name: 'None1',
-          conditions_op: 'and',
-          conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
-        };
+        let filter;
+        if (location.state.inputConds) {
+          filter = {
+            conditions_op: 'and',
+            conditions: location.state.inputConds,
+          };
+        } else {
+          filter = {
+            conditions_op: 'and',
+            conditions: [{ op: 'is', field: 'payee', value: null, type: 'id' }],
+          };
+        }
 
         dispatch({ type: 'set-schedule', filter });
       } else {
@@ -324,7 +332,10 @@ export default function EditFilter() {
         //'An error occurred while saving. Please contact help@actualbudget.com for support.',
       });
     } else {
-      history.goBack();
+      //history.goBack();
+      history.push(location.state.locationPtr.pathname, {
+        callbackConditions: state.filter.conditions,
+      });
     }
   }
 

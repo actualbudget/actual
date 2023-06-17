@@ -272,7 +272,7 @@ function AccountMenu({
   onReconcile,
   onMenuSelect,
   filters,
-  saved,
+  filterId,
 }) {
   let [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
@@ -319,9 +319,9 @@ function AccountMenu({
           account.closed
             ? { name: 'reopen', text: 'Reopen Account' }
             : { name: 'close', text: 'Close Account' },
-          saved !== null && { name: 'edit-filter', text: 'Edit filter' },
+          filterId !== null && { name: 'edit-filter', text: 'Edit filter' },
           filters.length > 0 &&
-            saved === null && {
+            filterId === null && {
               name: 'save-filter',
               text: 'Create new filter',
             },
@@ -331,7 +331,7 @@ function AccountMenu({
   );
 }
 
-function CategoryMenu({ onClose, onMenuSelect, filters, saved }) {
+function CategoryMenu({ onClose, onMenuSelect, filters, filterId }) {
   return (
     <MenuTooltip onClose={onClose}>
       <Menu
@@ -340,9 +340,9 @@ function CategoryMenu({ onClose, onMenuSelect, filters, saved }) {
         }}
         items={[
           { name: 'export', text: 'Export' },
-          saved !== null && { name: 'edit-filter', text: 'Edit filter' },
+          filterId !== null && { name: 'edit-filter', text: 'Edit filter' },
           filters.length > 0 &&
-            saved === null && {
+            filterId === null && {
               name: 'save-filter',
               text: 'Create new filter',
             },
@@ -538,9 +538,9 @@ function SelectedTransactionsButton({
   onUnlink,
   onCreateRule,
   onScheduleAction,
+  history,
 }) {
   let selectedItems = useSelectedItems();
-  let history = useHistory();
 
   let types = useMemo(() => {
     let items = [...selectedItems];
@@ -683,9 +683,11 @@ const AccountHeader = memo(
     editingName,
     isNameEditable,
     workingHard,
-    saved,
     accountName,
     account,
+    filterId,
+    history,
+    location,
     accountsSyncing,
     accounts,
     transactions,
@@ -954,6 +956,7 @@ const AccountHeader = memo(
                 onUnlink={onBatchUnlink}
                 onCreateRule={onCreateRule}
                 onScheduleAction={onScheduleAction}
+                history={history}
               />
             )}
             <Button
@@ -1004,7 +1007,7 @@ const AccountHeader = memo(
                     onReconcile={onReconcile}
                     onClose={() => setMenuOpen(false)}
                     filters={filters}
-                    saved={saved}
+                    filterId={filterId}
                   />
                 )}
               </View>
@@ -1020,7 +1023,7 @@ const AccountHeader = memo(
                     }}
                     onClose={() => setMenuOpen(false)}
                     filters={filters}
-                    saved={saved}
+                    filterId={filterId}
                   />
                 )}
               </View>
@@ -1029,7 +1032,11 @@ const AccountHeader = memo(
 
           {filters && filters.length > 0 && (
             <AppliedFilters
-              filters={filters}
+              filters={
+                location.state.callbackConditions
+                  ? location.state.callbackConditions
+                  : filters
+              }
               onUpdate={onUpdateFilter}
               onDelete={onDeleteFilter}
             />
@@ -1114,7 +1121,7 @@ class AccountInternal extends PureComponent {
       editingName: false,
       isAdding: false,
       latestDate: null,
-      saved: null,
+      filterId: null,
     };
   }
 
@@ -1505,6 +1512,17 @@ class AccountInternal extends PureComponent {
           this.setState({ showCleared: true });
         }
         break;
+      case 'save-filter':
+        this.props.history.push(`/filters/edit`, {
+          locationPtr: this.props.history.location,
+          inputConds: this.state.filters,
+        });
+        break;
+      case 'edit-filter':
+        this.props.history.push(`/filters/edit/${this.state.filterId}`, {
+          locationPtr: this.props.history.location,
+        });
+        break;
       default:
     }
   };
@@ -1780,27 +1798,36 @@ class AccountInternal extends PureComponent {
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
+    this.props.history.replace(this.props.location.pathname, {
+      callbackConditions: null,
+    });
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
-    this.setState({ saved: null });
+    this.setState({ filterId: null });
   };
 
   onDeleteFilter = filter => {
+    this.props.history.replace(this.props.location.pathname, {
+      callbackConditions: null,
+    });
     this.applyFilters(this.state.filters.filter(f => f !== filter));
-    this.setState({ saved: null });
+    this.setState({ filterId: null });
   };
 
   onApplyFilter = async cond => {
     let filters = this.state.filters;
+    this.props.history.replace(this.props.location.pathname, {
+      callbackConditions: null,
+    });
     if (cond.customName) {
       filters = filters.filter(f => f.customName !== cond.customName);
     }
     if (cond.conditions) {
-      this.setState({ saved: cond.id });
+      this.setState({ filterId: cond.id });
       this.applyFilters([...cond.conditions]);
     } else {
-      this.setState({ saved: null });
+      this.setState({ filterId: null });
       this.applyFilters([...filters, cond]);
     }
   };
@@ -1863,7 +1890,7 @@ class AccountInternal extends PureComponent {
       transactions,
       loading,
       workingHard,
-      saved,
+      filterId,
       reconcileAmount,
       transactionsFiltered,
       editingName,
@@ -1911,8 +1938,10 @@ class AccountInternal extends PureComponent {
                   editingName={editingName}
                   isNameEditable={isNameEditable}
                   workingHard={workingHard}
-                  saved={saved}
                   account={account}
+                  filterId={filterId}
+                  history={this.props.history}
+                  location={this.props.location}
                   accountName={accountName}
                   accountsSyncing={accountsSyncing}
                   accounts={accounts}
@@ -2069,6 +2098,7 @@ export default function Account() {
   }));
 
   let dispatch = useDispatch();
+  let history = useHistory();
   let actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
     [dispatch],
@@ -2114,6 +2144,7 @@ export default function Account() {
           }
           accountId={params.id}
           location={location}
+          history={history}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>
