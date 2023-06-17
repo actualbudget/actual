@@ -2033,7 +2033,6 @@ export default function Account() {
     modalShowing: state.modals.modalStack.length > 0,
     accountsSyncing: state.account.accountsSyncing,
     lastUndoState: state.app.lastUndoState,
-    tutorialStage: state.tutorial.stage,
   }));
 
   let dispatch = useDispatch();
