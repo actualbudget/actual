@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+//import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { styles } from '../../style';
-import { View, Select, Button, ButtonLink, Menu, Tooltip } from '../common';
+import { View, Select, Button, ButtonLink } from '../common';
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
@@ -45,7 +43,7 @@ function getFullRange(allMonths) {
   const end = monthUtils.currentMonth();
   return [start, end];
 }
-
+/* 
 function MenuButton({ onClick }) {
   return (
     <Button bare onClick={onClick} aria-label="Menu">
@@ -91,7 +89,7 @@ function MenuTooltip({ onClose, children }) {
     </Tooltip>
   );
 }
-
+ */
 function Header({
   title,
   start,
@@ -99,11 +97,8 @@ function Header({
   show1Month,
   allMonths,
   onChangeDates,
-  filters,
-  saved,
   extraButtons,
 }) {
-  let [menuOpen, setMenuOpen] = useState(false);
   return (
     <View
       style={{
@@ -178,7 +173,7 @@ function Header({
         <Button bare onClick={() => onChangeDates(...getFullRange(allMonths))}>
           All Time
         </Button>
-        <View
+        {/* <View
           style={{
             flexDirection: 'row',
             alignItems: 'flex-end',
@@ -197,7 +192,7 @@ function Header({
               saved={saved}
             />
           )}
-        </View>
+        </View> */}
       </View>
     </View>
   );

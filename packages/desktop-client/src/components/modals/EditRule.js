@@ -78,7 +78,7 @@ function getTransactionFields(conditions, actions) {
   return fields;
 }
 
-function FieldSelect({ fields, style, value, onChange }) {
+export function FieldSelect({ fields, style, value, onChange }) {
   return (
     <View style={style}>
       <CustomSelect
@@ -402,7 +402,7 @@ function newInput(item) {
   return { ...item, inputKey: '' + Math.random() };
 }
 
-function ConditionsList({
+export function ConditionsList({
   conditionsOp,
   conditions,
   editorStyle,
