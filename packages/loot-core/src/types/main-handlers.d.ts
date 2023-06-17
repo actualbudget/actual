@@ -229,7 +229,6 @@ export interface MainHandlers {
 
   'load-global-prefs': () => Promise<{
     floatingSidebar: boolean;
-    seenTutorial: boolean;
     maxMonths: number;
     autoUpdate: boolean;
     documentDir: string;
@@ -302,8 +301,6 @@ export interface MainHandlers {
     testMode: boolean;
     testBudgetId?;
   }) => Promise<unknown>;
-
-  'set-tutorial-seen': () => Promise<'ok'>;
 
   'import-budget': (arg: { filepath; type }) => Promise<{ error }>;
 
