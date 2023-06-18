@@ -9,7 +9,7 @@ import React, {
 
 import { type Query } from '../shared/query';
 
-import { liveQuery, LiveQuery, PagedQuery } from './query-helpers';
+import { liveQuery, LiveQuery } from './query-helpers';
 
 function makeContext(queryState, opts, QueryClass) {
   let query = new QueryClass(queryState, null, opts);
