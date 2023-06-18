@@ -348,7 +348,7 @@ export async function listRemoteFiles() {
       },
     });
   } catch (e) {
-    console.log('Error fetching file list from server', e);
+    console.log('Unexpected error fetching file list from server', e);
     return null;
   }
 
