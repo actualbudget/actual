@@ -20,7 +20,7 @@ function getFocusedKey(el) {
   return null;
 }
 
-export function focusElement(el, refocusContext) {
+function focusElement(el, refocusContext) {
   if (refocusContext) {
     let key = getFocusedKey(el);
     el.focus({ preventScroll: key && key === refocusContext.keyRef.current });

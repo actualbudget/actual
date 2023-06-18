@@ -204,11 +204,7 @@ function updateMenu(isBudgetOpen) {
   const file = menu.items.filter(item => item.label === 'File')[0];
   const fileItems = file.submenu.items;
   fileItems
-    .filter(
-      item =>
-        item.label === 'Start Tutorial' || item.label === 'Load Backup...',
-    )
-
+    .filter(item => item.label === 'Load Backup...')
     .map(item => (item.enabled = isBudgetOpen));
 
   let tools = menu.items.filter(item => item.label === 'Tools')[0];

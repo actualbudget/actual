@@ -1106,7 +1106,7 @@ handlers['accounts-sync'] = async function ({ id }) {
           errors.push({
             accountId: acct.id,
             message:
-              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
+              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
 
@@ -1347,7 +1347,7 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
           errors.push({
             accountId: acct.id,
             message:
-              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
+              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
 
@@ -1776,6 +1776,8 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
   if (url == null) {
     await asyncStorage.removeItem('user-token');
   } else {
+    url = url.replace(/\/+$/, '');
+
     if (validate) {
       // Validate the server is running
       let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {

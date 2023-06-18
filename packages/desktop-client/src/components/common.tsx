@@ -141,6 +141,7 @@ export function Link({ style, children, ...nativeProps }: LinkProps) {
           font: 'inherit',
           ':hover': {
             textDecoration: 'underline',
+            boxShadow: 'none',
           },
         },
         styles.smallText,
@@ -355,40 +356,6 @@ export function Search({
   );
 }
 
-type KeyboardButtonProps = ComponentProps<typeof Button> & {
-  highlighted?: boolean;
-};
-export function KeyboardButton({
-  highlighted,
-  children,
-  ...props
-}: KeyboardButtonProps) {
-  return (
-    <Button
-      {...props}
-      bare
-      style={[
-        {
-          backgroundColor: 'white',
-          shadowColor: colors.n3,
-          shadowOffset: { width: 0, height: 1 },
-          shadowRadius: 1,
-          shadowOpacity: 1,
-          elevation: 4,
-          borderWidth: 0,
-          paddingLeft: 17,
-          paddingRight: 17,
-        },
-        highlighted && { backgroundColor: colors.p6 },
-        props.style,
-      ]}
-      textStyle={[highlighted && { color: 'white' }]}
-    >
-      {children}
-    </Button>
-  );
-}
-
 type SelectProps = HTMLPropsWithStyle<HTMLSelectElement>;
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
@@ -467,7 +434,7 @@ type KeybindingProps = {
   keyName: ReactNode;
 };
 
-export function Keybinding({ keyName }: KeybindingProps) {
+function Keybinding({ keyName }: KeybindingProps) {
   return <Text style={{ fontSize: 10, color: colors.n6 }}>{keyName}</Text>;
 }
 
@@ -695,16 +662,6 @@ export function P({ style, isLast, children, ...props }: PProps) {
   );
 }
 
-type StrongProps = HTMLPropsWithStyle<HTMLSpanElement>;
-
-export function Strong({ style, children, ...props }: StrongProps) {
-  return (
-    <span {...props} {...css(style, { fontWeight: 500 })}>
-      {children}
-    </span>
-  );
-}
-
 type InlineFieldProps = {
   label: ReactNode;
   labelWidth?: number;
@@ -857,8 +814,6 @@ export function Label({ title, style }: LabelProps) {
     </Text>
   );
 }
-
-export const NullComponent = () => null;
 
 export * from './tooltips';
 export { useTooltip } from './tooltips';

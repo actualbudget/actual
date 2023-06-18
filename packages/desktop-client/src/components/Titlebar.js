@@ -63,7 +63,7 @@ export function TitlebarProvider({ children }) {
   );
 }
 
-export function UncategorizedButton() {
+function UncategorizedButton() {
   return (
     <SheetValue binding={queries.uncategorizedCount()}>
       {node => {

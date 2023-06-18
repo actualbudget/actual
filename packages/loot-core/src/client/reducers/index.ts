@@ -7,7 +7,6 @@ import notifications from './notifications';
 import prefs from './prefs';
 import profile from './profile';
 import queries from './queries';
-import tutorial from './tutorial';
 import user from './user';
 
 const reducers = {
@@ -20,7 +19,6 @@ const reducers = {
   modals,
   notifications,
   budgets,
-  tutorial,
   user,
 };
 export default reducers;
