@@ -214,6 +214,7 @@ const sidebars = {
             id: 'advanced/index',
           },
           items: [
+            'advanced/bank-sync',
             {
               type: 'category',
               label: 'Scripts',
@@ -230,7 +231,6 @@ const sidebars = {
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
             'experimental/report-budget',
-            'experimental/bank-sync',
           ],
         },
       ],

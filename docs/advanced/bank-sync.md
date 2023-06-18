@@ -1,12 +1,8 @@
 # Connecting Your Bank
 
-:::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
-:::
-
 :::note
-Client Version 23.3.0 and
-Server Version 23.3.1 or higher are required for this feature.
+Client Version 23.7.0 and
+Server Version 23.7.0 or higher are required for this feature.
 :::
 
 We are excited to offer this optional bank integration in Actual. Here are a couple of considerations to know about before making the decision to use bank sync in your installation of Actual Budget.
@@ -16,8 +12,6 @@ We are excited to offer this optional bank integration in Actual. Here are a cou
 - The integration only works if you are using actual-server
 
 - The Secrets and Keys are stored in your Actual installed version so it is highly recommended to turn on End to End encryption and create a strong passphrase to encrypt your files.
-
-- Bank Sync is part of the Experimental Features in settings and needs to be turned on in order to use this integration
 
 - You will need to add a config file to your installation
 
