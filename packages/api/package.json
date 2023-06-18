@@ -17,7 +17,6 @@
     "build": "rm -rf dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db"
   },
   "dependencies": {
-    "@actual-app/crdt": "*",
     "better-sqlite3": "^8.2.0",
     "node-fetch": "^2.6.9",
     "uuid": "3.3.2"
