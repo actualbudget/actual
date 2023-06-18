@@ -31,6 +31,22 @@ jobs:
           name: actual-api
           path: packages/api/actual-api.tgz
 
+  crdt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build CRDT
+        run: cd packages/crdt && yarn build
+      - name: Create package tgz
+        run: cd packages/crdt && yarn pack && mv package.tgz actual-crdt.tgz
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: actual-crdt
+          path: packages/crdt/actual-crdt.tgz
+
   web:
     runs-on: ubuntu-latest
     steps:
