@@ -2494,4 +2494,5 @@ export const lib = {
   // Expose CRDT mechanisms so server can use them
   // Backwards compatability
   ...CRDT,
+  timestamp: CRDT,
 };
