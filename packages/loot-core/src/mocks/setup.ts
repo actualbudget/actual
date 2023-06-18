@@ -52,9 +52,11 @@ global.resetRandomId = () => {
   _id = 1;
 };
 
-global.randomId = () => {
-  return 'id' + _id++;
-};
+jest.mock('uuid', () => ({
+  v4: () => {
+    return 'id' + _id++;
+  },
+}));
 
 global.getDatabaseDump = async function (tables) {
   if (!tables) {
