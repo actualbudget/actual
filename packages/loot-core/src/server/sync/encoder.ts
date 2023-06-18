@@ -1,8 +1,8 @@
+import { SyncProtoBuf } from '@actual-app/crdt';
+
 import * as encryption from '../encryption';
 import { SyncError } from '../errors';
 import * as prefs from '../prefs';
-
-import * as SyncPb from './proto/sync_pb';
 
 function coerceBuffer(value) {
   // The web encryption APIs give us back raw Uint8Array... but our
@@ -17,14 +17,14 @@ function coerceBuffer(value) {
 
 export async function encode(groupId, fileId, since, messages) {
   let { encryptKeyId } = prefs.getPrefs();
-  let requestPb = new SyncPb.SyncRequest();
+  let requestPb = new SyncProtoBuf.SyncRequest();
 
   for (let i = 0; i < messages.length; i++) {
     let msg = messages[i];
-    let envelopePb = new SyncPb.MessageEnvelope();
+    let envelopePb = new SyncProtoBuf.MessageEnvelope();
     envelopePb.setTimestamp(msg.timestamp);
 
-    let messagePb = new SyncPb.Message();
+    let messagePb = new SyncProtoBuf.Message();
     messagePb.setDataset(msg.dataset);
     messagePb.setRow(msg.row);
     messagePb.setColumn(msg.column);
@@ -32,7 +32,7 @@ export async function encode(groupId, fileId, since, messages) {
     let binaryMsg = messagePb.serializeBinary();
 
     if (encryptKeyId) {
-      let encrypted = new SyncPb.EncryptedData();
+      let encrypted = new SyncProtoBuf.EncryptedData();
 
       let result;
       try {
@@ -67,7 +67,7 @@ export async function encode(groupId, fileId, since, messages) {
 export async function decode(data) {
   let { encryptKeyId } = prefs.getPrefs();
 
-  let responsePb = SyncPb.SyncResponse.deserializeBinary(data);
+  let responsePb = SyncProtoBuf.SyncResponse.deserializeBinary(data);
   let merkle = JSON.parse(responsePb.getMerkle());
   let list = responsePb.getMessagesList();
   let messages = [];
@@ -79,7 +79,7 @@ export async function decode(data) {
     let msg;
 
     if (encrypted) {
-      let binary = SyncPb.EncryptedData.deserializeBinary(
+      let binary = SyncProtoBuf.EncryptedData.deserializeBinary(
         envelopePb.getContent() as Uint8Array,
       );
 
@@ -98,9 +98,9 @@ export async function decode(data) {
         });
       }
 
-      msg = SyncPb.Message.deserializeBinary(decrypted);
+      msg = SyncProtoBuf.Message.deserializeBinary(decrypted);
     } else {
-      msg = SyncPb.Message.deserializeBinary(
+      msg = SyncProtoBuf.Message.deserializeBinary(
         envelopePb.getContent() as Uint8Array,
       );
     }

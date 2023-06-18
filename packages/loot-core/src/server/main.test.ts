@@ -1,3 +1,5 @@
+import { getClock, deserializeClock } from '@actual-app/crdt';
+
 import { expectSnapshotWithDiffer } from '../mocks/util';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
@@ -5,7 +7,6 @@ import * as monthUtils from '../shared/months';
 
 import * as budgetActions from './budget/actions';
 import * as budget from './budget/base';
-import { getClock, deserializeClock } from './crdt';
 import * as db from './db';
 import { handlers } from './main';
 import {

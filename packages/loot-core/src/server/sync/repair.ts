@@ -1,4 +1,5 @@
-import { serializeClock, getClock, Timestamp, merkle } from '../crdt';
+import { serializeClock, getClock, Timestamp, merkle } from '@actual-app/crdt';
+
 import * as db from '../db';
 
 export function rebuildMerkleHash() {

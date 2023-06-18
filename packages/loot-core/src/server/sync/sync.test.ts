@@ -1,4 +1,5 @@
-import { getClock, Timestamp } from '../crdt';
+import { getClock, Timestamp } from '@actual-app/crdt';
+
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
