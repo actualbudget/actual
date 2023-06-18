@@ -46,7 +46,7 @@ The development version of the importer for nYNAB into Actual.
 
 ### Loot Core
 
-### Loot Design
+The shared underlying functionality component used by both the web/desktop frontend and the in-browser database server.
 
 ### Node Libofx
 

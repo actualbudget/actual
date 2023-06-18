@@ -36,7 +36,7 @@ Here are some initial guidelines for how contributions will be treated:
 
 ### The Project Layout
 
-The layout of the codebase in Actual Budget takes a bit of getting used to and finding things at first can be a little tricky, we have put together a help [document](./project-layout.md) that shows the structure of the project, while this isn't 100% complete it will give you a good starting point for your development. 
+The layout of the codebase in Actual Budget takes a bit of getting used to and finding things at first can be a little tricky, we have put together a help [document](./project-details/index.md) that shows the structure of the project, while this isn't 100% complete it will give you a good starting point for your development. 
 
 ### Working on existing issues
 

@@ -46,7 +46,17 @@ const sidebars = {
           label: 'Feature Requests',
           href: 'https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+',
         },
-        'contributing/project-layout',
+        {
+          type: 'category',
+          label: 'The Actual Project Structure',
+          link: {
+            type: 'doc',
+            id: 'contributing/project-details/index',
+          },
+          items: [
+            'contributing/project-details/database'
+          ]
+        },
         'contributing/preview-builds',
         'contributing/releasing',
         'contributing/windows',
