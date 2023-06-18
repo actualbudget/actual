@@ -1,4 +1,4 @@
-import { Timestamp } from '../crdt';
+import { Timestamp } from '@actual-app/crdt';
 
 import { addSyncListener, applyMessages } from './index';
 
