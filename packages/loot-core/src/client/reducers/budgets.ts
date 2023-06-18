@@ -20,7 +20,7 @@ function sortFiles(arr) {
 // 4. detached - Downloaded but broken group id (reset sync state)
 // 5. broken - user shouldn't have access to this file
 // 6. unknown - user is offline so can't determine the status
-export function reconcileFiles(localFiles, remoteFiles) {
+function reconcileFiles(localFiles, remoteFiles) {
   let reconciled = new Set();
 
   let files = localFiles.map(localFile => {

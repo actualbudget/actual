@@ -16,8 +16,7 @@ import * as db from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
-import { batchMessages } from '../sync';
-import { addSyncListener } from '../sync/index';
+import { batchMessages, addSyncListener } from '../sync';
 
 import {
   Condition,
