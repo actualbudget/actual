@@ -69,10 +69,6 @@ export function liveQueryContext(query, opts) {
   return makeContext(query, opts, LiveQuery);
 }
 
-export function pagedQueryContext(query, opts) {
-  return makeContext(query, opts, PagedQuery);
-}
-
 export function useLiveQuery(makeQuery: () => Query, deps: DependencyList) {
   let [data, setData] = useState(null);
   let query = useMemo(makeQuery, deps);
