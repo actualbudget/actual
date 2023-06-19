@@ -26,7 +26,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         it out to the cloud. Local data remains unencrypted so if you forget
         your password you can re-encrypt it.{' '}
         <a
-          href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption"
+          href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -42,7 +42,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         on your server to use end-to-end encryption. This problem may also occur
         if your browser is too old to work with Actual.{' '}
         <a
-          href="https://actualbudget.github.io/docs/Installing/HTTPS"
+          href="https://actualbudget.org/docs/config/https"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -65,7 +65,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         read it. If you want, you can use an additional password to encrypt your
         data on the server.{' '}
         <a
-          href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption"
+          href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -80,7 +80,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         without a server. Budget files are always kept unencrypted locally, and
         encryption is only applied when sending data to a server.{' '}
         <a
-          href="https://actualbudget.github.io/docs/Getting-Started/sync/#encryption"
+          href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -60,7 +60,7 @@ export default function Bootstrap() {
       <P isLast style={{ fontSize: 16, color: colors.n2 }}>
         Consider opening{' '}
         <a
-          href="https://actualbudget.github.io/docs/Getting-Started/using-actual/"
+          href="https://actualbudget.org/docs/tour/"
           target="_blank"
           rel="noopener noreferrer"
           style={{ color: colors.b4 }}

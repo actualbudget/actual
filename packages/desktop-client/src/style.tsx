@@ -2,8 +2,6 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from './tokens';
 
-export const debug = { borderWidth: 1, borderColor: 'red' };
-
 export const colors = {
   y1: '#733309',
   y2: '#87540d',

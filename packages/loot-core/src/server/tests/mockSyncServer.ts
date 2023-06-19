@@ -1,5 +1,4 @@
-import { makeClock, Timestamp, merkle } from '../crdt';
-import * as SyncPb from '../sync/proto/sync_pb';
+import { makeClock, Timestamp, merkle, SyncProtoBuf } from '@actual-app/crdt';
 
 import { basic as defaultMockData } from './mockData.json';
 
@@ -29,7 +28,7 @@ handlers['/'] = () => {
 };
 
 handlers['/sync/sync'] = async data => {
-  let requestPb = SyncPb.SyncRequest.deserializeBinary(data);
+  let requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(data);
   let since = requestPb.getSince();
   let messages = requestPb.getMessagesList();
 
@@ -52,11 +51,11 @@ handlers['/sync/sync'] = async data => {
 
   currentClock.merkle = merkle.prune(currentClock.merkle);
 
-  let responsePb = new SyncPb.SyncResponse();
+  let responsePb = new SyncProtoBuf.SyncResponse();
   responsePb.setMerkle(JSON.stringify(currentClock.merkle));
 
   newMessages.forEach(msg => {
-    let envelopePb = new SyncPb.MessageEnvelope();
+    let envelopePb = new SyncProtoBuf.MessageEnvelope();
     envelopePb.setTimestamp(msg.timestamp);
     envelopePb.setIsencrypted(msg.is_encrypted);
     envelopePb.setContent(msg.content);
@@ -112,7 +111,7 @@ export const getClock = () => {
 export const getMessages = () => {
   return currentMessages.map(msg => {
     let { timestamp, content } = msg;
-    let fields = SyncPb.Message.deserializeBinary(content);
+    let fields = SyncProtoBuf.Message.deserializeBinary(content);
 
     return {
       timestamp: timestamp,

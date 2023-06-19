@@ -23,6 +23,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/crdt@*, @actual-app/crdt@workspace:packages/crdt":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/crdt@workspace:packages/crdt"
+  dependencies:
+    "@types/jest": ^27.5.0
+    google-protobuf: ^3.12.0-rc.1
+    jest: ^27.0.0
+    murmurhash: ^0.0.2
+    ts-jest: ^27.0.0
+    typescript: ^5.0.2
+    uuid: 3.3.2
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/import-ynab4@*, @actual-app/import-ynab4@workspace:packages/import-ynab4":
   version: 0.0.0-use.local
   resolution: "@actual-app/import-ynab4@workspace:packages/import-ynab4"
@@ -12177,6 +12191,7 @@ __metadata:
   resolution: "loot-core@workspace:packages/loot-core"
   dependencies:
     "@actual-app/api": "*"
+    "@actual-app/crdt": "*"
     "@actual-app/import-ynab4": "*"
     "@babel/core": ~7.22.5
     "@babel/preset-env": ^7.22.5
@@ -12207,7 +12222,6 @@ __metadata:
     deep-equal: ^2.0.5
     fake-indexeddb: ^3.1.3
     fast-check: 3.7.1
-    google-protobuf: ^3.12.0-rc.1
     jest: ^27.0.0
     jsverify: ^0.8.4
     lru-cache: ^5.1.1
@@ -12216,7 +12230,6 @@ __metadata:
     memoize-one: ^4.0.0
     mitt: ^3.0.0
     mockdate: ^3.0.5
-    murmurhash: ^0.0.2
     node-fetch: ^2.6.9
     node-libofx: "*"
     npm-run-all: ^4.1.3

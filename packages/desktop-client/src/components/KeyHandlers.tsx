@@ -29,7 +29,7 @@ type KeyHandlerProps = {
   eventType?: string;
   handler: HotKeyHandler;
 };
-export function KeyHandler({
+function KeyHandler({
   keyName,
   eventType = 'keydown',
   handler,
