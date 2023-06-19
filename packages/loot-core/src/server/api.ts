@@ -176,6 +176,9 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     }
   } else {
     let files = await handlers['get-remote-files']();
+    if (!files) {
+      throw new Error('Could not get remote files');
+    }
     let file = files.find(f => f.groupId === syncId);
     if (!file) {
       throw new Error(
