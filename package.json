@@ -11,7 +11,8 @@
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest  --coverage",
     "types": "tsc --noEmit --incremental",
     "verify": "yarn -s lint && yarn types",
-    "reset-password": "node src/scripts/reset-password.js"
+    "reset-password": "node src/scripts/reset-password.js",
+    "health-check": "node src/scripts/health-check.js"
   },
   "dependencies": {
     "@actual-app/api": "6.1.0",
