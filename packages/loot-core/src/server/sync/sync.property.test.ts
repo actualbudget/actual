@@ -1,6 +1,6 @@
+import { merkle, getClock, Timestamp } from '@actual-app/crdt';
 import jsc, { type Arbitrary } from 'jsverify';
 
-import { merkle, getClock, Timestamp } from '../crdt';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
