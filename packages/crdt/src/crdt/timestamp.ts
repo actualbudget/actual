@@ -1,6 +1,5 @@
 import murmurhash from 'murmurhash';
-
-import * as uuid from '../../platform/uuid';
+import uuid from 'uuid';
 
 /**
  * Hybrid Unique Logical Clock (HULC) timestamp generator
@@ -65,7 +64,7 @@ export function deserializeClock(clock) {
 }
 
 export function makeClientId() {
-  return uuid.v4Sync().replace(/-/g, '').slice(-16);
+  return uuid.v4().replace(/-/g, '').slice(-16);
 }
 
 let config = {

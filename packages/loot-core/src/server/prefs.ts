@@ -1,6 +1,7 @@
+import { Timestamp } from '@actual-app/crdt';
+
 import * as fs from '../platform/server/fs';
 
-import { Timestamp } from './crdt';
 import { sendMessages } from './sync';
 
 let prefs = null;
