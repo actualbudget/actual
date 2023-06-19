@@ -69,7 +69,7 @@ function LoggedInUser({
       return 'Server offline';
     }
 
-    return 'Server';
+    return 'Server online';
   }
 
   if (hideIfNoServer && !serverUrl) {
