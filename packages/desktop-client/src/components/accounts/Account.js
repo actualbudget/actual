@@ -1798,9 +1798,12 @@ class AccountInternal extends PureComponent {
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
-    this.props.history.replace(this.props.location.pathname, {
-      callbackConditions: null,
-    });
+    if (this.props.location.state.callbackConditions) {
+      this.setState({ filters: this.props.location.state.callbackConditions });
+      this.props.history.replace(this.props.location.pathname, {
+        callbackConditions: null,
+      });
+    }
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
@@ -1808,18 +1811,24 @@ class AccountInternal extends PureComponent {
   };
 
   onDeleteFilter = filter => {
-    this.props.history.replace(this.props.location.pathname, {
-      callbackConditions: null,
-    });
+    if (this.props.location.state.callbackConditions) {
+      this.setState({ filters: this.props.location.state.callbackConditions });
+      this.props.history.replace(this.props.location.pathname, {
+        callbackConditions: null,
+      });
+    }
     this.applyFilters(this.state.filters.filter(f => f !== filter));
     this.setState({ filterId: null });
   };
 
   onApplyFilter = async cond => {
+    if (this.props.location.state.callbackConditions) {
+      this.setState({ filters: this.props.location.state.callbackConditions });
+      this.props.history.replace(this.props.location.pathname, {
+        callbackConditions: null,
+      });
+    }
     let filters = this.state.filters;
-    this.props.history.replace(this.props.location.pathname, {
-      callbackConditions: null,
-    });
     if (cond.customName) {
       filters = filters.filter(f => f.customName !== cond.customName);
     }

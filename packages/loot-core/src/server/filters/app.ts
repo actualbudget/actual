@@ -57,38 +57,32 @@ export async function filterNameExists(name, filterId, newItem) {
 
 //TODO: Possible to simplify this?
 //use filters and maps
-/* export function ConditionExists(item, filters, newItem) {
+export function ConditionExists(item, filters, newItem) {
   let { conditions, conditionsOp } = item;
   let condCheck = [];
   let fCondCheck = false;
   let fCondFound;
 
   filters.map(filter => {
-    fCondCheck = false;
     if (
-      !condCheck[conditions.length - 1] &&
+      !fCondCheck &&
+      //If conditions.length equals 1 then ignore conditionsOp
+      (conditions.length === 1 ? true :
+      (filter.conditionsOp === conditionsOp)) &&
       !filter.tombstone &&
-      filter.conditions.length === conditions.length &&
-      //Add: if conditions.length === 1 then ignore conditionsOp
-      filter.conditionsOp === conditionsOp
+      filter.conditions.length === conditions.length
     ) {
-      filter.conditions.map(fcond => {
-        if (!fCondCheck) {
-          conditions.map((cond, i) => {
-            condCheck[i] = false;
-            if (
-              !condCheck[i - 1] &&
-              cond.field === fcond.field &&
+      fCondCheck = false;
+      conditions.map((cond, i) => {
+        condCheck[i] = filter.conditions.filter(fcond => {
+            return (cond.value === fcond.value &&
               cond.op === fcond.op &&
-              cond.value === fcond.value
-            ) {
-              condCheck[i] = true;
-            }
-            fCondCheck = condCheck[i];
-          });
-        }
+              cond.field === fcond.field
+            );            
+          }).length > 0;
+          fCondCheck = (i === 0 ? true : fCondCheck) && condCheck[i];
       });
-      fCondFound = condCheck[conditions.length - 1] && filter;
+      fCondFound = (fCondCheck && condCheck[conditions.length - 1]) && filter;
     }
   });
 
@@ -98,7 +92,7 @@ export async function filterNameExists(name, filterId, newItem) {
     return fCondFound.id !== item.id && fCondFound.name;
   }
   return fCondFound.name;
-} */
+}
 
 export async function createFilter(filter) {
   let filterId = uuid.v4Sync();
@@ -112,7 +106,7 @@ export async function createFilter(filter) {
     throw new Error('Filters must be named');
   }
 
-  /*   if (item.conditions) {
+  if (item.conditions.length > 0) {
     let condExists = ConditionExists(item, filter.filters, true);
     if (condExists) {
       throw new Error(
@@ -120,7 +114,9 @@ export async function createFilter(filter) {
           condExists,
       );
     }
-  } */
+  } else {
+    throw new Error('Filters must include conditions');
+  }
 
   // Create the filter here based on the info
   await db.insertWithSchema('transaction_filters', filterModel.fromJS(item));
@@ -138,15 +134,17 @@ export async function updateFilter(filter) {
     throw new Error('Filters must be named');
   }
 
-  /*   if (item.conditions) {
-    let condExists = ConditionExists(item, filter.filters, false);
+  if (item.conditions.length > 0) {
+    let condExists = ConditionExists(item, filter.filters, true);
     if (condExists) {
       throw new Error(
         'Duplicate filter warning: conditions already exist. Filter name: ' +
           condExists,
       );
     }
-  } */
+  } else {
+    throw new Error('Filters must include conditions');
+  }
 
   await db.updateWithSchema('transaction_filters', filterModel.fromJS(item));
 }
