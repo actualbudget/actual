@@ -5,10 +5,7 @@ import { getPathForGroupFile } from './util/paths.js';
 
 import { sqlDir } from './load-config.js';
 
-import actual from '@actual-app/api';
-let merkle = actual.internal.merkle;
-let SyncPb = actual.internal.SyncProtoBuf;
-let Timestamp = actual.internal.timestamp.Timestamp;
+import { merkle, SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 
 function getGroupDb(groupId) {
   let path = getPathForGroupFile(groupId);
@@ -88,7 +85,7 @@ export function sync(messages, since, groupId) {
   return {
     trie,
     newMessages: newMessages.map((msg) => {
-      const envelopePb = new SyncPb.MessageEnvelope();
+      const envelopePb = new SyncProtoBuf.MessageEnvelope();
       envelopePb.setTimestamp(msg.timestamp);
       envelopePb.setIsencrypted(msg.is_encrypted);
       envelopePb.setContent(msg.content);

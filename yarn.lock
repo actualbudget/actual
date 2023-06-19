@@ -5,14 +5,14 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@actual-app/api@npm:6.1.0":
-  version: 6.1.0
-  resolution: "@actual-app/api@npm:6.1.0"
+"@actual-app/crdt@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@actual-app/crdt@npm:1.0.0"
   dependencies:
-    better-sqlite3: ^8.2.0
-    node-fetch: ^2.6.9
+    google-protobuf: ^3.12.0-rc.1
+    murmurhash: ^0.0.2
     uuid: 3.3.2
-  checksum: 75eeb5fdb2377175117bf2a229883a23224c8272d20aeaa79c2f30d609206156b9c1a0a9d65d580454b52da86a3aa38ead24d44daac69e728604467b1194e985
+  checksum: a8f300c1042ec08d392314daaf723db2071b9bdcba74e3a49feee37ee9a85b043db553315773d5cf6becdae41447ba9cbd6e8ff3883745bdddc1a3e2fa48b9ba
   languageName: node
   linkType: hard
 
@@ -1555,7 +1555,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual-sync@workspace:."
   dependencies:
-    "@actual-app/api": 6.1.0
+    "@actual-app/crdt": 1.0.0
     "@actual-app/web": 23.6.0
     "@babel/preset-typescript": ^7.20.2
     "@types/bcrypt": ^5.0.0
@@ -3282,6 +3282,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"google-protobuf@npm:^3.12.0-rc.1":
+  version: 3.21.2
+  resolution: "google-protobuf@npm:3.21.2"
+  checksum: 3caa2e1e2654714cc1a201ac5e5faabcaa48f5fba3d8ff9b64ca66fe19e4e0506b94053f32eddc77bf3a7a47ac1660315c6744185c1e2bb27654fd76fe91b988
+  languageName: node
+  linkType: hard
+
 "graceful-fs@npm:^4.2.6, graceful-fs@npm:^4.2.9":
   version: 4.2.10
   resolution: "graceful-fs@npm:4.2.10"
@@ -4573,6 +4580,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"murmurhash@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "murmurhash@npm:0.0.2"
+  checksum: e06d1e7cfdc39d742584d96af30e9b26bd44c995b9ced192b62c36b52898347ac28d32a9a94f5e0b286339d45657490ae32ed42ead75ef2a15aef9cfe386e5fa
+  languageName: node
+  linkType: hard
+
 "napi-build-utils@npm:^1.0.1":
   version: 1.0.2
   resolution: "napi-build-utils@npm:1.0.2"
@@ -4619,7 +4633,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.7, node-fetch@npm:^2.6.9":
+"node-fetch@npm:^2.6.7":
   version: 2.6.9
   resolution: "node-fetch@npm:2.6.9"
   dependencies:

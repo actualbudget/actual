@@ -9,8 +9,7 @@ import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
 import * as simpleSync from './sync-simple.js';
 
-import actual from '@actual-app/api';
-let SyncPb = actual.internal.SyncProtoBuf;
+import { SyncProtoBuf } from '@actual-app/crdt';
 
 const app = express();
 app.use(errorMiddleware);
@@ -33,7 +32,7 @@ app.post('/sync', async (req, res) => {
 
   let requestPb;
   try {
-    requestPb = SyncPb.SyncRequest.deserializeBinary(req.body);
+    requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(req.body);
   } catch (e) {
     res.status(500);
     res.send({ status: 'error', reason: 'internal-error' });
@@ -115,7 +114,7 @@ app.post('/sync', async (req, res) => {
   let { trie, newMessages } = simpleSync.sync(messages, since, group_id);
 
   // encode it back...
-  let responsePb = new SyncPb.SyncResponse();
+  let responsePb = new SyncProtoBuf.SyncResponse();
   responsePb.setMerkle(JSON.stringify(trie));
   newMessages.forEach((msg) => responsePb.addMessages(msg));
 
