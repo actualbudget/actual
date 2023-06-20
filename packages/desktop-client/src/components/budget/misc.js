@@ -181,6 +181,15 @@ class BudgetTable extends Component {
     });
   };
 
+  expandAllCategories = () => {
+    this.props.setCollapsed([]);
+  };
+
+  collapseAllCategories = () => {
+    let { setCollapsed, categoryGroups } = this.props;
+    setCollapsed(categoryGroups.map(g => g.id));
+  };
+
   render() {
     let {
       type,
@@ -253,6 +262,8 @@ class BudgetTable extends Component {
           <BudgetTotals
             MonthComponent={dataComponents.BudgetTotalsComponent}
             toggleHiddenCategories={this.toggleHiddenCategories}
+            expandAllCategories={this.expandAllCategories}
+            collapseAllCategories={this.collapseAllCategories}
           />
           <IntersectionBoundary.Provider value={this.budgetCategoriesRef}>
             <View
@@ -658,6 +669,8 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
 const BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
   toggleHiddenCategories,
+  expandAllCategories,
+  collapseAllCategories,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
@@ -714,13 +727,25 @@ const BudgetTotals = memo(function BudgetTotals({
                 onMenuSelect={type => {
                   if (type === 'toggleVisibility') {
                     toggleHiddenCategories();
+                  } else if (type === 'expandAllCategories') {
+                    expandAllCategories();
+                  } else if (type === 'collapseAllCategories') {
+                    collapseAllCategories();
                   }
                   setMenuOpen(false);
                 }}
                 items={[
                   {
                     name: 'toggleVisibility',
-                    text: 'Toggle hidden categories',
+                    text: 'Toggle hidden',
+                  },
+                  {
+                    name: 'expandAllCategories',
+                    text: 'Expand all',
+                  },
+                  {
+                    name: 'collapseAllCategories',
+                    text: 'Collapse all',
                   },
                 ]}
               />
