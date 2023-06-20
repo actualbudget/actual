@@ -6,7 +6,7 @@ import { convertOutputType } from '../schema-helpers';
 
 // Transactions executor
 
-export function toGroup(parents, children, mapper = x => x) {
+function toGroup(parents, children, mapper = x => x) {
   return parents.reduce((list, parent) => {
     let childs = children.get(parent.id) || [];
     list.push({

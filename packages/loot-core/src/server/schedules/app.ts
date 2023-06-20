@@ -100,7 +100,7 @@ export async function getRuleForSchedule(id) {
   return getRules().find(rule => rule.id === ruleId);
 }
 
-export async function fixRuleForSchedule(id) {
+async function fixRuleForSchedule(id) {
   let { data: ruleId } = await aqlQuery(
     q('schedules').filter({ id }).calculate('rule'),
   );
@@ -186,7 +186,7 @@ export async function setNextDate({
 
 // Methods
 
-export async function checkIfScheduleExists(name, scheduleId) {
+async function checkIfScheduleExists(name, scheduleId) {
   let idForName = await db.first('SELECT id from schedules WHERE name = ?', [
     name,
   ]);
@@ -349,7 +349,7 @@ export async function deleteSchedule({ id }) {
   });
 }
 
-export async function skipNextDate({ id }) {
+async function skipNextDate({ id }) {
   return setNextDate({
     id,
     start: nextDate => {
@@ -360,13 +360,13 @@ export async function skipNextDate({ id }) {
 
 // `schedule` here might not be a saved schedule, so it might not have
 // an id
-export function getPossibleTransactions({ schedule }) {}
+function getPossibleTransactions({ schedule }) {}
 
-export function discoverSchedules() {
+function discoverSchedules() {
   return findSchedules();
 }
 
-export async function getUpcomingDates({ config, count }) {
+async function getUpcomingDates({ config, count }) {
   let rules = recurConfigToRSchedule(config);
 
   try {
@@ -460,7 +460,7 @@ async function postTransactionForSchedule({ id }) {
 
 // TODO: make this sequential
 
-export async function advanceSchedulesService(syncSuccess) {
+async function advanceSchedulesService(syncSuccess) {
   // Move all paid schedules
   let { data: schedules } = await aqlQuery(
     q('schedules')
