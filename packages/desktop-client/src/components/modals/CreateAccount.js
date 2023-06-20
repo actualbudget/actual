@@ -106,7 +106,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                 <P style={{ fontSize: 15 }}>
                   Connect to an Actual server to set up{' '}
                   <a
-                    href="https://actualbudget.org/docs/experimental/bank-sync"
+                    href="https://actualbudget.org/docs/advanced/bank-sync"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

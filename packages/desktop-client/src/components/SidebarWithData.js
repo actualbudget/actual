@@ -10,7 +10,6 @@ import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import useFeatureFlag from '../hooks/useFeatureFlag';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import { styles, colors } from '../style';
 
@@ -119,8 +118,6 @@ function SidebarWithData({
   saveGlobalPrefs,
   getAccounts,
 }) {
-  const syncAccount = useFeatureFlag('syncAccount');
-
   useEffect(() => void getAccounts(), [getAccounts]);
 
   async function onReorder(id, dropPos, targetId) {
@@ -146,9 +143,7 @@ function SidebarWithData({
       getOffBudgetBalance={queries.offbudgetAccountBalance}
       onFloat={() => saveGlobalPrefs({ floatingSidebar: !floatingSidebar })}
       onReorder={onReorder}
-      onAddAccount={() =>
-        replaceModal(syncAccount ? 'add-account' : 'add-local-account')
-      }
+      onAddAccount={() => replaceModal('add-account')}
       showClosedAccounts={prefs['ui.showClosedAccounts']}
       onToggleClosedAccounts={() =>
         savePrefs({
