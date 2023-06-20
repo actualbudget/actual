@@ -69,14 +69,7 @@ export function getPrefs() {
 }
 
 export function getDefaultPrefs(id, budgetName) {
-  // Add any notifications in here that new users shouldn't see.
-  // Without them, a popup will show to explain a new feature.
-  return {
-    id,
-    budgetName,
-    'notifications.schedules': true,
-    'notifications.repair-splits': true,
-  };
+  return { id, budgetName };
 }
 
 export async function readPrefs(id) {

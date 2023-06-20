@@ -20,7 +20,6 @@ import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
-import checkForUpgradeNotifications from 'loot-core/src/client/upgrade-notifications';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import Cog from '../icons/v1/Cog';
