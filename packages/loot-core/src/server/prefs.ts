@@ -23,6 +23,12 @@ export async function loadPrefs(id?) {
     prefs = { id, budgetName: id };
   }
 
+  // delete released feature flags
+  let releasedFeatures = ['syncAccount'];
+  for (const feature of releasedFeatures) {
+    delete prefs[`flags.${feature}`];
+  }
+
   // delete legacy notifications
   for (const key of Object.keys(prefs)) {
     if (key.startsWith('notifications.')) {
