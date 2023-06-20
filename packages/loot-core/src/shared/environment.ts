@@ -1,8 +1,8 @@
-function isPreviewEnvironment() {
+export function isPreviewEnvironment() {
   return String(process.env.REACT_APP_NETLIFY) === 'true';
 }
 
-function isDevelopmentEnvironment() {
+export function isDevelopmentEnvironment() {
   return process.env.NODE_ENV === 'development';
 }
 
