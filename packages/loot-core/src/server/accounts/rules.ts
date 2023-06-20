@@ -21,7 +21,7 @@ function assert(test, type, msg) {
   }
 }
 
-export function parseRecurDate(desc) {
+function parseRecurDate(desc) {
   try {
     let rules = recurConfigToRSchedule(desc);
 
@@ -63,7 +63,7 @@ export function parseDateString(str) {
   return null;
 }
 
-export function parseBetweenAmount(between) {
+function parseBetweenAmount(between) {
   let { num1, num2 } = between;
   if (typeof num1 !== 'number' || typeof num2 !== 'number') {
     return null;

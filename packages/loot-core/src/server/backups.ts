@@ -14,7 +14,7 @@ import * as prefs from './prefs';
 const LATEST_BACKUP_FILENAME = 'db.latest.sqlite';
 let serviceInterval = null;
 
-export async function getBackups(id) {
+async function getBackups(id) {
   const budgetDir = fs.getBudgetDir(id);
   const backupDir = fs.join(budgetDir, 'backups');
 
@@ -46,7 +46,7 @@ export async function getBackups(id) {
   return backups;
 }
 
-export async function getLatestBackup(id) {
+async function getLatestBackup(id) {
   const budgetDir = fs.getBudgetDir(id);
   if (await fs.exists(fs.join(budgetDir, LATEST_BACKUP_FILENAME))) {
     return {

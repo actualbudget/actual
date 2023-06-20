@@ -9,7 +9,7 @@ import React, {
 
 import { type Query } from '../shared/query';
 
-import { liveQuery, LiveQuery, PagedQuery } from './query-helpers';
+import { liveQuery, LiveQuery } from './query-helpers';
 
 function makeContext(queryState, opts, QueryClass) {
   let query = new QueryClass(queryState, null, opts);
@@ -67,10 +67,6 @@ function makeContext(queryState, opts, QueryClass) {
 
 export function liveQueryContext(query, opts) {
   return makeContext(query, opts, LiveQuery);
-}
-
-export function pagedQueryContext(query, opts) {
-  return makeContext(query, opts, PagedQuery);
 }
 
 export function useLiveQuery(makeQuery: () => Query, deps: DependencyList) {

@@ -19,7 +19,7 @@ function dateToInt(date) {
   return parseInt(date.replace(/-/g, ''));
 }
 
-export function addTombstone(schema, tableName, tableId, whereStr) {
+function addTombstone(schema, tableName, tableId, whereStr) {
   let hasTombstone = schema[tableName].tombstone != null;
   return hasTombstone ? `${whereStr} AND ${tableId}.tombstone = 0` : whereStr;
 }
