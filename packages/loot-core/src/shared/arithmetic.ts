@@ -1,3 +1,5 @@
+import { getNumberFormat } from './util';
+
 function fail(state, msg) {
   throw new Error(
     msg + ': ' + JSON.stringify(state.str.slice(state.index, 10)),
@@ -27,24 +29,6 @@ function nextOperator(state, op) {
   return false;
 }
 
-function unifyNumberFormatForParsing(numberStr: string): string {
-  let unifiedNumberStr = '';
-  for (let i = 0; i < numberStr.length; i++) {
-    let ch = numberStr[i];
-    if (ch === ',' || ch === '.') {
-      // Skip thousands separators
-      let remainingChars = numberStr.length - i;
-      if (remainingChars > 3) {
-        continue;
-      }
-      // Unify decimal separator
-      ch = '.';
-    }
-    unifiedNumberStr += ch;
-  }
-  return unifiedNumberStr;
-}
-
 function parsePrimary(state) {
   // We only support numbers
   let isNegative = char(state) === '-';
@@ -60,14 +44,21 @@ function parsePrimary(state) {
   // and we should do more strict parsing
   let numberStr = '';
   while (char(state) && char(state).match(/[0-9,.]/)) {
-    numberStr += next(state);
+    let thousandsSep = getNumberFormat().separator === ',' ? '.' : ',';
+
+    // Don't include the thousands separator
+    if (char(state) === thousandsSep) {
+      next(state);
+    } else {
+      numberStr += next(state);
+    }
   }
 
   if (numberStr === '') {
     fail(state, 'Unexpected character');
   }
 
-  let number = parseFloat(unifyNumberFormatForParsing(numberStr));
+  let number = parseFloat(numberStr.replace(getNumberFormat().separator, '.'));
   return isNegative ? -number : number;
 }
 

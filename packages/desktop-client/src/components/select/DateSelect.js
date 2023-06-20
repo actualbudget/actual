@@ -69,7 +69,7 @@ let pickerStyles = {
   },
 };
 
-export let DatePicker = forwardRef(
+let DatePicker = forwardRef(
   ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
     let picker = useRef(null);
     let mountPoint = useRef(null);

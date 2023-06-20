@@ -43,16 +43,6 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
 
             <label style={{ display: 'flex' }}>
               <Checkbox
-                id="sync-account-flag"
-                checked={flags.syncAccount}
-                onChange={() => {
-                  savePrefs({ 'flags.syncAccount': !flags.syncAccount });
-                }}
-              />{' '}
-              <View>Account syncing via Nordigen</View>
-            </label>
-            <label style={{ display: 'flex' }}>
-              <Checkbox
                 id="goal-templates-flag"
                 checked={flags.goalTemplatesEnabled}
                 onChange={() => {

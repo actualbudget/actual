@@ -31,7 +31,6 @@
     "csv-parse": "^4.10.1",
     "csv-stringify": "^5.3.6",
     "deep-equal": "^2.0.5",
-    "google-protobuf": "^3.12.0-rc.1",
     "md5": "^2.3.0",
     "mitt": "^3.0.0",
     "node-fetch": "^2.6.9",
@@ -43,6 +42,7 @@
   },
   "devDependencies": {
     "@actual-app/api": "*",
+    "@actual-app/crdt": "*",
     "@actual-app/import-ynab4": "*",
     "@babel/core": "~7.22.5",
     "@babel/preset-env": "^7.22.5",
@@ -65,7 +65,6 @@
     "memfs": "3.1.1",
     "memoize-one": "^4.0.0",
     "mockdate": "^3.0.5",
-    "murmurhash": "^0.0.2",
     "npm-run-all": "^4.1.3",
     "peggy": "3.0.2",
     "snapshot-diff": "^0.10.0",

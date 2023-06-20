@@ -210,14 +210,7 @@ export function Value({
   }
 }
 
-export function ConditionExpression({
-  field,
-  op,
-  value,
-  options,
-  prefix,
-  style,
-}) {
+function ConditionExpression({ field, op, value, options, prefix, style }) {
   return (
     <View
       style={[
@@ -265,7 +258,7 @@ function ScheduleValue({ value }) {
   );
 }
 
-export function ActionExpression({ field, op, value, options, style }) {
+function ActionExpression({ field, op, value, options, style }) {
   return (
     <View
       style={[

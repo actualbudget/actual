@@ -1,3 +1,11 @@
+import {
+  makeClock,
+  setClock,
+  serializeClock,
+  deserializeClock,
+  makeClientId,
+  Timestamp,
+} from '@actual-app/crdt';
 import LRU from 'lru-cache';
 
 import * as fs from '../../platform/server/fs';
@@ -11,14 +19,6 @@ import {
   convertForUpdate,
   convertFromSelect,
 } from '../aql';
-import {
-  makeClock,
-  setClock,
-  serializeClock,
-  deserializeClock,
-  makeClientId,
-  Timestamp,
-} from '../crdt';
 import {
   accountModel,
   categoryModel,
