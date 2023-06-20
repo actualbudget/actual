@@ -56,3 +56,7 @@ export function FileDownloadError(reason, meta?) {
 export function FileUploadError(reason, meta?) {
   return { type: 'FileUploadError', reason, meta };
 }
+
+export function isCodeError(err) {
+  return err instanceof ReferenceError || err instanceof SyntaxError;
+}

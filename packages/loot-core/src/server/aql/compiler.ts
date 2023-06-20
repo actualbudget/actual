@@ -1118,3 +1118,7 @@ export function generateSQLWithState(
   let { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   return { sql: defaultConstructQuery(queryState, state, sqlPieces), state };
 }
+
+export function generateSQL(queryState) {
+  return generateSQLWithState(queryState).sql;
+}
