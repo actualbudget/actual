@@ -23,6 +23,13 @@ export async function loadPrefs(id?) {
     prefs = { id, budgetName: id };
   }
 
+  // delete legacy notifications
+  for (const key of Object.keys(prefs)) {
+    if (key.startsWith('notifications.')) {
+      delete prefs[key];
+    }
+  }
+
   // No matter what is in `id` field, force it to be the current id.
   // This makes it resilient to users moving around folders, etc
   prefs.id = id;
