@@ -19,7 +19,7 @@ function getErrorMessage(error) {
     case 'invalid-metadata-file':
       return 'The metadata file in the given archive is corrupted.';
     default:
-      return 'An unknown error occurred while importing. Sorry! We have been notified of this issue.';
+      return 'An unknown error occurred while importing. Please report this as a new issue on Github.';
   }
 }
 
