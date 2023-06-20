@@ -75,6 +75,7 @@ test.describe('Onboarding', () => {
     await configurationPage.startFresh();
 
     await navigation.clickOnNoServer();
+    await page.getByRole('button', { name: 'Start using a server' }).click();
 
     await expect(configurationPage.heading).toHaveText('Where’s the server?');
   });
