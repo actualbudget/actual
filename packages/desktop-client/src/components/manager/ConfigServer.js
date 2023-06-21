@@ -135,7 +135,7 @@ export default function ConfigServer() {
         <Input
           autoFocus={true}
           placeholder={'https://example.com'}
-          value={url}
+          value={url || ''}
           onChange={e => setUrl(e.target.value)}
           style={{ flex: 1, marginRight: 10 }}
         />
