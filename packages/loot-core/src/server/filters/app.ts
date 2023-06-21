@@ -82,15 +82,21 @@ export function ConditionExists(item, filters, newItem) {
             );
           }).length > 0;
         fCondCheck = (i === 0 ? true : fCondCheck) && condCheck[i];
+        return true;
       });
       fCondFound = fCondCheck && condCheck[conditions.length - 1] && filter;
     }
+    return true;
   });
 
   condCheck = [];
 
   if (!newItem) {
-    return (fCondFound ? (fCondFound.id !== item.id ? fCondFound.name : false) : false);
+    return fCondFound
+      ? fCondFound.id !== item.id
+        ? fCondFound.name
+        : false
+      : false;
   }
   return fCondFound ? fCondFound.name : false;
 }
