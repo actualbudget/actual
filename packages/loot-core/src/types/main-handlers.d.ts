@@ -306,10 +306,6 @@ export interface MainHandlers {
 
   'export-budget': () => Promise<unknown>;
 
-  'get-upgrade-notifications': () => Promise<unknown[]>;
-
-  'seen-upgrade-notification': (arg: { type }) => Promise<unknown>;
-
   'upload-file-web': (arg: { filename; contents }) => Promise<'ok'>;
 
   'backups-get': (arg: { id }) => Promise<unknown>;
