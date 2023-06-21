@@ -257,7 +257,7 @@ export interface MainHandlers {
 
   'subscribe-get-login-methods': () => Promise<{ methods: [string] }>;
 
-  'subscribe-bootstrap': (arg: { password }) => Promise<{ error: string }>;
+  'subscribe-bootstrap': (arg: { password }) => Promise<{ error: string } | null>;
 
   'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
 

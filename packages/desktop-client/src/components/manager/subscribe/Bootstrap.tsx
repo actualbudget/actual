@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../../style';
@@ -16,6 +16,7 @@ export default function Bootstrap() {
   let [error, setError] = useState(null);
 
   let { checked } = useBootstrapped();
+  let history = useHistory();
 
   function getErrorMessage(error) {
     switch (error) {
@@ -37,7 +38,7 @@ export default function Bootstrap() {
     if (error) {
       setError(error);
     } else {
-      dispatch(loggedIn());
+      history.push('/login');
     }
   }
 

@@ -1648,18 +1648,12 @@ handlers['subscribe-needs-bootstrap'] = async function ({
 };
 
 handlers['subscribe-bootstrap'] = async function ({ password }) {
-  let res;
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/bootstrap', { password });
+    await post(getServer().SIGNUP_SERVER + '/bootstrap', { password });
   } catch (err) {
     return { error: err.reason || 'network-failure' };
   }
-
-  if (res.token) {
-    await asyncStorage.setItem('user-token', res.token);
-    return {};
-  }
-  return { error: 'internal' };
+  return {};
 };
 
 handlers['subscribe-get-login-methods'] = async function () {

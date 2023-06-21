@@ -125,11 +125,10 @@ export default function Login() {
       )}
 
       {loginMethods.includes('openid') && (
-        <form
-          style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-          onSubmit={onSubmitOpenId}
-        >
-          <Button style={{ fontSize: 15 }}>Sign in with OpenId</Button>
+        <form onSubmit={onSubmitOpenId}>
+          <Button primary style={{ fontSize: 15 }}>
+            Sign in with OpenId
+          </Button>
         </form>
       )}
 
