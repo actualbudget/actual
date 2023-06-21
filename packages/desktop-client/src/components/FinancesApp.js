@@ -19,7 +19,6 @@ import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
-import * as undo from 'loot-core/src/platform/client/undo';
 
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
@@ -246,13 +245,6 @@ function FinancesApp(props) {
       }
     };
 
-    undo.setUndoState('url', window.location.href);
-
-    const cleanup = patchedHistory.listen(location => {
-      undo.setUndoState('url', window.location.href);
-    });
-
-    return cleanup;
   }, []);
 
   useEffect(() => {
