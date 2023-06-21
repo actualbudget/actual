@@ -743,17 +743,14 @@ const AccountHeader = memo(
     }
 
     function onCreateEditFilter(newItem) {
-      newItem ? 
-        (
-          history.push(`/filters/edit`, {
-          locationPtr: history.location,
-          inputConds: filters,
-          })) :
-        (
-          history.push(`/filters/edit/${filterId}`, {
+      newItem
+        ? history.push(`/filters/edit`, {
             locationPtr: history.location,
+            inputConds: filters,
           })
-        )
+        : history.push(`/filters/edit/${filterId}`, {
+            locationPtr: history.location,
+          });
     }
 
     return (

@@ -259,7 +259,7 @@ export default function EditFilter() {
   };
 
   return (
-    <Page title="Custom Filter" modalSize="large">
+    <Page title="Saved Filter" modalSize="large">
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Filter Name" htmlFor="name-field" />
