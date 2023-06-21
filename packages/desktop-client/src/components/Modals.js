@@ -29,7 +29,6 @@ import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 
 function Modals({
-  history,
   modalStack,
   isHidden,
   accounts,
@@ -70,11 +69,7 @@ function Modals({
 
         case 'add-local-account':
           return (
-            <CreateLocalAccount
-              modalProps={modalProps}
-              actions={actions}
-              history={history}
-            />
+            <CreateLocalAccount modalProps={modalProps} actions={actions} />
           );
 
         case 'close-account':
@@ -139,7 +134,6 @@ function Modals({
         case 'manage-rules':
           return (
             <ManageRulesModal
-              history={history}
               modalProps={modalProps}
               payeeId={options.payeeId}
             />
@@ -148,7 +142,6 @@ function Modals({
         case 'edit-rule':
           return (
             <EditRule
-              history={history}
               modalProps={modalProps}
               defaultRule={options.rule}
               onSave={options.onSave}
@@ -158,7 +151,6 @@ function Modals({
         case 'merge-unused-payees':
           return (
             <MergeUnusedPayees
-              history={history}
               modalProps={modalProps}
               payeeIds={options.payeeIds}
               targetPayeeId={options.targetPayeeId}
