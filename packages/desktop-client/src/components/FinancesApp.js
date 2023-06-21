@@ -69,7 +69,7 @@ function StackedRoutesInner({ location }) {
       <Route path="/" element={<Navigate to="/budget" replace />} />
 
       <Route
-        path="/reports"
+        path="/reports/*"
         element={
           <NarrowNotSupported>
             <Reports />

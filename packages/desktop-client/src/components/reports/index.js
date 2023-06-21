@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { View } from '../common';
 
@@ -10,9 +10,11 @@ import Overview from './Overview';
 export default function Reports() {
   return (
     <View style={{ flex: 1 }} data-testid="reports-page">
-      <Route path="/reports" element={<Overview />} />
-      <Route path="/reports/net-worth" element={<NetWorth />} />
-      <Route path="/reports/cash-flow" element={<CashFlow />} />
+      <Routes>
+        <Route path="/" element={<Overview />} />
+        <Route path="/net-worth" element={<NetWorth />} />
+        <Route path="/cash-flow" element={<CashFlow />} />
+      </Routes>
     </View>
   );
 }
