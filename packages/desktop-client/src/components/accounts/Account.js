@@ -1068,7 +1068,7 @@ const AccountHeader = memo(
                   style={{ marginTop: 4, width: 125 }}
                   onClick={() => onCreateEditFilter(true)}
                 >
-                  Create new filter
+                  New Saved filter
                 </Button>
               )}
             </Stack>
