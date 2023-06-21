@@ -63,6 +63,24 @@ function PageTitle({ name, style }) {
   );
 }
 
+function loadSize(modalSize) {
+  switch (modalSize) {
+    case 'medium': {
+      return { width: 750, height: 600 };
+    }
+    case 'large': {
+      return {
+        maxWidth: '100%',
+        width: 900,
+        height: '90vh',
+      };
+    }
+    default: {
+      return { width: 600 };
+    }
+  }
+}
+
 export function Page({ title, modalSize, children, titleStyle }) {
   let { type, current } = usePageType();
   let history = useHistory();
@@ -70,11 +88,7 @@ export function Page({ title, modalSize, children, titleStyle }) {
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 
   if (type === 'modal') {
-    let size = modalSize;
-    if (typeof modalSize === 'string') {
-      size =
-        modalSize === 'medium' ? { width: 750, height: 600 } : { width: 600 };
-    }
+    let size = typeof modalSize === 'string' ? loadSize(modalSize) : modalSize;
 
     return (
       <Modal

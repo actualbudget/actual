@@ -167,14 +167,6 @@ export default function EditFilter() {
 
   //Set Modal (default values or pull edit data)
   useEffect(() => {
-    // Flash the scrollbar
-    if (scrollableEl.current) {
-      let el = scrollableEl.current;
-      let top = el.scrollTop;
-      el.scrollTop = top + 1;
-      el.scrollTop = top;
-    }
-
     // Run it here
     async function run() {
       if (adding) {
@@ -204,6 +196,14 @@ export default function EditFilter() {
 
   //Set Transactions preview table
   useEffect(() => {
+    // Flash the scrollbar
+    if (scrollableEl.current) {
+      let el = scrollableEl.current;
+      let top = el.scrollTop;
+      el.scrollTop = top + 1;
+      el.scrollTop = top;
+    }
+
     let unsubscribe;
 
     send('make-filters-from-conditions', {
@@ -259,7 +259,7 @@ export default function EditFilter() {
   };
 
   return (
-    <Page title="Custom Filter" modalSize="medium">
+    <Page title="Custom Filter" modalSize="large">
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Filter Name" htmlFor="name-field" />
@@ -273,29 +273,37 @@ export default function EditFilter() {
           />
         </FormField>
       </Stack>
-      <View style={{ flexShrink: 0 }}>
-        <View style={{ marginBottom: 10, marginTop: 20 }}>
-          <Text style={{ color: colors.n4, marginBottom: 5 }}>
-            If
-            <FieldSelect
-              data-testid="conditions-op"
-              style={{ display: 'inline-flex' }}
-              fields={[
-                ['and', 'all'],
-                ['or', 'any'],
-              ]}
-              value={state.filter.conditionsOp}
-              onChange={(name, value) => {
-                dispatch({
-                  type: 'set-field',
-                  field: 'conditionsOp',
-                  value: value,
-                });
-              }}
-            />
-            of these conditions match:
-          </Text>
-
+      <View style={{ flexShrink: 0, marginTop: 20 }}>
+        <Text style={{ color: colors.n4, marginBottom: 5 }}>
+          If
+          <FieldSelect
+            data-testid="conditions-op"
+            style={{ display: 'inline-flex' }}
+            fields={[
+              ['and', 'all'],
+              ['or', 'any'],
+            ]}
+            value={state.filter.conditionsOp}
+            onChange={(name, value) => {
+              dispatch({
+                type: 'set-field',
+                field: 'conditionsOp',
+                value: value,
+              });
+            }}
+          />
+          of these conditions match:
+        </Text>
+      </View>
+      <View
+        innerRef={scrollableEl}
+        style={{
+          borderBottom: '1px solid ' + colors.border,
+          overflow: 'auto',
+          maxHeight: 'calc(100% - 400px)',
+        }}
+      >
+        <View style={{ marginBottom: 20, flexShrink: 0 }}>
           <ConditionsList
             conditionsOp={state.filter.conditionsOp}
             conditions={state.filter.conditions}
@@ -307,8 +315,8 @@ export default function EditFilter() {
         </View>
       </View>
 
-      <SelectedProvider instance={selectedInst}>
-        <View style={{ padding: '20px', flex: 1 }}>
+      <View style={{ marginTop: 30, flex: 1 }}>
+        <SelectedProvider instance={selectedInst}>
           <View
             style={{
               flexDirection: 'row',
@@ -331,28 +339,22 @@ export default function EditFilter() {
               marginTop: 5,
             }}
           />
-
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ marginTop: 20 }}
-          >
-            {state.error && (
-              <Text style={{ color: colors.r4 }}>{state.error}</Text>
-            )}
-            <Button
-              style={{ marginRight: 10 }}
-              onClick={() => history.goBack()}
-            >
-              Cancel
-            </Button>
-            <Button primary onClick={onSave}>
-              {adding ? 'Add' : 'Update'}
-            </Button>
-          </Stack>
-        </View>
-      </SelectedProvider>
+        </SelectedProvider>
+      </View>
+      <Stack
+        direction="row"
+        justify="flex-end"
+        align="center"
+        style={{ marginTop: 20 }}
+      >
+        {state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
+        <Button style={{ marginRight: 10 }} onClick={() => history.goBack()}>
+          Cancel
+        </Button>
+        <Button primary onClick={onSave}>
+          {adding ? 'Add' : 'Update'}
+        </Button>
+      </Stack>
     </Page>
   );
 }

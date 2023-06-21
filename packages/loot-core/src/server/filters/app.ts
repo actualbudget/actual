@@ -110,7 +110,7 @@ export async function createFilter(filter) {
       throw new Error('Cannot create filters with the same name');
     }
   } else {
-    throw new Error('Filters must be named');
+    throw new Error('Filter name is required');
   }
 
   if (item.conditions.length > 0) {
@@ -122,7 +122,7 @@ export async function createFilter(filter) {
       );
     }
   } else {
-    throw new Error('Filters must include conditions');
+    throw new Error('Conditions are required');
   }
 
   // Create the filter here based on the info
@@ -138,7 +138,7 @@ export async function updateFilter(filter) {
       throw new Error('There is already a filter with this name');
     }
   } else {
-    throw new Error('Filters must be named');
+    throw new Error('Filter name is required');
   }
 
   if (item.conditions.length > 0) {
@@ -150,7 +150,7 @@ export async function updateFilter(filter) {
       );
     }
   } else {
-    throw new Error('Filters must include conditions');
+    throw new Error('Conditions are required');
   }
 
   await db.updateWithSchema('transaction_filters', filterModel.fromJS(item));

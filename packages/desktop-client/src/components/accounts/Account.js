@@ -1026,11 +1026,37 @@ const AccountHeader = memo(
           </Stack>
 
           {filters && filters.length > 0 && (
-            <AppliedFilters
-              filters={filters}
-              onUpdate={onUpdateFilter}
-              onDelete={onDeleteFilter}
-            />
+            <Stack
+              spacing={2}
+              direction="row"
+              align="center"
+              style={{ marginTop: 10 }}
+            >
+              <AppliedFilters
+                filters={filters}
+                onUpdate={onUpdateFilter}
+                onDelete={onDeleteFilter}
+              />
+              <View style={{ flex: 1 }} />
+              {filterId !== null && (
+                <Button
+                  primary
+                  align="right"
+                  style={{ marginTop: 4, width: 125 }}
+                >
+                  Edit filter
+                </Button>
+              )}
+              {filters.length > 0 && filterId === null && (
+                <Button
+                  primary
+                  align="right"
+                  style={{ marginTop: 4, width: 125 }}
+                >
+                  Create new filter
+                </Button>
+              )}
+            </Stack>
           )}
         </View>
         {reconcileAmount != null && (
