@@ -262,15 +262,6 @@ function FinancesApp(props) {
     setTimeout(async () => {
       await props.sync();
 
-      // Check for upgrade notifications. We do this after syncing
-      // because these states are synced across devices, so they will
-      // only see it once for this file
-      checkForUpgradeNotifications(
-        props.addNotification,
-        props.resetSync,
-        patchedHistory,
-      );
-
       await checkForUpdateNotification(
         props.addNotification,
         getIsOutdated,
