@@ -157,7 +157,7 @@ function ManagementApp({
                     <Route path="/" element={<WelcomeScreen />} />
                   )}
                   {/* Redirect all other pages to this route */}
-                  <Route path="/" render={() => <Navigate to="/" />} />
+                  <Route path="/*" element={<Navigate to="/" />} />
                 </Routes>
 
                 <View
@@ -172,7 +172,7 @@ function ManagementApp({
                   <Routes>
                     <Route path="/config-server" element={null} />
                     <Route
-                      path="/"
+                      path="/*"
                       element={
                         <LoggedInUser
                           hideIfNoServer
@@ -191,8 +191,8 @@ function ManagementApp({
                 <Route path="/bootstrap" element={<Bootstrap />} />
                 {/* Redirect all other pages to this route */}
                 <Route
-                  path="/"
-                  render={() => <Navigate to="/bootstrap" replace />}
+                  path="/*"
+                  element={<Navigate to="/bootstrap" replace />}
                 />
               </Routes>
             )}
@@ -201,7 +201,7 @@ function ManagementApp({
 
         <Routes>
           <Route path="/config-server" element={null} />
-          <Route path="/" element={<ServerURL />} />
+          <Route path="/*" element={<ServerURL />} />
         </Routes>
         <Version />
       </View>
