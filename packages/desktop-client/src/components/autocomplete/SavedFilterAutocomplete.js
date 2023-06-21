@@ -46,7 +46,7 @@ export function FilterList({
   );
 }
 
-export default function SavedAutocomplete({ embedded, ...props }) {
+export default function SavedFilterAutocomplete({ embedded, ...props }) {
   let filters = useFilters() || [];
 
   return (

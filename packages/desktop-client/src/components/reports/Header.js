@@ -1,7 +1,6 @@
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
-//import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { styles } from '../../style';
 import { View, Select, Button, ButtonLink } from '../common';
 
@@ -43,53 +42,7 @@ function getFullRange(allMonths) {
   const end = monthUtils.currentMonth();
   return [start, end];
 }
-/* 
-function MenuButton({ onClick }) {
-  return (
-    <Button bare onClick={onClick} aria-label="Menu">
-      <DotsHorizontalTriple
-        width={15}
-        height={15}
-        style={{ color: 'inherit', transform: 'rotateZ(90deg)' }}
-      />
-    </Button>
-  );
-}
 
-function CategoryMenu({ onClose, filters, saved }) {
-  return (
-    <MenuTooltip onClose={onClose}>
-      <Menu
-        onMenuSelect={item => {
-          //onMenuSelect(item);
-        }}
-        items={[
-          { name: 'testing', text: 'Testing' },
-          saved !== null && { name: 'edit-filter', text: 'Edit filter' },
-          filters.length > 0 &&
-            saved === null && {
-              name: 'save-filter',
-              text: 'Create new filter',
-            },
-        ]}
-      />
-    </MenuTooltip>
-  );
-}
-
-function MenuTooltip({ onClose, children }) {
-  return (
-    <Tooltip
-      position="bottom-right"
-      width={200}
-      style={{ padding: 0 }}
-      onClose={onClose}
-    >
-      {children}
-    </Tooltip>
-  );
-}
- */
 function Header({
   title,
   start,

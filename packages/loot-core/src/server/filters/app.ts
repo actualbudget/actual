@@ -57,7 +57,7 @@ export async function filterNameExists(name, filterId, newItem) {
 
 //TODO: Possible to simplify this?
 //use filters and maps
-export function ConditionExists(item, filters, newItem) {
+export function conditionExists(item, filters, newItem) {
   let { conditions, conditionsOp } = item;
   let condCheck = [];
   let fCondCheck = false;
@@ -114,7 +114,7 @@ export async function createFilter(filter) {
   }
 
   if (item.conditions.length > 0) {
-    let condExists = ConditionExists(item, filter.filters, true);
+    let condExists = conditionExists(item, filter.filters, true);
     if (condExists) {
       throw new Error(
         'Duplicate filter warning: conditions already exist. Filter name: ' +
@@ -142,7 +142,7 @@ export async function updateFilter(filter) {
   }
 
   if (item.conditions.length > 0) {
-    let condExists = ConditionExists(item, filter.filters, false);
+    let condExists = conditionExists(item, filter.filters, false);
     if (condExists) {
       throw new Error(
         'Duplicate filter warning: conditions already exist. Filter name: ' +

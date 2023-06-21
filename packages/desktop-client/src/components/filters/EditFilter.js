@@ -246,7 +246,6 @@ export default function EditFilter() {
         //'An error occurred while saving. Please contact help@actualbudget.com for support.',
       });
     } else {
-      //history.goBack();
       history.push(location.state.locationPtr.pathname, {
         callbackConditions: state.filter,
       });

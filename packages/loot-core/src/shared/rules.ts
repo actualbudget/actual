@@ -11,7 +11,7 @@ export const TYPE_INFO = {
     ops: ['is', 'contains', 'oneOf'],
     nullable: true,
   },
-  id2: {
+  saved: {
     ops: [],
     nullable: false,
   },
@@ -55,7 +55,7 @@ export const FIELD_TYPES = new Map(
     category: 'id',
     account: 'id',
     cleared: 'boolean',
-    saved: 'id2',
+    saved: 'saved',
   }),
 );
 

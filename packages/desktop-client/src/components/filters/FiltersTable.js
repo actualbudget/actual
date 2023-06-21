@@ -169,10 +169,6 @@ export function FiltersTable({
     );
   }
 
-  function renderItem({ item }) {
-    return renderFilter({ item });
-  }
-
   return (
     <View style={[{ flex: 1 }, tableStyle]}>
       <TableHeader height={43} inset={15} version="v2">
@@ -185,7 +181,7 @@ export function FiltersTable({
         version="v2"
         style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
         items={items}
-        renderItem={renderItem}
+        renderItem={renderFilter}
         renderEmpty={filter ? 'No matching filters' : 'No filters'}
         allowPopupsEscape={items.length < 6}
       />

@@ -7,7 +7,7 @@ import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import Autocomplete from '../autocomplete/Autocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import SavedAutocomplete from '../autocomplete/SavedAutocomplete';
+import SavedFilterAutocomplete from '../autocomplete/SavedFilterAutocomplete';
 import { View, Input } from '../common';
 import { Checkbox } from '../forms';
 import DateSelect from '../select/DateSelect';
@@ -102,11 +102,11 @@ export default function GenericInput({
       }
       break;
 
-    case 'id2':
+    case 'saved':
       switch (field) {
         case 'saved':
           content = (
-            <SavedAutocomplete
+            <SavedFilterAutocomplete
               saved={saved}
               value={value}
               multi={multi}
