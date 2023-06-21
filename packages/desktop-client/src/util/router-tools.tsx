@@ -30,7 +30,7 @@ export function usePushModal() {
   );
 }
 
-function getParent(location: Location): Location | null {
+export function getParent(location: Location): Location | null {
   if (location.state?._version !== VERSION) {
     return null;
   }
