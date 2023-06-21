@@ -13,7 +13,7 @@ import React, {
   createElement,
   cloneElement,
 } from 'react';
-import { Route, NavLink, useMatch, useNavigate } from 'react-router-dom';
+import { NavLink, useMatch, useNavigate } from 'react-router-dom';
 
 import {
   ListboxInput,
@@ -228,22 +228,18 @@ export function ButtonLink({
   ...props
 }: ButtonLinkProps) {
   const navigate = useNavigate();
+  const match = useMatch({ path: to });
   return (
-    <Route
-      path={to}
-      element={
-        <Button
-          style={({ isActive }) => ({
-            ...style,
-            ...(isActive ? activeStyle : {}),
-          })}
-          {...props}
-          onClick={e => {
-            props.onClick && props.onClick(e);
-            navigate(to);
-          }}
-        />
-      }
+    <Button
+      style={{
+        ...style,
+        ...(match ? activeStyle : {}),
+      }}
+      {...props}
+      onClick={e => {
+        props.onClick && props.onClick(e);
+        navigate(to);
+      }}
     />
   );
 }
