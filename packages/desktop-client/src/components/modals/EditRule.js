@@ -55,22 +55,40 @@ function applyErrors(array, errorsArray) {
   });
 }
 
-function getTransactionFields(conditions, actions) {
+export function getTransactionFields(page, conditions, actions) {
   let fields = ['date'];
+  let orderedFields = [
+    'account',
+    'payee',
+    'imported_payee',
+    'notes',
+    'category',
+  ];
 
-  if (conditions.find(c => c.field === 'imported_payee')) {
-    fields.push('imported_payee');
-  }
-
-  fields.push('payee');
-
-  if (actions.find(a => a.field === 'category')) {
-    fields.push('category');
-  } else if (
-    actions.length > 0 &&
-    !['payee', 'date', 'amount'].includes(actions[0].field)
-  ) {
-    fields.push(actions[0].field);
+  switch (page) {
+    case 'filters':
+      orderedFields.map(field =>
+        conditions.find(c =>
+          [field].find(f => c.field === f && fields.push(f)),
+        ),
+      );
+      break;
+    case 'rules':
+      if (conditions.find(c => c.field === 'imported_payee')) {
+        fields.push('imported_payee');
+      }
+      fields.push('payee');
+      if (actions.find(a => a.field === 'category')) {
+        fields.push('category');
+      } else if (
+        actions.length > 0 &&
+        !['payee', 'date', 'amount'].includes(actions[0].field)
+      ) {
+        fields.push(actions[0].field);
+      }
+      break;
+    default:
+      throw new Error('Unknown page: ' + page);
   }
 
   fields.push('amount');
@@ -175,7 +193,7 @@ export function Editor({ error, style, children }) {
   );
 }
 
-function ConditionEditor({
+export function ConditionEditor({
   ops,
   condition,
   editorStyle,
@@ -883,7 +901,7 @@ export default function EditRule({
 
               <SimpleTransactionsTable
                 transactions={transactions}
-                fields={getTransactionFields(conditions, actions)}
+                fields={getTransactionFields('rules', conditions, actions)}
                 style={{ border: '1px solid ' + colors.border }}
               />
 
