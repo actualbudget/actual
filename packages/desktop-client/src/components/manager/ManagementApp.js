@@ -21,6 +21,7 @@ import Bootstrap from './subscribe/Bootstrap';
 import ChangePassword from './subscribe/ChangePassword';
 import Error from './subscribe/Error';
 import Login from './subscribe/Login';
+import OpenIdCallback from './subscribe/OpenIdCallback';
 import WelcomeScreen from './WelcomeScreen';
 
 function Version() {
@@ -194,6 +195,9 @@ function ManagementApp({
               <Switch>
                 <Route exact path="/login">
                   <Login />
+                </Route>
+                <Route exact path="/login/openid-cb">
+                  <OpenIdCallback />
                 </Route>
                 <Route exact path="/error">
                   <Error />

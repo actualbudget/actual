@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, useState } from 'react';
+import React, { type ChangeEvent, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
@@ -12,11 +12,18 @@ import { useBootstrapped, Title, Input } from './common';
 
 export default function Login() {
   let dispatch = useDispatch();
+  let [loginMethods, setLoginMethods] = useState(['password']);
   let [password, setPassword] = useState('');
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState(null);
 
   let { checked } = useBootstrapped();
+
+  useEffect(() => {
+    send('subscribe-get-login-methods')
+      .then(({ methods }) => setLoginMethods(methods))
+      .catch(error => setError(error));
+  }, []);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -24,12 +31,14 @@ export default function Login() {
         return 'Invalid password';
       case 'network-failure':
         return 'Unable to contact the server';
+      case 'internal-error':
+        return 'Internal error';
       default:
         return `An unknown error occurred: ${error}`;
     }
   }
 
-  async function onSubmit(e) {
+  async function onSubmitPassword(e) {
     e.preventDefault();
     if (password === '' || loading) {
       return;
@@ -44,6 +53,19 @@ export default function Login() {
       setError(error);
     } else {
       dispatch(loggedIn());
+    }
+  }
+
+  async function onSubmitOpenId(e) {
+    e.preventDefault();
+
+    let { error, redirect_url } = await send('subscribe-sign-in-openid', {
+      return_url: window.location.origin,
+    });
+    if (error) {
+      setError(error);
+    } else {
+      window.location.href = redirect_url;
     }
   }
 
@@ -82,23 +104,35 @@ export default function Login() {
         </Text>
       )}
 
-      <form
-        style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-        onSubmit={onSubmit}
-      >
-        <Input
-          autoFocus={true}
-          placeholder="Password"
-          type="password"
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setPassword(e.target.value)
-          }
-          style={{ flex: 1, marginRight: 10 }}
-        />
-        <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
-          Sign in
-        </ButtonWithLoading>
-      </form>
+      {loginMethods.includes('password') && (
+        <form
+          style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
+          onSubmit={onSubmitPassword}
+        >
+          <Input
+            autoFocus={true}
+            placeholder="Password"
+            type="password"
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
+            style={{ flex: 1, marginRight: 10 }}
+          />
+          <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
+            Sign in
+          </ButtonWithLoading>
+        </form>
+      )}
+
+      {loginMethods.includes('openid') && (
+        <form
+          style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
+          onSubmit={onSubmitOpenId}
+        >
+          <Button style={{ fontSize: 15 }}>Sign in with OpenId</Button>
+        </form>
+      )}
+
       <View
         style={{
           flexDirection: 'row',

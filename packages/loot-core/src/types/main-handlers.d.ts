@@ -255,6 +255,8 @@ export interface MainHandlers {
     { error: string } | { bootstrapped: unknown; hasServer: boolean }
   >;
 
+  'subscribe-get-login-methods': () => Promise<{ methods: [string] }>;
+
   'subscribe-bootstrap': (arg: { password }) => Promise<{ error: string }>;
 
   'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
@@ -265,7 +267,13 @@ export interface MainHandlers {
 
   'subscribe-sign-in': (arg: { password }) => Promise<{ error: string }>;
 
+  'subscribe-sign-in-openid': (arg: {
+    return_url: URL;
+  }) => Promise<{ error: string } | { redirect_url: URL }>;
+
   'subscribe-sign-out': () => Promise<'ok'>;
+
+  'subscribe-set-token': (arg: { token: string }) => Promise<null>;
 
   'get-server-version': () => Promise<{ error: string } | { version: string }>;
 

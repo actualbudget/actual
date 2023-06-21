@@ -1662,6 +1662,28 @@ handlers['subscribe-bootstrap'] = async function ({ password }) {
   return { error: 'internal' };
 };
 
+handlers['subscribe-get-login-methods'] = async function () {
+  const methods = await asyncStorage.getItem('loginMethods');
+  if (methods) {
+    return { methods };
+  }
+
+  let res;
+  try {
+    res = await fetch(getServer().SIGNUP_SERVER + '/login-methods').then(res =>
+      res.json(),
+    );
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+
+  if (res.methods) {
+    await asyncStorage.setItem('loginMethods', res.methods);
+    return { methods: res.methods };
+  }
+  return { error: 'internal' };
+};
+
 handlers['subscribe-get-user'] = async function () {
   if (!getServer()) {
     if (!(await asyncStorage.getItem('did-bootstrap'))) {
@@ -1729,6 +1751,17 @@ handlers['subscribe-sign-in'] = async function ({ password }) {
   return { error: 'invalid-password' };
 };
 
+handlers['subscribe-sign-in-openid'] = async function ({ return_url }) {
+  let res = await post(getServer().SIGNUP_SERVER + '/login-openid', {
+    return_url,
+  });
+
+  if (res.redirect_url) {
+    return { redirect_url: res.redirect_url };
+  }
+  return { error: 'internal-error' };
+};
+
 handlers['subscribe-sign-out'] = async function () {
   encryption.unloadAllKeys();
   await asyncStorage.multiRemove([
@@ -1736,8 +1769,13 @@ handlers['subscribe-sign-out'] = async function () {
     'encrypt-keys',
     'lastBudget',
     'readOnly',
+    'loginMethods',
   ]);
   return 'ok';
+};
+
+handlers['subscribe-set-token'] = async function ({ token }) {
+  await asyncStorage.setItem('user-token', token);
 };
 
 handlers['get-server-version'] = async function () {
