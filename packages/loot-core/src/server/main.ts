@@ -2266,30 +2266,6 @@ async function loadBudget(id) {
   return {};
 }
 
-handlers['get-upgrade-notifications'] = async function () {
-  let { id } = prefs.getPrefs();
-  if (id === TEST_BUDGET_ID || id === DEMO_BUDGET_ID) {
-    return [];
-  }
-
-  let types = ['schedules', 'repair-splits'];
-  let unseen = [];
-
-  for (let type of types) {
-    let key = `notifications.${type}`;
-    if (prefs.getPrefs()[key] == null) {
-      unseen.push(type);
-    }
-  }
-
-  return unseen;
-};
-
-handlers['seen-upgrade-notification'] = async function ({ type }) {
-  let key = `notifications.${type}`;
-  prefs.savePrefs({ [key]: true });
-};
-
 handlers['upload-file-web'] = async function ({ filename, contents }) {
   if (!Platform.isWeb) {
     return null;
