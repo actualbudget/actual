@@ -4,21 +4,20 @@ import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import q, { liveQuery, runQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
-import {
-  mapField,
-  friendlyOp,
-  getFieldError,
-  unparse,
-} from 'loot-core/src/shared/rules';
+import { mapField, unparse } from 'loot-core/src/shared/rules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import AddIcon from '../../icons/v0/Add';
-import SubtractIcon from '../../icons/v0/Subtract';
 import { colors } from '../../style';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
-import { View, Text, Button, Stack, CustomSelect } from '../common';
+import { View, Text, Button, Stack } from '../common';
 import { FormField, FormLabel } from '../forms';
-import { FieldSelect, ConditionsList } from '../modals/EditRule';
+import {
+  FieldSelect,
+  ConditionsList,
+  OpSelect,
+  EditorButtons,
+  Editor,
+} from '../modals/EditRule';
 import { Page } from '../Page';
 import { BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
@@ -36,90 +35,6 @@ function getTransactionFields(conditions) {
   fields.push('amount');
 
   return fields;
-}
-
-export function OpSelect({
-  ops,
-  type,
-  style,
-  value,
-  formatOp = friendlyOp,
-  onChange,
-}) {
-  // We don't support the `contains` operator for the id type for
-  // rules yet
-  if (type === 'id') {
-    ops = ops.filter(op => op !== 'contains');
-  }
-
-  return (
-    <CustomSelect
-      options={ops.map(op => [op, formatOp(op, type)])}
-      value={value}
-      onChange={value => onChange('op', value)}
-      style={style}
-    />
-  );
-}
-
-function EditorButtons({ onAdd, onDelete, style }) {
-  return (
-    <>
-      {onDelete && (
-        <Button
-          bare
-          onClick={onDelete}
-          style={{ padding: 7 }}
-          aria-label="Delete entry"
-        >
-          <SubtractIcon style={{ width: 8, height: 8 }} />
-        </Button>
-      )}
-      {onAdd && (
-        <Button
-          bare
-          onClick={onAdd}
-          style={{ padding: 7 }}
-          aria-label="Add entry"
-        >
-          <AddIcon style={{ width: 10, height: 10 }} />
-        </Button>
-      )}
-    </>
-  );
-}
-
-function FieldError({ type }) {
-  return (
-    <Text
-      style={{
-        fontSize: 12,
-        textAlign: 'center',
-        color: colors.r5,
-        marginBottom: 5,
-      }}
-    >
-      {getFieldError(type)}
-    </Text>
-  );
-}
-
-function Editor({ error, style, children }) {
-  return (
-    <View style={style} data-testid="editor-row">
-      <Stack
-        direction="row"
-        align="center"
-        spacing={1}
-        style={{
-          padding: '3px 5px',
-        }}
-      >
-        {children}
-      </Stack>
-      {error && <FieldError type={error} />}
-    </View>
-  );
 }
 
 export function ConditionEditor({
@@ -179,7 +94,6 @@ export function ConditionEditor({
 
 // TODO:
 // * Dont touch child transactions?
-
 let conditionFields = [
   'imported_payee',
   'account',
@@ -207,7 +121,7 @@ export default function EditFilter() {
   let [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
-        case 'set-schedule': {
+        case 'set-filter': {
           let filter = action.filter;
           return {
             ...state,
@@ -277,11 +191,11 @@ export default function EditFilter() {
           };
         }
 
-        dispatch({ type: 'set-schedule', filter });
+        dispatch({ type: 'set-filter', filter });
       } else {
         let filter = await loadFilter();
         if (filter) {
-          dispatch({ type: 'set-schedule', filter });
+          dispatch({ type: 'set-filter', filter });
         }
       }
     }
@@ -334,7 +248,7 @@ export default function EditFilter() {
     } else {
       //history.goBack();
       history.push(location.state.locationPtr.pathname, {
-        callbackConditions: state.filter.conditions,
+        callbackConditions: state.filter,
       });
     }
   }

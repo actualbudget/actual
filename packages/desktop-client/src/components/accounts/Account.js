@@ -1032,11 +1032,7 @@ const AccountHeader = memo(
 
           {filters && filters.length > 0 && (
             <AppliedFilters
-              filters={
-                location.state.callbackConditions
-                  ? location.state.callbackConditions
-                  : filters
-              }
+              filters={filters}
               onUpdate={onUpdateFilter}
               onDelete={onDeleteFilter}
             />
@@ -1122,6 +1118,7 @@ class AccountInternal extends PureComponent {
       isAdding: false,
       latestDate: null,
       filterId: null,
+      conditionsOp: 'and',
     };
   }
 
@@ -1195,7 +1192,18 @@ class AccountInternal extends PureComponent {
     }
   }
 
-  componentDidUpdate(prevProps) {
+  async componentDidUpdate(prevProps) {
+    if (this.props.location.state.callbackConditions) {
+      await this.setState({
+        filters: this.props.location.state.callbackConditions.conditions,
+        conditionsOp: this.props.location.state.callbackConditions.conditionsOp,
+      });
+      this.props.history.replace(this.props.location.pathname, {
+        callbackConditions: null,
+      });
+      let filters = this.state.filters ? this.state.filters : [];
+      this.applyFilters([...filters]);
+    }
     // If the user was on a different screen and is now coming back to
     // the transactions, automatically refresh the transaction to make
     // sure we have updated state
@@ -1798,12 +1806,7 @@ class AccountInternal extends PureComponent {
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
-    if (this.props.location.state.callbackConditions) {
-      this.setState({ filters: this.props.location.state.callbackConditions });
-      this.props.history.replace(this.props.location.pathname, {
-        callbackConditions: null,
-      });
-    }
+    this.setState({ conditionsOp: 'and' });
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
@@ -1811,23 +1814,14 @@ class AccountInternal extends PureComponent {
   };
 
   onDeleteFilter = filter => {
-    if (this.props.location.state.callbackConditions) {
-      this.setState({ filters: this.props.location.state.callbackConditions });
-      this.props.history.replace(this.props.location.pathname, {
-        callbackConditions: null,
-      });
-    }
+    this.setState({ conditionsOp: 'and' });
     this.applyFilters(this.state.filters.filter(f => f !== filter));
     this.setState({ filterId: null });
   };
 
   onApplyFilter = async cond => {
-    if (this.props.location.state.callbackConditions) {
-      this.setState({ filters: this.props.location.state.callbackConditions });
-      this.props.history.replace(this.props.location.pathname, {
-        callbackConditions: null,
-      });
-    }
+    let condOp = cond.conditionsOp ? cond.conditionsOp : 'and';
+    this.setState({ conditionsOp: condOp });
     let filters = this.state.filters;
     if (cond.customName) {
       filters = filters.filter(f => f.customName !== cond.customName);
@@ -1868,9 +1862,9 @@ class AccountInternal extends PureComponent {
       let { filters } = await send('make-filters-from-conditions', {
         conditions: conditions.filter(cond => !cond.customName),
       });
-
+      const conditionsOpKey = this.state.conditionsOp === 'or' ? '$or' : '$and';
       this.currentQuery = this.rootQuery.filter({
-        $and: [...filters, ...customFilters],
+        [conditionsOpKey]: [...filters, ...customFilters],
       });
       this.updateQuery(this.currentQuery, true);
       this.setState({ filters: conditions, search: '' });

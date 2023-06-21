@@ -67,31 +67,32 @@ export function ConditionExists(item, filters, newItem) {
     if (
       !fCondCheck &&
       //If conditions.length equals 1 then ignore conditionsOp
-      (conditions.length === 1 ? true :
-      (filter.conditionsOp === conditionsOp)) &&
+      (conditions.length === 1 ? true : filter.conditionsOp === conditionsOp) &&
       !filter.tombstone &&
       filter.conditions.length === conditions.length
     ) {
       fCondCheck = false;
       conditions.map((cond, i) => {
-        condCheck[i] = filter.conditions.filter(fcond => {
-            return (cond.value === fcond.value &&
+        condCheck[i] =
+          filter.conditions.filter(fcond => {
+            return (
+              cond.value === fcond.value &&
               cond.op === fcond.op &&
               cond.field === fcond.field
-            );            
+            );
           }).length > 0;
-          fCondCheck = (i === 0 ? true : fCondCheck) && condCheck[i];
+        fCondCheck = (i === 0 ? true : fCondCheck) && condCheck[i];
       });
-      fCondFound = (fCondCheck && condCheck[conditions.length - 1]) && filter;
+      fCondFound = fCondCheck && condCheck[conditions.length - 1] && filter;
     }
   });
 
   condCheck = [];
 
   if (!newItem) {
-    return fCondFound.id !== item.id && fCondFound.name;
+    return (fCondFound ? (fCondFound.id !== item.id ? fCondFound.name : false) : false);
   }
-  return fCondFound.name;
+  return fCondFound ? fCondFound.name : false;
 }
 
 export async function createFilter(filter) {
@@ -135,7 +136,7 @@ export async function updateFilter(filter) {
   }
 
   if (item.conditions.length > 0) {
-    let condExists = ConditionExists(item, filter.filters, true);
+    let condExists = ConditionExists(item, filter.filters, false);
     if (condExists) {
       throw new Error(
         'Duplicate filter warning: conditions already exist. Filter name: ' +

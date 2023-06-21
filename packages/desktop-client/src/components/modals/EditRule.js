@@ -115,7 +115,7 @@ export function OpSelect({
   );
 }
 
-function EditorButtons({ onAdd, onDelete, style }) {
+export function EditorButtons({ onAdd, onDelete, style }) {
   return (
     <>
       {onDelete && (
@@ -157,7 +157,7 @@ function FieldError({ type }) {
   );
 }
 
-function Editor({ error, style, children }) {
+export function Editor({ error, style, children }) {
   return (
     <View style={style} data-testid="editor-row">
       <Stack
