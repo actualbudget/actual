@@ -684,7 +684,6 @@ const AccountHeader = memo(
     account,
     filterId,
     history,
-    location,
     accountsSyncing,
     accounts,
     transactions,
@@ -741,6 +740,20 @@ const AccountHeader = memo(
           'expand-splits': !(splitsExpanded.state.mode === 'expand'),
         });
       }
+    }
+
+    function onCreateEditFilter(newItem) {
+      newItem ? 
+        (
+          history.push(`/filters/edit`, {
+          locationPtr: history.location,
+          inputConds: filters,
+          })) :
+        (
+          history.push(`/filters/edit/${filterId}`, {
+            locationPtr: history.location,
+          })
+        )
     }
 
     return (
@@ -1043,6 +1056,7 @@ const AccountHeader = memo(
                   primary
                   align="right"
                   style={{ marginTop: 4, width: 125 }}
+                  onClick={() => onCreateEditFilter(false)}
                 >
                   Edit filter
                 </Button>
@@ -1052,6 +1066,7 @@ const AccountHeader = memo(
                   primary
                   align="right"
                   style={{ marginTop: 4, width: 125 }}
+                  onClick={() => onCreateEditFilter(true)}
                 >
                   Create new filter
                 </Button>
