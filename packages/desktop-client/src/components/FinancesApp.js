@@ -286,6 +286,7 @@ function FinancesApp(props) {
               <Route path="/budget" element={<MobileNavTabs />} />
               <Route path="/accounts" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
+              <Route path="*" element={null} />
             </Routes>
           </View>
         </View>

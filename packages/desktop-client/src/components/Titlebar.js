@@ -349,6 +349,8 @@ function Titlebar({
             />
           }
         />
+
+        <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
