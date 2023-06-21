@@ -66,7 +66,7 @@ function StackedRoutesInner({ location }) {
   const { isNarrowWidth } = useResponsive();
   return (
     <Routes location={location}>
-      <Route path="/" render={() => <Navigate to="/budget" replace />} />
+      <Route path="/" element={<Navigate to="/budget" replace />} />
 
       <Route
         path="/reports"
