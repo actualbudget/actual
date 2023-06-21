@@ -1058,7 +1058,7 @@ const AccountHeader = memo(
                   style={{ marginTop: 4, width: 125 }}
                   onClick={() => onCreateEditFilter(false)}
                 >
-                  Edit filter
+                  Edit saved filter
                 </Button>
               )}
               {filters.length > 0 && filterId === null && (
@@ -1068,7 +1068,7 @@ const AccountHeader = memo(
                   style={{ marginTop: 4, width: 125 }}
                   onClick={() => onCreateEditFilter(true)}
                 >
-                  New Saved filter
+                  New saved filter
                 </Button>
               )}
             </Stack>
