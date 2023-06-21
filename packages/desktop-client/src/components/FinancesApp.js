@@ -1,17 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import {
-  Router,
   Route,
   Routes,
-  Redirect,
-  useLocation,
+  Navigate,
   NavLink,
+  useNavigate,
+  BrowserRouter,
 } from 'react-router-dom';
 
-import { createBrowserHistory } from 'history';
 import hotkeys from 'hotkeys-js';
 
 import * as actions from 'loot-core/src/client/actions';
@@ -25,14 +24,12 @@ import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
-import ExposeNavigate from '../util/ExposeNavigate';
-import { getLocationState, makeLocationState } from '../util/location-state';
+import { ExposeNavigate, StackedRoutes } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import Account from './accounts/Account';
 import MobileAccount from './accounts/MobileAccount';
 import MobileAccounts from './accounts/MobileAccounts';
-import { ActiveLocationProvider } from './ActiveLocation';
 import BankSyncStatus from './BankSyncStatus';
 import Budget from './budget';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
@@ -44,7 +41,6 @@ import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
 import NordigenLink from './nordigen/NordigenLink';
 import Notifications from './Notifications';
-import { PageTypeProvider } from './Page';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import Schedules from './schedules';
@@ -57,14 +53,20 @@ import Titlebar, { TitlebarProvider } from './Titlebar';
 
 function NarrowNotSupported({ children, redirectTo = '/budget' }) {
   const { isNarrowWidth } = useResponsive();
-  return isNarrowWidth ? <Redirect to={redirectTo} /> : children;
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isNarrowWidth) {
+      navigate(redirectTo);
+    }
+  }, [isNarrowWidth, navigate, redirectTo]);
+  return isNarrowWidth ? null : children;
 }
 
 function StackedRoutesInner({ location }) {
   const { isNarrowWidth } = useResponsive();
   return (
     <Routes location={location}>
-      <Route path="/" render={() => <Redirect to="/budget" />} />
+      <Route path="/" render={() => <Navigate to="/budget" replace />} />
 
       <Route
         path="/reports"
@@ -157,35 +159,6 @@ function StackedRoutesInner({ location }) {
   );
 }
 
-function StackedRoutes() {
-  let location = useLocation();
-  let locationPtr = getLocationState(location, 'locationPtr');
-
-  let locations = [location];
-  while (locationPtr) {
-    locations.unshift(locationPtr);
-    locationPtr = getLocationState(locationPtr, 'locationPtr');
-  }
-
-  let base = locations[0];
-  let stack = locations.slice(1);
-
-  return (
-    <ActiveLocationProvider location={locations[locations.length - 1]}>
-      <StackedRoutesInner location={base} />
-      {stack.map((location, idx) => (
-        <PageTypeProvider
-          key={location.key}
-          type="modal"
-          current={idx === stack.length - 1}
-        >
-          <StackedRoutesInner location={location} />
-        </PageTypeProvider>
-      ))}
-    </ActiveLocationProvider>
-  );
-}
-
 function NavTab({ icon: TabIcon, name, path }) {
   return (
     <NavLink
@@ -231,37 +204,22 @@ function MobileNavTabs() {
   );
 }
 
-function FinancesApp(props) {
-  const [patchedHistory] = useState(() => createBrowserHistory());
-
+function Redirector({ getAccounts }) {
+  let navigate = useNavigate();
   useEffect(() => {
-    let oldPush = patchedHistory.push;
-    patchedHistory.push = (to, state) => {
-      let newState = makeLocationState(to.state || state);
-      if (typeof to === 'object') {
-        return oldPush.call(patchedHistory, { ...to, state: newState });
-      } else {
-        return oldPush.call(patchedHistory, to, newState);
-      }
-    };
-
-  }, []);
-
-  useEffect(() => {
-    // TODO: quick hack fix for showing the demo
-    if (patchedHistory.location.pathname === '/subscribe') {
-      patchedHistory.push('/');
-    }
-
     // Get the accounts and check if any exist. If there are no
     // accounts, we want to redirect the user to the All Accounts
     // screen which will prompt them to add an account
-    props.getAccounts().then(accounts => {
+    getAccounts().then(accounts => {
       if (accounts.length === 0) {
-        patchedHistory.push('/accounts');
+        navigate('/accounts');
       }
     });
+  }, []);
+}
 
+function FinancesApp(props) {
+  useEffect(() => {
     // The default key handler scope
     hotkeys.setScope('app');
 
@@ -281,7 +239,8 @@ function FinancesApp(props) {
   }, []);
 
   return (
-    <Router history={patchedHistory}>
+    <BrowserRouter>
+      <Redirector getAccounts={props.getAccounts} />
       <ExposeNavigate />
 
       <View style={{ height: '100%', backgroundColor: colors.n10 }}>
@@ -317,8 +276,10 @@ function FinancesApp(props) {
             >
               <Notifications />
               <BankSyncStatus />
-              <StackedRoutes />
-              <Modals history={patchedHistory} />
+              <StackedRoutes
+                render={location => <StackedRoutesInner location={location} />}
+              />
+              <Modals />
             </div>
 
             <Routes>
@@ -329,7 +290,7 @@ function FinancesApp(props) {
           </View>
         </View>
       </View>
-    </Router>
+    </BrowserRouter>
   );
 }
 

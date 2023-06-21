@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Redirect, Router, Route, Routes } from 'react-router-dom';
-
-import { createBrowserHistory } from 'history';
+import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 
 import { colors } from '../../style';
 import tokens from '../../tokens';
-import ExposeNavigate from '../../util/ExposeNavigate';
+import { ExposeNavigate } from '../../util/router-tools';
 import { View, Text } from '../common';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
@@ -59,8 +57,6 @@ function ManagementApp({
   getUserData,
   loadAllFiles,
 }) {
-  const [history] = useState(createBrowserHistory);
-
   // runs on mount only
   useEffect(() => {
     // An action may have been triggered from outside, and we don't
@@ -107,7 +103,7 @@ function ManagementApp({
   }
 
   return (
-    <Router history={history}>
+    <BrowserRouter>
       <ExposeNavigate />
       <View style={{ height: '100%' }}>
         <View
@@ -161,7 +157,7 @@ function ManagementApp({
                     <Route path="/" element={<WelcomeScreen />} />
                   )}
                   {/* Redirect all other pages to this route */}
-                  <Route path="/" render={() => <Redirect to="/" />} />
+                  <Route path="/" render={() => <Navigate to="/" />} />
                 </Routes>
 
                 <View
@@ -194,7 +190,10 @@ function ManagementApp({
                 <Route path="/config-server" element={<ConfigServer />} />
                 <Route path="/bootstrap" element={<Bootstrap />} />
                 {/* Redirect all other pages to this route */}
-                <Route path="/" render={() => <Redirect to="/bootstrap" />} />
+                <Route
+                  path="/"
+                  render={() => <Navigate to="/bootstrap" replace />}
+                />
               </Routes>
             )}
           </View>
@@ -206,8 +205,8 @@ function ManagementApp({
         </Routes>
         <Version />
       </View>
-      <Modals history={history} />
-    </Router>
+      <Modals />
+    </BrowserRouter>
   );
 }
 

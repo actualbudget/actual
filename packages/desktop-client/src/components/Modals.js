@@ -35,7 +35,6 @@ function Modals({
   accounts,
   categoryGroups,
   categories,
-  payees,
   budgetId,
   actions,
 }) {
@@ -255,7 +254,6 @@ export default connect(
     accounts: state.queries.accounts,
     categoryGroups: state.queries.categories.grouped,
     categories: state.queries.categories.list,
-    payees: state.queries.payees,
     budgetId: state.prefs.local && state.prefs.local.id,
   }),
   dispatch => ({ actions: bindActionCreators(actions, dispatch) }),

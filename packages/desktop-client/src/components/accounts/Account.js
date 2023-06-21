@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  Redirect,
+  Navigate,
   useParams,
   useNavigate,
   useLocation,
@@ -1847,7 +1847,7 @@ class AccountInternal extends PureComponent {
     if (!accountName && !loading) {
       // This is probably an account that was deleted, so redirect to
       // all accounts
-      return <Redirect to="/accounts" />;
+      return <Navigate to="/accounts" replace />;
     }
 
     let showEmptyMessage = !loading && !accountId && accounts.length === 0;
