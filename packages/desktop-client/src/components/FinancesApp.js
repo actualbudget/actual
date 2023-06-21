@@ -143,12 +143,7 @@ function StackedRoutesInner({ location }) {
 
       <Route
         path="/accounts/:id"
-        element={props => {
-          const AcctCmp = isNarrowWidth ? MobileAccount : Account;
-          return (
-            props.match && <AcctCmp key={props.match.params.id} {...props} />
-          );
-        }}
+        Component={isNarrowWidth ? MobileAccount : Account}
       />
 
       <Route
