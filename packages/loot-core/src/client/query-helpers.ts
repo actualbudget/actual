@@ -7,13 +7,13 @@ export async function runQuery(query) {
   return send('query', query.serialize());
 }
 
-export function liveQuery(query, onData?, opts?) {
+export function liveQuery(query, onData?, opts?): LiveQuery {
   let q = new LiveQuery(query, onData, opts);
   q.run();
   return q;
 }
 
-export function pagedQuery(query, onData?, opts?) {
+export function pagedQuery(query, onData?, opts?): PagedQuery {
   let q = new PagedQuery(query, onData, opts);
   q.run();
   return q;
@@ -176,7 +176,7 @@ export class LiveQuery {
 }
 
 // Paging
-export class PagedQuery extends LiveQuery {
+class PagedQuery extends LiveQuery {
   done;
   onPageData;
   pageCount;

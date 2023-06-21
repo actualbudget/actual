@@ -182,7 +182,10 @@ function ManagementApp({
                   <Switch>
                     <Route exact path="/config-server" children={null} />
                     <Route exact path="/">
-                      <LoggedInUser style={{ padding: '4px 7px' }} />
+                      <LoggedInUser
+                        hideIfNoServer
+                        style={{ padding: '4px 7px' }}
+                      />
                     </Route>
                   </Switch>
                 </View>

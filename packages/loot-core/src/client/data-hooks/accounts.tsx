@@ -4,7 +4,7 @@ import q from '../query-helpers';
 import { useLiveQuery } from '../query-hooks';
 import { getAccountsById } from '../reducers/queries';
 
-export function useAccounts() {
+function useAccounts() {
   return useLiveQuery(() => q('accounts').select('*'), []);
 }
 

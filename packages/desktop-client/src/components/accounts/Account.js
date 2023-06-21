@@ -34,7 +34,6 @@ import {
   groupById,
 } from 'loot-core/src/shared/util';
 
-import useFeatureFlag from '../../hooks/useFeatureFlag';
 import {
   SelectedProviderWithItems,
   useSelectedItems,
@@ -264,7 +263,6 @@ function MenuTooltip({ onClose, children }) {
 function AccountMenu({
   account,
   canSync,
-  syncEnabled,
   showBalances,
   canShowBalances,
   showCleared,
@@ -304,8 +302,7 @@ function AccountMenu({
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
-          syncEnabled &&
-            account &&
+          account &&
             !account.closed &&
             (canSync
               ? {
@@ -691,7 +688,6 @@ const AccountHeader = memo(
     accountsSyncing,
     accounts,
     transactions,
-    syncEnabled,
     showBalances,
     showExtraBalances,
     showCleared,
@@ -728,7 +724,7 @@ const AccountHeader = memo(
     let searchInput = useRef(null);
     let splitsExpanded = useSplitsExpanded();
 
-    let canSync = syncEnabled && account && account.account_id;
+    let canSync = account && account.account_id;
     if (!account) {
       // All accounts - check for any syncable account
       canSync = !!accounts.find(account => !!account.account_id);
@@ -996,7 +992,6 @@ const AccountHeader = memo(
                   <AccountMenu
                     account={account}
                     canSync={canSync}
-                    syncEnabled={syncEnabled}
                     canShowBalances={canCalculateBalance()}
                     showBalances={showBalances}
                     showCleared={showCleared}
@@ -1880,7 +1875,6 @@ class AccountInternal extends PureComponent {
       accounts,
       categoryGroups,
       payees,
-      syncEnabled,
       dateFormat,
       hideFraction,
       addNotification,
@@ -1954,7 +1948,6 @@ class AccountInternal extends PureComponent {
                   showCleared={showCleared}
                   showEmptyMessage={showEmptyMessage}
                   balanceQuery={balanceQuery}
-                  syncEnabled={syncEnabled}
                   canCalculateBalance={this.canCalculateBalance}
                   reconcileAmount={reconcileAmount}
                   search={this.state.search}
@@ -2022,11 +2015,7 @@ class AccountInternal extends PureComponent {
                     renderEmpty={() =>
                       showEmptyMessage ? (
                         <EmptyMessage
-                          onAdd={() =>
-                            replaceModal(
-                              syncEnabled ? 'add-account' : 'add-local-account',
-                            )
-                          }
+                          onAdd={() => replaceModal('add-account')}
                         />
                       ) : !loading ? (
                         <View
@@ -2075,7 +2064,6 @@ function AccountHack(props) {
 }
 
 export default function Account() {
-  const syncEnabled = useFeatureFlag('syncAccount');
   let params = useParams();
   let location = useLocation();
   let activeLocation = useActiveLocation();
@@ -2139,7 +2127,6 @@ export default function Account() {
         <AccountHack
           {...state}
           {...actionCreators}
-          syncEnabled={syncEnabled}
           modalShowing={
             state.modalShowing ||
             !!(activeLocation.state && activeLocation.state.locationPtr)
