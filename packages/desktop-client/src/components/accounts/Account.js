@@ -66,6 +66,7 @@ import {
   Stack,
 } from '../common';
 import { KeyHandlers } from '../KeyHandlers';
+import { FieldSelect } from '../modals/EditRule';
 import NotesButton from '../NotesButton';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
@@ -696,6 +697,7 @@ const AccountHeader = memo(
     canCalculateBalance,
     search,
     filters,
+    conditionsOp,
     savePrefs,
     onSearch,
     onAddTransaction,
@@ -752,6 +754,8 @@ const AccountHeader = memo(
             locationPtr: history.location,
           });
     }
+
+    function handleChange(name, value) {}
 
     return (
       <>
@@ -1036,39 +1040,51 @@ const AccountHeader = memo(
           </Stack>
 
           {filters && filters.length > 0 && (
-            <Stack
-              spacing={2}
-              direction="row"
-              align="center"
-              style={{ marginTop: 10 }}
-            >
-              <AppliedFilters
-                filters={filters}
-                onUpdate={onUpdateFilter}
-                onDelete={onDeleteFilter}
-              />
-              <View style={{ flex: 1 }} />
-              {filterId !== null && (
-                <Button
-                  primary
-                  align="right"
-                  style={{ marginTop: 4, width: 125 }}
-                  onClick={() => onCreateEditFilter(false)}
-                >
-                  Edit saved filter
-                </Button>
-              )}
-              {filters.length > 0 && filterId === null && (
-                <Button
-                  primary
-                  align="right"
-                  style={{ marginTop: 4, width: 125 }}
-                  onClick={() => onCreateEditFilter(true)}
-                >
-                  New saved filter
-                </Button>
-              )}
-            </Stack>
+            <View>
+              <Text
+                style={{ color: colors.n4, marginTop: 15, marginBottom: -8 }}
+              >
+                If
+                <FieldSelect
+                  style={{ display: 'inline-flex' }}
+                  fields={[
+                    ['and', 'all'],
+                    ['or', 'any'],
+                  ]}
+                  value={conditionsOp}
+                  onChange={handleChange}
+                />
+                of these conditions match:
+              </Text>
+              <Stack spacing={2} direction="row" align="center">
+                <AppliedFilters
+                  filters={filters}
+                  onUpdate={onUpdateFilter}
+                  onDelete={onDeleteFilter}
+                />
+                <View style={{ flex: 1 }} />
+                {filterId !== null && (
+                  <Button
+                    primary
+                    align="right"
+                    style={{ marginTop: 4, width: 125 }}
+                    onClick={() => onCreateEditFilter(false)}
+                  >
+                    Edit saved filter
+                  </Button>
+                )}
+                {filters.length > 0 && filterId === null && (
+                  <Button
+                    primary
+                    align="right"
+                    style={{ marginTop: 4, width: 125 }}
+                    onClick={() => onCreateEditFilter(true)}
+                  >
+                    New saved filter
+                  </Button>
+                )}
+              </Stack>
+            </View>
           )}
         </View>
         {reconcileAmount != null && (
@@ -1990,6 +2006,7 @@ class AccountInternal extends PureComponent {
                   reconcileAmount={reconcileAmount}
                   search={this.state.search}
                   filters={this.state.filters}
+                  conditionsOp={this.state.conditionsOp}
                   savePrefs={this.props.savePrefs}
                   onSearch={this.onSearch}
                   onShowTransactions={this.onShowTransactions}

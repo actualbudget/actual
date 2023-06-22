@@ -185,7 +185,6 @@ export default function EditFilter() {
         <Text style={{ color: colors.n4, marginBottom: 5 }}>
           If
           <FieldSelect
-            data-testid="conditions-op"
             style={{ display: 'inline-flex' }}
             fields={[
               ['and', 'all'],
