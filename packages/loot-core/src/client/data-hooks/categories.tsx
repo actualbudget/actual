@@ -8,6 +8,10 @@ export function useCategories() {
   return useLiveQuery(() => q('categories').select('*'), []);
 }
 
+export function useCategoryGroups() {
+  return useLiveQuery(() => q('category_groups').select('*'), []);
+}
+
 let CategoriesContext = createContext(null);
 
 export function CategoriesProvider({ children }) {
