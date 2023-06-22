@@ -11,18 +11,21 @@ import { Table, Row, Field, Cell, SelectCell } from '../table';
 function useData(query: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setIsLoading(true);
+    setError(null);
 
     const run = async () => {
       try {
         console.log('run', query);
         const results = await runQuery(query);
         console.log('res', results);
-        setData(results);
+        setData(results.data);
       } catch (error) {
         console.log('error', error);
+        setError(error);
       }
       setIsLoading(false);
     };
@@ -33,6 +36,7 @@ function useData(query: string) {
   return {
     isLoading,
     data,
+    error,
   };
 }
 
@@ -64,7 +68,7 @@ export default function AQL() {
   const [query, setQuery] = useState(startQuery);
   const [tempQuery, setTempQuery] = useState(startQuery);
 
-  const { isLoading, data } = useData(query);
+  const { isLoading, data, error } = useData(query);
 
   const [firstItem] = data;
   const fields = useMemo<Array<{ name: string; width: 'flex' }>>(
@@ -111,7 +115,7 @@ export default function AQL() {
             Run query
           </ButtonWithLoading>
 
-          <Error>Error here</Error>
+          {error && <Error>{JSON.stringify(error)}</Error>}
         </View>
 
         <Table items={data} headers={fields} renderItem={renderItem} />
