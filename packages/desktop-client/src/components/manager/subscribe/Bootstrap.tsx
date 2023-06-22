@@ -10,10 +10,12 @@ import { View, Text, Button, P } from '../../common';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
+import { OpenIdForm } from './OpenIdForm';
 
 export default function Bootstrap() {
   let dispatch = useDispatch();
   let [error, setError] = useState(null);
+  let [showOpenId, setShowOpenId] = useState(false);
 
   let { checked } = useBootstrapped();
   let history = useHistory();
@@ -26,6 +28,12 @@ export default function Bootstrap() {
         return 'Passwords do not match';
       case 'network-failure':
         return 'Unable to contact the server';
+      case 'missing-issuer':
+        return 'OpenID server cannot be empty';
+      case 'missing-client-id':
+        return 'Client ID cannot be empty';
+      case 'missing-client-secret':
+        return 'Client secret cannot be empty';
       default:
         return `An unknown error occurred: ${error}`;
     }
@@ -34,6 +42,17 @@ export default function Bootstrap() {
   async function onSetPassword(password) {
     setError(null);
     let { error } = await send('subscribe-bootstrap', { password });
+
+    if (error) {
+      setError(error);
+    } else {
+      history.push('/login');
+    }
+  }
+
+  async function onSetOpenId(config) {
+    setError(null);
+    let { error } = await send('subscribe-bootstrap', { openid: config });
 
     if (error) {
       setError(error);
@@ -85,19 +104,40 @@ export default function Bootstrap() {
         </Text>
       )}
 
-      <ConfirmPasswordForm
-        buttons={
+      {!showOpenId && (
+        <>
+          <ConfirmPasswordForm
+            buttons={
+              <Button
+                bare
+                style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
+                onClick={onDemo}
+              >
+                Try Demo
+              </Button>
+            }
+            onSetPassword={onSetPassword}
+            onError={setError}
+          />
           <Button
-            bare
-            style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
-            onClick={onDemo}
+            style={{ marginTop: 10 }}
+            onClick={e => {
+              setShowOpenId(true);
+            }}
           >
-            Try Demo
+            Configure OpenID authentication instead (Advanced)
           </Button>
-        }
-        onSetPassword={onSetPassword}
-        onError={setError}
-      />
+        </>
+      )}
+
+      {showOpenId && (
+        <>
+          <OpenIdForm onSetOpenId={onSetOpenId} onError={setError} />
+          <Button style={{ marginTop: 10 }} onClick={e => setShowOpenId(false)}>
+            Configure password authentication instead
+          </Button>
+        </>
+      )}
     </View>
   );
 }

@@ -257,7 +257,15 @@ export interface MainHandlers {
 
   'subscribe-get-login-methods': () => Promise<{ methods: [string] }>;
 
-  'subscribe-bootstrap': (arg: { password }) => Promise<{ error: string } | null>;
+  'subscribe-bootstrap': (arg: {
+    password?: string;
+    openid?: {
+      issuer: string;
+      client_id: string;
+      client_secret: string;
+      server_hostname: string;
+    };
+  }) => Promise<{ error: string } | null>;
 
   'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
 

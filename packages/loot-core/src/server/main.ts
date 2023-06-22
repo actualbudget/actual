@@ -1647,9 +1647,9 @@ handlers['subscribe-needs-bootstrap'] = async function ({
   return { bootstrapped: res.data.bootstrapped, hasServer: true };
 };
 
-handlers['subscribe-bootstrap'] = async function ({ password }) {
+handlers['subscribe-bootstrap'] = async function (loginConfig) {
   try {
-    await post(getServer().SIGNUP_SERVER + '/bootstrap', { password });
+    await post(getServer().SIGNUP_SERVER + '/bootstrap', loginConfig);
   } catch (err) {
     return { error: err.reason || 'network-failure' };
   }
