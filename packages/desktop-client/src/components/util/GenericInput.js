@@ -23,17 +23,13 @@ export default function GenericInput({
   style,
   onChange,
 }) {
-  let { payees, accounts, saved, categoryGroups, dateFormat } = useSelector(
-    state => {
-      return {
-        payees: state.queries.payees,
-        accounts: state.queries.accounts,
-        saved: state.queries.saved,
-        categoryGroups: state.queries.categories.grouped,
-        dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-      };
-    },
-  );
+  let { saved, categoryGroups, dateFormat } = useSelector(state => {
+    return {
+      saved: state.queries.saved,
+      categoryGroups: state.queries.categories.grouped,
+      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
+    };
+  });
 
   // This makes the UI more resilient in case of faulty data
   if (multi && !Array.isArray(value)) {
@@ -51,8 +47,6 @@ export default function GenericInput({
         case 'payee':
           content = (
             <PayeeAutocomplete
-              payees={payees}
-              accounts={accounts}
               multi={multi}
               showMakeTransfer={false}
               openOnFocus={true}
@@ -69,7 +63,6 @@ export default function GenericInput({
         case 'account':
           content = (
             <AccountAutocomplete
-              accounts={accounts}
               value={value}
               multi={multi}
               openOnFocus={true}
