@@ -111,6 +111,10 @@ function checkDatabaseValidity(appliedIds, available) {
       i >= available.length ||
       appliedIds[i] !== getMigrationId(available[i])
     ) {
+      console.error('Database is out of sync with migrations:', {
+        appliedIds,
+        available,
+      });
       throw new Error('out-of-sync-migrations');
     }
   }
