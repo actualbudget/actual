@@ -24,7 +24,7 @@ import { colors } from '../../style';
 import { withThemeColor } from '../../util/withThemeColor';
 import SyncRefresh from '../SyncRefresh';
 
-import { default as AccountDetails } from './MobileAccountDetails';
+import AccountDetails from './MobileAccountDetails';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
