@@ -16,7 +16,6 @@ import TuningIcon from '../icons/v1/Tuning';
 import Wallet from '../icons/v1/Wallet';
 import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
-import SettingsSliderAlternate from '../icons/v2/SettingsSliderAlternate';
 import { styles, colors } from '../style';
 
 import { View, Block, AlignedText, AnchorLink, Button } from './common';
@@ -520,12 +519,6 @@ function Tools() {
             title="Settings"
             Icon={Cog}
             to="/settings"
-            indent={15}
-          />
-          <SecondaryItem
-            title="Filters"
-            Icon={SettingsSliderAlternate}
-            to="/filters"
             indent={15}
           />
         </>

@@ -206,7 +206,6 @@ function ConfigureField({
           style={{
             color: colors.n4,
             marginBottom: 10,
-            alignItems: 'left',
           }}
         >
           {field === 'saved' && 'Existing filters will be cleared'}

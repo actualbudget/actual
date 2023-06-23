@@ -40,6 +40,7 @@ import {
 } from '../../hooks/useSelected';
 import useSyncServerStatus from '../../hooks/useSyncServerStatus';
 import Loading from '../../icons/AnimatedLoading';
+import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Add from '../../icons/v1/Add';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
@@ -65,6 +66,7 @@ import {
   Menu,
   Stack,
 } from '../common';
+import { FormField, FormLabel } from '../forms';
 import { KeyHandlers } from '../KeyHandlers';
 import { FieldSelect } from '../modals/EditRule';
 import NotesButton from '../NotesButton';
@@ -72,6 +74,7 @@ import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { SelectedItemsButton } from '../table';
+import GenericInput from '../util/GenericInput';
 
 import { FilterButton, AppliedFilters } from './Filters';
 import TransactionList from './TransactionList';
@@ -248,11 +251,11 @@ function MenuButton({ onClick }) {
   );
 }
 
-function MenuTooltip({ onClose, children }) {
+function MenuTooltip({ width, onClose, children }) {
   return (
     <Tooltip
       position="bottom-right"
-      width={200}
+      width={width}
       style={{ padding: 0 }}
       onClose={onClose}
     >
@@ -270,8 +273,6 @@ function AccountMenu({
   onClose,
   onReconcile,
   onMenuSelect,
-  filters,
-  filterId,
 }) {
   let [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
@@ -283,7 +284,7 @@ function AccountMenu({
       onReconcile={onReconcile}
     />
   ) : (
-    <MenuTooltip onClose={onClose}>
+    <MenuTooltip width={200} onClose={onClose}>
       <Menu
         onMenuSelect={item => {
           if (item === 'reconcile') {
@@ -317,34 +318,156 @@ function AccountMenu({
           account.closed
             ? { name: 'reopen', text: 'Reopen Account' }
             : { name: 'close', text: 'Close Account' },
-          filterId !== null && { name: 'edit-filter', text: 'Edit filter' },
-          filters.length > 0 &&
-            filterId === null && {
-              name: 'save-filter',
-              text: 'Create new filter',
-            },
         ].filter(x => x)}
       />
     </MenuTooltip>
   );
 }
 
-function CategoryMenu({ onClose, onMenuSelect, filters, filterId }) {
+function FilterMenuButton({ filters, filterId }) {
+  let [menuOpen, setMenuOpen] = useState(false);
+  let [nameOpen, setNameOpen] = useState(false);
+  let [adding, setAdding] = useState(false);
+
+  const onFilterMenuSelect = async item => {
+    switch (item) {
+      case 'rename-filter':
+        setAdding(false);
+        setMenuOpen(false);
+        setNameOpen(true);
+        break;
+      case 'delete-filter':
+        setMenuOpen(false);
+        break;
+      case 'update-filter':
+        setAdding(false);
+        setMenuOpen(false);
+        break;
+      case 'save-filter':
+        setAdding(true);
+        setMenuOpen(false);
+        setNameOpen(true);
+        break;
+      case 'reload-filter':
+        setMenuOpen(false);
+        break;
+      default:
+    }
+  };
+
+  function FilterMenu({ onClose, filterId }) {
+    let filterName =
+      filterId.status === 'saved' ? (
+        filterId.name
+      ) : (
+        <Text>
+          {filterId.name}
+          <br />
+          (modified)
+        </Text>
+      );
+
+    return (
+      <MenuTooltip width={200} onClose={onClose}>
+        <Menu
+          onMenuSelect={item => {
+            onFilterMenuSelect(item);
+          }}
+          items={[
+            { type: Menu.label, name: filterName },
+            Menu.line,
+
+            ...(filterId.id !== null && filterId.status === 'saved'
+              ? [
+                  { name: 'rename-filter', text: 'Rename' },
+                  { name: 'delete-filter', text: 'Delete' },
+                ]
+              : [
+                  { name: 'update-filter', text: 'Update condtions' },
+                  { name: 'save-filter', text: 'Create new filter' },
+                  { name: 'reload-filter', text: 'Reload' },
+                  { name: 'delete-filter', text: 'Delete' },
+                ]),
+          ]}
+        />
+      </MenuTooltip>
+    );
+  }
+
+  function NameFilter({ onClose }) {
+    return (
+      <MenuTooltip width={400} onClose={onClose}>
+        <Stack
+          direction="row"
+          justify="flex-end"
+          align="center"
+          style={{ marginBottom: 10, padding: 10 }}
+        >
+          <FormField style={{ flex: 1 }}>
+            <FormLabel title="Filter Name" htmlFor="name-field" />
+            <GenericInput
+              field="string"
+              type="string"
+              /* value={state.filter.name}
+              onChange={e => {
+                dispatch({ type: 'set-field', field: 'name', value: e });
+              }} */
+            />
+          </FormField>
+          <Button primary style={{ marginTop: 18 }} onClick={onClose}>
+            {adding ? 'Add' : 'Update'}
+          </Button>
+        </Stack>
+      </MenuTooltip>
+      //{state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
+    );
+  }
+
   return (
-    <MenuTooltip onClose={onClose}>
+    <View>
+      {filterId.id && (
+        <Button
+          bare
+          style={{ marginTop: 4, width: 125 }}
+          onClick={() => {
+            setMenuOpen(true);
+            setAdding(false);
+          }}
+        >
+          Edit&nbsp;filter&nbsp;
+          {filterId.status === 'changed' && <Text>*&nbsp;</Text>}
+          <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
+        </Button>
+      )}
+      {filters.length > 0 && !filterId.id && (
+        <Button
+          bare
+          style={{ marginTop: 4, width: 125 }}
+          onClick={() => {
+            setNameOpen(true);
+            setAdding(true);
+          }}
+        >
+          Save&nbsp;filter&nbsp;
+          <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
+        </Button>
+      )}
+      {menuOpen && (
+        <FilterMenu onClose={() => setMenuOpen(false)} filterId={filterId} />
+      )}
+      {nameOpen && <NameFilter onClose={() => setNameOpen(false)} />}
+    </View>
+  );
+}
+
+function CategoryMenu({ onClose, onMenuSelect }) {
+  return (
+    <MenuTooltip width={200} onClose={onClose}>
       <Menu
         onMenuSelect={item => {
           onMenuSelect(item);
         }}
-        items={[
-          { name: 'export', text: 'Export' },
-          filterId !== null && { name: 'edit-filter', text: 'Edit filter' },
-          filters.length > 0 &&
-            filterId === null && {
-              name: 'save-filter',
-              text: 'Create new filter',
-            },
-        ]}
+        items={[{ name: 'export', text: 'Export' }]}
       />
     </MenuTooltip>
   );
@@ -744,17 +867,6 @@ const AccountHeader = memo(
       }
     }
 
-    function onCreateEditFilter(newItem) {
-      newItem
-        ? history.push(`/filters/edit`, {
-            locationPtr: history.location,
-            inputConds: filters,
-          })
-        : history.push(`/filters/edit/${filterId}`, {
-            locationPtr: history.location,
-          });
-    }
-
     function handleChange(name, value) {}
 
     return (
@@ -1015,8 +1127,6 @@ const AccountHeader = memo(
                     }}
                     onReconcile={onReconcile}
                     onClose={() => setMenuOpen(false)}
-                    filters={filters}
-                    filterId={filterId}
                   />
                 )}
               </View>
@@ -1031,8 +1141,6 @@ const AccountHeader = memo(
                       onMenuSelect(item);
                     }}
                     onClose={() => setMenuOpen(false)}
-                    filters={filters}
-                    filterId={filterId}
                   />
                 )}
               </View>
@@ -1063,26 +1171,7 @@ const AccountHeader = memo(
                   onDelete={onDeleteFilter}
                 />
                 <View style={{ flex: 1 }} />
-                {filterId !== null && (
-                  <Button
-                    primary
-                    align="right"
-                    style={{ marginTop: 4, width: 125 }}
-                    onClick={() => onCreateEditFilter(false)}
-                  >
-                    Edit saved filter
-                  </Button>
-                )}
-                {filters.length > 0 && filterId === null && (
-                  <Button
-                    primary
-                    align="right"
-                    style={{ marginTop: 4, width: 125 }}
-                    onClick={() => onCreateEditFilter(true)}
-                  >
-                    New saved filter
-                  </Button>
-                )}
+                <FilterMenuButton filters={filters} filterId={filterId} />
               </Stack>
             </View>
           )}
@@ -1166,7 +1255,7 @@ class AccountInternal extends PureComponent {
       editingName: false,
       isAdding: false,
       latestDate: null,
-      filterId: null,
+      filterId: [],
       conditionsOp: 'and',
     };
   }
@@ -1859,13 +1948,25 @@ class AccountInternal extends PureComponent {
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
-    this.setState({ filterId: null });
+    this.setState({
+      filterId: {
+        ...this.state.filterId,
+        status: this.state.filterId && 'changed',
+      },
+    });
   };
 
   onDeleteFilter = filter => {
     this.setState({ conditionsOp: 'and' });
     this.applyFilters(this.state.filters.filter(f => f !== filter));
-    this.setState({ filterId: null });
+    this.state.filters.length === 1
+      ? this.setState({ filterId: [] })
+      : this.setState({
+          filterId: {
+            ...this.state.filterId,
+            status: this.state.filterId && 'changed',
+          },
+        });
   };
 
   onApplyFilter = async cond => {
@@ -1876,10 +1977,15 @@ class AccountInternal extends PureComponent {
       filters = filters.filter(f => f.customName !== cond.customName);
     }
     if (cond.conditions) {
-      this.setState({ filterId: cond.id });
+      this.setState({ filterId: { ...cond, status: 'saved' } });
       this.applyFilters([...cond.conditions]);
     } else {
-      this.setState({ filterId: null });
+      this.setState({
+        filterId: {
+          ...this.state.filterId,
+          status: this.state.filterId && 'changed',
+        },
+      });
       this.applyFilters([...filters, cond]);
     }
   };

@@ -538,6 +538,7 @@ export function Menu({
                 lineHeight: '1em',
                 textTransform: 'uppercase',
                 margin: '3px 9px',
+                marginTop: 5,
               }}
             >
               {item.name}
