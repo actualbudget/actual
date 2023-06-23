@@ -1657,11 +1657,6 @@ handlers['subscribe-bootstrap'] = async function (loginConfig) {
 };
 
 handlers['subscribe-get-login-methods'] = async function () {
-  const methods = await asyncStorage.getItem('loginMethods');
-  if (methods) {
-    return { methods };
-  }
-
   let res;
   try {
     res = await fetch(getServer().SIGNUP_SERVER + '/login-methods').then(res =>
@@ -1672,7 +1667,6 @@ handlers['subscribe-get-login-methods'] = async function () {
   }
 
   if (res.methods) {
-    await asyncStorage.setItem('loginMethods', res.methods);
     return { methods: res.methods };
   }
   return { error: 'internal' };
@@ -1763,7 +1757,6 @@ handlers['subscribe-sign-out'] = async function () {
     'encrypt-keys',
     'lastBudget',
     'readOnly',
-    'loginMethods',
   ]);
   return 'ok';
 };

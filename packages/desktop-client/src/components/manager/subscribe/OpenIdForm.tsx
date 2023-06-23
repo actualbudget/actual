@@ -41,7 +41,7 @@ export function OpenIdForm({ onSetOpenId, onError }) {
       onSubmit={onSubmit}
     >
       <Input
-        placeholder="OpenID server"
+        placeholder="OpenID provider"
         type="text"
         value={issuer}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>

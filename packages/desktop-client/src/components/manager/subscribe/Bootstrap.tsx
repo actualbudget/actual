@@ -15,7 +15,7 @@ import { OpenIdForm } from './OpenIdForm';
 export default function Bootstrap() {
   let dispatch = useDispatch();
   let [error, setError] = useState(null);
-  let [showOpenId, setShowOpenId] = useState(false);
+  let [loginMethod, setLoginMethod] = useState('password');
 
   let { checked } = useBootstrapped();
   let history = useHistory();
@@ -104,7 +104,7 @@ export default function Bootstrap() {
         </Text>
       )}
 
-      {!showOpenId && (
+      {loginMethod === 'password' && (
         <>
           <ConfirmPasswordForm
             buttons={
@@ -122,7 +122,7 @@ export default function Bootstrap() {
           <Button
             style={{ marginTop: 10 }}
             onClick={e => {
-              setShowOpenId(true);
+              setLoginMethod('openid');
             }}
           >
             Configure OpenID authentication instead (Advanced)
@@ -130,10 +130,13 @@ export default function Bootstrap() {
         </>
       )}
 
-      {showOpenId && (
+      {loginMethod === 'openid' && (
         <>
           <OpenIdForm onSetOpenId={onSetOpenId} onError={setError} />
-          <Button style={{ marginTop: 10 }} onClick={e => setShowOpenId(false)}>
+          <Button
+            style={{ marginTop: 10 }}
+            onClick={e => setLoginMethod('password')}
+          >
             Configure password authentication instead
           </Button>
         </>
