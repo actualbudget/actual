@@ -76,19 +76,6 @@ export function getTestKeyError({ reason }) {
   }
 }
 
-export function getSubscribeError({ reason }) {
-  switch (reason) {
-    case 'network':
-      return 'Unable to reach the server. Check your internet connection';
-    case 'exists':
-      return 'An account with that email already exists. Did you mean to login?';
-    case 'invalid-email':
-      return 'Invalid email';
-    default:
-      return 'An error occurred. Please try again later.';
-  }
-}
-
 export function getSyncError(error, id) {
   if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
     return 'This budget cannot be loaded with this version of the app.';
