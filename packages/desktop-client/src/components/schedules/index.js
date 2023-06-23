@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { usePushModal } from '../../util/router-tools';
 import { View, Button, Search } from '../common';
 import { Page } from '../Page';
 
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {
-  let history = useHistory();
+  let pushModal = usePushModal();
 
   let [filter, setFilter] = useState('');
 
@@ -23,15 +23,15 @@ export default function Schedules() {
   let { schedules, statuses } = scheduleData;
 
   function onEdit(id) {
-    history.push(`/schedule/edit/${id}`, { locationPtr: history.location });
+    pushModal(`/schedule/edit/${id}`);
   }
 
   function onAdd() {
-    history.push(`/schedule/edit`, { locationPtr: history.location });
+    pushModal('/schedule/edit');
   }
 
   function onDiscover() {
-    history.push(`/schedule/discover`, { locationPtr: history.location });
+    pushModal('/schedule/discover');
   }
 
   async function onAction(name, id) {

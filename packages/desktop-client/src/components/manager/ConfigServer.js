@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
@@ -19,7 +19,7 @@ import { Title, Input } from './subscribe/common';
 export default function ConfigServer() {
   useSetThemeColor(colors.p5);
   let dispatch = useDispatch();
-  let history = useHistory();
+  let navigate = useNavigate();
   let [url, setUrl] = useState('');
   let currentUrl = useServerURL();
   let setServerUrl = useSetServerURL();
@@ -58,7 +58,7 @@ export default function ConfigServer() {
         setError(error);
       } else {
         await dispatch(signOut());
-        history.push('/');
+        navigate('/');
       }
       setLoading(false);
     } else if (error) {
@@ -67,7 +67,7 @@ export default function ConfigServer() {
     } else {
       setLoading(false);
       await dispatch(signOut());
-      history.push('/');
+      navigate('/');
     }
   }
 
@@ -78,13 +78,13 @@ export default function ConfigServer() {
   async function onSkip() {
     await setServerUrl(null);
     await dispatch(loggedIn());
-    history.push('/');
+    navigate('/');
   }
 
   async function onCreateTestFile() {
     await setServerUrl(null);
     await dispatch(createBudget({ testMode: true }));
-    window.__history.push('/');
+    window.__navigate('/');
   }
 
   return (
@@ -135,7 +135,7 @@ export default function ConfigServer() {
         <Input
           autoFocus={true}
           placeholder={'https://example.com'}
-          value={url}
+          value={url || ''}
           onChange={e => setUrl(e.target.value)}
           style={{ flex: 1, marginRight: 10 }}
         />
@@ -147,7 +147,7 @@ export default function ConfigServer() {
             bare
             type="button"
             style={{ fontSize: 15, marginLeft: 10 }}
-            onClick={() => history.goBack()}
+            onClick={() => navigate(-1)}
           >
             Cancel
           </Button>

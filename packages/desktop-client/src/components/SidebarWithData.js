@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { withRouter, useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { bindActionCreators } from 'redux';
 
@@ -18,7 +18,7 @@ import { Sidebar } from './sidebar';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
-  let history = useHistory();
+  let navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -30,7 +30,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
         setEditing(true);
         break;
       case 'settings':
-        history.push('/settings');
+        navigate('/settings');
         break;
       case 'help':
         window.open('https://actualbudget.org/docs/', '_blank');
@@ -155,15 +155,13 @@ function SidebarWithData({
   );
 }
 
-export default withRouter(
-  connect(
-    state => ({
-      accounts: state.queries.accounts,
-      failedAccounts: state.account.failedAccounts,
-      updatedAccounts: state.queries.updatedAccounts,
-      prefs: state.prefs.local,
-      floatingSidebar: state.prefs.global.floatingSidebar,
-    }),
-    dispatch => bindActionCreators(actions, dispatch),
-  )(SidebarWithData),
-);
+export default connect(
+  state => ({
+    accounts: state.queries.accounts,
+    failedAccounts: state.account.failedAccounts,
+    updatedAccounts: state.queries.updatedAccounts,
+    prefs: state.prefs.local,
+    floatingSidebar: state.prefs.global.floatingSidebar,
+  }),
+  dispatch => bindActionCreators(actions, dispatch),
+)(SidebarWithData);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -10,7 +10,7 @@ import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function ChangePassword() {
-  let history = useHistory();
+  let navigate = useNavigate();
   let [error, setError] = useState(null);
   let [msg, setMessage] = useState(null);
 
@@ -36,7 +36,7 @@ export default function ChangePassword() {
     } else {
       setMessage('Password successfully changed');
       await send('subscribe-sign-in', { password });
-      history.push('/');
+      navigate('/');
     }
   }
 
@@ -86,7 +86,7 @@ export default function ChangePassword() {
             bare
             type="button"
             style={{ fontSize: 15, marginRight: 10 }}
-            onClick={() => history.push('/')}
+            onClick={() => navigate('/')}
           >
             Cancel
           </Button>

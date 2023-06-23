@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Switch, Redirect, Router, Route } from 'react-router-dom';
-
-import { createBrowserHistory } from 'history';
+import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 
 import { colors } from '../../style';
 import tokens from '../../tokens';
+import { ExposeNavigate } from '../../util/router-tools';
 import { View, Text } from '../common';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
@@ -58,9 +57,6 @@ function ManagementApp({
   getUserData,
   loadAllFiles,
 }) {
-  const [history] = useState(createBrowserHistory);
-  window.__history = history;
-
   // runs on mount only
   useEffect(() => {
     // An action may have been triggered from outside, and we don't
@@ -107,7 +103,8 @@ function ManagementApp({
   }
 
   return (
-    <Router history={history}>
+    <BrowserRouter>
+      <ExposeNavigate />
       <View style={{ height: '100%' }}>
         <View
           style={{
@@ -150,25 +147,18 @@ function ManagementApp({
           >
             {userData && files ? (
               <>
-                <Switch>
-                  <Route exact path="/config-server">
-                    <ConfigServer />
-                  </Route>
-                  <Route exact path="/change-password">
-                    <ChangePassword />
-                  </Route>
+                <Routes>
+                  <Route path="/config-server" element={<ConfigServer />} />
+
+                  <Route path="/change-password" element={<ChangePassword />} />
                   {files && files.length > 0 ? (
-                    <Route exact path="/">
-                      <BudgetList />
-                    </Route>
+                    <Route path="/" element={<BudgetList />} />
                   ) : (
-                    <Route exact path="/">
-                      <WelcomeScreen />
-                    </Route>
+                    <Route path="/" element={<WelcomeScreen />} />
                   )}
                   {/* Redirect all other pages to this route */}
-                  <Route path="/" render={() => <Redirect to="/" />} />
-                </Switch>
+                  <Route path="/*" element={<Navigate to="/" />} />
+                </Routes>
 
                 <View
                   style={{
@@ -179,48 +169,44 @@ function ManagementApp({
                     zIndex: 4000,
                   }}
                 >
-                  <Switch>
-                    <Route exact path="/config-server" children={null} />
-                    <Route exact path="/">
-                      <LoggedInUser
-                        hideIfNoServer
-                        style={{ padding: '4px 7px' }}
-                      />
-                    </Route>
-                  </Switch>
+                  <Routes>
+                    <Route path="/config-server" element={null} />
+                    <Route
+                      path="/*"
+                      element={
+                        <LoggedInUser
+                          hideIfNoServer
+                          style={{ padding: '4px 7px' }}
+                        />
+                      }
+                    />
+                  </Routes>
                 </View>
               </>
             ) : (
-              <Switch>
-                <Route exact path="/login">
-                  <Login />
-                </Route>
-                <Route exact path="/error">
-                  <Error />
-                </Route>
-                <Route exact path="/config-server">
-                  <ConfigServer />
-                </Route>
-                <Route exact path="/bootstrap">
-                  <Bootstrap />
-                </Route>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/error" element={<Error />} />
+                <Route path="/config-server" element={<ConfigServer />} />
+                <Route path="/bootstrap" element={<Bootstrap />} />
                 {/* Redirect all other pages to this route */}
-                <Route path="/" render={() => <Redirect to="/bootstrap" />} />
-              </Switch>
+                <Route
+                  path="/*"
+                  element={<Navigate to="/bootstrap" replace />}
+                />
+              </Routes>
             )}
           </View>
         )}
 
-        <Switch>
-          <Route exact path="/config-server" children={null} />
-          <Route path="/">
-            <ServerURL />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path="/config-server" element={null} />
+          <Route path="/*" element={<ServerURL />} />
+        </Routes>
         <Version />
       </View>
-      <Modals history={history} />
-    </Router>
+      <Modals />
+    </BrowserRouter>
   );
 }
 
