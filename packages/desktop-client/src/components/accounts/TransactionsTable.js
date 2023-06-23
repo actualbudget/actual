@@ -236,9 +236,20 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
-const TransactionHeader = memo(
+export const TransactionHeader = memo(
   ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
     let dispatchSelected = useSelectedDispatch();
+    let [field, setField] = useState('');
+    let [arrow, setArrow] = useState('down');
+
+    function onSelect(e){
+      e.currentTarget.innerText === field ? (
+        arrow === 'down' ? setArrow('up') : setArrow('down')
+        ) : (
+        setField(e.currentTarget.innerText),
+        setArrow('down')
+      )
+    }
 
     return (
       <Row
@@ -257,14 +268,14 @@ const TransactionHeader = memo(
           width={20}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
-        <Cell value="Date" width={110} />
-        {showAccount && <Cell value="Account" width="flex" />}
-        <Cell value="Payee" width="flex" />
+        <Cell value="Date" width={110} icon={field === "Date" && arrow} onClick={e => onSelect(e)} />
+        {showAccount && <Cell value="Account" width="flex" icon={field === "Account" && arrow} onClick={e => onSelect(e)} />}
+        <Cell value="Payee" width="flex" icon={field === "Payee" && arrow} onClick={e => onSelect(e)} />
         <Cell value="Notes" width="flex" />
-        {showCategory && <Cell value="Category" width="flex" />}
-        <Cell value="Payment" width={80} textAlign="right" />
-        <Cell value="Deposit" width={80} textAlign="right" />
-        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
+        {showCategory && <Cell value="Category" width="flex" icon={field === "Category" && arrow} onClick={e => onSelect(e)} />}
+        <Cell value="Payment" width={100} textAlign="right" icon={field === "Payment" && arrow} onClick={e => onSelect(e)} />
+        <Cell value="Deposit" width={100} textAlign="right" icon={field === "Deposit" && arrow} onClick={e => onSelect(e)} />
+        {showBalance && <Cell value="Balance" width={88} textAlign="right" icon={field === "Balance" && arrow} onClick={e => onSelect(e)} />}
         {showCleared && <Field width={21} truncate={false} />}
         <Cell value="" width={15 + styles.scrollbarWidth} />
       </Row>
@@ -497,7 +508,7 @@ function CellWithScheduleIcon({ scheduleId, children }) {
   );
 }
 
-const Transaction = memo(function Transaction(props) {
+export const Transaction = memo(function Transaction(props) {
   let {
     transaction: originalTransaction,
     editing,
@@ -1067,7 +1078,7 @@ const Transaction = memo(function Transaction(props) {
   );
 });
 
-function TransactionError({ error, isDeposit, onAddSplit, style }) {
+export function TransactionError({ error, isDeposit, onAddSplit, style }) {
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
