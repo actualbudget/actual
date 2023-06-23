@@ -25,3 +25,4 @@ Content contained on external links is not managed or maintained by the Actual B
 :::
 
 - [Synology NAS](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)
+- [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
