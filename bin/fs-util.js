@@ -5,9 +5,16 @@ module.exports = class FsUtil {
   static async copyFile(src, dest) {
     await fs.copyFile(src, dest);
   }
-  // always makes parents, don't error if exists...
+
   static async rmdir(dir) {
-    await fs.rm(dir, { recursive: true });
+    try {
+      await fs.rm(dir, { recursive: true });
+    } catch(err) {
+      // don't care if doesn't exist
+      if (err.code != 'ENOENT') {
+        throw err;
+      }
+    }
   }
 
   static async mkdir(dir) {
