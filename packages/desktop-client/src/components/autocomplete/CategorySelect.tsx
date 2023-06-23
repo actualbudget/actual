@@ -6,11 +6,6 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import {
-  useCategories,
-  useCategoryGroups,
-} from 'loot-core/src/client/data-hooks/categories';
-
 import Split from '../../icons/v0/Split';
 import { colors } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
@@ -175,29 +170,6 @@ export default function CategoryAutocomplete({
   embedded,
   ...props
 }: CategoryAutocompleteProps) {
-  const catGroups = useCategoryGroups();
-  const catRows = useCategories();
-
-  let groups = catGroups && catGroups.filter(f => f.tombstone === false);
-  let rows =
-    catRows &&
-    catRows
-      .filter(f => f.tombstone === false)
-      .map(r => {
-        return { ...r, cat_group: r.group };
-      });
-
-  if (categoryGroups.length === 0 && groups && rows) {
-    categoryGroups = !groups
-      ? null
-      : groups.map(group => {
-          return {
-            ...group,
-            categories: rows.filter(row => row.cat_group === group.id),
-          };
-        });
-  }
-
   let categorySuggestions = useMemo(
     () =>
       categoryGroups.reduce(
