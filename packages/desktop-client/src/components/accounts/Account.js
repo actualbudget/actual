@@ -351,21 +351,25 @@ function FilterMenuButton({ filters, filterId }) {
       case 'reload-filter':
         setMenuOpen(false);
         break;
+      case 'clear-filter':
+        setMenuOpen(false);
+        break;
       default:
     }
   };
 
   function FilterMenu({ onClose, filterId }) {
-    let filterName =
-      filterId.status === 'saved' ? (
-        filterId.name
-      ) : (
-        <Text>
-          {filterId.name}
-          <br />
-          (modified)
-        </Text>
-      );
+    let filterName = !filterId.id ? (
+      'Not Saved'
+    ) : filterId.status === 'saved' ? (
+      filterId.name
+    ) : (
+      <Text>
+        {filterId.name}
+        <br />
+        (modified)
+      </Text>
+    );
 
     return (
       <MenuTooltip width={200} onClose={onClose}>
@@ -377,16 +381,33 @@ function FilterMenuButton({ filters, filterId }) {
             { type: Menu.label, name: filterName },
             Menu.line,
 
-            ...(filterId.id !== null && filterId.status === 'saved'
+            ...(!filterId.id
               ? [
-                  { name: 'rename-filter', text: 'Rename' },
-                  { name: 'delete-filter', text: 'Delete' },
+                  { name: 'save-filter', text: 'Create new filter' },
+                  { name: 'clear-filter', text: 'Clear all conditions' },
                 ]
               : [
-                  { name: 'update-filter', text: 'Update condtions' },
-                  { name: 'save-filter', text: 'Create new filter' },
-                  { name: 'reload-filter', text: 'Reload' },
-                  { name: 'delete-filter', text: 'Delete' },
+                  ...(filterId.id !== null && filterId.status === 'saved'
+                    ? [
+                        { name: 'rename-filter', text: 'Rename' },
+                        { name: 'delete-filter', text: 'Delete' },
+                        Menu.line,
+                        {
+                          name: 'save-filter',
+                          text: 'Create new filter',
+                          disabled: true,
+                        },
+                        { name: 'clear-filter', text: 'Clear all conditions' },
+                      ]
+                    : [
+                        { name: 'rename-filter', text: 'Rename' },
+                        { name: 'update-filter', text: 'Update condtions' },
+                        { name: 'reload-filter', text: 'Reload' },
+                        { name: 'delete-filter', text: 'Delete' },
+                        Menu.line,
+                        { name: 'save-filter', text: 'Create new filter' },
+                        { name: 'clear-filter', text: 'Clear all conditions' },
+                      ]),
                 ]),
           ]}
         />
@@ -425,30 +446,15 @@ function FilterMenuButton({ filters, filterId }) {
 
   return (
     <View>
-      {filterId.id && (
+      {filters.length > 0 && (
         <Button
           bare
           style={{ marginTop: 4, width: 125 }}
           onClick={() => {
             setMenuOpen(true);
-            setAdding(false);
           }}
         >
-          Edit&nbsp;filter&nbsp;
-          {filterId.status === 'changed' && <Text>*&nbsp;</Text>}
-          <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
-        </Button>
-      )}
-      {filters.length > 0 && !filterId.id && (
-        <Button
-          bare
-          style={{ marginTop: 4, width: 125 }}
-          onClick={() => {
-            setNameOpen(true);
-            setAdding(true);
-          }}
-        >
-          Save&nbsp;filter&nbsp;
+          Saved&nbsp;filters&nbsp;
           <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
         </Button>
       )}
