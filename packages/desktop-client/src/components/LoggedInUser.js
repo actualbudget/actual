@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 
 import { css } from 'glamor';
 
@@ -35,7 +34,7 @@ function LoggedInUser({
 
   async function onChangePassword() {
     await closeBudget();
-    window.__history.push('/change-password');
+    window.__navigate('/change-password');
   }
 
   async function onMenuSelect(type) {
@@ -47,14 +46,14 @@ function LoggedInUser({
         break;
       case 'sign-in':
         await closeBudget();
-        window.__history.push('/login');
+        window.__navigate('/login');
         break;
       case 'sign-out':
         signOut();
         break;
       case 'config-server':
         await closeBudget();
-        window.__history.push('/config-server');
+        window.__navigate('/config-server');
         break;
       default:
     }
@@ -132,4 +131,4 @@ function LoggedInUser({
 export default connect(
   state => ({ userData: state.user.data }),
   actions,
-)(withRouter(LoggedInUser));
+)(LoggedInUser);

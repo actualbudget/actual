@@ -11,7 +11,6 @@ import { View, Text, Modal, ModalButtons, Button, P } from '../common';
 let highlightStyle = { color: colors.p5 };
 
 export default function MergeUnusedPayees({
-  history,
   modalProps,
   payeeIds,
   targetPayeeId,
