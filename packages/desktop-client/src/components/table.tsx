@@ -27,6 +27,8 @@ import { useSelectedItems } from '../hooks/useSelected';
 import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
+import ArrowDown from '../icons/v1/ArrowDown';
+import ArrowUp from '../icons/v1/ArrowUp';
 import Checkmark from '../icons/v1/Checkmark';
 import { styles, colors } from '../style';
 
@@ -43,8 +45,6 @@ import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import format from './spreadsheet/format';
 import SheetValue from './spreadsheet/SheetValue';
-import ArrowDown from '../icons/v1/ArrowDown';
-import ArrowUp from '../icons/v1/ArrowUp';
 
 export const ROW_HEIGHT = 32;
 const TABLE_BACKGROUND_COLOR = colors.n11;
@@ -266,8 +266,12 @@ export function Cell({
             }}
           >
             {formatter ? formatter(value) : value}
-            {icon === "down" && (<ArrowDown width={12} height={12} style={{ marginLeft: 10 }} />)}
-            {icon === "up" && (<ArrowUp width={12} height={12} style={{ marginLeft: 10 }} />)}
+            {icon === 'down' && (
+              <ArrowDown width={12} height={12} style={{ marginLeft: 10 }} />
+            )}
+            {icon === 'up' && (
+              <ArrowUp width={12} height={12} style={{ marginLeft: 10 }} />
+            )}
           </Text>
         </View>
       )}

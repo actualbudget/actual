@@ -242,13 +242,12 @@ export const TransactionHeader = memo(
     let [field, setField] = useState('');
     let [arrow, setArrow] = useState('down');
 
-    function onSelect(e){
-      e.currentTarget.innerText === field ? (
-        arrow === 'down' ? setArrow('up') : setArrow('down')
-        ) : (
-        setField(e.currentTarget.innerText),
-        setArrow('down')
-      )
+    function onSelect(e) {
+      return e.currentTarget.innerText === field
+        ? arrow === 'down'
+          ? setArrow('up')
+          : setArrow('down')
+        : (setField(e.currentTarget.innerText), setArrow('down'));
     }
 
     return (
@@ -268,14 +267,58 @@ export const TransactionHeader = memo(
           width={20}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
-        <Cell value="Date" width={110} icon={field === "Date" && arrow} onClick={e => onSelect(e)} />
-        {showAccount && <Cell value="Account" width="flex" icon={field === "Account" && arrow} onClick={e => onSelect(e)} />}
-        <Cell value="Payee" width="flex" icon={field === "Payee" && arrow} onClick={e => onSelect(e)} />
+        <Cell
+          value="Date"
+          width={110}
+          icon={field === 'Date' && arrow}
+          onClick={e => onSelect(e)}
+        />
+        {showAccount && (
+          <Cell
+            value="Account"
+            width="flex"
+            icon={field === 'Account' && arrow}
+            onClick={e => onSelect(e)}
+          />
+        )}
+        <Cell
+          value="Payee"
+          width="flex"
+          icon={field === 'Payee' && arrow}
+          onClick={e => onSelect(e)}
+        />
         <Cell value="Notes" width="flex" />
-        {showCategory && <Cell value="Category" width="flex" icon={field === "Category" && arrow} onClick={e => onSelect(e)} />}
-        <Cell value="Payment" width={100} textAlign="right" icon={field === "Payment" && arrow} onClick={e => onSelect(e)} />
-        <Cell value="Deposit" width={100} textAlign="right" icon={field === "Deposit" && arrow} onClick={e => onSelect(e)} />
-        {showBalance && <Cell value="Balance" width={88} textAlign="right" icon={field === "Balance" && arrow} onClick={e => onSelect(e)} />}
+        {showCategory && (
+          <Cell
+            value="Category"
+            width="flex"
+            icon={field === 'Category' && arrow}
+            onClick={e => onSelect(e)}
+          />
+        )}
+        <Cell
+          value="Payment"
+          width={80}
+          textAlign="right"
+          icon={field === 'Payment' && arrow}
+          onClick={e => onSelect(e)}
+        />
+        <Cell
+          value="Deposit"
+          width={80}
+          textAlign="right"
+          icon={field === 'Deposit' && arrow}
+          onClick={e => onSelect(e)}
+        />
+        {showBalance && (
+          <Cell
+            value="Balance"
+            width={88}
+            textAlign="right"
+            icon={field === 'Balance' && arrow}
+            onClick={e => onSelect(e)}
+          />
+        )}
         {showCleared && <Field width={21} truncate={false} />}
         <Cell value="" width={15 + styles.scrollbarWidth} />
       </Row>
