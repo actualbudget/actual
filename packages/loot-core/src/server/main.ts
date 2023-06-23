@@ -1475,14 +1475,12 @@ handlers['save-global-prefs'] = async function (prefs) {
 handlers['load-global-prefs'] = async function () {
   let [
     [, floatingSidebar],
-    [, seenTutorial],
     [, maxMonths],
     [, autoUpdate],
     [, documentDir],
     [, encryptKey],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
-    'seen-tutorial',
     'max-months',
     'auto-update',
     'document-dir',
@@ -1490,7 +1488,6 @@ handlers['load-global-prefs'] = async function () {
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
-    seenTutorial: seenTutorial === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
@@ -2039,11 +2036,6 @@ handlers['create-budget'] = async function ({
   }
 
   return {};
-};
-
-handlers['set-tutorial-seen'] = async function () {
-  await asyncStorage.setItem('seen-tutorial', 'true');
-  return 'ok';
 };
 
 handlers['import-budget'] = async function ({ filepath, type }) {
