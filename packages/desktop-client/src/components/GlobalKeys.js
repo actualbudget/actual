@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
 
 export default function GlobalKeys() {
-  let history = useHistory();
+  let navigate = useNavigate();
   useEffect(() => {
     const handleKeys = e => {
       if (Platform.isBrowser) {
@@ -14,17 +14,17 @@ export default function GlobalKeys() {
       if (e.metaKey) {
         switch (e.key) {
           case '1':
-            history.push('/budget');
+            navigate('/budget');
             break;
           case '2':
-            history.push('/reports');
+            navigate('/reports');
             break;
           case '3':
-            history.push('/accounts');
+            navigate('/accounts');
             break;
           case ',':
             if (Platform.OS === 'mac') {
-              history.push('/settings');
+              navigate('/settings');
             }
             break;
           default:

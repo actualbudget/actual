@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -10,18 +10,18 @@ import DisplayId from '../util/DisplayId';
 
 export default function PostsOfflineNotification() {
   let location = useLocation();
-  let history = useHistory();
+  let navigate = useNavigate();
 
   let payees = (location.state && location.state.payees) || [];
   let plural = payees.length > 1;
 
   function onClose() {
-    history.goBack();
+    navigate(-1);
   }
 
   async function onPost() {
     await send('schedule/force-run-service');
-    history.goBack();
+    navigate(-1);
   }
 
   return (

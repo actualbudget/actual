@@ -13,8 +13,7 @@ import React, {
   createElement,
   cloneElement,
 } from 'react';
-import type { RouteComponentProps } from 'react-router';
-import { Route, NavLink, withRouter, useRouteMatch } from 'react-router-dom';
+import { NavLink, useMatch, useNavigate } from 'react-router-dom';
 
 import {
   ListboxInput,
@@ -156,7 +155,6 @@ export function Link({ style, children, ...nativeProps }: LinkProps) {
 
 type AnchorLinkProps = {
   to: string;
-  exact: boolean;
   style?: CSSProperties;
   activeStyle?: CSSProperties;
   children?: ReactNode;
@@ -164,17 +162,15 @@ type AnchorLinkProps = {
 
 export function AnchorLink({
   to,
-  exact,
   style,
   activeStyle,
   children,
 }: AnchorLinkProps) {
-  let match = useRouteMatch({ path: to, exact: true });
+  let match = useMatch({ path: to });
 
   return (
     <NavLink
       to={to}
-      exact={exact}
       {...css([styles.smallText, style, match ? activeStyle : null])}
     >
       {children}
@@ -221,39 +217,32 @@ export const ExternalLink = forwardRef<HTMLElement, ExternalLinkProps>(
   },
 );
 
-type ButtonLinkProps = ComponentProps<typeof Button> &
-  RouteComponentProps & {
-    to: string;
-    activeStyle?: CSSProperties;
-  };
-function ButtonLink_({
-  history,
-  staticContext,
+type ButtonLinkProps = ComponentProps<typeof Button> & {
+  to: string;
+  activeStyle?: CSSProperties;
+};
+export function ButtonLink({
   to,
   style,
   activeStyle,
-  match,
-  location,
   ...props
 }: ButtonLinkProps) {
+  const navigate = useNavigate();
+  const match = useMatch({ path: to });
   return (
-    <Route
-      path={to}
-      children={({ match }) => (
-        <Button
-          style={[style, match ? activeStyle : null]}
-          {...props}
-          onClick={e => {
-            props.onClick && props.onClick(e);
-            history.push(to);
-          }}
-        />
-      )}
+    <Button
+      style={{
+        ...style,
+        ...(match ? activeStyle : {}),
+      }}
+      {...props}
+      onClick={e => {
+        props.onClick && props.onClick(e);
+        navigate(to);
+      }}
     />
   );
 }
-
-export const ButtonLink = withRouter(ButtonLink_);
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
   leftContent: ReactNode;

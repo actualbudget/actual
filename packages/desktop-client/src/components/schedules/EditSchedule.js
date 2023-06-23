@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
@@ -81,7 +81,7 @@ export default function ScheduleDetails() {
   let { id, initialFields } = useParams();
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
-  let history = useHistory();
+  let navigate = useNavigate();
   let globalDispatch = useDispatch();
   let dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
@@ -379,7 +379,7 @@ export default function ScheduleDetails() {
       if (adding) {
         await onLinkTransactions([...selectedInst.items], res.data);
       }
-      history.goBack();
+      navigate(-1);
     }
   }
 
@@ -769,7 +769,7 @@ export default function ScheduleDetails() {
         style={{ marginTop: 20 }}
       >
         {state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
-        <Button style={{ marginRight: 10 }} onClick={() => history.goBack()}>
+        <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
           Cancel
         </Button>
         <Button primary onClick={onSave}>

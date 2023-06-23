@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -11,7 +11,7 @@ import { SchedulesTable } from './SchedulesTable';
 
 export default function ScheduleLink() {
   let location = useLocation();
-  let history = useHistory();
+  let navigate = useNavigate();
   let scheduleData = useSchedules(
     useCallback(query => query.filter({ completed: false }), []),
   );
@@ -32,7 +32,7 @@ export default function ScheduleLink() {
         updated: ids.map(id => ({ id, schedule: scheduleId })),
       });
     }
-    history.goBack();
+    navigate(-1);
   }
 
   return (
