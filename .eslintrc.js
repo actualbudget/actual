@@ -70,6 +70,7 @@ module.exports = {
     ],
     'import/no-useless-path-segments': 'error',
     'import/no-duplicates': ['error', { 'prefer-inline': true }],
+    'import/no-unused-modules': ['error', { 'unusedExports': true }],
     'import/order': [
       'error',
       {
@@ -166,5 +167,33 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['./packages/loot-core/src/**/*'],
+      rules: {
+        // defining 'src' to check all packages is slow, so only do it for loot-core
+        'import/no-unused-modules': ['error', { 'unusedExports': true, 'src': ['../**/*.{js,ts,tsx}'] }],
+      }
+    },
+    {
+      files: [
+        '**/icons/**/*.js', 
+        '**/mocks/**/*.{js,ts,tsx}', 
+        '**/{mocks,__mocks__}/*.{js,ts,tsx}', 
+        // can't correctly resolve usages
+        '**/*.{testing,electron,browser,web,api}.ts',
+        'packages/loot-core/src/server/main.ts'
+      ],
+      rules: { 'import/no-unused-modules': 'off' }
+    },
   ],
+  settings: {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  }
 };
