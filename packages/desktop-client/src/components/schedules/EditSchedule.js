@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import { colors, colorsm } from '../../style';
+import { colorsm } from '../../style';
 import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -676,19 +676,20 @@ export default function ScheduleDetails() {
       <View style={{ marginTop: 30, flex: 1 }}>
         <SelectedProvider instance={selectedInst}>
           {adding ? (
-            <View style={{ flexDirection: 'row', padding: '5px 0' }}>
-              <Text style={{ color: colorsm.tabletext }}>
-                These transactions match this schedule:
-              </Text>
+            <View
+              style={{
+                color: colorsm.tableText,
+                flexDirection: 'row',
+                padding: '5px 0',
+              }}
+            >
+              <Text>These transactions match this schedule:</Text>
               <View style={{ flex: 1 }} />
-              <Text style={{ color: colorsm.tableText }}>
-                Select transactions to link on save
-              </Text>
+              <Text>Select transactions to link on save</Text>
             </View>
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Button
-                bare
                 style={{
                   color:
                     state.transactionsMode === 'linked'
@@ -702,7 +703,6 @@ export default function ScheduleDetails() {
                 Linked transactions
               </Button>{' '}
               <Button
-                bare
                 style={{
                   color:
                     state.transactionsMode === 'matched'
@@ -749,7 +749,7 @@ export default function ScheduleDetails() {
                   }}
                 >
                   {state.error ? (
-                    <Text style={{ color: colors.r4 }}>
+                    <Text style={{ color: colorsm.errorText }}>
                       Could not search: {state.error}
                     </Text>
                   ) : (
@@ -761,7 +761,7 @@ export default function ScheduleDetails() {
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
             style={{
-              border: '1px solid ' + colors.border,
+              border: '1px solid ' + colorsm.tableBorder,
               borderRadius: 4,
               overflow: 'hidden',
               marginTop: 5,
@@ -776,7 +776,9 @@ export default function ScheduleDetails() {
         align="center"
         style={{ marginTop: 20 }}
       >
-        {state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
+        {state.error && (
+          <Text style={{ color: colorsm.errorText }}>{state.error}</Text>
+        )}
         <Button style={{ marginRight: 10 }} onClick={() => history.goBack()}>
           Cancel
         </Button>

@@ -126,6 +126,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
           borderBottomWidth: borderColor ? 1 : 0,
           borderColor,
           backgroundColor,
+          color: colorsm.tableText,
         },
         styles.smallText,
         style,
@@ -587,6 +588,9 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             alignItems: 'center',
             cursor: 'default',
             transition: 'box-shadow .15s',
+            backgroundColor: colorsm.buttonPositiveBackground,
+            border: '1px solid ' + colorsm.buttonPositiveBorder,
+            color: colorsm.buttonPositiveText,
             ':focus': {
               outline: 0,
               boxShadow: `0 0 0 3px white, 0 0 0 5px ${colorsm.buttonShadow}`,
@@ -655,9 +659,11 @@ export function SelectCell({
                 boxShadow: '0 1px 2px ' + colorsm.buttonShadow,
               },
             },
-            selected && {
-              backgroundColor: colorsm.tableTextEditingBackground,
-              borderColor: colorsm.tableBorderSelected,
+            {
+              backgroundColor: selected
+                ? colorsm.tableTextEditingBackground
+                : colorsm.tableBackground,
+              borderColor: colorsm.tableBorder,
             },
           ]}
           onEdit={onEdit}

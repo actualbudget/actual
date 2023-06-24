@@ -19,7 +19,7 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     <View
       {...css([
         {
-          backgroundColor: colorsm.tableBackground,
+          backgroundColor: colorsm.tableHeaderBackground,
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,
@@ -85,7 +85,6 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       style={{
         flexShrink: 0,
         alignSelf: 'flex-start',
-        color: colorsm.buttonPositiveText,
         marginBottom: 25,
       }}
     >

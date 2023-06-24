@@ -342,13 +342,13 @@ export function Search({
       onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
       style={{
         width,
-        borderColor: isInModal ? null : 'transparent',
-        backgroundColor: isInModal ? null : colorsm.searchBackground,
+        borderColor: isInModal ? null : colorsm.formInputBorder,
+        backgroundColor: isInModal ? null : colorsm.formInputBackground,
         ':focus': isInModal
           ? null
           : {
-              backgroundColor: colorsm.searchBackgroundFocus,
-              '::placeholder': { color: colorsm.searchTextFocus },
+              backgroundColor: colorsm.formInputBackground,
+              '::placeholder': { color: colorsm.formInputTextPlaceholder },
             },
       }}
     />
@@ -421,13 +421,27 @@ export function CustomSelect({
           />
         }
       />
-      <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
+      <ListboxPopover
+        {...css({
+          zIndex: 10000,
+          outline: 0,
+          backgroundColor: colorsm.menuBackground,
+        })}
+      >
         <ListboxList>
           {options.map(([value, label]) => (
             <ListboxOption
               key={value}
               value={value}
               disabled={disabledKeys.includes(value)}
+              {...css({
+                backgroundColor: colorsm.menuItemBackground,
+                color: colorsm.menuItemText,
+                ':hover': {
+                  backgroundColor: colorsm.menuItemBackgroundHover,
+                  color: colorsm.menuItemTextHover,
+                },
+              })}
             >
               {label}
             </ListboxOption>

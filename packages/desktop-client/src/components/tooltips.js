@@ -301,6 +301,8 @@ export class Tooltip extends Component {
       borderRadius: 4,
       backgroundColor: colorsm.tooltipBackground,
       color: colorsm.tableText,
+
+      border: '1px solid ' + colorsm.tooltipBorder,
       // opacity: 0,
       // transition: 'transform .1s, opacity .1s',
       // transitionTimingFunction: 'ease-out'

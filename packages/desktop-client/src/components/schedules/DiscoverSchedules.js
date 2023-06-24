@@ -10,7 +10,7 @@ import useSelected, {
   useSelectedItems,
   SelectedProvider,
 } from '../../hooks/useSelected';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { View, Stack, ButtonWithLoading, P } from '../common';
 import { Page, usePageType } from '../Page';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
@@ -34,16 +34,19 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        backgroundColor="transparent"
         onClick={e => {
           dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
-        borderColor={selected ? colors.b8 : colors.border}
+        borderColor={
+          selected ? colorsm.tableBorderSelected : colorsm.tableBorder
+        }
         style={{
           cursor: 'pointer',
-          backgroundColor: selected ? colors.selected : 'white',
+          backgroundColor: selected
+            ? colorsm.tableRowBackgroundHighlight
+            : colorsm.tableBackground,
           ':hover': {
-            backgroundColor: selected ? colors.selected : colors.hover,
+            backgroundColor: colorsm.tableRowBackgroundHighlight,
           },
         }}
       >

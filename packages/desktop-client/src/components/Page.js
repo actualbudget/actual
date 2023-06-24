@@ -51,6 +51,7 @@ export function PageTitle({ name, style }) {
     <Text
       style={[
         {
+          color: colorsm.pageText,
           fontSize: 25,
           fontWeight: 500,
           marginBottom: 15,
@@ -98,15 +99,16 @@ export function Page({ title, modalSize, children, titleStyle }) {
         }}
       />
       <View
-        style={
+        style={[
+          { color: colorsm.pageText },
           isNarrowWidth
             ? { overflowY: 'auto', padding: HORIZONTAL_PADDING }
             : {
                 paddingLeft: HORIZONTAL_PADDING,
                 paddingRight: HORIZONTAL_PADDING,
                 flex: 1,
-              }
-        }
+              },
+        ]}
       >
         {children}
       </View>

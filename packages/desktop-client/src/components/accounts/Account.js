@@ -748,7 +748,13 @@ const AccountHeader = memo(
         <View
           style={[styles.pageContent, { paddingBottom: 10, flexShrink: 0 }]}
         >
-          <View style={{ marginTop: 2, alignItems: 'flex-start' }}>
+          <View
+            style={{
+              marginTop: 2,
+              alignItems: 'flex-start',
+              color: colorsm.pageText,
+            }}
+          >
             <View>
               {editingName ? (
                 <InitialFocus>
@@ -908,14 +914,13 @@ const AccountHeader = memo(
               }
               inputRef={searchInput}
               value={search}
-              placeholder="Search"
+              placeholder="Search..."
               onKeyDown={e => {
                 if (e.key === 'Escape') onSearch('');
               }}
               getStyle={focused => [
                 {
                   backgroundColor: 'transparent',
-                  borderWidth: 0,
                   boxShadow: 'none',
                   transition: 'color .15s',
                   '& input::placeholder': {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useAllFeatureFlags } from '../../hooks/useFeatureFlag';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { Link, Text, View } from '../common';
 import { Checkbox } from '../forms';
 
@@ -20,7 +20,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             <label
               style={{
                 display: 'flex',
-                color: disabled ? colors.n5 : 'inherit',
+                color: disabled ? colorsm.pageTextSubdued : 'inherit',
               }}
             >
               <Checkbox
@@ -34,7 +34,13 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
               <View>
                 Budget mode toggle
                 {disabled && (
-                  <Text style={{ color: colors.r3, fontWeight: 500 }}>
+                  <Text
+                    style={{
+                      backgroundColor: colorsm.errorBackground,
+                      color: colorsm.errorText,
+                      fontWeight: 500,
+                    }}
+                  >
                     Switch to a rollover budget before turning off this feature
                   </Text>
                 )}
@@ -70,7 +76,6 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             style={{
               flexShrink: 0,
               alignSelf: 'flex-start',
-              color: colors.p4,
             }}
           >
             I understand the risks, show experimental features

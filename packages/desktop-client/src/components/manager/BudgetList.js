@@ -157,14 +157,15 @@ function File({ file, onSelect, onDelete }) {
           ...styles.shadow,
           margin: 10,
           padding: '12px 15px',
-          backgroundColor: colorsm.tableBackground,
-          color: colorsm.tableText,
+          backgroundColor: colorsm.buttonNeutralBackground,
+          color: colorsm.buttonNeutralText,
+          border: '1px solid' + colorsm.buttonNeutralBorder,
           borderRadius: 6,
           flexShrink: 0,
           cursor: 'pointer',
           ':hover': {
-            backgroundColor: colorsm.tableRowBackgroundHighlight,
-            color: colorsm.tableRowBackgroundHighlightText,
+            backgroundColor: colorsm.buttonNeutralBackgroundHover,
+            color: colorsm.buttonNeutralTextHover,
           },
         },
       ]}
@@ -335,7 +336,7 @@ function BudgetList({
           bare
           style={{
             marginLeft: 10,
-            color: colorsm.tableText,
+            color: colorsm.pageText,
           }}
           onClick={e => {
             e.preventDefault();

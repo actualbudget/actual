@@ -61,9 +61,13 @@ function About() {
           </Text>
         )}
         <Text>
-          <a href="https://actualbudget.github.io/docs/Release-Notes">
+          <ExternalLink
+            asAnchor={true}
+            href="https://actualbudget.github.io/docs/Release-Notes"
+            style={{ color: 'inherit' }}
+          >
             Release Notes
-          </a>
+          </ExternalLink>
         </Text>
       </View>
     </Setting>

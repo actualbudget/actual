@@ -101,7 +101,7 @@ export function ScheduleAmountCell({ amount, op }) {
       <Text
         style={{
           flex: 1,
-          color: num > 0 ? colorsm.noticeText : null,
+          color: colorsm.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -223,7 +223,7 @@ export function SchedulesTable({
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
             {item._date && item._date.frequency && (
-              <Check style={{ width: 13, height: 13 }} />
+              <Check style={{ width: 13, height: 13, color: 'inherit' }} />
             )}
           </Field>
         )}

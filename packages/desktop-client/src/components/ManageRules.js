@@ -30,7 +30,7 @@ import useSelected, {
   SelectedProvider,
 } from '../hooks/useSelected';
 import ArrowRight from '../icons/v0/RightArrow2';
-import { colors } from '../style';
+import { colorsm } from '../style';
 
 import { View, Text, Button, Stack, ExternalLink, Input } from './common';
 import {
@@ -136,11 +136,15 @@ export function Value({
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <Text style={{ color: colors.p4 }}>(empty)</Text>;
+      return <Text style={{ color: colorsm.pageTextPositive }}>(empty)</Text>;
     } else if (value.length === 1) {
       return (
         <Text>
-          [<Text style={{ color: colors.p4 }}>{formatValue(value[0])}</Text>]
+          [
+          <Text style={{ color: colorsm.pageTextPositive }}>
+            {formatValue(value[0])}
+          </Text>
+          ]
         </Text>
       );
     }
@@ -151,10 +155,14 @@ export function Value({
     }
     let numHidden = value.length - displayed.length;
     return (
-      <Text style={{ color: colors.n3 }}>
+      <Text style={{ color: colorsm.pageText }}>
         [
         {displayed.map((v, i) => {
-          let text = <Text style={{ color: colors.p4 }}>{formatValue(v)}</Text>;
+          let text = (
+            <Text style={{ color: colorsm.pageTextPositive }}>
+              {formatValue(v)}
+            </Text>
+          );
           let spacing;
           if (inline) {
             spacing = i !== 0 ? ' ' : '';
@@ -177,14 +185,14 @@ export function Value({
           );
         })}
         {numHidden > 0 && (
-          <Text style={{ color: colors.p4 }}>
+          <Text style={{ color: colorsm.pageTextPositive }}>
             &nbsp;&nbsp;
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a
               href="#"
               onClick={onExpand}
               {...css({
-                color: colors.p4,
+                color: colorsm.pageTextPositive,
                 textDecoration: 'none',
                 ':hover': { textDecoration: 'underline' },
               })}
@@ -201,12 +209,21 @@ export function Value({
     // An "in between" type
     return (
       <Text>
-        <Text style={{ color: colors.p4 }}>{formatValue(value.num1)}</Text> and{' '}
-        <Text style={{ color: colors.p4 }}>{formatValue(value.num2)}</Text>
+        <Text style={{ color: colorsm.pageTextPositive }}>
+          {formatValue(value.num1)}
+        </Text>{' '}
+        and{' '}
+        <Text style={{ color: colorsm.pageTextPositive }}>
+          {formatValue(value.num2)}
+        </Text>
       </Text>
     );
   } else {
-    return <Text style={{ color: colors.p4 }}>{formatValue(value)}</Text>;
+    return (
+      <Text style={{ color: colorsm.pageTextPositive }}>
+        {formatValue(value)}
+      </Text>
+    );
   }
 }
 
@@ -224,7 +241,7 @@ export function ConditionExpression({
         {
           display: 'block',
           maxWidth: '100%',
-          backgroundColor: colors.n10,
+          backgroundColor: colorsm.pageBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -234,9 +251,11 @@ export function ConditionExpression({
         style,
       ]}
     >
-      {prefix && <Text style={{ color: colors.n3 }}>{prefix} </Text>}
-      <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
-      <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+      {prefix && <Text style={{ color: colorsm.pageText }}>{prefix} </Text>}
+      <Text style={{ color: colorsm.pageTextPositive }}>
+        {mapField(field, options)}
+      </Text>{' '}
+      <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
       <Value value={value} field={field} />
     </View>
   );
@@ -272,7 +291,7 @@ export function ActionExpression({ field, op, value, options, style }) {
         {
           display: 'block',
           maxWidth: '100%',
-          backgroundColor: colors.n10,
+          backgroundColor: colorsm.pageBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -284,14 +303,16 @@ export function ActionExpression({ field, op, value, options, style }) {
     >
       {op === 'set' ? (
         <>
-          <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
-          <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
-          <Text style={{ color: colors.n3 }}>to </Text>
+          <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
+          <Text style={{ color: colorsm.pageTextPositive }}>
+            {mapField(field, options)}
+          </Text>{' '}
+          <Text style={{ color: colorsm.pageText }}>to </Text>
           <Value value={value} field={field} />
         </>
       ) : op === 'link-schedule' ? (
         <>
-          <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+          <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
           <ScheduleValue value={value} />
         </>
       ) : null}
@@ -311,7 +332,7 @@ let Rule = memo(
     onEditRule,
   }) => {
     let dispatchSelected = useSelectedDispatch();
-    let borderColor = selected ? colors.b8 : colors.border;
+    let borderColor = selected ? colorsm.tableBorderSelected : 'none';
     let backgroundFocus = hovered || focusedField === 'select';
 
     return (
@@ -319,7 +340,11 @@ let Rule = memo(
         height="auto"
         borderColor={borderColor}
         backgroundColor={
-          selected ? colors.selected : backgroundFocus ? colors.hover : 'white'
+          selected
+            ? colorsm.tableRowBackgroundHighlight
+            : backgroundFocus
+            ? colorsm.tableBackgroundHover
+            : colorsm.tableBackground
         }
         style={{ fontSize: 13, zIndex: editing || selected ? 101 : 'auto' }}
         collapsed="true"
@@ -336,14 +361,17 @@ let Rule = memo(
           selected={selected}
         />
 
-        <Cell name="stage" width={50} plain style={{ color: colors.n5 }}>
+        <Cell
+          name="stage"
+          width={50}
+          plain
+          style={{ color: colorsm.tableText }}
+        >
           {rule.stage && (
             <View
               style={{
                 alignSelf: 'flex-start',
                 margin: 5,
-                backgroundColor: colors.b10,
-                color: colors.b1,
                 borderRadius: 4,
                 padding: '3px 5px',
               }}
@@ -353,7 +381,13 @@ let Rule = memo(
           )}
         </Cell>
 
-        <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
+        <Field
+          width="flex"
+          style={{
+            padding: '15px 0',
+          }}
+          truncate={false}
+        >
           <Stack direction="row" align="center">
             <View
               style={{ flex: 1, alignItems: 'flex-start' }}
@@ -367,13 +401,21 @@ let Rule = memo(
                   value={cond.value}
                   options={cond.options}
                   prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
-                  style={i !== 0 && { marginTop: 3 }}
+                  style={
+                    (i !== 0 && { marginTop: 3 },
+                    {
+                      backgroundColor: colorsm.tableHeaderBackground,
+                    })
+                  }
                 />
               ))}
             </View>
 
             <Text>
-              <ArrowRight color={colors.n4} style={{ width: 12, height: 12 }} />
+              <ArrowRight
+                color={colorsm.tableText}
+                style={{ width: 12, height: 12 }}
+              />
             </Text>
 
             <View
@@ -387,7 +429,12 @@ let Rule = memo(
                   op={action.op}
                   value={action.value}
                   options={action.options}
-                  style={i !== 0 && { marginTop: 3 }}
+                  style={
+                    (i !== 0 && { marginTop: 3 },
+                    {
+                      backgroundColor: colorsm.tableHeaderBackground,
+                    })
+                  }
                 />
               ))}
             </View>
@@ -749,7 +796,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         >
           <View
             style={{
-              color: colors.n4,
+              color: colorsm.pageText,
               flexDirection: 'row',
               alignItems: 'center',
               width: '50%',
@@ -760,7 +807,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
               <ExternalLink
                 asAnchor={true}
                 href="https://actualbudget.github.io/docs/Budgeting/rules/"
-                style={{ color: colors.n4 }}
+                style={{ color: colorsm.pageText }}
               >
                 Learn more
               </ExternalLink>
@@ -773,17 +820,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             onChange={e => {
               setFilter(e.target.value);
               navigator.onEdit(null);
-            }}
-            style={{
-              width: 350,
-              borderColor: isModal ? null : 'transparent',
-              backgroundColor: isModal ? null : colors.n11,
-              ':focus': isModal
-                ? null
-                : {
-                    backgroundColor: 'white',
-                    '::placeholder': { color: colors.n8 },
-                  },
             }}
           />
         </View>
@@ -811,7 +847,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           style={{
             paddingBlock: 15,
             paddingInline: isModal ? 13 : 0,
-            borderTop: isModal && '1px solid ' + colors.border,
+            borderTop: isModal && '1px solid ' + colorsm.tableBorder,
             flexShrink: 0,
           }}
         >

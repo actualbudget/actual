@@ -40,15 +40,38 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     hoveredStyle = [
-      bare
-        ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
-        : { ...styles.shadow },
+      {
+        ...styles.shadow,
+        border: bare
+          ? null
+          : '1px solid ' +
+            (primary
+              ? colorsm.buttonPositiveBorder
+              : disabled
+              ? colorsm.buttonDisabledBorder
+              : colorsm.buttonNeutralBorder),
+        color: bare
+          ? null
+          : primary
+          ? colorsm.buttonPositiveTextHover
+          : disabled
+          ? colorsm.buttonDisabledTextHover
+          : colorsm.buttonNeutralTextHover,
+        backgroundColor: bare
+          ? 'inherit'
+          : primary
+          ? colorsm.buttonPositiveBackgroundHover
+          : disabled
+          ? colorsm.buttonDisabledBackgroundHover
+          : colorsm.buttonNeutralBackgroundHover,
+      },
       hoveredStyle,
     ];
     activeStyle = [
       bare
         ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
         : {
+            border: colorsm.buttonNeutralBorder,
             transform: bounce && 'translateY(1px)',
             boxShadow:
               !bare &&
@@ -86,7 +109,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 ? colorsm.buttonDisabledBorder
                 : colorsm.buttonPositiveBorder
               : colorsm.buttonNeutralBorder),
-        color: primary
+        color: bare
+          ? 'inherit'
+          : primary
           ? colorsm.buttonPositiveText
           : disabled
           ? colorsm.buttonDisabledText

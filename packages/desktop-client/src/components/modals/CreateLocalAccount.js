@@ -4,7 +4,7 @@ import { Formik } from 'formik';
 
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import {
   View,
   Modal,
@@ -15,13 +15,15 @@ import {
   FormError,
   InitialFocus,
   Text,
+  ExternalLink,
 } from '../common';
+import { Checkbox } from '../forms';
 
 function CreateLocalAccount({ modalProps, actions, history }) {
   return (
     <Modal title="Create Local Account" {...modalProps} showBack={false}>
       {() => (
-        <View>
+        <View style={{ color: colorsm.pageText }}>
           <Formik
             validateOnChange={false}
             initialValues={{ name: '', balance: '0' }}
@@ -93,7 +95,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                       }}
                       htmlFor="offbudget"
                     >
-                      <input
+                      <Checkbox
                         id="offbudget"
                         name="offbudget"
                         type="checkbox"
@@ -107,23 +109,20 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                       style={{
                         textAlign: 'right',
                         fontSize: '0.7em',
-                        color: colors.n5,
                         marginTop: 3,
                       }}
                     >
                       <Text>
                         This cannot be changed later. <br /> {'\n'}
                         See{' '}
-                        <a
+                        <ExternalLink
+                          asAnchor={true}
                           href="https://actualbudget.github.io/docs/Accounts/overview/#off-budget-accounts"
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{
-                            color: colors.n5,
-                          }}
                         >
                           Accounts Overview
-                        </a>{' '}
+                        </ExternalLink>{' '}
                         for more information.
                       </Text>
                     </div>

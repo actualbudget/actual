@@ -47,7 +47,10 @@ const Input = ({
             border: '1px solid ' + colorsm.formInputBorderSelected,
             boxShadow: '0 1px 1px ' + colorsm.formInputShadowSelected,
           },
-          '::placeholder': { color: colorsm.formInputTextPlaceholder },
+          '::placeholder': {
+            color: colorsm.formInputTextPlaceholder,
+            border: '1px solid ' + colorsm.formInputBorder,
+          },
           '::selection': {
             color: colorsm.formInputTextSelection,
             backgroundColor: colorsm.formInputBackgroundSelected,

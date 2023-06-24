@@ -242,7 +242,7 @@ export const TransactionHeader = memo(
 
     return (
       <Row
-        backgroundColor={colorsm.tableBackground}
+        backgroundColor={colorsm.tableHeaderBackground}
         style={{
           fontWeight: 300,
           zIndex: 200,
@@ -335,6 +335,7 @@ function StatusCell({
         : selected
         ? colorsm.tableTextSelected
         : colorsm.tableBorder,
+    backgroundColor: colorsm.tableBackground,
   };
 
   function onSelect() {
@@ -361,6 +362,7 @@ function StatusCell({
               border: '1px solid ' + props.color,
               boxShadow: `0 1px 2px ${props.color}`,
             },
+            backgroundColor: props.backgroundColor,
             cursor: isClearedField ? 'pointer' : 'default',
           },
 
