@@ -433,7 +433,7 @@ function onApplySync(oldValues, newValues) {
 // This is the service that move schedules forward automatically and
 // posts transactions
 
-async function postTransactionForSchedule({ id }) {
+async function postTransactionForSchedule({ id }: { id: string }) {
   let { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   let schedule = data[0];
   if (schedule == null || schedule._account == null) {

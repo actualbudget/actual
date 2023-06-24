@@ -82,11 +82,16 @@ export function withUndo<T>(
   );
 }
 
+// for some reason `void` is not inferred properly without this overload
+export function undoable<Args extends unknown[]>(
+  func: (...args: Args) => Promise<void>,
+): (...args: Args) => Promise<void>;
 export function undoable<
   Args extends unknown[],
   Return extends Promise<unknown>,
->(func: (...args: Args) => Return) {
-  return (...args: Args) => {
+>(func: (...args: Args) => Return): (...args: Args) => Return;
+export function undoable(func: (...args: unknown[]) => Promise<unknown>) {
+  return (...args: unknown[]) => {
     return withUndo(() => {
       return func(...args);
     });
