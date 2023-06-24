@@ -1,4 +1,9 @@
-import React, { type ReactElement, useEffect, useMemo } from 'react';
+import React, {
+  type ReactElement,
+  cloneElement,
+  useEffect,
+  useMemo,
+} from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
@@ -11,6 +16,7 @@ import {
   BrowserRouter,
   useLocation,
   useHref,
+  useMatch,
 } from 'react-router-dom';
 
 import hotkeys from 'hotkeys-js';
@@ -62,6 +68,22 @@ function NarrowNotSupported({
   return isNarrowWidth ? null : children;
 }
 
+// Always rendered, either visible or hidden, whether they match the route or not
+// To prevent re-processing all data when switching back to a common, data-heavy route
+function PersistentRoute({ element, path }) {
+  const match = useMatch(path);
+  return (
+    <View
+      style={{
+        flex: 1,
+        display: match ? 'flex' : 'none',
+      }}
+    >
+      {cloneElement(element, match)}
+    </View>
+  );
+}
+
 function StackedRoutesInner({ location }) {
   return (
     <Routes location={location}>
@@ -77,7 +99,10 @@ function StackedRoutesInner({ location }) {
         }
       />
 
-      <Route path="/budget" element={<NarrowAlternate name="Budget" />} />
+      <PersistentRoute
+        path="/budget"
+        element={<NarrowAlternate name="Budget" />}
+      />
 
       <Route
         path="/schedules"
