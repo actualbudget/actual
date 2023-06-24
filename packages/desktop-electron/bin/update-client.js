@@ -9,7 +9,7 @@ async function main() {
   fsUtil.copyFiles(Path.join(ROOT, '../desktop-client/build'), BUILD_DIR);
 
   // Remove the embedded backend for the browser version. Will improve this process
-  fsUtil.rmdir(Path.join(BUILD_DIR,'/data'));
+  fsUtil.rmdir(Path.join(BUILD_DIR, '/data'));
   fsUtil.emptyDir(BUILD_DIR, /.*kcab.*/);
   fsUtil.emptyDir(BUILD_DIR, /.*wasm/);
   fsUtil.emptyDir(BUILD_DIR, /.*map/);
