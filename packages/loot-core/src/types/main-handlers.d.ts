@@ -1,26 +1,31 @@
+import type { ParseFileResult } from '../server/accounts/parse-file';
+import type { batchUpdateTransactions } from '../server/accounts/transactions';
+import type { EmptyObject } from './util';
+
 export interface MainHandlers {
-  'transaction-update': (
-    transaction: unknown,
-  ) => Promise<Record<string, never>>;
+  'transaction-update': (transaction: unknown) => Promise<EmptyObject>;
 
-  undo: () => Promise<unknown>;
+  undo: () => Promise<void>;
 
-  redo: () => Promise<unknown>;
+  redo: () => Promise<void>;
 
-  'transactions-batch-update': (arg: {
-    added;
-    deleted;
-    updated;
-    learnCategories;
-  }) => Promise<unknown>;
+  'transactions-batch-update': (
+    arg: Omit<
+      Parameters<typeof batchUpdateTransactions>[0],
+      'detectOrphanPayees'
+    >,
+  ) => ReturnType<typeof batchUpdateTransactions>;
 
-  'transaction-add': (transaction) => Promise<Record<string, never>>;
+  'transaction-add': (transaction) => Promise<EmptyObject>;
 
-  'transaction-aupdatedd': (transaction) => Promise<Record<string, never>>;
+  'transaction-aupdatedd': (transaction) => Promise<EmptyObject>;
 
-  'transaction-delete': (transaction) => Promise<Record<string, never>>;
+  'transaction-delete': (transaction) => Promise<EmptyObject>;
 
-  'transactions-parse-file': (arg: { filepath; options }) => Promise<unknown>;
+  'transactions-parse-file': (arg: {
+    filepath: string;
+    options;
+  }) => Promise<ParseFileResult>;
 
   'transactions-export': (arg: {
     transactions;
@@ -285,7 +290,7 @@ export interface MainHandlers {
 
   'download-budget': (arg: { fileId; replace }) => Promise<{ error; id }>;
 
-  'sync-budget': () => Promise<Record<string, never>>;
+  'sync-budget': () => Promise<EmptyObject>;
 
   'load-budget': (arg: { id }) => Promise<{ error }>;
 

@@ -6,8 +6,16 @@ import { looselyParseAmount } from '../../shared/util';
 
 import qif2json from './qif2json';
 
-export function parseFile(filepath, options?: unknown) {
-  let errors = [];
+type ParseError = { message: string; internal: string };
+export type ParseFileResult =
+  | { errors?: ParseError[]; transactions?: [] }
+  | { transactions: unknown[] };
+
+export async function parseFile(
+  filepath,
+  options?: unknown,
+): Promise<ParseFileResult> {
+  let errors = Array<ParseError>();
   let m = filepath.match(/\.[^.]*$/);
 
   if (m) {
@@ -32,8 +40,11 @@ export function parseFile(filepath, options?: unknown) {
   return { errors, transactions: undefined };
 }
 
-async function parseCSV(filepath, options: { delimiter?: string } = {}) {
-  let errors = [];
+async function parseCSV(
+  filepath,
+  options: { delimiter?: string } = {},
+): Promise<ParseFileResult> {
+  let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
   let data;
@@ -59,8 +70,8 @@ async function parseCSV(filepath, options: { delimiter?: string } = {}) {
   return { errors, transactions: data };
 }
 
-async function parseQIF(filepath) {
-  let errors = [];
+async function parseQIF(filepath): Promise<ParseFileResult> {
+  let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
   let data;
@@ -75,7 +86,7 @@ async function parseQIF(filepath) {
   }
 
   return {
-    errors,
+    errors: [],
     transactions: data.transactions.map(trans => ({
       amount: trans.amount != null ? looselyParseAmount(trans.amount) : null,
       date: trans.date,
@@ -86,13 +97,13 @@ async function parseQIF(filepath) {
   };
 }
 
-async function parseOFX(filepath) {
+async function parseOFX(filepath): Promise<ParseFileResult> {
   let { getOFXTransactions, initModule } = await import(
     /* webpackChunkName: 'xfo' */ 'node-libofx'
   );
   await initModule();
 
-  let errors = [];
+  let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath, 'binary');
 
   let data;

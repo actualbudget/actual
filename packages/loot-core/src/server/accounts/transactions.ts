@@ -1,4 +1,5 @@
 import * as connection from '../../platform/server/connection';
+import { TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import { batchMessages } from '../sync';
@@ -18,7 +19,9 @@ async function idsWithChildren(ids: string[]) {
   return [...set];
 }
 
-async function getTransactionsByIds(ids: string[]) {
+async function getTransactionsByIds(
+  ids: string[],
+): Promise<TransactionEntity[]> {
   // TODO: convert to whereIn
   //
   // or better yet, use ActualQL
@@ -48,7 +51,7 @@ export async function batchUpdateTransactions({
   }>;
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
-}) {
+}): Promise<{ added: TransactionEntity[]; updated: unknown[] }> {
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
   let updatedIds = updated ? updated.map(u => u.id) : [];
@@ -123,7 +126,7 @@ export async function batchUpdateTransactions({
   // to the client so that can apply them. Note that added
   // transactions just return the full transaction.
   let resultAdded = allAdded;
-  let resultUpdated;
+  let resultUpdated: unknown[];
 
   await batchMessages(async () => {
     await Promise.all(allAdded.map(t => transfer.onInsert(t)));
