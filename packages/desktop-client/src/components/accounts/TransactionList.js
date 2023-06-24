@@ -59,6 +59,7 @@ export default function TransactionList({
   loadMoreTransactions,
   account,
   accounts,
+  category,
   categoryGroups,
   payees,
   balances,
@@ -163,6 +164,7 @@ export default function TransactionList({
       showCategory={true}
       animated={animated}
       currentAccountId={account && account.id}
+      currentCategoryId={category && category.id}
       isAdding={isAdding}
       isNew={isNew}
       isMatched={isMatched}

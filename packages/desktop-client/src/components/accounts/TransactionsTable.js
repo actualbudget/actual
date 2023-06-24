@@ -604,7 +604,7 @@ const Transaction = memo(function Transaction(props) {
     notes,
     date,
     account: accountId,
-    category,
+    category: categoryId,
     cleared,
     is_parent: isParent,
     _unmatched = false,
@@ -944,7 +944,7 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="category"
           width="flex"
-          value={category}
+          value={categoryId}
           formatter={value =>
             value
               ? getDisplayValue(
@@ -958,7 +958,7 @@ const Transaction = memo(function Transaction(props) {
           exposed={focusedField === 'category'}
           onExpose={name => onEdit(id, name)}
           valueStyle={
-            !category
+            !categoryId
               ? {
                   fontStyle: 'italic',
                   fontWeight: 300,
@@ -984,7 +984,7 @@ const Transaction = memo(function Transaction(props) {
           }) => (
             <CategoryAutocomplete
               categoryGroups={categoryGroups}
-              value={category}
+              value={categoryId}
               focused={true}
               tableBehavior={true}
               showSplitOption={!isChild && !isParent}
@@ -1108,12 +1108,17 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
   }
 }
 
-function makeTemporaryTransactions(currentAccountId, lastDate) {
+function makeTemporaryTransactions(
+  currentAccountId,
+  currentCategoryId,
+  lastDate,
+) {
   return [
     {
       id: 'temp',
       date: lastDate || currentDay(),
       account: currentAccountId || null,
+      category: currentCategoryId || null,
       cleared: false,
       amount: null,
     },
@@ -1519,7 +1524,12 @@ export let TransactionTable = forwardRef((props, ref) => {
   // Derive new transactions from the `isAdding` prop
   if (prevIsAdding !== props.isAdding) {
     if (!prevIsAdding && props.isAdding) {
-      setNewTransactions(makeTemporaryTransactions(props.currentAccountId));
+      setNewTransactions(
+        makeTemporaryTransactions(
+          props.currentAccountId,
+          props.currentCategoryId,
+        ),
+      );
     }
     setPrevIsAdding(props.isAdding);
   }
@@ -1536,7 +1546,11 @@ export let TransactionTable = forwardRef((props, ref) => {
         let transactions = latestState.current.newTransactions;
         let lastDate = transactions.length > 0 ? transactions[0].date : null;
         setNewTransactions(
-          makeTemporaryTransactions(props.currentAccountId, lastDate),
+          makeTemporaryTransactions(
+            props.currentAccountId,
+            props.currentCategoryId,
+            lastDate,
+          ),
         );
         newNavigator.onEdit('temp', 'date');
         props.onAdd(transactions);
@@ -1760,7 +1774,12 @@ export let TransactionTable = forwardRef((props, ref) => {
   );
 
   function onCloseAddTransaction() {
-    setNewTransactions(makeTemporaryTransactions(props.currentAccountId));
+    setNewTransactions(
+      makeTemporaryTransactions(
+        props.currentAccountId,
+        props.currentCategoryId,
+      ),
+    );
     props.onCloseAddTransaction();
   }
 
