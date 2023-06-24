@@ -348,7 +348,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         db.runQuery(
           db.cache(`INSERT INTO messages_crdt (timestamp, dataset, row, column, value)
            VALUES (?, ?, ?, ?, ?)`),
-          [timestamp.toString(), dataset, row, column, serializeValue(value)],
+          [timestamp, dataset, row, column, serializeValue(value)],
         );
 
         currentMerkle = merkle.insert(
