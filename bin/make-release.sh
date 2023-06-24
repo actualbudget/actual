@@ -42,7 +42,7 @@ git tag -a "$VERSION" -m "$NOTES"
 git push origin "$VERSION"
 
 # Make a macOS version
-./bin/package-electron --release --version "$VERSION"
+./bin/package-electron.sh --release --version "$VERSION"
 
 # TODO: browser version
 

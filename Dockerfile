@@ -8,4 +8,4 @@
 FROM node:18-bullseye as dev
 RUN apt-get update -y && apt-get upgrade -y && apt-get install -y openssl
 WORKDIR /app
-CMD ["sh", "./bin/docker-start"]
+CMD ["sh", "./bin/docker-start.sh"]

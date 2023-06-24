@@ -6,9 +6,9 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.desktop.config.js",
     "watch:node": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.desktop.config.js --watch",
-    "build:api": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.api.config.js && cross-env NODE_ENV=development ./bin/copy-migrations ../api",
-    "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
-    "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
+    "build:api": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.api.config.js && cross-env NODE_ENV=development ./bin/copy-migrations.js ../api",
+    "build:browser": "cross-env NODE_ENV=production ./bin/build-browser.js",
+    "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser.js",
     "lint": "eslint .",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "jest -c jest.config.js",

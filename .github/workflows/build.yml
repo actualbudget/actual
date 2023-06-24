@@ -54,7 +54,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
-        run: ./bin/package-browser
+        run: ./bin/package-browser.sh
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
@@ -75,7 +75,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron
-        run: ./bin/package-electron
+        run: ./bin/package-electron.sh
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
