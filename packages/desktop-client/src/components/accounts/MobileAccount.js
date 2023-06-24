@@ -164,7 +164,7 @@ function Account(props) {
 
   useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
 
-  if (!props.accounts || !props.accounts.length || !props.match) {
+  if (!props.accounts || !props.accounts.length) {
     return null;
   }
 

@@ -12,6 +12,7 @@ import {
   useParams,
   useNavigate,
   useLocation,
+  useMatch,
 } from 'react-router-dom';
 
 import { debounce } from 'debounce';
@@ -1996,10 +1997,12 @@ class AccountInternal extends PureComponent {
 
 function AccountHack(props) {
   let { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  let match = useMatch(props.location.pathname);
 
   return (
     <AccountInternal
       {...props}
+      match={match}
       splitsExpandedDispatch={splitsExpandedDispatch}
     />
   );
