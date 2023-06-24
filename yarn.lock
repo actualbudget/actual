@@ -105,7 +105,6 @@ __metadata:
     jest-watch-typeahead: ^2.2.2
     memoize-one: ^6.0.0
     pikaday: 1.8.0
-    rdndmb-html5-to-touch: ^8.0.1
     react: 18.2.0
     react-app-rewired: ^2.2.1
     react-dnd: ^16.0.1
@@ -15128,17 +15127,6 @@ __metadata:
   bin:
     rc: ./cli.js
   checksum: 2e26e052f8be2abd64e6d1dabfbd7be03f80ec18ccbc49562d31f617d0015fbdbcf0f9eed30346ea6ab789e0fdfe4337f033f8016efdbee0df5354751842080e
-  languageName: node
-  linkType: hard
-
-"rdndmb-html5-to-touch@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "rdndmb-html5-to-touch@npm:8.0.1"
-  dependencies:
-    dnd-multi-backend: ^8.0.1
-    react-dnd-html5-backend: ^16.0.1
-    react-dnd-touch-backend: ^16.0.1
-  checksum: ead371856837ef82a08a107f9c9357d5221b0d9379b9c3b9d4f1eaeaa7a245ce20e7538a6cc22f1cfacce64246b41d576620498218de7b07ecd6c0356daac05e
   languageName: node
   linkType: hard
 

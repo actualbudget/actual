@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo } from 'react';
-import { DndProvider } from 'react-dnd-multi-backend';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import {
+  DndProvider,
+  MouseTransition,
+  TouchTransition,
+} from 'react-dnd-multi-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { connect } from 'react-redux';
 import {
   Route,
@@ -11,7 +17,6 @@ import {
 } from 'react-router-dom';
 
 import hotkeys from 'hotkeys-js';
-import { HTML5toTouch } from 'rdndmb-html5-to-touch';
 
 import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
@@ -289,6 +294,23 @@ function FinancesApp(props) {
     </BrowserRouter>
   );
 }
+
+const HTML5toTouch = {
+  backends: [
+    {
+      id: 'html5',
+      backend: HTML5Backend,
+      transition: MouseTransition,
+    },
+    {
+      id: 'touch',
+      backend: TouchBackend,
+      options: { enableMouseEvents: true, delay: 200 },
+      preview: true,
+      transition: TouchTransition,
+    },
+  ],
+};
 
 function FinancesAppWithContext(props) {
   let app = useMemo(() => <FinancesApp {...props} />, [props]);
