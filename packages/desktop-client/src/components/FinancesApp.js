@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
-import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { connect } from 'react-redux';
 import {
   Route,
@@ -291,6 +292,11 @@ function FinancesApp(props) {
 }
 
 function FinancesAppWithContext(props) {
+  let isTouch =
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0 ||
+    navigator.msMaxTouchPoints > 0;
+
   let app = useMemo(() => <FinancesApp {...props} />, [props]);
 
   return (
@@ -300,7 +306,9 @@ function FinancesAppWithContext(props) {
           <BudgetMonthCountProvider>
             <PayeesProvider>
               <AccountsProvider>
-                <DndProvider backend={Backend}>{app}</DndProvider>
+                <DndProvider backend={isTouch ? TouchBackend : HTML5Backend}>
+                  {app}
+                </DndProvider>
               </AccountsProvider>
             </PayeesProvider>
           </BudgetMonthCountProvider>

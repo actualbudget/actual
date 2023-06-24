@@ -109,6 +109,7 @@ __metadata:
     react-app-rewired: ^2.2.1
     react-dnd: ^16.0.1
     react-dnd-html5-backend: ^16.0.1
+    react-dnd-touch-backend: ^16.0.1
     react-dom: 18.2.0
     react-merge-refs: ^1.1.0
     react-modal: 3.16.1
@@ -15186,6 +15187,16 @@ __metadata:
   dependencies:
     dnd-core: ^16.0.1
   checksum: e2368bf85d5632a5cd867b743feb54c9052d909ea5331608860fa455edf3c633ac791f5b338e3db29b19ea8670c0ba5fb43c9c1c2510760bea030811d726cdfa
+  languageName: node
+  linkType: hard
+
+"react-dnd-touch-backend@npm:^16.0.1":
+  version: 16.0.1
+  resolution: "react-dnd-touch-backend@npm:16.0.1"
+  dependencies:
+    "@react-dnd/invariant": ^4.0.1
+    dnd-core: ^16.0.1
+  checksum: 5362c5f4266e3655d02c716f341dc55c61fae53e12eb3b239245bafb7a3f3cdb953e27e187e8dcb9d86c01bc738853d764d7c85b87104a49a8a8f1ecc4d35755
   languageName: node
   linkType: hard
 
