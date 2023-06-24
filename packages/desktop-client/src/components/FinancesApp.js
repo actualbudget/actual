@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
   DndProvider,
-  MouseTransition,
+  PointerTransition,
   TouchTransition,
 } from 'react-dnd-multi-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
@@ -300,7 +300,7 @@ const HTML5toTouch = {
     {
       id: 'html5',
       backend: HTML5Backend,
-      transition: MouseTransition,
+      transition: PointerTransition,
     },
     {
       id: 'touch',
