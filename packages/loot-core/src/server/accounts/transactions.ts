@@ -45,9 +45,9 @@ export async function batchUpdateTransactions({
   deleted?: Array<{ id: string; payee: unknown }>;
   updated?: Array<{
     id: string;
-    payee: unknown;
-    account: unknown;
-    category: unknown;
+    payee?: unknown;
+    account?: unknown;
+    category?: unknown;
   }>;
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;

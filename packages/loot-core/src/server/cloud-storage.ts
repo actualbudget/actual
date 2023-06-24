@@ -37,7 +37,10 @@ async function fetchJSON(...args: Parameters<typeof fetch>) {
   return res.json();
 }
 
-export async function checkKey() {
+export async function checkKey(): Promise<{
+  valid: boolean;
+  error?: { reason: string };
+}> {
   let userToken = await asyncStorage.getItem('user-token');
 
   let { cloudFileId, encryptKeyId } = prefs.getPrefs();
@@ -50,7 +53,7 @@ export async function checkKey() {
     });
   } catch (e) {
     console.log(e);
-    return { error: { reason: 'network' } };
+    return { valid: false, error: { reason: 'network' } };
   }
 
   return {
