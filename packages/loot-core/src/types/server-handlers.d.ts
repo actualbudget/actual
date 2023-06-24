@@ -3,8 +3,8 @@ import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { EmptyObject } from './util';
 
-export interface MainHandlers {
-  'transaction-update': (transaction: unknown) => Promise<EmptyObject>;
+export interface ServerHandlers {
+  'transaction-update': (transaction: { id: string }) => Promise<EmptyObject>;
 
   undo: () => Promise<void>;
 
@@ -19,7 +19,7 @@ export interface MainHandlers {
 
   'transaction-add': (transaction) => Promise<EmptyObject>;
 
-  'transaction-aupdatedd': (transaction) => Promise<EmptyObject>;
+  'transaction-add': (transaction) => Promise<EmptyObject>;
 
   'transaction-delete': (transaction) => Promise<EmptyObject>;
 
@@ -58,7 +58,7 @@ export interface MainHandlers {
 
   'category-move': (arg: { id; groupId; targetId }) => Promise<unknown>;
 
-  'category-delete': (arg: { id; transferId }) => Promise<{ error }>;
+  'category-delete': (arg: { id; transferId }) => Promise<{ error?: string }>;
 
   'category-group-create': (arg: {
     name;
@@ -190,12 +190,12 @@ export interface MainHandlers {
   }>;
 
   'secret-set': (arg: { name: string; value: string }) => Promise<null>;
-  'secret-check': (arg: string) => Promise<null>;
+  'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
   'nordigen-poll-web-token': (arg: {
     upgradingAccountId;
     requisitionId;
-  }) => Promise<null>;
+  }) => Promise<{ error } | { data }>;
 
   'nordigen-status': () => Promise<{ configured: boolean }>;
 
@@ -217,7 +217,7 @@ export interface MainHandlers {
   }>;
 
   'transactions-import': (arg: { accountId; transactions }) => Promise<{
-    errors;
+    errors?: { message: string }[];
     added;
     updated;
   }>;
@@ -245,7 +245,7 @@ export interface MainHandlers {
 
   'load-prefs': () => Promise<Record<string, unknown> | null>;
 
-  'sync-reset': () => Promise<{ error }>;
+  'sync-reset': () => Promise<{ error?: { reason: string } }>;
 
   'sync-repair': () => Promise<unknown>;
 
@@ -258,28 +258,28 @@ export interface MainHandlers {
   'subscribe-needs-bootstrap': (
     args: { url } = {},
   ) => Promise<
-    { error: string } | { bootstrapped: unknown; hasServer: boolean }
+    { error?: string } | { bootstrapped: unknown; hasServer: boolean }
   >;
 
-  'subscribe-bootstrap': (arg: { password }) => Promise<{ error: string }>;
+  'subscribe-bootstrap': (arg: { password }) => Promise<{ error?: string }>;
 
   'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
 
   'subscribe-change-password': (arg: {
     password;
-  }) => Promise<{ error: string }>;
+  }) => Promise<{ error?: string }>;
 
-  'subscribe-sign-in': (arg: { password }) => Promise<{ error: string }>;
+  'subscribe-sign-in': (arg: { password }) => Promise<{ error?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
 
-  'get-server-version': () => Promise<{ error: string } | { version: string }>;
+  'get-server-version': () => Promise<{ error?: string } | { version: string }>;
 
   'get-server-url': () => Promise<unknown>;
 
   'set-server-url': (arg: { url; validate }) => Promise<unknown>;
 
-  sync: () => Promise<{ error: string }>;
+  sync: () => Promise<{ error?: string }>;
 
   'get-budgets': () => Promise<unknown>;
 
@@ -287,7 +287,7 @@ export interface MainHandlers {
 
   'reset-budget-cache': () => Promise<unknown>;
 
-  'upload-budget': (arg: { id } = {}) => Promise<{ error }>;
+  'upload-budget': (arg: { id } = {}) => Promise<{ error?: string }>;
 
   'download-budget': (arg: { fileId; replace }) => Promise<{ error; id }>;
 
