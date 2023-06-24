@@ -236,7 +236,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
-export const TransactionHeader = memo(
+const TransactionHeader = memo(
   ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
     let dispatchSelected = useSelectedDispatch();
 
@@ -497,7 +497,7 @@ function CellWithScheduleIcon({ scheduleId, children }) {
   );
 }
 
-export const Transaction = memo(function Transaction(props) {
+const Transaction = memo(function Transaction(props) {
   let {
     transaction: originalTransaction,
     editing,
@@ -1067,7 +1067,7 @@ export const Transaction = memo(function Transaction(props) {
   );
 });
 
-export function TransactionError({ error, isDeposit, onAddSplit, style }) {
+function TransactionError({ error, isDeposit, onAddSplit, style }) {
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {

@@ -1,3 +1,5 @@
+import { getClock } from '@actual-app/crdt';
+
 import * as connection from '../platform/server/connection';
 import {
   getDownloadError,
@@ -22,7 +24,6 @@ import {
 } from './api-models';
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
-import { getClock } from './crdt';
 import * as db from './db';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
@@ -101,6 +102,12 @@ async function validateExpenseCategory(debug, id) {
   }
 }
 
+function checkFileOpen() {
+  if (!(prefs.getPrefs() || {}).id) {
+    throw APIError('No budget file is open');
+  }
+}
+
 let batchPromise = null;
 
 handlers['api/batch-budget-start'] = async function () {
@@ -163,12 +170,15 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   );
   if (localBudget) {
     await handlers['load-budget']({ id: localBudget.id });
-    let result = await handlers['sync-budget']({ id: localBudget.id });
+    let result = await handlers['sync-budget']();
     if (result.error) {
       throw new Error(getSyncError(result.error, localBudget.id));
     }
   } else {
     let files = await handlers['get-remote-files']();
+    if (!files) {
+      throw new Error('Could not get remote files');
+    }
     let file = files.find(f => f.groupId === syncId);
     if (!file) {
       throw new Error(
@@ -198,6 +208,14 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   }
 };
 
+handlers['api/sync'] = async function () {
+  let { id } = prefs.getPrefs();
+  let result = await handlers['sync-budget']();
+  if (result.error) {
+    throw new Error(getSyncError(result.error, id));
+  }
+};
+
 handlers['api/start-import'] = async function ({ budgetName }) {
   // Notify UI to close budget
   await handlers['close-budget']();
@@ -217,6 +235,8 @@ handlers['api/start-import'] = async function ({ budgetName }) {
 };
 
 handlers['api/finish-import'] = async function () {
+  checkFileOpen();
+
   sheet.get().markCacheDirty();
 
   // We always need to fully reload the app. Importing doesn't touch
@@ -237,6 +257,8 @@ handlers['api/finish-import'] = async function () {
 
 handlers['api/abort-import'] = async function () {
   if (IMPORT_MODE) {
+    checkFileOpen();
+
     let { id } = prefs.getPrefs();
 
     await handlers['close-budget']();
@@ -248,15 +270,18 @@ handlers['api/abort-import'] = async function () {
 };
 
 handlers['api/query'] = async function ({ query }) {
+  checkFileOpen();
   return aqlQuery(query);
 };
 
 handlers['api/budget-months'] = async function () {
+  checkFileOpen();
   let { start, end } = await handlers['get-budget-bounds']();
   return monthUtils.range(start, end);
 };
 
 handlers['api/budget-month'] = async function ({ month }) {
+  checkFileOpen();
   await validateMonth(month);
 
   let groups = await db.getCategoriesGrouped();
@@ -318,6 +343,7 @@ handlers['api/budget-set-amount'] = withMutation(async function ({
   categoryId,
   amount,
 }) {
+  checkFileOpen();
   return handlers['budget/budget-amount']({
     month,
     category: categoryId,
@@ -330,6 +356,7 @@ handlers['api/budget-set-carryover'] = withMutation(async function ({
   categoryId,
   flag,
 }) {
+  checkFileOpen();
   await validateMonth(month);
   await validateExpenseCategory('budget-set-carryover', categoryId);
   return handlers['budget/set-carryover']({
@@ -344,6 +371,7 @@ handlers['api/transactions-export'] = async function ({
   categoryGroups,
   payees,
 }) {
+  checkFileOpen();
   return handlers['transactions-export']({
     transactions,
     categoryGroups,
@@ -355,6 +383,7 @@ handlers['api/transactions-import'] = withMutation(async function ({
   accountId,
   transactions,
 }) {
+  checkFileOpen();
   return handlers['transactions-import']({ accountId, transactions });
 });
 
@@ -362,6 +391,7 @@ handlers['api/transactions-add'] = withMutation(async function ({
   accountId,
   transactions,
 }) {
+  checkFileOpen();
   await addTransactions(accountId, transactions, { runTransfers: false });
   return 'ok';
 });
@@ -371,6 +401,7 @@ handlers['api/transactions-get'] = async function ({
   startDate,
   endDate,
 }) {
+  checkFileOpen();
   let { data } = await aqlQuery(
     q('transactions')
       .filter({
@@ -394,6 +425,7 @@ handlers['api/transaction-update'] = withMutation(async function ({
   id,
   fields,
 }) {
+  checkFileOpen();
   let { data } = await aqlQuery(
     q('transactions').filter({ id }).select('*').options({ splits: 'grouped' }),
   );
@@ -408,6 +440,7 @@ handlers['api/transaction-update'] = withMutation(async function ({
 });
 
 handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
   let { data } = await aqlQuery(
     q('transactions').filter({ id }).select('*').options({ splits: 'grouped' }),
   );
@@ -422,6 +455,7 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
 });
 
 handlers['api/accounts-get'] = async function () {
+  checkFileOpen();
   let accounts = await db.getAccounts();
   return accounts.map(account => accountModel.toExternal(account));
 };
@@ -430,9 +464,9 @@ handlers['api/account-create'] = withMutation(async function ({
   account,
   initialBalance = null,
 }) {
+  checkFileOpen();
   return handlers['account-create']({
     name: account.name,
-    type: account.type,
     offBudget: account.offbudget,
     closed: account.closed,
     // Current the API expects an amount but it really should expect
@@ -442,6 +476,7 @@ handlers['api/account-create'] = withMutation(async function ({
 });
 
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
+  checkFileOpen();
   return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
 });
 
@@ -450,6 +485,7 @@ handlers['api/account-close'] = withMutation(async function ({
   transferAccountId,
   transferCategoryId,
 }) {
+  checkFileOpen();
   return handlers['account-close']({
     id,
     transferAccountId,
@@ -458,16 +494,19 @@ handlers['api/account-close'] = withMutation(async function ({
 });
 
 handlers['api/account-reopen'] = withMutation(async function ({ id }) {
+  checkFileOpen();
   return handlers['account-reopen']({ id });
 });
 
 handlers['api/account-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
   return handlers['account-close']({ id, forced: true });
 });
 
 handlers['api/categories-get'] = async function ({
   grouped,
 }: { grouped? } = {}) {
+  checkFileOpen();
   let result = await handlers['get-categories']();
   return grouped
     ? result.grouped.map(categoryGroupModel.toExternal)
@@ -477,6 +516,7 @@ handlers['api/categories-get'] = async function ({
 handlers['api/category-group-create'] = withMutation(async function ({
   group,
 }) {
+  checkFileOpen();
   return handlers['category-group-create']({ name: group.name });
 });
 
@@ -484,6 +524,7 @@ handlers['api/category-group-update'] = withMutation(async function ({
   id,
   fields,
 }) {
+  checkFileOpen();
   return handlers['category-group-update']({
     id,
     ...categoryGroupModel.fromExternal(fields),
@@ -494,6 +535,7 @@ handlers['api/category-group-delete'] = withMutation(async function ({
   id,
   transferCategoryId,
 }) {
+  checkFileOpen();
   return handlers['category-group-delete']({
     id,
     transferId: transferCategoryId,
@@ -501,6 +543,7 @@ handlers['api/category-group-delete'] = withMutation(async function ({
 });
 
 handlers['api/category-create'] = withMutation(async function ({ category }) {
+  checkFileOpen();
   return handlers['category-create']({
     name: category.name,
     groupId: category.group_id,
@@ -509,6 +552,7 @@ handlers['api/category-create'] = withMutation(async function ({ category }) {
 });
 
 handlers['api/category-update'] = withMutation(async function ({ id, fields }) {
+  checkFileOpen();
   return handlers['category-update']({
     id,
     ...categoryModel.fromExternal(fields),
@@ -519,6 +563,7 @@ handlers['api/category-delete'] = withMutation(async function ({
   id,
   transferCategoryId,
 }) {
+  checkFileOpen();
   return handlers['category-delete']({
     id,
     transferId: transferCategoryId,
@@ -526,21 +571,25 @@ handlers['api/category-delete'] = withMutation(async function ({
 });
 
 handlers['api/payees-get'] = async function () {
+  checkFileOpen();
   let payees = await handlers['payees-get']();
   return payees.map(payeeModel.toExternal);
 };
 
 handlers['api/payee-create'] = withMutation(async function ({ payee }) {
+  checkFileOpen();
   return handlers['payee-create']({ name: payee.name });
 });
 
 handlers['api/payee-update'] = withMutation(async function ({ id, fields }) {
+  checkFileOpen();
   return handlers['payees-batch-change']({
     updated: [{ id, ...payeeModel.fromExternal(fields) }],
   });
 });
 
 handlers['api/payee-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
   return handlers['payees-batch-change']({ deleted: [{ id }] });
 });
 

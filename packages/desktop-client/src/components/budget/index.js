@@ -1,5 +1,6 @@
 import React, { memo, PureComponent, useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -331,7 +332,7 @@ class Budget extends PureComponent {
   };
 
   onShowActivity = (categoryName, categoryId, month) => {
-    this.props.history.push({
+    this.props.navigate({
       pathname: '/accounts',
       state: {
         goBack: true,
@@ -519,6 +520,9 @@ const RolloverBudgetSummary = memo(props => {
 function BudgetWrapper(props) {
   let spreadsheet = useSpreadsheet();
   let titlebar = useContext(TitlebarContext);
+  let location = useLocation();
+  let match = useMatch(location.pathname);
+  let navigate = useNavigate();
 
   let reportComponents = useMemo(
     () => ({
@@ -563,6 +567,8 @@ function BudgetWrapper(props) {
         rolloverComponents={rolloverComponents}
         spreadsheet={spreadsheet}
         titlebar={titlebar}
+        navigate={navigate}
+        match={match}
       />
     </View>
   );

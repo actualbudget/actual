@@ -326,7 +326,7 @@ export async function possiblyUpload() {
 }
 
 export async function removeFile(fileId) {
-  const [[, userToken]] = await asyncStorage.multiGet(['user-token']);
+  let userToken = await asyncStorage.getItem('user-token');
 
   await post(getServer().SYNC_SERVER + '/delete-user-file', {
     token: userToken,
@@ -348,11 +348,12 @@ export async function listRemoteFiles() {
       },
     });
   } catch (e) {
-    console.log('Error', e);
+    console.log('Unexpected error fetching file list from server', e);
     return null;
   }
 
   if (res.status === 'error') {
+    console.log('Error fetching file list from server', res);
     return null;
   }
 

@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useMemo } from 'react';
 import { connect, useSelector } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 
@@ -84,9 +83,7 @@ function Sidebar({ floatingSidebar }) {
   );
 }
 
-export default withRouter(
-  connect(
-    state => ({ floatingSidebar: state.prefs.global.floatingSidebar }),
-    actions,
-  )(Sidebar),
-);
+export default connect(
+  state => ({ floatingSidebar: state.prefs.global.floatingSidebar }),
+  actions,
+)(Sidebar);

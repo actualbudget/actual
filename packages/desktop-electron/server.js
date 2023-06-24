@@ -5,6 +5,7 @@ global.fetch = require('node-fetch');
 
 // Lazy load backend code
 function getBackend() {
+  // eslint-disable-next-line import/extensions
   return require('loot-core/lib-dist/bundle.desktop.js');
 }
 

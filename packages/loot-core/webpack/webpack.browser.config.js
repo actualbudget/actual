@@ -13,6 +13,9 @@ module.exports = {
     library: 'backend',
     publicPath: '/kcab/',
   },
+  stats: {
+    errorDetails: true,
+  },
   resolve: {
     extensions: [
       '.web.js',
@@ -23,9 +26,22 @@ module.exports = {
       '.tsx',
       '.json',
     ],
-    alias: {
-      fs: 'memfs',
-      path: 'path-browserify',
+    fallback: {
+      assert: require.resolve('assert/'),
+      buffer: require.resolve('buffer/'),
+      // used by sql.js, but only if the 'crypto' global is not defined
+      // used by adm-zip for ZipCrypto, but we don’t use that
+      crypto: false,
+      dgram: false,
+      fs: require.resolve('memfs'),
+      net: false,
+      path: require.resolve('path-browserify'),
+      process: require.resolve('process/browser'),
+      stream: require.resolve('stream-browserify'),
+      tls: false,
+      // used by memfs in a check which we can ignore I think
+      url: false,
+      zlib: require.resolve('browserify-zlib'),
     },
   },
   module: {
@@ -46,10 +62,11 @@ module.exports = {
     ],
   },
   optimization: {
-    namedChunks: true,
+    chunkIds: 'named',
   },
   plugins: [
     new webpack.DefinePlugin({
+      'process.env': '{}',
       'process.env.IS_DEV': JSON.stringify(
         process.env.NODE_ENV === 'development',
       ),
@@ -60,6 +77,10 @@ module.exports = {
       'process.env.ACTUAL_DATA_DIR': JSON.stringify('/'),
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
     }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser',
+    }),
     new webpack.SourceMapDevToolPlugin({
       filename: '[file].map',
       exclude: /xfo.kcab/,
@@ -68,9 +89,4 @@ module.exports = {
       resourceRegExp: /worker_threads|original-fs/,
     }),
   ],
-  node: {
-    dgram: 'empty',
-    net: 'empty',
-    tls: 'empty',
-  },
 };

@@ -25,6 +25,9 @@ export function applyBudgetAction(month, type, args) {
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
         break;
+      case 'check-templates':
+        dispatch(addNotification(await send('budget/check-templates')));
+        break;
       case 'apply-goal-template':
         dispatch(
           addNotification(await send('budget/apply-goal-template', { month })),
@@ -34,6 +37,13 @@ export function applyBudgetAction(month, type, args) {
         dispatch(
           addNotification(
             await send('budget/overwrite-goal-template', { month }),
+          ),
+        );
+        break;
+      case 'cleanup-goal-template':
+        dispatch(
+          addNotification(
+            await send('budget/cleanup-goal-template', { month }),
           ),
         );
         break;
@@ -223,9 +233,9 @@ export function updateAccount(account) {
   };
 }
 
-export function createAccount(name, type, balance, offBudget) {
+export function createAccount(name, balance, offBudget) {
   return async function (dispatch) {
-    let id = await send('account-create', { name, type, balance, offBudget });
+    let id = await send('account-create', { name, balance, offBudget });
     await dispatch(getAccounts());
     await dispatch(getPayees());
     return id;

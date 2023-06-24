@@ -11,24 +11,6 @@ import uuid from 'uuid';
 
 // Utils
 
-function mapAccountType(type) {
-  switch (type) {
-    case 'Cash':
-    case 'Checking':
-      return 'checking';
-    case 'CreditCard':
-      return 'credit';
-    case 'Savings':
-      return 'savings';
-    case 'InvestmentAccount':
-      return 'investment';
-    case 'Mortgage':
-      return 'mortgage';
-    default:
-      return 'other';
-  }
-}
-
 function sortByKey(arr, key) {
   return [...arr].sort((item1, item2) => {
     if (item1[key] < item2[key]) {
@@ -82,7 +64,6 @@ async function importAccounts(data, entityIdMap) {
     accounts.map(async account => {
       if (!account.isTombstone) {
         const id = await actual.createAccount({
-          type: mapAccountType(account.accountType),
           name: account.accountName,
           offbudget: account.onBudget ? false : true,
           closed: account.hidden ? true : false,

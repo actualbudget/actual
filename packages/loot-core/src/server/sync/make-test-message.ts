@@ -1,13 +1,13 @@
-import * as encryption from '../encryption';
+import { SyncProtoBuf } from '@actual-app/crdt';
 
-import * as SyncPb from './proto/sync_pb';
+import * as encryption from '../encryption';
 
 async function randomString() {
   return (await encryption.randomBytes(12)).toString();
 }
 
 export default async function makeTestMessage(keyId) {
-  let messagePb = new SyncPb.Message();
+  let messagePb = new SyncProtoBuf.Message();
   messagePb.setDataset(await randomString());
   messagePb.setRow(await randomString());
   messagePb.setColumn(await randomString());

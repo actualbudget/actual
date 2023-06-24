@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
@@ -80,7 +80,7 @@ export default function TransactionList({
   onCreatePayee,
 }) {
   let transactionsLatest = useRef();
-  let history = useHistory();
+  let navigate = useNavigate();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -145,12 +145,9 @@ export default function TransactionList({
     return newTransaction;
   }, []);
 
-  let onManagePayees = useCallback(
-    id => {
-      history.push('/payees', { selectedPayee: id });
-    },
-    [history],
-  );
+  let onManagePayees = useCallback(id => {
+    navigate('/payees', { selectedPayee: id });
+  });
 
   return (
     <TransactionTable

@@ -16,15 +16,7 @@ import ImportActual from './ImportActual';
 import ImportYNAB4 from './ImportYNAB4';
 import ImportYNAB5 from './ImportYNAB5';
 
-function Modals({
-  modalStack,
-  isHidden,
-  allFiles,
-  availableImports,
-  globalPrefs,
-  isLoggedIn,
-  actions,
-}) {
+function Modals({ modalStack, isHidden, availableImports, actions }) {
   let stack = modalStack.map(({ name, options }, idx) => {
     const modalProps = {
       onClose: actions.popModal,
@@ -111,9 +103,6 @@ export default connect(
     isHidden: state.modals.isHidden,
     budgets: state.budgets.budgets,
     availableImports: state.budgets.availableImports,
-    globalPrefs: state.prefs.global,
-    allFiles: state.budgets.allFiles,
-    isLoggedIn: !!state.user.data,
   }),
   dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
 )(Modals);

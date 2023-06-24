@@ -91,12 +91,6 @@ export class AccountPage {
     return new CloseAccountModal(this.page.locator('css=[aria-modal]'));
   }
 
-  async _clearFocusedField() {
-    let isMac = process.platform === 'darwin';
-    await this.page.keyboard.press(isMac ? 'Meta+A' : 'Control+A');
-    await this.page.keyboard.press('Backspace');
-  }
-
   async _fillTransactionFields(transactionRow, transaction) {
     if (transaction.payee) {
       await transactionRow.getByTestId('payee').click();
@@ -123,14 +117,12 @@ export class AccountPage {
 
     if (transaction.debit) {
       await transactionRow.getByTestId('debit').click();
-      await this._clearFocusedField();
       await this.page.keyboard.type(transaction.debit);
       await this.page.keyboard.press('Tab');
     }
 
     if (transaction.credit) {
       await transactionRow.getByTestId('credit').click();
-      await this._clearFocusedField();
       await this.page.keyboard.type(transaction.credit);
       await this.page.keyboard.press('Tab');
     }
