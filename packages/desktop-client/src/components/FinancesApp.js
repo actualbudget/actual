@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
+import { DndProvider } from 'react-dnd-multi-backend';
 import { connect } from 'react-redux';
 import {
   Route,
@@ -13,6 +11,7 @@ import {
 } from 'react-router-dom';
 
 import hotkeys from 'hotkeys-js';
+import { HTML5toTouch } from 'rdndmb-html5-to-touch';
 
 import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
@@ -292,11 +291,6 @@ function FinancesApp(props) {
 }
 
 function FinancesAppWithContext(props) {
-  let isTouch =
-    'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0 ||
-    navigator.msMaxTouchPoints > 0;
-
   let app = useMemo(() => <FinancesApp {...props} />, [props]);
 
   return (
@@ -306,12 +300,7 @@ function FinancesAppWithContext(props) {
           <BudgetMonthCountProvider>
             <PayeesProvider>
               <AccountsProvider>
-                <DndProvider
-                  backend={isTouch ? TouchBackend : HTML5Backend}
-                  options={{ delayTouchStart: 300 }}
-                >
-                  {app}
-                </DndProvider>
+                <DndProvider options={HTML5toTouch}>{app}</DndProvider>
               </AccountsProvider>
             </PayeesProvider>
           </BudgetMonthCountProvider>
