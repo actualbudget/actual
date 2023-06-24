@@ -62,7 +62,6 @@ function Import({ modalProps, availableImports }) {
           >
             <P>
               <ExternalLink
-                asAnchor={true}
                 href="https://actualbudget.org/docs/migration/nynab"
                 target="_blank"
               >

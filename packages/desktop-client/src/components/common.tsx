@@ -178,41 +178,22 @@ export function AnchorLink({
   );
 }
 
-type ExternalLinkAnchorProps = {
-  asAnchor: true;
-} & HTMLPropsWithStyle<HTMLAnchorElement>;
-type ExternalLinkButtonProps = { asAnchor: false | undefined } & ComponentProps<
-  typeof Button
->;
-type ExternalLinkProps = ExternalLinkAnchorProps | ExternalLinkButtonProps;
+type ExternalLinkProps = {
+  children?: ReactNode;
+  href: string;
+};
 
-export const ExternalLink = forwardRef<HTMLElement, ExternalLinkProps>(
-  ({ asAnchor, children, ...props }, ref) => {
+export const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
+  ({ children, href }, ref) => {
     function onClick(e) {
       e.preventDefault();
-      window.Actual.openURLInBrowser(props.href);
+      window.Actual.openURLInBrowser(href);
     }
 
-    if (asAnchor) {
-      return (
-        <a
-          ref={ref as Ref<HTMLAnchorElement>}
-          {...(props as ExternalLinkAnchorProps)}
-          onClick={onClick}
-        >
-          {children}
-        </a>
-      );
-    }
     return (
-      <Button
-        ref={ref as Ref<HTMLButtonElement>}
-        bare
-        {...(props as ExternalLinkButtonProps)}
-        onClick={onClick}
-      >
+      <a ref={ref} href={href} onClick={onClick}>
         {children}
-      </Button>
+      </a>
     );
   },
 );

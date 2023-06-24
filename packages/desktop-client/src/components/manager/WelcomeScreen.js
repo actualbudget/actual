@@ -29,14 +29,13 @@ function WelcomeScreen({ createBudget, pushModal }) {
         <P style={{ '& a, & a:visited': { color: colors.p5 } }}>
           Currently, Actual implements budgeting based on a{' '}
           <ExternalLink
-            asAnchor
             style={{ color: colors.p5 }}
             href="https://actualbudget.org/docs/budgeting/"
           >
             monthly envelope system
           </ExternalLink>
           . Consider taking our{' '}
-          <ExternalLink asAnchor href="https://actualbudget.org/docs/tour/">
+          <ExternalLink href="https://actualbudget.org/docs/tour/">
             guided tour
           </ExternalLink>{' '}
           to help you get your bearings, and check out the rest of the
