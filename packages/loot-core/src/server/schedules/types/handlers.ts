@@ -11,8 +11,6 @@ export interface SchedulesHandlers {
 
   'schedule/force-run-service': () => Promise<unknown>;
 
-  'schedule/get-possible-transactions': () => Promise<unknown>;
-
   'schedule/discover': () => Promise<unknown>;
 
   'schedule/get-upcoming-dates': () => Promise<unknown>;

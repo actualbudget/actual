@@ -358,11 +358,6 @@ async function skipNextDate({ id }) {
     },
   });
 }
-
-// `schedule` here might not be a saved schedule, so it might not have
-// an id
-function getPossibleTransactions({ schedule }) {}
-
 function discoverSchedules() {
   return findSchedules();
 }
@@ -548,7 +543,6 @@ app.method(
   'schedule/force-run-service',
   mutator(() => advanceSchedulesService(true)),
 );
-app.method('schedule/get-possible-transactions', getPossibleTransactions);
 app.method('schedule/discover', discoverSchedules);
 app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
