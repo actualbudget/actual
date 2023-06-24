@@ -1,6 +1,7 @@
-import type { ParseFileResult } from '../server/accounts/parse-file';
-import type { batchUpdateTransactions } from '../server/accounts/transactions';
-import type { EmptyObject } from './util';
+import { ParseFileResult } from '../server/accounts/parse-file';
+import { batchUpdateTransactions } from '../server/accounts/transactions';
+import { Backup } from '../server/backups';
+import { EmptyObject } from './util';
 
 export interface MainHandlers {
   'transaction-update': (transaction: unknown) => Promise<EmptyObject>;
@@ -307,19 +308,25 @@ export interface MainHandlers {
     testBudgetId?;
   }) => Promise<unknown>;
 
-  'import-budget': (arg: { filepath; type }) => Promise<{ error }>;
+  'import-budget': (arg: {
+    filepath: string;
+    type: 'ynab4' | 'ynab5' | 'actual';
+  }) => Promise<{ error?: string }>;
 
-  'export-budget': () => Promise<unknown>;
+  'export-budget': () => Promise<Buffer | null>;
 
-  'upload-file-web': (arg: { filename; contents }) => Promise<'ok'>;
+  'upload-file-web': (arg: {
+    filename: string;
+    contents: ArrayBuffer;
+  }) => Promise<EmptyObject | null>;
 
-  'backups-get': (arg: { id }) => Promise<unknown>;
+  'backups-get': (arg: { id: string }) => Promise<Backup[]>;
 
-  'backup-load': (arg: { id; backupId }) => Promise<unknown>;
+  'backup-load': (arg: { id: string; backupId: string }) => Promise<void>;
 
-  'backup-make': (arg: { id }) => Promise<unknown>;
+  'backup-make': (arg: { id: string }) => Promise<void>;
 
-  'get-last-opened-backup': () => Promise<unknown>;
+  'get-last-opened-backup': () => Promise<string | null>;
 
-  'app-focused': () => Promise<unknown>;
+  'app-focused': () => Promise<void>;
 }

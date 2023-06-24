@@ -2267,7 +2267,7 @@ handlers['upload-file-web'] = async function ({ filename, contents }) {
   }
 
   await fs.writeFile('/uploads/' + filename, contents);
-  return 'ok';
+  return {};
 };
 
 handlers['backups-get'] = async function ({ id }) {
