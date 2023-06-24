@@ -3,6 +3,9 @@ name: Handle completed feature requests
 on:
   pull_request:
     types: [closed]
+    
+permissions:
+  issues: write
 
 jobs:
   handle-feature-requests:
