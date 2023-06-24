@@ -6,7 +6,7 @@ export function rebuildMerkleHash(): {
   numMessages: number;
   trie: merkle.TrieNode;
 } {
-  let rows = db.runQuery('SELECT timestamp FROM messages_crdt', [], true);
+  let rows: { timestamp: string }[] = db.runQuery('SELECT timestamp FROM messages_crdt', [], true);
   let trie = merkle.emptyTrie();
 
   for (let i = 0; i < rows.length; i++) {
@@ -14,7 +14,7 @@ export function rebuildMerkleHash(): {
   }
 
   return {
-    numMessages: rows.length as number,
+    numMessages: rows.length,
     trie: trie,
   };
 }
