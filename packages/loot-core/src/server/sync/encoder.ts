@@ -3,6 +3,7 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 import * as encryption from '../encryption';
 import { SyncError } from '../errors';
 import * as prefs from '../prefs';
+
 import { Message } from './index';
 
 function coerceBuffer(value) {
