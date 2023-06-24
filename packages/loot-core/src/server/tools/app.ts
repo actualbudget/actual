@@ -2,8 +2,9 @@ import { batchUpdateTransactions } from '../accounts/transactions';
 import { createApp } from '../app';
 import * as db from '../db';
 import { runMutator } from '../mutators';
+import { ToolsHandlers } from './types/handlers';
 
-let app = createApp();
+let app = createApp<ToolsHandlers>();
 
 app.method('tools/fix-split-transactions', async () => {
   // 1. Check for child transactions that have a blank payee, and set

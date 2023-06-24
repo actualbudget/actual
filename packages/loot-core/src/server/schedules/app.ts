@@ -32,6 +32,7 @@ import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
+import { SchedulesHandlers } from './types/handlers';
 
 // Utilities
 
@@ -533,7 +534,7 @@ async function advanceSchedulesService(syncSuccess) {
 }
 
 // Expose functions to the client
-let app = createApp();
+let app = createApp<SchedulesHandlers>();
 
 app.method('schedule/create', mutator(undoable(createSchedule)));
 app.method('schedule/update', mutator(undoable(updateSchedule)));

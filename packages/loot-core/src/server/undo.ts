@@ -82,8 +82,11 @@ export function withUndo<T>(
   );
 }
 
-export function undoable(func) {
-  return (...args) => {
+export function undoable<
+  Args extends unknown[],
+  Return extends Promise<unknown>,
+>(func: (...args: Args) => Return) {
+  return (...args: Args) => {
     return withUndo(() => {
       return func(...args);
     });

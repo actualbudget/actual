@@ -7,20 +7,23 @@ import { captureException } from '../platform/exceptions';
 // makes it cleaner to combine methods. We call a group of related
 // methods an "app".
 
-class App {
+class App<Handlers> {
   events;
-  handlers;
+  handlers: Handlers;
   services;
   unlistenServices;
 
   constructor() {
-    this.handlers = {};
+    this.handlers = {} as Handlers;
     this.services = [];
     this.events = mitt();
     this.unlistenServices = [];
   }
 
-  method(name, func) {
+  method<Name extends string & keyof Handlers>(
+    name: Name,
+    func: Handlers[Name],
+  ) {
     if (this.handlers[name] != null) {
       throw new Error(
         'Conflicting method name, names must be globally unique: ' + name,
@@ -72,6 +75,6 @@ class App {
   }
 }
 
-export function createApp() {
-  return new App();
+export function createApp<T>() {
+  return new App<T>();
 }
