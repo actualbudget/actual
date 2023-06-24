@@ -37,6 +37,7 @@ export const FIELD_TYPES = new Map(
     category: 'id',
     account: 'id',
     cleared: 'boolean',
+    is_transfer: 'boolean',
   }),
 );
 
@@ -57,6 +58,8 @@ export function mapField(field, opts) {
       return 'amount (inflow)';
     case 'amount-outflow':
       return 'amount (outflow)';
+    case 'is_transfer':
+      return 'Transfer';
     default:
       return field;
   }

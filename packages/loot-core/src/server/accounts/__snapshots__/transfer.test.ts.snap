@@ -14,6 +14,7 @@ Array [
     "imported_payee": null,
     "is_child": 0,
     "is_parent": 0,
+    "is_transfer": 0,
     "notes": null,
     "parent_id": null,
     "payee": "id5",
@@ -32,24 +33,23 @@ exports[`Transfer transfers are properly de-categorized 2`] = `
 - First value
 + Second value
 
-@@ -9,16 +9,38 @@
+@@ -9,17 +9,40 @@
       \\"id\\": \\"id6\\",
       \\"imported_id\\": null,
       \\"imported_payee\\": null,
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
+-     \\"is_transfer\\": 0,
 -     \\"notes\\": null,
++     \\"is_transfer\\": 1,
 +     \\"notes\\": \\"hi\\",
-      \\"parent_id\\": null,
--     \\"payee\\": \\"id5\\",
--     \\"payee_name\\": \\"Non-transfer\\",
++     \\"parent_id\\": null,
 +     \\"payee\\": \\"id4\\",
 +     \\"payee_name\\": \\"\\",
-      \\"schedule\\": null,
-      \\"sort_order\\": 123456789,
-      \\"starting_balance_flag\\": 0,
-      \\"tombstone\\": 0,
--     \\"transfer_id\\": null,
++     \\"schedule\\": null,
++     \\"sort_order\\": 123456789,
++     \\"starting_balance_flag\\": 0,
++     \\"tombstone\\": 0,
 +     \\"transfer_id\\": \\"id7\\",
 +   },
 +   Object {
@@ -64,14 +64,18 @@ exports[`Transfer transfers are properly de-categorized 2`] = `
 +     \\"imported_payee\\": null,
 +     \\"is_child\\": 0,
 +     \\"is_parent\\": 0,
++     \\"is_transfer\\": 1,
 +     \\"notes\\": \\"hi\\",
-+     \\"parent_id\\": null,
+      \\"parent_id\\": null,
+-     \\"payee\\": \\"id5\\",
+-     \\"payee_name\\": \\"Non-transfer\\",
 +     \\"payee\\": \\"id2\\",
 +     \\"payee_name\\": \\"\\",
-+     \\"schedule\\": null,
-+     \\"sort_order\\": 123456789,
-+     \\"starting_balance_flag\\": 0,
-+     \\"tombstone\\": 0,
+      \\"schedule\\": null,
+      \\"sort_order\\": 123456789,
+      \\"starting_balance_flag\\": 0,
+      \\"tombstone\\": 0,
+-     \\"transfer_id\\": null,
 +     \\"transfer_id\\": \\"id6\\",
     },
   ]"
@@ -82,7 +86,7 @@ exports[`Transfer transfers are properly de-categorized 3`] = `
 - First value
 + Second value
 
-@@ -1,30 +1,30 @@
+@@ -1,10 +1,10 @@
   Array [
     Object {
       \\"account\\": \\"one\\",
@@ -94,9 +98,10 @@ exports[`Transfer transfers are properly de-categorized 3`] = `
       \\"error\\": null,
       \\"id\\": \\"id6\\",
       \\"imported_id\\": null,
-      \\"imported_payee\\": null,
+@@ -12,20 +12,20 @@
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
+      \\"is_transfer\\": 1,
       \\"notes\\": \\"hi\\",
       \\"parent_id\\": null,
 -     \\"payee\\": \\"id4\\",
@@ -132,6 +137,7 @@ Array [
     "imported_payee": null,
     "is_child": 0,
     "is_parent": 0,
+    "is_transfer": 0,
     "notes": null,
     "parent_id": null,
     "payee": "id5",
@@ -150,7 +156,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 2`] = `
 - First value
 + Second value
 
-@@ -19,6 +19,50 @@
+@@ -20,6 +20,52 @@
       \\"sort_order\\": 123456789,
       \\"starting_balance_flag\\": 0,
       \\"tombstone\\": 0,
@@ -168,6 +174,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 2`] = `
 +     \\"imported_payee\\": null,
 +     \\"is_child\\": 0,
 +     \\"is_parent\\": 0,
++     \\"is_transfer\\": 1,
 +     \\"notes\\": null,
 +     \\"parent_id\\": null,
 +     \\"payee\\": \\"id3\\",
@@ -190,6 +197,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 2`] = `
 +     \\"imported_payee\\": null,
 +     \\"is_child\\": 0,
 +     \\"is_parent\\": 0,
++     \\"is_transfer\\": 1,
 +     \\"notes\\": null,
 +     \\"parent_id\\": null,
 +     \\"payee\\": \\"id2\\",
@@ -208,7 +216,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 3`] = `
 - First value
 + Second value
 
-@@ -2,67 +2,67 @@
+@@ -2,70 +2,70 @@
     Object {
       \\"account\\": \\"one\\",
       \\"amount\\": 5000,
@@ -223,7 +231,9 @@ exports[`Transfer transfers are properly inserted/updated/deleted 3`] = `
       \\"imported_payee\\": null,
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
+-     \\"is_transfer\\": 0,
 -     \\"notes\\": null,
++     \\"is_transfer\\": 1,
 +     \\"notes\\": \\"This is a note\\",
       \\"parent_id\\": null,
 -     \\"payee\\": \\"id5\\",
@@ -254,6 +264,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 3`] = `
       \\"imported_payee\\": null,
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
+      \\"is_transfer\\": 1,
 -     \\"notes\\": null,
 +     \\"notes\\": \\"This is a note\\",
       \\"parent_id\\": null,
@@ -283,6 +294,8 @@ exports[`Transfer transfers are properly inserted/updated/deleted 3`] = `
       \\"imported_payee\\": null,
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
+-     \\"is_transfer\\": 1,
++     \\"is_transfer\\": 0,
       \\"notes\\": null,
       \\"parent_id\\": null,
 -     \\"payee\\": \\"id2\\",
@@ -304,10 +317,10 @@ exports[`Transfer transfers are properly inserted/updated/deleted 4`] = `
 - First value
 + Second value
 
-@@ -11,20 +11,20 @@
-      \\"imported_payee\\": null,
+@@ -12,20 +12,20 @@
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
+      \\"is_transfer\\": 1,
       \\"notes\\": \\"This is a note\\",
       \\"parent_id\\": null,
 -     \\"payee\\": \\"id3\\",
@@ -334,20 +347,21 @@ exports[`Transfer transfers are properly inserted/updated/deleted 5`] = `
 - First value
 + Second value
 
-@@ -11,39 +11,17 @@
+@@ -9,43 +9,20 @@
+      \\"id\\": \\"id7\\",
+      \\"imported_id\\": null,
       \\"imported_payee\\": null,
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
-      \\"notes\\": \\"This is a note\\",
-      \\"parent_id\\": null,
+-     \\"is_transfer\\": 1,
+-     \\"notes\\": \\"This is a note\\",
+-     \\"parent_id\\": null,
 -     \\"payee\\": \\"id4\\",
 -     \\"payee_name\\": \\"\\",
-+     \\"payee\\": \\"id9\\",
-+     \\"payee_name\\": \\"Not transferred anymore\\",
-      \\"schedule\\": null,
-      \\"sort_order\\": 123456789,
-      \\"starting_balance_flag\\": 0,
-      \\"tombstone\\": 0,
+-     \\"schedule\\": null,
+-     \\"sort_order\\": 123456789,
+-     \\"starting_balance_flag\\": 0,
+-     \\"tombstone\\": 0,
 -     \\"transfer_id\\": \\"id8\\",
 -   },
 -   Object {
@@ -362,14 +376,18 @@ exports[`Transfer transfers are properly inserted/updated/deleted 5`] = `
 -     \\"imported_payee\\": null,
 -     \\"is_child\\": 0,
 -     \\"is_parent\\": 0,
--     \\"notes\\": \\"This is a note\\",
--     \\"parent_id\\": null,
+-     \\"is_transfer\\": 1,
++     \\"is_transfer\\": 0,
+      \\"notes\\": \\"This is a note\\",
+      \\"parent_id\\": null,
 -     \\"payee\\": \\"id2\\",
 -     \\"payee_name\\": \\"\\",
--     \\"schedule\\": null,
--     \\"sort_order\\": 123456789,
--     \\"starting_balance_flag\\": 0,
--     \\"tombstone\\": 0,
++     \\"payee\\": \\"id9\\",
++     \\"payee_name\\": \\"Not transferred anymore\\",
+      \\"schedule\\": null,
+      \\"sort_order\\": 123456789,
+      \\"starting_balance_flag\\": 0,
+      \\"tombstone\\": 0,
 -     \\"transfer_id\\": \\"id7\\",
 +     \\"transfer_id\\": null,
     },
@@ -384,21 +402,22 @@ exports[`Transfer transfers are properly inserted/updated/deleted 6`] = `
 - First value
 + Second value
 
-@@ -11,17 +11,39 @@
+@@ -9,20 +9,43 @@
+      \\"id\\": \\"id7\\",
+      \\"imported_id\\": null,
       \\"imported_payee\\": null,
       \\"is_child\\": 0,
       \\"is_parent\\": 0,
-      \\"notes\\": \\"This is a note\\",
-      \\"parent_id\\": null,
--     \\"payee\\": \\"id9\\",
--     \\"payee_name\\": \\"Not transferred anymore\\",
+-     \\"is_transfer\\": 0,
++     \\"is_transfer\\": 1,
++     \\"notes\\": \\"This is a note\\",
++     \\"parent_id\\": null,
 +     \\"payee\\": \\"id3\\",
 +     \\"payee_name\\": \\"\\",
-      \\"schedule\\": null,
-      \\"sort_order\\": 123456789,
-      \\"starting_balance_flag\\": 0,
-      \\"tombstone\\": 0,
--     \\"transfer_id\\": null,
++     \\"schedule\\": null,
++     \\"sort_order\\": 123456789,
++     \\"starting_balance_flag\\": 0,
++     \\"tombstone\\": 0,
 +     \\"transfer_id\\": \\"id10\\",
 +   },
 +   Object {
@@ -413,14 +432,18 @@ exports[`Transfer transfers are properly inserted/updated/deleted 6`] = `
 +     \\"imported_payee\\": null,
 +     \\"is_child\\": 0,
 +     \\"is_parent\\": 0,
-+     \\"notes\\": \\"This is a note\\",
-+     \\"parent_id\\": null,
++     \\"is_transfer\\": 1,
+      \\"notes\\": \\"This is a note\\",
+      \\"parent_id\\": null,
+-     \\"payee\\": \\"id9\\",
+-     \\"payee_name\\": \\"Not transferred anymore\\",
 +     \\"payee\\": \\"id2\\",
 +     \\"payee_name\\": \\"\\",
-+     \\"schedule\\": null,
-+     \\"sort_order\\": 123456789,
-+     \\"starting_balance_flag\\": 0,
-+     \\"tombstone\\": 0,
+      \\"schedule\\": null,
+      \\"sort_order\\": 123456789,
+      \\"starting_balance_flag\\": 0,
+      \\"tombstone\\": 0,
+-     \\"transfer_id\\": null,
 +     \\"transfer_id\\": \\"id7\\",
     },
     Object {
@@ -434,7 +457,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 7`] = `
 - First value
 + Second value
 
-@@ -2,54 +2,10 @@
+@@ -2,56 +2,10 @@
     Object {
       \\"account\\": \\"one\\",
       \\"amount\\": 5000,
@@ -447,6 +470,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 7`] = `
 -     \\"imported_payee\\": null,
 -     \\"is_child\\": 0,
 -     \\"is_parent\\": 0,
+-     \\"is_transfer\\": 1,
 -     \\"notes\\": \\"This is a note\\",
 -     \\"parent_id\\": null,
 -     \\"payee\\": \\"id3\\",
@@ -469,6 +493,7 @@ exports[`Transfer transfers are properly inserted/updated/deleted 7`] = `
 -     \\"imported_payee\\": null,
 -     \\"is_child\\": 0,
 -     \\"is_parent\\": 0,
+-     \\"is_transfer\\": 1,
 -     \\"notes\\": \\"This is a note\\",
 -     \\"parent_id\\": null,
 -     \\"payee\\": \\"id2\\",

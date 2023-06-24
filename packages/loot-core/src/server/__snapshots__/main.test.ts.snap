@@ -15,6 +15,7 @@ Array [
     "imported_description": null,
     "isChild": 0,
     "isParent": 0,
+    "is_transfer": 0,
     "location": null,
     "notes": null,
     "parent_id": null,
@@ -39,6 +40,7 @@ Array [
     "imported_description": null,
     "isChild": 0,
     "isParent": 0,
+    "is_transfer": 0,
     "location": null,
     "notes": null,
     "parent_id": null,
@@ -58,7 +60,7 @@ exports[`Accounts Transfers are properly updated 2`] = `
 - First value
 + Second value
 
-@@ -2,12 +2,12 @@
+@@ -2,19 +2,19 @@
     Object {
       \\"acct\\": \\"one\\",
       \\"amount\\": 5000,
@@ -73,7 +75,15 @@ exports[`Accounts Transfers are properly updated 2`] = `
       \\"id\\": \\"test-transfer\\",
       \\"imported_description\\": null,
       \\"isChild\\": 0,
-@@ -22,15 +22,15 @@
+      \\"isParent\\": 0,
+-     \\"is_transfer\\": 0,
++     \\"is_transfer\\": 1,
+      \\"location\\": null,
+      \\"notes\\": null,
+      \\"parent_id\\": null,
+      \\"pending\\": 0,
+      \\"schedule\\": null,
+@@ -23,15 +23,15 @@
       \\"tombstone\\": 0,
       \\"transferred_id\\": \\"id2\\",
       \\"type\\": null,
@@ -98,7 +108,7 @@ exports[`Accounts Transfers are properly updated 3`] = `
 - First value
 + Second value
 
-@@ -17,12 +17,12 @@
+@@ -18,12 +18,12 @@
       \\"parent_id\\": null,
       \\"pending\\": 0,
       \\"schedule\\": null,
@@ -113,7 +123,7 @@ exports[`Accounts Transfers are properly updated 3`] = `
     Object {
       \\"acct\\": \\"three\\",
       \\"amount\\": -5000,
-@@ -41,10 +41,10 @@
+@@ -43,10 +43,10 @@
       \\"parent_id\\": null,
       \\"pending\\": 0,
       \\"schedule\\": null,

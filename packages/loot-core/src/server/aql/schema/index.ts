@@ -49,6 +49,7 @@ export const schema = {
     cleared: f('boolean', { default: true }),
     tombstone: f('boolean'),
     schedule: f('id', { ref: 'schedules' }),
+    is_transfer: f('boolean'),
     // subtransactions is a special field added if the table has the
     // `splits: grouped` option
   },
@@ -270,6 +271,8 @@ export const schemaConfig = {
           category: `CASE WHEN _.isParent = 1 THEN NULL ELSE cm.transferId END`,
           amount: `IFNULL(_.amount, 0)`,
           parent_id: 'CASE WHEN _.isChild = 0 THEN NULL ELSE _.parent_id END',
+          is_transfer:
+            'CASE WHEN _.transferred_id is NULL THEN FALSE ELSE TRUE END',
         });
 
         return `
