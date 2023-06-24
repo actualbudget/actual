@@ -184,18 +184,11 @@ type ExternalLinkProps = {
 };
 
 export const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
-  ({ children, href }, ref) => {
-    function onClick(e) {
-      e.preventDefault();
-      window.Actual.openURLInBrowser(href);
-    }
-
-    return (
-      <a ref={ref} href={href} onClick={onClick}>
-        {children}
-      </a>
-    );
-  },
+  ({ children, href }, ref) => (
+    <a ref={ref} href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  ),
 );
 
 type ButtonLinkProps = ComponentProps<typeof Button> & {
