@@ -56,7 +56,7 @@ test.describe('Budget', () => {
     let accountPage = await budgetPage.clickOnSpentAmountForRow(1);
     expect(page.url()).toContain('/accounts');
     expect(await accountPage.accountName.textContent()).toMatch(
-      new RegExp(`${categoryName} (\\w+ \\d+)`),
+      new RegExp(String.raw`${categoryName} \(\w+ \d+\)`),
     );
     await page.getByRole('button', { name: 'Back' }).click();
   });
