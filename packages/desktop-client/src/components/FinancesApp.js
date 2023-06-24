@@ -306,7 +306,10 @@ function FinancesAppWithContext(props) {
           <BudgetMonthCountProvider>
             <PayeesProvider>
               <AccountsProvider>
-                <DndProvider backend={isTouch ? TouchBackend : HTML5Backend}>
+                <DndProvider
+                  backend={isTouch ? TouchBackend : HTML5Backend}
+                  options={{ delayTouchStart: 300 }}
+                >
                   {app}
                 </DndProvider>
               </AccountsProvider>
