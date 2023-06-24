@@ -22,12 +22,11 @@ import { getServer } from './server-config';
 let UPLOAD_FREQUENCY_IN_DAYS = 7;
 
 export interface RemoteFile {
+  deleted: boolean;
   fileId: string;
-  name: string;
   groupId: string;
-  lastUploaded: string;
+  name: string;
   encryptKeyId: string;
-  encryptMeta: any;
   hasKey: boolean;
 }
 

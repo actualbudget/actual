@@ -15,7 +15,7 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
-import { ServerHandlers as ServerHandlers } from '../types/server-handlers';
+import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
 import {

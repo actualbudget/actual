@@ -96,7 +96,7 @@ function _runMutator<T extends () => Promise<unknown>>(
 export const runMutator = sequential(_runMutator) as typeof _runMutator;
 
 export function withMutatorContext<T>(
-  context: { undoListening: boolean; undoTag?: any },
+  context: { undoListening: boolean; undoTag?: unknown },
   func: () => Promise<T>,
 ): Promise<T> {
   if (currentContext == null && !globalMutationsEnabled) {
