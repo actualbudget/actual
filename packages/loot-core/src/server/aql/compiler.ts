@@ -19,7 +19,7 @@ function dateToInt(date) {
   return parseInt(date.replace(/-/g, ''));
 }
 
-export function addTombstone(schema, tableName, tableId, whereStr) {
+function addTombstone(schema, tableName, tableId, whereStr) {
   let hasTombstone = schema[tableName].tombstone != null;
   return hasTombstone ? `${whereStr} AND ${tableId}.tombstone = 0` : whereStr;
 }
@@ -1117,8 +1117,4 @@ export function generateSQLWithState(
 ) {
   let { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   return { sql: defaultConstructQuery(queryState, state, sqlPieces), state };
-}
-
-export function generateSQL(queryState) {
-  return generateSQLWithState(queryState).sql;
 }

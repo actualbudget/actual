@@ -39,7 +39,7 @@ import {
   IntersectionBoundary,
   Menu,
 } from './common';
-import { FixedSizeList } from './FixedSizeList';
+import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import format from './spreadsheet/format';
 import SheetValue from './spreadsheet/SheetValue';
@@ -453,7 +453,7 @@ export function InputCell({
   );
 }
 
-export function shouldSaveFromKey(e) {
+function shouldSaveFromKey(e) {
   switch (e.key) {
     case 'Tab':
     case 'Enter':

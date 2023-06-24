@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { colors } from '../../../style';
 import { View, Text, Button } from '../../common';
@@ -14,12 +14,12 @@ function getErrorMessage(reason) {
 }
 
 export default function Error() {
-  let history = useHistory();
+  let navigate = useNavigate();
   let location = useLocation();
   let { error } = (location.state || {}) as { error? };
 
   function onTryAgain() {
-    history.push('/');
+    navigate('/');
   }
 
   return (

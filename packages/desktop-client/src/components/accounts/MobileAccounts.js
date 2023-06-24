@@ -1,6 +1,6 @@
 import React, { Component, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useNavigate } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
@@ -11,7 +11,7 @@ import { Button, Text, TextOneLine, View } from '../common';
 import { Page } from '../Page';
 import CellValue from '../spreadsheet/CellValue';
 
-export function AccountHeader({ name, amount }) {
+function AccountHeader({ name, amount }) {
   return (
     <View
       style={{
@@ -44,7 +44,7 @@ export function AccountHeader({ name, amount }) {
   );
 }
 
-export function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
+function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
   return (
     <View
       style={{
@@ -148,7 +148,7 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-export class AccountList extends Component {
+class AccountList extends Component {
   isNewTransaction = id => {
     return this.props.newTransactions.includes(id);
   };

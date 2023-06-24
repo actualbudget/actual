@@ -10,7 +10,7 @@ async function runMigrations() {
   await migrations.migrate(db.getDatabase());
 }
 
-export async function updateViews() {
+async function updateViews() {
   let hashKey = 'view-hash';
   let row = await db.first('SELECT value FROM __meta__ WHERE key = ?', [
     hashKey,

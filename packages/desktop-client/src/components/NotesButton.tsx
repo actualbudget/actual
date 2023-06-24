@@ -17,7 +17,7 @@ type NotesTooltipProps = {
   position?: string;
   onClose?: (notes: string) => void;
 };
-export function NotesTooltip({
+function NotesTooltip({
   editable,
   defaultNotes,
   position = 'bottom-left',

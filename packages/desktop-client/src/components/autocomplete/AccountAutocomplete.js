@@ -7,12 +7,7 @@ import { View } from '../common';
 
 import Autocomplete from './Autocomplete';
 
-export function AccountList({
-  items,
-  getItemProps,
-  highlightedIndex,
-  embedded,
-}) {
+function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
   let lastItem = null;
 
   return (

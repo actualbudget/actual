@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useResponsive } from '../ResponsiveProvider';
 import { colorsm, styles } from '../style';
@@ -66,7 +66,7 @@ export function PageTitle({ name, style }) {
 
 export function Page({ title, modalSize, children, titleStyle }) {
   let { type, current } = usePageType();
-  let history = useHistory();
+  let navigate = useNavigate();
   let { isNarrowWidth } = useResponsive();
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 
@@ -82,7 +82,7 @@ export function Page({ title, modalSize, children, titleStyle }) {
         title={title}
         isCurrent={current}
         size={size}
-        onClose={() => history.goBack()}
+        onClose={() => navigate(-1)}
       >
         {children}
       </Modal>

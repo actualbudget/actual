@@ -66,12 +66,6 @@ export function getStatusProps(status) {
   return { color, backgroundColor, Icon };
 }
 
-export function StatusIcon({ status }) {
-  let { color, Icon } = getStatusProps(status);
-
-  return <Icon style={{ width: 13, height: 13, color }} />;
-}
-
 export function StatusBadge({ status, style }) {
   let { color, backgroundColor, Icon } = getStatusProps(status);
   return (

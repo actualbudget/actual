@@ -30,7 +30,6 @@ const fontWeight = 600;
 function ItemContent({
   style,
   to,
-  exact,
   onClick,
   activeStyle,
   forceActive,
@@ -57,7 +56,6 @@ function ItemContent({
   ) : (
     <AnchorLink
       to={to}
-      exact={exact}
       style={style}
       activeStyle={activeStyle}
       forceActive={forceActive}
@@ -74,7 +72,6 @@ function Item({
   style,
   indent = 0,
   to,
-  exact,
   onClick,
   button,
   forceHover = false,
@@ -124,7 +121,6 @@ function Item({
       <ItemContent
         style={linkStyle}
         to={to}
-        exact={exact}
         onClick={onClick}
         activeStyle={activeStyle}
         forceActive={forceActive}
@@ -136,16 +132,7 @@ function Item({
   );
 }
 
-function SecondaryItem({
-  Icon,
-  title,
-  style,
-  to,
-  exact,
-  onClick,
-  bold,
-  indent = 0,
-}) {
+function SecondaryItem({ Icon, title, style, to, onClick, bold, indent = 0 }) {
   const hoverStyle = {
     color: colorsm.sidebarItemTextHover,
     backgroundColor: colorsm.sidebarItemBackgroundHover,
@@ -188,7 +175,6 @@ function SecondaryItem({
       <ItemContent
         style={linkStyle}
         to={to}
-        exact={exact}
         onClick={onClick}
         activeStyle={activeStyle}
       >

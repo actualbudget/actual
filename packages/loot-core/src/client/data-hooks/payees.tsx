@@ -4,7 +4,7 @@ import q from '../query-helpers';
 import { useLiveQuery } from '../query-hooks';
 import { getPayeesById } from '../reducers/queries';
 
-export function usePayees() {
+function usePayees() {
   return useLiveQuery(() => q('payees').select('*'), []);
 }
 

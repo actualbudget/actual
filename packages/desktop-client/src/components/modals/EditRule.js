@@ -78,7 +78,7 @@ function getTransactionFields(conditions, actions) {
   return fields;
 }
 
-export function FieldSelect({ fields, style, value, onChange }) {
+function FieldSelect({ fields, style, value, onChange }) {
   return (
     <View
       style={{ color: colorsm.pageTextPositive, fontWeight: 700, ...style }}
@@ -176,7 +176,7 @@ function Editor({ error, style, children }) {
   );
 }
 
-export function ConditionEditor({
+function ConditionEditor({
   ops,
   condition,
   editorStyle,
@@ -412,7 +412,7 @@ function newInput(item) {
   return { ...item, inputKey: '' + Math.random() };
 }
 
-export function ConditionsList({
+function ConditionsList({
   conditionsOp,
   conditions,
   editorStyle,
@@ -596,7 +596,6 @@ let conditionFields = [
   ]);
 
 export default function EditRule({
-  history,
   modalProps,
   defaultRule,
   onSave: originalOnSave,

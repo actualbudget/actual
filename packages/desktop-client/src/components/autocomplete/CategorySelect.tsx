@@ -55,7 +55,7 @@ type CategoryListProps = {
   embedded: boolean;
   footer?: ReactNode;
 };
-export function CategoryList({
+function CategoryList({
   items,
   getItemProps,
   highlightedIndex,

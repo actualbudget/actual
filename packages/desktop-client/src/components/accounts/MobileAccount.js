@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import debounce from 'debounce';
 import memoizeOne from 'memoize-one';
@@ -25,7 +24,7 @@ import { colors } from '../../style';
 import { withThemeColor } from '../../util/withThemeColor';
 import SyncRefresh from '../SyncRefresh';
 
-import { default as AccountDetails } from './MobileAccountDetails';
+import AccountDetails from './MobileAccountDetails';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
@@ -165,7 +164,7 @@ function Account(props) {
 
   useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
 
-  if (!props.accounts || !props.accounts.length || !props.match) {
+  if (!props.accounts || !props.accounts.length) {
     return null;
   }
 

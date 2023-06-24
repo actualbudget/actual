@@ -31,7 +31,7 @@ const zIndices = { SECTION_HEADING: 10 };
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));
 
-export function isPreviewId(id) {
+function isPreviewId(id) {
   return id.indexOf('preview/') !== -1;
 }
 
@@ -80,7 +80,7 @@ function Status({ status }) {
   );
 }
 
-export class Transaction extends PureComponent {
+class Transaction extends PureComponent {
   render() {
     const {
       transaction,
@@ -463,9 +463,9 @@ function Option({ isLast, item, state }) {
   );
 }
 
-export const ROW_HEIGHT = 50;
+const ROW_HEIGHT = 50;
 
-export const ListItem = forwardRef(({ children, style, ...props }, ref) => {
+const ListItem = forwardRef(({ children, style, ...props }, ref) => {
   return (
     <View
       style={[

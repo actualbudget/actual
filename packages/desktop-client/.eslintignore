@@ -1,3 +1,5 @@
 bundle.browser.js
 build/
 public/kcab/
+**/node_modules/*
+node_modules/

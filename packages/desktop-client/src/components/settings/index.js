@@ -52,7 +52,7 @@ function About() {
         <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>
         {isOutdated ? (
-          <ExternalLink ref="https://actualbudget.github.io/docs/Release-Notes">
+          <ExternalLink ref="https://actualbudget.org/docs/releases">
             New version available: {latestVersion}
           </ExternalLink>
         ) : (
@@ -63,7 +63,7 @@ function About() {
         <Text>
           <ExternalLink
             asAnchor={true}
-            href="https://actualbudget.github.io/docs/Release-Notes"
+            href="https://actualbudget.org/docs/releases"
             style={{ color: 'inherit' }}
           >
             Release Notes

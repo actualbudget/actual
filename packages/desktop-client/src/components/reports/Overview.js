@@ -49,7 +49,6 @@ function Card({ flex, to, style, children }) {
     return (
       <AnchorLink
         to={to}
-        exact
         style={[{ textDecoration: 'none', flex }, containerProps]}
       >
         {content}

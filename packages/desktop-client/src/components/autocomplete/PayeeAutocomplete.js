@@ -42,7 +42,7 @@ function stripNew(value) {
   return value;
 }
 
-export function PayeeList({
+function PayeeList({
   items,
   getItemProps,
   highlightedIndex,
