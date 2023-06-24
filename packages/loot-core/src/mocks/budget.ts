@@ -564,14 +564,14 @@ export async function createTestBudget(handlers) {
   await db.runQuery('DELETE FROM category_groups');
 
   let accounts: AccountEntity[] = [
-    { name: 'Bank of America', type: 'checking' },
-    { name: 'Ally Savings', type: 'savings' },
-    { name: 'Capital One Checking', type: 'checking' },
-    { name: 'HSBC', type: 'checking' },
-    { name: 'Vanguard 401k', type: 'investment', offBudget: 1 },
-    { name: 'Mortgage', type: 'mortgage', offBudget: 1 },
-    { name: 'House Asset', type: 'other', offBudget: 1 },
-    { name: 'Roth IRA', type: 'investment', offBudget: 1 },
+    { name: 'Bank of America' },
+    { name: 'Ally Savings' },
+    { name: 'Capital One Checking' },
+    { name: 'HSBC' },
+    { name: 'Vanguard 401k', offBudget: 1 },
+    { name: 'Mortgage', offBudget: 1 },
+    { name: 'House Asset', offBudget: 1 },
+    { name: 'Roth IRA', offBudget: 1 },
   ];
   await runMutator(() =>
     batchMessages(async () => {
@@ -664,31 +664,27 @@ export async function createTestBudget(handlers) {
   await runMutator(() =>
     batchMessages(async () => {
       for (let account of accounts) {
-        switch (account.type) {
-          case 'checking':
-            if (account.name === 'Bank of America') {
-              await fillPrimaryChecking(handlers, account, payees, allGroups);
-            } else {
-              await fillChecking(handlers, account, payees, allGroups);
-            }
-            break;
-          case 'investment':
-            await fillInvestment(handlers, account, payees, allGroups);
-            break;
-          case 'savings':
-            await fillSavings(handlers, account, payees, allGroups);
-            break;
-          case 'mortgage':
-            await fillMortgage(handlers, account, payees, allGroups);
-            break;
-          case 'other':
-            if (account.name === 'House Asset') {
-              await fillOther(handlers, account, payees, allGroups);
-            } else {
-              await fillChecking(handlers, account, payees, allGroups);
-            }
-            break;
-          default:
+        if (account.name === 'Bank of America') {
+          await fillPrimaryChecking(handlers, account, payees, allGroups);
+        } else if (
+          account.name === 'Capital One Checking' ||
+          account.name === 'HSBC'
+        ) {
+          await fillChecking(handlers, account, payees, allGroups);
+        } else if (account.name === 'Ally Savings') {
+          await fillSavings(handlers, account, payees, allGroups);
+        } else if (
+          account.name === 'Vanguard 401k' ||
+          account.name === 'Roth IRA'
+        ) {
+          await fillInvestment(handlers, account, payees, allGroups);
+        } else if (account.name === 'Mortgage') {
+          await fillMortgage(handlers, account, payees, allGroups);
+        } else if (account.name === 'House Asset') {
+          await fillOther(handlers, account, payees, allGroups);
+        } else {
+          console.error('Unknown account name for test budget: ', account.name);
+          await fillChecking(handlers, account, payees, allGroups);
         }
       }
     }),

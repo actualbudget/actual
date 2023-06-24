@@ -49,6 +49,7 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
   process.env.ACTUAL_DATA_DIR = app.getPath('userData');
 }
 
+// eslint-disable-next-line import/extensions
 const WindowState = require('./window-state.js');
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -165,6 +166,25 @@ async function createWindow() {
     win.webContents.send('set-socket', { name: serverSocket });
   });
 
+  // hit when middle-clicking buttons or <a href/> with a target set to _blank
+  // always deny, optionally redirect to browser
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (isExternalUrl(url)) {
+      shell.openExternal(url);
+    }
+
+    return { action: 'deny' };
+  });
+
+  // hit when clicking <a href/> with no target
+  // optionally redirect to browser
+  win.webContents.on('will-navigate', (event, url) => {
+    if (isExternalUrl(url)) {
+      shell.openExternal(url);
+      event.preventDefault();
+    }
+  });
+
   if (process.platform === 'win32') {
     Menu.setApplicationMenu(null);
     win.setMenu(getMenu(isDev, createWindow));
@@ -175,16 +195,16 @@ async function createWindow() {
   clientWin = win;
 }
 
+function isExternalUrl(url) {
+  return !url.includes('localhost:') && !url.includes('app://');
+}
+
 function updateMenu(isBudgetOpen) {
   const menu = getMenu(isDev, createWindow);
   const file = menu.items.filter(item => item.label === 'File')[0];
   const fileItems = file.submenu.items;
   fileItems
-    .filter(
-      item =>
-        item.label === 'Start Tutorial' || item.label === 'Load Backup...',
-    )
-
+    .filter(item => item.label === 'Load Backup...')
     .map(item => (item.enabled = isBudgetOpen));
 
   let tools = menu.items.filter(item => item.label === 'Tools')[0];

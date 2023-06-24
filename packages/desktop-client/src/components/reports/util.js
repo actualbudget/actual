@@ -8,10 +8,6 @@ export function fromDateReprToDay(date) {
   return date;
 }
 
-export function toDateRepr(str) {
-  return parseInt(str.replace(/-/g, ''), 10);
-}
-
 export async function runAll(queries, cb) {
   let data = await Promise.all(
     queries.map(q => {

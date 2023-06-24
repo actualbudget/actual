@@ -1,82 +1,5 @@
 import * as models from './models';
 
-export const transactionModel = {
-  ...models.transactionModel,
-
-  toExternal(transactions, idx, payees) {
-    return transactions;
-    // function convert(t, payee) {
-    //   return {
-    //     id: t.id,
-    //     account_id: t.acct,
-    //     amount: t.amount,
-    //     payee_id: payee ? payee.id : null,
-    //     payee: payee ? payee.name : null,
-    //     imported_payee: t.imported_description,
-    //     category_id: t.category,
-    //     date: t.date,
-    //     notes: t.notes,
-    //     imported_id: t.financial_id,
-    //     transfer_id: t.transferred_id,
-    //     cleared: t.cleared
-    //   };
-    // }
-
-    // let splits = getAllSplitTransactions(transactions, idx);
-    // if (splits) {
-    //   let payee =
-    //     splits.parent.description && payees[splits.parent.description];
-
-    //   return {
-    //     ...convert(splits.parent, payee),
-    //     subtransactions: splits.children.map(child => convert(child, payee))
-    //   };
-    // }
-
-    // let transaction = transactions[idx];
-    // let payee = transaction.description && payees[transaction.description];
-    // return convert(transaction, payee);
-  },
-
-  fromExternal(transaction) {
-    let result: Record<string, unknown> = {};
-    if ('id' in transaction) {
-      result.id = transaction.id;
-    }
-    if ('account_id' in transaction) {
-      result.acct = transaction.account_id;
-    }
-    if ('amount' in transaction) {
-      result.amount = transaction.amount;
-    }
-    if ('payee_id' in transaction) {
-      result.description = transaction.payee_id;
-    }
-    if ('imported_payee' in transaction) {
-      result.imported_description = transaction.imported_payee;
-    }
-    if ('category_id' in transaction) {
-      result.category = transaction.category_id;
-    }
-    if ('date' in transaction) {
-      result.date = transaction.date;
-    }
-    if ('notes' in transaction) {
-      result.notes = transaction.notes;
-    }
-    if ('imported_id' in transaction) {
-      result.financial_id = transaction.imported_id;
-    }
-    if ('transfer_id' in transaction) {
-      result.transferred_id = transaction.transfer_id;
-    }
-    if ('cleared' in transaction) {
-      result.cleared = transaction.cleared;
-    }
-    return result;
-  },
-};
-
 export const accountModel = {
   ...models.accountModel,
 
@@ -84,7 +7,6 @@ export const accountModel = {
     return {
       id: account.id,
       name: account.name,
-      type: account.type,
       offbudget: account.offbudget ? true : false,
       closed: account.closed ? true : false,
     };

@@ -16,7 +16,7 @@ export function addGenericErrorNotification() {
     type: 'error',
     message:
       'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
-      'We have been notified of the issue and will try to fix it soon.',
+      'Please report this as a new issue on Github.',
   });
 }
 

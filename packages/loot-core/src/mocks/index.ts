@@ -2,7 +2,7 @@ import * as uuid from '../platform/uuid';
 import * as monthUtils from '../shared/months';
 import type { TransactionEntity } from '../types/models';
 
-export function generateAccount(name, isConnected, type, offbudget) {
+export function generateAccount(name, isConnected, offbudget) {
   return {
     id: uuid.v4Sync(),
     name,
@@ -10,7 +10,6 @@ export function generateAccount(name, isConnected, type, offbudget) {
     bank: isConnected ? Math.floor(Math.random() * 10000) : null,
     bankId: isConnected ? Math.floor(Math.random() * 10000) : null,
     bankName: isConnected ? 'boa' : null,
-    type: type || 'checking',
     offbudget: offbudget ? 1 : 0,
     closed: 0,
   };

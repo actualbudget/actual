@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<string, boolean> = {
-  syncAccount: false,
+  reportBudget: false,
   goalTemplatesEnabled: false,
 };
 

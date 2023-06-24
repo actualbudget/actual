@@ -1,7 +1,7 @@
 // We have to bundle in JS migrations manually to avoid having to `eval`
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
-import m1632571489012 from '../../../migrations/1632571489012_remove_cache.js';
+import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as uuid from '../../platform/uuid';
@@ -111,6 +111,10 @@ function checkDatabaseValidity(appliedIds, available) {
       i >= available.length ||
       appliedIds[i] !== getMigrationId(available[i])
     ) {
+      console.error('Database is out of sync with migrations:', {
+        appliedIds,
+        available,
+      });
       throw new Error('out-of-sync-migrations');
     }
   }

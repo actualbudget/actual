@@ -1,5 +1,6 @@
 import * as db from '../db';
 
+/* eslint-disable import/no-unused-modules */
 export async function createPayee(description) {
   // Check to make sure no payee already exists with exactly the same
   // name

@@ -1,3 +1,11 @@
+import {
+  makeClock,
+  setClock,
+  serializeClock,
+  deserializeClock,
+  makeClientId,
+  Timestamp,
+} from '@actual-app/crdt';
 import LRU from 'lru-cache';
 
 import * as fs from '../../platform/server/fs';
@@ -11,14 +19,6 @@ import {
   convertForUpdate,
   convertFromSelect,
 } from '../aql';
-import {
-  makeClock,
-  setClock,
-  serializeClock,
-  deserializeClock,
-  makeClientId,
-  Timestamp,
-} from '../crdt';
 import {
   accountModel,
   categoryModel,
@@ -547,12 +547,6 @@ export function getAccounts() {
 }
 
 export async function insertAccount(account) {
-  // Default to checking. Makes it a lot easier for tests and is
-  // generally harmless.
-  if (account.type === undefined) {
-    account = { ...account, type: 'checking' };
-  }
-
   const accounts = await all(
     'SELECT * FROM accounts WHERE offbudget = ? ORDER BY sort_order, name',
     [account.offbudget != null ? account.offbudget : 0],

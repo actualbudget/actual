@@ -20,7 +20,7 @@ import { styles, colors } from '../style';
 
 import { View, Block, AlignedText, AnchorLink, Button } from './common';
 import { useSidebar } from './FloatableSidebar';
-import { useDraggable, useDroppable, DropHighlight } from './sort.js';
+import { useDraggable, useDroppable, DropHighlight } from './sort';
 import CellValue from './spreadsheet/CellValue';
 
 export const SIDEBAR_WIDTH = 240;
@@ -30,7 +30,6 @@ const fontWeight = 600;
 function ItemContent({
   style,
   to,
-  exact,
   onClick,
   activeStyle,
   forceActive,
@@ -57,7 +56,6 @@ function ItemContent({
   ) : (
     <AnchorLink
       to={to}
-      exact={exact}
       style={style}
       activeStyle={activeStyle}
       forceActive={forceActive}
@@ -74,7 +72,6 @@ function Item({
   style,
   indent = 0,
   to,
-  exact,
   onClick,
   button,
   forceHover = false,
@@ -122,7 +119,6 @@ function Item({
       <ItemContent
         style={linkStyle}
         to={to}
-        exact={exact}
         onClick={onClick}
         activeStyle={activeStyle}
         forceActive={forceActive}
@@ -134,16 +130,7 @@ function Item({
   );
 }
 
-function SecondaryItem({
-  Icon,
-  title,
-  style,
-  to,
-  exact,
-  onClick,
-  bold,
-  indent = 0,
-}) {
+function SecondaryItem({ Icon, title, style, to, onClick, bold, indent = 0 }) {
   const hoverStyle = {
     backgroundColor: colors.n2,
   };
@@ -183,7 +170,6 @@ function SecondaryItem({
       <ItemContent
         style={linkStyle}
         to={to}
-        exact={exact}
         onClick={onClick}
         activeStyle={activeStyle}
       >

@@ -515,7 +515,7 @@ export const ManagePayees = forwardRef(
               style={{
                 marginRight: '10px',
               }}
-              disabled={!(orphanedPayees.length > 0) && !orphanedOnly}
+              disabled={!(orphanedPayees?.length > 0) && !orphanedOnly}
               onClick={() => {
                 setOrphanedOnly(!orphanedOnly);
                 const filterInput = document.getElementById('filter-input');
@@ -528,6 +528,7 @@ export const ManagePayees = forwardRef(
           </View>
           <View style={{ flex: 1 }} />
           <Input
+            id="filter-input"
             placeholder="Filter payees..."
             value={filter}
             onChange={e => {

@@ -36,30 +36,11 @@ export function fromDateRepr(number) {
 }
 
 export const accountModel = {
-  validateAccountType(account) {
-    const { type } = account;
-    if (
-      type !== 'checking' &&
-      type !== 'savings' &&
-      type !== 'investment' &&
-      type !== 'credit' &&
-      type !== 'mortgage' &&
-      type !== 'debt' &&
-      type !== 'other'
-    ) {
-      throw new Error('Invalid account type: ' + type);
-    }
-  },
-
   validate(account, { update }: { update?: boolean } = {}) {
-    if (!update || account.type != null) {
-      accountModel.validateAccountType(account);
-    }
-
     requiredFields(
       'account',
       account,
-      update ? ['name', 'type', 'offbudget', 'closed'] : ['name', 'type'],
+      update ? ['name', 'offbudget', 'closed'] : ['name'],
       update,
     );
 

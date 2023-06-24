@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import useSyncServerStatus from './useSyncServerStatus';
+
 export default function useNordigenStatus() {
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const status = useSyncServerStatus();
 
   useEffect(() => {
     async function fetch() {
@@ -16,8 +19,10 @@ export default function useNordigenStatus() {
       setIsLoading(false);
     }
 
-    fetch();
-  }, [setConfigured, setIsLoading]);
+    if (status === 'online') {
+      fetch();
+    }
+  }, [status]);
 
   return {
     configured,

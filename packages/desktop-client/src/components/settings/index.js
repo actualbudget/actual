@@ -54,7 +54,7 @@ function About() {
         {isOutdated ? (
           <a
             style={{ color: colors.p4 }}
-            href="https://actualbudget.github.io/docs/Release-Notes"
+            href="https://actualbudget.org/docs/releases"
           >
             New version available: {latestVersion}
           </a>
@@ -64,9 +64,7 @@ function About() {
           </Text>
         )}
         <Text>
-          <a href="https://actualbudget.github.io/docs/Release-Notes">
-            Release Notes
-          </a>
+          <a href="https://actualbudget.org/docs/releases">Release Notes</a>
         </Text>
       </View>
     </Setting>
@@ -176,7 +174,7 @@ function Settings({
           <AdvancedToggle>
             <AdvancedAbout prefs={prefs} />
             <ResetCache />
-            <ResetSync resetSync={resetSync} />
+            <ResetSync isEnabled={!!prefs.groupId} resetSync={resetSync} />
             <FixSplitsTool />
             <ExperimentalFeatures prefs={prefs} savePrefs={savePrefs} />
           </AdvancedToggle>

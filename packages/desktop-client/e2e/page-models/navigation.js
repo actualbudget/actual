@@ -57,17 +57,21 @@ export class Navigation {
 
   async createAccount(data) {
     await this.page.getByRole('button', { name: 'Add account' }).click();
+    await this.page
+      .getByRole('button', { name: 'Create local account' })
+      .click();
 
     // Fill the form
     await this.page.getByLabel('Name:').fill(data.name);
-    await this.page.getByLabel('Type:').selectOption({ label: data.type });
     await this.page.getByLabel('Balance:').fill(String(data.balance));
 
     if (data.offBudget) {
       await this.page.getByLabel('Off-budget').click();
     }
 
-    await this.page.getByRole('button', { name: 'Create' }).click();
+    await this.page
+      .getByRole('button', { name: 'Create', exact: true })
+      .click();
     return new AccountPage(this.page);
   }
 

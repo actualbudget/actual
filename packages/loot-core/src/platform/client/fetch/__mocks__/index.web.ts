@@ -22,7 +22,7 @@ export const initServer: T.InitServer = handlers => {
   };
 };
 
-export const clearServer: T.ClearServer = () => {
+export const clearServer: T.ClearServer = async () => {
   serverHandler = null;
   listeners = new Map();
 };
