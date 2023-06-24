@@ -1290,7 +1290,7 @@ class AccountInternal extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.match !== nextProps.match) {
+    if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
           editingName: false,

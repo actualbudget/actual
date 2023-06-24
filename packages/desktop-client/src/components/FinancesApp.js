@@ -9,7 +9,6 @@ import {
   NavLink,
   useNavigate,
   BrowserRouter,
-  useParams,
 } from 'react-router-dom';
 
 import hotkeys from 'hotkeys-js';
@@ -144,7 +143,7 @@ function StackedRoutesInner({ location }) {
 
       <Route
         path="/accounts/:id"
-        element={<AccountCmp isNarrowWidth={isNarrowWidth} />}
+        element={isNarrowWidth ? <MobileAccount /> : <Account />}
       />
 
       <Route
@@ -153,14 +152,6 @@ function StackedRoutesInner({ location }) {
       />
     </Routes>
   );
-}
-
-// Needed to re-mount the component for each account ID change
-function AccountCmp(props) {
-  const { id } = useParams();
-  const Component = props.isNarrowWidth ? MobileAccount : Account;
-
-  return <Component key={id} {...props} />;
 }
 
 function NavTab({ icon: TabIcon, name, path }) {

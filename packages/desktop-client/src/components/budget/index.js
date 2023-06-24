@@ -111,7 +111,7 @@ class Budget extends PureComponent {
       _initialBudgetMonth = this.state.startMonth;
     }
 
-    if (this.props.match && !prevProps.match) {
+    if (this.props.accountId !== prevProps.accountId) {
       // Make to sure to check if the budget bounds have changed, and
       // if so reload the budget data
       send('get-budget-bounds').then(({ start, end }) => {
