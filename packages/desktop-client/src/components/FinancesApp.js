@@ -305,7 +305,7 @@ const HTML5toTouch = {
     {
       id: 'touch',
       backend: TouchBackend,
-      options: { delay: 150 },
+      options: { delay: 300 },
       preview: true,
       transition: TouchTransition,
     },
