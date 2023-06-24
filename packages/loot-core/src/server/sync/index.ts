@@ -328,9 +328,8 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   db.transaction(() => {
     let added = new Set();
 
-    for (let i = 0; i < messages.length; i++) {
-      let msg = messages[i];
-      let { dataset, row, column, timestamp, value } = msg;
+    for (const msg of messages) {
+      const { dataset, row, column, timestamp, value } = msg;
 
       if (!msg.old) {
         apply(msg, getIn(oldData, [dataset, row]) || added.has(dataset + row));
@@ -354,7 +353,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
         currentMerkle = merkle.insert(
           currentMerkle,
-          Timestamp.parse(msg.timestamp),
+          Timestamp.parse(timestamp),
         );
       }
     }
