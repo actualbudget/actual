@@ -1,6 +1,7 @@
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
+import { RemoteFile } from '../server/cloud-storage';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -15,7 +16,7 @@ export interface ServerHandlers {
       Parameters<typeof batchUpdateTransactions>[0],
       'detectOrphanPayees'
     >,
-  ) => ReturnType<typeof batchUpdateTransactions>;
+  ) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
 
   'transaction-add': (transaction) => Promise<EmptyObject>;
 
@@ -30,7 +31,7 @@ export interface ServerHandlers {
 
   'transactions-export': (arg: {
     transactions;
-    accounts;
+    accounts?;
     categoryGroups;
     payees;
   }) => Promise<unknown>;
@@ -38,13 +39,13 @@ export interface ServerHandlers {
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
   'get-categories': () => Promise<{
-    grouped: unknown;
-    list: unknown;
+    grouped: unknown[];
+    list: unknown[];
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
 
-  'get-budget-bounds': () => Promise<unknown>;
+  'get-budget-bounds': () => Promise<{ start: string; end: string }>;
 
   'rollover-budget-month': (arg: { month }) => Promise<unknown>;
 
@@ -75,13 +76,17 @@ export interface ServerHandlers {
 
   'payee-create': (arg: { name }) => Promise<unknown>;
 
-  'payees-get': () => Promise<unknown>;
+  'payees-get': () => Promise<unknown[]>;
 
   'payees-get-rule-counts': () => Promise<unknown>;
 
   'payees-merge': (arg: { targetId; mergeIds }) => Promise<unknown>;
 
-  'payees-batch-change': (arg: { added; deleted; updated }) => Promise<unknown>;
+  'payees-batch-change': (arg: {
+    added?;
+    deleted?;
+    updated?;
+  }) => Promise<unknown>;
 
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
 
@@ -169,9 +174,9 @@ export interface ServerHandlers {
 
   'account-close': (arg: {
     id;
-    transferAccountId;
-    categoryId;
-    forced;
+    transferAccountId?;
+    categoryId?;
+    forced?;
   }) => Promise<unknown>;
 
   'account-reopen': (arg: { id }) => Promise<unknown>;
@@ -245,20 +250,23 @@ export interface ServerHandlers {
 
   'load-prefs': () => Promise<Record<string, unknown> | null>;
 
-  'sync-reset': () => Promise<{ error?: { reason: string } }>;
+  'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
   'sync-repair': () => Promise<unknown>;
 
   'key-make': (arg: { password }) => Promise<unknown>;
 
-  'key-test': (arg: { fileId; password }) => Promise<unknown>;
+  'key-test': (arg: {
+    fileId;
+    password;
+  }) => Promise<{ error?: { reason: string } }>;
 
   'get-did-bootstrap': () => Promise<boolean>;
 
   'subscribe-needs-bootstrap': (
     args: { url } = {},
   ) => Promise<
-    { error?: string } | { bootstrapped: unknown; hasServer: boolean }
+    { error: string } | { bootstrapped: unknown; hasServer: boolean }
   >;
 
   'subscribe-bootstrap': (arg: { password }) => Promise<{ error?: string }>;
@@ -281,15 +289,22 @@ export interface ServerHandlers {
 
   sync: () => Promise<{ error?: string }>;
 
-  'get-budgets': () => Promise<unknown>;
+  'get-budgets': () => Promise<
+    {
+      id: string;
+      cloudFileId: string;
+      groupId: string;
+      name: string;
+    }[]
+  >;
 
-  'get-remote-files': () => Promise<unknown>;
+  'get-remote-files': () => Promise<RemoteFile[]>;
 
   'reset-budget-cache': () => Promise<unknown>;
 
   'upload-budget': (arg: { id } = {}) => Promise<{ error?: string }>;
 
-  'download-budget': (arg: { fileId; replace }) => Promise<{ error; id }>;
+  'download-budget': (arg: { fileId; replace? }) => Promise<{ error; id }>;
 
   'sync-budget': () => Promise<EmptyObject>;
 
@@ -299,12 +314,12 @@ export interface ServerHandlers {
 
   'close-budget': () => Promise<'ok'>;
 
-  'delete-budget': (arg: { id; cloudFileId }) => Promise<'ok'>;
+  'delete-budget': (arg: { id; cloudFileId? }) => Promise<'ok'>;
 
   'create-budget': (arg: {
     budgetName?;
     avoidUpload?;
-    testMode: boolean;
+    testMode?: boolean;
     testBudgetId?;
   }) => Promise<unknown>;
 

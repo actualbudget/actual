@@ -2303,7 +2303,7 @@ handlers['app-focused'] = async function () {
   }
 };
 
-handlers = installAPI(handlers);
+handlers = installAPI(handlers) as Handlers;
 
 injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 

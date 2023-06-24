@@ -13,7 +13,8 @@ export function resetSync() {
       alert(getUploadError(error));
 
       if (
-        (error.reason === 'encrypt-failure' && error.meta.isMissingKey) ||
+        (error.reason === 'encrypt-failure' &&
+          (error.meta as { isMissingKey?: boolean }).isMissingKey) ||
         error.reason === 'file-has-new-key'
       ) {
         dispatch(

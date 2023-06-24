@@ -21,6 +21,16 @@ import { getServer } from './server-config';
 
 let UPLOAD_FREQUENCY_IN_DAYS = 7;
 
+export interface RemoteFile {
+  fileId: string;
+  name: string;
+  groupId: string;
+  lastUploaded: string;
+  encryptKeyId: string;
+  encryptMeta: any;
+  hasKey: boolean;
+}
+
 async function checkHTTPStatus(res) {
   if (res.status !== 200) {
     return res.text().then(str => {
@@ -328,7 +338,7 @@ export async function removeFile(fileId) {
   });
 }
 
-export async function listRemoteFiles() {
+export async function listRemoteFiles(): Promise<RemoteFile[] | null> {
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return null;

@@ -39,7 +39,7 @@ class App<Handlers> {
   combine(...apps) {
     for (let app of apps) {
       Object.keys(app.handlers).forEach(name => {
-        this.method(name, app.handlers[name]);
+        this.method(name as string & keyof Handlers, app.handlers[name]);
       });
 
       app.services.forEach(service => {

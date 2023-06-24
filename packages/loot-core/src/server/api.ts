@@ -14,7 +14,6 @@ import {
   deleteTransaction,
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
-import { ApiHandlers } from '../types/api-handlers';
 import { Handlers } from '../types/handlers';
 import { ServerHandlers as ServerHandlers } from '../types/server-handlers';
 
@@ -596,10 +595,8 @@ handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-batch-change']({ deleted: [{ id }] });
 });
 
-export default function installAPI(
-  serverHandlers: ServerHandlers,
-): ServerHandlers & ApiHandlers {
-  let merged = Object.assign({}, serverHandlers, handlers as ApiHandlers);
-  handlers = merged;
+export default function installAPI(serverHandlers: ServerHandlers) {
+  let merged = Object.assign({}, serverHandlers, handlers);
+  handlers = merged as Handlers;
   return merged;
 }

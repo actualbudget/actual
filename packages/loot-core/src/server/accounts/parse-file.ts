@@ -7,9 +7,10 @@ import { looselyParseAmount } from '../../shared/util';
 import qif2json from './qif2json';
 
 type ParseError = { message: string; internal: string };
-export type ParseFileResult =
-  | { errors?: ParseError[]; transactions?: [] }
-  | { transactions: unknown[] };
+export type ParseFileResult = {
+  errors?: ParseError[];
+  transactions?: unknown[];
+};
 
 export async function parseFile(
   filepath,

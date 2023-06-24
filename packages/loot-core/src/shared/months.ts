@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-export function _parse(value: string | Date) {
+export function _parse(value: string | number | Date) {
   if (typeof value === 'string') {
     // Dates are hard. We just want to deal with months in the format
     // 2020-01 and days in the format 2020-01-01, but life is never
@@ -66,20 +66,23 @@ export function _parse(value: string | Date) {
       return new Date(parseInt(year), 0, 1, 12);
     }
   }
+  if (typeof value === 'number') {
+    return new Date(value);
+  }
   return value;
 }
 
 export const parseDate = _parse;
 
-export function yearFromDate(date: string | Date) {
+export function yearFromDate(date: string | number | Date) {
   return d.format(_parse(date), 'yyyy');
 }
 
-export function monthFromDate(date: string | Date) {
+export function monthFromDate(date: string | number | Date) {
   return d.format(_parse(date), 'yyyy-MM');
 }
 
-export function dayFromDate(date: string | Date) {
+export function dayFromDate(date: string | number | Date) {
   return d.format(_parse(date), 'yyyy-MM-dd');
 }
 
@@ -126,7 +129,7 @@ export function subMonths(month: string | Date, n: number) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
-export function addDays(day: string | Date, n: string | number) {
+export function addDays(day: string | Date, n: number) {
   return d.format(d.addDays(_parse(day), n), 'yyyy-MM-dd');
 }
 
