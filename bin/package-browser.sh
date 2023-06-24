@@ -61,3 +61,4 @@ ACTUAL_RELEASE_TYPE=$RELEASE yarn workspace loot-core build:browser
 REACT_APP_RELEASE_TYPE=$RELEASE yarn workspace @actual-app/web build:browser
 
 echo "packages/desktop-client/build"
+ 
