@@ -256,7 +256,7 @@ function Account({
                 transform: 'translateX(-4.5px)',
               },
             }}
-            onContextMenu={e => isMobile && e.preventDefault()}
+            noContextMenu={isMobile}
           >
             <View
               style={{
