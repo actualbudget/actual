@@ -111,7 +111,7 @@ async function parseOFX(filepath) {
     transactions: data.map(trans => ({
       amount: trans.amount,
       imported_id: trans.fi_id,
-      date: trans.date ? dayFromDate(trans.date * 1000) : null,
+      date: trans.date ? dayFromDate(new Date(trans.date * 1000)) : null,
       payee_name: trans.name,
       imported_payee: trans.name,
       notes: trans.memo || null,

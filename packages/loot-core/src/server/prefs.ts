@@ -15,6 +15,7 @@ type Preferences = {
   groupId?: string;
   userId?: string;
   lastSyncedTimestamp?: string;
+  lastScheduleRun?: string;
   resetClock?: boolean;
   cloudFileId?: string;
   lastUploaded?: string;

@@ -220,12 +220,12 @@ export function sheetForMonth(month: string): string {
   return 'budget' + month.replace('-', '');
 }
 
-export function nameForMonth(month: string): string {
+export function nameForMonth(month: DateLike): string {
   // eslint-disable-next-line rulesdir/typography
   return d.format(_parse(month), "MMMM 'yy");
 }
 
-export function format(month: string, str: string): string {
+export function format(month: DateLike, str: string): string {
   return d.format(_parse(month), str);
 }
 
