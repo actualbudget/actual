@@ -179,18 +179,25 @@ export function AnchorLink({
   );
 }
 
+let externalLinkColors = {
+  purple: colors.p4,
+  blue: colors.b4,
+  muted: 'inherit',
+};
 type ExternalLinkProps = {
   children?: ReactNode;
   to: string;
+  linkColor?: keyof typeof externalLinkColors;
 };
 
 export const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
-  ({ children, to }, ref) => (
+  ({ children, to, linkColor = 'blue' }, ref) => (
     <a
       ref={ref}
       href={to}
       target="_blank"
       rel="noopener noreferrer"
+      style={{ color: externalLinkColors[linkColor] }}
     >
       {children}
     </a>
