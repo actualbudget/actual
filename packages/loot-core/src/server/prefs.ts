@@ -22,7 +22,6 @@ type Preferences = {
   encryptKeyId?: string;
   'notifications.schedules'?: boolean;
   'notifications.repair-splits'?: boolean;
-  dummyTestPrefs?: boolean;
   isCached?: boolean;
 };
 
@@ -30,10 +29,11 @@ let prefs: Preferences = null;
 
 export async function loadPrefs(
   id?: string,
-): Promise<Preferences | { dummyTestPrefs: boolean }> {
+): Promise<Preferences> {
   if (process.env.NODE_ENV === 'test' && !id) {
-    // TODO: check if we can remove this as it seems to be unused.
-    return { dummyTestPrefs: true };
+    // Needed so that we can make preferences object non-null for testing.
+    prefs = getDefaultPrefs("test", "test_preferences") 
+    return prefs;
   }
 
   const fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
