@@ -22,6 +22,7 @@ type Preferences = {
   'notifications.schedules'?: boolean;
   'notifications.repair-splits'?: boolean;
   dummyTestPrefs?: boolean;
+  isCached?: boolean;
 };
 
 let prefs: Preferences = null;

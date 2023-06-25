@@ -141,7 +141,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
   );
   let currentDay = monthUtils.currentDay();
   for (let month of months) {
-    let date = monthUtils.addDays(month, '12');
+    let date = monthUtils.addDays(month, 12);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -10000,
@@ -152,7 +152,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '18');
+    date = monthUtils.addDays(month, 18);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -9000,
@@ -163,7 +163,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '2');
+    date = monthUtils.addDays(month, 2);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -120000,
@@ -174,7 +174,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '20');
+    date = monthUtils.addDays(month, 20);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -6000,
@@ -186,7 +186,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '23');
+    date = monthUtils.addDays(month, 23);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -7500,
@@ -454,10 +454,10 @@ async function createBudget(accounts, payees, groups) {
   }
 
   function setBudgetIfSpent(month, cat) {
-    let spent = sheet.getCellValue(
+    let spent: number = sheet.getCellValue(
       monthUtils.sheetForMonth(month),
       `sum-amount-${cat.id}`,
-    );
+    ) as number;
 
     if (spent < 0) {
       setBudget(month, cat, -spent);
@@ -515,7 +515,10 @@ async function createBudget(accounts, payees, groups) {
           month <= monthUtils.currentMonth()
         ) {
           let sheetName = monthUtils.sheetForMonth(month);
-          let toBudget = sheet.getCellValue(sheetName, 'to-budget');
+          let toBudget: number = sheet.getCellValue(
+            sheetName,
+            'to-budget',
+          ) as number;
           let available = toBudget - prevSaved;
 
           if (available - 403000 > 0) {
@@ -534,7 +537,7 @@ async function createBudget(accounts, payees, groups) {
   await sheet.waitOnSpreadsheet();
 
   let sheetName = monthUtils.sheetForMonth(monthUtils.currentMonth());
-  let toBudget = sheet.getCellValue(sheetName, 'to-budget');
+  let toBudget: number = sheet.getCellValue(sheetName, 'to-budget') as number;
   if (toBudget < 0) {
     await addTransactions(primaryAccount.id, [
       {
