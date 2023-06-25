@@ -5,7 +5,16 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 
 import useNordigenStatus from '../../hooks/useNordigenStatus';
 import { authorizeBank } from '../../nordigen';
-import { View, Text, Modal, P, Button, ButtonWithLoading } from '../common';
+import { colorsm } from '../../style';
+import {
+  View,
+  Text,
+  Modal,
+  P,
+  Button,
+  ButtonWithLoading,
+  ExternalLink,
+} from '../common';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
   const dispatch = useDispatch();
@@ -40,7 +49,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
   return (
     <Modal title="Add Account" {...modalProps}>
       {() => (
-        <View style={{ maxWidth: 500, gap: 30 }}>
+        <View style={{ maxWidth: 500, gap: 30, color: colorsm.pageText }}>
           <View style={{ gap: 10 }}>
             <Button
               primary
@@ -57,13 +66,14 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
               <Text>
                 <strong>Create a local account</strong> if you want to add
                 transactions manually. You can also{' '}
-                <a
+                <ExternalLink
+                  asAnchor={true}
                   href="https://actualbudget.org/docs/transactions/importing"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   import QIF/OFX/QFX files into a local account
-                </a>
+                </ExternalLink>
                 .
               </Text>
             </View>
@@ -105,13 +115,14 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                 </Button>
                 <P style={{ fontSize: 15 }}>
                   Connect to an Actual server to set up{' '}
-                  <a
+                  <ExternalLink
+                    asAnchor={true}
                     href="https://actualbudget.org/docs/advanced/bank-sync"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     automatic syncing with Nordigen
-                  </a>
+                  </ExternalLink>
                   .
                 </P>
               </>

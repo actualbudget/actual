@@ -23,7 +23,7 @@ import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colors, colorsm } from '../../style';
+import { colorsm } from '../../style';
 import {
   useStableCallback,
   View,
@@ -232,17 +232,13 @@ const PayeeTable = forwardRef(
 );
 
 function PayeeTableHeader() {
-  let borderColor = colors.border;
   let dispatchSelected = useSelectedDispatch();
   let selectedItems = useSelectedItems();
 
   return (
     <View>
       <TableHeader
-        borderColor={borderColor}
         style={{
-          backgroundColor: 'white',
-          color: colors.n4,
           zIndex: 200,
           userSelect: 'none',
         }}
@@ -267,7 +263,7 @@ function EmptyMessage({ text, style }) {
       style={[
         {
           textAlign: 'center',
-          color: colors.n7,
+          color: colorsm.pageText,
           fontStyle: 'italic',
           fontSize: 13,
           marginTop: 5,
@@ -312,7 +308,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
               padding: 3,
               fontSize: 11,
               fontStyle: 'italic',
-              color: colors.n7,
+              color: colorsm.pageText,
             }}
           >
             {[...selectedPayees]

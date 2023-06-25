@@ -781,8 +781,8 @@ export function TableHeader({
         style={[
           { zIndex: 200 },
           version === 'v2'
-            ? { color: colorsm.tableText, fontWeight: 500 }
-            : { color: colorsm.tableText },
+            ? { color: colorsm.tableHeaderText, fontWeight: 500 }
+            : { color: colorsm.tableHeaderText },
           rowProps.style,
         ]}
       >
