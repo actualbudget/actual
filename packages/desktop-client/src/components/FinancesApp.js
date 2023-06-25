@@ -158,14 +158,14 @@ function NavTab({ icon: TabIcon, name, path }) {
   return (
     <NavLink
       to={path}
-      style={({ isActive }) => ({
+      style={{
         alignItems: 'center',
         color: colorsm.sidebarItemText,
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
-        activeStyle={{ color: colorsm.sidebarItemAccentSelected }}
-      })}
+      }}
+      activeStyle={{ color: colorsm.sidebarItemAccentSelected }}
     >
       <TabIcon
         width={22}
@@ -239,7 +239,7 @@ function FinancesApp(props) {
       <Redirector getAccounts={props.getAccounts} />
       <ExposeNavigate />
 
-      <View style={{ height: '100%', backgroundColor: colorsm.pageBackground  }}>
+      <View style={{ height: '100%', backgroundColor: colorsm.pageBackground }}>
         <GlobalKeys />
 
         <View style={{ flexDirection: 'row', flex: 1 }}>

@@ -447,7 +447,9 @@ type KeybindingProps = {
 };
 
 function Keybinding({ keyName }: KeybindingProps) {
-  return <Text style={{ fontSize: 10, colorsm.pageText }}>{keyName}</Text>;
+  return (
+    <Text style={{ fontSize: 10, color: colorsm.pageText }}>{keyName}</Text>
+  );
 }
 
 type MenuItem = {
