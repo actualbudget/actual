@@ -16,6 +16,7 @@ import {
   ButtonWithLoading,
   Stack,
   ExternalLink,
+  Link,
 } from './common';
 
 function compileMessage(message, actions, setLoading, onRemove) {
@@ -34,9 +35,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
                 if (href[0] === '#') {
                   let actionName = href.slice(1);
                   return (
-                    // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                    <a
-                      href="#"
+                    <Link
                       onClick={async e => {
                         e.preventDefault();
                         if (actions[actionName]) {
@@ -47,7 +46,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
                       }}
                     >
                       {text}
-                    </a>
+                    </Link>
                   );
                 }
 

@@ -10,7 +10,6 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux';
 
 import { format as formatDate, parseISO } from 'date-fns';
-import { css } from 'glamor';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
@@ -32,7 +31,7 @@ import useSelected, {
 import ArrowRight from '../icons/v0/RightArrow2';
 import { colors } from '../style';
 
-import { View, Text, Button, Stack, ExternalLink, Input } from './common';
+import { View, Text, Button, Stack, ExternalLink, Input, Link } from './common';
 import {
   SelectCell,
   Row,
@@ -179,18 +178,9 @@ export function Value({
         {numHidden > 0 && (
           <Text style={{ color: colors.p4 }}>
             &nbsp;&nbsp;
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a
-              href="#"
-              onClick={onExpand}
-              {...css({
-                color: colors.p4,
-                textDecoration: 'none',
-                ':hover': { textDecoration: 'underline' },
-              })}
-            >
+            <Link onClick={onExpand} style={{ color: colors.p4 }}>
               {numHidden} more items...
-            </a>
+            </Link>
             {!inline && <br />}
           </Text>
         )}
