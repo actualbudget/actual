@@ -173,7 +173,7 @@ export function AnchorLink({
       to={to}
       {...css([
         styles.smallText,
-        { color: colorsm.pageTextPositive, fontWeight: 700 },
+        { color: colorsm.pageTextPositive },
         style,
         match ? activeStyle : null,
       ])}
