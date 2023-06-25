@@ -22,7 +22,7 @@ import {
 } from 'loot-core/src/shared/months';
 import { stringToInteger } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { View, Input, Tooltip } from '../common';
 
 import DateSelectLeft from './DateSelect.left.png';
@@ -30,8 +30,8 @@ import DateSelectRight from './DateSelect.right.png';
 
 let pickerStyles = {
   '& .pika-single.actual-date-picker': {
-    color: colors.n11,
-    background: colors.n1,
+    color: colorsm.menuItemText,
+    background: colorsm.menuBackground,
     border: 'none',
     boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
     borderRadius: 4,
@@ -43,7 +43,7 @@ let pickerStyles = {
       width: 'auto',
     },
     '& .pika-label': {
-      backgroundColor: colors.n1,
+      backgroundColor: colorsm.menuItemBackground,
     },
     '& .pika-prev': {
       backgroundImage: `url(${DateSelectLeft})`,
@@ -52,18 +52,18 @@ let pickerStyles = {
       backgroundImage: `url(${DateSelectRight})`,
     },
     '& .pika-table th': {
-      color: colors.n11,
+      color: colorsm.menuItemTextHeader,
       '& abbr': { textDecoration: 'none' },
     },
     '& .pika-button': {
-      backgroundColor: colors.n2,
-      color: colors.n11,
+      backgroundColor: colorsm.buttonNeutralBackground,
+      color: colorsm.buttonNeutralText,
     },
     '& .is-today .pika-button': {
       textDecoration: 'underline',
     },
     '& .is-selected .pika-button': {
-      backgroundColor: colors.n5,
+      backgroundColor: colorsm.buttonPositiveBackground,
       boxShadow: 'none',
     },
   },
