@@ -917,7 +917,7 @@ handlers['account-close'] = mutator(async function ({
         [id],
       );
 
-      await batchMessages(() => {
+      await batchMessages(async () => {
         // TODO: what this should really do is send a special message that
         // automatically marks the tombstone value for all transactions
         // within an account... or something? This is problematic

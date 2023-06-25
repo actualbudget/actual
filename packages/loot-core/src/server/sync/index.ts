@@ -25,6 +25,7 @@ import * as undo from '../undo';
 
 import * as encoder from './encoder';
 import { rebuildMerkleHash } from './repair';
+import { isError } from './utils';
 
 export { default as makeTestMessage } from './make-test-message';
 export { default as resetSync } from './reset';
@@ -32,8 +33,9 @@ export { default as repairSync } from './repair';
 
 let FULL_SYNC_DELAY = 1000;
 let SYNCING_MODE = 'enabled';
+type SyncingMode = 'enabled' | 'offline' | 'disabled' | 'import';
 
-export function setSyncingMode(mode) {
+export function setSyncingMode(mode: SyncingMode) {
   let prevMode = SYNCING_MODE;
   switch (mode) {
     case 'enabled':
@@ -54,7 +56,7 @@ export function setSyncingMode(mode) {
   return prevMode;
 }
 
-export function checkSyncingMode(mode) {
+export function checkSyncingMode(mode: SyncingMode): boolean {
   switch (mode) {
     case 'enabled':
       return SYNCING_MODE === 'enabled' || SYNCING_MODE === 'offline';
@@ -69,7 +71,7 @@ export function checkSyncingMode(mode) {
   }
 }
 
-function apply(msg, prev?: unknown) {
+function apply(msg: Message, prev?: boolean) {
   let { dataset, row, column, value } = msg;
 
   if (dataset === 'prefs') {
@@ -147,7 +149,7 @@ async function fetchAll(table, ids) {
   return results;
 }
 
-export function serializeValue(value) {
+export function serializeValue(value: string | number | null): string {
   if (value === null) {
     return '0:';
   } else if (typeof value === 'number') {
@@ -159,7 +161,7 @@ export function serializeValue(value) {
   throw new Error('Unserializable value type: ' + JSON.stringify(value));
 }
 
-export function deserializeValue(value) {
+export function deserializeValue(value: string): string | number | null {
   const type = value[0];
   switch (type) {
     case '0':
@@ -174,9 +176,12 @@ export function deserializeValue(value) {
   throw new Error('Invalid type key for value: ' + value);
 }
 
-let _syncListeners = [];
+// TODO make this type stricter.
+type DataMap = Map<string, unknown>;
+type SyncListener = (oldData: DataMap, newData: DataMap) => unknown;
+let _syncListeners: SyncListener[] = [];
 
-export function addSyncListener(func) {
+export function addSyncListener(func: SyncListener) {
   _syncListeners.push(func);
 
   return () => {
@@ -184,7 +189,7 @@ export function addSyncListener(func) {
   };
 }
 
-async function compareMessages(messages) {
+async function compareMessages(messages: Message[]): Promise<Message[]> {
   let newMessages = [];
 
   for (let i = 0; i < messages.length; i++) {
@@ -218,7 +223,7 @@ async function compareMessages(messages) {
 // listeners importers should not rely on any functions that use any
 // projected state (like rules). We can't fire those because they
 // depend on having both old and new data which we don't quere here
-function applyMessagesForImport(messages) {
+function applyMessagesForImport(messages: Message[]): void {
   db.transaction(() => {
     for (let i = 0; i < messages.length; i++) {
       let msg = messages[i];
@@ -239,13 +244,13 @@ function applyMessagesForImport(messages) {
   });
 }
 
-type Message = {
+export type Message = {
   column: string;
   dataset: string;
   old?: unknown;
   row: string;
-  timestamp: number;
-  value: unknown;
+  timestamp: string;
+  value: string | number | null;
 };
 
 export const applyMessages = sequential(async (messages: Message[]) => {
@@ -283,7 +288,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     idsPerTable[msg.dataset].push(msg.row);
   });
 
-  async function fetchData() {
+  async function fetchData(): Promise<DataMap> {
     let data = new Map();
 
     for (let table of Object.keys(idsPerTable)) {
@@ -415,7 +420,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   return messages;
 });
 
-export function receiveMessages(messages: Message[]) {
+export function receiveMessages(messages: Message[]): Promise<Message[]> {
   messages.forEach(msg => {
     Timestamp.recv(msg.timestamp);
   });
@@ -423,7 +428,7 @@ export function receiveMessages(messages: Message[]) {
   return runMutator(() => applyMessages(messages));
 }
 
-async function _sendMessages(messages) {
+async function _sendMessages(messages: Message[]): Promise<void> {
   try {
     await applyMessages(messages);
   } catch (e) {
@@ -450,15 +455,15 @@ async function _sendMessages(messages) {
 }
 
 let IS_BATCHING = false;
-let _BATCHED = [];
-export async function batchMessages(func) {
+let _BATCHED: Message[] = [];
+export async function batchMessages(func: () => Promise<void>): Promise<void> {
   if (IS_BATCHING) {
     await func();
     return;
   }
 
   IS_BATCHING = true;
-  let batched = [];
+  let batched: Message[] = [];
 
   try {
     await func();
@@ -474,7 +479,7 @@ export async function batchMessages(func) {
   }
 }
 
-export async function sendMessages(messages) {
+export async function sendMessages(messages: Message[]) {
   if (IS_BATCHING) {
     _BATCHED = _BATCHED.concat(messages);
   } else {
@@ -482,7 +487,7 @@ export async function sendMessages(messages) {
   }
 }
 
-export function getMessagesSince(since) {
+export function getMessagesSince(since: string) {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
     [since],
@@ -490,19 +495,22 @@ export function getMessagesSince(since) {
   );
 }
 
-export async function syncAndReceiveMessages(messages, since) {
+export async function syncAndReceiveMessages(
+  messages: Message[],
+  since: string,
+): Promise<Message[]> {
   let localMessages = await getMessagesSince(since);
   await receiveMessages(
     messages.map(msg => ({
       ...msg,
-      value: deserializeValue(msg.value),
+      value: deserializeValue(msg.value as string),
       timestamp: Timestamp.parse(msg.timestamp),
     })),
   );
   return localMessages;
 }
 
-export function clearFullSyncTimeout() {
+export function clearFullSyncTimeout(): void {
   if (syncTimeout) {
     clearTimeout(syncTimeout);
     syncTimeout = null;
@@ -510,13 +518,15 @@ export function clearFullSyncTimeout() {
 }
 
 let syncTimeout = null;
-export function scheduleFullSync() {
+export function scheduleFullSync(): Promise<
+  { messages: Message[] } | { error: unknown }
+> {
   clearFullSyncTimeout();
 
   if (checkSyncingMode('enabled') && !checkSyncingMode('offline')) {
     if (process.env.NODE_ENV === 'test') {
       return fullSync().then(res => {
-        if (res.error) {
+        if (isError(res)) {
           throw res.error;
         }
         return res;
@@ -527,7 +537,7 @@ export function scheduleFullSync() {
   }
 }
 
-function getTablesFromMessages(messages) {
+function getTablesFromMessages(messages: Message[]): string[] {
   return messages.reduce((acc, message) => {
     let dataset =
       message.dataset === 'schedules_next_date' ? 'schedules' : message.dataset;
@@ -543,15 +553,17 @@ function getTablesFromMessages(messages) {
 // spreadsheet to finish any processing. This is useful if we want to
 // perform a full sync and wait for everything to finish, usually if
 // you're doing an initial sync before working with a file.
-export async function initialFullSync() {
+export async function initialFullSync(): Promise<void> {
   let result = await fullSync();
-  if (!result.error) {
+  if (isError(result)) {
     // Make sure to wait for anything in the spreadsheet to process
     await sheet.waitOnSpreadsheet();
   }
 }
 
-export const fullSync = once(async function () {
+export const fullSync = once(async function (): Promise<
+  { messages: Message[] } | { error: unknown }
+> {
   app.events.emit('sync', { type: 'start' });
   let messages;
 
@@ -621,7 +633,11 @@ export const fullSync = once(async function () {
   return { messages };
 });
 
-async function _fullSync(sinceTimestamp, count, prevDiffTime) {
+async function _fullSync(
+  sinceTimestamp: string,
+  count: number,
+  prevDiffTime: number,
+): Promise<Message[]> {
   let { cloudFileId, groupId, lastSyncedTimestamp } = prefs.getPrefs() || {};
 
   clearFullSyncTimeout();
@@ -678,7 +694,7 @@ async function _fullSync(sinceTimestamp, count, prevDiffTime) {
     receivedMessages = await receiveMessages(
       res.messages.map(msg => ({
         ...msg,
-        value: deserializeValue(msg.value),
+        value: deserializeValue(msg.value as string),
         timestamp: Timestamp.parse(msg.timestamp),
       })),
     );
