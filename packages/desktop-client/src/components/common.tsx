@@ -133,13 +133,17 @@ export function Link({ style, children, ...nativeProps }: LinkProps) {
         {
           textDecoration: 'none',
           color: styles.textColor,
-          backgroundColor: 'transparent',
+          backgroundColor: 'transparent !important',
+          display: 'inline',
           border: 0,
           cursor: 'pointer',
           padding: 0,
           font: 'inherit',
           ':hover': {
             textDecoration: 'underline',
+            boxShadow: 'none',
+          },
+          ':focus': {
             boxShadow: 'none',
           },
         },
