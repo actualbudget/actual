@@ -157,7 +157,7 @@ const colorsDark = {
   menuItemText: colorPallet.gray100,
   menuItemTextHover: colorPallet.gray200,
   menuItemTextSelected: colorPallet.gray200,
-  menuItemTextHeader: colorPallet.purple400,
+  menuItemTextHeader: colorPallet.purple300,
   menuBorder: colorPallet.gray800,
   menuBorderHover: colorPallet.purple300,
   buttonPositiveText: colorPallet.gray800,
@@ -405,9 +405,6 @@ export const styles = {
   },
   smallText: {
     fontSize: 13,
-    [`@media (min-width: ${tokens.breakpoint_small})`]: {
-      // lineHeight: 21 // TODO: This seems like trouble, but what's the right value?
-    },
   },
   verySmallText: {
     fontSize: 13,
