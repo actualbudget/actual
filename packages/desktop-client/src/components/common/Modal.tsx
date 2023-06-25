@@ -193,7 +193,7 @@ const Modal = ({
                     style={{ padding: '10px 10px' }}
                     aria-label="Close"
                   >
-                    <Delete width={10} />
+                    <Delete width={10} style={{ color: colorsm.pageText }} />
                   </Button>
                 )}
               </View>

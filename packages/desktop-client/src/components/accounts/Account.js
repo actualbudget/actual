@@ -749,7 +749,10 @@ const AccountHeader = memo(
         />
 
         <View
-          style={[styles.pageContent, { paddingBottom: 10, flexShrink: 0 }]}
+          style={[
+            styles.pageContent,
+            { paddingBottom: 10, flexShrink: 0, color: colorsm.pageText },
+          ]}
         >
           <View
             style={{
