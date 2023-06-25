@@ -4,35 +4,6 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from './tokens';
 
-export const debug = { borderWidth: 1, borderColor: 'red' };
-
-export const colorsn = {
-  primary: '#AB091E',
-  primaryText: '#AB091E',
-  primaryAccent: '#AB091E',
-  primaryAccentText: '#AB091E',
-
-  secondary: '#AB091E',
-  secondaryText: '#AB091E',
-  secondaryAccent: '#AB091E',
-  secondaryAccentText: '#AB091E',
-
-  error: '#AB091E',
-  errorText: '#AB091E',
-  errorAccent: '#AB091E',
-
-  warning: '#AB091E',
-  warningText: '#AB091E',
-  warningAccent: '#AB091E',
-
-  notice: '#AB091E',
-  noticeText: '#AB091E',
-  noticeAccent: '#AB091E',
-  noticeAccentText: '#AB091E',
-
-  background: '#AB091E',
-};
-
 // Only for use in contextual color definitions
 const colorPallet = {
   orange900: '#331302',
