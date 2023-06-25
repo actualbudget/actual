@@ -67,7 +67,12 @@ function Header({
         bare
         style={{ marginBottom: '15', alignSelf: 'flex-start' }}
       >
-        <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
+        <ArrowLeft
+          width={10}
+          height={10}
+          style={{ marginRight: 5, color: 'inherit' }}
+        />{' '}
+        Back
       </ButtonLink>
       <View style={styles.veryLargeText}>{title}</View>
 
@@ -81,7 +86,7 @@ function Header({
       >
         <div>
           <Select
-            style={{ flex: 0, backgroundColor: 'white' }}
+            style={{ flex: 0 }}
             onChange={e =>
               onChangeDates(...validateStart(allMonths, e.target.value, end))
             }
@@ -95,7 +100,7 @@ function Header({
           </Select>{' '}
           to{' '}
           <Select
-            style={{ flex: 0, backgroundColor: 'white' }}
+            style={{ flex: 0 }}
             onChange={e =>
               onChangeDates(...validateEnd(allMonths, start, e.target.value))
             }

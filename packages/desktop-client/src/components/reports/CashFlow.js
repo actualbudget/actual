@@ -7,7 +7,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
-import { colors, styles } from '../../style';
+import { colorsm, styles } from '../../style';
 import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, Text, Block, P, AlignedText } from '../common';
 
@@ -89,7 +89,12 @@ function CashFlow() {
   const { graphData, totalExpenses, totalIncome } = data;
 
   return (
-    <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+    <View
+      style={[
+        styles.page,
+        { minWidth: 650, overflow: 'hidden', color: colorsm.pageText },
+      ]}
+    >
       <Header
         title="Cash Flow"
         allMonths={allMonths}
@@ -105,7 +110,7 @@ function CashFlow() {
           marginTop: -10,
           paddingLeft: 20,
           paddingRight: 20,
-          backgroundColor: 'white',
+          backgroundColor: colorsm.tableBackground,
         }}
       >
         {filters.length > 0 && (
@@ -119,7 +124,7 @@ function CashFlow() {
 
       <View
         style={{
-          backgroundColor: 'white',
+          backgroundColor: colorsm.cardBackground,
           paddingLeft: 30,
           paddingRight: 30,
           overflow: 'auto',
@@ -131,7 +136,7 @@ function CashFlow() {
             paddingRight: 20,
             flexShrink: 0,
             alignItems: 'flex-end',
-            color: colors.n3,
+            color: colorsm.pageText,
           }}
         >
           <AlignedText

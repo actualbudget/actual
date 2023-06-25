@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
-import { styles } from '../../style';
+import { colorsm, styles } from '../../style';
 import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, P } from '../common';
 
@@ -80,7 +80,12 @@ function NetWorth({ accounts }) {
   }
 
   return (
-    <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+    <View
+      style={[
+        styles.page,
+        { minWidth: 650, overflow: 'hidden', color: colorsm.pageText },
+      ]}
+    >
       <Header
         title="Net Worth"
         allMonths={allMonths}
@@ -95,7 +100,7 @@ function NetWorth({ accounts }) {
           marginTop: -10,
           paddingLeft: 20,
           paddingRight: 20,
-          backgroundColor: 'white',
+          backgroundColor: colorsm.tableBackground,
         }}
       >
         {filters.length > 0 && (
@@ -109,7 +114,7 @@ function NetWorth({ accounts }) {
 
       <View
         style={{
-          backgroundColor: 'white',
+          backgroundColor: colorsm.cardBackground,
           padding: '30px',
           overflow: 'auto',
         }}

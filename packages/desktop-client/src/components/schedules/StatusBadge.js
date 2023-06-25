@@ -28,7 +28,7 @@ export function getStatusProps(status) {
       break;
     case 'upcoming':
       color = colorsm.formInputTextHighlight;
-      backgroundColor = colorsm.tableBackground;
+      backgroundColor = colorsm.formInputBackground;
       Icon = CalendarIcon;
       break;
     case 'paid':

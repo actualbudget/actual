@@ -28,6 +28,7 @@ function Card({ flex, to, style, children }) {
     <View
       style={[
         {
+          color: colorsm.pageText,
           backgroundColor: colorsm.cardBackground,
           borderRadius: 2,
           height: 200,

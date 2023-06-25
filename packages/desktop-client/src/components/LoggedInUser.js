@@ -96,7 +96,16 @@ function LoggedInUser({
   }
 
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
+    <View
+      style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          color: colorsm.pageTextSubdued,
+        },
+        style,
+      ]}
+    >
       <Button bare onClick={() => setMenuOpen(true)} style={{ color }}>
         {serverMessage()}
       </Button>

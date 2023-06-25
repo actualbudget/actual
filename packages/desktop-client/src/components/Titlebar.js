@@ -190,13 +190,19 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
   let { budgetType } = localPrefs;
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        color: colorsm.pageText,
+      }}
+    >
       <MonthCountSelector
         maxMonths={globalPrefs.maxMonths || 1}
         onChange={value => saveGlobalPrefs({ maxMonths: value })}
       />
       {reportBudgetEnabled && (
-        <View style={{ marginLeft: -5 }}>
+        <View style={{ marginLeft: -5, color: colorsm.pageTextSubdued }}>
           <ButtonWithLoading
             bare
             loading={loading}

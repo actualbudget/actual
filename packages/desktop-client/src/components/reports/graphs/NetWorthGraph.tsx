@@ -40,7 +40,7 @@ function Area({ start, end, scale, range }: AreaProps) {
             y={range.y[1]}
             width={endX - startX}
             height={zero - range.y[1] + 1}
-            fill="#ffffff"
+            fill={theme.colors.blueFadeStart}
           />
         </clipPath>
         <clipPath id="negative">
@@ -49,7 +49,7 @@ function Area({ start, end, scale, range }: AreaProps) {
             y={zero + 1}
             width={endX - startX}
             height={Math.max(range.y[0] - zero - 1, 0)}
-            fill="#ffffff"
+            fill={theme.colors.redFadeStart}
           />
         </clipPath>
         <linearGradient
@@ -150,7 +150,7 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
             />
             {!compact && (
               <VictoryAxis
-                style={{ ticks: { stroke: 'red' } }}
+                style={{ ticks: { stroke: theme.colors.red } }}
                 // eslint-disable-next-line rulesdir/typography
                 tickFormat={x => d.format(x, "MMM ''yy")}
                 tickValues={graphData.data.map(item => item.x)}

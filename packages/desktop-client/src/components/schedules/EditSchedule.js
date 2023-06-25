@@ -776,7 +776,9 @@ export default function ScheduleDetails() {
         align="center"
         style={{ marginTop: 20 }}
       >
-        {state.error && <Text style={{ color: colorsm.errorText }}>{state.error}</Text>}
+        {state.error && (
+          <Text style={{ color: colorsm.errorText }}>{state.error}</Text>
+        )}
         <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
           Cancel
         </Button>

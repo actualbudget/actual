@@ -556,7 +556,6 @@ export const ManagePayees = forwardRef(
           <View
             style={{
               flex: 1,
-              border: '1px solid ' + colorsm.tableBorder,
               borderRadius: 4,
               overflow: 'hidden',
             }}

@@ -24,7 +24,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import {
   View,
   Text,
@@ -92,13 +92,16 @@ function subfieldToOptions(field, subfield) {
 function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
-      bare
       style={[
-        { backgroundColor: colors.n10, marginBottom: 5 },
+        { border: '1px solid ' + colorsm.buttonNeutralBorder, marginBottom: 5 },
         style,
         selected && {
-          color: 'white',
-          '&,:hover,:active': { backgroundColor: colors.b4 },
+          color: colorsm.buttonPositiveText,
+          backgroundColor: colorsm.buttonPositiveBackground,
+          '&,:hover,:active': {
+            color: colorsm.buttonPositiveTextHover,
+            backgroundColor: colorsm.buttonPositiveBackgroundHover,
+          },
         },
       ]}
       onClick={onClick}
@@ -441,7 +444,8 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colors.n10,
+          color: colorsm.formInputText,
+          backgroundColor: colorsm.formInputBackground,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
@@ -459,13 +463,15 @@ function FilterExpression({
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
-            <Text style={{ color: colors.p4 }}>{customName}</Text>
+            <Text style={{ color: colorsm.formInputTextHighlight }}>
+              {customName}
+            </Text>
           ) : (
             <>
-              <Text style={{ color: colors.p4 }}>
+              <Text style={{ color: colorsm.formInputTextHighlight }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+              <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
@@ -481,7 +487,7 @@ function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            color: colors.n4,
+            color: colorsm.pageText,
             margin: 5,
             marginLeft: 3,
           }}
