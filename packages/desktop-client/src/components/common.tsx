@@ -32,7 +32,6 @@ import Button from './common/Button';
 import Input, { defaultInputStyle } from './common/Input';
 import Text from './common/Text';
 import View from './common/View';
-import { isElectron } from 'loot-core/src/shared/environment';
 
 export { default as Modal, ModalButtons } from './common/Modal';
 export { default as Button, ButtonWithLoading } from './common/Button';
@@ -192,6 +191,8 @@ type ExternalLinkProps = {
 
 export const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
   ({ children, to, linkColor = 'blue' }, ref) => (
+    // we can’t use <ExternalLink /> here for obvious reasons
+    // eslint-disable-next-line no-restricted-syntax
     <a
       ref={ref}
       href={to}

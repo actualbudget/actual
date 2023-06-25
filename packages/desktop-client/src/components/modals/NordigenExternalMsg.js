@@ -10,7 +10,16 @@ import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { colors } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
-import { View, Modal, Button, P, Link, Menu, Tooltip } from '../common';
+import {
+  View,
+  Modal,
+  Button,
+  P,
+  Link,
+  Menu,
+  Tooltip,
+  ExternalLink,
+} from '../common';
 import { FormField, FormLabel } from '../forms';
 
 import { COUNTRY_OPTIONS } from './countries';
@@ -180,21 +189,13 @@ export default function NordigenExternalMsg({
           service) read-only access to your entire account’s transaction
           history. This service is not affiliated with Actual in any way. Make
           sure you’ve read and understand Nordigen’s{' '}
-          <a
-            href="https://nordigen.com/en/company/privacy-policy/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <ExternalLink to="https://nordigen.com/en/company/privacy-policy/">
             Privacy Policy
-          </a>{' '}
+          </ExternalLink>{' '}
           and{' '}
-          <a
-            href="https://nordigen.com/en/company/privacy-policy-end-user/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <ExternalLink to="https://nordigen.com/en/company/privacy-policy-end-user/">
             End User Privacy Policy
-          </a>{' '}
+          </ExternalLink>{' '}
           before proceeding.
         </Warning>
 

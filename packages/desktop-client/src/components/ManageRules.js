@@ -751,8 +751,8 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             <Text>
               Rules are always run in the order that you see them.{' '}
               <ExternalLink
-                href="https://actualbudget.org/docs/budgeting/rules/"
-                style={{ color: colors.n4 }}
+                to="https://actualbudget.org/docs/budgeting/rules/"
+                linkColor="muted"
               >
                 Learn more
               </ExternalLink>
