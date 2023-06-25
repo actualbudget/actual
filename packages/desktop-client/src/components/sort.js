@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
-import { colors } from '../style';
+import { colorsm } from '../style';
 
 import { View } from './common';
 
@@ -130,7 +130,7 @@ export function DropHighlight({ pos, offset = {} }) {
           right: 2,
           borderRadius: 3,
           height: 3,
-          background: `linear-gradient(90deg, ${colors.b4} 0%, ${colors.b5} 100%)`,
+          background: colorsm.sidebarItemAccentSelected,
           zIndex: 10000,
           pointerEvents: 'none',
         },

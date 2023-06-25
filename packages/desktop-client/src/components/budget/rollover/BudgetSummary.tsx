@@ -347,7 +347,6 @@ export function BudgetSummary({
                 marginTop: 3,
                 fontSize: 18,
                 fontWeight: 500,
-                textDecorationSkip: 'ink',
               },
               currentMonth === month && { textDecoration: 'underline' },
             ])}

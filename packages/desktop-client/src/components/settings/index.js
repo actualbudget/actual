@@ -44,7 +44,6 @@ function About() {
             display: 'grid',
             gridTemplateRows: '1fr 1fr',
             gridTemplateColumns: '50% 50%',
-            columnGap: '2em',
             gridAutoFlow: 'column',
           }),
         ]}

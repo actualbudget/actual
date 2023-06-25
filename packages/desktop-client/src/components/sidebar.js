@@ -44,7 +44,6 @@ function ItemContent({
         {
           touchAction: 'auto',
           userSelect: 'none',
-          userDrag: 'none',
           cursor: 'pointer',
           ...(forceActive ? activeStyle : {}),
         },
