@@ -52,7 +52,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
                 }
 
                 return (
-                  <ExternalLink key={idx} href={match[2]}>
+                  <ExternalLink key={idx} to={match[2]}>
                     {match[1]}
                   </ExternalLink>
                 );

@@ -32,6 +32,7 @@ import Button from './common/Button';
 import Input, { defaultInputStyle } from './common/Input';
 import Text from './common/Text';
 import View from './common/View';
+import { isElectron } from 'loot-core/src/shared/environment';
 
 export { default as Modal, ModalButtons } from './common/Modal';
 export { default as Button, ButtonWithLoading } from './common/Button';
@@ -180,12 +181,17 @@ export function AnchorLink({
 
 type ExternalLinkProps = {
   children?: ReactNode;
-  href: string;
+  to: string;
 };
 
 export const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
-  ({ children, href }, ref) => (
-    <a ref={ref} href={href} target="_blank" rel="noopener noreferrer">
+  ({ children, to }, ref) => (
+    <a
+      ref={ref}
+      href={to}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       {children}
     </a>
   ),
