@@ -533,10 +533,30 @@ async function applyCategoryTemplate(
           dateCond,
           monthUtils._parse(current_month),
         );
+
+        let isRepeating =
+          Object(dateCond.value) === dateCond.value &&
+          'frequency' in dateCond.value;
+
         let num_months = monthUtils.differenceInCalendarMonths(
           next_date_string,
           current_month,
         );
+
+        if (isRepeating) {
+          let monthlyTarget = 0;
+          let next_month = monthUtils.addMonths(current_month, num_months + 1);
+          let next_date = getNextDate(
+            dateCond,
+            monthUtils._parse(current_month),
+          );
+          while (next_date < next_month) {
+            monthlyTarget += amountCond.value;
+            next_date = monthUtils.addDays(next_date, 1);
+            next_date = getNextDate(dateCond, monthUtils._parse(next_date));
+          }
+          amountCond.value = monthlyTarget;
+        }
 
         if (template.full === true) {
           if (num_months === 1) {
