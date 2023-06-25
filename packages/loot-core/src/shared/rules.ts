@@ -25,19 +25,6 @@ export const TYPE_INFO = {
   },
 };
 
-export type FieldTypes = {
-  imported_payee: string;
-  payee: string;
-  date: string;
-  notes: string;
-  amount: number;
-  amountInflow: number;
-  amountOutfow: number;
-  category: string;
-  account: string;
-  cleared: boolean;
-};
-
 export const FIELD_TYPES = new Map(
   Object.entries({
     imported_payee: 'string',
@@ -147,7 +134,7 @@ export function getFieldError(type) {
     case 'invalid-field':
       return 'Please choose a valid field for this type of rule';
     default:
-      return 'Internal error, sorry! Please get in touch https://actualbudget.github.io/docs/Contact/ for support';
+      return 'Internal error, sorry! Please get in touch https://actualbudget.org/contact/ for support';
   }
 }
 

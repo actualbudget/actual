@@ -1,3 +1,11 @@
+import {
+  makeClock,
+  setClock,
+  serializeClock,
+  deserializeClock,
+  makeClientId,
+  Timestamp,
+} from '@actual-app/crdt';
 import LRU from 'lru-cache';
 
 import * as fs from '../../platform/server/fs';
@@ -11,14 +19,6 @@ import {
   convertForUpdate,
   convertFromSelect,
 } from '../aql';
-import {
-  makeClock,
-  setClock,
-  serializeClock,
-  deserializeClock,
-  makeClientId,
-  Timestamp,
-} from '../crdt';
 import {
   accountModel,
   categoryModel,
@@ -491,7 +491,7 @@ export async function mergePayees(target, ids) {
       }),
     );
 
-    return Promise.all(
+    await Promise.all(
       ids.map(id =>
         Promise.all([
           update('payee_mapping', { id, targetId: target }),
@@ -583,7 +583,7 @@ export async function moveAccount(id, targetId) {
   }
 
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
-  await batchMessages(() => {
+  await batchMessages(async () => {
     for (let info of updates) {
       update('accounts', info);
     }

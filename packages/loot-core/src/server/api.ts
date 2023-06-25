@@ -1,3 +1,5 @@
+import { getClock } from '@actual-app/crdt';
+
 import * as connection from '../platform/server/connection';
 import {
   getDownloadError,
@@ -22,7 +24,6 @@ import {
 } from './api-models';
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
-import { getClock } from './crdt';
 import * as db from './db';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
@@ -175,6 +176,9 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     }
   } else {
     let files = await handlers['get-remote-files']();
+    if (!files) {
+      throw new Error('Could not get remote files');
+    }
     let file = files.find(f => f.groupId === syncId);
     if (!file) {
       throw new Error(

@@ -17,7 +17,7 @@ type AlertProps = {
   children?: ReactNode;
 };
 
-export const Alert = ({
+const Alert = ({
   icon: Icon,
   color,
   backgroundColor,

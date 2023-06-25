@@ -165,7 +165,7 @@ export function importBudget(filepath, type) {
     dispatch(closeModal());
 
     await dispatch(loadPrefs());
-    window.__history.push('/budget');
+    window.__navigate('/budget');
   };
 }
 

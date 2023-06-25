@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Formik } from 'formik';
 
@@ -17,7 +18,8 @@ import {
   Text,
 } from '../common';
 
-function CreateLocalAccount({ modalProps, actions, history }) {
+function CreateLocalAccount({ modalProps, actions }) {
+  let navigate = useNavigate();
   return (
     <Modal title="Create Local Account" {...modalProps} showBack={false}>
       {() => (
@@ -43,7 +45,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                   toRelaxedNumber(values.balance),
                   values.offbudget,
                 );
-                history.push('/accounts/' + id);
+                navigate('/accounts/' + id);
               }
             }}
             render={({
@@ -115,7 +117,7 @@ function CreateLocalAccount({ modalProps, actions, history }) {
                         This cannot be changed later. <br /> {'\n'}
                         See{' '}
                         <a
-                          href="https://actualbudget.github.io/docs/Accounts/overview/#off-budget-accounts"
+                          href="https://actualbudget.org/docs/accounts/#off-budget-accounts"
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{

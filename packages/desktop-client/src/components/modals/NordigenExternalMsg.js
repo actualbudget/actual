@@ -6,10 +6,11 @@ import { sendCatch } from 'loot-core/src/platform/client/fetch';
 
 import useNordigenStatus from '../../hooks/useNordigenStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
+import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { colors } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
-import { View, Modal, Button, P, Link } from '../common';
+import { View, Modal, Button, P, Link, Menu, Tooltip } from '../common';
 import { FormField, FormLabel } from '../forms';
 
 import { COUNTRY_OPTIONS } from './countries';
@@ -77,6 +78,7 @@ export default function NordigenExternalMsg({
   let [country, setCountry] = useState();
   let [error, setError] = useState(null);
   let [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
+  let [menuOpen, setMenuOpen] = useState(false);
   let data = useRef(null);
 
   const {
@@ -141,7 +143,14 @@ export default function NordigenExternalMsg({
         {isBankOptionError ? (
           <Error>
             Failed loading available banks: Nordigen access credentials might be
-            misconfigured. Please set them up again.
+            misconfigured. Please{' '}
+            <Link
+              onClick={onNordigenInit}
+              style={{ color: colors.b3, display: 'inline' }}
+            >
+              set them up
+            </Link>{' '}
+            again.
           </Error>
         ) : (
           country &&
@@ -189,18 +198,50 @@ export default function NordigenExternalMsg({
           before proceeding.
         </Warning>
 
-        <Button
-          primary
-          style={{
-            padding: '10px 0',
-            fontSize: 15,
-            fontWeight: 600,
-          }}
-          onClick={onJump}
-          disabled={!institutionId || !country}
-        >
-          Link bank in browser &rarr;
-        </Button>
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+          <Button
+            primary
+            style={{
+              padding: '10px 0',
+              fontSize: 15,
+              fontWeight: 600,
+              flexGrow: 1,
+            }}
+            onClick={onJump}
+            disabled={!institutionId || !country}
+          >
+            Link bank in browser &rarr;
+          </Button>
+          <Button bare onClick={() => setMenuOpen(true)} aria-label="Menu">
+            <DotsHorizontalTriple
+              width={15}
+              height={15}
+              style={{ color: 'inherit', transform: 'rotateZ(90deg)' }}
+            />
+            {menuOpen && (
+              <Tooltip
+                position="bottom-right"
+                width={200}
+                style={{ padding: 0 }}
+                onClose={() => setMenuOpen(false)}
+              >
+                <Menu
+                  onMenuSelect={item => {
+                    if (item === 'reconfigure') {
+                      onNordigenInit();
+                    }
+                  }}
+                  items={[
+                    {
+                      name: 'reconfigure',
+                      text: 'Set new API secrets',
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+          </Button>
+        </View>
       </View>
     );
   };

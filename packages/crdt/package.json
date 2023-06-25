@@ -1,0 +1,28 @@
+{
+  "name": "@actual-app/crdt",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "CRDT layer of Actual",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "build:node": "tsc --p tsconfig.dist.json",
+    "build": "rm -rf dist && yarn run build:node && cp src/proto/sync_pb.d.ts dist/src/proto/",
+    "test": "jest -c jest.config.js"
+  },
+  "dependencies": {
+    "google-protobuf": "^3.12.0-rc.1",
+    "murmurhash": "^0.0.2",
+    "uuid": "3.3.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.5.0",
+    "jest": "^27.0.0",
+    "ts-jest": "^27.0.0",
+    "typescript": "^5.0.2"
+  }
+}

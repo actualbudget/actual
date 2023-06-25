@@ -1,5 +1,6 @@
 import './polyfills';
 import * as injectAPI from '@actual-app/api/injected';
+import * as CRDT from '@actual-app/crdt';
 import * as YNAB4 from '@actual-app/import-ynab4/importer';
 import * as YNAB5 from '@actual-app/import-ynab5/importer';
 
@@ -37,16 +38,6 @@ import {
 import budgetApp from './budget/app';
 import * as budget from './budget/base';
 import * as cloudStorage from './cloud-storage';
-import {
-  getClock,
-  setClock,
-  makeClock,
-  makeClientId,
-  serializeClock,
-  deserializeClock,
-  Timestamp,
-  merkle,
-} from './crdt';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
@@ -73,7 +64,6 @@ import {
   repairSync,
 } from './sync';
 import * as syncMigrations from './sync/migrate';
-import * as SyncPb from './sync/proto/sync_pb';
 import toolsApp from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
@@ -927,7 +917,7 @@ handlers['account-close'] = mutator(async function ({
         [id],
       );
 
-      await batchMessages(() => {
+      await batchMessages(async () => {
         // TODO: what this should really do is send a special message that
         // automatically marks the tombstone value for all transactions
         // within an account... or something? This is problematic
@@ -1106,7 +1096,7 @@ handlers['accounts-sync'] = async function ({ id }) {
           errors.push({
             accountId: acct.id,
             message:
-              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
+              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
 
@@ -1347,7 +1337,7 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
           errors.push({
             accountId: acct.id,
             message:
-              'There was an internal error. Please get in touch https://actualbudget.github.io/docs/Contact for support.',
+              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
 
@@ -1485,14 +1475,12 @@ handlers['save-global-prefs'] = async function (prefs) {
 handlers['load-global-prefs'] = async function () {
   let [
     [, floatingSidebar],
-    [, seenTutorial],
     [, maxMonths],
     [, autoUpdate],
     [, documentDir],
     [, encryptKey],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
-    'seen-tutorial',
     'max-months',
     'auto-update',
     'document-dir',
@@ -1500,7 +1488,6 @@ handlers['load-global-prefs'] = async function () {
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
-    seenTutorial: seenTutorial === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
@@ -1776,6 +1763,8 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
   if (url == null) {
     await asyncStorage.removeItem('user-token');
   } else {
+    url = url.replace(/\/+$/, '');
+
     if (validate) {
       // Validate the server is running
       let { error } = await runHandler(handlers['subscribe-needs-bootstrap'], {
@@ -2049,11 +2038,6 @@ handlers['create-budget'] = async function ({
   return {};
 };
 
-handlers['set-tutorial-seen'] = async function () {
-  await asyncStorage.setItem('seen-tutorial', 'true');
-  return 'ok';
-};
-
 handlers['import-budget'] = async function ({ filepath, type }) {
   try {
     if (!(await fs.exists(filepath))) {
@@ -2212,10 +2196,10 @@ async function loadBudget(id) {
     //
     // TODO: The client id should be stored elsewhere. It shouldn't
     // work this way, but it's fine for now.
-    getClock().timestamp.setNode(makeClientId());
+    CRDT.getClock().timestamp.setNode(CRDT.makeClientId());
     await db.runQuery(
       'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-      [serializeClock(getClock())],
+      [CRDT.serializeClock(CRDT.getClock())],
     );
 
     await prefs.savePrefs({ resetClock: false });
@@ -2273,30 +2257,6 @@ async function loadBudget(id) {
 
   return {};
 }
-
-handlers['get-upgrade-notifications'] = async function () {
-  let { id } = prefs.getPrefs();
-  if (id === TEST_BUDGET_ID || id === DEMO_BUDGET_ID) {
-    return [];
-  }
-
-  let types = ['schedules', 'repair-splits'];
-  let unseen = [];
-
-  for (let type of types) {
-    let key = `notifications.${type}`;
-    if (prefs.getPrefs()[key] == null) {
-      unseen.push(type);
-    }
-  }
-
-  return unseen;
-};
-
-handlers['seen-upgrade-notification'] = async function ({ type }) {
-  let key = `notifications.${type}`;
-  prefs.savePrefs({ [key]: true });
-};
 
 handlers['upload-file-web'] = async function ({ filename, contents }) {
   if (!Platform.isWeb) {
@@ -2500,15 +2460,7 @@ export const lib = {
   db,
 
   // Expose CRDT mechanisms so server can use them
-  merkle,
-  timestamp: {
-    getClock,
-    setClock,
-    makeClock,
-    makeClientId,
-    serializeClock,
-    deserializeClock,
-    Timestamp,
-  },
-  SyncProtoBuf: SyncPb,
+  // Backwards compatability
+  ...CRDT,
+  timestamp: CRDT,
 };

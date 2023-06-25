@@ -515,7 +515,7 @@ export const ManagePayees = forwardRef(
               style={{
                 marginRight: '10px',
               }}
-              disabled={!(orphanedPayees.length > 0) && !orphanedOnly}
+              disabled={!(orphanedPayees?.length > 0) && !orphanedOnly}
               onClick={() => {
                 setOrphanedOnly(!orphanedOnly);
                 const filterInput = document.getElementById('filter-input');

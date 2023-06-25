@@ -1,7 +1,8 @@
+import { Timestamp } from '@actual-app/crdt';
+
 import * as connection from '../platform/server/connection';
 import { getIn } from '../shared/util';
 
-import { Timestamp } from './crdt';
 import { withMutatorContext, getMutatorContext } from './mutators';
 import { sendMessages } from './sync';
 

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 
-export let BudgetMonthCountContext = createContext();
+let BudgetMonthCountContext = createContext();
 
 export function BudgetMonthCountProvider({ children }) {
   let [displayMax, setDisplayMax] = useState(1);

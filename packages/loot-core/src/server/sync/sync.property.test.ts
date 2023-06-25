@@ -1,12 +1,13 @@
+import { merkle, getClock, Timestamp } from '@actual-app/crdt';
 import jsc, { type Arbitrary } from 'jsverify';
 
-import { merkle, getClock, Timestamp } from '../crdt';
 import * as db from '../db';
 import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
 import * as encoder from './encoder';
+import { isError } from './utils';
 
 import * as sync from './index';
 
@@ -278,10 +279,10 @@ async function run(msgs) {
     ),
   );
 
-  let { error } = await syncPromise;
-  if (error) {
-    console.log(error);
-    throw error;
+  let result = await syncPromise;
+  if (isError(result)) {
+    console.log(result.error);
+    throw result.error;
   }
 
   let serverMerkle = mockSyncServer.getClock().merkle;

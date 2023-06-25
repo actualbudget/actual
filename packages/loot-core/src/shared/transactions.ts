@@ -56,7 +56,7 @@ export function recalculateSplit(trans) {
   };
 }
 
-export function findParentIndex(transactions, idx) {
+function findParentIndex(transactions, idx) {
   // This relies on transactions being sorted in a way where parents
   // are always before children, which is enforced in the db layer.
   // Walk backwards and find the last parent;
@@ -95,7 +95,7 @@ export function ungroupTransactions(transactions) {
   return x;
 }
 
-export function groupTransaction(split) {
+function groupTransaction(split) {
   return { ...split[0], subtransactions: split.slice(1) };
 }
 
@@ -110,7 +110,7 @@ export function applyTransactionDiff(groupedTrans, diff) {
   return groupTransaction(applyChanges(diff, ungroupTransaction(groupedTrans)));
 }
 
-export function replaceTransactions(transactions, id, func) {
+function replaceTransactions(transactions, id, func) {
   let idx = transactions.findIndex(t => t.id === id);
   let trans = transactions[idx];
   let transactionsCopy = [...transactions];

@@ -5,20 +5,6 @@ function getMenu(isDev, createWindow) {
     {
       label: 'File',
       submenu: [
-        // {
-        //   label: 'Start Tutorial',
-        //   enabled: false,
-        //   click(item, focusedWindow) {
-        //     if (
-        //       focusedWindow &&
-        //       focusedWindow.webContents.getTitle() === 'Actual'
-        //     ) {
-        //       focusedWindow.webContents.executeJavaScript(
-        //         '__actionsForMenu.startTutorial()'
-        //       );
-        //     }
-        //   }
-        // },
         {
           label: 'Load Backup...',
           enabled: false,
@@ -145,7 +131,9 @@ function getMenu(isDev, createWindow) {
           enabled: false,
           click: function (menuItem, focusedWin) {
             focusedWin.webContents.executeJavaScript(
-              '__history && __history.push("/schedule/discover", { locationPtr: __history.location })',
+              // TODO: fix
+              // '__navigate && __history.push("/schedule/discover", { locationPtr: __history.location })',
+              'alert("Not implemented")',
             );
           },
         },
@@ -165,7 +153,7 @@ function getMenu(isDev, createWindow) {
         {
           label: 'Learn More',
           click() {
-            shell.openExternal('https://actualbudget.github.io/docs/');
+            shell.openExternal('https://actualbudget.org/docs/');
           },
         },
       ],

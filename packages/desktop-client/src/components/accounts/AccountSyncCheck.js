@@ -39,7 +39,7 @@ function getErrorMessage(type, code) {
     <>
       An internal error occurred. Try to login again, or get{' '}
       <a
-        href="https://actualbudget.github.io/docs/Contact/"
+        href="https://actualbudget.org/contact/"
         target="_blank"
         rel="noopener noreferrer"
       >

@@ -7,7 +7,13 @@ import React, {
   useMemo,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
+import {
+  Navigate,
+  useParams,
+  useNavigate,
+  useLocation,
+  useMatch,
+} from 'react-router-dom';
 
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
@@ -34,7 +40,6 @@ import {
   groupById,
 } from 'loot-core/src/shared/util';
 
-import useFeatureFlag from '../../hooks/useFeatureFlag';
 import {
   SelectedProviderWithItems,
   useSelectedItems,
@@ -264,7 +269,6 @@ function MenuTooltip({ onClose, children }) {
 function AccountMenu({
   account,
   canSync,
-  syncEnabled,
   showBalances,
   canShowBalances,
   showCleared,
@@ -302,8 +306,7 @@ function AccountMenu({
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
-          syncEnabled &&
-            account &&
+          account &&
             !account.closed &&
             (canSync
               ? {
@@ -524,7 +527,8 @@ function SelectedTransactionsButton({
   onScheduleAction,
 }) {
   let selectedItems = useSelectedItems();
-  let history = useHistory();
+  let navigate = useNavigate();
+  let location = useLocation();
 
   let types = useMemo(() => {
     let items = [...selectedItems];
@@ -636,14 +640,14 @@ function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              history.push(`/schedule/edit/${scheduleId}`, {
-                locationPtr: history.location,
+              navigate(`/schedule/edit/${scheduleId}`, {
+                locationPtr: location,
               });
             }
             break;
           case 'link-schedule':
-            history.push(`/schedule/link`, {
-              locationPtr: history.location,
+            navigate(`/schedule/link`, {
+              locationPtr: location,
               transactionIds: [...selectedItems],
             });
             break;
@@ -672,7 +676,6 @@ const AccountHeader = memo(
     accountsSyncing,
     accounts,
     transactions,
-    syncEnabled,
     showBalances,
     showExtraBalances,
     showCleared,
@@ -709,7 +712,7 @@ const AccountHeader = memo(
     let searchInput = useRef(null);
     let splitsExpanded = useSplitsExpanded();
 
-    let canSync = syncEnabled && account && account.account_id;
+    let canSync = account && account.account_id;
     if (!account) {
       // All accounts - check for any syncable account
       canSync = !!accounts.find(account => !!account.account_id);
@@ -976,7 +979,6 @@ const AccountHeader = memo(
                   <AccountMenu
                     account={account}
                     canSync={canSync}
-                    syncEnabled={syncEnabled}
                     canShowBalances={canCalculateBalance()}
                     showBalances={showBalances}
                     showCleared={showCleared}
@@ -1288,7 +1290,7 @@ class AccountInternal extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.match !== nextProps.match) {
+    if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
           editingName: false,
@@ -1820,7 +1822,6 @@ class AccountInternal extends PureComponent {
       accounts,
       categoryGroups,
       payees,
-      syncEnabled,
       dateFormat,
       hideFraction,
       addNotification,
@@ -1828,6 +1829,7 @@ class AccountInternal extends PureComponent {
       replaceModal,
       showExtraBalances,
       accountId,
+      categoryId,
     } = this.props;
     let {
       transactions,
@@ -1847,8 +1849,12 @@ class AccountInternal extends PureComponent {
     if (!accountName && !loading) {
       // This is probably an account that was deleted, so redirect to
       // all accounts
-      return <Redirect to="/accounts" />;
+      return <Navigate to="/accounts" replace />;
     }
+
+    let category = categoryGroups
+      .flatMap(g => g.categories)
+      .find(category => category.id === categoryId);
 
     let showEmptyMessage = !loading && !accountId && accounts.length === 0;
 
@@ -1890,7 +1896,6 @@ class AccountInternal extends PureComponent {
                   showCleared={showCleared}
                   showEmptyMessage={showEmptyMessage}
                   balanceQuery={balanceQuery}
-                  syncEnabled={syncEnabled}
                   canCalculateBalance={this.canCalculateBalance}
                   reconcileAmount={reconcileAmount}
                   search={this.state.search}
@@ -1932,6 +1937,7 @@ class AccountInternal extends PureComponent {
                       this.paged && this.paged.fetchNext()
                     }
                     accounts={accounts}
+                    category={category}
                     categoryGroups={categoryGroups}
                     payees={payees}
                     balances={
@@ -1958,11 +1964,7 @@ class AccountInternal extends PureComponent {
                     renderEmpty={() =>
                       showEmptyMessage ? (
                         <EmptyMessage
-                          onAdd={() =>
-                            replaceModal(
-                              syncEnabled ? 'add-account' : 'add-local-account',
-                            )
-                          }
+                          onAdd={() => replaceModal('add-account')}
                         />
                       ) : !loading ? (
                         <View
@@ -2001,17 +2003,18 @@ class AccountInternal extends PureComponent {
 
 function AccountHack(props) {
   let { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  let match = useMatch(props.location.pathname);
 
   return (
     <AccountInternal
       {...props}
+      match={match}
       splitsExpandedDispatch={splitsExpandedDispatch}
     />
   );
 }
 
 export default function Account() {
-  const syncEnabled = useFeatureFlag('syncAccount');
   let params = useParams();
   let location = useLocation();
   let activeLocation = useActiveLocation();
@@ -2033,7 +2036,6 @@ export default function Account() {
     modalShowing: state.modals.modalStack.length > 0,
     accountsSyncing: state.account.accountsSyncing,
     lastUndoState: state.app.lastUndoState,
-    tutorialStage: state.tutorial.stage,
   }));
 
   let dispatch = useDispatch();
@@ -2075,12 +2077,12 @@ export default function Account() {
         <AccountHack
           {...state}
           {...actionCreators}
-          syncEnabled={syncEnabled}
           modalShowing={
             state.modalShowing ||
             !!(activeLocation.state && activeLocation.state.locationPtr)
           }
           accountId={params.id}
+          categoryId={activeLocation?.state?.filter?.category}
           location={location}
         />
       </SplitsExpandedProvider>

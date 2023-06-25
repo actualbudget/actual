@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { withRouter, useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { bindActionCreators } from 'redux';
 
@@ -10,7 +10,6 @@ import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import useFeatureFlag from '../hooks/useFeatureFlag';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import { styles, colors } from '../style';
 
@@ -19,7 +18,7 @@ import { Sidebar } from './sidebar';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
-  let history = useHistory();
+  let navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -31,10 +30,10 @@ function EditableBudgetName({ prefs, savePrefs }) {
         setEditing(true);
         break;
       case 'settings':
-        history.push('/settings');
+        navigate('/settings');
         break;
       case 'help':
-        window.open('https://actualbudget.github.io/docs', '_blank');
+        window.open('https://actualbudget.org/docs/', '_blank');
         break;
       case 'close':
         dispatch(closeBudget());
@@ -119,8 +118,6 @@ function SidebarWithData({
   saveGlobalPrefs,
   getAccounts,
 }) {
-  const syncAccount = useFeatureFlag('syncAccount');
-
   useEffect(() => void getAccounts(), [getAccounts]);
 
   async function onReorder(id, dropPos, targetId) {
@@ -146,9 +143,7 @@ function SidebarWithData({
       getOffBudgetBalance={queries.offbudgetAccountBalance}
       onFloat={() => saveGlobalPrefs({ floatingSidebar: !floatingSidebar })}
       onReorder={onReorder}
-      onAddAccount={() =>
-        replaceModal(syncAccount ? 'add-account' : 'add-local-account')
-      }
+      onAddAccount={() => replaceModal('add-account')}
       showClosedAccounts={prefs['ui.showClosedAccounts']}
       onToggleClosedAccounts={() =>
         savePrefs({
@@ -160,15 +155,13 @@ function SidebarWithData({
   );
 }
 
-export default withRouter(
-  connect(
-    state => ({
-      accounts: state.queries.accounts,
-      failedAccounts: state.account.failedAccounts,
-      updatedAccounts: state.queries.updatedAccounts,
-      prefs: state.prefs.local,
-      floatingSidebar: state.prefs.global.floatingSidebar,
-    }),
-    dispatch => bindActionCreators(actions, dispatch),
-  )(SidebarWithData),
-);
+export default connect(
+  state => ({
+    accounts: state.queries.accounts,
+    failedAccounts: state.account.failedAccounts,
+    updatedAccounts: state.queries.updatedAccounts,
+    prefs: state.prefs.local,
+    floatingSidebar: state.prefs.global.floatingSidebar,
+  }),
+  dispatch => bindActionCreators(actions, dispatch),
+)(SidebarWithData);
