@@ -2,10 +2,8 @@
 
 
 ROOT=`dirname $0`
-VERSION=""
-BETA=""
 RELEASE=""
-RELEASE_NOTES=""
+RELEASE_NOTES="" # TODO: figure out automation for release notes when we start publishing electron versions
 CI=${CI:-false}
 
 cd "$ROOT/.."
@@ -15,15 +13,6 @@ while [[ $# -gt 0 ]]; do
   key="$1"
 
   case $key in
-      --version)
-      VERSION="$2"
-      shift
-      shift
-      ;;
-      --beta)
-      RELEASE="beta"
-      shift
-      ;;
       --release)
       RELEASE="production"
       shift
@@ -35,34 +24,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 set -- "${POSITIONAL[@]}"
-
-if [ -z "$VERSION" ] && [ -n "$RELEASE" ]; then
-    echo "Version is required if making a release"
-    exit 1
-fi
-
-if [ -n "$RELEASE" ]; then
-    if [ -z "$CIRCLE_TAG" ]; then
-        read -p "Make release: $RELEASE v$VERSION? [y/N] " -r
-        if [ -z "$REPLY" ] || [ "$REPLY" != "y" ]; then
-            exit 2
-        fi
-    fi
-
-    if [ "$RELEASE" == "production" ]; then
-        if [ -z "$CIRCLE_TAG" ]; then
-            RELEASE_NOTES=`git tag -l --format="%(contents:subject)" "$VERSION"`
-        else
-            RELEASE_NOTES=`git tag -l --format="%(contents:subject)" "$CIRCLE_TAG"`
-        fi
-    fi
-
-    PACKAGE_VERSION=`node -p -e "require('./packages/desktop-electron/package.json').version"`
-    if [ "$VERSION" != "$PACKAGE_VERSION" ]; then
-        echo "Version in desktop-electron/package.json does not match given version! ($PACKAGE_VERSION)"
-        exit 4
-    fi
-fi
 
 if [ "$OSTYPE" == "msys" ]; then
     if [ $CI != true ]; then
@@ -96,11 +57,7 @@ yarn workspace desktop-electron update-client
         fi
         yarn build --publish always -c.releaseInfo.releaseNotes="$RELEASE_NOTES" --arm64 --x64
 
-        echo "\nCreated release $VERSION with release notes \"$RELEASE_NOTES\""
-    elif [ "$RELEASE" == "beta" ]; then
-        yarn build --publish never --arm64 --x64
-
-        echo "\nCreated beta release $VERSION"
+        echo "\nCreated release with release notes \"$RELEASE_NOTES\""
     else
         SKIP_NOTARIZATION=true yarn build --publish never --x64
     fi

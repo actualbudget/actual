@@ -9,7 +9,6 @@ import join from './path-join';
 
 let FS = null;
 let BFS = null;
-// let NO_PERSIST = process.env.IS_BETA === true;
 let NO_PERSIST = false;
 
 export const bundledDatabasePath = '/default-db.sqlite';

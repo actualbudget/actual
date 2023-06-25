@@ -594,11 +594,6 @@ export const fullSync = once(async function (): Promise<
           subtype: e.reason,
           meta: e.meta,
         });
-      } else if (e.reason === 'beta-version') {
-        app.events.emit('sync', {
-          type: 'error',
-          subtype: e.reason,
-        });
       } else {
         app.events.emit('sync', { type: 'error' });
       }
