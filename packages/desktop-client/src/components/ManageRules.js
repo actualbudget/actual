@@ -406,8 +406,7 @@ let Rule = memo(
 
             <Text>
               <ArrowRight
-                color={colorsm.tableText}
-                style={{ width: 12, height: 12 }}
+                style={{ width: 12, height: 12, color: colorsm.tableText }}
               />
             </Text>
 
