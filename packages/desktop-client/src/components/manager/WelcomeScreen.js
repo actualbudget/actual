@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import { colors, styles } from '../../style';
+import { styles } from '../../style';
 import { View, Button, Text, P, ExternalLink } from '../common';
 
 function WelcomeScreen({ createBudget, pushModal }) {
@@ -26,11 +26,10 @@ function WelcomeScreen({ createBudget, pushModal }) {
           top of that, we want to provide powerful tools to allow you to do
           whatever you want with your data.
         </P>
-        <P style={{ '& a, & a:visited': { color: colors.p5 } }}>
+        <P>
           Currently, Actual implements budgeting based on a{' '}
           <ExternalLink
             asAnchor
-            style={{ color: colors.p5 }}
             href="https://actualbudget.org/docs/budgeting/"
           >
             monthly envelope system
@@ -42,7 +41,7 @@ function WelcomeScreen({ createBudget, pushModal }) {
           to help you get your bearings, and check out the rest of the
           documentation while you’re there to learn more about advanced topics.
         </P>
-        <P style={{ color: colors.n5 }}>
+        <P>
           Get started by importing an existing budget file from Actual or
           another budgeting app, or start fresh with an empty budget. You can
           always create or import another budget later.
