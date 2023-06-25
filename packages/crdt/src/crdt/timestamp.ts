@@ -281,7 +281,7 @@ Timestamp.recv = function (msg) {
  * timestamp parsing
  * converts a fixed-length string timestamp to the structured value
  */
-Timestamp.parse = function (timestamp) {
+Timestamp.parse = function (timestamp: string): Timestamp | null {
   if (typeof timestamp === 'string') {
     let parts = timestamp.split('-');
     if (parts && parts.length === 5) {

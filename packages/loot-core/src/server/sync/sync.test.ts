@@ -6,6 +6,7 @@ import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
 import * as encoder from './encoder';
+import { isError } from './utils';
 
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
 
@@ -86,9 +87,9 @@ describe('Sync', () => {
 
     expect(mockSyncServer.getMessages().length).toBe(0);
 
-    const { messages, error } = await fullSync();
-    expect(error).toBeFalsy();
-    expect(messages.length).toBe(0);
+    const result = await fullSync();
+    if (isError(result)) throw result.error;
+    expect(result.messages.length).toBe(0);
     expect(mockSyncServer.getMessages().length).toBe(2);
   });
 
@@ -133,8 +134,9 @@ describe('Sync', () => {
       },
     ]);
 
-    const { messages } = await fullSync();
-    expect(messages.length).toBe(2);
+    const result = await fullSync();
+    if (isError(result)) throw result.error;
+    expect(result.messages.length).toBe(2);
     expect(mockSyncServer.getMessages().length).toBe(3);
   });
 });
