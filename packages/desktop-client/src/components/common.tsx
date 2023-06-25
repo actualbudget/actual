@@ -171,7 +171,12 @@ export function AnchorLink({
   return (
     <NavLink
       to={to}
-      {...css([styles.smallText, style, match ? activeStyle : null])}
+      {...css([
+        styles.smallText,
+        { color: colorsm.pageTextPositive, fontWeight: 700 },
+        style,
+        match ? activeStyle : null,
+      ])}
     >
       {children}
     </NavLink>
@@ -196,6 +201,7 @@ export const ExternalLink = forwardRef<HTMLElement, ExternalLinkProps>(
     if (asAnchor) {
       return (
         <a
+          style={{ color: colorsm.pageTextPositive, fontWeight: 700 }}
           ref={ref as Ref<HTMLAnchorElement>}
           {...(props as ExternalLinkAnchorProps)}
           onClick={onClick}

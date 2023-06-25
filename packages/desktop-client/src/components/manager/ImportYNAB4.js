@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
-import { styles, colors } from '../../style';
+import { styles, colorsm } from '../../style';
 import { View, Block, Modal, ButtonWithLoading, P } from '../common';
 
 function getErrorMessage(error) {
@@ -41,9 +41,14 @@ function Import({ modalProps, availableImports }) {
   return (
     <Modal {...modalProps} title="Import from YNAB4" style={{ width: 400 }}>
       {() => (
-        <View style={[styles.smallText, { lineHeight: 1.5, marginTop: 20 }]}>
+        <View
+          style={[
+            styles.smallText,
+            { lineHeight: 1.5, marginTop: 20, color: colorsm.pageText },
+          ]}
+        >
           {error && (
-            <Block style={{ color: colors.r4, marginBottom: 15 }}>
+            <Block style={{ color: colorsm.errorText, marginBottom: 15 }}>
               {getErrorMessage(error)}
             </Block>
           )}

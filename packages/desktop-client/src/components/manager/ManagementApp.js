@@ -4,7 +4,7 @@ import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import tokens from '../../tokens';
 import { ExposeNavigate } from '../../util/router-tools';
 import { View, Text } from '../common';
@@ -28,8 +28,8 @@ function Version() {
   return (
     <Text
       style={{
-        color: colors.n7,
-        ':hover': { color: colors.n2 },
+        color: colorsm.pageTextSubdued,
+        ':hover': { color: colorsm.pageText },
         margin: 15,
         marginLeft: 17,
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
@@ -105,7 +105,7 @@ function ManagementApp({
   return (
     <BrowserRouter>
       <ExposeNavigate />
-      <View style={{ height: '100%' }}>
+      <View style={{ height: '100%', color: colorsm.pageText }}>
         <View
           style={{
             position: 'absolute',

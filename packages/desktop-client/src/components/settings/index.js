@@ -63,7 +63,6 @@ function About() {
           <ExternalLink
             asAnchor={true}
             href="https://actualbudget.org/docs/releases"
-            style={{ color: 'inherit' }}
           >
             Release Notes
           </ExternalLink>

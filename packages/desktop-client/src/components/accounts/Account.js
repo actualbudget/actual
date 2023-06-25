@@ -90,6 +90,7 @@ function EmptyMessage({ onAdd }) {
   return (
     <View
       style={{
+        color: colorsm.tableText,
         backgroundColor: colorsm.tableBackground,
         flex: 1,
         alignItems: 'center',

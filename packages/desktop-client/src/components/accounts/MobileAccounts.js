@@ -122,7 +122,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
 
 function EmptyMessage({ onAdd }) {
   return (
-    <View style={{ flex: 1, padding: 30 }}>
+    <View style={{ flex: 1, padding: 30, color: colorsm.tableText }}>
       <Text style={styles.text}>
         For Actual to be useful, you need to add an account. You can link an
         account to automatically download transactions, or manage it locally
