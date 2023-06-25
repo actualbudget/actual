@@ -51,6 +51,8 @@ function lookupName(items, id) {
   return items.find(item => item.id === id).name;
 }
 
+// TODO: delete if not needed
+/* eslint-disable-next-line import/no-unused-modules */
 export function DateHeader({ date }) {
   return (
     <ListItem

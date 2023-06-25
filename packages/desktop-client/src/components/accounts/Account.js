@@ -12,6 +12,7 @@ import {
   useParams,
   useNavigate,
   useLocation,
+  useMatch,
 } from 'react-router-dom';
 
 import { debounce } from 'debounce';
@@ -1289,7 +1290,7 @@ class AccountInternal extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.match !== nextProps.match) {
+    if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
           editingName: false,
@@ -1828,6 +1829,7 @@ class AccountInternal extends PureComponent {
       replaceModal,
       showExtraBalances,
       accountId,
+      categoryId,
     } = this.props;
     let {
       transactions,
@@ -1849,6 +1851,10 @@ class AccountInternal extends PureComponent {
       // all accounts
       return <Navigate to="/accounts" replace />;
     }
+
+    let category = categoryGroups
+      .flatMap(g => g.categories)
+      .find(category => category.id === categoryId);
 
     let showEmptyMessage = !loading && !accountId && accounts.length === 0;
 
@@ -1931,6 +1937,7 @@ class AccountInternal extends PureComponent {
                       this.paged && this.paged.fetchNext()
                     }
                     accounts={accounts}
+                    category={category}
                     categoryGroups={categoryGroups}
                     payees={payees}
                     balances={
@@ -1996,10 +2003,12 @@ class AccountInternal extends PureComponent {
 
 function AccountHack(props) {
   let { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  let match = useMatch(props.location.pathname);
 
   return (
     <AccountInternal
       {...props}
+      match={match}
       splitsExpandedDispatch={splitsExpandedDispatch}
     />
   );
@@ -2073,6 +2082,7 @@ export default function Account() {
             !!(activeLocation.state && activeLocation.state.locationPtr)
           }
           accountId={params.id}
+          categoryId={activeLocation?.state?.filter?.category}
           location={location}
         />
       </SplitsExpandedProvider>
