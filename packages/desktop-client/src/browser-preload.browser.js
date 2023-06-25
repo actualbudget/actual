@@ -39,7 +39,6 @@ global.Actual = {
   IS_DEV,
   ACTUAL_VERSION,
   IS_FAKE_WEB: true,
-  IS_BETA: process.env.REACT_APP_RELEASE_TYPE === 'beta',
 
   logToTerminal: (...args) => {
     console.log(...args);

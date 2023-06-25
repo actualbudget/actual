@@ -67,10 +67,6 @@ export async function resetSyncState(newKeyState) {
 
   let { cloudFileId } = prefs.getPrefs();
 
-  if (process.env.IS_BETA) {
-    return { error: { reason: 'beta-version' } };
-  }
-
   try {
     await post(getServer().SYNC_SERVER + '/reset-user-file', {
       token: userToken,
@@ -221,11 +217,6 @@ export async function upload() {
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     throw FileUploadError('unauthorized');
-  }
-
-  // We never change the server from the beta version
-  if (process.env.IS_BETA) {
-    throw FileUploadError('beta-version');
   }
 
   let zipContent = await exportBuffer();

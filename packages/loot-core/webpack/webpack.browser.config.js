@@ -70,9 +70,6 @@ module.exports = {
       'process.env.IS_DEV': JSON.stringify(
         process.env.NODE_ENV === 'development',
       ),
-      'process.env.IS_BETA': JSON.stringify(
-        process.env.ACTUAL_RELEASE_TYPE === 'beta',
-      ),
       'process.env.PUBLIC_URL': JSON.stringify(process.env.PUBLIC_URL || '/'),
       'process.env.ACTUAL_DATA_DIR': JSON.stringify('/'),
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),

@@ -16,8 +16,6 @@ export function getUploadError({ reason, meta }) {
       return 'Unable to encrypt your data because you are missing the key. Create the latest key in the next step.';
     case 'network':
       return 'Uploading the file failed. Check your network connection.';
-    case 'beta-version':
-      return 'You cannot perform this action in the beta version (resetting sync, deleting a file, etc).';
     default:
       return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
   }
