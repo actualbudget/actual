@@ -169,6 +169,7 @@ export function AnchorLink({
   style,
   activeStyle,
   children,
+  ...props
 }: AnchorLinkProps) {
   let match = useMatch({ path: to });
 
@@ -176,6 +177,7 @@ export function AnchorLink({
     <NavLink
       to={to}
       {...css([styles.smallText, style, match ? activeStyle : null])}
+      {...props}
     >
       {children}
     </NavLink>
