@@ -158,14 +158,15 @@ function NavTab({ icon: TabIcon, name, path }) {
   return (
     <NavLink
       to={path}
-      style={{
+      style={({ isActive }) => ({
         alignItems: 'center',
-        color: colorsm.sidebarItemText,
+        color: isActive
+          ? colorsm.sidebarItemAccentSelected
+          : colorsm.sidebarItemText,
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
-      }}
-      activeStyle={{ color: colorsm.sidebarItemAccentSelected }}
+      })}
     >
       <TabIcon
         width={22}
