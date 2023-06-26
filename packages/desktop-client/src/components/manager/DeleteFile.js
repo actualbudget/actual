@@ -74,12 +74,9 @@ export default function DeleteMenu({ modalProps, actions, file }) {
           )}
 
           {file.id && (
-            <>
-              <Text
-                style={[
-                  isRemote && { marginTop: 20, color: colorsm.tableText },
-                ]}
-              >
+            <Text
+              style={[isRemote && { marginTop: 20, color: colorsm.tableText }]}
+            >
               {isRemote ? (
                 <Text>
                   You can also delete just the local copy. This will remove all
@@ -129,7 +126,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               >
                 Delete file locally
               </ButtonWithLoading>
-            </>
+            </Text>
           )}
         </View>
       )}
