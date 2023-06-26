@@ -13,13 +13,14 @@ import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
   SchedulesProvider,
   useCachedSchedules,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { send, listen, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
 import {
   deleteTransaction,
@@ -324,24 +325,73 @@ function AccountMenu({
   );
 }
 
-function FilterMenuButton({ filters, filterId }) {
-  let [menuOpen, setMenuOpen] = useState(false);
+function ConditionsOpMenu({ conditionsOp, onCondOpChange, filters }) {
+  return (
+    <Text style={{ color: colors.n4, marginTop: 15, marginBottom: -8 }}>
+      If
+      <FieldSelect
+        style={{ display: 'inline-flex' }}
+        fields={[
+          ['and', 'all'],
+          ['or', 'any'],
+        ]}
+        value={conditionsOp}
+        onChange={(name, value) => onCondOpChange(value, filters)}
+      />
+      of these conditions match:
+    </Text>
+  );
+}
+
+function FilterMenuButton({
+  filters,
+  conditionsOp,
+  filterId,
+  onClearFilters,
+  onReloadSavedFilter,
+  filtersList,
+}) {
   let [nameOpen, setNameOpen] = useState(false);
   let [adding, setAdding] = useState(false);
+  let [menuOpen, setMenuOpen] = useState(false);
+  let [err, setErr] = useState(null);
+  let name = filterId.name;
+  let id = filterId.id;
+  let res;
+  let savedFilter;
 
   const onFilterMenuSelect = async item => {
     switch (item) {
       case 'rename-filter':
+        setErr(null);
         setAdding(false);
         setMenuOpen(false);
         setNameOpen(true);
         break;
       case 'delete-filter':
         setMenuOpen(false);
+        await send('filter-delete', { id });
+        onClearFilters();
         break;
       case 'update-filter':
         setAdding(false);
         setMenuOpen(false);
+        savedFilter = {
+          conditions: filters,
+          conditionsOp: conditionsOp,
+          id: filterId.id,
+          name: filterId.name,
+          status: 'saved',
+        };
+        res = await sendCatch('filter-update', {
+          state: savedFilter,
+          filters: [...filtersList],
+        });
+        if (res.error) {
+          setErr(res.error.message);
+        } else {
+          onReloadSavedFilter(savedFilter, 'update');
+        }
         break;
       case 'save-filter':
         setAdding(true);
@@ -350,9 +400,14 @@ function FilterMenuButton({ filters, filterId }) {
         break;
       case 'reload-filter':
         setMenuOpen(false);
+        savedFilter = {
+          status: 'saved',
+        };
+        onReloadSavedFilter(savedFilter, 'reload');
         break;
       case 'clear-filter':
         setMenuOpen(false);
+        onClearFilters();
         break;
       default:
     }
@@ -415,6 +470,44 @@ function FilterMenuButton({ filters, filterId }) {
     );
   }
 
+  async function onAddUpdate() {
+    if (adding) {
+      //crate new flow
+      savedFilter = {
+        conditions: filters,
+        conditionsOp: conditionsOp,
+        name: name,
+        status: 'saved',
+      };
+      res = await sendCatch('filter-create', {
+        state: savedFilter,
+        filters: [...filtersList],
+      });
+      savedFilter = {
+        ...savedFilter,
+        id: res.data,
+      };
+    } else {
+      //rename flow
+      savedFilter = {
+        conditions: filterId.conditions,
+        conditionsOp: filterId.conditionsOp,
+        id: filterId.id,
+        name: name,
+      };
+      res = await sendCatch('filter-update', {
+        state: savedFilter,
+        filters: [...filtersList],
+      });
+    }
+    if (res.error) {
+      setErr(res.error.message);
+    } else {
+      setNameOpen(false);
+      onReloadSavedFilter(savedFilter);
+    }
+  }
+
   function NameFilter({ onClose }) {
     return (
       <MenuTooltip width={400} onClose={onClose}>
@@ -422,25 +515,27 @@ function FilterMenuButton({ filters, filterId }) {
           direction="row"
           justify="flex-end"
           align="center"
-          style={{ marginBottom: 10, padding: 10 }}
+          style={{ padding: 10 }}
         >
           <FormField style={{ flex: 1 }}>
             <FormLabel title="Filter Name" htmlFor="name-field" />
             <GenericInput
               field="string"
               type="string"
-              /* value={state.filter.name}
-              onChange={e => {
-                dispatch({ type: 'set-field', field: 'name', value: e });
-              }} */
+              value={name}
+              onChange={e => (name = e)}
             />
           </FormField>
-          <Button primary style={{ marginTop: 18 }} onClick={onClose}>
+          <Button primary style={{ marginTop: 18 }} onClick={onAddUpdate}>
             {adding ? 'Add' : 'Update'}
           </Button>
         </Stack>
+        {err && (
+          <Stack direction="row" align="center" style={{ padding: 10 }}>
+            <Text style={{ color: colors.r4 }}>{err}</Text>
+          </Stack>
+        )}
       </MenuTooltip>
-      //{state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
     );
   }
 
@@ -813,6 +908,7 @@ const AccountHeader = memo(
     accountName,
     account,
     filterId,
+    filtersList,
     history,
     accountsSyncing,
     accounts,
@@ -847,6 +943,9 @@ const AccountHeader = memo(
     onCreateRule,
     onApplyFilter,
     onUpdateFilter,
+    onClearFilters,
+    onReloadSavedFilter,
+    onCondOpChange,
     onDeleteFilter,
     onScheduleAction,
   }) => {
@@ -872,8 +971,6 @@ const AccountHeader = memo(
         });
       }
     }
-
-    function handleChange(name, value) {}
 
     return (
       <>
@@ -1155,21 +1252,11 @@ const AccountHeader = memo(
 
           {filters && filters.length > 0 && (
             <View>
-              <Text
-                style={{ color: colors.n4, marginTop: 15, marginBottom: -8 }}
-              >
-                If
-                <FieldSelect
-                  style={{ display: 'inline-flex' }}
-                  fields={[
-                    ['and', 'all'],
-                    ['or', 'any'],
-                  ]}
-                  value={conditionsOp}
-                  onChange={handleChange}
-                />
-                of these conditions match:
-              </Text>
+              <ConditionsOpMenu
+                conditionsOp={conditionsOp}
+                onCondOpChange={onCondOpChange}
+                filters={filters}
+              />
               <Stack spacing={2} direction="row" align="center">
                 <AppliedFilters
                   filters={filters}
@@ -1177,7 +1264,14 @@ const AccountHeader = memo(
                   onDelete={onDeleteFilter}
                 />
                 <View style={{ flex: 1 }} />
-                <FilterMenuButton filters={filters} filterId={filterId} />
+                <FilterMenuButton
+                  filters={filters}
+                  conditionsOp={conditionsOp}
+                  filterId={filterId}
+                  onClearFilters={onClearFilters}
+                  onReloadSavedFilter={onReloadSavedFilter}
+                  filtersList={filtersList}
+                />
               </Stack>
             </View>
           )}
@@ -1337,17 +1431,6 @@ class AccountInternal extends PureComponent {
   }
 
   async componentDidUpdate(prevProps) {
-    if (this.props.location.state.callbackConditions) {
-      await this.setState({
-        filters: this.props.location.state.callbackConditions.conditions,
-        conditionsOp: this.props.location.state.callbackConditions.conditionsOp,
-      });
-      this.props.history.replace(this.props.location.pathname, {
-        callbackConditions: null,
-      });
-      let filters = this.state.filters ? this.state.filters : [];
-      this.applyFilters([...filters]);
-    }
     // If the user was on a different screen and is now coming back to
     // the transactions, automatically refresh the transaction to make
     // sure we have updated state
@@ -1949,8 +2032,34 @@ class AccountInternal extends PureComponent {
     this.props.pushModal('edit-rule', { rule });
   };
 
-  onUpdateFilter = (oldFilter, updatedFilter) => {
+  onCondOpChange = (value, filters) => {
+    this.setState({ conditionsOp: value });
+    this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
+    this.applyFilters([...filters]);
+  };
+
+  onReloadSavedFilter = (savedFilter, item) => {
+    if (item === 'reload') {
+      let [getFilter] = this.props.filtersList.filter(
+        f => f.id === this.state.filterId.id,
+      );
+      this.setState({ conditionsOp: getFilter.conditionsOp });
+      this.applyFilters([...getFilter.conditions]);
+    } else {
+      savedFilter.status &&
+        this.setState({ conditionsOp: savedFilter.conditionsOp }) &&
+        this.applyFilters([...savedFilter.conditions]);
+    }
+    this.setState({ filterId: { ...this.state.filterId, ...savedFilter } });
+  };
+
+  onClearFilters = () => {
     this.setState({ conditionsOp: 'and' });
+    this.setState({ filterId: [] });
+    this.applyFilters([]);
+  };
+
+  onUpdateFilter = (oldFilter, updatedFilter) => {
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
@@ -1963,10 +2072,10 @@ class AccountInternal extends PureComponent {
   };
 
   onDeleteFilter = filter => {
-    this.setState({ conditionsOp: 'and' });
     this.applyFilters(this.state.filters.filter(f => f !== filter));
     this.state.filters.length === 1
-      ? this.setState({ filterId: [] })
+      ? this.setState({ filterId: [] }) &&
+        this.setState({ conditionsOp: 'and' })
       : this.setState({
           filterId: {
             ...this.state.filterId,
@@ -1976,14 +2085,13 @@ class AccountInternal extends PureComponent {
   };
 
   onApplyFilter = async cond => {
-    let condOp = cond.conditionsOp ? cond.conditionsOp : 'and';
-    this.setState({ conditionsOp: condOp });
     let filters = this.state.filters;
     if (cond.customName) {
       filters = filters.filter(f => f.customName !== cond.customName);
     }
     if (cond.conditions) {
       this.setState({ filterId: { ...cond, status: 'saved' } });
+      this.setState({ conditionsOp: cond.conditionsOp });
       this.applyFilters([...cond.conditions]);
     } else {
       this.setState({
@@ -2103,6 +2211,7 @@ class AccountInternal extends PureComponent {
                   workingHard={workingHard}
                   account={account}
                   filterId={filterId}
+                  filtersList={this.props.filtersList}
                   history={this.props.history}
                   location={this.props.location}
                   accountName={accountName}
@@ -2140,6 +2249,9 @@ class AccountInternal extends PureComponent {
                   onBatchUnlink={this.onBatchUnlink}
                   onCreateRule={this.onCreateRule}
                   onUpdateFilter={this.onUpdateFilter}
+                  onClearFilters={this.onClearFilters}
+                  onReloadSavedFilter={this.onReloadSavedFilter}
+                  onCondOpChange={this.onCondOpChange}
                   onDeleteFilter={this.onDeleteFilter}
                   onApplyFilter={this.onApplyFilter}
                   onScheduleAction={this.onScheduleAction}
@@ -2256,6 +2368,7 @@ export default function Account() {
 
   let dispatch = useDispatch();
   let history = useHistory();
+  let filtersList = useFilters();
   let actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
     [dispatch],
@@ -2301,6 +2414,7 @@ export default function Account() {
           accountId={params.id}
           location={location}
           history={history}
+          filtersList={filtersList}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

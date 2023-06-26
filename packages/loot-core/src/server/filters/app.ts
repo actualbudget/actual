@@ -103,11 +103,16 @@ export function conditionExists(item, filters, newItem) {
 
 export async function createFilter(filter) {
   let filterId = uuid.v4Sync();
-  let item = { ...filter.state, id: filterId };
+  let item = {
+    id: filterId,
+    conditions: filter.state.conditions,
+    conditionsOp: filter.state.conditionsOp,
+    name: filter.state.name,
+  };
 
   if (item.name) {
     if (await filterNameExists(item.name, item.id, true)) {
-      throw new Error('Cannot create filters with the same name');
+      throw new Error('There is already a filter named ' + item.name);
     }
   } else {
     throw new Error('Filter name is required');
@@ -132,10 +137,15 @@ export async function createFilter(filter) {
 }
 
 export async function updateFilter(filter) {
-  let item = filter.state;
+  let item = {
+    id: filter.state.id,
+    conditions: filter.state.conditions,
+    conditionsOp: filter.state.conditionsOp,
+    name: filter.state.name,
+  };
   if (item.name) {
     if (await filterNameExists(item.name, item.id, false)) {
-      throw new Error('There is already a filter with this name');
+      throw new Error('There is already a filter named ' + item.name);
     }
   } else {
     throw new Error('Filter name is required');
@@ -165,5 +175,8 @@ export async function deleteFilter({ id }) {
 app.method('filter/create', mutator(undoable(createFilter)));
 app.method('filter/update', mutator(undoable(updateFilter)));
 app.method('filter/delete', mutator(undoable(deleteFilter)));
+app.method('filter-create', mutator(undoable(createFilter)));
+app.method('filter-update', mutator(undoable(updateFilter)));
+app.method('filter-delete', mutator(undoable(deleteFilter)));
 
 export default app;
