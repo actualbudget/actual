@@ -1,6 +1,5 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
-import { DelegatedPlugin } from 'webpack';
 
 type DateLike = string | Date;
 

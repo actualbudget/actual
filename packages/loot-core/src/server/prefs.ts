@@ -30,7 +30,7 @@ let prefs: Preferences = null;
 export async function loadPrefs(id?: string): Promise<Preferences> {
   if (process.env.NODE_ENV === 'test' && !id) {
     // Needed so that we can make preferences object non-null for testing.
-    prefs = getDefaultPrefs("test", "test_preferences");
+    prefs = getDefaultPrefs('test', 'test_preferences');
     return prefs;
   }
 
