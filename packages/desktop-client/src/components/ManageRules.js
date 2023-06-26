@@ -31,7 +31,15 @@ import useSelected, {
 import ArrowRight from '../icons/v0/RightArrow2';
 import { colors } from '../style';
 
-import { View, Text, Button, Stack, ExternalLink, Input, Link } from './common';
+import {
+  View,
+  Text,
+  Button,
+  Stack,
+  ExternalLink,
+  Input,
+  LinkButton,
+} from './common';
 import {
   SelectCell,
   Row,
@@ -178,9 +186,9 @@ export function Value({
         {numHidden > 0 && (
           <Text style={{ color: colors.p4 }}>
             &nbsp;&nbsp;
-            <Link onClick={onExpand} style={{ color: colors.p4 }}>
+            <LinkButton onClick={onExpand} style={{ color: colors.p4 }}>
               {numHidden} more items...
-            </Link>
+            </LinkButton>
             {!inline && <br />}
           </Text>
         )}
