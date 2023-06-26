@@ -17,6 +17,7 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
+import Bug from '../icons/v1/Bug';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
@@ -84,6 +85,18 @@ function UncategorizedButton() {
         );
       }}
     </SheetValue>
+  );
+}
+
+function ThemeButton() {
+  return (
+    <View>
+      <Button bare>
+        <Bug
+          style={{ width: 13, height: 13, color: colorsm.pageTextSubdued }}
+        />
+      </Button>
+    </View>
   );
 }
 
@@ -363,6 +376,7 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
+      <ThemeButton />
       {serverURL ? (
         <SyncButton
           style={{ marginLeft: 10 }}

@@ -230,6 +230,7 @@ function ReconcileTooltip({ account, onReconcile, onClose }) {
           {balance != null && (
             <InitialFocus>
               <Input
+                placeholder="Current balance..."
                 defaultValue={format(balance, 'financial')}
                 style={{ margin: '7px 0' }}
               />
@@ -931,7 +932,6 @@ const AccountHeader = memo(
                   boxShadow: 'none',
                   transition: 'color .15s',
                   '& input::placeholder': {
-                    color: colorsm.sidebarItemText,
                     transition: 'color .25s',
                   },
                 },
@@ -1994,12 +1994,14 @@ class AccountInternal extends PureComponent {
                       ) : !loading ? (
                         <View
                           style={{
+                            color: colorsm.pageText,
                             marginTop: 20,
                             textAlign: 'center',
                             fontStyle: 'italic',
                           }}
                         >
-                          No transactions
+                          No transactions (Add New or Import using the above
+                          buttons)
                         </View>
                       ) : null
                     }

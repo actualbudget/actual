@@ -775,7 +775,6 @@ export function TableHeader({
     >
       <Row
         backgroundColor={colorsm.tableHeaderBackground}
-        borderColor={colorsm.tableBorder}
         collapsed={true}
         {...rowProps}
         style={[

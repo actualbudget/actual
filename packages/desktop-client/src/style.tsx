@@ -88,7 +88,7 @@ const colorsDark = {
   pageText: colorPallet.gray100,
   pageTextSubdued: colorPallet.gray200,
   pageTextPositive: colorPallet.purple400,
-  modalBackground: colorPallet.gray700,
+  modalBackground: colorPallet.gray800,
   cardBackground: colorPallet.gray800,
   cardBorder: colorPallet.purple400,
   cardShadow: colorPallet.gray700,
@@ -170,7 +170,7 @@ const colorsDark = {
   formInputTextSelection: colorPallet.gray800,
   formInputShadowSelected: colorPallet.purple400,
   formInputTextHighlight: colorPallet.purple400,
-};
+} as const;
 
 const colorsLight = {
   pageBackground: colorPallet.gray50,
@@ -183,6 +183,7 @@ const colorsLight = {
   pageText: colorPallet.gray700,
   pageTextSubdued: colorPallet.gray500,
   pageTextPositive: colorPallet.purple600,
+  modalBackground: colorPallet.white,
   cardBackground: colorPallet.gray50,
   cardBorder: colorPallet.purple600,
   cardShadow: colorPallet.gray700,
@@ -195,7 +196,7 @@ const colorsLight = {
   tableTextEditingBackground: colorPallet.purple600,
   tableTextInactive: colorPallet.gray500,
   tableHeaderText: colorPallet.gray600,
-  tableHeaderBackground: colorPallet.gray100,
+  tableHeaderBackground: colorPallet.gray150,
   tableBorder: colorPallet.gray150,
   tableBorderSelected: colorPallet.purple600,
   tableBorderHover: colorPallet.purple500,
@@ -219,7 +220,6 @@ const colorsLight = {
   menuBackground: colorPallet.gray50,
   menuItemBackground: colorPallet.gray50,
   menuItemBackgroundHover: colorPallet.gray150,
-  menuItemBackgroundSelected: colorPallet.purple200,
   menuItemText: colorPallet.gray800,
   menuItemTextHover: colorPallet.gray800,
   menuItemTextSelected: colorPallet.gray800,
@@ -265,14 +265,26 @@ const colorsLight = {
   formInputTextSelection: colorPallet.gray100,
   formInputShadowSelected: colorPallet.purple600,
   formInputTextHighlight: colorPallet.purple600,
+} as const;
+
+const colorThemes = {
+  light: colorsLight,
+  dark: colorsDark,
 };
 
-const colorThemes = [
-  { name: 'actual-dark', colors: colorsDark, type: 'dark' },
-  { name: 'actual-light', colors: colorsLight, type: 'light' },
-];
+export function ThemeStyle({ theme }: { theme: keyof typeof colorThemes }) {
+  let themeColors = colorThemes[theme];
+  let css = Object.keys(themeColors)
+    .map(key => {
+      return `--${key}: ${themeColors[key]};`;
+    })
+    .join('\n');
+  return <style>{`:root { ${css} }`}</style>;
+}
 
-export const colorsm = colorThemes[0].colors;
+export const colorsm = Object.fromEntries(
+  Object.keys(colorsDark).map(key => [key, `var(--${key})`]),
+) as Record<keyof typeof colorsDark, string>;
 
 const _colors = {
   y1: '#733309',

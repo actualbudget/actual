@@ -746,7 +746,7 @@ export default function EditRule({
   }
 
   let editorStyle = {
-    backgroundColor: colorsm.tableRowHeaderBackground,
+    backgroundColor: colorsm.tableHeaderBackground,
     borderRadius: 4,
   };
 

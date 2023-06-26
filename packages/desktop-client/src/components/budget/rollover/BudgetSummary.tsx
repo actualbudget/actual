@@ -45,7 +45,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
         !collapsed && {
           padding: '5px 0',
           marginTop: 17,
-          backgroundColor: colorsm.tableHeaderBackground,
+          backgroundColor: colorsm.tableRowHeaderBackground,
           color: colorsm.pageText,
           borderTopWidth: 1,
           borderBottomWidth: 1,

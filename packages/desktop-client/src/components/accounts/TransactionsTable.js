@@ -912,6 +912,7 @@ const Transaction = memo(function Transaction(props) {
               {isParent && (
                 <CheveronDown
                   style={{
+                    color: 'inherit',
                     width: 14,
                     height: 14,
                     transition: 'transform .08s',

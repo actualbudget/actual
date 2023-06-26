@@ -44,14 +44,14 @@ const axisBaseStyles = {
 const theme = {
   colors: {
     ...colorFades,
-    red: colorsm.buttonNeutralBorder,
-    blue: colorsm.buttonPositiveBorder,
+    red: colorsm.errorText,
+    blue: colorsm.noticeText,
   },
   area: {
     style: {
       labels: baseLabelStyles,
       data: {
-        stroke: colorsm.buttonPositiveBorder,
+        stroke: colorsm.noticeText,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
@@ -82,7 +82,7 @@ const theme = {
   bar: {
     style: {
       labels: baseLabelStyles,
-      data: { fill: colorsm.buttonPositiveBorder, stroke: 'none' },
+      data: { fill: colorsm.noticeText, stroke: 'none' },
     },
   },
   line: {
@@ -90,7 +90,7 @@ const theme = {
       labels: baseLabelStyles,
       data: {
         fill: 'none',
-        stroke: colorsm.buttonPositiveBorder,
+        stroke: colorsm.noticeText,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',

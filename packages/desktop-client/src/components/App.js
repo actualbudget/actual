@@ -11,7 +11,7 @@ import {
 
 import installPolyfills from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
-import { styles, hasHiddenScrollbars, colorsm } from '../style';
+import { styles, hasHiddenScrollbars, colorsm, ThemeStyle } from '../style';
 
 import AppBackground from './AppBackground';
 import FatalError from './FatalError';
@@ -25,6 +25,7 @@ class App extends Component {
     fatalError: null,
     initializing: true,
     hiddenScrollbars: hasHiddenScrollbars(),
+    theme: 'light',
   };
 
   async init() {
@@ -74,6 +75,10 @@ class App extends Component {
     };
     window.addEventListener('focus', checkScrollbars);
     this.cleanup = () => window.removeEventListener('focus', checkScrollbars);
+
+    setInterval(() => {
+      this.setState({ theme: this.state.theme === 'dark' ? 'light' : 'dark' });
+    }, 4000);
   }
 
   componentDidCatch(error) {
@@ -128,6 +133,7 @@ class App extends Component {
           <UpdateNotification />
           <MobileWebMessage />
         </div>
+        <ThemeStyle theme={this.state.theme} />
       </ResponsiveProvider>
     );
   }
