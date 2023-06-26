@@ -9,7 +9,6 @@
     "dist"
   ],
   "scripts": {
-    "lint": "eslint .",
     "build:app": "yarn workspace loot-core build:api",
     "build:node": "tsc --p tsconfig.dist.json",
     "build:migrations": "cp migrations/*.sql dist/migrations",
