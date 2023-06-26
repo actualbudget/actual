@@ -276,7 +276,7 @@ function AccountMenu({
   onReconcile,
   onMenuSelect,
 }) {
-  let [tooltip, setTooltip] = useState('default');
+  const [tooltip, setTooltip] = useState('default');
   let syncServerStatus = useSyncServerStatus();
 
   return tooltip === 'reconcile' ? (
@@ -708,7 +708,7 @@ let AccountHeader = memo(
     onDeleteFilter,
     onScheduleAction,
   }) => {
-    let [menuOpen, setMenuOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
     let searchInput = useRef(null);
     let splitsExpanded = useSplitsExpanded();
 
@@ -1437,7 +1437,7 @@ class AccountInternal extends PureComponent {
   };
 
   onToggleExtraBalances = () => {
-    let { accountId, showExtraBalances } = this.props;
+    const { accountId, showExtraBalances } = this.props;
     let key = 'show-extra-balances-' + accountId;
 
     this.props.savePrefs({ [key]: !showExtraBalances });
@@ -1816,7 +1816,7 @@ class AccountInternal extends PureComponent {
   };
 
   render() {
-    let {
+    const {
       accounts,
       categoryGroups,
       payees,
@@ -1829,7 +1829,7 @@ class AccountInternal extends PureComponent {
       accountId,
       categoryId,
     } = this.props;
-    let {
+    const {
       transactions,
       loading,
       workingHard,

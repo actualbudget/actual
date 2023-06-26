@@ -24,8 +24,8 @@ function LoggedInUser({
   style,
   color,
 }) {
-  let [loading, setLoading] = useState(true);
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
   let serverUrl = useServerURL();
 
   useEffect(() => {

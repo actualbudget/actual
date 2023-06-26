@@ -23,7 +23,7 @@ function NotesTooltip({
   position = 'bottom-left',
   onClose,
 }: NotesTooltipProps) {
-  let [notes, setNotes] = useState<string>(defaultNotes);
+  const [notes, setNotes] = useState<string>(defaultNotes);
   let inputRef = createRef<HTMLTextAreaElement>();
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function NotesButton({
   tooltipPosition,
   style,
 }: NotesButtonProps) {
-  let [hover, setHover] = useState(false);
+  const [hover, setHover] = useState(false);
   let tooltip = useTooltip();
   let data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   let note = data && data.length > 0 ? data[0].note : null;
@@ -91,7 +91,7 @@ export default function NotesButton({
     tooltip.close();
   }
 
-  let [delayHandler, setDelayHandler] = useState(null);
+  const [delayHandler, setDelayHandler] = useState(null);
 
   let handleMouseEnter = () => {
     setDelayHandler(

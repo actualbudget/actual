@@ -289,7 +289,7 @@ export function Row({
   style,
   ...nativeProps
 }: RowProps) {
-  let [shouldHighlight, setShouldHighlight] = useState(false);
+  const [shouldHighlight, setShouldHighlight] = useState(false);
   let prevHighlighted = useRef(false);
   let rowRef = useRef(null);
   let timer = useRef(null);
@@ -367,7 +367,7 @@ function InputValue({
   onBlur,
   ...props
 }: InputValueProps) {
-  let [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(defaultValue);
 
   function onBlur_(e) {
     onUpdate && onUpdate(value);
@@ -478,8 +478,8 @@ export function CustomCell({
   onBlur,
   ...props
 }: CustomCellProps) {
-  let [value, setValue] = useState(defaultValue);
-  let [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
+  const [value, setValue] = useState(defaultValue);
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
 
   if (prevDefaultValue !== defaultValue) {
     setValue(defaultValue);
@@ -793,7 +793,7 @@ export function TableHeader({
 
 export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
   let selectedItems = useSelectedItems();
-  let [menuOpen, setMenuOpen] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(null);
 
   if (selectedItems.size === 0) {
     return null;
@@ -1161,8 +1161,8 @@ export let Table = forwardRef<TableHandleRef, TableProps>(
 
 export function useTableNavigator(data, fields) {
   let getFields = typeof fields !== 'function' ? () => fields : fields;
-  let [editingId, setEditingId] = useState(null);
-  let [focusedField, setFocusedField] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [focusedField, setFocusedField] = useState(null);
   let containerRef = useRef<HTMLDivElement>();
 
   // See `onBlur` for why we need this

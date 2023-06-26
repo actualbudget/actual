@@ -5,8 +5,8 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import useSyncServerStatus from './useSyncServerStatus';
 
 export default function useNordigenStatus() {
-  let [configured, setConfigured] = useState<boolean | null>(null);
-  let [isLoading, setIsLoading] = useState(false);
+  const [configured, setConfigured] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   let status = useSyncServerStatus();
 
   useEffect(() => {

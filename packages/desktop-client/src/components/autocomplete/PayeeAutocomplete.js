@@ -195,10 +195,10 @@ export default function PayeeAutocomplete({
     accounts = cachedAccounts;
   }
 
-  let [focusTransferPayees, setFocusTransferPayees] = useState(
+  const [focusTransferPayees, setFocusTransferPayees] = useState(
     defaultFocusTransferPayees,
   );
-  let [rawPayee, setRawPayee] = useState('');
+  const [rawPayee, setRawPayee] = useState('');
   let hasPayeeInput = !!rawPayee;
   let payeeSuggestions = useMemo(() => {
     let suggestions = getPayeeSuggestions(
@@ -232,7 +232,7 @@ export default function PayeeAutocomplete({
     }
   }
 
-  let [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
+  const [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
 
   return (
     <Autocomplete

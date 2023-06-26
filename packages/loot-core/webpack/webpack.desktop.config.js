@@ -1,8 +1,8 @@
-let path = require('path');
+const path = require('path');
 
-let webpack = require('webpack');
+const webpack = require('webpack');
 
-let browser = require('./webpack.browser.config');
+const browser = require('./webpack.browser.config');
 
 /** @type {webpack.Configuration} */
 module.exports = {

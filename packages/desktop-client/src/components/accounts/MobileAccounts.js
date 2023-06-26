@@ -148,7 +148,7 @@ class AccountList extends Component {
   };
 
   render() {
-    let {
+    const {
       accounts,
       updatedAccounts,
       // transactions,
@@ -224,7 +224,7 @@ class AccountList extends Component {
 }
 
 function Accounts(props) {
-  let transactions = useState({});
+  const transactions = useState({});
   let navigate = useNavigate();
 
   useEffect(() => {
@@ -251,7 +251,8 @@ function Accounts(props) {
     navigate(`/transaction/${transaction}`);
   };
 
-  let { accounts, categories, newTransactions, updatedAccounts, prefs } = props;
+  const { accounts, categories, newTransactions, updatedAccounts, prefs } =
+    props;
   let numberFormat = prefs.numberFormat || 'comma-dot';
   let hideFraction = prefs.hideFraction || false;
 

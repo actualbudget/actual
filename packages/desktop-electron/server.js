@@ -20,7 +20,7 @@ if (process.argv[2] === '--subprocess') {
   require('source-map-support').install();
   getBackend().initApp(true, 'actual-standalone');
 } else {
-  let { ipcRenderer } = require('electron');
+  const { ipcRenderer } = require('electron');
   let isDev = true;
 
   ipcRenderer.on('set-socket', (event, { name }) => {

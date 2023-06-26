@@ -7,7 +7,7 @@ import { Modal } from '../common';
 import ManageRules from '../ManageRules';
 
 export default function ManageRulesModal({ modalProps, payeeId }) {
-  let [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   let location = useLocation();
   if (isNonProductionEnvironment()) {
     if (location.pathname !== '/payees') {

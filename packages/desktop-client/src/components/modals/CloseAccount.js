@@ -42,7 +42,7 @@ function CloseAccount({
   actions,
   modalProps,
 }) {
-  let [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   let filtered = accounts.filter(a => a.id !== account.id);
   let onbudget = filtered.filter(a => a.offbudget === 0);

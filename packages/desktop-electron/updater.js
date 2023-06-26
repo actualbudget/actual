@@ -1,5 +1,5 @@
-let isDev = require('electron-is-dev');
-let { autoUpdater } = require('electron-updater');
+const isDev = require('electron-is-dev');
+const { autoUpdater } = require('electron-updater');
 
 // Every 5 minutes
 let INTERVAL = 1000 * 60 * 5;

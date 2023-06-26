@@ -46,7 +46,7 @@ export default function SheetValue({
 
   let spreadsheet = useSpreadsheet();
   let sheetName = useContext(NamespaceContext) || '__global';
-  let [result, setResult] = useState({
+  const [result, setResult] = useState({
     name: sheetName + '!' + bindingObj.name,
     value: initialValue != null ? initialValue : bindingObj.value,
     query: bindingObj.query,

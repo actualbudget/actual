@@ -20,7 +20,7 @@ export default function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
   let spreadsheet = useSpreadsheet();
   let sheetName = useContext(NamespaceContext);
 
-  let [amount, setAmount] = useState(null);
+  const [amount, setAmount] = useState(null);
 
   useEffect(() => {
     (async () => {

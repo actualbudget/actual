@@ -51,7 +51,7 @@ type AdvancedToggleProps = {
 
 export let AdvancedToggle = ({ children }: AdvancedToggleProps) => {
   let location = useLocation();
-  let [expanded, setExpanded] = useState(location.hash === '#advanced');
+  const [expanded, setExpanded] = useState(location.hash === '#advanced');
 
   return expanded ? (
     <View

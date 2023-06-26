@@ -162,7 +162,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   let cachedState = useSelector(state => state.app.lastSplitState);
   let reduxDispatch = useDispatch();
 
-  let [state, dispatch] = useReducer((state, action) => {
+  const [state, dispatch] = useReducer((state, action) => {
     switch (action.type) {
       case 'toggle-split': {
         let ids = new Set([...state.ids]);
@@ -498,7 +498,7 @@ function CellWithScheduleIcon({ scheduleId, children }) {
 }
 
 let Transaction = memo(function Transaction(props) {
-  let {
+  const {
     transaction: originalTransaction,
     editing,
     backgroundColor = 'white',
@@ -533,9 +533,9 @@ let Transaction = memo(function Transaction(props) {
 
   let dispatchSelected = useSelectedDispatch();
 
-  let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
-  let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
-  let [transaction, setTransaction] = useState(() =>
+  const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
+  const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
+  const [transaction, setTransaction] = useState(() =>
     serializeTransaction(originalTransaction, showZeroInDeposit),
   );
   let isPreview = isPreviewId(transaction.id);
@@ -1262,7 +1262,7 @@ function TransactionTableInner({
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
   let renderRow = ({ item, index, position, editing }) => {
-    let {
+    const {
       transactions,
       selectedItems,
       hoveredTransaction,
@@ -1440,11 +1440,11 @@ function TransactionTableInner({
 }
 
 export let TransactionTable = forwardRef((props, ref) => {
-  let [newTransactions, setNewTransactions] = useState(null);
-  let [hoveredTransaction, setHoveredTransaction] = useState(
+  const [newTransactions, setNewTransactions] = useState(null);
+  const [hoveredTransaction, setHoveredTransaction] = useState(
     props.hoveredTransaction,
   );
-  let [prevIsAdding, setPrevIsAdding] = useState(false);
+  const [prevIsAdding, setPrevIsAdding] = useState(false);
   let splitsExpanded = useSplitsExpanded();
   let prevSplitsExpanded = useRef(null);
 
@@ -1508,7 +1508,7 @@ export let TransactionTable = forwardRef((props, ref) => {
   let latestState = useRef({ newTransactions, newNavigator, tableNavigator });
   let savePending = useRef(false);
   let afterSaveFunc = useRef(false);
-  let [_, forceRerender] = useState({});
+  const [_, forceRerender] = useState({});
 
   let selectedItems = useSelectedItems();
 

@@ -12,9 +12,9 @@ import { useBootstrapped, Title, Input } from './common';
 
 export default function Login() {
   let dispatch = useDispatch();
-  let [password, setPassword] = useState('');
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState(null);
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   let { checked } = useBootstrapped();
 

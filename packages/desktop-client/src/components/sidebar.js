@@ -311,7 +311,7 @@ function Accounts({
   onToggleClosedAccounts,
   onReorder,
 }) {
-  let [isDragging, setIsDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   let offbudgetAccounts = useMemo(
     () =>
       accounts.filter(
@@ -464,7 +464,7 @@ function ToggleButton({ style, isFloating, onFloat }) {
 }
 
 function Tools() {
-  let [isOpen, setOpen] = useState(false);
+  const [isOpen, setOpen] = useState(false);
   let onToggle = useCallback(() => setOpen(open => !open), []);
   let location = useLocation();
 

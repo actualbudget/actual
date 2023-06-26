@@ -139,7 +139,7 @@ function ConfigureField({
   dispatch,
   onApply,
 }) {
-  let [subfield, setSubfield] = useState(initialSubfield);
+  const [subfield, setSubfield] = useState(initialSubfield);
   let inputRef = useRef();
   let prevOp = useRef(null);
 
@@ -281,7 +281,7 @@ export function FilterButton({ onApply }) {
     };
   });
 
-  let [state, dispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
         case 'select-field':
@@ -393,7 +393,7 @@ export function FilterButton({ onApply }) {
 }
 
 function FilterEditor({ field, op, value, options, onSave, onClose }) {
-  let [state, dispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
         case 'close':
@@ -433,7 +433,7 @@ function FilterExpression({
   onChange,
   onDelete,
 }) {
-  let [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   let field = subfieldFromFilter({ field: originalField, value });
 

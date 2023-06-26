@@ -10,7 +10,7 @@ class Tooltip extends Component {
   static defaultEvents = VictoryTooltip.defaultEvents;
 
   render() {
-    let {
+    const {
       active,
       x,
       y,

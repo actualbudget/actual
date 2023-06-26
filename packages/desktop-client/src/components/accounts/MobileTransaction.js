@@ -101,7 +101,7 @@ function Status({ status }) {
 
 class Transaction extends PureComponent {
   render() {
-    let {
+    const {
       transaction,
       accounts,
       categories,
@@ -276,7 +276,7 @@ export class TransactionList extends Component {
   });
 
   render() {
-    let {
+    const {
       transactions,
       scrollProps = {},
       onLoadMore,

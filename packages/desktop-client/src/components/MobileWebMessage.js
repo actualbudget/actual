@@ -18,12 +18,12 @@ export default function MobileWebMessage() {
 
   let { isNarrowWidth } = useResponsive();
 
-  let [show, setShow] = useState(
+  const [show, setShow] = useState(
     isNarrowWidth &&
       !hideMobileMessagePref &&
       !document.cookie.match(/hideMobileMessage=true/),
   );
-  let [requestDontRemindMe, setRequestDontRemindMe] = useState(false);
+  const [requestDontRemindMe, setRequestDontRemindMe] = useState(false);
 
   let dispatch = useDispatch();
 

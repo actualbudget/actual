@@ -1,6 +1,6 @@
-let path = require('path');
+const path = require('path');
 
-let webpack = require('webpack');
+const webpack = require('webpack');
 
 /** @type {webpack.Configuration} */
 module.exports = {

@@ -16,7 +16,7 @@ function makeContext(queryState, opts, QueryClass) {
   let Context = createContext(null);
 
   function Provider({ children }) {
-    let [data, setData] = useState(query.getData());
+    const [data, setData] = useState(query.getData());
     let value = useMemo(() => ({ data, query }), [data, query]);
 
     useEffect(() => {
@@ -70,7 +70,7 @@ export function liveQueryContext(query, opts) {
 }
 
 export function useLiveQuery(makeQuery: () => Query, deps: DependencyList) {
-  let [data, setData] = useState(null);
+  const [data, setData] = useState(null);
   let query = useMemo(makeQuery, deps);
 
   useEffect(() => {

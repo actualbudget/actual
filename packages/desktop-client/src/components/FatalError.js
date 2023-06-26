@@ -79,8 +79,8 @@ class FatalError extends Component {
   }
 
   render() {
-    let { buttonText, error } = this.props;
-    let { showError } = this.state;
+    const { buttonText, error } = this.props;
+    const { showError } = this.state;
 
     if (error.type === 'app-init-failure') {
       return this.renderSimple(error);
@@ -134,8 +134,8 @@ class FatalError extends Component {
 export default FatalError;
 
 function SharedArrayBufferOverride() {
-  let [expanded, setExpanded] = useState(false);
-  let [understand, setUnderstand] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [understand, setUnderstand] = useState(false);
 
   return expanded ? (
     <>

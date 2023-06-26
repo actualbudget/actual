@@ -180,7 +180,7 @@ let PayeeTable = forwardRef(
     },
     ref,
   ) => {
-    let [hovered, setHovered] = useState(null);
+    const [hovered, setHovered] = useState(null);
     let selectedItems = useSelectedItems();
 
     useLayoutEffect(() => {
@@ -352,12 +352,12 @@ export let ManagePayees = forwardRef(
     },
     ref,
   ) => {
-    let [highlightedRows, setHighlightedRows] = useState(null);
-    let [filter, setFilter] = useState('');
+    const [highlightedRows, setHighlightedRows] = useState(null);
+    const [filter, setFilter] = useState('');
     let table = useRef(null);
     let scrollTo = useRef(null);
     let resetAnimation = useRef(false);
-    let [orphanedOnly, setOrphanedOnly] = useState(false);
+    const [orphanedOnly, setOrphanedOnly] = useState(false);
 
     let filteredPayees = useMemo(() => {
       let filtered = payees;
@@ -474,7 +474,7 @@ export let ManagePayees = forwardRef(
 
     let payeesById = getPayeesById(payees);
 
-    let [menuOpen, setMenuOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     return (
       <View style={{ height: '100%' }}>

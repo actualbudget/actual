@@ -11,8 +11,8 @@ export default function ConfirmCategoryDelete({
   categoryGroups,
   onDelete,
 }) {
-  let [transferCategory, setTransferCategory] = useState(null);
-  let [error, setError] = useState(null);
+  const [transferCategory, setTransferCategory] = useState(null);
+  const [error, setError] = useState(null);
 
   let inputRef = useRef(null);
 

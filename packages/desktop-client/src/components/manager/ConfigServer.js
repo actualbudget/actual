@@ -20,14 +20,14 @@ export default function ConfigServer() {
   useSetThemeColor(colors.p5);
   let dispatch = useDispatch();
   let navigate = useNavigate();
-  let [url, setUrl] = useState('');
+  const [url, setUrl] = useState('');
   let currentUrl = useServerURL();
   let setServerUrl = useSetServerURL();
   useEffect(() => {
     setUrl(currentUrl);
   }, [currentUrl]);
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   function getErrorMessage(error) {
     switch (error) {

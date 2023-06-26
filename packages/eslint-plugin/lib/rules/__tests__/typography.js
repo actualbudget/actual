@@ -7,7 +7,7 @@
 
 const { RuleTester } = require('eslint');
 
-let rule = require('../typography');
+const rule = require('../typography');
 
 //------------------------------------------------------------------------------
 // Tests

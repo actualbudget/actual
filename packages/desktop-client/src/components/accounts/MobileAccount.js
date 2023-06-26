@@ -70,9 +70,9 @@ let paged;
 
 function Account(props) {
   let navigate = useNavigate();
-  let [transactions, setTransactions] = useState([]);
-  let [searchText, setSearchText] = useState('');
-  let [currentQuery, setCurrentQuery] = useState();
+  const [transactions, setTransactions] = useState([]);
+  const [searchText, setSearchText] = useState('');
+  const [currentQuery, setCurrentQuery] = useState();
 
   let state = useSelector(state => ({
     payees: state.queries.payees,

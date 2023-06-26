@@ -57,7 +57,7 @@ function AccountSyncCheck({
   pushModal,
 }) {
   let { id } = useParams();
-  let [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   if (!failedAccounts) {
     return null;
   }

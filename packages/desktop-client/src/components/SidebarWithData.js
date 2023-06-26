@@ -19,8 +19,8 @@ import { Sidebar } from './sidebar';
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
   let navigate = useNavigate();
-  let [editing, setEditing] = useState(false);
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   function onMenuSelect(type) {
     setMenuOpen(false);

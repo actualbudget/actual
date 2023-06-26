@@ -7,7 +7,7 @@ import { View, Text, Button } from '../common';
 import { Setting } from './UI';
 
 export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
-  let [documentDirChanged, setDirChanged] = useState(false);
+  const [documentDirChanged, setDirChanged] = useState(false);
   let dirScrolled = useRef(null);
 
   useEffect(() => {

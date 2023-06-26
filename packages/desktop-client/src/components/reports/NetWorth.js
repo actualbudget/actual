@@ -29,11 +29,11 @@ function NetWorth({ accounts }) {
     onUpdate: onUpdateFilter,
   } = useFilters();
 
-  let [allMonths, setAllMonths] = useState(null);
-  let [start, setStart] = useState(
+  const [allMonths, setAllMonths] = useState(null);
+  const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
-  let [end, setEnd] = useState(monthUtils.currentMonth());
+  const [end, setEnd] = useState(monthUtils.currentMonth());
 
   let params = useMemo(
     () => netWorthSpreadsheet(start, end, accounts, filters),

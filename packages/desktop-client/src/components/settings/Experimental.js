@@ -8,7 +8,7 @@ import { Checkbox } from '../forms';
 import { Setting } from './UI';
 
 export default function ExperimentalFeatures({ prefs, savePrefs }) {
-  let [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   let flags = useAllFeatureFlags();
   let disabled = prefs.budgetType === 'report' && flags.reportBudget;
 

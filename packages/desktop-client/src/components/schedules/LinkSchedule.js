@@ -16,7 +16,7 @@ export default function ScheduleLink() {
     useCallback(query => query.filter({ completed: false }), []),
   );
 
-  let [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState('');
 
   if (scheduleData == null) {
     return null;

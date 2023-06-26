@@ -10,8 +10,8 @@ import Subtract from '../../icons/v1/Subtract';
 import { View, Button, InputWithContent } from '../common';
 
 export function AmountInput({ id, defaultValue = 0, onChange, style }) {
-  let [negative, setNegative] = useState(defaultValue <= 0);
-  let [value, setValue] = useState(integerToCurrency(Math.abs(defaultValue)));
+  const [negative, setNegative] = useState(defaultValue <= 0);
+  const [value, setValue] = useState(integerToCurrency(Math.abs(defaultValue)));
 
   function onSwitch() {
     setNegative(!negative);
@@ -47,8 +47,8 @@ export function AmountInput({ id, defaultValue = 0, onChange, style }) {
 }
 
 export function BetweenAmountInput({ defaultValue, onChange }) {
-  let [num1, setNum1] = useState(defaultValue.num1);
-  let [num2, setNum2] = useState(defaultValue.num2);
+  const [num1, setNum1] = useState(defaultValue.num1);
+  const [num2, setNum2] = useState(defaultValue.num2);
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>

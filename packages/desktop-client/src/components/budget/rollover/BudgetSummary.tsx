@@ -149,7 +149,7 @@ function ToBudget({
   collapsed,
   onBudgetAction,
 }: ToBudgetProps) {
-  let [menuOpen, setMenuOpen] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(null);
 
   return (
     <SheetValue binding={rolloverBudget.toBudget} initialValue={0}>
@@ -270,7 +270,7 @@ export function BudgetSummary({
     onToggleSummaryCollapse,
   } = useRollover();
 
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen(e) {
     setMenuOpen(true);
   }

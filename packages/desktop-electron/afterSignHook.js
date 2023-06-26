@@ -1,7 +1,7 @@
-let fs = require('fs');
-let path = require('path');
+const fs = require('fs');
+const path = require('path');
 
-let electron_notarize = require('electron-notarize');
+const electron_notarize = require('electron-notarize');
 
 // This is expected to be run by `electron-builder` after it signs the build.
 // It's disabled for now as we currently don't sign builds after Actual being open sourced.

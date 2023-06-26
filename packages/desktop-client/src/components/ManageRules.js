@@ -78,7 +78,7 @@ export function Value({
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
-  let [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   function onExpand(e) {
     e.preventDefault();
@@ -572,9 +572,9 @@ function ruleToString(rule, data) {
 }
 
 function ManageRulesContent({ isModal, payeeId, setLoading }) {
-  let [allRules, setAllRules] = useState(null);
-  let [rules, setRules] = useState(null);
-  let [filter, setFilter] = useState('');
+  const [allRules, setAllRules] = useState(null);
+  const [rules, setRules] = useState(null);
+  const [filter, setFilter] = useState('');
   let dispatch = useDispatch();
   let navigator = useTableNavigator(rules, ['select', 'edit']);
 
@@ -598,7 +598,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
     [rules, filter, filterData],
   );
   let selectedInst = useSelected('manage-rules', allRules, []);
-  let [hoveredRule, setHoveredRule] = useState(null);
+  const [hoveredRule, setHoveredRule] = useState(null);
   let tableRef = useRef(null);
 
   async function loadRules() {

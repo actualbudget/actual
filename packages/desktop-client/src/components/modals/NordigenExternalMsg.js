@@ -16,9 +16,9 @@ import { FormField, FormLabel } from '../forms';
 import { COUNTRY_OPTIONS } from './countries';
 
 function useAvailableBanks(country) {
-  let [banks, setBanks] = useState([]);
-  let [isLoading, setIsLoading] = useState(false);
-  let [isError, setIsError] = useState(false);
+  const [banks, setBanks] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     async function fetch() {
@@ -72,13 +72,13 @@ export default function NordigenExternalMsg({
 }) {
   let dispatch = useDispatch();
 
-  let [waiting, setWaiting] = useState(null);
-  let [success, setSuccess] = useState(false);
-  let [institutionId, setInstitutionId] = useState();
-  let [country, setCountry] = useState();
-  let [error, setError] = useState(null);
-  let [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [waiting, setWaiting] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [institutionId, setInstitutionId] = useState();
+  const [country, setCountry] = useState();
+  const [error, setError] = useState(null);
+  const [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   let data = useRef(null);
 
   let {

@@ -55,7 +55,7 @@ class Budget extends PureComponent {
   }
 
   async componentDidMount() {
-    let { titlebar, budgetType } = this.props;
+    const { titlebar, budgetType } = this.props;
     this.loadCategories();
 
     let { start, end } = await send('get-budget-bounds');
@@ -115,7 +115,7 @@ class Budget extends PureComponent {
       // Make to sure to check if the budget bounds have changed, and
       // if so reload the budget data
       send('get-budget-bounds').then(({ start, end }) => {
-        let { bounds } = this.state;
+        const { bounds } = this.state;
         if (bounds.start !== start || bounds.end !== end) {
           this.setState({ bounds: { start, end } });
         }
@@ -143,7 +143,7 @@ class Budget extends PureComponent {
   };
 
   async prewarmAllMonths(bounds, type = null) {
-    let { startMonth } = this.state;
+    const { startMonth } = this.state;
     let numMonths = 3;
 
     bounds = getValidMonthBounds(
@@ -159,7 +159,7 @@ class Budget extends PureComponent {
   }
 
   onMonthSelect = async (month, numDisplayed) => {
-    let { startMonth } = this.state;
+    const { startMonth } = this.state;
 
     this.setState({ prewarmStartMonth: month });
 
@@ -212,7 +212,7 @@ class Budget extends PureComponent {
   }
 
   onSaveCategory = async category => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
 
     if (category.id === 'new') {
       let id = await this.props.createCategory(
@@ -244,7 +244,7 @@ class Budget extends PureComponent {
 
   onDeleteCategory = async id => {
     let mustTransfer = await send('must-category-transfer', { id });
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
 
     if (mustTransfer) {
       this.props.pushModal('confirm-category-delete', {
@@ -269,7 +269,7 @@ class Budget extends PureComponent {
   };
 
   onSaveGroup = async group => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
 
     if (group.id === 'new') {
       let id = await this.props.createGroup(group.name);
@@ -296,7 +296,7 @@ class Budget extends PureComponent {
   };
 
   onDeleteGroup = async id => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
     let group = categoryGroups.find(g => g.id === id);
 
     let mustTransfer = false;
@@ -348,7 +348,7 @@ class Budget extends PureComponent {
   };
 
   onReorderCategory = async sortInfo => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
 
     this.props.moveCategory(sortInfo.id, sortInfo.groupId, sortInfo.targetId);
     this.setState({
@@ -362,7 +362,7 @@ class Budget extends PureComponent {
   };
 
   onReorderGroup = async sortInfo => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
 
     this.props.moveCategoryGroup(sortInfo.id, sortInfo.targetId);
     this.setState({
@@ -398,13 +398,13 @@ class Budget extends PureComponent {
   };
 
   render() {
-    let {
+    const {
       maxMonths,
       budgetType: type,
       reportComponents,
       rolloverComponents,
     } = this.props;
-    let {
+    const {
       initialized,
       categoryGroups,
       prewarmStartMonth,

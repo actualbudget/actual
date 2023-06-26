@@ -19,7 +19,7 @@ import { MonthsContext } from './MonthsContext';
 export default function BudgetSummaries({ SummaryComponent }) {
   let { months } = useContext(MonthsContext);
 
-  let [widthState, setWidthState] = useState(0);
+  const [widthState, setWidthState] = useState(0);
   let [styles, spring] = useSpring(() => ({
     x: 0,
     config: { mass: 3, tension: 600, friction: 80 },

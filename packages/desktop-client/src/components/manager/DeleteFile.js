@@ -4,7 +4,7 @@ import { colors } from '../../style';
 import { View, Text, Modal, ButtonWithLoading } from '../common';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
-  let [loadingState, setLoadingState] = useState(null);
+  const [loadingState, setLoadingState] = useState(null);
 
   async function onDeleteCloud() {
     setLoadingState('cloud');

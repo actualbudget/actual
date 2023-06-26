@@ -78,7 +78,7 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
 }
 
 function LiveTransactionTable(props) {
-  let [transactions, setTransactions] = useState(props.transactions);
+  const [transactions, setTransactions] = useState(props.transactions);
 
   useEffect(() => {
     if (transactions === props.transactions) return;

@@ -301,7 +301,7 @@ export let BudgetSummary = memo(function BudgetSummary({
     onToggleSummaryCollapse,
   } = useReport();
 
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen() {
     setMenuOpen(true);
   }

@@ -14,8 +14,8 @@ class BackupTable extends Component {
   };
 
   render() {
-    let { backups, onSelect } = this.props;
-    let { hoveredBackup } = this.state;
+    const { backups, onSelect } = this.props;
+    const { hoveredBackup } = this.state;
 
     return (
       <View
@@ -50,7 +50,7 @@ function LoadBackup({
   actions,
   modalProps,
 }) {
-  let [backups, setBackups] = useState([]);
+  const [backups, setBackups] = useState([]);
 
   useEffect(() => {
     send('backups-get', { id: budgetId }).then(setBackups);

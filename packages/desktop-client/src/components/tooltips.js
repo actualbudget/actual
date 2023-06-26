@@ -8,7 +8,7 @@ import { styles } from '../style';
 export let IntersectionBoundary = createContext();
 
 export function useTooltip() {
-  let [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return {
     getOpenEvents: (events = {}) => ({
@@ -101,7 +101,7 @@ export class Tooltip extends Component {
   }
 
   getContainer() {
-    let { ignoreBoundary = false } = this.props;
+    const { ignoreBoundary = false } = this.props;
 
     if (!ignoreBoundary && this.context) {
       return this.context.current;
@@ -124,7 +124,7 @@ export class Tooltip extends Component {
   }
 
   layout() {
-    let { targetRect, offset = 0 } = this.props;
+    const { targetRect, offset = 0 } = this.props;
     let contentEl = this.contentRef.current;
     if (!contentEl) {
       return;
@@ -289,7 +289,7 @@ export class Tooltip extends Component {
   }
 
   render() {
-    let { children, width, style } = this.props;
+    const { children, width, style } = this.props;
 
     let contentStyle = {
       position: 'absolute',

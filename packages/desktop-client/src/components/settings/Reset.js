@@ -7,7 +7,7 @@ import { Text, ButtonWithLoading } from '../common';
 import { Setting } from './UI';
 
 export function ResetCache() {
-  let [resetting, setResetting] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   async function onResetCache() {
     setResetting(true);
@@ -35,7 +35,7 @@ export function ResetCache() {
 }
 
 export function ResetSync({ isEnabled, resetSync }) {
-  let [resetting, setResetting] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   async function onResetSync() {
     setResetting(true);

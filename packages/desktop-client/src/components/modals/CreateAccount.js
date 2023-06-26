@@ -9,7 +9,7 @@ import { View, Text, Modal, P, Button, ButtonWithLoading } from '../common';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
   let dispatch = useDispatch();
-  let [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
+  const [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
 
   let onConnect = () => {
     if (!isNordigenSetupComplete) {

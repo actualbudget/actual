@@ -1,4 +1,4 @@
-let electron = require('electron');
+const electron = require('electron');
 
 electron.app.on('web-contents-created', function (event, contents) {
   contents.on('will-attach-webview', function (event, webPreferences, params) {

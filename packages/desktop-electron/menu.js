@@ -1,4 +1,4 @@
-let { Menu, ipcMain, app, shell } = require('electron');
+const { Menu, ipcMain, app, shell } = require('electron');
 
 function getMenu(isDev, createWindow) {
   let template = [

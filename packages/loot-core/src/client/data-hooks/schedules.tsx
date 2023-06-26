@@ -20,7 +20,7 @@ function loadStatuses(schedules, onData) {
 
 type UseSchedulesArgs = { transform?: <T>(v: T) => T };
 export function useSchedules({ transform }: UseSchedulesArgs = {}) {
-  let [data, setData] = useState(null);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     let query = q('schedules').select('*');

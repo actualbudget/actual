@@ -1,4 +1,4 @@
-let { ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 
 let root = document.querySelector('#root');
 

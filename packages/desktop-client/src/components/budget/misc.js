@@ -68,7 +68,7 @@ class BudgetTable extends Component {
   };
 
   onReorderCategory = (id, dropPos, targetId) => {
-    let { categoryGroups } = this.props;
+    const { categoryGroups } = this.props;
 
     let isGroup = !!categoryGroups.find(g => g.id === targetId);
 
@@ -106,7 +106,7 @@ class BudgetTable extends Component {
   };
 
   onReorderGroup = (id, dropPos, targetId) => {
-    let { categoryGroups } = this.props;
+    const { categoryGroups } = this.props;
 
     this.props.onReorderGroup({
       id,
@@ -115,8 +115,8 @@ class BudgetTable extends Component {
   };
 
   moveVertically = dir => {
-    let { editing } = this.state;
-    let { type, categoryGroups, collapsed } = this.props;
+    const { editing } = this.state;
+    const { type, categoryGroups, collapsed } = this.props;
 
     let flattened = categoryGroups.reduce((all, group) => {
       if (collapsed.includes(group.id)) {
@@ -186,12 +186,12 @@ class BudgetTable extends Component {
   };
 
   collapseAllCategories = () => {
-    let { setCollapsed, categoryGroups } = this.props;
+    const { setCollapsed, categoryGroups } = this.props;
     setCollapsed(categoryGroups.map(g => g.id));
   };
 
   render() {
-    let {
+    const {
       type,
       categoryGroups,
       prewarmStartMonth,
@@ -212,7 +212,7 @@ class BudgetTable extends Component {
       onShowNewGroup,
       onHideNewGroup,
     } = this.props;
-    let { editing, draggingState, showHiddenCategories } = this.state;
+    const { editing, draggingState, showHiddenCategories } = this.state;
 
     return (
       <View
@@ -345,7 +345,7 @@ function SidebarCategory({
   onHideNewCategory,
 }) {
   let temporary = category.id === 'new';
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   let displayed = (
     <View
@@ -497,7 +497,7 @@ function SidebarGroup({
   onToggleCollapse,
 }) {
   let temporary = group.id === 'new';
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   let displayed = (
     <View
@@ -672,7 +672,7 @@ let BudgetTotals = memo(function BudgetTotals({
   expandAllCategories,
   collapseAllCategories,
 }) {
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <View
       data-testid="budget-totals"
@@ -1128,8 +1128,8 @@ let BudgetCategories = memo(
       showHiddenCategories,
     ]);
 
-    let [dragState, setDragState] = useState(null);
-    let [savedCollapsed, setSavedCollapsed] = useState(null);
+    const [dragState, setDragState] = useState(null);
+    const [savedCollapsed, setSavedCollapsed] = useState(null);
 
     // TODO: If we turn this into a reducer, we could probably memoize
     // each item in the list for better perf
@@ -1422,7 +1422,7 @@ let MonthPicker = ({
   let year = monthUtils.getYear(startMonth);
   let selectedIndex = monthUtils.getMonthIndex(startMonth);
 
-  let [size, setSize] = useState('small');
+  const [size, setSize] = useState('small');
   let containerRef = useResizeObserver(rect => {
     setSize(rect.width <= 320 ? 'small' : rect.width <= 400 ? 'medium' : 'big');
   });

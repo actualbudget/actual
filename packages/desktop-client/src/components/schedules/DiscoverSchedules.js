@@ -115,7 +115,7 @@ export default function DiscoverSchedules() {
     useSendPlatformRequest('schedule/discover');
   if (!schedules) schedules = [];
 
-  let [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   let selectedInst = useSelected('discover-schedules', schedules, []);
 

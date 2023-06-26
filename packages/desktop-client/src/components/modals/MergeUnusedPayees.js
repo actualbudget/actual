@@ -21,7 +21,7 @@ export default function MergeUnusedPayees({
   }));
   let isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
   let dispatch = useDispatch();
-  let [shouldCreateRule, setShouldCreateRule] = useState(true);
+  const [shouldCreateRule, setShouldCreateRule] = useState(true);
   let flashRef = useRef(null);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function MergeUnusedPayees({
   //
   // TODO: I think a custom `useSelector` hook that doesn't bind would
   // be nice
-  let [payees] = useState(() =>
+  const [payees] = useState(() =>
     payeeIds.map(id => allPayees.find(p => p.id === id)),
   );
   let targetPayee = allPayees.find(p => p.id === targetPayeeId);

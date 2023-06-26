@@ -8,8 +8,8 @@ export default function useSendPlatformRequest<K extends keyof Handlers>(
   args?: Parameters<Handlers[K]>[0],
   options?: { catchErrors?: boolean },
 ) {
-  let [data, setData] = useState<unknown>(null);
-  let [isLoading, setIsLoading] = useState<boolean | null>(null);
+  const [data, setData] = useState<unknown>(null);
+  const [isLoading, setIsLoading] = useState<boolean | null>(null);
 
   useEffect(() => {
     async function run() {

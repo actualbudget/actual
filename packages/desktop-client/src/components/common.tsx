@@ -80,7 +80,7 @@ type BlockProps = HTMLPropsWithStyle<HTMLDivElement> & {
 };
 
 export function Block(props: BlockProps) {
-  let { style, innerRef, ...restProps } = props;
+  const { style, innerRef, ...restProps } = props;
   return (
     <div
       {...restProps}
@@ -259,7 +259,7 @@ export function InputWithContent({
   getStyle,
   ...props
 }: InputWithContentProps) {
-  let [focused, setFocused] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   return (
     <View
@@ -452,7 +452,7 @@ export function Menu({
 }: MenuProps) {
   let elRef = useRef(null);
   let items = allItems.filter(x => x);
-  let [hoveredIndex, setHoveredIndex] = useState(null);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     let el = elRef.current;
@@ -746,7 +746,7 @@ export function HoverTarget({
   renderContent,
   disabled,
 }: HoverTargetProps) {
-  let [hovered, setHovered] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   let onMouseEnter = useCallback(() => {
     if (!disabled) {

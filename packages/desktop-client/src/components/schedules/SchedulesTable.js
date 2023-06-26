@@ -19,7 +19,7 @@ import { StatusBadge } from './StatusBadge';
 export let ROW_HEIGHT = 43;
 
 function OverflowMenu({ schedule, status, onAction }) {
-  let [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <View>
@@ -129,7 +129,7 @@ export function SchedulesTable({
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
 
-  let [showCompleted, setShowCompleted] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
 
   let payees = useCachedPayees();
   let accounts = useCachedAccounts();

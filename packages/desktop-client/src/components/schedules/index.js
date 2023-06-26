@@ -12,7 +12,7 @@ import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 export default function Schedules() {
   let pushModal = usePushModal();
 
-  let [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState('');
 
   let scheduleData = useSchedules();
 

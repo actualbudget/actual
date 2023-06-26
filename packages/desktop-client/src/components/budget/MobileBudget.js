@@ -96,7 +96,7 @@ class Budget extends Component {
   };
 
   onBudgetAction = type => {
-    let { currentMonth } = this.state;
+    const { currentMonth } = this.state;
     this.props.applyBudgetAction(currentMonth, type, this.state.bounds);
   };
 
@@ -105,7 +105,7 @@ class Budget extends Component {
       groupId,
       onAdd: async name => {
         let id = await this.props.createCategory(name, groupId);
-        let { categoryGroups } = this.state;
+        const { categoryGroups } = this.state;
 
         this.setState({
           categoryGroups: addCategory(categoryGroups, {
@@ -120,7 +120,7 @@ class Budget extends Component {
   };
 
   onReorderCategory = (id, { inGroup, aroundCategory }) => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
     let groupId, targetId;
 
     if (inGroup) {
@@ -150,7 +150,7 @@ class Budget extends Component {
   };
 
   onReorderGroup = (id, targetId, position) => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
 
     if (position === 'bottom') {
       let idx = categoryGroups.findIndex(group => group.id === targetId);
@@ -188,7 +188,7 @@ class Budget extends Component {
   };
 
   onOpenActionSheet = () => {
-    let { budgetType } = this.props;
+    const { budgetType } = this.props;
 
     let options = [
       'Edit Categories',
@@ -231,8 +231,8 @@ class Budget extends Component {
   };
 
   render() {
-    let { currentMonth, bounds, editMode, initialized } = this.state;
-    let {
+    const { currentMonth, bounds, editMode, initialized } = this.state;
+    const {
       categories,
       categoryGroups,
       prefs,

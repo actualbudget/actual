@@ -167,20 +167,20 @@ function SingleAutocomplete({
   value: initialValue,
   isMulti = false,
 }: SingleAutocompleteProps) {
-  let [selectedItem, setSelectedItem] = useState(() =>
+  const [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
   );
-  let [value, setValue] = useState(
+  const [value, setValue] = useState(
     selectedItem ? getItemName(selectedItem) : '',
   );
-  let [isChanged, setIsChanged] = useState(false);
-  let [originalItem, setOriginalItem] = useState(selectedItem);
+  const [isChanged, setIsChanged] = useState(false);
+  const [originalItem, setOriginalItem] = useState(selectedItem);
   let filteredSuggestions = useMemo(
     () => filterSuggestions(suggestions, value),
     [filterSuggestions, suggestions, value],
   );
-  let [highlightedIndex, setHighlightedIndex] = useState(null);
-  let [isOpen, setIsOpen] = useState(embedded);
+  const [highlightedIndex, setHighlightedIndex] = useState(null);
+  const [isOpen, setIsOpen] = useState(embedded);
 
   // Update the selected item if the suggestion list or initial
   // input value has changed
@@ -531,7 +531,7 @@ function MultiAutocomplete({
   strict,
   ...props
 }: MultiAutocompleteProps) {
-  let [focused, setFocused] = useState(false);
+  const [focused, setFocused] = useState(false);
   let lastSelectedItems = useRef<unknown[]>();
 
   useEffect(() => {

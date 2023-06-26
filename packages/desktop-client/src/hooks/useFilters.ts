@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 
 export default function useFilters<T>(initialFilters: T[] = []) {
-  let [filters, setFilters] = useState<T[]>(initialFilters);
+  const [filters, setFilters] = useState<T[]>(initialFilters);
 
   let onApply = useCallback(
     (newFilter: T) => {

@@ -63,7 +63,7 @@ export function useDraggable({ item, type, canDrag, onDragChange }) {
 
 export function useDroppable({ types, id, onDrop, onLongHover }) {
   let ref = useRef(null);
-  let [dropPos, setDropPos] = useState(null);
+  const [dropPos, setDropPos] = useState(null);
 
   let [{ isOver }, dropRef] = useDrop({
     accept: types,

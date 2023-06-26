@@ -20,10 +20,10 @@ let NordigenInitialise = ({
   modalProps,
   onSuccess,
 }: NordigenInitialiseProps) => {
-  let [secretId, setSecretId] = useState('');
-  let [secretKey, setSecretKey] = useState('');
-  let [isValid, setIsValid] = useState(true);
-  let [isLoading, setIsLoading] = useState(false);
+  const [secretId, setSecretId] = useState('');
+  const [secretKey, setSecretKey] = useState('');
+  const [isValid, setIsValid] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   let onSubmit = async () => {
     if (!secretId || !secretKey) {

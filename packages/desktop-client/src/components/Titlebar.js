@@ -85,8 +85,8 @@ function UncategorizedButton() {
 }
 
 export function SyncButton({ localPrefs, style, onSync }) {
-  let [syncing, setSyncing] = useState(false);
-  let [syncState, setSyncState] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncState, setSyncState] = useState(null);
 
   useEffect(() => {
     let unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
@@ -168,8 +168,8 @@ export function SyncButton({ localPrefs, style, onSync }) {
 
 function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
   let { sendEvent } = useContext(TitlebarContext);
-  let [loading, setLoading] = useState(false);
-  let [showTooltip, setShowTooltip] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   let reportBudgetEnabled = useFeatureFlag('reportBudget');
 

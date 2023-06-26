@@ -16,7 +16,7 @@ let View = (props: ViewProps) => {
   // everywhere and we can avoid any perf penalty that glamor would
   // incur.
 
-  let { style, nativeStyle, innerRef, ...restProps } = props;
+  const { style, nativeStyle, innerRef, ...restProps } = props;
   return (
     <div
       {...restProps}

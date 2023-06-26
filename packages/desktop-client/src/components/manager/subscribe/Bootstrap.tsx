@@ -13,7 +13,7 @@ import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function Bootstrap() {
   let dispatch = useDispatch();
-  let [error, setError] = useState(null);
+  const [error, setError] = useState(null);
 
   let { checked } = useBootstrapped();
 

@@ -26,8 +26,8 @@ function getErrorMessage(error) {
 
 function Import({ modalProps, availableImports }) {
   let dispatch = useDispatch();
-  let [error, setError] = useState(false);
-  let [importing, setImporting] = useState(false);
+  const [error, setError] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   async function onImport() {
     let res = await window.Actual.openFileDialog({

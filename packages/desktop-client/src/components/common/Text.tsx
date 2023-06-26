@@ -11,7 +11,7 @@ type TextProps = HTMLPropsWithStyle<HTMLSpanElement> & {
 };
 
 let Text = (props: TextProps) => {
-  let { style, innerRef, ...restProps } = props;
+  const { style, innerRef, ...restProps } = props;
   return (
     <span
       {...restProps}

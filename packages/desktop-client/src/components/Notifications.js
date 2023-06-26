@@ -70,8 +70,8 @@ function Notification({ notification, onRemove }) {
   let { type, title, message, pre, messageActions, sticky, internal, button } =
     notification;
 
-  let [loading, setLoading] = useState(false);
-  let [overlayLoading, setOverlayLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   useEffect(() => {
     if (type === 'error' && internal) {

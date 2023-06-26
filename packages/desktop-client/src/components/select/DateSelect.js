@@ -175,8 +175,8 @@ export default function DateSelect({
   }, [defaultValue, dateFormat]);
 
   let picker = useRef(null);
-  let [value, setValue] = useState(parsedDefaultValue);
-  let [open, setOpen] = useState(embedded || isOpen || false);
+  const [value, setValue] = useState(parsedDefaultValue);
+  const [open, setOpen] = useState(embedded || isOpen || false);
   let inputRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -191,7 +191,7 @@ export default function DateSelect({
   // around. `userSelectedValue` represents the last value that the
   // user actually selected (with enter or click). Having both allows
   // us to make various UX decisions
-  let [selectedValue, setSelectedValue] = useState(value);
+  const [selectedValue, setSelectedValue] = useState(value);
   let userSelectedValue = useRef(selectedValue);
 
   let firstDayOfWeekIdx = useSelector(state =>

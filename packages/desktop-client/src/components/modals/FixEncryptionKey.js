@@ -24,10 +24,10 @@ export default function FixEncryptionKey({
 }) {
   let { hasExistingKey, cloudFileId, onSuccess } = options;
 
-  let [password, setPassword] = useState('');
-  let [error, setError] = useState('');
-  let [loading, setLoading] = useState(false);
-  let [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function onUpdateKey() {
     if (password !== '' && !loading) {

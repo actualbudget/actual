@@ -87,8 +87,8 @@ class App extends Component {
   }
 
   render() {
-    let { budgetId, loadingText } = this.props;
-    let { fatalError, initializing, hiddenScrollbars } = this.state;
+    const { budgetId, loadingText } = this.props;
+    const { fatalError, initializing, hiddenScrollbars } = this.state;
 
     return (
       <ResponsiveProvider>

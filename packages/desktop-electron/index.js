@@ -1,7 +1,7 @@
 /* eslint-disable import/order */
 // (I have no idea why the imports are like this. Not touching them.)
-let isDev = require('electron-is-dev');
-let fs = require('fs');
+const isDev = require('electron-is-dev');
+const fs = require('fs');
 
 require('module').globalPaths.push(__dirname + '/..');
 
@@ -10,7 +10,7 @@ if (isDev) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 }
 
-let {
+const {
   app,
   ipcMain,
   BrowserWindow,
@@ -19,7 +19,7 @@ let {
   shell,
   protocol,
 } = require('electron');
-let promiseRetry = require('promise-retry');
+const promiseRetry = require('promise-retry');
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -29,15 +29,15 @@ protocol.registerSchemesAsPrivileged([
 
 global.fetch = require('node-fetch');
 
-let about = require('./about');
-let { getRandomPort } = require('get-port-please');
-let getMenu = require('./menu');
-let updater = require('./updater');
+const about = require('./about');
+const { getRandomPort } = require('get-port-please');
+const getMenu = require('./menu');
+const updater = require('./updater');
 
 require('./security');
 
-let { fork } = require('child_process');
-let path = require('path');
+const { fork } = require('child_process');
+const path = require('path');
 
 require('./setRequireHook');
 
@@ -50,7 +50,7 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 }
 
 // eslint-disable-next-line import/extensions
-let WindowState = require('./window-state.js');
+const WindowState = require('./window-state.js');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

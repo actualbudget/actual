@@ -71,7 +71,7 @@ export default function ConfigureLinkedAccounts({
   accounts,
   actions,
 }) {
-  let [offbudgetAccounts, setOffbudgetAccounts] = useState(() =>
+  const [offbudgetAccounts, setOffbudgetAccounts] = useState(() =>
     accounts.filter(acct => determineOffBudget(acct.type)).map(acct => acct.id),
   );
 

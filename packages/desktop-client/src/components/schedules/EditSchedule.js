@@ -87,7 +87,7 @@ export default function ScheduleDetails() {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
 
-  let [state, dispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
         case 'set-schedule': {

@@ -12,7 +12,7 @@ import CellValue from '../spreadsheet/CellValue';
 import { TransactionList } from './MobileTransaction';
 
 function TransactionSearchInput({ accountName, onSearch }) {
-  let [text, setText] = useState('');
+  const [text, setText] = useState('');
 
   return (
     <View

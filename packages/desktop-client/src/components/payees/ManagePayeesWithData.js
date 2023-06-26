@@ -18,9 +18,9 @@ function ManagePayeesWithData({
   setLastUndoState,
   pushModal,
 }) {
-  let [payees, setPayees] = useState(initialPayees);
-  let [ruleCounts, setRuleCounts] = useState({ value: new Map() });
-  let [orphans, setOrphans] = useState({ value: new Map() });
+  const [payees, setPayees] = useState(initialPayees);
+  const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
+  const [orphans, setOrphans] = useState({ value: new Map() });
   let payeesRef = useRef();
 
   async function refetchOrphanedPayees() {

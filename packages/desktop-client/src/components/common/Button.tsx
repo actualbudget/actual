@@ -118,7 +118,7 @@ export let ButtonWithLoading = forwardRef<
   HTMLButtonElement,
   ButtonWithLoadingProps
 >((props, ref) => {
-  let { loading, children, ...buttonProps } = props;
+  const { loading, children, ...buttonProps } = props;
   return (
     <Button
       {...buttonProps}

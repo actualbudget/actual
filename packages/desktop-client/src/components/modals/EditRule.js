@@ -348,7 +348,7 @@ function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
 }
 
 function StageInfo() {
-  let [open, setOpen] = useState();
+  const [open, setOpen] = useState();
 
   return (
     <View style={{ position: 'relative', marginLeft: 5 }}>
@@ -585,11 +585,13 @@ export default function EditRule({
   defaultRule,
   onSave: originalOnSave,
 }) {
-  let [conditions, setConditions] = useState(defaultRule.conditions.map(parse));
-  let [actions, setActions] = useState(defaultRule.actions.map(parse));
-  let [stage, setStage] = useState(defaultRule.stage);
-  let [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
-  let [transactions, setTransactions] = useState([]);
+  const [conditions, setConditions] = useState(
+    defaultRule.conditions.map(parse),
+  );
+  const [actions, setActions] = useState(defaultRule.actions.map(parse));
+  const [stage, setStage] = useState(defaultRule.stage);
+  const [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
+  const [transactions, setTransactions] = useState([]);
   let dispatch = useDispatch();
   let scrollableEl = useRef();
 

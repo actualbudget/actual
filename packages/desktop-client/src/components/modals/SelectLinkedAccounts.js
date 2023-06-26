@@ -14,7 +14,7 @@ export default function SelectLinkedAccounts({
   localAccounts,
   actions,
 }) {
-  let [chosenAccounts, setChosenAccounts] = useState(() => {
+  const [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(
       localAccounts
         .filter(acc => acc.account_id)
@@ -149,7 +149,7 @@ function TableRow({
   unlinkedAccounts,
   onSetLinkedAccount,
 }) {
-  let [focusedField, setFocusedField] = useState(null);
+  const [focusedField, setFocusedField] = useState(null);
 
   let availableAccountOptions = [
     ...unlinkedAccounts,

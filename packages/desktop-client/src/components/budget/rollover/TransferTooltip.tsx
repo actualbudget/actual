@@ -39,8 +39,8 @@ export default function TransferTooltip({
     categoryGroups = addToBeBudgetedGroup(categoryGroups);
   }
 
-  let [amount, setAmount] = useState(null);
-  let [category, setCategory] = useState(null);
+  const [amount, setAmount] = useState(null);
+  const [category, setCategory] = useState(null);
 
   useEffect(() => {
     (async () => {

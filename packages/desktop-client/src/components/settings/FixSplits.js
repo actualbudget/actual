@@ -46,8 +46,8 @@ function renderResults(results) {
 }
 
 export default function FixSplitsTool() {
-  let [loading, setLoading] = useState(false);
-  let [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState(null);
 
   async function onFix() {
     setLoading(true);

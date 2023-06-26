@@ -23,10 +23,10 @@ export default function CreateEncryptionKey({
   actions,
   options = {},
 }) {
-  let [password, setPassword] = useState('');
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState('');
-  let [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   let isRecreating = options.recreate;
 

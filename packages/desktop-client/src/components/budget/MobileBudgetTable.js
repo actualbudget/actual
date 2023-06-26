@@ -101,7 +101,7 @@ function Saved({ projected }) {
 
 class BudgetCell extends PureComponent {
   render() {
-    let {
+    const {
       name,
       binding,
       editing,
@@ -241,7 +241,7 @@ class BudgetCategory extends PureComponent {
   constructor(props) {
     super(props);
 
-    let { editMode, blank } = props;
+    const { editMode, blank } = props;
     // this.opacity = new Animated.Value(editMode || blank ? 0 : 1);
     this.opacity = editMode || blank ? 0 : 1;
   }
@@ -263,7 +263,7 @@ class BudgetCategory extends PureComponent {
   //   }
 
   render() {
-    let {
+    const {
       category,
       editing,
       index,
@@ -368,7 +368,7 @@ class TotalsRow extends PureComponent {
   constructor(props) {
     super(props);
 
-    let { editMode, blank } = props;
+    const { editMode, blank } = props;
     // this.animation = new Animated.Value(editMode || blank ? 0 : 1);
     this.opacity = editMode || blank ? 0 : 1;
   }
@@ -384,7 +384,7 @@ class TotalsRow extends PureComponent {
   //   }
 
   render() {
-    let { group, editMode, onAddCategory } = this.props;
+    const { group, editMode, onAddCategory } = this.props;
 
     let content = (
       <ListItem
@@ -485,7 +485,7 @@ class TotalsRow extends PureComponent {
 
 class IncomeCategory extends PureComponent {
   render() {
-    let { name, budget, balance, style, nameTextStyle, amountTextStyle } =
+    const { name, budget, balance, style, nameTextStyle, amountTextStyle } =
       this.props;
     return (
       <ListItem
@@ -570,7 +570,7 @@ class IncomeCategory extends PureComponent {
 
 class BudgetGroup extends PureComponent {
   render() {
-    let {
+    const {
       group,
       // editingId,
       editMode,
@@ -652,7 +652,7 @@ class BudgetGroup extends PureComponent {
 
 class IncomeBudgetGroup extends Component {
   render() {
-    let { type, group } = this.props;
+    const { type, group } = this.props;
     return (
       <View>
         <View
@@ -722,7 +722,7 @@ class BudgetGroups extends Component {
   });
 
   render() {
-    let {
+    const {
       type,
       categoryGroups,
       editingId,
@@ -861,7 +861,7 @@ export class BudgetTable extends Component {
   // };
 
   render() {
-    let {
+    const {
       type,
       categoryGroups,
       month,
@@ -878,7 +878,7 @@ export class BudgetTable extends Component {
       onBudgetAction,
     } = this.props;
     // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
-    let { editingCategory } = this.state;
+    const { editingCategory } = this.state;
     let currentMonth = monthUtils.currentMonth();
 
     return (

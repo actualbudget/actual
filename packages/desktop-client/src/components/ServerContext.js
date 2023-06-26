@@ -23,8 +23,8 @@ async function getServerVersion() {
 }
 
 export function ServerProvider({ children }) {
-  let [serverURL, setServerURL] = useState('');
-  let [version, setVersion] = useState('');
+  const [serverURL, setServerURL] = useState('');
+  const [version, setVersion] = useState('');
 
   useEffect(() => {
     async function run() {

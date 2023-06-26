@@ -22,7 +22,7 @@ import { useSetServerURL } from '../../ServerContext';
 // they will also potentially redirect to other pages which do *not*
 // do any checks.
 export function useBootstrapped() {
-  let [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(false);
   let navigate = useNavigate();
   let location = useLocation();
   let setServerURL = useSetServerURL();

@@ -1,6 +1,6 @@
 // webpack loader for .pegjs files using Peggy.
 
-let peg = require('peggy');
+const peg = require('peggy');
 
 module.exports = function loadPeg(source) {
   // TODO: a second value can be returned. A JS SourceMap object.

@@ -25,13 +25,13 @@ function CashFlow() {
     onUpdate: onUpdateFilter,
   } = useFilters();
 
-  let [allMonths, setAllMonths] = useState(null);
-  let [start, setStart] = useState(
+  const [allMonths, setAllMonths] = useState(null);
+  const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 30),
   );
-  let [end, setEnd] = useState(monthUtils.currentDay());
+  const [end, setEnd] = useState(monthUtils.currentDay());
 
-  let [isConcise, setIsConcise] = useState(() => {
+  const [isConcise, setIsConcise] = useState(() => {
     let numDays = d.differenceInCalendarDays(
       d.parseISO(end),
       d.parseISO(start),

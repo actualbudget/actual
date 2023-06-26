@@ -249,9 +249,9 @@ function MonthlyPatterns({ config, dispatch }) {
 }
 
 function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
-  let [previewDates, setPreviewDates] = useState(null);
+  const [previewDates, setPreviewDates] = useState(null);
 
-  let [state, dispatch] = useReducer(reducer, {
+  const [state, dispatch] = useReducer(reducer, {
     config: parseConfig(currentConfig),
   });
 

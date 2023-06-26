@@ -4,7 +4,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 function useReport(sheetName, getData) {
   let spreadsheet = useSpreadsheet();
-  let [results, setResults] = useState(null);
+  const [results, setResults] = useState(null);
 
   useEffect(() => {
     let cleanup;

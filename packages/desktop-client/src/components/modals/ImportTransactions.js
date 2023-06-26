@@ -556,16 +556,16 @@ function ImportTransactions({
   getPayees,
   savePrefs,
 }) {
-  let [multiplierAmount, setMultiplierAmount] = useState('');
-  let [loadingState, setLoadingState] = useState('parsing');
-  let [error, setError] = useState(null);
-  let [filename, setFilename] = useState(options.filename);
-  let [transactions, setTransactions] = useState([]);
-  let [filetype, setFileType] = useState(null);
-  let [fieldMappings, setFieldMappings] = useState(null);
-  let [splitMode, setSplitMode] = useState(false);
-  let [flipAmount, setFlipAmount] = useState(false);
-  let [multiplierEnabled, setMultiplierEnabled] = useState(false);
+  const [multiplierAmount, setMultiplierAmount] = useState('');
+  const [loadingState, setLoadingState] = useState('parsing');
+  const [error, setError] = useState(null);
+  const [filename, setFilename] = useState(options.filename);
+  const [transactions, setTransactions] = useState([]);
+  const [filetype, setFileType] = useState(null);
+  const [fieldMappings, setFieldMappings] = useState(null);
+  const [splitMode, setSplitMode] = useState(false);
+  const [flipAmount, setFlipAmount] = useState(false);
+  const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   let { accountId, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -573,11 +573,11 @@ function ImportTransactions({
   // options which are simple post-processing. That means if you
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
-  let [csvDelimiter, setCsvDelimiter] = useState(
+  const [csvDelimiter, setCsvDelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] || ',',
   );
 
-  let [parseDateFormat, setParseDateFormat] = useState(null);
+  const [parseDateFormat, setParseDateFormat] = useState(null);
 
   async function parse(filename, options) {
     setLoadingState('parsing');

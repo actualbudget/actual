@@ -52,7 +52,7 @@ function FileMenu({ onDelete, onClose }) {
 }
 
 function DetailButton({ state, onDelete }) {
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <View>
@@ -218,7 +218,7 @@ function BudgetTable({ files, onSelect, onDelete }) {
 }
 
 function RefreshButton({ onRefresh }) {
-  let [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function _onRefresh() {
     setLoading(true);
@@ -247,7 +247,7 @@ function BudgetList({
   createBudget,
   downloadBudget,
 }) {
-  let [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   let onCreate = ({ testMode } = {}) => {
     if (!creating) {

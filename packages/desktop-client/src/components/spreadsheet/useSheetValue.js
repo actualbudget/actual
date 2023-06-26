@@ -40,7 +40,7 @@ export default function useSheetValue(binding, onChange) {
   }
 
   let spreadsheet = useSpreadsheet();
-  let [result, setResult] = useState({
+  const [result, setResult] = useState({
     name: sheetName + '!' + binding.name,
     value: binding.value === undefined ? null : binding.value,
     query: binding.query,

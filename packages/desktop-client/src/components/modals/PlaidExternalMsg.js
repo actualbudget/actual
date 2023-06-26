@@ -21,9 +21,9 @@ export default function PlaidExternalMsg({
   onSuccess,
   onClose: originalOnClose,
 }) {
-  let [waiting, setWaiting] = useState(null);
-  let [success, setSuccess] = useState(false);
-  let [error, setError] = useState(null);
+  const [waiting, setWaiting] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
   let data = useRef(null);
 
   async function onJump() {

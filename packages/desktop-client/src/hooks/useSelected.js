@@ -22,7 +22,7 @@ function iterateRange(range, func) {
 }
 
 export default function useSelected(name, items, initialSelectedIds) {
-  let [state, dispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
         case 'select': {

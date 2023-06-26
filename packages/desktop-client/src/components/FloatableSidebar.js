@@ -15,7 +15,7 @@ export function SidebarProvider({ children }) {
   let floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
-  let [hidden, setHidden] = useState(true);
+  const [hidden, setHidden] = useState(true);
   let { width } = useResponsive();
   let alwaysFloats = width < 668;
   let floating = floatingSidebar || alwaysFloats;

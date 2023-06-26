@@ -41,7 +41,7 @@ function CoverTooltip({ tooltipProps, onSubmit, onClose }: CoverTooltipProps) {
   categoryGroups = addToBeBudgetedGroup(
     categoryGroups.filter(g => !g.is_income),
   );
-  let [category, setCategory] = useState(null);
+  const [category, setCategory] = useState(null);
 
   function submit() {
     if (category) {
@@ -115,7 +115,7 @@ function BalanceTooltip({
 }: BalanceTooltipProps) {
   let carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
   let balance = useSheetValue(rolloverBudget.catBalance(categoryId));
-  let [menu, setMenu] = useState('menu');
+  const [menu, setMenu] = useState('menu');
 
   return (
     <>

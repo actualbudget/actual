@@ -11,8 +11,8 @@ import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function ChangePassword() {
   let navigate = useNavigate();
-  let [error, setError] = useState(null);
-  let [msg, setMessage] = useState(null);
+  const [error, setError] = useState(null);
+  const [msg, setMessage] = useState(null);
 
   function getErrorMessage(error) {
     switch (error) {
