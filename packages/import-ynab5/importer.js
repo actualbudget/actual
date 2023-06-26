@@ -86,12 +86,13 @@ async function importCategories(data, entityIdMap) {
 
   for (let group of data.category_groups) {
     if (!group.deleted) {
+      let groupId;
       // Ignores internal category and credit cards
       if (
         group.name !== 'Internal Master Category' &&
         group.name !== 'Credit Card Payments'
       ) {
-        let groupId = await actual.createCategoryGroup({
+        groupId = await actual.createCategoryGroup({
           name: group.name,
           is_income: false,
         });
