@@ -38,7 +38,7 @@ describe('Sync', () => {
         row: 'foo',
         column: 'amount',
         value: 3200,
-        timestamp,
+        timestamp: timestamp.toString(),
       },
     ]);
 
@@ -51,7 +51,7 @@ describe('Sync', () => {
         row: 'foo',
         column: 'amount',
         value: 4200,
-        timestamp,
+        timestamp: timestamp.toString(),
       },
     ]);
 
@@ -102,7 +102,7 @@ describe('Sync', () => {
     prefs.loadPrefs();
     prefs.savePrefs({
       groupId: 'group',
-      lastSyncedTimestamp: Timestamp.zero().toString(),
+      lastSyncedTimestamp: Timestamp.zero.toString(),
     });
 
     await mockSyncServer.handlers['/sync/sync'](
@@ -158,7 +158,7 @@ async function asSecondClient(func) {
   prefs.loadPrefs();
   prefs.savePrefs({
     groupId: 'group',
-    lastSyncedTimestamp: Timestamp.zero().toString(),
+    lastSyncedTimestamp: Timestamp.zero.toString(),
   });
 
   await func();
@@ -166,7 +166,7 @@ async function asSecondClient(func) {
   await global.emptyDatabase()();
   prefs.savePrefs({
     groupId: 'group',
-    lastSyncedTimestamp: Timestamp.zero().toString(),
+    lastSyncedTimestamp: Timestamp.zero.toString(),
   });
 }
 
@@ -242,7 +242,7 @@ describe('Sync projections', () => {
 
     // Get all the messages. We'll apply them in two passes
     let messages = mockSyncServer.getMessages();
-    expect(messages.every(msg => Timestamp.parse(msg) !== null)).toBe(true);
+    expect(messages.every(msg => Timestamp.parse(msg.timestamp) !== null)).toBe(true);
 
     // Apply all but the last message (which deletes the category)
     await applyMessages(messages.slice(0, -1));
@@ -294,7 +294,7 @@ describe('Sync projections', () => {
 
     // Get all the messages. We'll apply them in two passes
     let messages = mockSyncServer.getMessages();
-    expect(messages.every(msg => Timestamp.parse(msg) !== null)).toBe(true);
+    expect(messages.every(msg => Timestamp.parse(msg.timestamp) !== null)).toBe(true);
 
     let firstMessages = messages.filter(m => m.column !== 'tombstone');
     let secondMessages = messages.filter(m => m.column === 'tombstone');
@@ -329,7 +329,7 @@ describe('Sync projections', () => {
 
     // Get all the messages. We'll apply them in two passes
     let messages = mockSyncServer.getMessages();
-    expect(messages.every(msg => Timestamp.parse(msg) !== null)).toBe(true);
+    expect(messages.every(msg => Timestamp.parse(msg.timestamp) !== null)).toBe(true);
 
     let firstMessages = messages.slice(0, -2);
     let secondMessages = messages.slice(-2);

@@ -151,7 +151,9 @@ export class Timestamp {
   /**
    * maximum timestamp
    */
-  max = Timestamp.parse('9999-12-31T23:59:59.999Z-FFFF-FFFFFFFFFFFFFFFF');
+  static max = Timestamp.parse(
+    '9999-12-31T23:59:59.999Z-FFFF-FFFFFFFFFFFFFFFF',
+  );
 
   /**
    * timestamp parsing
