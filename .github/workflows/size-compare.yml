@@ -1,0 +1,40 @@
+on:
+  pull_request:
+    branches: '*'
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    needs: [web]
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Download build artifact from master
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          branch: jed/stats
+          workflow: build.yml
+          name: build-stats
+          path: master
+
+      - name: Download build artifact from master
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          pr: ${{github.event.pull_request.number}}
+          workflow: build.yml
+          name: build-stats
+          path: pr
+
+      - uses: github/webpack-bundlesize-compare-action@v1.5.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          current-stats-json-path: ./pr/desktop-client-stats.json
+          base-stats-json-path: ./master/desktop-client-stats.json
+          title: desktop-client
+
+      - uses: github/webpack-bundlesize-compare-action@v1.5.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          current-stats-json-path: ./pr/loot-core-stats.json
+          base-stats-json-path: ./master/loot-core-stats.json
+          title: loot-core
