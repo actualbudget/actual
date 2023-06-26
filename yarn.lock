@@ -94,7 +94,7 @@ __metadata:
     focus-visible: ^4.1.1
     formik: ^0.11.10
     glamor: ^2.20.40
-    hotkeys-js: 3.8.2
+    hotkeys-js: 3.10.3
     identity-obj-proxy: 3.0.0
     inter-ui: ^3.19.3
     jest: ^27.0.0
@@ -10002,10 +10002,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hotkeys-js@npm:3.8.2":
-  version: 3.8.2
-  resolution: "hotkeys-js@npm:3.8.2"
-  checksum: 0fbe8e4a1b3091b9bb1ed2ca220509bda5337a0ab6a90b963ee2a942e06aef25eb4294ca7048f30a00be41f14002691e153c17797a4c0604fde71011318bb05f
+"hotkeys-js@npm:3.10.3":
+  version: 3.10.3
+  resolution: "hotkeys-js@npm:3.10.3"
+  checksum: c88bbb1178e61a0e52129a22ef4083c2f40de6d57041df1b18baa376424726073d122423ee125dfb92fdc5811ef1c0cd5e0bb394fc9f5a012a84653fd17dc76f
   languageName: node
   linkType: hard
 
