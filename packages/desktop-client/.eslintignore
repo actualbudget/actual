@@ -1,6 +1,0 @@
-bundle.browser.js
-build/
-public/kcab/
-public/data/
-**/node_modules/*
-node_modules/

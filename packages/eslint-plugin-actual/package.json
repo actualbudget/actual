@@ -5,7 +5,6 @@
   "exports": "./lib/index.js",
   "type": "commonjs",
   "scripts": {
-    "lint": "eslint .",
     "test": "jest"
   },
   "dependencies": {
