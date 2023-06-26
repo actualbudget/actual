@@ -29,30 +29,23 @@ function useMergedRefs(ref1, ref2) {
   }, [ref1, ref2]);
 }
 
-export function useDraggable({
-  item,
-  type,
-  makePreview,
-  children,
-  canDrag,
-  onDragChange,
-}) {
+export function useDraggable({ item, type, canDrag, onDragChange }) {
   let _onDragChange = useRef(onDragChange);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [{ isDragging }, dragRef] = useDrag({
-    item: { type, item },
-    collect: monitor => ({ isDragging: monitor.isDragging() }),
-
-    begin(monitor) {
+  const [, dragRef] = useDrag({
+    type,
+    item: () => {
       _onDragChange.current({ state: 'start-preview', type, item });
 
       setTimeout(() => {
         _onDragChange.current({ state: 'start' });
       }, 0);
-    },
 
-    end(item, monitor) {
+      return { type, item };
+    },
+    collect: monitor => ({ isDragging: monitor.isDragging() }),
+
+    end(item) {
       _onDragChange.current({ state: 'end', type, item });
     },
 
@@ -74,10 +67,10 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
 
   let [{ isOver }, dropRef] = useDrop({
     accept: types,
-    drop({ item }, monitor) {
+    drop({ item }) {
       onDrop(item.id, dropPos, id);
     },
-    hover({ item, type }, monitor) {
+    hover(_, monitor) {
       let hoverBoundingRect = ref.current.getBoundingClientRect();
       let hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       let clientOffset = monitor.getClientOffset();

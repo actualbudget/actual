@@ -8,6 +8,7 @@ env:
   CI: true
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -67,7 +68,6 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - windows-latest
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
@@ -82,5 +82,21 @@ jobs:
           name: actual-electron-${{ matrix.os }}
           path: |
             packages/desktop-electron/dist/*.dmg
-            packages/desktop-electron/dist/*.exe
             packages/desktop-electron/dist/*.AppImage
+  electron-windows:
+    # As electron builds take longer, we only run them in master.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Electron
+        env:
+          CSC_LINK: ${{ secrets.WIN_CERT_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASS }}
+        run: ./bin/package-electron
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: actual-electron-windows-latest
+          path: packages/desktop-electron/dist/*.exe

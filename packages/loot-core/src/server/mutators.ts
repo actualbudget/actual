@@ -84,11 +84,11 @@ export function disableGlobalMutations() {
 function _runMutator<T extends () => Promise<unknown>>(
   func: T,
   initialContext = {},
-) {
+): Promise<Awaited<ReturnType<T>>> {
   currentContext = initialContext;
   return func().finally(() => {
     currentContext = null;
-  }) as ReturnType<T>;
+  }) as Promise<Awaited<ReturnType<T>>>;
 }
 // Type cast needed as TS looses types over nested generic returns
 export const runMutator = sequential(_runMutator) as typeof _runMutator;
