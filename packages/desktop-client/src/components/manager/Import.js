@@ -32,7 +32,8 @@ function Import({ modalProps, actions }) {
 
   let itemStyle = {
     padding: 10,
-    border: '1px solid ' + colorsm.tableBorder,
+    border: '1px solid ' + colorsm.buttonNeutralBorder,
+    backgroundColor: colorsm.buttonNeutralBackground,
     borderRadius: 6,
     marginBottom: 10,
     display: 'block',
@@ -41,12 +42,7 @@ function Import({ modalProps, actions }) {
   return (
     <Modal {...modalProps} title="Import From" style={{ width: 400 }}>
       {() => (
-        <View
-          style={[
-            styles.smallText,
-            { lineHeight: 1.5, color: colorsm.pageText },
-          ]}
-        >
+        <View style={[styles.smallText, { lineHeight: 1.5 }]}>
           {error && (
             <Block style={{ color: colorsm.errorText, marginBottom: 15 }}>
               {getErrorMessage(error)}

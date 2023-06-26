@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { colors } from '../../style';
 import { Information } from '../alerts';
 import { View, Text, Button } from '../common';
 
@@ -46,7 +45,6 @@ export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
       <Text
         innerRef={dirScrolled}
         style={{
-          backgroundColor: colors.n10,
           padding: '7px 10px',
           borderRadius: 4,
           overflow: 'auto',

@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { Information } from '../alerts';
 import { View, Text, Modal, ModalButtons, Button, P } from '../common';
 
-let highlightStyle = { color: colors.p5 };
+let highlightStyle = { color: colorsm.pageTextPositive };
 
 export default function MergeUnusedPayees({
   modalProps,
@@ -131,7 +131,6 @@ export default function MergeUnusedPayees({
                 style={{
                   fontSize: 13,
                   marginTop: 10,
-                  color: colors.n4,
                   userSelect: 'none',
                   display: 'flex',
                   alignItems: 'center',

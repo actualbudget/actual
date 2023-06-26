@@ -7,7 +7,7 @@ import * as actions from 'loot-core/src/client/actions';
 
 import Loading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
-import { styles, colors } from '../style';
+import { styles, colorsm } from '../style';
 
 import {
   View,
@@ -95,7 +95,11 @@ function Notification({ notification, onRemove }) {
     <View
       style={{
         marginTop: 10,
-        color: positive ? colors.g3 : error ? colors.r3 : colors.y2,
+        color: positive
+          ? colorsm.noticeText
+          : error
+          ? colorsm.errorText
+          : colorsm.warningText,
       }}
     >
       <Stack
@@ -105,12 +109,16 @@ function Notification({ notification, onRemove }) {
           padding: '14px 14px',
           fontSize: 14,
           backgroundColor: positive
-            ? colors.g11
+            ? colorsm.noticeBackground
             : error
-            ? colors.r11
-            : colors.y10,
+            ? colorsm.errorBackground
+            : colorsm.warningBackground,
           borderTop: `3px solid ${
-            positive ? colors.g5 : error ? colors.r5 : colors.y4
+            positive
+              ? colorsm.noticeAccent
+              : error
+              ? colorsm.errorAccent
+              : colorsm.warningAccent
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
@@ -153,17 +161,21 @@ function Notification({ notification, onRemove }) {
               style={{
                 backgroundColor: 'transparent',
                 border: `1px solid ${
-                  positive ? colors.g5 : error ? colors.r4 : colors.y3
+                  positive
+                    ? colorsm.noticeAccent
+                    : error
+                    ? colorsm.errorAccent
+                    : colorsm.warningAccent
                 }`,
                 color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
                 '&:hover, &:active': {
                   backgroundColor: positive
-                    ? colors.g9
+                    ? colorsm.noticeBackground
                     : error
-                    ? colors.r10
-                    : colors.y9,
+                    ? colorsm.errorBackground
+                    : colorsm.warningBackground,
                 },
               }}
             >
@@ -189,7 +201,7 @@ function Notification({ notification, onRemove }) {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(250, 250, 250, .75)',
+            backgroundColor: colorsm.tableBackground,
             alignItems: 'center',
             justifyContent: 'center',
           }}

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { determineOffBudget } from 'loot-core/src/shared/accounts';
 
 import Checkmark from '../../icons/v1/Checkmark';
-import { styles, colors } from '../../style';
+import { styles, colorsm } from '../../style';
 import { View, Text, Modal, Button } from '../common';
 
 function EmptyMessage() {
@@ -30,7 +30,7 @@ function Account({ account, offbudget, onSelect }) {
             borderRadius: 4,
             flexDirection: 'row',
             alignItems: 'center',
-            border: '1px solid ' + colors.n10,
+            border: '1px solid ' + colorsm.tableBorder,
           },
         ]}
       >
@@ -39,7 +39,7 @@ function Account({ account, offbudget, onSelect }) {
           <View
             style={{
               fontSize: 13,
-              color: colors.n5,
+              color: colorsm.pageText,
               flexDirection: 'row',
             }}
           >
@@ -51,11 +51,13 @@ function Account({ account, offbudget, onSelect }) {
         </View>
 
         {offbudget ? (
-          <Text style={{ color: colors.n8 }}>Off budget</Text>
+          <Text style={{ color: colorsm.pageText }}>Off budget</Text>
         ) : (
           <>
-            <Checkmark style={{ width: 15, height: 15, color: colors.g5 }} />
-            <Text style={{ color: colors.g5, marginLeft: 5 }}>Budgeted</Text>
+            <Checkmark style={{ width: 15, height: 15 }} />
+            <Text style={{ color: colorsm.pageTextPositive, marginLeft: 5 }}>
+              Budgeted
+            </Text>
           </>
         )}
       </View>

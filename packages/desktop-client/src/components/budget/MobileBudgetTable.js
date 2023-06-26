@@ -545,7 +545,7 @@ class IncomeCategory extends PureComponent {
 //           flexDirection: 'row',
 //           justifyContent: 'flex-end',
 //           alignItems: 'stretch',
-//           backgroundColor: colors.n10,
+//           backgroundColor: colorsm.tableBackground,
 //           padding: 5,
 //           height: 45
 //         }}
@@ -970,7 +970,7 @@ export class BudgetTable extends Component {
               //   ref={el => (this.list = el)}
               //   keyboardShouldPersistTaps="always"
               //   refreshControl={refreshControl}
-              //   style={{ backgroundColor: colors.n10 }}
+              //   style={{ backgroundColor: colorsm.tableBackground }}
               //   automaticallyAdjustContentInsets={false}
               // >
               <View>

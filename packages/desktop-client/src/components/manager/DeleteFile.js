@@ -34,7 +34,6 @@ export default function DeleteMenu({ modalProps, actions, file }) {
       padding={0}
       showOverlay={false}
       onClose={modalProps.onBack}
-      style={{ backgroundColor: colorsm.tableBackground }}
     >
       {() => (
         <View

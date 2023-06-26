@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { Text, Button } from '../common';
 import { useServerURL } from '../ServerContext';
 
@@ -19,7 +19,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
       primaryAction={<Button onClick={onChangeKey}>Generate new key</Button>}
     >
       <Text>
-        <Text style={{ color: colors.g4, fontWeight: 600 }}>
+        <Text style={{ color: colorsm.noticeText, fontWeight: 600 }}>
           End-to-end Encryption is turned on.
         </Text>{' '}
         Your data is encrypted with a key that only you have before sending it

@@ -4,8 +4,17 @@ import { Formik } from 'formik';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
-import { View, Text, Modal, Button, P, Select, FormError } from '../common';
+import { colorsm } from '../../style';
+import {
+  View,
+  Text,
+  Modal,
+  Button,
+  P,
+  Select,
+  FormError,
+  AnchorLink,
+} from '../common';
 
 function needsCategory(account, currentTransfer, accounts) {
   const acct = accounts.find(a => a.id === currentTransfer);
@@ -178,8 +187,7 @@ function CloseAccount({
                   <View style={{ marginBottom: 15 }}>
                     <Text style={{ fontSize: 12 }}>
                       You can also{' '}
-                      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                      <a
+                      <AnchorLink
                         href="#"
                         onClick={e => {
                           e.preventDefault();
@@ -189,10 +197,10 @@ function CloseAccount({
                             .forceCloseAccount(account.id)
                             .then(() => modalProps.onClose());
                         }}
-                        style={{ color: colors.r6 }}
+                        style={{ color: colorsm.errorText }}
                       >
                         force close
-                      </a>{' '}
+                      </AnchorLink>{' '}
                       the account which will delete it and all its transactions
                       permanently. Doing so may change your budget unexpectedly
                       since money in it may vanish.

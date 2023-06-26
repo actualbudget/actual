@@ -131,8 +131,8 @@ export function Link({ style, children, ...nativeProps }: LinkProps) {
     <Button
       {...css(
         {
-          textDecoration: 'none',
-          color: 'inherit',
+          textDecoration: 'underline',
+          color: colorsm.pageTextPositive,
           backgroundColor: 'transparent',
           border: 0,
           cursor: 'pointer',
@@ -593,8 +593,8 @@ export function Menu({
                 backgroundColor: item.disabled
                   ? colorsm.buttonDisabledBackground
                   : hoveredIndex === idx
-                  ? colorsm.buttonNeutralBackgroundHover
-                  : colorsm.buttonNeutralBackground,
+                  ? colorsm.menuItemBackgroundHover
+                  : colorsm.menuItemBackground,
               },
             ]}
             onMouseEnter={() => setHoveredIndex(idx)}

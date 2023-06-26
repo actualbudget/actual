@@ -19,7 +19,7 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     <View
       {...css([
         {
-          backgroundColor: colorsm.tableHeaderBackground,
+          backgroundColor: colorsm.tableBackground,
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,

@@ -11,7 +11,7 @@ import {
   looselyParseAmount,
 } from 'loot-core/src/shared/util';
 
-import { colors, styles } from '../../style';
+import { colorsm, styles } from '../../style';
 import {
   View,
   Text,
@@ -130,12 +130,9 @@ function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
   return (
     <Text>
       <Text>
-        {date || (
-          <Text style={{ color: colors.n4, fontStyle: 'italic' }}>Empty</Text>
-        )}{' '}
-        &rarr;{' '}
+        {date || <Text style={{ fontStyle: 'italic' }}>Empty</Text>} &rarr;{' '}
       </Text>
-      <Text style={{ color: parsed ? colors.g3 : colors.r4 }}>
+      <Text style={{ color: parsed ? colorsm.noticeText : colorsm.errorText }}>
         {parsed || 'Invalid'}
       </Text>
     </Text>
@@ -274,8 +271,13 @@ function Transaction({
   inflow = amountToCurrency(inflow);
 
   return (
-    <Row style={{ backgroundColor: 'white' }}>
-      <Field width={200} borderColor={colors.border}>
+    <Row
+      style={{
+        backgroundColor: colorsm.tableBackground,
+        color: colorsm.tableText,
+      }}
+    >
+      <Field width={200} borderColor={colorsm.tableBorder}>
         {showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
@@ -288,19 +290,23 @@ function Transaction({
       </Field>
       <Field
         width="flex"
-        borderColor={colors.border}
+        borderColor={colorsm.tableBorder}
         title={transaction.imported_payee || transaction.payee_name}
       >
         {transaction.payee_name}
       </Field>
-      <Field width="flex" borderColor={colors.border} title={transaction.notes}>
+      <Field
+        width="flex"
+        borderColor={colorsm.tableBorder}
+        title={transaction.notes}
+      >
         {transaction.notes}
       </Field>
       {splitMode ? (
         <>
           <Field
             width={90}
-            borderColor={colors.border}
+            borderColor={colorsm.tableBorder}
             contentStyle={[{ textAlign: 'right' }, styles.tnum]}
             title={outflow}
           >
@@ -308,7 +314,7 @@ function Transaction({
           </Field>
           <Field
             width={90}
-            borderColor={colors.border}
+            borderColor={colorsm.tableBorder}
             contentStyle={[{ textAlign: 'right' }, styles.tnum]}
             title={inflow}
           >
@@ -318,7 +324,7 @@ function Transaction({
       ) : (
         <Field
           width={90}
-          borderColor={colors.border}
+          borderColor={colorsm.tableBorder}
           contentStyle={[{ textAlign: 'right' }, styles.tnum]}
           title={amount}
         >
@@ -331,7 +337,7 @@ function Transaction({
 
 function SubLabel({ title }) {
   return (
-    <Text style={{ fontSize: 13, marginBottom: 3, color: colors.n3 }}>
+    <Text style={{ fontSize: 13, marginBottom: 3, color: colorsm.errorText }}>
       {title}
     </Text>
   );
@@ -422,7 +428,10 @@ function FlipAmountOption({ value, disabled, onChange }) {
       />
       <label
         htmlFor="form_flip"
-        style={{ userSelect: 'none', color: disabled ? colors.n6 : null }}
+        style={{
+          userSelect: 'none',
+          color: disabled ? colorsm.pageTextSubdued : null,
+        }}
       >
         Flip amount
       </label>
@@ -794,7 +803,7 @@ function ImportTransactions({
     >
       {error && !error.parsed && (
         <View style={{ alignItems: 'center', marginBottom: 15 }}>
-          <Text style={{ marginRight: 10, color: colors.r4 }}>
+          <Text style={{ marginRight: 10, color: colorsm.errorText }}>
             <strong>Error:</strong> {error.message}
           </Text>
         </View>
@@ -804,7 +813,7 @@ function ImportTransactions({
           style={{
             flex: 'unset',
             height: 300,
-            border: '1px solid ' + colors.border,
+            border: '1px solid ' + colorsm.tableBorder,
           }}
         >
           <TableHeader headers={headers} />
@@ -812,7 +821,7 @@ function ImportTransactions({
           <TableWithNavigator
             items={transactions}
             fields={['payee', 'amount']}
-            style={{ backgroundColor: colors.n11 }}
+            style={{ backgroundColor: colorsm.tableBackground }}
             getItemKey={index => index}
             renderEmpty={() => {
               return (
@@ -820,7 +829,7 @@ function ImportTransactions({
                   style={{
                     textAlign: 'center',
                     marginTop: 25,
-                    color: colors.n4,
+                    color: colorsm.tableText,
                     fontStyle: 'italic',
                   }}
                 >
@@ -848,7 +857,7 @@ function ImportTransactions({
       {error && error.parsed && (
         <View
           style={{
-            color: colors.r4,
+            color: colorsm.errorText,
             alignItems: 'center',
             marginTop: 10,
           }}

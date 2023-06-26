@@ -4,7 +4,7 @@ import { useTransition, animated } from 'react-spring';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import { colors, styles } from '../style';
+import { colorsm, styles } from '../style';
 
 import AnimatedRefresh from './AnimatedRefresh';
 import { View, Text } from './common';
@@ -42,8 +42,8 @@ function BankSyncStatus({ accountsSyncing }) {
               <View
                 style={{
                   borderRadius: 4,
-                  backgroundColor: colors.b9,
-                  color: colors.b1,
+                  backgroundColor: colorsm.tableBackground,
+                  color: colorsm.tableText,
                   padding: '5px 13px',
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -52,7 +52,7 @@ function BankSyncStatus({ accountsSyncing }) {
               >
                 <AnimatedRefresh
                   animating={true}
-                  iconStyle={{ color: colors.b1 }}
+                  iconStyle={{ color: colorsm.tableText }}
                 />
                 <Text>Syncing {item}</Text>
               </View>

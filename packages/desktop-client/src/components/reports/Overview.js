@@ -249,7 +249,6 @@ function Overview({ accounts }) {
         <Card
           style={[
             {
-              color: colorsm.tableBackground,
               justifyContent: 'center',
               alignItems: 'center',
               width: 200,

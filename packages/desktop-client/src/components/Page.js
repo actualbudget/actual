@@ -90,7 +90,15 @@ export function Page({ title, modalSize, children, titleStyle }) {
   }
 
   return (
-    <View style={isNarrowWidth ? undefined : styles.page}>
+    <View
+      style={
+        ({
+          color: colorsm.tableText,
+          backgroundColor: colorsm.tableBackground,
+        },
+        isNarrowWidth ? undefined : styles.page)
+      }
+    >
       <PageTitle
         name={title}
         style={{

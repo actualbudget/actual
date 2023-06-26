@@ -15,7 +15,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colors, styles } from '../../../style';
+import { colorsm, styles } from '../../../style';
 import {
   View,
   Text,
@@ -101,8 +101,10 @@ function IncomeProgress({ current, target }: IncomeProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? colors.r7 : colors.g5}
-      backgroundColor={over ? colors.r10 : colors.n10}
+      color={over ? colorsm.errorText : colorsm.noticeText}
+      backgroundColor={
+        over ? colorsm.errorBackground : colorsm.noticeBackground
+      }
       style={{ width: 20, height: 20 }}
     />
   );
@@ -134,8 +136,10 @@ function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? colors.r7 : colors.g5}
-      backgroundColor={over ? colors.r10 : colors.n10}
+      color={over ? colorsm.errorText : colorsm.noticeText}
+      backgroundColor={
+        over ? colorsm.errorBackground : colorsm.noticeBackground
+      }
       style={{ width: 20, height: 20 }}
     />
   );
@@ -171,12 +175,12 @@ function BudgetTotal({
 
       <View style={{ marginLeft: 10 }}>
         <View>
-          <Text style={{ color: colors.n4 }}>{title}</Text>
+          <Text style={{ color: colorsm.pageText }}>{title}</Text>
         </View>
 
         <Text>
           <CellValue binding={current} type="financial" />
-          <Text style={{ color: colors.n6, fontStyle: 'italic' }}>
+          <Text style={{ color: colorsm.pageTextSubdued, fontStyle: 'italic' }}>
             {' of '}
             <CellValue
               binding={target}
@@ -233,9 +237,9 @@ function Saved({ projected, style }: SavedProps) {
   return (
     <View style={[{ alignItems: 'center', fontSize: 14 }, style]}>
       {projected ? (
-        <Text style={{ color: colors.n4 }}>Projected Savings:</Text>
+        <Text style={{ color: colorsm.pageText }}>Projected Savings:</Text>
       ) : (
-        <View style={{ color: colors.n4 }}>
+        <View style={{ color: colorsm.pageText }}>
           {isNegative ? 'Overspent:' : 'Saved:'}
         </View>
       )}
@@ -277,7 +281,16 @@ function Saved({ projected, style }: SavedProps) {
           {...css([
             {
               fontSize: 25,
-              color: projected ? colors.y3 : isNegative ? colors.r4 : colors.p5,
+              color: projected
+                ? colorsm.warningText
+                : isNegative
+                ? colorsm.errorText
+                : colorsm.pageTextPositive,
+              backgroundColor: projected
+                ? colorsm.warningBackground
+                : isNegative
+                ? colorsm.errorBackground
+                : colorsm.pageBackground,
             },
           ])}
         >
@@ -357,7 +370,7 @@ export const BudgetSummary = memo(function BudgetSummary({
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: colors.n6, margin: 1 }}
+                style={{ color: 'inherit', margin: 1 }}
               />
             </Button>
           </View>
@@ -392,7 +405,7 @@ export const BudgetSummary = memo(function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colors.n6}
+                defaultColor={colorsm.pageText}
               />
             </View>
             <View style={{ userSelect: 'none' }}>
@@ -400,7 +413,7 @@ export const BudgetSummary = memo(function BudgetSummary({
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: colors.n5 }}
+                  style={{ color: 'inherit' }}
                 />
               </Button>
               {menuOpen && (
@@ -435,7 +448,7 @@ export const BudgetSummary = memo(function BudgetSummary({
             spacing={2}
             style={{
               alignSelf: 'center',
-              backgroundColor: colors.n11,
+              backgroundColor: colorsm.tableBackground,
               borderRadius: 4,
               padding: '10px 15px',
               marginTop: 13,
@@ -452,8 +465,8 @@ export const BudgetSummary = memo(function BudgetSummary({
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: colors.n11,
-              borderTop: '1px solid ' + colors.n10,
+              backgroundColor: colorsm.tableBackground,
+              borderTop: '1px solid ' + colorsm.tableBorder,
             }}
           >
             <Saved projected={month >= currentMonth} />

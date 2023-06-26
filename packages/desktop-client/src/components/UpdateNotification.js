@@ -6,7 +6,7 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 
 import Close from '../icons/v1/Close';
-import { colors } from '../style';
+import { colorsm } from '../style';
 
 import { View, Text, Link, Button } from './common';
 
@@ -34,8 +34,8 @@ function UpdateNotification({
           bottom: 0,
           right: 0,
           margin: '15px 17px',
-          backgroundColor: colors.p6,
-          color: 'white',
+          backgroundColor: colorsm.pageTextPositive,
+          color: colorsm.tableBackground,
           padding: '7px 10px',
           borderRadius: 4,
           zIndex: 10000,
@@ -49,15 +49,8 @@ function UpdateNotification({
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
+              <Link onClick={updateApp}>Restart</Link> (
               <Link
-                onClick={updateApp}
-                style={{ color: 'white', textDecoration: 'underline' }}
-              >
-                Restart
-              </Link>{' '}
-              (
-              <Link
-                style={{ color: 'white', textDecoration: 'underline' }}
                 onClick={() =>
                   window.Actual.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
@@ -72,7 +65,7 @@ function UpdateNotification({
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onClick={() => closeNotification(setAppState)}
               >
-                <Close width={9} style={{ color: 'white' }} />
+                <Close width={9} style={{ color: colorsm.pageText }} />
               </Button>
             </Text>
           </View>

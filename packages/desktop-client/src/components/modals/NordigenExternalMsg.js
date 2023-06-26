@@ -7,7 +7,7 @@ import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import useNordigenStatus from '../../hooks/useNordigenStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
 import { View, Modal, Button, P, Link, Menu, Tooltip } from '../common';
@@ -144,10 +144,7 @@ export default function NordigenExternalMsg({
           <Error>
             Failed loading available banks: Nordigen access credentials might be
             misconfigured. Please{' '}
-            <Link
-              onClick={onNordigenInit}
-              style={{ color: colors.b3, display: 'inline' }}
-            >
+            <Link onClick={onNordigenInit} style={{ display: 'inline' }}>
               set them up
             </Link>{' '}
             again.
@@ -266,10 +263,10 @@ export default function NordigenExternalMsg({
           {waiting || isConfigurationLoading ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
-                color={colors.n1}
+                color={colorsm.pageTextPositive}
                 style={{ width: 20, height: 20 }}
               />
-              <View style={{ marginTop: 10, color: colors.n4 }}>
+              <View style={{ marginTop: 10, color: colorsm.pageText }}>
                 {isConfigurationLoading
                   ? 'Checking Nordigen configuration..'
                   : waiting === 'browser'
@@ -293,8 +290,8 @@ export default function NordigenExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: colors.g4,
-                borderColor: colors.g4,
+                backgroundColor: colorsm.noticeBackground,
+                borderColor: colorsm.noticeText,
               }}
               onClick={onContinue}
             >
@@ -304,7 +301,7 @@ export default function NordigenExternalMsg({
             renderLinkButton()
           ) : (
             <>
-              <P style={{ color: colors.r5 }}>
+              <P style={{ color: colorsm.errorText }}>
                 Nordigen integration has not yet been configured.
               </P>
               <Button primary onClick={onNordigenInit}>

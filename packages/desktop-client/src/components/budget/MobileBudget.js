@@ -12,7 +12,7 @@ import {
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { withThemeColor } from '../../util/withThemeColor';
 import { View } from '../common';
 import SyncRefresh from '../SyncRefresh';
@@ -248,7 +248,7 @@ class Budget extends Component {
         <View
           style={{
             flex: 1,
-            backgroundColor: 'white',
+            backgroundColor: colorsm.pageBackground,
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 25,
@@ -306,4 +306,4 @@ export default connect(
     initialBudgetMonth: state.app.budgetMonth,
   }),
   actions,
-)(withThemeColor(colors.p5)(BudgetWrapper));
+)(withThemeColor(colorsm.buttonPositiveBorder)(BudgetWrapper));

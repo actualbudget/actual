@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import {
   View,
   Text,
@@ -57,7 +57,6 @@ export default function FixEncryptionKey({
             style={{
               fontSize: 25,
               fontWeight: 700,
-              color: colors.n2,
               margin: '20px 0',
             }}
           >
@@ -106,7 +105,7 @@ export default function FixEncryptionKey({
               {error && (
                 <View
                   style={{
-                    color: colors.r4,
+                    color: colorsm.errorText,
                     textAlign: 'center',
                     fontSize: 13,
                     marginBottom: 3,

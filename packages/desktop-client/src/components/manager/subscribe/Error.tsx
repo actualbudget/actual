@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { colors } from '../../../style';
+import { colorsm } from '../../../style';
 import { View, Text, Button } from '../../common';
 
 function getErrorMessage(reason) {
@@ -23,11 +23,10 @@ export default function Error() {
   }
 
   return (
-    <View style={{ alignItems: 'center' }}>
+    <View style={{ alignItems: 'center', color: colorsm.pageText }}>
       <Text
         style={{
           fontSize: 16,
-          color: colors.n2,
           lineHeight: 1.4,
         }}
       >

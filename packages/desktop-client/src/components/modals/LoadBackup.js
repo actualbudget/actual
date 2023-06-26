@@ -2,7 +2,6 @@ import React, { Component, useState, useEffect } from 'react';
 
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../style';
 import { View, Text, Block, Modal, Button } from '../common';
 import { Row, Cell } from '../table';
 
@@ -115,9 +114,7 @@ function LoadBackup({
             )}
           </View>
           {previousBackups.length === 0 ? (
-            <Block style={{ color: colors.n6, marginLeft: 20 }}>
-              No backups available
-            </Block>
+            <Block style={{ marginLeft: 20 }}>No backups available</Block>
           ) : (
             <BackupTable
               backups={previousBackups}

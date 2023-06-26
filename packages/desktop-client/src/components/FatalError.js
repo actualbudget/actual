@@ -1,8 +1,18 @@
 import React, { Component, useState } from 'react';
 
-import { colors } from '../style';
+import { colorsm } from '../style';
 
-import { View, Stack, Text, Block, Modal, P, Link, Button } from './common';
+import {
+  View,
+  Stack,
+  Text,
+  Block,
+  Modal,
+  P,
+  Link,
+  Button,
+  ExternalLink,
+} from './common';
 import { Checkbox } from './forms';
 
 class FatalError extends Component {
@@ -62,10 +72,11 @@ class FatalError extends Component {
           style={{
             paddingBottom: 100,
             maxWidth: 500,
-            color: colors.r4,
+            color: colorsm.errorText,
+            backgroundColor: colorsm.errorBackground,
             lineHeight: '1.5em',
             fontSize: 15,
-            '& a': { color: colors.r4 },
+            '& a': { color: colorsm.errorText },
           }}
         >
           <Text>{msg}</Text>
@@ -93,12 +104,9 @@ class FatalError extends Component {
             <P>There was an unrecoverable error in the UI. Sorry!</P>
             <P>
               If this error persists, please get{' '}
-              <a
-                href="https://actualbudget.org/contact"
-                style={{ color: colors.p4 }}
-              >
+              <ExternalLink href="https://actualbudget.org/contact">
                 in touch
-              </a>{' '}
+              </ExternalLink>{' '}
               so it can be investigated.
             </P>
             <P>
@@ -107,12 +115,9 @@ class FatalError extends Component {
               </Button>
             </P>
             <P isLast={true} style={{ fontSize: 11 }}>
-              <Link
-                onClick={() => this.setState({ showError: true })}
-                style={{ color: colors.p4 }}
-              >
+              <ExternalLink onClick={() => this.setState({ showError: true })}>
                 Show Error
-              </Link>
+              </ExternalLink>
               {showError && (
                 <Block
                   style={{

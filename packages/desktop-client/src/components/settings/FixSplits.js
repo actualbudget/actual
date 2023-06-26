@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { View, Text, P, ButtonWithLoading } from '../common';
 
 import { Setting } from './UI';
@@ -33,7 +33,7 @@ function renderResults(results) {
   return (
     <P
       style={{
-        color: colors.g3,
+        color: colorsm.noticeText,
         marginBottom: 0,
         marginLeft: '1em',
         textAlign: 'right',

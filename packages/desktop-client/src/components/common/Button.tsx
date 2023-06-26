@@ -42,6 +42,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     hoveredStyle = [
       {
         ...styles.shadow,
+        cursor: 'pointer',
         border: bare
           ? null
           : '1px solid ' +

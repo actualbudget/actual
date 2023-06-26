@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { NativeCategorySelect } from '../autocomplete/CategorySelect';
 import { View, Text, Block, Modal, Button } from '../common';
 
@@ -34,7 +34,17 @@ export default function ConfirmCategoryDelete({
         msg = 'Something bad happened, sorry!';
     }
 
-    return <Text style={{ marginTop: 15, color: colors.r4 }}>{msg}</Text>;
+    return (
+      <Text
+        style={{
+          marginTop: 15,
+          color: colorsm.errorText,
+          backgroundColor: colorsm.errorBackground,
+        }}
+      >
+        {msg}
+      </Text>
+    );
   };
 
   const isIncome = !!(category || group).is_income;

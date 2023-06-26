@@ -14,7 +14,7 @@ import Downshift from 'downshift';
 import { type CSSProperties, css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
-import { colors, colorsm } from '../../style';
+import { colorsm } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
 
 const inst: { lastChangeType? } = {};
@@ -478,8 +478,6 @@ function SingleAutocomplete({
                 offset={2}
                 style={{
                   padding: 0,
-                  backgroundColor: colorsm.menuBackground,
-                  color: colorsm.menuItemText,
                   minWidth: 200,
                   ...tooltipStyle,
                 }}
@@ -507,6 +505,7 @@ function MultiItem({ name, onRemove }) {
         alignItems: 'center',
         flexDirection: 'row',
         backgroundColor: colorsm.menuBackground,
+        color: colorsm.menuItemText,
         padding: '2px 4px',
         margin: '2px',
         borderRadius: 4,
@@ -589,7 +588,7 @@ function MultiAutocomplete({
             },
             focused && {
               border: '1px solid ' + colorsm.menuBorderHover,
-              boxShadow: '0 1px 1px ' + colors.b7,
+              boxShadow: '0 1px 1px ' + colorsm.buttonPositiveBorder,
             },
           ]}
         >
