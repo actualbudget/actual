@@ -1,78 +1,59 @@
 #!usr/bin/env node
-const { fsUtil, shellUtil, webpackUtil, Path } = require('../../../bin/utils');
+const { fsUtil, fs, shellUtil, webpackUtil, join, packageRoot, migrationUtil } = require('@actual-app/bin');
 
-const migrationUtil = require('./migration-util');
+const ROOT = packageRoot('loot-core');
+const BUILD_DIR = join(ROOT, 'lib-dist/browser');
 
-const ROOT = Path.join(process.cwd(), '/bin'); //Make path consistent with bash
-const DATA_DIR = Path.join(ROOT, '../../desktop-client/public/data');
-const LOCAL_BUILD_FILES = Path.join(ROOT, '../lib-dist/browser');
-const CLIENT_BUILD_FILES = Path.join(ROOT, '../../desktop-client/public/kcab');
-
-// Add custom webpack args here
-let WEBPACK_ARGS = '';
+const CLIENT_ROOT = packageRoot('desktop-client');
+const CLIENT_DATA_DIR = join(CLIENT_ROOT, 'public/data');
+const CLIENT_BUILD_DIR = join(CLIENT_ROOT, 'public/kcab');
 
 async function prepareBuildFiles() {
-  await fsUtil.emptyDir(LOCAL_BUILD_FILES);
-  await fsUtil.rmdir(CLIENT_BUILD_FILES);
+  await migrationUtil.copyMigrations(ROOT, CLIENT_DATA_DIR);
 
   // Create an index file of all the public data files that need processing
-  // The seperator is hard coded to /, so replace the platform separator
-  let files = await fsUtil.listFiles(DATA_DIR, {
-    includeSubDirs: true,
-    excludeRootDir: true,
-  });
-  files = files.map(file => file.replace(Path.sep, '/')).sort();
+  let files = await fsUtil.findFiles(CLIENT_DATA_DIR, '**', true);
+  await fs.writeFile(join(CLIENT_DATA_DIR, '../data-file-index.txt'), files.sort().join('\n'));
 
-  await fsUtil.writeStringArrayToFile(
-    files,
-    Path.join(DATA_DIR, '../data-file-index.txt'),
-  );
-}
+  await fs.emptyDir(BUILD_DIR);
+  await fsUtil.rmdir(CLIENT_BUILD_DIR);
 
-async function setupForDevEnvironment() {
-  // In dev mode, always enable watch mode and symlink the build files.
-  // Make sure to do this before starting the build since watch mode
-  // will block
+  // In dev mode, symlink the build files.
   if (process.env.NODE_ENV === 'development') {
-    WEBPACK_ARGS += ' --watch';
-    await fsUtil.createSymlink(LOCAL_BUILD_FILES, CLIENT_BUILD_FILES);
+    await fs.ensureSymlink(BUILD_DIR, CLIENT_BUILD_DIR);
   }
 }
 
 /* eslint-disable prettier/prettier */
 async function executeWebpack() {
   const hash = webpackUtil.getContentHash();
+  
   const command = [
     'yarn webpack --config webpack/webpack.browser.config.js ',
     '--target webworker ',
     '--output-filename kcab.worker.', hash, '.js ',
     '--output-chunk-filename [id].[name].kcab.worker.', hash, 'js ',
     '--progress ',
-    WEBPACK_ARGS,
-  ].join('');
+  ];
 
-  await shellUtil.executeShellCmd(command);
-}
-
-async function postBuild() {
-  if (process.env.NODE_ENV === 'production') {
-    // In production, just copy the built files
-    await fsUtil.mkdir(LOCAL_BUILD_FILES);
-    await fsUtil.copyFiles(LOCAL_BUILD_FILES, CLIENT_BUILD_FILES);
+  if (process.env.NODE_ENV === 'development') {
+    // In dev mode enable watch, make sure to do it before starting the build
+    // as watch will block
+    command.push(' --watch');
   }
+
+  await shellUtil.executeShellCmd(command.join(''));
 }
 
 async function main() {
-  console.log('Node Version: ' + process.version);
-  console.log('Working Directory: ' + process.cwd());
-
-  await fsUtil.mkdir(DATA_DIR);
-  await migrationUtil.copyMigrations(Path.join(ROOT, '../'), DATA_DIR);
-
   await prepareBuildFiles();
-  await setupForDevEnvironment();
   await executeWebpack();
-  await postBuild();
+ 
+  if (process.env.NODE_ENV === 'production') {
+    // In production, just copy the built files
+    await fs.ensureDir(BUILD_DIR);
+    await fs.copy(BUILD_DIR, CLIENT_BUILD_DIR);
+  }
 }
 
 main();

@@ -1,18 +1,20 @@
 #!usr/bin/env node
-const { fsUtil, Path } = require('../../../bin/utils');
+const { fsUtil, join, packageRoot, fs } = require('@actual-app/bin');
 
-const ROOT = process.cwd();
-const BUILD_DIR = Path.join(ROOT, '/client-build');
+const ROOT = packageRoot('desktop-electron')
 
 async function main() {
-  fsUtil.rmdir(BUILD_DIR);
-  fsUtil.copyFiles(Path.join(ROOT, '../desktop-client/build'), BUILD_DIR);
+  const clientBuildDir = join(packageRoot('desktop-client'), 'build');
+  const buildDir = join(ROOT, 'client-build');
+
+  await fsUtil.rmdir(buildDir);
+  await fs.copy(clientBuildDir, buildDir);
 
   // Remove the embedded backend for the browser version. Will improve this process
-  fsUtil.rmdir(Path.join(BUILD_DIR, '/data'));
-  fsUtil.emptyDir(BUILD_DIR, /.*kcab.*/);
-  fsUtil.emptyDir(BUILD_DIR, /.*wasm/);
-  fsUtil.emptyDir(BUILD_DIR, /.*map/);
+  await fsUtil.rmdir(join(buildDir, 'data'));
+  await fsUtil.removeFiles(join(buildDir,'**/*.kcab.*'));
+  await fsUtil.removeFiles(join(buildDir,'**/*wasm'));
+  await fsUtil.removeFiles(join(buildDir,'**/*map'));
 }
 
 main();

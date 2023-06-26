@@ -23,9 +23,9 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build API
-        run: sudo cd packages/api && yarn build
+        run: cd packages/api && yarn build
       - name: Create package tgz
-        run: sudo cd packages/api && yarn pack && mv package.tgz actual-api.tgz
+        run: cd packages/api && yarn pack && mv package.tgz actual-api.tgz
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
@@ -39,9 +39,9 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build CRDT
-        run: sudo cd packages/crdt && yarn build
+        run: cd packages/crdt && yarn build
       - name: Create package tgz
-        run: sudo cd packages/crdt && yarn pack && mv package.tgz actual-crdt.tgz
+        run: cd packages/crdt && yarn pack && mv package.tgz actual-crdt.tgz
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
@@ -55,7 +55,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
-        run: sudo ./bin/package-browser.sh
+        run: ./bin/package-browser.sh
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
@@ -75,7 +75,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron
-        run: sudo ./bin/package-electron.sh
+        run: ./bin/package-electron.sh
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:

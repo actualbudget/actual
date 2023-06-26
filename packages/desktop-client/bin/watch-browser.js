@@ -1,16 +1,15 @@
-#!usr/bin/env node
-const { webpackUtil, shellUtil, Path, fsUtil } = require('../../../bin/utils');
+#!/usr/bin/env node
+const { fsUtil, webpackUtil, shellUtil, join, packageRoot, packageVersion} = require('@actual-app/bin');
 
-const ROOT = process.cwd();
+const ROOT = packageRoot('desktop-client');
 
 async function main() {
-  const version = await fsUtil.getVersion(Path.join(ROOT, '../package.json'));
+  const version = await packageVersion('desktop-client');
+
   const env = {
     IS_GENERIC_BROWSER: 1,
     PORT: 3001,
-    REACT_APP_BACKEND_WORKER_HASH: await webpackUtil.getWorkerFileHash(
-      Path.join(ROOT, '/public/kcab'),
-    ),
+    REACT_APP_BACKEND_WORKER_HASH: 'dev',
     REACT_APP_ACTUAL_VERSION: version,
   };
 

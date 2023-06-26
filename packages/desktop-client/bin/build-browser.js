@@ -1,10 +1,10 @@
-#!usr/bin/env node
-const { fsUtil, webpackUtil, shellUtil, Path } = require('../../../bin/utils');
+#!/usr/bin/env node
+const { fsUtil, webpackUtil, shellUtil, join, packageRoot, packageVersion} = require('@actual-app/bin');
 
-const ROOT = process.cwd();
+const ROOT = packageRoot('desktop-client');
 
 async function main() {
-  const version = await fsUtil.getVersion(Path.join(ROOT, '../package.json'));
+  const version = await packageVersion('desktop-client');
 
   console.log('Building version ' + version + ' for the browser...');
 
@@ -12,13 +12,12 @@ async function main() {
     IS_GENERIC_BROWSER: 1,
     INLINE_RUNTIME_CHUNK: false,
     REACT_APP_BACKEND_WORKER_HASH: await webpackUtil.getWorkerFileHash(
-      Path.join(ROOT, '/public/kcab'),
+      join(ROOT, 'public/kcab'),
     ),
     REACT_APP_ACTUAL_VERSION: version,
   };
 
-  await fsUtil.rmdir('build');
-
+  await fsUtil.rmdir(join(ROOT, 'build'));
   await shellUtil.executeShellCmd('yarn build', env);
 }
 

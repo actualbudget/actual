@@ -9,9 +9,11 @@ async function executeShellCmdWithOptions(command, env) {
   const spawn = require('child_process').spawn;
 
   let runArg = '-C'; // for bash
+  let shell = '/bin/sh';
 
   if (process.platform === 'win32') {
     runArg = '/C'; // for cmd.exe
+    shell = process.env.comspec;
   }
 
   let envOut = process.env;
@@ -19,7 +21,7 @@ async function executeShellCmdWithOptions(command, env) {
       envOut = { ...process.env, ...env };
   }
 
-  const childProcess = spawn( process.env.comspec, [runArg, command], {stdio: 'inherit', env: envOut});
+  const childProcess = spawn( shell, [runArg, command], {stdio: 'inherit', env: envOut});
 
   return new Promise((resolve, reject) => {
     childProcess.on('error', function (error) {

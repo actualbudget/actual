@@ -14,7 +14,7 @@ exports.getHashFromFile = (file) => {
 }
 
 exports.getWorkerFileName = async (directory) => {
-  let files = await fsUtil.findFiles(directory, /kcab\.worker\..*\.js/);
+  let files = await fsUtil.findFiles(directory, 'kcab.worker.*.js', true);
   return files[0];
 }
 

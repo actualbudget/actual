@@ -1,13 +1,11 @@
-#!usr/bin/env node
-const Path = require('path');
+#!/usr/bin/env node
+const { migrationUtil, join, packageRoot } = require('@actual-app/bin');
 
-const migrationUtil = require('./migration-util');
-
-const ROOT = process.cwd(); //Make path consistent with bash
-const DATA_DIR = Path.join(ROOT, process.argv[2]);
+const ROOT = packageRoot('loot-core');
+const DEST_DIR = join(ROOT, process.argv[2]);
 
 async function main() {
-  await migrationUtil.copyMigrations(ROOT, DATA_DIR);
+  await migrationUtil.copyMigrations(ROOT, DEST_DIR);
 }
 
 main();

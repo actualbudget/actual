@@ -1,0 +1,12 @@
+{
+  "name": "@actual-app/bin",
+  "version": "1.0.0",
+  "description": "Utilities for building and packaging actualbudget",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fast-glob": "^3.2.12",
+    "fs-extra": "^11.1.1"
+  }
+}
