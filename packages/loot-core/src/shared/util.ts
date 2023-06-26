@@ -136,18 +136,22 @@ export function groupById(data) {
   return res;
 }
 
-export function setIn(map, keys, item) {
+export function setIn(
+  map: Map<string, unknown>,
+  keys: string[],
+  item: unknown,
+): void {
   for (let i = 0; i < keys.length; i++) {
-    let key = keys[i];
+    const key = keys[i];
 
     if (i === keys.length - 1) {
       map.set(key, item);
     } else {
       if (!map.has(key)) {
-        map.set(key, new Map());
+        map.set(key, new Map<string, unknown>());
       }
 
-      map = map.get(key);
+      map = map.get(key) as Map<string, unknown>;
     }
   }
 }

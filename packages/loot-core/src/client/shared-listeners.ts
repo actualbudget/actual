@@ -242,7 +242,6 @@ export function listenForSyncEvent(actions, store) {
             message: `We couldn’t apply that change to the database. Please report this as a bug by [opening a Github issue](${githubIssueLink}).`,
           };
           break;
-        case 'beta-version':
         case 'network':
           // Show nothing
           break;
