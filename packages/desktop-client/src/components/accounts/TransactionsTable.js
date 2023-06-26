@@ -1370,7 +1370,15 @@ function TransactionTableInner({
   return (
     <View
       innerRef={containerRef}
-      style={[{ flex: 1, cursor: 'default' }, props.style]}
+      style={[
+        {
+          flex: 1,
+          cursor: 'default',
+          borderLeft: '1px solid ' + colorsm.tableBorder,
+          borderRight: '1px solid ' + colorsm.tableBorder,
+        },
+        props.style,
+      ]}
     >
       <View>
         <TransactionHeader
