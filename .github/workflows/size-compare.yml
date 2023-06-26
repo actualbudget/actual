@@ -4,7 +4,6 @@ on:
 jobs:
   compare:
     runs-on: ubuntu-latest
-    needs: [web]
     permissions:
       pull-requests: write
     steps:
