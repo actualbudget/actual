@@ -9,13 +9,13 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Wait for master build to succeed
+      - name: Wait for ${{github.base_ref}} build to succeed
         uses: fountainhead/action-wait-for-check@v1.1.0
         id: master-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: web
-          ref: master
+          ref: ${{github.base_ref}}
 
       - name: Wait for PR build to succeed
         uses: fountainhead/action-wait-for-check@v1.1.0
@@ -28,17 +28,17 @@ jobs:
       - name: Report build failure
         if: steps.wait-for-build.outputs.conclusion == 'failure'
         run: |
-          echo "Build failed on PR branch or master"
+          echo "Build failed on PR branch or ${{github.base_ref}}"
           exit 1
 
-      - name: Download build artifact from master
+      - name: Download build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@v2
         id: pr-build
         with:
-          branch: master
+          branch: ${{github.base_ref}}
           workflow: build.yml
           name: build-stats
-          path: master
+          path: base
 
       - name: Download build artifact from PR
         uses: dawidd6/action-download-artifact@v2
@@ -46,23 +46,23 @@ jobs:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
           name: build-stats
-          path: pr
+          path: head
 
       - name: Strip content hashes from stats files
         run: |
-          sed -i -E 's/\.[0-9a-f]{8,}\././g' ./pr/*.json
-          sed -i -E 's/\.[0-9a-f]{8,}\././g' ./master/*.json
+          sed -i -E 's/\.[0-9a-f]{8,}\././g' ./head/*.json
+          sed -i -E 's/\.[0-9a-f]{8,}\././g' ./base/*.json
 
       - uses: github/webpack-bundlesize-compare-action@v1.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          current-stats-json-path: ./pr/desktop-client-stats.json
-          base-stats-json-path: ./master/desktop-client-stats.json
+          current-stats-json-path: ./head/desktop-client-stats.json
+          base-stats-json-path: ./base/desktop-client-stats.json
           title: desktop-client
 
       - uses: github/webpack-bundlesize-compare-action@v1.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          current-stats-json-path: ./pr/loot-core-stats.json
-          base-stats-json-path: ./master/loot-core-stats.json
+          current-stats-json-path: ./head/loot-core-stats.json
+          base-stats-json-path: ./base/loot-core-stats.json
           title: loot-core
