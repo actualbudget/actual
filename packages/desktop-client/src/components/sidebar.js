@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { isMobile } from 'react-device-detect';
 import { useLocation } from 'react-router';
 
 import { css } from 'glamor';
@@ -256,7 +255,6 @@ function Account({
                 transform: 'translateX(-4.5px)',
               },
             }}
-            noContextMenu={isMobile}
           >
             <View
               style={{

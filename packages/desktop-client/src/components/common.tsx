@@ -162,7 +162,6 @@ type AnchorLinkProps = {
   style?: CSSProperties;
   activeStyle?: CSSProperties;
   children?: ReactNode;
-  noContextMenu?: boolean;
 };
 
 export function AnchorLink({
@@ -170,14 +169,12 @@ export function AnchorLink({
   style,
   activeStyle,
   children,
-  noContextMenu,
 }: AnchorLinkProps) {
   let match = useMatch({ path: to });
 
   return (
     <NavLink
       to={to}
-      onContextMenu={e => noContextMenu && e.preventDefault()}
       {...css([styles.smallText, style, match ? activeStyle : null])}
     >
       {children}
