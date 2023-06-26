@@ -9,6 +9,14 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - name: Wait for master build to succeed
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        id: wait-for-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: web
+          ref: master
+
       - name: Download build artifact from master
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -17,7 +25,15 @@ jobs:
           name: build-stats
           path: master
 
-      - name: Download build artifact from master
+      - name: Wait for PR build to succeed
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        id: wait-for-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: web
+          ref: ${{github.event.pull_request.head.sha}}
+
+      - name: Download build artifact from PR
         uses: dawidd6/action-download-artifact@v2
         with:
           pr: ${{github.event.pull_request.number}}
