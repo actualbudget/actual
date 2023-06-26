@@ -39,9 +39,10 @@ export default function DeleteMenu({ modalProps, actions, file }) {
         <View
           style={{
             padding: 15,
+            gap: 15,
             paddingTop: 0,
             paddingBottom: 25,
-            width: 500,
+            maxWidth: 512,
             lineHeight: '1.5em',
             color: colorsm.tableText,
           }}
@@ -62,7 +63,6 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                   backgroundColor: colorsm.tableText,
                   alignSelf: 'center',
                   border: 0,
-                  marginTop: 10,
                   padding: '10px 30px',
                   fontSize: 14,
                 }}
@@ -80,31 +80,28 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                   isRemote && { marginTop: 20, color: colorsm.tableText },
                 ]}
               >
-                {isRemote ? (
-                  <Text>
-                    You can also delete just the local copy. This will remove
-                    all local data and the file will be listed as available for
-                    download.
-                  </Text>
-                ) : (
-                  <Text>
-                    {file.state === 'broken' ? (
-                      <Text>
-                        This is a <strong>hosted file</strong> but it was
-                        created by another user. You can only delete the local
-                        copy.
-                      </Text>
-                    ) : (
-                      <Text>
-                        This a <strong>local file</strong> which is not stored
-                        on a server.
-                      </Text>
-                    )}{' '}
-                    Deleting it will remove it and all of its backups
-                    permanently.
-                  </Text>
-                )}
-              </Text>
+              {isRemote ? (
+                <Text>
+                  You can also delete just the local copy. This will remove all
+                  local data and the file will be listed as available for
+                  download.
+                </Text>
+              ) : (
+                <Text>
+                  {file.state === 'broken' ? (
+                    <>
+                      This is a <strong>hosted file</strong> but it was created
+                      by another user. You can only delete the local copy.
+                    </>
+                  ) : (
+                    <>
+                      This a <strong>local file</strong> which is not stored on
+                      a server.
+                    </>
+                  )}{' '}
+                  Deleting it will remove it and all of its backups permanently.
+                </Text>
+              )}
 
               <ButtonWithLoading
                 primary={!isRemote}

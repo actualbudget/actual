@@ -742,7 +742,7 @@ const AccountHeader = memo(
       <>
         <KeyHandlers
           keys={{
-            'mod+f': () => {
+            'ctrl+f, cmd+f': () => {
               if (searchInput.current) {
                 searchInput.current.focus();
               }
