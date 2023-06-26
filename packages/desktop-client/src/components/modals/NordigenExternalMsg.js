@@ -15,7 +15,7 @@ import {
   Modal,
   Button,
   P,
-  Link,
+  LinkButton,
   Menu,
   Tooltip,
   ExternalLink,
@@ -153,12 +153,12 @@ export default function NordigenExternalMsg({
           <Error>
             Failed loading available banks: Nordigen access credentials might be
             misconfigured. Please{' '}
-            <Link
+            <LinkButton
               onClick={onNordigenInit}
               style={{ color: colors.b3, display: 'inline' }}
             >
               set them up
-            </Link>{' '}
+            </LinkButton>{' '}
             again.
           </Error>
         ) : (
@@ -281,9 +281,9 @@ export default function NordigenExternalMsg({
               </View>
 
               {waiting === 'browser' && (
-                <Link onClick={onJump} style={{ marginTop: 10 }}>
+                <LinkButton onClick={onJump} style={{ marginTop: 10 }}>
                   (Account linking not opening in a new tab? Click here)
-                </Link>
+                </LinkButton>
               )}
             </View>
           ) : success ? (

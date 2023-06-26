@@ -16,7 +16,7 @@ import {
   ButtonWithLoading,
   Stack,
   ExternalLink,
-  Link,
+  LinkButton,
 } from './common';
 
 function compileMessage(message, actions, setLoading, onRemove) {
@@ -35,7 +35,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
                 if (href[0] === '#') {
                   let actionName = href.slice(1);
                   return (
-                    <Link
+                    <LinkButton
                       onClick={async e => {
                         e.preventDefault();
                         if (actions[actionName]) {
@@ -46,7 +46,7 @@ function compileMessage(message, actions, setLoading, onRemove) {
                       }}
                     >
                       {text}
-                    </Link>
+                    </LinkButton>
                   );
                 }
 

@@ -126,7 +126,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
 
 type LinkProps = ComponentProps<typeof Button>;
 
-export function Link({ style, children, ...nativeProps }: LinkProps) {
+export function LinkButton({ style, children, ...nativeProps }: LinkProps) {
   return (
     <Button
       {...css(

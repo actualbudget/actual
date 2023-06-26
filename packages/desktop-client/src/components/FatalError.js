@@ -9,7 +9,7 @@ import {
   Block,
   Modal,
   P,
-  Link,
+  LinkButton,
   Button,
   ExternalLink,
 } from './common';
@@ -119,12 +119,12 @@ class FatalError extends Component {
               </Button>
             </P>
             <P isLast={true} style={{ fontSize: 11 }}>
-              <Link
+              <LinkButton
                 onClick={() => this.setState({ showError: true })}
                 style={{ color: colors.p4 }}
               >
                 Show Error
-              </Link>
+              </LinkButton>
               {showError && (
                 <Block
                   style={{
@@ -175,7 +175,7 @@ function SharedArrayBufferOverride() {
       </Button>
     </>
   ) : (
-    <Link
+    <LinkButton
       onClick={() => setExpanded(true)}
       style={{
         color: `inherit !important`,
@@ -190,6 +190,6 @@ function SharedArrayBufferOverride() {
       }}
     >
       Advanced options
-    </Link>
+    </LinkButton>
   );
 }
