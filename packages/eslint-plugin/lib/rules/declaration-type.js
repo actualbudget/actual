@@ -69,6 +69,19 @@ module.exports = {
         return 'const';
       }
 
+      // const x: uniuqe symbol = ...
+      if (
+        node.id.type === 'Identifier' &&
+        node.id.typeAnnotation &&
+        node.id.typeAnnotation.type === 'TSTypeAnnotation' &&
+        node.id.typeAnnotation.typeAnnotation.type === 'TSTypeOperator' &&
+        node.id.typeAnnotation.typeAnnotation.operator === 'unique' &&
+        node.id.typeAnnotation.typeAnnotation.typeAnnotation.type ===
+          'TSSymbolKeyword'
+      ) {
+        return 'const';
+      }
+
       return 'let';
     }
 

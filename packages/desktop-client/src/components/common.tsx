@@ -583,7 +583,7 @@ export function Menu({
   );
 }
 
-let MenuLine: unique symbol = Symbol('menu-line');
+const MenuLine: unique symbol = Symbol('menu-line');
 Menu.line = MenuLine;
 Menu.label = Symbol('menu-label');
 
