@@ -60,6 +60,7 @@ export default function Bootstrap() {
       <P isLast style={{ fontSize: 16 }}>
         Consider opening{' '}
         <ExternalLink
+          asAnchor
           href="https://actualbudget.org/docs/tour/"
           target="_blank"
           rel="noopener noreferrer"
