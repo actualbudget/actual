@@ -165,7 +165,7 @@ function ConfigureField({
     <Tooltip
       position="bottom-left"
       style={{ padding: 15 }}
-      width={300}
+      width={250}
       onClose={() => dispatch({ type: 'close' })}
     >
       <FocusScope>
@@ -262,7 +262,8 @@ function ConfigureField({
             />
           )}
 
-          <View>
+          <Stack direction="row" justify="flex-end" align="center">
+            <View style={{ flex: 1 }} />
             <Button
               primary
               style={{ marginTop: 15 }}
@@ -278,7 +279,7 @@ function ConfigureField({
             >
               Apply
             </Button>
-          </View>
+          </Stack>
         </form>
       </FocusScope>
     </Tooltip>

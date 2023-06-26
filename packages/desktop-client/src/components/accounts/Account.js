@@ -5,6 +5,7 @@ import React, {
   useState,
   useRef,
   useMemo,
+  useEffect,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -361,10 +362,17 @@ function FilterMenuButton({
   let [adding, setAdding] = useState(false);
   let [menuOpen, setMenuOpen] = useState(false);
   let [err, setErr] = useState(null);
+  let inputRef = useRef();
   let name = filterId.name;
   let id = filterId.id;
   let res;
   let savedFilter;
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [NameFilter]);
 
   const onFilterMenuSelect = async item => {
     switch (item) {
@@ -400,6 +408,7 @@ function FilterMenuButton({
         }
         break;
       case 'save-filter':
+        setErr(null);
         setAdding(true);
         setMenuOpen(false);
         setNameOpen(true);
@@ -463,10 +472,10 @@ function FilterMenuButton({
                     : [
                         { name: 'rename-filter', text: 'Rename' },
                         { name: 'update-filter', text: 'Update condtions' },
-                        { name: 'reload-filter', text: 'Reload' },
+                        { name: 'reload-filter', text: 'Revert changes' },
                         { name: 'delete-filter', text: 'Delete' },
                         Menu.line,
-                        { name: 'save-filter', text: 'Create new filter' },
+                        { name: 'save-filter', text: 'Save new filter' },
                         { name: 'clear-filter', text: 'Clear all conditions' },
                       ]),
                 ]),
@@ -478,7 +487,7 @@ function FilterMenuButton({
 
   async function onAddUpdate() {
     if (adding) {
-      //crate new flow
+      //create new flow
       savedFilter = {
         conditions: filters,
         conditionsOp: conditionsOp,
@@ -517,30 +526,46 @@ function FilterMenuButton({
   function NameFilter({ onClose }) {
     return (
       <MenuTooltip width={400} onClose={onClose}>
-        <Stack
-          direction="row"
-          justify="flex-end"
-          align="center"
-          style={{ padding: 10 }}
-        >
-          <FormField style={{ flex: 1 }}>
-            <FormLabel title="Filter Name" htmlFor="name-field" />
-            <GenericInput
-              field="string"
-              type="string"
-              value={name}
-              onChange={e => (name = e)}
-            />
-          </FormField>
-          <Button primary style={{ marginTop: 18 }} onClick={onAddUpdate}>
-            {adding ? 'Add' : 'Update'}
-          </Button>
-        </Stack>
-        {err && (
-          <Stack direction="row" align="center" style={{ padding: 10 }}>
-            <Text style={{ color: colors.r4 }}>{err}</Text>
+        <form>
+          <Stack
+            direction="row"
+            justify="flex-end"
+            align="center"
+            style={{ padding: 10 }}
+          >
+            <FormField style={{ flex: 1 }}>
+              <FormLabel
+                title="Filter Name"
+                htmlFor="name-field"
+                style={{ userSelect: 'none' }}
+              />
+              <GenericInput
+                inputRef={inputRef}
+                id="name-field"
+                field="string"
+                type="string"
+                value={name}
+                onChange={e => (name = e)}
+              />
+            </FormField>
+            <Button
+              primary
+              type="submit"
+              style={{ marginTop: 18 }}
+              onClick={e => {
+                e.preventDefault();
+                onAddUpdate();
+              }}
+            >
+              {adding ? 'Add' : 'Update'}
+            </Button>
           </Stack>
-        )}
+          {err && (
+            <Stack direction="row" align="center" style={{ padding: 10 }}>
+              <Text style={{ color: colors.r4 }}>{err}</Text>
+            </Stack>
+          )}
+        </form>
       </MenuTooltip>
     );
   }
@@ -550,7 +575,7 @@ function FilterMenuButton({
       {filters.length > 0 && (
         <Button
           bare
-          style={{ marginTop: 4, width: 125 }}
+          style={{ marginTop: 4 }}
           onClick={() => {
             setMenuOpen(true);
           }}
