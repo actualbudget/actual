@@ -1,11 +1,12 @@
-import { makeClock, Timestamp, merkle, SyncProtoBuf } from '@actual-app/crdt';
+import { Clock, makeClock, Timestamp, merkle, SyncProtoBuf } from '@actual-app/crdt';
 
 import { basic as defaultMockData } from './mockData.json';
+import { Message } from '../sync';
 
 const handlers = {};
 let currentMockData = defaultMockData;
 let currentClock = makeClock(new Timestamp(0, 0, '0000000000000000'));
-let currentMessages = [];
+let currentMessages: any[] = [];
 
 // Ugh, this is duplicated...
 function deserializeValue(value) {
@@ -104,11 +105,11 @@ export const reset = () => {
   currentMessages = [];
 };
 
-export const getClock = () => {
+export const getClock = (): Clock => {
   return currentClock;
 };
 
-export const getMessages = () => {
+export const getMessages = (): Message[] => {
   return currentMessages.map(msg => {
     let { timestamp, content } = msg;
     let fields = SyncProtoBuf.Message.deserializeBinary(content);

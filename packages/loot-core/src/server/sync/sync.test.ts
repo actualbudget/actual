@@ -8,7 +8,7 @@ import * as mockSyncServer from '../tests/mockSyncServer';
 import * as encoder from './encoder';
 import { isError } from './utils';
 
-import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
+import { setSyncingMode, sendMessages, applyMessages, fullSync, Message } from './index';
 
 beforeEach(() => {
   mockSyncServer.reset();
@@ -236,10 +236,8 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages().map(msg => ({
-      ...msg,
-      timestamp: Timestamp.parse(msg.timestamp),
-    }));
+    let messages = mockSyncServer.getMessages()
+    expect(messages.every((msg) => Timestamp.parse(msg) !== null)).toBe(true);
 
     // Apply all but the last message (which deletes the category)
     await applyMessages(messages.slice(0, -1));
@@ -290,10 +288,8 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages().map(msg => ({
-      ...msg,
-      timestamp: Timestamp.parse(msg.timestamp),
-    }));
+    let messages = mockSyncServer.getMessages()
+    expect(messages.every((msg) => Timestamp.parse(msg) !== null)).toBe(true);
 
     let firstMessages = messages.filter(m => m.column !== 'tombstone');
     let secondMessages = messages.filter(m => m.column === 'tombstone');
@@ -327,10 +323,8 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages().map(msg => ({
-      ...msg,
-      timestamp: Timestamp.parse(msg.timestamp),
-    }));
+    let messages = mockSyncServer.getMessages()
+    expect(messages.every((msg) => Timestamp.parse(msg) !== null)).toBe(true);
 
     let firstMessages = messages.slice(0, -2);
     let secondMessages = messages.slice(-2);

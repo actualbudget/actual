@@ -26,7 +26,7 @@ import { TrieNode } from './merkle';
  * http://www.cse.buffalo.edu/tech-reports/2014-04.pdf
  */
 
-type Clock = {
+export type Clock = {
   timestamp: MutableTimestamp;
   merkle: TrieNode;
 };
