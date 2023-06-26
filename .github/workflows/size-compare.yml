@@ -10,19 +10,11 @@ jobs:
     steps:
       - name: Wait for master build to succeed
         uses: fountainhead/action-wait-for-check@v1.1.0
-        id: wait-for-build
+        id: master-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: web
           ref: master
-
-      - name: Download build artifact from master
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          branch: jed/stats
-          workflow: build.yml
-          name: build-stats
-          path: master
 
       - name: Wait for PR build to succeed
         uses: fountainhead/action-wait-for-check@v1.1.0
@@ -31,6 +23,21 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: web
           ref: ${{github.event.pull_request.head.sha}}
+
+      - name: Report build failure
+        if: steps.wait-for-build.outputs.conclusion == 'failure'
+        run: |
+          echo "Build failed on PR branch or master"
+          exit 1
+
+      - name: Download build artifact from master
+        uses: dawidd6/action-download-artifact@v2
+        id: pr-build
+        with:
+          branch: jed/stats
+          workflow: build.yml
+          name: build-stats
+          path: master
 
       - name: Download build artifact from PR
         uses: dawidd6/action-download-artifact@v2
