@@ -33,7 +33,7 @@
     "e2e": "yarn workspaces foreach --parallel --verbose run e2e",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "cross-env NODE_ENV=development yarn workspaces foreach --verbose run lint --max-warnings 0",
+    "lint": "eslint . --max-warnings 0",
     "typecheck": "yarn tsc",
     "postinstall": "patch-package"
   },
