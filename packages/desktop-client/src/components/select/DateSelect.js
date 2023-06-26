@@ -30,8 +30,8 @@ import DateSelectRight from './DateSelect.right.png';
 
 let pickerStyles = {
   '& .pika-single.actual-date-picker': {
-    color: colorsm.menuItemText,
-    background: colorsm.menuBackground,
+    color: colorsm.sidebarItemText,
+    background: colorsm.sidebarItemBackground,
     border: 'none',
     boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
     borderRadius: 4,
@@ -43,7 +43,7 @@ let pickerStyles = {
       width: 'auto',
     },
     '& .pika-label': {
-      backgroundColor: colorsm.menuItemBackground,
+      backgroundColor: colorsm.sidebarItemBackground,
     },
     '& .pika-prev': {
       backgroundImage: `url(${DateSelectLeft})`,
@@ -52,18 +52,20 @@ let pickerStyles = {
       backgroundImage: `url(${DateSelectRight})`,
     },
     '& .pika-table th': {
-      color: colorsm.menuItemTextHeader,
+      color: colorsm.sidebarItemTextSelected,
       '& abbr': { textDecoration: 'none' },
     },
     '& .pika-button': {
-      backgroundColor: colorsm.buttonNeutralBackground,
-      color: colorsm.buttonNeutralText,
+      backgroundColor: colorsm.sidebarItemBackground,
+      color: colorsm.sidebarItemText,
     },
     '& .is-today .pika-button': {
       textDecoration: 'underline',
     },
     '& .is-selected .pika-button': {
-      backgroundColor: colorsm.buttonPositiveBackground,
+      backgroundColor: colorsm.sidebarItemBackgroundHover,
+      color: colorsm.sidebarItemTextHover,
+      border: '1px solid ' + colorsm.tableBorder,
       boxShadow: 'none',
     },
   },
