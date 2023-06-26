@@ -37,7 +37,9 @@ function KeyHandler({
   let scope = useContext(KeyScopeContext);
 
   if (eventType !== 'keyup' && eventType !== 'keydown') {
-    throw new Error('KeyHandler: unknown event type: ' + eventType);
+    throw new Error(
+      'KeyHandler THIS IS A CHANGE!: unknown event type: ' + eventType,
+    );
   }
 
   useEffect(() => {
