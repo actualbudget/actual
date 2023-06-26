@@ -111,17 +111,11 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                     padding: '10px 30px',
                     fontSize: 14,
                   },
-                  isRemote
-                    ? {
-                        borderColor: colorsm.errorAccent,
-                        color: colorsm.errorBackground,
-                        backgroundColor: colorsm.errorText,
-                      }
-                    : {
-                        border: 0,
-                        color: colorsm.errorBackground,
-                        backgroundColor: colorsm.errorText,
-                      },
+                  {
+                    borderColor: colorsm.errorAccent,
+                    color: colorsm.errorBackground,
+                    backgroundColor: colorsm.errorText,
+                  },
                 ]}
                 onClick={onDeleteLocal}
               >

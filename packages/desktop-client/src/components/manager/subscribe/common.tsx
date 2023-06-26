@@ -104,7 +104,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
           fontSize: 15,
           border: 'none',
           ...styles.shadow,
-          ':focus': { border: 'none', ...styles.shadow },
+          ':focus': {
+            border: '1px solid ' + colorsm.buttonPositiveBorder,
+            ...styles.shadow,
+          },
         },
         props.style,
       ]}
