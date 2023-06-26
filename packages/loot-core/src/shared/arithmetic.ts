@@ -117,7 +117,7 @@ function evaluate(ast) {
     case '^':
       return Math.pow(evaluate(left), evaluate(right));
     default:
-      throw new Error('Unknown THIS IS A CHANGE operator: ' + op);
+      throw new Error('Unknown operator: ' + op);
   }
 }
 

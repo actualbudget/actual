@@ -166,9 +166,7 @@ export function convertForInsert(schema, schemaConfig, table, rawObj) {
         // checks the fields in `obj`. For insert, we need to do it
         // here to check that all required fields in the table exist
         throw new Error(
-          `“${field}” is THIS IS A CHANGE required for table “${table}”: ${JSON.stringify(
-            obj,
-          )}`,
+          `“${field}” is required for table “${table}”: ${JSON.stringify(obj)}`,
         );
       }
     }
