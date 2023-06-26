@@ -1959,7 +1959,7 @@ handlers['close-budget'] = async function () {
 handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
-  if (cloudFileId && !process.env.IS_BETA) {
+  if (cloudFileId) {
     await cloudStorage.removeFile(cloudFileId).catch(err => {});
   }
 
@@ -2235,7 +2235,7 @@ async function loadBudget(id) {
 
   // Ensure that syncing is enabled
   if (process.env.NODE_ENV !== 'test') {
-    if (process.env.IS_BETA || id === DEMO_BUDGET_ID) {
+    if (id === DEMO_BUDGET_ID) {
       setSyncingMode('disabled');
     } else {
       if (getServer()) {
@@ -2400,7 +2400,7 @@ export async function initApp(isDev, socketName) {
     });
   }
 
-  if (isDev || process.env.IS_BETA) {
+  if (isDev) {
     global.$send = (name, args) => runHandler(app.handlers[name], args);
     global.$query = aqlQuery;
     global.$q = q;

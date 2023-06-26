@@ -1,9 +1,10 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
+import { DelegatedPlugin } from 'webpack';
 
 type DateLike = string | Date;
 
-function _parse(value: DateLike): Date {
+export function _parse(value: DateLike): Date {
   if (typeof value === 'string') {
     // Dates are hard. We just want to deal with months in the format
     // 2020-01 and days in the format 2020-01-01, but life is never
@@ -113,7 +114,15 @@ export function addMonths(month: DateLike, n: number): string {
   return d.format(d.addMonths(_parse(month), n), 'yyyy-MM');
 }
 
-export function subMonths(month: DateLike, n: number): string {
+export function addWeeks(date: DateLike, n: number): string {
+  return d.format(d.addWeeks(_parse(date), n), 'yyyy-MM-dd');
+}
+
+export function differenceInCalendarMonths(month1: DateLike, month2: DateLike): number {
+  return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
+}
+
+export function subMonths(month, n) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
