@@ -105,7 +105,6 @@ function CashFlow() {
 
       <View
         style={{
-          marginTop: -10,
           paddingLeft: 20,
           paddingRight: 20,
           backgroundColor: 'white',

@@ -463,7 +463,6 @@ function FilterExpression({
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
-          marginBottom: 10,
           marginRight: 10,
         },
         style,
@@ -528,8 +527,6 @@ export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
-        marginTop: 10,
-        marginBottom: -5,
       }}
     >
       {filters.map((filter, i) => (

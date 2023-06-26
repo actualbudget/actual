@@ -332,24 +332,6 @@ function AccountMenu({
   );
 }
 
-function ConditionsOpMenu({ conditionsOp, onCondOpChange, filters }) {
-  return (
-    <Text style={{ color: colors.n4, marginTop: 15, marginBottom: -8 }}>
-      If
-      <FieldSelect
-        style={{ display: 'inline-flex' }}
-        fields={[
-          ['and', 'all'],
-          ['or', 'any'],
-        ]}
-        value={conditionsOp}
-        onChange={(name, value) => onCondOpChange(value, filters)}
-      />
-      of these conditions match:
-    </Text>
-  );
-}
-
 function FilterMenuButton({
   filters,
   conditionsOp,
@@ -1282,12 +1264,26 @@ const AccountHeader = memo(
 
           {filters && filters.length > 0 && (
             <View>
-              <ConditionsOpMenu
-                conditionsOp={conditionsOp}
-                onCondOpChange={onCondOpChange}
-                filters={filters}
-              />
-              <Stack spacing={2} direction="row" align="center">
+              <Stack
+                spacing={2}
+                direction="row"
+                align="center"
+                style={{ marginTop: 5 }}
+              >
+                {filters.length > 1 && (
+                  <Text style={{ color: colors.n4 }}>
+                    <FieldSelect
+                      style={{ display: 'inline-flex' }}
+                      fields={[
+                        ['and', 'all'],
+                        ['or', 'any'],
+                      ]}
+                      value={conditionsOp}
+                      onChange={(name, value) => onCondOpChange(value, filters)}
+                    />
+                    of:
+                  </Text>
+                )}
                 <AppliedFilters
                   filters={filters}
                   onUpdate={onUpdateFilter}
