@@ -183,7 +183,7 @@ export class Timestamp {
    * Timestamp send. Generates a unique, monotonic timestamp suitable
    * for transmission to another system in string format
    */
-  static send() {
+  static send(): Timestamp | null {
     if (!clock) {
       return null;
     }
@@ -223,7 +223,7 @@ export class Timestamp {
   // Timestamp receive. Parses and merges a timestamp from a remote
   // system with the local timeglobal uniqueness and monotonicity are
   // preserved
-  static recv(msg) {
+  static recv(msg): Timestamp | null {
     if (!clock) {
       return null;
     }
