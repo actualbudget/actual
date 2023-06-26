@@ -332,8 +332,7 @@ class Budget extends PureComponent {
   };
 
   onShowActivity = (categoryName, categoryId, month) => {
-    this.props.navigate({
-      pathname: '/accounts',
+    this.props.navigate('/accounts', {
       state: {
         goBack: true,
         filterName: `${categoryName} (${monthUtils.format(

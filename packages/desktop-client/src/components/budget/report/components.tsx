@@ -246,6 +246,7 @@ export const CategoryMonth = memo(function CategoryMonth({
         style={{ textAlign: 'right' }}
       >
         <span
+          data-testid="category-month-spent"
           onClick={() => onShowActivity(category.name, category.id, monthIndex)}
         >
           <CellValue
