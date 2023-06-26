@@ -424,7 +424,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
   messages.forEach(msg => {
-    Timestamp.recv(msg.timestamp);
+    Timestamp.recv(Timestamp.parse(msg.timestamp));
   });
 
   return runMutator(() => applyMessages(messages));
@@ -489,7 +489,7 @@ export async function sendMessages(messages: Message[]) {
   }
 }
 
-export function getMessagesSince(since: string) {
+export function getMessagesSince(since: string): Message[] {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
     [since],

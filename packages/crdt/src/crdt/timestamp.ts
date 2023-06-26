@@ -225,7 +225,7 @@ export class Timestamp {
   // Timestamp receive. Parses and merges a timestamp from a remote
   // system with the local timeglobal uniqueness and monotonicity are
   // preserved
-  static recv(msg): Timestamp | null {
+  static recv(msg: Timestamp): Timestamp | null {
     if (!clock) {
       return null;
     }

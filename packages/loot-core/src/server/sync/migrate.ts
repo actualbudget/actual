@@ -1,11 +1,11 @@
 import { Timestamp } from '@actual-app/crdt';
 
-import { addSyncListener, applyMessages } from './index';
+import { Message, addSyncListener, applyMessages } from './index';
 
 function migrateParentIds(_oldValues, newValues) {
   newValues.forEach((items, table) => {
     if (table === 'transactions') {
-      let toApply = [];
+      let toApply: Message[] = [];
 
       items.forEach(newValue => {
         if (
@@ -20,7 +20,7 @@ function migrateParentIds(_oldValues, newValues) {
             row: newValue.id,
             column: 'parent_id',
             value: parentId,
-            timestamp: Timestamp.send(),
+            timestamp: Timestamp.send().toString(),
           });
         }
       });

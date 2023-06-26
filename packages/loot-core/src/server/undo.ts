@@ -4,7 +4,7 @@ import * as connection from '../platform/server/connection';
 import { getIn } from '../shared/util';
 
 import { withMutatorContext, getMutatorContext } from './mutators';
-import { sendMessages } from './sync';
+import { Message, sendMessages } from './sync';
 
 // A marker always sits as the first entry to simplify logic
 type MarkerMessage = { type: 'marker'; meta? };
@@ -217,7 +217,7 @@ export async function redo() {
   }
 }
 
-function redoResurrections(messages, oldData) {
+function redoResurrections(messages, oldData): Message[] {
   let resurrect = new Set<string>();
 
   messages.forEach(message => {
@@ -246,7 +246,7 @@ function redoResurrections(messages, oldData) {
       row,
       column: 'tombstone',
       value: 0,
-      timestamp: Timestamp.send(),
+      timestamp: Timestamp.send().toString(),
     };
   });
 }
