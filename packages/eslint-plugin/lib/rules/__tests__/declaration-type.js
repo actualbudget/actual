@@ -5,9 +5,9 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-let RuleTester = require('eslint').RuleTester;
+const { RuleTester } = require('eslint');
 
-let rule = require('../../../lib/rules/let');
+const rule = require('../declaration-type');
 
 //------------------------------------------------------------------------------
 // Tests

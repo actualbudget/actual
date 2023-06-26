@@ -5,7 +5,7 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-let RuleTester = require('eslint').RuleTester;
+const { RuleTester } = require('eslint');
 
 let rule = require('../typography');
 
