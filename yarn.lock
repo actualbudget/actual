@@ -84,8 +84,6 @@ __metadata:
     "@types/react-dom": ^18.2.1
     "@types/react-modal": ^3.16.0
     "@types/react-router-dom": ^5.3.3
-    chalk: 2.4.1
-    chroma-js: ^1.3.3
     cross-env: ^7.0.3
     customize-cra: ^1.0.0
     date-fns: ^2.29.3
@@ -95,13 +93,10 @@ __metadata:
     formik: ^0.11.10
     glamor: ^2.20.40
     hotkeys-js: 3.10.3
-    identity-obj-proxy: 3.0.0
     inter-ui: ^3.19.3
     jest: ^27.0.0
     jest-watch-typeahead: ^2.2.2
     memoize-one: ^4.0.0
-    mitt: ^3.0.0
-    node-noop: 1.0.0
     pikaday: 1.8.0
     react: 18.2.0
     react-app-rewired: ^2.2.1
@@ -6231,17 +6226,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:2.4.1":
-  version: 2.4.1
-  resolution: "chalk@npm:2.4.1"
-  dependencies:
-    ansi-styles: ^3.2.1
-    escape-string-regexp: ^1.0.5
-    supports-color: ^5.3.0
-  checksum: 196eb8e99a0c00c6fcef216c794b109fd071931b10ec0f8f305c368fb6d776d0d4857d0028d2cc3561632428d6d94a41d7edf33b506f7540b7c8492f4224d89e
-  languageName: node
-  linkType: hard
-
 "chalk@npm:^2.0.0, chalk@npm:^2.4.1":
   version: 2.4.2
   resolution: "chalk@npm:2.4.2"
@@ -6328,13 +6312,6 @@ __metadata:
   version: 2.0.0
   resolution: "chownr@npm:2.0.0"
   checksum: c57cf9dd0791e2f18a5ee9c1a299ae6e801ff58fee96dc8bfd0dcb4738a6ce58dd252a3605b1c93c6418fe4f9d5093b28ffbf4d66648cb2a9c67eaef9679be2f
-  languageName: node
-  linkType: hard
-
-"chroma-js@npm:^1.3.3":
-  version: 1.4.1
-  resolution: "chroma-js@npm:1.4.1"
-  checksum: 37cc353386e9375d9dcd8e0e1126709766abadc88a0447092cb1a21bf1edae68a71fd0255693044843a1c94a5c4baf54e69f3f4b67218d4c47e42849a7532133
   languageName: node
   linkType: hard
 
@@ -10279,7 +10256,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"identity-obj-proxy@npm:3.0.0, identity-obj-proxy@npm:^3.0.0":
+"identity-obj-proxy@npm:^3.0.0":
   version: 3.0.0
   resolution: "identity-obj-proxy@npm:3.0.0"
   dependencies:
@@ -13064,13 +13041,6 @@ __metadata:
   resolution: "node-libofx@workspace:packages/node-libofx"
   languageName: unknown
   linkType: soft
-
-"node-noop@npm:1.0.0":
-  version: 1.0.0
-  resolution: "node-noop@npm:1.0.0"
-  checksum: 7a150b352380bdd734bc1b727399132d8f2dc6b8a92974b8aeaf4f5c965d54c9e9320f8af9d4ba8396d520830c60e123ce0c714ad55be73d47157b272ec4354e
-  languageName: node
-  linkType: hard
 
 "node-releases@npm:^2.0.8":
   version: 2.0.10
