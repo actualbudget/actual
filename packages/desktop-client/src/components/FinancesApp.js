@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
-import Backend from 'react-dnd-html5-backend';
+import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import {
   Route,

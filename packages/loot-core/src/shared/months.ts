@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-function _parse(value: string | Date) {
+export function _parse(value: string | Date) {
   if (typeof value === 'string') {
     // Dates are hard. We just want to deal with months in the format
     // 2020-01 and days in the format 2020-01-01, but life is never
@@ -109,6 +109,14 @@ export function prevMonth(month) {
 
 export function addMonths(month, n) {
   return d.format(d.addMonths(_parse(month), n), 'yyyy-MM');
+}
+
+export function addWeeks(date, n) {
+  return d.format(d.addWeeks(_parse(date), n), 'yyyy-MM-dd');
+}
+
+export function differenceInCalendarMonths(month1, month2) {
+  return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
 }
 
 export function subMonths(month, n) {
