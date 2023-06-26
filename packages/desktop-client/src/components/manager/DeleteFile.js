@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { colorsm } from '../../style';
 import { View, Text, Modal, ButtonWithLoading } from '../common';
 
-// eslint-disable-next-line import/no-unused-modules
 export default function DeleteMenu({ modalProps, actions, file }) {
   let [loadingState, setLoadingState] = useState(null);
 
