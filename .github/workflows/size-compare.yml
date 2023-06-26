@@ -1,0 +1,68 @@
+name: Compare Sizes
+
+on:
+  pull_request:
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Wait for master build to succeed
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        id: master-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: web
+          ref: master
+
+      - name: Wait for PR build to succeed
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        id: wait-for-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: web
+          ref: ${{github.event.pull_request.head.sha}}
+
+      - name: Report build failure
+        if: steps.wait-for-build.outputs.conclusion == 'failure'
+        run: |
+          echo "Build failed on PR branch or master"
+          exit 1
+
+      - name: Download build artifact from master
+        uses: dawidd6/action-download-artifact@v2
+        id: pr-build
+        with:
+          branch: jed/stats
+          workflow: build.yml
+          name: build-stats
+          path: master
+
+      - name: Download build artifact from PR
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          pr: ${{github.event.pull_request.number}}
+          workflow: build.yml
+          name: build-stats
+          path: pr
+
+      - name: Strip content hashes from stats files
+        run: |
+          sed -i -E 's/\.[0-9a-f]{8,}\././g' ./pr/*.json
+          sed -i -E 's/\.[0-9a-f]{8,}\././g' ./master/*.json
+
+      - uses: github/webpack-bundlesize-compare-action@v1.5.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          current-stats-json-path: ./pr/desktop-client-stats.json
+          base-stats-json-path: ./master/desktop-client-stats.json
+          title: desktop-client
+
+      - uses: github/webpack-bundlesize-compare-action@v1.5.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          current-stats-json-path: ./pr/loot-core-stats.json
+          base-stats-json-path: ./master/loot-core-stats.json
+          title: loot-core
