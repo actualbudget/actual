@@ -75,7 +75,7 @@ let TEST_BUDGET_ID = '_test-budget';
 // util
 
 function onSheetChange({ names }) {
-  const nodes = names.map(name => {
+  let nodes = names.map(name => {
     let node = sheet.get()._getNode(name);
     return { name: node.name, value: node.value };
   });
@@ -388,7 +388,7 @@ handlers['category-group-delete'] = mutator(async function ({
   transferId,
 }) {
   return withUndo(async () => {
-    const groupCategories = await db.all(
+    let groupCategories = await db.all(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
       [id],
     );
@@ -406,7 +406,7 @@ handlers['category-group-delete'] = mutator(async function ({
 });
 
 handlers['must-category-transfer'] = async function ({ id }) {
-  const res = await db.runQuery(
+  let res = await db.runQuery(
     `SELECT count(t.id) as count FROM transactions t
        LEFT JOIN category_mapping cm ON cm.id = t.category
        WHERE cm.transferId = ? AND t.tombstone = 0`,
@@ -423,8 +423,8 @@ handlers['must-category-transfer'] = async function ({ id }) {
   // If there are any non-zero budget values, also force the user to
   // transfer the category.
   return [...sheet.get().meta().createdMonths].some(month => {
-    const sheetName = monthUtils.sheetForMonth(month);
-    const value = sheet.get().getCellValue(sheetName, 'budget-' + id);
+    let sheetName = monthUtils.sheetForMonth(month);
+    let value = sheet.get().getCellValue(sheetName, 'budget-' + id);
 
     return value !== 0;
   });
@@ -681,7 +681,7 @@ handlers['query'] = async function (query) {
 };
 
 handlers['bank-delete'] = async function ({ id }) {
-  const accts = await db.runQuery(
+  let accts = await db.runQuery(
     'SELECT * FROM accounts WHERE bank = ?',
     [id],
     true,
@@ -711,11 +711,11 @@ handlers['accounts-get'] = async function () {
 };
 
 handlers['account-properties'] = async function ({ id }) {
-  const { balance } = await db.first(
+  let { balance } = await db.first(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
     [id],
   );
-  const { count } = await db.first(
+  let { count } = await db.first(
     'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
     [id],
   );
@@ -776,7 +776,7 @@ handlers['nordigen-accounts-link'] = async function ({
   let bank = await link.findOrCreateBank(account.institution, requisitionId);
 
   if (upgradingId) {
-    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+    let accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
       upgradingId,
     ]);
     id = accRow.id;
@@ -846,7 +846,7 @@ handlers['account-create'] = mutator(async function ({
   closed,
 }) {
   return withUndo(async () => {
-    const id = await db.insertAccount({
+    let id = await db.insertAccount({
       name,
       offbudget: offBudget ? 1 : 0,
       closed: closed ? 1 : 0,
@@ -898,7 +898,7 @@ handlers['account-close'] = mutator(async function ({
       return;
     }
 
-    const { balance, numTransactions } = await handlers['account-properties']({
+    let { balance, numTransactions } = await handlers['account-properties']({
       id,
     });
 
@@ -1060,10 +1060,10 @@ handlers['accounts-sync'] = async function ({ id }) {
   let updatedAccounts = [];
 
   for (let i = 0; i < accounts.length; i++) {
-    const acct = accounts[i];
+    let acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncAccount(
+        let res = await bankSync.syncAccount(
           userId,
           userKey,
           acct.id,
@@ -1213,7 +1213,7 @@ handlers['nordigen-poll-web-token'] = async function ({
 };
 
 handlers['nordigen-status'] = async function () {
-  const userToken = await asyncStorage.getItem('user-token');
+  let userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
     return { error: 'unauthorized' };
@@ -1229,7 +1229,7 @@ handlers['nordigen-status'] = async function () {
 };
 
 handlers['nordigen-get-banks'] = async function (country) {
-  const userToken = await asyncStorage.getItem('user-token');
+  let userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
     return { error: 'unauthorized' };
@@ -1301,10 +1301,10 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
   let updatedAccounts = [];
 
   for (let i = 0; i < accounts.length; i++) {
-    const acct = accounts[i];
+    let acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncNordigenAccount(
+        let res = await bankSync.syncNordigenAccount(
           userId,
           userKey,
           acct.id,
@@ -1674,12 +1674,12 @@ handlers['subscribe-get-user'] = async function () {
   }
 
   try {
-    const res = await get(getServer().SIGNUP_SERVER + '/validate', {
+    let res = await get(getServer().SIGNUP_SERVER + '/validate', {
       headers: {
         'X-ACTUAL-TOKEN': userToken,
       },
     });
-    const { status, reason } = JSON.parse(res);
+    let { status, reason } = JSON.parse(res);
 
     if (status === 'error') {
       if (reason === 'unauthorized') {
@@ -1744,9 +1744,9 @@ handlers['get-server-version'] = async function () {
 
   let version;
   try {
-    const res = await get(getServer().BASE_SERVER + '/info');
+    let res = await get(getServer().BASE_SERVER + '/info');
 
-    const info = JSON.parse(res);
+    let info = JSON.parse(res);
     version = info.build.version;
   } catch (err) {
     return { error: 'network-failure' };
@@ -1787,11 +1787,11 @@ handlers['sync'] = async function () {
 };
 
 handlers['get-budgets'] = async function () {
-  const paths = await fs.listDir(fs.getDocumentDir());
-  const budgets = (
+  let paths = await fs.listDir(fs.getDocumentDir());
+  let budgets = (
     await Promise.all(
       paths.map(async name => {
-        const prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
+        let prefsPath = fs.join(fs.getDocumentDir(), name, 'metadata.json');
         if (await fs.exists(prefsPath)) {
           let prefs;
           try {
@@ -2280,9 +2280,9 @@ handlers['backup-make'] = async function ({ id }) {
 };
 
 handlers['get-last-opened-backup'] = async function () {
-  const id = await asyncStorage.getItem('lastBudget');
+  let id = await asyncStorage.getItem('lastBudget');
   if (id && id !== '') {
-    const budgetDir = fs.getBudgetDir(id);
+    let budgetDir = fs.getBudgetDir(id);
 
     // We never want to give back a budget that does not exist on the
     // filesystem anymore, so first check that it exists
@@ -2447,7 +2447,7 @@ export async function init(config) {
 }
 
 // Export a few things required for the platform
-export const lib = {
+export let lib = {
   getDataDir: fs.getDataDir,
   sendMessage: (msg, args) => connection.send(msg, args),
   send: async (name, args) => {

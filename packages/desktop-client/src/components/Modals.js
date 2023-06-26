@@ -37,13 +37,13 @@ function Modals({
   budgetId,
   actions,
 }) {
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  let isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
-  const syncServerStatus = useSyncServerStatus();
+  let syncServerStatus = useSyncServerStatus();
 
   return modalStack
     .map(({ name, options = {} }, idx) => {
-      const modalProps = {
+      let modalProps = {
         onClose: actions.popModal,
         onBack: actions.popModal,
         showBack: idx > 0,

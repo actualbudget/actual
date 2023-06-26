@@ -5,7 +5,7 @@ import Autocomplete from '../autocomplete/Autocomplete';
 import { View, Modal, Button, Text } from '../common';
 import { TableHeader, Table, Row, Field } from '../table';
 
-const addAccountOption = { id: 'new', name: 'Create new account' };
+let addAccountOption = { id: 'new', name: 'Create new account' };
 
 export default function SelectLinkedAccounts({
   modalProps,
@@ -14,7 +14,7 @@ export default function SelectLinkedAccounts({
   localAccounts,
   actions,
 }) {
-  const [chosenAccounts, setChosenAccounts] = useState(() => {
+  let [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(
       localAccounts
         .filter(acc => acc.account_id)
@@ -23,7 +23,7 @@ export default function SelectLinkedAccounts({
   });
 
   async function onNext() {
-    const chosenLocalAccountIds = Object.values(chosenAccounts);
+    let chosenLocalAccountIds = Object.values(chosenAccounts);
 
     // Unlink accounts that were previously linked, but the user
     // chose to remove the bank-sync
@@ -35,7 +35,7 @@ export default function SelectLinkedAccounts({
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
       ([chosenExternalAccountId, chosenLocalAccountId]) => {
-        const externalAccount = externalAccounts.find(
+        let externalAccount = externalAccounts.find(
           account => account.account_id === chosenExternalAccountId,
         );
 
@@ -59,13 +59,13 @@ export default function SelectLinkedAccounts({
     actions.closeModal();
   }
 
-  const unlinkedAccounts = localAccounts.filter(
+  let unlinkedAccounts = localAccounts.filter(
     account => !Object.values(chosenAccounts).includes(account.id),
   );
 
   function onSetLinkedAccount(externalAccount, localAccountId) {
     setChosenAccounts(accounts => {
-      const updatedAccounts = { ...accounts };
+      let updatedAccounts = { ...accounts };
 
       if (localAccountId) {
         updatedAccounts[externalAccount.account_id] = localAccountId;
@@ -149,9 +149,9 @@ function TableRow({
   unlinkedAccounts,
   onSetLinkedAccount,
 }) {
-  const [focusedField, setFocusedField] = useState(null);
+  let [focusedField, setFocusedField] = useState(null);
 
-  const availableAccountOptions = [
+  let availableAccountOptions = [
     ...unlinkedAccounts,
     chosenAccount?.id !== addAccountOption.id && chosenAccount,
     addAccountOption,

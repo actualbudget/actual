@@ -93,7 +93,7 @@ export function applyBudgetAction(month, type, args) {
 
 export function getCategories() {
   return async function (dispatch) {
-    const categories = await send('get-categories');
+    let categories = await send('get-categories');
     dispatch({
       type: constants.LOAD_CATEGORIES,
       categories,
@@ -176,7 +176,7 @@ export function updateGroup(group) {
   // Strip off the categories field if it exist. It's not a real db
   // field but groups have this extra field in the client most of the
   // time
-  const { categories, ...rawGroup } = group;
+  let { categories, ...rawGroup } = group;
 
   return async dispatch => {
     await send('category-group-update', rawGroup);
@@ -220,7 +220,7 @@ export function createPayee(name) {
 
 export function getAccounts() {
   return async function (dispatch) {
-    const accounts = await send('accounts-get');
+    let accounts = await send('accounts-get');
     dispatch({ type: constants.LOAD_ACCOUNTS, accounts });
     return accounts;
   };
@@ -244,10 +244,10 @@ export function createAccount(name, balance, offBudget) {
 
 export function openAccountCloseModal(accountId) {
   return async function (dispatch, getState) {
-    const { balance, numTransactions } = await send('account-properties', {
+    let { balance, numTransactions } = await send('account-properties', {
       id: accountId,
     });
-    const account = getState().queries.accounts.find(
+    let account = getState().queries.accounts.find(
       acct => acct.id === accountId,
     );
 

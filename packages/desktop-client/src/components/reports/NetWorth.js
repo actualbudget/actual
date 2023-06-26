@@ -22,29 +22,29 @@ import useReport from './useReport';
 import { fromDateRepr } from './util';
 
 function NetWorth({ accounts }) {
-  const {
+  let {
     filters,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
   } = useFilters();
 
-  const [allMonths, setAllMonths] = useState(null);
-  const [start, setStart] = useState(
+  let [allMonths, setAllMonths] = useState(null);
+  let [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
-  const [end, setEnd] = useState(monthUtils.currentMonth());
+  let [end, setEnd] = useState(monthUtils.currentMonth());
 
-  const params = useMemo(
+  let params = useMemo(
     () => netWorthSpreadsheet(start, end, accounts, filters),
     [start, end, accounts, filters],
   );
-  const data = useReport('net_worth', params);
+  let data = useReport('net_worth', params);
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
-      const currentMonth = monthUtils.currentMonth();
+      let trans = await send('get-earliest-transaction');
+      let currentMonth = monthUtils.currentMonth();
       let earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
         : currentMonth;
@@ -52,12 +52,12 @@ function NetWorth({ accounts }) {
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      let yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
       if (earliestMonth > yearAgo) {
         earliestMonth = yearAgo;
       }
 
-      const allMonths = monthUtils
+      let allMonths = monthUtils
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,

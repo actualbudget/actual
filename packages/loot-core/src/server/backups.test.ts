@@ -5,7 +5,7 @@ import { updateBackups } from './backups';
 describe('Backups', () => {
   test('backups work', async () => {
     async function getUpdatedBackups(backups) {
-      const toRemove = await updateBackups(backups);
+      let toRemove = await updateBackups(backups);
       return backups.filter(b => !toRemove.includes(b.id));
     }
 

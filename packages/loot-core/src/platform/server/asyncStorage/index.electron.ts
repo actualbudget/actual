@@ -9,7 +9,7 @@ let getStorePath = () => join(lootFs.getDataDir(), 'global-store.json');
 let store;
 let persisted = true;
 
-export const init: T.Init = function ({ persist = true } = {}) {
+export let init: T.Init = function ({ persist = true } = {}) {
   if (persist) {
     try {
       store = JSON.parse(fs.readFileSync(getStorePath(), 'utf8'));
@@ -38,23 +38,23 @@ function _saveStore() {
   }
 }
 
-export const getItem: T.GetItem = function (key) {
+export let getItem: T.GetItem = function (key) {
   return new Promise(function (resolve) {
     return resolve(store[key]);
   });
 };
 
-export const setItem: T.SetItem = function (key, value) {
+export let setItem: T.SetItem = function (key, value) {
   store[key] = value;
   return _saveStore();
 };
 
-export const removeItem: T.RemoveItem = function (key) {
+export let removeItem: T.RemoveItem = function (key) {
   delete store[key];
   return _saveStore();
 };
 
-export const multiGet: T.MultiGet = function (keys) {
+export let multiGet: T.MultiGet = function (keys) {
   return new Promise(function (resolve) {
     return resolve(
       keys.map(function (key) {
@@ -64,14 +64,14 @@ export const multiGet: T.MultiGet = function (keys) {
   });
 };
 
-export const multiSet: T.MultiSet = function (keyValues) {
+export let multiSet: T.MultiSet = function (keyValues) {
   keyValues.forEach(function ([key, value]) {
     store[key] = value;
   });
   return _saveStore();
 };
 
-export const multiRemove: T.MultiRemove = function (keys) {
+export let multiRemove: T.MultiRemove = function (keys) {
   keys.forEach(function (key) {
     delete store[key];
   });

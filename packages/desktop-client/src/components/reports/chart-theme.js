@@ -8,13 +8,13 @@ let colorFades = {
 };
 
 // Typography
-const sansSerif =
+let sansSerif =
   'Inter var, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, Helvetica, Arial, sans-serif';
-const letterSpacing = 'normal';
-const fontSize = 13;
+let letterSpacing = 'normal';
+let fontSize = 13;
 
 // Labels
-const baseLabelStyles = {
+let baseLabelStyles = {
   fontFamily: sansSerif,
   fontSize,
   letterSpacing,
@@ -22,7 +22,7 @@ const baseLabelStyles = {
   stroke: 'transparent',
 };
 
-const axisBaseStyles = {
+let axisBaseStyles = {
   axis: {
     fill: 'transparent',
     stroke: 'none',
@@ -41,7 +41,7 @@ const axisBaseStyles = {
   tickLabels: baseLabelStyles,
 };
 
-const theme = {
+let theme = {
   colors: {
     ...colorFades,
     red: colors.r7,

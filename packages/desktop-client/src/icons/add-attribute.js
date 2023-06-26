@@ -1,9 +1,9 @@
-const positionMethod = {
+let positionMethod = {
   start: 'unshiftContainer',
   end: 'pushContainer',
 };
 
-const addJSXAttribute = ({ types: t, template }, opts) => {
+let addJSXAttribute = ({ types: t, template }, opts) => {
   function getAttributeValue({ literal, value }) {
     if (typeof value === 'boolean') {
       return t.jsxExpressionContainer(t.booleanLiteral(value));
@@ -48,11 +48,11 @@ const addJSXAttribute = ({ types: t, template }, opts) => {
             literal = false,
             position = 'end',
           }) => {
-            const method = positionMethod[position];
-            const newAttribute = getAttribute({ spread, name, value, literal });
-            const attributes = path.get('attributes');
+            let method = positionMethod[position];
+            let newAttribute = getAttribute({ spread, name, value, literal });
+            let attributes = path.get('attributes');
 
-            const isEqualAttribute = attribute => {
+            let isEqualAttribute = attribute => {
               if (spread) {
                 return attribute.get('argument').isIdentifier({ name });
               }
@@ -60,7 +60,7 @@ const addJSXAttribute = ({ types: t, template }, opts) => {
               return attribute.get('name').isJSXIdentifier({ name });
             };
 
-            const replaced = attributes.some(attribute => {
+            let replaced = attributes.some(attribute => {
               if (!isEqualAttribute(attribute)) {
                 return false;
               }

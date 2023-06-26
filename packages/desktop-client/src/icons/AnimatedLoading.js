@@ -4,7 +4,7 @@ import { css } from 'glamor';
 
 import Loading from './Loading';
 
-const rotation = css.keyframes({
+let rotation = css.keyframes({
   '0%': { transform: 'rotate(-90deg)' },
   '100%': { transform: 'rotate(666deg)' },
 });

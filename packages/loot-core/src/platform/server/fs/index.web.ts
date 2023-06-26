@@ -11,14 +11,14 @@ let FS = null;
 let BFS = null;
 let NO_PERSIST = false;
 
-export const bundledDatabasePath = '/default-db.sqlite';
-export const migrationsPath = '/migrations';
-export const demoBudgetPath = '/demo-budget';
+export let bundledDatabasePath = '/default-db.sqlite';
+export let migrationsPath = '/migrations';
+export let demoBudgetPath = '/demo-budget';
 export { join };
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
-export const getDataDir = () => process.env.ACTUAL_DATA_DIR;
+export let getDataDir = () => process.env.ACTUAL_DATA_DIR;
 
-export const pathToId = function (filepath) {
+export let pathToId = function (filepath) {
   return filepath.replace(/^\//, '').replace(/\//g, '-');
 };
 
@@ -197,7 +197,7 @@ async function populateDefaultFilesystem() {
   );
 }
 
-export const populateFileHeirarchy = async function () {
+export let populateFileHeirarchy = async function () {
   let { store } = idb.getStore(await idb.getDatabase(), 'files');
   let req = store.getAllKeys();
   let paths: string[] = await new Promise((resolve, reject) => {
@@ -211,7 +211,7 @@ export const populateFileHeirarchy = async function () {
   }
 };
 
-export const init = async function () {
+export let init = async function () {
   let Module = _getModule();
   FS = Module.FS;
 
@@ -248,53 +248,53 @@ export const init = async function () {
   await populateFileHeirarchy();
 };
 
-export const basename = function (filepath) {
+export let basename = function (filepath) {
   let parts = filepath.split('/');
   return parts.slice(0, -1).join('/');
 };
 
-export const listDir = async function (filepath) {
+export let listDir = async function (filepath) {
   let paths = FS.readdir(filepath);
   return paths.filter(p => p !== '.' && p !== '..');
 };
 
-export const exists = async function (filepath) {
+export let exists = async function (filepath) {
   return _exists(filepath);
 };
 
-export const mkdir = async function (filepath) {
+export let mkdir = async function (filepath) {
   FS.mkdir(filepath);
 };
 
-export const size = async function (filepath) {
+export let size = async function (filepath) {
   let attrs = FS.stat(resolveLink(filepath));
   return attrs.size;
 };
 
-export const copyFile = async function (frompath, topath) {
+export let copyFile = async function (frompath, topath) {
   // TODO: This reads the whole file into memory, but that's probably
   // not a problem. This could be optimized
   let contents = await _readFile(frompath);
   return _writeFile(topath, contents);
 };
 
-export const readFile = async function (filepath, encoding = 'utf8') {
+export let readFile = async function (filepath, encoding = 'utf8') {
   return _readFile(filepath, { encoding });
 };
 
-export const writeFile = async function (filepath, contents) {
+export let writeFile = async function (filepath, contents) {
   return _writeFile(filepath, contents);
 };
 
-export const removeFile = async function (filepath) {
+export let removeFile = async function (filepath) {
   return _removeFile(filepath);
 };
 
-export const removeDir = async function (filepath) {
+export let removeDir = async function (filepath) {
   FS.rmdir(filepath);
 };
 
-export const removeDirRecursively = async function (dirpath) {
+export let removeDirRecursively = async function (dirpath) {
   if (await exists(dirpath)) {
     for (let file of await listDir(dirpath)) {
       let fullpath = join(dirpath, file);
@@ -312,7 +312,7 @@ export const removeDirRecursively = async function (dirpath) {
   }
 };
 
-export const getModifiedTime = async function (filepath) {
+export let getModifiedTime = async function (filepath) {
   throw new Error(
     'getModifiedTime not supported on the web (only used for backups)',
   );

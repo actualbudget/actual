@@ -46,7 +46,7 @@ test.describe('Schedules', () => {
     });
 
     // Go to transactions page
-    const accountPage = await navigation.goToAccountPage('HSBC');
+    let accountPage = await navigation.goToAccountPage('HSBC');
     expect(await accountPage.getNthTransaction(0)).toMatchObject({
       payee: 'Home Depot',
       category: 'Categorize',
@@ -55,7 +55,7 @@ test.describe('Schedules', () => {
     });
 
     // go to rules page
-    const rulesPage = await navigation.goToRulesPage();
+    let rulesPage = await navigation.goToRulesPage();
     expect(await rulesPage.getNthRule(0)).toMatchObject({
       // actions: ['link schedule Home Depot (2023-02-28)'],
       actions: [

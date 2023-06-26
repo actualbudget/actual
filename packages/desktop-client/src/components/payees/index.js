@@ -165,7 +165,7 @@ let Payee = memo(
   },
 );
 
-const PayeeTable = forwardRef(
+let PayeeTable = forwardRef(
   (
     {
       payees,
@@ -335,7 +335,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
   );
 }
 
-export const ManagePayees = forwardRef(
+export let ManagePayees = forwardRef(
   (
     {
       modalProps,
@@ -357,7 +357,7 @@ export const ManagePayees = forwardRef(
     let table = useRef(null);
     let scrollTo = useRef(null);
     let resetAnimation = useRef(false);
-    const [orphanedOnly, setOrphanedOnly] = useState(false);
+    let [orphanedOnly, setOrphanedOnly] = useState(false);
 
     let filteredPayees = useMemo(() => {
       let filtered = payees;
@@ -518,7 +518,7 @@ export const ManagePayees = forwardRef(
               disabled={!(orphanedPayees?.length > 0) && !orphanedOnly}
               onClick={() => {
                 setOrphanedOnly(!orphanedOnly);
-                const filterInput = document.getElementById('filter-input');
+                let filterInput = document.getElementById('filter-input');
                 applyFilter(filterInput.value);
                 tableNavigator.onEdit(null);
               }}

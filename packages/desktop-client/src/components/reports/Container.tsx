@@ -10,7 +10,7 @@ type ContainerProps = {
   children: (width: number, height: number, host: HTMLDivElement) => ReactNode;
 };
 export default function Container({ style, children }: ContainerProps) {
-  const portalHost = useRef<HTMLDivElement>(null);
+  let portalHost = useRef<HTMLDivElement>(null);
 
   return (
     <View style={[{ height: 300, position: 'relative', flexShrink: 0 }, style]}>

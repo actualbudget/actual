@@ -35,7 +35,7 @@ class Budget extends PureComponent {
   constructor(props) {
     super(props);
 
-    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    let currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
     this.state = {
       initialized: false,
       prewarmStartMonth: currentMonth,
@@ -230,7 +230,7 @@ class Budget extends PureComponent {
         }),
       });
     } else {
-      const cat = {
+      let cat = {
         ...category,
         hidden: category.hidden ? 1 : 0,
       };
@@ -243,7 +243,7 @@ class Budget extends PureComponent {
   };
 
   onDeleteCategory = async id => {
-    const mustTransfer = await send('must-category-transfer', { id });
+    let mustTransfer = await send('must-category-transfer', { id });
     let { categoryGroups } = this.state;
 
     if (mustTransfer) {
@@ -283,7 +283,7 @@ class Budget extends PureComponent {
         }),
       });
     } else {
-      const grp = {
+      let grp = {
         ...group,
         hidden: group.hidden ? 1 : 0,
       };
@@ -506,8 +506,8 @@ class Budget extends PureComponent {
   }
 }
 
-const RolloverBudgetSummary = memo(props => {
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+let RolloverBudgetSummary = memo(props => {
+  let isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   return (
     <rollover.BudgetSummary
       {...props}

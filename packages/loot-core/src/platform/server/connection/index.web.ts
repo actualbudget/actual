@@ -28,8 +28,8 @@ function coerceError(error) {
   return { type: 'InternalError', message: error.message };
 }
 
-export const init: T.Init = function (serverChn, handlers) {
-  const serverChannel = serverChn as Window;
+export let init: T.Init = function (serverChn, handlers) {
+  let serverChannel = serverChn as Window;
   getGlobalObject().__globalServerChannel = serverChannel;
 
   serverChannel.addEventListener(
@@ -103,8 +103,8 @@ export const init: T.Init = function (serverChn, handlers) {
   serverChannel.postMessage({ type: 'connect' });
 };
 
-export const send: T.Send = function (name, args) {
-  const { __globalServerChannel } = getGlobalObject();
+export let send: T.Send = function (name, args) {
+  let { __globalServerChannel } = getGlobalObject();
   if (__globalServerChannel) {
     __globalServerChannel.postMessage({
       type: 'push',
@@ -114,6 +114,6 @@ export const send: T.Send = function (name, args) {
   }
 };
 
-export const getNumClients = function () {
+export let getNumClients = function () {
   return 1;
 };

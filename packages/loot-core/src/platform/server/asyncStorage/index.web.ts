@@ -2,7 +2,7 @@ import { getDatabase } from '../indexeddb';
 
 import * as T from '.';
 
-export const init: T.Init = function () {};
+export let init: T.Init = function () {};
 
 function commit(trans) {
   if (trans.commit) {
@@ -10,7 +10,7 @@ function commit(trans) {
   }
 }
 
-export const getItem: T.GetItem = async function (key) {
+export let getItem: T.GetItem = async function (key) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readonly');
@@ -24,7 +24,7 @@ export const getItem: T.GetItem = async function (key) {
   });
 };
 
-export const setItem: T.SetItem = async function (key, value) {
+export let setItem: T.SetItem = async function (key, value) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -38,7 +38,7 @@ export const setItem: T.SetItem = async function (key, value) {
   });
 };
 
-export const removeItem: T.RemoveItem = async function (key) {
+export let removeItem: T.RemoveItem = async function (key) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -52,7 +52,7 @@ export const removeItem: T.RemoveItem = async function (key) {
   });
 };
 
-export const multiGet: T.MultiGet = async function (keys) {
+export let multiGet: T.MultiGet = async function (keys) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readonly');
@@ -72,7 +72,7 @@ export const multiGet: T.MultiGet = async function (keys) {
   return promise;
 };
 
-export const multiSet: T.MultiSet = async function (keyValues) {
+export let multiSet: T.MultiSet = async function (keyValues) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');
@@ -92,7 +92,7 @@ export const multiSet: T.MultiSet = async function (keyValues) {
   return promise;
 };
 
-export const multiRemove: T.MultiRemove = async function (keys) {
+export let multiRemove: T.MultiRemove = async function (keys) {
   let db = await getDatabase();
 
   let transaction = db.transaction(['asyncStorage'], 'readwrite');

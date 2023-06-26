@@ -29,7 +29,7 @@ function sortByKey(arr, key) {
 
 function groupBy(arr, keyName) {
   return arr.reduce(function (obj, item) {
-    var key = item[keyName];
+    let key = item[keyName];
     if (!obj.hasOwnProperty(key)) {
       obj[key] = [];
     }
@@ -57,9 +57,9 @@ async function importCategories(data, entityIdMap) {
   // Hidden categories are put in its own group by YNAB,
   // so it's already handled.
 
-  const categories = await actual.getCategories();
-  const incomeCatId = categories.find(cat => cat.name === 'Income').id;
-  const ynabIncomeCategories = ['To be Budgeted', 'Inflow: Ready to Assign'];
+  let categories = await actual.getCategories();
+  let incomeCatId = categories.find(cat => cat.name === 'Income').id;
+  let ynabIncomeCategories = ['To be Budgeted', 'Inflow: Ready to Assign'];
 
   function checkSpecialCat(cat) {
     if (
@@ -91,7 +91,7 @@ async function importCategories(data, entityIdMap) {
         group.name !== 'Internal Master Category' &&
         group.name !== 'Credit Card Payments'
       ) {
-        var groupId = await actual.createCategoryGroup({
+        let groupId = await actual.createCategoryGroup({
           name: group.name,
           is_income: false,
         });
@@ -146,13 +146,13 @@ function importPayees(data, entityIdMap) {
 }
 
 async function importTransactions(data, entityIdMap) {
-  const payees = await actual.getPayees();
-  const categories = await actual.getCategories();
-  const incomeCatId = categories.find(cat => cat.name === 'Income').id;
-  const startingBalanceCatId = categories.find(
+  let payees = await actual.getPayees();
+  let categories = await actual.getCategories();
+  let incomeCatId = categories.find(cat => cat.name === 'Income').id;
+  let startingBalanceCatId = categories.find(
     cat => cat.name === 'Starting Balances',
   ).id; //better way to do it?
-  const startingPayeeYNAB = data.payees.find(
+  let startingPayeeYNAB = data.payees.find(
     payee => payee.name === 'Starting Balance',
   ).id;
 
@@ -244,10 +244,10 @@ async function importBudgets(data, entityIdMap) {
 
   let budgets = sortByKey(data.months, 'month');
 
-  const internalCatIdYnab = data.category_groups.find(
+  let internalCatIdYnab = data.category_groups.find(
     group => group.name === 'Internal Master Category',
   ).id;
-  const creditcardCatIdYnab = data.category_groups.find(
+  let creditcardCatIdYnab = data.category_groups.find(
     group => group.name === 'Credit Card Payments',
   ).id;
 
@@ -278,7 +278,7 @@ async function importBudgets(data, entityIdMap) {
 // Utils
 
 async function doImport(data) {
-  const entityIdMap = new Map();
+  let entityIdMap = new Map();
 
   console.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);

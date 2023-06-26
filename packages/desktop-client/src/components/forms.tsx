@@ -11,7 +11,7 @@ type SectionLabelProps = {
   style?: CSSProperties;
 };
 
-export const SectionLabel = ({ title, style }: SectionLabelProps) => {
+export let SectionLabel = ({ title, style }: SectionLabelProps) => {
   return (
     <View
       style={[
@@ -37,7 +37,7 @@ type FormLabelProps = {
   style?: CSSProperties;
 };
 
-export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
+export let FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text style={[{ fontSize: 13, marginBottom: 3, color: colors.n3 }, style]}>
       <label htmlFor={htmlFor} id={id}>
@@ -52,7 +52,7 @@ type FormFieldProps = {
   children: ReactNode;
 };
 
-export const FormField = ({ style, children }: FormFieldProps) => {
+export let FormField = ({ style, children }: FormFieldProps) => {
   return <View style={style}>{children}</View>;
 };
 
@@ -62,7 +62,7 @@ type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type' | 'styles'> & {
   styles?: CSSProperties;
 };
 
-export const Checkbox = (props: CheckboxProps) => {
+export let Checkbox = (props: CheckboxProps) => {
   return (
     <input
       type="checkbox"

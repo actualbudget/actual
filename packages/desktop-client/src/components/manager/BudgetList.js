@@ -247,9 +247,9 @@ function BudgetList({
   createBudget,
   downloadBudget,
 }) {
-  const [creating, setCreating] = useState(false);
+  let [creating, setCreating] = useState(false);
 
-  const onCreate = ({ testMode } = {}) => {
+  let onCreate = ({ testMode } = {}) => {
     if (!creating) {
       setCreating(true);
       createBudget({ testMode });

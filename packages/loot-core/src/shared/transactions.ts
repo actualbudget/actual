@@ -45,10 +45,7 @@ export function makeChild(parent, data) {
 export function recalculateSplit(trans) {
   // Calculate the new total of split transactions and make sure
   // that it equals the parent amount
-  const total = trans.subtransactions.reduce(
-    (acc, t) => acc + num(t.amount),
-    0,
-  );
+  let total = trans.subtransactions.reduce((acc, t) => acc + num(t.amount), 0);
   return {
     ...trans,
     error:

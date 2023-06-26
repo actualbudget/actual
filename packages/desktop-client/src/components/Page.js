@@ -21,7 +21,7 @@ export function usePageType() {
 }
 
 function PageTitle({ name, style }) {
-  const { isNarrowWidth } = useResponsive();
+  let { isNarrowWidth } = useResponsive();
 
   if (isNarrowWidth) {
     return (

@@ -94,7 +94,7 @@ export function Title({ text }: TitleProps) {
 }
 
 type InputProps = ComponentProps<typeof BaseInput>;
-export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+export let Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   return (
     <BaseInput
       {...props}

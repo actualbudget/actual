@@ -162,7 +162,7 @@ export function serializeValue(value: string | number | null): string {
 }
 
 export function deserializeValue(value: string): string | number | null {
-  const type = value[0];
+  let type = value[0];
   switch (type) {
     case '0':
       return null;
@@ -253,7 +253,7 @@ export type Message = {
   value: string | number | null;
 };
 
-export const applyMessages = sequential(async (messages: Message[]) => {
+export let applyMessages = sequential(async (messages: Message[]) => {
   if (checkSyncingMode('import')) {
     applyMessagesForImport(messages);
     return undefined;
@@ -292,7 +292,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     let data = new Map();
 
     for (let table of Object.keys(idsPerTable)) {
-      const rows = await fetchAll(table, idsPerTable[table]);
+      let rows = await fetchAll(table, idsPerTable[table]);
 
       for (let i = 0; i < rows.length; i++) {
         let row = rows[i];
@@ -561,7 +561,7 @@ export async function initialFullSync(): Promise<void> {
   }
 }
 
-export const fullSync = once(async function (): Promise<
+export let fullSync = once(async function (): Promise<
   { messages: Message[] } | { error: unknown }
 > {
   app.events.emit('sync', { type: 'start' });

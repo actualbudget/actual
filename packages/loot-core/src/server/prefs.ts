@@ -12,7 +12,7 @@ export async function loadPrefs(id?) {
     return prefs;
   }
 
-  const fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
+  let fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
 
   try {
     prefs = JSON.parse(await fs.readFile(fullpath));
@@ -25,12 +25,12 @@ export async function loadPrefs(id?) {
 
   // delete released feature flags
   let releasedFeatures = ['syncAccount'];
-  for (const feature of releasedFeatures) {
+  for (let feature of releasedFeatures) {
     delete prefs[`flags.${feature}`];
   }
 
   // delete legacy notifications
-  for (const key of Object.keys(prefs)) {
+  for (let key of Object.keys(prefs)) {
     if (key.startsWith('notifications.')) {
       delete prefs[key];
     }
@@ -86,7 +86,7 @@ export function getDefaultPrefs(id, budgetName) {
 }
 
 export async function readPrefs(id) {
-  const fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
+  let fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
 
   try {
     return JSON.parse(await fs.readFile(fullpath));

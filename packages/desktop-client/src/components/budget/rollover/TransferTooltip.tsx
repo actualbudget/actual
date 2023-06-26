@@ -45,7 +45,7 @@ export default function TransferTooltip({
   useEffect(() => {
     (async () => {
       if (initialAmountName) {
-        const node = await spreadsheet.get(sheetName, initialAmountName);
+        let node = await spreadsheet.get(sheetName, initialAmountName);
         setAmount(integerToCurrency(Math.max(node.value, 0)));
       } else {
         setAmount(integerToCurrency(Math.max(initialAmount, 0)));

@@ -27,9 +27,9 @@ import { ResetCache, ResetSync } from './Reset';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
-  const version = useServerVersion();
-  const latestVersion = useLatestVersion();
-  const isOutdated = useIsOutdated();
+  let version = useServerVersion();
+  let latestVersion = useLatestVersion();
+  let isOutdated = useIsOutdated();
 
   return (
     <Setting>
@@ -120,7 +120,7 @@ function Settings({
     return () => unlisten();
   }, [loadPrefs]);
 
-  const { isNarrowWidth } = useResponsive();
+  let { isNarrowWidth } = useResponsive();
 
   return (
     <View

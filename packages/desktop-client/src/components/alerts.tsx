@@ -17,7 +17,7 @@ type AlertProps = {
   children?: ReactNode;
 };
 
-const Alert = ({
+let Alert = ({
   icon: Icon,
   color,
   backgroundColor,
@@ -63,7 +63,7 @@ type ScopedAlertProps = {
   children?: ReactNode;
 };
 
-export const Information = ({ style, children }: ScopedAlertProps) => {
+export let Information = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={InformationOutline}
@@ -76,7 +76,7 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
   );
 };
 
-export const Warning = ({ style, children }: ScopedAlertProps) => {
+export let Warning = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={ExclamationOutline}
@@ -89,7 +89,7 @@ export const Warning = ({ style, children }: ScopedAlertProps) => {
   );
 };
 
-export const Error = ({ style, children }: ScopedAlertProps) => {
+export let Error = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={ExclamationOutline}

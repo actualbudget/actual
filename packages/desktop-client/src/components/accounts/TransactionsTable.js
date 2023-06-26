@@ -236,7 +236,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
-const TransactionHeader = memo(
+let TransactionHeader = memo(
   ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
     let dispatchSelected = useSelectedDispatch();
 
@@ -276,7 +276,7 @@ function getPayeePretty(transaction, payee, transferAcct) {
   let { payee: payeeId } = transaction;
 
   if (transferAcct) {
-    const Icon =
+    let Icon =
       (transaction._inverse ? -1 : 1) * transaction.amount > 0
         ? LeftArrow2
         : RightArrow2;
@@ -497,7 +497,7 @@ function CellWithScheduleIcon({ scheduleId, children }) {
   );
 }
 
-const Transaction = memo(function Transaction(props) {
+let Transaction = memo(function Transaction(props) {
   let {
     transaction: originalTransaction,
     editing,
@@ -1158,8 +1158,8 @@ function NewTransaction({
   onManagePayees,
   onCreatePayee,
 }) {
-  const error = transactions[0].error;
-  const isDeposit = transactions[0].amount > 0;
+  let error = transactions[0].error;
+  let isDeposit = transactions[0].amount > 0;
 
   return (
     <View
@@ -1252,8 +1252,8 @@ function TransactionTableInner({
   onScroll,
   ...props
 }) {
-  const containerRef = createRef();
-  const isAddingPrev = usePrevious(props.isAdding);
+  let containerRef = createRef();
+  let isAddingPrev = usePrevious(props.isAdding);
 
   useEffect(() => {
     if (!isAddingPrev && props.isAdding) {
@@ -1261,8 +1261,8 @@ function TransactionTableInner({
     }
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
-  const renderRow = ({ item, index, position, editing }) => {
-    const {
+  let renderRow = ({ item, index, position, editing }) => {
+    let {
       transactions,
       selectedItems,
       hoveredTransaction,
@@ -1488,7 +1488,7 @@ export let TransactionTable = forwardRef((props, ref) => {
     prevSplitsExpanded.current = splitsExpanded;
     return result;
   }, [props.transactions, splitsExpanded]);
-  const transactionMap = useMemo(() => {
+  let transactionMap = useMemo(() => {
     return new Map(transactions.map(trans => [trans.id, trans]));
   }, [transactions]);
 

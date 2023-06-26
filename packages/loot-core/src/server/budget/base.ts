@@ -385,8 +385,8 @@ export async function doTransfer(categoryIds, transferId) {
 }
 
 export async function createBudget(months) {
-  const categories = await db.getCategories();
-  const groups = await db.getCategoriesGrouped();
+  let categories = await db.getCategories();
+  let groups = await db.getCategoriesGrouped();
 
   sheet.startTransaction();
   let meta = sheet.get().meta();

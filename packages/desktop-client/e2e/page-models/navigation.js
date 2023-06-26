@@ -30,7 +30,7 @@ export class Navigation {
   }
 
   async goToRulesPage() {
-    const rulesLink = this.page.getByRole('link', { name: 'Rules' });
+    let rulesLink = this.page.getByRole('link', { name: 'Rules' });
 
     // Expand the "more" menu only if it is not already expanded
     if (!(await rulesLink.isVisible())) {
@@ -43,7 +43,7 @@ export class Navigation {
   }
 
   async goToSettingsPage() {
-    const settingsLink = this.page.getByRole('link', { name: 'Settings' });
+    let settingsLink = this.page.getByRole('link', { name: 'Settings' });
 
     // Expand the "more" menu only if it is not already expanded
     if (!(await settingsLink.isVisible())) {

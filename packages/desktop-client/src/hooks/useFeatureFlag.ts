@@ -1,13 +1,13 @@
 import { useSelector } from 'react-redux';
 
-const DEFAULT_FEATURE_FLAG_STATE: Record<string, boolean> = {
+let DEFAULT_FEATURE_FLAG_STATE: Record<string, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
 };
 
 export default function useFeatureFlag(name: string): boolean {
   return useSelector(state => {
-    const value = state.prefs.local[`flags.${name}`];
+    let value = state.prefs.local[`flags.${name}`];
 
     return value === undefined
       ? DEFAULT_FEATURE_FLAG_STATE[name] || false

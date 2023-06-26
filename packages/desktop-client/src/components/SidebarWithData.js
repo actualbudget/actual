@@ -19,8 +19,8 @@ import { Sidebar } from './sidebar';
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
   let navigate = useNavigate();
-  const [editing, setEditing] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  let [editing, setEditing] = useState(false);
+  let [menuOpen, setMenuOpen] = useState(false);
 
   function onMenuSelect(type) {
     setMenuOpen(false);
@@ -60,7 +60,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
           }}
           defaultValue={prefs.budgetName}
           onEnter={async e => {
-            const newBudgetName = e.target.value;
+            let newBudgetName = e.target.value;
             if (newBudgetName.trim() !== '') {
               await savePrefs({
                 budgetName: e.target.value,

@@ -1,3 +1,3 @@
-export const isMobile = false;
-export const isWeb = false;
-export const isDesktop = true;
+export let isMobile = false;
+export let isWeb = false;
+export let isDesktop = true;

@@ -28,7 +28,7 @@ function f(type: string, opts?: Record<string, unknown>) {
 // future, we can provide another option in the schema config to map a
 // table name the internal table that is updated.
 
-export const schema = {
+export let schema = {
   transactions: {
     id: f('id'),
     is_parent: f('boolean'),
@@ -116,7 +116,7 @@ export const schema = {
   },
 };
 
-export const schemaConfig = {
+export let schemaConfig = {
   // Note: these views *must* represent the underlying table that we
   // are mapping here. The compiler makes optimizations with this
   // assumption

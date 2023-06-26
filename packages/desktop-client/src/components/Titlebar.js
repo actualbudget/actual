@@ -67,7 +67,7 @@ function UncategorizedButton() {
   return (
     <SheetValue binding={queries.uncategorizedCount()}>
       {node => {
-        const num = node.value;
+        let num = node.value;
         return (
           num !== 0 && (
             <ButtonLink
@@ -171,7 +171,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
   let [loading, setLoading] = useState(false);
   let [showTooltip, setShowTooltip] = useState(false);
 
-  const reportBudgetEnabled = useFeatureFlag('reportBudget');
+  let reportBudgetEnabled = useFeatureFlag('reportBudget');
 
   function onSwitchType() {
     setLoading(true);
@@ -272,7 +272,7 @@ function Titlebar({
   let location = useLocation();
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
-  const serverURL = useServerURL();
+  let serverURL = useServerURL();
 
   return isNarrowWidth ? null : (
     <View

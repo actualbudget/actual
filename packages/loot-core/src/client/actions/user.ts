@@ -6,7 +6,7 @@ import { loadGlobalPrefs } from './prefs';
 
 export function getUserData() {
   return async dispatch => {
-    const data = await send('subscribe-get-user');
+    let data = await send('subscribe-get-user');
 
     dispatch({
       type: constants.GET_USER_DATA,

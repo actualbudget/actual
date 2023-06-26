@@ -492,7 +492,7 @@ export class Rule {
       return false;
     }
 
-    const method = this.conditionsOp === 'or' ? 'some' : 'every';
+    let method = this.conditionsOp === 'or' ? 'some' : 'every';
     return this.conditions[method](condition => {
       return condition.eval(object);
     });
@@ -611,7 +611,7 @@ export class RuleIndexer {
   }
 }
 
-const OP_SCORES = {
+let OP_SCORES = {
   is: 10,
   oneOf: 9,
   isapprox: 5,

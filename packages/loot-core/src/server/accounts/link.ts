@@ -50,7 +50,7 @@ export async function findOrCreateBank(institution, requisitionId) {
     return bank;
   }
 
-  const bankData = {
+  let bankData = {
     id: uuid.v4Sync(),
     bank_id: requisitionId,
     name: institution.name,

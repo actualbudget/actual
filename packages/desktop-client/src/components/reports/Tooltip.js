@@ -24,8 +24,8 @@ class Tooltip extends Component {
       forceActive,
       style,
     } = this.props;
-    const xRange = scale.x.range();
-    const xPos = x - xRange[0];
+    let xRange = scale.x.range();
+    let xPos = x - xRange[0];
 
     if (!position) {
       if (datum.labelPosition) {

@@ -13,7 +13,7 @@ function getErrorMessage(error) {
 }
 
 function Import({ modalProps, actions }) {
-  const [error] = useState(false);
+  let [error] = useState(false);
 
   function onSelectType(type) {
     switch (type) {

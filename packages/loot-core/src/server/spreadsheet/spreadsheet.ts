@@ -44,7 +44,7 @@ export default class Spreadsheet {
   // Spreadsheet interface
 
   _getNode(name) {
-    const { sheet } = unresolveName(name);
+    let { sheet } = unresolveName(name);
 
     if (!this.nodes.has(name)) {
       this.nodes.set(name, {
@@ -98,7 +98,7 @@ export default class Spreadsheet {
     this.transactionDepth--;
 
     if (this.transactionDepth === 0) {
-      const cells = this.dirtyCells;
+      let cells = this.dirtyCells;
       this.dirtyCells = [];
 
       this.queueComputation(this.graph.topologicalSort(cells));
@@ -294,14 +294,14 @@ export default class Spreadsheet {
   }
 
   load(name, value) {
-    const node = this._getNode(name);
+    let node = this._getNode(name);
     node.expr = value;
     node.value = value;
   }
 
   create(name, value) {
     return this.transaction(() => {
-      const node = this._getNode(name);
+      let node = this._getNode(name);
       node.expr = value;
       node.value = value;
       this._markDirty(name);

@@ -34,7 +34,7 @@ type StackProps = ComponentProps<typeof View> & {
   spacing?: number;
   debug?: boolean;
 };
-const Stack = forwardRef<HTMLDivElement, StackProps>(
+let Stack = forwardRef<HTMLDivElement, StackProps>(
   (
     {
       direction = 'column',
@@ -48,9 +48,9 @@ const Stack = forwardRef<HTMLDivElement, StackProps>(
     },
     ref,
   ) => {
-    const isReversed = direction.endsWith('reverse');
-    const isHorizontal = direction.startsWith('row');
-    const validChildren = getChildren('', children);
+    let isReversed = direction.endsWith('reverse');
+    let isHorizontal = direction.startsWith('row');
+    let validChildren = getChildren('', children);
 
     return (
       <View

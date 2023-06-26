@@ -101,7 +101,7 @@ function Saved({ projected }) {
 
 class BudgetCell extends PureComponent {
   render() {
-    const {
+    let {
       name,
       binding,
       editing,
@@ -485,7 +485,7 @@ class TotalsRow extends PureComponent {
 
 class IncomeCategory extends PureComponent {
   render() {
-    const { name, budget, balance, style, nameTextStyle, amountTextStyle } =
+    let { name, budget, balance, style, nameTextStyle, amountTextStyle } =
       this.props;
     return (
       <ListItem
@@ -570,7 +570,7 @@ class IncomeCategory extends PureComponent {
 
 class BudgetGroup extends PureComponent {
   render() {
-    const {
+    let {
       group,
       // editingId,
       editMode,
@@ -652,7 +652,7 @@ class BudgetGroup extends PureComponent {
 
 class IncomeBudgetGroup extends Component {
   render() {
-    const { type, group } = this.props;
+    let { type, group } = this.props;
     return (
       <View>
         <View
@@ -722,7 +722,7 @@ class BudgetGroups extends Component {
   });
 
   render() {
-    const {
+    let {
       type,
       categoryGroups,
       editingId,
@@ -735,7 +735,7 @@ class BudgetGroups extends Component {
       onReorderGroup,
       onBudgetAction,
     } = this.props;
-    const { incomeGroup, expenseGroups } = this.getGroups(categoryGroups);
+    let { incomeGroup, expenseGroups } = this.getGroups(categoryGroups);
 
     return (
       <View
@@ -861,7 +861,7 @@ export class BudgetTable extends Component {
   // };
 
   render() {
-    const {
+    let {
       type,
       categoryGroups,
       month,
@@ -1168,7 +1168,7 @@ function UnconnectedBudgetHeader({
   );
 }
 
-const BudgetHeader = connect(
+let BudgetHeader = connect(
   state => ({
     localPrefs: state.prefs.local,
   }),

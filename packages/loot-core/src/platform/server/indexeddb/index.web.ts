@@ -93,12 +93,12 @@ function _openDatabase() {
   });
 }
 
-export const getStore: T.GetStore = function (db, name) {
+export let getStore: T.GetStore = function (db, name) {
   let trans = db.transaction([name], 'readwrite');
   return { trans, store: trans.objectStore(name) };
 };
 
-export const get: T.Get = async function (store, key, mapper = x => x) {
+export let get: T.Get = async function (store, key, mapper = x => x) {
   return new Promise((resolve, reject) => {
     let req = store.get(key);
     req.onsuccess = e => {
@@ -108,7 +108,7 @@ export const get: T.Get = async function (store, key, mapper = x => x) {
   });
 };
 
-export const set: T.Set = async function (store, item) {
+export let set: T.Set = async function (store, item) {
   return new Promise((resolve, reject) => {
     let req = store.put(item);
     req.onsuccess = e => resolve(undefined);
@@ -116,7 +116,7 @@ export const set: T.Set = async function (store, item) {
   });
 };
 
-export const del: T.Del = async function (store, key) {
+export let del: T.Del = async function (store, key) {
   return new Promise((resolve, reject) => {
     let req = store.delete(key);
     req.onsuccess = e => resolve(undefined);
@@ -124,18 +124,18 @@ export const del: T.Del = async function (store, key) {
   });
 };
 
-export const getDatabase: T.GetDatabase = function () {
+export let getDatabase: T.GetDatabase = function () {
   return openedDb;
 };
 
-export const openDatabase: T.OpenDatabase = function () {
+export let openDatabase: T.OpenDatabase = function () {
   if (openedDb == null) {
     openedDb = _openDatabase();
   }
   return openedDb;
 };
 
-export const closeDatabase: T.CloseDatabase = function () {
+export let closeDatabase: T.CloseDatabase = function () {
   if (openedDb) {
     openedDb.then(db => {
       // @ts-expect-error db type needs refinement

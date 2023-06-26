@@ -190,7 +190,7 @@ function BalanceTooltip({
 
 let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
 
-export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+export let BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
@@ -249,7 +249,7 @@ export function IncomeHeaderMonth() {
 type ExpenseGroupMonthProps = {
   group: { id: string };
 };
-export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
+export let ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: ExpenseGroupMonthProps) {
   let borderColor = colors.border;
@@ -305,7 +305,7 @@ type ExpenseCategoryMonthProps = {
   onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
   onShowActivity: (name: string, id: string, idx: number) => void;
 };
-export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
+export let ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   monthIndex,
   category,
   editing,

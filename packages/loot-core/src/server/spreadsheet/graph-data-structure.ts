@@ -26,7 +26,7 @@ function Graph() {
   }
 
   function removeIncomingEdges(node) {
-    const incoming = adjacentIncoming(node);
+    let incoming = adjacentIncoming(node);
     incomingEdges.set(node, new Set());
 
     let iter = incoming.values();
@@ -91,8 +91,8 @@ function Graph() {
   }
 
   function topologicalSort(sourceNodes) {
-    const visited = new Set();
-    const sorted = [];
+    let visited = new Set();
+    let sorted = [];
 
     sourceNodes.forEach(name => {
       if (!visited.has(name)) {

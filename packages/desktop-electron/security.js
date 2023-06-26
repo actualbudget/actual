@@ -1,4 +1,4 @@
-const electron = require('electron');
+let electron = require('electron');
 
 electron.app.on('web-contents-created', function (event, contents) {
   contents.on('will-attach-webview', function (event, webPreferences, params) {
@@ -30,7 +30,7 @@ electron.app.on('ready', function () {
     permission,
     callback,
   ) {
-    var url = webContents.getURL();
+    let url = webContents.getURL();
     if (url.startsWith('file://')) {
       callback(true);
     } else {

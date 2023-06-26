@@ -21,17 +21,17 @@ function makeFunction(data) {
 
 describe('async', () => {
   test('sequential fn should force concurrent calls to be in order', async () => {
-    const test = async fn => {
+    let test = async fn => {
       fn(1);
       fn(2);
       await fn(3);
     };
 
-    const data = [];
+    let data = [];
     await test(makeFunction(data));
     expect(data).toEqual([1, 2, 3, 1, 2, 3, 1, 2, 3]);
 
-    const seqData = [];
+    let seqData = [];
     await test(sequential(makeFunction(seqData)));
     expect(seqData).toEqual([1, 1, 1, 2, 2, 2, 3, 3, 3]);
 
@@ -39,17 +39,17 @@ describe('async', () => {
   });
 
   test('sequential fn should always call function when queue is empty', async () => {
-    const test = async fn => {
+    let test = async fn => {
       await fn(1);
       await fn(2);
       await fn(3);
     };
 
-    const data = [];
+    let data = [];
     await test(makeFunction(data));
     expect(data).toEqual([1, 1, 1, 2, 2, 2, 3, 3, 3]);
 
-    const seqData = [];
+    let seqData = [];
     await test(sequential(makeFunction(seqData)));
     expect(seqData).toEqual([1, 1, 1, 2, 2, 2, 3, 3, 3]);
 
@@ -57,17 +57,17 @@ describe('async', () => {
   });
 
   test('sequential fn should still flush queue when error is thrown', async () => {
-    const test = async fn => {
+    let test = async fn => {
       fn(1);
       fn(2, { throwError: true }).catch(err => {});
       await fn(3);
     };
 
-    const data = [];
+    let data = [];
     await test(makeFunction(data));
     expect(data).toEqual([1, 2, 3, 1, 3, 1, 3]);
 
-    const seqData = [];
+    let seqData = [];
     await test(sequential(makeFunction(seqData)));
     expect(seqData).toEqual([1, 1, 1, 2, 3, 3, 3]);
 
@@ -75,8 +75,8 @@ describe('async', () => {
   });
 
   test('sequential fn should ignore promise chains in the future', async () => {
-    const data = [];
-    const fn = sequential(makeFunction(data));
+    let data = [];
+    let fn = sequential(makeFunction(data));
 
     fn(1).then(() => {
       // The next call should already have started (so it should have
@@ -96,7 +96,7 @@ describe('async', () => {
 
   test('once fn should only be called once', async () => {
     let timesCalled = 0;
-    const fn = once(async () => {
+    let fn = once(async () => {
       await timeout(200);
       timesCalled++;
     });
@@ -113,7 +113,7 @@ describe('async', () => {
 
   test('once fn should coalesce multiple calls', async () => {
     let timesCalled = 0;
-    const fn = once(async () => {
+    let fn = once(async () => {
       await timeout(200);
       timesCalled++;
       return {};

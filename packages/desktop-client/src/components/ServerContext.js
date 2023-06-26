@@ -8,11 +8,11 @@ import React, {
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-const ServerContext = createContext({});
+let ServerContext = createContext({});
 
-export const useServerURL = () => useContext(ServerContext).url;
-export const useServerVersion = () => useContext(ServerContext).version;
-export const useSetServerURL = () => useContext(ServerContext).setURL;
+export let useServerURL = () => useContext(ServerContext).url;
+export let useServerVersion = () => useContext(ServerContext).version;
+export let useSetServerURL = () => useContext(ServerContext).setURL;
 
 async function getServerVersion() {
   let { error, version } = await send('get-server-version');

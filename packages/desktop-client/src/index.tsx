@@ -34,7 +34,7 @@ import { handleGlobalEvents } from './global-events';
 // focus outline appear from keyboard events.
 import 'focus-visible';
 
-const appReducer = combineReducers(reducers);
+let appReducer = combineReducers(reducers);
 function rootReducer(state, action) {
   if (action.type === constants.CLOSE_BUDGET) {
     // Reset the state and only keep around things intentionally. This
@@ -56,8 +56,8 @@ function rootReducer(state, action) {
   return appReducer(state, action);
 }
 
-const store = createStore(rootReducer, undefined, applyMiddleware(thunk));
-const boundActions = bindActionCreators(actions, store.dispatch);
+let store = createStore(rootReducer, undefined, applyMiddleware(thunk));
+let boundActions = bindActionCreators(actions, store.dispatch);
 
 // Listen for global events from the server or main process
 handleGlobalEvents(boundActions, store);
@@ -81,8 +81,8 @@ window.$send = send;
 window.$query = runQuery;
 window.$q = q;
 
-const container = document.getElementById('root');
-const root = createRoot(container);
+let container = document.getElementById('root');
+let root = createRoot(container);
 root.render(
   <Provider store={store}>
     <ServerProvider>

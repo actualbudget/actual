@@ -201,7 +201,7 @@ export default function PayeeAutocomplete({
   let [rawPayee, setRawPayee] = useState('');
   let hasPayeeInput = !!rawPayee;
   let payeeSuggestions = useMemo(() => {
-    const suggestions = getPayeeSuggestions(
+    let suggestions = getPayeeSuggestions(
       payees,
       focusTransferPayees,
       accounts,
@@ -232,7 +232,7 @@ export default function PayeeAutocomplete({
     }
   }
 
-  const [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
+  let [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
 
   return (
     <Autocomplete

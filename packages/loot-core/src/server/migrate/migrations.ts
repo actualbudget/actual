@@ -36,7 +36,7 @@ export function getUpMigration(id, names) {
 }
 
 export async function getAppliedMigrations(db) {
-  const rows = await sqlite.runQuery<{ id: number }>(
+  let rows = await sqlite.runQuery<{ id: number }>(
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
     [],
@@ -46,12 +46,12 @@ export async function getAppliedMigrations(db) {
 }
 
 export async function getMigrationList(migrationsDir) {
-  const files = await fs.listDir(migrationsDir);
+  let files = await fs.listDir(migrationsDir);
   return files
     .filter(name => name.match(/(\.sql|\.js)$/))
     .sort((m1, m2) => {
-      const id1 = getMigrationId(m1);
-      const id2 = getMigrationId(m2);
+      let id1 = getMigrationId(m1);
+      let id2 = getMigrationId(m2);
       if (id1 < id2) {
         return -1;
       } else if (id1 > id2) {
@@ -63,13 +63,13 @@ export async function getMigrationList(migrationsDir) {
 
 export function getPending(appliedIds, all) {
   return all.filter(name => {
-    const id = getMigrationId(name);
+    let id = getMigrationId(name);
     return appliedIds.indexOf(id) === -1;
   });
 }
 
 async function applyJavaScript(db, id) {
-  const dbInterface = {
+  let dbInterface = {
     runQuery: (query, params, fetchAll) =>
       sqlite.runQuery(db, query, params, fetchAll),
     execQuery: query => sqlite.execQuery(db, query),
@@ -94,7 +94,7 @@ async function applySql(db, sql) {
 }
 
 export async function applyMigration(db, name, migrationsDir) {
-  const code = await fs.readFile(fs.join(migrationsDir, name));
+  let code = await fs.readFile(fs.join(migrationsDir, name));
   if (name.match(/\.js$/)) {
     await applyJavaScript(db, getMigrationId(name));
   } else {
@@ -126,7 +126,7 @@ export async function migrate(db) {
 
   checkDatabaseValidity(appliedIds, available);
 
-  const pending = getPending(appliedIds, available);
+  let pending = getPending(appliedIds, available);
 
   for (let migration of pending) {
     await applyMigration(db, migration, MIGRATIONS_DIR);

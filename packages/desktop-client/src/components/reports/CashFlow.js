@@ -18,41 +18,41 @@ import Header from './Header';
 import useReport from './useReport';
 
 function CashFlow() {
-  const {
+  let {
     filters,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
   } = useFilters();
 
-  const [allMonths, setAllMonths] = useState(null);
-  const [start, setStart] = useState(
+  let [allMonths, setAllMonths] = useState(null);
+  let [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 30),
   );
-  const [end, setEnd] = useState(monthUtils.currentDay());
+  let [end, setEnd] = useState(monthUtils.currentDay());
 
-  const [isConcise, setIsConcise] = useState(() => {
-    const numDays = d.differenceInCalendarDays(
+  let [isConcise, setIsConcise] = useState(() => {
+    let numDays = d.differenceInCalendarDays(
       d.parseISO(end),
       d.parseISO(start),
     );
     return numDays > 31 * 3;
   });
 
-  const params = useMemo(
+  let params = useMemo(
     () => cashFlowByDate(start, end, isConcise, filters),
     [start, end, isConcise, filters],
   );
-  const data = useReport('cash_flow', params);
+  let data = useReport('cash_flow', params);
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
-      const earliestMonth = trans
+      let trans = await send('get-earliest-transaction');
+      let earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(trans.date))
         : monthUtils.currentMonth();
 
-      const allMonths = monthUtils
+      let allMonths = monthUtils
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
@@ -66,11 +66,11 @@ function CashFlow() {
   }, []);
 
   function onChangeDates(start, end) {
-    const numDays = d.differenceInCalendarDays(
+    let numDays = d.differenceInCalendarDays(
       d.parseISO(end),
       d.parseISO(start),
     );
-    const isConcise = numDays > 31 * 3;
+    let isConcise = numDays > 31 * 3;
 
     let endDay = end + '-31';
     if (endDay > monthUtils.currentDay()) {
@@ -86,7 +86,7 @@ function CashFlow() {
     return null;
   }
 
-  const { graphData, totalExpenses, totalIncome } = data;
+  let { graphData, totalExpenses, totalIncome } = data;
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>

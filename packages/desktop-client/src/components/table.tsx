@@ -44,8 +44,8 @@ import { KeyHandlers } from './KeyHandlers';
 import format from './spreadsheet/format';
 import SheetValue from './spreadsheet/SheetValue';
 
-export const ROW_HEIGHT = 32;
-const TABLE_BACKGROUND_COLOR = colors.n11;
+export let ROW_HEIGHT = 32;
+let TABLE_BACKGROUND_COLOR = colors.n11;
 
 function fireBlur(onBlur, e) {
   if (document.hasFocus()) {
@@ -59,7 +59,7 @@ function fireBlur(onBlur, e) {
   }
 }
 
-const CellContext = createContext({
+let CellContext = createContext({
   backgroundColor: 'white',
   borderColor: colors.n9,
 });
@@ -92,7 +92,7 @@ type FieldProps = ComponentProps<typeof View> & {
   truncate?: boolean;
   contentStyle?: CSSProperties;
 };
-export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
+export let Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   {
     width,
     name,
@@ -203,8 +203,8 @@ export function Cell({
     borderColor = oldBorderColor;
   }
 
-  const widthStyle = width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
-  const cellStyle = {
+  let widthStyle = width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+  let cellStyle = {
     position: 'relative',
     textAlign: textAlign || 'left',
     justifyContent: 'center',
@@ -347,13 +347,13 @@ export function Row({
   );
 }
 
-const inputCellStyle = {
+let inputCellStyle = {
   backgroundColor: 'white',
   padding: '5px 3px',
   margin: '0 1px',
 };
 
-const readonlyInputStyle = {
+let readonlyInputStyle = {
   backgroundColor: 'transparent',
   '::selection': { backgroundColor: '#d9d9d9' },
 };
@@ -549,7 +549,7 @@ type CellButtonProps = {
   onEdit?: () => void;
   children: ReactNode;
 };
-export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
+export let CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
   ({ style, disabled, clickBehavior, onSelect, onEdit, children }, ref) => {
     // This represents a cell that acts like a button: it's clickable,
     // focusable, etc. The reason we don't use a button is because the
@@ -691,7 +691,7 @@ export function SheetCell({
   onSave,
   ...props
 }: SheetCellProps) {
-  const { binding, type, getValueStyle, formatExpr, unformatExpr } = valueProps;
+  let { binding, type, getValueStyle, formatExpr, unformatExpr } = valueProps;
 
   return (
     <SheetValue
@@ -848,7 +848,7 @@ type TableHandleRef = {
 type TableWithNavigatorProps = TableProps & {
   fields;
 };
-export const TableWithNavigator = forwardRef<
+export let TableWithNavigator = forwardRef<
   TableHandleRef,
   TableWithNavigatorProps
 >(({ fields, ...props }, ref) => {
@@ -886,7 +886,7 @@ type TableProps = {
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
 };
-export const Table = forwardRef<TableHandleRef, TableProps>(
+export let Table = forwardRef<TableHandleRef, TableProps>(
   (
     {
       items,
@@ -1240,7 +1240,7 @@ export function useTableNavigator(data, fields) {
       while (true) {
         nextIdx = nextIdx + dir;
         if (nextIdx >= 0 && nextIdx < data.length) {
-          const next = data[nextIdx];
+          let next = data[nextIdx];
           if (getFields(next).includes(focusedField)) {
             onEdit(next.id, focusedField);
             break;

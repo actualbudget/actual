@@ -22,8 +22,8 @@ function loadState() {
 }
 
 function updateState(win, state) {
-  const screen = electron.screen || electron.remote.screen;
-  const bounds = win.getBounds();
+  let screen = electron.screen || electron.remote.screen;
+  let bounds = win.getBounds();
   if (!win.isMaximized() && !win.isMinimized() && !win.isFullScreen()) {
     state.x = bounds.x;
     state.y = bounds.y;
@@ -52,7 +52,7 @@ function listen(win, state) {
     win.setFullScreen(true);
   }
 
-  const saver = saveState.bind(null, win, state);
+  let saver = saveState.bind(null, win, state);
 
   win.on('close', saver);
 
@@ -77,13 +77,13 @@ function validateState(state) {
     return {};
   }
 
-  const newState = Object.assign({}, state);
+  let newState = Object.assign({}, state);
 
   if (hasBounds(state) && state.displayBounds) {
-    const screen = electron.screen || electron.remote.screen;
+    let screen = electron.screen || electron.remote.screen;
 
     // Check if the display where the window was last open is still available
-    const displayBounds = screen.getDisplayMatching(state).bounds;
+    let displayBounds = screen.getDisplayMatching(state).bounds;
 
     if (
       state.displayBounds.x !== displayBounds.x ||
@@ -117,8 +117,8 @@ function validateState(state) {
 }
 
 async function get() {
-  const screen = electron.screen || electron.remote.screen;
-  const displayBounds = screen.getPrimaryDisplay().bounds;
+  let screen = electron.screen || electron.remote.screen;
+  let displayBounds = screen.getPrimaryDisplay().bounds;
 
   let state = loadState();
   state = Object.assign(

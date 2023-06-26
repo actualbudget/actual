@@ -27,11 +27,11 @@ test.describe('Settings', () => {
   });
 
   test('downloads the export of the budget', async () => {
-    const downloadPromise = page.waitForEvent('download');
+    let downloadPromise = page.waitForEvent('download');
 
     await settingsPage.exportData();
 
-    const download = await downloadPromise;
+    let download = await downloadPromise;
 
     expect(await download.suggestedFilename()).toMatch(
       /^\d{4}-\d{2}-\d{2}-.*.zip$/,

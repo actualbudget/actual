@@ -32,7 +32,7 @@ function serializeTransaction(transaction, dateFormat) {
   };
 }
 
-const TransactionRow = memo(function TransactionRow({
+let TransactionRow = memo(function TransactionRow({
   transaction,
   fields,
   payees,

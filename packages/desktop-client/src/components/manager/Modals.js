@@ -18,7 +18,7 @@ import ImportYNAB5 from './ImportYNAB5';
 
 function Modals({ modalStack, isHidden, availableImports, actions }) {
   let stack = modalStack.map(({ name, options }, idx) => {
-    const modalProps = {
+    let modalProps = {
       onClose: actions.popModal,
       onPush: actions.pushModal,
       onBack: actions.popModal,

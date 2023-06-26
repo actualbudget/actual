@@ -26,7 +26,7 @@ import SyncRefresh from '../SyncRefresh';
 
 import AccountDetails from './MobileAccountDetails';
 
-const getSchedulesTransform = memoizeOne((id, hasSearch) => {
+let getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
 
   // Never show schedules on these pages
@@ -69,10 +69,10 @@ function PreviewTransactions({ accountId, children }) {
 let paged;
 
 function Account(props) {
-  const navigate = useNavigate();
-  const [transactions, setTransactions] = useState([]);
-  const [searchText, setSearchText] = useState('');
-  const [currentQuery, setCurrentQuery] = useState();
+  let navigate = useNavigate();
+  let [transactions, setTransactions] = useState([]);
+  let [searchText, setSearchText] = useState('');
+  let [currentQuery, setCurrentQuery] = useState();
 
   let state = useSelector(state => ({
     payees: state.queries.payees,
@@ -88,11 +88,11 @@ function Account(props) {
     [dispatch],
   );
 
-  const { id: accountId } = useParams();
+  let { id: accountId } = useParams();
 
-  const makeRootQuery = () => queries.makeTransactionsQuery(accountId);
+  let makeRootQuery = () => queries.makeTransactionsQuery(accountId);
 
-  const updateQuery = query => {
+  let updateQuery = query => {
     if (paged) {
       paged.unsubscribe();
     }
@@ -104,7 +104,7 @@ function Account(props) {
     );
   };
 
-  const fetchTransactions = async () => {
+  let fetchTransactions = async () => {
     let query = makeRootQuery();
     setCurrentQuery(query);
     updateQuery(query);
@@ -148,7 +148,7 @@ function Account(props) {
     return () => unlisten();
   }, []);
 
-  const updateSearchQuery = debounce(() => {
+  let updateSearchQuery = debounce(() => {
     if (searchText === '' && currentQuery) {
       updateQuery(currentQuery);
     } else if (searchText && currentQuery) {
@@ -168,19 +168,19 @@ function Account(props) {
     return null;
   }
 
-  const account = props.accounts.find(acct => acct.id === accountId);
+  let account = props.accounts.find(acct => acct.id === accountId);
 
-  const isNewTransaction = id => {
+  let isNewTransaction = id => {
     return state.newTransactions.includes(id);
   };
 
-  const onSearch = async text => {
+  let onSearch = async text => {
     paged.unsubscribe();
     setSearchText(text);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSelectTransaction = transaction => {
+  let onSelectTransaction = transaction => {
     if (isPreviewId(transaction.id)) {
       let parts = transaction.id.split('/');
       let scheduleId = parts[1];
@@ -222,7 +222,7 @@ function Account(props) {
     }
   };
 
-  const onRefresh = async () => {
+  let onRefresh = async () => {
     await props.syncAndDownload();
   };
 

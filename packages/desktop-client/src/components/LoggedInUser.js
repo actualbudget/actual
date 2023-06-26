@@ -26,7 +26,7 @@ function LoggedInUser({
 }) {
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
-  const serverUrl = useServerURL();
+  let serverUrl = useServerURL();
 
   useEffect(() => {
     getUserData().then(() => setLoading(false));

@@ -40,7 +40,7 @@ export type ModalProps = {
   onClose?: () => void;
 };
 
-const Modal = ({
+let Modal = ({
   title,
   isCurrent,
   isHidden,
@@ -234,7 +234,7 @@ type ModalContentProps = {
   children: ReactNode;
 };
 
-const ModalContent = ({
+let ModalContent = ({
   style,
   size,
   noAnimation,
@@ -312,7 +312,7 @@ type ModalButtonsProps = {
   children: ReactNode;
 };
 
-export const ModalButtons = ({
+export let ModalButtons = ({
   style,
   leftContent,
   focusButton = false,

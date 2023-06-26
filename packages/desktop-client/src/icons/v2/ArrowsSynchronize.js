@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgArrowsSynchronize = props => (
+let SvgArrowsSynchronize = props => (
   <svg
     {...props}
     viewBox="0 0 24 24"

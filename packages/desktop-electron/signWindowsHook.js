@@ -1,15 +1,15 @@
-const { execSync } = require('child_process');
+let { execSync } = require('child_process');
 
-const {
+let {
   SIGN_TOOL_PATH = 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\x64\\signtool.exe',
   TIMESTAMP_SERVER = 'http://timestamp.digicert.com',
 } = process.env;
 
-const SITE = 'https://actualbudget.com/';
+let SITE = 'https://actualbudget.com/';
 
-const importPfx = (certPath, password) => {
+let importPfx = (certPath, password) => {
   /* eslint-disable @actual-app/typography */
-  const command = [
+  let command = [
     ['certutil'],
     ['-f'],
     ['-p', `"${password}"`],
@@ -26,9 +26,9 @@ const importPfx = (certPath, password) => {
   }
 };
 
-const signBinary = (path, name) => {
+let signBinary = (path, name) => {
   /* eslint-disable @actual-app/typography */
-  const command = [
+  let command = [
     [`"${SIGN_TOOL_PATH}"`],
     ['sign'],
     ['/a'],

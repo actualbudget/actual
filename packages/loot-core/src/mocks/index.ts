@@ -38,7 +38,7 @@ export function generateCategoryGroup(name, isIncome = false) {
 
 export function generateCategoryGroups(definition) {
   return definition.map(group => {
-    const g = generateCategoryGroup(group.name, group.is_income);
+    let g = generateCategoryGroup(group.name, group.is_income);
 
     return {
       ...g,
@@ -50,7 +50,7 @@ export function generateCategoryGroups(definition) {
 }
 
 function _generateTransaction(data): TransactionEntity {
-  const id = data.id || uuid.v4Sync();
+  let id = data.id || uuid.v4Sync();
   return {
     id: id,
     amount: data.amount || Math.floor(Math.random() * 10000 - 7000),
@@ -66,13 +66,13 @@ function _generateTransaction(data): TransactionEntity {
 }
 
 export function generateTransaction(data, splitAmount?, showError = false) {
-  const result = [];
+  let result = [];
 
-  const trans = _generateTransaction(data);
+  let trans = _generateTransaction(data);
   result.push(trans);
 
   if (splitAmount) {
-    const parent = trans;
+    let parent = trans;
     parent.isParent = true;
 
     result.push(
@@ -97,7 +97,7 @@ export function generateTransaction(data, splitAmount?, showError = false) {
     );
 
     if (showError) {
-      const last = result[result.length - 1];
+      let last = result[result.length - 1];
       last.amount += 500;
       last.error = {
         type: 'SplitTransactionError',
@@ -117,10 +117,10 @@ export function generateTransactions(
   splitAtIndexes = [],
   showError = false,
 ) {
-  const transactions = [];
+  let transactions = [];
 
   for (let i = 0; i < count; i++) {
-    const isSplit = splitAtIndexes.includes(i);
+    let isSplit = splitAtIndexes.includes(i);
 
     transactions.push.apply(
       transactions,

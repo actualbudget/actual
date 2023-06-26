@@ -9,12 +9,12 @@ export async function exportToCSV(
   categoryGroups,
   payees,
 ) {
-  const accountNamesById = accounts.reduce((reduced, { id, name }) => {
+  let accountNamesById = accounts.reduce((reduced, { id, name }) => {
     reduced[id] = name;
     return reduced;
   }, {});
 
-  const categoryNamesById = categoryGroups.reduce(
+  let categoryNamesById = categoryGroups.reduce(
     (reduced, { name, categories: subCategories }) => {
       subCategories.forEach(
         subCategory =>
@@ -25,12 +25,12 @@ export async function exportToCSV(
     {},
   );
 
-  const payeeNamesById = payees.reduce((reduced, { id, name }) => {
+  let payeeNamesById = payees.reduce((reduced, { id, name }) => {
     reduced[id] = name;
     return reduced;
   }, {});
 
-  const transactionsForExport = transactions.map(
+  let transactionsForExport = transactions.map(
     ({ account, date, payee, notes, category, amount }) => ({
       Account: accountNamesById[account],
       Date: date,

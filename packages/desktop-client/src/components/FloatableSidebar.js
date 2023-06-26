@@ -9,7 +9,7 @@ import { View } from './common';
 import { SIDEBAR_WIDTH } from './sidebar';
 import SidebarWithData from './SidebarWithData';
 
-const SidebarContext = createContext(null);
+let SidebarContext = createContext(null);
 
 export function SidebarProvider({ children }) {
   let floatingSidebar = useSelector(

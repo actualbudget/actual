@@ -14,7 +14,7 @@ type TResponsiveContext = {
   width: number;
 };
 
-const ResponsiveContext = createContext<TResponsiveContext>(null);
+let ResponsiveContext = createContext<TResponsiveContext>(null);
 
 export function ResponsiveProvider(props: { children: ReactNode }) {
   /*
@@ -26,12 +26,12 @@ export function ResponsiveProvider(props: { children: ReactNode }) {
    */
   useViewportSize();
 
-  const height = document.documentElement.clientHeight;
-  const width = document.documentElement.clientWidth;
+  let height = document.documentElement.clientHeight;
+  let width = document.documentElement.clientWidth;
 
   // Possible view modes: narrow, small, medium, wide
   // To check if we're at least small width, check !isNarrowWidth
-  const viewportInfo = {
+  let viewportInfo = {
     // atLeastMediumWidth is provided to avoid checking (isMediumWidth || isWideWidth)
     atLeastMediumWidth: width >= breakpoints.medium,
     isNarrowWidth: width < breakpoints.small,

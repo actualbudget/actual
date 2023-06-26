@@ -25,7 +25,7 @@ export function fromDateRepr(number) {
     throw new Error('fromDateRepr not passed a number: ' + number);
   }
 
-  const dateString = number.toString();
+  let dateString = number.toString();
   return (
     dateString.slice(0, 4) +
     '-' +
@@ -35,7 +35,7 @@ export function fromDateRepr(number) {
   );
 }
 
-export const accountModel = {
+export let accountModel = {
   validate(account, { update }: { update?: boolean } = {}) {
     requiredFields(
       'account',
@@ -48,7 +48,7 @@ export const accountModel = {
   },
 };
 
-export const categoryModel = {
+export let categoryModel = {
   validate(category, { update }: { update?: boolean } = {}) {
     requiredFields(
       'category',
@@ -62,7 +62,7 @@ export const categoryModel = {
   },
 };
 
-export const categoryGroupModel = {
+export let categoryGroupModel = {
   validate(categoryGroup, { update }: { update?: boolean } = {}) {
     requiredFields(
       'categoryGroup',
@@ -76,14 +76,14 @@ export const categoryGroupModel = {
   },
 };
 
-export const payeeModel = {
+export let payeeModel = {
   validate(payee, { update }: { update?: boolean } = {}) {
     requiredFields('payee', payee, ['name'], update);
     return payee;
   },
 };
 
-export const transactionModel = {
+export let transactionModel = {
   validate(trans, { update }: { update?: boolean } = {}) {
     requiredFields('transaction', trans, ['date', 'acct'], update);
 

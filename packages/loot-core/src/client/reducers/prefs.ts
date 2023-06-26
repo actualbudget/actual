@@ -1,7 +1,7 @@
 import { setNumberFormat } from '../../shared/util';
 import * as constants from '../constants';
 
-const initialState = {
+let initialState = {
   local: null,
   global: null,
 };

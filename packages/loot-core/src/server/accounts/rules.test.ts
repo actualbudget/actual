@@ -58,7 +58,7 @@ describe('Condition', () => {
   });
 
   test('ops handles undefined fields', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation();
+    let spy = jest.spyOn(console, 'warn').mockImplementation();
 
     let cond = new Condition('is', 'id', null, null, fieldTypes);
     // null is strict and won't match undefined

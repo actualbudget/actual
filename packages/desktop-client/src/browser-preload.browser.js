@@ -1,6 +1,6 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
-const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
+let backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 
 // This file installs global variables that the app expects.
 // Normally these are already provided by electron, but in a real
@@ -74,7 +74,7 @@ global.Actual = {
         let filename = file.name.replace(/.*(\.[^.]*)/, 'file$1');
 
         if (file) {
-          var reader = new FileReader();
+          let reader = new FileReader();
           reader.readAsArrayBuffer(file);
           reader.onload = async function (ev) {
             let filepath = `/uploads/${filename}`;
@@ -92,12 +92,12 @@ global.Actual = {
   },
 
   saveFile: (contents, defaultFilename, dialogTitle) => {
-    const temp = document.createElement('a');
+    let temp = document.createElement('a');
     temp.style = 'display: none';
     temp.download = defaultFilename;
     temp.rel = 'noopener';
 
-    const blob = new Blob([contents]);
+    let blob = new Blob([contents]);
     temp.href = URL.createObjectURL(blob);
     temp.dispatchEvent(new MouseEvent('click'));
   },

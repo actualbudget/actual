@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgTuning = props => (
+let SvgTuning = props => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"

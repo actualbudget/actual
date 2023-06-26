@@ -4,7 +4,7 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-const requireIndex = require('requireindex');
+let requireIndex = require('requireindex');
 
 //------------------------------------------------------------------------------
 // Plugin Definition

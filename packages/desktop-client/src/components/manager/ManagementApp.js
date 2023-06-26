@@ -23,7 +23,7 @@ import Login from './subscribe/Login';
 import WelcomeScreen from './WelcomeScreen';
 
 function Version() {
-  const version = useServerVersion();
+  let version = useServerVersion();
 
   return (
     <Text

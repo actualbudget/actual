@@ -1,6 +1,6 @@
 import * as constants from '../constants';
 
-export const initialState = {
+export let initialState = {
   loadingText: null,
   updateInfo: null,
   showUpdateNotification: true,

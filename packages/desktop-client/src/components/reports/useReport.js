@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 function useReport(sheetName, getData) {
-  const spreadsheet = useSpreadsheet();
-  const [results, setResults] = useState(null);
+  let spreadsheet = useSpreadsheet();
+  let [results, setResults] = useState(null);
 
   useEffect(() => {
     let cleanup;

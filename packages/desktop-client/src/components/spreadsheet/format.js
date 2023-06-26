@@ -3,7 +3,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 export default function format(value, type = 'string') {
   switch (type) {
     case 'string':
-      const val = JSON.stringify(value);
+      let val = JSON.stringify(value);
       // eslint-disable-next-line @actual-app/typography
       if (val.charAt(0) === '"' && val.charAt(val.length - 1) === '"') {
         return val.slice(1, -1);
@@ -21,7 +21,7 @@ export default function format(value, type = 'string') {
       if (value == null || value === '') {
         return integerToCurrency(0);
       } else if (typeof value === 'string') {
-        const parsed = parseFloat(value);
+        let parsed = parseFloat(value);
         value = isNaN(parsed) ? 0 : parsed;
       }
 

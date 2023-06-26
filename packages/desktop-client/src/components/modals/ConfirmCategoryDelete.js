@@ -11,10 +11,10 @@ export default function ConfirmCategoryDelete({
   categoryGroups,
   onDelete,
 }) {
-  const [transferCategory, setTransferCategory] = useState(null);
-  const [error, setError] = useState(null);
+  let [transferCategory, setTransferCategory] = useState(null);
+  let [error, setError] = useState(null);
 
-  const inputRef = useRef(null);
+  let inputRef = useRef(null);
 
   useEffect(() => {
     // Hack: 200ms is the timing of the modal animation
@@ -23,7 +23,7 @@ export default function ConfirmCategoryDelete({
     }, 200);
   }, []);
 
-  const renderError = error => {
+  let renderError = error => {
     let msg;
 
     switch (error) {
@@ -37,7 +37,7 @@ export default function ConfirmCategoryDelete({
     return <Text style={{ marginTop: 15, color: colors.r4 }}>{msg}</Text>;
   };
 
-  const isIncome = !!(category || group).is_income;
+  let isIncome = !!(category || group).is_income;
 
   return (
     <Modal title="Confirm Delete" {...modalProps} style={{ flex: 0 }}>

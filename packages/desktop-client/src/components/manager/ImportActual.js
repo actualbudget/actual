@@ -24,12 +24,12 @@ function getErrorMessage(error) {
 }
 
 function Import({ modalProps, availableImports }) {
-  const dispatch = useDispatch();
-  const [error, setError] = useState(false);
-  const [importing, setImporting] = useState(false);
+  let dispatch = useDispatch();
+  let [error, setError] = useState(false);
+  let [importing, setImporting] = useState(false);
 
   async function onImport() {
-    const res = await window.Actual.openFileDialog({
+    let res = await window.Actual.openFileDialog({
       properties: ['openFile'],
       filters: [{ name: 'actual', extensions: ['zip', 'blob'] }],
     });

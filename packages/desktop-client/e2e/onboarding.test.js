@@ -25,14 +25,14 @@ test.describe('Onboarding', () => {
 
   test('creates a new budget file by importing YNAB4 budget', async () => {
     await configurationPage.clickOnNoServer();
-    const budgetPage = await configurationPage.importBudget(
+    let budgetPage = await configurationPage.importBudget(
       'YNAB4',
       path.resolve(__dirname, 'data/ynab4-demo-budget.zip'),
     );
 
     await expect(budgetPage.budgetTable).toBeVisible({ timeout: 30000 });
 
-    const accountPage = await navigation.goToAccountPage(
+    let accountPage = await navigation.goToAccountPage(
       'Account1 with Starting Balance',
     );
     await expect(accountPage.accountBalance).toHaveText('-400.00');
@@ -46,14 +46,14 @@ test.describe('Onboarding', () => {
 
   test('creates a new budget file by importing Actual budget', async () => {
     await configurationPage.clickOnNoServer();
-    const budgetPage = await configurationPage.importBudget(
+    let budgetPage = await configurationPage.importBudget(
       'Actual',
       path.resolve(__dirname, 'data/actual-demo-budget.zip'),
     );
 
     await expect(budgetPage.budgetTable).toBeVisible();
 
-    const accountPage = await navigation.goToAccountPage('Ally Savings');
+    let accountPage = await navigation.goToAccountPage('Ally Savings');
     await expect(accountPage.accountBalance).toHaveText('1,772.80');
 
     await navigation.goToAccountPage('Roth IRA');
@@ -64,7 +64,7 @@ test.describe('Onboarding', () => {
     await configurationPage.clickOnNoServer();
     await configurationPage.startFresh();
 
-    const accountPage = new AccountPage(page);
+    let accountPage = new AccountPage(page);
     await expect(accountPage.accountName).toBeVisible();
     await expect(accountPage.accountName).toHaveText('All Accounts');
     await expect(accountPage.accountBalance).toHaveText('0.00');

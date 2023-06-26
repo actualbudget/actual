@@ -1,5 +1,5 @@
-const { BrowserWindow } = require('electron');
-const isDev = require('electron-is-dev');
+let { BrowserWindow } = require('electron');
+let isDev = require('electron-is-dev');
 
 let window;
 

@@ -1,16 +1,16 @@
 import { useCallback, useMemo, useState } from 'react';
 
 export default function useFilters<T>(initialFilters: T[] = []) {
-  const [filters, setFilters] = useState<T[]>(initialFilters);
+  let [filters, setFilters] = useState<T[]>(initialFilters);
 
-  const onApply = useCallback(
+  let onApply = useCallback(
     (newFilter: T) => {
       setFilters(state => [...state, newFilter]);
     },
     [setFilters],
   );
 
-  const onUpdate = useCallback(
+  let onUpdate = useCallback(
     (oldFilter: T, updatedFilter: T) => {
       setFilters(state =>
         state.map(f => (f === oldFilter ? updatedFilter : f)),
@@ -19,7 +19,7 @@ export default function useFilters<T>(initialFilters: T[] = []) {
     [setFilters],
   );
 
-  const onDelete = useCallback(
+  let onDelete = useCallback(
     (deletedFilter: T) => {
       setFilters(state => state.filter(f => f !== deletedFilter));
     },

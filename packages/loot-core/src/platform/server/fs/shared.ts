@@ -1,16 +1,16 @@
 import join from './path-join';
 
 let documentDir;
-export const _setDocumentDir = dir => (documentDir = dir);
+export let _setDocumentDir = dir => (documentDir = dir);
 
-export const getDocumentDir = () => {
+export let getDocumentDir = () => {
   if (!documentDir) {
     throw new Error('Document directory is not set');
   }
   return documentDir;
 };
 
-export const getBudgetDir = id => {
+export let getBudgetDir = id => {
   if (!id) {
     throw new Error('getDocumentDir: id is falsy: ' + id);
   }

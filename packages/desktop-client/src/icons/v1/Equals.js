@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgEquals = props => (
+let SvgEquals = props => (
   <svg
     {...props}
     viewBox="0 0 23 11"

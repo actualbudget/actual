@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgSubtract = props => (
+let SvgSubtract = props => (
   <svg
     {...props}
     viewBox="0 0 23 3"

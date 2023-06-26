@@ -9,7 +9,7 @@ import profile from './profile';
 import queries from './queries';
 import user from './user';
 
-const reducers = {
+let reducers = {
   app,
   queries,
   account,

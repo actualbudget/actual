@@ -12,11 +12,11 @@ import { Checkbox } from './forms';
 let buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
 export default function MobileWebMessage() {
-  const hideMobileMessagePref = useSelector(state => {
+  let hideMobileMessagePref = useSelector(state => {
     return (state.prefs.local && state.prefs.local.hideMobileMessage) || true;
   });
 
-  const { isNarrowWidth } = useResponsive();
+  let { isNarrowWidth } = useResponsive();
 
   let [show, setShow] = useState(
     isNarrowWidth &&

@@ -2,7 +2,7 @@ import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
-export const TYPE_INFO = {
+export let TYPE_INFO = {
   date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
@@ -25,7 +25,7 @@ export const TYPE_INFO = {
   },
 };
 
-export const FIELD_TYPES = new Map(
+export let FIELD_TYPES = new Map(
   Object.entries({
     imported_payee: 'string',
     payee: 'id',

@@ -291,7 +291,7 @@ function Saved({ projected, style }: SavedProps) {
 type BudgetSummaryProps = {
   month?: string;
 };
-export const BudgetSummary = memo(function BudgetSummary({
+export let BudgetSummary = memo(function BudgetSummary({
   month,
 }: BudgetSummaryProps) {
   let {

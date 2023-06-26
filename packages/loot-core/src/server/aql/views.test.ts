@@ -4,7 +4,7 @@ import { makeViews } from './views';
 
 beforeEach(global.emptyDatabase());
 
-const schema = {
+let schema = {
   transactions: {
     id: { type: 'id' },
     amount: { type: 'integer' },
@@ -12,7 +12,7 @@ const schema = {
   },
 };
 
-const schemaConfig = {
+let schemaConfig = {
   views: {
     transactions: {
       fields: {

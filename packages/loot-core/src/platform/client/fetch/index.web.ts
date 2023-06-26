@@ -12,7 +12,7 @@ function connectSocket(port, onOpen) {
   let client = new WebSocket('ws://localhost:' + port);
 
   client.onmessage = event => {
-    const msg = JSON.parse(event.data);
+    let msg = JSON.parse(event.data);
 
     if (msg.type === 'error') {
       // An error happened while handling a message so cleanup the
@@ -20,7 +20,7 @@ function connectSocket(port, onOpen) {
       // generic backend errors are handled separately and if you want
       // more specific handling you should manually forward the error
       // through a normal reply.
-      const { id } = msg;
+      let { id } = msg;
       replyHandlers.delete(id);
     } else if (msg.type === 'reply') {
       let { id, result, mutated, undoTag } = msg;
@@ -33,7 +33,7 @@ function connectSocket(port, onOpen) {
         result = new Uint8Array(result.data);
       }
 
-      const handler = replyHandlers.get(id);
+      let handler = replyHandlers.get(id);
       if (handler) {
         replyHandlers.delete(id);
 
@@ -44,9 +44,9 @@ function connectSocket(port, onOpen) {
         handler.resolve(result);
       }
     } else if (msg.type === 'push') {
-      const { name, args } = msg;
+      let { name, args } = msg;
 
-      const listens = listeners.get(name);
+      let listens = listeners.get(name);
       if (listens) {
         for (let i = 0; i < listens.length; i++) {
           let stop = listens[i](args);
@@ -74,16 +74,12 @@ function connectSocket(port, onOpen) {
   };
 }
 
-export const init: T.Init = async function (socketName) {
+export let init: T.Init = async function (socketName) {
   await clearServer();
   return new Promise(resolve => connectSocket(socketName, resolve));
 };
 
-export const send: T.Send = function (
-  name,
-  args,
-  { catchErrors = false } = {},
-) {
+export let send: T.Send = function (name, args, { catchErrors = false } = {}) {
   return new Promise((resolve, reject) => {
     uuid.v4().then(id => {
       replyHandlers.set(id, { resolve, reject });
@@ -114,11 +110,11 @@ export const send: T.Send = function (
   }) as any;
 };
 
-export const sendCatch: T.SendCatch = function (name, args) {
+export let sendCatch: T.SendCatch = function (name, args) {
   return send(name, args, { catchErrors: true });
 };
 
-export const listen: T.Listen = function (name, cb) {
+export let listen: T.Listen = function (name, cb) {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }
@@ -135,7 +131,7 @@ export const listen: T.Listen = function (name, cb) {
   };
 };
 
-export const unlisten: T.Unlisten = function (name) {
+export let unlisten: T.Unlisten = function (name) {
   listeners.set(name, []);
 };
 
@@ -148,7 +144,7 @@ async function closeSocket(onClose) {
   await socketClient.close();
 }
 
-export const clearServer: T.ClearServer = async function () {
+export let clearServer: T.ClearServer = async function () {
   if (socketClient != null) {
     return new Promise(closeSocket);
   }

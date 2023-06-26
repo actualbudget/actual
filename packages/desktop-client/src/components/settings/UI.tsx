@@ -14,7 +14,7 @@ type SettingProps = {
   children: ReactNode;
 };
 
-export const Setting = ({ primaryAction, style, children }: SettingProps) => {
+export let Setting = ({ primaryAction, style, children }: SettingProps) => {
   return (
     <View
       {...css([
@@ -49,7 +49,7 @@ type AdvancedToggleProps = {
   children: ReactNode;
 };
 
-export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
+export let AdvancedToggle = ({ children }: AdvancedToggleProps) => {
   let location = useLocation();
   let [expanded, setExpanded] = useState(location.hash === '#advanced');
 

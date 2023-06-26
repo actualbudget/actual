@@ -4,7 +4,7 @@ import { View, Text, AnchorLink } from '../common';
 import { useServerURL } from '../ServerContext';
 
 export default function ServerURL() {
-  const url = useServerURL();
+  let url = useServerURL();
 
   return (
     <View

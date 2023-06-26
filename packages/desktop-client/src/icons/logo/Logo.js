@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgLogo = props => (
+let SvgLogo = props => (
   <svg
     {...props}
     fill="none"

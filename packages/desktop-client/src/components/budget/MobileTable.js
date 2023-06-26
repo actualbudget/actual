@@ -3,9 +3,9 @@ import React from 'react';
 import { colors } from '../../style';
 import { View } from '../common';
 
-export const ROW_HEIGHT = 50;
+export let ROW_HEIGHT = 50;
 
-export const ListItem = ({ children, style, ...props }) => {
+export let ListItem = ({ children, style, ...props }) => {
   return (
     <View
       style={[

@@ -8,7 +8,7 @@ export function sequential<T extends (...args: unknown[]) => unknown>(
 
   function pump() {
     if (sequenceState.queue.length > 0) {
-      const next = sequenceState.queue.shift();
+      let next = sequenceState.queue.shift();
       run(next.args, next.resolve, next.reject);
     } else {
       sequenceState.running = null;

@@ -5,7 +5,7 @@ import * as bundle from './app/bundle.api.js';
 import * as injected from './injected';
 
 let actualApp;
-export const internal = bundle.lib;
+export let internal = bundle.lib;
 
 // DEPRECATED: remove the next line in @actual-app/api v7
 export * as methods from './methods';

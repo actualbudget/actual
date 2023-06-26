@@ -44,7 +44,7 @@ export class AccountPage {
     await this.addNewTransactionButton.click();
 
     // Root transaction
-    const transactionRow = this.newTransactionRow.first();
+    let transactionRow = this.newTransactionRow.first();
     await this._fillTransactionFields(transactionRow, {
       ...rootTransaction,
       category: 'split',
@@ -71,7 +71,7 @@ export class AccountPage {
    * 0-based index
    */
   async getNthTransaction(index) {
-    const row = this.transactionTableRow.nth(index);
+    let row = this.transactionTableRow.nth(index);
 
     return {
       payee: await row.getByTestId('payee').textContent(),

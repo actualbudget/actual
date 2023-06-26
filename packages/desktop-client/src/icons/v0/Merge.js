@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgMerge = props => (
+let SvgMerge = props => (
   <svg
     {...props}
     fill="none"

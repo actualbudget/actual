@@ -7,7 +7,7 @@ import { styles } from '../../style';
 import { View, Select, Button, ButtonLink } from '../common';
 
 function validateStart(allMonths, start, end) {
-  const earliest = allMonths[allMonths.length - 1].name;
+  let earliest = allMonths[allMonths.length - 1].name;
   if (end < start) {
     end = monthUtils.addMonths(start, 6);
   }
@@ -15,7 +15,7 @@ function validateStart(allMonths, start, end) {
 }
 
 function validateEnd(allMonths, start, end) {
-  const earliest = allMonths[allMonths.length - 1].name;
+  let earliest = allMonths[allMonths.length - 1].name;
   if (start > end) {
     start = monthUtils.subMonths(end, 6);
   }
@@ -23,7 +23,7 @@ function validateEnd(allMonths, start, end) {
 }
 
 function boundedRange(earliest, start, end) {
-  const latest = monthUtils.currentMonth();
+  let latest = monthUtils.currentMonth();
   if (end > latest) {
     end = latest;
   }
@@ -34,14 +34,14 @@ function boundedRange(earliest, start, end) {
 }
 
 function getLatestRange(offset) {
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, offset);
+  let end = monthUtils.currentMonth();
+  let start = monthUtils.subMonths(end, offset);
   return [start, end];
 }
 
 function getFullRange(allMonths) {
-  const start = allMonths[allMonths.length - 1].name;
-  const end = monthUtils.currentMonth();
+  let start = allMonths[allMonths.length - 1].name;
+  let end = monthUtils.currentMonth();
   return [start, end];
 }
 

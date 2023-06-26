@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgLeftArrow2 = props => (
+let SvgLeftArrow2 = props => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"

@@ -1,4 +1,4 @@
-const conjunctions = [
+let conjunctions = [
   'for', //
   'and',
   'nor',
@@ -8,13 +8,13 @@ const conjunctions = [
   'so',
 ];
 
-const articles = [
+let articles = [
   'a', //
   'an',
   'the',
 ];
 
-const prepositions = [
+let prepositions = [
   'aboard',
   'about',
   'above',
@@ -86,5 +86,5 @@ const prepositions = [
   'without',
 ];
 
-const dictionary = new Set([...conjunctions, ...articles, ...prepositions]);
+let dictionary = new Set([...conjunctions, ...articles, ...prepositions]);
 export default dictionary;

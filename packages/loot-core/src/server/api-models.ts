@@ -1,6 +1,6 @@
 import * as models from './models';
 
-export const accountModel = {
+export let accountModel = {
   ...models.accountModel,
 
   toExternal(account) {
@@ -24,7 +24,7 @@ export const accountModel = {
   },
 };
 
-export const categoryModel = {
+export let categoryModel = {
   ...models.categoryModel,
 
   toExternal(category) {
@@ -48,7 +48,7 @@ export const categoryModel = {
   },
 };
 
-export const categoryGroupModel = {
+export let categoryGroupModel = {
   ...models.categoryGroupModel,
 
   toExternal(group) {
@@ -72,7 +72,7 @@ export const categoryGroupModel = {
   },
 };
 
-export const payeeModel = {
+export let payeeModel = {
   ...models.payeeModel,
 
   toExternal(payee) {

@@ -118,7 +118,7 @@ class BudgetTable extends Component {
     let { editing } = this.state;
     let { type, categoryGroups, collapsed } = this.props;
 
-    const flattened = categoryGroups.reduce((all, group) => {
+    let flattened = categoryGroups.reduce((all, group) => {
       if (collapsed.includes(group.id)) {
         return all.concat({ id: group.id, isGroup: true });
       }
@@ -126,11 +126,11 @@ class BudgetTable extends Component {
     }, []);
 
     if (editing) {
-      const idx = flattened.findIndex(item => item.id === editing.id);
+      let idx = flattened.findIndex(item => item.id === editing.id);
       let nextIdx = idx + dir;
 
       while (nextIdx >= 0 && nextIdx < flattened.length) {
-        const next = flattened[nextIdx];
+        let next = flattened[nextIdx];
 
         if (next.isGroup) {
           nextIdx += dir;
@@ -317,7 +317,7 @@ class BudgetTable extends Component {
   }
 }
 
-const connected = connect(
+let connected = connect(
   state => ({
     prefs: state.prefs.local,
   }),
@@ -344,10 +344,10 @@ function SidebarCategory({
   onDelete,
   onHideNewCategory,
 }) {
-  const temporary = category.id === 'new';
-  const [menuOpen, setMenuOpen] = useState(false);
+  let temporary = category.id === 'new';
+  let [menuOpen, setMenuOpen] = useState(false);
 
-  const displayed = (
+  let displayed = (
     <View
       style={{
         flexDirection: 'row',
@@ -496,10 +496,10 @@ function SidebarGroup({
   onHideNewGroup,
   onToggleCollapse,
 }) {
-  const temporary = group.id === 'new';
-  const [menuOpen, setMenuOpen] = useState(false);
+  let temporary = group.id === 'new';
+  let [menuOpen, setMenuOpen] = useState(false);
 
-  const displayed = (
+  let displayed = (
     <View
       style={{
         flexDirection: 'row',
@@ -666,13 +666,13 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
   });
 }
 
-const BudgetTotals = memo(function BudgetTotals({
+let BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
   toggleHiddenCategories,
   expandAllCategories,
   collapseAllCategories,
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  let [menuOpen, setMenuOpen] = useState(false);
   return (
     <View
       data-testid="budget-totals"
@@ -1039,7 +1039,7 @@ function IncomeCategory({
   );
 }
 
-const BudgetCategories = memo(
+let BudgetCategories = memo(
   ({
     categoryGroups,
     newCategoryForGroup,
@@ -1074,7 +1074,7 @@ const BudgetCategories = memo(
             return [];
           }
 
-          const groupCategories = group.categories.filter(
+          let groupCategories = group.categories.filter(
             cat => showHiddenCategories || !cat.hidden,
           );
 
@@ -1359,7 +1359,7 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }) {
   );
 }
 
-export const BudgetPageHeader = memo(
+export let BudgetPageHeader = memo(
   ({ startMonth, onMonthSelect, numMonths, monthBounds, style }) => {
     function getValidMonth(month) {
       let start = monthBounds.start;
@@ -1406,24 +1406,24 @@ function getCurrentMonthName(startMonth, currentMonth) {
     : null;
 }
 
-const MonthPicker = ({
+let MonthPicker = ({
   startMonth,
   numDisplayed,
   monthBounds,
   style,
   onSelect,
 }) => {
-  const currentMonth = monthUtils.currentMonth();
-  const range = getRangeForYear(currentMonth);
-  const monthNames = range.map(month => {
+  let currentMonth = monthUtils.currentMonth();
+  let range = getRangeForYear(currentMonth);
+  let monthNames = range.map(month => {
     return monthUtils.format(month, 'MMM');
   });
-  const currentMonthName = getCurrentMonthName(startMonth, currentMonth);
-  const year = monthUtils.getYear(startMonth);
-  const selectedIndex = monthUtils.getMonthIndex(startMonth);
+  let currentMonthName = getCurrentMonthName(startMonth, currentMonth);
+  let year = monthUtils.getYear(startMonth);
+  let selectedIndex = monthUtils.getMonthIndex(startMonth);
 
-  const [size, setSize] = useState('small');
-  const containerRef = useResizeObserver(rect => {
+  let [size, setSize] = useState('small');
+  let containerRef = useResizeObserver(rect => {
     setSize(rect.width <= 320 ? 'small' : rect.width <= 400 ? 'medium' : 'big');
   });
 
@@ -1459,11 +1459,11 @@ const MonthPicker = ({
         }}
       >
         {monthNames.map((monthName, idx) => {
-          const lastSelectedIndex = selectedIndex + numDisplayed;
-          const selected = idx >= selectedIndex && idx < lastSelectedIndex;
-          const current = monthName === currentMonthName;
-          const month = getMonth(year, idx);
-          const isMonthBudgeted =
+          let lastSelectedIndex = selectedIndex + numDisplayed;
+          let selected = idx >= selectedIndex && idx < lastSelectedIndex;
+          let current = monthName === currentMonthName;
+          let month = getMonth(year, idx);
+          let isMonthBudgeted =
             month >= monthBounds.start && month <= monthBounds.end;
 
           return (

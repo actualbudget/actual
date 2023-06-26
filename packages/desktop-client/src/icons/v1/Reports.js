@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgReports = props => (
+let SvgReports = props => (
   <svg
     {...props}
     viewBox="0 0 20 20"

@@ -63,9 +63,9 @@ export function TextOneLine({ children, ...props }: TextOneLineProps) {
 
 type UseStableCallbackArg = (...args: unknown[]) => unknown;
 
-export const useStableCallback = (callback: UseStableCallbackArg) => {
-  const callbackRef = useRef<UseStableCallbackArg>();
-  const memoCallback = useCallback(
+export let useStableCallback = (callback: UseStableCallbackArg) => {
+  let callbackRef = useRef<UseStableCallbackArg>();
+  let memoCallback = useCallback(
     (...args) => callbackRef.current && callbackRef.current(...args),
     [],
   );
@@ -80,7 +80,7 @@ type BlockProps = HTMLPropsWithStyle<HTMLDivElement> & {
 };
 
 export function Block(props: BlockProps) {
-  const { style, innerRef, ...restProps } = props;
+  let { style, innerRef, ...restProps } = props;
   return (
     <div
       {...restProps}
@@ -92,7 +92,7 @@ export function Block(props: BlockProps) {
 
 type CardProps = ComponentProps<typeof View>;
 
-export const Card = forwardRef<HTMLDivElement, CardProps>(
+export let Card = forwardRef<HTMLDivElement, CardProps>(
   ({ children, ...props }, ref) => {
     return (
       <View
@@ -186,7 +186,7 @@ type ExternalLinkButtonProps = { asAnchor: false | undefined } & ComponentProps<
 >;
 type ExternalLinkProps = ExternalLinkAnchorProps | ExternalLinkButtonProps;
 
-export const ExternalLink = forwardRef<HTMLElement, ExternalLinkProps>(
+export let ExternalLink = forwardRef<HTMLElement, ExternalLinkProps>(
   ({ asAnchor, children, ...props }, ref) => {
     function onClick(e) {
       e.preventDefault();
@@ -227,8 +227,8 @@ export function ButtonLink({
   activeStyle,
   ...props
 }: ButtonLinkProps) {
-  const navigate = useNavigate();
-  const match = useMatch({ path: to });
+  let navigate = useNavigate();
+  let match = useMatch({ path: to });
   return (
     <Button
       style={{
@@ -347,7 +347,7 @@ export function Search({
 
 type SelectProps = HTMLPropsWithStyle<HTMLSelectElement>;
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(
+export let Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ style, children, ...nativeProps }, ref) => {
     return (
       <select
@@ -455,7 +455,7 @@ export function Menu({
   let [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
-    const el = elRef.current;
+    let el = elRef.current;
     el.focus();
 
     let onKeyDown = e => {
@@ -487,7 +487,7 @@ export function Menu({
           break;
         case 'Enter':
           e.preventDefault();
-          const item = items[hoveredIndex];
+          let item = items[hoveredIndex];
           if (hoveredIndex !== null && item !== Menu.line) {
             onMenuSelect && onMenuSelect(item.name);
           }
@@ -583,7 +583,7 @@ export function Menu({
   );
 }
 
-const MenuLine: unique symbol = Symbol('menu-line');
+let MenuLine: unique symbol = Symbol('menu-line');
 Menu.line = MenuLine;
 Menu.label = Symbol('menu-label');
 
@@ -604,7 +604,7 @@ export function AlignedText({
   truncate = 'left',
   ...nativeProps
 }: AlignedTextProps) {
-  const truncateStyle = {
+  let truncateStyle = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -748,13 +748,13 @@ export function HoverTarget({
 }: HoverTargetProps) {
   let [hovered, setHovered] = useState(false);
 
-  const onMouseEnter = useCallback(() => {
+  let onMouseEnter = useCallback(() => {
     if (!disabled) {
       setHovered(true);
     }
   }, [disabled]);
 
-  const onMouseLeave = useCallback(() => {
+  let onMouseLeave = useCallback(() => {
     if (!disabled) {
       setHovered(false);
     }

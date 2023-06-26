@@ -105,7 +105,7 @@ export function syncAccounts(id) {
       dispatch(setAccountsSyncing('__all'));
     }
 
-    const { errors, newTransactions, matchedTransactions, updatedAccounts } =
+    let { errors, newTransactions, matchedTransactions, updatedAccounts } =
       await send('nordigen-accounts-sync', { id });
     dispatch(setAccountsSyncing(null));
 

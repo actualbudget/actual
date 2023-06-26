@@ -11,7 +11,7 @@ import { isError } from './utils';
 
 import * as sync from './index';
 
-const uuidGenerator = jsc.integer(97, 122).smap(
+let uuidGenerator = jsc.integer(97, 122).smap(
   x => String.fromCharCode(x),
   x => x.charCodeAt(Number(x)),
 );

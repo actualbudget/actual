@@ -1,4 +1,4 @@
-const { ipcRenderer, contextBridge } = require('electron');
+let { ipcRenderer, contextBridge } = require('electron');
 
 let { version: VERSION, isDev: IS_DEV } =
   ipcRenderer.sendSync('get-bootstrap-data');

@@ -17,20 +17,20 @@ type HoldTooltipProps = {
   onClose: () => void;
 };
 export default function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
-  const spreadsheet = useSpreadsheet();
-  const sheetName = useContext(NamespaceContext);
+  let spreadsheet = useSpreadsheet();
+  let sheetName = useContext(NamespaceContext);
 
-  const [amount, setAmount] = useState(null);
+  let [amount, setAmount] = useState(null);
 
   useEffect(() => {
     (async () => {
-      const node = await spreadsheet.get(sheetName, 'to-budget');
+      let node = await spreadsheet.get(sheetName, 'to-budget');
       setAmount(integerToCurrency(Math.max(node.value, 0)));
     })();
   }, []);
 
   function submit() {
-    const parsedAmount = evalArithmetic(amount, null);
+    let parsedAmount = evalArithmetic(amount, null);
     if (parsedAmount) {
       onSubmit(amountToInteger(parsedAmount));
     }

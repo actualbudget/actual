@@ -5,8 +5,8 @@ export function last(arr) {
 export function getChangedValues(obj1, obj2) {
   // Keep the id field because this is mostly used to diff database
   // objects
-  const diff = obj1.id ? { id: obj1.id } : {};
-  const keys = Object.keys(obj2);
+  let diff = obj1.id ? { id: obj1.id } : {};
+  let keys = Object.keys(obj2);
   let hasChanged = false;
 
   for (let i = 0; i < keys.length; i++) {
@@ -44,7 +44,7 @@ export function applyChanges(changes, items) {
 
   if (changes.updated) {
     changes.updated.forEach(({ id, ...fields }) => {
-      const idx = items.findIndex(t => t.id === id);
+      let idx = items.findIndex(t => t.id === id);
       items[idx] = {
         ...items[idx],
         ...fields,
@@ -54,7 +54,7 @@ export function applyChanges(changes, items) {
 
   if (changes.deleted) {
     changes.deleted.forEach(t => {
-      const idx = items.findIndex(t2 => t.id === t2.id);
+      let idx = items.findIndex(t2 => t.id === t2.id);
       if (idx !== -1) {
         items.splice(idx, 1);
       }
@@ -117,7 +117,7 @@ export function diffItems(items, newItems) {
     if (!item) {
       added.push(newItem);
     } else {
-      const changes = getChangedValues(item, newItem);
+      let changes = getChangedValues(item, newItem);
       if (changes) {
         updated.push(changes);
       }
@@ -142,7 +142,7 @@ export function setIn(
   item: unknown,
 ): void {
   for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
+    let key = keys[i];
 
     if (i === keys.length - 1) {
       map.set(key, item);
@@ -253,8 +253,8 @@ setNumberFormat({ format: 'comma-dot', hideFraction: false });
 // because we always do that on numbers, the app would potentially
 // display wrong numbers. Instead of `2**53` we use `2**51` which
 // gives division more room to be correct
-const MAX_SAFE_NUMBER = 2 ** 51 - 1;
-const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
+let MAX_SAFE_NUMBER = 2 ** 51 - 1;
+let MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 
 export function safeNumber(value) {
   if (!Number.isInteger(value)) {

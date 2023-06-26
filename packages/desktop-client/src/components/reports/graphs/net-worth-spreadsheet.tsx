@@ -29,7 +29,7 @@ export default function createSpreadsheet(
       conditions: conditions.filter(cond => !cond.customName),
     });
 
-    const data = await Promise.all(
+    let data = await Promise.all(
       accounts.map(async acct => {
         let [starting, balances] = await Promise.all([
           runQuery(
@@ -73,9 +73,9 @@ export default function createSpreadsheet(
 }
 
 function recalculate(data, start, end) {
-  const months = monthUtils.rangeInclusive(start, end);
+  let months = monthUtils.rangeInclusive(start, end);
 
-  const accountBalances = data.map(account => {
+  let accountBalances = data.map(account => {
     // Start off with the balance at that point in time
     let balance = account.starting;
     return months.map(month => {
@@ -90,14 +90,14 @@ function recalculate(data, start, end) {
   let startNetWorth = 0;
   let endNetWorth = 0;
 
-  const graphData = months.reduce((arr, month, idx) => {
+  let graphData = months.reduce((arr, month, idx) => {
     let debt = 0;
     let assets = 0;
     let total = 0;
-    const last = arr.length === 0 ? null : arr[arr.length - 1];
+    let last = arr.length === 0 ? null : arr[arr.length - 1];
 
     accountBalances.forEach(balances => {
-      const balance = balances[idx];
+      let balance = balances[idx];
       if (balance < 0) {
         debt += -balance;
       } else {
@@ -110,10 +110,10 @@ function recalculate(data, start, end) {
       hasNegative = true;
     }
 
-    const x = d.parseISO(month + '-01');
-    const change = last ? total - amountToInteger(last.y) : 0;
+    let x = d.parseISO(month + '-01');
+    let change = last ? total - amountToInteger(last.y) : 0;
 
-    const label = (
+    let label = (
       <div>
         <div style={{ marginBottom: 10 }}>
           <strong>{d.format(x, 'MMMM yyyy')}</strong>

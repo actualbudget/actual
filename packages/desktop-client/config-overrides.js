@@ -1,6 +1,6 @@
-const path = require('path');
+let path = require('path');
 
-const {
+let {
   addWebpackResolve,
   override,
   overrideDevServer,

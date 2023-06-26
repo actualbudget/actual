@@ -32,7 +32,7 @@ function useMergedRefs(ref1, ref2) {
 export function useDraggable({ item, type, canDrag, onDragChange }) {
   let _onDragChange = useRef(onDragChange);
 
-  const [, dragRef] = useDrag({
+  let [, dragRef] = useDrag({
     type,
     item: () => {
       _onDragChange.current({ state: 'start-preview', type, item });
@@ -99,7 +99,7 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
   };
 }
 
-export const DropHighlightPosContext = createContext(null);
+export let DropHighlightPosContext = createContext(null);
 
 export function DropHighlight({ pos, offset = {} }) {
   let itemPos = useContext(DropHighlightPosContext);

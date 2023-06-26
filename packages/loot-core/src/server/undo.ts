@@ -94,7 +94,7 @@ async function applyUndoAction(messages, meta, undoTag) {
     );
   });
 
-  const tables = messages.reduce((acc, message) => {
+  let tables = messages.reduce((acc, message) => {
     if (!acc.includes(message.dataset)) {
       acc.push(message.dataset);
     }

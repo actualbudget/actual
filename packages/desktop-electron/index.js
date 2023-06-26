@@ -1,7 +1,7 @@
 /* eslint-disable import/order */
 // (I have no idea why the imports are like this. Not touching them.)
-const isDev = require('electron-is-dev');
-const fs = require('fs');
+let isDev = require('electron-is-dev');
+let fs = require('fs');
 
 require('module').globalPaths.push(__dirname + '/..');
 
@@ -10,7 +10,7 @@ if (isDev) {
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 }
 
-const {
+let {
   app,
   ipcMain,
   BrowserWindow,
@@ -19,7 +19,7 @@ const {
   shell,
   protocol,
 } = require('electron');
-const promiseRetry = require('promise-retry');
+let promiseRetry = require('promise-retry');
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -29,15 +29,15 @@ protocol.registerSchemesAsPrivileged([
 
 global.fetch = require('node-fetch');
 
-const about = require('./about');
-const { getRandomPort } = require('get-port-please');
-const getMenu = require('./menu');
-const updater = require('./updater');
+let about = require('./about');
+let { getRandomPort } = require('get-port-please');
+let getMenu = require('./menu');
+let updater = require('./updater');
 
 require('./security');
 
-const { fork } = require('child_process');
-const path = require('path');
+let { fork } = require('child_process');
+let path = require('path');
 
 require('./setRequireHook');
 
@@ -50,7 +50,7 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 }
 
 // eslint-disable-next-line import/extensions
-const WindowState = require('./window-state.js');
+let WindowState = require('./window-state.js');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -101,10 +101,10 @@ function createBackgroundProcess(socketName) {
 }
 
 async function createWindow() {
-  const windowState = await WindowState.get();
+  let windowState = await WindowState.get();
 
   // Create the browser window.
-  const win = new BrowserWindow({
+  let win = new BrowserWindow({
     x: windowState.x,
     y: windowState.y,
     width: windowState.width,
@@ -122,7 +122,7 @@ async function createWindow() {
   });
   win.setBackgroundColor('#E8ECF0');
 
-  const unlistenToState = WindowState.listen(win, windowState);
+  let unlistenToState = WindowState.listen(win, windowState);
 
   if (isDev) {
     win.loadURL(`file://${__dirname}/loading.html`);
@@ -200,9 +200,9 @@ function isExternalUrl(url) {
 }
 
 function updateMenu(isBudgetOpen) {
-  const menu = getMenu(isDev, createWindow);
-  const file = menu.items.filter(item => item.label === 'File')[0];
-  const fileItems = file.submenu.items;
+  let menu = getMenu(isDev, createWindow);
+  let file = menu.items.filter(item => item.label === 'File')[0];
+  let fileItems = file.submenu.items;
   fileItems
     .filter(item => item.label === 'Load Backup...')
     .map(item => (item.enabled = isBudgetOpen));
@@ -212,8 +212,8 @@ function updateMenu(isBudgetOpen) {
     item.enabled = isBudgetOpen;
   });
 
-  const edit = menu.items.filter(item => item.label === 'Edit')[0];
-  const editItems = edit.submenu.items;
+  let edit = menu.items.filter(item => item.label === 'Edit')[0];
+  let editItems = edit.submenu.items;
   editItems
     .filter(item => item.label === 'Undo' || item.label === 'Redo')
     .map(item => (item.enabled = isBudgetOpen));
@@ -241,7 +241,7 @@ app.on('ready', async () => {
       return null;
     }
 
-    const parsedUrl = new URL(request.url);
+    let parsedUrl = new URL(request.url);
     if (parsedUrl.protocol !== 'app:') {
       callback({ error: -302 }); // UNKNOWN_URL_SCHEME
       return;
@@ -252,7 +252,7 @@ app.on('ready', async () => {
       return;
     }
 
-    const pathname = parsedUrl.pathname;
+    let pathname = parsedUrl.pathname;
 
     if (pathname.startsWith('/static')) {
       callback({

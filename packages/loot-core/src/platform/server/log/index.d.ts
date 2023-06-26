@@ -6,5 +6,5 @@ export interface Logger {
   transports?: Transports;
 }
 
-const logger: Logger;
+let logger: Logger;
 export default logger;

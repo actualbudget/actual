@@ -17,7 +17,7 @@ import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
 
-const inst: { lastChangeType? } = {};
+let inst: { lastChangeType? } = {};
 
 function findItem(strict, suggestions, value) {
   if (strict) {
@@ -167,20 +167,20 @@ function SingleAutocomplete({
   value: initialValue,
   isMulti = false,
 }: SingleAutocompleteProps) {
-  const [selectedItem, setSelectedItem] = useState(() =>
+  let [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
   );
-  const [value, setValue] = useState(
+  let [value, setValue] = useState(
     selectedItem ? getItemName(selectedItem) : '',
   );
-  const [isChanged, setIsChanged] = useState(false);
-  const [originalItem, setOriginalItem] = useState(selectedItem);
-  const filteredSuggestions = useMemo(
+  let [isChanged, setIsChanged] = useState(false);
+  let [originalItem, setOriginalItem] = useState(selectedItem);
+  let filteredSuggestions = useMemo(
     () => filterSuggestions(suggestions, value),
     [filterSuggestions, suggestions, value],
   );
-  const [highlightedIndex, setHighlightedIndex] = useState(null);
-  const [isOpen, setIsOpen] = useState(embedded);
+  let [highlightedIndex, setHighlightedIndex] = useState(null);
+  let [isOpen, setIsOpen] = useState(embedded);
 
   // Update the selected item if the suggestion list or initial
   // input value has changed
@@ -189,7 +189,7 @@ function SingleAutocomplete({
   }, [initialValue, suggestions, strict]);
 
   function resetState(newValue) {
-    const val = newValue === undefined ? initialValue : newValue;
+    let val = newValue === undefined ? initialValue : newValue;
     let selectedItem = findItem(strict, suggestions, val);
 
     setSelectedItem(selectedItem);
@@ -207,7 +207,7 @@ function SingleAutocomplete({
     setIsChanged(false);
   }
 
-  const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
+  let filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
 
   return (
     <Downshift
@@ -267,7 +267,7 @@ function SingleAutocomplete({
 
         // Otherwise, filter the items and always the first item if
         // desired
-        const filteredSuggestions = filterSuggestions(suggestions, value);
+        let filteredSuggestions = filterSuggestions(suggestions, value);
 
         if (value === '') {
           // A blank value shouldn't highlight any item so that the field
@@ -452,7 +452,7 @@ function SingleAutocomplete({
                 }
               },
               onChange: (e: ChangeEvent<HTMLInputElement>) => {
-                const { onChange } = inputProps || {};
+                let { onChange } = inputProps || {};
                 // @ts-expect-error unsure if onChange needs an event or a string
                 onChange && onChange(e.target.value);
               },

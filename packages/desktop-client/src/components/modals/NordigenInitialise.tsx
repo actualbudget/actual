@@ -16,16 +16,16 @@ type NordigenInitialiseProps = {
   onSuccess: () => void;
 };
 
-const NordigenInitialise = ({
+let NordigenInitialise = ({
   modalProps,
   onSuccess,
 }: NordigenInitialiseProps) => {
-  const [secretId, setSecretId] = useState('');
-  const [secretKey, setSecretKey] = useState('');
-  const [isValid, setIsValid] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  let [secretId, setSecretId] = useState('');
+  let [secretKey, setSecretKey] = useState('');
+  let [isValid, setIsValid] = useState(true);
+  let [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async () => {
+  let onSubmit = async () => {
     if (!secretId || !secretKey) {
       setIsValid(false);
       return;

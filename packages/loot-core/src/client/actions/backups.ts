@@ -6,7 +6,7 @@ import { closeBudget, loadBudget } from './budgets';
 // isn't opened
 export function loadBackup(budgetId, backupId) {
   return async (dispatch, getState) => {
-    const prefs = getState().prefs.local;
+    let prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       await dispatch(closeBudget());
     }
@@ -18,7 +18,7 @@ export function loadBackup(budgetId, backupId) {
 
 export function makeBackup() {
   return async (dispatch, getState) => {
-    const prefs = getState().prefs.local;
+    let prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       await send('backup-make', { id: prefs.id });
     }

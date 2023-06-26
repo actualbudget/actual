@@ -52,8 +52,8 @@ import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 
 function NarrowNotSupported({ children, redirectTo = '/budget' }) {
-  const { isNarrowWidth } = useResponsive();
-  const navigate = useNavigate();
+  let { isNarrowWidth } = useResponsive();
+  let navigate = useNavigate();
   useEffect(() => {
     if (isNarrowWidth) {
       navigate(redirectTo);
@@ -63,7 +63,7 @@ function NarrowNotSupported({ children, redirectTo = '/budget' }) {
 }
 
 function StackedRoutesInner({ location }) {
-  const { isNarrowWidth } = useResponsive();
+  let { isNarrowWidth } = useResponsive();
   return (
     <Routes location={location}>
       <Route path="/" element={<Navigate to="/budget" replace />} />
@@ -177,7 +177,7 @@ function NavTab({ icon: TabIcon, name, path }) {
 }
 
 function MobileNavTabs() {
-  const { isNarrowWidth } = useResponsive();
+  let { isNarrowWidth } = useResponsive();
   return (
     <div
       style={{

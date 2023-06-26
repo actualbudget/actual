@@ -11,7 +11,7 @@ import NamespaceContext from '../spreadsheet/NamespaceContext';
 import SheetValue from '../spreadsheet/SheetValue';
 
 function BudgetSummary({ month, modalProps }) {
-  const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+  let prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
 
   return (
     <Modal title="Budget Details" {...modalProps} animate>

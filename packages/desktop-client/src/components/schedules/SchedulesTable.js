@@ -138,7 +138,7 @@ export function SchedulesTable({
     if (!filter) {
       return schedules;
     }
-    const filterIncludes = str =>
+    let filterIncludes = str =>
       str
         ? str.toLowerCase().includes(filter.toLowerCase()) ||
           filter.toLowerCase().includes(str.toLowerCase())

@@ -4,7 +4,7 @@ import { captureException } from '../../exceptions';
 import type * as T from '.';
 
 // for some reason import doesn't work
-const WebSocketServer = require('ws').Server;
+let WebSocketServer = require('ws').Server;
 
 // the websocket server
 let wss = null;
@@ -17,7 +17,7 @@ function coerceError(error) {
   return { type: 'InternalError', message: error.message };
 }
 
-export const init: T.Init = function (socketName, handlers) {
+export let init: T.Init = function (socketName, handlers) {
   wss = new WebSocketServer({ port: socketName });
 
   // websockets doesn't support sending objects so parse/stringify needed
@@ -104,7 +104,7 @@ export const init: T.Init = function (socketName, handlers) {
   });
 };
 
-export const getNumClients: T.GetNumClients = function () {
+export let getNumClients: T.GetNumClients = function () {
   if (wss) {
     return wss.clients.length;
   }
@@ -112,7 +112,7 @@ export const getNumClients: T.GetNumClients = function () {
   return 0;
 };
 
-export const send: T.Send = function (name, args) {
+export let send: T.Send = function (name, args) {
   if (wss) {
     wss.clients.forEach(client =>
       client.send(JSON.stringify({ type: 'push', name, args })),

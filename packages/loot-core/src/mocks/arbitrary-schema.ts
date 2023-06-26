@@ -147,7 +147,7 @@ export function makeTransaction({
   );
 }
 
-export const makeTransactionArray = (
+export let makeTransactionArray = (
   options: { minLength?; maxLength?; splitFreq?; payeeIds? } = {},
 ) => {
   let { minLength, maxLength, ...transOpts } = options;
@@ -155,7 +155,7 @@ export const makeTransactionArray = (
     .array(makeTransaction(transOpts), { minLength, maxLength })
     .map(arr => flattenSortTransactions(arr));
 };
-export const payee = tableArbitrary(schema.payees);
-export const account = tableArbitrary(schema.accounts);
-export const category = tableArbitrary(schema.categories);
-export const category_group = tableArbitrary(schema.category_groups);
+export let payee = tableArbitrary(schema.payees);
+export let account = tableArbitrary(schema.accounts);
+export let category = tableArbitrary(schema.categories);
+export let category_group = tableArbitrary(schema.category_groups);

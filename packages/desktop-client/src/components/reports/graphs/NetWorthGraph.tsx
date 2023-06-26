@@ -22,10 +22,10 @@ type AreaProps = {
   range?;
 };
 function Area({ start, end, scale, range }: AreaProps) {
-  const zero = scale.y(0);
+  let zero = scale.y(0);
 
-  const startX = scale.x(d.parseISO(start + '-01'));
-  const endX = scale.x(d.parseISO(end + '-01'));
+  let startX = scale.x(d.parseISO(start + '-01'));
+  let endX = scale.x(d.parseISO(end + '-01'));
 
   if (startX < 0 || endX < 0) {
     return null;
@@ -85,7 +85,7 @@ type NetWorthGraphProps = {
   compact: boolean;
 };
 function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
-  const Chart = compact ? VictoryGroup : VictoryChart;
+  let Chart = compact ? VictoryGroup : VictoryChart;
 
   return (
     <Container style={[style, compact && { height: 'auto' }]}>

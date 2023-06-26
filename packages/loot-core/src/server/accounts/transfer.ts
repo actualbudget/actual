@@ -16,11 +16,11 @@ async function getTransferredAccount(transaction) {
 }
 
 async function clearCategory(transaction, transferAcct) {
-  const { offbudget: fromOffBudget } = await db.first(
+  let { offbudget: fromOffBudget } = await db.first(
     'SELECT offbudget FROM accounts WHERE id = ?',
     [transaction.account],
   );
-  const { offbudget: toOffBudget } = await db.first(
+  let { offbudget: toOffBudget } = await db.first(
     'SELECT offbudget FROM accounts WHERE id = ?',
     [transferAcct],
   );
@@ -68,7 +68,7 @@ export async function addTransfer(transaction, transferredAccount) {
     }
   }
 
-  const id = await db.insertTransaction({
+  let id = await db.insertTransaction({
     account: transferredAccount,
     amount: -transaction.amount,
     payee: fromPayee,
@@ -79,7 +79,7 @@ export async function addTransfer(transaction, transferredAccount) {
   });
 
   await db.updateTransaction({ id: transaction.id, transfer_id: id });
-  const categoryCleared = await clearCategory(transaction, transferredAccount);
+  let categoryCleared = await clearCategory(transaction, transferredAccount);
 
   return {
     id: transaction.id,
@@ -127,7 +127,7 @@ export async function updateTransfer(transaction, transferredAccount) {
     amount: -transaction.amount,
   });
 
-  const categoryCleared = await clearCategory(transaction, transferredAccount);
+  let categoryCleared = await clearCategory(transaction, transferredAccount);
   if (categoryCleared) {
     return { id: transaction.id, category: null };
   }
@@ -148,7 +148,7 @@ export async function onDelete(transaction) {
 }
 
 export async function onUpdate(transaction) {
-  const transferredAccount = await getTransferredAccount(transaction);
+  let transferredAccount = await getTransferredAccount(transaction);
 
   if (transferredAccount && !transaction.transfer_id) {
     return addTransfer(transaction, transferredAccount);

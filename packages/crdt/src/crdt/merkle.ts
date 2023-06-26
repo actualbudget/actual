@@ -32,8 +32,8 @@ function insertKey(trie, key, hash) {
   if (key.length === 0) {
     return trie;
   }
-  const c = key[0];
-  const n = trie[c] || {};
+  let c = key[0];
+  let n = trie[c] || {};
   return Object.assign({}, trie, {
     [c]: Object.assign({}, n, insertKey(n, key.slice(1), hash), {
       hash: n.hash ^ hash,
@@ -124,7 +124,7 @@ export function prune(trie, n = 2) {
 }
 
 export function debug(trie, k = '', indent = 0) {
-  const str =
+  let str =
     ' '.repeat(indent) +
     (k !== '' ? `k: ${k} ` : '') +
     `hash: ${trie.hash || '(empty)'}\n`;

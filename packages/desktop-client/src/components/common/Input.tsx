@@ -7,7 +7,7 @@ import { useProperFocus } from '../../hooks/useProperFocus';
 import { styles, colors } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
-export const defaultInputStyle = {
+export let defaultInputStyle = {
   outline: 0,
   backgroundColor: 'white',
   margin: 0,
@@ -23,7 +23,7 @@ type InputProps = HTMLPropsWithStyle<HTMLInputElement> & {
   focused?: boolean;
 };
 
-const Input = ({
+let Input = ({
   style,
   inputRef,
   onEnter,

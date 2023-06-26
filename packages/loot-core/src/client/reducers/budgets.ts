@@ -93,7 +93,7 @@ function reconcileFiles(localFiles, remoteFiles) {
     .concat(sorted.filter(f => f.state === 'broken'));
 }
 
-const initialState = {
+let initialState = {
   budgets: [],
   availableImports: [],
   remoteFiles: null,

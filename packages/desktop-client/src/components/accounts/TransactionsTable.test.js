@@ -27,12 +27,12 @@ import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 jest.mock('loot-core/src/platform/client/fetch');
 jest.mock('../../hooks/useFeatureFlag', () => jest.fn().mockReturnValue(false));
 
-const accounts = [generateAccount('Bank of America')];
-const payees = [
+let accounts = [generateAccount('Bank of America')];
+let payees = [
   { id: 'payed-to', name: 'Payed To' },
   { id: 'guy', name: 'This guy on the side of the road' },
 ];
-const categoryGroups = generateCategoryGroups([
+let categoryGroups = generateCategoryGroups([
   {
     name: 'Investments and Savings',
     categories: [{ name: 'Savings' }],
@@ -46,13 +46,13 @@ const categoryGroups = generateCategoryGroups([
     categories: [{ name: 'Big Projects' }, { name: 'Shed' }],
   },
 ]);
-const usualGroup = categoryGroups[1];
+let usualGroup = categoryGroups[1];
 
 function generateTransactions(count, splitAtIndexes = [], showError = false) {
-  const transactions = [];
+  let transactions = [];
 
   for (let i = 0; i < count; i++) {
-    const isSplit = splitAtIndexes.includes(i);
+    let isSplit = splitAtIndexes.includes(i);
 
     transactions.push.apply(
       transactions,
@@ -78,36 +78,36 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
 }
 
 function LiveTransactionTable(props) {
-  const [transactions, setTransactions] = useState(props.transactions);
+  let [transactions, setTransactions] = useState(props.transactions);
 
   useEffect(() => {
     if (transactions === props.transactions) return;
     props.onTransactionsChange && props.onTransactionsChange(transactions);
   }, [transactions]);
 
-  const onSplit = id => {
+  let onSplit = id => {
     let { data, diff } = splitTransaction(transactions, id);
     setTransactions(data);
     return diff.added[0].id;
   };
 
-  const onSave = transaction => {
+  let onSave = transaction => {
     let { data } = updateTransaction(transactions, transaction);
     setTransactions(data);
   };
 
-  const onAdd = newTransactions => {
+  let onAdd = newTransactions => {
     newTransactions = realizeTempTransactions(newTransactions);
     setTransactions(trans => [...newTransactions, ...trans]);
   };
 
-  const onAddSplit = id => {
+  let onAddSplit = id => {
     let { data, diff } = addSplitTransaction(transactions, id);
     setTransactions(data);
     return diff.added[0].id;
   };
 
-  const onCreatePayee = () => 'id';
+  let onCreatePayee = () => 'id';
 
   // It's important that these functions are they same instances
   // across renders. Doing so tests that the transaction table
@@ -167,7 +167,7 @@ function waitForAutocomplete() {
   return new Promise(resolve => setTimeout(resolve, 0));
 }
 
-const categories = categoryGroups.reduce(
+let categories = categoryGroups.reduce(
   (all, group) => all.concat(group.categories),
   [],
 );
@@ -212,7 +212,7 @@ function renderTransactions(extraProps) {
 }
 
 function queryNewField(container, name, subSelector = '', idx = 0) {
-  const field = container.querySelectorAll(
+  let field = container.querySelectorAll(
     `[data-testid="new-transaction"] [data-testid="${name}"]`,
   )[idx];
   if (subSelector !== '') {
@@ -222,7 +222,7 @@ function queryNewField(container, name, subSelector = '', idx = 0) {
 }
 
 function queryField(container, name, subSelector = '', idx) {
-  const field = container.querySelectorAll(
+  let field = container.querySelectorAll(
     `[data-testid="transaction-table"] [data-testid="${name}"]`,
   )[idx];
   if (subSelector !== '') {
@@ -258,12 +258,12 @@ async function _editField(field, container) {
 }
 
 function editNewField(container, name, rowIndex) {
-  const field = queryNewField(container, name, '', rowIndex);
+  let field = queryNewField(container, name, '', rowIndex);
   return _editField(field, container);
 }
 
 function editField(container, name, rowIndex) {
-  const field = queryField(container, name, '', rowIndex);
+  let field = queryField(container, name, '', rowIndex);
   return _editField(field, container);
 }
 
@@ -274,7 +274,7 @@ function expectToBeEditingField(container, name, rowIndex, isNew) {
   } else {
     field = queryField(container, name, '', rowIndex);
   }
-  const input = field.querySelector(':focus');
+  let input = field.querySelector(':focus');
   expect(input).toBeTruthy();
   expect(container.ownerDocument.activeElement).toBe(input);
   return input;
@@ -282,7 +282,7 @@ function expectToBeEditingField(container, name, rowIndex, isNew) {
 
 describe('Transactions', () => {
   test('transactions table shows the correct data', () => {
-    const { container, getTransactions } = renderTransactions();
+    let { container, getTransactions } = renderTransactions();
 
     getTransactions().forEach((transaction, idx) => {
       expect(queryField(container, 'date', 'div', idx).textContent).toBe(
@@ -320,7 +320,7 @@ describe('Transactions', () => {
   });
 
   test('keybindings enter/tab/alt should move around', async () => {
-    const { container } = renderTransactions();
+    let { container } = renderTransactions();
 
     // Enter/tab goes down/right
     let input = await editField(container, 'notes', 2);
@@ -367,7 +367,7 @@ describe('Transactions', () => {
   });
 
   test('keybinding escape resets the value', async () => {
-    const { container } = renderTransactions();
+    let { container } = renderTransactions();
 
     let input = await editField(container, 'notes', 2);
     let oldValue = input.value;
@@ -387,11 +387,11 @@ describe('Transactions', () => {
   });
 
   test('text fields save when moved away from', async () => {
-    const { container, getTransactions } = renderTransactions();
+    let { container, getTransactions } = renderTransactions();
 
     // All of these keys move to a different field, and the value in
     // the previous input should be saved
-    const ks = [
+    let ks = [
       '[Tab]',
       '[Enter]',
       '{Shift>}[Tab]{/Shift}',
@@ -425,7 +425,7 @@ describe('Transactions', () => {
   });
 
   test('dropdown automatically opens and can be filtered', async () => {
-    const { container } = renderTransactions();
+    let { container } = renderTransactions();
 
     let input = await editField(container, 'category', 2);
     let tooltip = container.querySelector('[data-testid="tooltip"]');
@@ -459,7 +459,7 @@ describe('Transactions', () => {
   });
 
   test('dropdown selects an item with keyboard', async () => {
-    const { container, getTransactions } = renderTransactions();
+    let { container, getTransactions } = renderTransactions();
 
     let input = await editField(container, 'category', 2);
     let tooltip = container.querySelector('[data-testid="tooltip"]');
@@ -502,7 +502,7 @@ describe('Transactions', () => {
   });
 
   test('dropdown selects an item when clicking', async () => {
-    const { container, getTransactions } = renderTransactions();
+    let { container, getTransactions } = renderTransactions();
 
     await editField(container, 'category', 2);
 
@@ -542,7 +542,7 @@ describe('Transactions', () => {
   });
 
   test('dropdown hovers but doesn’t change value', async () => {
-    const { container, getTransactions } = renderTransactions();
+    let { container, getTransactions } = renderTransactions();
 
     let input = await editField(container, 'category', 2);
     let oldCategory = getTransactions()[2].category;
@@ -574,7 +574,7 @@ describe('Transactions', () => {
 
   // TODO: fix this test
   test.skip('dropdown invalid value resets correctly', async () => {
-    const { container, getTransactions } = renderTransactions();
+    let { container, getTransactions } = renderTransactions();
 
     // Invalid values should be rejected and nullified
     let input = await editField(container, 'category', 2);
@@ -613,7 +613,7 @@ describe('Transactions', () => {
   });
 
   test('dropdown escape resets the value ', async () => {
-    const { container } = renderTransactions();
+    let { container } = renderTransactions();
 
     let input = await editField(container, 'category', 2);
     let oldValue = input.value;
@@ -626,7 +626,7 @@ describe('Transactions', () => {
   });
 
   test('adding a new transaction works', async () => {
-    const { queryByTestId, container, getTransactions, updateProps } =
+    let { queryByTestId, container, getTransactions, updateProps } =
       renderTransactions();
 
     expect(getTransactions().length).toBe(5);
@@ -662,7 +662,7 @@ describe('Transactions', () => {
   });
 
   test('adding a new split transaction works', async () => {
-    const { container, getTransactions, updateProps } = renderTransactions();
+    let { container, getTransactions, updateProps } = renderTransactions();
     updateProps({ isAdding: true });
 
     let input = await editNewField(container, 'debit');
@@ -711,7 +711,7 @@ describe('Transactions', () => {
   });
 
   test('escape closes the new transaction rows', async () => {
-    const { container, updateProps } = renderTransactions({
+    let { container, updateProps } = renderTransactions({
       onCloseAddTransaction: () => {
         updateProps({ isAdding: false });
       },
@@ -748,10 +748,10 @@ describe('Transactions', () => {
   });
 
   test('transaction can be selected', async () => {
-    const { container } = renderTransactions();
+    let { container } = renderTransactions();
 
     await editField(container, 'date', 2);
-    const selectCell = queryField(
+    let selectCell = queryField(
       container,
       'select',
       '[data-testid=cell-button]',
@@ -766,7 +766,7 @@ describe('Transactions', () => {
   });
 
   test('transaction can be split, updated, and deleted', async () => {
-    const { container, getTransactions, updateProps } = renderTransactions();
+    let { container, getTransactions, updateProps } = renderTransactions();
 
     let transactions = [...getTransactions()];
     // Change the id to simulate a new transaction being added, and
@@ -843,7 +843,7 @@ describe('Transactions', () => {
 
     // This snapshot makes sure the data is as we expect. It also
     // shows the sort order and makes sure that is correct
-    const parentId = getTransactions()[0].id;
+    let parentId = getTransactions()[0].id;
     expect(getTransactions().slice(0, 3)).toEqual([
       {
         account: accounts[0].id,
@@ -905,7 +905,7 @@ describe('Transactions', () => {
   });
 
   test('transaction with splits shows 0 in correct column', async () => {
-    const { container, getTransactions } = renderTransactions();
+    let { container, getTransactions } = renderTransactions();
 
     let input = await editField(container, 'category', 0);
     let tooltip = container.querySelector('[data-testid="tooltip"]');

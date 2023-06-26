@@ -87,7 +87,7 @@ describe('Sync', () => {
 
     expect(mockSyncServer.getMessages().length).toBe(0);
 
-    const result = await fullSync();
+    let result = await fullSync();
     if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(0);
     expect(mockSyncServer.getMessages().length).toBe(2);
@@ -134,7 +134,7 @@ describe('Sync', () => {
       },
     ]);
 
-    const result = await fullSync();
+    let result = await fullSync();
     if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(2);
     expect(mockSyncServer.getMessages().length).toBe(3);

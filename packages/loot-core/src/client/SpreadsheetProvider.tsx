@@ -4,16 +4,16 @@ import LRU from 'lru-cache';
 
 import { listen, send } from '../platform/client/fetch';
 
-const SpreadsheetContext = createContext(undefined);
+let SpreadsheetContext = createContext(undefined);
 
 export function useSpreadsheet() {
   return useContext(SpreadsheetContext);
 }
 
 function makeSpreadsheet() {
-  const cellObservers = {};
-  const LRUValueCache = new LRU({ max: 1200 });
-  const cellCache = {};
+  let cellObservers = {};
+  let LRUValueCache = new LRU({ max: 1200 });
+  let cellCache = {};
   let observersDisabled = false;
 
   class Spreadsheet {
@@ -49,7 +49,7 @@ function makeSpreadsheet() {
         if (!observersDisabled) {
           // TODO: batch react so only renders once
           nodes.forEach(node => {
-            const observers = cellObservers[node.name];
+            let observers = cellObservers[node.name];
             if (observers) {
               observers.forEach(func => func(node));
               cellCache[node.name] = Promise.resolve(node);
@@ -77,7 +77,7 @@ function makeSpreadsheet() {
       if (cellCache[resolvedName] != null) {
         cellCache[resolvedName].then(cb);
       } else {
-        const req = this.get(sheetName, binding.name);
+        let req = this.get(sheetName, binding.name);
         cellCache[resolvedName] = req;
 
         req.then(result => {

@@ -72,8 +72,8 @@ let config = {
   maxDrift: 5 * 60 * 1000,
 };
 
-const MAX_COUNTER = parseInt('0xFFFF');
-const MAX_NODE_LENGTH = 16;
+let MAX_COUNTER = parseInt('0xFFFF');
+let MAX_NODE_LENGTH = 16;
 
 /**
  * timestamp instance class

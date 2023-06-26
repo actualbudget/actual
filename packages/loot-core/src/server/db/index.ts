@@ -104,7 +104,7 @@ export function runQuery(
 );
 export function runQuery(sql, params, fetchAll) {
   // const unrecord = perf.record('sqlite');
-  const result = sqlite.runQuery(db, sql, params, fetchAll);
+  let result = sqlite.runQuery(db, sql, params, fetchAll);
   // unrecord();
   return result;
 }
@@ -147,14 +147,14 @@ export async function all(sql, params?: (string | number)[]) {
 }
 
 export async function first(sql, params?: (string | number)[]) {
-  const arr = await runQuery(sql, params, true);
+  let arr = await runQuery(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
 // The underlying sql system is now sync, but we can't update `first` yet
 // without auditing all uses of it
 export function firstSync(sql, params?: (string | number)[]) {
-  const arr = runQuery(sql, params, true);
+  let arr = runQuery(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
@@ -166,7 +166,7 @@ export async function run(sql, params?: (string | number)[]) {
 }
 
 export async function select(table, id) {
-  const rows = await runQuery(
+  let rows = await runQuery(
     'SELECT * FROM ' + table + ' WHERE id = ?',
     [id],
     true,
@@ -281,10 +281,10 @@ export async function getCategories() {
 }
 
 export async function getCategoriesGrouped() {
-  const groups = await all(
+  let groups = await all(
     'SELECT * FROM category_groups WHERE tombstone = 0 ORDER BY is_income, sort_order, id',
   );
-  const rows = await all(`
+  let rows = await all(`
     SELECT * FROM categories WHERE tombstone = 0
       ORDER BY sort_order, id
   `);
@@ -298,10 +298,10 @@ export async function getCategoriesGrouped() {
 }
 
 export async function insertCategoryGroup(group) {
-  const lastGroup = await first(`
+  let lastGroup = await first(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
-  const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
+  let sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
 
   group = {
     ...categoryGroupModel.validate(group),
@@ -316,11 +316,11 @@ export function updateCategoryGroup(group) {
 }
 
 export async function moveCategoryGroup(id, targetId) {
-  const groups = await all(
+  let groups = await all(
     `SELECT id, sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
   );
 
-  const { updates, sort_order } = shoveSortOrders(groups, targetId);
+  let { updates, sort_order } = shoveSortOrders(groups, targetId);
   for (let info of updates) {
     await update('category_groups', info);
   }
@@ -328,7 +328,7 @@ export async function moveCategoryGroup(id, targetId) {
 }
 
 export async function deleteCategoryGroup(group, transferId?: string) {
-  const categories = await all('SELECT * FROM categories WHERE cat_group = ?', [
+  let categories = await all('SELECT * FROM categories WHERE cat_group = ?', [
     group.id,
   ]);
 
@@ -346,19 +346,19 @@ export async function insertCategory(
   let id_;
   await batchMessages(async () => {
     if (atEnd) {
-      const lastCat = await first(`
+      let lastCat = await first(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
     } else {
       // Unfortunately since we insert at the beginning, we need to shove
       // the sort orders to make sure there's room for it
-      const categories = await all(
+      let categories = await all(
         `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
         [category.cat_group],
       );
 
-      const { updates, sort_order: order } = shoveSortOrders(
+      let { updates, sort_order: order } = shoveSortOrders(
         categories,
         categories.length > 0 ? categories[0].id : null,
       );
@@ -373,7 +373,7 @@ export async function insertCategory(
       sort_order: sort_order,
     };
 
-    const id = await insertWithUUID('categories', category);
+    let id = await insertWithUUID('categories', category);
     // Create an entry in the mapping table that points it to itself
     await insert('category_mapping', { id, transferId: id });
     id_ = id;
@@ -391,12 +391,12 @@ export async function moveCategory(id, groupId, targetId?: string) {
     throw new Error('moveCategory: groupId is required');
   }
 
-  const categories = await all(
+  let categories = await all(
     `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
     [groupId],
   );
 
-  const { updates, sort_order } = shoveSortOrders(categories, targetId);
+  let { updates, sort_order } = shoveSortOrders(categories, targetId);
   for (let info of updates) {
     await update('categories', info);
   }
@@ -408,7 +408,7 @@ export async function deleteCategory(category, transferId?: string) {
     // We need to update all the deleted categories that currently
     // point to the one we're about to delete so they all are
     // "forwarded" to the new transferred category.
-    const existingTransfers = await all(
+    let existingTransfers = await all(
       'SELECT * FROM category_mapping WHERE transferId = ?',
       [category.id],
     );
@@ -547,7 +547,7 @@ export function getAccounts() {
 }
 
 export async function insertAccount(account) {
-  const accounts = await all(
+  let accounts = await all(
     'SELECT * FROM accounts WHERE offbudget = ? ORDER BY sort_order, name',
     [account.offbudget != null ? account.offbudget : 0],
   );
@@ -582,7 +582,7 @@ export async function moveAccount(id, targetId) {
     );
   }
 
-  const { updates, sort_order } = shoveSortOrders(accounts, targetId);
+  let { updates, sort_order } = shoveSortOrders(accounts, targetId);
   await batchMessages(async () => {
     for (let info of updates) {
       update('accounts', info);

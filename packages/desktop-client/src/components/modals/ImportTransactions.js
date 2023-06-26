@@ -43,8 +43,8 @@ export function parseDate(str, order) {
     return v && v.length === 1 ? '0' + v : v;
   }
 
-  const dateGroups = (a, b) => str => {
-    const parts = str
+  let dateGroups = (a, b) => str => {
+    let parts = str
       .replace(/^[^\d]+/, '')
       .replace(/[^\d]+$/, '')
       .split(/[^\d]+/);
@@ -52,11 +52,11 @@ export function parseDate(str, order) {
       return parts.slice(0, 3);
     }
 
-    const digits = str.replace(/[^\d]/g, '');
+    let digits = str.replace(/[^\d]/g, '');
     return [digits.slice(0, a), digits.slice(a, a + b), digits.slice(a + b)];
   };
-  const yearFirst = dateGroups(4, 2);
-  const twoDig = dateGroups(2, 2);
+  let yearFirst = dateGroups(4, 2);
+  let twoDig = dateGroups(2, 2);
 
   let parts, year, month, day;
   switch (order) {
@@ -220,7 +220,7 @@ function parseAmount(amount, mapper) {
 }
 
 function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
-  const multiplier = parseFloat(multiplierAmount) || 1.0;
+  let multiplier = parseFloat(multiplierAmount) || 1.0;
 
   if (splitMode) {
     // Split mode is a little weird; first we look for an outflow and
@@ -533,7 +533,7 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
 }
 
 function MultipliersField({ multiplierCB, value, onChange }) {
-  const styl = multiplierCB ? 'inherit' : 'none';
+  let styl = multiplierCB ? 'inherit' : 'none';
 
   return (
     <Input
@@ -635,7 +635,7 @@ function ImportTransactions({
   }
 
   function onMultiplierChange(e) {
-    const amt = e;
+    let amt = e;
     if (!amt || amt.match(/^\d{1,}(\.\d{0,4})?$/)) {
       setMultiplierAmount(amt);
     }
@@ -681,7 +681,7 @@ function ImportTransactions({
   }
 
   function onNewFile() {
-    const res = window.Actual.openFileDialog({
+    let res = window.Actual.openFileDialog({
       filters: [
         { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
       ],

@@ -9,7 +9,7 @@ let hasInitialized = false;
  * The goal of this function is to retry X amount of times
  * to retrieve the backend script with a small delay.
  */
-const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
+let importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
   try {
     importScripts(script);
   } catch (e) {

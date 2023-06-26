@@ -3,7 +3,7 @@ import memoizeOne from 'memoize-one';
 import { groupById } from '../../shared/util';
 import * as constants from '../constants';
 
-const initialState = {
+let initialState = {
   newTransactions: [],
   matchedTransactions: [],
   lastTransaction: null,
@@ -110,9 +110,9 @@ export default function update(state = initialState, action) {
   return state;
 }
 
-export const getAccountsById = memoizeOne(accounts => groupById(accounts));
-export const getPayeesById = memoizeOne(payees => groupById(payees));
-export const getCategoriesById = memoizeOne(categoryGroups => {
+export let getAccountsById = memoizeOne(accounts => groupById(accounts));
+export let getPayeesById = memoizeOne(payees => groupById(payees));
+export let getCategoriesById = memoizeOne(categoryGroups => {
   let res = {};
   categoryGroups.forEach(group => {
     group.categories.forEach(cat => {
@@ -122,7 +122,7 @@ export const getCategoriesById = memoizeOne(categoryGroups => {
   return res;
 });
 
-export const getActivePayees = memoizeOne((payees, accounts) => {
+export let getActivePayees = memoizeOne((payees, accounts) => {
   let accountsById = getAccountsById(accounts);
 
   return payees.filter(payee => {

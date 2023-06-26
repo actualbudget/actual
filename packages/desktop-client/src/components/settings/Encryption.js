@@ -7,8 +7,8 @@ import { useServerURL } from '../ServerContext';
 import { Setting } from './UI';
 
 export default function EncryptionSettings({ prefs, pushModal }) {
-  const serverURL = useServerURL();
-  const missingCryptoAPI = !(window.crypto && crypto.subtle);
+  let serverURL = useServerURL();
+  let missingCryptoAPI = !(window.crypto && crypto.subtle);
 
   function onChangeKey() {
     pushModal('create-encryption-key', { recreate: true });

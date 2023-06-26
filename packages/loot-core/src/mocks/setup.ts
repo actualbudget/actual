@@ -60,7 +60,7 @@ jest.mock('uuid', () => ({
 
 global.getDatabaseDump = async function (tables) {
   if (!tables) {
-    const rows = await sqlite.runQuery<{ name }>(
+    let rows = await sqlite.runQuery<{ name }>(
       db.getDatabase(),
       "SELECT name FROM sqlite_master WHERE type='table'",
       [],
@@ -70,7 +70,7 @@ global.getDatabaseDump = async function (tables) {
     tables = rows.map(row => row.name);
   }
 
-  const data = await Promise.all(
+  let data = await Promise.all(
     tables.map(async table => {
       let sortColumn;
       switch (table) {

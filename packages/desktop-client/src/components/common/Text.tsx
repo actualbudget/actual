@@ -10,8 +10,8 @@ type TextProps = HTMLPropsWithStyle<HTMLSpanElement> & {
   children?: ReactNode;
 };
 
-const Text = (props: TextProps) => {
-  const { style, innerRef, ...restProps } = props;
+let Text = (props: TextProps) => {
+  let { style, innerRef, ...restProps } = props;
   return (
     <span
       {...restProps}

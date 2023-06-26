@@ -46,7 +46,7 @@ export function listenForSyncEvent(actions, store) {
       let notif = null;
       let learnMore =
         '[Learn more](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)';
-      const githubIssueLink =
+      let githubIssueLink =
         'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug&template=bug-report.yml&title=%5BBug%5D%3A+';
 
       switch (subtype) {

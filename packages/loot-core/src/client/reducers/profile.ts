@@ -1,6 +1,6 @@
 import * as constants from '../constants';
 
-const initialState = {};
+let initialState = {};
 
 export default function update(state = initialState, action) {
   switch (action.type) {

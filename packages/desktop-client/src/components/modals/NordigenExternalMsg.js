@@ -16,9 +16,9 @@ import { FormField, FormLabel } from '../forms';
 import { COUNTRY_OPTIONS } from './countries';
 
 function useAvailableBanks(country) {
-  const [banks, setBanks] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  let [banks, setBanks] = useState([]);
+  let [isLoading, setIsLoading] = useState(false);
+  let [isError, setIsError] = useState(false);
 
   useEffect(() => {
     async function fetch() {
@@ -32,7 +32,7 @@ function useAvailableBanks(country) {
 
       setIsLoading(true);
 
-      const { data, error } = await sendCatch('nordigen-get-banks', country);
+      let { data, error } = await sendCatch('nordigen-get-banks', country);
 
       if (error) {
         setIsError(true);
@@ -70,7 +70,7 @@ export default function NordigenExternalMsg({
   onSuccess,
   onClose: originalOnClose,
 }) {
-  const dispatch = useDispatch();
+  let dispatch = useDispatch();
 
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
@@ -81,12 +81,12 @@ export default function NordigenExternalMsg({
   let [menuOpen, setMenuOpen] = useState(false);
   let data = useRef(null);
 
-  const {
+  let {
     data: bankOptions,
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
   } = useAvailableBanks(country);
-  const { configured: isConfigured, isLoading: isConfigurationLoading } =
+  let { configured: isConfigured, isLoading: isConfigurationLoading } =
     useNordigenStatus();
 
   async function onJump() {
@@ -116,7 +116,7 @@ export default function NordigenExternalMsg({
     setWaiting(null);
   }
 
-  const onNordigenInit = () => {
+  let onNordigenInit = () => {
     dispatch(
       pushModal('nordigen-init', {
         onSuccess: () => setIsNordigenSetupComplete(true),
@@ -124,7 +124,7 @@ export default function NordigenExternalMsg({
     );
   };
 
-  const renderLinkButton = () => {
+  let renderLinkButton = () => {
     return (
       <View style={{ gap: 10 }}>
         <FormField>

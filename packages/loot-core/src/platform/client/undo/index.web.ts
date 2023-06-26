@@ -13,26 +13,26 @@ let currentUndoState: T.UndoState = {
   selectedItems: null,
 };
 
-export const setUndoState: T.SetUndoState = function (name, value) {
+export let setUndoState: T.SetUndoState = function (name, value) {
   currentUndoState[name] = value;
   currentUndoState.id = uuid.v4Sync();
 };
 
-export const getUndoState: T.GetUndoState = function (name) {
+export let getUndoState: T.GetUndoState = function (name) {
   return currentUndoState[name];
 };
 
-export const getTaggedState: T.GetTaggedState = function (id) {
+export let getTaggedState: T.GetTaggedState = function (id) {
   return UNDO_STATE_MRU.find(state => state.id === id);
 };
 
-export const snapshot: T.Snapshot = function () {
+export let snapshot: T.Snapshot = function () {
   let tagged = { ...currentUndoState, id: uuid.v4Sync() };
   UNDO_STATE_MRU.unshift(tagged);
   UNDO_STATE_MRU = UNDO_STATE_MRU.slice(0, HISTORY_SIZE);
   return tagged.id;
 };
 
-export const gc: T.Gc = function (id) {
+export let gc: T.Gc = function (id) {
   UNDO_STATE_MRU = UNDO_STATE_MRU.filter(state => state.id !== id);
 };

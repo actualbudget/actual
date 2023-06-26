@@ -423,15 +423,15 @@ function getCompileError(error, stack) {
     .map(str => '\n  ' + str)
     .join('');
 
-  const rootMethod = stack[0].type;
-  const methodArgs = stack[0].args[0];
+  let rootMethod = stack[0].type;
+  let methodArgs = stack[0].args[0];
   stackStr += `\n  ${rootMethod}(${prettyValue(
     methodArgs.length === 1 ? methodArgs[0] : methodArgs,
   )})`;
 
   // In production, hide internal stack traces
   if (process.env.NODE_ENV === 'production') {
-    const err = new CompileError();
+    let err = new CompileError();
     err.message = `${error.message}\n\nExpression stack:` + stackStr;
     err.stack = null;
     return err;
@@ -470,7 +470,7 @@ function compileLiteral(value) {
   }
 }
 
-const compileExpr = saveStack('expr', (state, expr) => {
+let compileExpr = saveStack('expr', (state, expr) => {
   if (typeof expr === 'string') {
     // Field reference
     if (expr[0] === '$') {
@@ -506,7 +506,7 @@ const compileExpr = saveStack('expr', (state, expr) => {
   return compileLiteral(expr);
 });
 
-const compileFunction = saveStack('function', (state, func) => {
+let compileFunction = saveStack('function', (state, func) => {
   let [name] = Object.keys(func);
   let argExprs = func[name];
   if (!Array.isArray(argExprs)) {
@@ -620,7 +620,7 @@ const compileFunction = saveStack('function', (state, func) => {
   }
 });
 
-const compileOp = saveStack('op', (state, fieldRef, opData) => {
+let compileOp = saveStack('op', (state, fieldRef, opData) => {
   let { $transform, ...opExpr } = opData;
   let [op] = Object.keys(opExpr);
 
@@ -762,7 +762,7 @@ function compileAnd(state, conds) {
   return '(' + res.join('\n  AND ') + ')';
 }
 
-const compileWhere = saveStack('filter', (state, conds) => {
+let compileWhere = saveStack('filter', (state, conds) => {
   return compileAnd(state, conds);
 });
 
@@ -819,57 +819,54 @@ function expandStar(state, expr) {
   return Object.keys(table).map(field => (path ? `${path}.${field}` : field));
 }
 
-const compileSelect = saveStack(
-  'select',
-  (state, exprs, isAggregate, orders) => {
-    // Always include the id if it's not an aggregate
-    if (!isAggregate && !exprs.includes('id') && !exprs.includes('*')) {
-      exprs = exprs.concat(['id']);
+let compileSelect = saveStack('select', (state, exprs, isAggregate, orders) => {
+  // Always include the id if it's not an aggregate
+  if (!isAggregate && !exprs.includes('id') && !exprs.includes('*')) {
+    exprs = exprs.concat(['id']);
+  }
+
+  let select = exprs.map(expr => {
+    if (typeof expr === 'string') {
+      if (expr.indexOf('*') !== -1) {
+        let fields = expandStar(state, expr);
+
+        return fields
+          .map(field => {
+            let compiled = compileExpr(state, '$' + field);
+            state.outputTypes.set(field, compiled.type);
+            return compiled.value + ' AS ' + quoteAlias(field);
+          })
+          .join(', ');
+      }
+
+      let compiled = compileExpr(state, '$' + expr);
+      state.outputTypes.set(expr, compiled.type);
+      return compiled.value + ' AS ' + quoteAlias(expr);
     }
 
-    let select = exprs.map(expr => {
-      if (typeof expr === 'string') {
-        if (expr.indexOf('*') !== -1) {
-          let fields = expandStar(state, expr);
+    let [name, value] = Object.entries(expr)[0];
+    if (name[0] === '$') {
+      state.compileStack.push({ type: 'value', value: expr });
+      throw new CompileError(
+        `Invalid field “${name}”, are you trying to select a function? You need to name the expression`,
+      );
+    }
 
-          return fields
-            .map(field => {
-              let compiled = compileExpr(state, '$' + field);
-              state.outputTypes.set(field, compiled.type);
-              return compiled.value + ' AS ' + quoteAlias(field);
-            })
-            .join(', ');
-        }
-
-        let compiled = compileExpr(state, '$' + expr);
-        state.outputTypes.set(expr, compiled.type);
-        return compiled.value + ' AS ' + quoteAlias(expr);
-      }
-
-      let [name, value] = Object.entries(expr)[0];
-      if (name[0] === '$') {
-        state.compileStack.push({ type: 'value', value: expr });
-        throw new CompileError(
-          `Invalid field “${name}”, are you trying to select a function? You need to name the expression`,
-        );
-      }
-
-      if (typeof value === 'string') {
-        let compiled = compileExpr(state, '$' + value);
-        state.outputTypes.set(name, compiled.type);
-        return `${compiled.value} AS ${quoteAlias(name)}`;
-      }
-
-      let compiled = compileFunction({ ...state, orders }, value);
+    if (typeof value === 'string') {
+      let compiled = compileExpr(state, '$' + value);
       state.outputTypes.set(name, compiled.type);
-      return compiled.value + ` AS ${quoteAlias(name)}`;
-    });
+      return `${compiled.value} AS ${quoteAlias(name)}`;
+    }
 
-    return select.join(', ');
-  },
-);
+    let compiled = compileFunction({ ...state, orders }, value);
+    state.outputTypes.set(name, compiled.type);
+    return compiled.value + ` AS ${quoteAlias(name)}`;
+  });
 
-const compileGroupBy = saveStack('groupBy', (state, exprs) => {
+  return select.join(', ');
+});
+
+let compileGroupBy = saveStack('groupBy', (state, exprs) => {
   let groupBy = exprs.map(expr => {
     if (typeof expr === 'string') {
       return compileExpr(state, '$' + expr).value;
@@ -881,7 +878,7 @@ const compileGroupBy = saveStack('groupBy', (state, exprs) => {
   return groupBy.join(', ');
 });
 
-const compileOrderBy = saveStack('orderBy', (state, exprs) => {
+let compileOrderBy = saveStack('orderBy', (state, exprs) => {
   let orderBy = exprs.map(expr => {
     let compiled;
     let dir = null;

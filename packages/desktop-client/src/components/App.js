@@ -28,7 +28,7 @@ class App extends Component {
   };
 
   async init() {
-    const socketName = await global.Actual.getServerSocket();
+    let socketName = await global.Actual.getServerSocket();
 
     try {
       await initConnection(socketName);
@@ -45,7 +45,7 @@ class App extends Component {
     await this.props.loadGlobalPrefs();
 
     // Open the last opened budget, if any
-    const budgetId = await send('get-last-opened-backup');
+    let budgetId = await send('get-last-opened-backup');
     if (budgetId) {
       await this.props.loadBudget(budgetId);
 
@@ -87,8 +87,8 @@ class App extends Component {
   }
 
   render() {
-    const { budgetId, loadingText } = this.props;
-    const { fatalError, initializing, hiddenScrollbars } = this.state;
+    let { budgetId, loadingText } = this.props;
+    let { fatalError, initializing, hiddenScrollbars } = this.state;
 
     return (
       <ResponsiveProvider>

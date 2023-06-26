@@ -21,7 +21,7 @@ export class ConfigurationPage {
   }
 
   async importBudget(type, file) {
-    const fileChooserPromise = this.page.waitForEvent('filechooser');
+    let fileChooserPromise = this.page.waitForEvent('filechooser');
     await this.page.getByRole('button', { name: 'Import my budget' }).click();
 
     switch (type) {
@@ -56,7 +56,7 @@ export class ConfigurationPage {
         throw new Error(`Unrecognized import type: ${type}`);
     }
 
-    const fileChooser = await fileChooserPromise;
+    let fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(file);
 
     return new BudgetPage(this.page);

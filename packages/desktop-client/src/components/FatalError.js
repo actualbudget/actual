@@ -79,8 +79,8 @@ class FatalError extends Component {
   }
 
   render() {
-    const { buttonText, error } = this.props;
-    const { showError } = this.state;
+    let { buttonText, error } = this.props;
+    let { showError } = this.state;
 
     if (error.type === 'app-init-failure') {
       return this.renderSimple(error);

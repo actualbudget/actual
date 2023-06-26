@@ -217,7 +217,7 @@ async function processTemplate(month, force) {
   }
 }
 
-const TEMPLATE_PREFIX = '#template';
+let TEMPLATE_PREFIX = '#template';
 async function getCategoryTemplates() {
   let templates = {};
 

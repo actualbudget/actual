@@ -15,13 +15,13 @@ export type GetDocumentDir = typeof getDocumentDir;
 export function getBudgetDir(id: string): string;
 export type GetBudgetDir = typeof getBudgetDir;
 
-export const bundledDatabasePath: string;
+export let bundledDatabasePath: string;
 export type BundledDatabasePath = typeof bundledDatabasePath;
 
-export const migrationsPath: string;
+export let migrationsPath: string;
 export type MigrationsPath = typeof migrationsPath;
 
-export const demoBudgetPath: string;
+export let demoBudgetPath: string;
 export type DemoBudgetPath = typeof demoBudgetPath;
 
 export function pathToId(filepath: string): string;

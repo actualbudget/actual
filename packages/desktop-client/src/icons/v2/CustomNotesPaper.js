@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgCustomNotesPaper = props => (
+let SvgCustomNotesPaper = props => (
   <svg
     {...props}
     viewBox="0 0 19 24"

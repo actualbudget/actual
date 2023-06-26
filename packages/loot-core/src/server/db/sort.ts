@@ -1,8 +1,8 @@
-export const SORT_INCREMENT = 16384;
+export let SORT_INCREMENT = 16384;
 
 function midpoint(items, to) {
-  const below = items[to - 1];
-  const above = items[to];
+  let below = items[to - 1];
+  let above = items[to];
 
   if (!below) {
     return above.sort_order / 2;
@@ -14,9 +14,9 @@ function midpoint(items, to) {
 }
 
 export function shoveSortOrders(items, targetId?: string) {
-  const to = items.findIndex(item => item.id === targetId);
-  const target = items[to];
-  const before = items[to - 1];
+  let to = items.findIndex(item => item.id === targetId);
+  let target = items[to];
+  let before = items[to - 1];
   let updates = [];
 
   // If no target is specified, append at the end

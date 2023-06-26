@@ -110,7 +110,7 @@ export function transaction(db, fn) {
   transactionDepth++;
 
   try {
-    const result = fn();
+    let result = fn();
     execQuery(db, after);
     return result;
   } catch (ex) {

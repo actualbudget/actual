@@ -19,12 +19,12 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
         ]}
       >
         {items.map((item, idx) => {
-          const showGroup = lastItem
+          let showGroup = lastItem
             ? (item.offbudget !== lastItem.offbudget && !item.closed) ||
               (item.closed !== lastItem.closed && !item.offbudget)
             : true;
 
-          const group = `${
+          let group = `${
             item.closed
               ? 'Closed Accounts'
               : item.offbudget

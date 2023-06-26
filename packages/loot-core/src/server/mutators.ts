@@ -91,7 +91,7 @@ function _runMutator<T extends () => Promise<unknown>>(
   }) as Promise<Awaited<ReturnType<T>>>;
 }
 // Type cast needed as TS looses types over nested generic returns
-export const runMutator = sequential(_runMutator) as typeof _runMutator;
+export let runMutator = sequential(_runMutator) as typeof _runMutator;
 
 export function withMutatorContext(context, func) {
   if (currentContext == null && !globalMutationsEnabled) {

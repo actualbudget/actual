@@ -8,7 +8,7 @@ import { loadPrefs, loadGlobalPrefs } from './prefs';
 
 export function updateStatusText(text) {
   return (dispatch, getState) => {
-    const { loadingText } = getState().app;
+    let { loadingText } = getState().app;
     // The presence of any loading text puts the app in a "loading"
     // state. We only ever want to update the text, we never want to
     // set the app into a loading state. It's expected for workflows
@@ -21,7 +21,7 @@ export function updateStatusText(text) {
 
 export function loadBudgets() {
   return async dispatch => {
-    const budgets = await send('get-budgets');
+    let budgets = await send('get-budgets');
 
     dispatch({
       type: constants.SET_BUDGETS,
@@ -32,7 +32,7 @@ export function loadBudgets() {
 
 export function loadRemoteFiles() {
   return async dispatch => {
-    const files = await send('get-remote-files');
+    let files = await send('get-remote-files');
 
     dispatch({
       type: constants.SET_REMOTE_FILES,
@@ -43,8 +43,8 @@ export function loadRemoteFiles() {
 
 export function loadAllFiles() {
   return async (dispatch, getState) => {
-    const budgets = await send('get-budgets');
-    const files = await send('get-remote-files');
+    let budgets = await send('get-budgets');
+    let files = await send('get-remote-files');
 
     dispatch({
       type: constants.SET_ALL_FILES,
@@ -91,7 +91,7 @@ export function loadBudget(id, loadingText = '', options = {}) {
 
     await dispatch(loadPrefs());
 
-    const prefs = getState().prefs.local;
+    let prefs = getState().prefs.local;
     dispatch(setAppState({ loadingText: null }));
     dispatch(setAppState({ maxMonths: prefs.maxMonths }));
   };
@@ -99,7 +99,7 @@ export function loadBudget(id, loadingText = '', options = {}) {
 
 export function closeBudget() {
   return async (dispatch, getState) => {
-    const prefs = getState().prefs.local;
+    let prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       // This clears out all the app state so the user starts fresh
       dispatch({ type: constants.CLOSE_BUDGET });
@@ -157,7 +157,7 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
 
 export function importBudget(filepath, type) {
   return async (dispatch, getState) => {
-    const { error } = await send('import-budget', { filepath, type });
+    let { error } = await send('import-budget', { filepath, type });
     if (error) {
       throw new Error(error);
     }

@@ -1,13 +1,13 @@
-const isWindows =
+let isWindows =
   navigator.platform && navigator.platform.toLowerCase() === 'win32';
 
-const isMac =
+let isMac =
   navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
-export const isProbablySafari = /^((?!chrome|android).)*safari/i.test(
+export let isProbablySafari = /^((?!chrome|android).)*safari/i.test(
   navigator.userAgent,
 );
 
-export const OS = isWindows ? 'windows' : isMac ? 'mac' : 'linux';
-export const env: 'web' | 'mobile' = 'web';
-export const isBrowser = !!window.Actual?.IS_FAKE_WEB;
+export let OS = isWindows ? 'windows' : isMac ? 'mac' : 'linux';
+export let env: 'web' | 'mobile' = 'web';
+export let isBrowser = !!window.Actual?.IS_FAKE_WEB;

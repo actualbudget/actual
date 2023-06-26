@@ -22,7 +22,7 @@ test.describe('Accounts', () => {
   });
 
   test('creates a new account and views the initial balance transaction', async () => {
-    const accountPage = await navigation.createAccount({
+    let accountPage = await navigation.createAccount({
       name: 'New Account',
       offBudget: false,
       balance: 100,
@@ -38,11 +38,11 @@ test.describe('Accounts', () => {
   });
 
   test('closes an account', async () => {
-    const accountPage = await navigation.goToAccountPage('Roth IRA');
+    let accountPage = await navigation.goToAccountPage('Roth IRA');
 
     await expect(accountPage.accountName).toHaveText('Roth IRA');
 
-    const modal = await accountPage.clickCloseAccount();
+    let modal = await accountPage.clickCloseAccount();
     await modal.selectTransferAccount('Vanguard 401k');
     await modal.closeAccount();
 

@@ -3,7 +3,7 @@ import type * as T from '..';
 let listeners = new Map();
 let serverHandler = null;
 
-export const initServer: T.InitServer = handlers => {
+export let initServer: T.InitServer = handlers => {
   serverHandler = msg => {
     let { name, args, catchErrors } = msg;
     if (handlers[name]) {
@@ -22,14 +22,14 @@ export const initServer: T.InitServer = handlers => {
   };
 };
 
-export const clearServer: T.ClearServer = async () => {
+export let clearServer: T.ClearServer = async () => {
   serverHandler = null;
   listeners = new Map();
 };
 
-export const serverPush: T.ServerPush = (name, args) => {
+export let serverPush: T.ServerPush = (name, args) => {
   Promise.resolve().then(() => {
-    const listens = listeners.get(name);
+    let listens = listeners.get(name);
     if (listens) {
       listens.forEach(listener => {
         listener(args);
@@ -38,7 +38,7 @@ export const serverPush: T.ServerPush = (name, args) => {
   });
 };
 
-export const send = async (name, args, { catchErrors = false } = {}) => {
+export let send = async (name, args, { catchErrors = false } = {}) => {
   if (serverHandler) {
     return serverHandler({ name, args, catchErrors });
   } else {
@@ -46,11 +46,11 @@ export const send = async (name, args, { catchErrors = false } = {}) => {
   }
 };
 
-export const sendCatch = (name, args) => {
+export let sendCatch = (name, args) => {
   return send(name, args, { catchErrors: true });
 };
 
-export const listen = (name, cb) => {
+export let listen = (name, cb) => {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }

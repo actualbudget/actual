@@ -76,7 +76,7 @@ function toInternalField(obj) {
   };
 }
 
-export const ruleModel = {
+export let ruleModel = {
   validate(rule, { update }: { update?: boolean } = {}) {
     requiredFields('rules', rule, ['conditions', 'actions'], update);
 

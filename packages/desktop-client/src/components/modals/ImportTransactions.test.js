@@ -2,7 +2,7 @@ import { parseDate } from './ImportTransactions';
 
 describe('Import transactions', function () {
   describe('date parsing', function () {
-    const invalidInputs = [
+    let invalidInputs = [
       { str: '', order: 'yyyy mm dd' },
       { str: null, order: 'yyyy mm dd' },
       { str: 42, order: 'yyyy mm dd' },
@@ -36,7 +36,7 @@ describe('Import transactions', function () {
       },
     );
 
-    const validInputs = [
+    let validInputs = [
       {
         order: 'yyyy mm dd',
         cases: [
@@ -131,7 +131,7 @@ describe('Import transactions', function () {
       'should parse with order `$order`',
       ({ order, cases }) => {
         it.each(cases)('given input %j expects output %j', (input, output) => {
-          const parsed = parseDate(input, order);
+          let parsed = parseDate(input, order);
 
           expect(typeof parsed).toBe('string');
           expect(parsed).toBe(output);

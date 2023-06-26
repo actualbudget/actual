@@ -26,7 +26,7 @@ import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import { styles, colors } from '../../style';
 import { Text, TextOneLine, View } from '../common';
 
-const zIndices = { SECTION_HEADING: 10 };
+let zIndices = { SECTION_HEADING: 10 };
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));
@@ -101,7 +101,7 @@ function Status({ status }) {
 
 class Transaction extends PureComponent {
   render() {
-    const {
+    let {
       transaction,
       accounts,
       categories,
@@ -247,7 +247,7 @@ class Transaction extends PureComponent {
 export class TransactionList extends Component {
   makeData = memoizeOne(transactions => {
     // Group by date. We can assume transactions is ordered
-    const sections = [];
+    let sections = [];
     transactions.forEach(transaction => {
       if (
         sections.length === 0 ||
@@ -276,14 +276,14 @@ export class TransactionList extends Component {
   });
 
   render() {
-    const {
+    let {
       transactions,
       scrollProps = {},
       onLoadMore,
       // refreshControl
     } = this.props;
 
-    const sections = this.makeData(transactions);
+    let sections = this.makeData(transactions);
 
     return (
       <>
@@ -473,9 +473,9 @@ function Option({ isLast, item, state }) {
   );
 }
 
-const ROW_HEIGHT = 50;
+let ROW_HEIGHT = 50;
 
-const ListItem = forwardRef(({ children, style, ...props }, ref) => {
+let ListItem = forwardRef(({ children, style, ...props }, ref) => {
   return (
     <View
       style={[

@@ -9,7 +9,7 @@ import { Setting } from './UI';
 
 export default function ExperimentalFeatures({ prefs, savePrefs }) {
   let [expanded, setExpanded] = useState(false);
-  const flags = useAllFeatureFlags();
+  let flags = useAllFeatureFlags();
   let disabled = prefs.budgetType === 'report' && flags.reportBudget;
 
   return (

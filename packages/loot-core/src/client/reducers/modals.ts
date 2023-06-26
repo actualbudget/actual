@@ -1,6 +1,6 @@
 import * as constants from '../constants';
 
-const initialState = {
+let initialState = {
   modalStack: [],
   isHidden: false,
 };

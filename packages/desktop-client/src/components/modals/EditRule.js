@@ -619,7 +619,7 @@ export default function EditRule({
       });
 
       if (filters.length > 0) {
-        const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+        let conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
         let { data: transactions } = await runQuery(
           q('transactions')
             .filter({ [conditionsOpKey]: filters })

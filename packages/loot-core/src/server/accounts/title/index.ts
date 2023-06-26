@@ -13,7 +13,7 @@ let convertToRegExp = specials =>
   specials.map(s => [new RegExp(`\\b${s}\\b`, 'gi'), s]);
 
 function parseMatch(match) {
-  const firstCharacter = match[0];
+  let firstCharacter = match[0];
 
   // test first character
   if (/\s/.test(firstCharacter)) {
@@ -32,12 +32,12 @@ export default function title(str, options = { special: undefined }) {
   str = str
     .toLowerCase()
     .replace(regex, (m, lead = '', forced, lower, rest) => {
-      const parsedMatch = parseMatch(m);
+      let parsedMatch = parseMatch(m);
       if (!parsedMatch) {
         return m;
       }
       if (!forced) {
-        const fullLower = lower + rest;
+        let fullLower = lower + rest;
 
         if (lowerCase.has(fullLower)) {
           return parsedMatch;
@@ -47,9 +47,9 @@ export default function title(str, options = { special: undefined }) {
       return lead + (lower || forced).toUpperCase() + rest;
     });
 
-  const customSpecials = options.special || [];
-  const replace = [...specials, ...customSpecials];
-  const replaceRegExp = convertToRegExp(replace);
+  let customSpecials = options.special || [];
+  let replace = [...specials, ...customSpecials];
+  let replaceRegExp = convertToRegExp(replace);
 
   replaceRegExp.forEach(([pattern, s]) => {
     str = str.replace(pattern, s);

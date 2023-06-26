@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgSettingsSliderAlternate = props => (
+let SvgSettingsSliderAlternate = props => (
   <svg
     {...props}
     viewBox="0 0 24 24"

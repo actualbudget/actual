@@ -24,7 +24,7 @@ function sortByKey(arr, key) {
 
 function groupBy(arr, keyName) {
   return arr.reduce(function (obj, item) {
-    var key = item[keyName];
+    let key = item[keyName];
     if (!obj.hasOwnProperty(key)) {
       obj[key] = [];
     }
@@ -58,12 +58,12 @@ function monthFromDate(date) {
 // Importer
 
 async function importAccounts(data, entityIdMap) {
-  const accounts = sortByKey(data.accounts, 'sortableIndex');
+  let accounts = sortByKey(data.accounts, 'sortableIndex');
 
   return Promise.all(
     accounts.map(async account => {
       if (!account.isTombstone) {
-        const id = await actual.createAccount({
+        let id = await actual.createAccount({
           name: account.accountName,
           offbudget: account.onBudget ? false : true,
           closed: account.hidden ? true : false,
@@ -75,7 +75,7 @@ async function importAccounts(data, entityIdMap) {
 }
 
 async function importCategories(data, entityIdMap) {
-  const masterCategories = sortByKey(data.masterCategories, 'sortableIndex');
+  let masterCategories = sortByKey(data.masterCategories, 'sortableIndex');
 
   await Promise.all(
     masterCategories.map(async masterCategory => {
@@ -85,14 +85,14 @@ async function importCategories(data, entityIdMap) {
         masterCategory.subCategories &&
         masterCategory.subCategories.some(cat => !cat.isTombstone) > 0
       ) {
-        const id = await actual.createCategoryGroup({
+        let id = await actual.createCategoryGroup({
           name: masterCategory.name,
           is_income: false,
         });
         entityIdMap.set(masterCategory.entityId, id);
 
         if (masterCategory.subCategories) {
-          const subCategories = sortByKey(
+          let subCategories = sortByKey(
             masterCategory.subCategories,
             'sortableIndex',
           );
@@ -102,7 +102,7 @@ async function importCategories(data, entityIdMap) {
           // on insertion order
           for (let category of subCategories) {
             if (!category.isTombstone) {
-              const id = await actual.createCategory({
+              let id = await actual.createCategory({
                 name: category.name,
                 group_id: entityIdMap.get(category.masterCategoryId),
               });
@@ -132,10 +132,10 @@ async function importPayees(data, entityIdMap) {
 }
 
 async function importTransactions(data, entityIdMap) {
-  const categories = await actual.getCategories();
-  const incomeCategoryId = categories.find(cat => cat.name === 'Income').id;
-  const accounts = await actual.getAccounts();
-  const payees = await actual.getPayees();
+  let categories = await actual.getCategories();
+  let incomeCategoryId = categories.find(cat => cat.name === 'Income').id;
+  let accounts = await actual.getAccounts();
+  let payees = await actual.getPayees();
 
   function getCategory(id) {
     if (id == null || id === 'Category/__Split__') {
@@ -245,7 +245,7 @@ function fillInBudgets(data, categoryBudgets) {
   // To make sure our system has a chance to set this flag on each
   // category, make sure a budget exists for every category of every
   // month.
-  const budgets = [...categoryBudgets];
+  let budgets = [...categoryBudgets];
   data.masterCategories.forEach(masterCategory => {
     if (masterCategory.subCategories) {
       masterCategory.subCategories.forEach(category => {
@@ -299,7 +299,7 @@ function estimateRecentness(str) {
   // numbers that its aware of. This works because version numbers are
   // increasing integers.
   return str.split(',').reduce((total, version) => {
-    const [_, number] = version.split('-');
+    let [_, number] = version.split('-');
     return total + parseInt(number);
   }, 0);
 }
@@ -307,7 +307,7 @@ function estimateRecentness(str) {
 function findLatestDevice(zipped, entries) {
   let devices = entries
     .map(entry => {
-      const contents = zipped.readFile(entry).toString('utf8');
+      let contents = zipped.readFile(entry).toString('utf8');
 
       let data;
       try {
@@ -333,7 +333,7 @@ function findLatestDevice(zipped, entries) {
 }
 
 async function doImport(data) {
-  const entityIdMap = new Map();
+  let entityIdMap = new Map();
 
   console.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);
@@ -414,7 +414,7 @@ export async function importBuffer(filepath, buffer) {
   );
   let deviceGUID = findLatestDevice(zipped, deviceFiles);
 
-  const yfullPath = join(budgetPath, deviceGUID, 'Budget.yfull');
+  let yfullPath = join(budgetPath, deviceGUID, 'Budget.yfull');
   let contents;
   try {
     contents = zipped.readFile(getFile(entries, yfullPath)).toString('utf8');

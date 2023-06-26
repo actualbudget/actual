@@ -5,15 +5,15 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-const RuleTester = require('eslint').RuleTester;
+let RuleTester = require('eslint').RuleTester;
 
-const rule = require('../../../lib/rules/let');
+let rule = require('../../../lib/rules/let');
 
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
 
-const ruleTester = new RuleTester({
+let ruleTester = new RuleTester({
   parserOptions: {
     ecmaVersion: 2015,
     ecmaFeatures: { jsx: true },

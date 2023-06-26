@@ -2,7 +2,7 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from './tokens';
 
-export const colors = {
+export let colors = {
   y1: '#733309',
   y2: '#87540d',
   y3: '#B88115',
@@ -79,7 +79,7 @@ export const colors = {
   },
 };
 
-export const styles = {
+export let styles = {
   veryLargeText: {
     fontSize: 30,
     fontWeight: 600,
@@ -229,4 +229,4 @@ if (Platform.env === 'web') {
   });
 }
 
-export const hasHiddenScrollbars = () => hiddenScrollbars;
+export let hasHiddenScrollbars = () => hiddenScrollbars;

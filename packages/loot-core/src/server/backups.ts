@@ -11,12 +11,12 @@ import * as prefs from './prefs';
 
 // A special backup that represents the latest version of the db that
 // can be reverted to after loading a backup
-const LATEST_BACKUP_FILENAME = 'db.latest.sqlite';
+let LATEST_BACKUP_FILENAME = 'db.latest.sqlite';
 let serviceInterval = null;
 
 async function getBackups(id) {
-  const budgetDir = fs.getBudgetDir(id);
-  const backupDir = fs.join(budgetDir, 'backups');
+  let budgetDir = fs.getBudgetDir(id);
+  let backupDir = fs.join(budgetDir, 'backups');
 
   let paths = [];
   if (await fs.exists(backupDir)) {
@@ -24,9 +24,9 @@ async function getBackups(id) {
     paths = paths.filter(file => file.match(/\.sqlite$/));
   }
 
-  const backups = await Promise.all(
+  let backups = await Promise.all(
     paths.map(async path => {
-      const mtime = await fs.getModifiedTime(fs.join(backupDir, path));
+      let mtime = await fs.getModifiedTime(fs.join(backupDir, path));
       return {
         id: path,
         date: new Date(mtime),
@@ -47,7 +47,7 @@ async function getBackups(id) {
 }
 
 async function getLatestBackup(id) {
-  const budgetDir = fs.getBudgetDir(id);
+  let budgetDir = fs.getBudgetDir(id);
   if (await fs.exists(fs.join(budgetDir, LATEST_BACKUP_FILENAME))) {
     return {
       id: LATEST_BACKUP_FILENAME,
@@ -73,17 +73,17 @@ export async function getAvailableBackups(id) {
 }
 
 export async function updateBackups(backups) {
-  const byDay = backups.reduce((groups, backup) => {
-    const day = dateFns.format(backup.date, 'yyyy-MM-dd');
+  let byDay = backups.reduce((groups, backup) => {
+    let day = dateFns.format(backup.date, 'yyyy-MM-dd');
     groups[day] = groups[day] || [];
     groups[day].push(backup);
     return groups;
   }, {});
 
-  const removed = [];
+  let removed = [];
   for (let day of Object.keys(byDay)) {
-    const dayBackups = byDay[day];
-    const isToday = day === monthUtils.currentDay();
+    let dayBackups = byDay[day];
+    let isToday = day === monthUtils.currentDay();
     // Allow 3 backups of the current day (so fine-grained edits are
     // kept around). Otherwise only keep around one backup per day.
     // And only keep a total of 10 backups.
@@ -93,12 +93,12 @@ export async function updateBackups(backups) {
   }
 
   // Get the list of remaining backups and only keep the latest 10
-  const currentBackups = backups.filter(backup => !removed.includes(backup.id));
+  let currentBackups = backups.filter(backup => !removed.includes(backup.id));
   return removed.concat(currentBackups.slice(10).map(backup => backup.id));
 }
 
 export async function makeBackup(id) {
-  const budgetDir = fs.getBudgetDir(id);
+  let budgetDir = fs.getBudgetDir(id);
 
   // When making a backup, we no longer consider the user to be
   // viewing any backups. If there exists a "latest backup" we should
@@ -117,12 +117,12 @@ export async function makeBackup(id) {
   await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), backupPath);
 
   // Remove all the messages from the backup
-  const db = sqlite.openDatabase(backupPath);
+  let db = sqlite.openDatabase(backupPath);
   await sqlite.runQuery(db, 'DELETE FROM messages_crdt');
   await sqlite.runQuery(db, 'DELETE FROM messages_clock');
   sqlite.closeDatabase(db);
 
-  const toRemove = await updateBackups(await getBackups(id));
+  let toRemove = await updateBackups(await getBackups(id));
   for (let id of toRemove) {
     await fs.removeFile(fs.join(budgetDir, 'backups', id));
   }
@@ -131,7 +131,7 @@ export async function makeBackup(id) {
 }
 
 export async function loadBackup(id, backupId) {
-  const budgetDir = fs.getBudgetDir(id);
+  let budgetDir = fs.getBudgetDir(id);
 
   if (!(await fs.exists(fs.join(budgetDir, LATEST_BACKUP_FILENAME)))) {
     // If this is the first time we're loading a backup, save the

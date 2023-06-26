@@ -101,18 +101,18 @@ export function cashFlowByDate(start, end, isConcise, conditions = []) {
 
 function recalculate(data, start, end, isConcise) {
   let [startingBalance, income, expense] = data;
-  const dates = isConcise
+  let dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),
         monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
-  const incomes = index(
+  let incomes = index(
     income,
     'date',
     isConcise ? fromDateRepr : fromDateReprToDay,
   );
-  const expenses = index(
+  let expenses = index(
     expense,
     'date',
     isConcise ? fromDateRepr : fromDateReprToDay,
@@ -121,7 +121,7 @@ function recalculate(data, start, end, isConcise) {
   let balance = startingBalance;
   let totalExpenses = 0;
   let totalIncome = 0;
-  const graphData = dates.reduce(
+  let graphData = dates.reduce(
     (res, date) => {
       let income = 0;
       let expense = 0;
@@ -136,9 +136,9 @@ function recalculate(data, start, end, isConcise) {
       totalExpenses += expense;
       totalIncome += income;
       balance += income + expense;
-      const x = d.parseISO(date);
+      let x = d.parseISO(date);
 
-      const label = (
+      let label = (
         <div>
           <div style={{ marginBottom: 10 }}>
             <strong>
@@ -170,7 +170,7 @@ function recalculate(data, start, end, isConcise) {
     { expenses: [], income: [], balances: [] },
   );
 
-  const { balances } = graphData;
+  let { balances } = graphData;
 
   return {
     graphData,

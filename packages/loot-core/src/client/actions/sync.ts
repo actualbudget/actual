@@ -36,7 +36,7 @@ export function resetSync() {
 
 export function sync() {
   return async (dispatch, getState) => {
-    const prefs = getState().prefs.local;
+    let prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       let { error } = await send('sync');
       return { error };

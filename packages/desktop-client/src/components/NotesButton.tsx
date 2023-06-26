@@ -91,9 +91,9 @@ export default function NotesButton({
     tooltip.close();
   }
 
-  const [delayHandler, setDelayHandler] = useState(null);
+  let [delayHandler, setDelayHandler] = useState(null);
 
-  const handleMouseEnter = () => {
+  let handleMouseEnter = () => {
     setDelayHandler(
       setTimeout(() => {
         setHover(true);
@@ -101,13 +101,13 @@ export default function NotesButton({
     );
   };
 
-  const handleMouseLeave = () => {
+  let handleMouseLeave = () => {
     clearTimeout(delayHandler);
     setHover(false);
   };
 
   // This account for both the tooltip hover, and editing tooltip
-  const tooltipOpen = tooltip.isOpen || (hasNotes && hover);
+  let tooltipOpen = tooltip.isOpen || (hasNotes && hover);
 
   return (
     <View

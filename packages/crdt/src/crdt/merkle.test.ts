@@ -31,7 +31,7 @@ describe('merkle trie', () => {
     let trie1: { hash?: unknown } = {};
     let trie2: { hash?: unknown } = {};
 
-    const messages = [
+    let messages = [
       // First client messages
       message('2018-11-13T13:20:40.122Z-0000-0123456789ABCDEF', 1000),
       message('2018-11-14T13:05:35.122Z-0000-0123456789ABCDEF', 1100),

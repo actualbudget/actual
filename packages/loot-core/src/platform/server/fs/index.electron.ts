@@ -13,28 +13,28 @@ if (__filename.match('bundle')) {
   rootPath = path.join(__dirname, '..');
 }
 
-export const init = () => {
+export let init = () => {
   // Nothing to do
 };
 
-export const getDataDir = () => {
+export let getDataDir = () => {
   if (!process.env.ACTUAL_DATA_DIR) {
     throw new Error('ACTUAL_DATA_DIR env variable is required');
   }
   return process.env.ACTUAL_DATA_DIR;
 };
 
-export const bundledDatabasePath = path.join(rootPath, 'default-db.sqlite');
+export let bundledDatabasePath = path.join(rootPath, 'default-db.sqlite');
 
-export const migrationsPath = path.join(rootPath, 'migrations');
+export let migrationsPath = path.join(rootPath, 'migrations');
 
-export const demoBudgetPath = path.join(rootPath, 'demo-budget');
+export let demoBudgetPath = path.join(rootPath, 'demo-budget');
 
-export const join = path.join;
+export let join = path.join;
 
-export const basename = filepath => path.basename(filepath);
+export let basename = filepath => path.basename(filepath);
 
-export const listDir: T.ListDir = filepath =>
+export let listDir: T.ListDir = filepath =>
   new Promise((resolve, reject) => {
     fs.readdir(filepath, (err, files) => {
       if (err) {
@@ -45,14 +45,14 @@ export const listDir: T.ListDir = filepath =>
     });
   });
 
-export const exists = filepath =>
+export let exists = filepath =>
   new Promise(resolve => {
     fs.access(filepath, fs.constants.F_OK, err => {
       return resolve(!err);
     });
   });
 
-export const mkdir = filepath =>
+export let mkdir = filepath =>
   new Promise((resolve, reject) => {
     fs.mkdir(filepath, err => {
       if (err) {
@@ -63,7 +63,7 @@ export const mkdir = filepath =>
     });
   });
 
-export const size = filepath =>
+export let size = filepath =>
   new Promise((resolve, reject) => {
     fs.stat(filepath, (err, stats) => {
       if (err) {
@@ -74,10 +74,10 @@ export const size = filepath =>
     });
   });
 
-export const copyFile = (frompath, topath) => {
+export let copyFile = (frompath, topath) => {
   return new Promise((resolve, reject) => {
-    const readStream = fs.createReadStream(frompath);
-    const writeStream = fs.createWriteStream(topath);
+    let readStream = fs.createReadStream(frompath);
+    let writeStream = fs.createWriteStream(topath);
 
     readStream.on('error', reject);
     writeStream.on('error', reject);
@@ -87,7 +87,7 @@ export const copyFile = (frompath, topath) => {
   });
 };
 
-export const readFile: T.ReadFile = (
+export let readFile: T.ReadFile = (
   filepath: string,
   encoding: 'utf8' | 'binary' | null = 'utf8',
 ) => {
@@ -109,7 +109,7 @@ export const readFile: T.ReadFile = (
   });
 };
 
-export const writeFile: T.WriteFile = (filepath, contents) => {
+export let writeFile: T.WriteFile = (filepath, contents) => {
   return new Promise(function (resolve, reject) {
     // @ts-expect-error contents type needs refining
     fs.writeFile(filepath, contents, 'utf8', function (err) {
@@ -118,7 +118,7 @@ export const writeFile: T.WriteFile = (filepath, contents) => {
   });
 };
 
-export const removeFile = filepath => {
+export let removeFile = filepath => {
   return new Promise(function (resolve, reject) {
     fs.unlink(filepath, err => {
       return err ? reject(err) : resolve(undefined);
@@ -126,7 +126,7 @@ export const removeFile = filepath => {
   });
 };
 
-export const removeDir = dirpath => {
+export let removeDir = dirpath => {
   return new Promise(function (resolve, reject) {
     fs.rmdir(dirpath, err => {
       return err ? reject(err) : resolve(undefined);
@@ -134,10 +134,10 @@ export const removeDir = dirpath => {
   });
 };
 
-export const removeDirRecursively = async dirpath => {
+export let removeDirRecursively = async dirpath => {
   if (await exists(dirpath)) {
     for (let file of await listDir(dirpath)) {
-      const fullpath = join(dirpath, file);
+      let fullpath = join(dirpath, file);
       if (fs.statSync(fullpath).isDirectory()) {
         await removeDirRecursively(fullpath);
       } else {
@@ -149,7 +149,7 @@ export const removeDirRecursively = async dirpath => {
   }
 };
 
-export const getModifiedTime = filepath => {
+export let getModifiedTime = filepath => {
   return new Promise(function (resolve, reject) {
     fs.stat(filepath, (err, stats) => {
       if (err) {

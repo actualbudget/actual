@@ -128,7 +128,7 @@ async function processCleanup(month) {
   }
 }
 
-const TEMPLATE_PREFIX = '#cleanup ';
+let TEMPLATE_PREFIX = '#cleanup ';
 async function getCategoryTemplates() {
   let templates = {};
 

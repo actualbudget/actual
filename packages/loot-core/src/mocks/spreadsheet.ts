@@ -1,5 +1,5 @@
 function makeSpreadsheet() {
-  const cells = {};
+  let cells = {};
   return {
     observers: [],
     _getNode(sheetName, name) {
@@ -55,17 +55,17 @@ function makeSpreadsheet() {
     },
 
     set(sheetName, name, expr) {
-      const node = this._getNode(sheetName, name);
+      let node = this._getNode(sheetName, name);
       node.value = expr;
 
-      const resolvedName = `${sheetName}!${name}`;
+      let resolvedName = `${sheetName}!${name}`;
       if (this.observers[resolvedName]) {
         this.observers[resolvedName].forEach(cb => cb(node));
       }
     },
 
     getCellNames(sheetName) {
-      const names = Object.keys(cells);
+      let names = Object.keys(cells);
       if (sheetName) {
         return names.filter(name => name.startsWith(sheetName + '!'));
       }

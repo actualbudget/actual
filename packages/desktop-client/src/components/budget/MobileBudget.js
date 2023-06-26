@@ -25,7 +25,7 @@ class Budget extends Component {
 
     this.summary = 0;
 
-    const currentMonth = monthUtils.currentMonth();
+    let currentMonth = monthUtils.currentMonth();
     this.state = {
       bounds: { start: currentMonth, end: currentMonth },
       currentMonth: currentMonth,
@@ -47,7 +47,7 @@ class Budget extends Component {
 
     this.loadCategories();
 
-    const { start, end } = await send('get-budget-bounds');
+    let { start, end } = await send('get-budget-bounds');
     this.setState({ bounds: { start, end } });
 
     this.prewarmMonth(this.state.currentMonth);
@@ -96,7 +96,7 @@ class Budget extends Component {
   };
 
   onBudgetAction = type => {
-    const { currentMonth } = this.state;
+    let { currentMonth } = this.state;
     this.props.applyBudgetAction(currentMonth, type, this.state.bounds);
   };
 
@@ -166,7 +166,7 @@ class Budget extends Component {
   };
 
   sync = async () => {
-    const { updated, error } = await this.props.sync();
+    let { updated, error } = await this.props.sync();
     if (error) {
       return 'error';
     } else if (updated) {
@@ -231,8 +231,8 @@ class Budget extends Component {
   };
 
   render() {
-    const { currentMonth, bounds, editMode, initialized } = this.state;
-    const {
+    let { currentMonth, bounds, editMode, initialized } = this.state;
+    let {
       categories,
       categoryGroups,
       prefs,

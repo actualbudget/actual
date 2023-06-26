@@ -84,7 +84,7 @@ describe('Budgets', () => {
     await db.openDatabase('test-budget');
     await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
 
-    const spy = jest.spyOn(console, 'warn').mockImplementation();
+    let spy = jest.spyOn(console, 'warn').mockImplementation();
 
     let { error } = await runHandler(handlers['load-budget'], {
       id: 'test-budget',
@@ -134,13 +134,13 @@ describe('Accounts', () => {
 
     // Go through each account and make sure the starting balance was
     // created correctly
-    const res = await db.all('SELECT * FROM accounts');
+    let res = await db.all('SELECT * FROM accounts');
     for (let account of res) {
-      const sum = await db.first(
+      let sum = await db.first(
         'SELECT sum(amount) as sum FROM transactions WHERE acct = ? AND starting_balance_flag = 0',
         [account.id],
       );
-      const starting = await db.first(
+      let starting = await db.first(
         'SELECT * FROM transactions WHERE acct = ? AND starting_balance_flag = 1',
         [account.id],
       );
@@ -148,7 +148,7 @@ describe('Accounts', () => {
 
       // Also ensure that the starting balance has the earliest date
       // possible
-      const earliestTrans = await db.first(
+      let earliestTrans = await db.first(
         'SELECT p.name as payee_name FROM transactions t LEFT JOIN payees p ON p.id = t.description WHERE acct = ? ORDER BY date LIMIT 1',
         [account.id],
       );
@@ -178,7 +178,7 @@ describe('Accounts', () => {
       });
     });
 
-    const id = 'test-transfer';
+    let id = 'test-transfer';
     await runHandler(handlers['transaction-add'], {
       id,
       account: 'one',
@@ -206,7 +206,7 @@ describe('Accounts', () => {
 
 describe('Budget', () => {
   test('new budgets should be created', async () => {
-    const spreadsheet = await sheet.loadSpreadsheet(db);
+    let spreadsheet = await sheet.loadSpreadsheet(db);
 
     await runMutator(async () => {
       await db.insertCategoryGroup({
@@ -247,7 +247,7 @@ describe('Budget', () => {
   });
 
   test('budget updates when changing a category', async () => {
-    const spreadsheet = await sheet.loadSpreadsheet(db);
+    let spreadsheet = await sheet.loadSpreadsheet(db);
     function captureChangedCells(func) {
       return new Promise<unknown[]>(async resolve => {
         let changed = [];

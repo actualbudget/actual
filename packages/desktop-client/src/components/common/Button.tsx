@@ -21,7 +21,7 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   as?: 'button';
 };
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+let Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
@@ -114,7 +114,7 @@ type ButtonWithLoadingProps = ButtonProps & {
   loading?: boolean;
 };
 
-export const ButtonWithLoading = forwardRef<
+export let ButtonWithLoading = forwardRef<
   HTMLButtonElement,
   ButtonWithLoadingProps
 >((props, ref) => {

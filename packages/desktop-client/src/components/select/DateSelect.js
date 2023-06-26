@@ -194,7 +194,7 @@ export default function DateSelect({
   let [selectedValue, setSelectedValue] = useState(value);
   let userSelectedValue = useRef(selectedValue);
 
-  const firstDayOfWeekIdx = useSelector(state =>
+  let firstDayOfWeekIdx = useSelector(state =>
     state.prefs.local?.firstDayOfWeekIdx
       ? state.prefs.local.firstDayOfWeekIdx
       : '0',

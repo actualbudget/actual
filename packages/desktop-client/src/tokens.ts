@@ -8,7 +8,7 @@ type NumericBreakpoints = {
   [key in BreakpointNames]: number;
 };
 
-export const breakpoints: NumericBreakpoints = {
+export let breakpoints: NumericBreakpoints = {
   small: 512,
   medium: 730,
   wide: 1100,
@@ -24,7 +24,7 @@ type BreakpointsPx = {
 //   breakpoint_medium: '740px',
 //   breakpoint_wide: '1100px',
 // }
-const breakpointsInPx: BreakpointsPx = Object.entries(
+let breakpointsInPx: BreakpointsPx = Object.entries(
   breakpoints,
 ).reduce<BreakpointsPx>((acc, [key, val]) => {
   acc[`breakpoint_${key}`] = `${val}px`;

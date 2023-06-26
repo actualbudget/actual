@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgSplit = props => (
+let SvgSplit = props => (
   <svg
     {...props}
     fill="none"

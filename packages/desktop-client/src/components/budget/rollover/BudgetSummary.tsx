@@ -154,9 +154,9 @@ function ToBudget({
   return (
     <SheetValue binding={rolloverBudget.toBudget} initialValue={0}>
       {node => {
-        const availableValue = parseInt(node.value);
-        const num = isNaN(availableValue) ? 0 : availableValue;
-        const isNegative = num < 0;
+        let availableValue = parseInt(node.value);
+        let num = isNaN(availableValue) ? 0 : availableValue;
+        let isNegative = num < 0;
 
         return (
           <View style={{ alignItems: 'center' }}>

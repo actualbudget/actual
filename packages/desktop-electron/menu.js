@@ -1,7 +1,7 @@
-const { Menu, ipcMain, app, shell } = require('electron');
+let { Menu, ipcMain, app, shell } = require('electron');
 
 function getMenu(isDev, createWindow) {
-  const template = [
+  let template = [
     {
       label: 'File',
       submenu: [
@@ -169,7 +169,7 @@ function getMenu(isDev, createWindow) {
       },
     });
   } else if (process.platform === 'darwin') {
-    const name = app.getName();
+    let name = app.getName();
     template.unshift({
       label: name,
       submenu: [

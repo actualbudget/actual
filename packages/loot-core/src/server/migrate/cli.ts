@@ -14,7 +14,7 @@ import {
   migrate,
 } from './migrations';
 
-const argv = require('yargs').options({
+let argv = require('yargs').options({
   m: {
     alias: 'migrationsDir',
     requiresArg: true,
@@ -38,18 +38,18 @@ function getDatabase() {
 }
 
 function create(migrationName) {
-  const migrationsDir = getMigrationsDir();
-  const ts = Date.now();
-  const up = path.resolve(migrationsDir, ts + '_' + migrationName + '.sql');
+  let migrationsDir = getMigrationsDir();
+  let ts = Date.now();
+  let up = path.resolve(migrationsDir, ts + '_' + migrationName + '.sql');
 
   fs.writeFileSync(up, 'BEGIN TRANSACTION;\n\nCOMMIT;', 'utf8');
 }
 
 async function list(db) {
-  const migrationsDir = getMigrationsDir();
-  const applied = await getAppliedMigrations(getDatabase());
-  const all = await getMigrationList(migrationsDir);
-  const pending = getPending(applied, all);
+  let migrationsDir = getMigrationsDir();
+  let applied = await getAppliedMigrations(getDatabase());
+  let all = await getMigrationList(migrationsDir);
+  let pending = getPending(applied, all);
 
   console.log('Applied migrations:');
   applied.forEach(id => console.log('  ', getUpMigration(id, all)));
@@ -58,20 +58,20 @@ async function list(db) {
   pending.forEach(name => console.log('  ', name));
 }
 
-const cmd = argv._[0];
+let cmd = argv._[0];
 
 withMigrationsDir(argv.migrationsDir || getMigrationsDir(), async () => {
   switch (cmd) {
     case 'reset':
       fs.unlinkSync(argv.db);
-      const initSql = fs.readFileSync(
+      let initSql = fs.readFileSync(
         path.join(__dirname, '../../../src/server/sql/init.sql'),
         'utf8',
       );
       getDatabase().exec(initSql);
       break;
     case 'migrate':
-      const applied = await migrate(getDatabase());
+      let applied = await migrate(getDatabase());
       if (applied.length === 0) {
         console.log('No pending migrations');
       } else {
@@ -83,7 +83,7 @@ withMigrationsDir(argv.migrationsDir || getMigrationsDir(), async () => {
       break;
     case 'create':
     default:
-      const name = argv.name;
+      let name = argv.name;
       if (name == null || name === '') {
         console.log('Must pass a name for the new migration with --name');
         process.exit(1);

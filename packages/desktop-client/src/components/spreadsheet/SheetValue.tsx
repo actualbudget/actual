@@ -37,7 +37,7 @@ export default function SheetValue({
     binding = { ...binding, name: binding.value.toString() };
   }
 
-  const bindingObj =
+  let bindingObj =
     typeof binding === 'string' ? { name: binding, value: null } : binding;
 
   if (bindingObj.name == null) {

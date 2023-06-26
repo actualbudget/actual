@@ -23,7 +23,7 @@ export class RulesPage {
    * 0-based index
    */
   async getNthRule(index) {
-    const row = this.page.getByTestId('table').getByTestId('row').nth(index);
+    let row = this.page.getByTestId('table').getByTestId('row').nth(index);
 
     return {
       conditions: await row
@@ -63,10 +63,10 @@ export class RulesPage {
   }
 
   async _fillEditorFields(data, rootElement) {
-    for (const idx in data) {
-      const { field, op, value } = data[idx];
+    for (let idx in data) {
+      let { field, op, value } = data[idx];
 
-      const row = rootElement.getByTestId('editor-row').nth(idx);
+      let row = rootElement.getByTestId('editor-row').nth(idx);
 
       if (!(await row.isVisible())) {
         await rootElement.getByRole('button', { name: 'Add entry' }).click();

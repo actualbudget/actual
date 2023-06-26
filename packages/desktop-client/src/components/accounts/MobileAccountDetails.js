@@ -12,7 +12,7 @@ import CellValue from '../spreadsheet/CellValue';
 import { TransactionList } from './MobileTransaction';
 
 function TransactionSearchInput({ accountName, onSearch }) {
-  const [text, setText] = useState('');
+  let [text, setText] = useState('');
 
   return (
     <View
@@ -59,7 +59,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
   );
 }
 
-const LEFT_RIGHT_FLEX_WIDTH = 70;
+let LEFT_RIGHT_FLEX_WIDTH = 70;
 export default function AccountDetails({
   account,
   prependTransactions,

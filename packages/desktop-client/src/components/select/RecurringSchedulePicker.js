@@ -14,18 +14,18 @@ import { useTooltip } from '../tooltips';
 import DateSelect from './DateSelect';
 
 // ex: There is no 6th Friday of the Month
-const MAX_DAY_OF_WEEK_INTERVAL = 5;
+let MAX_DAY_OF_WEEK_INTERVAL = 5;
 
-const FREQUENCY_OPTIONS = [
+let FREQUENCY_OPTIONS = [
   { id: 'daily', name: 'Days' },
   { id: 'weekly', name: 'Weeks' },
   { id: 'monthly', name: 'Months' },
   { id: 'yearly', name: 'Years' },
 ];
 
-const DAY_OF_MONTH_OPTIONS = [...Array(31).keys()].map(day => day + 1);
+let DAY_OF_MONTH_OPTIONS = [...Array(31).keys()].map(day => day + 1);
 
-const DAY_OF_WEEK_OPTIONS = [
+let DAY_OF_WEEK_OPTIONS = [
   { id: 'SU', name: 'Sunday' },
   { id: 'MO', name: 'Monday' },
   { id: 'TU', name: 'Tuesday' },
@@ -132,7 +132,7 @@ function reducer(state, action) {
 }
 
 function SchedulePreview({ previewDates }) {
-  const dateFormat = useSelector(state =>
+  let dateFormat = useSelector(state =>
     (state.prefs.local.dateFormat || 'MM/dd/yyyy')
       .replace('MM', 'M')
       .replace('dd', 'd'),
@@ -173,7 +173,7 @@ function SchedulePreview({ previewDates }) {
 }
 
 function validInterval(interval) {
-  const intInterval = parseInt(interval);
+  let intInterval = parseInt(interval);
   return Number.isInteger(intInterval) && intInterval > 0 ? intInterval : 1;
 }
 

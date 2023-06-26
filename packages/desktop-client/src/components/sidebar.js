@@ -23,9 +23,9 @@ import { useSidebar } from './FloatableSidebar';
 import { useDraggable, useDroppable, DropHighlight } from './sort';
 import CellValue from './spreadsheet/CellValue';
 
-export const SIDEBAR_WIDTH = 240;
+export let SIDEBAR_WIDTH = 240;
 
-const fontWeight = 600;
+let fontWeight = 600;
 
 function ItemContent({
   style,
@@ -77,15 +77,15 @@ function Item({
   forceHover = false,
   forceActive = false,
 }) {
-  const hoverStyle = {
+  let hoverStyle = {
     backgroundColor: colors.n2,
   };
-  const activeStyle = {
+  let activeStyle = {
     borderLeft: '4px solid ' + colors.p8,
     paddingLeft: 19 + indent - 4,
     color: colors.p8,
   };
-  const linkStyle = [
+  let linkStyle = [
     {
       ...styles.mediumText,
       paddingTop: 9,
@@ -99,7 +99,7 @@ function Item({
     { ':hover': hoverStyle },
   ];
 
-  const content = (
+  let content = (
     <View
       style={{
         flexDirection: 'row',
@@ -131,16 +131,16 @@ function Item({
 }
 
 function SecondaryItem({ Icon, title, style, to, onClick, bold, indent = 0 }) {
-  const hoverStyle = {
+  let hoverStyle = {
     backgroundColor: colors.n2,
   };
-  const activeStyle = {
+  let activeStyle = {
     borderLeft: '4px solid ' + colors.p8,
     paddingLeft: 14 - 4 + indent,
     color: colors.p8,
     fontWeight: bold ? fontWeight : null,
   };
-  const linkStyle = [
+  let linkStyle = [
     accountNameStyle,
     {
       color: colors.n9,
@@ -150,7 +150,7 @@ function SecondaryItem({ Icon, title, style, to, onClick, bold, indent = 0 }) {
     { ':hover': hoverStyle },
   ];
 
-  const content = (
+  let content = (
     <View
       style={{
         flexDirection: 'row',
@@ -468,7 +468,7 @@ function Tools() {
   let onToggle = useCallback(() => setOpen(open => !open), []);
   let location = useLocation();
 
-  const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
+  let isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
     location.pathname.startsWith(route),
   );
 
@@ -532,7 +532,7 @@ export function Sidebar({
 }) {
   let hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
-  const sidebar = useSidebar();
+  let sidebar = useSidebar();
 
   return (
     <View

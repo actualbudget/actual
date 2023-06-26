@@ -151,7 +151,7 @@ export function uncategorizedCount() {
   };
 }
 
-export const rolloverBudget = {
+export let rolloverBudget = {
   incomeAvailable: 'available-funds',
   lastMonthOverspent: 'last-month-overspent',
   forNextMonth: 'buffered',
@@ -175,7 +175,7 @@ export const rolloverBudget = {
   catCarryover: id => `carryover-${id}`,
 };
 
-export const reportBudget = {
+export let reportBudget = {
   totalBudgetedExpense: 'total-budgeted',
   totalBudgetedIncome: 'total-budget-income',
   totalBudgetedSaved: 'total-saved',

@@ -23,7 +23,7 @@ type NativeCategorySelectProps = HTMLPropsWithStyle<HTMLSelectElement> & {
   categoryGroups: CategoryGroup[];
   emptyLabel: string;
 };
-export const NativeCategorySelect = forwardRef<
+export let NativeCategorySelect = forwardRef<
   HTMLSelectElement,
   NativeCategorySelectProps
 >(({ categoryGroups, emptyLabel, ...nativeProps }, ref) => {
@@ -107,7 +107,7 @@ function CategoryList({
             );
           }
 
-          const showGroup = item.cat_group !== lastGroup;
+          let showGroup = item.cat_group !== lastGroup;
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>

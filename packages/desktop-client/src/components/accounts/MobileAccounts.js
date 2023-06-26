@@ -148,7 +148,7 @@ class AccountList extends Component {
   };
 
   render() {
-    const {
+    let {
       accounts,
       updatedAccounts,
       // transactions,
@@ -161,19 +161,15 @@ class AccountList extends Component {
       // onSelectTransaction,
       // refreshControl
     } = this.props;
-    const budgetedAccounts = accounts.filter(
-      account => account.offbudget === 0,
-    );
-    const offbudgetAccounts = accounts.filter(
-      account => account.offbudget === 1,
-    );
+    let budgetedAccounts = accounts.filter(account => account.offbudget === 0);
+    let offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
     // If there are no accounts, show a helpful message
     if (accounts.length === 0) {
       return <EmptyMessage onAdd={onAddAccount} />;
     }
 
-    const accountContent = (
+    let accountContent = (
       <Page title="Accounts">
         <AccountHeader name="Budgeted" amount={getOnBudgetBalance()} />
         {budgetedAccounts.map((acct, idx) => (
@@ -228,11 +224,11 @@ class AccountList extends Component {
 }
 
 function Accounts(props) {
-  const transactions = useState({});
-  const navigate = useNavigate();
+  let transactions = useState({});
+  let navigate = useNavigate();
 
   useEffect(() => {
-    const getAccounts = async () => {
+    let getAccounts = async () => {
       if (props.categories.length === 0) {
         await props.getCategories();
       }
@@ -247,11 +243,11 @@ function Accounts(props) {
   //   await props.syncAndDownload();
   // };
 
-  const onSelectAccount = id => {
+  let onSelectAccount = id => {
     navigate(`/accounts/${id}`);
   };
 
-  const onSelectTransaction = transaction => {
+  let onSelectTransaction = transaction => {
     navigate(`/transaction/${transaction}`);
   };
 

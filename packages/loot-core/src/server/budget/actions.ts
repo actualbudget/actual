@@ -6,7 +6,7 @@ import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
 export async function getSheetValue(sheetName, cell) {
-  const node = await sheet.getCell(sheetName, cell);
+  let node = await sheet.getCell(sheetName, cell);
   return safeNumber(typeof node.value === 'number' ? node.value : 0);
 }
 
@@ -68,7 +68,7 @@ export function getBudget({ category, month }) {
 
 export function setBudget({ category, month, amount }) {
   amount = safeNumber(typeof amount === 'number' ? amount : 0);
-  const table = getBudgetTable();
+  let table = getBudgetTable();
 
   let existing = db.firstSync(
     `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
@@ -179,7 +179,7 @@ export async function set3MonthAvg({ month }) {
         'sum-amount-' + cat.id,
       );
 
-      const avg = Math.round((spent1 + spent2 + spent3) / 3);
+      let avg = Math.round((spent1 + spent2 + spent3) / 3);
       setBudget({ category: cat.id, month, amount: -avg });
     }
   });
@@ -228,7 +228,7 @@ export async function coverOverspending({ month, to, from }) {
 
   // If we are covering it from the to be budgeted amount, ignore this
   if (from !== 'to-be-budgeted') {
-    const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
+    let fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
     await setBudget({
       category: from,
       month,
@@ -249,15 +249,15 @@ export async function transferAvailable({ month, amount, category }) {
 }
 
 export async function transferCategory({ month, amount, from, to }) {
-  const sheetName = monthUtils.sheetForMonth(month);
-  const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
+  let sheetName = monthUtils.sheetForMonth(month);
+  let fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
 
   await setBudget({ category: from, month, amount: fromBudgeted - amount });
 
   // If we are simply moving it back into available cash to budget,
   // don't do anything else
   if (to !== 'to-be-budgeted') {
-    const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
+    let toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
     await setBudget({ category: to, month, amount: toBudgeted + amount });
   }
 }

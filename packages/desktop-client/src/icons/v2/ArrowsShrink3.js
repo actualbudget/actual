@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgArrowsShrink3 = props => (
+let SvgArrowsShrink3 = props => (
   <svg
     {...props}
     viewBox="0 0 24 24"

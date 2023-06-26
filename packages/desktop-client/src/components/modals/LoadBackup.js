@@ -14,8 +14,8 @@ class BackupTable extends Component {
   };
 
   render() {
-    const { backups, onSelect } = this.props;
-    const { hoveredBackup } = this.state;
+    let { backups, onSelect } = this.props;
+    let { hoveredBackup } = this.state;
 
     return (
       <View
@@ -63,8 +63,8 @@ function LoadBackup({
     }
   }, [watchUpdates]);
 
-  const latestBackup = backups.find(backup => backup.isLatest);
-  const previousBackups = backups.filter(backup => !backup.isLatest);
+  let latestBackup = backups.find(backup => backup.isLatest);
+  let previousBackups = backups.filter(backup => !backup.isLatest);
 
   return (
     <Modal title="Load Backup" padding={0} {...modalProps} style={{ flex: 0 }}>

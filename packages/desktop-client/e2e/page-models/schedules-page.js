@@ -32,7 +32,7 @@ export class SchedulesPage {
    * 0-based index
    */
   async getNthSchedule(index) {
-    const row = this.getNthScheduleRow(index);
+    let row = this.getNthScheduleRow(index);
 
     return {
       payee: await row.getByTestId('payee').textContent(),
@@ -62,8 +62,8 @@ export class SchedulesPage {
   }
 
   async _performNthAction(index, actionName) {
-    const row = this.getNthScheduleRow(index);
-    const actions = row.getByTestId('actions');
+    let row = this.getNthScheduleRow(index);
+    let actions = row.getByTestId('actions');
 
     await actions.getByRole('button').click();
     await this.page.getByRole('button', { name: actionName }).click();

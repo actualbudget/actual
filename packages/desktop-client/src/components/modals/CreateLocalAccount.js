@@ -29,7 +29,7 @@ function CreateLocalAccount({ modalProps, actions }) {
             initialValues={{ name: '', balance: '0' }}
             validate={() => ({})}
             onSubmit={async (values, { setErrors }) => {
-              const errors = {};
+              let errors = {};
               if (!values.name) {
                 errors.name = 'required';
               }

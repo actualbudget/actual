@@ -33,7 +33,7 @@ module.exports = {
 
       let rawText = context.getSourceCode().getText(node);
       if (strip) rawText = rawText.slice(1, -1);
-      for (const match of rawText.matchAll(/['"]/g)) {
+      for (let match of rawText.matchAll(/['"]/g)) {
         let index = node.range[0] + match.index + (strip ? 1 : 0);
         context.report({
           node,

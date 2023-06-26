@@ -16,8 +16,8 @@ import {
 import { loadRules, insertRule } from './transaction-rules';
 import * as transfer from './transfer';
 
-const papaJohns = 'Papa Johns east side';
-const lowes = 'Lowe’s Store';
+let papaJohns = 'Papa Johns east side';
+let lowes = 'Lowe’s Store';
 
 jest.mock('../../shared/months', () => ({
   ...jest.requireActual('../../shared/months'),
@@ -59,8 +59,8 @@ function expectSnapshotWithDiffer(initialValue) {
 function prepMockTransactions() {
   let mockTransactions;
   mockSyncServer.filterMockData(data => {
-    const account_id = data.accounts[0].account_id;
-    const transactions = data.transactions[account_id].filter(t => !t.pending);
+    let account_id = data.accounts[0].account_id;
+    let transactions = data.transactions[account_id].filter(t => !t.pending);
 
     mockTransactions = [
       ...transactions.filter(t => t.date <= '2017-10-15'),
@@ -84,14 +84,14 @@ async function prepareDatabase() {
     is_income: 1,
   });
 
-  const { accounts } = await post(getServer().PLAID_SERVER + '/accounts', {
+  let { accounts } = await post(getServer().PLAID_SERVER + '/accounts', {
     client_id: '',
     group_id: '',
     item_id: '1',
   });
-  const acct = accounts[0];
+  let acct = accounts[0];
 
-  const id = await db.insertAccount({
+  let id = await db.insertAccount({
     id: 'one',
     account_id: acct.account_id,
     name: acct.official_name,
@@ -137,7 +137,7 @@ describe('Account sync', () => {
 
   test('reconcile matches single transaction', async () => {
     let mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
+    let { id, account_id } = await prepareDatabase();
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
 
@@ -174,7 +174,7 @@ describe('Account sync', () => {
 
   test('reconcile matches multiple transactions', async () => {
     let mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
+    let { id, account_id } = await prepareDatabase();
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
 
@@ -238,7 +238,7 @@ describe('Account sync', () => {
 
   test('reconcile matches multiple transactions (imported_id wins)', async () => {
     let mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
+    let { id, account_id } = await prepareDatabase();
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
 
@@ -283,7 +283,7 @@ describe('Account sync', () => {
 
   test('import never matches existing with financial ids', async () => {
     let mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
+    let { id, account_id } = await prepareDatabase();
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
     let differ = expectSnapshotWithDiffer(await getAllTransactions());
@@ -324,7 +324,7 @@ describe('Account sync', () => {
 
   test('import updates transfers when matched', async () => {
     let mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
+    let { id, account_id } = await prepareDatabase();
     await db.insertAccount({ id: 'two', name: 'two' });
     await db.insertPayee({
       id: 'transfer-two',
@@ -335,11 +335,11 @@ describe('Account sync', () => {
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
     let differ = expectSnapshotWithDiffer(await getAllTransactions());
 
-    const mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
+    let mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
     mockTransaction.name = '#001 fenn st Macy’s 33333 EMX';
     mockTransaction.amount = 29.48;
 
-    const transactionId = await db.insertTransaction({
+    let transactionId = await db.insertTransaction({
       id: 'one',
       account: 'two',
       amount: 2948,
@@ -359,7 +359,7 @@ describe('Account sync', () => {
   });
 
   test('reconcile handles transactions with undefined fields', async () => {
-    const { id: acctId } = await prepareDatabase();
+    let { id: acctId } = await prepareDatabase();
 
     await db.insertTransaction({
       id: 'one',
@@ -388,7 +388,7 @@ describe('Account sync', () => {
   });
 
   test('reconcile run rules with inferred payee', async () => {
-    const { id: acctId } = await prepareDatabase();
+    let { id: acctId } = await prepareDatabase();
     await db.insertCategoryGroup({
       id: 'group2',
       name: 'group2',
@@ -426,7 +426,7 @@ describe('Account sync', () => {
   });
 
   test('reconcile avoids creating blank payees', async () => {
-    const { id: acctId } = await prepareDatabase();
+    let { id: acctId } = await prepareDatabase();
 
     await reconcileTransactions(acctId, [
       { date: '2020-01-02', payee_name: '     ', amount: 4133 },
@@ -447,7 +447,7 @@ describe('Account sync', () => {
   });
 
   test('reconcile run rules dont create unnecessary payees', async () => {
-    const { id: acctId } = await prepareDatabase();
+    let { id: acctId } = await prepareDatabase();
 
     let payeeId = await db.insertPayee({ name: 'bakkerij-renamed' });
 
@@ -473,7 +473,7 @@ describe('Account sync', () => {
 
   let testMapped = version => {
     test(`reconcile matches unmapped and mapped payees (${version})`, async () => {
-      const { id: acctId } = await prepareDatabase();
+      let { id: acctId } = await prepareDatabase();
 
       if (version === 'v1') {
         // This is quite complicated, but important to test. If a payee is
@@ -556,7 +556,7 @@ describe('Account sync', () => {
   testMapped('v2');
 
   test('addTransactions simply adds transactions', async () => {
-    const { id: acctId } = await prepareDatabase();
+    let { id: acctId } = await prepareDatabase();
 
     let payeeId = await db.insertPayee({ name: 'bakkerij-renamed' });
 
@@ -610,7 +610,7 @@ describe('Account sync', () => {
   });
 
   test('imports transactions for current day and adds latest', async () => {
-    const { id, account_id } = await prepareDatabase();
+    let { id, account_id } = await prepareDatabase();
 
     expect((await getAllTransactions()).length).toBe(0);
     await syncAccount('userId', 'userKey', id, account_id, 'bank');

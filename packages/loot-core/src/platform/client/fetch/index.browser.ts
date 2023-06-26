@@ -43,12 +43,12 @@ function handleMessage(msg) {
     // generic backend errors are handled separately and if you want
     // more specific handling you should manually forward the error
     // through a normal reply.
-    const { id } = msg;
+    let { id } = msg;
     replyHandlers.delete(id);
   } else if (msg.type === 'reply') {
-    const { id, result, mutated, undoTag } = msg;
+    let { id, result, mutated, undoTag } = msg;
 
-    const handler = replyHandlers.get(id);
+    let handler = replyHandlers.get(id);
     if (handler) {
       replyHandlers.delete(id);
 
@@ -59,9 +59,9 @@ function handleMessage(msg) {
       handler.resolve(result);
     }
   } else if (msg.type === 'push') {
-    const { name, args } = msg;
+    let { name, args } = msg;
 
-    const listens = listeners.get(name);
+    let listens = listeners.get(name);
     if (listens) {
       for (let i = 0; i < listens.length; i++) {
         let stop = listens[i](args);
@@ -135,17 +135,13 @@ function connectWorker(worker, onOpen, onError) {
   }
 }
 
-export const init: T.Init = async function (worker) {
+export let init: T.Init = async function (worker) {
   return new Promise((resolve, reject) =>
     connectWorker(worker, resolve, reject),
   );
 };
 
-export const send: T.Send = function (
-  name,
-  args,
-  { catchErrors = false } = {},
-) {
+export let send: T.Send = function (name, args, { catchErrors = false } = {}) {
   return new Promise((resolve, reject) => {
     uuid.v4().then(id => {
       replyHandlers.set(id, { resolve, reject });
@@ -166,11 +162,11 @@ export const send: T.Send = function (
   }) as any;
 };
 
-export const sendCatch: T.SendCatch = function (name, args) {
+export let sendCatch: T.SendCatch = function (name, args) {
   return send(name, args, { catchErrors: true });
 };
 
-export const listen: T.Listen = function (name, cb) {
+export let listen: T.Listen = function (name, cb) {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }
@@ -185,10 +181,10 @@ export const listen: T.Listen = function (name, cb) {
   };
 };
 
-export const unlisten: T.Unlisten = function (name) {
+export let unlisten: T.Unlisten = function (name) {
   listeners.set(name, []);
 };
 
-export const clearServer: T.ClearServer = async function () {
+export let clearServer: T.ClearServer = async function () {
   //
 };

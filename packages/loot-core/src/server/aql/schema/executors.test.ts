@@ -54,7 +54,7 @@ function expectTransactionOrder(
   data,
   fields?: Array<string | Record<string, string>>,
 ) {
-  const expectedFields = fields || [
+  let expectedFields = fields || [
     { date: 'desc' },
     'starting_balance_flag',
     { sort_order: 'desc' },

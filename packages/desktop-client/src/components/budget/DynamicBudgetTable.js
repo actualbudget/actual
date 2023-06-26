@@ -25,7 +25,7 @@ function getNumPossibleMonths(width) {
   return 6;
 }
 
-const DynamicBudgetTableInner = forwardRef(
+let DynamicBudgetTableInner = forwardRef(
   (
     {
       width,

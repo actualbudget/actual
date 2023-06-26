@@ -10,4 +10,4 @@ export {
   Timestamp,
 } from './crdt';
 
-export const SyncProtoBuf = SyncPb;
+export let SyncProtoBuf = SyncPb;

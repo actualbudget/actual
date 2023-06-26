@@ -113,14 +113,14 @@ export default function TransactionList({
   }, []);
 
   let onAddSplit = useCallback(id => {
-    const changes = addSplitTransaction(transactionsLatest.current, id);
+    let changes = addSplitTransaction(transactionsLatest.current, id);
     onChange(changes.newTransaction, changes.data);
     saveDiffAndApply(changes.diff, changes, onChange);
     return changes.diff.added[0].id;
   }, []);
 
   let onSplit = useCallback(id => {
-    const changes = splitTransaction(transactionsLatest.current, id);
+    let changes = splitTransaction(transactionsLatest.current, id);
     onChange(changes.newTransaction, changes.data);
     saveDiffAndApply(changes.diff, changes, onChange);
     return changes.diff.added[0].id;

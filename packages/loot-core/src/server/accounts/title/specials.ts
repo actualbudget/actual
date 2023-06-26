@@ -1,4 +1,4 @@
-const intended = [
+let intended = [
   'CLI',
   'API',
   'HTTP',

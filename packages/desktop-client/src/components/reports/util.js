@@ -18,7 +18,7 @@ export async function runAll(queries, cb) {
 }
 
 export function index(data, field, mapper) {
-  const result = {};
+  let result = {};
   data.forEach(item => {
     result[mapper ? mapper(item[field]) : item[field]] = item;
   });

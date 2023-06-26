@@ -5,7 +5,7 @@ let _libofxPromise;
 let _libofx;
 let ffi;
 
-var parser = {
+let parser = {
   ctx: null,
   transactions: [],
 

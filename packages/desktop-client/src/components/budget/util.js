@@ -29,7 +29,7 @@ export function makeAmountGrey(value) {
 }
 
 export function makeAmountStyle(value) {
-  const greyed = makeAmountGrey(value);
+  let greyed = makeAmountGrey(value);
   if (greyed) {
     return greyed;
   }

@@ -2,14 +2,14 @@ import { makeClock, Timestamp, merkle, SyncProtoBuf } from '@actual-app/crdt';
 
 import { basic as defaultMockData } from './mockData.json';
 
-const handlers = {};
+let handlers = {};
 let currentMockData = defaultMockData;
 let currentClock = makeClock(new Timestamp(0, 0, '0000000000000000'));
 let currentMessages = [];
 
 // Ugh, this is duplicated...
 function deserializeValue(value) {
-  const type = value[0];
+  let type = value[0];
   switch (type) {
     case '0':
       return null;
@@ -81,8 +81,8 @@ handlers['/plaid/transactions'] = ({
   count,
   offset,
 }) => {
-  const accounts = currentMockData.accounts;
-  const transactions = currentMockData.transactions[account_id].filter(
+  let accounts = currentMockData.accounts;
+  let transactions = currentMockData.transactions[account_id].filter(
     t => t.date >= start_date && t.date <= end_date,
   );
 
@@ -93,22 +93,22 @@ handlers['/plaid/transactions'] = ({
   };
 };
 
-export const filterMockData = func => {
+export let filterMockData = func => {
   let copied = JSON.parse(JSON.stringify(defaultMockData));
   currentMockData = func(copied);
 };
 
-export const reset = () => {
+export let reset = () => {
   currentMockData = defaultMockData;
   currentClock = makeClock(new Timestamp(0, 0, '0000000000000000'));
   currentMessages = [];
 };
 
-export const getClock = () => {
+export let getClock = () => {
   return currentClock;
 };
 
-export const getMessages = () => {
+export let getMessages = () => {
   return currentMessages.map(msg => {
     let { timestamp, content } = msg;
     let fields = SyncProtoBuf.Message.deserializeBinary(content);
@@ -123,7 +123,7 @@ export const getMessages = () => {
   });
 };
 
-export const handleRequest = (url, data) => {
+export let handleRequest = (url, data) => {
   url = url.replace(/http(s)?:\/\/[^/]*/, '');
   if (!handlers[url]) {
     throw new Error('No url handler for ' + url);

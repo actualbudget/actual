@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const SvgMic = props => (
+let SvgMic = props => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"

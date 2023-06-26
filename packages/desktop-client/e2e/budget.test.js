@@ -20,7 +20,7 @@ test.describe('Budget', () => {
   });
 
   test('renders the summary information: available funds, overspent, budgeted and for next month', async () => {
-    const summary = budgetPage.budgetSummary.first();
+    let summary = budgetPage.budgetSummary.first();
 
     await expect(summary.getByText('Available Funds')).toBeVisible({
       timeout: 10000,
@@ -31,8 +31,8 @@ test.describe('Budget', () => {
   });
 
   test('transfer funds to another category', async () => {
-    const currentFundsA = await budgetPage.getBalanceForRow(1);
-    const currentFundsB = await budgetPage.getBalanceForRow(2);
+    let currentFundsA = await budgetPage.getBalanceForRow(1);
+    let currentFundsB = await budgetPage.getBalanceForRow(2);
 
     await budgetPage.transferAllBalance(1, 2);
     await page.waitForTimeout(1000);

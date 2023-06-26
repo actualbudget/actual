@@ -1,10 +1,10 @@
-const { ipcRenderer } = require('electron');
+let { ipcRenderer } = require('electron');
 
-const root = document.querySelector('#root');
+let root = document.querySelector('#root');
 
-const { version: appVersion } = ipcRenderer.sendSync('get-bootstrap-data');
+let { version: appVersion } = ipcRenderer.sendSync('get-bootstrap-data');
 
-const iconPath = __dirname + '/../icons/icon.png';
+let iconPath = __dirname + '/../icons/icon.png';
 
 root.style.display = 'flex';
 root.style.flexDirection = 'column';
@@ -23,17 +23,17 @@ root.innerHTML = `
   <div style="color:rgba(0, 0, 0, .45)">&copy; 2020 Shift Reset LLC</div>
 `;
 
-const container = root.querySelector('#container');
+let container = root.querySelector('#container');
 container.style.height = '45px';
 container.style.textAlign = 'center';
 
-const updateEl = root.querySelector('#update-check');
-const applyUpdateEl = root.querySelector('#apply-update');
+let updateEl = root.querySelector('#update-check');
+let applyUpdateEl = root.querySelector('#apply-update');
 applyUpdateEl.style.display = 'none';
-const successEl = root.querySelector('#success');
+let successEl = root.querySelector('#success');
 successEl.style.display = 'none';
 successEl.style.textAlign = 'center';
-const errorEl = root.querySelector('#error');
+let errorEl = root.querySelector('#error');
 errorEl.style.display = 'none';
 
 root.querySelector('#update-check button').addEventListener('click', () => {

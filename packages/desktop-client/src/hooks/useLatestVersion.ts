@@ -4,7 +4,7 @@ import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 function useIsOutdated(): boolean {
   let [isOutdated, setIsOutdated] = useState(false);
-  const latestVersion = useLatestVersion();
+  let latestVersion = useLatestVersion();
 
   useEffect(() => {
     (async () => {

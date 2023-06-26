@@ -76,7 +76,7 @@ export async function getAccounts(userId, userKey, id) {
 }
 
 export async function getNordigenAccounts(userId, userKey, id) {
-  const userToken = await asyncStorage.getItem('user-token');
+  let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
   let res = await post(
@@ -125,9 +125,9 @@ async function downloadTransactions(
   let numDownloaded = 0;
 
   while (1) {
-    const endDate = monthUtils.currentDay();
+    let endDate = monthUtils.currentDay();
 
-    const res = await post(getServer().PLAID_SERVER + '/transactions', {
+    let res = await post(getServer().PLAID_SERVER + '/transactions', {
       userId: userId,
       key: userKey,
       item_id: '' + bankId,
@@ -184,9 +184,9 @@ async function downloadNordigenTransactions(
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  const endDate = new Date().toISOString().split('T')[0];
+  let endDate = new Date().toISOString().split('T')[0];
 
-  const res = await post(
+  let res = await post(
     getServer().NORDIGEN_SERVER + '/transactions',
     {
       userId: userId,
@@ -205,7 +205,7 @@ async function downloadNordigenTransactions(
     throw BankSyncError(res.error_type, res.error_code);
   }
 
-  const {
+  let {
     transactions: { all },
     balances,
     startingBalance,
@@ -313,7 +313,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
     // if this is a "Credited" or "Debited" transaction. This means
     // that it matters whether the amount is a positive or negative zero.
     if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
-      const nameParts = [];
+      let nameParts = [];
       nameParts.push(
         title(
           trans.debtorName ||
@@ -332,7 +332,7 @@ async function normalizeNordigenTransactions(transactions, acctId) {
       }
       payee_name = nameParts.join(' ');
     } else {
-      const nameParts = [];
+      let nameParts = [];
       nameParts.push(
         title(
           trans.creditorName ||
@@ -399,9 +399,9 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
 }
 
 export async function reconcileNordigenTransactions(acctId, transactions) {
-  const hasMatched = new Set();
-  const updated = [];
-  const added = [];
+  let hasMatched = new Set();
+  let updated = [];
+  let added = [];
 
   let { normalized, payeesToCreate } = await normalizeNordigenTransactions(
     transactions,
@@ -504,7 +504,7 @@ export async function reconcileNordigenTransactions(acctId, transactions) {
       };
 
       // Update the transaction
-      const updates = {
+      let updates = {
         date: trans.date,
         imported_id: trans.imported_id || null,
         payee: existing.payee || trans.payee || null,
@@ -544,9 +544,9 @@ export async function reconcileNordigenTransactions(acctId, transactions) {
 }
 
 export async function reconcileTransactions(acctId, transactions) {
-  const hasMatched = new Set();
-  const updated = [];
-  const added = [];
+  let hasMatched = new Set();
+  let updated = [];
+  let added = [];
 
   let { normalized, payeesToCreate } = await normalizeTransactions(
     transactions,
@@ -649,7 +649,7 @@ export async function reconcileTransactions(acctId, transactions) {
       };
 
       // Update the transaction
-      const updates = {
+      let updates = {
         date: trans.date,
         imported_id: trans.imported_id || null,
         payee: existing.payee || trans.payee || null,
@@ -695,7 +695,7 @@ export async function addTransactions(
   transactions,
   { runTransfers = true } = {},
 ) {
-  const added = [];
+  let added = [];
 
   let { normalized, payeesToCreate } = await normalizeTransactions(
     transactions,
@@ -741,19 +741,19 @@ export async function addTransactions(
 export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
   // TODO: Handle the case where transactions exist in the future
   // (that will make start date after end date)
-  const latestTransaction = await db.first(
+  let latestTransaction = await db.first(
     'SELECT * FROM v_transactions WHERE account = ? ORDER BY date DESC LIMIT 1',
     [id],
   );
 
-  const acctRow = await db.select('accounts', id);
+  let acctRow = await db.select('accounts', id);
 
   if (latestTransaction) {
-    const startingTransaction = await db.first(
+    let startingTransaction = await db.first(
       'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
       [id],
     );
-    const startingDate = db.fromDateRepr(startingTransaction.date);
+    let startingDate = db.fromDateRepr(startingTransaction.date);
     // assert(startingTransaction)
 
     // Get all transactions since the latest transaction, plus any 5
@@ -785,22 +785,21 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
     transactions = transactions.map(trans => ({ ...trans, account: id }));
 
     return runMutator(async () => {
-      const result = await reconcileNordigenTransactions(id, transactions);
+      let result = await reconcileNordigenTransactions(id, transactions);
       await updateAccountBalance(id, accountBalance);
       return result;
     });
   } else {
     // Otherwise, download transaction for the past 30 days
-    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 30);
+    let startingDay = monthUtils.subDays(monthUtils.currentDay(), 30);
 
-    const { transactions, startingBalance } =
-      await downloadNordigenTransactions(
-        userId,
-        userKey,
-        acctId,
-        bankId,
-        dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd'),
-      );
+    let { transactions, startingBalance } = await downloadNordigenTransactions(
+      userId,
+      userKey,
+      acctId,
+      bankId,
+      dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd'),
+    );
 
     // We need to add a transaction that represents the starting
     // balance for everything to balance out. In order to get balance
@@ -808,14 +807,14 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
     // current balance from the accounts table and subtract all the
     // imported transactions.
 
-    const oldestTransaction = transactions[transactions.length - 1];
+    let oldestTransaction = transactions[transactions.length - 1];
 
-    const oldestDate =
+    let oldestDate =
       transactions.length > 0
         ? oldestTransaction.valueDate || oldestTransaction.bookingDate
         : monthUtils.currentDay();
 
-    const payee = await getStartingBalancePayee();
+    let payee = await getStartingBalancePayee();
 
     return runMutator(async () => {
       let initialId = await db.insertTransaction({
@@ -840,17 +839,17 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
 export async function syncAccount(userId, userKey, id, acctId, bankId) {
   // TODO: Handle the case where transactions exist in the future
   // (that will make start date after end date)
-  const latestTransaction = await db.first(
+  let latestTransaction = await db.first(
     'SELECT * FROM v_transactions WHERE account = ? ORDER BY date DESC LIMIT 1',
     [id],
   );
 
   if (latestTransaction) {
-    const startingTransaction = await db.first(
+    let startingTransaction = await db.first(
       'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
       [id],
     );
-    const startingDate = db.fromDateRepr(startingTransaction.date);
+    let startingDate = db.fromDateRepr(startingTransaction.date);
     // assert(startingTransaction)
 
     // Get all transactions since the latest transaction, plus any 5
@@ -881,21 +880,21 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     transactions = transactions.map(trans => ({ ...trans, account: id }));
 
     return runMutator(async () => {
-      const result = await reconcileTransactions(id, transactions);
+      let result = await reconcileTransactions(id, transactions);
       await updateAccountBalance(id, accountBalance);
       return result;
     });
   } else {
-    const acctRow = await db.select('accounts', id);
+    let acctRow = await db.select('accounts', id);
 
     // Otherwise, download transaction for the last few days if it's an
     // on-budget account, or for the past 30 days if off-budget
-    const startingDay = monthUtils.subDays(
+    let startingDay = monthUtils.subDays(
       monthUtils.currentDay(),
       acctRow.offbudget === 0 ? 1 : 30,
     );
 
-    const { transactions } = await downloadTransactions(
+    let { transactions } = await downloadTransactions(
       userId,
       userKey,
       acctId,
@@ -910,11 +909,11 @@ export async function syncAccount(userId, userKey, id, acctId, bankId) {
     // imported transactions.
     let currentBalance = acctRow.balance_current;
 
-    const previousBalance = transactions.reduce((total, trans) => {
+    let previousBalance = transactions.reduce((total, trans) => {
       return total - trans.amount;
     }, currentBalance);
 
-    const oldestDate =
+    let oldestDate =
       transactions.length > 0
         ? transactions[transactions.length - 1].date
         : monthUtils.currentDay();

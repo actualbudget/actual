@@ -66,7 +66,7 @@ export class BudgetPage {
   }
 
   async transferAllBalance(fromIdx, toIdx) {
-    const toName = await this.getCategoryNameForRow(toIdx);
+    let toName = await this.getCategoryNameForRow(toIdx);
 
     await this.budgetTable
       .getByTestId('row')

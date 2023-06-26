@@ -277,7 +277,7 @@ function AccountMenu({
   onMenuSelect,
 }) {
   let [tooltip, setTooltip] = useState('default');
-  const syncServerStatus = useSyncServerStatus();
+  let syncServerStatus = useSyncServerStatus();
 
   return tooltip === 'reconcile' ? (
     <ReconcileTooltip
@@ -665,7 +665,7 @@ function SelectedTransactionsButton({
   );
 }
 
-const AccountHeader = memo(
+let AccountHeader = memo(
   ({
     tableRef,
     editingName,
@@ -1030,7 +1030,7 @@ const AccountHeader = memo(
 );
 
 function AllTransactions({ account = {}, transactions, filtered, children }) {
-  const { id: accountId } = account;
+  let { id: accountId } = account;
   let scheduleData = useCachedSchedules();
 
   let schedules = useMemo(
@@ -1240,7 +1240,7 @@ class AccountInternal extends PureComponent {
     this.paged = pagedQuery(
       query.select('*'),
       async (data, prevData) => {
-        const firstLoad = prevData == null;
+        let firstLoad = prevData == null;
 
         if (firstLoad) {
           this.table.current && this.table.current.setRowAnimation(false);
@@ -1328,18 +1328,18 @@ class AccountInternal extends PureComponent {
   }, 150);
 
   onSync = async () => {
-    const accountId = this.props.accountId;
-    const account = this.props.accounts.find(acct => acct.id === accountId);
+    let accountId = this.props.accountId;
+    let account = this.props.accounts.find(acct => acct.id === accountId);
 
     await this.props.syncAndDownload(account ? account.id : null);
   };
 
   onImport = async () => {
-    const accountId = this.props.accountId;
-    const account = this.props.accounts.find(acct => acct.id === accountId);
+    let accountId = this.props.accountId;
+    let account = this.props.accounts.find(acct => acct.id === accountId);
 
     if (account) {
-      const res = await window.Actual.openFileDialog({
+      let res = await window.Actual.openFileDialog({
         filters: [
           { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
         ],
@@ -1427,8 +1427,8 @@ class AccountInternal extends PureComponent {
 
   onSaveName = name => {
     if (name.trim().length) {
-      const accountId = this.props.accountId;
-      const account = this.props.accounts.find(
+      let accountId = this.props.accountId;
+      let account = this.props.accounts.find(
         account => account.id === accountId,
       );
       this.props.updateAccount({ ...account, name });
@@ -1444,10 +1444,8 @@ class AccountInternal extends PureComponent {
   };
 
   onMenuSelect = async item => {
-    const accountId = this.props.accountId;
-    const account = this.props.accounts.find(
-      account => account.id === accountId,
-    );
+    let accountId = this.props.accountId;
+    let account = this.props.accounts.find(account => account.id === accountId);
 
     switch (item) {
       case 'link':
@@ -1463,7 +1461,7 @@ class AccountInternal extends PureComponent {
         this.props.reopenAccount(accountId);
         break;
       case 'export':
-        const accountName = this.getAccountTitle(account, accountId);
+        let accountName = this.getAccountTitle(account, accountId);
         this.onExport(accountName);
         break;
       case 'toggle-balance':
@@ -1545,7 +1543,7 @@ class AccountInternal extends PureComponent {
 
   onCreateReconciliationTransaction = async diff => {
     // Create a new reconciliation transaction
-    const reconciliationTransactions = realizeTempTransactions([
+    let reconciliationTransactions = realizeTempTransactions([
       {
         id: 'temp',
         account: this.props.accountId,
@@ -1595,7 +1593,7 @@ class AccountInternal extends PureComponent {
         value = !!transactions.find(t => !t.cleared);
       }
 
-      const idSet = new Set(ids);
+      let idSet = new Set(ids);
 
       transactions.forEach(trans => {
         if (!idSet.has(trans.id)) {
@@ -1844,7 +1842,7 @@ class AccountInternal extends PureComponent {
     } = this.state;
 
     let account = accounts.find(account => account.id === accountId);
-    const accountName = this.getAccountTitle(account, accountId);
+    let accountName = this.getAccountTitle(account, accountId);
 
     if (!accountName && !loading) {
       // This is probably an account that was deleted, so redirect to

@@ -83,7 +83,7 @@ function normalizePath(path) {
   return path;
 }
 
-const join: T.Join = (...args) => {
+let join: T.Join = (...args) => {
   if (args.length === 0) return '.';
   let joined;
   for (let i = 0; i < args.length; ++i) {

@@ -5,8 +5,8 @@ import { useServerURL } from '../components/ServerContext';
 type SyncServerStatus = 'offline' | 'no-server' | 'online';
 
 export default function useSyncServerStatus(): SyncServerStatus {
-  const serverUrl = useServerURL();
-  const userData = useSelector(state => state.user.data);
+  let serverUrl = useServerURL();
+  let userData = useSelector(state => state.user.data);
 
   if (!serverUrl) {
     return 'no-server';

@@ -5,7 +5,7 @@ import { css, before } from 'glamor';
 
 import { styles } from '../style';
 
-export const IntersectionBoundary = createContext();
+export let IntersectionBoundary = createContext();
 
 export function useTooltip() {
   let [isOpen, setIsOpen] = useState(false);
@@ -178,7 +178,7 @@ export class Tooltip extends Component {
       anchorRect.top += container.scrollTop;
     }
 
-    const style = this.getStyleForPosition(
+    let style = this.getStyleForPosition(
       this.position,
       box,
       anchorRect,
@@ -226,7 +226,7 @@ export class Tooltip extends Component {
   }
 
   getStyleForPosition(position, boxRect, anchorRect, containerRect, offset) {
-    const style = {
+    let style = {
       top: 'inherit',
       bottom: 'inherit',
       left: 'inherit',
@@ -289,9 +289,9 @@ export class Tooltip extends Component {
   }
 
   render() {
-    const { children, width, style } = this.props;
+    let { children, width, style } = this.props;
 
-    const contentStyle = {
+    let contentStyle = {
       position: 'absolute',
       zIndex: 3000,
 

@@ -8,10 +8,10 @@ import { authorizeBank } from '../../nordigen';
 import { View, Text, Modal, P, Button, ButtonWithLoading } from '../common';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
-  const dispatch = useDispatch();
-  const [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
+  let dispatch = useDispatch();
+  let [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
 
-  const onConnect = () => {
+  let onConnect = () => {
     if (!isNordigenSetupComplete) {
       onNordigenInit();
       return;
@@ -20,7 +20,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
     authorizeBank((modal, params) => dispatch(pushModal(modal, params)));
   };
 
-  const onNordigenInit = () => {
+  let onNordigenInit = () => {
     dispatch(
       pushModal('nordigen-init', {
         onSuccess: () => setIsNordigenSetupComplete(true),
@@ -28,11 +28,11 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
     );
   };
 
-  const onCreateLocalAccount = () => {
+  let onCreateLocalAccount = () => {
     dispatch(pushModal('add-local-account'));
   };
 
-  const { configured } = useNordigenStatus();
+  let { configured } = useNordigenStatus();
   useEffect(() => {
     setIsNordigenSetupComplete(configured);
   }, [configured]);

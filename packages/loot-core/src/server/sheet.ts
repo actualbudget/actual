@@ -17,7 +17,7 @@ export function get() {
 async function updateSpreadsheetCache(rawDb, names) {
   await sqlite.transaction(rawDb, () => {
     names.forEach(name => {
-      const node = globalSheet._getNode(name);
+      let node = globalSheet._getNode(name);
 
       // Don't cache query nodes yet
       if (node.sql == null) {

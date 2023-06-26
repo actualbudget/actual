@@ -8,8 +8,8 @@ import { colors } from '../../style';
 import { View, Text, Modal, Button, P, Select, FormError } from '../common';
 
 function needsCategory(account, currentTransfer, accounts) {
-  const acct = accounts.find(a => a.id === currentTransfer);
-  const isOffBudget = acct && acct.offbudget === 1;
+  let acct = accounts.find(a => a.id === currentTransfer);
+  let isOffBudget = acct && acct.offbudget === 1;
 
   // The user must select a category if transferring from a budgeted
   // account to an off-budget account
@@ -74,7 +74,7 @@ function CloseAccount({
             validateOnChange={false}
             initialValues={{ transfer: '', category: '' }}
             onSubmit={(values, { setErrors }) => {
-              const errors = {};
+              let errors = {};
               if (balance !== 0 && values.transfer === '') {
                 errors.transfer = 'required';
               }

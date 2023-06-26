@@ -18,7 +18,7 @@ export { BudgetSummary } from './BudgetSummary';
 
 let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
 
-export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+export let BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
@@ -82,7 +82,7 @@ export function IncomeHeaderMonth() {
 type GroupMonthProps = {
   group: { id: string; is_income: boolean };
 };
-export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
+export let GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
   let borderColor = colors.border;
   let { id } = group;
 
@@ -180,7 +180,7 @@ type CategoryMonthProps = {
   onBudgetAction: (idx: number, action: string, arg: unknown) => void;
   onShowActivity: (name: string, id: string, idx: number) => void;
 };
-export const CategoryMonth = memo(function CategoryMonth({
+export let CategoryMonth = memo(function CategoryMonth({
   monthIndex,
   category,
   editing,
@@ -291,8 +291,8 @@ export const CategoryMonth = memo(function CategoryMonth({
   );
 });
 
-export const ExpenseGroupMonth = GroupMonth;
-export const ExpenseCategoryMonth = CategoryMonth;
+export let ExpenseGroupMonth = GroupMonth;
+export let ExpenseCategoryMonth = CategoryMonth;
 
-export const IncomeGroupMonth = GroupMonth;
-export const IncomeCategoryMonth = CategoryMonth;
+export let IncomeGroupMonth = GroupMonth;
+export let IncomeCategoryMonth = CategoryMonth;

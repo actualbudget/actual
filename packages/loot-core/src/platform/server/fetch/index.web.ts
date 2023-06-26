@@ -1,5 +1,5 @@
-export const fetch = self.fetch;
+export let fetch = self.fetch;
 
-export const fetchBinary = function () {
+export let fetchBinary = function () {
   throw new Error('fetchBinary not implemented');
 };

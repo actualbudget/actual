@@ -22,9 +22,9 @@ import Tooltip from './Tooltip';
 import useReport from './useReport';
 
 function Card({ flex, to, style, children }) {
-  const containerProps = { flex, margin: 15 };
+  let containerProps = { flex, margin: 15 };
 
-  const content = (
+  let content = (
     <View
       style={[
         {
@@ -59,14 +59,14 @@ function Card({ flex, to, style, children }) {
 }
 
 function NetWorthCard({ accounts }) {
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, 5);
+  let end = monthUtils.currentMonth();
+  let start = monthUtils.subMonths(end, 5);
 
-  const params = useMemo(
+  let params = useMemo(
     () => netWorthSpreadsheet(start, end, accounts),
     [start, end, accounts],
   );
-  const data = useReport('net_worth', params);
+  let data = useReport('net_worth', params);
 
   if (!data) {
     return null;
@@ -111,18 +111,18 @@ function NetWorthCard({ accounts }) {
 }
 
 function CashFlowCard() {
-  const end = monthUtils.currentDay();
-  const start = monthUtils.currentMonth() + '-01';
+  let end = monthUtils.currentDay();
+  let start = monthUtils.currentMonth() + '-01';
 
-  const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
-  const data = useReport('cash_flow_simple', params);
+  let params = useMemo(() => simpleCashFlow(start, end), [start, end]);
+  let data = useReport('cash_flow_simple', params);
   if (!data) {
     return null;
   }
 
-  const { graphData } = data;
-  const expense = -(graphData.expense || 0);
-  const income = graphData.income || 0;
+  let { graphData } = data;
+  let expense = -(graphData.expense || 0);
+  let income = graphData.income || 0;
 
   return (
     <Card flex={1} to="/reports/cash-flow">

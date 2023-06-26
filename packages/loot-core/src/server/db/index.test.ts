@@ -10,7 +10,7 @@ async function insertTransactions(transactions) {
 }
 
 async function getTransactions(latestDate) {
-  const rows = await db.getTransactions('foo');
+  let rows = await db.getTransactions('foo');
   return rows
     .filter(t => t.date <= latestDate)
     .map(row => ({
@@ -228,7 +228,7 @@ describe('Database', () => {
       },
     ]);
 
-    const rows = await db.getTransactions('foo');
+    let rows = await db.getTransactions('foo');
 
     expect(rows.find(t => t.id === 'parent1').category).toBe(null);
     expect(rows.find(t => t.id === 'child3').category).toBe('cat1');
@@ -277,7 +277,7 @@ describe('Database', () => {
 
     await db.deleteTransaction({ id: 'parent1' });
 
-    const rows = await db.getTransactions('foo');
+    let rows = await db.getTransactions('foo');
     expect(rows.length).toBe(1);
     expect(rows[0].id).toBe('trans1');
   });
