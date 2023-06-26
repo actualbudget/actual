@@ -141,11 +141,11 @@ function ManagePayeesWithData({
           orphans.map(o => o.id).includes(m),
         );
 
+        let newOrphans = orphans.filter(o => !mergeIds.includes(o.id));
         if (targetIdIsOrphan && mergeIdsOrphans.length !== mergeIds.length) {
           // there is a non-orphan in mergeIds, target can be removed from orphan arr
-          orphans = orphans.filter(o => o.id !== targetId);
+          newOrphans = newOrphans.filter(o => o.id !== targetId);
         }
-        orphans = orphans.filter(o => !mergeIds.includes(o.id));
 
         let result = payees.filter(p => !mergeIds.includes(p.id));
         mergeIds.forEach(id => {
@@ -157,7 +157,7 @@ function ManagePayeesWithData({
         });
 
         setPayees(result);
-        setOrphans(orphans);
+        setOrphans(newOrphans);
         setRuleCounts({ value: ruleCounts.value });
       }}
       onViewRules={onViewRules}

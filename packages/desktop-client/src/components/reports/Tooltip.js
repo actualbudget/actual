@@ -13,13 +13,13 @@ class Tooltip extends Component {
     const {
       active,
       x,
-      y,
+      y: requestedY,
       scale,
       datum,
       portalHost,
       offsetX = 0,
       offsetY,
-      position,
+      position: requestedPosition,
       light,
       forceActive,
       style,
@@ -27,6 +27,7 @@ class Tooltip extends Component {
     let xRange = scale.x.range();
     let xPos = x - xRange[0];
 
+    let position = requestedPosition;
     if (!position) {
       if (datum.labelPosition) {
         position = datum.labelPosition;
@@ -39,7 +40,7 @@ class Tooltip extends Component {
       return null;
     }
 
-    y = offsetY ? offsetY(y) : y;
+    let y = offsetY ? offsetY(requestedY) : requestedY;
 
     return ReactDOM.createPortal(
       <div

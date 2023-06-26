@@ -433,8 +433,13 @@ export default class FixedSizeList extends PureComponent {
 
   _getRangeToRender() {
     const { itemCount, overscanCount } = this.props;
-    const { isScrolling, scrollDirection, scrollOffset } = this.state;
+    const {
+      isScrolling,
+      scrollDirection,
+      scrollOffset: desiredScrollOffset,
+    } = this.state;
 
+    let scrollOffset = desiredScrollOffset;
     let anchoredPos = this.getAnchoredScrollPos();
     if (anchoredPos != null) {
       scrollOffset = anchoredPos;

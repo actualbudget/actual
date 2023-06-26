@@ -399,7 +399,7 @@ class Budget extends PureComponent {
 
   render() {
     const {
-      maxMonths,
+      maxMonths: desiredMaxMonths,
       budgetType: type,
       reportComponents,
       rolloverComponents,
@@ -416,7 +416,7 @@ class Budget extends PureComponent {
       bounds,
     } = this.state;
 
-    maxMonths = maxMonths || 1;
+    let maxMonths = desiredMaxMonths || 1;
 
     if (!initialized || !categoryGroups) {
       return null;
