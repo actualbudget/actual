@@ -38,6 +38,7 @@ module.exports = {
     'react/jsx-no-useless-fragment': 'error',
 
     '@actual-app/typography': 'error',
+    '@actual-app/let': 'error',
 
     // https://github.com/eslint/eslint/issues/16954
     // https://github.com/eslint/eslint/issues/16953
