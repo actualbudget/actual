@@ -28,7 +28,7 @@ ruleTester.run('let', rule, {
       errors: [
         {
           messageId: 'error',
-          data: { kind: 'var' },
+          data: { expected: 'let', actual: 'var' },
           type: 'VariableDeclaration',
           column: 1,
         },
@@ -40,7 +40,7 @@ ruleTester.run('let', rule, {
       errors: [
         {
           messageId: 'error',
-          data: { kind: 'const' },
+          data: { expected: 'let', actual: 'const' },
           type: 'VariableDeclaration',
           column: 1,
         },

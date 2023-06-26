@@ -1,10 +1,10 @@
 /* eslint-disable @actual-app/typography */
 const path = require('path');
 
-const ruleFCMsg =
+let ruleFCMsg =
   'Type the props argument and let TS infer or use ComponentType for a component prop';
 
-const restrictedImportPatterns = [
+let restrictedImportPatterns = [
   {
     group: ['*.api', '*.web', '*.electron'],
     message: 'Don’t directly reference imports from other platforms',
