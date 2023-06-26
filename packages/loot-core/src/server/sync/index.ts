@@ -502,7 +502,11 @@ export async function syncAndReceiveMessages(
   since: string,
 ): Promise<Message[]> {
   let localMessages = await getMessagesSince(since);
-  await receiveMessages(messages);
+  await receiveMessages(messages.map(msg => ({
+    ...msg,
+    // TODO: This should be done inside the encoder (or at least it should return a different type)
+    value: deserializeValue(msg.value as string),
+  })));
   return localMessages;
 }
 
@@ -682,7 +686,10 @@ async function _fullSync(
   // Apply the new messages
   let receivedMessages: Message[] = [];
   if (res.messages.length > 0) {
-    receivedMessages = await receiveMessages(res.messages);
+    receivedMessages = await receiveMessages(res.messages.map(msg => ({
+      ...msg,
+      value: deserializeValue(msg.value as string),
+    })),);
   }
 
   let diffTime = merkle.diff(res.merkle, getClock().merkle);
