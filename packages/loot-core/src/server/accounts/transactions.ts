@@ -25,7 +25,7 @@ async function getTransactionsByIds(ids: string[]) {
   return incrFetch(
     (query, params) => db.selectWithSchema('transactions', query, params),
     ids,
-    // eslint-disable-next-line rulesdir/typography
+    // eslint-disable-next-line @actual-app/typography
     id => `id = '${id}'`,
     where => `SELECT * FROM v_transactions_internal WHERE ${where}`,
   );

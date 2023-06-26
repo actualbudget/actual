@@ -4,7 +4,7 @@ export default function format(value, type = 'string') {
   switch (type) {
     case 'string':
       const val = JSON.stringify(value);
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line @actual-app/typography
       if (val.charAt(0) === '"' && val.charAt(val.length - 1) === '"') {
         return val.slice(1, -1);
       }

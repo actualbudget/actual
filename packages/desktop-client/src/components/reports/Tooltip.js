@@ -71,7 +71,7 @@ class Tooltip extends Component {
                 '7px solid ' + colors.n1,
               [position === 'right' ? 'left' : 'right']: -6,
               top: 'calc(50% - 7px)',
-              // eslint-disable-next-line rulesdir/typography
+              // eslint-disable-next-line @actual-app/typography
               content: '" "',
             }),
           style,

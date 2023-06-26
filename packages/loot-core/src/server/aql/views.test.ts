@@ -29,7 +29,7 @@ const schemaConfig = {
 
       v_transactions2: (_, publicFields) => {
         let fields = publicFields({
-          // eslint-disable-next-line rulesdir/typography
+          // eslint-disable-next-line @actual-app/typography
           transfer_id: 'COERCE(transfer_id, "foo")',
         });
 

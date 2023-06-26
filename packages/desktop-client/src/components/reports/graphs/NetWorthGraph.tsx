@@ -151,7 +151,7 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
             {!compact && (
               <VictoryAxis
                 style={{ ticks: { stroke: 'red' } }}
-                // eslint-disable-next-line rulesdir/typography
+                // eslint-disable-next-line @actual-app/typography
                 tickFormat={x => d.format(x, "MMM ''yy")}
                 tickValues={graphData.data.map(item => item.x)}
                 tickCount={Math.min(5, graphData.data.length)}

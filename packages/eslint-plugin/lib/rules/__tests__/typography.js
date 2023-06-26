@@ -1,4 +1,4 @@
-/* eslint-disable rulesdir/typography */
+/* eslint-disable @actual-app/typography */
 'use strict';
 
 //------------------------------------------------------------------------------
@@ -7,7 +7,7 @@
 
 const RuleTester = require('eslint').RuleTester;
 
-const rule = require('../../../lib/rules/typography');
+const rule = require('../typography');
 
 //------------------------------------------------------------------------------
 // Tests

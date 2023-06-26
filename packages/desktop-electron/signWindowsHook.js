@@ -8,7 +8,7 @@ const {
 const SITE = 'https://actualbudget.com/';
 
 const importPfx = (certPath, password) => {
-  /* eslint-disable rulesdir/typography */
+  /* eslint-disable @actual-app/typography */
   const command = [
     ['certutil'],
     ['-f'],
@@ -17,7 +17,7 @@ const importPfx = (certPath, password) => {
   ]
     .map(sub => sub.join(' '))
     .join(' ');
-  /* eslint-enable rulesdir/typography */
+  /* eslint-enable @actual-app/typography */
 
   try {
     execSync(command, { stdio: 'inherit' });
@@ -27,7 +27,7 @@ const importPfx = (certPath, password) => {
 };
 
 const signBinary = (path, name) => {
-  /* eslint-disable rulesdir/typography */
+  /* eslint-disable @actual-app/typography */
   const command = [
     [`"${SIGN_TOOL_PATH}"`],
     ['sign'],
@@ -41,7 +41,7 @@ const signBinary = (path, name) => {
   ]
     .map(sub => sub.join(' '))
     .join(' ');
-  /* eslint-enable rulesdir/typography */
+  /* eslint-enable @actual-app/typography */
 
   try {
     execSync(command, { stdio: 'inherit' });

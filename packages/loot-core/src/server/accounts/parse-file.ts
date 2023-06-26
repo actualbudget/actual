@@ -42,7 +42,7 @@ async function parseCSV(filepath, options: { delimiter?: string } = {}) {
       columns: true,
       bom: true,
       delimiter: options.delimiter || ',',
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line @actual-app/typography
       quote: '"',
       trim: true,
       relax_column_count: true,

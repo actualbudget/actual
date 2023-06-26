@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-actual",
+  "name": "@actual-app/eslint-plugin",
   "private": true,
   "main": "./lib/index.js",
   "exports": "./lib/index.js",

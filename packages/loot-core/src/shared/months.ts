@@ -219,7 +219,7 @@ export function sheetForMonth(month) {
 }
 
 export function nameForMonth(month) {
-  // eslint-disable-next-line rulesdir/typography
+  // eslint-disable-next-line @actual-app/typography
   return d.format(_parse(month), "MMMM 'yy");
 }
 

@@ -27,7 +27,7 @@ export async function incrFetch(
 
 export function whereIn(ids: string[], field: string) {
   let ids2 = [...new Set(ids)];
-  // eslint-disable-next-line rulesdir/typography
+  // eslint-disable-next-line @actual-app/typography
   let filter = `${field} IN (` + ids2.map(id => `'${id}'`).join(',') + ')';
   return filter;
 }

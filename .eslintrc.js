@@ -1,14 +1,5 @@
-/* eslint-disable rulesdir/typography */
+/* eslint-disable @actual-app/typography */
 const path = require('path');
-
-const rulesDirPlugin = require('eslint-plugin-rulesdir');
-rulesDirPlugin.RULES_DIR = path.join(
-  __dirname,
-  'packages',
-  'eslint-plugin-actual',
-  'lib',
-  'rules',
-);
 
 const ruleFCMsg =
   'Type the props argument and let TS infer or use ComponentType for a component prop';
@@ -21,7 +12,7 @@ const restrictedImportPatterns = [
 ];
 
 module.exports = {
-  plugins: ['prettier', 'import', 'rulesdir', '@typescript-eslint'],
+  plugins: ['prettier', 'import', '@typescript-eslint', '@actual-app'],
   extends: ['react-app', 'plugin:@typescript-eslint/recommended'],
   parser: '@typescript-eslint/parser',
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
@@ -46,7 +37,7 @@ module.exports = {
 
     'react/jsx-no-useless-fragment': 'error',
 
-    'rulesdir/typography': 'error',
+    '@actual-app/typography': 'error',
 
     // https://github.com/eslint/eslint/issues/16954
     // https://github.com/eslint/eslint/issues/16953
@@ -70,7 +61,7 @@ module.exports = {
     ],
     'import/no-useless-path-segments': 'error',
     'import/no-duplicates': ['error', { 'prefer-inline': true }],
-    'import/no-unused-modules': ['error', { 'unusedExports': true }],
+    'import/no-unused-modules': ['error', { unusedExports: true }],
     'import/order': [
       'error',
       {
@@ -171,29 +162,32 @@ module.exports = {
       files: ['./packages/loot-core/src/**/*'],
       rules: {
         // defining 'src' to check all packages is slow, so only do it for loot-core
-        'import/no-unused-modules': ['error', { 'unusedExports': true, 'src': ['../**/*.{js,ts,tsx}'] }],
-      }
+        'import/no-unused-modules': [
+          'error',
+          { unusedExports: true, src: ['../**/*.{js,ts,tsx}'] },
+        ],
+      },
     },
     {
       files: [
-        '**/icons/**/*.js', 
-        '**/mocks/**/*.{js,ts,tsx}', 
-        '**/{mocks,__mocks__}/*.{js,ts,tsx}', 
+        '**/icons/**/*.js',
+        '**/mocks/**/*.{js,ts,tsx}',
+        '**/{mocks,__mocks__}/*.{js,ts,tsx}',
         // can't correctly resolve usages
         '**/*.{testing,electron,browser,web,api}.ts',
-        'packages/loot-core/src/server/main.ts'
+        'packages/loot-core/src/server/main.ts',
       ],
-      rules: { 'import/no-unused-modules': 'off' }
+      rules: { 'import/no-unused-modules': 'off' },
     },
   ],
   settings: {
-    "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx"]
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
-    "import/resolver": {
-      "typescript": {
-        "alwaysTryTypes": true
-      }
-    }
-  }
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+      },
+    },
+  },
 };

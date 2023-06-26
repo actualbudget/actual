@@ -1079,7 +1079,7 @@ function UnconnectedBudgetHeader({
           },
         ]}
       >
-        {/* eslint-disable-next-line rulesdir/typography */}
+        {/* eslint-disable-next-line @actual-app/typography */}
         {monthUtils.format(currentMonth, "MMMM ''yy")}
       </Text>
       {editMode ? (

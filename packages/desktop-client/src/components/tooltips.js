@@ -378,7 +378,7 @@ export function Pointer({
               ? {
                   transform: 'rotate(-45deg)',
                   top: border ? -4 : -3,
-                  // eslint-disable-next-line rulesdir/typography
+                  // eslint-disable-next-line @actual-app/typography
                   content: '" "',
                   ...(pointerPosition === 'center'
                     ? { left: 'calc(50% - 3.5px)' }
@@ -390,7 +390,7 @@ export function Pointer({
               ? {
                   transform: 'rotate(135deg)',
                   bottom: border ? -4 : -3,
-                  // eslint-disable-next-line rulesdir/typography
+                  // eslint-disable-next-line @actual-app/typography
                   content: '" "',
                   ...(pointerPosition === 'center'
                     ? { left: 'calc(50% - 3.5px)' }
@@ -401,7 +401,7 @@ export function Pointer({
               : pointerDirection === 'right'
               ? {
                   transform: 'rotate(45deg)',
-                  // eslint-disable-next-line rulesdir/typography
+                  // eslint-disable-next-line @actual-app/typography
                   content: '" "',
                   top: 'calc(50% - 3.5px)',
                   right: -3,
