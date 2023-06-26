@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
-import { isIOS } from 'react-device-detect';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
   DndProvider,
-  PointerTransition,
+  HTML5DragTransition,
   TouchTransition,
 } from 'react-dnd-multi-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
@@ -296,31 +295,19 @@ function FinancesApp(props) {
   );
 }
 
-// Special handling for iOS because TouchBackend currently does not work well with iOS.
-// Creating this custom transition object to allow us to use HTML5Backend for iOS.
-const iOSTransition = {
-  event: 'touchstart',
-  check: event => isIOS,
-};
-
 const HTML5toTouch = {
   backends: [
-    {
-      id: 'html5ios',
-      backend: HTML5Backend,
-      transition: iOSTransition,
-    },
-    {
-      id: 'html5',
-      backend: HTML5Backend,
-      transition: PointerTransition,
-    },
     {
       id: 'touch',
       backend: TouchBackend,
       options: { delay: 300 },
       preview: true,
       transition: TouchTransition,
+    },
+    {
+      id: 'html5',
+      backend: HTML5Backend,
+      transition: HTML5DragTransition,
     },
   ],
 };
