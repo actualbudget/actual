@@ -6,7 +6,7 @@ import React, {
   useContext,
 } from 'react';
 import { connect } from 'react-redux';
-import { Switch, Route, useLocation, useHistory } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import { css, media } from 'glamor';
 
@@ -268,7 +268,7 @@ function Titlebar({
   style,
   sync,
 }) {
-  let history = useHistory();
+  let navigate = useNavigate();
   let location = useLocation();
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
@@ -320,32 +320,38 @@ function Titlebar({
         </Button>
       )}
 
-      <Switch>
-        <Route path="/accounts" exact>
-          {location.state?.goBack ? (
-            <Button onClick={() => history.goBack()} bare>
-              <ArrowLeft
-                width={10}
-                height={10}
-                style={{ marginRight: 5, color: 'currentColor' }}
-              />{' '}
-              Back
-            </Button>
-          ) : null}
-        </Route>
+      <Routes>
+        <Route
+          path="/accounts"
+          element={
+            location.state?.goBack ? (
+              <Button onClick={() => navigate(-1)} bare>
+                <ArrowLeft
+                  width={10}
+                  height={10}
+                  style={{ marginRight: 5, color: 'currentColor' }}
+                />{' '}
+                Back
+              </Button>
+            ) : null
+          }
+        />
 
-        <Route path="/accounts/:id" exact>
-          <AccountSyncCheck />
-        </Route>
+        <Route path="/accounts/:id" element={<AccountSyncCheck />} />
 
-        <Route path="/budget" exact>
-          <BudgetTitlebar
-            globalPrefs={globalPrefs}
-            saveGlobalPrefs={saveGlobalPrefs}
-            localPrefs={localPrefs}
-          />
-        </Route>
-      </Switch>
+        <Route
+          path="/budget"
+          element={
+            <BudgetTitlebar
+              globalPrefs={globalPrefs}
+              saveGlobalPrefs={saveGlobalPrefs}
+              localPrefs={localPrefs}
+            />
+          }
+        />
+
+        <Route path="*" element={null} />
+      </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
       {serverURL ? (

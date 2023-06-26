@@ -599,7 +599,6 @@ let conditionFields = [
   ]);
 
 export default function EditRule({
-  history,
   modalProps,
   defaultRule,
   onSave: originalOnSave,

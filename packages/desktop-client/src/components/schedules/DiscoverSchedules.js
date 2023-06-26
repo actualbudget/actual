@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -12,6 +12,7 @@ import useSelected, {
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { colors } from '../../style';
+import { getParent } from '../../util/router-tools';
 import { View, Stack, ButtonWithLoading, P } from '../common';
 import { Page, usePageType } from '../Page';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
@@ -109,12 +110,19 @@ function DiscoverSchedulesTable({ schedules, loading }) {
 
 export default function DiscoverSchedules() {
   let pageType = usePageType();
-  let history = useHistory();
-  let { data: schedules = [], isLoading } =
+  let navigate = useNavigate();
+  let { data: schedules, isLoading } =
     useSendPlatformRequest('schedule/discover');
+  if (!schedules) schedules = [];
+
   let [creating, setCreating] = useState(false);
 
   let selectedInst = useSelected('discover-schedules', schedules, []);
+
+  let location = useLocation();
+  if (!getParent(location)) {
+    return <Navigate to="/schedules" replace />;
+  }
 
   async function onCreate() {
     let selected = schedules.filter(s => selectedInst.items.has(s.id));
@@ -144,7 +152,7 @@ export default function DiscoverSchedules() {
     }
 
     setCreating(false);
-    history.goBack();
+    navigate(-1);
   }
 
   return (

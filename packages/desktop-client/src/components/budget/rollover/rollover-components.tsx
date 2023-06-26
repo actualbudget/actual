@@ -371,6 +371,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         style={{ textAlign: 'right' }}
       >
         <span
+          data-testid="category-month-spent"
           onClick={() => onShowActivity(category.name, category.id, monthIndex)}
         >
           <CellValue

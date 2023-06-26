@@ -918,7 +918,7 @@ handlers['account-close'] = mutator(async function ({
         [id],
       );
 
-      await batchMessages(() => {
+      await batchMessages(async () => {
         // TODO: what this should really do is send a special message that
         // automatically marks the tombstone value for all transactions
         // within an account... or something? This is problematic
@@ -1476,14 +1476,12 @@ handlers['save-global-prefs'] = async function (prefs) {
 handlers['load-global-prefs'] = async function () {
   let [
     [, floatingSidebar],
-    [, seenTutorial],
     [, maxMonths],
     [, autoUpdate],
     [, documentDir],
     [, encryptKey],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
-    'seen-tutorial',
     'max-months',
     'auto-update',
     'document-dir',
@@ -1491,7 +1489,6 @@ handlers['load-global-prefs'] = async function () {
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
-    seenTutorial: seenTutorial === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
@@ -1963,7 +1960,7 @@ handlers['close-budget'] = async function () {
 handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
-  if (cloudFileId && !process.env.IS_BETA) {
+  if (cloudFileId) {
     await cloudStorage.removeFile(cloudFileId).catch(err => {});
   }
 
@@ -2040,11 +2037,6 @@ handlers['create-budget'] = async function ({
   }
 
   return {};
-};
-
-handlers['set-tutorial-seen'] = async function () {
-  await asyncStorage.setItem('seen-tutorial', 'true');
-  return 'ok';
 };
 
 handlers['import-budget'] = async function ({ filepath, type }) {
@@ -2244,7 +2236,7 @@ async function loadBudget(id) {
 
   // Ensure that syncing is enabled
   if (process.env.NODE_ENV !== 'test') {
-    if (process.env.IS_BETA || id === DEMO_BUDGET_ID) {
+    if (id === DEMO_BUDGET_ID) {
       setSyncingMode('disabled');
     } else {
       if (getServer()) {
@@ -2409,7 +2401,7 @@ export async function initApp(isDev, socketName) {
     });
   }
 
-  if (isDev || process.env.IS_BETA) {
+  if (isDev) {
     global.$send = (name, args) => runHandler(app.handlers[name], args);
     global.$query = aqlQuery;
     global.$q = q;

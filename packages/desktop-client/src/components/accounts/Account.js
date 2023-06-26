@@ -7,7 +7,13 @@ import React, {
   useMemo,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
+import {
+  Navigate,
+  useParams,
+  useNavigate,
+  useLocation,
+  useMatch,
+} from 'react-router-dom';
 
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
@@ -763,6 +769,8 @@ function SelectedTransactionsButton({
   history,
 }) {
   let selectedItems = useSelectedItems();
+  let navigate = useNavigate();
+  let location = useLocation();
 
   let types = useMemo(() => {
     let items = [...selectedItems];
@@ -874,14 +882,14 @@ function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              history.push(`/schedule/edit/${scheduleId}`, {
-                locationPtr: history.location,
+              navigate(`/schedule/edit/${scheduleId}`, {
+                locationPtr: location,
               });
             }
             break;
           case 'link-schedule':
-            history.push(`/schedule/link`, {
-              locationPtr: history.location,
+            navigate(`/schedule/link`, {
+              locationPtr: location,
               transactionIds: [...selectedItems],
             });
             break;
@@ -1552,7 +1560,7 @@ class AccountInternal extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.match !== nextProps.match) {
+    if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
           editingName: false,
@@ -2156,6 +2164,7 @@ class AccountInternal extends PureComponent {
       replaceModal,
       showExtraBalances,
       accountId,
+      categoryId,
     } = this.props;
     let {
       transactions,
@@ -2176,8 +2185,12 @@ class AccountInternal extends PureComponent {
     if (!accountName && !loading) {
       // This is probably an account that was deleted, so redirect to
       // all accounts
-      return <Redirect to="/accounts" />;
+      return <Navigate to="/accounts" replace />;
     }
+
+    let category = categoryGroups
+      .flatMap(g => g.categories)
+      .find(category => category.id === categoryId);
 
     let showEmptyMessage = !loading && !accountId && accounts.length === 0;
 
@@ -2268,6 +2281,7 @@ class AccountInternal extends PureComponent {
                       this.paged && this.paged.fetchNext()
                     }
                     accounts={accounts}
+                    category={category}
                     categoryGroups={categoryGroups}
                     payees={payees}
                     balances={
@@ -2333,10 +2347,12 @@ class AccountInternal extends PureComponent {
 
 function AccountHack(props) {
   let { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  let match = useMatch(props.location.pathname);
 
   return (
     <AccountInternal
       {...props}
+      match={match}
       splitsExpandedDispatch={splitsExpandedDispatch}
     />
   );
@@ -2412,6 +2428,7 @@ export default function Account() {
             !!(activeLocation.state && activeLocation.state.locationPtr)
           }
           accountId={params.id}
+          categoryId={activeLocation?.state?.filter?.category}
           location={location}
           history={history}
           filtersList={filtersList}
