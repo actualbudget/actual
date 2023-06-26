@@ -1,11 +1,19 @@
-import { Clock, makeClock, Timestamp, merkle, SyncProtoBuf } from '@actual-app/crdt';
+import {
+  Clock,
+  makeClock,
+  Timestamp,
+  merkle,
+  SyncProtoBuf,
+} from '@actual-app/crdt';
+
+import { Message } from '../sync';
 
 import { basic as defaultMockData } from './mockData.json';
-import { Message } from '../sync';
 
 const handlers = {};
 let currentMockData = defaultMockData;
 let currentClock = makeClock(new Timestamp(0, 0, '0000000000000000'));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let currentMessages: any[] = [];
 
 // Ugh, this is duplicated...
