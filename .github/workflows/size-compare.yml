@@ -35,7 +35,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         id: pr-build
         with:
-          branch: jed/stats
+          branch: master
           workflow: build.yml
           name: build-stats
           path: master
