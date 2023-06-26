@@ -9,7 +9,7 @@ export function rebuildMerkleHash(): {
   let rows: { timestamp: string }[] = db.runQuery(
     'SELECT timestamp FROM messages_crdt',
     [],
-    true
+    true,
   );
   let trie = merkle.emptyTrie();
 
