@@ -117,7 +117,10 @@ export function addWeeks(date: DateLike, n: number): string {
   return d.format(d.addWeeks(_parse(date), n), 'yyyy-MM-dd');
 }
 
-export function differenceInCalendarMonths(month1: DateLike, month2: DateLike): number {
+export function differenceInCalendarMonths(
+   month1: DateLike,
+   month2: DateLike
+): number {
   return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
 }
 
