@@ -84,6 +84,7 @@ __metadata:
     "@types/react-dom": ^18.2.1
     "@types/react-modal": ^3.16.0
     "@types/react-router-dom": ^5.3.3
+    "@types/webpack-bundle-analyzer": ^4.6.0
     cross-env: ^7.0.3
     customize-cra: ^1.0.0
     date-fns: ^2.29.3
@@ -113,6 +114,7 @@ __metadata:
     redux: ^4.0.5
     redux-thunk: ^2.3.0
     victory: ^36.6.8
+    webpack-bundle-analyzer: ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -1964,7 +1966,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discoveryjs/json-ext@npm:^0.5.0":
+"@discoveryjs/json-ext@npm:0.5.7, @discoveryjs/json-ext@npm:^0.5.0":
   version: 0.5.7
   resolution: "@discoveryjs/json-ext@npm:0.5.7"
   checksum: 2176d301cc258ea5c2324402997cf8134ebb212469c0d397591636cea8d3c02f2b3cf9fd58dcb748c7a0dade77ebdc1b10284fa63e608c033a1db52fddc69918
@@ -2798,6 +2800,13 @@ __metadata:
     webpack-plugin-serve:
       optional: true
   checksum: c45beded9c56fbbdc7213a2c36131ace5db360ed704d462cc39d6678f980173a91c9a3f691e6bd3a026f25486644cd0027e8a12a0a4eced8e8b886a0472e7d34
+  languageName: node
+  linkType: hard
+
+"@polka/url@npm:^1.0.0-next.20":
+  version: 1.0.0-next.21
+  resolution: "@polka/url@npm:1.0.0-next.21"
+  checksum: c7654046d38984257dd639eab3dc770d1b0340916097b2fac03ce5d23506ada684e05574a69b255c32ea6a144a957c8cd84264159b545fca031c772289d88788
   languageName: node
   linkType: hard
 
@@ -4467,6 +4476,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/webpack-bundle-analyzer@npm:^4.6.0":
+  version: 4.6.0
+  resolution: "@types/webpack-bundle-analyzer@npm:4.6.0"
+  dependencies:
+    "@types/node": "*"
+    tapable: ^2.2.0
+    webpack: ^5
+  checksum: 1cd5baa621a1dbe820bacf981d6e48f3423b733fb5e33c1356347e73d5e3e880ae6ebacf8f43d9e47e135d3ed2653ec5e40e12c6ce187f2eb3f548d9c949f6aa
+  languageName: node
+  linkType: hard
+
 "@types/webpack@npm:^5.28.0":
   version: 5.28.1
   resolution: "@types/webpack@npm:5.28.1"
@@ -4940,7 +4960,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"acorn-walk@npm:^8.1.1":
+"acorn-walk@npm:^8.0.0, acorn-walk@npm:^8.1.1":
   version: 8.2.0
   resolution: "acorn-walk@npm:8.2.0"
   checksum: 1715e76c01dd7b2d4ca472f9c58968516a4899378a63ad5b6c2d668bba8da21a71976c14ec5f5b75f887b6317c4ae0b897ab141c831d741dc76024d8745f1ad1
@@ -4953,6 +4973,15 @@ __metadata:
   bin:
     acorn: bin/acorn
   checksum: 1860f23c2107c910c6177b7b7be71be350db9e1080d814493fae143ae37605189504152d1ba8743ba3178d0b37269ce1ffc42b101547fdc1827078f82671e407
+  languageName: node
+  linkType: hard
+
+"acorn@npm:^8.0.4":
+  version: 8.9.0
+  resolution: "acorn@npm:8.9.0"
+  bin:
+    acorn: bin/acorn
+  checksum: 25dfb94952386ecfb847e61934de04a4e7c2dc21c2e700fc4e2ef27ce78cb717700c4c4f279cd630bb4774948633c3859fc16063ec8573bda4568e0a312e6744
   languageName: node
   linkType: hard
 
@@ -12307,6 +12336,7 @@ __metadata:
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/pegjs": ^0.10.3
     "@types/webpack": ^5.28.0
+    "@types/webpack-bundle-analyzer": ^4.6.0
     absurd-sql: 0.0.53
     adm-zip: ^0.5.9
     assert: ^2.0.0
@@ -12346,6 +12376,7 @@ __metadata:
     typescript: ^4.6.4
     uuid: 3.3.2
     webpack: ^5.86.0
+    webpack-bundle-analyzer: ^4.9.0
     webpack-cli: ^5.1.3
     ws: ^4.1.0
     yargs: ^9.0.1
@@ -12836,6 +12867,13 @@ __metadata:
   version: 3.0.5
   resolution: "mockdate@npm:3.0.5"
   checksum: 72b66786d9e072379693f80bf9fb82eb5153c9741030a4294184e3ccaf952d0713fae8966f77780580cf902f8ec7ccc95577b0ad47980d255e2ffb71fc7ca49c
+  languageName: node
+  linkType: hard
+
+"mrmime@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "mrmime@npm:1.0.1"
+  checksum: cc979da44bbbffebaa8eaf7a45117e851f2d4cb46a3ada6ceb78130466a04c15a0de9a9ce1c8b8ba6f6e1b8618866b1352992bf1757d241c0ddca558b9f28a77
   languageName: node
   linkType: hard
 
@@ -13371,6 +13409,15 @@ __metadata:
     is-inside-container: ^1.0.0
     is-wsl: ^2.2.0
   checksum: 3993c0f61d51fed8ac290e99c9c3cf45d3b6cfb3e2aa2b74cafd312c3486c22fd81df16ac8f3ab91dd8a4e3e729a16fc2480cfc406c4833416cf908acf1ae7c9
+  languageName: node
+  linkType: hard
+
+"opener@npm:^1.5.2":
+  version: 1.5.2
+  resolution: "opener@npm:1.5.2"
+  bin:
+    opener: bin/opener-bin.js
+  checksum: 33b620c0d53d5b883f2abc6687dd1c5fd394d270dbe33a6356f2d71e0a2ec85b100d5bac94694198ccf5c30d592da863b2292c5539009c715a9c80c697b4f6cc
   languageName: node
   linkType: hard
 
@@ -16308,6 +16355,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sirv@npm:^1.0.7":
+  version: 1.0.19
+  resolution: "sirv@npm:1.0.19"
+  dependencies:
+    "@polka/url": ^1.0.0-next.20
+    mrmime: ^1.0.0
+    totalist: ^1.0.0
+  checksum: c943cfc61baf85f05f125451796212ec35d4377af4da90ae8ec1fa23e6d7b0b4d9c74a8fbf65af83c94e669e88a09dc6451ba99154235eead4393c10dda5b07c
+  languageName: node
+  linkType: hard
+
 "sisteransi@npm:^1.0.5":
   version: 1.0.5
   resolution: "sisteransi@npm:1.0.5"
@@ -17324,6 +17382,13 @@ __metadata:
   version: 1.0.1
   resolution: "toidentifier@npm:1.0.1"
   checksum: 952c29e2a85d7123239b5cfdd889a0dde47ab0497f0913d70588f19c53f7e0b5327c95f4651e413c74b785147f9637b17410ac8c846d5d4a20a5a33eb6dc3a45
+  languageName: node
+  linkType: hard
+
+"totalist@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "totalist@npm:1.1.0"
+  checksum: dfab80c7104a1d170adc8c18782d6c04b7df08352dec452191208c66395f7ef2af7537ddfa2cf1decbdcfab1a47afbbf0dec6543ea191da98c1c6e1599f86adc
   languageName: node
   linkType: hard
 
@@ -18503,6 +18568,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"webpack-bundle-analyzer@npm:^4.9.0":
+  version: 4.9.0
+  resolution: "webpack-bundle-analyzer@npm:4.9.0"
+  dependencies:
+    "@discoveryjs/json-ext": 0.5.7
+    acorn: ^8.0.4
+    acorn-walk: ^8.0.0
+    chalk: ^4.1.0
+    commander: ^7.2.0
+    gzip-size: ^6.0.0
+    lodash: ^4.17.20
+    opener: ^1.5.2
+    sirv: ^1.0.7
+    ws: ^7.3.1
+  bin:
+    webpack-bundle-analyzer: lib/bin/analyzer.js
+  checksum: e439aea4e88e18bfdc16eb69782c1bb17b2e581905a5cfa8d34058dc6677f6e202f896189268e58b49fa14ae12f5ef4c25cdca9f98f3de7e6699ac62def2f0af
+  languageName: node
+  linkType: hard
+
 "webpack-cli@npm:^5.1.3":
   version: 5.1.3
   resolution: "webpack-cli@npm:5.1.3"
@@ -19164,7 +19249,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^7.4.6":
+"ws@npm:^7.3.1, ws@npm:^7.4.6":
   version: 7.5.9
   resolution: "ws@npm:7.5.9"
   peerDependencies:
