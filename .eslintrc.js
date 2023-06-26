@@ -120,8 +120,11 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['./**/*.js'],
+      files: ['.eslintrc.js', './**/.eslintrc.js'],
       parserOptions: { project: null },
+      rules: {
+        '@typescript-eslint/consistent-type-exports': 'off',
+      },
     },
     {
       files: [
