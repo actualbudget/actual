@@ -147,19 +147,6 @@ function CategoryList({
   );
 }
 
-export function useCategoriesGrouped(groups, rows) {
-  if (!groups) {
-    return null;
-  } else {
-    return groups.map(group => {
-      return {
-        ...group,
-        categories: rows.filter(row => row.cat_group === group.id),
-      };
-    });
-  }
-}
-
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: CategoryGroup[];
   showSplitOption?: boolean;

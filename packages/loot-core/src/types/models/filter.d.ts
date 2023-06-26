@@ -1,4 +1,4 @@
-export interface FilterEntity {
+interface FilterEntity {
   id?: string;
   name?: string;
   conditions: unknown;

@@ -210,7 +210,7 @@ export function Value({
   }
 }
 
-export function ConditionExpression({
+function ConditionExpression({
   field,
   op,
   value,

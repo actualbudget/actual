@@ -35,8 +35,6 @@ import Budget from './budget';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import MobileBudget from './budget/MobileBudget';
 import { View } from './common';
-import Filters from './filters';
-import EditFilter from './filters/EditFilter';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';

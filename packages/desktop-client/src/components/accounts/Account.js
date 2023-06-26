@@ -766,7 +766,6 @@ function SelectedTransactionsButton({
   onUnlink,
   onCreateRule,
   onScheduleAction,
-  history,
 }) {
   let selectedItems = useSelectedItems();
   let navigate = useNavigate();
@@ -917,7 +916,6 @@ const AccountHeader = memo(
     account,
     filterId,
     filtersList,
-    history,
     accountsSyncing,
     accounts,
     transactions,
@@ -1189,7 +1187,6 @@ const AccountHeader = memo(
                 onUnlink={onBatchUnlink}
                 onCreateRule={onCreateRule}
                 onScheduleAction={onScheduleAction}
-                history={history}
               />
             )}
             <Button
@@ -1755,17 +1752,6 @@ class AccountInternal extends PureComponent {
           this.setState({ showCleared: true });
         }
         break;
-      case 'save-filter':
-        this.props.history.push(`/filters/edit`, {
-          locationPtr: this.props.history.location,
-          inputConds: this.state.filters,
-        });
-        break;
-      case 'edit-filter':
-        this.props.history.push(`/filters/edit/${this.state.filterId}`, {
-          locationPtr: this.props.history.location,
-        });
-        break;
       default:
     }
   };
@@ -2225,7 +2211,6 @@ class AccountInternal extends PureComponent {
                   account={account}
                   filterId={filterId}
                   filtersList={this.props.filtersList}
-                  history={this.props.history}
                   location={this.props.location}
                   accountName={accountName}
                   accountsSyncing={accountsSyncing}
@@ -2383,7 +2368,6 @@ export default function Account() {
   }));
 
   let dispatch = useDispatch();
-  let history = useHistory();
   let filtersList = useFilters();
   let actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
@@ -2430,7 +2414,6 @@ export default function Account() {
           accountId={params.id}
           categoryId={activeLocation?.state?.filter?.category}
           location={location}
-          history={history}
           filtersList={filtersList}
         />
       </SplitsExpandedProvider>

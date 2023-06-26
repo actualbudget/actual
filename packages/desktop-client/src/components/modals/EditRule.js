@@ -55,7 +55,7 @@ function applyErrors(array, errorsArray) {
   });
 }
 
-export function getTransactionFields(page, conditions, actions) {
+function getTransactionFields(page, conditions, actions) {
   let fields = ['date'];
   let orderedFields = [
     'account',
@@ -133,7 +133,7 @@ export function OpSelect({
   );
 }
 
-export function EditorButtons({ onAdd, onDelete, style }) {
+function EditorButtons({ onAdd, onDelete, style }) {
   return (
     <>
       {onDelete && (
@@ -175,7 +175,7 @@ function FieldError({ type }) {
   );
 }
 
-export function Editor({ error, style, children }) {
+function Editor({ error, style, children }) {
   return (
     <View style={style} data-testid="editor-row">
       <Stack
@@ -193,7 +193,7 @@ export function Editor({ error, style, children }) {
   );
 }
 
-export function ConditionEditor({
+function ConditionEditor({
   ops,
   condition,
   editorStyle,
@@ -420,7 +420,7 @@ function newInput(item) {
   return { ...item, inputKey: '' + Math.random() };
 }
 
-export function ConditionsList({
+function ConditionsList({
   conditionsOp,
   conditions,
   editorStyle,

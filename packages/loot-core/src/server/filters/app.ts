@@ -9,7 +9,7 @@ import { undoable } from '../undo';
 
 let app = createApp();
 
-export const filterModel = {
+const filterModel = {
   validate(filter, { update }: { update?: boolean } = {}) {
     requiredFields('transaction_filters', filter, ['conditions'], update);
 
@@ -40,7 +40,7 @@ export const filterModel = {
   },
 };
 
-export async function filterNameExists(name, filterId, newItem) {
+async function filterNameExists(name, filterId, newItem) {
   let idForName = await db.first(
     'SELECT id from transaction_filters WHERE tombstone = 0 AND name = ?',
     [name],
@@ -57,7 +57,7 @@ export async function filterNameExists(name, filterId, newItem) {
 
 //TODO: Possible to simplify this?
 //use filters and maps
-export function conditionExists(item, filters, newItem) {
+function conditionExists(item, filters, newItem) {
   let { conditions, conditionsOp } = item;
   let condCheck = [];
   let fCondCheck = false;
@@ -101,7 +101,7 @@ export function conditionExists(item, filters, newItem) {
   return fCondFound ? fCondFound.name : false;
 }
 
-export async function createFilter(filter) {
+async function createFilter(filter) {
   let filterId = uuid.v4Sync();
   let item = {
     id: filterId,
@@ -136,7 +136,7 @@ export async function createFilter(filter) {
   return filterId;
 }
 
-export async function updateFilter(filter) {
+async function updateFilter(filter) {
   let item = {
     id: filter.state.id,
     conditions: filter.state.conditions,
@@ -166,7 +166,7 @@ export async function updateFilter(filter) {
   await db.updateWithSchema('transaction_filters', filterModel.fromJS(item));
 }
 
-export async function deleteFilter({ id }) {
+async function deleteFilter({ id }) {
   await batchMessages(async () => {
     await db.delete_('transaction_filters', id);
   });

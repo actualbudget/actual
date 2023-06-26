@@ -7,12 +7,7 @@ import { View } from '../common';
 
 import Autocomplete from './Autocomplete';
 
-export function FilterList({
-  items,
-  getItemProps,
-  highlightedIndex,
-  embedded,
-}) {
+function FilterList({ items, getItemProps, highlightedIndex, embedded }) {
   return (
     <View>
       <View
