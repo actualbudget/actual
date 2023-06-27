@@ -82,6 +82,7 @@ export default function TransactionList({
 }) {
   let transactionsLatest = useRef();
   let navigate = useNavigate();
+  let onNavigate = to => navigate(to);
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -183,6 +184,7 @@ export default function TransactionList({
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
       style={{ backgroundColor: 'white' }}
+      onNavigate={onNavigate}
     />
   );
 }

@@ -14,7 +14,6 @@ import React, {
   useReducer,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 
 import {
   format as formatDate,
@@ -485,7 +484,9 @@ function PayeeIcons({ transaction, transferAccount, onNavigate, children }) {
       />
     );
 
-  let onTransferIconClick = () => onNavigate('/accounts/' + transferAccount.id);
+  let onTransferIconClick = () =>
+    !isTemporaryId(transaction.id) &&
+    onNavigate('/accounts/' + transferAccount.id);
   let TransferDirectionIcon = () =>
     (transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
       <LeftArrow2 style={style} onClick={onTransferIconClick} />
@@ -537,11 +538,10 @@ const Transaction = memo(function Transaction(props) {
     onManagePayees,
     onCreatePayee,
     onToggleSplit,
+    onNavigate,
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
-  let navigate = useNavigate();
-  let onNavigate = to => navigate(to);
 
   let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
@@ -1358,6 +1358,7 @@ function TransactionTableInner({
           onManagePayees={props.onManagePayees}
           onCreatePayee={props.onCreatePayee}
           onToggleSplit={props.onToggleSplit}
+          onNavigate={props.onNavigate}
         />
       </>
     );
