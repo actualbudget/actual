@@ -50,4 +50,14 @@ test.describe('Budget', () => {
       balance: expect.any(Number),
     });
   });
+
+  test('clicking on spent amounts opens a transaction page', async () => {
+    let categoryName = await budgetPage.getCategoryNameForRow(1);
+    let accountPage = await budgetPage.clickOnSpentAmountForRow(1);
+    expect(page.url()).toContain('/accounts');
+    expect(await accountPage.accountName.textContent()).toMatch(
+      new RegExp(String.raw`${categoryName} \(\w+ \d+\)`),
+    );
+    await page.getByRole('button', { name: 'Back' }).click();
+  });
 });

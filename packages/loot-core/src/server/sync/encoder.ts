@@ -4,6 +4,8 @@ import * as encryption from '../encryption';
 import { SyncError } from '../errors';
 import * as prefs from '../prefs';
 
+import { Message } from './index';
+
 function coerceBuffer(value) {
   // The web encryption APIs give us back raw Uint8Array... but our
   // encryption code assumes we can work with it as a buffer. This is
@@ -15,7 +17,12 @@ function coerceBuffer(value) {
   return value;
 }
 
-export async function encode(groupId, fileId, since, messages) {
+export async function encode(
+  groupId: string,
+  fileId: string,
+  since: string,
+  messages: Message[],
+): Promise<Uint8Array> {
   let { encryptKeyId } = prefs.getPrefs();
   let requestPb = new SyncProtoBuf.SyncRequest();
 
@@ -28,7 +35,7 @@ export async function encode(groupId, fileId, since, messages) {
     messagePb.setDataset(msg.dataset);
     messagePb.setRow(msg.row);
     messagePb.setColumn(msg.column);
-    messagePb.setValue(msg.value);
+    messagePb.setValue(msg.value as string);
     let binaryMsg = messagePb.serializeBinary();
 
     if (encryptKeyId) {
@@ -64,7 +71,9 @@ export async function encode(groupId, fileId, since, messages) {
   return requestPb.serializeBinary();
 }
 
-export async function decode(data) {
+export async function decode(
+  data: Uint8Array,
+): Promise<{ messages: Message[]; merkle: { hash: number } }> {
   let { encryptKeyId } = prefs.getPrefs();
 
   let responsePb = SyncProtoBuf.SyncResponse.deserializeBinary(data);

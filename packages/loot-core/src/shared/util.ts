@@ -1,48 +1,5 @@
-export function cleanUUID(uuid) {
-  return uuid.replace(/-/g, '');
-}
-
 export function last(arr) {
   return arr[arr.length - 1];
-}
-
-export function mergeObjects(objects) {
-  return Object.assign.apply(null, [{}, ...objects]);
-}
-
-export function composeCellChanges(objects) {
-  const merged = {};
-  Object.keys(objects).forEach(key => {
-    if (merged[key]) {
-      merged[key] = { ...merged[key], ...objects[key] };
-    } else {
-      merged[key] = objects[key];
-    }
-  });
-}
-
-export function flattenArray(arrays) {
-  return Array.prototype.concat.apply([], arrays);
-}
-
-export function shallowEqual(a, b) {
-  if (a === b) {
-    return true;
-  }
-
-  let numKeysA = 0,
-    numKeysB = 0,
-    key;
-  for (key in b) {
-    numKeysB++;
-    if (!a.hasOwnProperty(key) || a[key] !== b[key]) {
-      return false;
-    }
-  }
-  for (key in a) {
-    numKeysA++;
-  }
-  return numKeysA === numKeysB;
 }
 
 export function getChangedValues(obj1, obj2) {
@@ -132,19 +89,6 @@ export function groupBy(data, field, mapper?: (v: unknown) => unknown) {
   return res;
 }
 
-export function groupBySingle(data, field, mapper) {
-  let res = new Map();
-  for (let i = 0; i < data.length; i++) {
-    let item = data[i];
-    let key = item[field];
-    if (res.has(key)) {
-      throw new Error('groupBySingle found conflicting key: ' + key);
-    }
-    res.set(key, mapper ? mapper(item) : data[i]);
-  }
-  return res;
-}
-
 // This should replace the existing `groupById` function, since a
 // `Map` is better, but we can't swap it out because `Map` has a
 // different API and we need to go through and update everywhere that
@@ -192,26 +136,22 @@ export function groupById(data) {
   return res;
 }
 
-export function debugMemoFailure(prevProps, nextProps) {
-  let changed = getChangedValues(prevProps, nextProps);
-  if (changed !== null) {
-    console.log(changed);
-  }
-  return changed === null;
-}
-
-export function setIn(map, keys, item) {
+export function setIn(
+  map: Map<string, unknown>,
+  keys: string[],
+  item: unknown,
+): void {
   for (let i = 0; i < keys.length; i++) {
-    let key = keys[i];
+    const key = keys[i];
 
     if (i === keys.length - 1) {
       map.set(key, item);
     } else {
       if (!map.has(key)) {
-        map.set(key, new Map());
+        map.set(key, new Map<string, unknown>());
       }
 
-      map = map.get(key);
+      map = map.get(key) as Map<string, unknown>;
     }
   }
 }
@@ -226,11 +166,6 @@ export function getIn(map, keys) {
     }
   }
   return item;
-}
-
-// Useful for throwing exception from expressions
-export function throwError(err) {
-  throw err;
 }
 
 export function fastSetMerge(set1, set2) {
@@ -339,10 +274,6 @@ export function toRelaxedNumber(value) {
   return integerToAmount(currencyToInteger(value) || 0);
 }
 
-export function toRelaxedInteger(value) {
-  return stringToInteger(value) || 0;
-}
-
 export function integerToCurrency(n) {
   return numberFormat.formatter.format(safeNumber(n) / 100);
 }
@@ -405,16 +336,4 @@ export function looselyParseAmount(amount) {
   let right = extractNumbers(amount.slice(m.index + 1));
 
   return safeNumber(parseFloat(left + '.' + right));
-}
-
-export function semverToNumber(str) {
-  return parseInt(
-    '1' +
-      str
-        .split('.')
-        .map(x => {
-          return ('000' + x.replace(/[^0-9]/g, '')).slice(-3);
-        })
-        .join(''),
-  );
 }

@@ -1,6 +1,6 @@
 import React, { memo, PureComponent, useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
 import * as actions from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -111,7 +111,7 @@ class Budget extends PureComponent {
       _initialBudgetMonth = this.state.startMonth;
     }
 
-    if (this.props.match && !prevProps.match) {
+    if (this.props.accountId !== prevProps.accountId) {
       // Make to sure to check if the budget bounds have changed, and
       // if so reload the budget data
       send('get-budget-bounds').then(({ start, end }) => {
@@ -332,8 +332,7 @@ class Budget extends PureComponent {
   };
 
   onShowActivity = (categoryName, categoryId, month) => {
-    this.props.history.push({
-      pathname: '/accounts',
+    this.props.navigate('/accounts', {
       state: {
         goBack: true,
         filterName: `${categoryName} (${monthUtils.format(
@@ -520,7 +519,9 @@ const RolloverBudgetSummary = memo(props => {
 function BudgetWrapper(props) {
   let spreadsheet = useSpreadsheet();
   let titlebar = useContext(TitlebarContext);
-  let history = useHistory();
+  let location = useLocation();
+  let match = useMatch(location.pathname);
+  let navigate = useNavigate();
 
   let reportComponents = useMemo(
     () => ({
@@ -565,7 +566,8 @@ function BudgetWrapper(props) {
         rolloverComponents={rolloverComponents}
         spreadsheet={spreadsheet}
         titlebar={titlebar}
-        history={history}
+        navigate={navigate}
+        match={match}
       />
     </View>
   );

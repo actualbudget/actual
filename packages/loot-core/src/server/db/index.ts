@@ -491,7 +491,7 @@ export async function mergePayees(target, ids) {
       }),
     );
 
-    return Promise.all(
+    await Promise.all(
       ids.map(id =>
         Promise.all([
           update('payee_mapping', { id, targetId: target }),
@@ -583,7 +583,7 @@ export async function moveAccount(id, targetId) {
   }
 
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
-  await batchMessages(() => {
+  await batchMessages(async () => {
     for (let info of updates) {
       update('accounts', info);
     }
