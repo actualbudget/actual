@@ -106,6 +106,7 @@ function CashFlow() {
           paddingLeft: 20,
           paddingRight: 20,
           backgroundColor: 'white',
+          flexShrink: 0,
         }}
       >
         {filters.length > 0 && (
