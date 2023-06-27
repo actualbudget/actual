@@ -1,4 +1,4 @@
-import { css } from 'glamor';
+import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
@@ -172,7 +172,7 @@ export const styles = {
   },
   textColor: colors.n1,
   delayedFadeIn: {
-    animationName: css.keyframes({
+    animationName: keyframes({
       '0%': { opacity: 0 },
       '100%': { opacity: 1 },
     }),
