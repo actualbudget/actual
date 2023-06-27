@@ -82,7 +82,6 @@ export default function TransactionList({
 }) {
   let transactionsLatest = useRef();
   let navigate = useNavigate();
-  let onNavigate = to => navigate(to);
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -151,6 +150,14 @@ export default function TransactionList({
     navigate('/payees', { selectedPayee: id });
   });
 
+  let onNavigateToTransferAccount = useCallback(accountId => {
+    navigate('/accounts/' + accountId);
+  });
+
+  let onNavigateToSchedule = useCallback(scheduleId => {
+    navigate('/schedule/edit/' + scheduleId);
+  });
+
   return (
     <TransactionTable
       ref={tableRef}
@@ -184,7 +191,8 @@ export default function TransactionList({
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
       style={{ backgroundColor: 'white' }}
-      onNavigate={onNavigate}
+      onNavigateToTransferAccount={onNavigateToTransferAccount}
+      onNavigateToSchedule={onNavigateToSchedule}
     />
   );
 }

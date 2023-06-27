@@ -454,7 +454,13 @@ function PayeeCell({
   );
 }
 
-function PayeeIcons({ transaction, transferAccount, onNavigate, children }) {
+function PayeeIcons({
+  transaction,
+  transferAccount,
+  onNavigateToTransferAccount,
+  onNavigateToSchedule,
+  children,
+}) {
   let scheduleId = transaction.schedule;
   let scheduleData = useCachedSchedules();
   let schedule = scheduleData.schedules.find(s => s.id === scheduleId);
@@ -473,7 +479,7 @@ function PayeeIcons({ transaction, transferAccount, onNavigate, children }) {
   };
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
-  let onScheduleIconClick = () => onNavigate('/schedule/edit/' + scheduleId);
+  let onScheduleIconClick = () => onNavigateToSchedule(scheduleId);
   let ScheduledIcon = () =>
     recurring ? (
       <ArrowsSynchronize style={style} onClick={onScheduleIconClick} />
@@ -486,7 +492,7 @@ function PayeeIcons({ transaction, transferAccount, onNavigate, children }) {
 
   let onTransferIconClick = () =>
     !isTemporaryId(transaction.id) &&
-    onNavigate('/accounts/' + transferAccount.id);
+    onNavigateToTransferAccount(transferAccount.id);
   let TransferDirectionIcon = () =>
     (transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
       <LeftArrow2 style={style} onClick={onTransferIconClick} />
@@ -538,7 +544,8 @@ const Transaction = memo(function Transaction(props) {
     onManagePayees,
     onCreatePayee,
     onToggleSplit,
-    onNavigate,
+    onNavigateToTransferAccount,
+    onNavigateToSchedule,
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
@@ -823,7 +830,8 @@ const Transaction = memo(function Transaction(props) {
           <PayeeIcons
             transaction={transaction}
             transferAccount={transferAcct}
-            onNavigate={onNavigate}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
           >
             {cell}
           </PayeeIcons>
@@ -1168,6 +1176,8 @@ function NewTransaction({
   onAddSplit,
   onManagePayees,
   onCreatePayee,
+  onNavigateToTransferAccount,
+  onNavigateToSchedule,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1214,6 +1224,8 @@ function NewTransaction({
           onManagePayees={onManagePayees}
           onCreatePayee={onCreatePayee}
           style={{ marginTop: -1 }}
+          onNavigateToTransferAccount={onNavigateToTransferAccount}
+          onNavigateToSchedule={onNavigateToSchedule}
         />
       ))}
       <View
@@ -1265,6 +1277,16 @@ function TransactionTableInner({
 }) {
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
+
+  let onNavigateToTransferAccount = useCallback(accountId => {
+    props.onCloseAddTransaction();
+    props.onNavigateToTransferAccount(accountId);
+  });
+
+  let onNavigateToSchedule = useCallback(scheduleId => {
+    props.onCloseAddTransaction();
+    props.onNavigateToSchedule(scheduleId);
+  });
 
   useEffect(() => {
     if (!isAddingPrev && props.isAdding) {
@@ -1358,7 +1380,8 @@ function TransactionTableInner({
           onManagePayees={props.onManagePayees}
           onCreatePayee={props.onCreatePayee}
           onToggleSplit={props.onToggleSplit}
-          onNavigate={props.onNavigate}
+          onNavigateToTransferAccount={onNavigateToTransferAccount}
+          onNavigateToSchedule={onNavigateToSchedule}
         />
       </>
     );
@@ -1408,6 +1431,8 @@ function TransactionTableInner({
               onHover={onHover}
               onManagePayees={props.onManagePayees}
               onCreatePayee={props.onCreatePayee}
+              onNavigateToTransferAccount={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToTransferAccount}
             />
           </View>
         )}
