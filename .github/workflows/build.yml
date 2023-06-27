@@ -68,6 +68,7 @@ jobs:
   size-compare:
     runs-on: ubuntu-latest
     needs: [web]
+    if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write
     steps:
