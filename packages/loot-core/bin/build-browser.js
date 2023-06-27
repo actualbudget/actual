@@ -1,19 +1,17 @@
 #!usr/bin/env node
-const { fsUtil, fs, shellUtil, webpackUtil, join, packageRoot, migrationUtil } = require('@actual-app/bin');
+const { fsUtil, fs, shellUtil, webpackUtil, migrationUtil, build } = require('@actual-app/bin');
 
-const ROOT = packageRoot('loot-core');
-const BUILD_DIR = join(ROOT, 'lib-dist/browser');
-
-const CLIENT_ROOT = packageRoot('desktop-client');
-const CLIENT_DATA_DIR = join(CLIENT_ROOT, 'public/data');
-const CLIENT_BUILD_DIR = join(CLIENT_ROOT, 'public/kcab');
+const ROOT = build.workerRot;
+const BUILD_DIR = build.workerBuildDir;
+const CLIENT_DATA_DIR = build.clientDataDir;
+const CLIENT_BUILD_DIR = build.clientWorkerDir;
 
 async function prepareBuildFiles() {
   await migrationUtil.copyMigrations(ROOT, CLIENT_DATA_DIR);
 
   // Create an index file of all the public data files that need processing
   let files = await fsUtil.findFiles(CLIENT_DATA_DIR, '**', true);
-  await fs.writeFile(join(CLIENT_DATA_DIR, '../data-file-index.txt'), files.sort().join('\n'));
+  await fs.writeFile(build.clientDataIndexFileName, files.sort().join('\n'));
 
   await fs.emptyDir(BUILD_DIR);
   await fsUtil.rmdir(CLIENT_BUILD_DIR);
