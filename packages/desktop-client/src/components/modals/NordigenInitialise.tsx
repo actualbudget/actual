@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
+import { ExternalLink } from '../common';
 import { ButtonWithLoading } from '../common/Button';
 import Input from '../common/Input';
 import Modal, { ModalButtons } from '../common/Modal';
@@ -56,14 +57,7 @@ const NordigenInitialise = ({
           In order to enable bank-sync via Nordigen (only for EU banks) you will
           need to create access credentials. This can be done by creating an
           account with{' '}
-          <a
-            href="https://nordigen.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nordigen
-          </a>
-          .
+          <ExternalLink to="https://nordigen.com/">Nordigen</ExternalLink>.
         </Text>
 
         <FormField>
