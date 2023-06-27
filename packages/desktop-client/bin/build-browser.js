@@ -8,14 +8,14 @@ async function main() {
 
   console.log('Building version ' + version + ' for the browser...');
 
+  await fs.rmdir('build');
+  
   const env = {
     IS_GENERIC_BROWSER: 1,
     INLINE_RUNTIME_CHUNK: false,
     REACT_APP_BACKEND_WORKER_HASH: await build.workerFileHash(),
     REACT_APP_ACTUAL_VERSION: version,
   };
-
-  await fs.rmdir('build');
   
   await shell.exec('yarn build', env);
 
