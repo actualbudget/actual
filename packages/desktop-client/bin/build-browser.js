@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-const { fs, shell, packageVersion, build } = require('@actual-app/bin');
+const { fs, shell, packageVersion, packageRoot, build } = require('@actual-app/bin');
 
 async function main() {
+  process.chdir(packageRoot('desktop-client'));
+
   const version = await packageVersion('desktop-client');
 
   console.log('Building version ' + version + ' for the browser...');
@@ -13,8 +15,13 @@ async function main() {
     REACT_APP_ACTUAL_VERSION: version,
   };
 
-  await fs.rmdir(build.clientBuildDir);
+  await fs.rmdir('build');
+  
   await shell.exec('yarn build', env);
+
+  await fs.emptyDir('build-stats');
+  await fs.move( 'build/kcab/stats.json', 'build-stats/loot-core-stats.json');
+  await fs.move('build/stats.json', 'build-stats/desktop-client-stats.json');
 }
 
 main();
