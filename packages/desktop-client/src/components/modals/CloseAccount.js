@@ -52,7 +52,7 @@ function CloseAccount({
   let [loading, setLoading] = useState(false);
   let [transfer, setTransfer] = useState('');
   let [category, setCategory] = useState('');
-  let [errors, setErrors] = useState({});
+  let [errors, setErrors] = useState({ transfer: false, category: false });
 
   let filtered = accounts.filter(a => a.id !== account.id);
   let onbudget = filtered.filter(a => a.offbudget === 0);
@@ -84,15 +84,15 @@ function CloseAccount({
             onSubmit={event => {
               event.preventDefault();
 
-              const errors = {};
+              const errors = { transfer: false, category: false };
               if (balance !== 0 && transfer === '') {
-                errors.transfer = 'required';
+                errors.transfer = true;
               }
               if (
                 needsCategory(account, transfer, accounts) &&
                 category === ''
               ) {
-                errors.category = 'required';
+                errors.category = true;
               }
               setErrors(errors);
 
@@ -118,7 +118,12 @@ function CloseAccount({
 
                 <Select
                   value={transfer}
-                  onChange={event => setTransfer(event.target.value)}
+                  onChange={event => {
+                    setTransfer(event.target.value);
+                    if (errors.transfer && event.target.value) {
+                      setErrors({ ...errors, transfer: false });
+                    }
+                  }}
                   style={{ width: 200, marginBottom: 15 }}
                 >
                   <option value="">Select account...</option>
@@ -155,7 +160,12 @@ function CloseAccount({
                     <CategorySelect
                       categoryGroups={categoryGroups}
                       value={category}
-                      onChange={event => setCategory(event.target.value)}
+                      onChange={event => {
+                        setCategory(event.target.value);
+                        if (errors.category && event.target.value) {
+                          setErrors({ ...errors, category: false });
+                        }
+                      }}
                       style={{ width: 200 }}
                     />
                     {errors.category && (

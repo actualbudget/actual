@@ -22,7 +22,9 @@ function CreateLocalAccount({ modalProps, actions }) {
   let [name, setName] = useState('');
   let [offbudget, setOffbudget] = useState(false);
   let [balance, setBalance] = useState('0');
-  let [errors, setErrors] = useState({});
+  let [errors, setErrors] = useState({ name: false, balance: false });
+
+  let validateBalance = balance => !isNaN(parseFloat(balance));
 
   return (
     <Modal title="Create Local Account" {...modalProps} showBack={false}>
@@ -31,12 +33,12 @@ function CreateLocalAccount({ modalProps, actions }) {
           <form
             onSubmit={async event => {
               event.preventDefault();
-              const errors = {};
+              const errors = { name: false, balance: false };
               if (!name) {
-                errors.name = 'required';
+                errors.name = true;
               }
-              if (isNaN(parseFloat(balance))) {
-                errors.balance = 'format';
+              if (!validateBalance(balance)) {
+                errors.balance = true;
               }
               setErrors(errors);
 
@@ -57,6 +59,13 @@ function CreateLocalAccount({ modalProps, actions }) {
                   name="name"
                   value={name}
                   onChange={event => setName(event.target.value)}
+                  onBlur={event => {
+                    let name = event.target.value.trim();
+                    setName(name);
+                    if (name && errors.name) {
+                      setErrors({ ...errors, name: false });
+                    }
+                  }}
                   style={{ flex: 1 }}
                 />
               </InitialFocus>
@@ -121,6 +130,13 @@ function CreateLocalAccount({ modalProps, actions }) {
                 name="balance"
                 value={balance}
                 onChange={event => setBalance(event.target.value)}
+                onBlur={event => {
+                  let balance = event.target.value.trim();
+                  setBalance(balance);
+                  if (validateBalance(balance) && errors.balance) {
+                    setErrors({ ...errors, balance: false });
+                  }
+                }}
                 style={{ flex: 1 }}
               />
             </InlineField>
