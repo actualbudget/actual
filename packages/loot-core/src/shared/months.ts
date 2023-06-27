@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-export function _parse(value: string | Date) {
+export function _parse(value: string | number | Date) {
   if (typeof value === 'string') {
     // Dates are hard. We just want to deal with months in the format
     // 2020-01 and days in the format 2020-01-01, but life is never
@@ -66,24 +66,27 @@ export function _parse(value: string | Date) {
       return new Date(parseInt(year), 0, 1, 12);
     }
   }
+  if (typeof value === 'number') {
+    return new Date(value);
+  }
   return value;
 }
 
 export const parseDate = _parse;
 
-export function yearFromDate(date) {
+export function yearFromDate(date: string | number | Date) {
   return d.format(_parse(date), 'yyyy');
 }
 
-export function monthFromDate(date) {
+export function monthFromDate(date: string | number | Date) {
   return d.format(_parse(date), 'yyyy-MM');
 }
 
-export function dayFromDate(date) {
+export function dayFromDate(date: string | number | Date) {
   return d.format(_parse(date), 'yyyy-MM-dd');
 }
 
-export function currentMonth() {
+export function currentMonth(): string {
   if (global.IS_TESTING) {
     return global.currentMonth || '2017-01';
   } else {
@@ -99,57 +102,64 @@ export function currentDay() {
   }
 }
 
-export function nextMonth(month) {
+export function nextMonth(month: string | Date) {
   return d.format(d.addMonths(_parse(month), 1), 'yyyy-MM');
 }
 
-export function prevMonth(month) {
+export function prevMonth(month: string | Date) {
   return d.format(d.subMonths(_parse(month), 1), 'yyyy-MM');
 }
 
-export function addMonths(month, n) {
+export function addMonths(month: string | Date, n: number) {
   return d.format(d.addMonths(_parse(month), n), 'yyyy-MM');
 }
 
-export function addWeeks(date, n) {
+export function addWeeks(date: string | Date, n: number) {
   return d.format(d.addWeeks(_parse(date), n), 'yyyy-MM-dd');
 }
 
-export function differenceInCalendarMonths(month1, month2) {
+export function differenceInCalendarMonths(
+  month1: string | Date,
+  month2: string | Date,
+) {
   return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
 }
 
-export function subMonths(month, n) {
+export function subMonths(month: string | Date, n: number) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
-export function addDays(day, n) {
+export function addDays(day: string | Date, n: number) {
   return d.format(d.addDays(_parse(day), n), 'yyyy-MM-dd');
 }
 
-export function subDays(day, n) {
+export function subDays(day: string | Date, n: number) {
   return d.format(d.subDays(_parse(day), n), 'yyyy-MM-dd');
 }
 
-export function isBefore(month1, month2) {
+export function isBefore(month1: string | Date, month2: string | Date) {
   return d.isBefore(_parse(month1), _parse(month2));
 }
 
-export function isAfter(month1, month2) {
+export function isAfter(month1: string | Date, month2: string | Date) {
   return d.isAfter(_parse(month1), _parse(month2));
 }
 
 // TODO: This doesn't really fit in this module anymore, should
 // probably live elsewhere
-export function bounds(month) {
+export function bounds(month: string | Date) {
   return {
     start: parseInt(d.format(d.startOfMonth(_parse(month)), 'yyyyMMdd')),
     end: parseInt(d.format(d.endOfMonth(_parse(month)), 'yyyyMMdd')),
   };
 }
 
-export function _range(start, end, inclusive = false) {
-  const months = [];
+export function _range(
+  start: string | Date,
+  end: string | Date,
+  inclusive = false,
+): string[] {
+  const months: string[] = [];
   let month = monthFromDate(start);
   while (d.isBefore(_parse(month), _parse(end))) {
     months.push(month);
@@ -163,16 +173,20 @@ export function _range(start, end, inclusive = false) {
   return months;
 }
 
-export function range(start, end) {
+export function range(start: string, end: string) {
   return _range(start, end);
 }
 
-export function rangeInclusive(start, end) {
+export function rangeInclusive(start: string, end: string) {
   return _range(start, end, true);
 }
 
-export function _dayRange(start, end, inclusive = false) {
-  const days = [];
+export function _dayRange(
+  start: string,
+  end: string | Date,
+  inclusive = false,
+): string[] {
+  const days: string[] = [];
   let day = start;
   while (d.isBefore(_parse(day), _parse(end))) {
     days.push(day);
@@ -186,48 +200,48 @@ export function _dayRange(start, end, inclusive = false) {
   return days;
 }
 
-export function dayRange(start, end) {
+export function dayRange(start: string, end: string) {
   return _dayRange(start, end);
 }
 
-export function dayRangeInclusive(start, end) {
+export function dayRangeInclusive(start: string, end: string) {
   return _dayRange(start, end, true);
 }
 
-export function getMonthIndex(month) {
+export function getMonthIndex(month: string) {
   return parseInt(month.slice(5, 7)) - 1;
 }
 
-export function getYear(month) {
+export function getYear(month: string) {
   return month.slice(0, 4);
 }
 
-export function getMonth(day) {
+export function getMonth(day: string) {
   return day.slice(0, 7);
 }
 
-export function getYearStart(month) {
+export function getYearStart(month: string) {
   return getYear(month) + '-01';
 }
 
-export function getYearEnd(month) {
+export function getYearEnd(month: string) {
   return getYear(month) + '-12';
 }
 
-export function sheetForMonth(month) {
+export function sheetForMonth(month: string) {
   return 'budget' + month.replace('-', '');
 }
 
-export function nameForMonth(month) {
+export function nameForMonth(month: string | Date) {
   // eslint-disable-next-line rulesdir/typography
   return d.format(_parse(month), "MMMM 'yy");
 }
 
-export function format(month, str) {
+export function format(month: string | Date, str: string) {
   return d.format(_parse(month), str);
 }
 
-export const getDateFormatRegex = memoizeOne(format => {
+export const getDateFormatRegex = memoizeOne((format: string) => {
   return new RegExp(
     format
       .replace(/d+/g, '\\d{1,2}')
@@ -236,14 +250,14 @@ export const getDateFormatRegex = memoizeOne(format => {
   );
 });
 
-export const getDayMonthFormat = memoizeOne(format => {
+export const getDayMonthFormat = memoizeOne((format: string) => {
   return format
     .replace(/y+/g, '')
     .replace(/[^\w]$/, '')
     .replace(/^[^\w]/, '');
 });
 
-export const getDayMonthRegex = memoizeOne(format => {
+export const getDayMonthRegex = memoizeOne((format: string) => {
   let regex = format
     .replace(/y+/g, '')
     .replace(/[^\w]$/, '')
@@ -253,7 +267,7 @@ export const getDayMonthRegex = memoizeOne(format => {
   return new RegExp('^' + regex + '$');
 });
 
-export const getMonthYearFormat = memoizeOne(format => {
+export const getMonthYearFormat = memoizeOne((format: string) => {
   return format
     .replace(/d+/g, '')
     .replace(/[^\w]$/, '')
@@ -263,7 +277,7 @@ export const getMonthYearFormat = memoizeOne(format => {
     .replace(/--/, '-');
 });
 
-export const getMonthYearRegex = memoizeOne(format => {
+export const getMonthYearRegex = memoizeOne((format: string) => {
   let regex = format
     .replace(/d+/g, '')
     .replace(/[^\w]$/, '')
@@ -274,11 +288,11 @@ export const getMonthYearRegex = memoizeOne(format => {
   return new RegExp('^' + regex + '$');
 });
 
-export const getShortYearFormat = memoizeOne(format => {
+export const getShortYearFormat = memoizeOne((format: string) => {
   return format.replace(/y+/g, 'yy');
 });
 
-export const getShortYearRegex = memoizeOne(format => {
+export const getShortYearRegex = memoizeOne((format: string) => {
   let regex = format
     .replace(/[^\w]$/, '')
     .replace(/^[^\w]/, '')
