@@ -302,10 +302,18 @@ async function doImport(data) {
   console.log('Setting up...');
 }
 
-export async function importYNAB5(data) {
+export default async function importYNAB5(_filepath, buffer) {
+  let data;
+  try {
+    data = JSON.parse(buffer.toString());
+  } catch (e) {
+    return { error: 'parse-error' };
+  }
+
   if (data.data) {
     data = data.data;
   }
 
-  return actual.runImport(data.budget.name, () => doImport(data.budget));
+  await actual.runImport(data.budget.name, () => doImport(data.budget));
+  return {};
 }

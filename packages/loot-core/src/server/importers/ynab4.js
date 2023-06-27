@@ -390,7 +390,7 @@ function join(...paths) {
   }, paths[0].replace(/\/$/, ''));
 }
 
-export async function importBuffer(filepath, buffer) {
+export default async function importYNAB4(filepath, buffer) {
   let budgetName = getBudgetName(filepath);
 
   if (!budgetName) {

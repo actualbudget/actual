@@ -69,6 +69,7 @@ import toolsApp from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
+import { handleBudgetImport } from './importers';
 
 let DEMO_BUDGET_ID = '_demo-budget';
 let TEST_BUDGET_ID = '_test-budget';
@@ -2054,80 +2055,7 @@ handlers['import-budget'] = async function ({ filepath, type }) {
     }
 
     let buffer = Buffer.from(await fs.readFile(filepath, 'binary'));
-
-    switch (type) {
-      case 'ynab4':
-        try {
-          await YNAB4.importBuffer(filepath, buffer);
-        } catch (e) {
-          let msg = e.message.toLowerCase();
-          if (
-            msg.includes('not a ynab4') ||
-            msg.includes('could not find file')
-          ) {
-            return { error: 'not-ynab4' };
-          }
-        }
-        break;
-      case 'ynab5':
-        let data;
-        try {
-          data = JSON.parse(buffer.toString());
-        } catch (e) {
-          return { error: 'parse-error' };
-        }
-
-        try {
-          await YNAB5.importYNAB5(data);
-        } catch (e) {
-          return { error: 'not-ynab5' };
-        }
-        break;
-      case 'actual':
-        // We should pull out import/export into its own app so this
-        // can be abstracted out better. Importing Actual files is a
-        // special case because we can directly write down the files,
-        // but because it doesn't go through the API layer we need to
-        // duplicate some of the workflow
-        await handlers['close-budget']();
-
-        let id;
-        try {
-          ({ id } = await cloudStorage.importBuffer(
-            { cloudFileId: null, groupId: null },
-            buffer,
-          ));
-        } catch (e) {
-          if (e.type === 'FileDownloadError') {
-            return { error: e.reason };
-          }
-          throw e;
-        }
-
-        // We never want to load cached data from imported files, so
-        // delete the cache
-        let sqliteDb = await sqlite.openDatabase(
-          fs.join(fs.getBudgetDir(id), 'db.sqlite'),
-        );
-        sqlite.execQuery(
-          sqliteDb,
-          `
-          DELETE FROM kvcache;
-          DELETE FROM kvcache_key;
-        `,
-        );
-        sqlite.closeDatabase(sqliteDb);
-
-        // Load the budget, force everything to be computed, and try
-        // to upload it as a cloud file
-        await handlers['load-budget']({ id });
-        await handlers['get-budget-bounds']();
-        await sheet.waitOnSpreadsheet();
-        await cloudStorage.upload().catch(err => {});
-
-        break;
-      default:
-    }
+    await handleBudgetImport(type, filepath, buffer);
   } catch (err) {
     err.message = 'Error importing budget: ' + err.message;
     captureException(err);
