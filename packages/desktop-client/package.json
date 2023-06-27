@@ -21,6 +21,7 @@
     "@types/react-dom": "^18.2.1",
     "@types/react-modal": "^3.16.0",
     "@types/react-router-dom": "^5.3.3",
+    "@types/webpack-bundle-analyzer": "^4.6.0",
     "cross-env": "^7.0.3",
     "customize-cra": "^1.0.0",
     "date-fns": "^2.29.3",
@@ -33,7 +34,7 @@
     "inter-ui": "^3.19.3",
     "jest": "^27.0.0",
     "jest-watch-typeahead": "^2.2.2",
-    "memoize-one": "^4.0.0",
+    "memoize-one": "^6.0.0",
     "pikaday": "1.8.0",
     "react": "18.2.0",
     "react-app-rewired": "^2.2.1",
@@ -49,7 +50,8 @@
     "react-virtualized-auto-sizer": "^1.0.2",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "victory": "^36.6.8"
+    "victory": "^36.6.8",
+    "webpack-bundle-analyzer": "^4.9.0"
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-app-rewired start",

@@ -8,7 +8,7 @@ import * as actions from 'loot-core/src/client/actions';
 import Close from '../icons/v1/Close';
 import { colors } from '../style';
 
-import { View, Text, Link, Button } from './common';
+import { View, Text, LinkButton, Button } from './common';
 
 function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session
@@ -49,14 +49,14 @@ function UpdateNotification({
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
-              <Link
+              <LinkButton
                 onClick={updateApp}
                 style={{ color: 'white', textDecoration: 'underline' }}
               >
                 Restart
-              </Link>{' '}
+              </LinkButton>{' '}
               (
-              <Link
+              <LinkButton
                 style={{ color: 'white', textDecoration: 'underline' }}
                 onClick={() =>
                   window.Actual.openURLInBrowser(
@@ -65,7 +65,7 @@ function UpdateNotification({
                 }
               >
                 notes
-              </Link>
+              </LinkButton>
               )
               <Button
                 bare

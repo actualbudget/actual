@@ -12,7 +12,7 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import tokens from '../../tokens';
 import { withThemeColor } from '../../util/withThemeColor';
-import { View, Text, Button, Input } from '../common';
+import { View, Text, Button, Input, ExternalLink } from '../common';
 import { FormField, FormLabel } from '../forms';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
@@ -52,19 +52,21 @@ function About() {
         <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>
         {isOutdated ? (
-          <a
-            style={{ color: colors.p4 }}
-            href="https://actualbudget.org/docs/releases"
+          <ExternalLink
+            to="https://actualbudget.org/docs/releases"
+            linkColor="purple"
           >
             New version available: {latestVersion}
-          </a>
+          </ExternalLink>
         ) : (
           <Text style={{ color: colors.g2, fontWeight: 600 }}>
             You’re up to date!
           </Text>
         )}
         <Text>
-          <a href="https://actualbudget.org/docs/releases">Release Notes</a>
+          <ExternalLink to="https://actualbudget.org/docs/releases">
+            Release Notes
+          </ExternalLink>
         </Text>
       </View>
     </Setting>

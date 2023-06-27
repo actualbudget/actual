@@ -16,6 +16,7 @@ import {
   FormError,
   InitialFocus,
   Text,
+  ExternalLink,
 } from '../common';
 
 function CreateLocalAccount({ modalProps, actions }) {
@@ -116,16 +117,12 @@ function CreateLocalAccount({ modalProps, actions }) {
                       <Text>
                         This cannot be changed later. <br /> {'\n'}
                         See{' '}
-                        <a
-                          href="https://actualbudget.org/docs/accounts/#off-budget-accounts"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: colors.n5,
-                          }}
+                        <ExternalLink
+                          linkColor="muted"
+                          to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
                         >
                           Accounts Overview
-                        </a>{' '}
+                        </ExternalLink>{' '}
                         for more information.
                       </Text>
                     </div>
