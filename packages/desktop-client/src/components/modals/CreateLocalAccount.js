@@ -22,7 +22,9 @@ function CreateLocalAccount({ modalProps, actions }) {
   let [name, setName] = useState('');
   let [offbudget, setOffbudget] = useState(false);
   let [balance, setBalance] = useState('0');
-  let [errors, setErrors] = useState({ name: false, balance: false });
+
+  let [nameError, setNameError] = useState(false);
+  let [balanceError, setBalanceError] = useState(false);
 
   let validateBalance = balance => !isNaN(parseFloat(balance));
 
@@ -33,16 +35,14 @@ function CreateLocalAccount({ modalProps, actions }) {
           <form
             onSubmit={async event => {
               event.preventDefault();
-              const errors = { name: false, balance: false };
-              if (!name) {
-                errors.name = true;
-              }
-              if (!validateBalance(balance)) {
-                errors.balance = true;
-              }
-              setErrors(errors);
 
-              if (Object.keys(errors).length === 0) {
+              let nameError = !name;
+              setNameError(nameError);
+
+              let balanceError = !validateBalance(balance);
+              setBalanceError(balanceError);
+
+              if (!nameError && !balanceError) {
                 modalProps.onClose();
                 let id = await actions.createAccount(
                   name,
@@ -62,15 +62,15 @@ function CreateLocalAccount({ modalProps, actions }) {
                   onBlur={event => {
                     let name = event.target.value.trim();
                     setName(name);
-                    if (name && errors.name) {
-                      setErrors({ ...errors, name: false });
+                    if (name && nameError) {
+                      setNameError(false);
                     }
                   }}
                   style={{ flex: 1 }}
                 />
               </InitialFocus>
             </InlineField>
-            {errors.name && (
+            {nameError && (
               <FormError style={{ marginLeft: 75 }}>Name is required</FormError>
             )}
 
@@ -133,14 +133,14 @@ function CreateLocalAccount({ modalProps, actions }) {
                 onBlur={event => {
                   let balance = event.target.value.trim();
                   setBalance(balance);
-                  if (validateBalance(balance) && errors.balance) {
-                    setErrors({ ...errors, balance: false });
+                  if (validateBalance(balance) && balanceError) {
+                    setBalanceError(false);
                   }
                 }}
                 style={{ flex: 1 }}
               />
             </InlineField>
-            {errors.balance && (
+            {balanceError && (
               <FormError style={{ marginLeft: 75 }}>
                 Balance must be a number
               </FormError>

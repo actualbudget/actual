@@ -52,7 +52,9 @@ function CloseAccount({
   let [loading, setLoading] = useState(false);
   let [transfer, setTransfer] = useState('');
   let [category, setCategory] = useState('');
-  let [errors, setErrors] = useState({ transfer: false, category: false });
+
+  let [transferError, setTransferError] = useState(false);
+  let [categoryError, setCategoryError] = useState(false);
 
   let filtered = accounts.filter(a => a.id !== account.id);
   let onbudget = filtered.filter(a => a.offbudget === 0);
@@ -84,19 +86,14 @@ function CloseAccount({
             onSubmit={event => {
               event.preventDefault();
 
-              const errors = { transfer: false, category: false };
-              if (balance !== 0 && transfer === '') {
-                errors.transfer = true;
-              }
-              if (
-                needsCategory(account, transfer, accounts) &&
-                category === ''
-              ) {
-                errors.category = true;
-              }
-              setErrors(errors);
+              let transferError = balance !== 0 && transfer === '';
+              setTransferError(transferError);
 
-              if (Object.keys(errors).length === 0) {
+              let categoryError =
+                needsCategory(account, transfer, accounts) && category === '';
+              setCategoryError(categoryError);
+
+              if (!transferError && !categoryError) {
                 setLoading(true);
 
                 actions
@@ -120,8 +117,8 @@ function CloseAccount({
                   value={transfer}
                   onChange={event => {
                     setTransfer(event.target.value);
-                    if (errors.transfer && event.target.value) {
-                      setErrors({ ...errors, transfer: false });
+                    if (transferError && event.target.value) {
+                      setTransferError(false);
                     }
                   }}
                   style={{ width: 200, marginBottom: 15 }}
@@ -143,7 +140,7 @@ function CloseAccount({
                     ))}
                   </optgroup>
                 </Select>
-                {errors.transfer && (
+                {transferError && (
                   <FormError style={{ marginBottom: 15 }}>
                     Transfer is required
                   </FormError>
@@ -162,13 +159,13 @@ function CloseAccount({
                       value={category}
                       onChange={event => {
                         setCategory(event.target.value);
-                        if (errors.category && event.target.value) {
-                          setErrors({ ...errors, category: false });
+                        if (categoryError && event.target.value) {
+                          setCategoryError(false);
                         }
                       }}
                       style={{ width: 200 }}
                     />
-                    {errors.category && (
+                    {categoryError && (
                       <FormError>Category is required</FormError>
                     )}
                   </View>
