@@ -40,7 +40,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/import-ynab4@*, @actual-app/import-ynab4@workspace:packages/import-ynab4":
+"@actual-app/import-ynab4@workspace:packages/import-ynab4":
   version: 0.0.0-use.local
   resolution: "@actual-app/import-ynab4@workspace:packages/import-ynab4"
   dependencies:
@@ -12569,7 +12569,6 @@ __metadata:
   dependencies:
     "@actual-app/api": "*"
     "@actual-app/crdt": "*"
-    "@actual-app/import-ynab4": "*"
     "@babel/core": ~7.22.5
     "@babel/preset-env": ^7.22.5
     "@babel/preset-typescript": ^7.22.5
@@ -12616,6 +12615,7 @@ __metadata:
     path-browserify: ^1.0.1
     peggy: 3.0.2
     process: ^0.11.10
+    slash: 3.0.0
     snapshot-diff: ^0.10.0
     source-map: ^0.7.3
     stream-browserify: ^3.0.0
