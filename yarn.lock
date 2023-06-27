@@ -23,6 +23,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/bin@workspace:packages/bin":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/bin@workspace:packages/bin"
+  dependencies:
+    fast-glob: ^3.2.12
+    fs-extra: ^11.1.1
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/crdt@*, @actual-app/crdt@workspace:packages/crdt":
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
@@ -9435,6 +9444,17 @@ __metadata:
     jsonfile: ^6.0.1
     universalify: ^2.0.0
   checksum: dc94ab37096f813cc3ca12f0f1b5ad6744dfed9ed21e953d72530d103cea193c2f81584a39e9dee1bea36de5ee66805678c0dddc048e8af1427ac19c00fffc50
+  languageName: node
+  linkType: hard
+
+"fs-extra@npm:^11.1.1":
+  version: 11.1.1
+  resolution: "fs-extra@npm:11.1.1"
+  dependencies:
+    graceful-fs: ^4.2.0
+    jsonfile: ^6.0.1
+    universalify: ^2.0.0
+  checksum: fb883c68245b2d777fbc1f2082c9efb084eaa2bbf9fddaa366130d196c03608eebef7fb490541276429ee1ca99f317e2d73e96f5ca0999eefedf5a624ae1edfd
   languageName: node
   linkType: hard
 
