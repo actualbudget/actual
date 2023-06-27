@@ -281,7 +281,7 @@ async function importBudgets(data, entityIdMap) {
 
 // Utils
 
-async function doImport(data) {
+export async function doImport(data) {
   const entityIdMap = new Map();
 
   console.log('Importing Accounts...');
@@ -302,18 +302,15 @@ async function doImport(data) {
   console.log('Setting up...');
 }
 
-export default async function importYNAB5(_filepath, buffer) {
-  let data;
-  try {
-    data = JSON.parse(buffer.toString());
-  } catch (e) {
-    return { error: 'parse-error' };
-  }
-
+export function parseFile(buffer) {
+  let data = JSON.parse(buffer.toString());
   if (data.data) {
     data = data.data;
   }
 
-  await actual.runImport(data.budget.name, () => doImport(data.budget));
-  return {};
+  return data;
+}
+
+export function getBudgetName(_filepath, data) {
+  return data.budget_name;
 }

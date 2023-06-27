@@ -1,41 +1,56 @@
+import { handlers } from '../main';
+
 import importActual from './actual';
-import importYNAB4 from './ynab4';
-import importYNAB5 from './ynab5';
+import * as YNAB4 from './ynab4';
+import * as YNAB5 from './ynab5';
 
 type ImportableBudgetType = 'ynab4' | 'ynab5' | 'actual';
+
+type Importer = {
+  parseFile(buffer: Buffer): unknown;
+  getBudgetName(filepath: string, data: unknown): string | null;
+  doImport(data: unknown): Promise<void>;
+};
+
+let importers: Record<Exclude<ImportableBudgetType, 'actual'>, Importer> = {
+  ynab4: YNAB4,
+  ynab5: YNAB5,
+};
 
 export async function handleBudgetImport(
   type: ImportableBudgetType,
   filepath: string,
   buffer: Buffer,
 ) {
-  switch (type) {
-    case 'ynab4':
-      try {
-        await importYNAB4(filepath, buffer);
-      } catch (e) {
-        let msg = e.message.toLowerCase();
-        if (
-          msg.includes('not a ynab4') ||
-          msg.includes('could not find file')
-        ) {
-          return { error: 'not-ynab4' };
-        }
-      }
-      break;
-    case 'ynab5':
-      try {
-        let result = await importYNAB5(filepath, buffer);
-        if (result) {
-          return result;
-        }
-      } catch (e) {
-        return { error: 'not-ynab5' };
-      }
-      break;
-    case 'actual':
-      await importActual(filepath, buffer);
-      break;
-    default:
+  if (type === 'actual') {
+    return importActual(filepath, buffer);
   }
+  let importer = importers[type];
+  try {
+    let data;
+    let budgetName: string;
+    try {
+      data = importer.parseFile(buffer);
+      budgetName = importer.getBudgetName(filepath, data);
+    } catch (e) {
+      console.error('failed to parse file', e);
+    }
+    if (!budgetName) {
+      return { error: 'not-' + type };
+    }
+
+    try {
+      await handlers['api/start-import']({ budgetName });
+    } catch (e) {
+      console.error('failed to start import', e);
+      return { error: 'unknown' };
+    }
+    await importer.doImport(data);
+  } catch (e) {
+    await handlers['api/abort-import']();
+    console.error('failed to run import', e);
+    return { error: 'unknown' };
+  }
+
+  await handlers['api/finish-import']();
 }

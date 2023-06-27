@@ -333,7 +333,7 @@ function findLatestDevice(zipped, entries) {
   return devices[devices.length - 1].deviceGUID;
 }
 
-async function doImport(data) {
+export async function doImport(data) {
   const entityIdMap = new Map();
 
   console.log('Importing Accounts...');
@@ -354,7 +354,7 @@ async function doImport(data) {
   console.log('Setting up...');
 }
 
-function getBudgetName(filepath) {
+export function getBudgetName(filepath, _data) {
   let unixFilepath = normalizePathSep(filepath);
 
   if (!/\.zip/.test(unixFilepath)) {
@@ -390,13 +390,7 @@ function join(...paths) {
   }, paths[0].replace(/\/$/, ''));
 }
 
-export default async function importYNAB4(filepath, buffer) {
-  let budgetName = getBudgetName(filepath);
-
-  if (!budgetName) {
-    throw new Error('Not a YNAB4 file: ' + filepath);
-  }
-
+export function parseFile(buffer) {
   let zipped = new AdmZip(buffer);
   let entries = zipped.getEntries();
 
@@ -424,12 +418,9 @@ export default async function importYNAB4(filepath, buffer) {
     throw new Error('Error reading Budget.yfull file');
   }
 
-  let data;
   try {
-    data = JSON.parse(contents);
+    return JSON.parse(contents);
   } catch (e) {
-    throw new Error('Error parsing Budget.yull file');
+    throw new Error('Error parsing Budget.yfull file');
   }
-
-  return actual.runImport(budgetName, () => doImport(data));
 }
