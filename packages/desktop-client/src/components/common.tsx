@@ -129,11 +129,11 @@ type LinkProps = ComponentProps<typeof Button>;
 export function LinkButton({ style, children, ...nativeProps }: LinkProps) {
   return (
     <Button
-      {...css(
+      style={[
         {
           textDecoration: 'none',
           color: styles.textColor,
-          backgroundColor: 'transparent !important',
+          backgroundColor: 'transparent',
           display: 'inline',
           border: 0,
           cursor: 'pointer',
@@ -149,7 +149,7 @@ export function LinkButton({ style, children, ...nativeProps }: LinkProps) {
         },
         styles.smallText,
         style,
-      )}
+      ]}
       {...nativeProps}
     >
       {children}
