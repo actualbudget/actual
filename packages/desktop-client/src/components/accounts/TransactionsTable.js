@@ -461,7 +461,7 @@ function CellWithIcons({ transaction, transferAccount, onNavigate, children }) {
   let schedule = scheduleData.schedules.find(s => s.id === scheduleId);
 
   if (schedule == null && transferAccount == null) {
-    // This must be a deleted schedule and not a transfer.
+    // Neither a valid scheduled transaction nor a transfer.
     return children;
   }
 
@@ -495,9 +495,7 @@ function CellWithIcons({ transaction, transferAccount, onNavigate, children }) {
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch' }}>
-      {/* Scheduled icon. */}
       {schedule && <Cell exposed={true}>{ScheduledIcon}</Cell>}
-      {/* Transfer direction icon. Only show if not a scheduled transaction. */}
       {!schedule && transferAccount && (
         <Cell exposed={true}>{TransferDirectionIcon}</Cell>
       )}
