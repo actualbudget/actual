@@ -39,8 +39,10 @@ export function sync() {
   return async (dispatch, getState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
-      let { error } = await send('sync');
-      return { error };
+      let result = await send('sync');
+      if ('error' in result) {
+        return { error: result.error };
+      }
     }
   };
 }

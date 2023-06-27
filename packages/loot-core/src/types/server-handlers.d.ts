@@ -2,6 +2,7 @@ import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
+import { Message } from '../server/sync';
 
 import { EmptyObject } from './util';
 
@@ -288,7 +289,10 @@ export interface ServerHandlers {
 
   'set-server-url': (arg: { url; validate }) => Promise<unknown>;
 
-  sync: () => Promise<{ error?: string }>;
+  sync: () => Promise<
+    | { error: { message: string; reason: string; meta: unknown } }
+    | { messages: Message[] }
+  >;
 
   'get-budgets': () => Promise<
     {
