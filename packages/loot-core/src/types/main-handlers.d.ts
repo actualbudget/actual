@@ -276,8 +276,8 @@ export interface MainHandlers {
   'subscribe-sign-in': (arg: { password }) => Promise<{ error: string }>;
 
   'subscribe-sign-in-openid': (arg: {
-    return_url: URL;
-  }) => Promise<{ error: string } | { redirect_url: URL }>;
+    return_url: string;
+  }) => Promise<{ error?: string; redirect_url?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
 
