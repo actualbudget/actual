@@ -27,7 +27,7 @@
     "start:browser": "npm-run-all --parallel 'start:browser-*'",
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
-    "build:browser": "./bin/package-browser.sh",
+    "build:browser": "./bin/package-browser",
     "test": "yarn workspaces foreach --parallel --verbose run test",
     "test:debug": "yarn workspaces foreach --verbose run test",
     "e2e": "yarn workspaces foreach --parallel --verbose run e2e",
