@@ -1,5 +1,5 @@
 #!usr/bin/env node
-const { fsUtil, fs, shellUtil, webpackUtil, migrationUtil, build } = require('@actual-app/bin');
+const { fs, shell, webpackUtil, migrations, build } = require('@actual-app/bin');
 
 const ROOT = build.workerRoot;
 const BUILD_DIR = build.workerBuildDir;
@@ -7,14 +7,14 @@ const CLIENT_DATA_DIR = build.clientDataDir;
 const CLIENT_BUILD_DIR = build.clientWorkerDir;
 
 async function prepareBuildFiles() {
-  await migrationUtil.copyMigrations(ROOT, CLIENT_DATA_DIR);
+  await migrations.copyMigrations(ROOT, CLIENT_DATA_DIR);
 
   // Create an index file of all the public data files that need processing
-  let files = await fsUtil.findFiles(CLIENT_DATA_DIR, '**', true);
+  let files = await fs.findFiles(CLIENT_DATA_DIR, '**', true);
   await fs.writeFile(build.clientDataIndexFileName, files.sort().join('\n'));
 
   await fs.emptyDir(BUILD_DIR);
-  await fsUtil.rmdir(CLIENT_BUILD_DIR);
+  await fs.rmdir(CLIENT_BUILD_DIR);
 
   // In dev mode, symlink the build files.
   if (process.env.NODE_ENV === 'development') {
@@ -40,7 +40,7 @@ async function executeWebpack() {
     command.push(' --watch');
   }
 
-  await shellUtil.executeShellCmd(command.join(''));
+  await shell.exec(command.join(''));
 }
 
 async function main() {

@@ -1,31 +1,36 @@
-const fs = require('fs-extra')
 const Path = require('path');
 const fg = require('fast-glob');
 
-module.exports = class FsUtil {
-  static async copyFileToFolder(file, dest) {
-    await fs.copyFile(file, Path.join(dest, Path.parse(file).base));
-  }
+var fs = require('fs-extra');
 
-  static async rmdir(dir) {
-      await fs.rm(dir, { recursive: true, force: true });
-  }
+// deprecated in favour of rm but its cleaner to not need caller
+// to pass the force & recursive params each time
+delete fs['rmdir'];
 
-  static async findFiles(directory, pattern, relativePath=false) {
-    if (relativePath) {
-       return fg(pattern, { cwd: directory, absolute: false });
-    }
-    return fg(pattern, { cwd: directory, absolute: true });
-  }
+fs.rmdir = async dir => {
+  await fs.rm(dir, { recursive: true, force: true });
+};
 
-  static async removeFiles(pattern) {
-    let files = await fg(pattern);
-    await Promise.all(files.map(file => fs.unlink(files)));
-  }
+fs.copyFileToFolder = async (file, dest) => {
+  await fs.copyFile(file, Path.join(dest, Path.parse(file).base));
+};
 
-  static async getVersion(packageJsonPath) {
-    const data = await fs.readFile(packageJsonPath);
-    const json = JSON.parse(data);
-    return json.version;
+fs.findFiles = async (directory, pattern, relativePath = false) => {
+  if (relativePath) {
+    return fg(pattern, { cwd: directory, absolute: false });
   }
-}
+  return fg(pattern, { cwd: directory, absolute: true });
+};
+
+fs.removeFiles = async pattern => {
+  let files = await fg(pattern);
+  await Promise.all(files.map(file => fs.unlink(files)));
+};
+
+fs.getVersion = async packageJsonPath => {
+  const data = await fs.readFile(packageJsonPath);
+  const json = JSON.parse(data);
+  return json.version;
+};
+
+module.exports = fs;

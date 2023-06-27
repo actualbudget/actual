@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-const { fsUtil, webpackUtil, shellUtil, join, packageRoot, packageVersion} = require('@actual-app/bin');
-
-const ROOT = packageRoot('desktop-client');
+const { shell, packageVersion } = require('@actual-app/bin');
 
 async function main() {
   const version = await packageVersion('desktop-client');
@@ -13,7 +11,7 @@ async function main() {
     REACT_APP_ACTUAL_VERSION: version,
   };
 
-  shellUtil.executeShellCmd('yarn start', env);
+  shell.exec('yarn start', env);
 }
 
 main();

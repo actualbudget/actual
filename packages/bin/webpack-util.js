@@ -1,4 +1,4 @@
-const fsUtil = require('./fs-util');
+const fs = require('./fs-util');
 
 // Use a constant filename in development mode to make it easier to
 // rebuild the backend without having to rebuild the frontend
@@ -9,16 +9,16 @@ exports.getContentHash = () => {
   return '[contenthash]';
 };
 
-exports.getHashFromFile = (file) => {
+exports.getHashFromFile = file => {
   return file.match(/(?<=kcab\.worker\.).*(?=\.js)/)[0];
-}
+};
 
-exports.getWorkerFileName = async (directory) => {
-  let files = await fsUtil.findFiles(directory, 'kcab.worker.*.js', true);
+exports.getWorkerFileName = async directory => {
+  let files = await fs.findFiles(directory, 'kcab.worker.*.js', true);
   return files[0];
-}
+};
 
-exports.getWorkerFileHash = async (directory) => {
-    let workerFile = await this.getWorkerFileName(directory);
-    return this.getHashFromFile(workerFile);
-}
+exports.getWorkerFileHash = async directory => {
+  let workerFile = await this.getWorkerFileName(directory);
+  return this.getHashFromFile(workerFile);
+};
