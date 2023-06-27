@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+ROOT=`dirname $0`/..
+
+rm -rf ${ROOT}/client-build
+cp -r ${ROOT}/../desktop-client/build ${ROOT}/client-build
+
+# Remove the embedded backend for the browser version. Will improve
+# this process
+rm -rf ${ROOT}/client-build/data
+rm -rf ${ROOT}/client-build/*kcab.*
+rm -rf ${ROOT}/client-build/*.wasm
+rm -rf ${ROOT}/client-build/*.map

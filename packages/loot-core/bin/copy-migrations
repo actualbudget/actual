@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+ROOT=`dirname $(dirname "$0")`
+DEST="$1"
+
+rm -rf "$DEST"/migrations
+mkdir -p "$DEST"/migrations
+cp "$ROOT"/migrations/* "$DEST"/migrations/
+cp "$ROOT"/default-db.sqlite "$DEST"
