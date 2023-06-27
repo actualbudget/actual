@@ -5,59 +5,20 @@
 import * as actual from '@actual-app/api/methods';
 import { amountToInteger } from '@actual-app/api/utils';
 import AdmZip from 'adm-zip';
-import * as d from 'date-fns';
 import normalizePathSep from 'slash';
 import { v4 as uuidv4 } from 'uuid';
 
-// Utils
+import * as monthUtils from '../../shared/months';
+import { groupBy, sortByKey } from '../../shared/util';
 
-function sortByKey(arr, key) {
-  return [...arr].sort((item1, item2) => {
-    if (item1[key] < item2[key]) {
-      return -1;
-    } else if (item1[key] > item2[key]) {
-      return 1;
-    }
-    return 0;
-  });
-}
-
-function groupBy(arr, keyName) {
-  return arr.reduce(function (obj, item) {
-    var key = item[keyName];
-    if (!obj.hasOwnProperty(key)) {
-      obj[key] = [];
-    }
-    obj[key].push(item);
-    return obj;
-  }, {});
-}
-
-function _parse(value) {
-  if (typeof value === 'string') {
-    // We don't want parsing to take local timezone into account,
-    // which parsing a string does. Pass the integers manually to
-    // bypass it.
-
-    let [year, month, day] = value.split('-');
-    if (day != null) {
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    } else if (month != null) {
-      return new Date(parseInt(year), parseInt(month) - 1, 1);
-    } else {
-      return new Date(parseInt(year), 0, 1);
-    }
-  }
-  return value;
-}
-
-function monthFromDate(date) {
-  return d.format(_parse(date), 'yyyy-MM');
-}
+import { YNAB4 } from './ynab4-types';
 
 // Importer
 
-async function importAccounts(data, entityIdMap) {
+async function importAccounts(
+  data: YNAB4.YFull,
+  entityIdMap: Map<string, string>,
+) {
   const accounts = sortByKey(data.accounts, 'sortableIndex');
 
   return Promise.all(
@@ -74,7 +35,10 @@ async function importAccounts(data, entityIdMap) {
   );
 }
 
-async function importCategories(data, entityIdMap) {
+async function importCategories(
+  data: YNAB4.YFull,
+  entityIdMap: Map<string, string>,
+) {
   const masterCategories = sortByKey(data.masterCategories, 'sortableIndex');
 
   await Promise.all(
@@ -83,7 +47,7 @@ async function importCategories(data, entityIdMap) {
         masterCategory.type === 'OUTFLOW' &&
         !masterCategory.isTombstone &&
         masterCategory.subCategories &&
-        masterCategory.subCategories.some(cat => !cat.isTombstone) > 0
+        masterCategory.subCategories.some(cat => !cat.isTombstone)
       ) {
         const id = await actual.createCategoryGroup({
           name: masterCategory.name,
@@ -115,7 +79,10 @@ async function importCategories(data, entityIdMap) {
   );
 }
 
-async function importPayees(data, entityIdMap) {
+async function importPayees(
+  data: YNAB4.YFull,
+  entityIdMap: Map<string, string>,
+) {
   for (let payee of data.payees) {
     if (!payee.isTombstone) {
       let id = await actual.createPayee({
@@ -131,13 +98,18 @@ async function importPayees(data, entityIdMap) {
   }
 }
 
-async function importTransactions(data, entityIdMap) {
+async function importTransactions(
+  data: YNAB4.YFull,
+  entityIdMap: Map<string, string>,
+) {
   const categories = await actual.getCategories();
-  const incomeCategoryId = categories.find(cat => cat.name === 'Income').id;
+  const incomeCategoryId: string = categories.find(
+    cat => cat.name === 'Income',
+  ).id;
   const accounts = await actual.getAccounts();
   const payees = await actual.getPayees();
 
-  function getCategory(id) {
+  function getCategory(id: string) {
     if (id == null || id === 'Category/__Split__') {
       return null;
     } else if (
@@ -149,7 +121,7 @@ async function importTransactions(data, entityIdMap) {
     return entityIdMap.get(id);
   }
 
-  function isOffBudget(acctId) {
+  function isOffBudget(acctId: string) {
     let acct = accounts.find(acct => acct.id === acctId);
     if (!acct) {
       throw new Error('Could not find account for transaction when importing');
@@ -172,8 +144,8 @@ async function importTransactions(data, entityIdMap) {
   let transactionsGrouped = groupBy(data.transactions, 'accountId');
 
   await Promise.all(
-    Object.keys(transactionsGrouped).map(async accountId => {
-      let transactions = transactionsGrouped[accountId];
+    [...transactionsGrouped.keys()].map(async accountId => {
+      let transactions = transactionsGrouped.get(accountId);
 
       let toImport = transactions
         .map(transaction => {
@@ -183,7 +155,7 @@ async function importTransactions(data, entityIdMap) {
 
           let id = entityIdMap.get(transaction.entityId);
 
-          function transferProperties(t) {
+          function transferProperties(t: YNAB4.SubTransaction) {
             let transferId = entityIdMap.get(t.transferTransactionId) || null;
 
             let payee = null;
@@ -216,19 +188,19 @@ async function importTransactions(data, entityIdMap) {
             notes: transaction.memo || null,
             cleared: transaction.cleared === 'Cleared',
             ...transferProperties(transaction),
-          };
 
-          newTransaction.subtransactions =
-            transaction.subTransactions &&
-            transaction.subTransactions.map((t, i) => {
-              return {
-                id: entityIdMap.get(t.entityId),
-                amount: amountToInteger(t.amount),
-                category: getCategory(t.categoryId),
-                notes: t.memo || null,
-                ...transferProperties(t),
-              };
-            });
+            subtransactions:
+              transaction.subTransactions &&
+              transaction.subTransactions.map((t, i) => {
+                return {
+                  id: entityIdMap.get(t.entityId),
+                  amount: amountToInteger(t.amount),
+                  category: getCategory(t.categoryId),
+                  notes: t.memo || null,
+                  ...transferProperties(t),
+                };
+              }),
+          };
 
           return newTransaction;
         })
@@ -239,14 +211,21 @@ async function importTransactions(data, entityIdMap) {
   );
 }
 
-function fillInBudgets(data, categoryBudgets) {
+function fillInBudgets(
+  data: YNAB4.YFull,
+  categoryBudgets: YNAB4.MonthlySubCategoryBudget[],
+) {
   // YNAB only contains entries for categories that have been actually
   // budgeted. That would be fine except that we need to set the
   // "carryover" flag on each month when carrying debt across months.
   // To make sure our system has a chance to set this flag on each
   // category, make sure a budget exists for every category of every
   // month.
-  const budgets = [...categoryBudgets];
+  const budgets: {
+    budgeted: number;
+    categoryId: string;
+    overspendingHandling?: string;
+  }[] = [...categoryBudgets];
   data.masterCategories.forEach(masterCategory => {
     if (masterCategory.subCategories) {
       masterCategory.subCategories.forEach(category => {
@@ -262,7 +241,10 @@ function fillInBudgets(data, categoryBudgets) {
   return budgets;
 }
 
-async function importBudgets(data, entityIdMap) {
+async function importBudgets(
+  data: YNAB4.YFull,
+  entityIdMap: Map<string, string>,
+) {
   let budgets = sortByKey(data.monthlyBudgets, 'month');
 
   await actual.batchBudgetUpdates(async () => {
@@ -276,7 +258,7 @@ async function importBudgets(data, entityIdMap) {
         filled.map(async catBudget => {
           let amount = amountToInteger(catBudget.budgeted);
           let catId = entityIdMap.get(catBudget.categoryId);
-          let month = monthFromDate(budget.month);
+          let month = monthUtils.monthFromDate(budget.month);
           if (!catId) {
             return;
           }
@@ -294,7 +276,7 @@ async function importBudgets(data, entityIdMap) {
   });
 }
 
-function estimateRecentness(str) {
+function estimateRecentness(str: string) {
   // The "recentness" is the total amount of changes that this device
   // is aware of, which is estimated by summing up all of the version
   // numbers that its aware of. This works because version numbers are
@@ -305,7 +287,7 @@ function estimateRecentness(str) {
   }, 0);
 }
 
-function findLatestDevice(zipped, entries) {
+function findLatestDevice(zipped: AdmZip, entries: AdmZip.IZipEntry[]): string {
   let devices = entries
     .map(entry => {
       const contents = zipped.readFile(entry).toString('utf8');
@@ -333,8 +315,8 @@ function findLatestDevice(zipped, entries) {
   return devices[devices.length - 1].deviceGUID;
 }
 
-export async function doImport(data) {
-  const entityIdMap = new Map();
+export async function doImport(data: YNAB4.YFull) {
+  const entityIdMap = new Map<string, string>();
 
   console.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);
@@ -373,7 +355,7 @@ export function getBudgetName(filepath, _data) {
   return m[1];
 }
 
-function getFile(entries, path) {
+function getFile(entries: AdmZip.IZipEntry[], path: string) {
   let files = entries.filter(e => e.entryName === path);
   if (files.length === 0) {
     throw new Error('Could not find file: ' + path);
@@ -384,13 +366,13 @@ function getFile(entries, path) {
   return files[0];
 }
 
-function join(...paths) {
+function join(...paths: string[]): string {
   return paths.slice(1).reduce((full, path) => {
     return full + '/' + path.replace(/^\//, '');
   }, paths[0].replace(/\/$/, ''));
 }
 
-export function parseFile(buffer) {
+export function parseFile(buffer: Buffer): YNAB4.YFull {
   let zipped = new AdmZip(buffer);
   let entries = zipped.getEntries();
 
