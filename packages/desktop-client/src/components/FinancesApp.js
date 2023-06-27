@@ -298,6 +298,10 @@ function FinancesApp(props) {
 const HTML5toTouch = {
   backends: [
     {
+      id: 'default',
+      backend: HTML5Backend,
+    },
+    {
       id: 'html5',
       backend: HTML5Backend,
       transition: PointerTransition,
@@ -308,7 +312,7 @@ const HTML5toTouch = {
       options: { delay: 300 },
       preview: true,
       transition: TouchTransition,
-    },
+    }
   ],
 };
 
