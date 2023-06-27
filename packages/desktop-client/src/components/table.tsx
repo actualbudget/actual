@@ -894,7 +894,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       headers,
       contentHeader,
       loading,
-      rowHeight,
+      rowHeight = ROW_HEIGHT,
       backgroundColor = TABLE_BACKGROUND_COLOR,
       renderItem,
       renderEmpty,
@@ -920,7 +920,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
         getNavigatorProps: props => props,
       };
     }
-    rowHeight = rowHeight ? rowHeight : ROW_HEIGHT;
 
     let { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
     let list = useRef(null);

@@ -20,7 +20,6 @@ import useReport from './useReport';
 function CashFlow() {
   const {
     filters,
-    saved,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
@@ -98,8 +97,6 @@ function CashFlow() {
         end={monthUtils.getMonth(end)}
         show1Month
         onChangeDates={onChangeDates}
-        filters={filters}
-        saved={saved}
         extraButtons={<FilterButton onApply={onApplyFilter} />}
       />
 

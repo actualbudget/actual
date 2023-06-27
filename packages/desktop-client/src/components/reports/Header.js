@@ -126,26 +126,6 @@ function Header({
         <Button bare onClick={() => onChangeDates(...getFullRange(allMonths))}>
           All Time
         </Button>
-        {/* <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'flex-end',
-          }}
-        >
-          <MenuButton onClick={() => setMenuOpen(true)} />
-
-          {menuOpen && (
-            <CategoryMenu
-              onMenuSelect={item => {
-                setMenuOpen(false);
-                //onMenuSelect(item);
-              }}
-              onClose={() => setMenuOpen(false)}
-              filters={filters}
-              saved={saved}
-            />
-          )}
-        </View> */}
       </View>
     </View>
   );
