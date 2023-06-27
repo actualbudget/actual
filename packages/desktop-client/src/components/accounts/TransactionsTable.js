@@ -14,6 +14,7 @@ import React, {
   useReducer,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import {
   format as formatDate,
@@ -276,11 +277,6 @@ function getPayeePretty(transaction, payee, transferAcct) {
   let { payee: payeeId } = transaction;
 
   if (transferAcct) {
-    const Icon =
-      (transaction._inverse ? -1 : 1) * transaction.amount > 0
-        ? LeftArrow2
-        : RightArrow2;
-
     return (
       <View
         style={{
@@ -288,7 +284,6 @@ function getPayeePretty(transaction, payee, transferAcct) {
           alignItems: 'center',
         }}
       >
-        <Icon width={10} height={8} style={{ marginRight: 5, flexShrink: 0 }} />
         <div
           style={{
             overflow: 'hidden',
@@ -460,17 +455,15 @@ function PayeeCell({
   );
 }
 
-function CellWithScheduleIcon({ scheduleId, children }) {
+function CellWithIcons({ transaction, transferAccount, onNavigate, children }) {
+  let scheduleId = transaction.schedule;
   let scheduleData = useCachedSchedules();
-
   let schedule = scheduleData.schedules.find(s => s.id === scheduleId);
 
-  if (schedule == null) {
-    // This must be a deleted schedule
+  if (schedule == null && transferAccount == null) {
+    // This must be a deleted schedule and not a transfer.
     return children;
   }
-
-  let recurring = schedule._date && !!schedule._date.frequency;
 
   let style = {
     width: 13,
@@ -480,17 +473,34 @@ function CellWithScheduleIcon({ scheduleId, children }) {
     color: 'inherit',
   };
 
+  let recurring = schedule && schedule._date && !!schedule._date.frequency;
+  let onScheduleIconClick = () => onNavigate('/schedule/edit/' + scheduleId);
+  let ScheduledIcon = () =>
+    recurring ? (
+      <ArrowsSynchronize style={style} onClick={onScheduleIconClick} />
+    ) : (
+      <CalendarIcon
+        style={{ ...style, transform: 'translateY(-1px)' }}
+        onClick={onScheduleIconClick}
+      />
+    );
+
+  let onTransferIconClick = () => onNavigate('/accounts/' + transferAccount.id);
+  let TransferDirectionIcon = () =>
+    (transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+      <LeftArrow2 style={style} onClick={onTransferIconClick} />
+    ) : (
+      <RightArrow2 style={style} onClick={onTransferIconClick} />
+    );
+
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch' }}>
-      <Cell exposed={true}>
-        {() =>
-          recurring ? (
-            <ArrowsSynchronize style={style} />
-          ) : (
-            <CalendarIcon style={{ ...style, transform: 'translateY(-1px)' }} />
-          )
-        }
-      </Cell>
+      {/* Scheduled icon. */}
+      {schedule && <Cell exposed={true}>{ScheduledIcon}</Cell>}
+      {/* Transfer direction icon. Only show if not a scheduled transaction. */}
+      {!schedule && transferAccount && (
+        <Cell exposed={true}>{TransferDirectionIcon}</Cell>
+      )}
 
       {children}
     </View>
@@ -532,6 +542,8 @@ const Transaction = memo(function Transaction(props) {
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
+  let navigate = useNavigate();
+  let onNavigate = to => navigate(to);
 
   let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
@@ -809,14 +821,15 @@ const Transaction = memo(function Transaction(props) {
           />
         );
 
-        if (transaction.schedule) {
-          return (
-            <CellWithScheduleIcon scheduleId={transaction.schedule}>
-              {cell}
-            </CellWithScheduleIcon>
-          );
-        }
-        return cell;
+        return (
+          <CellWithIcons
+            transaction={transaction}
+            transferAccount={transferAcct}
+            onNavigate={onNavigate}
+          >
+            {cell}
+          </CellWithIcons>
+        );
       })()}
 
       {isPreview ? (
