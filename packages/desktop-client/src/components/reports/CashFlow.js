@@ -102,6 +102,7 @@ function CashFlow() {
 
       <View
         style={{
+          paddingTop: 10,
           paddingLeft: 20,
           paddingRight: 20,
           backgroundColor: 'white',
@@ -119,8 +120,8 @@ function CashFlow() {
       <View
         style={{
           backgroundColor: 'white',
-          paddingLeft: 30,
-          paddingRight: 30,
+          padding: 30,
+          paddingTop: 0,
           overflow: 'auto',
         }}
       >

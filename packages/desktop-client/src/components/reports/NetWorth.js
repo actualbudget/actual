@@ -95,6 +95,7 @@ function NetWorth({ accounts }) {
 
       <View
         style={{
+          paddingTop: 10,
           paddingLeft: 20,
           paddingRight: 20,
           backgroundColor: 'white',
@@ -112,11 +113,19 @@ function NetWorth({ accounts }) {
       <View
         style={{
           backgroundColor: 'white',
-          padding: '30px',
+          padding: 30,
+          paddingTop: 0,
           overflow: 'auto',
         }}
       >
-        <View style={{ textAlign: 'right', paddingRight: 20, flexShrink: 0 }}>
+        <View
+          style={{
+            textAlign: 'right',
+            paddingTop: 20,
+            paddingRight: 20,
+            flexShrink: 0,
+          }}
+        >
           <View
             style={[styles.largeText, { fontWeight: 400, marginBottom: 5 }]}
           >
