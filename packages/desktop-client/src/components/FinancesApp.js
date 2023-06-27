@@ -240,7 +240,7 @@ function FinancesApp(props) {
       <Redirector getAccounts={props.getAccounts} />
       <ExposeNavigate />
 
-      <View style={{ height: '100%', backgroundColor: colorsm.pageBackground }}>
+      <View style={{ height: '100%' }}>
         <GlobalKeys />
 
         <View style={{ flexDirection: 'row', flex: 1 }}>
@@ -248,6 +248,8 @@ function FinancesApp(props) {
 
           <View
             style={{
+              color: colorsm.pageText,
+              backgroundColor: colorsm.pageBackground,
               flex: 1,
               overflow: 'hidden',
               width: '100%',

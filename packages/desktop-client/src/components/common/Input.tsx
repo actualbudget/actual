@@ -49,7 +49,6 @@ const Input = ({
           },
           '::placeholder': {
             color: colorsm.formInputTextPlaceholder,
-            border: '1px solid ' + colorsm.formInputBorder,
           },
           '::selection': {
             color: colorsm.formInputTextSelection,

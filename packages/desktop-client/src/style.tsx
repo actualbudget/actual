@@ -142,11 +142,9 @@ const colorsDark = {
   buttonNeutralBackground: colorPallet.gray600,
   buttonNeutralBackgroundHover: colorPallet.gray800,
   buttonNeutralBorder: colorPallet.gray300,
-  buttonDisabledText: colorPallet.gray500,
-  buttonDisabledTextHover: colorPallet.gray100,
+  buttonDisabledText: colorPallet.gray400,
   buttonDisabledBackground: colorPallet.gray800,
-  buttonDisabledBackgroundHover: colorPallet.gray800,
-  buttonDisabledBorder: colorPallet.gray600,
+  buttonDisabledBorder: colorPallet.gray500,
   buttonShadow: colorPallet.gray700,
   noticeBackground: colorPallet.gray900,
   noticeText: colorPallet.green400,
@@ -173,13 +171,13 @@ const colorsDark = {
 } as const;
 
 const colorsLight = {
-  pageBackground: colorPallet.gray50,
+  pageBackground: colorPallet.gray100,
   pageBackgroundModalActive: colorPallet.gray200,
-  pageBackgroundTopLeft: colorPallet.navy100,
-  pageBackgroundBottomRight: colorPallet.navy150,
+  pageBackgroundTopLeft: colorPallet.gray150,
+  pageBackgroundBottomRight: colorPallet.gray200,
   pageBackgroundLineTop: colorPallet.gray50,
-  pageBackgroundLineMid: colorPallet.navy100,
-  pageBackgroundLineBottom: colorPallet.navy200,
+  pageBackgroundLineMid: colorPallet.gray150,
+  pageBackgroundLineBottom: colorPallet.gray200,
   pageText: colorPallet.gray700,
   pageTextSubdued: colorPallet.gray500,
   pageTextPositive: colorPallet.purple600,
@@ -201,7 +199,7 @@ const colorsLight = {
   tableBorderSelected: colorPallet.purple600,
   tableBorderHover: colorPallet.purple500,
   tableBorderSeparator: colorPallet.gray400,
-  tableRowBackgroundHighlight: colorPallet.purple200,
+  tableRowBackgroundHighlight: colorPallet.purple400,
   tableRowBackgroundHighlightText: colorPallet.gray700,
   tableRowHeaderBackground: colorPallet.gray100,
   tableRowHeaderBackgroundText: colorPallet.gray800,
@@ -237,11 +235,9 @@ const colorsLight = {
   buttonNeutralBackground: colorPallet.gray50,
   buttonNeutralBackgroundHover: colorPallet.gray150,
   buttonNeutralBorder: colorPallet.gray300,
-  buttonDisabledText: colorPallet.gray200,
-  buttonDisabledTextHover: colorPallet.gray700,
+  buttonDisabledText: colorPallet.gray300,
   buttonDisabledBackground: colorPallet.gray50,
-  buttonDisabledBackgroundHover: colorPallet.gray50,
-  buttonDisabledBorder: colorPallet.gray150,
+  buttonDisabledBorder: colorPallet.gray300,
   buttonShadow: colorPallet.gray700,
   noticeBackground: colorPallet.gray900,
   noticeText: colorPallet.green400,
@@ -453,34 +449,36 @@ export const styles = {
 
 let hiddenScrollbars = false;
 
+// need both styles defined for primary and secondary colors
+// e.g. transaction table and sidebar
+// lightScrollbar => primary
+// darkScrollbar => secondary
 function onScrollbarChange() {
   styles.lightScrollbar = hiddenScrollbars
     ? null
     : {
+        // webkit
         '& ::-webkit-scrollbar': {
-          width: 11,
-          backgroundColor: 'rgba(200, 200, 200, .2)',
+          width: 7,
         },
         '& ::-webkit-scrollbar-thumb': {
-          width: 7,
           borderRadius: 30,
           backgroundClip: 'padding-box',
-          border: '2px solid rgba(0, 0, 0, 0)',
-        },
-        '& ::-webkit-scrollbar-thumb:vertical': {
-          backgroundColor: '#ed6704',
+          border: '2px solid rgba(100,100,100,0.5)',
         },
       };
 
   styles.darkScrollbar = hiddenScrollbars
     ? null
     : {
+        // webkit
         '& ::-webkit-scrollbar': {
           width: 7,
-          backgroundColor: 'rgba(0, 0, 0, 0)',
         },
-        '& ::-webkit-scrollbar-thumb:vertical': {
-          backgroundColor: 'rgba(200, 200, 200, .5)',
+        '& ::-webkit-scrollbar-thumb': {
+          borderRadius: 30,
+          backgroundClip: 'padding-box',
+          border: '2px solid rgba(100,100,100,0.5)',
         },
       };
 

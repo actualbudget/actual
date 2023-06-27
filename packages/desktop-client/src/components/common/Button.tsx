@@ -56,14 +56,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           : primary
           ? colorsm.buttonPositiveTextHover
           : disabled
-          ? colorsm.buttonDisabledTextHover
+          ? colorsm.buttonDisabledText
           : colorsm.buttonNeutralTextHover,
         backgroundColor: bare
           ? 'inherit'
           : primary
           ? colorsm.buttonPositiveBackgroundHover
           : disabled
-          ? colorsm.buttonDisabledBackgroundHover
+          ? colorsm.buttonDisabledBackground
           : colorsm.buttonNeutralBackgroundHover,
       },
       hoveredStyle,

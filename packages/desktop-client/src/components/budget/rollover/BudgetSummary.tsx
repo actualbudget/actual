@@ -369,7 +369,7 @@ export function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colorsm.tableText}
+                defaultColor={colorsm.tableHeaderText}
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>

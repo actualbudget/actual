@@ -11,7 +11,7 @@ import {
 
 import installPolyfills from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
-import { styles, hasHiddenScrollbars, colorsm, ThemeStyle } from '../style';
+import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
 import AppBackground from './AppBackground';
 import FatalError from './FatalError';
@@ -102,7 +102,6 @@ class App extends Component {
           {...css([
             {
               height: '100%',
-              backgroundColor: colorsm.pageBackground,
               overflow: 'hidden',
             },
             styles.lightScrollbar,

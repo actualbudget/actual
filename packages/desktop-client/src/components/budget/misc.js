@@ -518,6 +518,7 @@ function SidebarGroup({
           width={8}
           height={8}
           style={{
+            color: colorsm.tableText,
             marginRight: 5,
             marginLeft: 5,
             flexShrink: 0,
@@ -548,7 +549,11 @@ function SidebarGroup({
               }}
               style={{ padding: 3 }}
             >
-              <CheveronDown width={14} height={14} />
+              <CheveronDown
+                width={14}
+                height={14}
+                style={{ color: colorsm.tableText }}
+              />
             </Button>
             {menuOpen && (
               <Tooltip
