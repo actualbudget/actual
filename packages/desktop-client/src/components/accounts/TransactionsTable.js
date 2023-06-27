@@ -455,7 +455,7 @@ function PayeeCell({
   );
 }
 
-function CellWithIcons({ transaction, transferAccount, onNavigate, children }) {
+function PayeeIcons({ transaction, transferAccount, onNavigate, children }) {
   let scheduleId = transaction.schedule;
   let scheduleData = useCachedSchedules();
   let schedule = scheduleData.schedules.find(s => s.id === scheduleId);
@@ -820,13 +820,13 @@ const Transaction = memo(function Transaction(props) {
         );
 
         return (
-          <CellWithIcons
+          <PayeeIcons
             transaction={transaction}
             transferAccount={transferAcct}
             onNavigate={onNavigate}
           >
             {cell}
-          </CellWithIcons>
+          </PayeeIcons>
         );
       })()}
 
