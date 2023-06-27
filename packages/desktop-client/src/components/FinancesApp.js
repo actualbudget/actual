@@ -312,7 +312,7 @@ const HTML5toTouch = {
       options: { delay: 300 },
       preview: true,
       transition: TouchTransition,
-    }
+    },
   ],
 };
 
