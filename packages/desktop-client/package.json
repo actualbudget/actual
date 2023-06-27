@@ -34,7 +34,7 @@
     "inter-ui": "^3.19.3",
     "jest": "^27.0.0",
     "jest-watch-typeahead": "^2.2.2",
-    "memoize-one": "^4.0.0",
+    "memoize-one": "^6.0.0",
     "pikaday": "1.8.0",
     "react": "18.2.0",
     "react-app-rewired": "^2.2.1",

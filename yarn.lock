@@ -97,7 +97,7 @@ __metadata:
     inter-ui: ^3.19.3
     jest: ^27.0.0
     jest-watch-typeahead: ^2.2.2
-    memoize-one: ^4.0.0
+    memoize-one: ^6.0.0
     pikaday: 1.8.0
     react: 18.2.0
     react-app-rewired: ^2.2.1
@@ -12357,7 +12357,7 @@ __metadata:
     lru-cache: ^5.1.1
     md5: ^2.3.0
     memfs: 3.1.1
-    memoize-one: ^4.0.0
+    memoize-one: ^6.0.0
     mitt: ^3.0.0
     mockdate: ^3.0.5
     node-fetch: ^2.6.9
@@ -12579,10 +12579,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"memoize-one@npm:^4.0.0":
-  version: 4.0.3
-  resolution: "memoize-one@npm:4.0.3"
-  checksum: addd18c046542f57440ba70bf8ebd48663d17626cade681f777522ef70900a87ec72c5041bed8ece4f6d40a2cb58803bae388b50a4b740d64f36bcda20c147b7
+"memoize-one@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "memoize-one@npm:6.0.0"
+  checksum: f185ea69f7cceae5d1cb596266dcffccf545e8e7b4106ec6aa93b71ab9d16460dd118ac8b12982c55f6d6322fcc1485de139df07eacffaae94888b9b3ad7675f
   languageName: node
   linkType: hard
 
