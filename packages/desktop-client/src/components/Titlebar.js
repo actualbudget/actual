@@ -34,6 +34,7 @@ import {
   ButtonWithLoading,
   Tooltip,
   P,
+  ExternalLink,
 } from './common';
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
@@ -238,16 +239,12 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                 </ButtonWithLoading>
               </P>
               <P isLast={true}>
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <a
-                  href="#"
-                  style={{
-                    color: colors.n4,
-                    fontStyle: 'italic',
-                  }}
+                <ExternalLink
+                  to="https://actualbudget.org/docs/experimental/report-budget"
+                  linkColor="muted"
                 >
                   How do these types of budgeting work?
-                </a>
+                </ExternalLink>
               </P>
             </Tooltip>
           )}
