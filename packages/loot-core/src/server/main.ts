@@ -17,6 +17,7 @@ import * as monthUtils from '../shared/months';
 import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
 import { amountToInteger, stringToInteger } from '../shared/util';
+import { Handlers } from '../types/handlers';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
@@ -84,7 +85,9 @@ function onSheetChange({ names }) {
 
 // handlers
 
-export let handlers = {};
+// need to work around the type system here because the object
+// is /currently/ empty but we promise to fill it in later
+export let handlers = {} as unknown as Handlers;
 
 handlers['undo'] = mutator(async function () {
   return undo();
@@ -2264,7 +2267,7 @@ handlers['upload-file-web'] = async function ({ filename, contents }) {
   }
 
   await fs.writeFile('/uploads/' + filename, contents);
-  return 'ok';
+  return {};
 };
 
 handlers['backups-get'] = async function ({ id }) {
@@ -2300,7 +2303,7 @@ handlers['app-focused'] = async function () {
   }
 };
 
-handlers = installAPI(handlers);
+handlers = installAPI(handlers) as Handlers;
 
 injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 

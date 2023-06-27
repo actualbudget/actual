@@ -25,7 +25,7 @@ export function setLastUndoState(undoState) {
 // This is only used in the fake web version where everything runs in
 // the browser. It's a way to send a file to the backend to be
 // imported into the virtual filesystem.
-export function uploadFile(filename, contents) {
+export function uploadFile(filename: string, contents: ArrayBuffer) {
   return dispatch => {
     return send('upload-file-web', { filename, contents });
   };
