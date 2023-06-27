@@ -5,40 +5,18 @@
 import * as actual from '@actual-app/api/methods';
 import { v4 as uuidv4 } from 'uuid';
 
-function amountFromYnab(amount) {
+import * as monthUtils from '../../shared/months';
+import { sortByKey, groupBy } from '../../shared/util';
+
+import { YNAB5 } from './ynab5-types';
+
+function amountFromYnab(amount: number) {
   // ynabs multiplies amount by 1000 and actual by 100
   // so, this function divides by 10
   return Math.round(amount / 10);
 }
 
-function monthFromDate(date) {
-  let parts = date.split('-');
-  return parts[0] + '-' + parts[1];
-}
-
-function sortByKey(arr, key) {
-  return [...arr].sort((item1, item2) => {
-    if (item1[key] < item2[key]) {
-      return -1;
-    } else if (item1[key] > item2[key]) {
-      return 1;
-    }
-    return 0;
-  });
-}
-
-function groupBy(arr, keyName) {
-  return arr.reduce(function (obj, item) {
-    var key = item[keyName];
-    if (!obj.hasOwnProperty(key)) {
-      obj[key] = [];
-    }
-    obj[key].push(item);
-    return obj;
-  }, {});
-}
-
-function importAccounts(data, entityIdMap) {
+function importAccounts(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
   return Promise.all(
     data.accounts.map(async account => {
       if (!account.deleted) {
@@ -53,7 +31,10 @@ function importAccounts(data, entityIdMap) {
   );
 }
 
-async function importCategories(data, entityIdMap) {
+async function importCategories(
+  data: YNAB5.Budget,
+  entityIdMap: Map<string, string>,
+) {
   // Hidden categories are put in its own group by YNAB,
   // so it's already handled.
 
@@ -86,12 +67,13 @@ async function importCategories(data, entityIdMap) {
 
   for (let group of data.category_groups) {
     if (!group.deleted) {
+      let groupId;
       // Ignores internal category and credit cards
       if (
         group.name !== 'Internal Master Category' &&
         group.name !== 'Credit Card Payments'
       ) {
-        var groupId = await actual.createCategoryGroup({
+        groupId = await actual.createCategoryGroup({
           name: group.name,
           is_income: false,
         });
@@ -104,9 +86,6 @@ async function importCategories(data, entityIdMap) {
 
       for (let cat of cats.reverse()) {
         if (!cat.deleted) {
-          let newCategory = {};
-          newCategory.name = cat.name;
-
           // Handles special categories. Starting balance is a payee
           // in YNAB so it's handled in importTransactions
           switch (checkSpecialCat(cat)) {
@@ -120,8 +99,10 @@ async function importCategories(data, entityIdMap) {
             case 'internal': // uncategorized is ignored too, handled by actual
               break;
             default: {
-              newCategory.group_id = groupId;
-              let id = await actual.createCategory(newCategory);
+              let id = await actual.createCategory({
+                name: cat.name,
+                group_id: groupId,
+              });
               entityIdMap.set(cat.id, id);
               break;
             }
@@ -132,7 +113,7 @@ async function importCategories(data, entityIdMap) {
   }
 }
 
-function importPayees(data, entityIdMap) {
+function importPayees(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
   return Promise.all(
     data.payees.map(async payee => {
       if (!payee.deleted) {
@@ -145,7 +126,10 @@ function importPayees(data, entityIdMap) {
   );
 }
 
-async function importTransactions(data, entityIdMap) {
+async function importTransactions(
+  data: YNAB5.Budget,
+  entityIdMap: Map<string, string>,
+) {
   const payees = await actual.getPayees();
   const categories = await actual.getCategories();
   const incomeCatId = categories.find(cat => cat.name === 'Income').id;
@@ -169,8 +153,8 @@ async function importTransactions(data, entityIdMap) {
   }
 
   await Promise.all(
-    Object.keys(transactionsGrouped).map(async accountId => {
-      let transactions = transactionsGrouped[accountId];
+    [...transactionsGrouped.keys()].map(async accountId => {
+      let transactions = transactionsGrouped.get(accountId);
 
       let toImport = transactions
         .map(transaction => {
@@ -179,7 +163,7 @@ async function importTransactions(data, entityIdMap) {
           }
 
           // Handle subtransactions
-          let subtransactions = subtransactionsGrouped[transaction.id];
+          let subtransactions = subtransactionsGrouped.get(transaction.id);
           if (subtransactions) {
             subtransactions = subtransactions.map(subtrans => {
               return {
@@ -203,7 +187,17 @@ async function importTransactions(data, entityIdMap) {
             imported_id: transaction.import_id || null,
             transfer_id:
               entityIdMap.get(transaction.transfer_transaction_id) || null,
-            subtransactions: subtransactions,
+            subtransactions: subtransactions
+              ? subtransactions.map(subtrans => {
+                  return {
+                    amount: amountFromYnab(subtrans.amount),
+                    category: entityIdMap.get(subtrans.category_id) || null,
+                    notes: subtrans.memo,
+                  };
+                })
+              : null,
+            payee: null,
+            imported_payee: null,
           };
 
           // Handle transfer payee
@@ -237,7 +231,10 @@ async function importTransactions(data, entityIdMap) {
   );
 }
 
-async function importBudgets(data, entityIdMap) {
+async function importBudgets(
+  data: YNAB5.Budget,
+  entityIdMap: Map<string, string>,
+) {
   // There should be info in the docs to deal with
   // no credit card category and how YNAB and Actual
   // handle differently the amount To be Budgeted
@@ -257,7 +254,7 @@ async function importBudgets(data, entityIdMap) {
 
   await actual.batchBudgetUpdates(async () => {
     for (let budget of budgets) {
-      let month = monthFromDate(budget.month);
+      let month = monthUtils.monthFromDate(budget.month);
 
       await Promise.all(
         budget.categories.map(async catBudget => {
@@ -281,8 +278,8 @@ async function importBudgets(data, entityIdMap) {
 
 // Utils
 
-export async function doImport(data) {
-  const entityIdMap = new Map();
+export async function doImport(data: YNAB5.Budget) {
+  const entityIdMap = new Map<string, string>();
 
   console.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);
@@ -302,7 +299,7 @@ export async function doImport(data) {
   console.log('Setting up...');
 }
 
-export function parseFile(buffer) {
+export function parseFile(buffer: Buffer): YNAB5.Budget {
   let data = JSON.parse(buffer.toString());
   if (data.data) {
     data = data.data;
@@ -311,6 +308,6 @@ export function parseFile(buffer) {
   return data;
 }
 
-export function getBudgetName(_filepath, data) {
+export function getBudgetName(_filepath: string, data: YNAB5.Budget) {
   return data.budget_name;
 }

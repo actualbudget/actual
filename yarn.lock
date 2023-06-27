@@ -40,36 +40,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/import-ynab4@workspace:packages/import-ynab4":
-  version: 0.0.0-use.local
-  resolution: "@actual-app/import-ynab4@workspace:packages/import-ynab4"
-  dependencies:
-    "@actual-app/api": "*"
-    "@types/uuid": ^9.0.2
-    adm-zip: ^0.5.9
-    date-fns: ^2.29.3
-    slash: 3.0.0
-    ts-node: ^10.9.1
-    uuid: ^9.0.0
-  bin:
-    import-ynab4: ./index.js
-  languageName: unknown
-  linkType: soft
-
-"@actual-app/import-ynab5@workspace:packages/import-ynab5":
-  version: 0.0.0-use.local
-  resolution: "@actual-app/import-ynab5@workspace:packages/import-ynab5"
-  dependencies:
-    "@actual-app/api": "*"
-    "@types/uuid": ^9.0.2
-    date-fns: ^2.29.3
-    ts-node: ^10.9.1
-    uuid: ^9.0.0
-  bin:
-    import-ynab5: ./index.js
-  languageName: unknown
-  linkType: soft
-
 "@actual-app/web@workspace:packages/desktop-client":
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
@@ -17831,7 +17801,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.7.0, ts-node@npm:^10.9.1":
+"ts-node@npm:^10.7.0":
   version: 10.9.1
   resolution: "ts-node@npm:10.9.1"
   dependencies:
