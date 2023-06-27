@@ -1278,15 +1278,21 @@ function TransactionTableInner({
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
 
-  let onNavigateToTransferAccount = useCallback(accountId => {
-    props.onCloseAddTransaction();
-    props.onNavigateToTransferAccount(accountId);
-  });
+  let onNavigateToTransferAccount = useCallback(
+    accountId => {
+      props.onCloseAddTransaction();
+      props.onNavigateToTransferAccount(accountId);
+    },
+    [props.onCloseAddTransaction, props.onNavigateToTransferAccount],
+  );
 
-  let onNavigateToSchedule = useCallback(scheduleId => {
-    props.onCloseAddTransaction();
-    props.onNavigateToSchedule(scheduleId);
-  });
+  let onNavigateToSchedule = useCallback(
+    scheduleId => {
+      props.onCloseAddTransaction();
+      props.onNavigateToSchedule(scheduleId);
+    },
+    [props.onCloseAddTransaction, props.onNavigateToSchedule],
+  );
 
   useEffect(() => {
     if (!isAddingPrev && props.isAdding) {
