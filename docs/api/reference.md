@@ -189,10 +189,9 @@ Delete a transaction.
 
 await importTransactions(accountId, [
   {
-    account_id: 'e2564e8c-ec96-43d7-92ce-3b91ee9d2d69',
     date: '2019-08-20',
     amount: 1200,
-    payee: 'Kroger',
+    payee_name: 'Kroger',
     category_id: 'c179c3f4-28a6-4fbd-a54d-195cced07a80',
   },
 ]);
