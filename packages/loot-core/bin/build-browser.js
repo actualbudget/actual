@@ -1,7 +1,7 @@
 #!usr/bin/env node
 const { fsUtil, fs, shellUtil, webpackUtil, migrationUtil, build } = require('@actual-app/bin');
 
-const ROOT = build.workerRot;
+const ROOT = build.workerRoot;
 const BUILD_DIR = build.workerBuildDir;
 const CLIENT_DATA_DIR = build.clientDataDir;
 const CLIENT_BUILD_DIR = build.clientWorkerDir;
