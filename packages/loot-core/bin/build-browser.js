@@ -1,5 +1,11 @@
 #!usr/bin/env node
-const { fs, shell, webpackUtil, migrations, build } = require('@actual-app/bin');
+const {
+  fs,
+  shell,
+  webpackUtil,
+  migrations,
+  build,
+} = require('@actual-app/bin');
 
 const ROOT = build.workerRoot;
 const BUILD_DIR = build.workerBuildDir;

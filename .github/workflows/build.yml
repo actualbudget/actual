@@ -8,7 +8,6 @@ env:
   CI: true
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

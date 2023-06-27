@@ -1,6 +1,6 @@
 const Path = require('path');
-const fg = require('fast-glob');
 
+const fg = require('fast-glob');
 var fs = require('fs-extra');
 
 // deprecated in favour of rm but its cleaner to not need caller
