@@ -17,10 +17,11 @@
   "dependencies": {
     "google-protobuf": "^3.12.0-rc.1",
     "murmurhash": "^0.0.2",
-    "uuid": "3.3.2"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/jest": "^27.5.0",
+    "@types/uuid": "^9.0.2",
     "jest": "^27.0.0",
     "ts-jest": "^27.0.0",
     "ts-protoc-gen": "^0.15.0",

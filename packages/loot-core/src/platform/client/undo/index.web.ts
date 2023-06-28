@@ -1,4 +1,4 @@
-import * as uuid from '../../uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type * as T from '.';
 
@@ -15,7 +15,7 @@ let currentUndoState: T.UndoState = {
 
 export const setUndoState: T.SetUndoState = function (name, value) {
   currentUndoState[name] = value;
-  currentUndoState.id = uuid.v4Sync();
+  currentUndoState.id = uuidv4();
 };
 
 export const getUndoState: T.GetUndoState = function (name) {
@@ -27,7 +27,7 @@ export const getTaggedState: T.GetTaggedState = function (id) {
 };
 
 export const snapshot: T.Snapshot = function () {
-  let tagged = { ...currentUndoState, id: uuid.v4Sync() };
+  let tagged = { ...currentUndoState, id: uuidv4() };
   UNDO_STATE_MRU.unshift(tagged);
   UNDO_STATE_MRU = UNDO_STATE_MRU.slice(0, HISTORY_SIZE);
   return tagged.id;
