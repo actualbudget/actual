@@ -237,18 +237,17 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
 }
 
 const TransactionHeader = memo(
-  ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
+  ({
+    hasSelected,
+    showAccount,
+    showCategory,
+    showBalance,
+    showCleared,
+    onSortTable,
+    ascDesc,
+    field,
+  }) => {
     let dispatchSelected = useSelectedDispatch();
-    let [field, setField] = useState('');
-    let [arrow, setArrow] = useState('down');
-
-    function onSelect(e) {
-      return e.currentTarget.innerText === field
-        ? arrow === 'down'
-          ? setArrow('up')
-          : setArrow('down')
-        : (setField(e.currentTarget.innerText), setArrow('down'));
-    }
 
     return (
       <Row
@@ -270,53 +269,53 @@ const TransactionHeader = memo(
         <Cell
           value="Date"
           width={110}
-          icon={field === 'Date' && arrow}
-          onClick={e => onSelect(e)}
+          icon={field === 'date' && ascDesc}
+          onClick={e => onSortTable(e)}
         />
         {showAccount && (
           <Cell
             value="Account"
             width="flex"
-            icon={field === 'Account' && arrow}
-            onClick={e => onSelect(e)}
+            icon={field === 'account' && ascDesc}
+            onClick={e => onSortTable(e)}
           />
         )}
         <Cell
           value="Payee"
           width="flex"
-          icon={field === 'Payee' && arrow}
-          onClick={e => onSelect(e)}
+          icon={field === 'payee' && ascDesc}
+          onClick={e => onSortTable(e)}
         />
         <Cell value="Notes" width="flex" />
         {showCategory && (
           <Cell
             value="Category"
             width="flex"
-            icon={field === 'Category' && arrow}
-            onClick={e => onSelect(e)}
+            icon={field === 'category' && ascDesc}
+            onClick={e => onSortTable(e)}
           />
         )}
         <Cell
           value="Payment"
           width={80}
           textAlign="right"
-          icon={field === 'Payment' && arrow}
-          onClick={e => onSelect(e)}
+          icon={field === 'payment' && ascDesc}
+          onClick={e => onSortTable(e)}
         />
         <Cell
           value="Deposit"
           width={80}
           textAlign="right"
-          icon={field === 'Deposit' && arrow}
-          onClick={e => onSelect(e)}
+          icon={field === 'deposit' && ascDesc}
+          onClick={e => onSortTable(e)}
         />
         {showBalance && (
           <Cell
             value="Balance"
             width={88}
             textAlign="right"
-            icon={field === 'Balance' && arrow}
-            onClick={e => onSelect(e)}
+            icon={field === 'balance' && ascDesc}
+            onClick={e => onSortTable(e)}
           />
         )}
         {showCleared && <Field width={21} truncate={false} />}
@@ -1304,6 +1303,9 @@ function TransactionTableInner({
   renderEmpty,
   onHover,
   onScroll,
+  onSortTable,
+  field,
+  ascDesc,
   ...props
 }) {
   const containerRef = createRef();
@@ -1418,6 +1420,9 @@ function TransactionTableInner({
           showCategory={props.showCategory}
           showBalance={!!props.balances}
           showCleared={props.showCleared}
+          onSortTable={onSortTable}
+          ascDesc={ascDesc}
+          field={field}
         />
 
         {props.isAdding && (
@@ -1841,6 +1846,25 @@ export let TransactionTable = forwardRef((props, ref) => {
     id => splitsExpanded.dispatch({ type: 'toggle-split', id }),
     [splitsExpanded.dispatch],
   );
+  let [field, setField] = useState(null);
+  let [ascDesc, setAscDesc] = useState('desc');
+
+  function onSortTable(e) {
+    if (e.currentTarget.innerText.toLowerCase() === field) {
+      ascDesc === 'desc' ? setAscDesc('asc') : setAscDesc('desc');
+    } else {
+      setField(e.currentTarget.innerText.toLowerCase());
+      setAscDesc('desc');
+    }
+  }
+
+  useEffect(() => {
+    if (field) {
+      ascDesc === 'asc'
+        ? transactions.sort((a, b) => a[field] < b[field])
+        : transactions.sort((a, b) => a[field] > b[field]);
+    }
+  }, [field, ascDesc]);
 
   return (
     <TransactionTableInner
@@ -1864,6 +1888,9 @@ export let TransactionTable = forwardRef((props, ref) => {
       newTransactions={newTransactions}
       tableNavigator={tableNavigator}
       newNavigator={newNavigator}
+      onSortTable={onSortTable}
+      field={field}
+      ascDesc={ascDesc}
     />
   );
 });

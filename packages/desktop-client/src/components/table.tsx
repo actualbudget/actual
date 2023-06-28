@@ -266,10 +266,10 @@ export function Cell({
             }}
           >
             {formatter ? formatter(value) : value}
-            {icon === 'down' && (
+            {icon === 'desc' && (
               <ArrowDown width={12} height={12} style={{ marginLeft: 10 }} />
             )}
-            {icon === 'up' && (
+            {icon === 'asc' && (
               <ArrowUp width={12} height={12} style={{ marginLeft: 10 }} />
             )}
           </Text>
