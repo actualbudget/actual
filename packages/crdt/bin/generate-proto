@@ -1,0 +1,21 @@
+#!/bin/bash
+
+cd "$(dirname "$(dirname "$0")")"
+
+if ! [ -x "$(command -v protoc)" ]; then
+  echo 'Error: protoc is not installed. See the readme for installation instructions.' >&2
+  exit 1
+fi
+
+export PATH="$PWD/bin:$PATH"
+
+protoc --plugin="protoc-gen-ts=../../node_modules/.bin/protoc-gen-ts" \
+  --ts_opt=esModuleInterop=true \
+  --ts_out="src/proto" \
+  --js_out=import_style=commonjs,binary:src/proto \
+  --proto_path=src/proto \
+  sync.proto
+
+../../node_modules/.bin/prettier --write src/proto/*.d.ts
+
+echo 'One more step! Find the `var global = ...` declaration in src/proto/sync_pb.js and change it to `var global = globalThis;`'
