@@ -24,7 +24,7 @@ fs.findFiles = async (directory, pattern, relativePath = false) => {
 
 fs.removeFiles = async pattern => {
   let files = await fg(pattern);
-  await Promise.all(files.map(file => fs.unlink(files)));
+  await Promise.all(files.map(file => fs.unlink(file)));
 };
 
 fs.getVersion = async packageJsonPath => {
