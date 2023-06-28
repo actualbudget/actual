@@ -188,8 +188,8 @@ export function AnchorLink({
 }
 
 let externalLinkColors = {
-  purple: colors.p4,
-  blue: colors.b4,
+  purple: colorsm.pageTextPositive,
+  blue: colorsm.pageTextLink,
   muted: 'inherit',
 };
 type ExternalLinkProps = {

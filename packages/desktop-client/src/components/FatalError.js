@@ -120,10 +120,7 @@ class FatalError extends Component {
               </Button>
             </P>
             <P isLast={true} style={{ fontSize: 11 }}>
-              <LinkButton
-                onClick={() => this.setState({ showError: true })}
-                style={{ color: colors.p4 }}
-              >
+              <LinkButton onClick={() => this.setState({ showError: true })}>
                 Show Error
               </LinkButton>
               {showError && (

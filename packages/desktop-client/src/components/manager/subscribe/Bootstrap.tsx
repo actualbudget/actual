@@ -6,14 +6,7 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colorsm } from '../../../style';
-import {
-  View,
-  Text,
-  Button,
-  P,
-  ExternalLink,
-  ExternalLink,
-} from '../../common';
+import { View, Text, Button, P, ExternalLink } from '../../common';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';

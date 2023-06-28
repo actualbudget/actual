@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { colorsm } from '../../style';
-import { ExternalLink, Text, Button, ExternalLink } from '../common';
+import { Text, Button, ExternalLink } from '../common';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
