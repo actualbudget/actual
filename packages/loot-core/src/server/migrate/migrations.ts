@@ -13,7 +13,10 @@ let javascriptMigrations = {
   1632571489012: m1632571489012,
 };
 
-export async function withMigrationsDir(dir: string, func: () => Promise<void>): Promise<void> {
+export async function withMigrationsDir(
+  dir: string,
+  func: () => Promise<void>,
+): Promise<void> {
   let oldDir = MIGRATIONS_DIR;
   MIGRATIONS_DIR = dir;
   await func();
@@ -46,7 +49,9 @@ export async function getAppliedMigrations(db: Database): Promise<number[]> {
   return rows.map(row => row.id);
 }
 
-export async function getMigrationList(migrationsDir: string): Promise<string[]> {
+export async function getMigrationList(
+  migrationsDir: string,
+): Promise<string[]> {
   const files = await fs.listDir(migrationsDir);
   return files
     .filter(name => name.match(/(\.sql|\.js)$/))
@@ -94,7 +99,11 @@ async function applySql(db, sql) {
   }
 }
 
-export async function applyMigration(db: Database, name: string, migrationsDir: string): Promise<void> {
+export async function applyMigration(
+  db: Database,
+  name: string,
+  migrationsDir: string,
+): Promise<void> {
   const code = await fs.readFile(fs.join(migrationsDir, name));
   if (name.match(/\.js$/)) {
     await applyJavaScript(db, getMigrationId(name));
@@ -106,7 +115,10 @@ export async function applyMigration(db: Database, name: string, migrationsDir: 
   ]);
 }
 
-function checkDatabaseValidity(appliedIds: number[], available: string[]): void {
+function checkDatabaseValidity(
+  appliedIds: number[],
+  available: string[],
+): void {
   for (let i = 0; i < appliedIds.length; i++) {
     if (
       i >= available.length ||
