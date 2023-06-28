@@ -1,7 +1,11 @@
 export interface FiltersHandlers {
-  'filter-create': () => Promise<unknown>;
+  'filter-create': () => Promise<{
+    filter: object;
+  }>;
 
-  'filter-update': () => Promise<unknown>;
+  'filter-update': () => Promise<{
+    filter: object;
+  }>;
 
-  'filter-delete': () => Promise<unknown>;
+  'filter-delete': () => Promise<{ id: string }>;
 }

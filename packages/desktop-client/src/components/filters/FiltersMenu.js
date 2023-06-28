@@ -38,6 +38,8 @@ import {
 import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 
+import { CondOpMenu } from './SavedFilters';
+
 let filterFields = [
   'date',
   'account',
@@ -464,6 +466,7 @@ function FilterExpression({
           flexDirection: 'row',
           alignItems: 'center',
           marginRight: 10,
+          marginBottom: 10,
         },
         style,
       ]}
@@ -520,15 +523,27 @@ function FilterExpression({
   );
 }
 
-export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
+export function AppliedFilters({
+  filters,
+  editingFilter,
+  onUpdate,
+  onDelete,
+  conditionsOp,
+  onCondOpChange,
+}) {
   return (
     <View
       style={{
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         flexWrap: 'wrap',
       }}
     >
+      <CondOpMenu
+        conditionsOp={conditionsOp}
+        onCondOpChange={onCondOpChange}
+        filters={filters}
+      />
       {filters.map((filter, i) => (
         <FilterExpression
           key={i}

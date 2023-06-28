@@ -167,14 +167,9 @@ async function updateFilter(filter) {
 }
 
 async function deleteFilter({ id }) {
-  await batchMessages(async () => {
     await db.delete_('transaction_filters', id);
-  });
 }
 
-app.method('filter/create', mutator(undoable(createFilter)));
-app.method('filter/update', mutator(undoable(updateFilter)));
-app.method('filter/delete', mutator(undoable(deleteFilter)));
 app.method('filter-create', mutator(undoable(createFilter)));
 app.method('filter-update', mutator(undoable(updateFilter)));
 app.method('filter-delete', mutator(undoable(deleteFilter)));

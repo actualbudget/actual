@@ -11,8 +11,8 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
 import { styles } from '../../style';
-import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, P } from '../common';
+import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 import Change from './Change';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';

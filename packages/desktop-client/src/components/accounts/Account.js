@@ -5,7 +5,6 @@ import React, {
   useState,
   useRef,
   useMemo,
-  useEffect,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -27,7 +26,7 @@ import {
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
-import { send, listen, sendCatch } from 'loot-core/src/platform/client/fetch';
+import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
 import {
   deleteTransaction,
@@ -48,7 +47,6 @@ import {
 } from '../../hooks/useSelected';
 import useSyncServerStatus from '../../hooks/useSyncServerStatus';
 import Loading from '../../icons/AnimatedLoading';
-import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Add from '../../icons/v1/Add';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
@@ -74,17 +72,15 @@ import {
   Menu,
   Stack,
 } from '../common';
-import { FormField, FormLabel } from '../forms';
+import { FilterButton } from '../filters/FiltersMenu';
+import { FiltersStack } from '../filters/SavedFilters';
 import { KeyHandlers } from '../KeyHandlers';
-import { FieldSelect } from '../modals/EditRule';
 import NotesButton from '../NotesButton';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { SelectedItemsButton } from '../table';
-import GenericInput from '../util/GenericInput';
 
-import { FilterButton, AppliedFilters } from './Filters';
 import TransactionList from './TransactionList';
 import {
   SplitsExpandedProvider,
@@ -259,7 +255,7 @@ function MenuButton({ onClick }) {
   );
 }
 
-function MenuTooltip({ width, onClose, children }) {
+export function MenuTooltip({ width, onClose, children }) {
   return (
     <Tooltip
       position="bottom-right"
@@ -329,248 +325,6 @@ function AccountMenu({
         ].filter(x => x)}
       />
     </MenuTooltip>
-  );
-}
-
-function FilterMenuButton({
-  filters,
-  conditionsOp,
-  filterId,
-  onClearFilters,
-  onReloadSavedFilter,
-  filtersList,
-}) {
-  let [nameOpen, setNameOpen] = useState(false);
-  let [adding, setAdding] = useState(false);
-  let [menuOpen, setMenuOpen] = useState(false);
-  let [err, setErr] = useState(null);
-  let inputRef = useRef();
-  let name = filterId.name;
-  let id = filterId.id;
-  let res;
-  let savedFilter;
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [NameFilter]);
-
-  const onFilterMenuSelect = async item => {
-    switch (item) {
-      case 'rename-filter':
-        setErr(null);
-        setAdding(false);
-        setMenuOpen(false);
-        setNameOpen(true);
-        break;
-      case 'delete-filter':
-        setMenuOpen(false);
-        await send('filter-delete', { id });
-        onClearFilters();
-        break;
-      case 'update-filter':
-        setAdding(false);
-        setMenuOpen(false);
-        savedFilter = {
-          conditions: filters,
-          conditionsOp: conditionsOp,
-          id: filterId.id,
-          name: filterId.name,
-          status: 'saved',
-        };
-        res = await sendCatch('filter-update', {
-          state: savedFilter,
-          filters: [...filtersList],
-        });
-        if (res.error) {
-          setErr(res.error.message);
-        } else {
-          onReloadSavedFilter(savedFilter, 'update');
-        }
-        break;
-      case 'save-filter':
-        setErr(null);
-        setAdding(true);
-        setMenuOpen(false);
-        setNameOpen(true);
-        break;
-      case 'reload-filter':
-        setMenuOpen(false);
-        savedFilter = {
-          status: 'saved',
-        };
-        onReloadSavedFilter(savedFilter, 'reload');
-        break;
-      case 'clear-filter':
-        setMenuOpen(false);
-        onClearFilters();
-        break;
-      default:
-    }
-  };
-
-  function FilterMenu({ onClose, filterId }) {
-    let filterName = !filterId.id ? (
-      'Not Saved'
-    ) : filterId.status === 'saved' ? (
-      filterId.name
-    ) : (
-      <Text>
-        {filterId.name}
-        <br />
-        (modified)
-      </Text>
-    );
-
-    return (
-      <MenuTooltip width={200} onClose={onClose}>
-        <Menu
-          onMenuSelect={item => {
-            onFilterMenuSelect(item);
-          }}
-          items={[
-            { type: Menu.label, name: filterName },
-            Menu.line,
-
-            ...(!filterId.id
-              ? [
-                  { name: 'save-filter', text: 'Create new filter' },
-                  { name: 'clear-filter', text: 'Clear all conditions' },
-                ]
-              : [
-                  ...(filterId.id !== null && filterId.status === 'saved'
-                    ? [
-                        { name: 'rename-filter', text: 'Rename' },
-                        { name: 'delete-filter', text: 'Delete' },
-                        Menu.line,
-                        {
-                          name: 'save-filter',
-                          text: 'Create new filter',
-                          disabled: true,
-                        },
-                        { name: 'clear-filter', text: 'Clear all conditions' },
-                      ]
-                    : [
-                        { name: 'rename-filter', text: 'Rename' },
-                        { name: 'update-filter', text: 'Update condtions' },
-                        { name: 'reload-filter', text: 'Revert changes' },
-                        { name: 'delete-filter', text: 'Delete' },
-                        Menu.line,
-                        { name: 'save-filter', text: 'Save new filter' },
-                        { name: 'clear-filter', text: 'Clear all conditions' },
-                      ]),
-                ]),
-          ]}
-        />
-      </MenuTooltip>
-    );
-  }
-
-  async function onAddUpdate() {
-    if (adding) {
-      //create new flow
-      savedFilter = {
-        conditions: filters,
-        conditionsOp: conditionsOp,
-        name: name,
-        status: 'saved',
-      };
-      res = await sendCatch('filter-create', {
-        state: savedFilter,
-        filters: [...filtersList],
-      });
-      savedFilter = {
-        ...savedFilter,
-        id: res.data,
-      };
-    } else {
-      //rename flow
-      savedFilter = {
-        conditions: filterId.conditions,
-        conditionsOp: filterId.conditionsOp,
-        id: filterId.id,
-        name: name,
-      };
-      res = await sendCatch('filter-update', {
-        state: savedFilter,
-        filters: [...filtersList],
-      });
-    }
-    if (res.error) {
-      setErr(res.error.message);
-    } else {
-      setNameOpen(false);
-      onReloadSavedFilter(savedFilter);
-    }
-  }
-
-  function NameFilter({ onClose }) {
-    return (
-      <MenuTooltip width={400} onClose={onClose}>
-        <form>
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ padding: 10 }}
-          >
-            <FormField style={{ flex: 1 }}>
-              <FormLabel
-                title="Filter Name"
-                htmlFor="name-field"
-                style={{ userSelect: 'none' }}
-              />
-              <GenericInput
-                inputRef={inputRef}
-                id="name-field"
-                field="string"
-                type="string"
-                value={name}
-                onChange={e => (name = e)}
-              />
-            </FormField>
-            <Button
-              primary
-              type="submit"
-              style={{ marginTop: 18 }}
-              onClick={e => {
-                e.preventDefault();
-                onAddUpdate();
-              }}
-            >
-              {adding ? 'Add' : 'Update'}
-            </Button>
-          </Stack>
-          {err && (
-            <Stack direction="row" align="center" style={{ padding: 10 }}>
-              <Text style={{ color: colors.r4 }}>{err}</Text>
-            </Stack>
-          )}
-        </form>
-      </MenuTooltip>
-    );
-  }
-
-  return (
-    <View>
-      {filters.length > 0 && (
-        <Button
-          bare
-          style={{ marginTop: 4 }}
-          onClick={() => {
-            setMenuOpen(true);
-          }}
-        >
-          Saved&nbsp;filters&nbsp;
-          <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
-        </Button>
-      )}
-      {menuOpen && (
-        <FilterMenu onClose={() => setMenuOpen(false)} filterId={filterId} />
-      )}
-      {nameOpen && <NameFilter onClose={() => setNameOpen(false)} />}
-    </View>
   );
 }
 
@@ -1263,43 +1017,17 @@ const AccountHeader = memo(
           </Stack>
 
           {filters && filters.length > 0 && (
-            <View>
-              <Stack
-                spacing={2}
-                direction="row"
-                align="center"
-                style={{ marginTop: 5 }}
-              >
-                {filters.length > 1 && (
-                  <Text style={{ color: colors.n4 }}>
-                    <FieldSelect
-                      style={{ display: 'inline-flex' }}
-                      fields={[
-                        ['and', 'all'],
-                        ['or', 'any'],
-                      ]}
-                      value={conditionsOp}
-                      onChange={(name, value) => onCondOpChange(value, filters)}
-                    />
-                    of:
-                  </Text>
-                )}
-                <AppliedFilters
-                  filters={filters}
-                  onUpdate={onUpdateFilter}
-                  onDelete={onDeleteFilter}
-                />
-                <View style={{ flex: 1 }} />
-                <FilterMenuButton
-                  filters={filters}
-                  conditionsOp={conditionsOp}
-                  filterId={filterId}
-                  onClearFilters={onClearFilters}
-                  onReloadSavedFilter={onReloadSavedFilter}
-                  filtersList={filtersList}
-                />
-              </Stack>
-            </View>
+            <FiltersStack
+              filters={filters}
+              conditionsOp={conditionsOp}
+              onUpdateFilter={onUpdateFilter}
+              onDeleteFilter={onDeleteFilter}
+              onClearFilters={onClearFilters}
+              onReloadSavedFilter={onReloadSavedFilter}
+              filterId={filterId}
+              filtersList={filtersList}
+              onCondOpChange={onCondOpChange}
+            />
           )}
         </View>
         {reconcileAmount != null && (
