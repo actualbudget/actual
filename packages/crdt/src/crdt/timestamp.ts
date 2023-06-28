@@ -159,7 +159,10 @@ export class Timestamp {
    * timestamp parsing
    * converts a fixed-length string timestamp to the structured value
    */
-  static parse(timestamp: string): Timestamp | null {
+  static parse(timestamp: string | Timestamp): Timestamp | null {
+    if (timestamp instanceof Timestamp) {
+      return timestamp;
+    }
     if (typeof timestamp === 'string') {
       let parts = timestamp.split('-');
       if (parts && parts.length === 5) {

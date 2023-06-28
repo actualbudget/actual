@@ -195,12 +195,13 @@ async function compareMessages(messages: Message[]): Promise<Message[]> {
   for (let i = 0; i < messages.length; i++) {
     let message = messages[i];
     let { dataset, row, column, timestamp } = message;
+    let timestampStr = timestamp.toString();
 
     let res = db.runQuery(
       db.cache(
         'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?',
       ),
-      [dataset, row, column, String(timestamp)],
+      [dataset, row, column, timestampStr],
       true,
     );
 
@@ -352,7 +353,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         db.runQuery(
           db.cache(`INSERT INTO messages_crdt (timestamp, dataset, row, column, value)
            VALUES (?, ?, ?, ?, ?)`),
-          [timestamp, dataset, row, column, serializeValue(value)],
+          [String(timestamp), dataset, row, column, serializeValue(value)],
         );
 
         currentMerkle = merkle.insert(

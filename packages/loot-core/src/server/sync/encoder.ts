@@ -29,7 +29,7 @@ export async function encode(
   for (let i = 0; i < messages.length; i++) {
     let msg = messages[i];
     let envelopePb = new SyncProtoBuf.MessageEnvelope();
-    envelopePb.setTimestamp(msg.timestamp);
+    envelopePb.setTimestamp(msg.timestamp.toString());
 
     let messagePb = new SyncProtoBuf.Message();
     messagePb.setDataset(msg.dataset);
