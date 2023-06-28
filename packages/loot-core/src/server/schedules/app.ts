@@ -1,9 +1,9 @@
 import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
+import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
-import * as uuid from '../../platform/uuid';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import {
@@ -205,7 +205,7 @@ export async function createSchedule({
   schedule = null,
   conditions = [],
 } = {}) {
-  let scheduleId = (schedule && schedule.id) || uuid.v4Sync();
+  let scheduleId = (schedule && schedule.id) || uuidv4();
 
   let { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
