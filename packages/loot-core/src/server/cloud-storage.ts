@@ -1,10 +1,10 @@
 import AdmZip from 'adm-zip';
+import * as uuid from 'uuid';
 
 import * as asyncStorage from '../platform/server/asyncStorage';
 import { fetch } from '../platform/server/fetch';
 import * as fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
-import * as uuid from '../platform/uuid';
 import * as monthUtils from '../shared/months';
 
 import * as encryption from './encryption';
@@ -257,7 +257,7 @@ export async function upload() {
   }
 
   if (!cloudFileId) {
-    cloudFileId = uuid.v4Sync();
+    cloudFileId = uuid.v4();
   }
 
   let res;

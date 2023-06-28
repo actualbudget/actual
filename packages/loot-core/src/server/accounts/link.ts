@@ -1,5 +1,6 @@
+import * as uuid from 'uuid';
+
 import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as uuid from '../../platform/uuid';
 import { amountToInteger } from '../../shared/util';
 import * as db from '../db';
 import { runMutator } from '../mutators';
@@ -18,7 +19,7 @@ export async function handoffPublicToken(institution, publicToken) {
     throw new Error('Invalid institution object');
   }
 
-  let id = uuid.v4Sync();
+  let id = uuid.v4();
 
   // Make sure to generate an access token first before inserting it
   // into our local database in case it fails
@@ -51,7 +52,7 @@ export async function findOrCreateBank(institution, requisitionId) {
   }
 
   const bankData = {
-    id: uuid.v4Sync(),
+    id: uuid.v4(),
     bank_id: requisitionId,
     name: institution.name,
   };

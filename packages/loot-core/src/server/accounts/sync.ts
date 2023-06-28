@@ -1,7 +1,7 @@
 import * as dateFns from 'date-fns';
+import * as uuid from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as uuid from '../../platform/uuid';
 import * as monthUtils from '../../shared/months';
 import {
   makeChild as makeChildTransaction,
@@ -229,7 +229,7 @@ async function resolvePayee(trans, payeeName, payeesToCreate) {
       return payee.id;
     } else {
       // Otherwise we're going to create a new one
-      let newPayee = { id: uuid.v4Sync(), name: payeeName };
+      let newPayee = { id: uuid.v4(), name: payeeName };
       payeesToCreate.set(payeeName.toLowerCase(), newPayee);
       return newPayee.id;
     }
@@ -521,7 +521,7 @@ export async function reconcileNordigenTransactions(acctId, transactions) {
       // Insert a new transaction
       let finalTransaction = {
         ...trans,
-        id: uuid.v4Sync(),
+        id: uuid.v4(),
         category: trans.category || null,
         cleared: trans.cleared != null ? trans.cleared : true,
       };
@@ -666,7 +666,7 @@ export async function reconcileTransactions(acctId, transactions) {
       // Insert a new transaction
       let finalTransaction = {
         ...trans,
-        id: uuid.v4Sync(),
+        id: uuid.v4(),
         category: trans.category || null,
         cleared: trans.cleared != null ? trans.cleared : true,
       };
@@ -708,7 +708,7 @@ export async function addTransactions(
     trans = runRules(trans);
 
     let finalTransaction = {
-      id: uuid.v4Sync(),
+      id: uuid.v4(),
       ...trans,
       account: acctId,
       cleared: trans.cleared != null ? trans.cleared : true,

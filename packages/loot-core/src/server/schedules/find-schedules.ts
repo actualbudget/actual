@@ -1,6 +1,6 @@
 import * as d from 'date-fns';
+import * as uuid from 'uuid';
 
-import * as uuid from '../../platform/uuid';
 import { dayFromDate, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
@@ -369,7 +369,7 @@ export async function findSchedules() {
 
       // Convert to schedule and return it
       return {
-        id: uuid.v4Sync(),
+        id: uuid.v4(),
         account: winner.account,
         payee: winner.payee,
         date: winner.date,
