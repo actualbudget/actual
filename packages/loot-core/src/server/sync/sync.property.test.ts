@@ -6,7 +6,7 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
-import * as encoder from './encoder';
+import * as encoder from '@actual-app/crdt/src/encoder';
 import { isError } from './utils';
 
 import * as sync from './index';
@@ -257,6 +257,7 @@ async function run(msgs) {
         value: sync.serializeValue(x.value),
         timestamp: x.timestamp.toString(),
       })),
+      null,
     ),
   );
 
@@ -276,6 +277,7 @@ async function run(msgs) {
         value: sync.serializeValue(x.value),
         timestamp: x.timestamp.toString(),
       })),
+      null,
     ),
   );
 

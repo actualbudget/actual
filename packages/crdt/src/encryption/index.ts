@@ -1,6 +1,6 @@
-import * as uuid from '../platform/uuid';
+import * as uuid from 'uuid';
 
-import * as internals from './encryption-internals';
+import * as internals from './internals';
 
 // A map of all possible master encryption keys to use, keyed by
 // unique id
@@ -11,7 +11,7 @@ class Key {
   value;
 
   constructor({ id }) {
-    this.id = id || uuid.v4Sync();
+    this.id = id || uuid.v4();
   }
 
   async createFromPassword({ password, salt }) {

@@ -10,13 +10,8 @@ export {
   Timestamp,
 } from './crdt';
 
-export const SyncProtoBuf = SyncPb;
+export { Message, SyncError } from './types';
 
-export type Message = {
-  column: string;
-  dataset: string;
-  old?: unknown;
-  row: string;
-  timestamp: string;
-  value: string | number | null;
-};
+export * as encoder from './encoder';
+
+export const SyncProtoBuf = SyncPb;

@@ -23,17 +23,6 @@ export class HTTPError extends Error {
   }
 }
 
-export class SyncError extends Error {
-  meta;
-  reason;
-
-  constructor(reason, meta?) {
-    super('SyncError: ' + reason);
-    this.reason = reason;
-    this.meta = meta;
-  }
-}
-
 export class TransactionError extends Error {}
 
 export class RuleError extends Error {

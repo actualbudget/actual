@@ -1,8 +1,6 @@
-import { SyncProtoBuf, Message } from '@actual-app/crdt';
-
-import * as encryption from '../encryption';
-import { SyncError } from '../errors';
-import * as prefs from '../prefs';
+import * as encryption from './encryption';
+import * as SyncPb from './proto/sync_pb';
+import { Message, SyncError } from './types';
 
 function coerceBuffer(value) {
   // The web encryption APIs give us back raw Uint8Array... but our
@@ -20,16 +18,16 @@ export async function encode(
   fileId: string,
   since: string,
   messages: Message[],
+  encryptKeyId?: string,
 ): Promise<Uint8Array> {
-  let { encryptKeyId } = prefs.getPrefs();
-  let requestPb = new SyncProtoBuf.SyncRequest();
+  let requestPb = new SyncPb.SyncRequest();
 
   for (let i = 0; i < messages.length; i++) {
     let msg = messages[i];
-    let envelopePb = new SyncProtoBuf.MessageEnvelope();
+    let envelopePb = new SyncPb.MessageEnvelope();
     envelopePb.setTimestamp(msg.timestamp);
 
-    let messagePb = new SyncProtoBuf.Message();
+    let messagePb = new SyncPb.Message();
     messagePb.setDataset(msg.dataset);
     messagePb.setRow(msg.row);
     messagePb.setColumn(msg.column);
@@ -37,7 +35,7 @@ export async function encode(
     let binaryMsg = messagePb.serializeBinary();
 
     if (encryptKeyId) {
-      let encrypted = new SyncProtoBuf.EncryptedData();
+      let encrypted = new SyncPb.EncryptedData();
 
       let result;
       try {
@@ -71,10 +69,9 @@ export async function encode(
 
 export async function decode(
   data: Uint8Array,
+  encryptKeyId?: string,
 ): Promise<{ messages: Message[]; merkle: { hash: number } }> {
-  let { encryptKeyId } = prefs.getPrefs();
-
-  let responsePb = SyncProtoBuf.SyncResponse.deserializeBinary(data);
+  let responsePb = SyncPb.SyncResponse.deserializeBinary(data);
   let merkle = JSON.parse(responsePb.getMerkle());
   let list = responsePb.getMessagesList();
   let messages = [];
@@ -86,7 +83,7 @@ export async function decode(
     let msg;
 
     if (encrypted) {
-      let binary = SyncProtoBuf.EncryptedData.deserializeBinary(
+      let binary = SyncPb.EncryptedData.deserializeBinary(
         envelopePb.getContent() as Uint8Array,
       );
 
@@ -105,9 +102,9 @@ export async function decode(
         });
       }
 
-      msg = SyncProtoBuf.Message.deserializeBinary(decrypted);
+      msg = SyncPb.Message.deserializeBinary(decrypted);
     } else {
-      msg = SyncProtoBuf.Message.deserializeBinary(
+      msg = SyncPb.Message.deserializeBinary(
         envelopePb.getContent() as Uint8Array,
       );
     }

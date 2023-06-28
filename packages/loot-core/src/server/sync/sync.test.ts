@@ -5,7 +5,7 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
-import * as encoder from './encoder';
+import * as encoder from '@actual-app/crdt/src/encoder';
 import { isError } from './utils';
 
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
@@ -121,6 +121,7 @@ describe('Sync', () => {
             timestamp: '1970-01-02T10:17:36.999Z-0000-0000testinguuid2',
           },
         ],
+        null,
       ),
     );
 

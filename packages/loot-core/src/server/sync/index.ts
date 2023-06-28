@@ -5,6 +5,7 @@ import {
   Timestamp,
   merkle,
   Message,
+  SyncError,
 } from '@actual-app/crdt';
 
 import { captureException } from '../../platform/exceptions';
@@ -15,7 +16,7 @@ import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
 import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as db from '../db';
-import { PostError, SyncError } from '../errors';
+import { PostError } from '../errors';
 import app from '../main-app';
 import { runMutator } from '../mutators';
 import { postBinary } from '../post';
@@ -24,7 +25,7 @@ import { getServer } from '../server-config';
 import * as sheet from '../sheet';
 import * as undo from '../undo';
 
-import * as encoder from './encoder';
+import * as encoder from '@actual-app/crdt/src/encoder';
 import { rebuildMerkleHash } from './repair';
 import { isError } from './utils';
 
@@ -626,7 +627,8 @@ async function _fullSync(
   count: number,
   prevDiffTime: number,
 ): Promise<Message[]> {
-  let { cloudFileId, groupId, lastSyncedTimestamp } = prefs.getPrefs() || {};
+  let { cloudFileId, groupId, lastSyncedTimestamp, encryptKeyId } =
+    prefs.getPrefs() || {};
 
   clearFullSyncTimeout();
 
@@ -654,7 +656,13 @@ async function _fullSync(
     '(attempt: ' + count + ')',
   );
 
-  let buffer = await encoder.encode(groupId, cloudFileId, since, messages);
+  let buffer = await encoder.encode(
+    groupId,
+    cloudFileId,
+    since,
+    messages,
+    encryptKeyId,
+  );
 
   // TODO: There a limit on how many messages we can send because of
   // the payload size. Right now it's at 20MB on the server. We should
@@ -670,7 +678,7 @@ async function _fullSync(
     return [];
   }
 
-  let res = await encoder.decode(resBuffer);
+  let res = await encoder.decode(resBuffer, encryptKeyId);
 
   logger.info('Got messages from server', res.messages.length);
 
