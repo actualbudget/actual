@@ -476,7 +476,6 @@ function PayeeIcons({
   let style = {
     width: 23,
     height: 23,
-    marginRight: -3,
     ...colorStyle,
   };
 
