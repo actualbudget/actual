@@ -222,6 +222,7 @@ async function importTransactions(data, entityIdMap) {
             transaction.subTransactions &&
             transaction.subTransactions.map((t, i) => {
               return {
+                id: entityIdMap.get(t.entityId),
                 amount: amountToInteger(t.amount),
                 category: getCategory(t.categoryId),
                 notes: t.memo || null,
