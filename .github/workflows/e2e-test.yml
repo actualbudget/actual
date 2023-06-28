@@ -20,7 +20,7 @@ jobs:
         env:
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./bin/netlify-wait-for-build
+        run: ./.github/actions/netlify-wait-for-build
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
