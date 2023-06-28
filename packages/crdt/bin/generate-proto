@@ -15,3 +15,7 @@ protoc --plugin="protoc-gen-ts=../../node_modules/.bin/protoc-gen-ts" \
   --js_out=import_style=commonjs,binary:src/proto \
   --proto_path=src/proto \
   sync.proto
+
+../../node_modules/.bin/prettier --write src/proto/*.d.ts
+
+echo 'One more step! Find the `var global = ...` declaration in src/proto/sync_pb.js and change it to `var global = globalThis;`'
