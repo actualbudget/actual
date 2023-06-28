@@ -61,11 +61,7 @@ function Import({ modalProps, availableImports }) {
             style={{ alignItems: 'center', '& > div': { lineHeight: '1.7em' } }}
           >
             <P>
-              <ExternalLink
-                asAnchor={true}
-                href="https://actualbudget.org/docs/migration/nynab"
-                target="_blank"
-              >
+              <ExternalLink to="https://actualbudget.org/docs/migration/nynab">
                 Read here
               </ExternalLink>{' '}
               for instructions on how to migrate your data from YNAB. You need

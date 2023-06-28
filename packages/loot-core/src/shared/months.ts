@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-type DateLike = string | Date;
+type DateLike = string | number | Date;
 
 export function _parse(value: DateLike): Date {
   if (typeof value === 'string') {
@@ -68,6 +68,9 @@ export function _parse(value: DateLike): Date {
       return new Date(parseInt(year), 0, 1, 12);
     }
   }
+  if (typeof value === 'number') {
+    return new Date(value);
+  }
   return value;
 }
 
@@ -124,7 +127,7 @@ export function differenceInCalendarMonths(
   return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
 }
 
-export function subMonths(month, n) {
+export function subMonths(month: string | Date, n: number) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
@@ -240,7 +243,7 @@ export function format(month: DateLike, str: string): string {
   return d.format(_parse(month), str);
 }
 
-export const getDateFormatRegex = memoizeOne(format => {
+export const getDateFormatRegex = memoizeOne((format: string) => {
   return new RegExp(
     format
       .replace(/d+/g, '\\d{1,2}')
@@ -249,14 +252,14 @@ export const getDateFormatRegex = memoizeOne(format => {
   );
 });
 
-export const getDayMonthFormat = memoizeOne(format => {
+export const getDayMonthFormat = memoizeOne((format: string) => {
   return format
     .replace(/y+/g, '')
     .replace(/[^\w]$/, '')
     .replace(/^[^\w]/, '');
 });
 
-export const getDayMonthRegex = memoizeOne(format => {
+export const getDayMonthRegex = memoizeOne((format: string) => {
   let regex = format
     .replace(/y+/g, '')
     .replace(/[^\w]$/, '')
@@ -266,7 +269,7 @@ export const getDayMonthRegex = memoizeOne(format => {
   return new RegExp('^' + regex + '$');
 });
 
-export const getMonthYearFormat = memoizeOne(format => {
+export const getMonthYearFormat = memoizeOne((format: string) => {
   return format
     .replace(/d+/g, '')
     .replace(/[^\w]$/, '')
@@ -276,7 +279,7 @@ export const getMonthYearFormat = memoizeOne(format => {
     .replace(/--/, '-');
 });
 
-export const getMonthYearRegex = memoizeOne(format => {
+export const getMonthYearRegex = memoizeOne((format: string) => {
   let regex = format
     .replace(/d+/g, '')
     .replace(/[^\w]$/, '')
@@ -287,11 +290,11 @@ export const getMonthYearRegex = memoizeOne(format => {
   return new RegExp('^' + regex + '$');
 });
 
-export const getShortYearFormat = memoizeOne(format => {
+export const getShortYearFormat = memoizeOne((format: string) => {
   return format.replace(/y+/g, 'yy');
 });
 
-export const getShortYearRegex = memoizeOne(format => {
+export const getShortYearRegex = memoizeOne((format: string) => {
   let regex = format
     .replace(/[^\w]$/, '')
     .replace(/^[^\w]/, '')

@@ -15,15 +15,15 @@
   },
   "bin": "./index.js",
   "homepage": "https://github.com/actualbudget/actual/tree/master/packages/import-ynab4#readme",
-  "scripts": {
-    "lint": "eslint ."
-  },
   "dependencies": {
     "@actual-app/api": "*",
     "adm-zip": "^0.5.9",
     "date-fns": "^2.29.3",
     "slash": "3.0.0",
     "ts-node": "^10.9.1",
-    "uuid": "3.3.2"
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.2"
   }
 }

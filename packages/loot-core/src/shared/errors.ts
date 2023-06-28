@@ -1,9 +1,15 @@
-export function getUploadError({ reason, meta }) {
+export function getUploadError({
+  reason,
+  meta,
+}: {
+  reason: string;
+  meta?: unknown;
+}) {
   switch (reason) {
     case 'unauthorized':
       return 'You are not logged in.';
     case 'encrypt-failure':
-      if (meta.isMissingKey) {
+      if ((meta as { isMissingKey: boolean }).isMissingKey) {
         return 'Encrypting your file failed because you are missing your encryption key. Create your key in the next step.';
       }
       return 'Encrypting the file failed. You have the correct key so this is an internal bug. To fix this, generate a new key in the next step.';
