@@ -18,6 +18,11 @@ const restrictedImportPatterns = [
     group: ['*.api', '*.web', '*.electron'],
     message: 'Don’t directly reference imports from other platforms',
   },
+  {
+    group: ['uuid'],
+    importNames: ['*'],
+    message: "Use `import { v4 as uuidv4 } from 'uuid'` instead",
+  },
 ];
 
 module.exports = {
