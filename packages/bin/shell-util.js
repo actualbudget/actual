@@ -8,7 +8,7 @@ async function executeShellCmdWithOptions(command, env) {
   const spawn = require('child_process').spawn;
 
   let runArg = '-C'; // for bash
-  let shell = '/bin/sh';
+  let shell = '/bin/bash';
 
   if (process.platform === 'win32') {
     runArg = '/C'; // for cmd.exe
