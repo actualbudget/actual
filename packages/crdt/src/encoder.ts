@@ -13,13 +13,19 @@ function coerceBuffer(value) {
   return value;
 }
 
-export async function encode(
-  groupId: string,
-  fileId: string,
-  since: string,
-  messages: Message[],
-  encryptKeyId?: string,
-): Promise<Uint8Array> {
+export async function encode({
+  groupId,
+  fileId,
+  since,
+  messages,
+  encryptKeyId,
+}: {
+  groupId: string;
+  fileId: string;
+  since: string;
+  messages: Message[];
+  encryptKeyId?: string;
+}): Promise<Uint8Array> {
   let requestPb = new SyncPb.SyncRequest();
 
   for (let i = 0; i < messages.length; i++) {

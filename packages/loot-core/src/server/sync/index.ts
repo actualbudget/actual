@@ -656,13 +656,13 @@ async function _fullSync(
     '(attempt: ' + count + ')',
   );
 
-  let buffer = await encoder.encode(
+  let buffer = await encoder.encode({
     groupId,
-    cloudFileId,
+    fileId: cloudFileId,
     since,
     messages,
     encryptKeyId,
-  );
+  });
 
   // TODO: There a limit on how many messages we can send because of
   // the payload size. Right now it's at 20MB on the server. We should

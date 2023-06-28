@@ -101,11 +101,11 @@ describe('Sync', () => {
     });
 
     await mockSyncServer.handlers['/sync/sync'](
-      await encoder.encode(
-        'group',
-        'client',
-        '1970-01-01T01:17:37.000Z-0000-0000testinguuid2',
-        [
+      await encoder.encode({
+        groupId: 'group',
+        fileId: 'client',
+        since: '1970-01-01T01:17:37.000Z-0000-0000testinguuid2',
+        messages: [
           {
             dataset: 'transactions',
             row: 'foo',
@@ -121,8 +121,8 @@ describe('Sync', () => {
             timestamp: '1970-01-02T10:17:36.999Z-0000-0000testinguuid2',
           },
         ],
-        null,
-      ),
+        encryptKeyId: null,
+      }),
     );
 
     await applyMessages([
