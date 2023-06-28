@@ -3,6 +3,7 @@ import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
 import * as YNAB4 from '@actual-app/import-ynab4/importer';
 import * as YNAB5 from '@actual-app/import-ynab5/importer';
+import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
@@ -11,12 +12,12 @@ import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
 import logger from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
-import * as uuid from '../platform/uuid';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import q, { Query } from '../shared/query';
 import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
 import { amountToInteger, stringToInteger } from '../shared/util';
+import { Handlers } from '../types/handlers';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
@@ -84,7 +85,9 @@ function onSheetChange({ names }) {
 
 // handlers
 
-export let handlers = {};
+// need to work around the type system here because the object
+// is /currently/ empty but we promise to fill it in later
+export let handlers = {} as unknown as Handlers;
 
 handlers['undo'] = mutator(async function () {
   return undo();
@@ -786,7 +789,7 @@ handlers['nordigen-accounts-link'] = async function ({
       bank: bank.id,
     });
   } else {
-    id = uuid.v4Sync();
+    id = uuidv4();
     await db.insertWithUUID('accounts', {
       id,
       account_id: account.account_id,
@@ -955,7 +958,7 @@ handlers['account-close'] = mutator(async function ({
         );
 
         await handlers['transaction-add']({
-          id: uuid.v4Sync(),
+          id: uuidv4(),
           payee: payeeId,
           amount: -balance,
           account: id,
@@ -1535,7 +1538,7 @@ handlers['key-make'] = async function ({ password }) {
   }
 
   let salt = encryption.randomBytes(32).toString('base64');
-  let id = uuid.v4Sync();
+  let id = uuidv4();
   let key = await encryption.createKey({ id, password, salt });
 
   // Load the key
@@ -2264,7 +2267,7 @@ handlers['upload-file-web'] = async function ({ filename, contents }) {
   }
 
   await fs.writeFile('/uploads/' + filename, contents);
-  return 'ok';
+  return {};
 };
 
 handlers['backups-get'] = async function ({ id }) {
@@ -2300,7 +2303,7 @@ handlers['app-focused'] = async function () {
   }
 };
 
-handlers = installAPI(handlers);
+handlers = installAPI(handlers) as Handlers;
 
 injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 

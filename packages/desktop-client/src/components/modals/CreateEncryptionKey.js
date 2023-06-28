@@ -67,10 +67,7 @@ export default function CreateEncryptionKey({
                 will generate a key based on a password and use it to encrypt
                 from now on. <strong>This requires a sync reset</strong> and all
                 other devices will have to revert to this version of your data.{' '}
-                <ExternalLink
-                  asAnchor
-                  href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-                >
+                <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                   Learn more
                 </ExternalLink>
               </P>
@@ -106,10 +103,7 @@ export default function CreateEncryptionKey({
                 <strong>This requires a sync reset</strong> and all other
                 devices will have to revert to this version of your data. Actual
                 will take you through that process on those devices.{' '}
-                <ExternalLink
-                  asAnchor
-                  href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-                >
+                <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                   Learn more
                 </ExternalLink>
               </P>

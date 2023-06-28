@@ -10,7 +10,6 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux';
 
 import { format as formatDate, parseISO } from 'date-fns';
-import { css } from 'glamor';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
@@ -32,7 +31,15 @@ import useSelected, {
 import ArrowRight from '../icons/v0/RightArrow2';
 import { colorsm } from '../style';
 
-import { View, Text, Button, Stack, ExternalLink, Input } from './common';
+import {
+  View,
+  Text,
+  Button,
+  Stack,
+  ExternalLink,
+  Input,
+  LinkButton,
+} from './common';
 import {
   SelectCell,
   Row,
@@ -187,18 +194,12 @@ export function Value({
         {numHidden > 0 && (
           <Text style={{ color: colorsm.pageTextPositive }}>
             &nbsp;&nbsp;
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a
-              href="#"
+            <LinkButton
               onClick={onExpand}
-              {...css({
-                color: colorsm.pageTextPositive,
-                textDecoration: 'none',
-                ':hover': { textDecoration: 'underline' },
-              })}
+              style={{ color: colorsm.pageTextPositive }}
             >
               {numHidden} more items...
-            </a>
+            </LinkButton>
             {!inline && <br />}
           </Text>
         )}
@@ -797,9 +798,8 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             <Text>
               Rules are always run in the order that you see them.{' '}
               <ExternalLink
-                asAnchor={true}
-                href="https://actualbudget.org/docs/budgeting/rules/"
-                style={{ color: colorsm.pageText }}
+                to="https://actualbudget.org/docs/budgeting/rules/"
+                linkColor="muted"
               >
                 Learn more
               </ExternalLink>

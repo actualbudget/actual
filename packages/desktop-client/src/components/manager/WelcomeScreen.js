@@ -29,13 +29,16 @@ function WelcomeScreen({ createBudget, pushModal }) {
         <P>
           Currently, Actual implements budgeting based on a{' '}
           <ExternalLink
-            asAnchor
-            href="https://actualbudget.org/docs/budgeting/"
+            to="https://actualbudget.org/docs/budgeting/"
+            linkColor="purple"
           >
             monthly envelope system
           </ExternalLink>
           . Consider taking our{' '}
-          <ExternalLink asAnchor href="https://actualbudget.org/docs/tour/">
+          <ExternalLink
+            to="https://actualbudget.org/docs/tour/"
+            linkColor="purple"
+          >
             guided tour
           </ExternalLink>{' '}
           to help you get your bearings, and check out the rest of the

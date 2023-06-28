@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useAllFeatureFlags } from '../../hooks/useFeatureFlag';
 import { colorsm } from '../../style';
-import { Link, Text, View } from '../common';
+import { LinkButton, Text, View } from '../common';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
@@ -61,7 +61,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             </label>
           </View>
         ) : (
-          <Link
+          <LinkButton
             onClick={() => setExpanded(true)}
             style={{
               flexShrink: 0,
@@ -69,7 +69,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             }}
           >
             I understand the risks, show experimental features
-          </Link>
+          </LinkButton>
         )
       }
     >

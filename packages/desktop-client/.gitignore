@@ -9,6 +9,7 @@ test-results
 
 # production
 build
+build-stats
 
 # misc
 .DS_Store
@@ -19,3 +20,4 @@ npm-debug.log
 public/kcab
 public/data
 public/data-file-index.txt
+public/*.wasm

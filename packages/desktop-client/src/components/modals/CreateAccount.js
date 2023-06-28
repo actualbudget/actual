@@ -67,10 +67,8 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                 <strong>Create a local account</strong> if you want to add
                 transactions manually. You can also{' '}
                 <ExternalLink
-                  asAnchor={true}
-                  href="https://actualbudget.org/docs/transactions/importing"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  to="https://actualbudget.org/docs/transactions/importing"
+                  linkColor="muted"
                 >
                   import QIF/OFX/QFX files into a local account
                 </ExternalLink>
@@ -116,10 +114,8 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                 <P style={{ fontSize: 15 }}>
                   Connect to an Actual server to set up{' '}
                   <ExternalLink
-                    asAnchor={true}
-                    href="https://actualbudget.org/docs/advanced/bank-sync"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    to="https://actualbudget.org/docs/advanced/bank-sync"
+                    linkColor="muted"
                   >
                     automatic syncing with Nordigen
                   </ExternalLink>

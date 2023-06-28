@@ -13,7 +13,7 @@ import {
   P,
   Select,
   FormError,
-  AnchorLink,
+  LinkButton,
 } from '../common';
 
 function needsCategory(account, currentTransfer, accounts) {
@@ -187,10 +187,8 @@ function CloseAccount({
                   <View style={{ marginBottom: 15 }}>
                     <Text style={{ fontSize: 12 }}>
                       You can also{' '}
-                      <AnchorLink
-                        href="#"
-                        onClick={e => {
-                          e.preventDefault();
+                      <LinkButton
+                        onClick={() => {
                           setLoading(true);
 
                           actions
@@ -200,7 +198,7 @@ function CloseAccount({
                         style={{ color: colorsm.errorText }}
                       >
                         force close
-                      </AnchorLink>{' '}
+                      </LinkButton>{' '}
                       the account which will delete it and all its transactions
                       permanently. Doing so may change your budget unexpectedly
                       since money in it may vanish.

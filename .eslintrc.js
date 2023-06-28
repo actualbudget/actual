@@ -18,6 +18,11 @@ const restrictedImportPatterns = [
     group: ['*.api', '*.web', '*.electron'],
     message: 'Don’t directly reference imports from other platforms',
   },
+  {
+    group: ['uuid'],
+    importNames: ['*'],
+    message: "Use `import { v4 as uuidv4 } from 'uuid'` instead",
+  },
 ];
 
 module.exports = {
@@ -108,6 +113,12 @@ module.exports = {
           ":matches(MemberExpression[object.name='React'], TSQualifiedName[left.name='React'])",
         message:
           'Using default React import is discouraged, please use named exports directly instead.',
+      },
+      {
+        // forbid <a> in favor of <LinkButton> or <ExternalLink>
+        selector: 'JSXOpeningElement[name.name="a"]',
+        message:
+          'Using <a> is discouraged, please use <LinkButton> or <ExternalLink> instead.',
       },
     ],
     'no-restricted-imports': ['error', { patterns: restrictedImportPatterns }],

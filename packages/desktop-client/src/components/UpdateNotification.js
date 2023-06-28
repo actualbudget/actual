@@ -8,7 +8,7 @@ import * as actions from 'loot-core/src/client/actions';
 import Close from '../icons/v1/Close';
 import { colorsm } from '../style';
 
-import { View, Text, Link, Button } from './common';
+import { View, Text, LinkButton, Button } from './common';
 
 function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session
@@ -49,8 +49,8 @@ function UpdateNotification({
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
-              <Link onClick={updateApp}>Restart</Link> (
-              <Link
+              <LinkButton onClick={updateApp}>Restart</LinkButton> (
+              <LinkButton
                 onClick={() =>
                   window.Actual.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
@@ -58,7 +58,7 @@ function UpdateNotification({
                 }
               >
                 notes
-              </Link>
+              </LinkButton>
               )
               <Button
                 bare

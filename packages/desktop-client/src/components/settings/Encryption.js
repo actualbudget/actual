@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { colorsm } from '../../style';
-import { ExternalLink, Text, Button } from '../common';
+import { ExternalLink, Text, Button, ExternalLink } from '../common';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
@@ -25,11 +25,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         Your data is encrypted with a key that only you have before sending it
         it out to the cloud. Local data remains unencrypted so if you forget
         your password you can re-encrypt it.{' '}
-        <ExternalLink
-          href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
           Learn more…
         </ExternalLink>
       </Text>
@@ -41,11 +37,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         unencrypted connection to a remote server. You’ll need to enable HTTPS
         on your server to use end-to-end encryption. This problem may also occur
         if your browser is too old to work with Actual.{' '}
-        <ExternalLink
-          href="https://actualbudget.org/docs/config/https"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <ExternalLink to="https://actualbudget.org/docs/config/https">
           Learn more…
         </ExternalLink>
       </Text>
@@ -64,11 +56,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         end-to-end encrypted which means the server owners have the ability to
         read it. If you want, you can use an additional password to encrypt your
         data on the server.{' '}
-        <ExternalLink
-          href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
           Learn more…
         </ExternalLink>
       </Text>
@@ -79,11 +67,7 @@ export default function EncryptionSettings({ prefs, pushModal }) {
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and
         encryption is only applied when sending data to a server.{' '}
-        <ExternalLink
-          href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
           Learn more…
         </ExternalLink>
       </Text>

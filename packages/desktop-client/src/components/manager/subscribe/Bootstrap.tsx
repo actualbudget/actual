@@ -6,7 +6,14 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colorsm } from '../../../style';
-import { View, Text, Button, P, ExternalLink } from '../../common';
+import {
+  View,
+  Text,
+  Button,
+  P,
+  ExternalLink,
+  ExternalLink,
+} from '../../common';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -59,12 +66,7 @@ export default function Bootstrap() {
 
       <P isLast style={{ fontSize: 16 }}>
         Consider opening{' '}
-        <ExternalLink
-          asAnchor
-          href="https://actualbudget.org/docs/tour/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <ExternalLink to="https://actualbudget.org/docs/tour/">
           our tour
         </ExternalLink>{' '}
         in a new tab for some guidance on what to do when you’ve set your

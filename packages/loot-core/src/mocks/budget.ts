@@ -141,7 +141,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
   );
   let currentDay = monthUtils.currentDay();
   for (let month of months) {
-    let date = monthUtils.addDays(month, '12');
+    let date = monthUtils.addDays(month, 12);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -10000,
@@ -152,7 +152,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '18');
+    date = monthUtils.addDays(month, 18);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -9000,
@@ -163,7 +163,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '2');
+    date = monthUtils.addDays(month, 2);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -120000,
@@ -174,7 +174,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '20');
+    date = monthUtils.addDays(month, 20);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -6000,
@@ -186,7 +186,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '23');
+    date = monthUtils.addDays(month, 23);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -7500,

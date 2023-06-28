@@ -1,11 +1,13 @@
 const path = require('path');
 
 const {
+  addWebpackPlugin,
   addWebpackResolve,
+  babelInclude,
   override,
   overrideDevServer,
-  babelInclude,
 } = require('customize-cra');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 if (process.env.CI) {
   process.env.DISABLE_ESLINT_PLUGIN = 'true';
@@ -27,6 +29,12 @@ module.exports = {
         '.tsx',
       ],
     }),
+    addWebpackPlugin(
+      new BundleAnalyzerPlugin({
+        analyzerMode: 'disabled',
+        generateStatsFile: true,
+      }),
+    ),
     config => {
       config.cache = false;
       return config;

@@ -118,10 +118,8 @@ function CreateLocalAccount({ modalProps, actions }) {
                         This cannot be changed later. <br /> {'\n'}
                         See{' '}
                         <ExternalLink
-                          asAnchor={true}
-                          href="https://actualbudget.org/docs/accounts/#off-budget-accounts"
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          linkColor="muted"
+                          to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
                         >
                           Accounts Overview
                         </ExternalLink>{' '}
