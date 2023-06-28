@@ -66,7 +66,7 @@ import {
 } from './sync';
 import * as syncMigrations from './sync/migrate';
 import toolsApp from './tools/app';
-import { withUndo, clearUndo, undo, redo } from './undo';
+import { withUndo, clearUndo, undo, redo, undoable } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
 
@@ -97,13 +97,12 @@ handlers['redo'] = mutator(function () {
   return redo();
 });
 
-handlers['transactions-batch-update'] = mutator(async function ({
+handlers['transactions-batch-update'] = mutator(undoable(async function ({
   added,
   deleted,
   updated,
   learnCategories,
 }) {
-  return withUndo(async () => {
     let result = await batchUpdateTransactions({
       added,
       updated,
@@ -113,8 +112,8 @@ handlers['transactions-batch-update'] = mutator(async function ({
 
     // Return all data updates to the frontend
     return result.updated;
-  });
-});
+  })
+);
 
 handlers['transaction-add'] = mutator(async function (transaction) {
   await handlers['transactions-batch-update']({ added: [transaction] });
@@ -276,12 +275,8 @@ handlers['budget-set-type'] = async function ({ type }) {
   return prefs.savePrefs({ budgetType: type });
 };
 
-handlers['category-create'] = mutator(async function ({
-  name,
-  groupId,
-  isIncome,
-}) {
-  return withUndo(async () => {
+handlers['category-create'] = mutator(
+  undoable(async function ({ name, groupId, isIncome }) {
     if (!groupId) {
       throw APIError('Creating a category: groupId is required');
     }
@@ -291,11 +286,11 @@ handlers['category-create'] = mutator(async function ({
       cat_group: groupId,
       is_income: isIncome ? 1 : 0,
     });
-  });
-});
+  }),
+);
 
-handlers['category-update'] = mutator(async function (category) {
-  return withUndo(async () => {
+handlers['category-update'] = mutator(
+  undoable(async function (category) {
     try {
       await db.updateCategory(category);
     } catch (e) {
@@ -305,20 +300,20 @@ handlers['category-update'] = mutator(async function (category) {
       throw e;
     }
     return {};
-  });
-});
+  }),
+);
 
-handlers['category-move'] = mutator(async function ({ id, groupId, targetId }) {
-  return withUndo(async () => {
+handlers['category-move'] = mutator(
+  undoable(async function ({ id, groupId, targetId }) {
     await batchMessages(async () => {
       await db.moveCategory(id, groupId, targetId);
     });
     return 'ok';
-  });
-});
+  }),
+);
 
-handlers['category-delete'] = mutator(async function ({ id, transferId }) {
-  return withUndo(async () => {
+handlers['category-delete'] = mutator(
+  undoable(async function ({ id, transferId }) {
     let result = {};
     await batchMessages(async () => {
       let row = await db.first(
@@ -356,41 +351,35 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
     });
 
     return result;
-  });
-});
+  }),
+);
 
-handlers['category-group-create'] = mutator(async function ({
-  name,
-  isIncome,
-}) {
-  return withUndo(async () => {
+handlers['category-group-create'] = mutator(
+  undoable(async function ({ name, isIncome }) {
     return db.insertCategoryGroup({
       name,
       is_income: isIncome ? 1 : 0,
     });
-  });
-});
+  }),
+);
 
-handlers['category-group-update'] = mutator(async function (group) {
-  return withUndo(async () => {
+handlers['category-group-update'] = mutator(
+  undoable(async function (group) {
     return db.updateCategoryGroup(group);
-  });
-});
+  }),
+);
 
-handlers['category-group-move'] = mutator(async function ({ id, targetId }) {
-  return withUndo(async () => {
+handlers['category-group-move'] = mutator(
+  undoable(async function ({ id, targetId }) {
     await batchMessages(async () => {
       await db.moveCategoryGroup(id, targetId);
     });
     return 'ok';
-  });
-});
+  }),
+);
 
-handlers['category-group-delete'] = mutator(async function ({
-  id,
-  transferId,
-}) {
-  return withUndo(async () => {
+handlers['category-group-delete'] = mutator(
+  undoable(async function ({ id, transferId }) {
     const groupCategories = await db.all(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
       [id],
@@ -405,8 +394,8 @@ handlers['category-group-delete'] = mutator(async function ({
       }
       await db.deleteCategoryGroup({ id }, transferId);
     });
-  });
-});
+  }),
+);
 
 handlers['must-category-transfer'] = async function ({ id }) {
   const res = await db.runQuery(
@@ -433,11 +422,11 @@ handlers['must-category-transfer'] = async function ({ id }) {
   });
 };
 
-handlers['payee-create'] = mutator(async function ({ name }) {
-  return withUndo(async () => {
+handlers['payee-create'] = mutator(
+  undoable(async function ({ name }) {
     return db.insertPayee({ name });
-  });
-});
+  }),
+);
 
 handlers['payees-get'] = async function () {
   return db.getPayees();
@@ -469,12 +458,8 @@ handlers['payees-merge'] = mutator(async function ({ targetId, mergeIds }) {
   );
 });
 
-handlers['payees-batch-change'] = mutator(async function ({
-  added,
-  deleted,
-  updated,
-}) {
-  return withUndo(async () => {
+handlers['payees-batch-change'] = mutator(
+  undoable(async function ({ added, deleted, updated }) {
     return batchMessages(async () => {
       if (deleted) {
         await Promise.all(deleted.map(p => db.deletePayee(p)));
@@ -488,8 +473,8 @@ handlers['payees-batch-change'] = mutator(async function ({
         await Promise.all(updated.map(p => db.updatePayee(p)));
       }
     });
-  });
-});
+  }),
+);
 
 handlers['payees-check-orphaned'] = async function ({ ids }) {
   let orphaned = new Set(await db.getOrphanedPayees());
@@ -702,12 +687,12 @@ handlers['bank-delete'] = async function ({ id }) {
   return 'ok';
 };
 
-handlers['account-update'] = mutator(async function ({ id, name }) {
-  return withUndo(async () => {
+handlers['account-update'] = mutator(
+  undoable(async function ({ id, name }) {
     await db.update('accounts', { id, name });
     return {};
-  });
-});
+  }),
+);
 
 handlers['accounts-get'] = async function () {
   return db.getAccounts();
@@ -842,13 +827,8 @@ handlers['nordigen-accounts-connect'] = async function ({
   return ids;
 };
 
-handlers['account-create'] = mutator(async function ({
-  name,
-  balance,
-  offBudget,
-  closed,
-}) {
-  return withUndo(async () => {
+handlers['account-create'] = mutator(
+  undoable(async function ({ name, balance, offBudget, closed }) {
     const id = await db.insertAccount({
       name,
       offbudget: offBudget ? 1 : 0,
@@ -875,8 +855,8 @@ handlers['account-create'] = mutator(async function ({
     }
 
     return id;
-  });
-});
+  }),
+);
 
 handlers['account-close'] = mutator(async function ({
   id,
@@ -971,17 +951,17 @@ handlers['account-close'] = mutator(async function ({
   });
 });
 
-handlers['account-reopen'] = mutator(async function ({ id }) {
-  return withUndo(async () => {
+handlers['account-reopen'] = mutator(
+  undoable(async function ({ id }) {
     await db.update('accounts', { id, closed: 0 });
-  });
-});
+  }),
+);
 
-handlers['account-move'] = mutator(async function ({ id, targetId }) {
-  return withUndo(async () => {
+handlers['account-move'] = mutator(
+  undoable(async function ({ id, targetId }) {
     await db.moveAccount(id, targetId);
-  });
-});
+  }),
+);
 
 let stopPolling = false;
 
@@ -1362,11 +1342,10 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
 };
 
-handlers['transactions-import'] = mutator(function ({
+handlers['transactions-import'] = mutator(undoable(async function ({
   accountId,
   transactions,
 }) {
-  return withUndo(async () => {
     if (typeof accountId !== 'string') {
       throw APIError('transactions-import: accountId must be an id');
     }
@@ -1380,8 +1359,8 @@ handlers['transactions-import'] = mutator(function ({
 
       throw err;
     }
-  });
-});
+  })
+);
 
 handlers['account-unlink'] = mutator(async function ({ id }) {
   let { bank: bankId } = await db.first(
