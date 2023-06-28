@@ -1,4 +1,4 @@
-import * as uuid from '../platform/uuid';
+import * as uuid from 'uuid';
 
 import {
   splitTransaction,
@@ -14,7 +14,7 @@ import {
 
 function makeTransaction(data) {
   return {
-    id: uuid.v4Sync(),
+    id: uuid.v4(),
     amount: 2422,
     date: '2020-01-05',
     account: 'acct1',
