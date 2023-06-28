@@ -13,6 +13,7 @@ const CLIENT_DATA_DIR = build.clientDataDir;
 const CLIENT_BUILD_DIR = build.clientWorkerDir;
 
 async function main() {
+  process.chdir(ROOT);
   await fs.ensureDir(CLIENT_DATA_DIR);
   await migrations.copyMigrations(ROOT, CLIENT_DATA_DIR);
 
@@ -25,10 +26,10 @@ async function main() {
 
   const outputHash = webpackUtil.getContentHash();
   const command = [
-    'yarn webpack --config webpack/webpack.browser.config.js ',
+    'yarn webpack --config "webpack/webpack.browser.config.js" ',
     '--target webworker ',
-    '--output-filename kcab.worker.', outputHash, '.js ',
-    '--output-chunk-filename [id].[name].kcab.worker.', outputHash, 'js ',
+    '--output-filename "kcab.worker.', outputHash, '.js" ',
+    '--output-chunk-filename "[id].[name].kcab.worker.', outputHash, '.js" ',
     '--progress ',
   ];
 
