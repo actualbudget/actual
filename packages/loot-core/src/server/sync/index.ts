@@ -4,6 +4,7 @@ import {
   getClock,
   Timestamp,
   merkle,
+  Message,
 } from '@actual-app/crdt';
 
 import { captureException } from '../../platform/exceptions';
@@ -243,15 +244,6 @@ function applyMessagesForImport(messages: Message[]): void {
     }
   });
 }
-
-export type Message = {
-  column: string;
-  dataset: string;
-  old?: unknown;
-  row: string;
-  timestamp: string;
-  value: string | number | null;
-};
 
 export const applyMessages = sequential(async (messages: Message[]) => {
   if (checkSyncingMode('import')) {

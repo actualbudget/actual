@@ -1,10 +1,8 @@
-import { SyncProtoBuf } from '@actual-app/crdt';
+import { SyncProtoBuf, Message } from '@actual-app/crdt';
 
 import * as encryption from '../encryption';
 import { SyncError } from '../errors';
 import * as prefs from '../prefs';
-
-import { Message } from './index';
 
 function coerceBuffer(value) {
   // The web encryption APIs give us back raw Uint8Array... but our
