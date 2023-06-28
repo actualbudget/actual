@@ -2,10 +2,11 @@
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
 import { Database } from 'better-sqlite3';
+import { v4 as uuidv4 } from 'uuid';
+
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
-import * as uuid from '../../platform/uuid';
 
 let MIGRATIONS_DIR = fs.migrationsPath;
 
@@ -87,7 +88,7 @@ async function applyJavaScript(db, id) {
   }
 
   let run = javascriptMigrations[id];
-  return run(dbInterface, () => uuid.v4Sync());
+  return run(dbInterface, () => uuidv4());
 }
 
 async function applySql(db, sql) {

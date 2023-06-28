@@ -16,10 +16,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
+    "@types/uuid": ^9.0.2
     better-sqlite3: ^8.2.0
     node-fetch: ^2.6.9
     typescript: ^5.0.2
-    uuid: 3.3.2
+    uuid: ^9.0.0
   languageName: unknown
   linkType: soft
 
@@ -28,13 +29,14 @@ __metadata:
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
     "@types/jest": ^27.5.0
+    "@types/uuid": ^9.0.2
     google-protobuf: ^3.12.0-rc.1
     jest: ^27.0.0
     murmurhash: ^0.0.2
     ts-jest: ^27.0.0
     ts-protoc-gen: ^0.15.0
     typescript: ^5.0.2
-    uuid: 3.3.2
+    uuid: ^9.0.0
   languageName: unknown
   linkType: soft
 
@@ -43,11 +45,12 @@ __metadata:
   resolution: "@actual-app/import-ynab4@workspace:packages/import-ynab4"
   dependencies:
     "@actual-app/api": "*"
+    "@types/uuid": ^9.0.2
     adm-zip: ^0.5.9
     date-fns: ^2.29.3
     slash: 3.0.0
     ts-node: ^10.9.1
-    uuid: 3.3.2
+    uuid: ^9.0.0
   bin:
     import-ynab4: ./index.js
   languageName: unknown
@@ -58,9 +61,10 @@ __metadata:
   resolution: "@actual-app/import-ynab5@workspace:packages/import-ynab5"
   dependencies:
     "@actual-app/api": "*"
+    "@types/uuid": ^9.0.2
     date-fns: ^2.29.3
     ts-node: ^10.9.1
-    uuid: 3.3.2
+    uuid: ^9.0.0
   bin:
     import-ynab5: ./index.js
   languageName: unknown
@@ -85,6 +89,7 @@ __metadata:
     "@types/react-dom": ^18.2.1
     "@types/react-modal": ^3.16.0
     "@types/react-router-dom": ^5.3.3
+    "@types/uuid": ^9.0.2
     "@types/webpack-bundle-analyzer": ^4.6.0
     cross-env: ^7.0.3
     customize-cra: ^1.0.0
@@ -115,6 +120,7 @@ __metadata:
     redux: ^4.0.5
     redux-thunk: ^2.3.0
     sass: ^1.63.6
+    uuid: ^9.0.0
     victory: ^36.6.8
     webpack-bundle-analyzer: ^4.9.0
   languageName: unknown
@@ -4468,6 +4474,13 @@ __metadata:
   version: 2.0.3
   resolution: "@types/trusted-types@npm:2.0.3"
   checksum: 4794804bc4a4a173d589841b6d26cf455ff5dc4f3e704e847de7d65d215f2e7043d8757e4741ce3a823af3f08260a8d04a1a6e9c5ec9b20b7b04586956a6b005
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^9.0.2":
+  version: 9.0.2
+  resolution: "@types/uuid@npm:9.0.2"
+  checksum: 1754bcf3444e1e3aeadd6e774fc328eb53bc956665e2e8fb6ec127aa8e1f43d9a224c3d22a9a6233dca8dd81a12dc7fed4d84b8876dd5ec82d40f574f7ff8b68
   languageName: node
   linkType: hard
 
@@ -12344,6 +12357,7 @@ __metadata:
     "@types/jest": ^27.5.0
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/pegjs": ^0.10.3
+    "@types/uuid": ^9.0.2
     "@types/webpack": ^5.28.0
     "@types/webpack-bundle-analyzer": ^4.6.0
     absurd-sql: 0.0.53
@@ -12382,7 +12396,7 @@ __metadata:
     ts-jest: ^27.0.0
     ts-node: ^10.7.0
     typescript: ^4.6.4
-    uuid: 3.3.2
+    uuid: ^9.0.0
     webpack: ^5.86.0
     webpack-bundle-analyzer: ^4.9.0
     webpack-cli: ^5.1.3
@@ -17984,21 +17998,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:3.3.2":
-  version: 3.3.2
-  resolution: "uuid@npm:3.3.2"
-  bin:
-    uuid: ./bin/uuid
-  checksum: 8793629d2799f500aeea9fcd0aec6c4e9fbcc4d62ed42159ad96be345c3fffac1bbf61a23e18e2782600884fee05e6d4012ce4b70d0037c8e987533ae6a77870
-  languageName: node
-  linkType: hard
-
 "uuid@npm:^8.3.2":
   version: 8.3.2
   resolution: "uuid@npm:8.3.2"
   bin:
     uuid: dist/bin/uuid
   checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "uuid@npm:9.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
   languageName: node
   linkType: hard
 

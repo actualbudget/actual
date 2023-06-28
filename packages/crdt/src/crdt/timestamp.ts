@@ -1,5 +1,5 @@
 import murmurhash from 'murmurhash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { TrieNode } from './merkle';
 
@@ -74,7 +74,7 @@ export function deserializeClock(clock: string): Clock {
 }
 
 export function makeClientId() {
-  return uuid.v4().replace(/-/g, '').slice(-16);
+  return uuidv4().replace(/-/g, '').slice(-16);
 }
 
 let config = {
