@@ -72,13 +72,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       bare
         ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
         : {
-            border: colorsm.buttonNeutralBorder,
             transform: bounce && 'translateY(1px)',
-            boxShadow:
-              !bare &&
-              (primary
-                ? '0 1px 4px 0 rgba(0,0,0,0.3)'
-                : '0 1px 4px 0 rgba(0,0,0,0.2)'),
             transition: 'none',
           },
       activeStyle,
@@ -98,17 +92,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         backgroundColor: bare
           ? 'transparent'
           : primary
-          ? disabled
-            ? colorsm.buttonDisabledBackground
-            : colorsm.buttonPositiveBackground
+          ? colorsm.buttonPositiveBackground
+          : disabled
+          ? colorsm.buttonDisabledBackground
           : colorsm.buttonNeutralBackground,
         border: bare
           ? 'none'
           : '1px solid ' +
             (primary
-              ? disabled
-                ? colorsm.buttonDisabledBorder
-                : colorsm.buttonPositiveBorder
+              ? colorsm.buttonPositiveBorder
+              : disabled
+              ? colorsm.buttonDisabledBorder
               : colorsm.buttonNeutralBorder),
         color: bare
           ? 'inherit'

@@ -422,6 +422,10 @@ export function CustomSelect({
           zIndex: 10000,
           outline: 0,
           backgroundColor: colorsm.menuBackground,
+          border: '1px solid ' + colorsm.menuBorder,
+          ':focus-within': {
+            boxShadow: '0px 1px 2px ' + colorsm.buttonShadow,
+          },
         })}
       >
         <ListboxList>
@@ -431,10 +435,14 @@ export function CustomSelect({
               value={value}
               disabled={disabledKeys.includes(value)}
               {...css({
-                backgroundColor: colorsm.menuItemBackground,
+                background: colorsm.menuItemBackground,
                 color: colorsm.menuItemText,
                 ':hover': {
-                  backgroundColor: colorsm.menuItemBackgroundHover,
+                  background: colorsm.menuItemBackgroundHover,
+                  color: colorsm.menuItemTextHover,
+                },
+                ':active': {
+                  background: colorsm.menuItemBackgroundHover,
                   color: colorsm.menuItemTextHover,
                 },
               })}

@@ -159,7 +159,7 @@ function File({ file, onSelect, onDelete }) {
           padding: '12px 15px',
           backgroundColor: colorsm.buttonNeutralBackground,
           color: colorsm.buttonNeutralText,
-          border: '1px solid' + colorsm.buttonNeutralBorder,
+          border: '1px solid ' + colorsm.buttonNeutralBorder,
           borderRadius: 6,
           flexShrink: 0,
           cursor: 'pointer',
@@ -291,7 +291,6 @@ function BudgetList({
           name="Files"
           style={{
             margin: 20,
-            color: colorsm.pageText,
           }}
         />
         <View

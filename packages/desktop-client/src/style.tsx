@@ -139,13 +139,13 @@ const colorsDark = {
   buttonPositiveBorder: colorPallet.purple400,
   buttonNeutralText: colorPallet.gray100,
   buttonNeutralTextHover: colorPallet.gray100,
-  buttonNeutralBackground: colorPallet.gray600,
-  buttonNeutralBackgroundHover: colorPallet.gray800,
+  buttonNeutralBackground: colorPallet.gray800,
+  buttonNeutralBackgroundHover: colorPallet.gray600,
   buttonNeutralBorder: colorPallet.gray300,
   buttonDisabledText: colorPallet.gray400,
   buttonDisabledBackground: colorPallet.gray800,
   buttonDisabledBorder: colorPallet.gray500,
-  buttonShadow: colorPallet.gray700,
+  buttonShadow: colorPallet.purple600,
   noticeBackground: colorPallet.gray900,
   noticeText: colorPallet.green400,
   noticeAccent: colorPallet.gray700,
@@ -459,7 +459,7 @@ function onScrollbarChange() {
     : {
         // webkit
         '& ::-webkit-scrollbar': {
-          width: 11,
+          width: 9,
         },
         '& ::-webkit-scrollbar-thumb': {
           borderRadius: 30,
@@ -473,7 +473,7 @@ function onScrollbarChange() {
     : {
         // webkit
         '& ::-webkit-scrollbar': {
-          width: 11,
+          width: 9,
         },
         '& ::-webkit-scrollbar-thumb': {
           borderRadius: 30,
@@ -483,7 +483,7 @@ function onScrollbarChange() {
         },
       };
 
-  styles.scrollbarWidth = hiddenScrollbars ? 0 : 13;
+  styles.scrollbarWidth = hiddenScrollbars ? 0 : 11;
 }
 
 if (Platform.env === 'web') {

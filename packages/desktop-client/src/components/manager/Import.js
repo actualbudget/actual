@@ -32,8 +32,6 @@ function Import({ modalProps, actions }) {
 
   let itemStyle = {
     padding: 10,
-    border: '1px solid ' + colorsm.buttonNeutralBorder,
-    backgroundColor: colorsm.buttonNeutralBackground,
     borderRadius: 6,
     marginBottom: 10,
     display: 'block',
