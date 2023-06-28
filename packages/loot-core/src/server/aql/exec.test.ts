@@ -1,4 +1,5 @@
-import * as uuid from '../../platform/uuid';
+import { v4 as uuidv4 } from 'uuid';
+
 import query from '../../shared/query';
 import { makeChild } from '../../shared/transactions';
 import * as db from '../db';
@@ -37,14 +38,14 @@ async function insertTransactions(repeatTimes = 1) {
     });
 
     let parent = {
-      id: uuid.v4Sync(),
+      id: uuidv4(),
       account: 'acct',
       date: '2020-01-04',
       amount: -100,
       is_parent: true,
     };
     let parent2 = {
-      id: uuid.v4Sync(),
+      id: uuidv4(),
       account: 'acct',
       date: '2020-01-01',
       amount: -89,
@@ -115,7 +116,7 @@ describe('runQuery', () => {
   });
 
   it('provides named parameters and converts types', async () => {
-    let transId = uuid.v4Sync();
+    let transId = uuidv4();
     await db.insertTransaction({
       id: transId,
       account: 'acct',
@@ -196,7 +197,7 @@ describe('runQuery', () => {
   });
 
   it('parameters have the correct order', async () => {
-    let transId = uuid.v4Sync();
+    let transId = uuidv4();
     await db.insertTransaction({
       id: transId,
       account: 'acct',

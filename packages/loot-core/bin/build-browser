@@ -4,7 +4,8 @@ cd `dirname "$0"`
 ROOT=`pwd -P`
 WEBPACK_ARGS=""
 
-DATA_DIR="$ROOT"/../../desktop-client/public/data
+PUBLIC_DIR="$ROOT"/../../desktop-client/public
+DATA_DIR="$PUBLIC_DIR"/data
 mkdir -p "$DATA_DIR"
 "$ROOT"/copy-migrations "$DATA_DIR"
 
@@ -34,6 +35,9 @@ if [ $NODE_ENV == 'development' ]; then
   fi
   ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
 fi
+
+cp ../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm "$PUBLIC_DIR"/sql-wasm.wasm
+cp ../../node-libofx/libofx.web.wasm "$PUBLIC_DIR"/libofx.web.wasm
 
 yarn webpack --config ../webpack/webpack.browser.config.js \
   --target "webworker" \
