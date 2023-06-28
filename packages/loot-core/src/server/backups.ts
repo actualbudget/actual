@@ -1,9 +1,9 @@
 import * as dateFns from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
-import * as uuid from '../platform/uuid';
 import * as monthUtils from '../shared/months';
 
 import * as cloudStorage from './cloud-storage';
@@ -111,7 +111,7 @@ export async function makeBackup(id: string) {
     await fs.removeFile(fs.join(fs.getBudgetDir(id), LATEST_BACKUP_FILENAME));
   }
 
-  let backupId = `${uuid.v4Sync()}.sqlite`;
+  let backupId = `${uuidv4()}.sqlite`;
   let backupPath = fs.join(budgetDir, 'backups', backupId);
 
   if (!(await fs.exists(fs.join(budgetDir, 'backups')))) {
