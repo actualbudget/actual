@@ -21,6 +21,7 @@
     "@types/react-dom": "^18.2.1",
     "@types/react-modal": "^3.16.0",
     "@types/react-router-dom": "^5.3.3",
+    "@types/uuid": "^9.0.2",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "cross-env": "^7.0.3",
     "customize-cra": "^1.0.0",
@@ -51,6 +52,7 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "sass": "^1.63.6",
+    "uuid": "^9.0.0",
     "victory": "^36.6.8",
     "webpack-bundle-analyzer": "^4.9.0"
   },
