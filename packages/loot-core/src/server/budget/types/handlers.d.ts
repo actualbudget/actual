@@ -1,5 +1,9 @@
 export interface BudgetHandlers {
-  'budget/budget-amount': (...args: unknown[]) => Promise<unknown>;
+  'budget/budget-amount': (arg: {
+    category: string /* category id */;
+    month: string;
+    amount: number;
+  }) => Promise<unknown>;
 
   'budget/copy-previous-month': (...args: unknown[]) => Promise<unknown>;
 

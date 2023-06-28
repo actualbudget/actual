@@ -39,7 +39,8 @@ async function importFileWithRealTime(
   global.restoreFakeDateNow();
 
   if (transactions) {
-    transactions = transactions.map(trans => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    transactions = (transactions as any[]).map(trans => ({
       ...trans,
       amount: amountToInteger(trans.amount),
       date: dateFormat
