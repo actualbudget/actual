@@ -69,14 +69,14 @@ describe('Sync', () => {
         row: 'foo',
         column: 'amount',
         value: 3200,
-        timestamp: Timestamp.send().toString(),
+        timestamp: Timestamp.send(),
       },
       global.stepForwardInTime() || {
         dataset: 'transactions',
         row: 'foo',
         column: 'amount',
         value: 3200,
-        timestamp: Timestamp.send().toString(),
+        timestamp: Timestamp.send(),
       },
     ]);
 
@@ -130,7 +130,7 @@ describe('Sync', () => {
         row: 'foo',
         column: 'amount',
         value: 5000,
-        timestamp: Timestamp.send().toString(),
+        timestamp: Timestamp.send(),
       },
     ]);
 

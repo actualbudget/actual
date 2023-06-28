@@ -195,13 +195,12 @@ async function compareMessages(messages: Message[]): Promise<Message[]> {
   for (let i = 0; i < messages.length; i++) {
     let message = messages[i];
     let { dataset, row, column, timestamp } = message;
-    let timestampStr = timestamp.toString();
 
     let res = db.runQuery(
       db.cache(
         'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?',
       ),
-      [dataset, row, column, timestampStr],
+      [dataset, row, column, String(timestamp)],
       true,
     );
 
@@ -249,7 +248,7 @@ export type Message = {
   dataset: string;
   old?: unknown;
   row: string;
-  timestamp: string;
+  timestamp: string | Timestamp;
   value: string | number | null;
 };
 

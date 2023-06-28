@@ -188,7 +188,7 @@ export async function update(table, params) {
         row: params.id,
         column: k,
         value: params[k],
-        timestamp: Timestamp.send().toString(),
+        timestamp: Timestamp.send(),
       };
     }),
   );
@@ -221,7 +221,7 @@ export async function insert(table, row) {
         row: row.id,
         column: k,
         value: row[k],
-        timestamp: Timestamp.send().toString(),
+        timestamp: Timestamp.send(),
       };
     }),
   );
@@ -234,7 +234,7 @@ export async function delete_(table, id) {
       row: id,
       column: 'tombstone',
       value: 1,
-      timestamp: Timestamp.send().toString(),
+      timestamp: Timestamp.send(),
     },
   ]);
 }

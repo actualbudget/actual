@@ -257,7 +257,7 @@ function redoResurrections(messages, oldData): Message[] {
       row,
       column: 'tombstone',
       value: 0,
-      timestamp: Timestamp.send().toString(),
+      timestamp: Timestamp.send(),
     };
   });
 }
