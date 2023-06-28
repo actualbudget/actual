@@ -5,7 +5,7 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
-import * as encoder from '@actual-app/crdt/src/encoder';
+import * as encoder from './encoder';
 import { isError } from './utils';
 
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
@@ -101,11 +101,11 @@ describe('Sync', () => {
     });
 
     await mockSyncServer.handlers['/sync/sync'](
-      await encoder.encode({
-        groupId: 'group',
-        fileId: 'client',
-        since: '1970-01-01T01:17:37.000Z-0000-0000testinguuid2',
-        messages: [
+      await encoder.encode(
+        'group',
+        'client',
+        '1970-01-01T01:17:37.000Z-0000-0000testinguuid2',
+        [
           {
             dataset: 'transactions',
             row: 'foo',
@@ -121,8 +121,7 @@ describe('Sync', () => {
             timestamp: '1970-01-02T10:17:36.999Z-0000-0000testinguuid2',
           },
         ],
-        encryptKeyId: null,
-      }),
+      ),
     );
 
     await applyMessages([

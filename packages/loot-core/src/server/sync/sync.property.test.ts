@@ -6,7 +6,7 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
-import * as encoder from '@actual-app/crdt/src/encoder';
+import * as encoder from './encoder';
 import { isError } from './utils';
 
 import * as sync from './index';
@@ -248,17 +248,16 @@ async function run(msgs) {
   await client1Sync;
 
   await mockSyncServer.handlers['/sync/sync'](
-    await encoder.encode({
-      groupId: 'group',
-      fileId: clientId2,
-      since: Timestamp.zero(),
-      messages: res.secondMessages.map(x => ({
+    await encoder.encode(
+      'group',
+      clientId2,
+      Timestamp.zero(),
+      res.secondMessages.map(x => ({
         ...x,
         value: sync.serializeValue(x.value),
         timestamp: x.timestamp.toString(),
       })),
-      encryptKeyId: null,
-    }),
+    ),
   );
 
   let syncPromise = sync.fullSync();
@@ -268,17 +267,16 @@ async function run(msgs) {
   let lastReceive = sync.receiveMessages(chunks[chunks.length - 1]);
 
   mockSyncServer.handlers['/sync/sync'](
-    await encoder.encode({
-      groupId: 'group',
-      fileId: clientId2,
-      since: Timestamp.zero(),
-      messages: res.secondMessages.map(x => ({
+    await encoder.encode(
+      'group',
+      clientId2,
+      Timestamp.zero(),
+      res.secondMessages.map(x => ({
         ...x,
         value: sync.serializeValue(x.value),
         timestamp: x.timestamp.toString(),
       })),
-      encryptKeyId: null,
-    }),
+    ),
   );
 
   let result = await syncPromise;

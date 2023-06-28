@@ -10,8 +10,4 @@ export {
   Timestamp,
 } from './crdt';
 
-export { Message, SyncError } from './types';
-
-export * as encoder from './encoder';
-
 export const SyncProtoBuf = SyncPb;
