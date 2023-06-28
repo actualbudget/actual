@@ -20,5 +20,8 @@
     "date-fns": "^2.29.3",
     "ts-node": "^10.9.1",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.2"
   }
 }

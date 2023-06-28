@@ -16,6 +16,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
+    "@types/uuid": ^9.0.2
     better-sqlite3: ^8.2.0
     node-fetch: ^2.6.9
     typescript: ^5.0.2
@@ -28,6 +29,7 @@ __metadata:
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
     "@types/jest": ^27.5.0
+    "@types/uuid": ^9.0.2
     google-protobuf: ^3.12.0-rc.1
     jest: ^27.0.0
     murmurhash: ^0.0.2
@@ -43,6 +45,7 @@ __metadata:
   resolution: "@actual-app/import-ynab4@workspace:packages/import-ynab4"
   dependencies:
     "@actual-app/api": "*"
+    "@types/uuid": ^9.0.2
     adm-zip: ^0.5.9
     date-fns: ^2.29.3
     slash: 3.0.0
@@ -58,6 +61,7 @@ __metadata:
   resolution: "@actual-app/import-ynab5@workspace:packages/import-ynab5"
   dependencies:
     "@actual-app/api": "*"
+    "@types/uuid": ^9.0.2
     date-fns: ^2.29.3
     ts-node: ^10.9.1
     uuid: ^9.0.0
