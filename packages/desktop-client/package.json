@@ -50,6 +50,7 @@
     "react-virtualized-auto-sizer": "^1.0.2",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
+    "sass": "^1.63.6",
     "victory": "^36.6.8",
     "webpack-bundle-analyzer": "^4.9.0"
   },
