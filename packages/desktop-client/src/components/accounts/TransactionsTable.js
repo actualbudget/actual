@@ -472,22 +472,33 @@ function PayeeIcons({
     return children;
   }
 
-  let colorStyle = { color: 'inherit' };
-  let style = {
+  let buttonStyle = {
     width: 23,
     height: 23,
-    ...colorStyle,
+    color: 'inherit',
+  };
+
+  let scheduleIconStyle = {
+    width: 13,
+    height: 13,
+    color: 'inherit',
+  };
+
+  let transferIconStyle = {
+    width: 10,
+    height: 10,
+    color: 'inherit',
   };
 
   let onScheduleIconClick = () => onNavigateToSchedule(scheduleId);
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
   let ScheduledIcon = () => (
-    <Button bare style={style} onClick={onScheduleIconClick}>
+    <Button bare style={buttonStyle} onClick={onScheduleIconClick}>
       {recurring ? (
-        <ArrowsSynchronize style={colorStyle} />
+        <ArrowsSynchronize style={scheduleIconStyle} />
       ) : (
-        <CalendarIcon style={colorStyle} />
+        <CalendarIcon style={scheduleIconStyle} />
       )}
     </Button>
   );
@@ -497,11 +508,11 @@ function PayeeIcons({
     onNavigateToTransferAccount(transferAccount.id);
 
   let TransferDirectionIcon = () => (
-    <Button bare style={style} onClick={onTransferIconClick}>
+    <Button bare style={buttonStyle} onClick={onTransferIconClick}>
       {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
-        <LeftArrow2 style={colorStyle} />
+        <LeftArrow2 style={transferIconStyle} />
       ) : (
-        <RightArrow2 style={colorStyle} />
+        <RightArrow2 style={transferIconStyle} />
       )}
     </Button>
   );
