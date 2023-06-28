@@ -19,7 +19,7 @@ __metadata:
     better-sqlite3: ^8.2.0
     node-fetch: ^2.6.9
     typescript: ^5.0.2
-    uuid: 3.3.2
+    uuid: ^9.0.0
   languageName: unknown
   linkType: soft
 
@@ -34,7 +34,7 @@ __metadata:
     ts-jest: ^27.0.0
     ts-protoc-gen: ^0.15.0
     typescript: ^5.0.2
-    uuid: 3.3.2
+    uuid: ^9.0.0
   languageName: unknown
   linkType: soft
 
@@ -47,7 +47,7 @@ __metadata:
     date-fns: ^2.29.3
     slash: 3.0.0
     ts-node: ^10.9.1
-    uuid: 3.3.2
+    uuid: ^9.0.0
   bin:
     import-ynab4: ./index.js
   languageName: unknown
@@ -60,7 +60,7 @@ __metadata:
     "@actual-app/api": "*"
     date-fns: ^2.29.3
     ts-node: ^10.9.1
-    uuid: 3.3.2
+    uuid: ^9.0.0
   bin:
     import-ynab5: ./index.js
   languageName: unknown
@@ -116,7 +116,7 @@ __metadata:
     redux: ^4.0.5
     redux-thunk: ^2.3.0
     sass: ^1.63.6
-    uuid: 3.3.2
+    uuid: ^9.0.0
     victory: ^36.6.8
     webpack-bundle-analyzer: ^4.9.0
   languageName: unknown
@@ -12392,7 +12392,7 @@ __metadata:
     ts-jest: ^27.0.0
     ts-node: ^10.7.0
     typescript: ^4.6.4
-    uuid: 3.3.2
+    uuid: ^9.0.0
     webpack: ^5.86.0
     webpack-bundle-analyzer: ^4.9.0
     webpack-cli: ^5.1.3
@@ -17994,21 +17994,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:3.3.2":
-  version: 3.3.2
-  resolution: "uuid@npm:3.3.2"
-  bin:
-    uuid: ./bin/uuid
-  checksum: 8793629d2799f500aeea9fcd0aec6c4e9fbcc4d62ed42159ad96be345c3fffac1bbf61a23e18e2782600884fee05e6d4012ce4b70d0037c8e987533ae6a77870
-  languageName: node
-  linkType: hard
-
 "uuid@npm:^8.3.2":
   version: 8.3.2
   resolution: "uuid@npm:8.3.2"
   bin:
     uuid: dist/bin/uuid
   checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "uuid@npm:9.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
   languageName: node
   linkType: hard
 

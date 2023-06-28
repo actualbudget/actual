@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   generateTransaction,
@@ -772,7 +772,7 @@ describe('Transactions', () => {
     // Change the id to simulate a new transaction being added, and
     // work with that one. This makes sure that the transaction table
     // properly references new data.
-    transactions[0] = { ...transactions[0], id: uuid.v4() };
+    transactions[0] = { ...transactions[0], id: uuidv4() };
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions) {

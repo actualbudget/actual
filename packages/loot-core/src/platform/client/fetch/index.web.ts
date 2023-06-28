@@ -1,4 +1,4 @@
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '../undo';
 
@@ -86,7 +86,7 @@ export const send: T.Send = function (
   { catchErrors = false } = {},
 ) {
   return new Promise((resolve, reject) => {
-    let id = uuid.v4();
+    let id = uuidv4();
     replyHandlers.set(id, { resolve, reject });
 
     if (socketClient) {

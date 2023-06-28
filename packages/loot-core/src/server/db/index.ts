@@ -7,7 +7,7 @@ import {
   Timestamp,
 } from '@actual-app/crdt';
 import LRU from 'lru-cache';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
@@ -196,7 +196,7 @@ export async function update(table, params) {
 
 export async function insertWithUUID(table, row) {
   if (!row.id) {
-    row = { ...row, id: uuid.v4() };
+    row = { ...row, id: uuidv4() };
   }
 
   await insert(table, row);
@@ -255,7 +255,7 @@ export function insertWithSchema(table, row) {
   // Even though `insertWithUUID` does this, we need to do it here so
   // the schema validation passes
   if (!row.id) {
-    row = { ...row, id: uuid.v4() };
+    row = { ...row, id: uuidv4() };
   }
 
   return insertWithUUID(

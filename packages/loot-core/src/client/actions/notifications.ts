@@ -1,4 +1,4 @@
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as constants from '../constants';
 
@@ -7,7 +7,7 @@ export function addNotification(notification) {
     type: constants.ADD_NOTIFICATION,
     notification: {
       ...notification,
-      id: notification.id || uuid.v4(),
+      id: notification.id || uuidv4(),
     },
   };
 }

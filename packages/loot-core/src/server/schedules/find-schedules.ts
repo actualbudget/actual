@@ -1,5 +1,5 @@
 import * as d from 'date-fns';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { dayFromDate, parseDate } from '../../shared/months';
 import q from '../../shared/query';
@@ -369,7 +369,7 @@ export async function findSchedules() {
 
       // Convert to schedule and return it
       return {
-        id: uuid.v4(),
+        id: uuidv4(),
         account: winner.account,
         payee: winner.payee,
         date: winner.date,

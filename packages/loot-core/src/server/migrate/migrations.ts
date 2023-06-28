@@ -1,7 +1,7 @@
 // We have to bundle in JS migrations manually to avoid having to `eval`
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import * as fs from '../../platform/server/fs';
@@ -82,7 +82,7 @@ async function applyJavaScript(db, id) {
   }
 
   let run = javascriptMigrations[id];
-  return run(dbInterface, () => uuid.v4());
+  return run(dbInterface, () => uuidv4());
 }
 
 async function applySql(db, sql) {

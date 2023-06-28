@@ -3,7 +3,7 @@ import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
 import * as YNAB4 from '@actual-app/import-ynab4/importer';
 import * as YNAB5 from '@actual-app/import-ynab5/importer';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
@@ -789,7 +789,7 @@ handlers['nordigen-accounts-link'] = async function ({
       bank: bank.id,
     });
   } else {
-    id = uuid.v4();
+    id = uuidv4();
     await db.insertWithUUID('accounts', {
       id,
       account_id: account.account_id,
@@ -958,7 +958,7 @@ handlers['account-close'] = mutator(async function ({
         );
 
         await handlers['transaction-add']({
-          id: uuid.v4(),
+          id: uuidv4(),
           payee: payeeId,
           amount: -balance,
           account: id,
@@ -1538,7 +1538,7 @@ handlers['key-make'] = async function ({ password }) {
   }
 
   let salt = encryption.randomBytes(32).toString('base64');
-  let id = uuid.v4();
+  let id = uuidv4();
   let key = await encryption.createKey({ id, password, salt });
 
   // Load the key
