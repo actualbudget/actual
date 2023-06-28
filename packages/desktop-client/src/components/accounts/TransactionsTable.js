@@ -463,42 +463,49 @@ function PayeeIcons({
 }) {
   let scheduleId = transaction.schedule;
   let scheduleData = useCachedSchedules();
-  let schedule = scheduleData.schedules.find(s => s.id === scheduleId);
+  let schedule = scheduleData
+    ? scheduleData.schedules.find(s => s.id === scheduleId)
+    : null;
 
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
     return children;
   }
 
+  let colorStyle = { color: 'inherit' };
   let style = {
-    width: 13,
-    height: 13,
-    marginLeft: 5,
-    marginRight: 3,
-    color: 'inherit',
+    width: 23,
+    height: 23,
+    marginRight: -3,
+    ...colorStyle,
   };
 
-  let recurring = schedule && schedule._date && !!schedule._date.frequency;
   let onScheduleIconClick = () => onNavigateToSchedule(scheduleId);
-  let ScheduledIcon = () =>
-    recurring ? (
-      <ArrowsSynchronize style={style} onClick={onScheduleIconClick} />
-    ) : (
-      <CalendarIcon
-        style={{ ...style, transform: 'translateY(-1px)' }}
-        onClick={onScheduleIconClick}
-      />
-    );
+
+  let recurring = schedule && schedule._date && !!schedule._date.frequency;
+  let ScheduledIcon = () => (
+    <Button bare style={style} onClick={onScheduleIconClick}>
+      {recurring ? (
+        <ArrowsSynchronize style={colorStyle} />
+      ) : (
+        <CalendarIcon style={colorStyle} />
+      )}
+    </Button>
+  );
 
   let onTransferIconClick = () =>
     !isTemporaryId(transaction.id) &&
     onNavigateToTransferAccount(transferAccount.id);
-  let TransferDirectionIcon = () =>
-    (transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
-      <LeftArrow2 style={style} onClick={onTransferIconClick} />
-    ) : (
-      <RightArrow2 style={style} onClick={onTransferIconClick} />
-    );
+
+  let TransferDirectionIcon = () => (
+    <Button bare style={style} onClick={onTransferIconClick}>
+      {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+        <LeftArrow2 style={colorStyle} />
+      ) : (
+        <RightArrow2 style={colorStyle} />
+      )}
+    </Button>
+  );
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch' }}>

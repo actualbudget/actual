@@ -381,10 +381,11 @@ function SelectedBalance({ selectedItems, account }) {
 
   let scheduleBalance = null;
   let scheduleData = useCachedSchedules();
+  let schedules = scheduleData ? scheduleData.schedules : [];
   let previewIds = [...selectedItems]
     .filter(id => isPreviewId(id))
     .map(id => id.slice(8));
-  for (let s of scheduleData.schedules) {
+  for (let s of schedules) {
     if (previewIds.includes(s.id)) {
       if (!account || account.id === s._account) {
         scheduleBalance += s._amount;
