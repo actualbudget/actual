@@ -1,9 +1,9 @@
 import * as dateFns from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
-import * as uuid from '../platform/uuid';
 import * as monthUtils from '../shared/months';
 
 import * as cloudStorage from './cloud-storage';
@@ -14,7 +14,11 @@ import * as prefs from './prefs';
 const LATEST_BACKUP_FILENAME = 'db.latest.sqlite';
 let serviceInterval = null;
 
-async function getBackups(id) {
+export type Backup = { id: string; date: string } | LatestBackup;
+type LatestBackup = { id: string; date: null; isLatest: true };
+type BackupWithDate = { id: string; date: Date };
+
+async function getBackups(id: string): Promise<BackupWithDate[]> {
   const budgetDir = fs.getBudgetDir(id);
   const backupDir = fs.join(budgetDir, 'backups');
 
@@ -46,7 +50,7 @@ async function getBackups(id) {
   return backups;
 }
 
-async function getLatestBackup(id) {
+async function getLatestBackup(id: string): Promise<LatestBackup | null> {
   const budgetDir = fs.getBudgetDir(id);
   if (await fs.exists(fs.join(budgetDir, LATEST_BACKUP_FILENAME))) {
     return {
@@ -58,7 +62,7 @@ async function getLatestBackup(id) {
   return null;
 }
 
-export async function getAvailableBackups(id) {
+export async function getAvailableBackups(id: string): Promise<Backup[]> {
   let backups = await getBackups(id);
 
   let latestBackup = await getLatestBackup(id);
@@ -97,7 +101,7 @@ export async function updateBackups(backups) {
   return removed.concat(currentBackups.slice(10).map(backup => backup.id));
 }
 
-export async function makeBackup(id) {
+export async function makeBackup(id: string) {
   const budgetDir = fs.getBudgetDir(id);
 
   // When making a backup, we no longer consider the user to be
@@ -107,7 +111,7 @@ export async function makeBackup(id) {
     await fs.removeFile(fs.join(fs.getBudgetDir(id), LATEST_BACKUP_FILENAME));
   }
 
-  let backupId = `${uuid.v4Sync()}.sqlite`;
+  let backupId = `${uuidv4()}.sqlite`;
   let backupPath = fs.join(budgetDir, 'backups', backupId);
 
   if (!(await fs.exists(fs.join(budgetDir, 'backups')))) {
@@ -130,7 +134,7 @@ export async function makeBackup(id) {
   connection.send('backups-updated', await getAvailableBackups(id));
 }
 
-export async function loadBackup(id, backupId) {
+export async function loadBackup(id: string, backupId: string) {
   const budgetDir = fs.getBudgetDir(id);
 
   if (!(await fs.exists(fs.join(budgetDir, LATEST_BACKUP_FILENAME)))) {
@@ -203,7 +207,7 @@ export async function loadBackup(id, backupId) {
   }
 }
 
-export function startBackupService(id) {
+export function startBackupService(id: string) {
   if (serviceInterval) {
     clearInterval(serviceInterval);
   }

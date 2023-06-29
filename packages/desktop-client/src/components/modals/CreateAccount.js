@@ -5,7 +5,15 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 
 import useNordigenStatus from '../../hooks/useNordigenStatus';
 import { authorizeBank } from '../../nordigen';
-import { View, Text, Modal, P, Button, ButtonWithLoading } from '../common';
+import {
+  View,
+  Text,
+  Modal,
+  P,
+  Button,
+  ButtonWithLoading,
+  ExternalLink,
+} from '../common';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
   const dispatch = useDispatch();
@@ -57,13 +65,12 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
               <Text>
                 <strong>Create a local account</strong> if you want to add
                 transactions manually. You can also{' '}
-                <a
-                  href="https://actualbudget.org/docs/transactions/importing"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <ExternalLink
+                  to="https://actualbudget.org/docs/transactions/importing"
+                  linkColor="muted"
                 >
                   import QIF/OFX/QFX files into a local account
-                </a>
+                </ExternalLink>
                 .
               </Text>
             </View>
@@ -105,13 +112,12 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                 </Button>
                 <P style={{ fontSize: 15 }}>
                   Connect to an Actual server to set up{' '}
-                  <a
-                    href="https://actualbudget.org/docs/advanced/bank-sync"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <ExternalLink
+                    to="https://actualbudget.org/docs/advanced/bank-sync"
+                    linkColor="muted"
                   >
                     automatic syncing with Nordigen
-                  </a>
+                  </ExternalLink>
                   .
                 </P>
               </>
