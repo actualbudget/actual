@@ -430,7 +430,7 @@ export function BudgetSummary({
               padding: '10px 20px',
               justifyContent: 'space-between',
               backgroundColor: colorsm.tableBackground,
-              borderTop: '1px solid ' + colorsm.tableBorderSelected,
+              borderTop: '1px solid ' + colorsm.tableBorder,
             }}
           >
             <ToBudget
