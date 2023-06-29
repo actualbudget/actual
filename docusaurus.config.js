@@ -62,24 +62,29 @@ module.exports = {
             to: '/#features',
             // never render as active
             activeBaseRegex: '^$',
-            position: 'left',
             label: 'Features',
+            position: 'left',
           },
           {
             type: 'doc',
             docId: 'index',
-            position: 'left',
             label: 'Docs',
+            position: 'left',
           },
           {
             to: 'blog',
-            position: 'left',
             label: 'Blog',
+            position: 'left',
           },
           {
             to: '/contact',
-            position: 'left',
             label: 'Contact',
+            position: 'left',
+          },
+          {
+            href: 'https://opencollective.com/actual',
+            label: 'Donate',
+            position: 'left',
           },
           {
             href: 'https://discord.gg/8JfAXSgfRf',
@@ -105,12 +110,16 @@ module.exports = {
             href: 'https://github.com/actualbudget/actual',
           },
           {
+            href: 'https://opencollective.com/actual',
+            label: 'Donate',
+          },
+          {
             label: 'Website Source',
             href: 'https://github.com/actualbudget/docs',
           },
           {
             label: 'RSS Feed',
-            href: 'https://actualbudget.org/blog/rss.xml',
+            href: '/blog/rss.xml',
           },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Actual Budget. Built with Docusaurus.`,
