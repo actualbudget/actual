@@ -55,12 +55,18 @@ const sidebars = {
           },
           items: [
             'contributing/project-details/database',
-            'contributing/project-details/architecture'
-          ]
+            'contributing/project-details/architecture',
+          ],
         },
         'contributing/preview-builds',
         'contributing/releasing',
         'contributing/windows',
+        {
+          type: 'category',
+          label: 'Project Leadership',
+          collapsible: false,
+          items: ['contributing/leadership/funding'],
+        },
       ],
     },
     {
