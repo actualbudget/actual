@@ -1,4 +1,5 @@
-import * as uuid from '../../uuid';
+import { v4 as uuidv4 } from 'uuid';
+
 import * as undo from '../undo';
 
 import type * as T from '.';
@@ -85,31 +86,30 @@ export const send: T.Send = function (
   { catchErrors = false } = {},
 ) {
   return new Promise((resolve, reject) => {
-    uuid.v4().then(id => {
-      replyHandlers.set(id, { resolve, reject });
+    let id = uuidv4();
+    replyHandlers.set(id, { resolve, reject });
 
-      if (socketClient) {
-        socketClient.send(
-          JSON.stringify({
-            id,
-            name,
-            args,
-            undoTag: undo.snapshot(),
-            catchErrors: !!catchErrors,
-          }),
-        );
-      } else {
-        messageQueue.push(
-          JSON.stringify({
-            id,
-            name,
-            args,
-            undoTag: undo.snapshot(),
-            catchErrors,
-          }),
-        );
-      }
-    });
+    if (socketClient) {
+      socketClient.send(
+        JSON.stringify({
+          id,
+          name,
+          args,
+          undoTag: undo.snapshot(),
+          catchErrors: !!catchErrors,
+        }),
+      );
+    } else {
+      messageQueue.push(
+        JSON.stringify({
+          id,
+          name,
+          args,
+          undoTag: undo.snapshot(),
+          catchErrors,
+        }),
+      );
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }) as any;
 };
