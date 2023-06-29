@@ -14,6 +14,11 @@ if (process.env.CI) {
   process.env.DISABLE_ESLINT_PLUGIN = 'true';
 }
 
+// Forward Netlify env variables
+if (process.env.REVIEW_ID) {
+  process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
+}
+
 module.exports = {
   webpack: override(
     babelInclude([path.resolve('src'), path.resolve('../loot-core')]),
