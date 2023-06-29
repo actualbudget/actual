@@ -24,6 +24,7 @@ function SavedFilterMenuButton({
   let [adding, setAdding] = useState(false);
   let [menuOpen, setMenuOpen] = useState(false);
   let [err, setErr] = useState(null);
+  let [menuItem, setMenuItem] = useState(null);
   let inputRef = useRef();
   let name = filterId.name;
   let id = filterId.id;
@@ -37,6 +38,7 @@ function SavedFilterMenuButton({
   }, [NameFilter]);
 
   const onFilterMenuSelect = async item => {
+    setMenuItem(item);
     switch (item) {
       case 'rename-filter':
         setErr(null);
@@ -50,6 +52,7 @@ function SavedFilterMenuButton({
         onClearFilters();
         break;
       case 'update-filter':
+        setErr(null);
         setAdding(false);
         setMenuOpen(false);
         savedFilter = {
@@ -65,6 +68,7 @@ function SavedFilterMenuButton({
         });
         if (res.error) {
           setErr(res.error.message);
+          setNameOpen(true);
         } else {
           onReloadSavedFilter(savedFilter, 'update');
         }
@@ -172,47 +176,49 @@ function SavedFilterMenuButton({
 
   function NameFilter({ onClose }) {
     return (
-      <MenuTooltip width={400} onClose={onClose}>
-        <form>
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ padding: 10 }}
-          >
-            <FormField style={{ flex: 1 }}>
-              <FormLabel
-                title="Filter Name"
-                htmlFor="name-field"
-                style={{ userSelect: 'none' }}
-              />
-              <GenericInput
-                inputRef={inputRef}
-                id="name-field"
-                field="string"
-                type="string"
-                value={name}
-                onChange={e => (name = e)}
-              />
-            </FormField>
-            <Button
-              primary
-              type="submit"
-              style={{ marginTop: 18 }}
-              onClick={e => {
-                e.preventDefault();
-                onAddUpdate();
-              }}
+      <MenuTooltip width={325} onClose={onClose}>
+        {menuItem !== 'update-filter' && (
+          <form>
+            <Stack
+              direction="row"
+              justify="flex-end"
+              align="center"
+              style={{ padding: 10 }}
             >
-              {adding ? 'Add' : 'Update'}
-            </Button>
-          </Stack>
-          {err && (
-            <Stack direction="row" align="center" style={{ padding: 10 }}>
-              <Text style={{ color: colors.r4 }}>{err}</Text>
+              <FormField style={{ flex: 1 }}>
+                <FormLabel
+                  title="Filter Name"
+                  htmlFor="name-field"
+                  style={{ userSelect: 'none' }}
+                />
+                <GenericInput
+                  inputRef={inputRef}
+                  id="name-field"
+                  field="string"
+                  type="string"
+                  value={name}
+                  onChange={e => (name = e)}
+                />
+              </FormField>
+              <Button
+                primary
+                type="submit"
+                style={{ marginTop: 18 }}
+                onClick={e => {
+                  e.preventDefault();
+                  onAddUpdate();
+                }}
+              >
+                {adding ? 'Add' : 'Update'}
+              </Button>
             </Stack>
-          )}
-        </form>
+          </form>
+        )}
+        {err && (
+          <Stack direction="row" align="center" style={{ padding: 10 }}>
+            <Text style={{ color: colors.r4 }}>{err}</Text>
+          </Stack>
+        )}
       </MenuTooltip>
     );
   }

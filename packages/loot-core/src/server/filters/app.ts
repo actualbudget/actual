@@ -1,13 +1,13 @@
-import * as uuid from '../../platform/uuid';
+import { v4 as uuidv4 } from 'uuid';
+
 import { parseConditionsOrActions } from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import * as db from '../db';
 import { requiredFields } from '../models';
 import { mutator } from '../mutators';
-import { batchMessages } from '../sync';
 import { undoable } from '../undo';
 
-let app = createApp();
+import { FiltersHandlers } from './types/handlers';
 
 const filterModel = {
   validate(filter, { update }: { update?: boolean } = {}) {
@@ -102,7 +102,7 @@ function conditionExists(item, filters, newItem) {
 }
 
 async function createFilter(filter) {
-  let filterId = uuid.v4Sync();
+  let filterId = uuidv4();
   let item = {
     id: filterId,
     conditions: filter.state.conditions,
@@ -166,9 +166,11 @@ async function updateFilter(filter) {
   await db.updateWithSchema('transaction_filters', filterModel.fromJS(item));
 }
 
-async function deleteFilter({ id }) {
-    await db.delete_('transaction_filters', id);
+async function deleteFilter(id) {
+  await db.delete_('transaction_filters', id);
 }
+
+let app = createApp<FiltersHandlers>();
 
 app.method('filter-create', mutator(undoable(createFilter)));
 app.method('filter-update', mutator(undoable(updateFilter)));
