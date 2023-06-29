@@ -25,3 +25,5 @@ packages/loot-core/**/proto/*
 packages/node-libofx/libofx.*.js
 packages/node-libofx/libofx/
 packages/node-libofx/OpenSP-*/
+
+packages/bin/*

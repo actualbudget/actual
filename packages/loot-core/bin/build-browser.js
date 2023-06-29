@@ -1,35 +1,29 @@
 #!/usr/bin/env node
-const {
-  fs,
-  shell,
-  webpackUtil,
-  migrations,
-  build,
-} = require('@actual-app/bin');
+/* eslint-disable */
+const BuildScript = require('@actual-app/bin');
 
-const ROOT = build.workerRoot;
-const BUILD_DIR = build.workerBuildDir;
-const CLIENT_DATA_DIR = build.clientDataDir;
-const CLIENT_BUILD_DIR = build.clientWorkerDir;
+const build = new BuildScript('loot-core', async () => {
+  const BUILD_DIR = build.workerBuildDir;
+  const CLIENT_BUILD_DIR = build.clientWorkerDir;
 
-async function main() {
-  process.chdir(ROOT);
-  await fs.ensureDir(CLIENT_DATA_DIR);
-  await migrations.copyMigrations(ROOT, CLIENT_DATA_DIR);
+  await build.fs.ensureDir(build.clientDataDir);
+  await build.migrations.copyMigrations(build.packageRoot, build.clientDataDir);
 
-  let files = await fs.findFiles(CLIENT_DATA_DIR, '**', true);
-  await fs.writeFile(build.clientDataIndexFileName, files.sort().join('\n'));
+  let files = await build.fs.findFiles(build.clientDataDir, '**', true);
+  await build.fs.writeFile(
+    build.clientDataIdxFileName,
+    files.sort().join('\n'),
+  );
 
   // Clean out previous build files
-  await fs.emptyDir(BUILD_DIR);
-  await fs.rmdir(CLIENT_BUILD_DIR);
+  await build.fs.emptyDir(BUILD_DIR);
+  await build.fs.rmdir(CLIENT_BUILD_DIR);
 
-  const outputHash = webpackUtil.getContentHash();
   const command = [
-    'yarn webpack --config "webpack/webpack.browser.config.js" ',
+    'yarn webpack --config webpack/webpack.browser.config.js ',
     '--target webworker ',
-    '--output-filename "kcab.worker.', outputHash, '.js" ',
-    '--output-chunk-filename "[id].[name].kcab.worker.', outputHash, '.js" ',
+    '--output-filename kcab.worker.', build.outputHash, '.js ',
+    '--output-chunk-filename [id].[name].kcab.worker.', build.outputHash, '.js ',
     '--progress ',
   ];
 
@@ -37,16 +31,16 @@ async function main() {
     // In dev mode, always enable watch mode and symlink the build files.
     // Make sure to do this before starting the build since watch mode will block
     command.push(' --watch');
-    await fs.ensureSymlink(BUILD_DIR, CLIENT_BUILD_DIR);
+    await build.fs.ensureSymlink(BUILD_DIR, CLIENT_BUILD_DIR);
   }
 
-  await shell.exec(command.join(''));
- 
+  await build.exec(command.join(''));
+
   if (process.env.NODE_ENV === 'production') {
     // In production, just copy the built files
-    await fs.ensureDir(CLIENT_BUILD_DIR);
-    await fs.copy(BUILD_DIR, CLIENT_BUILD_DIR);
+    await build.fs.ensureDir(CLIENT_BUILD_DIR);
+    await build.fs.copy(BUILD_DIR, CLIENT_BUILD_DIR);
   }
-}
+});
 
-main();
+build.run();

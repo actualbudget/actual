@@ -1,11 +1,9 @@
 #!/usr/bin/env node
-const { migrations, join, packageRoot } = require('@actual-app/bin');
+const BuildScript = require('@actual-app/bin');
 
-const ROOT = packageRoot('loot-core');
-const DEST_DIR = join(ROOT, process.argv[2]);
+const build = new BuildScript('loot-core', async () => {
+  const destDir = build.join(build.packageRoot, process.argv[2]);
+  await build.migrations.copyMigrations(build.packageRoot, destDir);
+});
 
-async function main() {
-  await migrations.copyMigrations(ROOT, DEST_DIR);
-}
-
-main();
+build.run();
