@@ -1,27 +1,17 @@
-rich-howell:
-  name: Rich Howell
-  title: Actual Budget Maintainer
-  url: https://github.com/rich-howell
-  image_url: /img/authors/rich-howell.jpeg
-  email: rich@actualbudget.org
-
 trevdor:
   name: Trevor Farlow
   title: Actual Budget Maintainer
   url: https://github.com/trevdor
   image_url: /img/authors/trevdor.jpeg
-  #email: rich@actualbudget.org
 
 MatissJanis:
   name: Matiss Janis Aboltins
   title: Actual Budget Maintainer
   url: https://github.com/MatissJanis
   image_url: /img/authors/Matiss-Janis.jpeg
-  #email: rich@actualbudget.org
 
 j-f1:
   name: Jed Fox
   title: Actual Budget Maintainer
   url: https://github.com/j-f1
   image_url: /img/authors/jed-fox.jpeg
-  email: git@jedfox.com
