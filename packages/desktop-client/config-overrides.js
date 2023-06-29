@@ -1,5 +1,6 @@
 const path = require('path');
 
+const { IgnorePlugin } = require('webpack');
 const {
   addWebpackPlugin,
   addWebpackResolve,
@@ -33,6 +34,15 @@ module.exports = {
       new BundleAnalyzerPlugin({
         analyzerMode: 'disabled',
         generateStatsFile: true,
+      }),
+    ),
+    // Pikaday throws a warning if Moment.js is not installed however it doesn't
+    // actually require it to be installed. As we don't use Moment.js ourselves
+    // then we can just silence this warning.
+    addWebpackPlugin(
+      new IgnorePlugin({
+        contextRegExp: /moment$/,
+        resourceRegExp: /pikaday$/,
       }),
     ),
     config => {
