@@ -297,27 +297,13 @@ const TransactionHeader = memo(
         )}
         <Cell
           value="Payment"
-          width={80}
-          textAlign="right"
-          icon={field === 'payment' && ascDesc}
+          width={90}
+          textAlign="flex"
+          icon={field === 'amount' && ascDesc}
           onClick={e => onSortTable(e)}
         />
-        <Cell
-          value="Deposit"
-          width={80}
-          textAlign="right"
-          icon={field === 'deposit' && ascDesc}
-          onClick={e => onSortTable(e)}
-        />
-        {showBalance && (
-          <Cell
-            value="Balance"
-            width={88}
-            textAlign="right"
-            icon={field === 'balance' && ascDesc}
-            onClick={e => onSortTable(e)}
-          />
-        )}
+        <Cell value="Deposit" width={85} textAlign="flex" />
+        {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
         <Cell value="" width={15 + styles.scrollbarWidth} />
       </Row>
@@ -1053,13 +1039,13 @@ const Transaction = memo(function Transaction(props) {
 
       <InputCell
         type="input"
-        width={80}
+        width={90}
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
         value={debit === '' && credit === '' ? '0.00' : debit}
         valueStyle={valueStyle}
-        textAlign="right"
+        textAlign="flex"
         title={debit}
         onExpose={!isPreview && (name => onEdit(id, name))}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
@@ -1077,7 +1063,7 @@ const Transaction = memo(function Transaction(props) {
         focused={focusedField === 'credit'}
         value={credit}
         valueStyle={valueStyle}
-        textAlign="right"
+        textAlign="flex"
         title={credit}
         onExpose={!isPreview && (name => onEdit(id, name))}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
@@ -1098,7 +1084,7 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
           style={[styles.tnum, amountStyle]}
           width={88}
-          textAlign="right"
+          textAlign="flex"
         />
       )}
 
@@ -1850,21 +1836,113 @@ export let TransactionTable = forwardRef((props, ref) => {
   let [ascDesc, setAscDesc] = useState('desc');
 
   function onSortTable(e) {
-    if (e.currentTarget.innerText.toLowerCase() === field) {
+    let transform =
+      e.currentTarget.innerText.toLowerCase() === 'payment'
+        ? 'amount'
+        : e.currentTarget.innerText.toLowerCase();
+    if (transform === field) {
       ascDesc === 'desc' ? setAscDesc('asc') : setAscDesc('desc');
     } else {
-      setField(e.currentTarget.innerText.toLowerCase());
+      setField(transform);
       setAscDesc('desc');
     }
   }
 
-  useEffect(() => {
-    if (field) {
+  let category = props.categoryGroups.flatMap(cat => {
+    return cat.categories;
+  });
+  let fields = [field] + 's';
+
+  function sortStrings() {
+    transactions =
       ascDesc === 'asc'
-        ? transactions.sort((a, b) => a[field] < b[field])
-        : transactions.sort((a, b) => a[field] > b[field]);
+        ? transactions
+            .map(e => {
+              return {
+                ...e,
+                test: props[fields].find(f => {
+                  return f.id === e[field];
+                })
+                  ? props[fields].find(f => {
+                      return f.id === e[field];
+                    }).name
+                  : '',
+              };
+            })
+            .sort((a, b) => a.test > b.test)
+        : transactions
+            .map(e => {
+              return {
+                ...e,
+                test: props[fields].find(f => {
+                  return f.id === e[field];
+                })
+                  ? props[fields].find(f => {
+                      return f.id === e[field];
+                    }).name
+                  : '',
+              };
+            })
+            .sort((a, b) => a.test < b.test);
+  }
+
+  function sortCat() {
+    transactions =
+      ascDesc === 'asc'
+        ? transactions
+            .map(e => {
+              return {
+                ...e,
+                test: category.find(f => {
+                  return f.id === e[field];
+                })
+                  ? category.find(f => {
+                      return f.id === e[field];
+                    }).name
+                  : '',
+              };
+            })
+            .sort((a, b) => a.test > b.test)
+        : transactions
+            .map(e => {
+              return {
+                ...e,
+                test: category.find(f => {
+                  return f.id === e[field];
+                })
+                  ? category.find(f => {
+                      return f.id === e[field];
+                    }).name
+                  : '',
+              };
+            })
+            .sort((a, b) => a.test < b.test);
+  }
+
+  if (field) {
+    switch (field) {
+      case 'account':
+        sortStrings();
+        break;
+      case 'payee':
+        sortStrings();
+        break;
+      case 'category':
+        sortCat();
+        break;
+      case 'date':
+        ascDesc === 'asc'
+          ? transactions.sort((a, b) => a[field] < b[field])
+          : transactions.sort((a, b) => a[field] > b[field]);
+        break;
+      case 'amount':
+        ascDesc === 'asc'
+          ? transactions.sort((a, b) => a[field] < b[field])
+          : transactions.sort((a, b) => a[field] > b[field]);
+        break;
+      default:
     }
-  }, [field, ascDesc]);
+  }
 
   return (
     <TransactionTableInner
