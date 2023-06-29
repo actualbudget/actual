@@ -1,6 +1,5 @@
 const path = require('path');
 
-const { IgnorePlugin } = require('webpack');
 const {
   addWebpackPlugin,
   addWebpackResolve,
@@ -8,6 +7,7 @@ const {
   override,
   overrideDevServer,
 } = require('customize-cra');
+const { IgnorePlugin } = require('webpack');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 if (process.env.CI) {
