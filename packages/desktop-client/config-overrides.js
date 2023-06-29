@@ -15,8 +15,9 @@ if (process.env.CI) {
 }
 
 // Forward Netlify env variables
-if (process.env.REVIEW_ID)
+if (process.env.REVIEW_ID) {
   process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
+}
 
 module.exports = {
   webpack: override(
