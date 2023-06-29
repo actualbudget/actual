@@ -15,15 +15,16 @@ export default function DevelopmentTopBar() {
           color: colors.y2,
           backgroundColor: colors.y8,
           borderBottom: `1px solid ${colors.y6}`,
+          zIndex: 1,
         },
       ]}
     >
-      <View>This is a development build of Actual.</View>
+      <View>This is a demo build of Actual.</View>
       <View>
         <ExternalLink
           to={`https://github.com/actualbudget/actual/pull/${process.env.REACT_APP_REVIEW_ID}`}
         >
-          Open the PR: #{process.env.REVIEW_ID}
+          Open the PR: #{process.env.REACT_APP_REVIEW_ID}
         </ExternalLink>
       </View>
     </View>
