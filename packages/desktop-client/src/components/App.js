@@ -14,6 +14,7 @@ import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars } from '../style';
 
 import AppBackground from './AppBackground';
+import DevelopmentTopBar from './DevelopmentTopBar';
 import FatalError from './FatalError';
 import FinancesApp from './FinancesApp';
 import ManagementApp from './manager/ManagementApp';
@@ -103,6 +104,8 @@ class App extends Component {
             styles.lightScrollbar,
           ])}
         >
+          {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
+
           {fatalError ? (
             <>
               <AppBackground />
