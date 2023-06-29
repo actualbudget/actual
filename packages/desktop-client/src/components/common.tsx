@@ -126,20 +126,24 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
 
 type LinkProps = ComponentProps<typeof Button>;
 
-export function Link({ style, children, ...nativeProps }: LinkProps) {
+export function LinkButton({ style, children, ...nativeProps }: LinkProps) {
   return (
     <Button
       {...css(
         {
           textDecoration: 'none',
           color: styles.textColor,
-          backgroundColor: 'transparent',
+          backgroundColor: 'transparent !important',
+          display: 'inline',
           border: 0,
           cursor: 'pointer',
           padding: 0,
           font: 'inherit',
           ':hover': {
             textDecoration: 'underline',
+            boxShadow: 'none',
+          },
+          ':focus': {
             boxShadow: 'none',
           },
         },
@@ -178,43 +182,31 @@ export function AnchorLink({
   );
 }
 
-type ExternalLinkAnchorProps = {
-  asAnchor: true;
-} & HTMLPropsWithStyle<HTMLAnchorElement>;
-type ExternalLinkButtonProps = { asAnchor: false | undefined } & ComponentProps<
-  typeof Button
->;
-type ExternalLinkProps = ExternalLinkAnchorProps | ExternalLinkButtonProps;
+let externalLinkColors = {
+  purple: colors.p4,
+  blue: colors.b4,
+  muted: 'inherit',
+};
+type ExternalLinkProps = {
+  children?: ReactNode;
+  to: string;
+  linkColor?: keyof typeof externalLinkColors;
+};
 
-export const ExternalLink = forwardRef<HTMLElement, ExternalLinkProps>(
-  ({ asAnchor, children, ...props }, ref) => {
-    function onClick(e) {
-      e.preventDefault();
-      window.Actual.openURLInBrowser(props.href);
-    }
-
-    if (asAnchor) {
-      return (
-        <a
-          ref={ref as Ref<HTMLAnchorElement>}
-          {...(props as ExternalLinkAnchorProps)}
-          onClick={onClick}
-        >
-          {children}
-        </a>
-      );
-    }
-    return (
-      <Button
-        ref={ref as Ref<HTMLButtonElement>}
-        bare
-        {...(props as ExternalLinkButtonProps)}
-        onClick={onClick}
-      >
-        {children}
-      </Button>
-    );
-  },
+export const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
+  ({ children, to, linkColor = 'blue' }, ref) => (
+    // we can’t use <ExternalLink /> here for obvious reasons
+    // eslint-disable-next-line no-restricted-syntax
+    <a
+      ref={ref}
+      href={to}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ color: externalLinkColors[linkColor] }}
+    >
+      {children}
+    </a>
+  ),
 );
 
 type ButtonLinkProps = ComponentProps<typeof Button> & {

@@ -41,7 +41,6 @@ function Version() {
           zIndex: 5001,
         },
       }}
-      href="https://actualbudget.org/docs/releases"
     >
       {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
     </Text>

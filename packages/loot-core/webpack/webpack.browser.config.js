@@ -1,6 +1,7 @@
 let path = require('path');
 
 let webpack = require('webpack');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 /** @type {webpack.Configuration} */
 module.exports = {
@@ -84,6 +85,10 @@ module.exports = {
     }),
     new webpack.IgnorePlugin({
       resourceRegExp: /worker_threads|original-fs/,
+    }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'disabled',
+      generateStatsFile: true,
     }),
   ],
 };

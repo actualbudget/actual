@@ -1,4 +1,4 @@
-import * as uuid from '../platform/uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as internals from './encryption-internals';
 
@@ -11,7 +11,7 @@ class Key {
   value;
 
   constructor({ id }) {
-    this.id = id || uuid.v4Sync();
+    this.id = id || uuidv4();
   }
 
   async createFromPassword({ password, salt }) {

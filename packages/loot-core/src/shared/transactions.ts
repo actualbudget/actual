@@ -1,4 +1,4 @@
-import * as uuid from '../platform/uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { last, diffItems, applyChanges } from './util';
 
@@ -28,7 +28,7 @@ export function makeChild(parent, data) {
     amount: 0,
     ...data,
     payee: data.payee || parent.payee,
-    id: data.id ? data.id : prefix + uuid.v4Sync(),
+    id: data.id ? data.id : prefix + uuidv4(),
     account: parent.account,
     date: parent.date,
     cleared: parent.cleared != null ? parent.cleared : null,
@@ -242,14 +242,14 @@ export function splitTransaction(transactions, id) {
 
 export function realizeTempTransactions(transactions) {
   let parent = transactions.find(t => !t.is_child);
-  parent = { ...parent, id: uuid.v4Sync() };
+  parent = { ...parent, id: uuidv4() };
 
   let children = transactions.filter(t => t.is_child);
   return [
     parent,
     ...children.map(child => ({
       ...child,
-      id: uuid.v4Sync(),
+      id: uuidv4(),
       parent_id: parent.id,
     })),
   ];

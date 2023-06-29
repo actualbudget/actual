@@ -198,7 +198,6 @@ export function importTransactions(id, transactions) {
         addNotification({
           type: 'error',
           message: error.message,
-          internal: error.internal,
         }),
       );
     });

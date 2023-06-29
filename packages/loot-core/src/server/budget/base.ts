@@ -14,7 +14,7 @@ export function getBudgetType() {
   return meta.budgetType || 'rollover';
 }
 
-export function getBudgetRange(start, end) {
+export function getBudgetRange(start: string, end: string) {
   start = monthUtils.getMonth(start);
   end = monthUtils.getMonth(end);
 

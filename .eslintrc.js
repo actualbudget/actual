@@ -18,6 +18,11 @@ const restrictedImportPatterns = [
     group: ['*.api', '*.web', '*.electron'],
     message: 'Don’t directly reference imports from other platforms',
   },
+  {
+    group: ['uuid'],
+    importNames: ['*'],
+    message: "Use `import { v4 as uuidv4 } from 'uuid'` instead",
+  },
 ];
 
 module.exports = {
@@ -70,7 +75,7 @@ module.exports = {
     ],
     'import/no-useless-path-segments': 'error',
     'import/no-duplicates': ['error', { 'prefer-inline': true }],
-    'import/no-unused-modules': ['error', { 'unusedExports': true }],
+    'import/no-unused-modules': ['error', { unusedExports: true }],
     'import/order': [
       'error',
       {
@@ -109,6 +114,12 @@ module.exports = {
         message:
           'Using default React import is discouraged, please use named exports directly instead.',
       },
+      {
+        // forbid <a> in favor of <LinkButton> or <ExternalLink>
+        selector: 'JSXOpeningElement[name.name="a"]',
+        message:
+          'Using <a> is discouraged, please use <LinkButton> or <ExternalLink> instead.',
+      },
     ],
     'no-restricted-imports': ['error', { patterns: restrictedImportPatterns }],
 
@@ -120,8 +131,11 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['./**/*.js'],
+      files: ['.eslintrc.js', './**/.eslintrc.js'],
       parserOptions: { project: null },
+      rules: {
+        '@typescript-eslint/consistent-type-exports': 'off',
+      },
     },
     {
       files: [
@@ -171,29 +185,32 @@ module.exports = {
       files: ['./packages/loot-core/src/**/*'],
       rules: {
         // defining 'src' to check all packages is slow, so only do it for loot-core
-        'import/no-unused-modules': ['error', { 'unusedExports': true, 'src': ['../**/*.{js,ts,tsx}'] }],
-      }
+        'import/no-unused-modules': [
+          'error',
+          { unusedExports: true, src: ['../**/*.{js,ts,tsx}'] },
+        ],
+      },
     },
     {
       files: [
-        '**/icons/**/*.js', 
-        '**/mocks/**/*.{js,ts,tsx}', 
-        '**/{mocks,__mocks__}/*.{js,ts,tsx}', 
+        '**/icons/**/*.js',
+        '**/mocks/**/*.{js,ts,tsx}',
+        '**/{mocks,__mocks__}/*.{js,ts,tsx}',
         // can't correctly resolve usages
         '**/*.{testing,electron,browser,web,api}.ts',
-        'packages/loot-core/src/server/main.ts'
+        'packages/loot-core/src/server/main.ts',
       ],
-      rules: { 'import/no-unused-modules': 'off' }
+      rules: { 'import/no-unused-modules': 'off' },
     },
   ],
   settings: {
-    "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx"]
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
-    "import/resolver": {
-      "typescript": {
-        "alwaysTryTypes": true
-      }
-    }
-  }
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+      },
+    },
+  },
 };

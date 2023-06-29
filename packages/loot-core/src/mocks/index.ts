@@ -1,10 +1,11 @@
-import * as uuid from '../platform/uuid';
+import { v4 as uuidv4 } from 'uuid';
+
 import * as monthUtils from '../shared/months';
 import type { TransactionEntity } from '../types/models';
 
 export function generateAccount(name, isConnected, offbudget) {
   return {
-    id: uuid.v4Sync(),
+    id: uuidv4(),
     name,
     balance_current: isConnected ? Math.floor(Math.random() * 100000) : null,
     bank: isConnected ? Math.floor(Math.random() * 10000) : null,
@@ -18,7 +19,7 @@ export function generateAccount(name, isConnected, offbudget) {
 let sortOrder = 1;
 export function generateCategory(name, group, isIncome = false) {
   return {
-    id: uuid.v4Sync(),
+    id: uuidv4(),
     name: name,
     cat_group: group,
     is_income: isIncome ? 1 : 0,
@@ -29,7 +30,7 @@ export function generateCategory(name, group, isIncome = false) {
 let groupSortOrder = 1;
 export function generateCategoryGroup(name, isIncome = false) {
   return {
-    id: uuid.v4Sync(),
+    id: uuidv4(),
     name: name,
     is_income: isIncome ? 1 : 0,
     sort_order: groupSortOrder++,
@@ -50,7 +51,7 @@ export function generateCategoryGroups(definition) {
 }
 
 function _generateTransaction(data): TransactionEntity {
-  const id = data.id || uuid.v4Sync();
+  const id = data.id || uuidv4();
   return {
     id: id,
     amount: data.amount || Math.floor(Math.random() * 10000 - 7000),
@@ -77,7 +78,7 @@ export function generateTransaction(data, splitAmount?, showError = false) {
 
     result.push(
       {
-        id: parent.id + '/' + uuid.v4Sync(),
+        id: parent.id + '/' + uuidv4(),
         amount: trans.amount - splitAmount,
         account: parent.account,
         date: parent.date,
@@ -86,7 +87,7 @@ export function generateTransaction(data, splitAmount?, showError = false) {
         isChild: true,
       },
       {
-        id: parent.id + '/' + uuid.v4Sync(),
+        id: parent.id + '/' + uuidv4(),
         amount: splitAmount,
         account: parent.account,
         date: parent.date,

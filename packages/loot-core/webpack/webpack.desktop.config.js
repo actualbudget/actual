@@ -1,6 +1,7 @@
 let path = require('path');
 
 let webpack = require('webpack');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 let browser = require('./webpack.browser.config');
 
@@ -38,6 +39,10 @@ module.exports = {
   plugins: [
     new webpack.IgnorePlugin({
       resourceRegExp: /original-fs/,
+    }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'disabled',
+      generateStatsFile: true,
     }),
   ],
   node: {

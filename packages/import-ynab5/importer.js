@@ -3,7 +3,7 @@
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
 import * as actual from '@actual-app/api/methods';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 function amountFromYnab(amount) {
   // ynabs multiplies amount by 1000 and actual by 100
@@ -162,7 +162,7 @@ async function importTransactions(data, entityIdMap) {
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
   for (let transaction of data.transactions) {
-    entityIdMap.set(transaction.id, uuid.v4());
+    entityIdMap.set(transaction.id, uuidv4());
   }
 
   await Promise.all(

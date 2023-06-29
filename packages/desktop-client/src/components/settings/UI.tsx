@@ -6,7 +6,7 @@ import type { CSSProperties } from 'glamor';
 
 import { colors } from '../../style';
 import tokens from '../../tokens';
-import { View, Link } from '../common';
+import { View, LinkButton } from '../common';
 
 type SettingProps = {
   primaryAction: ReactNode;
@@ -79,7 +79,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       {children}
     </View>
   ) : (
-    <Link
+    <LinkButton
       id="advanced"
       onClick={() => setExpanded(true)}
       style={{
@@ -90,6 +90,6 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       }}
     >
       Show advanced settings
-    </Link>
+    </LinkButton>
   );
 };

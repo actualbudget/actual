@@ -20,11 +20,11 @@ export class EncryptedData extends jspb.Message {
   setData(value: Uint8Array | string): void;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): EncryptedDataAsObject;
+  toObject(includeInstance?: boolean): EncryptedData.AsObject;
   static toObject(
     includeInstance: boolean,
     msg: EncryptedData,
-  ): EncryptedDataAsObject;
+  ): EncryptedData.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
@@ -40,11 +40,13 @@ export class EncryptedData extends jspb.Message {
   ): EncryptedData;
 }
 
-export type EncryptedDataAsObject = {
-  iv: Uint8Array | string;
-  authtag: Uint8Array | string;
-  data: Uint8Array | string;
-};
+export namespace EncryptedData {
+  export type AsObject = {
+    iv: Uint8Array | string;
+    authtag: Uint8Array | string;
+    data: Uint8Array | string;
+  };
+}
 
 export class Message extends jspb.Message {
   getDataset(): string;
@@ -60,8 +62,8 @@ export class Message extends jspb.Message {
   setValue(value: string): void;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): MessageAsObject;
-  static toObject(includeInstance: boolean, msg: Message): MessageAsObject;
+  toObject(includeInstance?: boolean): Message.AsObject;
+  static toObject(includeInstance: boolean, msg: Message): Message.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
@@ -77,12 +79,14 @@ export class Message extends jspb.Message {
   ): Message;
 }
 
-export type MessageAsObject = {
-  dataset: string;
-  row: string;
-  column: string;
-  value: string;
-};
+export namespace Message {
+  export type AsObject = {
+    dataset: string;
+    row: string;
+    column: string;
+    value: string;
+  };
+}
 
 export class MessageEnvelope extends jspb.Message {
   getTimestamp(): string;
@@ -97,11 +101,11 @@ export class MessageEnvelope extends jspb.Message {
   setContent(value: Uint8Array | string): void;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): MessageEnvelopeAsObject;
+  toObject(includeInstance?: boolean): MessageEnvelope.AsObject;
   static toObject(
     includeInstance: boolean,
     msg: MessageEnvelope,
-  ): MessageEnvelopeAsObject;
+  ): MessageEnvelope.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
@@ -117,11 +121,13 @@ export class MessageEnvelope extends jspb.Message {
   ): MessageEnvelope;
 }
 
-export type MessageEnvelopeAsObject = {
-  timestamp: string;
-  isencrypted: boolean;
-  content: Uint8Array | string;
-};
+export namespace MessageEnvelope {
+  export type AsObject = {
+    timestamp: string;
+    isencrypted: boolean;
+    content: Uint8Array | string;
+  };
+}
 
 export class SyncRequest extends jspb.Message {
   clearMessagesList(): void;
@@ -142,11 +148,11 @@ export class SyncRequest extends jspb.Message {
   setSince(value: string): void;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): SyncRequestAsObject;
+  toObject(includeInstance?: boolean): SyncRequest.AsObject;
   static toObject(
     includeInstance: boolean,
     msg: SyncRequest,
-  ): SyncRequestAsObject;
+  ): SyncRequest.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
@@ -162,13 +168,15 @@ export class SyncRequest extends jspb.Message {
   ): SyncRequest;
 }
 
-export type SyncRequestAsObject = {
-  messagesList: Array<MessageEnvelopeAsObject>;
-  fileid: string;
-  groupid: string;
-  keyid: string;
-  since: string;
-};
+export namespace SyncRequest {
+  export type AsObject = {
+    messagesList: Array<MessageEnvelope.AsObject>;
+    fileid: string;
+    groupid: string;
+    keyid: string;
+    since: string;
+  };
+}
 
 export class SyncResponse extends jspb.Message {
   clearMessagesList(): void;
@@ -180,11 +188,11 @@ export class SyncResponse extends jspb.Message {
   setMerkle(value: string): void;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): SyncResponseAsObject;
+  toObject(includeInstance?: boolean): SyncResponse.AsObject;
   static toObject(
     includeInstance: boolean,
     msg: SyncResponse,
-  ): SyncResponseAsObject;
+  ): SyncResponse.AsObject;
   static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
   static extensionsBinary: {
     [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
@@ -200,7 +208,9 @@ export class SyncResponse extends jspb.Message {
   ): SyncResponse;
 }
 
-export type SyncResponseAsObject = {
-  messagesList: Array<MessageEnvelopeAsObject>;
-  merkle: string;
-};
+export namespace SyncResponse {
+  export type AsObject = {
+    messagesList: Array<MessageEnvelope.AsObject>;
+    merkle: string;
+  };
+}

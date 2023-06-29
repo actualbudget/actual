@@ -1,9 +1,9 @@
 import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
+import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
-import * as uuid from '../../platform/uuid';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import {
@@ -32,6 +32,7 @@ import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
+import { SchedulesHandlers } from './types/handlers';
 
 // Utilities
 
@@ -204,7 +205,7 @@ export async function createSchedule({
   schedule = null,
   conditions = [],
 } = {}) {
-  let scheduleId = (schedule && schedule.id) || uuid.v4Sync();
+  let scheduleId = (schedule && schedule.id) || uuidv4();
 
   let { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
@@ -357,11 +358,6 @@ async function skipNextDate({ id }) {
     },
   });
 }
-
-// `schedule` here might not be a saved schedule, so it might not have
-// an id
-function getPossibleTransactions({ schedule }) {}
-
 function discoverSchedules() {
   return findSchedules();
 }
@@ -437,7 +433,7 @@ function onApplySync(oldValues, newValues) {
 // This is the service that move schedules forward automatically and
 // posts transactions
 
-async function postTransactionForSchedule({ id }) {
+async function postTransactionForSchedule({ id }: { id: string }) {
   let { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   let schedule = data[0];
   if (schedule == null || schedule._account == null) {
@@ -533,7 +529,7 @@ async function advanceSchedulesService(syncSuccess) {
 }
 
 // Expose functions to the client
-let app = createApp();
+let app = createApp<SchedulesHandlers>();
 
 app.method('schedule/create', mutator(undoable(createSchedule)));
 app.method('schedule/update', mutator(undoable(updateSchedule)));
@@ -547,7 +543,6 @@ app.method(
   'schedule/force-run-service',
   mutator(() => advanceSchedulesService(true)),
 );
-app.method('schedule/get-possible-transactions', getPossibleTransactions);
 app.method('schedule/discover', discoverSchedules);
 app.method('schedule/get-upcoming-dates', getUpcomingDates);
 

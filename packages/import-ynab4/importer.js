@@ -7,7 +7,7 @@ import { amountToInteger } from '@actual-app/api/utils';
 import AdmZip from 'adm-zip';
 import * as d from 'date-fns';
 import normalizePathSep from 'slash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 // Utils
 
@@ -160,11 +160,11 @@ async function importTransactions(data, entityIdMap) {
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
   for (let transaction of data.transactions) {
-    entityIdMap.set(transaction.entityId, uuid.v4());
+    entityIdMap.set(transaction.entityId, uuidv4());
 
     if (transaction.subTransactions) {
       for (let subTransaction of transaction.subTransactions) {
-        entityIdMap.set(subTransaction.entityId, uuid.v4());
+        entityIdMap.set(subTransaction.entityId, uuidv4());
       }
     }
   }

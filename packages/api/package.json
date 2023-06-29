@@ -9,7 +9,6 @@
     "dist"
   ],
   "scripts": {
-    "lint": "eslint .",
     "build:app": "yarn workspace loot-core build:api",
     "build:node": "tsc --p tsconfig.dist.json",
     "build:migrations": "cp migrations/*.sql dist/migrations",
@@ -19,9 +18,10 @@
   "dependencies": {
     "better-sqlite3": "^8.2.0",
     "node-fetch": "^2.6.9",
-    "uuid": "3.3.2"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.2",
     "typescript": "^5.0.2"
   }
 }

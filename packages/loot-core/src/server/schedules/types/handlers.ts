@@ -1,19 +1,27 @@
 export interface SchedulesHandlers {
-  'schedule/create': () => Promise<unknown>;
+  'schedule/create': (arg: {
+    schedule: unknown;
+    conditions: unknown[];
+  }) => Promise<string>;
 
-  'schedule/update': () => Promise<unknown>;
+  'schedule/update': (schedule: {
+    schedule;
+    conditions?;
+    resetNextDate?: boolean;
+  }) => Promise<void>;
 
-  'schedule/delete': () => Promise<unknown>;
+  'schedule/delete': (arg: { id: string }) => Promise<void>;
 
-  'schedule/skip-next-date': () => Promise<unknown>;
+  'schedule/skip-next-date': (arg: { id: string }) => Promise<void>;
 
-  'schedule/post-transaction': () => Promise<unknown>;
+  'schedule/post-transaction': (arg: { id: string }) => Promise<void>;
 
   'schedule/force-run-service': () => Promise<unknown>;
 
-  'schedule/get-possible-transactions': () => Promise<unknown>;
-
   'schedule/discover': () => Promise<unknown>;
 
-  'schedule/get-upcoming-dates': () => Promise<unknown>;
+  'schedule/get-upcoming-dates': (arg: {
+    config;
+    count: number;
+  }) => Promise<string[]>;
 }

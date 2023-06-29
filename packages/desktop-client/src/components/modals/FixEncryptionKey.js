@@ -70,10 +70,7 @@ export default function FixEncryptionKey({
               This file was encrypted with a different key than you are
               currently using. This probably means you changed your password.
               Enter your current password to update your key.{' '}
-              <ExternalLink
-                asAnchor
-                href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-              >
+              <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                 Learn more
               </ExternalLink>
             </P>
@@ -81,10 +78,7 @@ export default function FixEncryptionKey({
             <P>
               We don’t have a key that encrypts or decrypts this file. Enter the
               password for this file to create the key for encryption.{' '}
-              <ExternalLink
-                asAnchor
-                href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-              >
+              <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                 Learn more
               </ExternalLink>
             </P>

@@ -7,7 +7,7 @@ import * as actions from 'loot-core/src/client/actions';
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
 import { authorizeBank } from '../../nordigen';
 import { colors } from '../../style';
-import { View, Button, Tooltip } from '../common';
+import { View, Button, Tooltip, ExternalLink } from '../common';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
@@ -38,13 +38,9 @@ function getErrorMessage(type, code) {
   return (
     <>
       An internal error occurred. Try to login again, or get{' '}
-      <a
-        href="https://actualbudget.org/contact/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <ExternalLink to="https://actualbudget.org/contact/">
         in touch
-      </a>{' '}
+      </ExternalLink>{' '}
       for support.
     </>
   );

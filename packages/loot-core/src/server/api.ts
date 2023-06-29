@@ -14,6 +14,8 @@ import {
   deleteTransaction,
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
+import { Handlers } from '../types/handlers';
+import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
 import {
@@ -68,7 +70,7 @@ function withMutation(handler) {
   };
 }
 
-let handlers = {};
+let handlers = {} as unknown as Handlers;
 
 async function validateMonth(month) {
   if (!month.match(/^\d{4}-\d{2}$/)) {
@@ -593,7 +595,8 @@ handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-batch-change']({ deleted: [{ id }] });
 });
 
-export default function installAPI(serverHandlers) {
-  handlers = Object.assign({}, serverHandlers, handlers);
-  return handlers;
+export default function installAPI(serverHandlers: ServerHandlers) {
+  let merged = Object.assign({}, serverHandlers, handlers);
+  handlers = merged as Handlers;
+  return merged;
 }

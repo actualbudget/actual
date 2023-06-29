@@ -10,7 +10,16 @@ import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { colors } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
-import { View, Modal, Button, P, Link, Menu, Tooltip } from '../common';
+import {
+  View,
+  Modal,
+  Button,
+  P,
+  LinkButton,
+  Menu,
+  Tooltip,
+  ExternalLink,
+} from '../common';
 import { FormField, FormLabel } from '../forms';
 
 import { COUNTRY_OPTIONS } from './countries';
@@ -144,12 +153,12 @@ export default function NordigenExternalMsg({
           <Error>
             Failed loading available banks: Nordigen access credentials might be
             misconfigured. Please{' '}
-            <Link
+            <LinkButton
               onClick={onNordigenInit}
               style={{ color: colors.b3, display: 'inline' }}
             >
               set them up
-            </Link>{' '}
+            </LinkButton>{' '}
             again.
           </Error>
         ) : (
@@ -180,21 +189,13 @@ export default function NordigenExternalMsg({
           service) read-only access to your entire account’s transaction
           history. This service is not affiliated with Actual in any way. Make
           sure you’ve read and understand Nordigen’s{' '}
-          <a
-            href="https://nordigen.com/en/company/privacy-policy/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <ExternalLink to="https://nordigen.com/en/company/privacy-policy/">
             Privacy Policy
-          </a>{' '}
+          </ExternalLink>{' '}
           and{' '}
-          <a
-            href="https://nordigen.com/en/company/privacy-policy-end-user/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <ExternalLink to="https://nordigen.com/en/company/privacy-policy-end-user/">
             End User Privacy Policy
-          </a>{' '}
+          </ExternalLink>{' '}
           before proceeding.
         </Warning>
 
@@ -280,9 +281,9 @@ export default function NordigenExternalMsg({
               </View>
 
               {waiting === 'browser' && (
-                <Link onClick={onJump} style={{ marginTop: 10 }}>
+                <LinkButton onClick={onJump} style={{ marginTop: 10 }}>
                   (Account linking not opening in a new tab? Click here)
-                </Link>
+                </LinkButton>
               )}
             </View>
           ) : success ? (

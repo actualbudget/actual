@@ -562,7 +562,8 @@ export async function initialFullSync(): Promise<void> {
 }
 
 export const fullSync = once(async function (): Promise<
-  { messages: Message[] } | { error: unknown }
+  | { messages: Message[] }
+  | { error: { message: string; reason: string; meta: unknown } }
 > {
   app.events.emit('sync', { type: 'start' });
   let messages;

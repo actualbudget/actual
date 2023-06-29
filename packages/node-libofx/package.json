@@ -4,8 +4,5 @@
   "description": "",
   "main": "index.js",
   "author": "",
-  "license": "ISC",
-  "scripts": {
-    "lint": "eslint ."
-  }
+  "license": "ISC"
 }

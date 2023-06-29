@@ -3,12 +3,11 @@
   "productName": "Actual",
   "author": "Shift Reset LLC",
   "description": "A simple and powerful personal finance system",
-  "version": "23.5.0",
+  "version": "23.6.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "electron-builder",
-    "lint": "eslint .",
     "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
   "main": "index.js",

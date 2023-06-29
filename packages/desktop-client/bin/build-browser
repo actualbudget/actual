@@ -3,15 +3,17 @@
 ROOT=`dirname $0`
 cd "$ROOT/.."
 
-VERSION=`cat "$ROOT/../../desktop-client/package.json" | grep version | head -n1 | awk -F "\"" '{print $4}' | tr -d '\r\n'`
-
-echo "Building version $VERSION for the browser..."
+echo "Building the browser..."
 
 rm -fr build
 
 export IS_GENERIC_BROWSER=1
 export INLINE_RUNTIME_CHUNK=false
 export REACT_APP_BACKEND_WORKER_HASH=`ls "$ROOT"/../public/kcab/kcab.worker.*.js |  sed 's/.*kcab\.worker\.\(.*\)\.js/\1/'`
-export REACT_APP_ACTUAL_VERSION="$VERSION"
 
 yarn build
+
+rm -fr build-stats
+mkdir build-stats
+mv build/kcab/stats.json build-stats/loot-core-stats.json
+mv build/stats.json build-stats/desktop-client-stats.json

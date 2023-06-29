@@ -1,10 +1,10 @@
 import AdmZip from 'adm-zip';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../platform/server/asyncStorage';
 import { fetch } from '../platform/server/fetch';
 import * as fs from '../platform/server/fs';
 import * as sqlite from '../platform/server/sqlite';
-import * as uuid from '../platform/uuid';
 import * as monthUtils from '../shared/months';
 
 import * as encryption from './encryption';
@@ -20,6 +20,15 @@ import * as prefs from './prefs';
 import { getServer } from './server-config';
 
 let UPLOAD_FREQUENCY_IN_DAYS = 7;
+
+export interface RemoteFile {
+  deleted: boolean;
+  fileId: string;
+  groupId: string;
+  name: string;
+  encryptKeyId: string;
+  hasKey: boolean;
+}
 
 async function checkHTTPStatus(res) {
   if (res.status !== 200) {
@@ -37,7 +46,10 @@ async function fetchJSON(...args: Parameters<typeof fetch>) {
   return res.json();
 }
 
-export async function checkKey() {
+export async function checkKey(): Promise<{
+  valid: boolean;
+  error?: { reason: string };
+}> {
   let userToken = await asyncStorage.getItem('user-token');
 
   let { cloudFileId, encryptKeyId } = prefs.getPrefs();
@@ -50,7 +62,7 @@ export async function checkKey() {
     });
   } catch (e) {
     console.log(e);
-    return { error: { reason: 'network' } };
+    return { valid: false, error: { reason: 'network' } };
   }
 
   return {
@@ -245,7 +257,7 @@ export async function upload() {
   }
 
   if (!cloudFileId) {
-    cloudFileId = uuid.v4Sync();
+    cloudFileId = uuidv4();
   }
 
   let res;
@@ -325,7 +337,7 @@ export async function removeFile(fileId) {
   });
 }
 
-export async function listRemoteFiles() {
+export async function listRemoteFiles(): Promise<RemoteFile[] | null> {
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return null;

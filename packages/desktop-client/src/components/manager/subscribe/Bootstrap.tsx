@@ -6,7 +6,7 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../../style';
-import { View, Text, Button, P } from '../../common';
+import { View, Text, Button, P, ExternalLink } from '../../common';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -59,14 +59,9 @@ export default function Bootstrap() {
 
       <P isLast style={{ fontSize: 16, color: colors.n2 }}>
         Consider opening{' '}
-        <a
-          href="https://actualbudget.org/docs/tour/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: colors.b4 }}
-        >
+        <ExternalLink to="https://actualbudget.org/docs/tour/">
           our tour
-        </a>{' '}
+        </ExternalLink>{' '}
         in a new tab for some guidance on what to do when you’ve set your
         password.
       </P>

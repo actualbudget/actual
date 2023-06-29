@@ -5,8 +5,9 @@ import { undoable } from '../undo';
 import * as actions from './actions';
 import * as cleanupActions from './cleanup-template';
 import * as goalActions from './goaltemplates';
+import { BudgetHandlers } from './types/handlers';
 
-let app = createApp();
+let app = createApp<BudgetHandlers>();
 
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
 app.method(

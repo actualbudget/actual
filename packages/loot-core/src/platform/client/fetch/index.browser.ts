@@ -1,5 +1,6 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { captureException, captureBreadcrumb } from '../../exceptions';
-import * as uuid from '../../uuid';
 import * as undo from '../undo';
 
 import type * as T from '.';
@@ -147,21 +148,21 @@ export const send: T.Send = function (
   { catchErrors = false } = {},
 ) {
   return new Promise((resolve, reject) => {
-    uuid.v4().then(id => {
-      replyHandlers.set(id, { resolve, reject });
-      let message = {
-        id,
-        name,
-        args,
-        undoTag: undo.snapshot(),
-        catchErrors,
-      };
-      if (messageQueue) {
-        messageQueue.push(message);
-      } else {
-        globalWorker.postMessage(message);
-      }
-    });
+    let id = uuidv4();
+
+    replyHandlers.set(id, { resolve, reject });
+    let message = {
+      id,
+      name,
+      args,
+      undoTag: undo.snapshot(),
+      catchErrors,
+    };
+    if (messageQueue) {
+      messageQueue.push(message);
+    } else {
+      globalWorker.postMessage(message);
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }) as any;
 };
