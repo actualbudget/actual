@@ -91,6 +91,7 @@ __metadata:
     "@types/react-router-dom": ^5.3.3
     "@types/uuid": ^9.0.2
     "@types/webpack-bundle-analyzer": ^4.6.0
+    chokidar: ^3.5.3
     cross-env: ^7.0.3
     customize-cra: ^1.0.0
     date-fns: ^2.29.3
@@ -5019,6 +5020,7 @@ __metadata:
     eslint: ^8.37.0
     eslint-config-react-app: 7.0.1
     eslint-import-resolver-typescript: 3.5.5
+    eslint-plugin-import: 2.27.5
     eslint-plugin-prettier: 4.2.1
     eslint-plugin-react: 7.32.2
     eslint-plugin-rulesdir: ^0.2.2
@@ -8534,7 +8536,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-import@npm:^2.25.3":
+"eslint-plugin-import@npm:2.27.5, eslint-plugin-import@npm:^2.25.3":
   version: 2.27.5
   resolution: "eslint-plugin-import@npm:2.27.5"
   dependencies:
