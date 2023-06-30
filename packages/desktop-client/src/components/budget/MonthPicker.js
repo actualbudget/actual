@@ -8,10 +8,6 @@ import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { styles, colors } from '../../style';
 import { View, Button } from '../common';
 
-function getMonth(year, idx) {
-  return monthUtils.addMonths(year, idx);
-}
-
 function getCurrentMonthName(startMonth, currentMonth) {
   return monthUtils.getYear(startMonth) === monthUtils.getYear(currentMonth)
     ? monthUtils.format(currentMonth, 'MMM')
@@ -26,18 +22,28 @@ export const MonthPicker = ({
   onSelect,
 }) => {
   const currentMonth = monthUtils.currentMonth();
-  const range = getRangeForYear(currentMonth);
-  const monthNames = range.map(month => {
-    return monthUtils.format(month, 'MMM');
-  });
+  const firstSelectedMonth = startMonth;
+
+  const lastSelectedMonth = monthUtils.addMonths(
+    firstSelectedMonth,
+    numDisplayed - 1,
+  );
+
+  const range = monthUtils.rangeInclusive(
+    monthUtils.subMonths(firstSelectedMonth, 6 - numDisplayed / 2),
+    monthUtils.addMonths(lastSelectedMonth, 6 - numDisplayed / 2),
+  );
+
   const currentMonthName = getCurrentMonthName(startMonth, currentMonth);
-  const year = monthUtils.getYear(startMonth);
-  const selectedIndex = monthUtils.getMonthIndex(startMonth);
+  const selectedIndex =
+    Math.floor(range.length / 2) - Math.floor(numDisplayed / 2);
 
   const [size, setSize] = useState('small');
   const containerRef = useResizeObserver(rect => {
-    setSize(rect.width <= 320 ? 'small' : rect.width <= 400 ? 'medium' : 'big');
+    setSize(rect.width <= 400 ? 'small' : 'big');
   });
+
+  let yearHeadersShown = [];
 
   return (
     <View
@@ -51,17 +57,6 @@ export const MonthPicker = ({
       ]}
     >
       <View
-        style={{
-          padding: '3px 0px',
-          margin: '3px 0',
-          fontWeight: 'bold',
-          fontSize: 14,
-          flex: '0 0 40px',
-        }}
-      >
-        {monthUtils.format(year, 'yyyy')}
-      </View>
-      <View
         innerRef={containerRef}
         style={{
           flexDirection: 'row',
@@ -70,11 +65,28 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
-        {monthNames.map((monthName, idx) => {
+        <Button
+          onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
+          bare
+        >
+          <ArrowThinLeft width={12} height={12} />
+        </Button>
+
+        {range.map((month, idx) => {
+          const monthName = monthUtils.format(month, 'MMM');
           const lastSelectedIndex = selectedIndex + numDisplayed;
           const selected = idx >= selectedIndex && idx < lastSelectedIndex;
+
           const current = monthName === currentMonthName;
-          const month = getMonth(year, idx);
+          const year = monthUtils.getYear(month);
+
+          let showYearHeader = false;
+
+          if (!yearHeadersShown.includes(year)) {
+            yearHeadersShown.push(year);
+            showYearHeader = true;
+          }
+
           const isMonthBudgeted =
             month >= monthBounds.start && month <= monthBounds.end;
 
@@ -84,7 +96,8 @@ export const MonthPicker = ({
               style={[
                 {
                   marginRight: 1,
-                  padding: size === 'big' ? '3px 5px' : '3px 3px',
+                  padding: '3px 3px',
+                  width: size === 'big' ? '35px' : '20px',
                   textAlign: 'center',
                   cursor: 'default',
                   borderRadius: 2,
@@ -93,7 +106,11 @@ export const MonthPicker = ({
                     color: 'white',
                   },
                 },
-                !isMonthBudgeted && { color: colors.n7 },
+                (!isMonthBudgeted ||
+                  year !== monthUtils.getYear(firstSelectedMonth)) && {
+                  color: colors.n7,
+                },
+                !isMonthBudgeted && { textDecoration: 'line-through' },
                 styles.smallText,
                 selected && {
                   backgroundColor: colors.p6,
@@ -119,24 +136,27 @@ export const MonthPicker = ({
               onClick={() => onSelect(month)}
             >
               {size === 'small' ? monthName[0] : monthName}
+              {showYearHeader && (
+                <View
+                  style={[
+                    {
+                      position: 'absolute',
+                      top: -14,
+                      left: 0,
+                      fontSize: 10,
+                      fontWeight: 'bold',
+                    },
+                    year !== monthUtils.getYear(firstSelectedMonth)
+                      ? { color: colors.n7 }
+                      : { color: '#272630' },
+                  ]}
+                >
+                  {year}
+                </View>
+              )}
             </View>
           );
         })}
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          flex: '0 0 50px',
-          justifyContent: 'flex-end',
-        }}
-      >
-        <Button
-          onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
-          bare
-        >
-          <ArrowThinLeft width={12} height={12} />
-        </Button>
         <Button
           onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
           bare
