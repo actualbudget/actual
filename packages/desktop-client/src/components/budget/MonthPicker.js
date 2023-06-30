@@ -102,8 +102,7 @@ export const MonthPicker = ({
                   borderRadius: 2,
                   border: 'none',
                 },
-                (!isMonthBudgeted ||
-                  year !== monthUtils.getYear(firstSelectedMonth)) && {
+                year !== monthUtils.getYear(firstSelectedMonth) && {
                   color: colors.n7,
                 },
                 !isMonthBudgeted && { textDecoration: 'line-through' },
