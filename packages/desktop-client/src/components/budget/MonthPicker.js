@@ -28,8 +28,9 @@ export const MonthPicker = ({
     monthUtils.addMonths(lastSelectedMonth, 6 - numDisplayed / 2),
   );
 
-  const selectedIndex =
+  const firstSelectedIndex =
     Math.floor(range.length / 2) - Math.floor(numDisplayed / 2);
+  const lastSelectedIndex = firstSelectedIndex + numDisplayed - 1;
 
   const [size, setSize] = useState('small');
   const containerRef = useResizeObserver(rect => {
@@ -76,8 +77,8 @@ export const MonthPicker = ({
 
         {range.map((month, idx) => {
           const monthName = monthUtils.format(month, 'MMM');
-          const lastSelectedIndex = selectedIndex + numDisplayed;
-          const selected = idx >= selectedIndex && idx < lastSelectedIndex;
+          const selected =
+            idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 
           const current = currentMonth === month;
           const year = monthUtils.getYear(month);
@@ -119,16 +120,16 @@ export const MonthPicker = ({
                   color: 'white',
                   borderRadius: 0,
                 },
-                idx === selectedIndex && {
+                idx === firstSelectedIndex && {
                   borderTopLeftRadius: 2,
                   borderBottomLeftRadius: 2,
                 },
-                idx === lastSelectedIndex - 1 && {
+                idx === lastSelectedIndex && {
                   borderTopRightRadius: 2,
                   borderBottomRightRadius: 2,
                 },
-                idx >= selectedIndex &&
-                  idx < lastSelectedIndex - 1 && {
+                idx >= firstSelectedIndex &&
+                  idx <= lastSelectedIndex && {
                     marginRight: 0,
                     borderRight: 'solid 1px',
                     borderColor: colors.p6,
