@@ -2,9 +2,7 @@
 const BuildScript = require('@actual-app/bin');
 
 const bd = new BuildScript('desktop-client', async () => {
-  const version = await bd.packageVersion();
-
-  console.log('Building version ' + version + ' for the browser...');
+  console.log('Building the browser...');
 
   await bd.fs.rmdir('build');
 
@@ -12,7 +10,6 @@ const bd = new BuildScript('desktop-client', async () => {
     IS_GENERIC_BROWSER: 1,
     INLINE_RUNTIME_CHUNK: false,
     REACT_APP_BACKEND_WORKER_HASH: await bd.getWorkerFileHash(),
-    REACT_APP_ACTUAL_VERSION: version,
   };
 
   await bd.exec('yarn build', env);
