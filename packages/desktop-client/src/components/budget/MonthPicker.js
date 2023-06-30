@@ -102,6 +102,7 @@ export const MonthPicker = ({
                   padding: '3px 3px',
                   width: size === 'big' ? '35px' : '20px',
                   textAlign: 'center',
+                  userSelect: 'none',
                   cursor: 'default',
                   borderRadius: 2,
                   ':hover':
