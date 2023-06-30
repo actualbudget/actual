@@ -48,6 +48,7 @@ body:
         - Docker
         - Fly.io
         - NAS
+        - Electron App
         - Other
     validations:
       required: false
