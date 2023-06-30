@@ -27,10 +27,4 @@ fs.removeFiles = async pattern => {
   await Promise.all(files.map(file => fs.unlink(file)));
 };
 
-fs.getVersion = async packageJsonPath => {
-  const data = await fs.readFile(packageJsonPath);
-  const json = JSON.parse(data);
-  return json.version;
-};
-
 module.exports = fs;
