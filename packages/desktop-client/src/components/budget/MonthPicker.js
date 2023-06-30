@@ -133,7 +133,7 @@ export const MonthPicker = ({
                     borderRight: 'solid 1px',
                     borderColor: colors.p6,
                   },
-                current && { textDecoration: 'underline' },
+                current && { fontWeight: 'bold' },
               ]}
               onClick={() => onSelect(month)}
             >
