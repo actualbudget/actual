@@ -91,7 +91,7 @@ export const MonthPicker = ({
 
           return (
             <View
-              key={monthName}
+              key={month}
               style={[
                 {
                   padding: '3px 3px',
