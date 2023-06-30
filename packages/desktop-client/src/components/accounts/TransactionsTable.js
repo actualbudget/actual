@@ -268,6 +268,7 @@ const TransactionHeader = memo(
         />
         <Cell
           value="Date"
+          id="date"
           width={110}
           icon={field === 'date' && ascDesc}
           onClick={e => onSortTable(e)}
@@ -275,6 +276,7 @@ const TransactionHeader = memo(
         {showAccount && (
           <Cell
             value="Account"
+            id="account"
             width="flex"
             icon={field === 'account' && ascDesc}
             onClick={e => onSortTable(e)}
@@ -282,6 +284,7 @@ const TransactionHeader = memo(
         )}
         <Cell
           value="Payee"
+          id="payee"
           width="flex"
           icon={field === 'payee' && ascDesc}
           onClick={e => onSortTable(e)}
@@ -290,6 +293,7 @@ const TransactionHeader = memo(
         {showCategory && (
           <Cell
             value="Category"
+            id="category"
             width="flex"
             icon={field === 'category' && ascDesc}
             onClick={e => onSortTable(e)}
@@ -297,6 +301,7 @@ const TransactionHeader = memo(
         )}
         <Cell
           value="Payment"
+          id="payment"
           width={90}
           textAlign="flex"
           icon={field === 'amount' && ascDesc}
@@ -304,6 +309,7 @@ const TransactionHeader = memo(
         />
         <Cell
           value="Deposit"
+          id="deposit"
           width={85}
           textAlign="flex"
           onClick={e => onSortTable(e)}
@@ -1837,15 +1843,15 @@ export let TransactionTable = forwardRef((props, ref) => {
     id => splitsExpanded.dispatch({ type: 'toggle-split', id }),
     [splitsExpanded.dispatch],
   );
-  let [field, setField] = useState(null);
-  let [ascDesc, setAscDesc] = useState('desc');
+  let [field, setField] = useState('date');
+  let [ascDesc, setAscDesc] = useState('asc');
 
-  function onSortTable(e) {
+  function onSortTable(headerClicked) {
     let transform =
-      e.currentTarget.innerText.toLowerCase() === 'payment' ||
-      e.currentTarget.innerText.toLowerCase() === 'deposit'
+      headerClicked.currentTarget.id === 'payment' ||
+      headerClicked.currentTarget.id === 'deposit'
         ? 'amount'
-        : e.currentTarget.innerText.toLowerCase();
+        : headerClicked.currentTarget.id;
     if (transform === field) {
       ascDesc === 'desc' ? setAscDesc('asc') : setAscDesc('desc');
     } else {
@@ -1859,97 +1865,54 @@ export let TransactionTable = forwardRef((props, ref) => {
   let category = props.categoryGroups.flatMap(cat => {
     return cat.categories;
   });
-  let fields = [field] + 's';
+  let fields = field + 's';
 
   function sortStrings() {
-    transactions =
-      ascDesc === 'asc'
-        ? transactions
-            .map(e => {
-              return {
-                ...e,
-                test: props[fields].find(f => {
-                  return f.id === e[field];
-                })
-                  ? props[fields].find(f => {
-                      return f.id === e[field];
-                    }).name
-                  : '',
-              };
-            })
-            .sort((a, b) => a.test < b.test)
-        : transactions
-            .map(e => {
-              return {
-                ...e,
-                test: props[fields].find(f => {
-                  return f.id === e[field];
-                })
-                  ? props[fields].find(f => {
-                      return f.id === e[field];
-                    }).name
-                  : '',
-              };
-            })
-            .sort((a, b) => a.test > b.test);
+    let sortDesc = transactions
+      .map(e => {
+        return {
+          ...e,
+          fieldName: props[fields].find(f => f.id === e[field])?.name ?? '',
+        };
+      })
+      .sort((a, b) => a.fieldName > b.fieldName);
+
+    transactions = ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
   }
 
   function sortCat() {
-    transactions =
-      ascDesc === 'asc'
-        ? transactions
-            .map(e => {
-              return {
-                ...e,
-                test: category.find(f => {
-                  return f.id === e[field];
-                })
-                  ? category.find(f => {
-                      return f.id === e[field];
-                    }).name
-                  : '',
-              };
-            })
-            .sort((a, b) => a.test < b.test)
-        : transactions
-            .map(e => {
-              return {
-                ...e,
-                test: category.find(f => {
-                  return f.id === e[field];
-                })
-                  ? category.find(f => {
-                      return f.id === e[field];
-                    }).name
-                  : '',
-              };
-            })
-            .sort((a, b) => a.test > b.test);
+    let sortDesc = transactions
+      .map(e => {
+        return {
+          ...e,
+          fieldName: category.find(f => f.id === e[field])?.name ?? '',
+        };
+      })
+      .sort((a, b) => a.fieldName > b.fieldName);
+
+    transactions = ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
   }
 
-  if (field) {
-    switch (field) {
-      case 'account':
-        sortStrings();
-        break;
-      case 'payee':
-        sortStrings();
-        break;
-      case 'category':
-        sortCat();
-        break;
-      case 'date':
-        ascDesc === 'asc'
-          ? transactions.sort((a, b) => a[field] < b[field])
-          : transactions.sort((a, b) => a[field] > b[field]);
-        break;
-      case 'amount':
-        ascDesc === 'asc'
-          ? transactions.sort((a, b) => a[field] > b[field])
-          : transactions.sort((a, b) => a[field] < b[field]);
-        break;
-      default:
-    }
+  switch (field) {
+    case 'account':
+      sortStrings();
+      break;
+    case 'payee':
+      sortStrings();
+      break;
+    case 'category':
+      sortCat();
+      break;
+    case 'date':
+      ascDesc === 'asc'
+        ? transactions.sort((a, b) => a[field] < b[field])
+        : transactions.sort((a, b) => a[field] > b[field]);
+      break;
+    case 'amount':
+      let sortAscAmt = transactions.sort((a, b) => a[field] > b[field]);
+      transactions = ascDesc === 'asc' ? sortAscAmt : sortAscAmt.reverse();
+      break;
+    default:
   }
 
   return (
