@@ -102,10 +102,10 @@ export const MonthPicker = ({
                   borderRadius: 2,
                   border: 'none',
                 },
-                year !== monthUtils.getYear(firstSelectedMonth) && {
+                !isMonthBudgeted && {
+                  textDecoration: 'line-through',
                   color: colors.n7,
                 },
-                !isMonthBudgeted && { textDecoration: 'line-through' },
                 styles.smallText,
                 selected && {
                   backgroundColor: colors.p6,
@@ -148,10 +148,8 @@ export const MonthPicker = ({
                       left: 0,
                       fontSize: 10,
                       fontWeight: 'bold',
+                      color: isMonthBudgeted ? '#272630' : colors.n7,
                     },
-                    year !== monthUtils.getYear(firstSelectedMonth)
-                      ? { color: colors.n7 }
-                      : { color: '#272630' },
                   ]}
                 >
                   {year}
