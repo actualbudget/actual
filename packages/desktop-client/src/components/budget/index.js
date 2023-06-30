@@ -104,10 +104,13 @@ class Budget extends PureComponent {
       this.props.savePrefs({ 'budget.collapsed': this.state.collapsed });
     }
 
-    if (prevState.startMonth !== this.props.startMonth) {
+    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    const startMonth = this.props.startMonth || currentMonth;
+
+    if (prevState.startMonth !== startMonth) {
       // Save it off into a global state so if the component re-mounts
       // we keep this state (but don't need to subscribe to it)
-      _initialBudgetMonth = this.props.startMonth;
+      _initialBudgetMonth = startMonth;
     }
 
     if (this.props.accountId !== prevProps.accountId) {
@@ -144,10 +147,13 @@ class Budget extends PureComponent {
   async prewarmAllMonths(bounds, type = null) {
     let numMonths = 3;
 
+    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    const startMonth = this.props.startMonth || currentMonth;
+
     bounds = getValidMonthBounds(
       bounds,
-      monthUtils.subMonths(this.props.startMonth, 1),
-      monthUtils.addMonths(this.props.startMonth, numMonths + 1),
+      monthUtils.subMonths(startMonth, 1),
+      monthUtils.addMonths(startMonth, numMonths + 1),
     );
     let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
@@ -161,16 +167,19 @@ class Budget extends PureComponent {
 
     this.warmingMonth = month;
 
+    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    const startMonth = this.props.startMonth || currentMonth;
+
     // We could be smarter about this, but this is a good start. We
     // optimize for the case where users press the left/right button
     // to move between months. This loads the month data all at once
     // and "prewarms" the spreadsheet cache. This uses a simple
     // heuristic that will fail if the user clicks an arbitrary month,
     // but it will just load in some unnecessary data.
-    if (month < this.props.startMonth) {
+    if (month < startMonth) {
       // pre-warm prev month
       await this.prewarmMonth(monthUtils.subMonths(month, 1));
-    } else if (month > this.props.startMonth) {
+    } else if (month > startMonth) {
       // pre-warm next month
       await this.prewarmMonth(monthUtils.addMonths(month, numDisplayed));
     }
@@ -417,6 +426,9 @@ class Budget extends PureComponent {
       return null;
     }
 
+    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    const startMonth = this.props.startMonth || currentMonth;
+
     let table;
     if (type === 'report') {
       table = (
@@ -430,7 +442,7 @@ class Budget extends PureComponent {
             type={type}
             categoryGroups={categoryGroups}
             prewarmStartMonth={prewarmStartMonth}
-            startMonth={this.props.startMonth}
+            startMonth={startMonth}
             monthBounds={bounds}
             maxMonths={maxMonths}
             collapsed={collapsed}
@@ -467,7 +479,7 @@ class Budget extends PureComponent {
             type={type}
             categoryGroups={categoryGroups}
             prewarmStartMonth={prewarmStartMonth}
-            startMonth={this.props.startMonth}
+            startMonth={startMonth}
             monthBounds={bounds}
             maxMonths={maxMonths}
             collapsed={collapsed}
