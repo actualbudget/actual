@@ -7,10 +7,16 @@ const {
   override,
   overrideDevServer,
 } = require('customize-cra');
+const { IgnorePlugin } = require('webpack');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 if (process.env.CI) {
   process.env.DISABLE_ESLINT_PLUGIN = 'true';
+}
+
+// Forward Netlify env variables
+if (process.env.REVIEW_ID) {
+  process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
 }
 
 module.exports = {
@@ -33,6 +39,15 @@ module.exports = {
       new BundleAnalyzerPlugin({
         analyzerMode: 'disabled',
         generateStatsFile: true,
+      }),
+    ),
+    // Pikaday throws a warning if Moment.js is not installed however it doesn't
+    // actually require it to be installed. As we don't use Moment.js ourselves
+    // then we can just silence this warning.
+    addWebpackPlugin(
+      new IgnorePlugin({
+        contextRegExp: /moment$/,
+        resourceRegExp: /pikaday$/,
       }),
     ),
     config => {
