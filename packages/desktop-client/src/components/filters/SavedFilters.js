@@ -48,7 +48,7 @@ function SavedFilterMenuButton({
         break;
       case 'delete-filter':
         setMenuOpen(false);
-        await send('filter-delete', { id });
+        await send('filter-delete', id);
         onClearFilters();
         break;
       case 'update-filter':
