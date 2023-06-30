@@ -1,5 +1,6 @@
 const path = require('path');
 
+const chokidar = require('chokidar');
 const {
   addWebpackPlugin,
   addWebpackResolve,
@@ -50,14 +51,22 @@ module.exports = {
         resourceRegExp: /moment$/,
       }),
     ),
-    config => {
-      config.cache = false;
-      return config;
-    },
   ),
   devServer: overrideDevServer(config => {
     return {
       ...config,
+      onBeforeSetupMiddleware(server) {
+        chokidar
+          .watch([
+            path.resolve('../loot-core/lib-dist/*.js'),
+            path.resolve('../loot-core/lib-dist/browser/*.js'),
+          ])
+          .on('all', function () {
+            for (const ws of server.webSocketServer.clients) {
+              ws.send(JSON.stringify({ type: 'static-changed' }));
+            }
+          });
+      },
       headers: {
         ...config.headers,
         'Cross-Origin-Opener-Policy': 'same-origin',
