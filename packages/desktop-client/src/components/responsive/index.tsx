@@ -9,6 +9,9 @@ let loadNarrow = () =>
 let loadWide = () => import(/* webpackChunkName: "wide-components" */ './wide');
 
 export function WideComponent({ name }: { name: keyof typeof WideComponents }) {
+  console.log(
+    `<WideComponent name=${name} /> mounted at ${new Date().toISOString()}`,
+  );
   return <LoadComponent name={name} importer={loadWide} />;
 }
 
@@ -17,6 +20,9 @@ export function NarrowAlternate({
 }: {
   name: keyof typeof WideComponents & keyof typeof NarrowComponents;
 }) {
+  console.log(
+    `<NarrowAlternate name=${name} /> mounted at ${new Date().toISOString()}`,
+  );
   const { isNarrowWidth } = useResponsive();
   return (
     <LoadComponent

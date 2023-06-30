@@ -10,6 +10,7 @@ import { Page } from '../Page';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {
+  console.log(`<Schedules> mounted at ${new Date().toISOString()}`);
   let pushModal = usePushModal();
 
   let [filter, setFilter] = useState('');

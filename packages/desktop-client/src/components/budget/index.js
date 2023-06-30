@@ -517,6 +517,7 @@ const RolloverBudgetSummary = memo(props => {
 });
 
 function BudgetWrapper(props) {
+  console.log(`<BudgetWrapper> mounted at ${new Date().toISOString()}`);
   let spreadsheet = useSpreadsheet();
   let titlebar = useContext(TitlebarContext);
   let location = useLocation();
