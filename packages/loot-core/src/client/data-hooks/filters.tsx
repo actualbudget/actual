@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-
-import q, { liveQuery } from '../query-helpers';
+import q from '../query-helpers';
 import { useLiveQuery } from '../query-hooks';
 
 function toJS(rows) {
@@ -18,5 +16,7 @@ function toJS(rows) {
 }
 
 export function useFilters() {
-  return toJS(useLiveQuery(() => q('transaction_filters').select('*'), []) || []);
+  return toJS(
+    useLiveQuery(() => q('transaction_filters').select('*'), []) || [],
+  );
 }
