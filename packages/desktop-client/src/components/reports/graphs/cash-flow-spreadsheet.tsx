@@ -45,16 +45,17 @@ export function simpleCashFlow(start, end) {
 }
 
 export function cashFlowByDate(start, end, isConcise, conditions = [], conditionsOp,) {
-  const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
   return async (spreadsheet, setData) => {
     let { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     function makeQuery(where) {
       let query = q('transactions').filter({
-        [conditionsOpKey]: filters,
+        [conditionsOpKey]: [...filters],
+      }).filter({
         $and: [
           { date: { $transform: '$month', $gte: start } },
           { date: { $transform: '$month', $lte: end } },

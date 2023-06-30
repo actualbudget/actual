@@ -21,8 +21,7 @@ export default function createSpreadsheet(
   conditions = [],
   conditionsOp,
 ) {
-  const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-
+  
   return async (spreadsheet, setData) => {
     if (accounts.length === 0) {
       return null;
@@ -31,6 +30,7 @@ export default function createSpreadsheet(
     let { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     const data = await Promise.all(
       accounts.map(async acct => {
@@ -48,8 +48,9 @@ export default function createSpreadsheet(
           runQuery(
             q('transactions')
               .filter({
+                [conditionsOpKey]: [...filters],
+              }).filter({
                 account: acct.id,
-                [conditionsOpKey]: filters,
                 $and: [
                   { date: { $gte: start + '-01' } },
                   { date: { $lte: end + '-31' } },

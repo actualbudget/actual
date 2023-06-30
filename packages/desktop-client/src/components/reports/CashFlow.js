@@ -42,7 +42,7 @@ function CashFlow() {
 
   const params = useMemo(
     () => cashFlowByDate(start, end, isConcise, filters, conditionsOp),
-    [start, end, isConcise, filters],
+    [start, end, isConcise, filters, conditionsOp],
   );
   const data = useReport('cash_flow', params);
 

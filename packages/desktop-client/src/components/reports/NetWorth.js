@@ -39,7 +39,7 @@ function NetWorth({ accounts }) {
 
   const params = useMemo(
     () => netWorthSpreadsheet(start, end, accounts, filters, conditionsOp),
-    [start, end, accounts, filters],
+    [start, end, accounts, filters, conditionsOp],
   );
   const data = useReport('net_worth', params);
 
