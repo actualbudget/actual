@@ -44,8 +44,13 @@ export function simpleCashFlow(start, end) {
   };
 }
 
-export function cashFlowByDate(start, end, isConcise, conditions = [], conditionsOp,) {
-
+export function cashFlowByDate(
+  start,
+  end,
+  isConcise,
+  conditions = [],
+  conditionsOp,
+) {
   return async (spreadsheet, setData) => {
     let { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
@@ -53,21 +58,23 @@ export function cashFlowByDate(start, end, isConcise, conditions = [], condition
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     function makeQuery(where) {
-      let query = q('transactions').filter({
-        [conditionsOpKey]: [...filters],
-      }).filter({
-        $and: [
-          { date: { $transform: '$month', $gte: start } },
-          { date: { $transform: '$month', $lte: end } },
-        ],
-        'account.offbudget': false,
-        $or: [
-          {
-            'payee.transfer_acct.offbudget': true,
-            'payee.transfer_acct': null,
-          },
-        ],
-      });
+      let query = q('transactions')
+        .filter({
+          [conditionsOpKey]: [...filters],
+        })
+        .filter({
+          $and: [
+            { date: { $transform: '$month', $gte: start } },
+            { date: { $transform: '$month', $lte: end } },
+          ],
+          'account.offbudget': false,
+          $or: [
+            {
+              'payee.transfer_acct.offbudget': true,
+              'payee.transfer_acct': null,
+            },
+          ],
+        });
 
       if (isConcise) {
         return query

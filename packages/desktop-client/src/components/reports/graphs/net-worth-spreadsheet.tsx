@@ -21,7 +21,6 @@ export default function createSpreadsheet(
   conditions = [],
   conditionsOp,
 ) {
-  
   return async (spreadsheet, setData) => {
     if (accounts.length === 0) {
       return null;
@@ -49,7 +48,8 @@ export default function createSpreadsheet(
             q('transactions')
               .filter({
                 [conditionsOpKey]: [...filters],
-              }).filter({
+              })
+              .filter({
                 account: acct.id,
                 $and: [
                   { date: { $gte: start + '-01' } },

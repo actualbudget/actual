@@ -92,7 +92,6 @@ function NetWorth({ accounts }) {
         filters={filters}
         saved={saved}
         onApply={onApplyFilter}
-        filters={filters}
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}

@@ -139,14 +139,15 @@ function Header({
           spacing={2}
           direction="row"
           justify="flex-start"
-          align="flex-start">
-            <AppliedFilters
-              filters={filters}
-              onUpdate={onUpdateFilter}
-              onDelete={onDeleteFilter}
-              conditionsOp={conditionsOp}
-              onCondOpChange={onCondOpChange}
-            />
+          align="flex-start"
+        >
+          <AppliedFilters
+            filters={filters}
+            onUpdate={onUpdateFilter}
+            onDelete={onDeleteFilter}
+            conditionsOp={conditionsOp}
+            onCondOpChange={onCondOpChange}
+          />
         </View>
       )}
     </View>
