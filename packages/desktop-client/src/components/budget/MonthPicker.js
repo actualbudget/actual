@@ -3,10 +3,8 @@ import { useState } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
-import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
-import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { styles, colors } from '../../style';
-import { View, Button } from '../common';
+import { View } from '../common';
 
 export const MonthPicker = ({
   startMonth,
@@ -15,6 +13,7 @@ export const MonthPicker = ({
   style,
   onSelect,
 }) => {
+  const [hoverId, setHoverId] = useState(null);
   const currentMonth = monthUtils.currentMonth();
   const firstSelectedMonth = startMonth;
 
@@ -59,26 +58,14 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            flex: '0 0 48px',
-            justifyContent: 'flex-start',
-          }}
-        >
-          <Button
-            onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
-            bare
-          >
-            <ArrowThinLeft width={12} height={12} />
-          </Button>
-        </View>
-
         {range.map((month, idx) => {
           const monthName = monthUtils.format(month, 'MMM');
           const selected =
             idx >= firstSelectedIndex && idx <= lastSelectedIndex;
+
+          const lastHoverId = hoverId + numDisplayed - 1;
+          const hovered =
+            hoverId === null ? false : idx >= hoverId && idx <= lastHoverId;
 
           const current = currentMonth === month;
           const year = monthUtils.getYear(month);
@@ -98,23 +85,13 @@ export const MonthPicker = ({
               key={monthName}
               style={[
                 {
-                  marginRight: 1,
                   padding: '3px 3px',
                   width: size === 'big' ? '35px' : '20px',
                   textAlign: 'center',
                   userSelect: 'none',
                   cursor: 'default',
                   borderRadius: 2,
-                  ':hover':
-                    isMonthBudgeted &&
-                    idx >= firstSelectedIndex &&
-                    idx <= lastSelectedIndex
-                      ? {
-                          backgroundColor: colors.p7,
-                        }
-                      : {
-                          backgroundColor: 'rgba(100, 100, 100, .15)',
-                        },
+                  border: 'none',
                 },
                 (!isMonthBudgeted ||
                   year !== monthUtils.getYear(firstSelectedMonth)) && {
@@ -125,24 +102,33 @@ export const MonthPicker = ({
                 selected && {
                   backgroundColor: colors.p6,
                   color: 'white',
+                },
+                (hovered || selected) && {
                   borderRadius: 0,
                 },
-                idx === firstSelectedIndex && {
+                hovered &&
+                  !selected && {
+                    backgroundColor: 'rgba(100, 100, 100, .15)',
+                  },
+                hovered &&
+                  selected && {
+                    backgroundColor: colors.p7,
+                  },
+                (idx === firstSelectedIndex ||
+                  (idx === hoverId && !selected)) && {
                   borderTopLeftRadius: 2,
                   borderBottomLeftRadius: 2,
                 },
-                idx === lastSelectedIndex && {
+                (idx === lastSelectedIndex ||
+                  (idx === lastHoverId && !selected)) && {
                   borderTopRightRadius: 2,
                   borderBottomRightRadius: 2,
                 },
-                idx >= firstSelectedIndex &&
-                  idx <= lastSelectedIndex && {
-                    marginRight: 0,
-                    borderColor: colors.p6,
-                  },
                 current && { fontWeight: 'bold' },
               ]}
               onClick={() => onSelect(month)}
+              onMouseEnter={() => setHoverId(idx)}
+              onMouseLeave={() => setHoverId(null)}
             >
               {size === 'small' ? monthName[0] : monthName}
               {showYearHeader && (
@@ -166,21 +152,6 @@ export const MonthPicker = ({
             </View>
           );
         })}
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            flex: '0 0 48px',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <Button
-            onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
-            bare
-          >
-            <ArrowThinRight width={12} height={12} />
-          </Button>
-        </View>
       </View>
     </View>
   );
