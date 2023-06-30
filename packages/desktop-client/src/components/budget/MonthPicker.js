@@ -8,12 +8,6 @@ import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { styles, colors } from '../../style';
 import { View, Button } from '../common';
 
-function getCurrentMonthName(startMonth, currentMonth) {
-  return monthUtils.getYear(startMonth) === monthUtils.getYear(currentMonth)
-    ? monthUtils.format(currentMonth, 'MMM')
-    : null;
-}
-
 export const MonthPicker = ({
   startMonth,
   numDisplayed,
@@ -34,7 +28,6 @@ export const MonthPicker = ({
     monthUtils.addMonths(lastSelectedMonth, 6 - numDisplayed / 2),
   );
 
-  const currentMonthName = getCurrentMonthName(startMonth, currentMonth);
   const selectedIndex =
     Math.floor(range.length / 2) - Math.floor(numDisplayed / 2);
 
@@ -86,7 +79,7 @@ export const MonthPicker = ({
           const lastSelectedIndex = selectedIndex + numDisplayed;
           const selected = idx >= selectedIndex && idx < lastSelectedIndex;
 
-          const current = monthName === currentMonthName;
+          const current = currentMonth === month;
           const year = monthUtils.getYear(month);
 
           let showYearHeader = false;
