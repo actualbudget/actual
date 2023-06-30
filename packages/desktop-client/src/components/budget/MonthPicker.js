@@ -42,7 +42,9 @@ export const MonthPicker = ({
   const [size, setSize] = useState('small');
   const containerRef = useResizeObserver(rect => {
     setSize(rect.width <= 400 ? 'small' : 'big');
-    setTargetMonthCount(Math.max(Math.floor(rect.width / 50), 12));
+    setTargetMonthCount(
+      Math.min(Math.max(Math.floor(rect.width / 50), 12), 24),
+    );
   });
 
   let yearHeadersShown = [];
