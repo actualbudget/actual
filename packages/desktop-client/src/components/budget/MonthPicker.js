@@ -104,10 +104,16 @@ export const MonthPicker = ({
                   textAlign: 'center',
                   cursor: 'default',
                   borderRadius: 2,
-                  ':hover': isMonthBudgeted && {
-                    backgroundColor: colors.p6,
-                    color: 'white',
-                  },
+                  ':hover':
+                    isMonthBudgeted &&
+                    idx >= firstSelectedIndex &&
+                    idx <= lastSelectedIndex
+                      ? {
+                          backgroundColor: colors.p7,
+                        }
+                      : {
+                          backgroundColor: 'rgba(100, 100, 100, .15)',
+                        },
                 },
                 (!isMonthBudgeted ||
                   year !== monthUtils.getYear(firstSelectedMonth)) && {
@@ -131,7 +137,6 @@ export const MonthPicker = ({
                 idx >= firstSelectedIndex &&
                   idx <= lastSelectedIndex && {
                     marginRight: 0,
-                    borderRight: 'solid 1px',
                     borderColor: colors.p6,
                   },
                 current && { fontWeight: 'bold' },
