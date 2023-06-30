@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import q, { liveQuery } from '../query-helpers';
+import { useLiveQuery } from '../query-hooks';
 
 function toJS(rows) {
   let filters = rows.map(row => {
@@ -17,20 +18,5 @@ function toJS(rows) {
 }
 
 export function useFilters() {
-  let [data, setData] = useState([]);
-
-  useEffect(() => {
-    let query = q('transaction_filters').select('*');
-
-    let filterQuery = liveQuery(query, async filters => {
-      let filte = toJS(filters);
-      setData(filte);
-    });
-
-    return () => {
-      filterQuery.unsubscribe();
-    };
-  }, []);
-
-  return data;
+  return toJS(useLiveQuery(() => q('transaction_filters').select('*'), []) || []);
 }
