@@ -302,7 +302,12 @@ const TransactionHeader = memo(
           icon={field === 'amount' && ascDesc}
           onClick={e => onSortTable(e)}
         />
-        <Cell value="Deposit" width={85} textAlign="flex" />
+        <Cell
+          value="Deposit"
+          width={85}
+          textAlign="flex"
+          onClick={e => onSortTable(e)}
+        />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
         <Cell value="" width={15 + styles.scrollbarWidth} />
@@ -1837,14 +1842,15 @@ export let TransactionTable = forwardRef((props, ref) => {
 
   function onSortTable(e) {
     let transform =
-      e.currentTarget.innerText.toLowerCase() === 'payment'
+      e.currentTarget.innerText.toLowerCase() === 'payment' ||
+      e.currentTarget.innerText.toLowerCase() === 'deposit'
         ? 'amount'
         : e.currentTarget.innerText.toLowerCase();
     if (transform === field) {
       ascDesc === 'desc' ? setAscDesc('asc') : setAscDesc('desc');
     } else {
       setField(transform);
-      setAscDesc('desc');
+      transform === 'amount' || transform === 'date' ? setAscDesc('asc') : setAscDesc('desc');
     }
   }
 
@@ -1869,7 +1875,7 @@ export let TransactionTable = forwardRef((props, ref) => {
                   : '',
               };
             })
-            .sort((a, b) => a.test > b.test)
+            .sort((a, b) => a.test < b.test)
         : transactions
             .map(e => {
               return {
@@ -1883,7 +1889,7 @@ export let TransactionTable = forwardRef((props, ref) => {
                   : '',
               };
             })
-            .sort((a, b) => a.test < b.test);
+            .sort((a, b) => a.test > b.test);
   }
 
   function sortCat() {
@@ -1902,7 +1908,7 @@ export let TransactionTable = forwardRef((props, ref) => {
                   : '',
               };
             })
-            .sort((a, b) => a.test > b.test)
+            .sort((a, b) => a.test < b.test)
         : transactions
             .map(e => {
               return {
@@ -1916,7 +1922,7 @@ export let TransactionTable = forwardRef((props, ref) => {
                   : '',
               };
             })
-            .sort((a, b) => a.test < b.test);
+            .sort((a, b) => a.test > b.test);
   }
 
   if (field) {
@@ -1937,8 +1943,8 @@ export let TransactionTable = forwardRef((props, ref) => {
         break;
       case 'amount':
         ascDesc === 'asc'
-          ? transactions.sort((a, b) => a[field] < b[field])
-          : transactions.sort((a, b) => a[field] > b[field]);
+          ? transactions.sort((a, b) => a[field] > b[field])
+          : transactions.sort((a, b) => a[field] < b[field]);
         break;
       default:
     }
