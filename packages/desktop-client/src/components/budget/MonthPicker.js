@@ -65,12 +65,21 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
-        <Button
-          onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
-          bare
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            flex: '0 0 48px',
+            justifyContent: 'flex-start',
+          }}
         >
-          <ArrowThinLeft width={12} height={12} />
-        </Button>
+          <Button
+            onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
+            bare
+          >
+            <ArrowThinLeft width={12} height={12} />
+          </Button>
+        </View>
 
         {range.map((month, idx) => {
           const monthName = monthUtils.format(month, 'MMM');
@@ -157,12 +166,21 @@ export const MonthPicker = ({
             </View>
           );
         })}
-        <Button
-          onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
-          bare
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            flex: '0 0 48px',
+            justifyContent: 'flex-end',
+          }}
         >
-          <ArrowThinRight width={12} height={12} />
-        </Button>
+          <Button
+            onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
+            bare
+          >
+            <ArrowThinRight width={12} height={12} />
+          </Button>
+        </View>
       </View>
     </View>
   );
