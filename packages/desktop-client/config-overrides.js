@@ -47,8 +47,8 @@ module.exports = {
     // then we can just silence this warning.
     addWebpackPlugin(
       new IgnorePlugin({
-        contextRegExp: /moment$/,
-        resourceRegExp: /pikaday$/,
+        contextRegExp: /pikaday$/,
+        resourceRegExp: /moment$/,
       }),
     ),
   ),
