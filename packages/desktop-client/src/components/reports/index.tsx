@@ -7,7 +7,9 @@ export default function Reports() {
       <LoadComponent
         name="ReportRouter"
         message="Loading reports..."
-        importer={() => import('./ReportRouter')}
+        importer={() =>
+          import(/* webpackChunkName: 'reports' */ './ReportRouter')
+        }
       />
     </View>
   );
