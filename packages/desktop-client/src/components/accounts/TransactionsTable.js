@@ -1850,7 +1850,9 @@ export let TransactionTable = forwardRef((props, ref) => {
       ascDesc === 'desc' ? setAscDesc('asc') : setAscDesc('desc');
     } else {
       setField(transform);
-      transform === 'amount' || transform === 'date' ? setAscDesc('asc') : setAscDesc('desc');
+      transform === 'amount' || transform === 'date'
+        ? setAscDesc('asc')
+        : setAscDesc('desc');
     }
   }
 
