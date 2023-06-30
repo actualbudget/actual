@@ -112,8 +112,11 @@ export function handleGlobalEvents(actions, store) {
         } else {
           actions.closeModal();
 
-          if (window.location.href !== tagged.url) {
-            window.location.href = tagged.url;
+          if (
+            window.location.href.replace(window.location.origin, '') !==
+            tagged.url
+          ) {
+            window.__navigate(tagged.url);
             // This stops propagation of the undo event, which is
             // important because if we are changing URLs any existing
             // undo listeners on the current page don't need to be run
