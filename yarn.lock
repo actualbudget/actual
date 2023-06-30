@@ -91,6 +91,7 @@ __metadata:
     "@types/react-router-dom": ^5.3.3
     "@types/uuid": ^9.0.2
     "@types/webpack-bundle-analyzer": ^4.6.0
+    chokidar: ^3.5.3
     cross-env: ^7.0.3
     customize-cra: ^1.0.0
     date-fns: ^2.29.3
