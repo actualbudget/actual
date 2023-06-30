@@ -1,4 +1,3 @@
-export { default as Reports } from '../reports';
 export { default as Budget } from '../budget';
 
 export { default as Schedules } from '../schedules';
