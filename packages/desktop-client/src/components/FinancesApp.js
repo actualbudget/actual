@@ -14,6 +14,7 @@ import {
   NavLink,
   useNavigate,
   BrowserRouter,
+  useLocation,
 } from 'react-router-dom';
 
 import hotkeys from 'hotkeys-js';
@@ -23,6 +24,7 @@ import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
+import * as undo from 'loot-core/src/platform/client/undo';
 
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
@@ -204,7 +206,7 @@ function MobileNavTabs() {
   );
 }
 
-function Redirector({ getAccounts }) {
+function RouterBehaviors({ getAccounts }) {
   let navigate = useNavigate();
   useEffect(() => {
     // Get the accounts and check if any exist. If there are no
@@ -216,6 +218,11 @@ function Redirector({ getAccounts }) {
       }
     });
   }, []);
+
+  let location = useLocation();
+  useEffect(() => {
+    undo.setUndoState('url', location.href);
+  }, [location]);
 }
 
 function FinancesApp(props) {
@@ -240,7 +247,7 @@ function FinancesApp(props) {
 
   return (
     <BrowserRouter>
-      <Redirector getAccounts={props.getAccounts} />
+      <RouterBehaviors getAccounts={props.getAccounts} />
       <ExposeNavigate />
 
       <View style={{ height: '100%', backgroundColor: colors.n10 }}>
