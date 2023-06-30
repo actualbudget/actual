@@ -15,6 +15,7 @@ import {
   useNavigate,
   BrowserRouter,
   useLocation,
+  useHref,
 } from 'react-router-dom';
 
 import hotkeys from 'hotkeys-js';
@@ -220,9 +221,10 @@ function RouterBehaviors({ getAccounts }) {
   }, []);
 
   let location = useLocation();
+  let href = useHref(location);
   useEffect(() => {
-    undo.setUndoState('url', location.href);
-  }, [location]);
+    undo.setUndoState('url', href);
+  }, [href]);
 }
 
 function FinancesApp(props) {
