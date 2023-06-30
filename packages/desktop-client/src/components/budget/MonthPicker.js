@@ -14,6 +14,8 @@ export const MonthPicker = ({
   onSelect,
 }) => {
   const [hoverId, setHoverId] = useState(null);
+  const [targetMonthCount, setTargetMonthCount] = useState(12);
+
   const currentMonth = monthUtils.currentMonth();
   const firstSelectedMonth = startMonth;
 
@@ -23,8 +25,14 @@ export const MonthPicker = ({
   );
 
   const range = monthUtils.rangeInclusive(
-    monthUtils.subMonths(firstSelectedMonth, 6 - numDisplayed / 2),
-    monthUtils.addMonths(lastSelectedMonth, 6 - numDisplayed / 2),
+    monthUtils.subMonths(
+      firstSelectedMonth,
+      targetMonthCount / 2 - numDisplayed / 2,
+    ),
+    monthUtils.addMonths(
+      lastSelectedMonth,
+      targetMonthCount / 2 - numDisplayed / 2,
+    ),
   );
 
   const firstSelectedIndex =
@@ -34,6 +42,7 @@ export const MonthPicker = ({
   const [size, setSize] = useState('small');
   const containerRef = useResizeObserver(rect => {
     setSize(rect.width <= 400 ? 'small' : 'big');
+    setTargetMonthCount(Math.max(Math.floor(rect.width / 50), 12));
   });
 
   let yearHeadersShown = [];
