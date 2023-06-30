@@ -62,6 +62,7 @@ body:
         - Chrome
         - Safari
         - Microsoft Edge
+        - Desktop App (Electron)
         - Other
   - type: dropdown
     id: operating-system
