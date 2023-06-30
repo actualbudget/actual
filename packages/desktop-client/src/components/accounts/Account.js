@@ -1951,7 +1951,7 @@ class AccountInternal extends PureComponent {
               fetchAllIds={this.fetchAllIds}
               registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
             >
-              <View style={[styles.page, { backgroundColor: colors.n11 }]}>
+              <View style={[styles.page]}>
                 <AccountHeader
                   tableRef={this.table}
                   editingName={editingName}

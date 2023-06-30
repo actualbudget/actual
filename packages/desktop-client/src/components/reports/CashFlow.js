@@ -9,7 +9,6 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import useFilters from '../../hooks/useFilters';
 import { colors, styles } from '../../style';
 import { View, Text, Block, P, AlignedText } from '../common';
-import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
@@ -20,9 +19,11 @@ import useReport from './useReport';
 function CashFlow() {
   const {
     filters,
+    conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
+    onCondOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
@@ -40,7 +41,7 @@ function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, filters),
+    () => cashFlowByDate(start, end, isConcise, filters, conditionsOp),
     [start, end, isConcise, filters],
   );
   const data = useReport('cash_flow', params);
@@ -97,26 +98,13 @@ function CashFlow() {
         end={monthUtils.getMonth(end)}
         show1Month
         onChangeDates={onChangeDates}
-        extraButtons={<FilterButton onApply={onApplyFilter} />}
+        onApply={onApplyFilter}
+        filters={filters}
+        onUpdateFilter={onUpdateFilter}
+        onDeleteFilter={onDeleteFilter}
+        conditionsOp={conditionsOp}
+        onCondOpChange={onCondOpChange}
       />
-
-      <View
-        style={{
-          paddingTop: 10,
-          paddingLeft: 20,
-          paddingRight: 20,
-          backgroundColor: 'white',
-          flexShrink: 0,
-        }}
-      >
-        {filters.length > 0 && (
-          <AppliedFilters
-            filters={filters}
-            onUpdate={onUpdateFilter}
-            onDelete={onDeleteFilter}
-          />
-        )}
-      </View>
 
       <View
         style={{

@@ -259,9 +259,8 @@ function SavedFilterMenuButton({
 
 export function CondOpMenu({ conditionsOp, onCondOpChange, filters }) {
   return (
-    filters.length > 1 &&
-    onCondOpChange && (
-      <Text style={{ color: colors.n4 }}>
+    filters.length > 1 && (
+      <Text style={{ color: colors.n4, marginTop: 1 }}>
         <FieldSelect
           style={{ display: 'inline-flex' }}
           fields={[
@@ -271,7 +270,7 @@ export function CondOpMenu({ conditionsOp, onCondOpChange, filters }) {
           value={conditionsOp}
           onChange={(name, value) => onCondOpChange(value, filters)}
         />
-        of:
+        of:&nbsp;
       </Text>
     )
   );

@@ -461,7 +461,7 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colors.n10,
+          backgroundColor: colors.n9,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',

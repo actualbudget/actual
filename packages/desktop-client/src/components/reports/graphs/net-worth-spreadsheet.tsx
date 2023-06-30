@@ -19,7 +19,10 @@ export default function createSpreadsheet(
   end,
   accounts,
   conditions = [],
+  conditionsOp,
 ) {
+  const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+
   return async (spreadsheet, setData) => {
     if (accounts.length === 0) {
       return null;
@@ -35,7 +38,7 @@ export default function createSpreadsheet(
           runQuery(
             q('transactions')
               .filter({
-                $and: filters,
+                [conditionsOpKey]: filters,
                 account: acct.id,
                 date: { $lt: start + '-01' },
               })
@@ -46,8 +49,8 @@ export default function createSpreadsheet(
             q('transactions')
               .filter({
                 account: acct.id,
+                [conditionsOpKey]: filters,
                 $and: [
-                  ...filters,
                   { date: { $gte: start + '-01' } },
                   { date: { $lte: end + '-31' } },
                 ],

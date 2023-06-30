@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 export default function useFilters<T>(initialFilters: T[] = []) {
   const [filters, setFilters] = useState<T[]>(initialFilters);
+  const [conditionsOp, setConditionsOp] = useState('and');
   const [saved, setSaved] = useState<T[]>(null);
 
   const onApply = useCallback(
@@ -35,14 +36,23 @@ export default function useFilters<T>(initialFilters: T[] = []) {
     [setFilters],
   );
 
+  const onCondOpChange = useCallback(
+    condOp => {
+      setConditionsOp(condOp);
+    },
+    [setConditionsOp],
+  );
+
   return useMemo(
     () => ({
       filters,
       saved,
+      conditionsOp,
       onApply,
       onUpdate,
       onDelete,
+      onCondOpChange,
     }),
-    [filters, saved, onApply, onUpdate, onDelete],
+    [filters, saved, onApply, onUpdate, onDelete, onCondOpChange, conditionsOp],
   );
 }

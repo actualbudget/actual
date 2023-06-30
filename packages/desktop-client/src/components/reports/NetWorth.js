@@ -12,7 +12,6 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import useFilters from '../../hooks/useFilters';
 import { styles } from '../../style';
 import { View, P } from '../common';
-import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 import Change from './Change';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
@@ -25,9 +24,11 @@ function NetWorth({ accounts }) {
   const {
     filters,
     saved,
+    conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
+    onCondOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
@@ -37,7 +38,7 @@ function NetWorth({ accounts }) {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, filters),
+    () => netWorthSpreadsheet(start, end, accounts, filters, conditionsOp),
     [start, end, accounts, filters],
   );
   const data = useReport('net_worth', params);
@@ -90,26 +91,13 @@ function NetWorth({ accounts }) {
         onChangeDates={onChangeDates}
         filters={filters}
         saved={saved}
-        extraButtons={<FilterButton onApply={onApplyFilter} />}
+        onApply={onApplyFilter}
+        filters={filters}
+        onUpdateFilter={onUpdateFilter}
+        onDeleteFilter={onDeleteFilter}
+        conditionsOp={conditionsOp}
+        onCondOpChange={onCondOpChange}
       />
-
-      <View
-        style={{
-          paddingTop: 10,
-          paddingLeft: 20,
-          paddingRight: 20,
-          backgroundColor: 'white',
-          flexShrink: 0,
-        }}
-      >
-        {filters.length > 0 && (
-          <AppliedFilters
-            filters={filters}
-            onUpdate={onUpdateFilter}
-            onDelete={onDeleteFilter}
-          />
-        )}
-      </View>
 
       <View
         style={{
