@@ -38,8 +38,7 @@ class Budget extends PureComponent {
     const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
     this.state = {
       initialized: false,
-      prewarmStartMonth: currentMonth,
-      startMonth: currentMonth,
+      prewarmStartMonth: props.startMonth || currentMonth,
       newCategoryForGroup: null,
       isAddingGroup: false,
       collapsed: props.collapsedPrefs || [],
@@ -105,10 +104,10 @@ class Budget extends PureComponent {
       this.props.savePrefs({ 'budget.collapsed': this.state.collapsed });
     }
 
-    if (prevState.startMonth !== this.state.startMonth) {
+    if (prevState.startMonth !== this.props.startMonth) {
       // Save it off into a global state so if the component re-mounts
       // we keep this state (but don't need to subscribe to it)
-      _initialBudgetMonth = this.state.startMonth;
+      _initialBudgetMonth = this.props.startMonth;
     }
 
     if (this.props.accountId !== prevProps.accountId) {
@@ -143,13 +142,12 @@ class Budget extends PureComponent {
   };
 
   async prewarmAllMonths(bounds, type = null) {
-    let { startMonth } = this.state;
     let numMonths = 3;
 
     bounds = getValidMonthBounds(
       bounds,
-      monthUtils.subMonths(startMonth, 1),
-      monthUtils.addMonths(startMonth, numMonths + 1),
+      monthUtils.subMonths(this.props.startMonth, 1),
+      monthUtils.addMonths(this.props.startMonth, numMonths + 1),
     );
     let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
@@ -159,8 +157,6 @@ class Budget extends PureComponent {
   }
 
   onMonthSelect = async (month, numDisplayed) => {
-    let { startMonth } = this.state;
-
     this.setState({ prewarmStartMonth: month });
 
     this.warmingMonth = month;
@@ -171,16 +167,16 @@ class Budget extends PureComponent {
     // and "prewarms" the spreadsheet cache. This uses a simple
     // heuristic that will fail if the user clicks an arbitrary month,
     // but it will just load in some unnecessary data.
-    if (month < startMonth) {
+    if (month < this.props.startMonth) {
       // pre-warm prev month
       await this.prewarmMonth(monthUtils.subMonths(month, 1));
-    } else if (month > startMonth) {
+    } else if (month > this.props.startMonth) {
       // pre-warm next month
       await this.prewarmMonth(monthUtils.addMonths(month, numDisplayed));
     }
 
     if (this.warmingMonth === month) {
-      this.setState({ startMonth: month });
+      this.props.savePrefs({ 'budget.startMonth': month });
     }
   };
 
@@ -408,7 +404,6 @@ class Budget extends PureComponent {
       initialized,
       categoryGroups,
       prewarmStartMonth,
-      startMonth,
       newCategoryForGroup,
       isAddingGroup,
       collapsed,
@@ -435,7 +430,7 @@ class Budget extends PureComponent {
             type={type}
             categoryGroups={categoryGroups}
             prewarmStartMonth={prewarmStartMonth}
-            startMonth={startMonth}
+            startMonth={this.props.startMonth}
             monthBounds={bounds}
             maxMonths={maxMonths}
             collapsed={collapsed}
@@ -472,7 +467,7 @@ class Budget extends PureComponent {
             type={type}
             categoryGroups={categoryGroups}
             prewarmStartMonth={prewarmStartMonth}
-            startMonth={startMonth}
+            startMonth={this.props.startMonth}
             monthBounds={bounds}
             maxMonths={maxMonths}
             collapsed={collapsed}
@@ -575,6 +570,7 @@ function BudgetWrapper(props) {
 
 export default connect(
   state => ({
+    startMonth: state.prefs.local['budget.startMonth'],
     collapsedPrefs: state.prefs.local['budget.collapsed'],
     summaryCollapsed: state.prefs.local['budget.summaryCollapsed'],
     budgetType: state.prefs.local.budgetType || 'rollover',
