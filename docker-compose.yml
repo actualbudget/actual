@@ -13,6 +13,7 @@ services:
       # - ACTUAL_NORDIGEN_SECRET_ID=xxxx
       # - ACTUAL_NORDIGEN_SECRET_KEY=xxxx
       # See all options and more details at https://actualbudget.github.io/docs/Installing/Configuration
+      # !! If you are not using any of these options, remove the 'environment:' tag entirely.
     volumes:
       # Change './actual-data' below to the path to the folder you want Actual to store its data in on your server.
       # '/data' is the path Actual will look for its files in by default, so leave that as-is.
