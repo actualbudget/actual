@@ -172,8 +172,8 @@ async function deleteFilter(id) {
 
 let app = createApp<FiltersHandlers>();
 
-app.method('filter-create', mutator(undoable(createFilter)));
-app.method('filter-update', mutator(undoable(updateFilter)));
+app.method('filter-create', mutator(createFilter));
+app.method('filter-update', mutator(updateFilter));
 app.method('filter-delete', mutator(undoable(deleteFilter)));
 
 export default app;

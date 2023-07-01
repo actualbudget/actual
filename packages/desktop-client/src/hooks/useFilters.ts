@@ -9,6 +9,7 @@ export default function useFilters<T>(initialFilters: T[] = []) {
     newFilter => {
       if (newFilter.conditions) {
         setFilters([...newFilter.conditions]);
+        setConditionsOp(newFilter.conditionsOp);
         setSaved(newFilter.id);
       } else {
         setFilters(state => [...state, newFilter]);
