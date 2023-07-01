@@ -148,7 +148,12 @@ export async function exportBuffer() {
       `,
     );
 
-    let dbContent = sqlite.exportDatabase(memDb);
+    await memDb.backup(`backup-for-export.db`);
+
+    rawDbContent = await fs.readFile('backup-for-export.db', 'binary');
+
+    await fs.removeFile('backup-for-export.db');
+
     sqlite.closeDatabase(memDb);
 
     // mark it as a file that needs a new clock so when a new client
@@ -160,7 +165,7 @@ export async function exportBuffer() {
     meta.resetClock = true;
     let metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
 
-    zipped.addFile('db.sqlite', dbContent);
+    zipped.addFile('db.sqlite', rawDbContent);
     zipped.addFile('metadata.json', metaContent);
   });
 
