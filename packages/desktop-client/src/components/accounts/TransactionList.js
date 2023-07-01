@@ -11,6 +11,8 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
+import { usePushModal } from '../../util/router-tools';
+
 import { TransactionTable } from './TransactionsTable';
 
 // When data changes, there are two ways to update the UI:
@@ -82,6 +84,7 @@ export default function TransactionList({
 }) {
   let transactionsLatest = useRef();
   let navigate = useNavigate();
+  let pushModal = usePushModal();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -150,6 +153,14 @@ export default function TransactionList({
     navigate('/payees', { selectedPayee: id });
   });
 
+  let onNavigateToTransferAccount = useCallback(accountId => {
+    navigate(`/accounts/${accountId}`);
+  });
+
+  let onNavigateToSchedule = useCallback(scheduleId => {
+    pushModal(`/schedule/edit/${scheduleId}`);
+  });
+
   return (
     <TransactionTable
       ref={tableRef}
@@ -183,6 +194,8 @@ export default function TransactionList({
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
       style={{ backgroundColor: 'white' }}
+      onNavigateToTransferAccount={onNavigateToTransferAccount}
+      onNavigateToSchedule={onNavigateToSchedule}
     />
   );
 }
