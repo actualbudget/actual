@@ -124,7 +124,7 @@ const Modal = ({
             minWidth: '100%',
             minHeight: 0,
             borderRadius: 4,
-            border: '1px solid ' + colorsm.buttonPositiveBorder,
+            border: '1px solid ' + colorsm.modalBorder,
             color: colorsm.tableText,
             backgroundColor: colorsm.modalBackground,
             opacity: isHidden ? 0 : 1,

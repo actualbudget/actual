@@ -449,7 +449,6 @@ function Balances({
         bare
         onClick={onToggleExtraBalances}
         style={{
-          backgroundColor: colorsm.tableBackground,
           '& svg': {
             opacity: selectedItems.size > 0,
           },

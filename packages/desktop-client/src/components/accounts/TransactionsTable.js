@@ -355,7 +355,6 @@ function StatusCell({
       <CellButton
         style={[
           {
-            padding: 3,
             border: '1px solid transparent',
             borderRadius: 50,
             ':focus': {

@@ -1455,7 +1455,6 @@ const MonthPicker = ({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          color: colorsm.pageTextSubdued,
         },
         style,
       ]}
@@ -1544,15 +1543,12 @@ const MonthPicker = ({
         <Button
           onClick={() => onSelect(monthUtils.subMonths(startMonth, 1))}
           bare
-          style={{
-            color: colorsm.pageTextSubdued,
-          }}
         >
           <ArrowThinLeft
             width={12}
             height={12}
             style={{
-              color: colorsm.pageTextSubdued,
+              color: colorsm.pageText,
             }}
           />
         </Button>
@@ -1565,7 +1561,7 @@ const MonthPicker = ({
             width={12}
             height={12}
             style={{
-              color: colorsm.pageTextSubdued,
+              color: colorsm.pageText,
             }}
           />
         </Button>

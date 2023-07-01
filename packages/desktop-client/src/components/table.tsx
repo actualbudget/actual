@@ -820,7 +820,11 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         style={{ color: colorsm.buttonNeutralText }}
         onClick={() => setMenuOpen(true)}
       >
-        <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
+        <ExpandArrow
+          width={8}
+          height={8}
+          style={{ marginRight: 5, color: 'inherit' }}
+        />
         {selectedItems.size} {name}
       </Button>
 
