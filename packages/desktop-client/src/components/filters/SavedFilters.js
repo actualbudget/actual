@@ -260,7 +260,7 @@ function SavedFilterMenuButton({
 export function CondOpMenu({ conditionsOp, onCondOpChange, filters }) {
   return (
     filters.length > 1 && (
-      <Text style={{ color: colors.n4, marginTop: 1 }}>
+      <Text style={{ color: colors.n4, marginTop: 11, marginRight: 5 }}>
         <FieldSelect
           style={{ display: 'inline-flex' }}
           fields={[
@@ -270,7 +270,7 @@ export function CondOpMenu({ conditionsOp, onCondOpChange, filters }) {
           value={conditionsOp}
           onChange={(name, value) => onCondOpChange(value, filters)}
         />
-        of:&nbsp;
+        of:
       </Text>
     )
   );
@@ -290,7 +290,6 @@ export function FiltersStack({
   return (
     <View>
       <Stack
-        style={{ marginTop: 5 }}
         spacing={2}
         direction="row"
         justify="flex-start"
