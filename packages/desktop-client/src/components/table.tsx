@@ -267,10 +267,14 @@ export function Cell({
           >
             {formatter ? formatter(value) : value}
             {icon === 'desc' && (
-              <ArrowDown width={12} height={12} style={{ marginLeft: 10 }} />
+              <Button bare >
+                <ArrowDown width={10} height={10} />
+              </Button>
             )}
             {icon === 'asc' && (
-              <ArrowUp width={12} height={12} style={{ marginLeft: 10 }} />
+              <Button bare >
+                <ArrowUp width={10} height={10} />
+              </Button>
             )}
           </Text>
         </View>

@@ -268,51 +268,45 @@ const TransactionHeader = memo(
         />
         <Cell
           value="Date"
-          id="date"
           width={110}
           icon={field === 'date' && ascDesc}
-          onClick={e => onSortTable(e)}
+          onClick={onSortTable('date')}
         />
         {showAccount && (
           <Cell
             value="Account"
-            id="account"
             width="flex"
             icon={field === 'account' && ascDesc}
-            onClick={e => onSortTable(e)}
+            onClick={onSortTable('account')}
           />
         )}
         <Cell
           value="Payee"
-          id="payee"
           width="flex"
           icon={field === 'payee' && ascDesc}
-          onClick={e => onSortTable(e)}
+          onClick={onSortTable('payee')}
         />
         <Cell value="Notes" width="flex" />
         {showCategory && (
           <Cell
             value="Category"
-            id="category"
             width="flex"
             icon={field === 'category' && ascDesc}
-            onClick={e => onSortTable(e)}
+            onClick={onSortTable('category')}
           />
         )}
         <Cell
           value="Payment"
-          id="payment"
           width={90}
           textAlign="flex"
-          icon={field === 'amount' && ascDesc}
-          onClick={e => onSortTable(e)}
+          onClick={onSortTable('amount')}
         />
         <Cell
           value="Deposit"
-          id="deposit"
           width={85}
           textAlign="flex"
-          onClick={e => onSortTable(e)}
+          icon={field === 'amount' && ascDesc}
+          onClick={onSortTable('amount')}
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
@@ -1847,16 +1841,11 @@ export let TransactionTable = forwardRef((props, ref) => {
   let [ascDesc, setAscDesc] = useState('asc');
 
   function onSortTable(headerClicked) {
-    let transform =
-      headerClicked.currentTarget.id === 'payment' ||
-      headerClicked.currentTarget.id === 'deposit'
-        ? 'amount'
-        : headerClicked.currentTarget.id;
-    if (transform === field) {
+    if (headerClicked === field) {
       ascDesc === 'desc' ? setAscDesc('asc') : setAscDesc('desc');
     } else {
-      setField(transform);
-      transform === 'amount' || transform === 'date'
+      setField(headerClicked);
+      headerClicked === 'amount' || headerClicked === 'date'
         ? setAscDesc('asc')
         : setAscDesc('desc');
     }
