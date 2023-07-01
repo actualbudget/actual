@@ -14,6 +14,10 @@ name: Compare Sizes
 on:
   pull_request_target:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   compare:
     runs-on: ubuntu-latest
