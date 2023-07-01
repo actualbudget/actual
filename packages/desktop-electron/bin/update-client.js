@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 const BuildScript = require('@actual-app/bin');
 
-const build = new BuildScript('desktop-electron', async () => {
-  await build.fs.emptyDir('client-build');
-  await build.fs.copy(build.clientBuildDir, 'client-build');
+const b = new BuildScript('desktop-electron', async () => {
+  await b.fs.emptyDir('client-build');
+  await b.fs.copy(b.clientBuildDir, 'client-build');
 
   // Remove the embedded backend for the browser version. Will improve this process
-  await build.fs.rmdir('client-build/data');
-  await build.fs.removeFiles('client-build/*.kcab.*');
-  await build.fs.removeFiles('client-build/*wasm');
-  await build.fs.removeFiles('client-build/*map');
+  await b.fs.rmdir('client-build/data');
+  await b.fs.removeFiles('client-build/*.kcab.*');
+  await b.fs.removeFiles('client-build/*{wasm,map}');
 });
 
-build.run();
+b.run();

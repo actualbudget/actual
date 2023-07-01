@@ -16,15 +16,12 @@ fs.copyFileToFolder = async (file, dest) => {
 };
 
 fs.findFiles = async (directory, pattern, relativePath = false) => {
-  if (relativePath) {
-    return fg(pattern, { cwd: directory, absolute: false });
-  }
-  return fg(pattern, { cwd: directory, absolute: true });
+  return fg(pattern, { cwd: directory, absolute: !relativePath });
 };
 
 fs.removeFiles = async pattern => {
   let files = await fg(pattern);
-  await Promise.all(files.map(file => fs.unlink(file)));
+  return Promise.all(files.map(file => fs.unlink(file)));
 };
 
 module.exports = fs;

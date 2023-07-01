@@ -15,7 +15,7 @@ class BuildScript extends BuildDefines {
   constructor(packageName, buildRunnable) {
     super(packageName);
     this.buildRunnable = buildRunnable;
-
+    // set working dir
     process.chdir(this.packageRoot);
   }
 

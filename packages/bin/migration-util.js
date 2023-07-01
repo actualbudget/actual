@@ -2,7 +2,7 @@ const { join } = require('path');
 
 const fs = require('./fs-util');
 
-exports.copyMigrations = async (sourceDir, destDir) => {
+exports.copy = async (sourceDir, destDir) => {
   let destMigrationDir = join(destDir, 'migrations');
 
   await fs.ensureDir(destDir);
@@ -18,3 +18,8 @@ exports.copyMigrations = async (sourceDir, destDir) => {
   );
   await fs.copyFileToFolder(join(sourceDir, 'default-db.sqlite'), destDir);
 };
+
+exports.createIndexFile = async (dataDir) => {
+  let files = await fs.findFiles(dataDir, '**', true);
+  return fs.writeFile(join(dataDir, '../data-file-index.txt'), files.sort().join('\n'));
+}

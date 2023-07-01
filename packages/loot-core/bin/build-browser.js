@@ -2,45 +2,39 @@
 /* eslint-disable */
 const BuildScript = require('@actual-app/bin');
 
-const build = new BuildScript('loot-core', async () => {
-  const BUILD_DIR = build.workerBuildDir;
-  const CLIENT_BUILD_DIR = build.clientWorkerDir;
+const b = new BuildScript('loot-core', async () => {
+  const buildDir = b.workerBuildDir;
+  const clientOutputDir = b.clientWorkerDir;
 
-  await build.fs.ensureDir(build.clientDataDir);
-  await build.migrations.copyMigrations(build.packageRoot, build.clientDataDir);
-
-  let files = await build.fs.findFiles(build.clientDataDir, '**', true);
-  await build.fs.writeFile(
-    build.clientDataIdxFileName,
-    files.sort().join('\n'),
-  );
-
+  await b.migrations.copy(b.packageRoot, b.clientDataDir);
+  await b.migrations.createIndexFile(b.clientDataDir);
+  
   // Clean out previous build files
-  await build.fs.emptyDir(BUILD_DIR);
-  await build.fs.rmdir(CLIENT_BUILD_DIR);
+  await b.fs.emptyDir(buildDir);
+  await b.fs.rmdir(clientOutputDir);
 
   const command = [
     'yarn webpack --config webpack/webpack.browser.config.js ',
     '--target webworker ',
-    '--output-filename kcab.worker.', build.outputHash, '.js ',
-    '--output-chunk-filename [id].[name].kcab.worker.', build.outputHash, '.js ',
+    '--output-filename kcab.worker.', b.outputHash, '.js ',
+    '--output-chunk-filename [id].[name].kcab.worker.', b.outputHash, '.js ',
     '--progress ',
   ];
 
-  if (process.env.NODE_ENV === 'development') {
+  if (b.isDev) {
     // In dev mode, always enable watch mode and symlink the build files.
     // Make sure to do this before starting the build since watch mode will block
     command.push(' --watch');
-    await build.fs.ensureSymlink(BUILD_DIR, CLIENT_BUILD_DIR);
+    await b.fs.ensureSymlink(buildDir, clientOutputDir);
   }
 
-  await build.exec(command.join(''));
+  await b.exec(command.join(''));
 
-  if (process.env.NODE_ENV === 'production') {
+  if (b.isProduction) {
     // In production, just copy the built files
-    await build.fs.ensureDir(CLIENT_BUILD_DIR);
-    await build.fs.copy(BUILD_DIR, CLIENT_BUILD_DIR);
+    await b.fs.ensureDir(clientOutputDir);
+    await b.fs.copy(buildDir, clientOutputDir);
   }
 });
 
-build.run();
+b.run();
