@@ -43,7 +43,7 @@ function CreateLocalAccount({ modalProps, actions }) {
               setBalanceError(balanceError);
 
               if (!nameError && !balanceError) {
-                modalProps.onClose();
+                actions.closeModal();
                 let id = await actions.createAccount(
                   name,
                   toRelaxedNumber(balance),
