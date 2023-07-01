@@ -1,5 +1,6 @@
 const path = require('path');
 
+const chokidar = require('chokidar');
 const {
   addWebpackPlugin,
   addWebpackResolve,
@@ -7,10 +8,16 @@ const {
   override,
   overrideDevServer,
 } = require('customize-cra');
+const { IgnorePlugin } = require('webpack');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 if (process.env.CI) {
   process.env.DISABLE_ESLINT_PLUGIN = 'true';
+}
+
+// Forward Netlify env variables
+if (process.env.REVIEW_ID) {
+  process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
 }
 
 module.exports = {
@@ -35,14 +42,31 @@ module.exports = {
         generateStatsFile: true,
       }),
     ),
-    config => {
-      config.cache = false;
-      return config;
-    },
+    // Pikaday throws a warning if Moment.js is not installed however it doesn't
+    // actually require it to be installed. As we don't use Moment.js ourselves
+    // then we can just silence this warning.
+    addWebpackPlugin(
+      new IgnorePlugin({
+        contextRegExp: /pikaday$/,
+        resourceRegExp: /moment$/,
+      }),
+    ),
   ),
   devServer: overrideDevServer(config => {
     return {
       ...config,
+      onBeforeSetupMiddleware(server) {
+        chokidar
+          .watch([
+            path.resolve('../loot-core/lib-dist/*.js'),
+            path.resolve('../loot-core/lib-dist/browser/*.js'),
+          ])
+          .on('all', function () {
+            for (const ws of server.webSocketServer.clients) {
+              ws.send(JSON.stringify({ type: 'static-changed' }));
+            }
+          });
+      },
       headers: {
         ...config.headers,
         'Cross-Origin-Opener-Policy': 'same-origin',
