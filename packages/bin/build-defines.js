@@ -1,5 +1,7 @@
 const Path = require('path');
 
+const fs = require('./fs-util')
+
 // Define useful paths and values that are shared across projects
 // and may be useful in build scripts.
 class BuildDefines {
