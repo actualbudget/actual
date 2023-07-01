@@ -112,7 +112,6 @@ export function handleGlobalEvents(actions, store) {
         } else {
           actions.closeModal();
 
-
           if (
             window.location.href.replace(window.location.origin, '') !==
             tagged.url

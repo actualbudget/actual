@@ -228,6 +228,7 @@ function SavedFilterMenuButton({
       {filters.length > 0 && (
         <Button
           bare
+          style={{ marginTop: 10 }}
           onClick={() => {
             setMenuOpen(true);
           }}
