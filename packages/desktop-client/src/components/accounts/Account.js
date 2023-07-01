@@ -482,42 +482,7 @@ function Balances({
   );
 }
 
-// function ScheduleMenu({ onSelect, onClose }) {
-//   let params = useParams();
-//   let scheduleData = useCachedSchedules();
-//   let payees = useSelector(state => state.queries.payees);
-//   let byId = getPayeesById(payees);
-
-//   if (scheduleData == null) {
-//     return null;
-//   }
-
-//   return (
-//     <Tooltip
-//       position="bottom-right"
-//       width={200}
-//       style={{ padding: 0 }}
-//       onClose={onClose}
-//     >
-//       <Menu
-//         onMenuSelect={name => {
-//           onSelect(name);
-//           onClose();
-//         }}
-//         items={scheduleData.schedules.map(s => {
-//           let desc = s._payee
-//             ? `${byId[s._payee].name} (${s.next_date})`
-//             : `No payee (${s.next_date})`;
-
-//           return { name: s.id, text: desc };
-//         })}
-//       />
-//     </Tooltip>
-//   );
-// }
-
 function SelectedTransactionsButton({
-  style,
   getTransaction,
   onShow,
   onDuplicate,
@@ -1439,7 +1404,7 @@ class AccountInternal extends PureComponent {
 
   onToggleExtraBalances = () => {
     let { accountId, showExtraBalances } = this.props;
-    let key = 'show-extra-balances-' + accountId;
+    let key = 'show-extra-balances-' + accountId || 'all-accounts';
 
     this.props.savePrefs({ [key]: !showExtraBalances });
   };
@@ -2032,7 +1997,7 @@ export default function Account() {
     showBalances: params.id && state.prefs.local['show-balances-' + params.id],
     showCleared: params.id && !state.prefs.local['hide-cleared-' + params.id],
     showExtraBalances:
-      params.id && state.prefs.local['show-extra-balances-' + params.id],
+      state.prefs.local['show-extra-balances-' + params.id || 'all-accounts'],
     payees: state.queries.payees,
     modalShowing: state.modals.modalStack.length > 0,
     accountsSyncing: state.account.accountsSyncing,
