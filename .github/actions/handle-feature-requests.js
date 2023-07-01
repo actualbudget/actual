@@ -73,7 +73,10 @@ async function main() {
     await group(`Issue #${number}: Remove labels`, async () => {
       const toRemove = labels.nodes
         .filter(
-          label => label.name === 'help wanted' || label.name === 'needs votes',
+          label =>
+            label.name === 'help wanted' ||
+            label.name === 'needs votes' ||
+            lahel.name === 'good first issue',
         )
         .map(label => label.id);
       const res = await makeAPIRequest(
