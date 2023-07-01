@@ -7,13 +7,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  Navigate,
-  useParams,
-  useNavigate,
-  useLocation,
-  useMatch,
-} from 'react-router-dom';
+import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
 
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
@@ -58,6 +52,7 @@ import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { authorizeBank } from '../../nordigen';
 import { styles, colors } from '../../style';
+import { usePushModal } from '../../util/router-tools';
 import { useActiveLocation } from '../ActiveLocation';
 import AnimatedRefresh from '../AnimatedRefresh';
 import {
@@ -527,8 +522,8 @@ function SelectedTransactionsButton({
   onCreateRule,
   onScheduleAction,
 }) {
+  let pushModal = usePushModal();
   let selectedItems = useSelectedItems();
-  let navigate = useNavigate();
   let location = useLocation();
 
   let types = useMemo(() => {
@@ -641,13 +636,17 @@ function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              navigate(`/schedule/edit/${scheduleId}`, {
+              pushModal(`/schedule/edit/${scheduleId}`, {
+                // Required in order to trigger re-renders after linking the transaction
+                // TODO: figure out a way how to remove this
                 locationPtr: location,
               });
             }
             break;
           case 'link-schedule':
-            navigate(`/schedule/link`, {
+            pushModal('/schedule/link', {
+              // Required in order to trigger re-renders after linking the transaction
+              // TODO: figure out a way how to remove this
               locationPtr: location,
               transactionIds: [...selectedItems],
             });

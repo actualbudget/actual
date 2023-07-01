@@ -24,8 +24,10 @@ export function usePushModal() {
   let location = useLocation();
 
   return useCallback(
-    (path: To) =>
-      navigate(path, { state: { parent: location, _version: VERSION } }),
+    (path: To, stateProps: Record<string, unknown> = {}) =>
+      navigate(path, {
+        state: { parent: location, _version: VERSION, ...stateProps },
+      }),
     [navigate, location],
   );
 }
