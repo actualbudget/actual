@@ -148,11 +148,7 @@ export async function exportBuffer() {
       `,
     );
 
-    await memDb.backup(`backup-for-export.db`);
-
-    rawDbContent = await fs.readFile('backup-for-export.db', 'binary');
-
-    await fs.removeFile('backup-for-export.db');
+    let dbContent = await sqlite.exportDatabase(memDb);
 
     sqlite.closeDatabase(memDb);
 
@@ -165,7 +161,7 @@ export async function exportBuffer() {
     meta.resetClock = true;
     let metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
 
-    zipped.addFile('db.sqlite', rawDbContent);
+    zipped.addFile('db.sqlite', dbContent);
     zipped.addFile('metadata.json', metaContent);
   });
 
