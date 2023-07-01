@@ -10,6 +10,8 @@
 *.js text eol=lf
 *.ts text eol=lf
 *.sh text eol=lf
+*.tsx text eol=lf
+
 yarn.lock text eol=lf
 
 # Denote all files that are truly binary and should not be modified.
