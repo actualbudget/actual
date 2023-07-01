@@ -5,6 +5,10 @@ on: [pull_request]
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Run end-to-end tests on Netlify PR preview
