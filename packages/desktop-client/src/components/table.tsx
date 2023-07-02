@@ -253,7 +253,7 @@ export function Cell({
               flexDirection: 'row',
               flex: 1,
               padding: '0 5px',
-              justifyContent: 'center',
+              alignItems: 'center',
             },
             styles.smallText,
             valueStyle,
