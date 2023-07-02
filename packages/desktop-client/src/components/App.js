@@ -25,7 +25,6 @@ class App extends Component {
     fatalError: null,
     initializing: true,
     hiddenScrollbars: hasHiddenScrollbars(),
-    theme: 'light',
   };
 
   async init() {
@@ -75,10 +74,6 @@ class App extends Component {
     };
     window.addEventListener('focus', checkScrollbars);
     this.cleanup = () => window.removeEventListener('focus', checkScrollbars);
-
-    setInterval(() => {
-      this.setState({ theme: this.state.theme === 'dark' ? 'light' : 'dark' });
-    }, 4000);
   }
 
   componentDidCatch(error) {
@@ -94,7 +89,6 @@ class App extends Component {
   render() {
     const { budgetId, loadingText } = this.props;
     const { fatalError, initializing, hiddenScrollbars } = this.state;
-
     return (
       <ResponsiveProvider>
         <div
@@ -132,7 +126,7 @@ class App extends Component {
           <UpdateNotification />
           <MobileWebMessage />
         </div>
-        <ThemeStyle theme={this.state.theme} />
+        <ThemeStyle theme={this.state.theme ? this.state.theme : 'light'} />
       </ResponsiveProvider>
     );
   }
@@ -143,6 +137,12 @@ export default connect(
     budgetId: state.prefs.local && state.prefs.local.id,
     cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
     loadingText: state.app.loadingText,
+    prefs: state.prefs,
+    theme: state.prefs
+      ? state.prefs.global
+        ? state.prefs.global.theme
+        : 'light'
+      : 'light',
   }),
   actions,
 )(App);
