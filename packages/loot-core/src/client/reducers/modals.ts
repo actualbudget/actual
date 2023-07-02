@@ -1,11 +1,13 @@
 import * as constants from '../constants';
+import type { Action } from '../state-types';
+import type { ModalsState } from '../state-types/modals';
 
-const initialState = {
+const initialState: ModalsState = {
   modalStack: [],
   isHidden: false,
 };
 
-function update(state = initialState, action) {
+function update(state = initialState, action: Action): ModalsState {
   switch (action.type) {
     case constants.PUSH_MODAL:
       return {
