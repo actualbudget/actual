@@ -1,3 +1,4 @@
+import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
@@ -8,7 +9,7 @@ export function cleanupTemplate({ month }) {
   return processCleanup(month);
 }
 
-async function processCleanup(month) {
+async function processCleanup(month: string): Promise<Notification> {
   let num_sources = 0;
   let num_sinks = 0;
   let total_weight = 0;

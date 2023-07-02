@@ -4,6 +4,7 @@ import type { AccountActions, AccountState } from './account';
 import type { AppActions, AppState } from './app';
 import type { BudgetsActions, BudgetsState } from './budgets';
 import type { ModalsActions, ModalsState } from './modals';
+import type { NotificationsActions, NotificationsState } from './notifications';
 
 export type CloseBudgetAction = {
   type: typeof constants.CLOSE_BUDGET;
@@ -14,6 +15,7 @@ export type Action =
   | AppActions
   | BudgetsActions
   | ModalsActions
+  | NotificationsActions
   | CloseBudgetAction;
 
 export type State = {
@@ -21,6 +23,7 @@ export type State = {
   app: AppState;
   budgets: BudgetsState;
   modals: ModalsState;
+  notifications: NotificationsState;
 };
 
 declare module 'react-redux' {

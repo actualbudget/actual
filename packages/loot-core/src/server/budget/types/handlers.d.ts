@@ -1,3 +1,5 @@
+import type { Notification } from '../../../client/state-types/notifications';
+
 export interface BudgetHandlers {
   'budget/budget-amount': (arg: {
     category: string /* category id */;
@@ -17,7 +19,7 @@ export interface BudgetHandlers {
 
   'budget/overwrite-goal-template': (...args: unknown[]) => Promise<unknown>;
 
-  'budget/cleanup-goal-template': (...args: unknown[]) => Promise<unknown>;
+  'budget/cleanup-goal-template': (...args: unknown[]) => Promise<Notification>;
 
   'budget/hold-for-next-month': (...args: unknown[]) => Promise<unknown>;
 
