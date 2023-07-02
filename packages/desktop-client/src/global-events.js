@@ -36,14 +36,9 @@ export function handleGlobalEvents(actions, store) {
   });
 
   listen('schedules-offline', ({ payees }) => {
-    let navigate = window.__navigate;
-    if (navigate) {
-      navigate(`/schedule/posts-offline-notification`, {
-        state: {
-          locationPtr: navigate.location,
-          payees,
-        },
-      });
+    let pushModal = window.__pushModal;
+    if (pushModal) {
+      pushModal(`/schedule/posts-offline-notification`, { payees });
     }
   });
 

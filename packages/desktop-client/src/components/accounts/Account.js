@@ -636,18 +636,11 @@ function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              pushModal(`/schedule/edit/${scheduleId}`, {
-                // Required in order to trigger re-renders after linking the transaction
-                // TODO: figure out a way how to remove this
-                locationPtr: location,
-              });
+              pushModal(`/schedule/edit/${scheduleId}`);
             }
             break;
           case 'link-schedule':
             pushModal('/schedule/link', {
-              // Required in order to trigger re-renders after linking the transaction
-              // TODO: figure out a way how to remove this
-              locationPtr: location,
               transactionIds: [...selectedItems],
             });
             break;
@@ -2079,7 +2072,7 @@ export default function Account() {
           {...actionCreators}
           modalShowing={
             state.modalShowing ||
-            !!(activeLocation.state && activeLocation.state.locationPtr)
+            !!(activeLocation.state && activeLocation.state.parent)
           }
           accountId={params.id}
           categoryId={activeLocation?.state?.filter?.category}
