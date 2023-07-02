@@ -91,13 +91,15 @@ async function processTemplate(month, force) {
   if (remainder_found) lowestPriority = remainder_priority;
 
   for (let priority = 0; priority <= lowestPriority; priority++) {
+    let sheetName = monthUtils.sheetForMonth(month);
+    let available_start = await getSheetValue(sheetName, `to-budget`);
+
     // setup scaling for remainder
     let remainder_scale = 1;
     if (priority === lowestPriority) {
-      let sheetName = monthUtils.sheetForMonth(month);
-      let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
-      remainder_scale = Math.round(budgetAvailable / remainder_weight_total);
+      remainder_scale = Math.round(available_start / remainder_weight_total);
     }
+    
 
     for (let c = 0; c < categories.length; c++) {
       let category = categories[c];
@@ -150,6 +152,7 @@ async function processTemplate(month, force) {
                 month,
                 priority,
                 remainder_scale,
+                available_start,
                 force,
               );
             if (to_budget != null) {
@@ -252,6 +255,7 @@ async function applyCategoryTemplate(
   month,
   priority,
   remainder_scale,
+  available_start,
   force,
 ) {
   let current_month = `${month}-01`;
@@ -493,6 +497,8 @@ async function applyCategoryTemplate(
         let monthlyIncome = 0;
         if (template.category.toLowerCase() === 'all income') {
           monthlyIncome = await getSheetValue(sheetName, `total-income`);
+        } else if (template.category.toLowerCase() === 'available funds') {
+          monthlyIncome = available_start;
         } else {
           let income_category = (await db.getCategories()).find(
             c =>
