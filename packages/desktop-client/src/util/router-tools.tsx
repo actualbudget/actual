@@ -16,8 +16,8 @@ export function ExposeNavigate() {
   let pushModal = usePushModal();
   useLayoutEffect(() => {
     window.__navigate = navigate;
-    window.__pushModal;
-  }, [navigate]);
+    window.__pushModal = pushModal;
+  }, [navigate, pushModal]);
   return null;
 }
 
