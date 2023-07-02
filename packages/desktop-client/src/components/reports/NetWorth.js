@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
-import { bindActionCreators } from 'redux';
 
-import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -20,7 +18,8 @@ import Header from './Header';
 import useReport from './useReport';
 import { fromDateRepr } from './util';
 
-function NetWorth({ accounts }) {
+export default function NetWorth() {
+  let accounts = useSelector(state => state.queries.accounts);
   const {
     filters,
     saved,
@@ -140,8 +139,3 @@ function NetWorth({ accounts }) {
     </View>
   );
 }
-
-export default connect(
-  state => ({ accounts: state.queries.accounts }),
-  dispatch => bindActionCreators(actions, dispatch),
-)(NetWorth);

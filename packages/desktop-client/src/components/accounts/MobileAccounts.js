@@ -1,12 +1,12 @@
 import React, { Component, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
+import { useActions } from '../../hooks/useActions';
+import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors, styles } from '../../style';
-import { withThemeColor } from '../../util/withThemeColor';
 import { Button, Text, TextOneLine, View } from '../common';
 import { Page } from '../Page';
 import CellValue from '../spreadsheet/CellValue';
@@ -226,20 +226,32 @@ class AccountList extends Component {
   }
 }
 
-function Accounts(props) {
+export default function Accounts() {
+  let accounts = useSelector(state => state.queries.accounts);
+  let newTransactions = useSelector(state => state.queries.newTransactions);
+  let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  let categories = useSelector(state => state.queries.categories.list);
+  let numberFormat = useSelector(
+    state => state.prefs.local.numberFormat || 'comma-dot',
+  );
+  let hideFraction = useSelector(
+    state => state.prefs.local.hideFraction || false,
+  );
+
+  let { getCategories, getAccounts } = useActions();
+
   const transactions = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    const getAccounts = async () => {
-      if (props.categories.length === 0) {
-        await props.getCategories();
+    (async () => {
+      if (categories.length === 0) {
+        debugger;
+        await getCategories();
       }
 
-      props.getAccounts();
-    };
-
-    getAccounts();
+      getAccounts();
+    })();
   }, []);
 
   // const sync = async () => {
@@ -254,9 +266,7 @@ function Accounts(props) {
     navigate(`/transaction/${transaction}`);
   };
 
-  let { accounts, categories, newTransactions, updatedAccounts, prefs } = props;
-  let numberFormat = prefs.numberFormat || 'comma-dot';
-  let hideFraction = prefs.hideFraction || false;
+  useSetThemeColor(colors.b2);
 
   return (
     <View style={{ flex: 1 }}>
@@ -282,14 +292,3 @@ function Accounts(props) {
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    accounts: state.queries.accounts,
-    newTransactions: state.queries.newTransactions,
-    updatedAccounts: state.queries.updatedAccounts,
-    categories: state.queries.categories.list,
-    prefs: state.prefs.local,
-  }),
-  actions,
-)(withThemeColor(colors.b2)(Accounts));
