@@ -1,15 +1,17 @@
 import type * as constants from '../constants';
 
 import type { AccountActions, AccountState } from './account';
+import type { AppActions, AppState } from './app';
 
 export type CloseBudgetAction = {
   type: typeof constants.CLOSE_BUDGET;
 };
 
-export type Action = AccountActions | CloseBudgetAction;
+export type Action = AccountActions | AppActions | CloseBudgetAction;
 
 export type State = {
   account: AccountState;
+  app: AppState;
 };
 
 declare module 'react-redux' {

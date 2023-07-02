@@ -1,6 +1,8 @@
 import * as constants from '../constants';
+import type { Action } from '../state-types';
+import type { AppState } from '../state-types/app';
 
-export const initialState = {
+export const initialState: AppState = {
   loadingText: null,
   updateInfo: null,
   showUpdateNotification: true,
@@ -9,7 +11,7 @@ export const initialState = {
   lastSplitState: { current: null },
 };
 
-export default function update(state = initialState, action) {
+export default function update(state = initialState, action: Action): AppState {
   switch (action.type) {
     case constants.SET_APP_STATE:
       return {
