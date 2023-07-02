@@ -199,6 +199,6 @@ export function closeDatabase(db) {
   db.close();
 }
 
-export function exportDatabase(db) {
+export async function exportDatabase(db) {
   return db.export();
 }
