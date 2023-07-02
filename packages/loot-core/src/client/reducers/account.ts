@@ -1,11 +1,16 @@
 import * as constants from '../constants';
+import type { Action } from '../state-types';
+import type { AccountState } from '../state-types/account';
 
-const initialState = {
+const initialState: AccountState = {
   failedAccounts: new Map(),
   accountsSyncing: null,
 };
 
-export default function update(state = initialState, action) {
+export default function update(
+  state = initialState,
+  action: Action,
+): AccountState {
   switch (action.type) {
     case constants.SET_ACCOUNTS_SYNCING:
       return {
