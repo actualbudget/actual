@@ -524,7 +524,6 @@ function SelectedTransactionsButton({
 }) {
   let pushModal = usePushModal();
   let selectedItems = useSelectedItems();
-  let location = useLocation();
 
   let types = useMemo(() => {
     let items = [...selectedItems];
