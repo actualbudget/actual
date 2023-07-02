@@ -78,7 +78,7 @@ function getTransactionFields(conditions, actions) {
   return fields;
 }
 
-function FieldSelect({ fields, style, value, onChange }) {
+export function FieldSelect({ fields, style, value, onChange }) {
   return (
     <View style={style}>
       <CustomSelect
