@@ -162,6 +162,23 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   );
 });
 
+export function UnexposedCellContent({
+  value,
+  formatter,
+}: Pick<CellProps, 'value' | 'formatter'>) {
+  return (
+    <Text
+      style={{
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}
+    >
+      {formatter ? formatter(value) : value}
+    </Text>
+  );
+}
+
 type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   formatter?: (value: string, type?: unknown) => string;
   focused?: boolean;
@@ -170,6 +187,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   plain?: boolean;
   exposed?: boolean;
   children?: ReactNode | (() => ReactNode);
+  unexposedContent?: ReactNode;
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
@@ -188,6 +206,7 @@ export function Cell({
   plain,
   style,
   valueStyle,
+  unexposedContent,
   ...viewProps
 }: CellProps) {
   let mouseCoords = useRef(null);
@@ -231,6 +250,7 @@ export function Cell({
         <View
           style={[
             {
+              flexDirection: 'row',
               flex: 1,
               padding: '0 5px',
               justifyContent: 'center',
@@ -254,15 +274,9 @@ export function Cell({
           // When testing, allow the click handler to be used instead
           onClick={global.IS_TESTING && (() => onExpose && onExpose(name))}
         >
-          <Text
-            style={{
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {formatter ? formatter(value) : value}
-          </Text>
+          {unexposedContent || (
+            <UnexposedCellContent value={value} formatter={formatter} />
+          )}
         </View>
       )}
     </View>
