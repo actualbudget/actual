@@ -99,7 +99,6 @@ async function processTemplate(month, force) {
     if (priority === lowestPriority) {
       remainder_scale = Math.round(available_start / remainder_weight_total);
     }
-    
 
     for (let c = 0; c < categories.length; c++) {
       let category = categories[c];
