@@ -169,6 +169,7 @@ export function UnexposedCellContent({
   return (
     <Text
       style={{
+        flexGrow: 1,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -262,17 +263,20 @@ export function Cell({
           // the user does a direct click, not if they also drag the
           // mouse to select something
           onMouseDown={e => (mouseCoords.current = [e.clientX, e.clientY])}
-          onMouseUp={e => {
-            if (
-              mouseCoords.current &&
-              Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
-              Math.abs(e.clientY - mouseCoords.current[1]) < 5
-            ) {
-              onExpose && onExpose(name);
-            }
-          }}
           // When testing, allow the click handler to be used instead
-          onClick={global.IS_TESTING && (() => onExpose && onExpose(name))}
+          onClick={
+            global.IS_TESTING
+              ? () => onExpose && onExpose(name)
+              : e => {
+                  if (
+                    mouseCoords.current &&
+                    Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
+                    Math.abs(e.clientY - mouseCoords.current[1]) < 5
+                  ) {
+                    onExpose && onExpose(name);
+                  }
+                }
+          }
         >
           {unexposedContent || (
             <UnexposedCellContent value={value} formatter={formatter} />

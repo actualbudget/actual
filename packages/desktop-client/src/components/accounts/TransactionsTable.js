@@ -419,7 +419,7 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-      unexposedContent={() => (
+      unexposedContent={
         <>
           <PayeeIcons
             transaction={transaction}
@@ -432,7 +432,7 @@ function PayeeCell({
             formatter={() => getPayeePretty(transaction, payee, transferAcct)}
           />
         </>
-      )}
+      }
     >
       {({
         onBlur,
@@ -488,6 +488,8 @@ function PayeeIcons({
   }
 
   let buttonStyle = {
+    marginLeft: -5,
+    marginRight: 2,
     width: 23,
     height: 23,
     color: 'inherit',
@@ -505,16 +507,17 @@ function PayeeIcons({
     color: 'inherit',
   };
 
-  let onScheduleIconClick = () => onNavigateToSchedule(scheduleId);
-
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
 
-  let onTransferIconClick = () =>
-    !isTemporaryId(transaction.id) &&
-    onNavigateToTransferAccount(transferAccount.id);
-
   return schedule ? (
-    <Button bare style={buttonStyle} onClick={onScheduleIconClick}>
+    <Button
+      bare
+      style={buttonStyle}
+      onClick={e => {
+        e.stopPropagation();
+        onNavigateToSchedule(scheduleId);
+      }}
+    >
       {recurring ? (
         <ArrowsSynchronize style={scheduleIconStyle} />
       ) : (
@@ -522,7 +525,16 @@ function PayeeIcons({
       )}
     </Button>
   ) : transferAccount ? (
-    <Button bare style={buttonStyle} onClick={onTransferIconClick}>
+    <Button
+      bare
+      style={buttonStyle}
+      onClick={e => {
+        e.stopPropagation();
+        if (!isTemporaryId(transaction.id)) {
+          onNavigateToTransferAccount(transferAccount.id);
+        }
+      }}
+    >
       {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
         <LeftArrow2 style={transferIconStyle} />
       ) : (
