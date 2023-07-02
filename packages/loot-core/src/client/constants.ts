@@ -14,7 +14,6 @@ export const SET_REMOTE_FILES = 'SET_REMOTE_FILES';
 export const SET_ALL_FILES = 'SET_ALL_FILES';
 export const CLOSE_BUDGET = 'CLOSE_BUDGET';
 export const SET_APP_STATE = 'SET_APP_STATE';
-export const DEBUG_CELL = 'DEBUG_CELL';
 export const PUSH_MODAL = 'PUSH_MODAL';
 export const REPLACE_MODAL = 'REPLACE_MODAL';
 export const CLOSE_MODAL = 'CLOSE_MODAL';

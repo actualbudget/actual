@@ -1,7 +1,6 @@
 import account from './account';
 import app from './app';
 import budgets from './budgets';
-import debug from './debug';
 import modals from './modals';
 import notifications from './notifications';
 import prefs from './prefs';
@@ -12,7 +11,6 @@ const reducers = {
   app,
   queries,
   account,
-  debug,
   prefs,
   modals,
   notifications,
