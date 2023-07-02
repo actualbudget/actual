@@ -91,9 +91,7 @@ export function loadBudget(id, loadingText = '', options = {}) {
 
     await dispatch(loadPrefs());
 
-    const prefs = getState().prefs.local;
     dispatch(setAppState({ loadingText: null }));
-    dispatch(setAppState({ maxMonths: prefs.maxMonths }));
   };
 }
 

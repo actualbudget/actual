@@ -1,7 +1,6 @@
 import * as constants from '../constants';
 
 const initialState = {
-  banks: [],
   failedAccounts: new Map(),
   accountsSyncing: null,
 };

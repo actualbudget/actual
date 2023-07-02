@@ -95,7 +95,6 @@ function reconcileFiles(localFiles, remoteFiles) {
 
 const initialState = {
   budgets: [],
-  availableImports: [],
   remoteFiles: null,
   allFiles: null,
 };
