@@ -1,4 +1,6 @@
-# Restoring Data Into Actual
+# Restoring Backups
+
+## Restoring a manual backup
 
 If you previously followed the [steps](./backup.md) to back up your data and have an Actual
 zip export, you can now import that using the web version of Actual.
@@ -28,19 +30,17 @@ To do this,
 
 That is it. A fresh budget will show in your budget list. If the imported data is a copy of your current budget, you may want to rename the new budget by clicking on it's name so you can tell them apart. Once you verify the new imported budget is correct, you can navigate back to the budget selection screen by closing the current budget and deleting the old copy.
 
-# Restore a backup in the desktop application
+## Automatic Backups
 
-# Loading a backup
+:::caution
+Automatic backups are currently only available in the (beta) desktop app.
+:::
 
 Actual keeps backups of your data locally. If something disastrous happens, you can always load a recent backup to get your data back.
 
 Currently it keeps up to 10 backups, one per day of usage of the app, multiple backups of the current day. The result is you will have data backed **up to the last 15 minutes**, in addition to the last 10 days you used the app.
 
-:::caution
-Backups are only available on the desktop app currently.
-:::
-
-## Loading a backup
+### Loading an automatic backup
 
 - Select the **File > Load Backup…** menu item
 - Choose the backup you want to load and select it
