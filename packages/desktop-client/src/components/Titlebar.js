@@ -17,7 +17,6 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
-import Bug from '../icons/v1/Bug';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
@@ -41,6 +40,7 @@ import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import SheetValue from './spreadsheet/SheetValue';
+import { ThemeSelector } from './ThemeSelector';
 
 export let TitlebarContext = createContext();
 
@@ -86,18 +86,6 @@ function UncategorizedButton() {
         );
       }}
     </SheetValue>
-  );
-}
-
-function ThemeButton() {
-  return (
-    <View>
-      <Button bare>
-        <Bug
-          style={{ width: 13, height: 13, color: colorsm.pageTextSubdued }}
-        />
-      </Button>
-    </View>
   );
 }
 
@@ -373,7 +361,7 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <ThemeButton />
+      <ThemeSelector />
       {serverURL ? (
         <SyncButton
           style={{ marginLeft: 10 }}
@@ -392,6 +380,7 @@ export default connect(
     localPrefs: state.prefs.local,
     userData: state.user.data,
     floatingSidebar: state.prefs.global.floatingSidebar,
+    theme: state.prefs.global.theme,
   }),
   actions,
 )(Titlebar);

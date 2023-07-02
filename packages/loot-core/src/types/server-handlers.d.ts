@@ -241,6 +241,7 @@ export interface ServerHandlers {
   'save-global-prefs': (prefs) => Promise<'ok'>;
 
   'load-global-prefs': () => Promise<{
+    theme: string;
     floatingSidebar: boolean;
     maxMonths: number;
     autoUpdate: boolean;
