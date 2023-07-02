@@ -13,9 +13,11 @@ let VERSION = Date.now();
 
 export function ExposeNavigate() {
   let navigate = useNavigate();
+  let pushModal = usePushModal();
   useLayoutEffect(() => {
     window.__navigate = navigate;
-  }, [navigate]);
+    window.__pushModal = pushModal;
+  }, [navigate, pushModal]);
   return null;
 }
 
