@@ -20,7 +20,7 @@ import { Checkbox } from '../forms';
 function CreateLocalAccount({ modalProps, actions }) {
   let navigate = useNavigate();
   let [name, setName] = useState('');
-  let [offbudget] = useState(false);
+  let [offbudget, setOffBudget] = useState(false);
   let [balance, setBalance] = useState('0');
 
   let [nameError, setNameError] = useState(false);
@@ -93,13 +93,12 @@ function CreateLocalAccount({ modalProps, actions }) {
                   }}
                   htmlFor="offbudget"
                 >
-                  <input
+                  <Checkbox
                     id="offbudget"
                     name="offbudget"
                     type="checkbox"
-                    checked={!!values.offbudget}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
+                    checked={offbudget}
+                    onChange={event => setOffBudget(event.target.checked)}
                   />
                   Off-budget
                 </label>
