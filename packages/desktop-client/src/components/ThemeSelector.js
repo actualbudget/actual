@@ -1,17 +1,17 @@
 import React from 'react';
-import { connect, useSelector } from 'react-redux';
+import { connect, useSelector, shallowEqual } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { saveGlobalPrefs } from 'loot-core/src/client/actions';
 
-import Bug from '../icons/v1/Bug';
+import { MoonStars, Sun } from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
 
-import { Button, Text, View } from './common';
+import { Button, View } from './common';
 
 export function ThemeSelector() {
   let { isNarrowWidth } = useResponsive();
-  let theme = useSelector(state => state.prefs.global.theme);
+  let theme = useSelector(state => state.prefs.global.theme, shallowEqual);
 
   // Don't display on mobile
   return isNarrowWidth ? null : (
@@ -28,11 +28,15 @@ export function ThemeSelector() {
           });
         }}
       >
-        <Bug style={{ width: 13, height: 13, color: 'inherit' }} />{' '}
-        <Text>{theme}</Text>
+        {theme === 'light' ? (
+          <MoonStars style={{ width: 13, height: 13, color: 'inherit' }} />
+        ) : (
+          <Sun style={{ width: 13, height: 13, color: 'inherit' }} />
+        )}{' '}
       </Button>
     </View>
   );
 }
 
+/* eslint-disable import/no-unused-modules */
 export default connect(null, actions)(ThemeSelector);

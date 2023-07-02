@@ -126,7 +126,7 @@ class App extends Component {
           <UpdateNotification />
           <MobileWebMessage />
         </div>
-        <ThemeStyle theme={this.state.theme ? this.state.theme : 'light'} />
+        <ThemeStyle theme={this.props.theme} />
       </ResponsiveProvider>
     );
   }
@@ -141,6 +141,8 @@ export default connect(
     theme: state.prefs
       ? state.prefs.global
         ? state.prefs.global.theme
+          ? state.prefs.global.theme
+          : 'light'
         : 'light'
       : 'light',
   }),
