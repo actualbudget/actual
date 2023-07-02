@@ -138,6 +138,9 @@ export default connect(
     cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
     loadingText: state.app.loadingText,
     prefs: state.prefs,
+    /* render() and init() run in parallel, 
+    so no guarantee global prefs are loading
+    in time for render() to use the theme */
     theme: state.prefs
       ? state.prefs.global
         ? state.prefs.global.theme
