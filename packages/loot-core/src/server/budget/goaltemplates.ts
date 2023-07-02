@@ -93,7 +93,6 @@ async function processTemplate(month, force) {
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
   for (let priority = 0; priority <= lowestPriority; priority++) {
-
     // setup scaling for remainder
     let remainder_scale = 1;
     if (priority === lowestPriority) {
