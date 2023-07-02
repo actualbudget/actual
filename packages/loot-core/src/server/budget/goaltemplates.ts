@@ -90,14 +90,15 @@ async function processTemplate(month, force) {
   // so the remainders don't get skiped
   if (remainder_found) lowestPriority = remainder_priority;
 
+  let sheetName = monthUtils.sheetForMonth(month);
+  let available_start = await getSheetValue(sheetName, `to-budget`);
   for (let priority = 0; priority <= lowestPriority; priority++) {
-    let sheetName = monthUtils.sheetForMonth(month);
-    let available_start = await getSheetValue(sheetName, `to-budget`);
 
     // setup scaling for remainder
     let remainder_scale = 1;
     if (priority === lowestPriority) {
-      remainder_scale = Math.round(available_start / remainder_weight_total);
+      let available_now = await getSheetValue(sheetName, `to-budget`);
+      remainder_scale = Math.round(available_now / remainder_weight_total);
     }
 
     for (let c = 0; c < categories.length; c++) {
