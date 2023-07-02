@@ -6,7 +6,6 @@ const migrationUtil = require('./migration-util');
 const shellUtil = require('./shell-util');
 
 class BuildScript extends BuildDefines {
-  // re-export methods to reduce build script 'requires'
   fs = fs;
   migrations = migrationUtil;
   join = Path.join;
@@ -19,7 +18,6 @@ class BuildScript extends BuildDefines {
     process.chdir(this.packageRoot);
   }
 
-  // Run the build script (with some handy timing info)
   async run() {
     console.time('run');
     await this.buildRunnable();
