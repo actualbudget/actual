@@ -493,37 +493,34 @@ function PayeeIcons({
   let onScheduleIconClick = () => onNavigateToSchedule(scheduleId);
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
-  let ScheduledIcon = () => (
-    <Button bare style={buttonStyle} onClick={onScheduleIconClick}>
-      {recurring ? (
-        <ArrowsSynchronize style={scheduleIconStyle} />
-      ) : (
-        <CalendarIcon style={scheduleIconStyle} />
-      )}
-    </Button>
-  );
 
   let onTransferIconClick = () =>
     !isTemporaryId(transaction.id) &&
     onNavigateToTransferAccount(transferAccount.id);
 
-  let TransferDirectionIcon = () => (
-    <Button bare style={buttonStyle} onClick={onTransferIconClick}>
-      {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
-        <LeftArrow2 style={transferIconStyle} />
-      ) : (
-        <RightArrow2 style={transferIconStyle} />
-      )}
-    </Button>
-  );
-
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch' }}>
-      {schedule && <Cell exposed={true}>{ScheduledIcon}</Cell>}
-      {!schedule && transferAccount && (
-        <Cell exposed={true}>{TransferDirectionIcon}</Cell>
-      )}
-
+      <Cell exposed={true}>
+        {() =>
+          schedule ? (
+            <Button bare style={buttonStyle} onClick={onScheduleIconClick}>
+              {recurring ? (
+                <ArrowsSynchronize style={scheduleIconStyle} />
+              ) : (
+                <CalendarIcon style={scheduleIconStyle} />
+              )}
+            </Button>
+          ) : transferAccount ? (
+            <Button bare style={buttonStyle} onClick={onTransferIconClick}>
+              {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+                <LeftArrow2 style={transferIconStyle} />
+              ) : (
+                <RightArrow2 style={transferIconStyle} />
+              )}
+            </Button>
+          ) : null
+        }
+      </Cell>
       {children}
     </View>
   );
