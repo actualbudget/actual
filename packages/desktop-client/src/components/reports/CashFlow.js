@@ -8,7 +8,6 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
 import { colors, styles } from '../../style';
-import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, Text, Block, P, AlignedText } from '../common';
 
 import Change from './Change';
@@ -20,9 +19,11 @@ import useReport from './useReport';
 function CashFlow() {
   const {
     filters,
+    conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
+    onCondOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
@@ -40,8 +41,8 @@ function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, filters),
-    [start, end, isConcise, filters],
+    () => cashFlowByDate(start, end, isConcise, filters, conditionsOp),
+    [start, end, isConcise, filters, conditionsOp],
   );
   const data = useReport('cash_flow', params);
 
@@ -97,31 +98,19 @@ function CashFlow() {
         end={monthUtils.getMonth(end)}
         show1Month
         onChangeDates={onChangeDates}
-        extraButtons={<FilterButton onApply={onApplyFilter} />}
+        onApply={onApplyFilter}
+        filters={filters}
+        onUpdateFilter={onUpdateFilter}
+        onDeleteFilter={onDeleteFilter}
+        conditionsOp={conditionsOp}
+        onCondOpChange={onCondOpChange}
       />
 
       <View
         style={{
-          marginTop: -10,
-          paddingLeft: 20,
-          paddingRight: 20,
           backgroundColor: 'white',
-        }}
-      >
-        {filters.length > 0 && (
-          <AppliedFilters
-            filters={filters}
-            onUpdate={onUpdateFilter}
-            onDelete={onDeleteFilter}
-          />
-        )}
-      </View>
-
-      <View
-        style={{
-          backgroundColor: 'white',
-          paddingLeft: 30,
-          paddingRight: 30,
+          padding: 30,
+          paddingTop: 0,
           overflow: 'auto',
         }}
       >

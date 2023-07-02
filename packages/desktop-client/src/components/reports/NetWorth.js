@@ -11,7 +11,6 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
 import { styles } from '../../style';
-import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View, P } from '../common';
 
 import Change from './Change';
@@ -24,9 +23,12 @@ import { fromDateRepr } from './util';
 function NetWorth({ accounts }) {
   const {
     filters,
+    saved,
+    conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
+    onCondOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
@@ -36,8 +38,8 @@ function NetWorth({ accounts }) {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, filters),
-    [start, end, accounts, filters],
+    () => netWorthSpreadsheet(start, end, accounts, filters, conditionsOp),
+    [start, end, accounts, filters, conditionsOp],
   );
   const data = useReport('net_worth', params);
 
@@ -87,34 +89,31 @@ function NetWorth({ accounts }) {
         start={start}
         end={end}
         onChangeDates={onChangeDates}
-        extraButtons={<FilterButton onApply={onApplyFilter} />}
+        filters={filters}
+        saved={saved}
+        onApply={onApplyFilter}
+        onUpdateFilter={onUpdateFilter}
+        onDeleteFilter={onDeleteFilter}
+        conditionsOp={conditionsOp}
+        onCondOpChange={onCondOpChange}
       />
 
       <View
         style={{
-          marginTop: -10,
-          paddingLeft: 20,
-          paddingRight: 20,
           backgroundColor: 'white',
-        }}
-      >
-        {filters.length > 0 && (
-          <AppliedFilters
-            filters={filters}
-            onUpdate={onUpdateFilter}
-            onDelete={onDeleteFilter}
-          />
-        )}
-      </View>
-
-      <View
-        style={{
-          backgroundColor: 'white',
-          padding: '30px',
+          padding: 30,
+          paddingTop: 0,
           overflow: 'auto',
         }}
       >
-        <View style={{ textAlign: 'right', paddingRight: 20, flexShrink: 0 }}>
+        <View
+          style={{
+            textAlign: 'right',
+            paddingTop: 20,
+            paddingRight: 20,
+            flexShrink: 0,
+          }}
+        >
           <View
             style={[styles.largeText, { fontWeight: 400, marginBottom: 5 }]}
           >
