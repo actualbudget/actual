@@ -277,11 +277,6 @@ function getPayeePretty(transaction, payee, transferAcct) {
   let { payee: payeeId } = transaction;
 
   if (transferAcct) {
-    const Icon =
-      (transaction._inverse ? -1 : 1) * transaction.amount > 0
-        ? LeftArrow2
-        : RightArrow2;
-
     return (
       <View
         style={{
@@ -289,7 +284,6 @@ function getPayeePretty(transaction, payee, transferAcct) {
           alignItems: 'center',
         }}
       >
-        <Icon width={10} height={8} style={{ marginRight: 5, flexShrink: 0 }} />
         <div
           style={{
             overflow: 'hidden',
@@ -465,37 +459,75 @@ function PayeeCell({
   );
 }
 
-function CellWithScheduleIcon({ scheduleId, children }) {
+function PayeeIcons({
+  transaction,
+  transferAccount,
+  onNavigateToTransferAccount,
+  onNavigateToSchedule,
+  children,
+}) {
+  let scheduleId = transaction.schedule;
   let scheduleData = useCachedSchedules();
+  let schedule = scheduleData
+    ? scheduleData.schedules.find(s => s.id === scheduleId)
+    : null;
 
-  let schedule = scheduleData.schedules.find(s => s.id === scheduleId);
-
-  if (schedule == null) {
-    // This must be a deleted schedule
+  if (schedule == null && transferAccount == null) {
+    // Neither a valid scheduled transaction nor a transfer.
     return children;
   }
 
-  let recurring = schedule._date && !!schedule._date.frequency;
-
-  let style = {
-    width: 13,
-    height: 13,
-    marginLeft: 5,
-    marginRight: 3,
+  let buttonStyle = {
+    width: 23,
+    height: 23,
     color: 'inherit',
   };
 
+  let scheduleIconStyle = {
+    width: 13,
+    height: 13,
+    color: 'inherit',
+  };
+
+  let transferIconStyle = {
+    width: 10,
+    height: 10,
+    color: 'inherit',
+  };
+
+  let onScheduleIconClick = () => onNavigateToSchedule(scheduleId);
+
+  let recurring = schedule && schedule._date && !!schedule._date.frequency;
+  let ScheduledIcon = () => (
+    <Button bare style={buttonStyle} onClick={onScheduleIconClick}>
+      {recurring ? (
+        <ArrowsSynchronize style={scheduleIconStyle} />
+      ) : (
+        <CalendarIcon style={scheduleIconStyle} />
+      )}
+    </Button>
+  );
+
+  let onTransferIconClick = () =>
+    !isTemporaryId(transaction.id) &&
+    onNavigateToTransferAccount(transferAccount.id);
+
+  let TransferDirectionIcon = () => (
+    <Button bare style={buttonStyle} onClick={onTransferIconClick}>
+      {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+        <LeftArrow2 style={transferIconStyle} />
+      ) : (
+        <RightArrow2 style={transferIconStyle} />
+      )}
+    </Button>
+  );
+
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch' }}>
-      <Cell exposed={true}>
-        {() =>
-          recurring ? (
-            <ArrowsSynchronize style={style} />
-          ) : (
-            <CalendarIcon style={{ ...style, transform: 'translateY(-1px)' }} />
-          )
-        }
-      </Cell>
+      {schedule && <Cell exposed={true}>{ScheduledIcon}</Cell>}
+      {!schedule && transferAccount && (
+        <Cell exposed={true}>{TransferDirectionIcon}</Cell>
+      )}
 
       {children}
     </View>
@@ -533,6 +565,8 @@ const Transaction = memo(function Transaction(props) {
     onManagePayees,
     onCreatePayee,
     onToggleSplit,
+    onNavigateToTransferAccount,
+    onNavigateToSchedule,
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
@@ -818,14 +852,16 @@ const Transaction = memo(function Transaction(props) {
           />
         );
 
-        if (transaction.schedule) {
-          return (
-            <CellWithScheduleIcon scheduleId={transaction.schedule}>
-              {cell}
-            </CellWithScheduleIcon>
-          );
-        }
-        return cell;
+        return (
+          <PayeeIcons
+            transaction={transaction}
+            transferAccount={transferAcct}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
+          >
+            {cell}
+          </PayeeIcons>
+        );
       })()}
 
       {isPreview ? (
@@ -1171,6 +1207,8 @@ function NewTransaction({
   onAddSplit,
   onManagePayees,
   onCreatePayee,
+  onNavigateToTransferAccount,
+  onNavigateToSchedule,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1217,6 +1255,8 @@ function NewTransaction({
           onManagePayees={onManagePayees}
           onCreatePayee={onCreatePayee}
           style={{ marginTop: -1 }}
+          onNavigateToTransferAccount={onNavigateToTransferAccount}
+          onNavigateToSchedule={onNavigateToSchedule}
         />
       ))}
       <View
@@ -1268,6 +1308,22 @@ function TransactionTableInner({
 }) {
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
+
+  let onNavigateToTransferAccount = useCallback(
+    accountId => {
+      props.onCloseAddTransaction();
+      props.onNavigateToTransferAccount(accountId);
+    },
+    [props.onCloseAddTransaction, props.onNavigateToTransferAccount],
+  );
+
+  let onNavigateToSchedule = useCallback(
+    scheduleId => {
+      props.onCloseAddTransaction();
+      props.onNavigateToSchedule(scheduleId);
+    },
+    [props.onCloseAddTransaction, props.onNavigateToSchedule],
+  );
 
   useEffect(() => {
     if (!isAddingPrev && props.isAdding) {
@@ -1361,6 +1417,8 @@ function TransactionTableInner({
           onManagePayees={props.onManagePayees}
           onCreatePayee={props.onCreatePayee}
           onToggleSplit={props.onToggleSplit}
+          onNavigateToTransferAccount={onNavigateToTransferAccount}
+          onNavigateToSchedule={onNavigateToSchedule}
         />
       </>
     );
@@ -1418,6 +1476,8 @@ function TransactionTableInner({
               onHover={onHover}
               onManagePayees={props.onManagePayees}
               onCreatePayee={props.onCreatePayee}
+              onNavigateToTransferAccount={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToTransferAccount}
             />
           </View>
         )}

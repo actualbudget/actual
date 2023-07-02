@@ -8,6 +8,7 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
+import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import {
@@ -24,7 +25,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -37,6 +38,8 @@ import {
 import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 
+import { CondOpMenu } from './SavedFilters';
+
 let filterFields = [
   'date',
   'account',
@@ -45,6 +48,7 @@ let filterFields = [
   'category',
   'amount',
   'cleared',
+  'saved',
 ].map(field => [field, mapField(field)]);
 
 function subfieldFromFilter({ field, options, value }) {
@@ -92,16 +96,13 @@ function subfieldToOptions(field, subfield) {
 function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
+      bare
       style={[
-        { border: '1px solid ' + colorsm.buttonNeutralBorder, marginBottom: 5 },
+        { backgroundColor: colors.n10, marginBottom: 5 },
         style,
         selected && {
-          color: colorsm.buttonPositiveText,
-          backgroundColor: colorsm.buttonPositiveBackground,
-          '&,:hover,:active': {
-            color: colorsm.buttonPositiveTextHover,
-            backgroundColor: colorsm.buttonPositiveBackgroundHover,
-          },
+          color: 'white',
+          '&,:hover,:active': { backgroundColor: colors.b4 },
         },
       ]}
       onClick={onClick}
@@ -166,7 +167,7 @@ function ConfigureField({
     <Tooltip
       position="bottom-left"
       style={{ padding: 15 }}
-      width={300}
+      width={250}
       onClose={() => dispatch({ type: 'close' })}
     >
       <FocusScope>
@@ -201,6 +202,15 @@ function ConfigureField({
           ) : (
             titleFirst(mapField(field))
           )}
+        </View>
+
+        <View
+          style={{
+            color: colors.n4,
+            marginBottom: 10,
+          }}
+        >
+          {field === 'saved' && 'Existing filters will be cleared'}
         </View>
 
         <Stack
@@ -254,7 +264,8 @@ function ConfigureField({
             />
           )}
 
-          <View>
+          <Stack direction="row" justify="flex-end" align="center">
+            <View style={{ flex: 1 }} />
             <Button
               primary
               style={{ marginTop: 15 }}
@@ -270,7 +281,7 @@ function ConfigureField({
             >
               Apply
             </Button>
-          </View>
+          </Stack>
         </form>
       </FocusScope>
     </Tooltip>
@@ -278,6 +289,8 @@ function ConfigureField({
 }
 
 export function FilterButton({ onApply }) {
+  let filters = useFilters();
+
   let { dateFormat } = useSelector(state => {
     return {
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
@@ -338,16 +351,20 @@ export function FilterButton({ onApply }) {
       }
     }
 
-    let { error } = await send('rule-validate', {
-      conditions: [cond],
-      actions: [],
-    });
+    let { error } =
+      cond.field !== 'saved' &&
+      (await send('rule-validate', {
+        conditions: [cond],
+        actions: [],
+      }));
+
+    let saved = filters.find(f => cond.value === f.id);
 
     if (error && error.conditionErrors.length > 0) {
       let field = titleFirst(mapField(cond.field));
       alert(field + ': ' + getFieldError(error.conditionErrors[0]));
     } else {
-      onApply(cond);
+      onApply(saved ? saved : cond);
       dispatch({ type: 'close' });
     }
   }
@@ -444,13 +461,12 @@ function FilterExpression({
     <View
       style={[
         {
-          color: colorsm.formInputText,
-          backgroundColor: colorsm.formInputBackground,
+          backgroundColor: colors.n9,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
-          marginBottom: 10,
           marginRight: 10,
+          marginTop: 10,
         },
         style,
       ]}
@@ -463,15 +479,13 @@ function FilterExpression({
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
-            <Text style={{ color: colorsm.formInputTextHighlight }}>
-              {customName}
-            </Text>
+            <Text style={{ color: colors.p4 }}>{customName}</Text>
           ) : (
             <>
-              <Text style={{ color: colorsm.formInputTextHighlight }}>
+              <Text style={{ color: colors.p4 }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
+              <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
@@ -487,7 +501,7 @@ function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            color: colorsm.pageText,
+            color: colors.n4,
             margin: 5,
             marginLeft: 3,
           }}
@@ -509,17 +523,27 @@ function FilterExpression({
   );
 }
 
-export function AppliedFilters({ filters, editingFilter, onUpdate, onDelete }) {
+export function AppliedFilters({
+  filters,
+  editingFilter,
+  onUpdate,
+  onDelete,
+  conditionsOp,
+  onCondOpChange,
+}) {
   return (
     <View
       style={{
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         flexWrap: 'wrap',
-        marginTop: 10,
-        marginBottom: -5,
       }}
     >
+      <CondOpMenu
+        conditionsOp={conditionsOp}
+        onCondOpChange={onCondOpChange}
+        filters={filters}
+      />
       {filters.map((filter, i) => (
         <FilterExpression
           key={i}

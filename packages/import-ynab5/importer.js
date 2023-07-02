@@ -164,6 +164,9 @@ async function importTransactions(data, entityIdMap) {
   for (let transaction of data.transactions) {
     entityIdMap.set(transaction.id, uuidv4());
   }
+  for (let transaction of data.subtransactions) {
+    entityIdMap.set(transaction.id, uuidv4());
+  }
 
   await Promise.all(
     Object.keys(transactionsGrouped).map(async accountId => {
@@ -180,6 +183,7 @@ async function importTransactions(data, entityIdMap) {
           if (subtransactions) {
             subtransactions = subtransactions.map(subtrans => {
               return {
+                id: entityIdMap.get(subtrans.id),
                 amount: amountFromYnab(subtrans.amount),
                 category: entityIdMap.get(subtrans.category_id) || null,
                 notes: subtrans.memo,

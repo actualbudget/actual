@@ -71,8 +71,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         <View
           style={{
             flex: '1 auto',
-            height: 52,
-            marginTop: 10,
+            margin: '10px 0',
           }}
         >
           <View

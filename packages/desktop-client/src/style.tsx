@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'glamor';
+import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
@@ -446,6 +447,16 @@ export const styles = {
   text: {
     fontSize: 16,
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
+  },
+
+  delayedFadeIn: {
+    animationName: keyframes({
+      '0%': { opacity: 0 },
+      '100%': { opacity: 1 },
+    }),
+    animationDuration: '0.2s',
+    animationFillMode: 'both',
+    animationDelay: '0.5s',
   },
   // Dynamically set
   lightScrollbar: null as CSSProperties | null,

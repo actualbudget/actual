@@ -228,7 +228,15 @@ export function Value({
   }
 }
 
-function ConditionExpression({ field, op, value, options, prefix, style }) {
+function ConditionExpression({
+  field,
+  op,
+  value,
+  options,
+  prefix,
+  style,
+  inline,
+}) {
   return (
     <View
       style={[
@@ -250,7 +258,7 @@ function ConditionExpression({ field, op, value, options, prefix, style }) {
         {mapField(field, options)}
       </Text>{' '}
       <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
-      <Value value={value} field={field} />
+      <Value value={value} field={field} inline={inline} />
     </View>
   );
 }
@@ -392,6 +400,7 @@ let Rule = memo(
                   key={i}
                   field={cond.field}
                   op={cond.op}
+                  inline={true}
                   value={cond.value}
                   options={cond.options}
                   prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}

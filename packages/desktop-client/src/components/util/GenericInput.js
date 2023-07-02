@@ -8,6 +8,7 @@ import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import Autocomplete from '../autocomplete/Autocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import SavedFilterAutocomplete from '../autocomplete/SavedFilterAutocomplete';
 import { View, Input } from '../common';
 import { Checkbox } from '../forms';
 import DateSelect from '../select/DateSelect';
@@ -23,10 +24,9 @@ export default function GenericInput({
   style,
   onChange,
 }) {
-  let { payees, accounts, categoryGroups, dateFormat } = useSelector(state => {
+  let { saved, categoryGroups, dateFormat } = useSelector(state => {
     return {
-      payees: state.queries.payees,
-      accounts: state.queries.accounts,
+      saved: state.queries.saved,
       categoryGroups: state.queries.categories.grouped,
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
@@ -48,8 +48,6 @@ export default function GenericInput({
         case 'payee':
           content = (
             <PayeeAutocomplete
-              payees={payees}
-              accounts={accounts}
               multi={multi}
               showMakeTransfer={false}
               openOnFocus={true}
@@ -66,7 +64,6 @@ export default function GenericInput({
         case 'account':
           content = (
             <AccountAutocomplete
-              accounts={accounts}
               value={value}
               multi={multi}
               openOnFocus={true}
@@ -83,6 +80,28 @@ export default function GenericInput({
           content = (
             <CategoryAutocomplete
               categoryGroups={categoryGroups}
+              value={value}
+              multi={multi}
+              openOnFocus={true}
+              onSelect={onChange}
+              inputProps={{
+                inputRef,
+                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+              }}
+            />
+          );
+          break;
+
+        default:
+      }
+      break;
+
+    case 'saved':
+      switch (field) {
+        case 'saved':
+          content = (
+            <SavedFilterAutocomplete
+              saved={saved}
               value={value}
               multi={multi}
               openOnFocus={true}

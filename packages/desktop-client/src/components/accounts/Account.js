@@ -19,6 +19,7 @@ import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
   SchedulesProvider,
   useCachedSchedules,
@@ -71,6 +72,8 @@ import {
   Menu,
   Stack,
 } from '../common';
+import { FilterButton } from '../filters/FiltersMenu';
+import { FiltersStack } from '../filters/SavedFilters';
 import { KeyHandlers } from '../KeyHandlers';
 import NotesButton from '../NotesButton';
 import CellValue from '../spreadsheet/CellValue';
@@ -78,7 +81,6 @@ import format from '../spreadsheet/format';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { SelectedItemsButton } from '../table';
 
-import { FilterButton, AppliedFilters } from './Filters';
 import TransactionList from './TransactionList';
 import {
   SplitsExpandedProvider,
@@ -255,11 +257,11 @@ function MenuButton({ onClick }) {
   );
 }
 
-function MenuTooltip({ onClose, children }) {
+export function MenuTooltip({ width, onClose, children }) {
   return (
     <Tooltip
       position="bottom-right"
-      width={200}
+      width={width}
       style={{ padding: 0 }}
       onClose={onClose}
     >
@@ -288,7 +290,7 @@ function AccountMenu({
       onReconcile={onReconcile}
     />
   ) : (
-    <MenuTooltip onClose={onClose}>
+    <MenuTooltip width={200} onClose={onClose}>
       <Menu
         onMenuSelect={item => {
           if (item === 'reconcile') {
@@ -330,7 +332,7 @@ function AccountMenu({
 
 function CategoryMenu({ onClose, onMenuSelect }) {
   return (
-    <MenuTooltip onClose={onClose}>
+    <MenuTooltip width={200} onClose={onClose}>
       <Menu
         onMenuSelect={item => {
           onMenuSelect(item);
@@ -383,10 +385,11 @@ function SelectedBalance({ selectedItems, account }) {
 
   let scheduleBalance = null;
   let scheduleData = useCachedSchedules();
+  let schedules = scheduleData ? scheduleData.schedules : [];
   let previewIds = [...selectedItems]
     .filter(id => isPreviewId(id))
     .map(id => id.slice(8));
-  for (let s of scheduleData.schedules) {
+  for (let s of schedules) {
     if (previewIds.includes(s.id)) {
       if (!account || account.id === s._account) {
         scheduleBalance += s._amount;
@@ -487,42 +490,7 @@ function Balances({
   );
 }
 
-// function ScheduleMenu({ onSelect, onClose }) {
-//   let params = useParams();
-//   let scheduleData = useCachedSchedules();
-//   let payees = useSelector(state => state.queries.payees);
-//   let byId = getPayeesById(payees);
-
-//   if (scheduleData == null) {
-//     return null;
-//   }
-
-//   return (
-//     <Tooltip
-//       position="bottom-right"
-//       width={200}
-//       style={{ padding: 0 }}
-//       onClose={onClose}
-//     >
-//       <Menu
-//         onMenuSelect={name => {
-//           onSelect(name);
-//           onClose();
-//         }}
-//         items={scheduleData.schedules.map(s => {
-//           let desc = s._payee
-//             ? `${byId[s._payee].name} (${s.next_date})`
-//             : `No payee (${s.next_date})`;
-
-//           return { name: s.id, text: desc };
-//         })}
-//       />
-//     </Tooltip>
-//   );
-// }
-
 function SelectedTransactionsButton({
-  style,
   getTransaction,
   onShow,
   onDuplicate,
@@ -679,6 +647,8 @@ const AccountHeader = memo(
     workingHard,
     accountName,
     account,
+    filterId,
+    filtersList,
     accountsSyncing,
     accounts,
     transactions,
@@ -691,6 +661,7 @@ const AccountHeader = memo(
     canCalculateBalance,
     search,
     filters,
+    conditionsOp,
     savePrefs,
     onSearch,
     onAddTransaction,
@@ -711,6 +682,9 @@ const AccountHeader = memo(
     onCreateRule,
     onApplyFilter,
     onUpdateFilter,
+    onClearFilters,
+    onReloadSavedFilter,
+    onCondOpChange,
     onDeleteFilter,
     onScheduleAction,
   }) => {
@@ -1028,10 +1002,16 @@ const AccountHeader = memo(
           </Stack>
 
           {filters && filters.length > 0 && (
-            <AppliedFilters
+            <FiltersStack
               filters={filters}
-              onUpdate={onUpdateFilter}
-              onDelete={onDeleteFilter}
+              conditionsOp={conditionsOp}
+              onUpdateFilter={onUpdateFilter}
+              onDeleteFilter={onDeleteFilter}
+              onClearFilters={onClearFilters}
+              onReloadSavedFilter={onReloadSavedFilter}
+              filterId={filterId}
+              filtersList={filtersList}
+              onCondOpChange={onCondOpChange}
             />
           )}
         </View>
@@ -1114,6 +1094,8 @@ class AccountInternal extends PureComponent {
       editingName: false,
       isAdding: false,
       latestDate: null,
+      filterId: [],
+      conditionsOp: 'and',
     };
   }
 
@@ -1457,7 +1439,7 @@ class AccountInternal extends PureComponent {
 
   onToggleExtraBalances = () => {
     let { accountId, showExtraBalances } = this.props;
-    let key = 'show-extra-balances-' + accountId;
+    let key = 'show-extra-balances-' + accountId || 'all-accounts';
 
     this.props.savePrefs({ [key]: !showExtraBalances });
   };
@@ -1778,14 +1760,56 @@ class AccountInternal extends PureComponent {
     this.props.pushModal('edit-rule', { rule });
   };
 
+  onCondOpChange = (value, filters) => {
+    this.setState({ conditionsOp: value });
+    this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
+    this.applyFilters([...filters]);
+  };
+
+  onReloadSavedFilter = (savedFilter, item) => {
+    if (item === 'reload') {
+      let [getFilter] = this.props.filtersList.filter(
+        f => f.id === this.state.filterId.id,
+      );
+      this.setState({ conditionsOp: getFilter.conditionsOp });
+      this.applyFilters([...getFilter.conditions]);
+    } else {
+      savedFilter.status &&
+        this.setState({ conditionsOp: savedFilter.conditionsOp }) &&
+        this.applyFilters([...savedFilter.conditions]);
+    }
+    this.setState({ filterId: { ...this.state.filterId, ...savedFilter } });
+  };
+
+  onClearFilters = () => {
+    this.setState({ conditionsOp: 'and' });
+    this.setState({ filterId: [] });
+    this.applyFilters([]);
+  };
+
   onUpdateFilter = (oldFilter, updatedFilter) => {
     this.applyFilters(
       this.state.filters.map(f => (f === oldFilter ? updatedFilter : f)),
     );
+    this.setState({
+      filterId: {
+        ...this.state.filterId,
+        status: this.state.filterId && 'changed',
+      },
+    });
   };
 
   onDeleteFilter = filter => {
     this.applyFilters(this.state.filters.filter(f => f !== filter));
+    this.state.filters.length === 1
+      ? this.setState({ filterId: [] }) &&
+        this.setState({ conditionsOp: 'and' })
+      : this.setState({
+          filterId: {
+            ...this.state.filterId,
+            status: this.state.filterId && 'changed',
+          },
+        });
   };
 
   onApplyFilter = async cond => {
@@ -1793,7 +1817,19 @@ class AccountInternal extends PureComponent {
     if (cond.customName) {
       filters = filters.filter(f => f.customName !== cond.customName);
     }
-    this.applyFilters([...filters, cond]);
+    if (cond.conditions) {
+      this.setState({ filterId: { ...cond, status: 'saved' } });
+      this.setState({ conditionsOp: cond.conditionsOp });
+      this.applyFilters([...cond.conditions]);
+    } else {
+      this.setState({
+        filterId: {
+          ...this.state.filterId,
+          status: this.state.filterId && 'changed',
+        },
+      });
+      this.applyFilters([...filters, cond]);
+    }
   };
 
   onScheduleAction = async (name, ids) => {
@@ -1823,9 +1859,9 @@ class AccountInternal extends PureComponent {
       let { filters } = await send('make-filters-from-conditions', {
         conditions: conditions.filter(cond => !cond.customName),
       });
-
+      const conditionsOpKey = this.state.conditionsOp === 'or' ? '$or' : '$and';
       this.currentQuery = this.rootQuery.filter({
-        $and: [...filters, ...customFilters],
+        [conditionsOpKey]: [...filters, ...customFilters],
       });
       this.updateQuery(this.currentQuery, true);
       this.setState({ filters: conditions, search: '' });
@@ -1854,6 +1890,7 @@ class AccountInternal extends PureComponent {
       transactions,
       loading,
       workingHard,
+      filterId,
       reconcileAmount,
       transactionsFiltered,
       editingName,
@@ -1906,6 +1943,9 @@ class AccountInternal extends PureComponent {
                   isNameEditable={isNameEditable}
                   workingHard={workingHard}
                   account={account}
+                  filterId={filterId}
+                  filtersList={this.props.filtersList}
+                  location={this.props.location}
                   accountName={accountName}
                   accountsSyncing={accountsSyncing}
                   accounts={accounts}
@@ -1919,6 +1959,7 @@ class AccountInternal extends PureComponent {
                   reconcileAmount={reconcileAmount}
                   search={this.state.search}
                   filters={this.state.filters}
+                  conditionsOp={this.state.conditionsOp}
                   savePrefs={this.props.savePrefs}
                   onSearch={this.onSearch}
                   onShowTransactions={this.onShowTransactions}
@@ -1940,6 +1981,9 @@ class AccountInternal extends PureComponent {
                   onBatchUnlink={this.onBatchUnlink}
                   onCreateRule={this.onCreateRule}
                   onUpdateFilter={this.onUpdateFilter}
+                  onClearFilters={this.onClearFilters}
+                  onReloadSavedFilter={this.onReloadSavedFilter}
+                  onCondOpChange={this.onCondOpChange}
                   onDeleteFilter={this.onDeleteFilter}
                   onApplyFilter={this.onApplyFilter}
                   onScheduleAction={this.onScheduleAction}
@@ -2052,7 +2096,7 @@ export default function Account() {
     showBalances: params.id && state.prefs.local['show-balances-' + params.id],
     showCleared: params.id && !state.prefs.local['hide-cleared-' + params.id],
     showExtraBalances:
-      params.id && state.prefs.local['show-extra-balances-' + params.id],
+      state.prefs.local['show-extra-balances-' + params.id || 'all-accounts'],
     payees: state.queries.payees,
     modalShowing: state.modals.modalStack.length > 0,
     accountsSyncing: state.account.accountsSyncing,
@@ -2060,6 +2104,7 @@ export default function Account() {
   }));
 
   let dispatch = useDispatch();
+  let filtersList = useFilters();
   let actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
     [dispatch],
@@ -2105,6 +2150,7 @@ export default function Account() {
           accountId={params.id}
           categoryId={activeLocation?.state?.filter?.category}
           location={location}
+          filtersList={filtersList}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

@@ -39,7 +39,7 @@ class FatalError extends Component {
           does not support <code>SharedArrayBuffer</code>, or your server is not
           sending the appropriate headers, or you are not using HTTPS. See{' '}
           <ExternalLink
-            muted
+            linkColor="muted"
             to="https://actualbudget.org/docs/troubleshooting/shared-array-buffer"
           >
             our troubleshooting documentation
@@ -55,7 +55,10 @@ class FatalError extends Component {
         <Text>
           There was a problem loading the app in this browser version. If this
           continues to be a problem, you can{' '}
-          <ExternalLink muted to="https://github.com/actualbudget/releases">
+          <ExternalLink
+            linkColor="muted"
+            to="https://github.com/actualbudget/releases"
+          >
             download the desktop app
           </ExternalLink>
           .
@@ -84,7 +87,10 @@ class FatalError extends Component {
           <Text>{msg}</Text>
           <Text>
             Please get{' '}
-            <ExternalLink muted to="https://actualbudget.org/contact">
+            <ExternalLink
+              linkColor="muted"
+              to="https://actualbudget.org/contact"
+            >
               in touch
             </ExternalLink>{' '}
             for support
