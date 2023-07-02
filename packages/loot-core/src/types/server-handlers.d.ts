@@ -40,9 +40,10 @@ export interface ServerHandlers {
 
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
+  // incomplete
   'get-categories': () => Promise<{
-    grouped: unknown[];
-    list: unknown[];
+    grouped: { id: string }[];
+    list: { id: string }[];
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
@@ -294,14 +295,7 @@ export interface ServerHandlers {
     | { messages: Message[] }
   >;
 
-  'get-budgets': () => Promise<
-    {
-      id: string;
-      cloudFileId: string;
-      groupId: string;
-      name: string;
-    }[]
-  >;
+  'get-budgets': () => Promise<Budget[]>;
 
   'get-remote-files': () => Promise<RemoteFile[]>;
 

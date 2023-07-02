@@ -1,12 +1,14 @@
 import { send } from '../../platform/client/fetch';
 import { getDownloadError, getSyncError } from '../../shared/errors';
+import type { Handlers } from '../../types/handlers';
 import * as constants from '../constants';
 
 import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
+import type { ActionResult } from './types';
 
-export function updateStatusText(text) {
+export function updateStatusText(text: string | null): ActionResult {
   return (dispatch, getState) => {
     const { loadingText } = getState().app;
     // The presence of any loading text puts the app in a "loading"
@@ -19,7 +21,7 @@ export function updateStatusText(text) {
   };
 }
 
-export function loadBudgets() {
+export function loadBudgets(): ActionResult {
   return async dispatch => {
     const budgets = await send('get-budgets');
 
@@ -30,7 +32,7 @@ export function loadBudgets() {
   };
 }
 
-export function loadRemoteFiles() {
+export function loadRemoteFiles(): ActionResult {
   return async dispatch => {
     const files = await send('get-remote-files');
 
@@ -41,7 +43,7 @@ export function loadRemoteFiles() {
   };
 }
 
-export function loadAllFiles() {
+export function loadAllFiles(): ActionResult {
   return async (dispatch, getState) => {
     const budgets = await send('get-budgets');
     const files = await send('get-remote-files');
@@ -56,7 +58,11 @@ export function loadAllFiles() {
   };
 }
 
-export function loadBudget(id, loadingText = '', options = {}) {
+export function loadBudget(
+  id: string,
+  loadingText = '',
+  options = {},
+): ActionResult {
   return async (dispatch, getState) => {
     dispatch(setAppState({ loadingText }));
 
@@ -95,7 +101,7 @@ export function loadBudget(id, loadingText = '', options = {}) {
   };
 }
 
-export function closeBudget() {
+export function closeBudget(): ActionResult {
   return async (dispatch, getState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
@@ -112,7 +118,7 @@ export function closeBudget() {
   };
 }
 
-export function closeBudgetUI() {
+export function closeBudgetUI(): ActionResult {
   return async (dispatch, getState) => {
     let prefs = getState().prefs.local;
     if (prefs && prefs.id) {
@@ -121,14 +127,20 @@ export function closeBudgetUI() {
   };
 }
 
-export function deleteBudget(id, cloudFileId) {
+export function deleteBudget(
+  id: string | undefined,
+  cloudFileId: string | undefined,
+): ActionResult {
   return async dispatch => {
     await send('delete-budget', { id, cloudFileId });
     await dispatch(loadAllFiles());
   };
 }
 
-export function createBudget({ testMode = false, demoMode = false } = {}) {
+export function createBudget({
+  testMode = false,
+  demoMode = false,
+} = {}): ActionResult {
   return async (dispatch, getState) => {
     dispatch(
       setAppState({
@@ -153,7 +165,10 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   };
 }
 
-export function importBudget(filepath, type) {
+export function importBudget(
+  filepath: string,
+  type: Parameters<Handlers['import-budget']>[0]['type'],
+): ActionResult {
   return async (dispatch, getState) => {
     const { error } = await send('import-budget', { filepath, type });
     if (error) {
@@ -167,7 +182,7 @@ export function importBudget(filepath, type) {
   };
 }
 
-export function uploadBudget(id) {
+export function uploadBudget(id: string): ActionResult {
   return async dispatch => {
     let { error } = await send('upload-budget', { id });
     if (error) {
@@ -179,7 +194,7 @@ export function uploadBudget(id) {
   };
 }
 
-export function closeAndDownloadBudget(cloudFileId) {
+export function closeAndDownloadBudget(cloudFileId: string): ActionResult {
   return async dispatch => {
     // It's very important that we set this loading message before
     // closing the budget. Otherwise, the manager will ignore our
@@ -191,7 +206,10 @@ export function closeAndDownloadBudget(cloudFileId) {
   };
 }
 
-export function downloadBudget(cloudFileId, { replace = false } = {}) {
+export function downloadBudget(
+  cloudFileId: string,
+  { replace = false } = {},
+): ActionResult {
   return async dispatch => {
     dispatch(setAppState({ loadingText: 'Downloading...' }));
 

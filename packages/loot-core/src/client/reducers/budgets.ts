@@ -1,12 +1,19 @@
+import type { RemoteFile } from '../../server/cloud-storage';
+import type { Budget } from '../../types/budget';
+import { type File } from '../../types/file';
 import * as constants from '../constants';
+import type { Action } from '../state-types';
+import type { BudgetsState } from '../state-types/budgets';
 
-function sortFiles(arr) {
+function sortFiles(arr: File[]) {
   arr.sort((x, y) => {
     let name1 = x.name.toLowerCase();
     let name2 = y.name.toLowerCase();
     let i = name1 < name2 ? -1 : name1 > name2 ? 1 : 0;
     if (i === 0) {
-      i = x.id < y.id ? -1 : x.id > y.id ? 1 : 0;
+      let xId = x.state === 'remote' ? x.cloudFileId : x.id;
+      let yId = x.state === 'remote' ? x.cloudFileId : x.id;
+      i = xId < yId ? -1 : xId > yId ? 1 : 0;
     }
     return i;
   });
@@ -20,10 +27,14 @@ function sortFiles(arr) {
 // 4. detached - Downloaded but broken group id (reset sync state)
 // 5. broken - user shouldn't have access to this file
 // 6. unknown - user is offline so can't determine the status
-function reconcileFiles(localFiles, remoteFiles) {
+function reconcileFiles(
+  localFiles: Budget[],
+  remoteFiles: RemoteFile[] | null,
+): File[] {
+  console.log({ localFiles, remoteFiles });
   let reconciled = new Set();
 
-  let files = localFiles.map(localFile => {
+  let files = localFiles.map((localFile): File & { deleted: boolean } => {
     if (localFile.cloudFileId) {
       // This is the case where for some reason getting the files from
       // the server failed. We don't want to scare the user, just show
@@ -31,7 +42,15 @@ function reconcileFiles(localFiles, remoteFiles) {
       // back online
 
       if (remoteFiles == null) {
-        return { ...localFile, state: 'unknown' };
+        let cloudFileId = localFile.cloudFileId;
+        let groupId = localFile.groupId;
+        return {
+          ...localFile,
+          cloudFileId,
+          groupId,
+          deleted: false,
+          state: 'unknown',
+        };
       }
 
       let remote = remoteFiles.find(f => localFile.cloudFileId === f.fileId);
@@ -59,10 +78,10 @@ function reconcileFiles(localFiles, remoteFiles) {
           };
         }
       } else {
-        return { ...localFile, state: 'broken' };
+        return { ...localFile, deleted: false, state: 'broken' };
       }
     } else {
-      return { ...localFile, state: 'local' };
+      return { ...localFile, deleted: false, state: 'local' };
     }
   });
 
@@ -93,13 +112,16 @@ function reconcileFiles(localFiles, remoteFiles) {
     .concat(sorted.filter(f => f.state === 'broken'));
 }
 
-const initialState = {
+const initialState: BudgetsState = {
   budgets: [],
   remoteFiles: null,
   allFiles: null,
 };
 
-export default function update(state = initialState, action) {
+export default function update(
+  state = initialState,
+  action: Action,
+): BudgetsState {
   switch (action.type) {
     case constants.SET_BUDGETS:
       return {
