@@ -5,7 +5,6 @@ import debug from './debug';
 import modals from './modals';
 import notifications from './notifications';
 import prefs from './prefs';
-import profile from './profile';
 import queries from './queries';
 import user from './user';
 
@@ -14,7 +13,6 @@ const reducers = {
   queries,
   account,
   debug,
-  profile,
   prefs,
   modals,
   notifications,

@@ -74,37 +74,6 @@ export default function update(state = initialState, action) {
         ...state,
         payees: action.payees,
       };
-    case constants.ADD_CATEGORY: {
-      let category = { id: 'temp', name: action.name };
-
-      return {
-        ...state,
-        categories: {
-          grouped: state.categories.grouped.map(group => {
-            if (group.id === action.groupId) {
-              return { ...group, categories: [category, ...group.categories] };
-            }
-            return group;
-          }),
-          list: [category, ...state.categories.list],
-        },
-      };
-    }
-    case constants.DELETE_CATEGORY: {
-      return {
-        ...state,
-        categories: {
-          grouped: state.categories.grouped.map(group => {
-            return {
-              ...group,
-              categories: group.categories.filter(cat => cat.id !== action.id),
-            };
-          }),
-          list: state.categories.list.filter(cat => cat.id !== action.id),
-        },
-      };
-    }
-
     default:
   }
   return state;

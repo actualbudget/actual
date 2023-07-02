@@ -121,11 +121,6 @@ export default function update(state = initialState, action) {
         remoteFiles: action.remoteFiles,
         allFiles: reconcileFiles(action.budgets, action.remoteFiles),
       };
-    case constants.SET_AVAILABLE_IMPORTS:
-      return {
-        ...state,
-        availableImports: action.imports,
-      };
     case constants.SIGN_OUT:
       // If the user logs out, make sure to reset all the files
       return { ...state, allFiles: null };

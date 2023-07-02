@@ -8,11 +8,6 @@ const initialState = {
 
 export default function update(state = initialState, action) {
   switch (action.type) {
-    case constants.LOAD_BANKS:
-      return {
-        ...state,
-        banks: action.banks,
-      };
     case constants.SET_ACCOUNTS_SYNCING:
       return {
         ...state,
