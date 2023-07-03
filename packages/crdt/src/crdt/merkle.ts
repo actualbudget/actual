@@ -139,7 +139,9 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
   let next = { hash: trie.hash };
 
   // Prune child nodes.
-  keys.slice(-n).map(k => (next[k] = prune(trie[k], n)));
+  for (let k of keys.slice(-n)) {
+    next[k] = prune(trie[k], n);
+  }
 
   return next;
 }
