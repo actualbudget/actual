@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -7,20 +7,15 @@ import { colors } from '../../style';
 import { Modal, Text, P, Button, Stack } from '../common';
 import DisplayId from '../util/DisplayId';
 
-export default function PostsOfflineNotification({ modalProps }) {
+export default function PostsOfflineNotification({ modalProps, actions }) {
   let location = useLocation();
-  let navigate = useNavigate();
 
   let payees = (location.state && location.state.payees) || [];
   let plural = payees.length > 1;
 
-  function onClose() {
-    navigate(-1);
-  }
-
   async function onPost() {
     await send('schedule/force-run-service');
-    navigate(-1);
+    actions.popModal();
   }
 
   return (
@@ -69,7 +64,7 @@ export default function PostsOfflineNotification({ modalProps }) {
         style={{ marginTop: 20 }}
         spacing={2}
       >
-        <Button onClick={onClose}>Decide later</Button>
+        <Button onClick={actions.popModal}>Decide later</Button>
         <Button primary onClick={onPost}>
           Post transactions
         </Button>

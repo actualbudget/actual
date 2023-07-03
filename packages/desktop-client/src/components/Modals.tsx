@@ -230,6 +230,7 @@ export default function Modals() {
               modalProps={modalProps}
               id={options.id || null}
               initialFields={options.initialFields}
+              actions={actions}
             />
           );
 
@@ -238,12 +239,19 @@ export default function Modals() {
             <ScheduleLink
               key={name}
               modalProps={modalProps}
+              actions={actions}
               transactionIds={options.transactionIds}
             />
           );
 
         case 'schedules-discover':
-          return <DiscoverSchedules key={name} modalProps={modalProps} />;
+          return (
+            <DiscoverSchedules
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
+            />
+          );
 
         case 'schedule-posts-offline-notification':
           return (

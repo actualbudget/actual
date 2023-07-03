@@ -76,7 +76,12 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export default function ScheduleDetails({ modalProps, id, initialFields }) {
+export default function ScheduleDetails({
+  modalProps,
+  actions,
+  id,
+  initialFields,
+}) {
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
   let navigate = useNavigate();
@@ -377,7 +382,7 @@ export default function ScheduleDetails({ modalProps, id, initialFields }) {
       if (adding) {
         await onLinkTransactions([...selectedInst.items], res.data);
       }
-      navigate(-1);
+      actions.popModal();
     }
   }
 
@@ -768,7 +773,7 @@ export default function ScheduleDetails({ modalProps, id, initialFields }) {
         style={{ marginTop: 20 }}
       >
         {state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
-        <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
+        <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
           Cancel
         </Button>
         <Button primary onClick={onSave}>

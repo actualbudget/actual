@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -8,8 +7,11 @@ import { Modal, Search, Text, View } from '../common';
 
 import { SchedulesTable } from './SchedulesTable';
 
-export default function ScheduleLink({ modalProps, transactionIds: ids }) {
-  let navigate = useNavigate();
+export default function ScheduleLink({
+  modalProps,
+  actions,
+  transactionIds: ids,
+}) {
   let scheduleData = useSchedules(
     useCallback(query => query.filter({ completed: false }), []),
   );
@@ -24,11 +26,11 @@ export default function ScheduleLink({ modalProps, transactionIds: ids }) {
 
   async function onSelect(scheduleId) {
     if (ids && ids.length > 0) {
-      await send('transactions-batch-update', {
+      await send('tran;sactions-batch-update', {
         updated: ids.map(id => ({ id, schedule: scheduleId })),
       });
     }
-    navigate(-1);
+    actions.popModal();
   }
 
   return (

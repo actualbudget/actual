@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -104,8 +103,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
   );
 }
 
-export default function DiscoverSchedules({ modalProps }) {
-  let navigate = useNavigate();
+export default function DiscoverSchedules({ modalProps, actions }) {
   let { data: schedules, isLoading } =
     useSendPlatformRequest('schedule/discover');
   if (!schedules) schedules = [];
@@ -142,7 +140,7 @@ export default function DiscoverSchedules({ modalProps }) {
     }
 
     setCreating(false);
-    navigate(-1);
+    actions.popModal();
   }
 
   return (
