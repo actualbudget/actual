@@ -162,6 +162,24 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   );
 });
 
+export function UnexposedCellContent({
+  value,
+  formatter,
+}: Pick<CellProps, 'value' | 'formatter'>) {
+  return (
+    <Text
+      style={{
+        flexGrow: 1,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}
+    >
+      {formatter ? formatter(value) : value}
+    </Text>
+  );
+}
+
 type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   formatter?: (value: string, type?: unknown) => string;
   focused?: boolean;
@@ -170,6 +188,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   plain?: boolean;
   exposed?: boolean;
   children?: ReactNode | (() => ReactNode);
+  unexposedContent?: ReactNode;
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
@@ -188,6 +207,7 @@ export function Cell({
   plain,
   style,
   valueStyle,
+  unexposedContent,
   ...viewProps
 }: CellProps) {
   let mouseCoords = useRef(null);
@@ -231,9 +251,10 @@ export function Cell({
         <View
           style={[
             {
+              flexDirection: 'row',
               flex: 1,
               padding: '0 5px',
-              justifyContent: 'center',
+              alignItems: 'center',
             },
             styles.smallText,
             valueStyle,
@@ -242,27 +263,24 @@ export function Cell({
           // the user does a direct click, not if they also drag the
           // mouse to select something
           onMouseDown={e => (mouseCoords.current = [e.clientX, e.clientY])}
-          onMouseUp={e => {
-            if (
-              mouseCoords.current &&
-              Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
-              Math.abs(e.clientY - mouseCoords.current[1]) < 5
-            ) {
-              onExpose && onExpose(name);
-            }
-          }}
           // When testing, allow the click handler to be used instead
-          onClick={global.IS_TESTING && (() => onExpose && onExpose(name))}
+          onClick={
+            global.IS_TESTING
+              ? () => onExpose && onExpose(name)
+              : e => {
+                  if (
+                    mouseCoords.current &&
+                    Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
+                    Math.abs(e.clientY - mouseCoords.current[1]) < 5
+                  ) {
+                    onExpose && onExpose(name);
+                  }
+                }
+          }
         >
-          <Text
-            style={{
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {formatter ? formatter(value) : value}
-          </Text>
+          {unexposedContent || (
+            <UnexposedCellContent value={value} formatter={formatter} />
+          )}
         </View>
       )}
     </View>
