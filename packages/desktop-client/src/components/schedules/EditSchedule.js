@@ -1,6 +1,5 @@
 import React, { useEffect, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
@@ -84,7 +83,6 @@ export default function ScheduleDetails({
 }) {
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
-  let navigate = useNavigate();
   let globalDispatch = useDispatch();
   let dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
