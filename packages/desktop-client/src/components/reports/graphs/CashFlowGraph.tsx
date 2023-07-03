@@ -10,7 +10,6 @@ import {
   VictoryGroup,
 } from 'victory';
 
-import { colors } from '../../../style';
 import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
@@ -46,7 +45,7 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
               labelComponent={<Tooltip portalHost={portalHost} />}
               labels={x => x.premadeLabel}
               style={{
-                data: { stroke: colors.n5 },
+                data: { stroke: theme.line.style.data.stroke },
               }}
             />
             <VictoryAxis

@@ -25,7 +25,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import {
   View,
   Text,
@@ -98,11 +98,17 @@ function OpButton({ op, selected, style, onClick }) {
     <Button
       bare
       style={[
-        { backgroundColor: colors.n10, marginBottom: 5 },
+        {
+          color: colorsm.buttonNeutralText,
+          backgroundColor: colorsm.buttonNeutralBackground,
+          marginBottom: 5,
+        },
         style,
         selected && {
-          color: 'white',
-          '&,:hover,:active': { backgroundColor: colors.b4 },
+          color: colorsm.buttonNeutralTextHover,
+          '&,:hover,:active': {
+            backgroundColor: colorsm.buttonNeutralBackgroundHover,
+          },
         },
       ]}
       onClick={onClick}
@@ -206,7 +212,7 @@ function ConfigureField({
 
         <View
           style={{
-            color: colors.n4,
+            color: colorsm.pageTextSubdued,
             marginBottom: 10,
           }}
         >
@@ -461,7 +467,9 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colors.n9,
+          backgroundColor: colorsm.menuItemBackground,
+          color: colorsm.menuItemText,
+          border: '1px solid ' + colorsm.menuBorder,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
@@ -477,15 +485,25 @@ function FilterExpression({
         onClick={() => setEditing(true)}
         style={{ marginRight: -7 }}
       >
-        <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
+        <div
+          style={{
+            paddingBlock: 1,
+            paddingLeft: 5,
+            paddingRight: 2,
+          }}
+        >
           {customName ? (
-            <Text style={{ color: colors.p4 }}>{customName}</Text>
+            <Text style={{ color: colorsm.pageTextPositive }}>
+              {customName}
+            </Text>
           ) : (
             <>
-              <Text style={{ color: colors.p4 }}>
+              <Text style={{ color: colorsm.pageTextPositive }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+              <Text style={{ color: colorsm.menuItemText }}>
+                {friendlyOp(op)}
+              </Text>{' '}
               <Value
                 value={value}
                 field={field}
@@ -501,7 +519,7 @@ function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            color: colors.n4,
+            color: 'inherit',
             margin: 5,
             marginLeft: 3,
           }}
