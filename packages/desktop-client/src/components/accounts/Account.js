@@ -346,7 +346,7 @@ function DetailedBalance({ name, balance }) {
     <Text
       style={{
         marginLeft: 15,
-        backgroundColor: colors.n10,
+        backgroundColor: colors.n9,
         borderRadius: 4,
         padding: '4px 6px',
         color: colors.n5,
