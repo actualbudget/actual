@@ -1108,7 +1108,13 @@ const Transaction = memo(function Transaction(props) {
   );
 });
 
-function TransactionError({ error, isDeposit, onAddSplit, style }) {
+function TransactionError({
+  error,
+  isDeposit,
+  onAddSplit,
+  style,
+  onBalanceLastSplit,
+}) {
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
@@ -1126,11 +1132,18 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
           >
             <Text>
               Amount left:{' '}
-              <Text style={{ fontWeight: 500 }}>
+              <Button
+                bare
+                onClick={onBalanceLastSplit}
+                style={{
+                  display: 'inline',
+                  fontWeight: 500,
+                }}
+              >
                 {integerToCurrency(
                   isDeposit ? error.difference : -error.difference,
                 )}
-              </Text>
+              </Button>
             </Text>
             <View style={{ flex: 1 }} />
             <Button
@@ -1200,6 +1213,7 @@ function NewTransaction({
   onCreatePayee,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
+  onBalanceLastSplit,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1270,6 +1284,7 @@ function NewTransaction({
           <TransactionError
             error={error}
             isDeposit={isDeposit}
+            onBalanceLastSplit={onBalanceLastSplit}
             onAddSplit={() => onAddSplit(transactions[0].id)}
           />
         ) : (
@@ -1295,6 +1310,7 @@ function TransactionTableInner({
   renderEmpty,
   onHover,
   onScroll,
+  onBalanceLastSplit,
   ...props
 }) {
   const containerRef = createRef();
@@ -1461,6 +1477,7 @@ function TransactionTableInner({
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToTransferAccount}
+              onBalanceLastSplit={onBalanceLastSplit}
             />
           </View>
         )}
@@ -1853,6 +1870,18 @@ export let TransactionTable = forwardRef((props, ref) => {
     [splitsExpanded.dispatch],
   );
 
+  let onBalanceLastSplit = useCallback(() => {
+    let newTrans = latestState.current.newTransactions;
+    if (newTrans.length > 1) {
+      if (newTrans[0].error) {
+        if (newTrans[newTrans.length - 1].amount === 0) {
+          newTrans[newTrans.length - 1].amount = newTrans[0].error.difference;
+          setNewTransactions(newTrans);
+        }
+      }
+    }
+  }, []);
+
   return (
     <TransactionTableInner
       tableRef={mergedRef}
@@ -1875,6 +1904,7 @@ export let TransactionTable = forwardRef((props, ref) => {
       newTransactions={newTransactions}
       tableNavigator={tableNavigator}
       newNavigator={newNavigator}
+      onBalanceLastSplit={onBalanceLastSplit}
     />
   );
 });
