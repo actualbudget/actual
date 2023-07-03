@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -12,9 +12,7 @@ import useSelected, {
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { colors } from '../../style';
-import { getParent } from '../../util/router-tools';
 import { View, Stack, ButtonWithLoading, P } from '../common';
-import { Page } from '../Page';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
@@ -115,11 +113,6 @@ export default function DiscoverSchedules({ modalProps }) {
   let [creating, setCreating] = useState(false);
 
   let selectedInst = useSelected('discover-schedules', schedules, []);
-
-  let location = useLocation();
-  if (!getParent(location)) {
-    return <Navigate to="/schedules" replace />;
-  }
 
   async function onCreate() {
     let selected = schedules.filter(s => selectedInst.items.has(s.id));
