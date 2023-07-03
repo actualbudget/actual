@@ -2,7 +2,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
 import { styles } from '../../style';
-import { View, Select, Button, ButtonLink } from '../common';
+import { View, Button, ButtonLink, CustomSelect } from '../common';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 function validateStart(allMonths, start, end) {
@@ -83,35 +83,31 @@ function Header({
           gap: 15,
         }}
       >
-        <div>
-          <Select
-            style={{ flex: 0, backgroundColor: 'white' }}
-            onChange={e =>
-              onChangeDates(...validateStart(allMonths, e.target.value, end))
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
+          }}
+        >
+          <CustomSelect
+            style={{ backgroundColor: 'white', width: 130 }}
+            onChange={newValue =>
+              onChangeDates(...validateStart(allMonths, newValue, end))
             }
             value={start}
-          >
-            {allMonths.map(month => (
-              <option key={month.name} value={month.name}>
-                {month.pretty}
-              </option>
-            ))}
-          </Select>{' '}
-          to{' '}
-          <Select
-            style={{ flex: 0, backgroundColor: 'white' }}
-            onChange={e =>
-              onChangeDates(...validateEnd(allMonths, start, e.target.value))
+            options={allMonths.map(({ name, pretty }) => [name, pretty])}
+          />
+          <View>to</View>
+          <CustomSelect
+            style={{ backgroundColor: 'white', width: 130 }}
+            onChange={newValue =>
+              onChangeDates(...validateEnd(allMonths, start, newValue))
             }
             value={end}
-          >
-            {allMonths.map(month => (
-              <option key={month.name} value={month.name}>
-                {month.pretty}
-              </option>
-            ))}
-          </Select>
-        </div>
+            options={allMonths.map(({ name, pretty }) => [name, pretty])}
+          />
+        </View>
 
         <FilterButton onApply={onApply} />
 
