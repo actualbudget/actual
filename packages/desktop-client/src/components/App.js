@@ -148,9 +148,9 @@ export default connect(
       ? state.prefs.global
         ? state.prefs.global.theme
           ? state.prefs.global.theme
-          : 'dark'
-        : 'dark'
-      : 'dark',
+          : 'light'
+        : 'light'
+      : 'light',
   }),
   actions,
 )(App);

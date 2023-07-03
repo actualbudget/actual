@@ -1501,7 +1501,7 @@ handlers['load-global-prefs'] = async function () {
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
-    theme: theme || 'dark',
+    theme: theme || 'light',
   };
 };
 

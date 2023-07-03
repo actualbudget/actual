@@ -1,17 +1,15 @@
 import React from 'react';
-import { connect, useSelector, shallowEqual } from 'react-redux';
+import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { saveGlobalPrefs } from 'loot-core/src/client/actions';
 
 import { MoonStars, Sun } from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
 
 import { Button, View } from './common';
 
-export function ThemeSelector() {
+export function ThemeSelector({ globalPrefs, saveGlobalPrefs }) {
   let { isNarrowWidth } = useResponsive();
-  let theme = useSelector(state => state.prefs.global.theme, shallowEqual);
 
   // Don't display on mobile
   return isNarrowWidth ? null : (
@@ -19,16 +17,15 @@ export function ThemeSelector() {
       <Button
         bare
         // Switch theme value then update the global pref
-        // which should trigger a theme update in <App> <ThemeStyle>
+        // which triggers a theme update in <App> <ThemeStyle>
         onClick={() => {
-          theme = theme === 'dark' ? 'light' : 'dark';
-          console.log(theme);
+          globalPrefs.theme = globalPrefs.theme === 'dark' ? 'light' : 'dark';
           saveGlobalPrefs({
-            theme: theme,
+            theme: globalPrefs.theme,
           });
         }}
       >
-        {theme === 'light' ? (
+        {globalPrefs.theme === 'light' ? (
           <MoonStars style={{ width: 13, height: 13, color: 'inherit' }} />
         ) : (
           <Sun style={{ width: 13, height: 13, color: 'inherit' }} />

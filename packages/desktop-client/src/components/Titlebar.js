@@ -361,7 +361,10 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <ThemeSelector />
+      <ThemeSelector
+        globalPrefs={globalPrefs}
+        saveGlobalPrefs={saveGlobalPrefs}
+      />
       {serverURL ? (
         <SyncButton
           style={{ marginLeft: 10 }}
@@ -380,7 +383,6 @@ export default connect(
     localPrefs: state.prefs.local,
     userData: state.user.data,
     floatingSidebar: state.prefs.global.floatingSidebar,
-    theme: state.prefs.global.theme,
   }),
   actions,
 )(Titlebar);
