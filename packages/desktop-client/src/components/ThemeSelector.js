@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import { MoonStars, Sun } from '../icons/v2';
+import MoonStars from '../icons/v2/MoonStars';
+import Sun from '../icons/v2/Sun';
 import { useResponsive } from '../ResponsiveProvider';
 
 import { Button, View } from './common';
