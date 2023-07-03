@@ -12,7 +12,7 @@ import useSelected, {
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { colors } from '../../style';
-import { View, Stack, ButtonWithLoading, P } from '../common';
+import { Modal, View, Stack, ButtonWithLoading, P } from '../common';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 

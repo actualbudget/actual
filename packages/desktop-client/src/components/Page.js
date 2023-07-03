@@ -1,12 +1,9 @@
-import React, { createContext, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
 
-import { Modal, View, Text } from './common';
-
-let PageTypeContext = createContext({ type: 'page' });
+import { View, Text } from './common';
 
 function PageTitle({ name, style }) {
   const { isNarrowWidth } = useResponsive();
