@@ -88,7 +88,10 @@ export class AccountPage {
   async clickCloseAccount() {
     await this.menuButton.click();
     await this.page.getByRole('button', { name: 'Close Account' }).click();
-    return new CloseAccountModal(this.page.locator('css=[aria-modal]'));
+    return new CloseAccountModal(
+      this.page.locator('css=[aria-modal]'),
+      this.page,
+    );
   }
 
   async _fillTransactionFields(transactionRow, transaction) {
