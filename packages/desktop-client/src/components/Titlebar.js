@@ -18,6 +18,8 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
+import SvgEye from '../icons/v2/Eye';
+import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors } from '../style';
@@ -82,6 +84,32 @@ function UncategorizedButton() {
         );
       }}
     </SheetValue>
+  );
+}
+
+function PrivacyButton({ localPrefs, onTogglePrivacy }) {
+  let [isPrivacyEnabled, setIsPrivacyEnabled] = useState(
+    localPrefs.isPrivacyEnabled,
+  );
+  let togglePrivacy = () => {
+    setIsPrivacyEnabled(!isPrivacyEnabled);
+    onTogglePrivacy(!isPrivacyEnabled);
+  };
+
+  let privacyIconStyle = {
+    width: 23,
+    height: 23,
+    color: 'inherit',
+  };
+
+  return (
+    <Button bare onClick={togglePrivacy}>
+      {isPrivacyEnabled ? (
+        <SvgEyeSlashed style={privacyIconStyle} />
+      ) : (
+        <SvgEye style={privacyIconStyle} />
+      )}
+    </Button>
   );
 }
 
@@ -257,6 +285,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
 function Titlebar({
   globalPrefs,
   saveGlobalPrefs,
+  savePrefs,
   localPrefs,
   userData,
   floatingSidebar,
@@ -270,6 +299,10 @@ function Titlebar({
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
+
+  let onTogglePrivacy = enabled => {
+    savePrefs({ isPrivacyEnabled: enabled });
+  };
 
   return isNarrowWidth ? null : (
     <View
@@ -351,6 +384,10 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
+      <PrivacyButton
+        localPrefs={localPrefs}
+        onTogglePrivacy={onTogglePrivacy}
+      />
       {serverURL ? (
         <SyncButton
           style={{ marginLeft: 10 }}

@@ -20,6 +20,7 @@ import { styles, colors } from '../style';
 
 import { View, Block, AlignedText, AnchorLink, Button } from './common';
 import { useSidebar } from './FloatableSidebar';
+import PrivacyFilter from './PrivacyFilter';
 import { useDraggable, useDroppable, DropHighlight } from './sort';
 import CellValue from './spreadsheet/CellValue';
 
@@ -284,7 +285,9 @@ function Account({
             <AlignedText
               left={name}
               right={
-                <CellValue debug={true} binding={query} type="financial" />
+                <PrivacyFilter>
+                  <CellValue debug={true} binding={query} type="financial" />
+                </PrivacyFilter>
               }
             />
           </AnchorLink>
