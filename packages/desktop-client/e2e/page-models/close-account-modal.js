@@ -4,7 +4,8 @@ export class CloseAccountModal {
   }
 
   async selectTransferAccount(accountName) {
-    await this.page.getByRole('combobox').selectOption({ label: accountName });
+    await this.page.getByPlaceholder('Select account...').fill(accountName);
+    await this.page.keyboard.press('Enter');
   }
 
   async closeAccount() {
