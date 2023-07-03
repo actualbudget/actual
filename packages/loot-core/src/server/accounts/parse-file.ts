@@ -124,9 +124,21 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
       amount: trans.amount,
       imported_id: trans.fi_id,
       date: trans.date ? dayFromDate(trans.date * 1000) : null,
-      payee_name: trans.name,
-      imported_payee: trans.name,
-      notes: trans.memo || null,
+      payee_name: chooseOfxPayee(trans).value,
+      imported_payee: chooseOfxPayee(trans).value,
+      notes: chooseOfxPayee(trans).memoUsed ? null : trans.memo,
     })),
   };
+}
+
+// Banks don't always implement the OFX standard properly.
+// If no payee is available try fallback to memo
+function chooseOfxPayee(trans) {
+  let isPayeeAvailable = trans.name != null && trans.name != '';
+  let isMemoAvailable = trans.memo != null && trans.memo != '';
+
+  if (!isPayeeAvailable && isMemoAvailable) {
+    return { memoUsed: true, value: trans.memo };
+  }
+  return { memoUsed: false, value: trans.payee };
 }
