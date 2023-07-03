@@ -142,7 +142,7 @@ export async function migrate(db: Database): Promise<string[]> {
 
   const pending = getPending(appliedIds, available);
 
-  for (const migration of pending) {
+  for (let migration of pending) {
     await applyMigration(db, migration, MIGRATIONS_DIR);
   }
 

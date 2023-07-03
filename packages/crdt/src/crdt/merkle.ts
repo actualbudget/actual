@@ -61,8 +61,8 @@ function insertKey(trie: TrieNode, key: string, hash: number) {
 }
 
 export function build(timestamps: Timestamp[]) {
-  const trie = emptyTrie();
-  for (const timestamp of timestamps) {
+  let trie = emptyTrie();
+  for (let timestamp of timestamps) {
     insert(trie, timestamp);
   }
   return trie;
