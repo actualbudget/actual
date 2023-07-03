@@ -13,9 +13,11 @@ let VERSION = Date.now();
 
 export function ExposeNavigate() {
   let navigate = useNavigate();
+  let pushModal = usePushModal();
   useLayoutEffect(() => {
     window.__navigate = navigate;
-  }, [navigate]);
+    window.__pushModal = pushModal;
+  }, [navigate, pushModal]);
   return null;
 }
 
@@ -24,8 +26,10 @@ export function usePushModal() {
   let location = useLocation();
 
   return useCallback(
-    (path: To) =>
-      navigate(path, { state: { parent: location, _version: VERSION } }),
+    (path: To, stateProps: Record<string, unknown> = {}) =>
+      navigate(path, {
+        state: { parent: location, _version: VERSION, ...stateProps },
+      }),
     [navigate, location],
   );
 }
