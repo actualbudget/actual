@@ -126,7 +126,7 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
       date: trans.date ? dayFromDate(trans.date * 1000) : null,
       payee_name: chooseOfxPayee(trans).value,
       imported_payee: chooseOfxPayee(trans).value,
-      notes: chooseOfxPayee(trans).memoUsed ? null : trans.memo,
+      notes: chooseOfxPayee(trans).memoUsed ? null : (trans.memo || null),
     })),
   };
 }
@@ -140,5 +140,5 @@ function chooseOfxPayee(trans) {
   if (!isPayeeAvailable && isMemoAvailable) {
     return { memoUsed: true, value: trans.memo };
   }
-  return { memoUsed: false, value: trans.payee };
+  return { memoUsed: false, value: trans.name };
 }
