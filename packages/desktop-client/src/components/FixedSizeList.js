@@ -336,7 +336,7 @@ export default class FixedSizeList extends PureComponent {
 
   getStopIndexForStartIndex = (startIndex, scrollOffset) => {
     const offset = startIndex * this.props.itemSize;
-    const size = this.props.width;
+    const size = this.props.height;
     const numVisibleItems = Math.ceil(
       (size + scrollOffset - offset) / this.props.itemSize,
     );
