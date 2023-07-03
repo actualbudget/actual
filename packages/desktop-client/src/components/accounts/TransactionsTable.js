@@ -269,44 +269,45 @@ const TransactionHeader = memo(
         <Cell
           value="Date"
           width={110}
-          icon={field === 'date' && ascDesc}
-          onClick={onSortTable('date')}
+          icon={field === 'date' ? ascDesc : 'clickable'}
+          onClick={() => onSortTable('date')}
         />
         {showAccount && (
           <Cell
             value="Account"
             width="flex"
-            icon={field === 'account' && ascDesc}
-            onClick={onSortTable('account')}
+            icon={field === 'account' ? ascDesc : 'clickable'}
+            onClick={() => onSortTable('account')}
           />
         )}
         <Cell
           value="Payee"
           width="flex"
-          icon={field === 'payee' && ascDesc}
-          onClick={onSortTable('payee')}
+          icon={field === 'payee' ? ascDesc : 'clickable'}
+          onClick={() => onSortTable('payee')}
         />
         <Cell value="Notes" width="flex" />
         {showCategory && (
           <Cell
             value="Category"
             width="flex"
-            icon={field === 'category' && ascDesc}
-            onClick={onSortTable('category')}
+            icon={field === 'category' ? ascDesc : 'clickable'}
+            onClick={() => onSortTable('category')}
           />
         )}
         <Cell
           value="Payment"
           width={90}
           textAlign="flex"
-          onClick={onSortTable('amount')}
+          icon={'clickable'}
+          onClick={() => onSortTable('amount')}
         />
         <Cell
           value="Deposit"
           width={85}
           textAlign="flex"
-          icon={field === 'amount' && ascDesc}
-          onClick={onSortTable('amount')}
+          icon={field === 'amount' ? ascDesc : 'clickable'}
+          onClick={() => onSortTable('amount')}
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
@@ -1924,7 +1925,7 @@ export let TransactionTable = forwardRef((props, ref) => {
           fieldName: props[fields].find(f => f.id === e[field])?.name ?? '',
         };
       })
-      .sort((a, b) => a.fieldName > b.fieldName);
+      .sort((a, b) => a.fieldName.localeCompare(b.fieldName));
 
     transactions = ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
   }
@@ -1937,7 +1938,7 @@ export let TransactionTable = forwardRef((props, ref) => {
           fieldName: category.find(f => f.id === e[field])?.name ?? '',
         };
       })
-      .sort((a, b) => a.fieldName > b.fieldName);
+      .sort((a, b) => a.fieldName.localeCompare(b.fieldName));
 
     transactions = ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
   }
@@ -1954,11 +1955,11 @@ export let TransactionTable = forwardRef((props, ref) => {
       break;
     case 'date':
       ascDesc === 'asc'
-        ? transactions.sort((a, b) => a[field] < b[field])
-        : transactions.sort((a, b) => a[field] > b[field]);
+        ? transactions.sort((a, b) => b[field].localeCompare(a[field]))
+        : transactions.sort((a, b) => a[field].localeCompare(b[field]));
       break;
     case 'amount':
-      let sortAscAmt = transactions.sort((a, b) => a[field] > b[field]);
+      let sortAscAmt = transactions.sort((a, b) => a[field] - b[field]);
       transactions = ascDesc === 'asc' ? sortAscAmt : sortAscAmt.reverse();
       break;
     default:
