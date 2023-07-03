@@ -167,6 +167,7 @@ export default function AccountDetails({
         // refreshControl={refreshControl}
         onLoadMore={onLoadMore}
         onSelect={onSelectTransaction}
+        pushModal={pushModal}
       />
     </View>
   );

@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 
+import * as actions from 'loot-core/src/client/actions';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { usePushModal } from '../../util/router-tools';
 import { View, Button, Search } from '../common';
 import { Page } from '../Page';
 
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
-export default function Schedules() {
-  let pushModal = usePushModal();
-
+function Schedules({ pushModal }) {
   let [filter, setFilter] = useState('');
 
   let scheduleData = useSchedules();
@@ -23,15 +22,15 @@ export default function Schedules() {
   let { schedules, statuses } = scheduleData;
 
   function onEdit(id) {
-    pushModal(`/schedule/edit/${id}`);
+    pushModal('schedule-edit', { id });
   }
 
   function onAdd() {
-    pushModal('/schedule/edit');
+    pushModal('schedule-edit');
   }
 
   function onDiscover() {
-    pushModal('/schedule/discover');
+    pushModal('schedules-discover');
   }
 
   async function onAction(name, id) {
@@ -102,3 +101,5 @@ export default function Schedules() {
     </Page>
   );
 }
+
+export default connect(null, actions)(Schedules);

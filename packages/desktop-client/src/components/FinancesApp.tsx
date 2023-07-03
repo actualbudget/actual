@@ -27,7 +27,7 @@ import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
-import { ExposeNavigate, StackedRoutes } from '../util/router-tools';
+import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import BankSyncStatus from './BankSyncStatus';
@@ -41,7 +41,6 @@ import Notifications from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
-import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 
@@ -62,9 +61,9 @@ function NarrowNotSupported({
   return isNarrowWidth ? null : children;
 }
 
-function StackedRoutesInner({ location }) {
+function StackedRoutesInner() {
   return (
-    <Routes location={location}>
+    <Routes>
       <Route path="/" element={<Navigate to="/budget" replace />} />
 
       <Route
@@ -86,44 +85,6 @@ function StackedRoutesInner({ location }) {
             <WideComponent name="Schedules" />
           </NarrowNotSupported>
         }
-      />
-
-      <Route
-        path="/schedule/edit"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="EditSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/edit/:id"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="EditSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="LinkSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/discover"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="DiscoverSchedules" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route
-        path="/schedule/posts-offline-notification"
-        element={<PostsOfflineNotification />}
       />
 
       <Route path="/payees" element={<ManagePayeesPage />} />
@@ -241,6 +202,8 @@ function FinancesApp(props) {
     }, 100);
   }, []);
 
+  const { isNarrowWidth } = useResponsive();
+
   return (
     <BrowserRouter>
       <RouterBehaviors getAccounts={props.getAccounts} />
@@ -279,9 +242,9 @@ function FinancesApp(props) {
             >
               <Notifications />
               <BankSyncStatus />
-              <StackedRoutes
-                render={location => <StackedRoutesInner location={location} />}
-              />
+
+              <StackedRoutesInner />
+
               <Modals />
             </div>
 

@@ -8,18 +8,6 @@ import { Modal, View, Text } from './common';
 
 let PageTypeContext = createContext({ type: 'page' });
 
-export function PageTypeProvider({ type, current, children }) {
-  return (
-    <PageTypeContext.Provider value={{ type, current }}>
-      {children}
-    </PageTypeContext.Provider>
-  );
-}
-
-export function usePageType() {
-  return useContext(PageTypeContext);
-}
-
 function PageTitle({ name, style }) {
   const { isNarrowWidth } = useResponsive();
 
@@ -63,30 +51,9 @@ function PageTitle({ name, style }) {
   );
 }
 
-export function Page({ title, modalSize, children, titleStyle }) {
-  let { type, current } = usePageType();
-  let navigate = useNavigate();
+export function Page({ title, children, titleStyle }) {
   let { isNarrowWidth } = useResponsive();
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
-
-  if (type === 'modal') {
-    let size = modalSize;
-    if (typeof modalSize === 'string') {
-      size =
-        modalSize === 'medium' ? { width: 750, height: 600 } : { width: 600 };
-    }
-
-    return (
-      <Modal
-        title={title}
-        isCurrent={current}
-        size={size}
-        onClose={() => navigate(-1)}
-      >
-        {children}
-      </Modal>
-    );
-  }
 
   return (
     <View style={isNarrowWidth ? undefined : styles.page}>

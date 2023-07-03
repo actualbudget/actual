@@ -36,10 +36,7 @@ export function handleGlobalEvents(actions, store) {
   });
 
   listen('schedules-offline', ({ payees }) => {
-    let pushModal = window.__pushModal;
-    if (pushModal) {
-      pushModal(`/schedule/posts-offline-notification`, { payees });
-    }
+    actions.pushModal(`schedule-posts-offline-notification`, { payees });
   });
 
   // This is experimental: we sync data locally automatically when

@@ -11,8 +11,6 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
-import { usePushModal } from '../../util/router-tools';
-
 import { TransactionTable } from './TransactionsTable';
 
 // When data changes, there are two ways to update the UI:
@@ -77,6 +75,7 @@ export default function TransactionList({
   dateFormat,
   hideFraction,
   addNotification,
+  pushModal,
   renderEmpty,
   onSort,
   sortField,
@@ -88,7 +87,6 @@ export default function TransactionList({
 }) {
   let transactionsLatest = useRef();
   let navigate = useNavigate();
-  let pushModal = usePushModal();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -162,7 +160,7 @@ export default function TransactionList({
   });
 
   let onNavigateToSchedule = useCallback(scheduleId => {
-    pushModal(`/schedule/edit/${scheduleId}`);
+    pushModal('schedule-edit', { id: scheduleId });
   });
 
   return (

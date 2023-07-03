@@ -4,11 +4,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../style';
-import { Text, P, Button, Stack } from '../common';
-import { Page } from '../Page';
+import { Modal, Text, P, Button, Stack } from '../common';
 import DisplayId from '../util/DisplayId';
 
-export default function PostsOfflineNotification() {
+export default function PostsOfflineNotification({ modalProps }) {
   let location = useLocation();
   let navigate = useNavigate();
 
@@ -25,7 +24,7 @@ export default function PostsOfflineNotification() {
   }
 
   return (
-    <Page title="Post transactions?" modalSize="small">
+    <Modal title="Post transactions?" size="small" {...modalProps}>
       <P>
         {payees.length > 0 ? (
           <Text>
@@ -75,6 +74,6 @@ export default function PostsOfflineNotification() {
           Post transactions
         </Button>
       </Stack>
-    </Page>
+    </Modal>
   );
 }

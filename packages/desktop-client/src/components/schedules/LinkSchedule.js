@@ -1,16 +1,14 @@
 import React, { useCallback, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { Search, Text, View } from '../common';
-import { Page } from '../Page';
+import { Modal, Search, Text, View } from '../common';
 
 import { SchedulesTable } from './SchedulesTable';
 
-export default function ScheduleLink() {
-  let location = useLocation();
+export default function ScheduleLink({ modalProps, transactionIds: ids }) {
   let navigate = useNavigate();
   let scheduleData = useSchedules(
     useCallback(query => query.filter({ completed: false }), []),
@@ -25,8 +23,6 @@ export default function ScheduleLink() {
   let { schedules, statuses } = scheduleData;
 
   async function onSelect(scheduleId) {
-    let { state } = location;
-    let ids = state.transactionIds;
     if (ids && ids.length > 0) {
       await send('transactions-batch-update', {
         updated: ids.map(id => ({ id, schedule: scheduleId })),
@@ -36,7 +32,7 @@ export default function ScheduleLink() {
   }
 
   return (
-    <Page title="Link Schedule" modalSize="medium">
+    <Modal title="Link Schedule" size="medium" {...modalProps}>
       <View
         style={{ flexDirection: 'row', marginBottom: 20, alignItems: 'center' }}
       >
@@ -59,6 +55,6 @@ export default function ScheduleLink() {
         onSelect={onSelect}
         tableStyle={{ marginInline: -20 }}
       />
-    </Page>
+    </Modal>
   );
 }

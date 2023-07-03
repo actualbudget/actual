@@ -80,6 +80,19 @@ type FinanceModals = {
   'budget-summary': {
     month: string;
   };
+
+  'schedule-edit': {
+    id?: string;
+    initialFields?: unknown;
+  };
+
+  'schedule-link': {
+    transactionIds?: string[];
+  };
+
+  'schedules-discover': null;
+
+  'schedule-posts-offline-notification': null;
 };
 
 export type PushModalAction = {

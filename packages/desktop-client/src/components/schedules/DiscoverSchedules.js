@@ -14,7 +14,7 @@ import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { colors } from '../../style';
 import { getParent } from '../../util/router-tools';
 import { View, Stack, ButtonWithLoading, P } from '../common';
-import { Page, usePageType } from '../Page';
+import { Page } from '../Page';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
@@ -23,7 +23,6 @@ import { ScheduleAmountCell } from './SchedulesTable';
 let ROW_HEIGHT = 43;
 
 function DiscoverSchedulesTable({ schedules, loading }) {
-  let pageType = usePageType();
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
 
@@ -92,11 +91,10 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       <Table
         rowHeight={ROW_HEIGHT}
         version="v2"
-        backgroundColor={pageType.type === 'modal' ? 'transparent' : undefined}
+        backgroundColor="transparent"
         style={{
           flex: 1,
-          backgroundColor:
-            pageType.type === 'modal' ? 'transparent' : undefined,
+          backgroundColor: 'transparent',
         }}
         items={schedules}
         loading={loading}
@@ -108,8 +106,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
   );
 }
 
-export default function DiscoverSchedules() {
-  let pageType = usePageType();
+export default function DiscoverSchedules({ modalProps }) {
   let navigate = useNavigate();
   let { data: schedules, isLoading } =
     useSendPlatformRequest('schedule/discover');
@@ -156,7 +153,11 @@ export default function DiscoverSchedules() {
   }
 
   return (
-    <Page title="Found schedules" modalSize={{ width: 850, height: 650 }}>
+    <Modal
+      title="Found schedules"
+      size={{ width: 850, height: 650 }}
+      {...modalProps}
+    >
       <P>
         We found some possible schedules in your current transactions. Select
         the ones you want to create.
@@ -177,7 +178,7 @@ export default function DiscoverSchedules() {
         justify="flex-end"
         style={{
           paddingTop: 20,
-          paddingBottom: pageType.type === 'modal' ? 0 : 20,
+          paddingBottom: 0,
         }}
       >
         <ButtonWithLoading
@@ -189,6 +190,6 @@ export default function DiscoverSchedules() {
           Create schedules
         </ButtonWithLoading>
       </Stack>
-    </Page>
+    </Modal>
   );
 }

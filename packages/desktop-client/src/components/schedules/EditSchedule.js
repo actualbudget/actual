@@ -13,10 +13,9 @@ import useSelected, { SelectedProvider } from '../../hooks/useSelected';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { Stack, View, Text, Button } from '../common';
+import { Modal, Stack, View, Text, Button } from '../common';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRule';
-import { Page } from '../Page';
 import DateSelect from '../select/DateSelect';
 import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '../table';
@@ -77,8 +76,7 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export default function ScheduleDetails() {
-  let { id, initialFields } = useParams();
+export default function ScheduleDetails({ modalProps, id, initialFields }) {
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
   let navigate = useNavigate();
@@ -429,9 +427,10 @@ export default function ScheduleDetails() {
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
 
   return (
-    <Page
+    <Modal
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
-      modalSize="medium"
+      size="medium"
+      {...modalProps}
     >
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
@@ -776,6 +775,6 @@ export default function ScheduleDetails() {
           {adding ? 'Add' : 'Save'}
         </Button>
       </Stack>
-    </Page>
+    </Modal>
   );
 }
