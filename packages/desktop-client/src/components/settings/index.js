@@ -24,6 +24,7 @@ import FixSplitsTool from './FixSplits';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
+import ThemeSettings from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
@@ -164,6 +165,10 @@ function Settings({
             />
           )}
 
+          <ThemeSettings
+            saveGlobalPrefs={saveGlobalPrefs}
+            globalPrefs={globalPrefs}
+          />
           <FormatSettings prefs={prefs} savePrefs={savePrefs} />
           <EncryptionSettings prefs={prefs} pushModal={pushModal} />
           <ExportBudget prefs={prefs} />

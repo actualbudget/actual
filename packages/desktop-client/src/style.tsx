@@ -275,6 +275,10 @@ const colorThemes = {
   dark: colorsDark,
 };
 
+export function GetColorThemes() {
+  return Object.keys(colorThemes);
+}
+
 export function ThemeStyle({ theme }: { theme: keyof typeof colorThemes }) {
   let themeColors = colorThemes[theme];
   let css = Object.keys(themeColors)
