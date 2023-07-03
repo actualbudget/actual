@@ -7,13 +7,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  Navigate,
-  useParams,
-  useNavigate,
-  useLocation,
-  useMatch,
-} from 'react-router-dom';
+import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
 
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
@@ -59,6 +53,7 @@ import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { authorizeBank } from '../../nordigen';
 import { styles, colorsm } from '../../style';
+import { usePushModal } from '../../util/router-tools';
 import { useActiveLocation } from '../ActiveLocation';
 import AnimatedRefresh from '../AnimatedRefresh';
 import {
@@ -500,9 +495,8 @@ function SelectedTransactionsButton({
   onCreateRule,
   onScheduleAction,
 }) {
+  let pushModal = usePushModal();
   let selectedItems = useSelectedItems();
-  let navigate = useNavigate();
-  let location = useLocation();
 
   let types = useMemo(() => {
     let items = [...selectedItems];
@@ -614,14 +608,11 @@ function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              navigate(`/schedule/edit/${scheduleId}`, {
-                locationPtr: location,
-              });
+              pushModal(`/schedule/edit/${scheduleId}`);
             }
             break;
           case 'link-schedule':
-            navigate(`/schedule/link`, {
-              locationPtr: location,
+            pushModal('/schedule/link', {
               transactionIds: [...selectedItems],
             });
             break;
@@ -2145,7 +2136,7 @@ export default function Account() {
           {...actionCreators}
           modalShowing={
             state.modalShowing ||
-            !!(activeLocation.state && activeLocation.state.locationPtr)
+            !!(activeLocation.state && activeLocation.state.parent)
           }
           accountId={params.id}
           categoryId={activeLocation?.state?.filter?.category}

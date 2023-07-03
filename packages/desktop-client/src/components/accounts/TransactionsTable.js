@@ -69,6 +69,7 @@ import {
   CellButton,
   useTableNavigator,
   Table,
+  UnexposedCellContent,
 } from '../table';
 
 function getDisplayValue(obj, name) {
@@ -394,6 +395,8 @@ function PayeeCell({
   onUpdate,
   onCreatePayee,
   onManagePayees,
+  onNavigateToTransferAccount,
+  onNavigateToSchedule,
 }) {
   let isCreatingPayee = useRef(false);
 
@@ -410,7 +413,6 @@ function PayeeCell({
         valueStyle,
         inherited && { color: colorsm.tableTextInactive },
       ]}
-      formatter={() => getPayeePretty(transaction, payee, transferAcct)}
       exposed={focused}
       onExpose={!isPreview && (name => onEdit(id, name))}
       onUpdate={async value => {
@@ -423,6 +425,20 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
+      unexposedContent={
+        <>
+          <PayeeIcons
+            transaction={transaction}
+            transferAccount={transferAcct}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
+          />
+          <UnexposedCellContent
+            value={payeeId}
+            formatter={() => getPayeePretty(transaction, payee, transferAcct)}
+          />
+        </>
+      }
     >
       {({
         onBlur,
@@ -478,6 +494,8 @@ function PayeeIcons({
   }
 
   let buttonStyle = {
+    marginLeft: -5,
+    marginRight: 2,
     width: 23,
     height: 23,
     color: 'inherit',
@@ -495,43 +513,41 @@ function PayeeIcons({
     color: 'inherit',
   };
 
-  let onScheduleIconClick = () => onNavigateToSchedule(scheduleId);
-
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
-  let ScheduledIcon = () => (
-    <Button bare style={buttonStyle} onClick={onScheduleIconClick}>
+
+  return schedule ? (
+    <Button
+      bare
+      style={buttonStyle}
+      onClick={e => {
+        e.stopPropagation();
+        onNavigateToSchedule(scheduleId);
+      }}
+    >
       {recurring ? (
         <ArrowsSynchronize style={scheduleIconStyle} />
       ) : (
         <CalendarIcon style={scheduleIconStyle} />
       )}
     </Button>
-  );
-
-  let onTransferIconClick = () =>
-    !isTemporaryId(transaction.id) &&
-    onNavigateToTransferAccount(transferAccount.id);
-
-  let TransferDirectionIcon = () => (
-    <Button bare style={buttonStyle} onClick={onTransferIconClick}>
+  ) : transferAccount ? (
+    <Button
+      bare
+      style={buttonStyle}
+      onClick={e => {
+        e.stopPropagation();
+        if (!isTemporaryId(transaction.id)) {
+          onNavigateToTransferAccount(transferAccount.id);
+        }
+      }}
+    >
       {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
         <LeftArrow2 style={transferIconStyle} />
       ) : (
         <RightArrow2 style={transferIconStyle} />
       )}
     </Button>
-  );
-
-  return (
-    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch' }}>
-      {schedule && <Cell exposed={true}>{ScheduledIcon}</Cell>}
-      {!schedule && transferAccount && (
-        <Cell exposed={true}>{TransferDirectionIcon}</Cell>
-      )}
-
-      {children}
-    </View>
-  );
+  ) : null;
 }
 
 const Transaction = memo(function Transaction(props) {
@@ -829,40 +845,29 @@ const Transaction = memo(function Transaction(props) {
           )}
         </CustomCell>
       )}
-      {(() => {
-        let cell = (
-          <PayeeCell
-            id={id}
-            payeeId={payeeId}
-            accountId={accountId}
-            focused={focusedField === 'payee'}
-            inherited={inheritedFields && inheritedFields.has('payee')}
-            payees={payees}
-            accounts={accounts}
-            valueStyle={valueStyle}
-            transaction={transaction}
-            payee={payee}
-            transferAcct={transferAcct}
-            importedPayee={importedPayee}
-            isPreview={isPreview}
-            onEdit={onEdit}
-            onUpdate={onUpdate}
-            onCreatePayee={onCreatePayee}
-            onManagePayees={onManagePayees}
-          />
-        );
-
-        return (
-          <PayeeIcons
-            transaction={transaction}
-            transferAccount={transferAcct}
-            onNavigateToTransferAccount={onNavigateToTransferAccount}
-            onNavigateToSchedule={onNavigateToSchedule}
-          >
-            {cell}
-          </PayeeIcons>
-        );
-      })()}
+      {(() => (
+        <PayeeCell
+          id={id}
+          payeeId={payeeId}
+          accountId={accountId}
+          focused={focusedField === 'payee'}
+          inherited={inheritedFields && inheritedFields.has('payee')}
+          payees={payees}
+          accounts={accounts}
+          valueStyle={valueStyle}
+          transaction={transaction}
+          payee={payee}
+          transferAcct={transferAcct}
+          importedPayee={importedPayee}
+          isPreview={isPreview}
+          onEdit={onEdit}
+          onUpdate={onUpdate}
+          onCreatePayee={onCreatePayee}
+          onManagePayees={onManagePayees}
+          onNavigateToTransferAccount={onNavigateToTransferAccount}
+          onNavigateToSchedule={onNavigateToSchedule}
+        />
+      ))()}
 
       {isPreview ? (
         <Cell name="notes" width="flex" />
