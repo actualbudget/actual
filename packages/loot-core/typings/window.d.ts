@@ -1,3 +1,5 @@
+import { usePushModal } from '../../desktop-client/src/util/router-tools';
+
 export {};
 
 declare global {
@@ -9,5 +11,6 @@ declare global {
     };
 
     __navigate?: import('react-router').NavigateFunction;
+    __pushModal?: ReturnType<typeof usePushModal>;
   }
 }
