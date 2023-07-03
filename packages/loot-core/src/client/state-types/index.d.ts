@@ -6,6 +6,7 @@ import type { BudgetsActions, BudgetsState } from './budgets';
 import type { ModalsActions, ModalsState } from './modals';
 import type { NotificationsActions, NotificationsState } from './notifications';
 import type { PrefsActions, PrefsState } from './prefs';
+import type { QueriesActions, QueriesState } from './queries';
 
 export type CloseBudgetAction = {
   type: typeof constants.CLOSE_BUDGET;
@@ -18,6 +19,7 @@ export type Action =
   | ModalsActions
   | NotificationsActions
   | PrefsActions
+  | QueriesActions
   | CloseBudgetAction;
 
 export type State = {
@@ -27,6 +29,7 @@ export type State = {
   modals: ModalsState;
   notifications: NotificationsState;
   prefs: PrefsState;
+  queries: QueriesState;
 };
 
 declare module 'react-redux' {
