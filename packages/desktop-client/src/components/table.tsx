@@ -265,18 +265,21 @@ export function Cell({
               textOverflow: 'ellipsis',
             }}
           >
-            {icon ? 
-              <Button bare >
+            {icon ? (
+              <Button bare>
                 {formatter ? formatter(value) : value}
                 {icon === 'desc' && (
-                    <ArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
+                  <ArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
                 )}
                 {icon === 'asc' && (
-                    <ArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+                  <ArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
                 )}
               </Button>
-            : formatter ? formatter(value) : value
-            }
+            ) : formatter ? (
+              formatter(value)
+            ) : (
+              value
+            )}
           </Text>
         </View>
       )}

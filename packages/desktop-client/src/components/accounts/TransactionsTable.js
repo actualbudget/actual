@@ -1927,7 +1927,7 @@ export let TransactionTable = forwardRef((props, ref) => {
       })
       .sort((a, b) => a.fieldName.localeCompare(b.fieldName));
 
-    transactions = ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
+    return ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
   }
 
   function sortCat() {
@@ -1940,36 +1940,33 @@ export let TransactionTable = forwardRef((props, ref) => {
       })
       .sort((a, b) => a.fieldName.localeCompare(b.fieldName));
 
-    transactions = ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
+    return ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
   }
 
-  switch (field) {
-    case 'account':
-      sortStrings();
-      break;
-    case 'payee':
-      sortStrings();
-      break;
-    case 'category':
-      sortCat();
-      break;
-    case 'date':
-      ascDesc === 'asc'
-        ? transactions.sort((a, b) => b[field].localeCompare(a[field]))
-        : transactions.sort((a, b) => a[field].localeCompare(b[field]));
-      break;
-    case 'amount':
-      let sortAscAmt = transactions.sort((a, b) => a[field] - b[field]);
-      transactions = ascDesc === 'asc' ? sortAscAmt : sortAscAmt.reverse();
-      break;
-    default:
-  }
+  const sortedTransactions = useMemo(() => {
+    switch (field) {
+      case 'account':
+        return sortStrings();
+      case 'payee':
+        return sortStrings();
+      case 'category':
+        return sortCat();
+      case 'date':
+        return ascDesc === 'asc'
+          ? transactions.sort((a, b) => b[field].localeCompare(a[field]))
+          : transactions.sort((a, b) => a[field].localeCompare(b[field]));
+      case 'amount':
+        let sortAscAmt = transactions.sort((a, b) => a[field] - b[field]);
+        return ascDesc === 'asc' ? sortAscAmt : sortAscAmt.reverse();
+      default:
+    }
+  }, [field, ascDesc, transactions]);
 
   return (
     <TransactionTableInner
       tableRef={mergedRef}
       {...props}
-      transactions={transactions}
+      transactions={sortedTransactions}
       transactionMap={transactionMap}
       selectedItems={selectedItems}
       hoveredTransaction={hoveredTransaction}
