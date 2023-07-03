@@ -497,21 +497,6 @@ export function getMessagesSince(since: string): Message[] {
   );
 }
 
-export async function syncAndReceiveMessages(
-  messages: Message[],
-  since: string,
-): Promise<Message[]> {
-  let localMessages = await getMessagesSince(since);
-  await receiveMessages(
-    messages.map(msg => ({
-      ...msg,
-      // TODO: This should be done inside the encoder (or at least it should return a different type)
-      value: deserializeValue(msg.value as string),
-    })),
-  );
-  return localMessages;
-}
-
 export function clearFullSyncTimeout(): void {
   if (syncTimeout) {
     clearTimeout(syncTimeout);
