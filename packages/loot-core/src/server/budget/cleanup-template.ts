@@ -5,7 +5,7 @@ import * as db from '../db';
 import { setBudget, getSheetValue } from './actions';
 import { parse } from './cleanup-template.pegjs';
 
-export function cleanupTemplate({ month }) {
+export function cleanupTemplate({ month }: { month: string }) {
   return processCleanup(month);
 }
 
