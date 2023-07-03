@@ -249,7 +249,7 @@ export type Message = {
   dataset: string;
   old?: unknown;
   row: string;
-  timestamp: string | Timestamp;
+  timestamp: Timestamp;
   value: string | number | null;
 };
 

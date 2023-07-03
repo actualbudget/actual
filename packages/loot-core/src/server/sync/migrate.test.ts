@@ -8,6 +8,7 @@ import * as db from '../db';
 import { listen, unlisten } from './migrate';
 
 import { Message, addSyncListener, sendMessages } from './index';
+import { Timestamp } from '@actual-app/crdt';
 
 beforeEach(() => {
   listen();
@@ -39,7 +40,8 @@ let messageArb: fc.Arbitrary<Message> = fc
       })
       .noBias()
       .noShrink()
-      .map(date => date.toISOString() + '-0000-0123456789ABCDEF');
+      .map(date => date.toISOString() + '-0000-0123456789ABCDEF')
+      .map(Timestamp.parse);
 
     return fc.record<Message>({
       timestamp: timestamp,

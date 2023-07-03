@@ -55,7 +55,7 @@ export async function savePrefs(prefsToSet, { avoidSync = false } = {}) {
             row: key,
             column: 'value',
             value: prefsToSet[key],
-            timestamp: Timestamp.send().toString(),
+            timestamp: Timestamp.send(),
           };
         }
         return null;

@@ -33,7 +33,7 @@ describe('Sync', () => {
         row: 'foo',
         column: 'amount',
         value: 3200,
-        timestamp: timestamp.toString(),
+        timestamp,
       },
     ]);
 
@@ -46,7 +46,7 @@ describe('Sync', () => {
         row: 'foo',
         column: 'amount',
         value: 4200,
-        timestamp: timestamp.toString(),
+        timestamp,
       },
     ]);
 
@@ -111,14 +111,18 @@ describe('Sync', () => {
             row: 'foo',
             column: 'amount',
             value: 'N:3200',
-            timestamp: '1970-01-02T05:17:36.789Z-0000-0000testinguuid2',
+            timestamp: Timestamp.parse(
+              '1970-01-02T05:17:36.789Z-0000-0000testinguuid2',
+            ),
           },
           {
             dataset: 'transactions',
             row: 'foo',
             column: 'amount',
             value: 'N:4200',
-            timestamp: '1970-01-02T10:17:36.999Z-0000-0000testinguuid2',
+            timestamp: Timestamp.parse(
+              '1970-01-02T10:17:36.999Z-0000-0000testinguuid2',
+            ),
           },
         ],
       ),
