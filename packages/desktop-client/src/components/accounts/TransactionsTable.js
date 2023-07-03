@@ -406,6 +406,7 @@ function PayeeCell({
     <CustomCell
       width="flex"
       name="payee"
+      value={payeeId}
       valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
       exposed={focused}
       onExpose={!isPreview && (name => onEdit(id, name))}
