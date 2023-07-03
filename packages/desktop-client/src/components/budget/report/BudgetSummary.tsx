@@ -328,7 +328,7 @@ export const BudgetSummary = memo(function BudgetSummary({
   return (
     <View
       style={{
-        backgroundColor: 'white',
+        backgroundColor: colorsm.tableBackground,
         boxShadow: MONTH_BOX_SHADOW,
         borderRadius: 6,
         marginLeft: 0,

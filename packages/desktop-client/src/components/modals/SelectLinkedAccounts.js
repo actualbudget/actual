@@ -158,7 +158,7 @@ function TableRow({
   ].filter(Boolean);
 
   return (
-    <Row style={{ backgroundColor: 'white' }}>
+    <Row style={{ backgroundColor: colorsm.tableBackground }}>
       <Field width={200}>{externalAccount.name}</Field>
       <Field
         width="flex"

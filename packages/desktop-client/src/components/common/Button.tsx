@@ -40,8 +40,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     hoveredStyle = [
+      !bare && { ...styles.shadow },
       {
-        ...styles.shadow,
         cursor: 'pointer',
         border: bare
           ? null
@@ -59,7 +59,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? colorsm.buttonDisabledText
           : colorsm.buttonNeutralTextHover,
         backgroundColor: bare
-          ? 'inherit'
+          ? 'rgba(100,100,100,0.15)' // doesn't do anything visible in dark mode, but keep for light
           : primary
           ? colorsm.buttonPositiveBackgroundHover
           : disabled
