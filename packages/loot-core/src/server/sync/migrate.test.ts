@@ -1,3 +1,4 @@
+import { Timestamp } from '@actual-app/crdt';
 import fc from 'fast-check';
 
 import * as arbs from '../../mocks/arbitrary-schema';
@@ -8,7 +9,6 @@ import * as db from '../db';
 import { listen, unlisten } from './migrate';
 
 import { Message, addSyncListener, sendMessages } from './index';
-import { Timestamp } from '@actual-app/crdt';
 
 beforeEach(() => {
   listen();

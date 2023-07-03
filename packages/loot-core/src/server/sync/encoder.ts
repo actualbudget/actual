@@ -1,5 +1,4 @@
-import { Timestamp } from '@actual-app/crdt';
-import { SyncProtoBuf } from '@actual-app/crdt';
+import { Timestamp, SyncProtoBuf } from '@actual-app/crdt';
 
 import * as encryption from '../encryption';
 import { SyncError } from '../errors';
