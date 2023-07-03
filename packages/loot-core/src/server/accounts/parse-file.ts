@@ -130,7 +130,7 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
       date: trans.date ? dayFromDate(trans.date * 1000) : null,
       payee_name: useName ? trans.name : trans.memo,
       imported_payee: useName ? trans.name : trans.memo,
-      notes: useName ? trans.memo : null, //memo used for payee
+      notes: useName ? trans.memo || null : null, //memo used for payee
     })),
   };
 }
