@@ -1925,6 +1925,11 @@ export let TransactionTable = forwardRef((props, ref) => {
           fieldName: props[fields].find(f => f.id === e[field])?.name ?? '',
         };
       })
+      //if 2 transactions share a date and fieldname then sort by UUID
+      .sort((a, b) => a.id.localeCompare(b.id))
+      //secondary: date
+      .sort((a, b) => a.date.localeCompare(b.date))
+      //primary field
       .sort((a, b) => a.fieldName.localeCompare(b.fieldName));
 
     return ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
@@ -1938,7 +1943,12 @@ export let TransactionTable = forwardRef((props, ref) => {
           fieldName: category.find(f => f.id === e[field])?.name ?? '',
         };
       })
-      .sort((a, b) => a.fieldName.localeCompare(b.fieldName));
+      //if 2 transactions share a date and fieldname then sort by UUID
+      .sort((a, b) => a.id.localeCompare(b.id))
+      //secondary: date
+      .sort((a, b) => a.date.localeCompare(b.date))
+      //primary field
+      .sort((a, b) => a.fieldName.localeCompare(b.fieldName)).sort((a, b) => a.id - b.id);
 
     return ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
   }
@@ -1952,11 +1962,22 @@ export let TransactionTable = forwardRef((props, ref) => {
       case 'category':
         return sortCat();
       case 'date':
-        return ascDesc === 'asc'
-          ? transactions.sort((a, b) => b[field].localeCompare(a[field]))
-          : transactions.sort((a, b) => a[field].localeCompare(b[field]));
+        let sortAscDate = transactions
+        //if 2 transactions share a payee and date then sort by UUID
+        .sort((a, b) => a.id.localeCompare(b.id))
+        //secondary: payee
+        .sort((a, b) => a.payee.localeCompare(b.date))
+        //primary field
+        .sort((a, b) => b[field].localeCompare(a[field]))
+        return ascDesc === 'asc' ? sortAscDate : sortAscDate.reverse();
       case 'amount':
-        let sortAscAmt = transactions.sort((a, b) => a[field] - b[field]);
+        let sortAscAmt = transactions
+        //if 2 transactions share a date and amount then sort by UUID
+        .sort((a, b) => a.id.localeCompare(b.id))
+        //secondary: date
+        .sort((a, b) => a.date.localeCompare(b.date))
+        //primary field
+        .sort((a, b) => a[field] - b[field]);
         return ascDesc === 'asc' ? sortAscAmt : sortAscAmt.reverse();
       default:
     }
