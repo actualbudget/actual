@@ -1,3 +1,4 @@
+import { Timestamp } from '@actual-app/crdt';
 import { SyncProtoBuf } from '@actual-app/crdt';
 
 import * as encryption from '../encryption';
@@ -83,7 +84,7 @@ export async function decode(
 
   for (let i = 0; i < list.length; i++) {
     let envelopePb = list[i];
-    let timestamp = envelopePb.getTimestamp();
+    let timestamp = Timestamp.parse(envelopePb.getTimestamp());
     let encrypted = envelopePb.getIsencrypted();
     let msg;
 
