@@ -1,3 +1,4 @@
+import { GlobalPrefs, LocalPrefs } from '../client/state-types/prefs';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
@@ -241,17 +242,11 @@ export interface ServerHandlers {
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 
-  'load-global-prefs': () => Promise<{
-    floatingSidebar: boolean;
-    maxMonths: number;
-    autoUpdate: boolean;
-    documentDir: string;
-    keyId: string;
-  }>;
+  'load-global-prefs': () => Promise<GlobalPrefs>;
 
   'save-prefs': (prefsToSet) => Promise<'ok'>;
 
-  'load-prefs': () => Promise<Record<string, unknown> | null>;
+  'load-prefs': () => Promise<LocalPrefs | null>;
 
   'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
