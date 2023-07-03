@@ -61,64 +61,6 @@ function NarrowNotSupported({
   return isNarrowWidth ? null : children;
 }
 
-function StackedRoutesInner() {
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/budget" replace />} />
-
-      <Route
-        path="/reports/*"
-        element={
-          <NarrowNotSupported>
-            {/* Has its own lazy loading logic */}
-            <Reports />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route path="/budget" element={<NarrowAlternate name="Budget" />} />
-
-      <Route
-        path="/schedules"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="Schedules" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route path="/payees" element={<ManagePayeesPage />} />
-      <Route path="/rules" element={<ManageRulesPage />} />
-      <Route path="/settings" element={<Settings />} />
-
-      {/* TODO: remove Nordigen route after v23.8.0 */}
-      <Route
-        path="/nordigen/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="GoCardlessLink" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/gocardless/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="GoCardlessLink" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route
-        path="/accounts/:id"
-        element={<NarrowAlternate name="Account" />}
-      />
-
-      <Route path="/accounts" element={<NarrowAlternate name="Accounts" />} />
-    </Routes>
-  );
-}
-
 function NavTab({ icon: TabIcon, name, path }) {
   return (
     <NavLink
@@ -243,7 +185,65 @@ function FinancesApp(props) {
               <Notifications />
               <BankSyncStatus />
 
-              <StackedRoutesInner />
+              <Routes>
+                <Route path="/" element={<Navigate to="/budget" replace />} />
+
+                <Route
+                  path="/reports/*"
+                  element={
+                    <NarrowNotSupported>
+                      {/* Has its own lazy loading logic */}
+                      <Reports />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/budget"
+                  element={<NarrowAlternate name="Budget" />}
+                />
+
+                <Route
+                  path="/schedules"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="Schedules" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route path="/payees" element={<ManagePayeesPage />} />
+                <Route path="/rules" element={<ManageRulesPage />} />
+                <Route path="/settings" element={<Settings />} />
+
+                {/* TODO: remove Nordigen route after v23.8.0 */}
+                <Route
+                  path="/nordigen/link"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="GoCardlessLink" />
+                    </NarrowNotSupported>
+                  }
+                />
+                <Route
+                  path="/gocardless/link"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="GoCardlessLink" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/accounts/:id"
+                  element={<NarrowAlternate name="Account" />}
+                />
+
+                <Route
+                  path="/accounts"
+                  element={<NarrowAlternate name="Accounts" />}
+                />
+              </Routes>
 
               <Modals />
             </div>
