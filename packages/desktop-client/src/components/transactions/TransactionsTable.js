@@ -317,7 +317,7 @@ const TransactionHeader = memo(
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
-        <Cell value="" width={15 + styles.scrollbarWidth} />
+        <Cell value="" width={styles.scrollbarWidth} />
       </Row>
     );
   },
@@ -390,7 +390,7 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width="auto"
+      width={21}
       focused={focused}
       style={{ padding: 1 }}
       plain
@@ -456,6 +456,8 @@ function PayeeCell({
     <CustomCell
       width="flex"
       name="payee"
+      textAlign="flex"
+      style={{ paddingLeft: 6 }}
       value={payeeId}
       valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
       exposed={focused}
@@ -809,6 +811,8 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="date"
           width={110}
+          textAlign="flex"
+          style={{ paddingLeft: 5 }}
           exposed={focusedField === 'date'}
           value={date}
           valueStyle={valueStyle}
@@ -845,6 +849,8 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="account"
           width="flex"
+          textAlign="flex"
+          style={{ paddingLeft: 5 }}
           value={accountId}
           formatter={acctId => {
             let acct = acctId && getAccountsById(accounts)[acctId];
@@ -916,6 +922,8 @@ const Transaction = memo(function Transaction(props) {
         <InputCell
           width="flex"
           name="notes"
+          textAlign="flex"
+          style={{ paddingLeft: 9 }}
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
           value={notes || ''}
@@ -963,7 +971,7 @@ const Transaction = memo(function Transaction(props) {
           name="category"
           width="flex"
           focused={focusedField === 'category'}
-          style={{ padding: 0 }}
+          style={{ padding: 0, paddingLeft: 10 }}
           plain
         >
           <CellButton
@@ -1025,7 +1033,7 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{ fontStyle: 'italic', color: '#c0c0c0', fontWeight: 300 }}
+          style={{ fontStyle: 'italic', color: '#c0c0c0', fontWeight: 300, paddingLeft: 8 }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
@@ -1035,6 +1043,8 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="category"
           width="flex"
+          style={{ paddingLeft: 10 }}
+          textAlign="flex"
           value={categoryId}
           formatter={value =>
             value
@@ -1100,7 +1110,7 @@ const Transaction = memo(function Transaction(props) {
         textAlign="flex"
         title={debit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
+        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle, {paddingLeft: 8}]}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
@@ -1118,7 +1128,7 @@ const Transaction = memo(function Transaction(props) {
         textAlign="flex"
         title={credit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
+        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle, {paddingLeft: 8}]}
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
@@ -1134,7 +1144,7 @@ const Transaction = memo(function Transaction(props) {
               : integerToCurrency(balance)
           }
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
-          style={[styles.tnum, amountStyle]}
+          style={[styles.tnum, amountStyle, {paddingLeft: 5}]}
           width={88}
           textAlign="flex"
         />
@@ -1152,8 +1162,6 @@ const Transaction = memo(function Transaction(props) {
           onUpdate={onUpdate}
         />
       )}
-
-      <Cell width={15} />
     </Row>
   );
 });
