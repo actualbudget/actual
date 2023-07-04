@@ -7,6 +7,7 @@ import { useSelectedItems } from '../../hooks/useSelected';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
 import { colors } from '../../style';
 import { View, Text, Button } from '../common';
+import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import useSheetValue from '../spreadsheet/useSheetValue';
@@ -127,14 +128,16 @@ export function Balances({
           '&:hover svg': { opacity: 1 },
         }}
       >
-        <CellValue
-          binding={{ ...balanceQuery, value: 0 }}
-          type="financial"
-          style={{ fontSize: 22, fontWeight: 400 }}
-          getStyle={value => ({
-            color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
-          })}
-        />
+        <PrivacyFilter blurIntensity={4}>
+          <CellValue
+            binding={{ ...balanceQuery, value: 0 }}
+            type="financial"
+            style={{ fontSize: 22, fontWeight: 400 }}
+            getStyle={value => ({
+              color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
+            })}
+          />
+        </PrivacyFilter>
 
         <ArrowButtonRight1
           style={{
@@ -146,7 +149,11 @@ export function Balances({
           }}
         />
       </Button>
-      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
+      {showExtraBalances && (
+        <PrivacyFilter>
+          <MoreBalances balanceQuery={balanceQuery} />
+        </PrivacyFilter>
+      )}
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
