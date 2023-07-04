@@ -8,8 +8,7 @@ import { colors, styles } from '../../style';
 import { Button, InputWithContent, Label, View } from '../common';
 import Text from '../common/Text';
 import CellValue from '../spreadsheet/CellValue';
-
-import { TransactionList } from './MobileTransaction';
+import { TransactionList } from '../transactions/MobileTransaction';
 
 function TransactionSearchInput({ accountName, onSearch }) {
   const [text, setText] = useState('');

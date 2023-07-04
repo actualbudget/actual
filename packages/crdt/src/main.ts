@@ -7,6 +7,7 @@ export {
   makeClientId,
   serializeClock,
   deserializeClock,
+  Clock,
   Timestamp,
 } from './crdt';
 
