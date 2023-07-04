@@ -353,13 +353,10 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         db.runQuery(
           db.cache(`INSERT INTO messages_crdt (timestamp, dataset, row, column, value)
            VALUES (?, ?, ?, ?, ?)`),
-          [String(timestamp), dataset, row, column, serializeValue(value)],
+          [timestamp.toString(), dataset, row, column, serializeValue(value)],
         );
 
-        currentMerkle = merkle.insert(
-          currentMerkle,
-          Timestamp.parse(timestamp),
-        );
+        currentMerkle = merkle.insert(currentMerkle, timestamp);
       }
     }
 
@@ -424,7 +421,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
   messages.forEach(msg => {
-    Timestamp.recv(Timestamp.parse(msg.timestamp));
+    Timestamp.recv(msg.timestamp);
   });
 
   return runMutator(() => applyMessages(messages));

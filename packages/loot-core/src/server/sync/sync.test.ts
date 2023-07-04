@@ -104,7 +104,7 @@ describe('Sync', () => {
       await encoder.encode(
         'group',
         'client',
-        '1970-01-01T01:17:37.000Z-0000-0000testinguuid2',
+        Timestamp.parse('1970-01-01T01:17:37.000Z-0000-0000testinguuid2'),
         [
           {
             dataset: 'transactions',
@@ -241,9 +241,6 @@ describe('Sync projections', () => {
 
     // Get all the messages. We'll apply them in two passes
     let messages = mockSyncServer.getMessages();
-    expect(messages.every(msg => Timestamp.parse(msg.timestamp) !== null)).toBe(
-      true,
-    );
 
     // Apply all but the last message (which deletes the category)
     await applyMessages(messages.slice(0, -1));
@@ -295,9 +292,6 @@ describe('Sync projections', () => {
 
     // Get all the messages. We'll apply them in two passes
     let messages = mockSyncServer.getMessages();
-    expect(messages.every(msg => Timestamp.parse(msg.timestamp) !== null)).toBe(
-      true,
-    );
 
     let firstMessages = messages.filter(m => m.column !== 'tombstone');
     let secondMessages = messages.filter(m => m.column === 'tombstone');
@@ -332,9 +326,6 @@ describe('Sync projections', () => {
 
     // Get all the messages. We'll apply them in two passes
     let messages = mockSyncServer.getMessages();
-    expect(messages.every(msg => Timestamp.parse(msg.timestamp) !== null)).toBe(
-      true,
-    );
 
     let firstMessages = messages.slice(0, -2);
     let secondMessages = messages.slice(-2);

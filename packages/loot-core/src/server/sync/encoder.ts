@@ -20,7 +20,7 @@ function coerceBuffer(value) {
 export async function encode(
   groupId: string,
   fileId: string,
-  since: string,
+  since: Timestamp,
   messages: Message[],
 ): Promise<Uint8Array> {
   let { encryptKeyId } = prefs.getPrefs();
@@ -66,7 +66,7 @@ export async function encode(
   requestPb.setGroupid(groupId);
   requestPb.setFileid(fileId);
   requestPb.setKeyid(encryptKeyId);
-  requestPb.setSince(since);
+  requestPb.setSince(since.toString());
 
   return requestPb.serializeBinary();
 }
