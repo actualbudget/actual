@@ -4,8 +4,7 @@ import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { colors } from '../../style';
-import { MenuTooltip } from '../accounts/Account';
-import { View, Text, Button, Menu, Stack } from '../common';
+import { View, Text, Button, Menu, MenuTooltip, Stack } from '../common';
 import { FormField, FormLabel } from '../forms';
 import { FieldSelect } from '../modals/EditRule';
 import GenericInput from '../util/GenericInput';
