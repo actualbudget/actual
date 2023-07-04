@@ -25,10 +25,8 @@ export default function PrivacyFilter({
         ...(!hovered && { filter: `blur${blurAmount}` }),
         ...(!hovered && { WebkitFilter: `blur(${blurAmount})` }),
       }}
-      onMouseEnter={onHover}
-      onMouseLeave={onHoverEnd}
-      onTouchStart={onHover}
-      onTouchEnd={onHoverEnd}
+      onPointerEnter={onHover}
+      onPointerLeave={onHoverEnd}
     >
       {children}
     </div>
