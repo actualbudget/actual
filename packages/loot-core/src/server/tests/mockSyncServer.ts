@@ -1,11 +1,23 @@
-import { makeClock, Timestamp, merkle, SyncProtoBuf } from '@actual-app/crdt';
+import {
+  Clock,
+  makeClock,
+  Timestamp,
+  merkle,
+  SyncProtoBuf,
+} from '@actual-app/crdt';
+
+import { Message } from '../sync';
 
 import { basic as defaultMockData } from './mockData.json';
 
 const handlers = {};
 let currentMockData = defaultMockData;
 let currentClock = makeClock(new Timestamp(0, 0, '0000000000000000'));
-let currentMessages = [];
+let currentMessages: {
+  timestamp: string;
+  is_encrypted: boolean;
+  content: Uint8Array;
+}[] = [];
 
 // Ugh, this is duplicated...
 function deserializeValue(value) {
@@ -27,7 +39,7 @@ handlers['/'] = () => {
   return 'development';
 };
 
-handlers['/sync/sync'] = async data => {
+handlers['/sync/sync'] = async (data: Uint8Array): Promise<Uint8Array> => {
   let requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(data);
   let since = requestPb.getSince();
   let messages = requestPb.getMessagesList();
@@ -39,7 +51,7 @@ handlers['/sync/sync'] = async data => {
       currentMessages.push({
         timestamp: msg.getTimestamp(),
         is_encrypted: msg.getIsencrypted(),
-        content: msg.getContent(),
+        content: msg.getContent_asU8(),
       });
 
       currentClock.merkle = merkle.insert(
@@ -104,17 +116,17 @@ export const reset = () => {
   currentMessages = [];
 };
 
-export const getClock = () => {
+export const getClock = (): Clock => {
   return currentClock;
 };
 
-export const getMessages = () => {
+export const getMessages = (): Message[] => {
   return currentMessages.map(msg => {
     let { timestamp, content } = msg;
     let fields = SyncProtoBuf.Message.deserializeBinary(content);
 
     return {
-      timestamp: timestamp,
+      timestamp: Timestamp.parse(timestamp),
       dataset: fields.getDataset(),
       row: fields.getRow(),
       column: fields.getColumn(),
