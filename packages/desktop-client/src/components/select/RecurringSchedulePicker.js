@@ -8,7 +8,15 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import { colors } from '../../style';
-import { Button, Select, Input, Tooltip, View, Text, Stack } from '../common';
+import {
+  Button,
+  CustomSelect,
+  Input,
+  Tooltip,
+  View,
+  Text,
+  Stack,
+} from '../common';
 import { useTooltip } from '../tooltips';
 
 import DateSelect from './DateSelect';
@@ -191,38 +199,33 @@ function MonthlyPatterns({ config, dispatch }) {
             flexDirection: 'row',
           }}
         >
-          <Select
-            style={{ marginRight: 10 }}
+          <CustomSelect
+            options={[
+              [-1, 'Last'],
+              ['-', '---'],
+              ...DAY_OF_MONTH_OPTIONS.map(opt => [opt, opt]),
+            ]}
             value={recurrence.value}
             onChange={e =>
               updateRecurrence(
                 recurrence,
                 'value',
-                parsePatternValue(e.target.value),
+                parsePatternValue(e.targert.value),
               )
             }
-          >
-            <option value={-1}>Last</option>
-            <option disabled>---</option>
-            {DAY_OF_MONTH_OPTIONS.map(opt => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </Select>
-          <Select
-            style={{ marginRight: 10 }}
+            disabledKeys={['-']}
+          />
+          <CustomSelect
+            options={[
+              ['day', 'Day'],
+              ['-', '---'],
+              DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name]),
+            ]}
             value={recurrence.type}
+            style={{ marginRight: 10 }}
             onChange={e => updateRecurrence(recurrence, 'type', e.target.value)}
-          >
-            <option value="day">Day</option>
-            <option disabled>---</option>
-            {DAY_OF_WEEK_OPTIONS.map(opt => (
-              <option key={opt.id} value={opt.id}>
-                {opt.name}
-              </option>
-            ))}
-          </Select>
+            disabledKeys={['-']}
+          />
           <Button
             bare
             style={{ padding: 7 }}
@@ -322,17 +325,12 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           onEnter={e => updateField('interval', e.target.value)}
           defaultValue={config.interval || 1}
         ></Input>
-        <Select
-          onChange={e => updateField('frequency', e.target.value)}
+        <CustomSelect
+          options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
+          onChange={e => updateField('frequency', e.target.value)}
           style={{ flex: 0 }}
-        >
-          {FREQUENCY_OPTIONS.map(opt => (
-            <option key={opt.id} value={opt.id}>
-              {opt.name}
-            </option>
-          ))}
-        </Select>
+        />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
           <Button onClick={() => dispatch({ type: 'add-recurrence' })}>
