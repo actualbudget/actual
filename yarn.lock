@@ -5,21 +5,21 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@actual-app/crdt@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@actual-app/crdt@npm:1.0.0"
+"@actual-app/crdt@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@actual-app/crdt@npm:2.0.0"
   dependencies:
     google-protobuf: ^3.12.0-rc.1
     murmurhash: ^0.0.2
-    uuid: 3.3.2
-  checksum: a8f300c1042ec08d392314daaf723db2071b9bdcba74e3a49feee37ee9a85b043db553315773d5cf6becdae41447ba9cbd6e8ff3883745bdddc1a3e2fa48b9ba
+    uuid: ^9.0.0
+  checksum: e81b5492dbfa58ce61cc093b8ab5683cdb279311efc10228f12afff8156abd757e691993f4c93056546725b55b59472f4d12fca7ac43b1a32810071c96559499
   languageName: node
   linkType: hard
 
-"@actual-app/web@npm:23.6.0":
-  version: 23.6.0
-  resolution: "@actual-app/web@npm:23.6.0"
-  checksum: a3bbfe54c9285f3d285b36a1fc57ec856d1af82ec66d4ae16e70031bb4279b213a4f214757f72dce087ff9f0537624c70c612726b0779e4c0525975f7aee0637
+"@actual-app/web@npm:23.7.0":
+  version: 23.7.0
+  resolution: "@actual-app/web@npm:23.7.0"
+  checksum: 5bc82ae1e46fc5deb7d68aedc4025879d5935a04b7a39c081ae394839bb782b1e98890d31ef6b448fb165b9ab36e2370c515c5ebe9bf014ad0c80f9d3759a33f
   languageName: node
   linkType: hard
 
@@ -1555,8 +1555,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual-sync@workspace:."
   dependencies:
-    "@actual-app/crdt": 1.0.0
-    "@actual-app/web": 23.6.0
+    "@actual-app/crdt": 2.0.0
+    "@actual-app/web": 23.7.0
     "@babel/preset-typescript": ^7.20.2
     "@types/bcrypt": ^5.0.0
     "@types/better-sqlite3": ^7.6.3
@@ -5891,15 +5891,6 @@ __metadata:
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: c81095493225ecfc28add49c106ca4f09cdf56bc66731aa8dabc2edbbccb1e1bfe2de6a115e5c6a380d3ea166d1636410b62ef216bb07b3feb1cfde1d95d5080
-  languageName: node
-  linkType: hard
-
-"uuid@npm:3.3.2":
-  version: 3.3.2
-  resolution: "uuid@npm:3.3.2"
-  bin:
-    uuid: ./bin/uuid
-  checksum: 8793629d2799f500aeea9fcd0aec6c4e9fbcc4d62ed42159ad96be345c3fffac1bbf61a23e18e2782600884fee05e6d4012ce4b70d0037c8e987533ae6a77870
   languageName: node
   linkType: hard
 
