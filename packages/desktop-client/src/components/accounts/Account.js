@@ -81,7 +81,7 @@ import {
   SplitsExpandedProvider,
   useSplitsExpanded,
   isPreviewId,
-} from './TransactionsTable';
+} from '../transactions/TransactionsTable';
 
 function EmptyMessage({ onAdd }) {
   return (

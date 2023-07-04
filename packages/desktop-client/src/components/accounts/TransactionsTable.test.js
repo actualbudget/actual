@@ -22,7 +22,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 
-import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
+import { SplitsExpandedProvider, TransactionTable } from '../transactions/TransactionsTable';
 
 jest.mock('loot-core/src/platform/client/fetch');
 jest.mock('../../hooks/useFeatureFlag', () => jest.fn().mockReturnValue(false));

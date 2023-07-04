@@ -13,7 +13,7 @@ import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
 import { usePushModal } from '../../util/router-tools';
 
-import { TransactionTable } from './TransactionsTable';
+import { TransactionTable } from '../transactions/TransactionsTable';
 
 // When data changes, there are two ways to update the UI:
 //
