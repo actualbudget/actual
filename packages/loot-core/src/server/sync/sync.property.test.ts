@@ -251,7 +251,7 @@ async function run(msgs) {
     await encoder.encode(
       'group',
       clientId2,
-      Timestamp.zero(),
+      Timestamp.zero,
       res.secondMessages.map(x => ({
         ...x,
         value: sync.serializeValue(x.value),
@@ -270,7 +270,7 @@ async function run(msgs) {
     await encoder.encode(
       'group',
       clientId2,
-      Timestamp.zero(),
+      Timestamp.zero,
       res.secondMessages.map(x => ({
         ...x,
         value: sync.serializeValue(x.value),

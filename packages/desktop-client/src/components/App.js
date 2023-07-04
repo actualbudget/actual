@@ -94,42 +94,45 @@ class App extends Component {
     return (
       <ResponsiveProvider>
         <div
-          key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-          {...css([
-            {
-              height: '100%',
-              backgroundColor: '#E8ECF0',
-              overflow: 'hidden',
-            },
-            styles.lightScrollbar,
-          ])}
+          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
         >
           {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
-
-          {fatalError ? (
-            <>
-              <AppBackground />
-              <FatalError error={fatalError} buttonText="Restart app" />
-            </>
-          ) : initializing ? (
-            <AppBackground
-              initializing={initializing}
-              loadingText={loadingText}
-            />
-          ) : budgetId ? (
-            <FinancesApp />
-          ) : (
-            <>
+          <div
+            key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+            {...css([
+              {
+                flexGrow: 1,
+                backgroundColor: '#E8ECF0',
+                overflow: 'hidden',
+              },
+              styles.lightScrollbar,
+            ])}
+          >
+            {fatalError ? (
+              <>
+                <AppBackground />
+                <FatalError error={fatalError} buttonText="Restart app" />
+              </>
+            ) : initializing ? (
               <AppBackground
                 initializing={initializing}
                 loadingText={loadingText}
               />
-              <ManagementApp isLoading={loadingText != null} />
-            </>
-          )}
+            ) : budgetId ? (
+              <FinancesApp />
+            ) : (
+              <>
+                <AppBackground
+                  initializing={initializing}
+                  loadingText={loadingText}
+                />
+                <ManagementApp isLoading={loadingText != null} />
+              </>
+            )}
 
-          <UpdateNotification />
-          <MobileWebMessage />
+            <UpdateNotification />
+            <MobileWebMessage />
+          </div>
         </div>
       </ResponsiveProvider>
     );
