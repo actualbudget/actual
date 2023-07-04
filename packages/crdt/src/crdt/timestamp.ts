@@ -1,6 +1,8 @@
 import murmurhash from 'murmurhash';
 import { v4 as uuidv4 } from 'uuid';
 
+import { TrieNode } from './merkle';
+
 /**
  * Hybrid Unique Logical Clock (HULC) timestamp generator
  *
@@ -24,29 +26,37 @@ import { v4 as uuidv4 } from 'uuid';
  * http://www.cse.buffalo.edu/tech-reports/2014-04.pdf
  */
 
-// A mutable global clock
-let clock = null;
+export type Clock = {
+  timestamp: MutableTimestamp;
+  merkle: TrieNode;
+};
 
-export function setClock(clock_) {
+// A mutable global clock
+let clock: Clock = null;
+
+export function setClock(clock_: Clock): void {
   clock = clock_;
 }
 
-export function getClock() {
+export function getClock(): Clock {
   return clock;
 }
 
-export function makeClock(timestamp, merkle = {}) {
+export function makeClock(
+  timestamp: Timestamp,
+  merkle: TrieNode = { hash: 0 },
+) {
   return { timestamp: MutableTimestamp.from(timestamp), merkle };
 }
 
-export function serializeClock(clock) {
+export function serializeClock(clock: Clock): string {
   return JSON.stringify({
     timestamp: clock.timestamp.toString(),
     merkle: clock.merkle,
   });
 }
 
-export function deserializeClock(clock) {
+export function deserializeClock(clock: string): Clock {
   let data;
   try {
     data = JSON.parse(clock);
@@ -79,18 +89,7 @@ const MAX_NODE_LENGTH = 16;
  * timestamp instance class
  */
 export class Timestamp {
-  static init;
-  static max;
-  static parse;
-  static recv;
-  static send;
-  static since;
-  static zero;
-  static ClockDriftError;
-  static DuplicateNodeError;
-  static OverflowError;
-
-  _state;
+  _state: { millis: number; counter: number; node: string };
 
   constructor(millis: number, counter: number, node: string) {
     this._state = {
@@ -127,10 +126,211 @@ export class Timestamp {
   hash() {
     return murmurhash.v3(this.toString());
   }
+
+  // Timestamp generator initialization
+  // * sets the node ID to an arbitrary value
+  // * useful for mocking/unit testing
+  static init(options: { maxDrift?: number; node?: string } = {}) {
+    if (options.maxDrift) {
+      config.maxDrift = options.maxDrift;
+    }
+
+    setClock(
+      makeClock(
+        new Timestamp(
+          0,
+          0,
+          options.node
+            ? ('0000000000000000' + options.node).toString().slice(-16)
+            : '',
+        ),
+      ),
+    );
+  }
+
+  /**
+   * maximum timestamp
+   */
+  static max = Timestamp.parse(
+    '9999-12-31T23:59:59.999Z-FFFF-FFFFFFFFFFFFFFFF',
+  );
+
+  /**
+   * timestamp parsing
+   * converts a fixed-length string timestamp to the structured value
+   */
+  static parse(timestamp: string | Timestamp): Timestamp | null {
+    if (timestamp instanceof Timestamp) {
+      return timestamp;
+    }
+    if (typeof timestamp === 'string') {
+      let parts = timestamp.split('-');
+      if (parts && parts.length === 5) {
+        let millis = Date.parse(parts.slice(0, 3).join('-')).valueOf();
+        let counter = parseInt(parts[3], 16);
+        let node = parts[4];
+        if (
+          !isNaN(millis) &&
+          millis >= 0 &&
+          !isNaN(counter) &&
+          counter <= MAX_COUNTER &&
+          typeof node === 'string' &&
+          node.length <= MAX_NODE_LENGTH
+        ) {
+          return new Timestamp(millis, counter, node);
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Timestamp send. Generates a unique, monotonic timestamp suitable
+   * for transmission to another system in string format
+   */
+  static send(): Timestamp | null {
+    if (!clock) {
+      return null;
+    }
+
+    // retrieve the local wall time
+    let phys = Date.now();
+
+    // unpack the clock.timestamp logical time and counter
+    let lOld = clock.timestamp.millis();
+    let cOld = clock.timestamp.counter();
+
+    // calculate the next logical time and counter
+    // * ensure that the logical time never goes backward
+    // * increment the counter if phys time does not advance
+    let lNew = Math.max(lOld, phys);
+    let cNew = lOld === lNew ? cOld + 1 : 0;
+
+    // check the result for drift and counter overflow
+    if (lNew - phys > config.maxDrift) {
+      throw new Timestamp.ClockDriftError(lNew, phys, config.maxDrift);
+    }
+    if (cNew > MAX_COUNTER) {
+      throw new Timestamp.OverflowError();
+    }
+
+    // repack the logical time/counter
+    clock.timestamp.setMillis(lNew);
+    clock.timestamp.setCounter(cNew);
+
+    return new Timestamp(
+      clock.timestamp.millis(),
+      clock.timestamp.counter(),
+      clock.timestamp.node(),
+    );
+  }
+
+  // Timestamp receive. Parses and merges a timestamp from a remote
+  // system with the local timeglobal uniqueness and monotonicity are
+  // preserved
+  static recv(msg: Timestamp): Timestamp | null {
+    if (!clock) {
+      return null;
+    }
+
+    // retrieve the local wall time
+    let phys = Date.now();
+
+    // unpack the message wall time/counter
+    let lMsg = msg.millis();
+    let cMsg = msg.counter();
+
+    // assert the node id and remote clock drift
+    // if (msg.node() === clock.timestamp.node()) {
+    //   throw new Timestamp.DuplicateNodeError(clock.timestamp.node());
+    // }
+    if (lMsg - phys > config.maxDrift) {
+      throw new Timestamp.ClockDriftError();
+    }
+
+    // unpack the clock.timestamp logical time and counter
+    let lOld = clock.timestamp.millis();
+    let cOld = clock.timestamp.counter();
+
+    // calculate the next logical time and counter
+    // . ensure that the logical time never goes backward
+    // . if all logical clocks are equal, increment the max counter
+    // . if max = old > message, increment local counter
+    // . if max = messsage > old, increment message counter
+    // . otherwise, clocks are monotonic, reset counter
+    let lNew = Math.max(Math.max(lOld, phys), lMsg);
+    let cNew =
+      lNew === lOld && lNew === lMsg
+        ? Math.max(cOld, cMsg) + 1
+        : lNew === lOld
+        ? cOld + 1
+        : lNew === lMsg
+        ? cMsg + 1
+        : 0;
+
+    // check the result for drift and counter overflow
+    if (lNew - phys > config.maxDrift) {
+      throw new Timestamp.ClockDriftError();
+    }
+    if (cNew > MAX_COUNTER) {
+      throw new Timestamp.OverflowError();
+    }
+
+    // repack the logical time/counter
+    clock.timestamp.setMillis(lNew);
+    clock.timestamp.setCounter(cNew);
+
+    return new Timestamp(
+      clock.timestamp.millis(),
+      clock.timestamp.counter(),
+      clock.timestamp.node(),
+    );
+  }
+
+  /**
+   * zero/minimum timestamp
+   */
+  static zero = Timestamp.parse(
+    '1970-01-01T00:00:00.000Z-0000-0000000000000000',
+  );
+
+  static since = isoString => isoString + '-0000-0000000000000000';
+
+  /**
+   * error classes
+   */
+  static DuplicateNodeError = class DuplicateNodeError extends Error {
+    constructor(node: string) {
+      super('duplicate node identifier ' + node);
+      this.name = 'DuplicateNodeError';
+    }
+  };
+
+  static ClockDriftError = class ClockDriftError extends Error {
+    constructor(...args: unknown[]) {
+      super(
+        ['maximum clock drift exceeded'].concat(args as string[]).join(' '),
+      );
+      this.name = 'ClockDriftError';
+    }
+  };
+
+  static OverflowError = class OverflowError extends Error {
+    constructor() {
+      super('timestamp counter overflow');
+      this.name = 'OverflowError';
+    }
+  };
 }
 
 class MutableTimestamp extends Timestamp {
-  static from;
+  static from(timestamp) {
+    return new MutableTimestamp(
+      timestamp.millis(),
+      timestamp.counter(),
+      timestamp.node(),
+    );
+  }
 
   setMillis(n) {
     this._state.millis = n;
@@ -144,205 +344,3 @@ class MutableTimestamp extends Timestamp {
     this._state.node = n;
   }
 }
-
-MutableTimestamp.from = timestamp => {
-  return new MutableTimestamp(
-    timestamp.millis(),
-    timestamp.counter(),
-    timestamp.node(),
-  );
-};
-
-// Timestamp generator initialization
-// * sets the node ID to an arbitrary value
-// * useful for mocking/unit testing
-Timestamp.init = function (options: { maxDrift?: number; node?: string } = {}) {
-  if (options.maxDrift) {
-    config.maxDrift = options.maxDrift;
-  }
-
-  setClock(
-    makeClock(
-      new Timestamp(
-        0,
-        0,
-        options.node
-          ? ('0000000000000000' + options.node).toString().slice(-16)
-          : '',
-      ),
-    ),
-  );
-};
-
-/**
- * Timestamp send. Generates a unique, monotonic timestamp suitable
- * for transmission to another system in string format
- */
-Timestamp.send = function () {
-  if (!clock) {
-    return null;
-  }
-
-  // retrieve the local wall time
-  let phys = Date.now();
-
-  // unpack the clock.timestamp logical time and counter
-  let lOld = clock.timestamp.millis();
-  let cOld = clock.timestamp.counter();
-
-  // calculate the next logical time and counter
-  // * ensure that the logical time never goes backward
-  // * increment the counter if phys time does not advance
-  let lNew = Math.max(lOld, phys);
-  let cNew = lOld === lNew ? cOld + 1 : 0;
-
-  // check the result for drift and counter overflow
-  if (lNew - phys > config.maxDrift) {
-    throw new Timestamp.ClockDriftError(lNew, phys, config.maxDrift);
-  }
-  if (cNew > MAX_COUNTER) {
-    throw new Timestamp.OverflowError();
-  }
-
-  // repack the logical time/counter
-  clock.timestamp.setMillis(lNew);
-  clock.timestamp.setCounter(cNew);
-
-  return new Timestamp(
-    clock.timestamp.millis(),
-    clock.timestamp.counter(),
-    clock.timestamp.node(),
-  );
-};
-
-// Timestamp receive. Parses and merges a timestamp from a remote
-// system with the local timeglobal uniqueness and monotonicity are
-// preserved
-Timestamp.recv = function (msg) {
-  if (!clock) {
-    return null;
-  }
-
-  // retrieve the local wall time
-  let phys = Date.now();
-
-  // unpack the message wall time/counter
-  let lMsg = msg.millis();
-  let cMsg = msg.counter();
-
-  // assert the node id and remote clock drift
-  // if (msg.node() === clock.timestamp.node()) {
-  //   throw new Timestamp.DuplicateNodeError(clock.timestamp.node());
-  // }
-  if (lMsg - phys > config.maxDrift) {
-    throw new Timestamp.ClockDriftError();
-  }
-
-  // unpack the clock.timestamp logical time and counter
-  let lOld = clock.timestamp.millis();
-  let cOld = clock.timestamp.counter();
-
-  // calculate the next logical time and counter
-  // . ensure that the logical time never goes backward
-  // . if all logical clocks are equal, increment the max counter
-  // . if max = old > message, increment local counter
-  // . if max = messsage > old, increment message counter
-  // . otherwise, clocks are monotonic, reset counter
-  let lNew = Math.max(Math.max(lOld, phys), lMsg);
-  let cNew =
-    lNew === lOld && lNew === lMsg
-      ? Math.max(cOld, cMsg) + 1
-      : lNew === lOld
-      ? cOld + 1
-      : lNew === lMsg
-      ? cMsg + 1
-      : 0;
-
-  // check the result for drift and counter overflow
-  if (lNew - phys > config.maxDrift) {
-    throw new Timestamp.ClockDriftError();
-  }
-  if (cNew > MAX_COUNTER) {
-    throw new Timestamp.OverflowError();
-  }
-
-  // repack the logical time/counter
-  clock.timestamp.setMillis(lNew);
-  clock.timestamp.setCounter(cNew);
-
-  return new Timestamp(
-    clock.timestamp.millis(),
-    clock.timestamp.counter(),
-    clock.timestamp.node(),
-  );
-};
-
-/**
- * timestamp parsing
- * converts a fixed-length string timestamp to the structured value
- */
-Timestamp.parse = function (timestamp: string): Timestamp | null {
-  if (typeof timestamp === 'string') {
-    let parts = timestamp.split('-');
-    if (parts && parts.length === 5) {
-      let millis = Date.parse(parts.slice(0, 3).join('-')).valueOf();
-      let counter = parseInt(parts[3], 16);
-      let node = parts[4];
-      if (
-        !isNaN(millis) &&
-        millis >= 0 &&
-        !isNaN(counter) &&
-        counter <= MAX_COUNTER &&
-        typeof node === 'string' &&
-        node.length <= MAX_NODE_LENGTH
-      ) {
-        return new Timestamp(millis, counter, node);
-      }
-    }
-  }
-  return null;
-};
-
-/**
- * zero/minimum timestamp
- */
-let zero = Timestamp.parse('1970-01-01T00:00:00.000Z-0000-0000000000000000');
-Timestamp.zero = function () {
-  return zero;
-};
-
-/**
- * maximum timestamp
- */
-let max = Timestamp.parse('9999-12-31T23:59:59.999Z-FFFF-FFFFFFFFFFFFFFFF');
-Timestamp.max = function () {
-  return max;
-};
-
-Timestamp.since = isoString => {
-  return isoString + '-0000-0000000000000000';
-};
-
-/**
- * error classes
- */
-Timestamp.DuplicateNodeError = class extends Error {
-  constructor(node) {
-    super('duplicate node identifier ' + node);
-    this.name = 'DuplicateNodeError';
-  }
-};
-
-Timestamp.ClockDriftError = class extends Error {
-  constructor(...args) {
-    super(['maximum clock drift exceeded'].concat(args).join(' '));
-    this.name = 'ClockDriftError';
-  }
-};
-
-Timestamp.OverflowError = class extends Error {
-  constructor() {
-    super('timestamp counter overflow');
-    this.name = 'OverflowError';
-  }
-};

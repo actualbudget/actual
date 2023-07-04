@@ -1,3 +1,5 @@
+import { keyframes } from 'glamor';
+
 import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from './tokens';
@@ -169,6 +171,15 @@ export const styles = {
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
   textColor: colors.n1,
+  delayedFadeIn: {
+    animationName: keyframes({
+      '0%': { opacity: 0 },
+      '100%': { opacity: 1 },
+    }),
+    animationDuration: '0.2s',
+    animationFillMode: 'both',
+    animationDelay: '0.5s',
+  },
   // Dynamically set
   lightScrollbar: undefined,
   darkScrollbar: undefined,

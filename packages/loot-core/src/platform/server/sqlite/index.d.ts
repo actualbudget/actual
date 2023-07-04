@@ -29,4 +29,4 @@ export async function openDatabase(pathOrBuffer?: string | Buffer): Database;
 
 export function closeDatabase(db): void;
 
-export function exportDatabase(db): void;
+export async function exportDatabase(db): Buffer;

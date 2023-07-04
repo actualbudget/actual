@@ -5,6 +5,10 @@ on: [pull_request]
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Run end-to-end tests on Netlify PR preview
@@ -20,7 +24,7 @@ jobs:
         env:
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./bin/netlify-wait-for-build
+        run: ./.github/actions/netlify-wait-for-build
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
