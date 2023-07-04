@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 import { useSelectedItems } from '../../hooks/useSelected';
+import { usePushModal } from '../../util/router-tools';
 import { Menu } from '../common';
 import { SelectedItemsButton } from '../table';
 
@@ -17,9 +17,8 @@ export function SelectedTransactionsButton({
   onCreateRule,
   onScheduleAction,
 }) {
+  let pushModal = usePushModal();
   let selectedItems = useSelectedItems();
-  let navigate = useNavigate();
-  let location = useLocation();
 
   let types = useMemo(() => {
     let items = [...selectedItems];
@@ -131,14 +130,11 @@ export function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              navigate(`/schedule/edit/${scheduleId}`, {
-                locationPtr: location,
-              });
+              pushModal(`/schedule/edit/${scheduleId}`);
             }
             break;
           case 'link-schedule':
-            navigate(`/schedule/link`, {
-              locationPtr: location,
+            pushModal('/schedule/link', {
               transactionIds: [...selectedItems],
             });
             break;

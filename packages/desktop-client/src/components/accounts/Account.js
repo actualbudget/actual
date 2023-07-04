@@ -485,7 +485,7 @@ class AccountInternal extends PureComponent {
 
   onToggleExtraBalances = () => {
     let { accountId, showExtraBalances } = this.props;
-    let key = 'show-extra-balances-' + accountId;
+    let key = 'show-extra-balances-' + accountId || 'all-accounts';
 
     this.props.savePrefs({ [key]: !showExtraBalances });
   };
@@ -1140,7 +1140,7 @@ export default function Account() {
     showBalances: params.id && state.prefs.local['show-balances-' + params.id],
     showCleared: params.id && !state.prefs.local['hide-cleared-' + params.id],
     showExtraBalances:
-      params.id && state.prefs.local['show-extra-balances-' + params.id],
+      state.prefs.local['show-extra-balances-' + params.id || 'all-accounts'],
     payees: state.queries.payees,
     modalShowing: state.modals.modalStack.length > 0,
     accountsSyncing: state.account.accountsSyncing,
@@ -1189,7 +1189,7 @@ export default function Account() {
           {...actionCreators}
           modalShowing={
             state.modalShowing ||
-            !!(activeLocation.state && activeLocation.state.locationPtr)
+            !!(activeLocation.state && activeLocation.state.parent)
           }
           accountId={params.id}
           categoryId={activeLocation?.state?.filter?.category}
