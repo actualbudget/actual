@@ -11,7 +11,6 @@ import useSyncServerStatus from '../hooks/useSyncServerStatus';
 
 import BudgetSummary from './modals/BudgetSummary';
 import CloseAccount from './modals/CloseAccount';
-import ConfigureLinkedAccounts from './modals/ConfigureLinkedAccounts';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
@@ -93,18 +92,6 @@ function Modals({
               requisitionId={options.requisitionId}
               localAccounts={accounts.filter(acct => acct.closed === 0)}
               upgradingAccountId={options.upgradingAccountId}
-              actions={actions}
-            />
-          );
-
-        case 'configure-linked-accounts':
-          return (
-            <ConfigureLinkedAccounts
-              modalProps={modalProps}
-              institution={options.institution}
-              publicToken={options.publicToken}
-              accounts={options.accounts}
-              upgradingId={options.upgradingId}
               actions={actions}
             />
           );
