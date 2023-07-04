@@ -4,6 +4,7 @@ import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
+import { AccountEntity } from './models';
 
 import { EmptyObject } from './util';
 
@@ -136,7 +137,7 @@ export interface ServerHandlers {
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
-  'accounts-get': () => Promise<unknown>;
+  'accounts-get': () => Promise<AccountEntity[]>;
 
   'account-properties': (arg: {
     id;
@@ -170,10 +171,10 @@ export interface ServerHandlers {
   }) => Promise<unknown>;
 
   'account-create': (arg: {
-    name;
-    balance;
-    offBudget;
-    closed?;
+    name: string;
+    balance: number;
+    offBudget?: boolean;
+    closed?: 0 | 1;
   }) => Promise<string>;
 
   'account-close': (arg: {

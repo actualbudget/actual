@@ -6,7 +6,7 @@ export type QueriesState = {
   matchedTransactions: unknown[];
   lastTransaction: unknown | null;
   updatedAccounts: string[];
-  accounts: unknown[];
+  accounts: AccountEntity[];
   categories: Awaited<ReturnType<Handlers['get-categories']>>;
   payees: unknown[];
   earliestTransaction: unknown | null;
@@ -36,7 +36,7 @@ type MarkAccountReadAction = {
 
 type LoadAccountsAction = {
   type: typeof constants.LOAD_ACCOUNTS;
-  accounts: unknown[];
+  accounts: AccountEntity[];
 };
 
 type UpdateAccountAction = {
