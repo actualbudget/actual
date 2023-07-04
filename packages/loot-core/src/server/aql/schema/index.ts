@@ -114,6 +114,13 @@ export const schema = {
     id: f('id'),
     note: f('string'),
   },
+  transaction_filters: {
+    id: f('id'),
+    name: f('string'),
+    conditions_op: f('string'),
+    conditions: f('json'),
+    tombstone: f('boolean'),
+  },
 };
 
 export const schemaConfig = {
