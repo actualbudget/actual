@@ -121,8 +121,8 @@ export function addWeeks(date: DateLike, n: number): string {
 }
 
 export function differenceInCalendarMonths(
-   month1: DateLike,
-   month2: DateLike
+  month1: DateLike,
+  month2: DateLike,
 ): number {
   return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
 }
