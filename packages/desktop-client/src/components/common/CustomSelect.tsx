@@ -14,6 +14,7 @@ type CustomSelectProps = {
   value: string;
   onChange?: (newValue: string) => void;
   style?: CSSProperties;
+  wrapperStyle?: CSSProperties;
   disabledKeys?: string[];
 };
 
@@ -22,20 +23,21 @@ export default function CustomSelect({
   value,
   onChange,
   style,
+  wrapperStyle,
   disabledKeys = [],
 }: CustomSelectProps) {
   return (
     <ListboxInput
       value={value}
       onChange={onChange}
-      style={{ lineHeight: '1em' }}
+      style={{ lineHeight: '1em', ...wrapperStyle }}
     >
       <ListboxButton
         {...css([{ borderWidth: 0, padding: 5, borderRadius: 4 }, style])}
         arrow={<ExpandArrow style={{ width: 7, height: 7, paddingTop: 3 }} />}
       />
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
-        <ListboxList>
+        <ListboxList style={{ maxHeight: 250, overflowY: 'scroll' }}>
           {options.map(([value, label]) => (
             <ListboxOption
               key={value}

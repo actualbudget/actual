@@ -345,8 +345,9 @@ function SelectField({ width, style, options, value, onChange }) {
         ...options.map(option => [option, option]),
       ]}
       value={value}
-      style={style}
-      onChange={e => onChange(e.target.value)}
+      style={{ borderWidth: 1, width: '100%' }}
+      wrapperStyle={style}
+      onChange={value => onChange(value)}
     />
   );
 }
@@ -377,7 +378,8 @@ function DateFormatSelect({
           f.label.replace(/ /g, delimiter),
         ])}
         value={parseDateFormat || ''}
-        onChange={e => onChange(e.target.value)}
+        onChange={value => onChange(value)}
+        style={{ borderWidth: 1, width: '100%' }}
       />
     </View>
   );
@@ -900,10 +902,11 @@ function ImportTransactions({
                       [';', ';'],
                     ]}
                     value={csvDelimiter}
-                    onChange={e => {
-                      setCsvDelimiter(e.target.value);
-                      parse(filename, { delimiter: e.target.value });
+                    onChange={value => {
+                      setCsvDelimiter(value);
+                      parse(filename, { delimiter: value });
                     }}
+                    style={{ borderWidth: 1, width: '100%' }}
                   />
                 </View>
               )}
