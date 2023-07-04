@@ -61,7 +61,6 @@ import {
   setSyncingMode,
   makeTestMessage,
   clearFullSyncTimeout,
-  syncAndReceiveMessages,
   resetSync,
   repairSync,
 } from './sync';
@@ -2468,12 +2467,6 @@ export const lib = {
     return res;
   },
   on: (name, func) => app.events.on(name, func),
-  syncAndReceiveMessages,
   q,
   db,
-
-  // Expose CRDT mechanisms so server can use them
-  // Backwards compatability
-  ...CRDT,
-  timestamp: CRDT,
 };

@@ -1,4 +1,4 @@
-import { SyncProtoBuf } from '@actual-app/crdt';
+import { Timestamp, SyncProtoBuf } from '@actual-app/crdt';
 
 import * as encryption from '../encryption';
 import { SyncError } from '../errors';
@@ -20,7 +20,7 @@ function coerceBuffer(value) {
 export async function encode(
   groupId: string,
   fileId: string,
-  since: string,
+  since: Timestamp,
   messages: Message[],
 ): Promise<Uint8Array> {
   let { encryptKeyId } = prefs.getPrefs();
@@ -29,7 +29,7 @@ export async function encode(
   for (let i = 0; i < messages.length; i++) {
     let msg = messages[i];
     let envelopePb = new SyncProtoBuf.MessageEnvelope();
-    envelopePb.setTimestamp(msg.timestamp);
+    envelopePb.setTimestamp(msg.timestamp.toString());
 
     let messagePb = new SyncProtoBuf.Message();
     messagePb.setDataset(msg.dataset);
@@ -66,7 +66,7 @@ export async function encode(
   requestPb.setGroupid(groupId);
   requestPb.setFileid(fileId);
   requestPb.setKeyid(encryptKeyId);
-  requestPb.setSince(since);
+  requestPb.setSince(since.toString());
 
   return requestPb.serializeBinary();
 }
@@ -83,7 +83,7 @@ export async function decode(
 
   for (let i = 0; i < list.length; i++) {
     let envelopePb = list[i];
-    let timestamp = envelopePb.getTimestamp();
+    let timestamp = Timestamp.parse(envelopePb.getTimestamp());
     let encrypted = envelopePb.getIsencrypted();
     let msg;
 
