@@ -219,7 +219,7 @@ function MonthlyPatterns({ config, dispatch }) {
             options={[
               ['day', 'Day'],
               ['-', '---'],
-              DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name]),
+              ...DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name]),
             ]}
             value={recurrence.type}
             style={{ marginRight: 10 }}

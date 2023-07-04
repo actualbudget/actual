@@ -342,10 +342,10 @@ function SelectField({ width, style, options, value, onChange }) {
     <CustomSelect
       options={[
         ['', 'Choose field...'],
-        options.map(option => [option, option]),
+        ...options.map(option => [option, option]),
       ]}
       value={value}
-      stlye={style}
+      style={style}
       onChange={e => onChange(e.target.value)}
     />
   );
