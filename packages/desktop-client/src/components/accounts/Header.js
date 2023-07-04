@@ -9,7 +9,7 @@ import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
 import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { styles, colors } from '../../style';
+import { styles, colorsm } from '../../style';
 import AnimatedRefresh from '../AnimatedRefresh';
 import {
   View,
@@ -172,7 +172,7 @@ export function AccountHeader({
                     style={{
                       width: 11,
                       height: 11,
-                      color: colors.n8,
+                      color: 'inherit',
                     }}
                   />
                 </Button>
@@ -250,7 +250,7 @@ export function AccountHeader({
                   width: 13,
                   height: 13,
                   flexShrink: 0,
-                  color: search ? colors.p7 : 'inherit',
+                  color: search ? colorsm.pageTextPositive : 'inherit',
                   margin: 5,
                   marginRight: 0,
                 }}
@@ -287,18 +287,18 @@ export function AccountHeader({
                 boxShadow: 'none',
                 transition: 'color .15s',
                 '& input::placeholder': {
-                  color: colors.n1,
+                  color: colorsm.pageText,
                   transition: 'color .25s',
                 },
               },
-              focused && { boxShadow: '0 0 0 2px ' + colors.b5 },
-              !focused && search !== '' && { color: colors.p4 },
+              focused && { boxShadow: '0 0 0 2px ' + colorsm.boxShadow },
+              !focused && search !== '' && { color: colorsm.pageTextPositive },
             ]}
             onChange={e => onSearch(e.target.value)}
           />
           {workingHard ? (
             <View>
-              <Loading color={colors.n1} style={{ width: 16, height: 16 }} />
+              <Loading color="inherit" style={{ width: 16, height: 16 }} />
             </View>
           ) : (
             <SelectedTransactionsButton

@@ -5,7 +5,7 @@ import q from 'loot-core/src/client/query-helpers';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
-import { colors } from '../../style';
+import { colorsm } from '../../style';
 import { View, Text, Button } from '../common';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
@@ -17,10 +17,10 @@ function DetailedBalance({ name, balance }) {
     <Text
       style={{
         marginLeft: 15,
-        backgroundColor: colors.n9,
+        backgroundColor: colorsm.tooltipBackground,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colors.n5,
+        color: colorsm.menuItemText,
       }}
     >
       {name}{' '}
@@ -132,7 +132,12 @@ export function Balances({
           type="financial"
           style={{ fontSize: 22, fontWeight: 400 }}
           getStyle={value => ({
-            color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
+            color:
+              value < 0
+                ? colorsm.errorText
+                : value > 0
+                ? colorsm.noticeText
+                : colorsm.pageTextPositive,
           })}
         />
 
@@ -141,7 +146,7 @@ export function Balances({
             width: 10,
             height: 10,
             marginLeft: 10,
-            color: colors.n5,
+            color: 'inherit',
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
           }}
         />
