@@ -22,8 +22,10 @@ export default function PrivacyFilter({
   ) : (
     <div
       style={{
-        ...(!hovered && { filter: `blur${blurAmount}` }),
-        ...(!hovered && { WebkitFilter: `blur(${blurAmount})` }),
+        ...(!hovered && {
+          filter: `blur(${blurAmount})`,
+          WebkitFilter: `blur(${blurAmount})`,
+        }),
       }}
       onPointerEnter={onHover}
       onPointerLeave={onHoverEnd}
