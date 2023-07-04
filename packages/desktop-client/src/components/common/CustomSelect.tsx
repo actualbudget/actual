@@ -8,6 +8,7 @@ import {
 import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
+import { colorsm } from '../../style';
 
 type CustomSelectProps = {
   options: Array<[string, string]>;
@@ -32,15 +33,47 @@ export default function CustomSelect({
     >
       <ListboxButton
         {...css([{ borderWidth: 0, padding: 5, borderRadius: 4 }, style])}
-        arrow={<ExpandArrow style={{ width: 7, height: 7, paddingTop: 3 }} />}
+        arrow={
+          <ExpandArrow
+            style={{
+              width: 7,
+              height: 7,
+              paddingTop: 3,
+              color: colorsm.formInputText,
+            }}
+          />
+        }
       />
-      <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
+      <ListboxPopover
+        {...css({
+          zIndex: 10000,
+          outline: 0,
+          borderRadius: 4,
+          backgroundColor: colorsm.menuBackground,
+          border: '1px solid ' + colorsm.menuBorder,
+          ':focus-within': {
+            boxShadow: '0px 1px 2px ' + colorsm.buttonShadow,
+          },
+        })}
+      >
         <ListboxList>
           {options.map(([value, label]) => (
             <ListboxOption
               key={value}
               value={value}
               disabled={disabledKeys.includes(value)}
+              {...css({
+                background: colorsm.menuItemBackground,
+                color: colorsm.menuItemText,
+                ':hover': {
+                  background: colorsm.menuItemBackgroundHover,
+                  color: colorsm.menuItemTextHover,
+                },
+                ':active': {
+                  background: colorsm.menuItemBackgroundHover,
+                  color: colorsm.menuItemTextHover,
+                },
+              })}
             >
               {label}
             </ListboxOption>

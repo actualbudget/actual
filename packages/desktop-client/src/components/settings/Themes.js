@@ -17,7 +17,6 @@ export default function ThemeSettings({ globalPrefs, saveGlobalPrefs }) {
               saveGlobalPrefs({ theme: e.target.value });
             }}
           >
-            <option value="">Choose theme...</option>
             {themes.map(x => (
               <option key={x} value={x}>
                 {x}
