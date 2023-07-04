@@ -1033,7 +1033,12 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{ fontStyle: 'italic', color: '#c0c0c0', fontWeight: 300, paddingLeft: 8 }}
+          style={{
+            fontStyle: 'italic',
+            color: '#c0c0c0',
+            fontWeight: 300,
+            paddingLeft: 8,
+          }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
@@ -1110,7 +1115,12 @@ const Transaction = memo(function Transaction(props) {
         textAlign="flex"
         title={debit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle, {paddingLeft: 8}]}
+        style={[
+          isParent && { fontStyle: 'italic' },
+          styles.tnum,
+          amountStyle,
+          { paddingLeft: 8 },
+        ]}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
@@ -1128,7 +1138,12 @@ const Transaction = memo(function Transaction(props) {
         textAlign="flex"
         title={credit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle, {paddingLeft: 8}]}
+        style={[
+          isParent && { fontStyle: 'italic' },
+          styles.tnum,
+          amountStyle,
+          { paddingLeft: 8 },
+        ]}
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
@@ -1144,7 +1159,7 @@ const Transaction = memo(function Transaction(props) {
               : integerToCurrency(balance)
           }
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
-          style={[styles.tnum, amountStyle, {paddingLeft: 5}]}
+          style={[styles.tnum, amountStyle, { paddingLeft: 5 }]}
           width={88}
           textAlign="flex"
         />

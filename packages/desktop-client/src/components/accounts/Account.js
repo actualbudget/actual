@@ -33,7 +33,6 @@ import TransactionList from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,
   useSplitsExpanded,
-  isPreviewId,
 } from '../transactions/TransactionsTable';
 
 import { AccountHeader } from './Header';
