@@ -602,11 +602,10 @@ function SidebarGroup({
         style,
         {
           width: 200,
-          backgroundColor: colorsm.tableBackground,
           '& button': { display: 'none' },
           '&:hover button': {
             display: 'flex',
-            color: colorsm.tableBackgroundHover,
+            color: colorsm.tableRowBackgroundHover,
           },
         },
         dragPreview && {
@@ -687,6 +686,7 @@ const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
+        color: colorsm.tableHeaderText,
         backgroundColor: colorsm.tableBackground,
         flexDirection: 'row',
         flexShrink: 0,
@@ -700,7 +700,6 @@ const BudgetTotals = memo(function BudgetTotals({
       <View
         style={{
           width: 200,
-          color: colorsm.tableHeaderText,
           justifyContent: 'center',
           paddingLeft: 15,
           paddingRight: 5,
@@ -812,9 +811,9 @@ function ExpenseGroup({
   return (
     <Row
       collapsed={true}
-      backgroundColor={colorsm.tableRowHeaderBackground}
       style={{
-        color: colorsm.tableHeaderText,
+        backgroundColor: colorsm.tableRowHeaderBackground,
+        color: colorsm.tableRowHeaderText,
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
       }}
@@ -967,8 +966,11 @@ function IncomeGroup({
   return (
     <Row
       collapsed={true}
-      backgroundColor={colorsm.tableRowHeaderBackground}
-      style={{ fontWeight: 600, color: colorsm.tableHeaderText }}
+      style={{
+        fontWeight: 600,
+        color: colorsm.tableHeaderText,
+        backgroundColor: colorsm.tableRowHeaderBackground,
+      }}
     >
       <SidebarGroup
         group={group}
@@ -1337,7 +1339,7 @@ const BudgetCategories = memo(
                 style={
                   !dragState && {
                     ':hover': {
-                      backgroundColor: colorsm.tableBackgroundHover,
+                      backgroundColor: colorsm.tableRowBackgroundHover,
                     },
                   }
                 }
@@ -1358,7 +1360,8 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }) {
       style={{
         flexDirection: 'row',
         flex: 1,
-        color: colorsm.tableHeaderText,
+        backgroundColor: colorsm.tableBackground,
+        ':hover': { backgroundColor: colorsm.tableBackground },
       }}
     >
       <View

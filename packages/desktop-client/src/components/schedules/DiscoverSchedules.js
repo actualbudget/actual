@@ -23,7 +23,6 @@ import { ScheduleAmountCell } from './SchedulesTable';
 let ROW_HEIGHT = 43;
 
 function DiscoverSchedulesTable({ schedules, loading }) {
-  let pageType = usePageType();
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
 
@@ -39,16 +38,20 @@ function DiscoverSchedulesTable({ schedules, loading }) {
         onClick={e => {
           dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
-        borderColor={
-          selected ? colorsm.tableBorderSelected : colorsm.tableBorder
-        }
         style={{
+          borderColor: selected
+            ? colorsm.tableBorderSelected
+            : colorsm.tableBorder,
           cursor: 'pointer',
+          color: selected
+            ? colorsm.tableRowBackgroundHighlightText
+            : colorsm.tableText,
           backgroundColor: selected
             ? colorsm.tableRowBackgroundHighlight
             : colorsm.tableBackground,
           ':hover': {
-            backgroundColor: colorsm.tableRowBackgroundHighlight,
+            backgroundColor: colorsm.tableRowBackgroundHover,
+            color: colorsm.tableText,
           },
         }}
       >
@@ -76,7 +79,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+      <TableHeader height={ROW_HEIGHT} inset={15}>
         <SelectCell
           exposed={!loading}
           focused={false}
@@ -94,12 +97,8 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
-        version="v2"
-        backgroundColor={pageType.type === 'modal' ? 'transparent' : undefined}
         style={{
           flex: 1,
-          backgroundColor:
-            pageType.type === 'modal' ? 'transparent' : undefined,
         }}
         items={schedules}
         loading={loading}

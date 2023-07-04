@@ -277,7 +277,7 @@ function Transaction({
         color: colorsm.tableText,
       }}
     >
-      <Field width={200} borderColor={colorsm.tableBorder}>
+      <Field width={200} style={{ borderColor: colorsm.tableBorder }}>
         {showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
@@ -290,14 +290,14 @@ function Transaction({
       </Field>
       <Field
         width="flex"
-        borderColor={colorsm.tableBorder}
+        style={{ borderColor: colorsm.tableBorder }}
         title={transaction.imported_payee || transaction.payee_name}
       >
         {transaction.payee_name}
       </Field>
       <Field
         width="flex"
-        borderColor={colorsm.tableBorder}
+        style={{ borderColor: colorsm.tableBorder }}
         title={transaction.notes}
       >
         {transaction.notes}
@@ -306,7 +306,7 @@ function Transaction({
         <>
           <Field
             width={90}
-            borderColor={colorsm.tableBorder}
+            style={{ borderColor: colorsm.tableBorder }}
             contentStyle={[{ textAlign: 'right' }, styles.tnum]}
             title={outflow}
           >
@@ -314,7 +314,7 @@ function Transaction({
           </Field>
           <Field
             width={90}
-            borderColor={colorsm.tableBorder}
+            style={{ borderColor: colorsm.tableBorder }}
             contentStyle={[{ textAlign: 'right' }, styles.tnum]}
             title={inflow}
           >
@@ -324,7 +324,7 @@ function Transaction({
       ) : (
         <Field
           width={90}
-          borderColor={colorsm.tableBorder}
+          style={{ borderColor: colorsm.tableBorder }}
           contentStyle={[{ textAlign: 'right' }, styles.tnum]}
           title={amount}
         >

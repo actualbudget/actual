@@ -113,17 +113,17 @@ let Payee = memo(
 
     return (
       <Row
-        borderColor={borderColor}
-        backgroundColor={
-          selected
-            ? colorsm.tableRowBackgroundHighlight
-            : backgroundFocus
-            ? colorsm.tableBackgroundHover
-            : colorsm.tableBackground
-        }
         highlighted={highlighted}
         style={[
-          { alignItems: 'stretch' },
+          {
+            alignItems: 'stretch',
+            borderColor: borderColor,
+            backgroundColor: selected
+              ? colorsm.tableRowBackgroundHighlight
+              : backgroundFocus
+              ? colorsm.tableRowBackgroundHover
+              : colorsm.tableBackground,
+          },
           style,
           selected && {
             zIndex: 100,
@@ -243,7 +243,6 @@ function PayeeTableHeader() {
           userSelect: 'none',
         }}
         collapsed={true}
-        version="v2"
       >
         <SelectCell
           exposed={true}

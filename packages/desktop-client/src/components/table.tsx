@@ -92,28 +92,10 @@ type FieldProps = ComponentProps<typeof View> & {
   contentStyle?: CSSProperties;
 };
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
-  {
-    width,
-    name,
-    borderColor: oldBorderColor,
-    truncate = true,
-    children,
-    style,
-    contentStyle,
-    ...props
-  },
+  { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
 ) {
-  let { backgroundColor, borderColor } = useContext(CellContext);
-
-  // TODO: Get rid of this. Go through and remove all the places where
-  // the border color is manually passed in.
-  if (oldBorderColor) {
-    borderColor = oldBorderColor;
-  } else {
-    borderColor = colorsm.tableBorder;
-  }
-
+  let borderColor = colorsm.tableBorder;
   return (
     <View
       innerRef={ref}
@@ -125,8 +107,6 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
           borderTopWidth: borderColor ? 1 : 0,
           borderBottomWidth: borderColor ? 1 : 0,
           borderColor,
-          backgroundColor,
-          color: colorsm.tableText,
         },
         styles.smallText,
         style,
@@ -300,8 +280,6 @@ type RowProps = ComponentProps<typeof View> & {
   highlighted?: boolean;
 };
 export function Row({
-  backgroundColor = colorsm.tableBackground,
-  borderColor = colorsm.tableBorder,
   inset = 0,
   collapsed,
   focused,
@@ -341,9 +319,9 @@ export function Row({
   return (
     <CellProvider
       backgroundColor={
-        shouldHighlight ? colorsm.tableRowBackgroundHighlight : backgroundColor
+        shouldHighlight ? colorsm.tableRowBackgroundHighlight : null
       }
-      borderColor={shouldHighlight ? colorsm.tableBorderSelected : 'none'}
+      borderColor={shouldHighlight ? colorsm.tableBorderSelected : null}
     >
       <View
         innerRef={rowRef}
@@ -783,25 +761,22 @@ export function TableHeader({
 }: TableHeaderProps) {
   return (
     <View
-      style={
-        version === 'v2' && {
-          borderRadius: '6px 6px 0 0',
-          overflow: 'hidden',
-          flexShrink: 0,
-        }
-      }
+      style={{
+        borderRadius: '6px 6px 0 0',
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}
     >
       <Row
-        backgroundColor={colorsm.tableHeaderBackground}
         collapsed={true}
         {...rowProps}
-        style={[
-          { zIndex: 200 },
-          version === 'v2'
-            ? { color: colorsm.tableHeaderText, fontWeight: 500 }
-            : { color: colorsm.tableHeaderText },
-          rowProps.style,
-        ]}
+        style={{
+          color: colorsm.tableHeaderText,
+          backgroundColor: colorsm.tableHeaderBackground,
+          zIndex: 200,
+          fontWeight: 500,
+          ...rowProps.style,
+        }}
       >
         {headers
           ? headers.map(header => {
@@ -1134,7 +1109,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       >
         {headers && (
           <TableHeader
-            version={version}
             height={rowHeight}
             {...(Array.isArray(headers) ? { headers } : { children: headers })}
           />
@@ -1175,7 +1149,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
                             ? getScrollOffset(height, initialScrollTo.current)
                             : 0
                         }
-                        version={version}
                         animated={animated}
                         overscanCount={5}
                         onItemsRendered={onItemsRendered}

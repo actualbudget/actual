@@ -46,24 +46,24 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         border: bare
           ? null
           : '1px solid ' +
-            (primary
-              ? colorsm.buttonPositiveBorder
-              : disabled
+            (disabled // always use disabled before primary since we can have a disabled primary button
               ? colorsm.buttonDisabledBorder
+              : primary
+              ? colorsm.buttonPositiveBorder
               : colorsm.buttonNeutralBorder),
         color: bare
           ? null
-          : primary
-          ? colorsm.buttonPositiveTextHover
           : disabled
           ? colorsm.buttonDisabledText
+          : primary
+          ? colorsm.buttonPositiveTextHover
           : colorsm.buttonNeutralTextHover,
         backgroundColor: bare
           ? 'rgba(100,100,100,0.15)' // doesn't do anything visible in dark mode, but keep for light
-          : primary
-          ? colorsm.buttonPositiveBackgroundHover
           : disabled
           ? colorsm.buttonDisabledBackground
+          : primary
+          ? colorsm.buttonPositiveBackgroundHover
           : colorsm.buttonNeutralBackgroundHover,
       },
       hoveredStyle,
@@ -91,25 +91,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         borderRadius: 4,
         backgroundColor: bare
           ? 'transparent'
+          : disabled // always use disabled before primary since we can have a disabled primary button
+          ? colorsm.buttonDisabledBackground
           : primary
           ? colorsm.buttonPositiveBackground
-          : disabled
-          ? colorsm.buttonDisabledBackground
           : colorsm.buttonNeutralBackground,
         border: bare
           ? 'none'
           : '1px solid ' +
-            (primary
-              ? colorsm.buttonPositiveBorder
-              : disabled
+            (disabled
               ? colorsm.buttonDisabledBorder
+              : primary
+              ? colorsm.buttonPositiveBorder
               : colorsm.buttonNeutralBorder),
         color: bare
           ? 'inherit'
-          : primary
-          ? colorsm.buttonPositiveText
           : disabled
           ? colorsm.buttonDisabledText
+          : primary
+          ? colorsm.buttonPositiveText
           : colorsm.buttonNeutralText,
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',

@@ -246,8 +246,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       <Field
         name="spent"
         width="flex"
-        borderColor={borderColor}
-        style={{ textAlign: 'right' }}
+        style={{ textAlign: 'right', borderColor: borderColor }}
       >
         <span
           data-testid="category-month-spent"
@@ -271,8 +270,11 @@ export const CategoryMonth = memo(function CategoryMonth({
         <Field
           name="balance"
           width="flex"
-          borderColor={borderColor}
-          style={{ paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' }}
+          style={{
+            paddingRight: MONTH_RIGHT_PADDING,
+            textAlign: 'right',
+            borderColor: borderColor,
+          }}
         >
           <span {...(category.is_income ? {} : balanceTooltip.getOpenEvents())}>
             <BalanceWithCarryover

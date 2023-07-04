@@ -340,15 +340,16 @@ let Rule = memo(
     return (
       <Row
         height="auto"
-        borderColor={borderColor}
-        backgroundColor={
-          selected
+        style={{
+          fontSize: 13,
+          zIndex: editing || selected ? 101 : 'auto',
+          borderColor: borderColor,
+          backgroundColor: selected
             ? colorsm.tableRowBackgroundHighlight
             : backgroundFocus
-            ? colorsm.tableBackgroundHover
-            : colorsm.tableBackground
-        }
-        style={{ fontSize: 13, zIndex: editing || selected ? 101 : 'auto' }}
+            ? colorsm.tableRowBackgroundHover
+            : colorsm.tableBackground,
+        }}
         collapsed="true"
         onMouseEnter={() => onHover && onHover(rule.id)}
         onMouseLeave={() => onHover && onHover(null)}
@@ -522,7 +523,7 @@ function RulesHeader() {
   let dispatchSelected = useSelectedDispatch();
 
   return (
-    <TableHeader version="v2" style={{}}>
+    <TableHeader>
       <SelectCell
         exposed={true}
         focused={false}

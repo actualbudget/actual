@@ -243,11 +243,11 @@ const TransactionHeader = memo(
 
     return (
       <Row
-        backgroundColor={colorsm.tableHeaderBackground}
         style={{
           fontWeight: 300,
           zIndex: 200,
           color: colorsm.tableHeaderText,
+          backgroundColor: colorsm.tableHeaderBackground,
         }}
       >
         <SelectCell
@@ -693,16 +693,16 @@ const Transaction = memo(function Transaction(props) {
 
   return (
     <Row
-      borderColor={borderColor}
-      backgroundColor={
-        selected
-          ? colorsm.tableRowBackgroundHighlight
-          : backgroundFocus
-          ? colorsm.tableBackground
-          : colorsm.background
-      }
       highlighted={highlighted}
       style={[
+        {
+          borderColor: borderColor,
+          backgroundColor: selected
+            ? colorsm.tableRowBackgroundHighlight
+            : backgroundFocus
+            ? colorsm.tableRowBackgroundHover
+            : colorsm.tableBackground,
+        },
         highlighted || selected
           ? { color: colorsm.tableRowBackgroundHighlightText }
           : { color: colorsm.tableText },
@@ -717,7 +717,6 @@ const Transaction = memo(function Transaction(props) {
     >
       {isChild && (
         <Field
-          borderColor="transparent"
           width={110}
           style={{
             width: 110,
@@ -727,7 +726,6 @@ const Transaction = memo(function Transaction(props) {
       )}
       {isChild && showAccount && (
         <Field
-          borderColor="transparent"
           style={{
             flex: 1,
           }}
@@ -931,7 +929,7 @@ const Transaction = memo(function Transaction(props) {
               borderRadius: 4,
               transition: 'none',
               '&:hover': {
-                backgroundColor: colorsm.tableBackgroundHover,
+                backgroundColor: colorsm.tableRowBackgroundHover,
                 color: colorsm.tableTextHover,
               },
             }}

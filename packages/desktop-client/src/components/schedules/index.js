@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colorsm } from '../../style';
 import { usePushModal } from '../../util/router-tools';
 import { View, Button, Search } from '../common';
 import { Page } from '../Page';
@@ -83,7 +82,6 @@ export default function Schedules() {
           allowCompleted={true}
           onSelect={onEdit}
           onAction={onAction}
-          style={{ backgroundColor: colorsm.tableBackground }}
         />
       </View>
 

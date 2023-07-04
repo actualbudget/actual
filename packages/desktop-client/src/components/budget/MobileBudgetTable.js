@@ -715,7 +715,7 @@ class IncomeBudgetGroup extends Component {
                 }
                 index={index}
                 style={{
-                  backgroundColor: colorsm.tableRowBackground,
+                  backgroundColor: colorsm.tableBackground,
                   color: colorsm.tableText,
                 }}
               />

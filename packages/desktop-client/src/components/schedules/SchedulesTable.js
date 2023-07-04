@@ -187,12 +187,11 @@ export function SchedulesTable({
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        backgroundColor="transparent"
         onClick={() => onSelect(item.id)}
         style={{
           cursor: 'pointer',
           backgroundColor: colorsm.tableBackground,
-          ':hover': { backgroundColor: colorsm.tableBackgroundHover },
+          ':hover': { backgroundColor: colorsm.tableRowBackgroundHover },
         }}
       >
         <Field width="flex" name="name">
@@ -246,10 +245,10 @@ export function SchedulesTable({
         <Row
           height={ROW_HEIGHT}
           inset={15}
-          backgroundColor="transparent"
           style={{
             cursor: 'pointer',
-            ':hover': { backgroundColor: colorsm.tableBackgroundHover },
+            backgroundColor: 'transparent',
+            ':hover': { backgroundColor: colorsm.tableRowBackgroundHover },
           }}
           onClick={() => setShowCompleted(true)}
         >
@@ -271,7 +270,7 @@ export function SchedulesTable({
 
   return (
     <View style={[{ flex: 1 }, tableStyle]}>
-      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+      <TableHeader height={ROW_HEIGHT} inset={15}>
         <Field width="flex">Name</Field>
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
@@ -289,8 +288,6 @@ export function SchedulesTable({
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
-        backgroundColor="transparent"
-        version="v2"
         style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
         items={items}
         renderItem={renderItem}
