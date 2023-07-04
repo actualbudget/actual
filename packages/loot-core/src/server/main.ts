@@ -61,7 +61,6 @@ import {
   setSyncingMode,
   makeTestMessage,
   clearFullSyncTimeout,
-  syncAndReceiveMessages,
   resetSync,
   repairSync,
 } from './sync';
@@ -2462,7 +2461,6 @@ export const lib = {
     return res;
   },
   on: (name, func) => app.events.on(name, func),
-  syncAndReceiveMessages,
   q,
   db,
 
