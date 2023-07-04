@@ -132,9 +132,11 @@ All the examples below use the case of $100 leftover when the remainder pass is 
 
 ## Apply the templates
 
-To apply the goal templates you create, enable the feature in the Settings experimental section. When the feature is on, two new options will appear in the monthly budget actions list.
+To apply the goal templates you create, enable the feature in the Settings experimental section. When the feature is on, three new options will appear in the monthly budget actions list.
 
 ![](/img/goal-template/goal-template-2.png)
+
+**Check templates** will test all template lines for proper syntax.
 
 **Apply budget template** will only fill empty cells using the templates.
 
