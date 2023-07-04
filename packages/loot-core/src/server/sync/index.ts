@@ -249,7 +249,7 @@ export type Message = {
   dataset: string;
   old?: unknown;
   row: string;
-  timestamp: string;
+  timestamp: Timestamp;
   value: string | number | null;
 };
 
@@ -333,9 +333,8 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   db.transaction(() => {
     let added = new Set();
 
-    for (let i = 0; i < messages.length; i++) {
-      let msg = messages[i];
-      let { dataset, row, column, timestamp, value } = msg;
+    for (const msg of messages) {
+      const { dataset, row, column, timestamp, value } = msg;
 
       if (!msg.old) {
         apply(msg, getIn(oldData, [dataset, row]) || added.has(dataset + row));
@@ -357,7 +356,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
           [timestamp.toString(), dataset, row, column, serializeValue(value)],
         );
 
-        currentMerkle = merkle.insert(currentMerkle, msg.timestamp);
+        currentMerkle = merkle.insert(currentMerkle, timestamp);
       }
     }
 
@@ -487,27 +486,12 @@ export async function sendMessages(messages: Message[]) {
   }
 }
 
-export function getMessagesSince(since: string) {
+export function getMessagesSince(since: string): Message[] {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
     [since],
     true,
   );
-}
-
-export async function syncAndReceiveMessages(
-  messages: Message[],
-  since: string,
-): Promise<Message[]> {
-  let localMessages = await getMessagesSince(since);
-  await receiveMessages(
-    messages.map(msg => ({
-      ...msg,
-      value: deserializeValue(msg.value as string),
-      timestamp: Timestamp.parse(msg.timestamp),
-    })),
-  );
-  return localMessages;
 }
 
 export function clearFullSyncTimeout(): void {
@@ -691,7 +675,6 @@ async function _fullSync(
       res.messages.map(msg => ({
         ...msg,
         value: deserializeValue(msg.value as string),
-        timestamp: Timestamp.parse(msg.timestamp),
       })),
     );
   }

@@ -3,16 +3,14 @@ import React, { useState } from 'react';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  P,
-  Select,
-  FormError,
-  LinkButton,
-} from '../common';
+import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
+import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import { P, LinkButton } from '../common';
+import Button from '../common/Button';
+import FormError from '../common/FormError';
+import Modal from '../common/Modal';
+import Text from '../common/Text';
+import View from '../common/View';
 
 function needsCategory(account, currentTransfer, accounts) {
   const acct = accounts.find(a => a.id === currentTransfer);
@@ -21,23 +19,6 @@ function needsCategory(account, currentTransfer, accounts) {
   // The user must select a category if transferring from a budgeted
   // account to an off-budget account
   return account.offbudget === 0 && isOffBudget;
-}
-
-function CategorySelect({ categoryGroups, ...nativeProps }) {
-  return (
-    <Select {...nativeProps}>
-      <option value="">Select category...</option>
-      {categoryGroups.map(group => (
-        <optgroup key={group.id} label={group.name}>
-          {group.categories.map(category => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </optgroup>
-      ))}
-    </Select>
-  );
 }
 
 function CloseAccount({
@@ -55,10 +36,6 @@ function CloseAccount({
 
   let [transferError, setTransferError] = useState(false);
   let [categoryError, setCategoryError] = useState(false);
-
-  let filtered = accounts.filter(a => a.id !== account.id);
-  let onbudget = filtered.filter(a => a.offbudget === 0);
-  let offbudget = filtered.filter(a => a.offbudget === 1);
 
   return (
     <Modal
@@ -113,33 +90,23 @@ function CloseAccount({
                   to:
                 </P>
 
-                <Select
-                  value={transfer}
-                  onChange={event => {
-                    setTransfer(event.target.value);
-                    if (transferError && event.target.value) {
-                      setTransferError(false);
-                    }
-                  }}
-                  style={{ width: 200, marginBottom: 15 }}
-                >
-                  <option value="">Select account...</option>
-                  <optgroup label="For Budget">
-                    {onbudget.map(acct => (
-                      <option key={acct.id} value={acct.id}>
-                        {acct.name}
-                      </option>
-                    ))}
-                  </optgroup>
+                <View style={{ marginBottom: 15 }}>
+                  <AccountAutocomplete
+                    includeClosedAccounts={false}
+                    value={transfer}
+                    accounts={accounts}
+                    inputProps={{
+                      placeholder: 'Select account...',
+                    }}
+                    onSelect={acc => {
+                      setTransfer(acc);
+                      if (transferError && acc) {
+                        setTransferError(false);
+                      }
+                    }}
+                  />
+                </View>
 
-                  <optgroup label="Off Budget">
-                    {offbudget.map(acct => (
-                      <option key={acct.id} value={acct.id}>
-                        {acct.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                </Select>
                 {transferError && (
                   <FormError style={{ marginBottom: 15 }}>
                     Transfer is required
@@ -154,17 +121,20 @@ function CloseAccount({
                       categorized. Select a category:
                     </P>
 
-                    <CategorySelect
+                    <CategoryAutocomplete
                       categoryGroups={categoryGroups}
                       value={category}
-                      onChange={event => {
-                        setCategory(event.target.value);
-                        if (categoryError && event.target.value) {
+                      inputProps={{
+                        placeholder: 'Select category...',
+                      }}
+                      onSelect={newValue => {
+                        setCategory(newValue);
+                        if (categoryError && newValue) {
                           setCategoryError(false);
                         }
                       }}
-                      style={{ width: 200 }}
                     />
+
                     {categoryError && (
                       <FormError>Category is required</FormError>
                     )}

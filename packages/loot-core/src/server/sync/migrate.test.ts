@@ -1,3 +1,4 @@
+import { Timestamp } from '@actual-app/crdt';
 import fc from 'fast-check';
 
 import * as arbs from '../../mocks/arbitrary-schema';
@@ -39,7 +40,8 @@ let messageArb: fc.Arbitrary<Message> = fc
       })
       .noBias()
       .noShrink()
-      .map(date => date.toISOString() + '-0000-0123456789ABCDEF');
+      .map(date => date.toISOString() + '-0000-0123456789ABCDEF')
+      .map(Timestamp.parse);
 
     return fc.record<Message>({
       timestamp: timestamp,
