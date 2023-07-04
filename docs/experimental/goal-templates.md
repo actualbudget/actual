@@ -33,8 +33,9 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template $10 repeat every week starting 2022-01-03 up to 80|Budget $10 a week, up to a maximum of $80|
 |#template $10 repeat every 2 weeks starting 2022-01-04|Budget $10 fortnightly|
 |#template $10 repeat every 9 weeks starting 2022-01-04 up to 30|Budget $10 every 9 weeks, up to a maximum of $30|
-|#template 10% of Income|Budget 10% of the Income category|
-|#template 15% of all income|Budget 15% of all income categories|
+|#template 15% of all income|Budget 15% of all income categories| Using a "pay yourself first" strategy|
+|#template 10% of Paycheck|Budget 10% of the "Paycheck" income category| Using a "pay yourself first" strategy, but have income categories you want to ignore|
+|#template 12% of available funds|Budget 12% of funds available for that month|Using a "pay yourself first" strategy in conjuction with a "month ahead" strategy |
 |#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transacions|
 |#template schedule full {SCHEDULE NAME}|Fund upcoming scheduled transaction only on needed month| Small schedules that are non-monthly|
 |#template remainder | Add all remaining funds to this category| See the [Remainder Template](#remainder-template) Section for info |
@@ -84,7 +85,7 @@ Templates can be given a priority flag to change the order that the templates ge
 - Lower priority values get run first. EX 0 is run first, then 1, then 2, etc.
 - No priority flag defaults to priority 0 and is the same as a standard template.
 - Negative priorities are not allowed and will result in the template being skipped.
-- Default template application order is bottom to top. This also applies to within a given priority level.
+- Template application order is based on the database order, not the view order.  To guarantee a specific fill order use separate priorities for each category
 - If you have multiple `schedule` or `by` template lines in a single category, they will be forced to match the same priority level as the line run first.
 
 ### Remainder Template
