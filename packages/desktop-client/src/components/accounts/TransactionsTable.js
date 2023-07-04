@@ -286,7 +286,12 @@ const TransactionHeader = memo(
           icon={field === 'payee' ? ascDesc : 'clickable'}
           onClick={() => onSortTable('payee')}
         />
-        <Cell value="Notes" width="flex" />
+        <Cell
+          value="Notes"
+          width="flex"
+          icon={field === 'notes' ? ascDesc : 'clickable'}
+          onClick={() => onSortTable('notes')}
+        />
         {showCategory && (
           <Cell
             value="Category"
@@ -299,15 +304,15 @@ const TransactionHeader = memo(
           value="Payment"
           width={90}
           textAlign="flex"
-          icon={'clickable'}
-          onClick={() => onSortTable('amount')}
+          icon={field === 'payment' ? ascDesc : 'clickable'}
+          onClick={() => onSortTable('payment')}
         />
         <Cell
           value="Deposit"
           width={85}
           textAlign="flex"
-          icon={field === 'amount' ? ascDesc : 'clickable'}
-          onClick={() => onSortTable('amount')}
+          icon={field === 'deposit' ? ascDesc : 'clickable'}
+          onClick={() => onSortTable('deposit')}
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
@@ -1099,7 +1104,7 @@ const Transaction = memo(function Transaction(props) {
 
       <InputCell
         type="input"
-        width={80}
+        width={85}
         name="credit"
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
@@ -1620,8 +1625,17 @@ export let TransactionTable = forwardRef((props, ref) => {
   let savePending = useRef(false);
   let afterSaveFunc = useRef(false);
   let [_, forceRerender] = useState({});
-
+  let [field, setField] = useState('date');
+  let [sortedTransactionsPrev, setSortedTransactionsPrev] = useState([]);
   let selectedItems = useSelectedItems();
+
+  useEffect(() => {
+    //Use UUID as the base sort in case sort and sortPrev are exactly the same
+    //This makes sure the sort is consistent and reacts the same every time
+    setSortedTransactionsPrev(
+      setSorted(transactions.sort((a, b) => a.id.localeCompare(b.id))),
+    );
+  }, [transactions]);
 
   useLayoutEffect(() => {
     latestState.current = {
@@ -1898,96 +1912,85 @@ export let TransactionTable = forwardRef((props, ref) => {
     id => splitsExpanded.dispatch({ type: 'toggle-split', id }),
     [splitsExpanded.dispatch],
   );
-  let [field, setField] = useState('date');
+  let [fields, setFields] = useState('dates');
   let [ascDesc, setAscDesc] = useState('asc');
+  let [sortedTransactions, setSortedTransactions] = useState([]);
 
   function onSortTable(headerClicked) {
     if (headerClicked === field) {
       ascDesc === 'desc' ? setAscDesc('asc') : setAscDesc('desc');
     } else {
+      setSortedTransactionsPrev(sortedTransactions);
       setField(headerClicked);
-      headerClicked === 'amount' || headerClicked === 'date'
+      setFields(headerClicked + 's');
+      headerClicked === 'payment' || headerClicked === 'date'
         ? setAscDesc('asc')
         : setAscDesc('desc');
     }
   }
 
-  let category = props.categoryGroups.flatMap(cat => {
-    return cat.categories;
-  });
-  let fields = field + 's';
+  function sortStrings(transactionsList, lookUp) {
+    let fieldList =
+      fields === 'categorys'
+        ? props.categoryGroups.flatMap(cat => {
+            return cat.categories;
+          })
+        : props[fields];
 
-  function sortStrings() {
-    let sortDesc = transactions
+    let sortDesc = transactionsList
       .map(e => {
         return {
           ...e,
-          fieldName: props[fields].find(f => f.id === e[field])?.name ?? '',
+          fieldName: lookUp
+            ? fieldList.find(f => f.id === e[field])?.name ?? ''
+            : e[field] ?? '',
         };
       })
-      //if 2 transactions share a date and fieldname then sort by UUID
-      .sort((a, b) => a.id.localeCompare(b.id))
-      //secondary: date
-      .sort((a, b) => a.date.localeCompare(b.date))
       //primary field
       .sort((a, b) => a.fieldName.localeCompare(b.fieldName));
 
     return ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
   }
 
-  function sortCat() {
-    let sortDesc = transactions
+  function sortNumber(transactionsList) {
+    let sortAscAmt = transactionsList
       .map(e => {
-        return {
-          ...e,
-          fieldName: category.find(f => f.id === e[field])?.name ?? '',
-        };
+        return { ...e };
       })
-      //if 2 transactions share a date and fieldname then sort by UUID
-      .sort((a, b) => a.id.localeCompare(b.id))
-      //secondary: date
-      .sort((a, b) => a.date.localeCompare(b.date))
       //primary field
-      .sort((a, b) => a.fieldName.localeCompare(b.fieldName)).sort((a, b) => a.id - b.id);
+      .sort((a, b) => a.amount - b.amount);
 
-    return ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
+    return ascDesc === 'asc' ? sortAscAmt : sortAscAmt.reverse();
   }
 
-  const sortedTransactions = useMemo(() => {
+  function setSorted(transactionsList) {
     switch (field) {
-      case 'account':
-        return sortStrings();
-      case 'payee':
-        return sortStrings();
-      case 'category':
-        return sortCat();
       case 'date':
-        let sortAscDate = transactions
-        //if 2 transactions share a payee and date then sort by UUID
-        .sort((a, b) => a.id.localeCompare(b.id))
-        //secondary: payee
-        .sort((a, b) => a.payee.localeCompare(b.date))
-        //primary field
-        .sort((a, b) => b[field].localeCompare(a[field]))
-        return ascDesc === 'asc' ? sortAscDate : sortAscDate.reverse();
-      case 'amount':
-        let sortAscAmt = transactions
-        //if 2 transactions share a date and amount then sort by UUID
-        .sort((a, b) => a.id.localeCompare(b.id))
-        //secondary: date
-        .sort((a, b) => a.date.localeCompare(b.date))
-        //primary field
-        .sort((a, b) => a[field] - b[field]);
-        return ascDesc === 'asc' ? sortAscAmt : sortAscAmt.reverse();
+        return sortStrings(transactionsList, false);
+      case 'notes':
+        return sortStrings(transactionsList, false);
+      case 'payment':
+        return sortNumber(transactionsList);
+      case 'deposit':
+        return sortNumber(transactionsList);
       default:
+        return sortStrings(transactionsList, true);
     }
-  }, [field, ascDesc, transactions]);
+  }
+
+  useEffect(() => {
+    setSortedTransactions(setSorted(sortedTransactionsPrev));
+  }, [field, ascDesc, sortedTransactionsPrev]);
 
   return (
     <TransactionTableInner
       tableRef={mergedRef}
       {...props}
-      transactions={sortedTransactions}
+      transactions={
+        sortedTransactions.length === 0
+          ? sortedTransactionsPrev
+          : sortedTransactions
+      }
       transactionMap={transactionMap}
       selectedItems={selectedItems}
       hoveredTransaction={hoveredTransaction}
