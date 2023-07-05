@@ -1,4 +1,3 @@
-import budget from '../../../../desktop-client/src/components/budget';
 import * as monthUtils from '../../shared/months';
 import {
   extractScheduleConds,
