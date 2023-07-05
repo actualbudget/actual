@@ -204,7 +204,7 @@ export class Condition {
   options;
   selectNegate;
   rawValue;
-  type;
+  fieldTypes;
   unparsedValue;
   value;
 
@@ -243,7 +243,7 @@ export class Condition {
     this.selectNegate = selectNegate;
     this.value = type.parse ? type.parse(op, value, field) : value;
     this.options = options;
-    this.type = typeName;
+    this.fieldTypes = typeName;
   }
 
   eval(object) {
