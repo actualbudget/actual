@@ -2463,9 +2463,4 @@ export const lib = {
   on: (name, func) => app.events.on(name, func),
   q,
   db,
-
-  // Expose CRDT mechanisms so server can use them
-  // Backwards compatability
-  ...CRDT,
-  timestamp: CRDT,
 };
