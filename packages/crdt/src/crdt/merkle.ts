@@ -12,15 +12,18 @@ import { Timestamp } from './timestamp';
 /**
  * Represents a node within a trinary radix trie.
  */
-export type TrieNode = {
-  '0'?: TrieNode;
-  '1'?: TrieNode;
-  '2'?: TrieNode;
-  hash: number;
-};
+type EmptyTrieNode = { hash: null };
+export type TrieNode =
+  | EmptyTrieNode
+  | {
+      '0'?: TrieNode;
+      '1'?: TrieNode;
+      '2'?: TrieNode;
+      hash: number;
+    };
 
-export function emptyTrie(): TrieNode {
-  return { hash: 0 };
+export function emptyTrie(): EmptyTrieNode {
+  return { hash: null };
 }
 
 export function getKeys(trie: TrieNode): ('0' | '1' | '2')[] {
