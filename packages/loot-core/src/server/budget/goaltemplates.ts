@@ -1,3 +1,4 @@
+import budget from '../../../../desktop-client/src/components/budget';
 import * as monthUtils from '../../shared/months';
 import {
   extractScheduleConds,
@@ -97,7 +98,7 @@ async function processTemplate(month, force) {
     let remainder_scale = 1;
     if (priority === lowestPriority) {
       let available_now = await getSheetValue(sheetName, `to-budget`);
-      remainder_scale = Math.round(available_now / remainder_weight_total);
+      remainder_scale = available_now / remainder_weight_total;
     }
 
     for (let c = 0; c < categories.length; c++) {
@@ -606,7 +607,7 @@ async function applyCategoryTemplate(
         if (remainder_scale > 0) {
           to_budget += Math.round(remainder_scale * template.weight);
           // can over budget with the rounding, so checking that
-          if (to_budget > budgetAvailable + budgeted) {
+          if (to_budget > budgetAvailable + budgeted || to_budget === budgetAvailable + budgeted - 1) {
             to_budget = budgetAvailable + budgeted;
           }
         }
