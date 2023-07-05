@@ -300,6 +300,7 @@ function Titlebar({
   let { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
 
+  let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let onTogglePrivacy = enabled => {
     savePrefs({ isPrivacyEnabled: enabled });
   };
@@ -384,10 +385,12 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <PrivacyButton
-        localPrefs={localPrefs}
-        onTogglePrivacy={onTogglePrivacy}
-      />
+      {privacyModeFeatureFlag && (
+        <PrivacyButton
+          localPrefs={localPrefs}
+          onTogglePrivacy={onTogglePrivacy}
+        />
+      )}
       {serverURL ? (
         <SyncButton
           style={{ marginLeft: 10 }}

@@ -19,6 +19,7 @@ import {
   AlignedText,
 } from '../../common';
 import NotesButton from '../../NotesButton';
+import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
@@ -91,40 +92,48 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             </Tooltip>
           )}
         >
-          <CellValue
-            binding={rolloverBudget.incomeAvailable}
-            type="financial"
-            style={{ fontWeight: 600 }}
-          />
+          <PrivacyFilter>
+            <CellValue
+              binding={rolloverBudget.incomeAvailable}
+              type="financial"
+              style={{ fontWeight: 600 }}
+            />
+          </PrivacyFilter>
         </HoverTarget>
 
-        <CellValue
-          binding={rolloverBudget.lastMonthOverspent}
-          formatter={value => {
-            let v = format(value, 'financial');
-            return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
-          }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
-        />
+        <PrivacyFilter>
+          <CellValue
+            binding={rolloverBudget.lastMonthOverspent}
+            formatter={value => {
+              let v = format(value, 'financial');
+              return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
+            }}
+            style={[{ fontWeight: 600 }, styles.tnum]}
+          />
+        </PrivacyFilter>
 
-        <CellValue
-          binding={rolloverBudget.totalBudgeted}
-          formatter={value => {
-            let v = format(value, 'financial');
-            return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
-          }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
-        />
+        <PrivacyFilter>
+          <CellValue
+            binding={rolloverBudget.totalBudgeted}
+            formatter={value => {
+              let v = format(value, 'financial');
+              return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
+            }}
+            style={[{ fontWeight: 600 }, styles.tnum]}
+          />
+        </PrivacyFilter>
 
-        <CellValue
-          binding={rolloverBudget.forNextMonth}
-          formatter={value => {
-            let n = parseInt(value) || 0;
-            let v = format(Math.abs(n), 'financial');
-            return n >= 0 ? '-' + v : '+' + v;
-          }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
-        />
+        <PrivacyFilter>
+          <CellValue
+            binding={rolloverBudget.forNextMonth}
+            formatter={value => {
+              let n = parseInt(value) || 0;
+              let v = format(Math.abs(n), 'financial');
+              return n >= 0 ? '-' + v : '+' + v;
+            }}
+            style={[{ fontWeight: 600 }, styles.tnum]}
+          />
+        </PrivacyFilter>
       </View>
 
       <View>
@@ -173,26 +182,28 @@ function ToBudget({
                   </Tooltip>
                 )}
               >
-                <Block
-                  onClick={() => setMenuOpen('actions')}
-                  data-cellname={node.name}
-                  {...css([
-                    styles.veryLargeText,
-                    {
-                      fontWeight: 400,
-                      userSelect: 'none',
-                      cursor: 'pointer',
-                      color: isNegative ? colors.r4 : colors.p5,
-                      marginBottom: -1,
-                      borderBottom: '1px solid transparent',
-                      ':hover': {
-                        borderColor: isNegative ? colors.r4 : colors.p5,
+                <PrivacyFilter blurIntensity={7}>
+                  <Block
+                    onClick={() => setMenuOpen('actions')}
+                    data-cellname={node.name}
+                    {...css([
+                      styles.veryLargeText,
+                      {
+                        fontWeight: 400,
+                        userSelect: 'none',
+                        cursor: 'pointer',
+                        color: isNegative ? colors.r4 : colors.p5,
+                        marginBottom: -1,
+                        borderBottom: '1px solid transparent',
+                        ':hover': {
+                          borderColor: isNegative ? colors.r4 : colors.p5,
+                        },
                       },
-                    },
-                  ])}
-                >
-                  {format(num, 'financial')}
-                </Block>
+                    ])}
+                  >
+                    {format(num, 'financial')}
+                  </Block>
+                </PrivacyFilter>
               </HoverTarget>
               {menuOpen === 'actions' && (
                 <Tooltip

@@ -25,7 +25,9 @@ function DetailedBalance({ name, balance }) {
       }}
     >
       {name}{' '}
-      <Text style={{ fontWeight: 600 }}>{format(balance, 'financial')}</Text>
+      <PrivacyFilter>
+        <Text style={{ fontWeight: 600 }}>{format(balance, 'financial')}</Text>
+      </PrivacyFilter>
     </Text>
   );
 }
@@ -149,11 +151,7 @@ export function Balances({
           }}
         />
       </Button>
-      {showExtraBalances && (
-        <PrivacyFilter>
-          <MoreBalances balanceQuery={balanceQuery} />
-        </PrivacyFilter>
-      )}
+      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />

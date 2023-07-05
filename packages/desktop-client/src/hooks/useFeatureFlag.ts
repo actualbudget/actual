@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 const DEFAULT_FEATURE_FLAG_STATE: Record<string, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
+  privacyMode: false,
 };
 
 export default function useFeatureFlag(name: string): boolean {

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { css } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
-import { PrivacyProvider } from 'loot-core/src/client/data-hooks/privacy';
+import { PrivacyProvider } from 'loot-core/src/client/privacy';
 import {
   init as initConnection,
   send,
