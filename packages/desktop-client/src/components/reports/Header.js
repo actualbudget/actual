@@ -91,7 +91,7 @@ function Header({
           }}
         >
           <CustomSelect
-            style={{ backgroundColor: 'white', width: 130 }}
+            style={{ backgroundColor: 'white' }}
             onChange={newValue =>
               onChangeDates(...validateStart(allMonths, newValue, end))
             }
@@ -100,7 +100,7 @@ function Header({
           />
           <View>to</View>
           <CustomSelect
-            style={{ backgroundColor: 'white', width: 130 }}
+            style={{ backgroundColor: 'white' }}
             onChange={newValue =>
               onChangeDates(...validateEnd(allMonths, start, newValue))
             }
