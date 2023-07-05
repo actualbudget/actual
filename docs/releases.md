@@ -2,6 +2,12 @@
 
 ## 23.7.0
 
+:::warning
+
+Please **do not install this release**. It has multiple severe bugs. We are hoping to release a bug fix update in the near future.
+
+:::
+
 **Docker tag: 23.7.0**
 
 ### Actual
@@ -135,7 +141,7 @@ Version: 23.7.0
 - [#218](https://github.com/actualbudget/actual-server/pull/218) Port from `@actual-app/api` usage to `@actual-app/crdt` — thanks @MatissJanis
 
 ## 23.6.0
-
+::
 **Docker tag: 23.6.0**
 
 ### Actual
