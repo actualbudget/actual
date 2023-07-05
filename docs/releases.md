@@ -1,10 +1,28 @@
 # Release Notes
 
+## 23.7.1
+
+**Docker tag: 23.7.1**
+
+### Actual
+
+Version: 23.7.1
+
+#### Bugfix
+
+- [#1289](https://github.com/actualbudget/actual/pull/1289) Fix Nordigen sync issue; fix sorting of budget categories - thanks @MatissJanis
+- [#1291](https://github.com/actualbudget/actual/pull/1291) Fix new budget files not syncing correctly - thanks @MatissJanis
+- [#1294](https://github.com/actualbudget/actual/pull/1294) Fix month picker responsiveness in reports page and make the select boxes scrollable - thanks @MatissJanis & @aleetsaiya
+
+### Actual Server
+
+Version: 23.7.1
+
 ## 23.7.0
 
 :::warning
 
-Please **do not install this release**. It has multiple severe bugs. We are hoping to release a bug fix update in the near future.
+Please **do not install this release**. It has multiple severe bugs. The fixes are available in v23.7.1
 
 :::
 
@@ -141,7 +159,7 @@ Version: 23.7.0
 - [#218](https://github.com/actualbudget/actual-server/pull/218) Port from `@actual-app/api` usage to `@actual-app/crdt` — thanks @MatissJanis
 
 ## 23.6.0
-::
+
 **Docker tag: 23.6.0**
 
 ### Actual
@@ -672,7 +690,7 @@ Version: 23.3.0
 - [#121](https://github.com/actualbudget/actual-server/pull/121) Update the :edge images to use the very latest web UI version — thanks @j-f1 & @trevdor
 - [#146](https://github.com/actualbudget/actual-serve/pull/146) upgrade yarn to v3.4.1 and add interactive-tools plugin — thanks @MatissJanis
 - [#147](https://github.com/actualbudget/actual-serve/pull/147) Improve edge image build times — thanks @j-f1
-- [#148](https://github.com/actualbudget/actual-serve/pull/148) adding trailing commas everywhere — thanks @MatissJanise
+- [#148](https://github.com/actualbudget/actual-serve/pull/148) adding trailing commas everywhere — thanks @MatissJanis
 - [#149](https://github.com/actualbudget/actual-serve/pull/149) Fix edge image tagging — thanks @j-f1
 - [#153](https://github.com/actualbudget/actual-server/pull/153) Fix Docker actions failing on PRs from forks — thanks @j-f1
 
