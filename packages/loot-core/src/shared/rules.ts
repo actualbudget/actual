@@ -67,18 +67,18 @@ export function mapField(field, opts) {
   }
 }
 
-export function friendlyOp(op, type) {
+export function friendlyOp(op, type, selectNegate) {
   switch (op) {
     case 'oneOf':
-      return 'one of';
+      return selectNegate ? 'not one of' : 'one of';
     case 'is':
-      return 'is';
+      return selectNegate ? 'is not' : 'is';
     case 'isapprox':
       return 'is approx';
     case 'isbetween':
       return 'is between';
     case 'contains':
-      return 'contains';
+      return selectNegate ? 'does not contain' : 'contains';
     case 'gt':
       if (type === 'date') {
         return 'is after';

@@ -528,6 +528,7 @@ function validateRule(rule) {
         cond.field,
         cond.value,
         cond.options,
+        cond.selectNegate,
         ruleFieldTypes,
       ),
   );

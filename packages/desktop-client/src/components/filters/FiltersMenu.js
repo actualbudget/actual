@@ -35,6 +35,7 @@ import {
   Menu,
   CustomSelect,
 } from '../common';
+import { Checkbox } from '../forms';
 import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 
@@ -144,6 +145,7 @@ function ConfigureField({
   onApply,
 }) {
   let [subfield, setSubfield] = useState(initialSubfield);
+  let [selectNegate, setSelectNegate] = useState(false);
   let inputRef = useRef();
   let prevOp = useRef(null);
 
@@ -264,15 +266,29 @@ function ConfigureField({
             />
           )}
 
-          <Stack direction="row" justify="flex-end" align="center">
-            <View style={{ flex: 1 }} />
+          <Stack direction="row" justify="flex-end" align="center" style={{ marginTop: 15 }}>
+            {field === 'account' || field === 'payee' || field === 'notes' || field === 'category' ? (
+              <View 
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  userSelect: 'none',
+                }}
+              >
+                <Checkbox id="add_negate" checked={selectNegate} onChange={() => {setSelectNegate(!selectNegate)}} />
+                <Text htmlFor="add_negate">Not</Text>
+              </View>
+            )
+            : (<View style={{ flex: 1 }} />)
+            }
             <Button
               primary
-              style={{ marginTop: 15 }}
               onClick={e => {
                 e.preventDefault();
                 onApply({
                   field,
+                  selectNegate,
                   op,
                   value,
                   options: subfieldToOptions(field, subfield),
@@ -446,6 +462,7 @@ function FilterExpression({
   field: originalField,
   customName,
   op,
+  selectNegate,
   value,
   options,
   stage,
@@ -485,7 +502,7 @@ function FilterExpression({
               <Text style={{ color: colors.p4 }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+              <Text style={{ color: colors.n3 }}>{friendlyOp(op, null, selectNegate)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
@@ -550,6 +567,7 @@ export function AppliedFilters({
           customName={filter.customName}
           field={filter.field}
           op={filter.op}
+          selectNegate={filter.selectNegate}
           value={filter.value}
           options={filter.options}
           editing={editingFilter === filter}

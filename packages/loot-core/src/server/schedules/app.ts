@@ -73,6 +73,7 @@ export function getNextDate(dateCond, start = new Date()) {
     'date',
     dateCond.value,
     null,
+    false,
     new Map(Object.entries({ date: 'date' })),
   );
   let value = cond.getValue();

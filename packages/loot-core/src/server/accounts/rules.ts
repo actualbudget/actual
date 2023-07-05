@@ -202,12 +202,13 @@ export class Condition {
   field;
   op;
   options;
+  selectNegate;
   rawValue;
   type;
   unparsedValue;
   value;
 
-  constructor(op, field, value, options, fieldTypes) {
+  constructor(op, field, value, options, selectNegate, fieldTypes) {
     let typeName = fieldTypes.get(field);
     assert(typeName, 'internal', 'Invalid condition field: ' + field);
 
@@ -239,6 +240,7 @@ export class Condition {
     this.unparsedValue = value;
     this.op = op;
     this.field = field;
+    this.selectNegate = selectNegate;
     this.value = type.parse ? type.parse(op, value, field) : value;
     this.options = options;
     this.type = typeName;
@@ -392,8 +394,9 @@ export class Condition {
       op: this.op,
       field: this.field,
       value: this.unparsedValue,
-      type: this.type,
       ...(this.options ? { options: this.options } : null),
+      selectNegate: this.selectNegate,
+      type: this.type,
     };
   }
 }
@@ -480,7 +483,7 @@ export class Rule {
     this.stage = stage;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
-      c => new Condition(c.op, c.field, c.value, c.options, fieldTypes),
+      c => new Condition(c.op, c.field, c.value, c.options, c.selectNegate, fieldTypes),
     );
     this.actions = actions.map(
       a => new Action(a.op, a.field, a.value, a.options, fieldTypes),
