@@ -1,4 +1,4 @@
-import React, { useState, useCallback, type Ref } from 'react';
+import React, { useState, useCallback, type Ref, type ReactNode } from 'react';
 
 import { usePrivacyMode } from 'loot-core/src/client/privacy';
 
@@ -7,15 +7,16 @@ import useFeatureFlag from '../hooks/useFeatureFlag';
 type PrivacyFilterProps = {
   onActivate?: () => boolean;
   blurIntensity?: number;
+  children?: ReactNode;
   ref?: Ref<HTMLDivElement>;
 };
 export default function PrivacyFilter({
   onActivate,
   blurIntensity,
   ref,
+  children,
   ...props
 }: PrivacyFilterProps) {
-  let { children } = props;
   let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let privacyMode = usePrivacyMode();
   let activate = privacyMode && (!onActivate || (onActivate && onActivate()));
