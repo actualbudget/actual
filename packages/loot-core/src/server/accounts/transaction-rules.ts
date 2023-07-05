@@ -417,7 +417,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           }
           return apply(field, '$eq', number);
         }
-        
+
         return apply(field, selectNegate ? '$ne' : '$eq', value);
 
       case 'isbetween':
@@ -441,7 +441,9 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           // This forces it to match nothing
           return { id: null };
         }
-        return selectNegate ? { $and: values.map(v => apply(field, '$ne', v)) } : { $or: values.map(v => apply(field, '$eq', v)) };
+        return selectNegate
+          ? { $and: values.map(v => apply(field, '$ne', v)) }
+          : { $or: values.map(v => apply(field, '$eq', v)) };
       case 'gt':
         return apply(field, '$gt', getValue(value));
       case 'gte':

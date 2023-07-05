@@ -483,7 +483,15 @@ export class Rule {
     this.stage = stage;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
-      c => new Condition(c.op, c.field, c.value, c.options, c.selectNegate, fieldTypes),
+      c =>
+        new Condition(
+          c.op,
+          c.field,
+          c.value,
+          c.options,
+          c.selectNegate,
+          fieldTypes,
+        ),
     );
     this.actions = actions.map(
       a => new Action(a.op, a.field, a.value, a.options, fieldTypes),

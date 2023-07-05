@@ -266,9 +266,17 @@ function ConfigureField({
             />
           )}
 
-          <Stack direction="row" justify="flex-end" align="center" style={{ marginTop: 15 }}>
-            {field === 'account' || field === 'payee' || field === 'notes' || field === 'category' ? (
-              <View 
+          <Stack
+            direction="row"
+            justify="flex-end"
+            align="center"
+            style={{ marginTop: 15 }}
+          >
+            {field === 'account' ||
+            field === 'payee' ||
+            field === 'notes' ||
+            field === 'category' ? (
+              <View
                 style={{
                   flex: 1,
                   flexDirection: 'row',
@@ -276,12 +284,18 @@ function ConfigureField({
                   userSelect: 'none',
                 }}
               >
-                <Checkbox id="add_negate" checked={selectNegate} onChange={() => {setSelectNegate(!selectNegate)}} />
+                <Checkbox
+                  id="add_negate"
+                  checked={selectNegate}
+                  onChange={() => {
+                    setSelectNegate(!selectNegate);
+                  }}
+                />
                 <Text htmlFor="add_negate">Not</Text>
               </View>
-            )
-            : (<View style={{ flex: 1 }} />)
-            }
+            ) : (
+              <View style={{ flex: 1 }} />
+            )}
             <Button
               primary
               onClick={e => {
@@ -502,7 +516,9 @@ function FilterExpression({
               <Text style={{ color: colors.p4 }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>{friendlyOp(op, null, selectNegate)}</Text>{' '}
+              <Text style={{ color: colors.n3 }}>
+                {friendlyOp(op, null, selectNegate)}
+              </Text>{' '}
               <Value
                 value={value}
                 field={field}
