@@ -606,7 +606,9 @@ async function applyCategoryTemplate(
         if (remainder_scale > 0) {
           to_budget += Math.round(remainder_scale * template.weight);
           // can over budget with the rounding, so checking that
-          if (to_budget > budgetAvailable + budgeted) to_budget = budgetAvailable + budgeted;
+          if (to_budget > budgetAvailable + budgeted) {
+            to_budget = budgetAvailable + budgeted;
+          }
         }
         break;
       }
