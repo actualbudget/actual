@@ -245,6 +245,7 @@ const TransactionHeader = memo(
     showBalance,
     showCleared,
     onSortTable,
+    scrollWidth,
     ascDesc,
     field,
   }) => {
@@ -317,7 +318,7 @@ const TransactionHeader = memo(
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
-        <Cell value="" width={styles.scrollbarWidth} />
+        <Cell value="" width={5 + scrollWidth ?? 0} />
       </Row>
     );
   },
@@ -923,7 +924,7 @@ const Transaction = memo(function Transaction(props) {
           width="flex"
           name="notes"
           textAlign="flex"
-          style={{ paddingLeft: 9 }}
+          style={{ paddingLeft: 5 }}
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
           value={notes || ''}
@@ -971,7 +972,7 @@ const Transaction = memo(function Transaction(props) {
           name="category"
           width="flex"
           focused={focusedField === 'category'}
-          style={{ padding: 0, paddingLeft: 10 }}
+          style={{ padding: 0, paddingLeft: 5 }}
           plain
         >
           <CellButton
@@ -1037,7 +1038,7 @@ const Transaction = memo(function Transaction(props) {
             fontStyle: 'italic',
             color: '#c0c0c0',
             fontWeight: 300,
-            paddingLeft: 8,
+            paddingLeft: 5,
           }}
           inputProps={{
             readOnly: true,
@@ -1048,7 +1049,7 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="category"
           width="flex"
-          style={{ paddingLeft: 10 }}
+          style={{ paddingLeft: 5 }}
           textAlign="flex"
           value={categoryId}
           formatter={value =>
@@ -1119,7 +1120,7 @@ const Transaction = memo(function Transaction(props) {
           isParent && { fontStyle: 'italic' },
           styles.tnum,
           amountStyle,
-          { paddingLeft: 8 },
+          { paddingLeft: 5 },
         ]}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
@@ -1142,7 +1143,7 @@ const Transaction = memo(function Transaction(props) {
           isParent && { fontStyle: 'italic' },
           styles.tnum,
           amountStyle,
-          { paddingLeft: 8 },
+          { paddingLeft: 4 },
         ]}
         inputProps={{
           value: credit,
@@ -1159,7 +1160,7 @@ const Transaction = memo(function Transaction(props) {
               : integerToCurrency(balance)
           }
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
-          style={[styles.tnum, amountStyle, { paddingLeft: 5 }]}
+          style={[styles.tnum, amountStyle]}
           width={88}
           textAlign="flex"
         />
@@ -1177,6 +1178,8 @@ const Transaction = memo(function Transaction(props) {
           onUpdate={onUpdate}
         />
       )}
+
+      <Cell width={5} />
     </Row>
   );
 });
@@ -1375,6 +1378,11 @@ function TransactionTableInner({
 }) {
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
+  let [scrollWidth, setScrollWidth] = useState(null);
+
+  function getScrollWidth(width) {
+    setScrollWidth(width);
+  }
 
   let onNavigateToTransferAccount = useCallback(
     accountId => {
@@ -1504,6 +1512,7 @@ function TransactionTableInner({
           showBalance={!!props.balances}
           showCleared={props.showCleared}
           onSortTable={onSortTable}
+          scrollWidth={scrollWidth}
           ascDesc={ascDesc}
           field={field}
         />
@@ -1562,6 +1571,7 @@ function TransactionTableInner({
           isSelected={id => props.selectedItems.has(id)}
           onKeyDown={e => props.onCheckEnter(e)}
           onScroll={onScroll}
+          getScrollWidth={getScrollWidth}
         />
 
         {props.isAdding && (
