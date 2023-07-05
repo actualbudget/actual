@@ -16,7 +16,7 @@ export type TrieNode = {
   '0'?: TrieNode;
   '1'?: TrieNode;
   '2'?: TrieNode;
-  hash: number;
+  hash?: number;
 };
 
 export function emptyTrie(): TrieNode {

@@ -42,10 +42,7 @@ export function getClock(): Clock {
   return clock;
 }
 
-export function makeClock(
-  timestamp: Timestamp,
-  merkle: TrieNode = { hash: 0 },
-) {
+export function makeClock(timestamp: Timestamp, merkle: TrieNode = {}) {
   return { timestamp: MutableTimestamp.from(timestamp), merkle };
 }
 
