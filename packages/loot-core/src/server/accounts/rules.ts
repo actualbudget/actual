@@ -34,7 +34,7 @@ function parseRecurDate(desc) {
   }
 }
 
-export function parseDateString(str) {
+function parseDateString(str) {
   if (typeof str !== 'string') {
     return null;
   } else if (str.length === 10) {
@@ -256,7 +256,7 @@ export class Condition {
       fieldValue = fieldValue.toLowerCase();
     }
 
-    let type = this.type;
+    let type = this.fieldTypes;
 
     if (type === 'number' && this.options) {
       if (this.options.outflow) {
@@ -396,7 +396,7 @@ export class Condition {
       value: this.unparsedValue,
       ...(this.options ? { options: this.options } : null),
       selectNegate: this.selectNegate,
-      type: this.type,
+      type: this.fieldTypes,
     };
   }
 }
