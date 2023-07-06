@@ -20,7 +20,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 |---|---|---|
 |#template $50|Budget $50 each month|Regular monthly bills, such as internet|
 |#template up to $150|Budget up to $150 each month, and remove extra funds over $150|Variable expenses, such as petrol and groceries|
-|#template up to $150 hold|Budget up to $150 each month, but retain any funds over $150 |Variable expenses that may get refunds or reimbursments|
+|#template up to $150 hold|Budget up to $150 each month, but retain any funds over $150 |Variable expenses that may get refunds or reimbursements|
 |#template $50 up to $300|Budget $50 each month up to a maximum of $300|Funding rainy day categories, such as replacement shoes and bicycle repairs
 |#template $500 by 2022-03|Break down large, less-frequent expenses into manageable monthly expenses|Saving for a replacement car in a few years
 |#template $500 by 2021-03 repeat every 6 months|Break down large, less-frequent expenses into manageable monthly expenses|Biannual credit card fees
@@ -35,8 +35,8 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template $10 repeat every 9 weeks starting 2022-01-04 up to 30|Budget $10 every 9 weeks, up to a maximum of $30|
 |#template 15% of all income|Budget 15% of all income categories| Using a "pay yourself first" strategy|
 |#template 10% of Paycheck|Budget 10% of the "Paycheck" income category| Using a "pay yourself first" strategy, but have income categories you want to ignore|
-|#template 12% of available funds|Budget 12% of funds available for that month|Using a "pay yourself first" strategy in conjuction with a "month ahead" strategy |
-|#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transacions|
+|#template 12% of available funds|Budget 12% of funds available for that month|Using a "pay yourself first" strategy in conjunction with a "month ahead" strategy |
+|#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transactions|
 |#template schedule full {SCHEDULE NAME}|Fund upcoming scheduled transaction only on needed month| Small schedules that are non-monthly|
 |#template remainder | Add all remaining funds to this category| See the [Remainder Template](#remainder-template) Section for info |
 
@@ -47,8 +47,10 @@ You are welcome to have other lines in your note, but the #template line must ma
 - Number formats that use comma for the decimal separator are not supported (eg, 123,45). You must use 123.45.
 - Thousands separators are not supported (eg, 1,234). You must use 1234.
 - {SCHEDULE NAME} is defined in the **Schedules** editor.
-- By default templates do not consider avaiable funds when being applied. Use template priorites to not budget more than is available.
+- By default templates do not consider available funds when being applied. Use template priorities to not budget more than is available.
 - The `hold` flag can be added to any goal that uses the `up to` key word.
+- A single category with two templates that use `up to` is not supported.
+- If multiple templates with the same priority and are in the same category and one template uses the `up to` key word, both templates will be limited to the maximum amount specified by `up to`.
 
 ### Multiple Template Lines
 
@@ -87,6 +89,19 @@ Templates can be given a priority flag to change the order that the templates ge
 - Negative priorities are not allowed and will result in the template being skipped.
 - Template application order is based on the database order, not the view order.  To guarantee a specific fill order use separate priorities for each category
 - If you have multiple `schedule` or `by` template lines in a single category, they will be forced to match the same priority level as the line run first.
+- If the `up to` key words are used with a category that has multiple templates with different priorities, the lowest priority will take precedence because it is evaluated last as shown in the following examples.
+
+    - **Expected budgeted amount is 200**  
+    **Expected maximum category balance is 200**
+
+        #template 300
+        #template-1 150 up to 200
+        
+    - **Expected budgeted amount is 450**  
+    **No maximum category balance exists**
+
+        #template 150 up to 500
+        #template-1 300
 
 ### Remainder Template
 
@@ -94,9 +109,9 @@ The remainder template is run differently to the other templates. Any remainder 
 
 - You can use as many remainder templates as you want
 - Remainder templates don't have a priority as they are always run last
-- The remainder template supports weights to control the distribution of funds accross multiple categories. See the examples on how this is done.
+- The remainder template supports weights to control the distribution of funds across multiple categories. See the examples on how this is done.
 - If no weight is provided, the weight will be defaulted to 1
-- The budgeted amout is calculated as `budgeted_amount=available_funds/sum_of_weights*category_weight`
+- The budgeted amount is calculated as `budgeted_amount=available_funds/sum_of_weights*category_weight`
 
 #### Examples
 
@@ -115,7 +130,7 @@ All the examples below use the case of $100 leftover when the remainder pass is 
 | Savings       | #template remainder | $50            |
 | Vacation Fund | #template remainder | $50            |
 
-3. Split funds with one category recieving extra
+3. Split funds with one category receiving extra
 
 | Category      | Template line         | Amount applied |
 | ------------- | --------------------- | -------------- |
