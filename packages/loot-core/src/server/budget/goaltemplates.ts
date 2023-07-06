@@ -609,6 +609,7 @@ async function applyCategoryTemplate(
           if (to_budget >= budgetAvailable + budgeted - 1) {
             to_budget = budgetAvailable + budgeted;
           }
+          if (to_budget === 0) to_budget = budgetAvailable;
         }
         break;
       }
