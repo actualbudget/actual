@@ -27,6 +27,7 @@ import {
   AlignedText,
 } from '../../common';
 import NotesButton from '../../NotesButton';
+import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
@@ -174,17 +175,19 @@ function BudgetTotal({
           <Text style={{ color: colors.n4 }}>{title}</Text>
         </View>
 
-        <Text>
-          <CellValue binding={current} type="financial" />
-          <Text style={{ color: colors.n6, fontStyle: 'italic' }}>
-            {' of '}
-            <CellValue
-              binding={target}
-              type="financial"
-              style={styles.notFixed}
-            />
+        <PrivacyFilter>
+          <Text>
+            <CellValue binding={current} type="financial" />
+            <Text style={{ color: colors.n6, fontStyle: 'italic' }}>
+              {' of '}
+              <CellValue
+                binding={target}
+                type="financial"
+                style={styles.notFixed}
+              />
+            </Text>
           </Text>
-        </Text>
+        </PrivacyFilter>
       </View>
     </View>
   );
@@ -281,7 +284,9 @@ function Saved({ projected, style }: SavedProps) {
             },
           ])}
         >
-          {format(saved, 'financial')}
+          <PrivacyFilter blurIntensity={7}>
+            {format(saved, 'financial')}
+          </PrivacyFilter>
         </View>
       </HoverTarget>
     </View>

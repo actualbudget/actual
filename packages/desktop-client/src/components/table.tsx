@@ -13,6 +13,7 @@ import React, {
   type ReactNode,
   type KeyboardEvent,
   type UIEvent,
+  type ReactElement,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -41,6 +42,7 @@ import {
 } from './common';
 import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
+import PrivacyFilter, { type PrivacyFilterProps } from './PrivacyFilter';
 import format from './spreadsheet/format';
 import SheetValue from './spreadsheet/SheetValue';
 
@@ -192,6 +194,14 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
+  privacyFilter?:
+    | boolean
+    | ((
+        render?: (
+          props?: PrivacyFilterProps,
+        ) => ReactElement<PrivacyFilterProps, typeof PrivacyFilter>,
+        defaultPrivacyFilterProps?: PrivacyFilterProps,
+      ) => ReactElement<PrivacyFilterProps, typeof PrivacyFilter>);
 };
 export function Cell({
   width,
@@ -208,6 +218,7 @@ export function Cell({
   style,
   valueStyle,
   unexposedContent,
+  privacyFilter,
   ...viewProps
 }: CellProps) {
   let mouseCoords = useRef(null);
@@ -234,15 +245,9 @@ export function Cell({
     backgroundColor,
   };
 
-  return (
-    <View
-      innerRef={viewRef}
-      style={[widthStyle, cellStyle, style]}
-      className="animated-cell"
-      {...viewProps}
-      data-testid={name}
-    >
-      {plain ? (
+  let content = useMemo(
+    () =>
+      plain ? (
         children
       ) : exposed ? (
         // @ts-expect-error Missing props refinement
@@ -282,7 +287,60 @@ export function Cell({
             <UnexposedCellContent value={value} formatter={formatter} />
           )}
         </View>
-      )}
+      ),
+    [
+      children,
+      plain,
+      exposed,
+      styles,
+      valueStyle,
+      onExpose,
+      name,
+      unexposedContent,
+      value,
+      formatter,
+    ],
+  );
+
+  let maybePrivateContent = useMemo(() => {
+    let defaultPrivacyFilterProps: PrivacyFilterProps = {
+      onActivate: () => !focused || !exposed,
+      style: {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+      },
+    };
+
+    return privacyFilter ? (
+      typeof privacyFilter === 'function' ? (
+        privacyFilter(
+          privacyFilterProps => (
+            <PrivacyFilter
+              {...(privacyFilterProps || defaultPrivacyFilterProps)}
+            >
+              {content}
+            </PrivacyFilter>
+          ),
+          defaultPrivacyFilterProps,
+        )
+      ) : (
+        <PrivacyFilter {...defaultPrivacyFilterProps}>{content}</PrivacyFilter>
+      )
+    ) : (
+      content
+    );
+  }, [privacyFilter, focused, exposed, content]);
+
+  return (
+    <View
+      innerRef={viewRef}
+      style={[widthStyle, cellStyle, style]}
+      className="animated-cell"
+      {...viewProps}
+      data-testid={name}
+    >
+      {maybePrivateContent}
     </View>
   );
 }

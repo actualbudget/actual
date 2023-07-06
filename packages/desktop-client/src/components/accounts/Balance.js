@@ -130,7 +130,7 @@ export function Balances({
           '&:hover svg': { opacity: 1 },
         }}
       >
-        <PrivacyFilter blurIntensity={4}>
+        <PrivacyFilter blurIntensity={5}>
           <CellValue
             binding={{ ...balanceQuery, value: 0 }}
             type="financial"

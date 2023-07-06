@@ -11,7 +11,7 @@ import useFeatureFlag from '../hooks/useFeatureFlag';
 
 import { View } from './common';
 
-type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
+export type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
   onActivate?: () => boolean;
   blurIntensity?: number;
 };
