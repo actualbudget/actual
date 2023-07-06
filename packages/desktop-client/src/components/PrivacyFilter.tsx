@@ -1,4 +1,10 @@
-import React, { useState, useCallback, type Ref, type ReactNode } from 'react';
+import React, {
+  useState,
+  useCallback,
+  Children,
+  type Ref,
+  type ReactNode,
+} from 'react';
 
 import { usePrivacyMode } from 'loot-core/src/client/privacy';
 
@@ -24,7 +30,7 @@ export default function PrivacyFilter({
   let blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
 
   return !privacyModeFeatureFlag || !activate ? (
-    children
+    <>{Children.toArray(children)}</>
   ) : (
     <BlurredOverlay ref={ref} blurIntensity={blurAmount} {...props}>
       {children}
