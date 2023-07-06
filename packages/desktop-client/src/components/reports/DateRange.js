@@ -26,7 +26,11 @@ function DateRange({ start, end }) {
     content = d.format(end, 'MMMM yyyy');
   }
 
-  return <Block style={{ color: colors.n6 }}>{content}</Block>;
+  return (
+    <Block style={{ color: colors.n6 }} data-vrt-mask>
+      {content}
+    </Block>
+  );
 }
 
 export default DateRange;

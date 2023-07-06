@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Accounts', () => {
   let page;
@@ -35,6 +36,7 @@ test.describe('Accounts', () => {
       debit: '',
       credit: '100.00',
     });
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
   test('closes an account', async () => {

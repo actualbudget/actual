@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Transactions', () => {
   let page;
@@ -26,7 +27,7 @@ test.describe('Transactions', () => {
     accountPage = await navigation.goToAccountPage('Ally Savings');
   });
 
-  test('creates a test transaction', async () => {
+  test('creates test transactions', async () => {
     await accountPage.createSingleTransaction({
       payee: 'Home Depot',
       notes: 'Notes field',
@@ -41,9 +42,7 @@ test.describe('Transactions', () => {
       debit: '12.34',
       credit: '',
     });
-  });
 
-  test('creates a split test transaction', async () => {
     await accountPage.createSplitTransaction([
       {
         payee: 'Krogger',
@@ -80,5 +79,6 @@ test.describe('Transactions', () => {
       debit: '111.11',
       credit: '',
     });
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 });

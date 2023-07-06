@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Schedules', () => {
   let page;
@@ -26,6 +27,10 @@ test.describe('Schedules', () => {
     schedulesPage = await navigation.goToSchedulesPage();
   });
 
+  test('checks the page design', async () => {
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
+  });
+
   test('creates a new schedule, posts the transaction and later completes it', async () => {
     await schedulesPage.addNewSchedule({
       payee: 'Home Depot',
@@ -39,6 +44,7 @@ test.describe('Schedules', () => {
       amount: '~25.00',
       status: 'Due',
     });
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
 
     await schedulesPage.postNthSchedule(0);
     expect(await schedulesPage.getNthSchedule(0)).toMatchObject({

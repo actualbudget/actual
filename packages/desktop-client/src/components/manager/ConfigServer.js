@@ -177,6 +177,7 @@ export default function ConfigServer() {
                   marginRight: 15,
                 }}
                 onClick={onSameDomain}
+                data-vrt-mask
               >
                 Use {window.location.origin.replace(/https?:\/\//, '')}
               </Button>

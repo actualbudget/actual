@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { css } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
+import * as Platform from 'loot-core/src/client/platform';
 import {
   init as initConnection,
   send,
@@ -96,7 +97,9 @@ class App extends Component {
         <div
           style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
         >
-          {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
+          {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
+            <DevelopmentTopBar />
+          )}
           <div
             key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
             {...css([

@@ -769,6 +769,7 @@ const Transaction = memo(function Transaction(props) {
           onUpdate={value => {
             onUpdate('date', value);
           }}
+          data-vrt-mask
         >
           {({
             onBlur,

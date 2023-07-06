@@ -1437,6 +1437,7 @@ const MonthPicker = ({
         },
         style,
       ]}
+      data-vrt-mask
     >
       <View
         style={{

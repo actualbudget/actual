@@ -49,20 +49,27 @@ function About() {
           }),
         ]}
       >
-        <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
-        <Text>Server version: {version}</Text>
-        {isOutdated ? (
-          <ExternalLink
-            to="https://actualbudget.org/docs/releases"
-            linkColor="purple"
-          >
-            New version available: {latestVersion}
-          </ExternalLink>
-        ) : (
-          <Text style={{ color: colors.g2, fontWeight: 600 }}>
-            You’re up to date!
-          </Text>
-        )}
+        <Text>
+          Client version:{' '}
+          <span data-vrt-mask>v{window.Actual.ACTUAL_VERSION}</span>
+        </Text>
+        <Text>
+          Server version: <span data-vrt-mask>{version}</span>
+        </Text>
+        <div data-vrt-mask>
+          {isOutdated ? (
+            <ExternalLink
+              to="https://actualbudget.org/docs/releases"
+              linkColor="purple"
+            >
+              New version available: {latestVersion}
+            </ExternalLink>
+          ) : (
+            <Text style={{ color: colors.g2, fontWeight: 600 }}>
+              You’re up to date!
+            </Text>
+          )}
+        </div>
         <Text>
           <ExternalLink to="https://actualbudget.org/docs/releases">
             Release Notes

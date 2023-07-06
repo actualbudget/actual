@@ -7,6 +7,10 @@ export class ConfigurationPage {
     this.heading = page.getByRole('heading');
   }
 
+  async waitForPageLoad() {
+    await this.page.getByRole('heading', { name: 'Where’s the server?' });
+  }
+
   async createTestFile() {
     await this.page.getByRole('button', { name: 'Create test file' }).click();
     return new BudgetPage(this.page);
