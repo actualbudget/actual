@@ -689,7 +689,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
 
         return `CASE
           WHEN ${left} IS NULL THEN ${right} IS NULL
-          ELSE ${left} = ${right}
+          ELSE ${left} != ${right}
         END`;
       }
 
@@ -708,7 +708,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
     }
     case '$notlike': {
       let [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
-      return `${left} NOT LIKE ${right}`;
+      return `(${left} NOT LIKE ${right}\n OR ${left} IS NULL)`;
     }
     default:
       throw new CompileError(`Unknown operator: ${op}`);

@@ -39,6 +39,7 @@ import {
   CustomSelect,
   Tooltip,
 } from '../common';
+import { Checkbox } from '../forms';
 import { StatusBadge } from '../schedules/StatusBadge';
 import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
@@ -184,7 +185,7 @@ function ConditionEditor({
   onDelete,
   onAdd,
 }) {
-  let { field, op, value, type, options, error } = condition;
+  let { field, op, value, type, options, error, selectNegate } = condition;
 
   if (field === 'amount' && options) {
     if (options.inflow) {
@@ -227,6 +228,29 @@ function ConditionEditor({
           onDelete={isSchedule && field === 'date' ? null : onDelete}
         />
       </Stack>
+      {(field === 'account' ||
+        field === 'payee' ||
+        field === 'notes' ||
+        field === 'category' ||
+        field === 'imported_payee') && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            userSelect: 'none',
+          }}
+        >
+          <Checkbox
+            id="add_negate"
+            checked={selectNegate}
+            onChange={() => {
+              selectNegate = !selectNegate;
+              onChange('negate', selectNegate);
+            }}
+          />
+          <label htmlFor="add_negate">Not</label>
+        </View>
+      )}
     </Editor>
   );
 }
@@ -431,6 +455,7 @@ function ConditionsList({
       field,
       op: 'is',
       value: null,
+      selectNegate: false,
     });
     onChangeConditions(copy);
   }
@@ -446,7 +471,14 @@ function ConditionsList({
   function updateCondition(cond, field, value) {
     onChangeConditions(
       updateValue(conditions, cond, () => {
-        if (field === 'field') {
+        if (field === 'negate') {
+          let newCond = {
+            ...cond,
+            selectNegate: value,
+          };
+
+          return newCond;
+        } else if (field === 'field') {
           let newCond = { field: value };
 
           if (value === 'amount-inflow') {
