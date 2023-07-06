@@ -97,12 +97,8 @@ handlers['redo'] = mutator(function () {
   return redo();
 });
 
-handlers['transactions-batch-update'] = mutator(undoable(async function ({
-  added,
-  deleted,
-  updated,
-  learnCategories,
-}) {
+handlers['transactions-batch-update'] = mutator(
+  undoable(async function ({ added, deleted, updated, learnCategories }) {
     let result = await batchUpdateTransactions({
       added,
       updated,
@@ -112,7 +108,7 @@ handlers['transactions-batch-update'] = mutator(undoable(async function ({
 
     // Return all data updates to the frontend
     return result.updated;
-  })
+  }),
 );
 
 handlers['transaction-add'] = mutator(async function (transaction) {
@@ -1342,10 +1338,8 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
 };
 
-handlers['transactions-import'] = mutator(undoable(async function ({
-  accountId,
-  transactions,
-}) {
+handlers['transactions-import'] = mutator(
+  undoable(async function ({ accountId, transactions }) {
     if (typeof accountId !== 'string') {
       throw APIError('transactions-import: accountId must be an id');
     }
@@ -1359,7 +1353,7 @@ handlers['transactions-import'] = mutator(undoable(async function ({
 
       throw err;
     }
-  })
+  }),
 );
 
 handlers['account-unlink'] = mutator(async function ({ id }) {
