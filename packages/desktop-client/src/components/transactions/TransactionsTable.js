@@ -1872,12 +1872,25 @@ export let TransactionTable = forwardRef((props, ref) => {
 
   let onBalanceLastSplit = useCallback(() => {
     let newTrans = latestState.current.newTransactions;
-    if (newTrans.length > 1) {
-      if (newTrans[0].error) {
-        if (newTrans[newTrans.length - 1].amount === 0) {
-          newTrans[newTrans.length - 1].amount = newTrans[0].error.difference;
-          setNewTransactions(newTrans);
-        }
+    // If there is an empty split row at the end
+    if (newTrans.length > 1 && newTrans[0].error) {
+      if (newTrans[newTrans.length - 1].amount === 0) {
+        // Copy last transaction and set the difference
+        let lastTransaction = newTrans[newTrans.length - 1];
+        let copy = { ...lastTransaction };
+        copy.amount = newTrans[0].error.difference;
+
+        // Update the transaction group
+        let { diff, data } = updateTransaction(newTrans, copy);
+        setNewTransactions(data);
+
+        // This is needed to reflect the change in the editor
+        latestState.current.newTransactions[newTrans.length - 1] =
+          data[data.length - 1];
+        newNavigator.onEdit(
+          diff.updated[diff.updated.length - 1].id,
+          latestState.current.newNavigator.focusedField,
+        );
       }
     }
   }, []);
