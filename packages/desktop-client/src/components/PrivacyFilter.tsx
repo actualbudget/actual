@@ -2,24 +2,22 @@ import React, {
   useState,
   useCallback,
   Children,
-  type Ref,
-  type ReactNode,
+  type ComponentPropsWithRef,
 } from 'react';
 
 import { usePrivacyMode } from 'loot-core/src/client/privacy';
 
 import useFeatureFlag from '../hooks/useFeatureFlag';
 
-type PrivacyFilterProps = {
+import { View } from './common';
+
+type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
   onActivate?: () => boolean;
   blurIntensity?: number;
-  children?: ReactNode;
-  ref?: Ref<HTMLDivElement>;
 };
 export default function PrivacyFilter({
   onActivate,
   blurIntensity,
-  ref,
   children,
   ...props
 }: PrivacyFilterProps) {
@@ -32,32 +30,38 @@ export default function PrivacyFilter({
   return !privacyModeFeatureFlag || !activate ? (
     <>{Children.toArray(children)}</>
   ) : (
-    <BlurredOverlay ref={ref} blurIntensity={blurAmount} {...props}>
+    <BlurredOverlay blurIntensity={blurAmount} {...props}>
       {children}
     </BlurredOverlay>
   );
 }
 
-function BlurredOverlay({ ref, blurIntensity, children, ...props }) {
+function BlurredOverlay({ blurIntensity, children, ...props }) {
   let [hovered, setHovered] = useState(false);
   let onHover = useCallback(() => setHovered(true), [setHovered]);
   let onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
 
+  let blurStyle = {
+    ...(!hovered && {
+      filter: `blur(${blurIntensity})`,
+      WebkitFilter: `blur(${blurIntensity})`,
+    }),
+  };
+
+  let { style, ...restProps } = props;
+
   return (
-    <div
-      ref={ref}
+    <View
       style={{
-        ...(!hovered && {
-          filter: `blur(${blurIntensity})`,
-          WebkitFilter: `blur(${blurIntensity})`,
-        }),
         display: 'inline-flex',
+        ...blurStyle,
+        ...style,
       }}
       onPointerEnter={onHover}
       onPointerLeave={onHoverEnd}
-      {...props}
+      {...restProps}
     >
       {children}
-    </div>
+    </View>
   );
 }
