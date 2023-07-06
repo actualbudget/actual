@@ -179,7 +179,6 @@ function Account(props) {
     setSearchText(text);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSelectTransaction = transaction => {
     if (isPreviewId(transaction.id)) {
       let parts = transaction.id.split('/');
@@ -216,8 +215,8 @@ function Account(props) {
         trans = getSplit(transactions, index);
       }
 
-      navigate('Transaction', {
-        transactions: trans,
+      navigate(`${transaction.id}`, {
+        state: { transactions: trans },
       });
     }
   };
@@ -263,7 +262,7 @@ function Account(props) {
                     paged && paged.fetchNext();
                   }}
                   onSearch={onSearch}
-                  onSelectTransaction={() => {}} // onSelectTransaction}
+                  onSelectTransaction={onSelectTransaction}
                 />
               )
             }

@@ -27,6 +27,7 @@ import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import Add from '../icons/v1/Add';
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
@@ -58,6 +59,7 @@ import LinkSchedule from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
+import { TransactionEdit } from './transactions/MobileTransaction';
 
 function NarrowNotSupported({ children, redirectTo = '/budget' }) {
   const { isNarrowWidth } = useResponsive();
@@ -155,7 +157,17 @@ function StackedRoutesInner({ location }) {
       />
 
       <Route
+        path="/accounts/:id/:transactionId"
+        element={<TransactionEdit />}
+      />
+
+      <Route
         path="/accounts"
+        element={isNarrowWidth ? <MobileAccounts /> : <Account />}
+      />
+
+      <Route
+        path="/add-transaction"
         element={isNarrowWidth ? <MobileAccounts /> : <Account />}
       />
     </Routes>
@@ -202,6 +214,7 @@ function MobileNavTabs() {
     >
       <NavTab name="Budget" path="/budget" icon={Wallet} />
       <NavTab name="Accounts" path="/accounts" icon={PiggyBank} />
+      <NavTab name="Transaction" path="/add-transaction" icon={Add} />
       <NavTab name="Settings" path="/settings" icon={Cog} />
     </div>
   );
@@ -294,6 +307,7 @@ function FinancesApp(props) {
             <Routes>
               <Route path="/budget" element={<MobileNavTabs />} />
               <Route path="/accounts" element={<MobileNavTabs />} />
+              <Route path="/add-transaction" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
