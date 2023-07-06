@@ -34,7 +34,7 @@ function parseRecurDate(desc) {
   }
 }
 
-function parseDateString(str) {
+export function parseDateString(str) {
   if (typeof str !== 'string') {
     return null;
   } else if (str.length === 10) {
@@ -204,7 +204,7 @@ export class Condition {
   options;
   selectNegate;
   rawValue;
-  fieldTypes;
+  type;
   unparsedValue;
   value;
 
@@ -243,7 +243,7 @@ export class Condition {
     this.selectNegate = selectNegate;
     this.value = type.parse ? type.parse(op, value, field) : value;
     this.options = options;
-    this.fieldTypes = typeName;
+    this.type = typeName;
   }
 
   eval(object) {
@@ -256,7 +256,7 @@ export class Condition {
       fieldValue = fieldValue.toLowerCase();
     }
 
-    let type = this.fieldTypes;
+    let type = this.type;
 
     if (type === 'number' && this.options) {
       if (this.options.outflow) {
@@ -396,7 +396,7 @@ export class Condition {
       value: this.unparsedValue,
       ...(this.options ? { options: this.options } : null),
       selectNegate: this.selectNegate,
-      type: this.fieldTypes,
+      type: this.type,
     };
   }
 }
@@ -483,15 +483,7 @@ export class Rule {
     this.stage = stage;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
-      c =>
-        new Condition(
-          c.op,
-          c.field,
-          c.value,
-          c.options,
-          c.selectNegate,
-          fieldTypes,
-        ),
+      c => new Condition(c.op, c.field, c.value, c.options, false, fieldTypes),
     );
     this.actions = actions.map(
       a => new Action(a.op, a.field, a.value, a.options, fieldTypes),
