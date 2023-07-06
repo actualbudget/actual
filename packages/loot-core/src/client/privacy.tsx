@@ -9,11 +9,7 @@ let PrivacyContext = createContext<TPrivacyModeContext>(null);
 
 export function PrivacyProvider({ children }) {
   let prefs = useSelector(state => state.prefs);
-  let isPrivacyEnabled = prefs
-    ? prefs.local
-      ? prefs.local.isPrivacyEnabled
-      : false
-    : false;
+  let isPrivacyEnabled = prefs?.local?.isPrivacyEnabled || false;
 
   return (
     <PrivacyContext.Provider
