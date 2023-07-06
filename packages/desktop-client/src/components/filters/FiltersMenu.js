@@ -291,7 +291,7 @@ function ConfigureField({
                     setSelectNegate(!selectNegate);
                   }}
                 />
-                <Text htmlFor="add_negate">Not</Text>
+                <label htmlFor="add_negate">Not</label>
               </View>
             ) : (
               <View style={{ flex: 1 }} />
