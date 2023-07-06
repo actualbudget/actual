@@ -77,7 +77,7 @@ function apply(msg: Message, prev?: boolean) {
   if (dataset === 'prefs') {
     // Do nothing, it doesn't exist in the db
   } else {
-    var query;
+    let query;
     try {
       if (prev) {
         query = {
