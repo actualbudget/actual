@@ -3,10 +3,11 @@ import React, {
   Component,
   forwardRef,
   useEffect,
+  useState,
   useRef,
 } from 'react';
 import { connect } from 'react-redux';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useFocusRing } from '@react-aria/focus';
 import { useListBox, useListBoxSection, useOption } from '@react-aria/listbox';
@@ -22,10 +23,12 @@ import {
 import memoizeOne from 'memoize-one';
 
 import * as actions from 'loot-core/src/client/actions';
+import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
+  ungroupTransactions,
   splitTransaction,
   updateTransaction,
   addSplitTransaction,
@@ -759,32 +762,56 @@ function TransactionEditUnconnected(props) {
   //   this.props.getAccounts();
   // }
 
-  useEffect(() => {
-    props.getCategories();
-    props.getAccounts();
-  }, []);
-
-  console.log(props);
   const { categories, accounts, payees, lastTransaction, dateFormat } = props;
-  let { id: accountId } = useParams();
-  let location = useLocation();
-  console.log(location);
+  let { id: accountId, transactionId } = useParams();
   let navigate = useNavigate();
-  let transactions = location.state.transactions || {};
-  let onTransactionsChange = location.state.onTransactionsChange;
+  let [transactions, setTransactions] = useState(null);
   let adding = false;
   let deleted = false;
 
-  if (transactions === null) {
-    // Create an empty transaction
-    transactions = makeTemporaryTransactions(
-      accountId || (lastTransaction && lastTransaction.account) || null,
-      lastTransaction && lastTransaction.date,
-    );
-    adding = true;
-  }
+  useEffect(() => {
+    // May as well update categories / accounts when transaction ID changes
+    props.getCategories();
+    props.getAccounts();
 
-  if (categories.length === 0 || accounts.length === 0) {
+    async function fetchTransaction() {
+      let fetchedTransactions = [];
+      if (transactionId) {
+        // Query for the transaction based on the ID with grouped splits.
+        //
+        // This means if the transaction in question is a split transaction, its
+        // subtransactions will be returned in the `substransactions` property on
+        // the parent transaction.
+        //
+        // The edit item components expect to work with a flat array of
+        // transactions when handling splits, so we call ungroupTransactions to
+        // flatten parent and children into one array.
+        let { data } = await runQuery(
+          q('transactions')
+            .filter({ id: transactionId })
+            .select('*')
+            .options({ splits: 'grouped' }),
+        );
+        fetchedTransactions = ungroupTransactions(data);
+      }
+
+      if (fetchedTransactions.length === 0) {
+        // Create an empty transaction
+        setTransactions(
+          makeTemporaryTransactions(
+            accountId || (lastTransaction && lastTransaction.account) || null,
+            lastTransaction && lastTransaction.date,
+          ),
+        );
+        adding = true;
+      } else {
+        setTransactions(fetchedTransactions);
+      }
+    }
+    fetchTransaction();
+  }, [transactionId]);
+
+  if (categories.length === 0 || accounts.length === 0 || !transactions) {
     return null;
   }
 
@@ -820,18 +847,18 @@ function TransactionEditUnconnected(props) {
       changes.updated.length > 0 ||
       changes.deleted.length
     ) {
-      const remoteUpdates = await send('transactions-batch-update', {
+      const _remoteUpdates = await send('transactions-batch-update', {
         added: changes.added,
         deleted: changes.deleted,
         updated: changes.updated,
       });
 
-      if (onTransactionsChange) {
-        onTransactionsChange({
-          ...changes,
-          updated: changes.updated.concat(remoteUpdates),
-        });
-      }
+      // if (onTransactionsChange) {
+      //   onTransactionsChange({
+      //     ...changes,
+      //     updated: changes.updated.concat(remoteUpdates),
+      //   });
+      // }
     }
 
     // If transactions is null, we are adding a new transaction
@@ -851,10 +878,10 @@ function TransactionEditUnconnected(props) {
       deleted = true;
     } else {
       const changes = { deleted: transactions };
-      const remoteUpdates = await send('transactions-batch-update', changes);
-      if (onTransactionsChange) {
-        onTransactionsChange({ ...changes, updated: remoteUpdates });
-      }
+      const _remoteUpdates = await send('transactions-batch-update', changes);
+      // if (onTransactionsChange) {
+      //   onTransactionsChange({ ...changes, updated: remoteUpdates });
+      // }
     }
   };
 

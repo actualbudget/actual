@@ -15,7 +15,6 @@ import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
-  getSplit,
   isPreviewId,
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
@@ -207,17 +206,15 @@ function Account(props) {
         },
       );
     } else {
-      let trans = [transaction];
-      if (transaction.parent_id || transaction.is_parent) {
-        let index = transactions.findIndex(
-          t => t.id === (transaction.parent_id || transaction.id),
-        );
-        trans = getSplit(transactions, index);
-      }
+      // let trans = [transaction];
+      // if (transaction.parent_id || transaction.is_parent) {
+      //   let index = transactions.findIndex(
+      //     t => t.id === (transaction.parent_id || transaction.id),
+      //   );
+      //   trans = getSplit(transactions, index);
+      // }
 
-      navigate(`${transaction.id}`, {
-        state: { transactions: trans },
-      });
+      navigate(`${transaction.id}`);
     }
   };
 
