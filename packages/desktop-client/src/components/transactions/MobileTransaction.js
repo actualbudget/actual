@@ -231,7 +231,7 @@ class TransactionEditInner extends PureComponent {
     }
 
     this.props.onSave(transactions);
-    this.props.navigation.goBack(null);
+    this.props.navigation(-1);
   };
 
   onSaveChild = childTransaction => {
@@ -631,7 +631,7 @@ class TransactionEditInner extends PureComponent {
                   defaultValue={transaction.date}
                   onUpdate={value => this.onEdit(transaction, 'date', value)}
                   onChange={e =>
-                    this.onQueueChange(transaction, 'date', e.nativeEvent.text)
+                    this.onQueueChange(transaction, 'date', e.target.value)
                   }
                 />
               </View>
@@ -651,14 +651,14 @@ class TransactionEditInner extends PureComponent {
               defaultValue={transaction.notes}
               onUpdate={value => this.onEdit(transaction, 'notes', value)}
               onChange={e =>
-                this.onQueueChange(transaction, 'notes', e.nativeEvent.text)
+                this.onQueueChange(transaction, 'notes', e.target.value)
               }
             />
 
             {!adding && (
               <View style={{ alignItems: 'center' }}>
                 <Button
-                  onPress={() => onDelete()}
+                  onClick={() => onDelete()}
                   style={{
                     paddingVertical: 5,
                     marginHorizontal: EDITING_PADDING,
@@ -691,7 +691,7 @@ class TransactionEditInner extends PureComponent {
             }}
           >
             {adding ? (
-              <Button onPress={() => this.onAdd()}>
+              <Button onClick={() => this.onAdd()}>
                 <SvgAdd width={17} height={17} style={{ color: colors.b3 }} />
                 <Text
                   style={[styles.text, { color: colors.b3, marginLeft: 5 }]}
@@ -700,7 +700,7 @@ class TransactionEditInner extends PureComponent {
                 </Text>
               </Button>
             ) : (
-              <Button onPress={() => this.onSave()}>
+              <Button onClick={() => this.onSave()}>
                 <SvgPencilWriteAlternate
                   style={{ width: 16, height: 16, color: colors.n1 }}
                 />
@@ -769,10 +769,11 @@ function TransactionEditUnconnected(props) {
   let { id: accountId } = useParams();
   let location = useLocation();
   console.log(location);
-  let navigation = useNavigate();
+  let navigate = useNavigate();
   let transactions = location.state.transactions || {};
   let onTransactionsChange = location.state.onTransactionsChange;
   let adding = false;
+  let deleted = false;
 
   if (transactions === null) {
     // Create an empty transaction
@@ -809,7 +810,7 @@ function TransactionEditUnconnected(props) {
   };
 
   const onSave = async newTransactions => {
-    if (this.deleted) {
+    if (deleted) {
       return;
     }
 
@@ -843,11 +844,11 @@ function TransactionEditUnconnected(props) {
 
   const onDelete = async () => {
     // Eagerly go back
-    navigation.goBack(null);
+    navigate(-1);
 
     if (transactions === null) {
       // Adding a new transactions, this disables saving when the component unmounts
-      this.deleted = true;
+      deleted = true;
     } else {
       const changes = { deleted: transactions };
       const remoteUpdates = await send('transactions-batch-update', changes);
@@ -870,7 +871,7 @@ function TransactionEditUnconnected(props) {
         categories={categories}
         accounts={accounts}
         payees={payees}
-        navigation={navigation}
+        navigation={navigate}
         // TODO: ChildEdit is complicated and heavily relies on RN
         // renderChildEdit={props => <ChildEdit {...props} />}
         renderChildEdit={props => {}}

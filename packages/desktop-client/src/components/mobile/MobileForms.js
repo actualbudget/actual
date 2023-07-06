@@ -45,8 +45,8 @@ export const InputField = forwardRef(function InputField(
       autoCorrect={false}
       autoCapitalize="none"
       editable={!disabled}
-      onEndEditing={e => {
-        onUpdate && onUpdate(e.nativeEvent.text);
+      onBlur={e => {
+        onUpdate && onUpdate(e.target.value);
       }}
       style={[
         valueStyle,
