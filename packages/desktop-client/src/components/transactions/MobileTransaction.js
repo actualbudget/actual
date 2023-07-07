@@ -751,7 +751,8 @@ function TransactionEditUnconnected(props) {
   const { categories, accounts, payees, lastTransaction, dateFormat } = props;
   let { id: accountId, transactionId } = useParams();
   let navigate = useNavigate();
-  let [transactions, setTransactions] = useState(null);
+  let [fetchedTransactions, setFetchedTransactions] = useState(null);
+  let transactions = [];
   let adding = false;
   let deleted = false;
 
@@ -762,7 +763,7 @@ function TransactionEditUnconnected(props) {
     props.getPayees();
 
     async function fetchTransaction() {
-      let fetchedTransactions = [];
+      let transactions = [];
       if (transactionId) {
         // Query for the transaction based on the ID with grouped splits.
         //
@@ -779,27 +780,29 @@ function TransactionEditUnconnected(props) {
             .select('*')
             .options({ splits: 'grouped' }),
         );
-        fetchedTransactions = ungroupTransactions(data);
-      }
-
-      if (fetchedTransactions.length === 0) {
-        // Create an empty transaction
-        setTransactions(
-          makeTemporaryTransactions(
-            accountId || (lastTransaction && lastTransaction.account) || null,
-            lastTransaction && lastTransaction.date,
-          ),
-        );
-        adding = true;
-      } else {
-        setTransactions(fetchedTransactions);
+        transactions = ungroupTransactions(data);
+        setFetchedTransactions(transactions);
       }
     }
     fetchTransaction();
   }, [transactionId]);
 
-  if (categories.length === 0 || accounts.length === 0 || !transactions) {
+  if (
+    categories.length === 0 ||
+    accounts.length === 0 ||
+    (transactionId && !fetchedTransactions)
+  ) {
     return null;
+  }
+
+  if (!transactionId) {
+    transactions = makeTemporaryTransactions(
+      accountId || (lastTransaction && lastTransaction.account) || null,
+      lastTransaction && lastTransaction.date,
+    );
+    adding = true;
+  } else {
+    transactions = fetchedTransactions;
   }
 
   const onEdit = async transaction => {
@@ -848,8 +851,7 @@ function TransactionEditUnconnected(props) {
       // }
     }
 
-    // If transactions is null, we are adding a new transaction
-    if (transactions === null) {
+    if (adding) {
       // The first one is always the "parent" and the only one we care
       // about
       props.setLastTransaction(newTransactions[0]);
@@ -860,7 +862,7 @@ function TransactionEditUnconnected(props) {
     // Eagerly go back
     navigate(-1);
 
-    if (transactions === null) {
+    if (adding) {
       // Adding a new transactions, this disables saving when the component unmounts
       deleted = true;
     } else {

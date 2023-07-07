@@ -161,6 +161,11 @@ function StackedRoutesInner({ location }) {
       />
 
       <Route
+        path="/accounts/:id/new-transaction"
+        element={<TransactionEdit />}
+      />
+
+      <Route
         path="/accounts"
         element={isNarrowWidth ? <MobileAccounts /> : <Account />}
       />
