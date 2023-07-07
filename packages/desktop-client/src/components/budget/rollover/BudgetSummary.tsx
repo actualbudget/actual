@@ -185,14 +185,9 @@ function ToBudget({
                       cursor: 'pointer',
                       color: isNegative
                         ? colorsm.errorText
-                        : colorsm.noticeText,
+                        : colorsm.pageTextPositive,
                       marginBottom: -1,
                       borderBottom: '1px solid transparent',
-                      ':hover': {
-                        borderColor: isNegative
-                          ? colorsm.errorText
-                          : colorsm.noticeText,
-                      },
                     },
                   ])}
                 >

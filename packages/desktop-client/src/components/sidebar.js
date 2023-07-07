@@ -44,6 +44,7 @@ function ItemContent({
         {
           touchAction: 'auto',
           userSelect: 'none',
+          userDrag: 'none',
           cursor: 'pointer',
           ...(forceActive ? activeStyle : {}),
         },
@@ -551,10 +552,12 @@ export function Sidebar({
           color: colorsm.sidebarItemText,
           backgroundColor: colorsm.sidebarBackground,
           '& .float': {
+            opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
             width: hasWindowButtons || isFloating ? null : 0,
           },
           '&:hover .float': {
+            opacity: 1,
             width: hasWindowButtons ? null : 'auto',
           },
         },

@@ -15,7 +15,6 @@ function LoggedInUser({
   signOut,
   closeBudget,
   style,
-  color,
 }) {
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
@@ -92,11 +91,12 @@ function LoggedInUser({
           flexDirection: 'row',
           alignItems: 'center',
           color: colorsm.pageTextSubdued,
+          ':hover': { color: colorsm.pageText },
         },
         style,
       ]}
     >
-      <Button bare onClick={() => setMenuOpen(true)} style={{ color }}>
+      <Button bare onClick={() => setMenuOpen(true)}>
         {serverMessage()}
       </Button>
 

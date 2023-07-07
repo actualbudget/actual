@@ -6,6 +6,7 @@ import * as actions from 'loot-core/src/client/actions';
 import MoonStars from '../icons/v2/MoonStars';
 import Sun from '../icons/v2/Sun';
 import { useResponsive } from '../ResponsiveProvider';
+import { colorsm } from '../style';
 
 import { Button, View } from './common';
 
@@ -24,6 +25,10 @@ export function ThemeSelector({ globalPrefs, saveGlobalPrefs }) {
           saveGlobalPrefs({
             theme: globalPrefs.theme,
           });
+        }}
+        style={{
+          color: colorsm.pageTextSubdued,
+          ':hover': { color: colorsm.pageText },
         }}
       >
         {globalPrefs.theme === 'light' ? (
