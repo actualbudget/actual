@@ -236,7 +236,7 @@ class AmountInput extends PureComponent {
         type="text"
         ref={el => (this.input = el)}
         value={text}
-        inputMode="numeric"
+        inputMode="decimal"
         autoCapitalize="none"
         onChange={e => this.onChangeText(e.target.value)}
         onBlur={this.onBlur}
@@ -248,7 +248,7 @@ class AmountInput extends PureComponent {
         onFocus={() => this.addEventListeners()}
         onKeyPress={this.onKeyPress}
         data-testid="amount-input"
-        style={{ flex: 1, textAlign: 'center' }}
+        style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
       />
     );
 
@@ -406,6 +406,7 @@ class FocusableAmountInput_ extends PureComponent {
             buttonProps && buttonProps.style,
             focused && { display: 'none' },
           ]}
+          bare={true}
         >
           <View
             style={[

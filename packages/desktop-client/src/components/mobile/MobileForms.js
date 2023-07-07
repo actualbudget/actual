@@ -69,25 +69,31 @@ export function TapField({
 }) {
   return (
     <Button
+      as={View}
       onClick={!disabled ? onClick : undefined}
-      style={{ backgroundColor: 'white' }}
+      style={[
+        { flexDirection: 'row', alignItems: 'center' },
+        style,
+        valueStyle,
+        { backgroundColor: 'white' },
+        disabled && { backgroundColor: colors.n11 },
+      ]}
+      bounce={false}
+      activeStyle={{
+        opacity: 0.5,
+        boxShadow: 'none',
+      }}
+      hoveredStyle={{
+        boxShadow: 'none',
+      }}
       // activeOpacity={0.05}
     >
-      <View
-        style={[
-          valueStyle,
-          { flexDirection: 'row', alignItems: 'center' },
-          disabled && { backgroundColor: colors.n11 },
-          style,
-        ]}
-      >
-        {children ? (
-          children
-        ) : (
-          <Text style={[{ flex: 1 }, textStyle]}>{value}</Text>
-        )}
-        {!disabled && rightContent}
-      </View>
+      {children ? (
+        children
+      ) : (
+        <Text style={[{ flex: 1 }, textStyle]}>{value}</Text>
+      )}
+      {!disabled && rightContent}
     </Button>
   );
 }

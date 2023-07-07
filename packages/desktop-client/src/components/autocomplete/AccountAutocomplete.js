@@ -7,7 +7,13 @@ import { View } from '../common';
 
 import Autocomplete from './Autocomplete';
 
-function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
+function AccountList({
+  items,
+  getItemProps,
+  highlightedIndex,
+  embedded,
+  groupHeaderStyle,
+}) {
   let lastItem = null;
 
   return (
@@ -41,6 +47,7 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
                 style={{
                   color: colors.y9,
                   padding: '4px 9px',
+                  ...groupHeaderStyle,
                 }}
                 data-testid="account-item-group"
               >
@@ -74,6 +81,7 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
 export default function AccountAutocomplete({
   embedded,
   includeClosedAccounts = true,
+  groupHeaderStyle,
   ...props
 }) {
   let accounts = useCachedAccounts() || [];
@@ -104,6 +112,7 @@ export default function AccountAutocomplete({
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
           embedded={embedded}
+          groupHeaderStyle={groupHeaderStyle}
         />
       )}
       {...props}

@@ -54,6 +54,7 @@ type CategoryListProps = {
   highlightedIndex: number;
   embedded: boolean;
   footer?: ReactNode;
+  groupHeaderStyle: object;
 };
 function CategoryList({
   items,
@@ -61,6 +62,7 @@ function CategoryList({
   highlightedIndex,
   embedded,
   footer,
+  groupHeaderStyle,
 }: CategoryListProps) {
   let lastGroup = null;
 
@@ -116,6 +118,7 @@ function CategoryList({
                   style={{
                     color: colors.y9,
                     padding: '4px 9px',
+                    ...groupHeaderStyle,
                   }}
                   data-testid="category-item-group"
                 >
@@ -150,11 +153,13 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: CategoryGroup[];
   showSplitOption?: boolean;
+  groupHeaderStyle: object;
 };
 export default function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,
   embedded,
+  groupHeaderStyle,
   ...props
 }: CategoryAutocompleteProps) {
   let categorySuggestions = useMemo(
@@ -201,6 +206,7 @@ export default function CategoryAutocomplete({
           embedded={embedded}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
+          groupHeaderStyle={groupHeaderStyle}
         />
       )}
       {...props}

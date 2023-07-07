@@ -7,6 +7,7 @@ import * as actions from 'loot-core/src/client/actions';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
@@ -38,11 +39,12 @@ function EditField({
     modalProps.onClose();
   }
 
+  const { isNarrowWidth } = useResponsive();
   let label, editor, minWidth;
   let inputStyle = { ':focus': { boxShadow: 0 } };
   let autocompleteProps = {
     inputProps: { style: inputStyle },
-    containerProps: { style: { height: 275 } },
+    containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
   switch (name) {
@@ -78,6 +80,13 @@ function EditField({
               onSelect(value);
             }
           }}
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: colors.n6,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -93,6 +102,7 @@ function EditField({
           focused={true}
           embedded={true}
           showManagePayees={false}
+          showMakeTransfer={!isNarrowWidth}
           onSelect={async value => {
             if (value && value.startsWith('new:')) {
               value = await createPayee(value.slice('new:'.length));
@@ -101,6 +111,13 @@ function EditField({
             onSelect(value);
           }}
           isCreatable
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: colors.n6,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -130,6 +147,13 @@ function EditField({
           onSelect={value => {
             onSelect(value);
           }}
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: colors.n6,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -151,31 +175,34 @@ function EditField({
 
   return (
     <Modal
-      noAnimation={true}
-      showHeader={false}
+      title={label}
+      noAnimation={!isNarrowWidth}
+      showHeader={isNarrowWidth}
       focusAfterClose={false}
       {...modalProps}
       padding={0}
       style={[
         {
           flex: 0,
+          height: isNarrowWidth ? '90vh' : 275,
           padding: '15px 10px',
-          backgroundColor: colors.n1,
-          color: 'white',
         },
         minWidth && { minWidth },
+        !isNarrowWidth && { backgroundColor: colors.n1, color: 'white' },
       ]}
     >
       {() => (
         <View>
-          <SectionLabel
-            title={label}
-            style={{
-              alignSelf: 'center',
-              color: colors.b10,
-              marginBottom: 10,
-            }}
-          />
+          {!isNarrowWidth && (
+            <SectionLabel
+              title={label}
+              style={{
+                alignSelf: 'center',
+                color: colors.b10,
+                marginBottom: 10,
+              }}
+            />
+          )}
           <View style={{ flex: 1 }}>{editor}</View>
         </View>
       )}

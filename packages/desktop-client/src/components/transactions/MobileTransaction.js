@@ -400,7 +400,7 @@ class TransactionEditInner extends PureComponent {
         style={{
           margin: 10,
           marginTop: 3,
-          backgroundColor: 'white',
+          backgroundColor: colors.n11,
           flex: 1,
           borderRadius: 4,
 
@@ -412,18 +412,28 @@ class TransactionEditInner extends PureComponent {
           shadowOpacity: 1,
         }}
       >
-        <View style={{ borderRadius: 4, overflow: 'hidden', flex: 1 }}>
+        <View
+          style={{
+            borderRadius: 4,
+            overflow: 'hidden',
+            flex: 1,
+          }}
+        >
           <View
             style={{
               borderBottomWidth: 1,
               borderColor: colors.n9,
+              backgroundColor: 'white',
               flexDirection: 'row',
               justifyContent: 'center',
               padding: 15,
             }}
           >
             <TextOneLine
-              style={[styles.header.headerTitleStyle, { marginHorizontal: 30 }]}
+              style={[
+                styles.header.headerTitleStyle,
+                { marginLeft: 30, marginRight: 30 },
+              ]}
             >
               {payeeId == null
                 ? adding
@@ -444,11 +454,16 @@ class TransactionEditInner extends PureComponent {
             }}
             contentContainerStyle={{ flexGrow: 1 }}
           > */}
-          <View style={{ overflowY: 'auto' }}>
+          <View
+            style={{
+              overflowY: 'auto',
+              overflowX: 'hidden',
+            }}
+          >
             <View
               style={{
                 alignItems: 'center',
-                marginVertical: 20,
+                marginTop: 20,
               }}
             >
               <FieldLabel
@@ -466,11 +481,12 @@ class TransactionEditInner extends PureComponent {
                 onChange={value =>
                   this.onQueueChange(transaction, 'amount', value)
                 }
-                style={{ height: 37, transform: [] }}
+                style={{ transform: [] }}
                 focusedStyle={{
                   width: 'auto',
-                  paddingVertical: 0,
-                  paddingHorizontal: 10,
+                  padding: '5px',
+                  paddingLeft: '20px',
+                  paddingRight: '20px',
                   minWidth: 120,
                   transform: [{ translateY: -0.5 }],
                 }}
@@ -579,6 +595,7 @@ class TransactionEditInner extends PureComponent {
                         paddingHorizontal: 15,
                       }}
                       onPress={this.onAddSplit}
+                      bare={true}
                     >
                       Add split
                     </Button>
@@ -606,7 +623,7 @@ class TransactionEditInner extends PureComponent {
                 />
               </View>
 
-              <View style={{ marginHorizontal: 35 }}>
+              <View style={{ marginLeft: 35, marginRight: 35 }}>
                 <FieldLabel title="Cleared" />
                 <BooleanField
                   value={transaction.cleared}
@@ -632,11 +649,13 @@ class TransactionEditInner extends PureComponent {
                   style={{
                     borderWidth: 0,
                     paddingVertical: 5,
-                    marginHorizontal: EDITING_PADDING,
+                    marginLeft: EDITING_PADDING,
+                    marginRight: EDITING_PADDING,
                     marginTop: 20,
                     marginBottom: 15,
                     backgroundColor: 'transparent',
                   }}
+                  bare={true}
                 >
                   <SvgTrash
                     width={17}
