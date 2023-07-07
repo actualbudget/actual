@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
+
 import q from '../query-helpers';
 import { useLiveQuery } from '../query-hooks';
-import { useMemo } from 'react';
 
 function toJS(rows) {
   let filters = rows.map(row => {
