@@ -54,12 +54,6 @@ class AmountInput extends PureComponent {
   componentDidUpdate(prevProps, prevState) {
     if (!prevProps.focused && this.props.focused) {
       this.focus();
-    } else if (prevProps.focused && !this.props.focused) {
-      if (this.animating) {
-        this.animating = false;
-        this.animation.stop();
-        this.backgroundValue.setValue(0);
-      }
     }
 
     if (prevProps.value !== this.props.value) {
@@ -122,11 +116,6 @@ class AmountInput extends PureComponent {
 
   focus() {
     this.input.focus();
-
-    if (!this.animating) {
-      this.animating = true;
-      this.animate();
-    }
 
     const initialState = this.getInitialValue();
     this.setState(initialState);
@@ -247,10 +236,9 @@ class AmountInput extends PureComponent {
         type="text"
         ref={el => (this.input = el)}
         value={text}
-        keyboardType="numeric"
-        selectTextOnFocus={false}
+        inputMode="numeric"
         autoCapitalize="none"
-        onChangeText={this.onChangeText}
+        onChange={e => this.onChangeText(e.target.value)}
         onBlur={this.onBlur}
         // Normally, focus is controlled outside of this component
         // this is a "hidden" input and the user can't directly tap
@@ -323,13 +311,13 @@ class AmountInput extends PureComponent {
   }
 }
 
-function AmountInputWithContext(props) {
+const AmountInputWithContext = forwardRef((props, ref) => {
   return (
     <AmountAccessoryContext.Consumer>
-      {context => <AmountInput {...props} context={context} />}
+      {context => <AmountInput {...props} ref={ref} context={context} />}
     </AmountAccessoryContext.Consumer>
   );
-}
+});
 
 class FocusableAmountInput_ extends PureComponent {
   state = { focused: false };
@@ -386,7 +374,7 @@ class FocusableAmountInput_ extends PureComponent {
     const { focused } = this.state;
 
     return (
-      <View testID="scroll-to-boundary">
+      <View>
         <AmountInputWithContext
           {...this.props}
           ref={el => (this.amount = el)}
@@ -410,8 +398,9 @@ class FocusableAmountInput_ extends PureComponent {
         />
 
         <Button
-          onPress={this.onFocus}
-          hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+          onClick={this.onFocus}
+          // Defines how far touch can start away from the button
+          // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
           {...buttonProps}
           style={[
             buttonProps && buttonProps.style,

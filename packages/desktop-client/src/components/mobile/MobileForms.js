@@ -42,9 +42,9 @@ export const InputField = forwardRef(function InputField(
   return (
     <Input
       ref={ref}
-      autoCorrect={false}
+      autoCorrect="false"
       autoCapitalize="none"
-      editable={!disabled}
+      disabled={disabled}
       onBlur={e => {
         onUpdate && onUpdate(e.target.value);
       }}
@@ -65,13 +65,13 @@ export function TapField({
   rightContent,
   style,
   textStyle,
-  onTap,
+  onClick,
 }) {
   return (
     <Button
-      onPress={!disabled && onTap}
+      onClick={!disabled ? onClick : undefined}
       style={{ backgroundColor: 'white' }}
-      activeOpacity={0.05}
+      // activeOpacity={0.05}
     >
       <View
         style={[

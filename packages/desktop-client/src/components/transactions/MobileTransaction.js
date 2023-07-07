@@ -268,59 +268,20 @@ class TransactionEditInner extends PureComponent {
     this._queuedChange = [transaction, name, value];
   };
 
-  onTap = (transactionId, name) => {
-    let { navigation, dateFormat } = this.props;
+  onClick = (transactionId, name) => {
+    let { dateFormat } = this.props;
 
-    if (navigation) {
-      switch (name) {
-        case 'category':
-          navigation.navigate('CategorySelect', {
-            onSelect: id => {
-              let { transactions } = this.state;
-              let transaction = transactions.find(t => t.id === transactionId);
-              // This is a deficiency of this API, need to fix. It
-              // assumes that it receives a serialized transaction,
-              // but we only have access to the raw transaction
-              this.onEdit(
-                serializeTransaction(transaction, dateFormat),
-                name,
-                id,
-              );
-            },
-          });
-          break;
-        case 'account':
-          navigation.navigate('AccountSelect', {
-            title: 'Select an account',
-            onSelect: id => {
-              let { transactions } = this.state;
-              let transaction = transactions.find(t => t.id === transactionId);
-              // See above
-              this.onEdit(
-                serializeTransaction(transaction, dateFormat),
-                name,
-                id,
-              );
-            },
-          });
-          break;
-        case 'payee':
-          navigation.navigate('PayeeSelect', {
-            onSelect: id => {
-              let { transactions } = this.state;
-              let transaction = transactions.find(t => t.id === transactionId);
-              // See above
-              this.onEdit(
-                serializeTransaction(transaction, dateFormat),
-                name,
-                id,
-              );
-            },
-          });
-          break;
-        default:
-      }
-    }
+    this.props.pushModal('edit-field', {
+      name,
+      onSubmit: (name, value) => {
+        let { transactions } = this.state;
+        let transaction = transactions.find(t => t.id === transactionId);
+        // This is a deficiency of this API, need to fix. It
+        // assumes that it receives a serialized transaction,
+        // but we only have access to the raw transaction
+        this.onEdit(serializeTransaction(transaction, dateFormat), name, value);
+      },
+    });
   };
 
   onSplit = () => {
@@ -462,7 +423,6 @@ class TransactionEditInner extends PureComponent {
             }}
           >
             <TextOneLine
-              centered={true}
               style={[styles.header.headerTitleStyle, { marginHorizontal: 30 }]}
             >
               {payeeId == null
@@ -521,7 +481,7 @@ class TransactionEditInner extends PureComponent {
             <FieldLabel title="Payee" flush />
             <TapField
               value={descriptionPretty}
-              onTap={() => this.onTap(transaction.id, 'payee')}
+              onClick={() => this.onClick(transaction.id, 'payee')}
             />
 
             <View>
@@ -534,19 +494,26 @@ class TransactionEditInner extends PureComponent {
                 <TapField
                   value={category ? lookupName(categories, category) : null}
                   disabled={(account && !!account.offbudget) || transferAcct}
-                  rightContent={
-                    <Button
-                      contentStyle={{
-                        paddingVertical: 4,
-                        paddingHorizontal: 15,
-                        margin: 0,
-                      }}
-                      onPress={this.onSplit}
-                    >
-                      Split
-                    </Button>
-                  }
-                  onTap={() => this.onTap(transaction.id, 'category')}
+                  // TODO: the button to turn this transaction into a split
+                  // transaction was on top of the category button in the native
+                  // app, on the right-hand side
+                  //
+                  // On the web this doesn't work well and react gets upset if
+                  // nest a button in a button.
+                  //
+                  // rightContent={
+                  //   <Button
+                  //     contentStyle={{
+                  //       paddingVertical: 4,
+                  //       paddingHorizontal: 15,
+                  //       margin: 0,
+                  //     }}
+                  //     onPress={this.onSplit}
+                  //   >
+                  //     Split
+                  //   </Button>
+                  // }
+                  onClick={() => this.onClick(transaction.id, 'category')}
                 />
               ) : (
                 <View>
@@ -607,7 +574,7 @@ class TransactionEditInner extends PureComponent {
                       </Text>
                     )}
                     <Button
-                      contentStyle={{
+                      style={{
                         paddingVertical: 6,
                         paddingHorizontal: 15,
                       }}
@@ -624,7 +591,7 @@ class TransactionEditInner extends PureComponent {
             <TapField
               disabled={!adding}
               value={account ? account.name : null}
-              onTap={() => this.onTap(transaction.id, 'account')}
+              onClick={() => this.onClick(transaction.id, 'account')}
             />
 
             <View style={{ flexDirection: 'row' }}>
@@ -663,13 +630,13 @@ class TransactionEditInner extends PureComponent {
                 <Button
                   onClick={() => onDelete()}
                   style={{
+                    borderWidth: 0,
                     paddingVertical: 5,
                     marginHorizontal: EDITING_PADDING,
                     marginTop: 20,
                     marginBottom: 15,
                     backgroundColor: 'transparent',
                   }}
-                  contentStyle={{ borderWidth: 0 }}
                 >
                   <SvgTrash
                     width={17}
@@ -773,6 +740,7 @@ function TransactionEditUnconnected(props) {
     // May as well update categories / accounts when transaction ID changes
     props.getCategories();
     props.getAccounts();
+    props.getPayees();
 
     async function fetchTransaction() {
       let fetchedTransactions = [];
@@ -898,6 +866,7 @@ function TransactionEditUnconnected(props) {
         categories={categories}
         accounts={accounts}
         payees={payees}
+        pushModal={props.pushModal}
         navigation={navigate}
         // TODO: ChildEdit is complicated and heavily relies on RN
         // renderChildEdit={props => <ChildEdit {...props} />}
