@@ -25,6 +25,7 @@ function readMigrations(ref) {
     migrationsDir,
   ]);
   const files = stdout.toString().split('\n').filter(Boolean);
+  console.log(`Found ${files.length} migrations on ${ref}.`, files);
   return files
     .map(file => path.basename(file))
     .filter(file => !file.startsWith('.'))
