@@ -216,6 +216,10 @@ class AccountInternal extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
+    if (this.state.isAdding && this.props.accountId !== prevProps.accountId) {
+      this.setState({ isAdding: false });
+    }
+
     // If the user was on a different screen and is now coming back to
     // the transactions, automatically refresh the transaction to make
     // sure we have updated state
