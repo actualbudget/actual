@@ -35,6 +35,7 @@ function readMigrations(ref) {
     }));
 }
 
+spawnSync('git', ['fetch', 'origin', 'master']);
 let masterMigrations = readMigrations('master');
 let headMigrations = readMigrations('HEAD');
 
