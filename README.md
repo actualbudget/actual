@@ -37,7 +37,7 @@ The Actual app is split up into a few packages:
 - desktop-client - The desktop UI
 - desktop-electron - The desktop app
 
-More information on the project structure is available in our [community documentation](https://actualbudget.org/docs/contributing/project-layout).
+More information on the project structure is available in our [community documentation](https://actualbudget.org/docs/contributing/project-details).
 
 ## Feature Requests
 

@@ -45,18 +45,15 @@ export default function CustomSelect({
         }
       />
       <ListboxPopover
-        {...css({
+        style={{
           zIndex: 10000,
           outline: 0,
           borderRadius: 4,
           backgroundColor: colorsm.menuBackground,
           border: '1px solid ' + colorsm.menuBorder,
-          ':focus-within': {
-            boxShadow: '0px 1px 2px ' + colorsm.buttonShadow,
-          },
-        })}
+        }}
       >
-        <ListboxList>
+        <ListboxList style={{ maxHeight: 250, overflowY: 'scroll' }}>
           {options.map(([value, label]) => (
             <ListboxOption
               key={value}
