@@ -44,11 +44,6 @@ function FilterList({ items, getItemProps, highlightedIndex, embedded }) {
 export default function SavedFilterAutocomplete({ embedded, ...props }) {
   let filters = useFilters() || [];
 
-  // Sort filtered items by alphabetical
-  filters.sort((a, b) =>
-    a.name.trim().localeCompare(b.name.trim(), { ignorePunctuation: true }),
-  );
-
   return (
     <Autocomplete
       strict={true}
