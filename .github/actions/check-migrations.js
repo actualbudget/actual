@@ -31,7 +31,7 @@ function readMigrations(ref) {
     .filter(file => !file.startsWith('.'))
     .map(name => ({
       date: parseInt(name.split('_')[0]),
-      name: name.match(/\d+_(.+?)\.sql/)?.[1] ?? '***' + name,
+      name: name.match(/^\d+_(.+?)(\.sql)?$/)?.[1] ?? '***' + name,
     }));
 }
 
