@@ -31,12 +31,14 @@ function readMigrations(ref) {
     .filter(file => !file.startsWith('.'))
     .map(name => ({
       date: parseInt(name.split('_')[0]),
-      name: name.match(/\d+_(.+?)\.sql/)[1],
+      name: name.match(/\d+_(.+?)\.sql/)?.[1] ?? '***' + name,
     }));
 }
 
 let masterMigrations = readMigrations('master');
 let headMigrations = readMigrations('HEAD');
+
+console.log({ masterMigrations, headMigrations });
 
 let latestMasterMigration = masterMigrations[masterMigrations.length - 1].date;
 let newMigrations = headMigrations.filter(
