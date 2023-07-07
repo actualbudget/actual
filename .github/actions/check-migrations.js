@@ -25,7 +25,7 @@ function readMigrations(ref) {
     migrationsDir + '/',
   ]);
   const files = stdout.toString().split('\n').filter(Boolean);
-  console.log(`Found ${files.length} migrations on ${ref}.`, files);
+  console.log(`Found ${files.length} migrations on ${ref}.`);
   return files
     .map(file => path.basename(file))
     .filter(file => !file.startsWith('.'))
@@ -38,8 +38,6 @@ function readMigrations(ref) {
 spawnSync('git', ['fetch', 'origin', 'master']);
 let masterMigrations = readMigrations('origin/master');
 let headMigrations = readMigrations('HEAD');
-
-console.log({ masterMigrations, headMigrations });
 
 let latestMasterMigration = masterMigrations[masterMigrations.length - 1].date;
 let newMigrations = headMigrations.filter(
