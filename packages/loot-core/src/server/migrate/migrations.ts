@@ -47,7 +47,14 @@ export async function getAppliedMigrations(db: Database): Promise<number[]> {
     [],
     true,
   );
-  return rows.map(row => row.id);
+  let ids = rows.map(row => row.id);
+
+  let badFiltersMigration = 1685375406832;
+  if (ids.includes(badFiltersMigration)) {
+    ids = ids.filter(id => id !== badFiltersMigration).concat([1688749527273]);
+  }
+
+  return ids;
 }
 
 export async function getMigrationList(
