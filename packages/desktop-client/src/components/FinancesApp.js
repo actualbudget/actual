@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import {
-  DndProvider,
-  HTML5DragTransition,
-  TouchTransition,
-} from 'react-dnd-multi-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import {
   Route,
@@ -304,23 +299,6 @@ function FinancesApp(props) {
   );
 }
 
-const HTML5toTouch = {
-  backends: [
-    {
-      id: 'touch',
-      backend: TouchBackend,
-      options: { delay: 300 },
-      preview: true,
-      transition: TouchTransition,
-    },
-    {
-      id: 'html5',
-      backend: HTML5Backend,
-      transition: HTML5DragTransition,
-    },
-  ],
-};
-
 function FinancesAppWithContext(props) {
   let app = useMemo(() => <FinancesApp {...props} />, [props]);
 
@@ -331,7 +309,7 @@ function FinancesAppWithContext(props) {
           <BudgetMonthCountProvider>
             <PayeesProvider>
               <AccountsProvider>
-                <DndProvider options={HTML5toTouch}>{app}</DndProvider>
+                <DndProvider backend={Backend}>{app}</DndProvider>
               </AccountsProvider>
             </PayeesProvider>
           </BudgetMonthCountProvider>
