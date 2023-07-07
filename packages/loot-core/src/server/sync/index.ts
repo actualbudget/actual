@@ -81,17 +81,17 @@ function apply(msg: Message, prev?: boolean) {
     try {
       if (prev) {
         query = {
-          sql: db.cache(`UPDATE ${dataset} SET ${column} = ? WHERE id = ?`),
+          sql: `UPDATE ${dataset} SET ${column} = ? WHERE id = ?`,
           params: [value, row],
         };
       } else {
         query = {
-          sql: db.cache(`INSERT INTO ${dataset} (id, ${column}) VALUES (?, ?)`),
+          sql: `INSERT INTO ${dataset} (id, ${column}) VALUES (?, ?)`,
           params: [row, value],
         };
       }
 
-      db.runQuery(query.sql, query.params);
+      db.runQuery(db.cache(query.sql), query.params);
     } catch (error) {
       throw new SyncError('invalid-schema', {
         error: { message: error.message, stack: error.stack },
@@ -564,11 +564,13 @@ export const fullSync = once(async function (): Promise<
         app.events.emit('sync', {
           type: 'error',
           subtype: 'out-of-sync',
+          meta: e.meta,
         });
       } else if (e.reason === 'invalid-schema') {
         app.events.emit('sync', {
           type: 'error',
           subtype: 'invalid-schema',
+          meta: e.meta,
         });
       } else if (
         e.reason === 'decrypt-failure' ||
@@ -580,7 +582,7 @@ export const fullSync = once(async function (): Promise<
           meta: e.meta,
         });
       } else {
-        app.events.emit('sync', { type: 'error' });
+        app.events.emit('sync', { type: 'error', meta: e.meta });
       }
     } else if (e instanceof PostError) {
       console.log(e);
