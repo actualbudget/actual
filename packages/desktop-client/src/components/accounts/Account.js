@@ -216,6 +216,7 @@ class AccountInternal extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
+    // If the active account changes - close the transaction entry mode
     if (this.state.isAdding && this.props.accountId !== prevProps.accountId) {
       this.setState({ isAdding: false });
     }
