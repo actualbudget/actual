@@ -1,16 +1,12 @@
 #!/usr/bin/env node
 
 // overview:
-// 1. List all migrations in packages/loot-core/migrations/*
-// 2. Check the commit that created the migration file
-// 3. Make sure that newer migrations were committed after older migrations (by date in the migration name)
+// 1. Identify the migrations in packages/loot-core/migrations/* on `master` and HEAD
+// 2. Make sure that any new migrations on HEAD are dated after the latest migration on `master`.
 
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-
-// Please don’t add to this list, we just can’t change this migration ID since it already happened
-const exceptions = ['1679728867040_rules_conditions.sql'];
 
 const migrationsDir = path.join(
   __dirname,
@@ -21,49 +17,44 @@ const migrationsDir = path.join(
   'migrations',
 );
 
-const migrations = fs
-  .readdirSync(migrationsDir)
-  .filter(file => !file.startsWith('.'))
-  .map(file => {
-    const [_, date] = file.match(/^(\d+)_/) || [];
-    const { stdout } = spawnSync('git', [
-      'log',
-      '--format=%ct',
-      '-n',
-      '1',
-      path.join(migrationsDir, file),
-    ]);
-    return {
-      migrationDate: parseInt(date),
-      commitDate: parseInt(stdout) * 1000,
-      file,
-    };
-  });
-
-const sortedMigrations = migrations.sort(
-  (a, b) => a.migrationDate - b.migrationDate,
-);
-
-let ok = true;
-for (let i = sortedMigrations.length - 1; i > 0; i--) {
-  const migration = sortedMigrations[i];
-  const prevMigration = sortedMigrations[i - 1];
-  if (migration.commitDate < prevMigration.commitDate) {
-    if (exceptions.includes(migration.file)) {
-      continue;
-    }
-    console.error(
-      `error: migration ${migration.file} was committed before ${prevMigration.file}, but it has a later date in the filename`,
-    );
-    ok = false;
-  }
+function readMigrations(ref) {
+  const { stdout } = spawnSync('git', [
+    'ls-tree',
+    '--name-only',
+    ref,
+    migrationsDir + '/',
+  ]);
+  const files = stdout.toString().split('\n').filter(Boolean);
+  console.log(`Found ${files.length} migrations on ${ref}.`);
+  return files
+    .map(file => path.basename(file))
+    .filter(file => !file.startsWith('.'))
+    .map(name => ({
+      date: parseInt(name.split('_')[0]),
+      name: name.match(/^\d+_(.+?)(\.sql)?$/)?.[1] ?? '***' + name,
+    }));
 }
 
-if (ok) {
-  console.log('All migration IDs are in order');
-} else {
+spawnSync('git', ['fetch', 'origin', 'master']);
+let masterMigrations = readMigrations('origin/master');
+let headMigrations = readMigrations('HEAD');
+
+let latestMasterMigration = masterMigrations[masterMigrations.length - 1].date;
+let newMigrations = headMigrations.filter(
+  migration => !masterMigrations.find(m => m.name === migration.name),
+);
+let badMigrations = newMigrations.filter(
+  migration => migration.date <= latestMasterMigration,
+);
+
+if (badMigrations.length) {
   console.error(
-    '\nMigrations must be ordered by date or they will fail to apply properly',
+    `The following migrations are dated before the latest migration on master:`,
   );
+  badMigrations.forEach(migration => {
+    console.error(`  ${migration.name}`);
+  });
   process.exit(1);
+} else {
+  console.log(`All migrations are dated after the latest migration on master.`);
 }
