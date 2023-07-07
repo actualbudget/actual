@@ -22,7 +22,7 @@ function readMigrations(ref) {
     'ls-tree',
     '--name-only',
     ref,
-    migrationsDir,
+    migrationsDir + '/',
   ]);
   const files = stdout.toString().split('\n').filter(Boolean);
   console.log(`Found ${files.length} migrations on ${ref}.`, files);
