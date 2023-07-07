@@ -36,7 +36,7 @@ function readMigrations(ref) {
 }
 
 spawnSync('git', ['fetch', 'origin', 'master']);
-let masterMigrations = readMigrations('master');
+let masterMigrations = readMigrations('origin/master');
 let headMigrations = readMigrations('HEAD');
 
 console.log({ masterMigrations, headMigrations });
