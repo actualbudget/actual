@@ -1,47 +1,19 @@
-import { useContext, useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
-import NamespaceContext from './NamespaceContext';
-
-function unresolveName(name) {
-  let idx = name.indexOf('!');
-  if (idx !== -1) {
-    return {
-      sheet: name.slice(0, idx),
-      name: name.slice(idx + 1),
-    };
-  }
-  return { sheet: null, name };
-}
+import useSheetName from './useSheetName';
 
 export default function useSheetValue(binding, onChange) {
   if (!binding) {
-    throw new Error('SheetValue binding is required');
-  }
-  if (global.IS_TESTING && typeof binding !== 'string' && !binding.name) {
-    binding = { ...binding, name: binding.value.toString() };
+    throw new Error('Binding is required');
   }
 
-  binding =
-    typeof binding === 'string' ? { name: binding, value: null } : binding;
-
-  if (binding.name == null) {
-    throw new Error('Binding name is now required');
-  }
-
-  // Get the current sheet name, and unresolve the binding name if
-  // necessary (you might pass a fully resolve name like foo!name)
-  let sheetName = useContext(NamespaceContext) || '__global';
-  let unresolved = unresolveName(binding.name);
-  if (unresolved.sheet) {
-    sheetName = unresolved.sheet;
-    binding = { ...binding, name: unresolved.name };
-  }
+  let { sheetName, fullSheetName } = useSheetName(binding);
 
   let spreadsheet = useSpreadsheet();
   let [result, setResult] = useState({
-    name: sheetName + '!' + binding.name,
+    name: fullSheetName,
     value: binding.value === undefined ? null : binding.value,
     query: binding.query,
   });

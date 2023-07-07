@@ -5,7 +5,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { colors, styles } from '../../style';
 import { View, Text, Modal, Button } from '../common';
-import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
@@ -36,30 +35,26 @@ function BudgetSummary({ month, modalProps }) {
                 },
               ]}
             >
-              <PrivacyFilter>
-                <CellValue
-                  binding={rolloverBudget.incomeAvailable}
-                  type="financial"
-                />
-              </PrivacyFilter>
-              <PrivacyFilter>
-                <CellValue
-                  binding={rolloverBudget.lastMonthOverspent}
-                  type="financial"
-                />
-              </PrivacyFilter>
-              <PrivacyFilter>
-                <CellValue
-                  binding={rolloverBudget.totalBudgeted}
-                  type="financial"
-                />
-              </PrivacyFilter>
-              <PrivacyFilter>
-                <CellValue
-                  binding={rolloverBudget.forNextMonth}
-                  type="financial"
-                />
-              </PrivacyFilter>
+              <CellValue
+                binding={rolloverBudget.incomeAvailable}
+                type="financial"
+                privacyFilter
+              />
+              <CellValue
+                binding={rolloverBudget.lastMonthOverspent}
+                type="financial"
+                privacyFilter
+              />
+              <CellValue
+                binding={rolloverBudget.totalBudgeted}
+                type="financial"
+                privacyFilter
+              />
+              <CellValue
+                binding={rolloverBudget.forNextMonth}
+                type="financial"
+                privacyFilter
+              />
             </View>
 
             <View

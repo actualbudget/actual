@@ -130,16 +130,20 @@ export function Balances({
           '&:hover svg': { opacity: 1 },
         }}
       >
-        <PrivacyFilter blurIntensity={5}>
-          <CellValue
-            binding={{ ...balanceQuery, value: 0 }}
-            type="financial"
-            style={{ fontSize: 22, fontWeight: 400 }}
-            getStyle={value => ({
-              color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
-            })}
-          />
-        </PrivacyFilter>
+        <CellValue
+          binding={{ ...balanceQuery, value: 0 }}
+          type="financial"
+          style={{ fontSize: 22, fontWeight: 400 }}
+          getStyle={value => ({
+            color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
+          })}
+          privacyFilter={(render, defaultProps) =>
+            render({
+              ...defaultProps,
+              blurIntensity: 5,
+            })
+          }
+        />
 
         <ArrowButtonRight1
           style={{

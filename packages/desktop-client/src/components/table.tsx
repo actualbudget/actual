@@ -13,7 +13,6 @@ import React, {
   type ReactNode,
   type KeyboardEvent,
   type UIEvent,
-  type ReactElement,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -42,7 +41,10 @@ import {
 } from './common';
 import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
-import PrivacyFilter, { type PrivacyFilterProps } from './PrivacyFilter';
+import {
+  ConditionalPrivacyFilter,
+  type ConditionalPrivacyFilterProps,
+} from './PrivacyFilter';
 import format from './spreadsheet/format';
 import SheetValue from './spreadsheet/SheetValue';
 
@@ -194,14 +196,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
-  privacyFilter?:
-    | boolean
-    | ((
-        render?: (
-          props?: PrivacyFilterProps,
-        ) => ReactElement<PrivacyFilterProps, typeof PrivacyFilter>,
-        defaultPrivacyFilterProps?: PrivacyFilterProps,
-      ) => ReactElement<PrivacyFilterProps, typeof PrivacyFilter>);
+  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
 };
 export function Cell({
   width,
@@ -245,54 +240,69 @@ export function Cell({
     backgroundColor,
   };
 
-  let content = useMemo(
-    () =>
-      plain ? (
-        children
-      ) : exposed ? (
-        // @ts-expect-error Missing props refinement
-        children()
-      ) : (
-        <View
-          style={[
-            {
-              flexDirection: 'row',
-              flex: 1,
-              padding: '0 5px',
-              alignItems: 'center',
-            },
-            styles.smallText,
-            valueStyle,
-          ]}
-          // Can't use click because we only want to expose the cell if
-          // the user does a direct click, not if they also drag the
-          // mouse to select something
-          onMouseDown={e => (mouseCoords.current = [e.clientX, e.clientY])}
-          // When testing, allow the click handler to be used instead
-          onClick={
-            global.IS_TESTING
-              ? () => onExpose && onExpose(name)
-              : e => {
-                  if (
-                    mouseCoords.current &&
-                    Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
-                    Math.abs(e.clientY - mouseCoords.current[1]) < 5
-                  ) {
-                    onExpose && onExpose(name);
+  let conditionalPrivacyFilter = useMemo(
+    () => (
+      <ConditionalPrivacyFilter
+        privacyFilter={privacyFilter}
+        privacyFilterProps={{
+          activationFilters: [!focused, !exposed],
+          style: {
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+          },
+        }}
+      >
+        {plain ? (
+          children
+        ) : exposed ? (
+          // @ts-expect-error Missing props refinement
+          children()
+        ) : (
+          <View
+            style={[
+              {
+                flexDirection: 'row',
+                flex: 1,
+                padding: '0 5px',
+                alignItems: 'center',
+              },
+              styles.smallText,
+              valueStyle,
+            ]}
+            // Can't use click because we only want to expose the cell if
+            // the user does a direct click, not if they also drag the
+            // mouse to select something
+            onMouseDown={e => (mouseCoords.current = [e.clientX, e.clientY])}
+            // When testing, allow the click handler to be used instead
+            onClick={
+              global.IS_TESTING
+                ? () => onExpose && onExpose(name)
+                : e => {
+                    if (
+                      mouseCoords.current &&
+                      Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
+                      Math.abs(e.clientY - mouseCoords.current[1]) < 5
+                    ) {
+                      onExpose && onExpose(name);
+                    }
                   }
-                }
-          }
-        >
-          {unexposedContent || (
-            <UnexposedCellContent value={value} formatter={formatter} />
-          )}
-        </View>
-      ),
+            }
+          >
+            {unexposedContent || (
+              <UnexposedCellContent value={value} formatter={formatter} />
+            )}
+          </View>
+        )}
+      </ConditionalPrivacyFilter>
+    ),
     [
+      privacyFilter,
+      focused,
+      exposed,
       children,
       plain,
       exposed,
-      styles,
       valueStyle,
       onExpose,
       name,
@@ -302,36 +312,6 @@ export function Cell({
     ],
   );
 
-  let maybePrivateContent = useMemo(() => {
-    let defaultPrivacyFilterProps: PrivacyFilterProps = {
-      onActivate: () => !focused || !exposed,
-      style: {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-      },
-    };
-
-    return privacyFilter ? (
-      typeof privacyFilter === 'function' ? (
-        privacyFilter(
-          privacyFilterProps => (
-            <PrivacyFilter
-              {...(privacyFilterProps || defaultPrivacyFilterProps)}
-            >
-              {content}
-            </PrivacyFilter>
-          ),
-          defaultPrivacyFilterProps,
-        )
-      ) : (
-        <PrivacyFilter {...defaultPrivacyFilterProps}>{content}</PrivacyFilter>
-      )
-    ) : (
-      content
-    );
-  }, [privacyFilter, focused, exposed, content]);
-
   return (
     <View
       innerRef={viewRef}
@@ -340,7 +320,7 @@ export function Cell({
       {...viewProps}
       data-testid={name}
     >
-      {maybePrivateContent}
+      {conditionalPrivacyFilter}
     </View>
   );
 }

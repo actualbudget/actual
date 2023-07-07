@@ -2,7 +2,6 @@ import React, { type ComponentProps } from 'react';
 
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { View } from '../common';
-import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 
@@ -23,20 +22,19 @@ export default function BalanceWithCarryover({
 
   return (
     <>
-      <PrivacyFilter>
-        <CellValue
-          binding={balance}
-          type="financial"
-          getStyle={makeAmountStyle}
-          style={[
-            { textAlign: 'right' },
-            !disabled && {
-              cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' },
-            },
-          ]}
-        />
-      </PrivacyFilter>
+      <CellValue
+        binding={balance}
+        type="financial"
+        getStyle={makeAmountStyle}
+        style={[
+          { textAlign: 'right' },
+          !disabled && {
+            cursor: 'pointer',
+            ':hover': { textDecoration: 'underline' },
+          },
+        ]}
+        privacyFilter
+      />
       {carryoverValue === true && (
         <View
           style={{

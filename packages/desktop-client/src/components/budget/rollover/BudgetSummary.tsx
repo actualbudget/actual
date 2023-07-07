@@ -92,48 +92,44 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             </Tooltip>
           )}
         >
-          <PrivacyFilter>
-            <CellValue
-              binding={rolloverBudget.incomeAvailable}
-              type="financial"
-              style={{ fontWeight: 600 }}
-            />
-          </PrivacyFilter>
+          <CellValue
+            binding={rolloverBudget.incomeAvailable}
+            type="financial"
+            style={{ fontWeight: 600 }}
+            privacyFilter
+          />
         </HoverTarget>
 
-        <PrivacyFilter>
-          <CellValue
-            binding={rolloverBudget.lastMonthOverspent}
-            formatter={value => {
-              let v = format(value, 'financial');
-              return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
-            }}
-            style={[{ fontWeight: 600 }, styles.tnum]}
-          />
-        </PrivacyFilter>
+        <CellValue
+          binding={rolloverBudget.lastMonthOverspent}
+          formatter={value => {
+            let v = format(value, 'financial');
+            return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
+          }}
+          style={[{ fontWeight: 600 }, styles.tnum]}
+          privacyFilter
+        />
 
-        <PrivacyFilter>
-          <CellValue
-            binding={rolloverBudget.totalBudgeted}
-            formatter={value => {
-              let v = format(value, 'financial');
-              return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
-            }}
-            style={[{ fontWeight: 600 }, styles.tnum]}
-          />
-        </PrivacyFilter>
+        <CellValue
+          binding={rolloverBudget.totalBudgeted}
+          formatter={value => {
+            let v = format(value, 'financial');
+            return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
+          }}
+          style={[{ fontWeight: 600 }, styles.tnum]}
+          privacyFilter
+        />
 
-        <PrivacyFilter>
-          <CellValue
-            binding={rolloverBudget.forNextMonth}
-            formatter={value => {
-              let n = parseInt(value) || 0;
-              let v = format(Math.abs(n), 'financial');
-              return n >= 0 ? '-' + v : '+' + v;
-            }}
-            style={[{ fontWeight: 600 }, styles.tnum]}
-          />
-        </PrivacyFilter>
+        <CellValue
+          binding={rolloverBudget.forNextMonth}
+          formatter={value => {
+            let n = parseInt(value) || 0;
+            let v = format(Math.abs(n), 'financial');
+            return n >= 0 ? '-' + v : '+' + v;
+          }}
+          style={[{ fontWeight: 600 }, styles.tnum]}
+          privacyFilter
+        />
       </View>
 
       <View>

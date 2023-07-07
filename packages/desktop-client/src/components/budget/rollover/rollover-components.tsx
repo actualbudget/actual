@@ -15,7 +15,6 @@ import {
   Button,
   Menu,
 } from '../../common';
-import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import useSheetValue from '../../spreadsheet/useSheetValue';
@@ -204,36 +203,33 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
     >
       <View style={headerLabelStyle}>
         <Text style={{ color: colors.n4 }}>Budgeted</Text>
-        <PrivacyFilter>
-          <CellValue
-            binding={rolloverBudget.totalBudgeted}
-            type="financial"
-            style={{ color: colors.n4, fontWeight: 600 }}
-            formatter={value => {
-              return format(-parseFloat(value || '0'), 'financial');
-            }}
-          />
-        </PrivacyFilter>
+        <CellValue
+          binding={rolloverBudget.totalBudgeted}
+          type="financial"
+          style={{ color: colors.n4, fontWeight: 600 }}
+          formatter={value => {
+            return format(-parseFloat(value || '0'), 'financial');
+          }}
+          privacyFilter
+        />
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: colors.n4 }}>Spent</Text>
-        <PrivacyFilter>
-          <CellValue
-            binding={rolloverBudget.totalSpent}
-            type="financial"
-            style={{ color: colors.n4, fontWeight: 600 }}
-          />
-        </PrivacyFilter>
+        <CellValue
+          binding={rolloverBudget.totalSpent}
+          type="financial"
+          style={{ color: colors.n4, fontWeight: 600 }}
+          privacyFilter
+        />
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: colors.n4 }}>Balance</Text>
-        <PrivacyFilter>
-          <CellValue
-            binding={rolloverBudget.totalBalance}
-            type="financial"
-            style={{ color: colors.n4, fontWeight: 600 }}
-          />
-        </PrivacyFilter>
+        <CellValue
+          binding={rolloverBudget.totalBalance}
+          type="financial"
+          style={{ color: colors.n4, fontWeight: 600 }}
+          privacyFilter
+        />
       </View>
     </View>
   );
@@ -394,17 +390,16 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.name, category.id, monthIndex)}
         >
-          <PrivacyFilter>
-            <CellValue
-              binding={rolloverBudget.catSumAmount(category.id)}
-              type="financial"
-              getStyle={makeAmountGrey}
-              style={{
-                cursor: 'pointer',
-                ':hover': { textDecoration: 'underline' },
-              }}
-            />
-          </PrivacyFilter>
+          <CellValue
+            binding={rolloverBudget.catSumAmount(category.id)}
+            type="financial"
+            getStyle={makeAmountGrey}
+            style={{
+              cursor: 'pointer',
+              ':hover': { textDecoration: 'underline' },
+            }}
+            privacyFilter
+          />
         </span>
       </Field>
 
@@ -489,16 +484,15 @@ export function IncomeCategoryMonth({
         <span
           onClick={() => onShowActivity(category.name, category.id, monthIndex)}
         >
-          <PrivacyFilter>
-            <CellValue
-              binding={rolloverBudget.catSumAmount(category.id)}
-              type="financial"
-              style={{
-                cursor: 'pointer',
-                ':hover': { textDecoration: 'underline' },
-              }}
-            />
-          </PrivacyFilter>
+          <CellValue
+            binding={rolloverBudget.catSumAmount(category.id)}
+            type="financial"
+            style={{
+              cursor: 'pointer',
+              ':hover': { textDecoration: 'underline' },
+            }}
+            privacyFilter
+          />
         </span>
       </Field>
     </View>
