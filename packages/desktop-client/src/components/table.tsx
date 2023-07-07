@@ -584,9 +584,9 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             alignItems: 'center',
             cursor: 'default',
             transition: 'box-shadow .15s',
-            backgroundColor: colorsm.buttonPositiveBackground,
-            border: '1px solid ' + colorsm.buttonPositiveBorder,
-            color: colorsm.buttonPositiveText,
+            backgroundColor: colorsm.buttonNeutralBackground,
+            border: '1px solid ' + colorsm.buttonNeutralBorder,
+            color: colorsm.buttonNeutralText,
             ':focus': {
               outline: 0,
               boxShadow: `1px 1px 2px ${colorsm.buttonShadow}`,
