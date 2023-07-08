@@ -399,7 +399,7 @@ function onScrollbarChange() {
         '& ::-webkit-scrollbar-thumb': {
           borderRadius: 30,
           backgroundClip: 'padding-box',
-          border: '2px solid rgba(100,100,100,0.5)',
+          background: colorsm.menuItemBackgroundHover,
         },
       };
 
@@ -413,8 +413,7 @@ function onScrollbarChange() {
         '& ::-webkit-scrollbar-thumb': {
           borderRadius: 30,
           backgroundClip: 'padding-box',
-          border: '2px solid rgba(100,100,100,0.5)',
-          backgroundColor: colorsm.sidebarItemBackgroundHover,
+          background: colorsm.sidebarItemBackgroundHover,
         },
       };
 
