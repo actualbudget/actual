@@ -544,6 +544,8 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
 
 type CellButtonProps = {
   style?: CSSProperties;
+  primary?: boolean;
+  bare?: boolean;
   disabled?: boolean;
   clickBehavior?: string;
   onSelect?: (e) => void;
@@ -551,7 +553,19 @@ type CellButtonProps = {
   children: ReactNode;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
-  ({ style, disabled, clickBehavior, onSelect, onEdit, children }, ref) => {
+  (
+    {
+      style,
+      primary,
+      bare,
+      disabled,
+      clickBehavior,
+      onSelect,
+      onEdit,
+      children,
+    },
+    ref,
+  ) => {
     // This represents a cell that acts like a button: it's clickable,
     // focusable, etc. The reason we don't use a button is because the
     // full behavior is undesirable: we really don't want stuff like
@@ -584,9 +598,28 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             alignItems: 'center',
             cursor: 'default',
             transition: 'box-shadow .15s',
-            backgroundColor: colorsm.buttonNeutralBackground,
-            border: '1px solid ' + colorsm.buttonNeutralBorder,
-            color: colorsm.buttonNeutralText,
+            backgroundColor: bare
+              ? 'transparent'
+              : disabled // always use disabled before primary since we can have a disabled primary button
+              ? colorsm.buttonDisabledBackground
+              : primary
+              ? colorsm.buttonPositiveBackground
+              : colorsm.buttonNeutralBackground,
+            border: bare
+              ? 'none'
+              : '1px solid ' +
+                (disabled
+                  ? colorsm.buttonDisabledBorder
+                  : primary
+                  ? colorsm.buttonPositiveBorder
+                  : colorsm.buttonNeutralBorder),
+            color: bare
+              ? 'inherit'
+              : disabled
+              ? colorsm.buttonDisabledText
+              : primary
+              ? colorsm.buttonPositiveText
+              : colorsm.buttonNeutralText,
             ':focus': {
               outline: 0,
               boxShadow: `1px 1px 2px ${colorsm.buttonShadow}`,
