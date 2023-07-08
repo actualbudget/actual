@@ -40,6 +40,12 @@ import GenericInput from '../util/GenericInput';
 
 import { CondOpMenu } from './SavedFilters';
 
+// todo: merge pill styles across app (e.g. ManageRules)
+let valueStyle = {
+  fontWeight: 500,
+  color: colorsm.pageTextPositive,
+};
+
 let filterFields = [
   'date',
   'account',
@@ -467,9 +473,9 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colorsm.menuItemBackground,
-          color: colorsm.menuItemText,
-          border: '1px solid ' + colorsm.menuBorder,
+          backgroundColor: colorsm.pillBackground,
+          color: colorsm.pillText,
+          border: '1px solid ' + colorsm.pillBorder,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
@@ -493,17 +499,11 @@ function FilterExpression({
           }}
         >
           {customName ? (
-            <Text style={{ color: colorsm.pageTextPositive }}>
-              {customName}
-            </Text>
+            <Text style={valueStyle}>{customName}</Text>
           ) : (
             <>
-              <Text style={{ color: colorsm.pageTextPositive }}>
-                {mapField(field, options)}
-              </Text>{' '}
-              <Text style={{ color: colorsm.menuItemText }}>
-                {friendlyOp(op)}
-              </Text>{' '}
+              <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
+              <Text>{friendlyOp(op)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
