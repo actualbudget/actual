@@ -28,10 +28,10 @@ import {
   useStableCallback,
   View,
   Text,
-  Input,
   Button,
   Tooltip,
   Menu,
+  Search,
 } from '../common';
 import {
   Table,
@@ -531,17 +531,12 @@ export const ManagePayees = forwardRef(
             </Button>
           </View>
           <View style={{ flex: 1 }} />
-          <Input
+          <Search
             id="filter-input"
+            width={350}
             placeholder="Filter payees..."
             value={filter}
-            onChange={e => {
-              applyFilter(e.target.value);
-              tableNavigator.onEdit(null);
-            }}
-            style={{
-              width: 350,
-            }}
+            onChange={applyFilter}
           />
         </View>
 

@@ -37,7 +37,7 @@ import {
   Button,
   Stack,
   ExternalLink,
-  Input,
+  Search,
   LinkButton,
 } from './common';
 import {
@@ -788,14 +788,14 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
               </ExternalLink>
             </Text>
           </View>
+
           <View style={{ flex: 1 }} />
-          <Input
+          <Search
+            id="filter-input"
+            width={350}
             placeholder="Filter rules..."
             value={filter}
-            onChange={e => {
-              setFilter(e.target.value);
-              navigator.onEdit(null);
-            }}
+            onChange={setFilter}
           />
         </View>
         <View style={{ flex: 1 }}>

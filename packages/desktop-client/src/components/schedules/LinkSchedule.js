@@ -43,7 +43,6 @@ export default function ScheduleLink() {
         <Text>Choose a schedule to link these transactions to:</Text>
         <View style={{ flex: 1 }} />
         <Search
-          isInModal
           width={300}
           placeholder="Filter schedules…"
           value={filter}
