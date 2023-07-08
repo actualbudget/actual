@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 
-import { colorsm } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import Autocomplete from '../autocomplete/Autocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
@@ -204,11 +203,5 @@ export default function GenericInput({
       break;
   }
 
-  return (
-    <View
-      style={[{ flex: 1, backgroundColor: colorsm.tableBackground }, style]}
-    >
-      {content}
-    </View>
-  );
+  return <View style={[{ flex: 1 }, style]}>{content}</View>;
 }
