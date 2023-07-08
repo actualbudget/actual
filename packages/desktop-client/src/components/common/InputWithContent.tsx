@@ -8,6 +8,7 @@ import Input, { defaultInputStyle } from './Input';
 import View from './View';
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
+  id: string;
   leftContent: ReactNode;
   rightContent: ReactNode;
   inputStyle?: CSSProperties;
@@ -15,6 +16,7 @@ type InputWithContentProps = ComponentProps<typeof Input> & {
   getStyle?: (focused: boolean) => CSSProperties;
 };
 export default function InputWithContent({
+  id,
   leftContent,
   rightContent,
   inputStyle,
@@ -45,6 +47,7 @@ export default function InputWithContent({
     >
       {leftContent}
       <Input
+        id={id}
         {...props}
         style={[
           inputStyle,
