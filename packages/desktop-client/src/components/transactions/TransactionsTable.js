@@ -998,7 +998,7 @@ const Transaction = memo(function Transaction(props) {
           ))
         : isBudgetTransfer || isOffBudget || isPreview
         ? ({
-            /* Category field for transfer and offbudget transactions
+            /* Category field for transfer and off-budget transactions
      (NOT preview, it is covered first) */
           },
           (
