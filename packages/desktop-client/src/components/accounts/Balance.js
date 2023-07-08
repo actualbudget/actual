@@ -17,10 +17,10 @@ function DetailedBalance({ name, balance }) {
     <Text
       style={{
         marginLeft: 15,
-        backgroundColor: colorsm.tooltipBackground,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colorsm.menuItemText,
+        color: colorsm.menuItemTextHover,
+        backgroundColor: colorsm.menuItemBackgroundHover,
       }}
     >
       {name}{' '}
