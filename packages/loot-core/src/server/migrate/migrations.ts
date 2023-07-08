@@ -61,9 +61,7 @@ export async function getAppliedMigrations(db: Database): Promise<number[]> {
     [],
     true,
   );
-  let ids = rows.map(row => row.id);
-
-  return ids;
+  return rows.map(row => row.id);
 }
 
 export async function getMigrationList(
