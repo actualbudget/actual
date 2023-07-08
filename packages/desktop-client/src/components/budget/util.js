@@ -24,7 +24,7 @@ export function separateGroups(categoryGroups) {
 
 export function makeAmountGrey(value) {
   return value === 0 || value === '0' || value === ''
-    ? { color: colorsm.pageTextSubdued }
+    ? { color: colorsm.tableTextInactive }
     : null;
 }
 
