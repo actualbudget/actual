@@ -24,3 +24,18 @@ export function index(data, field, mapper) {
   });
   return result;
 }
+
+export function indexCF(data, field, field2, mapper) {
+  const results = {};
+  data.forEach(item => {
+    let findExisting = results[item.date]
+      ? results[item.date][item.xfer]
+        ? results[item.date][item.xfer]
+        : 0
+      : 0;
+    let result = { [item[field2]]: item.amount + findExisting };
+    results[item[field]] = { ...results[item[field]], ...result };
+    return { [item[field]]: result };
+  });
+  return results;
+}
