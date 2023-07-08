@@ -75,6 +75,7 @@ function EditField({
           accounts={accounts}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           onSelect={value => {
             if (value) {
               onSelect(value);
@@ -101,6 +102,7 @@ function EditField({
           value={null}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           showManagePayees={false}
           showMakeTransfer={!isNarrowWidth}
           onSelect={async value => {
@@ -142,6 +144,7 @@ function EditField({
           value={null}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           showSplitOption={false}
           onUpdate={() => {}}
           onSelect={value => {

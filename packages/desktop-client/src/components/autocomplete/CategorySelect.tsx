@@ -159,6 +159,7 @@ export default function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,
   embedded,
+  closeOnBlur,
   groupHeaderStyle,
   ...props
 }: CategoryAutocompleteProps) {
@@ -182,6 +183,7 @@ export default function CategoryAutocomplete({
       strict={true}
       highlightFirst={true}
       embedded={embedded}
+      closeOnBlur={closeOnBlur}
       getHighlightedIndex={suggestions => {
         if (suggestions.length === 0) {
           return null;

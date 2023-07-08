@@ -82,6 +82,7 @@ export default function AccountAutocomplete({
   embedded,
   includeClosedAccounts = true,
   groupHeaderStyle,
+  closeOnBlur,
   ...props
 }) {
   let accounts = useCachedAccounts() || [];
@@ -105,6 +106,7 @@ export default function AccountAutocomplete({
       strict={true}
       highlightFirst={true}
       embedded={embedded}
+      closeOnBlur={closeOnBlur}
       suggestions={accounts}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <AccountList

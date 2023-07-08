@@ -180,6 +180,7 @@ export default function PayeeAutocomplete({
   defaultFocusTransferPayees = false,
   tableBehavior,
   embedded,
+  closeOnBlur,
   onUpdate,
   onSelect,
   onManagePayees,
@@ -245,6 +246,7 @@ export default function PayeeAutocomplete({
       value={stripNew(value)}
       suggestions={payeeSuggestions}
       tableBehavior={tableBehavior}
+      closeOnBlur={closeOnBlur}
       itemToString={item => {
         if (!item) {
           return '';

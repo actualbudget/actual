@@ -140,6 +140,7 @@ type SingleAutocompleteProps = {
   strict?: boolean;
   onSelect: (id: unknown, value: string) => void;
   tableBehavior?: boolean;
+  closeOnBlur?: boolean;
   value: unknown[];
   isMulti?: boolean;
 };
@@ -164,6 +165,7 @@ function SingleAutocomplete({
   strict,
   onSelect,
   tableBehavior,
+  closeOnBlur = true,
   value: initialValue,
   isMulti = false,
 }: SingleAutocompleteProps) {
@@ -373,6 +375,8 @@ function SingleAutocomplete({
                 // @ts-expect-error Should this be e.nativeEvent
                 e.preventDownshiftDefault = true;
                 inputProps.onBlur && inputProps.onBlur(e);
+
+                if (!closeOnBlur) return;
 
                 if (!tableBehavior) {
                   if (e.target.value === '') {
