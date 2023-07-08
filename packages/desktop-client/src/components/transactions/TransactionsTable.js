@@ -327,10 +327,11 @@ function StatusCell({
         ? colorsm.errorText
         : status === 'due'
         ? colorsm.warningText
+        : status === 'upcoming'
+        ? colorsm.pageTextPositive
         : selected
         ? colorsm.tableTextSelected
         : colorsm.tableBorder,
-    backgroundColor: colorsm.tableBackground,
   };
 
   function onSelect() {
@@ -356,7 +357,6 @@ function StatusCell({
               border: '1px solid ' + props.color,
               boxShadow: `0 1px 2px ${props.color}`,
             },
-            backgroundColor: props.backgroundColor,
             cursor: isClearedField ? 'pointer' : 'default',
           },
 
@@ -681,9 +681,6 @@ const Transaction = memo(function Transaction(props) {
   }
 
   let isChild = transaction.is_child;
-  let borderColor = selected
-    ? colorsm.tableBorderSelected
-    : colorsm.tableBorder;
   let isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   let isOffBudget = account && account.offbudget === 1;
 
@@ -696,7 +693,6 @@ const Transaction = memo(function Transaction(props) {
       highlighted={highlighted}
       style={[
         {
-          borderColor: borderColor,
           backgroundColor: selected
             ? colorsm.tableRowBackgroundHighlight
             : backgroundFocus
@@ -715,23 +711,31 @@ const Transaction = memo(function Transaction(props) {
       ]}
       onMouseEnter={() => onHover && onHover(transaction.id)}
     >
+      {/* Checkmark blank placeholder for Child transaction */}
       {isChild && (
         <Field
           width={110}
           style={{
             width: 110,
-            borderBottomWidth: 0,
-          }}
-        />
-      )}
-      {isChild && showAccount && (
-        <Field
-          style={{
-            flex: 1,
+            backgroundColor: colorsm.pageBackground,
+            border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
         />
       )}
 
+      {/* Account blank placeholder for Child transaction */}
+      {isChild && showAccount && (
+        <Field
+          style={{
+            flex: 1,
+            backgroundColor: colorsm.pageBackground,
+            border: 0,
+          }}
+        />
+      )}
+
+      {/* Checkmark - for Child transaction 
+      between normal Date and Payee or Account and Payee if needed */}
       {isTemporaryId(transaction.id) ? (
         isChild ? (
           <DeleteCell
@@ -743,25 +747,34 @@ const Transaction = memo(function Transaction(props) {
           <Cell width={20} />
         )
       ) : (
-        <SelectCell
-          exposed={hovered || selected || editing}
-          focused={focusedField === 'select'}
-          onSelect={e => {
-            dispatchSelected({ type: 'select', id: transaction.id, event: e });
-          }}
-          onEdit={() => onEdit(id, 'select')}
-          selected={selected}
-          style={[isChild && { borderLeftWidth: 1 }]}
-          value={
-            matched && (
-              <Hyperlink2
-                style={{ width: 13, height: 13, color: colorsm.errorText }}
-              />
-            )
-          }
-        />
+        ({
+          /* Checkmark field for non-child transaction */
+        },
+        (
+          <SelectCell
+            exposed={hovered || selected || editing}
+            focused={focusedField === 'select'}
+            onSelect={e => {
+              dispatchSelected({
+                type: 'select',
+                id: transaction.id,
+                event: e,
+              });
+            }}
+            onEdit={() => onEdit(id, 'select')}
+            selected={selected}
+            style={[isChild && { borderLeftWidth: 1 }]}
+            value={
+              matched && (
+                <Hyperlink2
+                  style={{ width: 13, height: 13, color: 'inherit' }}
+                />
+              )
+            }
+          />
+        ))
       )}
-
+      {/* Date field for non-child transaction */}
       {!isChild && (
         <CustomCell
           name="date"
@@ -798,6 +811,7 @@ const Transaction = memo(function Transaction(props) {
         </CustomCell>
       )}
 
+      {/* Account field for non-child transaction */}
       {!isChild && showAccount && (
         <CustomCell
           name="account"
@@ -843,6 +857,8 @@ const Transaction = memo(function Transaction(props) {
           )}
         </CustomCell>
       )}
+
+      {/* Payee field for all transactions */}
       {(() => (
         <PayeeCell
           id={id}
@@ -867,6 +883,7 @@ const Transaction = memo(function Transaction(props) {
         />
       ))()}
 
+      {/* Notes field for all transactions */}
       {isPreview ? (
         <Cell name="notes" width="flex" />
       ) : (
@@ -885,170 +902,195 @@ const Transaction = memo(function Transaction(props) {
         />
       )}
 
-      {isPreview ? (
-        <Cell width="flex" style={{ alignItems: 'flex-start' }} exposed={true}>
-          {() => (
-            <View
-              style={{
-                color:
-                  notes === 'missed'
-                    ? colorsm.errorText
-                    : notes === 'due'
-                    ? colorsm.warningText
-                    : selected
-                    ? colorsm.formInputTextHighlight
-                    : colorsm.tableText,
-                backgroundColor:
-                  notes === 'missed'
-                    ? colorsm.errorBackground
-                    : notes === 'due'
-                    ? colorsm.warningBackground
-                    : selected
-                    ? colorsm.tableRowBackgroundHighlight
-                    : colorsm.tableBackground,
-                margin: '0 5px',
-                padding: '3px 7px',
-                borderRadius: 4,
-              }}
+      {isPreview
+        ? ({
+            /* Category field for preview transactions */
+          },
+          (
+            <Cell
+              width="flex"
+              style={{ alignItems: 'flex-start' }}
+              exposed={true}
             >
-              {titleFirst(notes)}
-            </View>
-          )}
-        </Cell>
-      ) : isParent ? (
-        <Cell
-          name="category"
-          width="flex"
-          focused={focusedField === 'category'}
-          style={{ padding: 0 }}
-          plain
-        >
-          <CellButton
-            style={{
-              alignSelf: 'flex-start',
-              borderRadius: 4,
-              transition: 'none',
-              '&:hover': {
-                backgroundColor: colorsm.tableRowBackgroundHover,
-                color: colorsm.tableTextHover,
-              },
-            }}
-            disabled={isTemporaryId(transaction.id)}
-            onEdit={() => onEdit(id, 'category')}
-            onSelect={() => onToggleSplit(id)}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                alignSelf: 'stretch',
-                borderRadius: 4,
-                flex: 1,
-                padding: 4,
-              }}
-            >
-              {isParent && (
-                <CheveronDown
+              {() => (
+                <View
                   style={{
-                    color: 'inherit',
-                    width: 14,
-                    height: 14,
-                    transition: 'transform .08s',
-                    transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
+                    color:
+                      notes === 'missed'
+                        ? colorsm.errorText
+                        : notes === 'due'
+                        ? colorsm.warningText
+                        : notes === 'upcoming'
+                        ? colorsm.pageTextPositive
+                        : selected
+                        ? colorsm.formInputTextHighlight
+                        : colorsm.tableText,
+                    backgroundColor:
+                      notes === 'missed'
+                        ? colorsm.errorBackground
+                        : notes === 'due'
+                        ? colorsm.warningBackground
+                        : notes === 'upcoming'
+                        ? 'none'
+                        : selected
+                        ? colorsm.tableRowBackgroundHighlight
+                        : colorsm.tableBackground,
+                    margin: '0 5px',
+                    padding: '3px 7px',
+                    borderRadius: 4,
                   }}
+                >
+                  {titleFirst(notes)}
+                </View>
+              )}
+            </Cell>
+          ))
+        : isParent
+        ? ({
+            /* Category field (Split button) for parent transactions */
+          },
+          (
+            <Cell
+              name="category"
+              width="flex"
+              focused={focusedField === 'category'}
+              style={{ padding: 0 }}
+              plain
+            >
+              <CellButton
+                bare
+                style={{
+                  alignSelf: 'flex-start',
+                  borderRadius: 4,
+                  transition: 'none',
+                }}
+                disabled={isTemporaryId(transaction.id)}
+                onEdit={() => onEdit(id, 'category')}
+                onSelect={() => onToggleSplit(id)}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    alignSelf: 'stretch',
+                    borderRadius: 4,
+                    flex: 1,
+                    padding: 4,
+                  }}
+                >
+                  {isParent && (
+                    <CheveronDown
+                      style={{
+                        color: 'inherit',
+                        width: 14,
+                        height: 14,
+                        transition: 'transform .08s',
+                        transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
+                      }}
+                    />
+                  )}
+                  <Text style={{ fontStyle: 'italic', userSelect: 'none' }}>
+                    Split
+                  </Text>
+                </View>
+              </CellButton>
+            </Cell>
+          ))
+        : isBudgetTransfer || isOffBudget || isPreview
+        ? ({
+            /* Category field for transfer and offbudget transactions
+     (NOT preview, it is covered first) */
+          },
+          (
+            <InputCell
+              name="category"
+              width="flex"
+              exposed={focusedField === 'category'}
+              focused={focusedField === 'category'}
+              onExpose={!isPreview && (name => onEdit(id, name))}
+              value={
+                isParent
+                  ? 'Split'
+                  : isOffBudget
+                  ? 'Off Budget'
+                  : isBudgetTransfer
+                  ? 'Transfer'
+                  : ''
+              }
+              valueStyle={valueStyle}
+              style={{
+                fontStyle: 'italic',
+                fontWeight: 300,
+              }}
+              inputProps={{
+                readOnly: true,
+                style: { fontStyle: 'italic' },
+              }}
+            />
+          ))
+        : ({
+            /* Category field for normal and child transactions */
+          },
+          (
+            <CustomCell
+              name="category"
+              width="flex"
+              value={categoryId}
+              formatter={value =>
+                value
+                  ? getDisplayValue(
+                      getCategoriesById(categoryGroups)[value],
+                      'name',
+                    )
+                  : transaction.id
+                  ? 'Categorize'
+                  : ''
+              }
+              exposed={focusedField === 'category'}
+              onExpose={name => onEdit(id, name)}
+              valueStyle={
+                !categoryId
+                  ? {
+                      // uncategorized transaction
+                      fontStyle: 'italic',
+                      fontWeight: 500,
+                      color: colorsm.formInputTextHighlight,
+                    }
+                  : valueStyle
+              }
+              onUpdate={async value => {
+                if (value === 'split') {
+                  onSplit(transaction.id);
+                } else {
+                  onUpdate('category', value);
+                }
+              }}
+            >
+              {({
+                onBlur,
+                onKeyDown,
+                onUpdate,
+                onSave,
+                shouldSaveFromKey,
+                inputStyle,
+              }) => (
+                <CategoryAutocomplete
+                  categoryGroups={categoryGroups}
+                  value={categoryId}
+                  focused={true}
+                  tableBehavior={true}
+                  showSplitOption={!isChild && !isParent}
+                  shouldSaveFromKey={shouldSaveFromKey}
+                  inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                  onUpdate={onUpdate}
+                  onSelect={onSave}
+                  menuPortalTarget={undefined}
                 />
               )}
-              <Text style={{ fontStyle: 'italic', userSelect: 'none' }}>
-                Split
-              </Text>
-            </View>
-          </CellButton>
-        </Cell>
-      ) : isBudgetTransfer || isOffBudget || isPreview ? (
-        <InputCell
-          name="category"
-          width="flex"
-          exposed={focusedField === 'category'}
-          focused={focusedField === 'category'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
-          value={
-            isParent
-              ? 'Split'
-              : isOffBudget
-              ? 'Off Budget'
-              : isBudgetTransfer
-              ? 'Transfer'
-              : ''
-          }
-          valueStyle={valueStyle}
-          style={{
-            fontStyle: 'italic',
-            color: colorsm.tableText,
-            fontWeight: 300,
-          }}
-          inputProps={{
-            readOnly: true,
-            style: { fontStyle: 'italic' },
-          }}
-        />
-      ) : (
-        <CustomCell
-          name="category"
-          width="flex"
-          value={categoryId}
-          formatter={value =>
-            value
-              ? getDisplayValue(
-                  getCategoriesById(categoryGroups)[value],
-                  'name',
-                )
-              : transaction.id
-              ? 'Categorize'
-              : ''
-          }
-          exposed={focusedField === 'category'}
-          onExpose={name => onEdit(id, name)}
-          valueStyle={
-            !categoryId
-              ? {
-                  fontStyle: 'italic',
-                  fontWeight: 500,
-                  color: colorsm.formInputTextHighlight,
-                }
-              : valueStyle
-          }
-          onUpdate={async value => {
-            if (value === 'split') {
-              onSplit(transaction.id);
-            } else {
-              onUpdate('category', value);
-            }
-          }}
-        >
-          {({
-            onBlur,
-            onKeyDown,
-            onUpdate,
-            onSave,
-            shouldSaveFromKey,
-            inputStyle,
-          }) => (
-            <CategoryAutocomplete
-              categoryGroups={categoryGroups}
-              value={categoryId}
-              focused={true}
-              tableBehavior={true}
-              showSplitOption={!isChild && !isParent}
-              shouldSaveFromKey={shouldSaveFromKey}
-              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-              onUpdate={onUpdate}
-              onSelect={onSave}
-              menuPortalTarget={undefined}
-            />
-          )}
-        </CustomCell>
-      )}
+            </CustomCell>
+          ))}
 
+      {/* Debit field for all transactions */}
       <InputCell
         type="input"
         width={80}
@@ -1067,6 +1109,7 @@ const Transaction = memo(function Transaction(props) {
         }}
       />
 
+      {/* Credit field for all transactions */}
       <InputCell
         type="input"
         width={80}
@@ -1085,6 +1128,7 @@ const Transaction = memo(function Transaction(props) {
         }}
       />
 
+      {/* Balance field for all transactions */}
       {showBalance && (
         <Cell
           name="balance"
@@ -1102,6 +1146,7 @@ const Transaction = memo(function Transaction(props) {
         />
       )}
 
+      {/* Cleared field for all transactions */}
       {showCleared && (
         <StatusCell
           id={id}

@@ -620,10 +620,12 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
               : primary
               ? colorsm.buttonPositiveText
               : colorsm.buttonNeutralText,
-            ':focus': {
-              outline: 0,
-              boxShadow: `1px 1px 2px ${colorsm.buttonShadow}`,
-            },
+            ':focus': bare
+              ? null
+              : {
+                  outline: 0,
+                  boxShadow: `1px 1px 2px ${colorsm.buttonShadow}`,
+                },
           },
           style,
         ]}
