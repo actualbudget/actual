@@ -71,33 +71,46 @@ export function checkSyncingMode(mode: SyncingMode): boolean {
   }
 }
 
+let ignoredMessages = [
+  // never existed in the DB
+  { dataset: 'prefs' },
+  // removed in `1686139660866_remove_account_type.sql`
+  { dataset: 'accounts', column: 'type' },
+];
+
 function apply(msg: Message, prev?: boolean) {
   let { dataset, row, column, value } = msg;
 
-  if (dataset === 'prefs') {
-    // Do nothing, it doesn't exist in the db
-  } else {
-    let query;
-    try {
-      if (prev) {
-        query = {
-          sql: `UPDATE ${dataset} SET ${column} = ? WHERE id = ?`,
-          params: [value, row],
-        };
-      } else {
-        query = {
-          sql: `INSERT INTO ${dataset} (id, ${column}) VALUES (?, ?)`,
-          params: [row, value],
-        };
-      }
-
-      db.runQuery(db.cache(query.sql), query.params);
-    } catch (error) {
-      throw new SyncError('invalid-schema', {
-        error: { message: error.message, stack: error.stack },
-        query,
-      });
+  for (let template of ignoredMessages) {
+    let matched = Object.keys(template).every(key => {
+      return template[key] === msg[key];
+    });
+    if (matched) {
+      console.log('Ignoring message', msg, 'because of template', template);
+      return;
     }
+  }
+
+  let query;
+  try {
+    if (prev) {
+      query = {
+        sql: `UPDATE ${dataset} SET ${column} = ? WHERE id = ?`,
+        params: [value, row],
+      };
+    } else {
+      query = {
+        sql: `INSERT INTO ${dataset} (id, ${column}) VALUES (?, ?)`,
+        params: [row, value],
+      };
+    }
+
+    db.runQuery(db.cache(query.sql), query.params);
+  } catch (error) {
+    throw new SyncError('invalid-schema', {
+      error: { message: error.message, stack: error.stack },
+      query,
+    });
   }
 }
 
