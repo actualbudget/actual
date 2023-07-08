@@ -35,7 +35,7 @@ export default function CustomSelect({
         arrow={<ExpandArrow style={{ width: 7, height: 7, paddingTop: 3 }} />}
       />
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
-        <ListboxList style={{ maxHeight: 250, overflowY: 'scroll' }}>
+        <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
           {options.map(([value, label]) => (
             <ListboxOption
               key={value}
