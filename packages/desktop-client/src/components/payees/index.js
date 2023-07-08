@@ -78,9 +78,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
             <>Create rule</>
           )}
         </Text>
-        <ArrowThinRight
-          style={{ width: 8, height: 8, color: colorsm.buttonPositiveText }}
-        />
+        <ArrowThinRight style={{ width: 8, height: 8, color: 'inherit' }} />
       </CellButton>
     </Cell>
   );
