@@ -138,6 +138,7 @@ function recalculate(data, start, end, isConcise) {
   let balance = startingBalance;
   let totalExpenses = 0;
   let totalIncome = 0;
+  let totalTransfers = 0;
 
   const graphData = dates.reduce(
     (res, date) => {
@@ -158,6 +159,7 @@ function recalculate(data, start, end, isConcise) {
       totalExpenses += expense;
       totalIncome += income;
       balance += income + expense + creditTransfers + debitTransfers;
+      totalTransfers += creditTransfers + debitTransfers;
       const x = d.parseISO(date);
 
       const label = (
@@ -205,6 +207,7 @@ function recalculate(data, start, end, isConcise) {
     balance: balances[balances.length - 1].amount,
     totalExpenses,
     totalIncome,
+    totalTransfers,
     totalChange: balances[balances.length - 1].amount - balances[0].amount,
   };
 }
