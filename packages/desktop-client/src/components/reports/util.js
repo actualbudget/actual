@@ -25,7 +25,7 @@ export function index(data, field, mapper) {
   return result;
 }
 
-export function indexCF(data, field, field2, mapper) {
+export function indexCashFlow(data, date, isTransfer) {
   const results = {};
   data.forEach(item => {
     let findExisting = results[item.date]
@@ -33,9 +33,8 @@ export function indexCF(data, field, field2, mapper) {
         ? results[item.date][item.xfer]
         : 0
       : 0;
-    let result = { [item[field2]]: item.amount + findExisting };
-    results[item[field]] = { ...results[item[field]], ...result };
-    return { [item[field]]: result };
+    let result = { [item[isTransfer]]: item.amount + findExisting };
+    results[item[date]] = { ...results[item[date]], ...result };
   });
   return results;
 }

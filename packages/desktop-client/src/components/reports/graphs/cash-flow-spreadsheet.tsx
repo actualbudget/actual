@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
 
 import { AlignedText } from '../../common';
-import { fromDateRepr, fromDateReprToDay, runAll, indexCF } from '../util';
+import { fromDateRepr, fromDateReprToDay, runAll, indexCashFlow } from '../util';
 
 export function simpleCashFlow(start, end) {
   return async (spreadsheet, setData) => {
@@ -75,7 +75,7 @@ export function cashFlowByDate(
           .groupBy([{ $month: '$date' }, 'payee.transfer_acct'])
           .select([
             { date: { $month: '$date' } },
-            { xfer: 'payee.transfer_acct' },
+            { isTransfer: 'payee.transfer_acct' },
             { amount: { $sum: '$amount' } },
           ]);
       }
@@ -84,7 +84,7 @@ export function cashFlowByDate(
         .groupBy(['date', 'payee.transfer_acct'])
         .select([
           'date',
-          { xfer: 'payee.transfer_acct' },
+          { isTransfer: 'payee.transfer_acct' },
           { amount: { $sum: '$amount' } },
         ]);
     }
@@ -111,10 +111,10 @@ export function cashFlowByDate(
 function recalculate(data, start, end, isConcise) {
   let [startingBalance, income, expense] = data;
   let convIncome = income.map(t => {
-    return { ...t, xfer: t.xfer !== null };
+    return { ...t, isTransfer: t.isTransfer !== null };
   });
   let convExpense = expense.map(t => {
-    return { ...t, xfer: t.xfer !== null };
+    return { ...t, isTransfer: t.isTransfer !== null };
   });
   const dates = isConcise
     ? monthUtils.rangeInclusive(
@@ -122,17 +122,15 @@ function recalculate(data, start, end, isConcise) {
         monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
-  const incomes = indexCF(
+  const incomes = indexCashFlow(
     convIncome,
     'date',
-    'xfer',
-    isConcise ? fromDateRepr : fromDateReprToDay,
+    'isTransfer',
   );
-  const expenses = indexCF(
+  const expenses = indexCashFlow(
     convExpense,
     'date',
-    'xfer',
-    isConcise ? fromDateRepr : fromDateReprToDay,
+    'isTransfer',
   );
 
   let balance = startingBalance;
