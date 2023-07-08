@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
 
 import { AlignedText } from '../../common';
-import { fromDateRepr, fromDateReprToDay, runAll, indexCashFlow } from '../util';
+import { runAll, indexCashFlow } from '../util';
 
 export function simpleCashFlow(start, end) {
   return async (spreadsheet, setData) => {
@@ -122,16 +122,8 @@ function recalculate(data, start, end, isConcise) {
         monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
-  const incomes = indexCashFlow(
-    convIncome,
-    'date',
-    'isTransfer',
-  );
-  const expenses = indexCashFlow(
-    convExpense,
-    'date',
-    'isTransfer',
-  );
+  const incomes = indexCashFlow(convIncome, 'date', 'isTransfer');
+  const expenses = indexCashFlow(convExpense, 'date', 'isTransfer');
 
   let balance = startingBalance;
   let totalExpenses = 0;
