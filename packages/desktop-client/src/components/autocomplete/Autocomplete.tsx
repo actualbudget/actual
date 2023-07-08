@@ -504,8 +504,9 @@ function MultiItem({ name, onRemove }) {
       style={{
         alignItems: 'center',
         flexDirection: 'row',
-        backgroundColor: colorsm.menuBackground,
-        color: colorsm.menuItemText,
+        backgroundColor: colorsm.pillBackground,
+        color: colorsm.pillText,
+        border: '1px solid ' + colorsm.pillBorder,
         padding: '2px 4px',
         margin: '2px',
         borderRadius: 4,

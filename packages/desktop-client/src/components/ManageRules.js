@@ -50,6 +50,10 @@ import {
   useTableNavigator,
 } from './table';
 
+let valueStyle = {
+  fontWeight: 500,
+  color: colorsm.pageTextPositive,
+};
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
 export function Value({
@@ -143,15 +147,11 @@ export function Value({
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <Text style={{ color: colorsm.pageTextPositive }}>(empty)</Text>;
+      return <Text style={valueStyle}>(empty)</Text>;
     } else if (value.length === 1) {
       return (
         <Text>
-          [
-          <Text style={{ color: colorsm.pageTextPositive }}>
-            {formatValue(value[0])}
-          </Text>
-          ]
+          [<Text style={valueStyle}>{formatValue(value[0])}</Text>]
         </Text>
       );
     }
@@ -165,11 +165,7 @@ export function Value({
       <Text style={{ color: colorsm.pageText }}>
         [
         {displayed.map((v, i) => {
-          let text = (
-            <Text style={{ color: colorsm.pageTextPositive }}>
-              {formatValue(v)}
-            </Text>
-          );
+          let text = <Text style={valueStyle}>{formatValue(v)}</Text>;
           let spacing;
           if (inline) {
             spacing = i !== 0 ? ' ' : '';
@@ -192,12 +188,9 @@ export function Value({
           );
         })}
         {numHidden > 0 && (
-          <Text style={{ color: colorsm.pageTextPositive }}>
+          <Text style={valueStyle}>
             &nbsp;&nbsp;
-            <LinkButton
-              onClick={onExpand}
-              style={{ color: colorsm.pageTextPositive }}
-            >
+            <LinkButton onClick={onExpand} style={valueStyle}>
               {numHidden} more items...
             </LinkButton>
             {!inline && <br />}
@@ -210,21 +203,12 @@ export function Value({
     // An "in between" type
     return (
       <Text>
-        <Text style={{ color: colorsm.pageTextPositive }}>
-          {formatValue(value.num1)}
-        </Text>{' '}
-        and{' '}
-        <Text style={{ color: colorsm.pageTextPositive }}>
-          {formatValue(value.num2)}
-        </Text>
+        <Text style={valueStyle}>{formatValue(value.num1)}</Text> and{' '}
+        <Text style={valueStyle}>{formatValue(value.num2)}</Text>
       </Text>
     );
   } else {
-    return (
-      <Text style={{ color: colorsm.pageTextPositive }}>
-        {formatValue(value)}
-      </Text>
-    );
+    return <Text style={valueStyle}>{formatValue(value)}</Text>;
   }
 }
 
@@ -243,7 +227,8 @@ function ConditionExpression({
         {
           display: 'block',
           maxWidth: '100%',
-          backgroundColor: colorsm.pageBackground,
+          color: colorsm.pillText,
+          backgroundColor: colorsm.pillBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -253,11 +238,9 @@ function ConditionExpression({
         style,
       ]}
     >
-      {prefix && <Text style={{ color: colorsm.pageText }}>{prefix} </Text>}
-      <Text style={{ color: colorsm.pageTextPositive }}>
-        {mapField(field, options)}
-      </Text>{' '}
-      <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
+      {prefix && <Text>{prefix} </Text>}
+      <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
+      <Text>{friendlyOp(op)}</Text>{' '}
       <Value value={value} field={field} inline={inline} />
     </View>
   );
@@ -271,7 +254,7 @@ function describeSchedule(schedule, payee) {
   }
 }
 
-function ScheduleValue({ value }) {
+function ScheduleValue({ value, style }) {
   let payees = useSelector(state => state.queries.payees);
   let byId = getPayeesById(payees);
   let { data: schedules } = SchedulesQuery.useQuery();
@@ -279,6 +262,7 @@ function ScheduleValue({ value }) {
   return (
     <Value
       value={value}
+      style={style}
       field="rule"
       data={schedules}
       describe={schedule => describeSchedule(schedule, byId[schedule._payee])}
@@ -293,7 +277,8 @@ function ActionExpression({ field, op, value, options, style }) {
         {
           display: 'block',
           maxWidth: '100%',
-          backgroundColor: colorsm.pageBackground,
+          color: colorsm.pillText,
+          backgroundColor: colorsm.pillBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -305,17 +290,15 @@ function ActionExpression({ field, op, value, options, style }) {
     >
       {op === 'set' ? (
         <>
-          <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
-          <Text style={{ color: colorsm.pageTextPositive }}>
-            {mapField(field, options)}
-          </Text>{' '}
-          <Text style={{ color: colorsm.pageText }}>to </Text>
+          <Text>{friendlyOp(op)}</Text>{' '}
+          <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
+          <Text>to </Text>
           <Value value={value} field={field} />
         </>
       ) : op === 'link-schedule' ? (
         <>
-          <Text style={{ color: colorsm.pageText }}>{friendlyOp(op)}</Text>{' '}
-          <ScheduleValue value={value} />
+          <Text>{friendlyOp(op)}</Text>{' '}
+          <ScheduleValue style={style} value={value} />
         </>
       ) : null}
     </View>
@@ -405,12 +388,7 @@ let Rule = memo(
                   value={cond.value}
                   options={cond.options}
                   prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
-                  style={
-                    (i !== 0 && { marginTop: 3 },
-                    {
-                      backgroundColor: colorsm.tableHeaderBackground,
-                    })
-                  }
+                  style={i !== 0 && { marginTop: 3 }}
                 />
               ))}
             </View>
@@ -432,12 +410,7 @@ let Rule = memo(
                   op={action.op}
                   value={action.value}
                   options={action.options}
-                  style={
-                    (i !== 0 && { marginTop: 3 },
-                    {
-                      backgroundColor: colorsm.tableHeaderBackground,
-                    })
-                  }
+                  style={i !== 0 && { marginTop: 3 }}
                 />
               ))}
             </View>

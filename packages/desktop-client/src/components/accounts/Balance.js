@@ -19,8 +19,8 @@ function DetailedBalance({ name, balance }) {
         marginLeft: 15,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colorsm.menuItemTextHover,
-        backgroundColor: colorsm.menuItemBackgroundHover,
+        color: colorsm.pillText,
+        backgroundColor: colorsm.pillBackground,
       }}
     >
       {name}{' '}

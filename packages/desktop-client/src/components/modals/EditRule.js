@@ -395,11 +395,18 @@ function StageButton({ selected, children, style, onSelect }) {
       style={[
         {
           fontSize: 'inherit',
+          border: '1px solid ' + colorsm.pillBorder,
+          color: colorsm.pillText,
+          backgroundColor: colorsm.pillBackground,
+          ':hover': {
+            color: colorsm.pillTextSelected,
+            backgroundColor: colorsm.pillBackgroundSelected,
+          },
         },
         selected && {
-          border: '1px solid ' + colorsm.buttonPositiveBorder,
-          color: colorsm.buttonNeutralText,
-          backgroundColor: colorsm.buttonNeutralBackgroundHover,
+          border: '1px solid ' + colorsm.pillBorderSelected,
+          color: colorsm.pillTextSelected,
+          backgroundColor: colorsm.pillBackgroundSelected,
         },
         style,
       ]}

@@ -99,17 +99,17 @@ function OpButton({ op, selected, style, onClick }) {
       bare
       style={[
         {
-          color: colorsm.buttonNeutralText,
-          backgroundColor: colorsm.buttonNeutralBackground,
-          marginBottom: 5,
+          fontSize: 'inherit',
+          border: '1px solid ' + colorsm.pillBorder,
+          color: colorsm.pillText,
+          backgroundColor: colorsm.pillBackground,
+        },
+        selected && {
+          border: '1px solid ' + colorsm.pillBorderSelected,
+          color: colorsm.pillTextSelected,
+          backgroundColor: colorsm.pillBackgroundSelected,
         },
         style,
-        selected && {
-          color: colorsm.buttonNeutralTextHover,
-          '&,:hover,:active': {
-            backgroundColor: colorsm.buttonNeutralBackgroundHover,
-          },
-        },
       ]}
       onClick={onClick}
     >

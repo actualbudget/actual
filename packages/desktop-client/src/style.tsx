@@ -172,6 +172,12 @@ const colorsDark = {
   formInputShadowSelected: colorPallet.purple400,
   formInputTextHighlight: colorPallet.purple400,
   editorBackground: colorPallet.gray900,
+  pillBackground: colorPallet.gray700,
+  pillText: colorPallet.gray150,
+  pillBorder: colorPallet.gray700,
+  pillBackgroundSelected: colorPallet.purple600,
+  pillTextSelected: colorPallet.gray100,
+  pillBorderSelected: colorPallet.purple400,
 } as const;
 
 const colorsLight = {
@@ -268,6 +274,12 @@ const colorsLight = {
   formInputShadowSelected: colorPallet.purple500,
   formInputTextHighlight: colorPallet.purple500,
   editorBackground: colorPallet.gray150,
+  pillBackground: colorPallet.gray150,
+  pillText: colorPallet.gray800,
+  pillBorder: colorPallet.gray150,
+  pillBackgroundSelected: colorPallet.purple150,
+  pillTextSelected: colorPallet.gray700,
+  pillBorderSelected: colorPallet.purple500,
 } as const;
 
 const colorThemes = {
