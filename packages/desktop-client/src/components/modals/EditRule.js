@@ -391,13 +391,15 @@ function StageInfo() {
 function StageButton({ selected, children, style, onSelect }) {
   return (
     <Button
+      bare
       style={[
         {
           fontSize: 'inherit',
         },
         selected && {
-          backgroundColor: colorsm.buttonPositiveBackground,
-          color: colorsm.buttonPositiveText,
+          border: '1px solid ' + colorsm.buttonPositiveBorder,
+          color: colorsm.buttonNeutralText,
+          backgroundColor: colorsm.buttonNeutralBackgroundHover,
         },
         style,
       ]}
