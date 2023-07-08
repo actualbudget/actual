@@ -280,20 +280,6 @@ export function AccountHeader({
             onKeyDown={e => {
               if (e.key === 'Escape') onSearch('');
             }}
-            getStyle={focused => [
-              {
-                backgroundColor: 'transparent',
-                borderWidth: 0,
-                boxShadow: 'none',
-                transition: 'color .15s',
-                '& input::placeholder': {
-                  color: colorsm.pageText,
-                  transition: 'color .25s',
-                },
-              },
-              focused && { boxShadow: '0 0 0 2px ' + colorsm.boxShadow },
-              !focused && search !== '' && { color: colorsm.pageTextPositive },
-            ]}
             onChange={e => onSearch(e.target.value)}
           />
           {workingHard ? (

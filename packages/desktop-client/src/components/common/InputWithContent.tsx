@@ -35,6 +35,7 @@ export default function InputWithContent({
           alignItems: 'center',
         },
         focused && {
+          backgroundColor: colorsm.formInputBackground,
           border: '1px solid ' + colorsm.formInputBorderSelected,
           boxShadow: '0 1px 1px ' + colorsm.formInputShadowSelected,
         },

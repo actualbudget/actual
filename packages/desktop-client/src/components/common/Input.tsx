@@ -9,12 +9,21 @@ import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
   outline: 0,
-  color: colorsm.formInputText,
-  backgroundColor: colorsm.formInputBackground,
+  color: colorsm.pageTextPositive,
+  backgroundColor: 'transparent',
   margin: 0,
   padding: 5,
   borderRadius: 4,
   border: '1px solid ' + colorsm.formInputBorder,
+  '::placeholder': {
+    color: colorsm.formInputTextPlaceholder,
+  },
+  ':focus': {
+    color: colorsm.formInputText,
+    backgroundColor: colorsm.formInputBackground,
+    border: '1px solid ' + colorsm.formInputBorderSelected,
+    boxShadow: '0 1px 1px ' + colorsm.formInputShadowSelected,
+  },
 };
 
 type InputProps = HTMLPropsWithStyle<HTMLInputElement> & {
@@ -37,22 +46,13 @@ const Input = ({
 
   return (
     <input
-      // Intentionally no background so we can blend with everywhere
       ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
       {...css(
         defaultInputStyle,
         {
-          color: colorsm.formInputText,
           ':focus': {
             border: '1px solid ' + colorsm.formInputBorderSelected,
             boxShadow: '0 1px 1px ' + colorsm.formInputShadowSelected,
-          },
-          '::placeholder': {
-            color: colorsm.formInputTextPlaceholder,
-          },
-          '::selection': {
-            color: colorsm.formInputTextSelection,
-            backgroundColor: colorsm.formInputBackgroundSelected,
           },
         },
         styles.smallText,
