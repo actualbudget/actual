@@ -250,7 +250,9 @@ export function AccountHeader({
                   width: 13,
                   height: 13,
                   flexShrink: 0,
-                  color: search ? colorsm.pageTextPositive : 'inherit',
+                  color: search
+                    ? colorsm.pageTextPositive
+                    : colorsm.formInputText,
                   margin: 5,
                   marginRight: 0,
                 }}
