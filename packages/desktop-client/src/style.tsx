@@ -150,7 +150,7 @@ const colorsDark = {
   buttonDisabledBorder: colorPallet.gray500,
   buttonShadow: colorPallet.gray700,
   noticeBackground: colorPallet.green800,
-  noticeText: colorPallet.green200,
+  noticeText: colorPallet.green300,
   noticeAccent: colorPallet.green500,
   warningBackground: colorPallet.orange800,
   warningText: colorPallet.orange200,
