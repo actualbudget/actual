@@ -63,13 +63,6 @@ global.Actual = {
       input.style.position = 'absolute';
       input.style.top = '0px';
       input.style.left = '0px';
-      input.dispatchEvent(
-        new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-        }),
-      );
 
       input.addEventListener('change', e => {
         let file = e.target.files[0];
@@ -90,6 +83,14 @@ global.Actual = {
           };
         }
       });
+
+      input.dispatchEvent(
+        new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
     });
   },
 
