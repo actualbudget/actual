@@ -9,7 +9,7 @@ import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
   outline: 0,
-  color: colorsm.pageTextPositive,
+  color: colorsm.formInputText,
   backgroundColor: 'transparent',
   margin: 0,
   padding: 5,
@@ -17,6 +17,9 @@ export const defaultInputStyle = {
   border: '1px solid ' + colorsm.formInputBorder,
   '::placeholder': {
     color: colorsm.formInputTextPlaceholder,
+  },
+  ':hover': {
+    backgroundColor: colorsm.formInputBackground,
   },
   ':focus': {
     color: colorsm.formInputText,
@@ -47,17 +50,7 @@ const Input = ({
   return (
     <input
       ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
-      {...css(
-        defaultInputStyle,
-        {
-          ':focus': {
-            border: '1px solid ' + colorsm.formInputBorderSelected,
-            boxShadow: '0 1px 1px ' + colorsm.formInputShadowSelected,
-          },
-        },
-        styles.smallText,
-        style,
-      )}
+      {...css(defaultInputStyle, styles.smallText, style)}
       {...nativeProps}
       onKeyDown={e => {
         if (e.key === 'Enter' && onEnter) {
