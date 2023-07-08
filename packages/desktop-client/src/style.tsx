@@ -204,7 +204,7 @@ const colorsLight = {
   tableTextHover: colorPallet.gray900,
   tableTextEditing: colorPallet.gray50,
   tableTextEditingBackground: colorPallet.purple500,
-  tableTextInactive: colorPallet.gray500,
+  tableTextInactive: colorPallet.gray300,
   tableHeaderText: colorPallet.gray500,
   tableHeaderBackground: colorPallet.gray50,
   tableBorder: colorPallet.gray150,
