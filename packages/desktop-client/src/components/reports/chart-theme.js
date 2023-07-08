@@ -1,10 +1,10 @@
 import { colorsm } from '../../style';
 
 let colorFades = {
-  blueFadeStart: 'rgba(229, 245, 255, 1)',
-  blueFadeEnd: 'rgba(229, 245, 255, 0)',
-  redFadeStart: 'rgba(255, 243, 242, 1)',
-  redFadeEnd: 'rgba(255, 243, 242, 0)',
+  blueFadeStart: 'rgba(44, 192, 144, 1)',
+  blueFadeEnd: 'rgba(44, 192, 144, 0)',
+  redFadeStart: 'rgba(172, 115, 235, 1)',
+  redFadeEnd: 'rgba(172, 115, 235, 0)',
 };
 
 // Typography
