@@ -117,9 +117,9 @@ function updateFilterReducer(state, action) {
     case 'set-op': {
       let type = FIELD_TYPES.get(state.field);
       let value = state.value;
-      if (type === 'id' && action.op === 'contains') {
-        // Clear out the value if switching between contains for
-        // the id type
+      if ((type === 'id' || type === 'string') && (action.op === 'contains' || action.op === 'is')) {
+        // Clear out the value if switching between contains or
+        // is for the id or string type
         value = null;
       }
       return { ...state, op: action.op, value };
