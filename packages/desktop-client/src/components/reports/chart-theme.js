@@ -44,7 +44,7 @@ const axisBaseStyles = {
 const theme = {
   colors: {
     ...colorFades,
-    red: colorsm.errorText,
+    red: colorsm.pageTextPositive,
     blue: colorsm.noticeText,
   },
   area: {
