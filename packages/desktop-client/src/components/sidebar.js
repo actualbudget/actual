@@ -79,7 +79,6 @@ function Item({
 }) {
   const hoverStyle = {
     backgroundColor: colorsm.sidebarItemBackgroundHover,
-    color: colorsm.sidebarItemTextHover,
   };
   const activeStyle = {
     backgroundColor: colorsm.sidebarItemBackgroundSelected,
@@ -96,7 +95,6 @@ function Item({
       paddingRight: 10,
       textDecoration: 'none',
       color: colorsm.sidebarItemText,
-      ...(forceHover ? hoverStyle : {}),
     },
     { ':hover': hoverStyle },
   ];
@@ -134,7 +132,6 @@ function Item({
 
 function SecondaryItem({ Icon, title, style, to, onClick, bold, indent = 0 }) {
   const hoverStyle = {
-    color: colorsm.sidebarItemTextHover,
     backgroundColor: colorsm.sidebarItemBackgroundHover,
   };
   const activeStyle = {
@@ -282,7 +279,7 @@ function Account({
                   height: 5,
                   borderRadius: 5,
                   backgroundColor: failed
-                    ? colorsm.noticeBackground
+                    ? colorsm.errorBackground
                     : colorsm.sidebarItemBackground,
                   marginLeft: 2,
                   transition: 'transform .3s',
