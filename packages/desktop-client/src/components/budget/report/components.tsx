@@ -206,19 +206,15 @@ export const CategoryMonth = memo(function CategoryMonth({
         onExpose={() => onEdit(category.id, monthIndex)}
         style={[editing && { zIndex: 100 }, styles.tnum]}
         textAlign="right"
-        valueStyle={[
-          {
-            cursor: 'default',
-            margin: 1,
-            padding: '0 4px',
-            borderRadius: 4,
+        valueStyle={{
+          cursor: 'default',
+          margin: 1,
+          padding: '0 4px',
+          borderRadius: 4,
+          ':hover': {
+            boxShadow: 'inset 0 0 0 1px ' + colorsm.formInputShadowSelected,
           },
-          {
-            ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + colorsm.formInputShadowSelected,
-            },
-          },
-        ]}
+        }}
         valueProps={{
           binding: reportBudget.catBudgeted(category.id),
           type: 'financial',
