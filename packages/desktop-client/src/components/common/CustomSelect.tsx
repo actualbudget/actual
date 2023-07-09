@@ -26,6 +26,8 @@ export default function CustomSelect({
   wrapperStyle,
   disabledKeys = [],
 }: CustomSelectProps) {
+  const arrowSize = 7;
+  const label = options.filter(option => option[0] === value)[0][1];
   return (
     <ListboxInput
       value={value}
@@ -33,9 +35,26 @@ export default function CustomSelect({
       style={{ lineHeight: '1em', ...wrapperStyle }}
     >
       <ListboxButton
-        {...css([{ borderWidth: 0, padding: 5, borderRadius: 4 }, style])}
-        arrow={<ExpandArrow style={{ width: 7, height: 7, paddingTop: 3 }} />}
-      />
+        {...css([
+          { borderWidth: 0, padding: '2px 5px', borderRadius: 4 },
+          style,
+        ])}
+        arrow={<ExpandArrow style={{ width: arrowSize, height: arrowSize }} />}
+      >
+        <span
+          style={{
+            display: 'flex',
+            overflowX: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: `calc(100% - ${arrowSize + 5}px)`,
+            minHeight: '18px',
+            alignItems: 'center',
+          }}
+        >
+          {label}
+        </span>
+      </ListboxButton>
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
         <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
           {options.map(([value, label]) => (
