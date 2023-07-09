@@ -319,21 +319,6 @@ function StatusCell({
   let isClearedField = status === 'cleared' || status == null;
   let statusProps = getStatusProps(status);
 
-  let props = {
-    color:
-      status === 'cleared'
-        ? colorsm.noticeText
-        : status === 'missed'
-        ? colorsm.errorText
-        : status === 'due'
-        ? colorsm.warningText
-        : status === 'upcoming'
-        ? colorsm.pageTextPositive
-        : selected
-        ? colorsm.tableTextSelected
-        : colorsm.tableBorder,
-  };
-
   function onSelect() {
     if (isClearedField) {
       onUpdate('cleared', !(status === 'cleared'));
@@ -371,7 +356,7 @@ function StatusCell({
           style: {
             width: 13,
             height: 13,
-            color: props.color,
+            color: statusProps.color,
             marginTop: status === 'due' ? -1 : 0,
           },
         })}
@@ -690,6 +675,8 @@ const Transaction = memo(function Transaction(props) {
   let backgroundFocus = hovered || focusedField === 'select';
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
+  let statusProps = getStatusProps(notes);
+
   return (
     <Row
       highlighted={highlighted}
@@ -706,7 +693,7 @@ const Transaction = memo(function Transaction(props) {
           : { color: colorsm.tableText },
         style,
         isPreview && {
-          color: colorsm.formInputTextHighlight,
+          color: colorsm.tableTextInactive,
           fontStyle: 'italic',
         },
         _unmatched && { opacity: 0.5 },
@@ -917,26 +904,9 @@ const Transaction = memo(function Transaction(props) {
               {() => (
                 <View
                   style={{
-                    color:
-                      notes === 'missed'
-                        ? colorsm.errorText
-                        : notes === 'due'
-                        ? colorsm.warningText
-                        : notes === 'upcoming'
-                        ? colorsm.pageTextPositive
-                        : selected
-                        ? colorsm.formInputTextHighlight
-                        : colorsm.tableText,
-                    backgroundColor:
-                      notes === 'missed'
-                        ? colorsm.errorBackground
-                        : notes === 'due'
-                        ? colorsm.warningBackground
-                        : notes === 'upcoming'
-                        ? 'none'
-                        : selected
-                        ? colorsm.tableRowBackgroundHighlight
-                        : colorsm.tableBackground,
+                    border: '1px solid ' + statusProps.borderColor,
+                    color: statusProps.color,
+                    backgroundColor: statusProps.backgroundColor,
                     margin: '0 5px',
                     padding: '3px 7px',
                     borderRadius: 4,
@@ -1148,7 +1118,7 @@ const Transaction = memo(function Transaction(props) {
         />
       )}
 
-      {/* Cleared field for all transactions */}
+      {/* Icon field for all transactions */}
       {showCleared && (
         <StatusCell
           id={id}

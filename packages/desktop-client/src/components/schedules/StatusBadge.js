@@ -13,57 +13,66 @@ import { colorsm } from '../../style';
 import { View, Text } from '../common';
 
 export function getStatusProps(status) {
-  let color, backgroundColor, Icon;
+  let color, backgroundColor, borderColor, Icon;
 
   switch (status) {
     case 'missed':
       color = colorsm.errorText;
       backgroundColor = colorsm.errorBackground;
+      borderColor = colorsm.errorAccent;
       Icon = EditSkull1;
       break;
     case 'due':
       color = colorsm.warningText;
       backgroundColor = colorsm.warningBackground;
+      borderColor = colorsm.warningAccent;
       Icon = AlertTriangle;
       break;
     case 'upcoming':
-      color = colorsm.formInputTextHighlight;
-      backgroundColor = colorsm.formInputBackground;
+      color = colorsm.tableTextInactive;
+      backgroundColor = colorsm.tableBackground;
+      borderColor = colorsm.tableBorder;
       Icon = CalendarIcon;
       break;
     case 'paid':
       color = colorsm.noticeText;
       backgroundColor = colorsm.noticeBackground;
+      borderColor = colorsm.noticeAccent;
       Icon = ValidationCheck;
       break;
     case 'completed':
       color = colorsm.tableText;
       backgroundColor = colorsm.tableBackground;
+      borderColor = colorsm.tableBorder;
       Icon = FavoriteStar;
       break;
     case 'pending':
       color = colorsm.noticeText;
       backgroundColor = colorsm.noticeBackground;
+      borderColor = colorsm.noticeAccent;
       Icon = CalendarIcon;
       break;
     case 'scheduled':
       color = colorsm.tableText;
       backgroundColor = colorsm.tableBackground;
+      borderColor = colorsm.tableBorder;
       Icon = CalendarIcon;
       break;
     case 'cleared':
       color = colorsm.noticeText;
       backgroundColor = colorsm.noticeBackground;
+      borderColor = colorsm.noticeAccent;
       Icon = CheckCircle1;
       break;
     default:
       color = colorsm.buttonDisabledText;
       backgroundColor = colorsm.buttonDisabledBackground;
+      borderColor = colorsm.buttonDisabledBorder;
       Icon = CheckCircleHollow;
       break;
   }
 
-  return { color, backgroundColor, Icon };
+  return { color, backgroundColor, borderColor, Icon };
 }
 
 export function StatusBadge({ status, style }) {
