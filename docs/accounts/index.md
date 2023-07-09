@@ -19,9 +19,8 @@ You can add an account to your budget at any time, however when you first instal
 You can also add an account using the `+ Add account` button in the sidebar.
 
 A box will appear asking you to fill in a few options
-
+- Create Local Account or Link to Nordigen (See Advanced/Connecting Your Bank)
 - Give your account a name
-- Decide what type your account is
 - Is the account on or off budget
 - The current account balance
 
@@ -29,7 +28,9 @@ A box will appear asking you to fill in a few options
 Off budget means that the balance is not reflected when you assign money to categories in your budget register
 :::
 
-![](/img/add-account/CreateAccount.png)
+![](/img/add-account/CreateAccount1.png)
+
+![](/img/add-account/CreateAccount@2x.png)
 
 Here you can see how that looks when the options are completed.
 
