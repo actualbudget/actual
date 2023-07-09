@@ -90,7 +90,7 @@ const theme = {
       labels: baseLabelStyles,
       data: {
         fill: 'none',
-        stroke: colorsm.tableHeaderText,
+        stroke: colorsm.noticeText,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
