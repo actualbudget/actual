@@ -351,11 +351,13 @@ function StatusCell({
       <CellButton
         style={[
           {
+            padding: 3,
+            backgroundColor: 'transparent',
             border: '1px solid transparent',
             borderRadius: 50,
             ':focus': {
-              border: '1px solid ' + props.color,
-              boxShadow: `0 1px 2px ${props.color}`,
+              border: '1px solid ' + colorsm.formInputBorderSelected,
+              boxShadow: '0 1px 2px ' + colorsm.formInputBorderSelected,
             },
             cursor: isClearedField ? 'pointer' : 'default',
           },
