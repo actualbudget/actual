@@ -40,6 +40,20 @@ export function getUpMigration(id, names) {
   }
 }
 
+async function patchBadMigrations(db: Database) {
+  let badFiltersMigration = 1685375406832;
+  let newFiltersMigration = 1688749527273;
+  let appliedIds = await getAppliedMigrations(db);
+  if (appliedIds.includes(badFiltersMigration)) {
+    await sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
+      badFiltersMigration,
+    ]);
+    await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+      newFiltersMigration,
+    ]);
+  }
+}
+
 export async function getAppliedMigrations(db: Database): Promise<number[]> {
   const rows = await sqlite.runQuery<{ id: number }>(
     db,
@@ -135,6 +149,7 @@ function checkDatabaseValidity(
 }
 
 export async function migrate(db: Database): Promise<string[]> {
+  await patchBadMigrations(db);
   let appliedIds = await getAppliedMigrations(db);
   let available = await getMigrationList(MIGRATIONS_DIR);
 

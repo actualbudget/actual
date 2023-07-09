@@ -53,7 +53,7 @@ export default function CustomSelect({
           border: '1px solid ' + colorsm.menuBorder,
         }}
       >
-        <ListboxList style={{ maxHeight: 250, overflowY: 'scroll' }}>
+        <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
           {options.map(([value, label]) => (
             <ListboxOption
               key={value}
