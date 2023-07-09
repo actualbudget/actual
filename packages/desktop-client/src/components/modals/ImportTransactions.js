@@ -344,7 +344,7 @@ function SelectField({ width, style, options, value, onChange }) {
         ['choose-field', 'Choose field...'],
         ...options.map(option => [option, option]),
       ]}
-      value={value === null ? 'chose-field' : value}
+      value={value === null ? 'choose-field' : value}
       style={{ borderWidth: 1, width: '100%' }}
       wrapperStyle={style}
       onChange={value => onChange(value)}
