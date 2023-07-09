@@ -341,10 +341,10 @@ function SelectField({ width, style, options, value, onChange }) {
   return (
     <CustomSelect
       options={[
-        ['', 'Choose field...'],
+        ['chose-field', 'Choose field...'],
         ...options.map(option => [option, option]),
       ]}
-      value={value}
+      value={value === null ? 'chose-field' : value}
       style={{ borderWidth: 1, width: '100%' }}
       wrapperStyle={style}
       onChange={value => onChange(value)}
@@ -462,12 +462,11 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
         spacing={1}
         style={{ marginTop: 5 }}
       >
-        <View style={{ width: 200 }}>
+        <View style={{ flex: 1 }}>
           <SubLabel title="Date" />
           <SelectField
-            width={200}
             options={options}
-            value={mappings.date || ''}
+            value={mappings.date}
             style={{ marginRight: 5 }}
             onChange={name => onChange('date', name)}
           />
@@ -475,9 +474,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
         <View style={{ flex: 1 }}>
           <SubLabel title="Payee" />
           <SelectField
-            width="flex"
             options={options}
-            value={mappings.payee || ''}
+            value={mappings.payee}
             style={{ marginRight: 5 }}
             onChange={name => onChange('payee', name)}
           />
@@ -485,41 +483,37 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
         <View style={{ flex: 1 }}>
           <SubLabel title="Notes" />
           <SelectField
-            width="flex"
             options={options}
-            value={mappings.notes || ''}
+            value={mappings.notes}
             style={{ marginRight: 5 }}
             onChange={name => onChange('notes', name)}
           />
         </View>
         {splitMode ? (
           <>
-            <View style={{ width: 90 }}>
+            <View style={{ flex: 0.5 }}>
               <SubLabel title="Outflow" />
               <SelectField
-                width={90}
                 options={options}
-                value={mappings.outflow || ''}
+                value={mappings.outflow}
                 onChange={name => onChange('outflow', name)}
               />
             </View>
-            <View style={{ width: 90 }}>
+            <View style={{ flex: 0.5 }}>
               <SubLabel title="Inflow" />
               <SelectField
-                width={90}
                 options={options}
-                value={mappings.inflow || ''}
+                value={mappings.inflow}
                 onChange={name => onChange('inflow', name)}
               />
             </View>
           </>
         ) : (
-          <View style={{ width: 90 }}>
+          <View style={{ flex: 1 }}>
             <SubLabel title="Amount" />
             <SelectField
-              width={90}
               options={options}
-              value={mappings.amount || ''}
+              value={mappings.amount}
               onChange={name => onChange('amount', name)}
             />
           </View>
