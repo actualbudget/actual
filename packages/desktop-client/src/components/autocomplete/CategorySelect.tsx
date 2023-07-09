@@ -97,6 +97,7 @@ function CategoryList({
                     width={10}
                     height={10}
                     style={{
+                      color: 'inherit',
                       marginRight: 5,
                     }}
                   />
