@@ -341,7 +341,7 @@ function SelectField({ width, style, options, value, onChange }) {
   return (
     <CustomSelect
       options={[
-        ['chose-field', 'Choose field...'],
+        ['choose-field', 'Choose field...'],
         ...options.map(option => [option, option]),
       ]}
       value={value === null ? 'chose-field' : value}
