@@ -16,10 +16,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/web@npm:23.7.1":
-  version: 23.7.1
-  resolution: "@actual-app/web@npm:23.7.1"
-  checksum: 3b54aa469ce18d1120e21a3875a3d0b4a41f14c112d298fef1f9bdb7b370c294ce12a304d80d7d4b14d345944abef47cffdb04091046977fa6363a33c7e3486d
+"@actual-app/web@npm:23.7.2":
+  version: 23.7.2
+  resolution: "@actual-app/web@npm:23.7.2"
+  checksum: 9350a9de304b08061a23a38dbad91e1766190907f3cd7f158341f7a4e7e1ff005ec565e04c81a930c64559a426546fda3f71e98c9de61c7b2d5ca7f0526c4061
   languageName: node
   linkType: hard
 
@@ -1556,7 +1556,7 @@ __metadata:
   resolution: "actual-sync@workspace:."
   dependencies:
     "@actual-app/crdt": 2.0.1
-    "@actual-app/web": 23.7.1
+    "@actual-app/web": 23.7.2
     "@babel/preset-typescript": ^7.20.2
     "@types/bcrypt": ^5.0.0
     "@types/better-sqlite3": ^7.6.3
