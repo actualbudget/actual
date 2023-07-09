@@ -17,7 +17,7 @@ import {
   Text,
   Stack,
   Modal,
-  Select,
+  CustomSelect,
   Input,
   Button,
   ButtonWithLoading,
@@ -345,18 +345,16 @@ function SubLabel({ title }) {
 
 function SelectField({ width, style, options, value, onChange }) {
   return (
-    <Select
-      value={value}
-      style={style}
-      onChange={e => onChange(e.target.value)}
-    >
-      <option value="">Choose field...</option>
-      {options.map(x => (
-        <option key={x} value={x}>
-          {x}
-        </option>
-      ))}
-    </Select>
+    <CustomSelect
+      options={[
+        ['choose-field', 'Choose field...'],
+        ...options.map(option => [option, option]),
+      ]}
+      value={value === null ? 'choose-field' : value}
+      style={{ borderWidth: 1, width: '100%' }}
+      wrapperStyle={style}
+      onChange={value => onChange(value)}
+    />
   );
 }
 
@@ -380,16 +378,15 @@ function DateFormatSelect({
   return (
     <View style={{ width: 120 }}>
       <SectionLabel title="Date format" />
-      <Select
+      <CustomSelect
+        options={dateFormats.map(f => [
+          f.format,
+          f.label.replace(/ /g, delimiter),
+        ])}
         value={parseDateFormat || ''}
-        onChange={e => onChange(e.target.value)}
-      >
-        {dateFormats.map(f => (
-          <option key={f.format} value={f.format}>
-            {f.label.replace(/ /g, delimiter)}
-          </option>
-        ))}
-      </Select>
+        onChange={value => onChange(value)}
+        style={{ borderWidth: 1, width: '100%' }}
+      />
     </View>
   );
 }
@@ -474,12 +471,11 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
         spacing={1}
         style={{ marginTop: 5 }}
       >
-        <View style={{ width: 200 }}>
+        <View style={{ flex: 1 }}>
           <SubLabel title="Date" />
           <SelectField
-            width={200}
             options={options}
-            value={mappings.date || ''}
+            value={mappings.date}
             style={{ marginRight: 5 }}
             onChange={name => onChange('date', name)}
           />
@@ -487,9 +483,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
         <View style={{ flex: 1 }}>
           <SubLabel title="Payee" />
           <SelectField
-            width="flex"
             options={options}
-            value={mappings.payee || ''}
+            value={mappings.payee}
             style={{ marginRight: 5 }}
             onChange={name => onChange('payee', name)}
           />
@@ -497,41 +492,37 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
         <View style={{ flex: 1 }}>
           <SubLabel title="Notes" />
           <SelectField
-            width="flex"
             options={options}
-            value={mappings.notes || ''}
+            value={mappings.notes}
             style={{ marginRight: 5 }}
             onChange={name => onChange('notes', name)}
           />
         </View>
         {splitMode ? (
           <>
-            <View style={{ width: 90 }}>
+            <View style={{ flex: 0.5 }}>
               <SubLabel title="Outflow" />
               <SelectField
-                width={90}
                 options={options}
-                value={mappings.outflow || ''}
+                value={mappings.outflow}
                 onChange={name => onChange('outflow', name)}
               />
             </View>
-            <View style={{ width: 90 }}>
+            <View style={{ flex: 0.5 }}>
               <SubLabel title="Inflow" />
               <SelectField
-                width={90}
                 options={options}
-                value={mappings.inflow || ''}
+                value={mappings.inflow}
                 onChange={name => onChange('inflow', name)}
               />
             </View>
           </>
         ) : (
-          <View style={{ width: 90 }}>
+          <View style={{ flex: 1 }}>
             <SubLabel title="Amount" />
             <SelectField
-              width={90}
               options={options}
-              value={mappings.amount || ''}
+              value={mappings.amount}
               onChange={name => onChange('amount', name)}
             />
           </View>
@@ -908,16 +899,18 @@ function ImportTransactions({
               {filetype === 'csv' && (
                 <View style={{ marginLeft: 25 }}>
                   <SectionLabel title="CSV DELIMITER" />
-                  <Select
+                  <CustomSelect
+                    options={[
+                      [',', ','],
+                      [';', ';'],
+                    ]}
                     value={csvDelimiter}
-                    onChange={e => {
-                      setCsvDelimiter(e.target.value);
-                      parse(filename, { delimiter: e.target.value });
+                    onChange={value => {
+                      setCsvDelimiter(value);
+                      parse(filename, { delimiter: value });
                     }}
-                  >
-                    <option value=",">,</option>
-                    <option value=";">;</option>
-                  </Select>
+                    style={{ borderWidth: 1, width: '100%' }}
+                  />
                 </View>
               )}
             </View>
