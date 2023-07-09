@@ -14,6 +14,7 @@ type CustomSelectProps = {
   value: string;
   onChange?: (newValue: string) => void;
   style?: CSSProperties;
+  wrapperStyle?: CSSProperties;
   disabledKeys?: string[];
 };
 
@@ -22,13 +23,14 @@ export default function CustomSelect({
   value,
   onChange,
   style,
+  wrapperStyle,
   disabledKeys = [],
 }: CustomSelectProps) {
   return (
     <ListboxInput
       value={value}
       onChange={onChange}
-      style={{ lineHeight: '1em' }}
+      style={{ lineHeight: '1em', ...wrapperStyle }}
     >
       <ListboxButton
         {...css([{ borderWidth: 0, padding: 5, borderRadius: 4 }, style])}

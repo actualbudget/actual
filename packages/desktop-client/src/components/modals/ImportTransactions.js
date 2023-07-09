@@ -17,7 +17,7 @@ import {
   Text,
   Stack,
   Modal,
-  Select,
+  CustomSelect,
   Input,
   Button,
   ButtonWithLoading,
@@ -339,18 +339,16 @@ function SubLabel({ title }) {
 
 function SelectField({ width, style, options, value, onChange }) {
   return (
-    <Select
+    <CustomSelect
+      options={[
+        ['', 'Choose field...'],
+        ...options.map(option => [option, option]),
+      ]}
       value={value}
-      style={style}
-      onChange={e => onChange(e.target.value)}
-    >
-      <option value="">Choose field...</option>
-      {options.map(x => (
-        <option key={x} value={x}>
-          {x}
-        </option>
-      ))}
-    </Select>
+      style={{ borderWidth: 1, width: '100%' }}
+      wrapperStyle={style}
+      onChange={value => onChange(value)}
+    />
   );
 }
 
@@ -374,16 +372,15 @@ function DateFormatSelect({
   return (
     <View style={{ width: 120 }}>
       <SectionLabel title="Date format" />
-      <Select
+      <CustomSelect
+        options={dateFormats.map(f => [
+          f.format,
+          f.label.replace(/ /g, delimiter),
+        ])}
         value={parseDateFormat || ''}
-        onChange={e => onChange(e.target.value)}
-      >
-        {dateFormats.map(f => (
-          <option key={f.format} value={f.format}>
-            {f.label.replace(/ /g, delimiter)}
-          </option>
-        ))}
-      </Select>
+        onChange={value => onChange(value)}
+        style={{ borderWidth: 1, width: '100%' }}
+      />
     </View>
   );
 }
@@ -899,16 +896,18 @@ function ImportTransactions({
               {filetype === 'csv' && (
                 <View style={{ marginLeft: 25 }}>
                   <SectionLabel title="CSV DELIMITER" />
-                  <Select
+                  <CustomSelect
+                    options={[
+                      [',', ','],
+                      [';', ';'],
+                    ]}
                     value={csvDelimiter}
-                    onChange={e => {
-                      setCsvDelimiter(e.target.value);
-                      parse(filename, { delimiter: e.target.value });
+                    onChange={value => {
+                      setCsvDelimiter(value);
+                      parse(filename, { delimiter: value });
                     }}
-                  >
-                    <option value=",">,</option>
-                    <option value=";">;</option>
-                  </Select>
+                    style={{ borderWidth: 1, width: '100%' }}
+                  />
                 </View>
               )}
             </View>
