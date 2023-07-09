@@ -244,6 +244,10 @@ export function AccountHeader({
             <FilterButton onApply={onApplyFilter} />
           </View>
           <InputWithContent
+            style={{
+              backgroundColor: 'transparent',
+              // border: '1px solid transparent',// makes :focus border style fail
+            }}
             leftContent={
               <SearchAlternate
                 style={{
