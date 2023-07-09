@@ -115,6 +115,7 @@ export const MonthPicker = ({
                 },
                 (hovered || selected) && {
                   borderRadius: 0,
+                  cursor: 'pointer',
                 },
                 hovered &&
                   !selected && {
