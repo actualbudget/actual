@@ -66,7 +66,7 @@ Version: 23.7.0
 - [#1127](https://github.com/actualbudget/actual/pull/1127) Nordigen: do not perform status check if server is offline — thanks @MatissJanis
 - [#1128](https://github.com/actualbudget/actual/pull/1128) Nordigen: fix first-time setup flow when started in the accounts page — thanks @MatissJanis
 - [#1133](https://github.com/actualbudget/actual/pull/1133) Nordigen: fix bank-sync expiry functionality — thanks @MatissJanis
-- [#1136](https://github.com/actualbudget/actual/pull/1136) Fix "find schedules" page crashing if interction is made before loading data finishes — thanks @MatissJanis
+- [#1136](https://github.com/actualbudget/actual/pull/1136) Fix "find schedules" page crashing if interaction is made before loading data finishes — thanks @MatissJanis
 - [#1139](https://github.com/actualbudget/actual/pull/1139) Remove redundant usage of 'export' keyword — thanks @Shazib
 - [#1140](https://github.com/actualbudget/actual/pull/1140) Automatically remove a trailing slash from server URLs before saving them — thanks @j-f1
 - [#1144](https://github.com/actualbudget/actual/pull/1144) Revert “Make number parsing agnostic to decimal and thousands separators” because it produced undesirable behavior — thanks @j-f1
@@ -286,7 +286,7 @@ Version: 23.5.0
 - [#962](https://github.com/actualbudget/actual/pull/962) TypeScript: migrated an assortment of common components to TS — thanks @MatissJanis
 - [#974](https://github.com/actualbudget/actual/pull/974) eslint: Switch to TypeScript-aware `no-unused-vars` rule. — thanks @trevdor
 - [#976](https://github.com/actualbudget/actual/pull/976) Remove unused `prop-types` dependency — thanks @MatissJanis
-- [#977](https://github.com/actualbudget/actual/pull/977) Make `yarn start:browser` the default `start` command instead of `start:desktop` which currently doesn't realiably work — thanks @MatissJanis
+- [#977](https://github.com/actualbudget/actual/pull/977) Make `yarn start:browser` the default `start` command instead of `start:desktop` which currently doesn't reliably work — thanks @MatissJanis
 - [#978](https://github.com/actualbudget/actual/pull/978) Contributors: add back Rich, add also Alberto — thanks @MatissJanis
 - [#980](https://github.com/actualbudget/actual/pull/980) Run feature-request management github action when the "feature" label is added — thanks @MatissJanis
 - [#982](https://github.com/actualbudget/actual/pull/982) Run feature-request management github action only once and for the "feature" label only (not for other labels) — thanks @MatissJanis
@@ -762,7 +762,7 @@ Version: 23.2.5
 - [#475](https://github.com/actualbudget/actual/pull/475) Add support for filtering the rules list — thanks @j-f1
 - [#482](https://github.com/actualbudget/actual/pull/482) Add option to control the "cleared state" in Rules — thanks @shall0pass
 - [#569](https://github.com/actualbudget/actual/pull/569) List of categories in transfer money dialog — thanks @shall0pass
-- [#570](https://github.com/actualbudget/actual/pull/570) Use navigitor.userAgent to determine isMobile — thanks @shall0pass
+- [#570](https://github.com/actualbudget/actual/pull/570) Use navigator.userAgent to determine isMobile — thanks @shall0pass
 - [#573](https://github.com/actualbudget/actual/pull/573) Goal templates — thanks @shall0pass
 - [#579](https://github.com/actualbudget/actual/pull/579) Add 'View on Hover' to Category Notes for #563 — thanks @gsumpster
 - [#580](https://github.com/actualbudget/actual/pull/580) Added date to export file name — thanks @rich-howell
@@ -784,7 +784,7 @@ Version: 23.2.5
 - [#489](https://github.com/actualbudget/actual/pull/489) Fix “Repair split transactions” button being missing — thanks @j-f1
 - [#490](https://github.com/actualbudget/actual/pull/490) 🐛 (ynab4) transaction cleared state in imports — thanks @MatissJanis
 - [#574](https://github.com/actualbudget/actual/pull/574) Fix #488 — thanks @MatissJanis
-- [#572](https://github.com/actualbudget/actual/pull/572) fix: typo in reconcilation transaction creation — thanks @MatissJanis
+- [#572](https://github.com/actualbudget/actual/pull/572) fix: typo in reconciliation transaction creation — thanks @MatissJanis
 - [#591](https://github.com/actualbudget/actual/pull/591) Allow libofx to handle decoding imported files — thanks @j-f1
 - [#592](https://github.com/actualbudget/actual/pull/592) Update SelectedBalance to use useSheetValue — thanks @j-f1
 - [#599](https://github.com/actualbudget/actual/pull/599) Don’t crash when loading an invalid account ID — thanks @j-f1
@@ -870,7 +870,7 @@ Version: 23.1.12
 - [#429](https://github.com/actualbudget/actual/pull/429) prune: remove unused icons — thanks @MatissJanis
 - [#431](https://github.com/actualbudget/actual/pull/431) prune: remove unused variables — thanks @MatissJanis
 - [#434](https://github.com/actualbudget/actual/pull/434) Split the Settings component into multiple files — thanks @j-f1
-- [#437](https://github.com/actualbudget/actual/pull/437) chore: remove unsed vars & cleanups — thanks @MatissJanis
+- [#437](https://github.com/actualbudget/actual/pull/437) chore: remove unused vars & cleanups — thanks @MatissJanis
 - [#439](https://github.com/actualbudget/actual/pull/439) docs: add netlify as sponsors to README — thanks @MatissJanis
 - [#442](https://github.com/actualbudget/actual/pull/442) 🔥 removal of react-native mobile apps — thanks @MatissJanis
 - [#443](https://github.com/actualbudget/actual/pull/443) ⬆️ upgrade prettier and fix new issues — thanks @MatissJanis

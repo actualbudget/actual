@@ -103,6 +103,6 @@ Nordigen
 
 **Automatic Bank Sync**
 
-At this moment, it is not yet possible for Actual to automatically sync with your bank. You need to do this manually by going to "All Acounts" and pressing "Sync".
+At this moment, it is not yet possible for Actual to automatically sync with your bank. You need to do this manually by going to "All Accounts" and pressing "Sync".
 
 ![](/static/img/connecting-your-bank/syncing-with-your-bank.png)

@@ -126,7 +126,7 @@ For example, many feature instructions may first require the user to navigate to
 > "Click on 'Settings' in the sidebar"  
 > [inserted image of the settings button in the sidebar]
 
-In this case the relavent screenshot is found at `/static/img/elements/sidebar/sidebar-settings@2x.png`, along with all other possible menu selections in the sidebar.
+In this case the relevant screenshot is found at `/static/img/elements/sidebar/sidebar-settings@2x.png`, along with all other possible menu selections in the sidebar.
 
 If there's an image missing from any of the respective folders in `elements/`, feel free to add one yourself following the same naming scheme.
 
