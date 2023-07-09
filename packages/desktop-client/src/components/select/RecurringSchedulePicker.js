@@ -295,7 +295,11 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
 
   return (
     <Tooltip
-      style={{ padding: 10, width: 380 }}
+      style={{
+        backgroundColor: colorsm.modalBackground,
+        padding: 10,
+        width: 380,
+      }}
       offset={1}
       position="bottom-left"
       onClose={onClose}
