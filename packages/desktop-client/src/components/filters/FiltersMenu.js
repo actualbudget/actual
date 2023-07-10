@@ -183,7 +183,12 @@ function ConfigureField({
       onClose={() => dispatch({ type: 'close' })}
     >
       <FocusScope>
-        <View style={{ marginBottom: 10 }}>
+        <View
+          style={{
+            marginBottom: 10,
+            fontWeight: 700,
+          }}
+        >
           {field === 'amount' || field === 'date' ? (
             <CustomSelect
               options={
@@ -218,7 +223,6 @@ function ConfigureField({
 
         <View
           style={{
-            color: colorsm.pageTextSubdued,
             marginBottom: 10,
           }}
         >
