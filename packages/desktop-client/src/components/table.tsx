@@ -187,14 +187,14 @@ export function UnexposedCellContent({
           }}
         >
           {formatter ? formatter(value) : value}
-          {icon === 'desc' && (
+          {icon === 'asc' && (
             <ArrowDown
               width={10}
               height={10}
               style={{ marginLeft: 5, color: colors.n4 }}
             />
           )}
-          {icon === 'asc' && (
+          {icon === 'desc' && (
             <ArrowUp
               width={10}
               height={10}

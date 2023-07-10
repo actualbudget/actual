@@ -244,8 +244,8 @@ const TransactionHeader = memo(
     showCategory,
     showBalance,
     showCleared,
-    onSortTable,
     scrollWidth,
+    onSort,
     ascDesc,
     field,
   }) => {
@@ -272,34 +272,62 @@ const TransactionHeader = memo(
           value="Date"
           width={110}
           icon={field === 'date' ? ascDesc : 'clickable'}
-          onClick={() => onSortTable('date')}
+          onClick={() => {
+            let setAscDesc =
+              field === 'date' ? (ascDesc === 'desc' ? 'asc' : 'desc') : 'desc';
+            onSort('date', setAscDesc);
+          }}
         />
         {showAccount && (
           <Cell
             value="Account"
             width="flex"
             icon={field === 'account' ? ascDesc : 'clickable'}
-            onClick={() => onSortTable('account')}
+            onClick={() => {
+              let setAscDesc =
+                field === 'account'
+                  ? ascDesc === 'asc'
+                    ? 'desc'
+                    : 'asc'
+                  : 'asc';
+              onSort('account', setAscDesc);
+            }}
           />
         )}
         <Cell
           value="Payee"
           width="flex"
           icon={field === 'payee' ? ascDesc : 'clickable'}
-          onClick={() => onSortTable('payee')}
+          onClick={() => {
+            let setAscDesc =
+              field === 'payee' ? (ascDesc === 'asc' ? 'desc' : 'asc') : 'asc';
+            onSort('payee', setAscDesc);
+          }}
         />
         <Cell
           value="Notes"
           width="flex"
           icon={field === 'notes' ? ascDesc : 'clickable'}
-          onClick={() => onSortTable('notes')}
+          onClick={() => {
+            let setAscDesc =
+              field === 'notes' ? (ascDesc === 'asc' ? 'desc' : 'asc') : 'asc';
+            onSort('notes', setAscDesc);
+          }}
         />
         {showCategory && (
           <Cell
             value="Category"
             width="flex"
             icon={field === 'category' ? ascDesc : 'clickable'}
-            onClick={() => onSortTable('category')}
+            onClick={() => {
+              let setAscDesc =
+                field === 'category'
+                  ? ascDesc === 'asc'
+                    ? 'desc'
+                    : 'asc'
+                  : 'asc';
+              onSort('category', setAscDesc);
+            }}
           />
         )}
         <Cell
@@ -307,14 +335,30 @@ const TransactionHeader = memo(
           width={90}
           textAlign="flex"
           icon={field === 'payment' ? ascDesc : 'clickable'}
-          onClick={() => onSortTable('payment')}
+          onClick={() => {
+            let setAscDesc =
+              field === 'payment'
+                ? ascDesc === 'asc'
+                  ? 'desc'
+                  : 'asc'
+                : 'asc';
+            onSort('payment', setAscDesc);
+          }}
         />
         <Cell
           value="Deposit"
           width={85}
           textAlign="flex"
           icon={field === 'deposit' ? ascDesc : 'clickable'}
-          onClick={() => onSortTable('deposit')}
+          onClick={() => {
+            let setAscDesc =
+              field === 'deposit'
+                ? ascDesc === 'desc'
+                  ? 'asc'
+                  : 'desc'
+                : 'desc';
+            onSort('deposit', setAscDesc);
+          }}
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
@@ -1371,9 +1415,6 @@ function TransactionTableInner({
   renderEmpty,
   onHover,
   onScroll,
-  onSortTable,
-  field,
-  ascDesc,
   ...props
 }) {
   const containerRef = createRef();
@@ -1511,10 +1552,10 @@ function TransactionTableInner({
           showCategory={props.showCategory}
           showBalance={!!props.balances}
           showCleared={props.showCleared}
-          onSortTable={onSortTable}
           scrollWidth={scrollWidth}
-          ascDesc={ascDesc}
-          field={field}
+          onSort={props.onSort}
+          ascDesc={props.ascDesc}
+          field={props.sortField}
         />
 
         {props.isAdding && (
@@ -1663,16 +1704,11 @@ export let TransactionTable = forwardRef((props, ref) => {
   let savePending = useRef(false);
   let afterSaveFunc = useRef(false);
   let [_, forceRerender] = useState({});
-  let [field, setField] = useState('date');
-  let [sortedTransactionsPrev, setSortedTransactionsPrev] = useState([]);
   let selectedItems = useSelectedItems();
 
   useEffect(() => {
     //Use UUID as the base sort in case sort and sortPrev are exactly the same
     //This makes sure the sort is consistent and reacts the same every time
-    setSortedTransactionsPrev(
-      setSorted(transactions.sort((a, b) => a.id.localeCompare(b.id))),
-    );
   }, [transactions]);
 
   useLayoutEffect(() => {
@@ -1950,85 +1986,12 @@ export let TransactionTable = forwardRef((props, ref) => {
     id => splitsExpanded.dispatch({ type: 'toggle-split', id }),
     [splitsExpanded.dispatch],
   );
-  let [fields, setFields] = useState('dates');
-  let [ascDesc, setAscDesc] = useState('asc');
-  let [sortedTransactions, setSortedTransactions] = useState([]);
-
-  function onSortTable(headerClicked) {
-    if (headerClicked === field) {
-      ascDesc === 'desc' ? setAscDesc('asc') : setAscDesc('desc');
-    } else {
-      setSortedTransactionsPrev(sortedTransactions);
-      setField(headerClicked);
-      setFields(headerClicked + 's');
-      headerClicked === 'payment' || headerClicked === 'date'
-        ? setAscDesc('asc')
-        : setAscDesc('desc');
-    }
-  }
-
-  function sortStrings(transactionsList, lookUp) {
-    let fieldList =
-      fields === 'categorys'
-        ? props.categoryGroups.flatMap(cat => {
-            return cat.categories;
-          })
-        : props[fields];
-
-    let sortDesc = transactionsList
-      .map(e => {
-        return {
-          ...e,
-          fieldName: lookUp
-            ? fieldList.find(f => f.id === e[field])?.name ?? ''
-            : e[field] ?? '',
-        };
-      })
-      //primary field
-      .sort((a, b) => a.fieldName.localeCompare(b.fieldName));
-
-    return ascDesc === 'desc' ? sortDesc : sortDesc.reverse();
-  }
-
-  function sortNumber(transactionsList) {
-    let sortAscAmt = transactionsList
-      .map(e => {
-        return { ...e };
-      })
-      //primary field
-      .sort((a, b) => a.amount - b.amount);
-
-    return ascDesc === 'asc' ? sortAscAmt : sortAscAmt.reverse();
-  }
-
-  function setSorted(transactionsList) {
-    switch (field) {
-      case 'date':
-        return sortStrings(transactionsList, false);
-      case 'notes':
-        return sortStrings(transactionsList, false);
-      case 'payment':
-        return sortNumber(transactionsList);
-      case 'deposit':
-        return sortNumber(transactionsList);
-      default:
-        return sortStrings(transactionsList, true);
-    }
-  }
-
-  useEffect(() => {
-    setSortedTransactions(setSorted(sortedTransactionsPrev));
-  }, [field, ascDesc, sortedTransactionsPrev]);
 
   return (
     <TransactionTableInner
       tableRef={mergedRef}
       {...props}
-      transactions={
-        sortedTransactions.length === 0
-          ? sortedTransactionsPrev
-          : sortedTransactions
-      }
+      transactions={transactions}
       transactionMap={transactionMap}
       selectedItems={selectedItems}
       hoveredTransaction={hoveredTransaction}
@@ -2046,9 +2009,6 @@ export let TransactionTable = forwardRef((props, ref) => {
       newTransactions={newTransactions}
       tableNavigator={tableNavigator}
       newNavigator={newNavigator}
-      onSortTable={onSortTable}
-      field={field}
-      ascDesc={ascDesc}
     />
   );
 });
