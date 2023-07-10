@@ -18,7 +18,7 @@ export default function format(value, type = 'string') {
       }
       return formatted;
     case 'financial':
-      if (value == null || value === '') {
+      if (value == null || value === '' || value === 0) {
         return integerToCurrency(0);
       } else if (typeof value === 'string') {
         const parsed = parseFloat(value);
