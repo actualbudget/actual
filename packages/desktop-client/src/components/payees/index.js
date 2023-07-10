@@ -59,27 +59,21 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
       style={{ padding: '0 10px' }}
       plain
     >
-      <CellButton
-        style={{
-          borderRadius: 4,
-          padding: '3px 6px',
-          fontSize: 12,
-        }}
+      <Button
+        as={CellButton}
         onEdit={onEdit}
         onSelect={onClick}
         onFocus={onEdit}
       >
-        <Text style={{ paddingRight: 5 }}>
-          {ruleCount > 0 ? (
-            <>
-              {ruleCount} associated {plural(ruleCount, 'rule', 'rules')}
-            </>
-          ) : (
-            <>Create rule</>
-          )}
-        </Text>
+        {ruleCount > 0 ? (
+          <>
+            {ruleCount} associated {plural(ruleCount, 'rule', 'rules')}
+          </>
+        ) : (
+          <>Create rule</>
+        )}
         <ArrowThinRight style={{ width: 8, height: 8, color: 'inherit' }} />
-      </CellButton>
+      </Button>
     </Cell>
   );
 }
