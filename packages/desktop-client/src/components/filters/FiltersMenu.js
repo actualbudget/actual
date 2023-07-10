@@ -145,7 +145,7 @@ function ConfigureField({
   onApply,
 }) {
   let [subfield, setSubfield] = useState(initialSubfield);
-  let [selectNegate, setSelectNegate] = useState(false);
+  let [negated, setNegated] = useState(null);
   let inputRef = useRef();
   let prevOp = useRef(null);
 
@@ -157,7 +157,9 @@ function ConfigureField({
   }, [op]);
 
   let type = FIELD_TYPES.get(field);
-  let ops = TYPE_INFO[type].ops;
+  let ops = negated
+    ? TYPE_INFO[type].ops.slice(3, 6)
+    : TYPE_INFO[type].ops.slice(0, 3);
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later
@@ -169,7 +171,7 @@ function ConfigureField({
     <Tooltip
       position="bottom-left"
       style={{ padding: 15 }}
-      width={250}
+      width={300}
       onClose={() => dispatch({ type: 'close' })}
     >
       <FocusScope>
@@ -252,15 +254,45 @@ function ConfigureField({
               ))}
         </Stack>
 
+        {field === 'account' ||
+        field === 'payee' ||
+        field === 'notes' ||
+        field === 'category' ? (
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              userSelect: 'none',
+              marginTop: 5,
+            }}
+          >
+            <Checkbox
+              id="add_negate"
+              checked={negated}
+              onChange={() => {
+                setNegated(!negated);
+              }}
+            />
+            <label htmlFor="add_negate">Not</label>
+          </View>
+        ) : (
+          <View style={{ flex: 1 }} />
+        )}
+
         <form action="#">
           {type !== 'boolean' && (
             <GenericInput
               inputRef={inputRef}
               field={field}
               subfield={subfield}
-              type={type === 'id' && op === 'contains' ? 'string' : type}
+              type={
+                type === 'id' && (op === 'contains' || op === 'doesNotContain')
+                  ? 'string'
+                  : type
+              }
               value={value}
-              multi={op === 'oneOf'}
+              multi={op === 'oneOf' || op === 'notOneOf'}
               style={{ marginTop: 10 }}
               onChange={v => dispatch({ type: 'set-value', value: v })}
             />
@@ -272,37 +304,13 @@ function ConfigureField({
             align="center"
             style={{ marginTop: 15 }}
           >
-            {field === 'account' ||
-            field === 'payee' ||
-            field === 'notes' ||
-            field === 'category' ? (
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  userSelect: 'none',
-                }}
-              >
-                <Checkbox
-                  id="add_negate"
-                  checked={selectNegate}
-                  onChange={() => {
-                    setSelectNegate(!selectNegate);
-                  }}
-                />
-                <label htmlFor="add_negate">Not</label>
-              </View>
-            ) : (
-              <View style={{ flex: 1 }} />
-            )}
+            <View style={{ flex: 1 }} />
             <Button
               primary
               onClick={e => {
                 e.preventDefault();
                 onApply({
                   field,
-                  selectNegate,
                   op,
                   value,
                   options: subfieldToOptions(field, subfield),
@@ -476,7 +484,6 @@ function FilterExpression({
   field: originalField,
   customName,
   op,
-  selectNegate,
   value,
   options,
   stage,
@@ -516,9 +523,7 @@ function FilterExpression({
               <Text style={{ color: colors.p4 }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>
-                {friendlyOp(op, null, selectNegate)}
-              </Text>{' '}
+              <Text style={{ color: colors.n3 }}>{friendlyOp(op, null)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
@@ -583,7 +588,6 @@ export function AppliedFilters({
           customName={filter.customName}
           field={filter.field}
           op={filter.op}
-          selectNegate={filter.selectNegate}
           value={filter.value}
           options={filter.options}
           editing={editingFilter === filter}

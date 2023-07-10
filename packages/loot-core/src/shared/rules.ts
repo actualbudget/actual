@@ -8,7 +8,7 @@ export const TYPE_INFO = {
     nullable: false,
   },
   id: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: true,
   },
   saved: {
@@ -16,7 +16,7 @@ export const TYPE_INFO = {
     nullable: false,
   },
   string: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: false,
   },
   number: {
@@ -67,18 +67,24 @@ export function mapField(field, opts) {
   }
 }
 
-export function friendlyOp(op, type, selectNegate) {
+export function friendlyOp(op, type) {
   switch (op) {
     case 'oneOf':
-      return selectNegate ? 'not one of' : 'one of';
+      return 'one of';
+    case 'notOneOf':
+      return 'not one of';
     case 'is':
-      return selectNegate ? 'is not' : 'is';
+      return 'is';
+    case 'isNot':
+      return 'is not';
     case 'isapprox':
       return 'is approx';
     case 'isbetween':
       return 'is between';
     case 'contains':
-      return selectNegate ? 'does not contain' : 'contains';
+      return 'contains';
+    case 'doesNotContain':
+      return 'does not contain';
     case 'gt':
       if (type === 'date') {
         return 'is after';

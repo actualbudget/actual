@@ -301,7 +301,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           cond.field,
           cond.value,
           cond.options,
-          cond.selectNegate,
           FIELD_TYPES,
         );
       } catch (e) {
@@ -314,7 +313,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
 
   // rule -> actualql
   let filters = conditions.map(cond => {
-    let { type, field, op, value, options, selectNegate } = cond;
+    let { type, field, op, value, options } = cond;
 
     let getValue = value => {
       if (type === 'number') {
@@ -351,6 +350,8 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
 
     switch (op) {
       case 'isapprox':
+      case 'isNot':
+        return apply(field, '$ne', value);
       case 'is':
         if (type === 'date') {
           if (value.type === 'recur') {
@@ -418,7 +419,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           return apply(field, '$eq', number);
         }
 
-        return apply(field, selectNegate ? '$ne' : '$eq', value);
+        return apply(field, '$eq', value);
 
       case 'isbetween':
         // This operator is only applicable to the specific `between`
@@ -432,7 +433,15 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         // the `name` of the referenced table and do a string match
         return apply(
           type === 'id' ? field + '.name' : field,
-          selectNegate ? '$notlike' : '$like',
+          '$like',
+          '%' + value + '%',
+        );
+      case 'doesNotContain':
+        // Running contains with id will automatically reach into
+        // the `name` of the referenced table and do a string match
+        return apply(
+          type === 'id' ? field + '.name' : field,
+          '$notlike',
           '%' + value + '%',
         );
       case 'oneOf':
@@ -441,9 +450,14 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           // This forces it to match nothing
           return { id: null };
         }
-        return selectNegate
-          ? { $and: values.map(v => apply(field, '$ne', v)) }
-          : { $or: values.map(v => apply(field, '$eq', v)) };
+        return { $or: values.map(v => apply(field, '$eq', v)) };
+      case 'notOneOf':
+        let notValues = value;
+        if (notValues.length === 0) {
+          // This forces it to match nothing
+          return { id: null };
+        }
+        return { $and: notValues.map(v => apply(field, '$ne', v)) };
       case 'gt':
         return apply(field, '$gt', getValue(value));
       case 'gte':

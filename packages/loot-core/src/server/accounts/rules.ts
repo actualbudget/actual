@@ -109,7 +109,7 @@ let CONDITION_TYPES = {
     },
   },
   id: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: true,
     parse(op, value, fieldName) {
       if (op === 'oneOf') {
@@ -124,7 +124,7 @@ let CONDITION_TYPES = {
     },
   },
   string: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: false,
     parse(op, value, fieldName) {
       if (op === 'oneOf') {
@@ -202,13 +202,12 @@ export class Condition {
   field;
   op;
   options;
-  selectNegate;
   rawValue;
   type;
   unparsedValue;
   value;
 
-  constructor(op, field, value, options, selectNegate, fieldTypes) {
+  constructor(op, field, value, options, fieldTypes) {
     let typeName = fieldTypes.get(field);
     assert(typeName, 'internal', 'Invalid condition field: ' + field);
 
@@ -240,7 +239,6 @@ export class Condition {
     this.unparsedValue = value;
     this.op = op;
     this.field = field;
-    this.selectNegate = selectNegate;
     this.value = type.parse ? type.parse(op, value, field) : value;
     this.options = options;
     this.type = typeName;
@@ -395,7 +393,6 @@ export class Condition {
       field: this.field,
       value: this.unparsedValue,
       ...(this.options ? { options: this.options } : null),
-      selectNegate: this.selectNegate,
       type: this.type,
     };
   }
@@ -483,7 +480,7 @@ export class Rule {
     this.stage = stage;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
-      c => new Condition(c.op, c.field, c.value, c.options, false, fieldTypes),
+      c => new Condition(c.op, c.field, c.value, c.options, fieldTypes),
     );
     this.actions = actions.map(
       a => new Action(a.op, a.field, a.value, a.options, fieldTypes),
