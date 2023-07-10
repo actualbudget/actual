@@ -24,6 +24,7 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colorsm } from '../../style';
+import { MONTH_BOX_SHADOW } from '../budget/constants';
 import {
   useStableCallback,
   View,
@@ -539,6 +540,7 @@ export const ManagePayees = forwardRef(
               flex: 1,
               borderRadius: 4,
               overflow: 'hidden',
+              boxShadow: MONTH_BOX_SHADOW,
             }}
           >
             <PayeeTableHeader />

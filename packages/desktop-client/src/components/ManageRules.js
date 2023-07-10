@@ -31,6 +31,7 @@ import useSelected, {
 import ArrowRight from '../icons/v0/RightArrow2';
 import { colorsm } from '../style';
 
+import { MONTH_BOX_SHADOW } from './budget/constants';
 import {
   View,
   Text,
@@ -761,82 +762,80 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View style={{ overflow: 'hidden' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: isModal ? '0 13px 15px' : '0 0 15px',
+          flexShrink: 0,
+        }}
+      >
         <View
           style={{
+            color: colorsm.pageText,
             flexDirection: 'row',
             alignItems: 'center',
-            padding: isModal ? '0 13px 15px' : '0 0 15px',
-            flexShrink: 0,
+            width: '50%',
           }}
         >
-          <View
-            style={{
-              color: colorsm.pageText,
-              flexDirection: 'row',
-              alignItems: 'center',
-              width: '50%',
-            }}
-          >
-            <Text>
-              Rules are always run in the order that you see them.{' '}
-              <ExternalLink
-                to="https://actualbudget.org/docs/budgeting/rules/"
-                linkColor="muted"
-              >
-                Learn more
-              </ExternalLink>
-            </Text>
-          </View>
+          <Text>
+            Rules are always run in the order that you see them.{' '}
+            <ExternalLink
+              to="https://actualbudget.org/docs/budgeting/rules/"
+              linkColor="muted"
+            >
+              Learn more
+            </ExternalLink>
+          </Text>
+        </View>
 
-          <View style={{ flex: 1 }} />
-          <Search
-            id="filter-input"
-            width={350}
-            placeholder="Filter rules..."
-            value={filter}
-            onChange={setFilter}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <RulesHeader />
-          <SimpleTable
-            ref={tableRef}
-            data={filteredRules}
-            navigator={navigator}
-            loadMore={loadMore}
-            // Hide the last border of the item in the table
-            style={{ marginBottom: -1 }}
-          >
-            <RulesList
-              rules={filteredRules}
-              selectedItems={selectedInst.items}
-              navigator={navigator}
-              hoveredRule={hoveredRule}
-              onHover={onHover}
-              onEditRule={onEditRule}
-            />
-          </SimpleTable>
-        </View>
-        <View
-          style={{
-            paddingBlock: 15,
-            paddingInline: isModal ? 13 : 0,
-            borderTop: isModal && '1px solid ' + colorsm.tableBorder,
-            flexShrink: 0,
-          }}
+        <View style={{ flex: 1 }} />
+        <Search
+          id="filter-input"
+          width={350}
+          placeholder="Filter rules..."
+          value={filter}
+          onChange={setFilter}
+        />
+      </View>
+      <View style={{ flex: 1, boxShadow: MONTH_BOX_SHADOW }}>
+        <RulesHeader />
+        <SimpleTable
+          ref={tableRef}
+          data={filteredRules}
+          navigator={navigator}
+          loadMore={loadMore}
+          // Hide the last border of the item in the table
+          style={{ marginBottom: -1 }}
         >
-          <Stack direction="row" align="center" justify="flex-end" spacing={2}>
-            {selectedInst.items.size > 0 && (
-              <Button onClick={onDeleteSelected}>
-                Delete {selectedInst.items.size} rules
-              </Button>
-            )}
-            <Button primary onClick={onCreateRule}>
-              Create new rule
+          <RulesList
+            rules={filteredRules}
+            selectedItems={selectedInst.items}
+            navigator={navigator}
+            hoveredRule={hoveredRule}
+            onHover={onHover}
+            onEditRule={onEditRule}
+          />
+        </SimpleTable>
+      </View>
+      <View
+        style={{
+          paddingBlock: 15,
+          paddingInline: isModal ? 13 : 0,
+          borderTop: isModal && '1px solid ' + colorsm.tableBorder,
+          flexShrink: 0,
+        }}
+      >
+        <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+          {selectedInst.items.size > 0 && (
+            <Button onClick={onDeleteSelected}>
+              Delete {selectedInst.items.size} rules
             </Button>
-          </Stack>
-        </View>
+          )}
+          <Button primary onClick={onCreateRule}>
+            Create new rule
+          </Button>
+        </Stack>
       </View>
     </SelectedProvider>
   );

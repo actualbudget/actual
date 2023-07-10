@@ -4,6 +4,7 @@ import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { usePushModal } from '../../util/router-tools';
+import { MONTH_BOX_SHADOW } from '../budget/constants';
 import { View, Button, Search } from '../common';
 import { Page } from '../Page';
 
@@ -73,6 +74,7 @@ export default function Schedules() {
           marginTop: 20,
           flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
           overflow: 'hidden',
+          boxShadow: MONTH_BOX_SHADOW,
         }}
       >
         <SchedulesTable
