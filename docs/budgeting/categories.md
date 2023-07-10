@@ -54,6 +54,9 @@ You can see in the budget that our categories have now been successfully merged 
 
 ![](/img/categories/CategoriesMerged.png)
 
+## Expanding, Collapsing or Hiding Categories
+Updates, in June and July 2023, added the ability to (a) *expand or collapse category groups* by clicking on the three dots at the top of the Category list and (b) *hide categories* that are no longer needed (using the down arrow by each category name). Hidden categories can be viewed, when needed, by clicking on the three dots at the top of the category list. The screenshots above do not currently reflect these enhancements.
+
 ## Category Notes
 
 It is possible to add notes to Categories, to do this hover over the category that you would like to add a note to, a paper icon will appear.
