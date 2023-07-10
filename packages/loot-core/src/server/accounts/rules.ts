@@ -274,6 +274,8 @@ export class Condition {
 
     switch (this.op) {
       case 'isapprox':
+      case 'isNot':
+        return fieldValue === this.value;
       case 'is':
         if (type === 'date') {
           if (fieldValue == null) {
@@ -568,7 +570,7 @@ export class RuleIndexer {
     let cond = rule.conditions.find(cond => cond.field === this.field);
     let indexes = [];
 
-    if (cond && (cond.op === 'oneOf' || cond.op === 'is')) {
+    if (cond && (cond.op === 'oneOf' || cond.op === 'is' || cond.op === 'isNot')) {
       if (cond.op === 'oneOf') {
         cond.value.forEach(val => indexes.push(this.getIndexForValue(val)));
       } else {
@@ -635,7 +637,7 @@ function computeScore(rule) {
 
   if (
     rule.conditions.every(
-      cond => cond.op === 'is' || cond.op === 'isapprox' || cond.op === 'oneOf',
+      cond => cond.op === 'is' || cond.op === 'isNot' || cond.op === 'isapprox' || cond.op === 'oneOf',
     )
   ) {
     return initialScore * 2;
@@ -716,6 +718,10 @@ export function migrateIds(rule, mappings) {
           cond.value = mappings.get(cond.rawValue) || cond.rawValue;
           cond.unparsedValue = cond.value;
           break;
+          case 'isNot':
+            cond.value = mappings.get(cond.rawValue) || cond.rawValue;
+            cond.unparsedValue = cond.value;
+            break;
         case 'oneOf':
           cond.value = cond.rawValue.map(v => mappings.get(v) || v);
           cond.unparsedValue = [...cond.value];
@@ -750,6 +756,11 @@ export function iterateIds(rules, fieldName, func) {
               continue ruleiter;
             }
             break;
+            case 'isNot':
+              if (func(rule, cond.value)) {
+                continue ruleiter;
+              }
+              break;
           case 'oneOf':
             for (let vi = 0; vi < cond.value.length; vi++) {
               if (func(rule, cond.value[vi])) {
