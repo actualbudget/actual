@@ -70,7 +70,8 @@ export default function CustomSelect({
           outline: 0,
           borderRadius: 4,
           backgroundColor: colorsm.menuBackground,
-          border: '1px solid ' + colorsm.menuBorder,
+          boxShadow: '0 2px 6px rgba(0, 0, 0, .25)',
+          border: '1px solid ' + colorsm.tooltipBorder,
         }}
       >
         <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
