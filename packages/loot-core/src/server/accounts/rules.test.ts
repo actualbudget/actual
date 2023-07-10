@@ -42,43 +42,29 @@ describe('Condition', () => {
   });
 
   test('ops handles null fields', () => {
-    let cond = new Condition(
-      'contains',
-      'name',
-      'foo',
-      null,
-      false,
-      fieldTypes,
-    );
+    let cond = new Condition('contains', 'name', 'foo', null, fieldTypes);
     expect(cond.eval({ name: null })).toBe(false);
 
-    cond = new Condition('oneOf', 'name', ['foo'], null, false, fieldTypes);
+    cond = new Condition('oneOf', 'name', ['foo'], null, fieldTypes);
     expect(cond.eval({ name: null })).toBe(false);
 
     ['gt', 'gte', 'lt', 'lte', 'isapprox'].forEach(op => {
-      let cond = new Condition(
-        op,
-        'date',
-        '2020-01-01',
-        null,
-        false,
-        fieldTypes,
-      );
+      let cond = new Condition(op, 'date', '2020-01-01', null, fieldTypes);
       expect(cond.eval({ date: null })).toBe(false);
     });
 
-    cond = new Condition('is', 'id', null, null, false, fieldTypes);
+    cond = new Condition('is', 'id', null, null, fieldTypes);
     expect(cond.eval({ id: null })).toBe(true);
   });
 
   test('ops handles undefined fields', () => {
     const spy = jest.spyOn(console, 'warn').mockImplementation();
 
-    let cond = new Condition('is', 'id', null, null, false, fieldTypes);
+    let cond = new Condition('is', 'id', null, null, fieldTypes);
     // null is strict and won't match undefined
     expect(cond.eval({ name: 'James' })).toBe(false);
 
-    cond = new Condition('contains', 'name', 'foo', null, false, fieldTypes);
+    cond = new Condition('contains', 'name', 'foo', null, fieldTypes);
     expect(cond.eval({ date: '2020-01-01' })).toBe(false);
 
     spy.mockRestore();
@@ -86,54 +72,40 @@ describe('Condition', () => {
 
   test('date restricts operators for each type', () => {
     expect(() => {
-      new Condition('isapprox', 'date', '2020-08', null, false, fieldTypes);
+      new Condition('isapprox', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
     expect(() => {
-      new Condition('gt', 'date', '2020-08', null, false, fieldTypes);
+      new Condition('gt', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
     expect(() => {
-      new Condition('gte', 'date', '2020-08', null, false, fieldTypes);
+      new Condition('gte', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
     expect(() => {
-      new Condition('lt', 'date', '2020-08', null, false, fieldTypes);
+      new Condition('lt', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
     expect(() => {
-      new Condition('lte', 'date', '2020-08', null, false, fieldTypes);
+      new Condition('lte', 'date', '2020-08', null, fieldTypes);
     }).toThrow('Invalid date value for');
   });
 
   test('date conditions work with `is` operator', () => {
-    let cond = new Condition(
-      'is',
-      'date',
-      '2020-08-10',
-      null,
-      false,
-      fieldTypes,
-    );
+    let cond = new Condition('is', 'date', '2020-08-10', null, fieldTypes);
     expect(cond.eval({ date: '2020-08-05' })).toBe(false);
     expect(cond.eval({ date: '2020-08-10' })).toBe(true);
 
-    cond = new Condition('is', 'date', '2020-08', null, false, fieldTypes);
+    cond = new Condition('is', 'date', '2020-08', null, fieldTypes);
     expect(cond.eval({ date: '2020-08-05' })).toBe(true);
     expect(cond.eval({ date: '2020-08-10' })).toBe(true);
     expect(cond.eval({ date: '2020-09-10' })).toBe(false);
 
-    cond = new Condition('is', 'date', '2020', null, false, fieldTypes);
+    cond = new Condition('is', 'date', '2020', null, fieldTypes);
     expect(cond.eval({ date: '2020-08-05' })).toBe(true);
     expect(cond.eval({ date: '2020-08-10' })).toBe(true);
     expect(cond.eval({ date: '2020-09-10' })).toBe(true);
     expect(cond.eval({ date: '2019-09-10' })).toBe(false);
 
     // Approximate dates
-    cond = new Condition(
-      'isapprox',
-      'date',
-      '2020-08-07',
-      null,
-      false,
-      fieldTypes,
-    );
+    cond = new Condition('isapprox', 'date', '2020-08-07', null, fieldTypes);
     expect(cond.eval({ date: '2020-08-04' })).toBe(false);
     expect(cond.eval({ date: '2020-08-05' })).toBe(true);
     expect(cond.eval({ date: '2020-08-09' })).toBe(true);
@@ -150,7 +122,6 @@ describe('Condition', () => {
         patterns: [{ type: 'day', value: 15 }],
       },
       null,
-      false,
       fieldTypes,
     );
     expect(cond.eval({ date: '2018-03-15' })).toBe(false);
@@ -168,7 +139,6 @@ describe('Condition', () => {
         interval: 3,
       },
       null,
-      false,
       fieldTypes,
     );
     expect(cond.eval({ date: '2019-01-12' })).toBe(true);
@@ -186,7 +156,6 @@ describe('Condition', () => {
         patterns: [{ type: 'day', value: 15 }],
       },
       null,
-      false,
       fieldTypes,
     );
     expect(cond.eval({ date: '2019-03-12' })).toBe(false);
@@ -200,46 +169,32 @@ describe('Condition', () => {
   });
 
   test('date conditions work with comparison operators', () => {
-    let cond = new Condition(
-      'gt',
-      'date',
-      '2020-08-10',
-      null,
-      false,
-      fieldTypes,
-    );
+    let cond = new Condition('gt', 'date', '2020-08-10', null, fieldTypes);
     expect(cond.eval({ date: '2020-08-11' })).toBe(true);
     expect(cond.eval({ date: '2020-08-10' })).toBe(false);
 
-    cond = new Condition('gte', 'date', '2020-08-10', null, false, fieldTypes);
+    cond = new Condition('gte', 'date', '2020-08-10', null, fieldTypes);
     expect(cond.eval({ date: '2020-08-11' })).toBe(true);
     expect(cond.eval({ date: '2020-08-10' })).toBe(true);
     expect(cond.eval({ date: '2020-08-09' })).toBe(false);
 
-    cond = new Condition('lt', 'date', '2020-08-10', null, false, fieldTypes);
+    cond = new Condition('lt', 'date', '2020-08-10', null, fieldTypes);
     expect(cond.eval({ date: '2020-08-09' })).toBe(true);
     expect(cond.eval({ date: '2020-08-10' })).toBe(false);
 
-    cond = new Condition('lte', 'date', '2020-08-10', null, false, fieldTypes);
+    cond = new Condition('lte', 'date', '2020-08-10', null, fieldTypes);
     expect(cond.eval({ date: '2020-08-09' })).toBe(true);
     expect(cond.eval({ date: '2020-08-10' })).toBe(true);
     expect(cond.eval({ date: '2020-08-11' })).toBe(false);
   });
 
   test('id works with all operators', () => {
-    let cond = new Condition('is', 'id', 'foo', null, false, fieldTypes);
+    let cond = new Condition('is', 'id', 'foo', null, fieldTypes);
     expect(cond.eval({ id: 'foo' })).toBe(true);
     expect(cond.eval({ id: 'FOO' })).toBe(true);
     expect(cond.eval({ id: 'foo2' })).toBe(false);
 
-    cond = new Condition(
-      'oneOf',
-      'id',
-      ['foo', 'bar'],
-      null,
-      false,
-      fieldTypes,
-    );
+    cond = new Condition('oneOf', 'id', ['foo', 'bar'], null, fieldTypes);
     expect(cond.eval({ id: 'foo' })).toBe(true);
     expect(cond.eval({ id: 'FOO' })).toBe(true);
     expect(cond.eval({ id: 'Bar' })).toBe(true);
@@ -247,25 +202,18 @@ describe('Condition', () => {
   });
 
   test('string works with all operators', () => {
-    let cond = new Condition('is', 'name', 'foo', null, false, fieldTypes);
+    let cond = new Condition('is', 'name', 'foo', null, fieldTypes);
     expect(cond.eval({ name: 'foo' })).toBe(true);
     expect(cond.eval({ name: 'FOO' })).toBe(true);
     expect(cond.eval({ name: 'foo2' })).toBe(false);
 
-    cond = new Condition(
-      'oneOf',
-      'name',
-      ['foo', 'bar'],
-      null,
-      false,
-      fieldTypes,
-    );
+    cond = new Condition('oneOf', 'name', ['foo', 'bar'], null, fieldTypes);
     expect(cond.eval({ name: 'foo' })).toBe(true);
     expect(cond.eval({ name: 'FOO' })).toBe(true);
     expect(cond.eval({ name: 'Bar' })).toBe(true);
     expect(cond.eval({ name: 'bar2' })).toBe(false);
 
-    cond = new Condition('contains', 'name', 'foo', null, false, fieldTypes);
+    cond = new Condition('contains', 'name', 'foo', null, fieldTypes);
     expect(cond.eval({ name: 'bar foo baz' })).toBe(true);
     expect(cond.eval({ name: 'bar FOOb' })).toBe(true);
     expect(cond.eval({ name: 'foo' })).toBe(true);
@@ -276,21 +224,14 @@ describe('Condition', () => {
   });
 
   test('number validates value', () => {
-    new Condition('isapprox', 'amount', 34, null, false, fieldTypes);
+    new Condition('isapprox', 'amount', 34, null, fieldTypes);
 
     expect(() => {
-      new Condition('isapprox', 'amount', 'hello', null, false, fieldTypes);
+      new Condition('isapprox', 'amount', 'hello', null, fieldTypes);
     }).toThrow('Value must be a number or between amount');
 
     expect(() => {
-      new Condition(
-        'is',
-        'amount',
-        { num1: 0, num2: 10 },
-        null,
-        false,
-        fieldTypes,
-      );
+      new Condition('is', 'amount', { num1: 0, num2: 10 }, null, fieldTypes);
     }).toThrow('Invalid number value for');
 
     new Condition(
@@ -298,31 +239,23 @@ describe('Condition', () => {
       'amount',
       { num1: 0, num2: 10 },
       null,
-      false,
       fieldTypes,
     );
 
     expect(() => {
-      new Condition('isbetween', 'amount', 34.22, null, false, fieldTypes);
+      new Condition('isbetween', 'amount', 34.22, null, fieldTypes);
     }).toThrow('Invalid between value for');
     expect(() => {
-      new Condition(
-        'isbetween',
-        'amount',
-        { num1: 0 },
-        null,
-        false,
-        fieldTypes,
-      );
+      new Condition('isbetween', 'amount', { num1: 0 }, null, fieldTypes);
     }).toThrow('Value must be a number or between amount');
   });
 
   test('number works with all operators', () => {
-    let cond = new Condition('is', 'amount', 155, null, false, fieldTypes);
+    let cond = new Condition('is', 'amount', 155, null, fieldTypes);
     expect(cond.eval({ amount: 155 })).toBe(true);
     expect(cond.eval({ amount: 167 })).toBe(false);
 
-    cond = new Condition('isapprox', 'amount', 1535, null, false, fieldTypes);
+    cond = new Condition('isapprox', 'amount', 1535, null, fieldTypes);
     expect(cond.eval({ amount: 1540 })).toBe(true);
     expect(cond.eval({ amount: 1300 })).toBe(false);
     expect(cond.eval({ amount: 1650 })).toBe(true);
@@ -333,7 +266,6 @@ describe('Condition', () => {
       'amount',
       { num1: 32, num2: 86 },
       null,
-      false,
       fieldTypes,
     );
     expect(cond.eval({ amount: 30 })).toBe(false);
@@ -347,28 +279,27 @@ describe('Condition', () => {
       'amount',
       { num1: -16, num2: -20 },
       null,
-      false,
       fieldTypes,
     );
     expect(cond.eval({ amount: -18 })).toBe(true);
     expect(cond.eval({ amount: -12 })).toBe(false);
 
-    cond = new Condition('gt', 'amount', 1.55, null, false, fieldTypes);
+    cond = new Condition('gt', 'amount', 1.55, null, fieldTypes);
     expect(cond.eval({ amount: 1.55 })).toBe(false);
     expect(cond.eval({ amount: 1.67 })).toBe(true);
     expect(cond.eval({ amount: 1.5 })).toBe(false);
 
-    cond = new Condition('gte', 'amount', 1.55, null, false, fieldTypes);
+    cond = new Condition('gte', 'amount', 1.55, null, fieldTypes);
     expect(cond.eval({ amount: 1.55 })).toBe(true);
     expect(cond.eval({ amount: 1.67 })).toBe(true);
     expect(cond.eval({ amount: 1.5 })).toBe(false);
 
-    cond = new Condition('lt', 'amount', 1.55, null, false, fieldTypes);
+    cond = new Condition('lt', 'amount', 1.55, null, fieldTypes);
     expect(cond.eval({ amount: 1.55 })).toBe(false);
     expect(cond.eval({ amount: 1.67 })).toBe(false);
     expect(cond.eval({ amount: 1.5 })).toBe(true);
 
-    cond = new Condition('lte', 'amount', 1.55, null, false, fieldTypes);
+    cond = new Condition('lte', 'amount', 1.55, null, fieldTypes);
     expect(cond.eval({ amount: 1.55 })).toBe(true);
     expect(cond.eval({ amount: 1.67 })).toBe(false);
     expect(cond.eval({ amount: 1.5 })).toBe(true);
