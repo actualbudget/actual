@@ -405,6 +405,11 @@ class FocusableAmountInput_ extends PureComponent {
           style={[
             buttonProps && buttonProps.style,
             focused && { display: 'none' },
+            {
+              ':hover': {
+                backgroundColor: 'transparent',
+              },
+            },
           ]}
           bare={true}
         >
